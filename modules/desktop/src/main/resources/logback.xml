@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <property name="DEFAULT_PATTERN" value="%d{yyyy.MM.dd HH:mm:ss.SSS} %-5p [%c{20}][%t] - %m%n"/>
+    <!-- Comment out the property, logback.printToConsole to stop printing to console -->
+    <!--<property name="logback.printToConsole" value="disabled"/>-->
+    <property name="logback.syslog" value="enabled"/>
+    <property name="APP" value="virtue"/>
+    <property name="USER_FILE" value="disabled"/>
+    <property name="LOGDIR" value="logs/"/>
+    <property name="ROLLING_FILE_MAX_NUM" value="5"/>
+    <property name="ROLLING_FILE_MAX_SIZE" value="5MB"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${DEFAULT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGDIR}${APP}.debug.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${LOGDIR}${APP}.debug.%i.log</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>${ROLLING_FILE_MAX_NUM}</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>${ROLLING_FILE_MAX_SIZE}</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>${DEFAULT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGDIR}${APP}.info.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${LOGDIR}${APP}.info.%i.log</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>${ROLLING_FILE_MAX_NUM}</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>${ROLLING_FILE_MAX_SIZE}</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>${DEFAULT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+  <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+     <discriminator>
+      <key>userId</key>
+      <defaultValue>unknown</defaultValue>
+    </discriminator>
+    <sift>
+      <appender name="SIFT-${userId}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGDIR}users/${APP}.${userId}.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+          <level>DEBUG</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+          <fileNamePattern>${LOGDIR}users/${APP}.${userId}.%i.log</fileNamePattern>
+          <minIndex>1</minIndex>
+          <maxIndex>1</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+          <maxFileSize>${ROLLING_FILE_MAX_SIZE}</maxFileSize>
+        </triggeringPolicy>
+    	<encoder>
+      	  <pattern>${DEFAULT_PATTERN}</pattern>
+    	</encoder>
+      </appender>
+    </sift>
+  </appender>
+  -->
+
+    <logger name="com.ncc.savior.desktop" additivity="false">
+        <level value="DEBUG"/>
+        <!--<if condition='p("logback.printToConsole").contains("enabled")'>
+          <then>
+            <appender-ref ref="CONSOLE" />
+          </then>
+        </if>-->
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG"/>
+        <appender-ref ref="INFO"/>
+    </logger>
+    <!--
+    <logger name="com.ncc" additivity="false">
+        <level value="DEBUG" />
+        <if condition='p("logback.printToConsole").contains("enabled")'>
+          <then>
+            <appender-ref ref="CONSOLE" />
+          </then>
+        </if>
+        <appender-ref ref="DEBUG" />
+        <appender-ref ref="INFO" />
+        <if condition='p("USER_FILE").contains("enabled")'>
+          <then>
+            <appender-ref ref="SIFT" />
+          </then>
+        </if>
+    </logger>
+    -->
+
+    <logger name="com" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG"/>
+        <appender-ref ref="INFO"/>
+    </logger>
+
+    <root>
+        <level value="ERROR"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG"/>
+        <appender-ref ref="INFO"/>
+    </root>
+</configuration>
