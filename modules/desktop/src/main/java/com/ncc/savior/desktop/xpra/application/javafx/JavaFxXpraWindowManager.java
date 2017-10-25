@@ -11,14 +11,17 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 import javafx.application.Platform;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
 public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	private AnchorPane pane;
+	private Stage stage;
 
-	public JavaFxXpraWindowManager(XpraClient client, AnchorPane anchor) {
+	public JavaFxXpraWindowManager(XpraClient client, Stage primaryStage, AnchorPane anchor) {
 		super(client);
 		this.pane = anchor;
+		this.stage = primaryStage;
 	}
 
 	@Override
@@ -30,7 +33,7 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 	@Override
 	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
 		Canvas canvas = new Canvas();
-		JavaFxWindow window = new JavaFxWindow(packet, packetSender, canvas);
+		JavaFxWindow window = new JavaFxWindow(packet, packetSender, canvas, stage);
 
 		Platform.runLater(new Runnable() {
 

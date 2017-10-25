@@ -11,16 +11,14 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  *
  */
-public class ConfigureWindowPacket extends Packet {
-	private int windowId;
+public class ConfigureWindowPacket extends WindowPacket {
 	private int x;
 	private int y;
 	private int width;
 	private int height;
 
 	public ConfigureWindowPacket(int windowId, int x, int y, int width, int height) {
-		super(PacketType.CONFIGURE_WINDOW);
-		this.windowId = windowId;
+		super(windowId, PacketType.CONFIGURE_WINDOW);
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -28,8 +26,7 @@ public class ConfigureWindowPacket extends Packet {
     }
 
 	public ConfigureWindowPacket(List<Object> list) {
-    	super(PacketType.CONFIGURE_WINDOW);
-		this.windowId = PacketUtils.asInt(list.get(1));
+		super(PacketUtils.asInt(list.get(1)), PacketType.CONFIGURE_WINDOW);
 		this.x = PacketUtils.asInt(list.get(2));
 		this.y = PacketUtils.asInt(list.get(3));
 		this.width = PacketUtils.asInt(list.get(4));

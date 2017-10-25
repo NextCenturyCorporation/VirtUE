@@ -26,7 +26,11 @@ public class UnknownPacket extends Packet {
                 '}';
     }
 
-    @Override
+	public List<Object> getList() {
+		return list;
+	}
+
+	@Override
     protected void doAddToList(ArrayList<Object> list) {
         //do nothing
     }

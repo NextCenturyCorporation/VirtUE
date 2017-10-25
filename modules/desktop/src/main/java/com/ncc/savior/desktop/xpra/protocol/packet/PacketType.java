@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.xpra.protocol.packet;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.HelloPacket;
@@ -13,6 +14,8 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.SetDeflatePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnknownPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 
 /**
  * All the PacketTypes found in the Xpra documentation. Implemented classes
@@ -42,9 +45,9 @@ public enum PacketType {
     CONFIGURE_OVERRIDE_REDIRECT("configure-override-redirect"),
     WINDOW_MOVE_RESIZE("window-move-resize"),
     WINDOW_RESIZED("window-resized"),
-    WINDOW_ICON("window-icon"),
-    WINDOW_METADATA("window-metadata"),
-    CURSOR("cursor"),
+    WINDOW_ICON("window-icon", WindowIconPacket.class),
+    WINDOW_METADATA("window-metadata",WindowMetadataPacket.class),
+    CURSOR("cursor", CursorPacket.class),
     BELL("bell"),
     NOTIFY_SHOW("notify-show"),
     NOTIFY_CLOSE("notify-close"),

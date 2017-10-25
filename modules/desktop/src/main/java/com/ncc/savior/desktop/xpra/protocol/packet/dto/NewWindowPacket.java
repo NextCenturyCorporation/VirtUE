@@ -18,25 +18,25 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  *
  */
-public class NewWindowPacket extends Packet {
+public class NewWindowPacket extends WindowPacket {
 
-	private int windowId;
 	private int x;
 	private int y;
 	private int width;
 	private int height;
-	private Map<String, Object> metadata;
+	private Map<String, Object> metadataRaw;
+	private WindowMetadata metadata;
 	private Map<String, Object> otherData;
 
 	protected NewWindowPacket(int windowId, int x, int y, int w, int h, Map<String, Object> metadata,
 			Map<String, Object> other) {
-		super(PacketType.NEW_WINDOW);
-		this.windowId = windowId;
+		super(windowId, PacketType.NEW_WINDOW);
 		this.x = x;
 		this.y = y;
 		this.width = w;
 		this.height = h;
-		this.metadata = metadata;
+		this.metadataRaw = metadata;
+		this.metadata = new WindowMetadata(metadataRaw);
 		// Empty from what I've seen...
 		this.otherData = new HashMap<String, Object>();
 	}
@@ -55,12 +55,8 @@ public class NewWindowPacket extends Packet {
 		list.add(y);
 		list.add(width);
 		list.add(height);
-		list.add(metadata);
+		list.add(metadataRaw);
 		list.add(otherData);
-	}
-
-	public int getWindowId() {
-		return windowId;
 	}
 
 	public int getX() {
@@ -79,7 +75,11 @@ public class NewWindowPacket extends Packet {
 		return height;
 	}
 
-	public Map<String, Object> getMetadata() {
+	public Map<String, Object> getMetadataRaw() {
+		return metadataRaw;
+	}
+
+	public WindowMetadata getMetadata() {
 		return metadata;
 	}
 

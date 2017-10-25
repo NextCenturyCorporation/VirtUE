@@ -12,13 +12,11 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  *
  */
-public class LostWindowPacket extends Packet {
+public class LostWindowPacket extends WindowPacket {
 
-	private int windowId;
 
 	protected LostWindowPacket(int windowId) {
-		super(PacketType.LOST_WINDOW);
-		this.windowId = windowId;
+		super(windowId, PacketType.LOST_WINDOW);
 	}
 
 	public LostWindowPacket(List<Object> list) {
@@ -29,10 +27,6 @@ public class LostWindowPacket extends Packet {
 	@Override
 	protected void doAddToList(ArrayList<Object> list) {
 		list.add(windowId);
-	}
-
-	public int getWindowId() {
-		return windowId;
 	}
 
 	@Override

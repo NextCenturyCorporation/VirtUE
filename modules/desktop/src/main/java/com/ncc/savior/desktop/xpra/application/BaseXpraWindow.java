@@ -43,12 +43,12 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 
 	protected void onMousePress(int button, int x, int y, List<String> modifiers) {
 		MouseButtonActionPacket sendPacket = new MouseButtonActionPacket(id, button, true, x, y, modifiers);
-		sendPacket(sendPacket, "pointer position packet");
+		sendPacket(sendPacket, "mouse button action packet (pressed)");
 	}
 
 	protected void onMouseRelease(int button, int x, int y, List<String> modifiers) {
 		MouseButtonActionPacket sendPacket = new MouseButtonActionPacket(id, button, false, x, y, modifiers);
-		sendPacket(sendPacket, "pointer position packet");
+		sendPacket(sendPacket, "mouse button action packet (released)");
 	}
 
 	private void sendPacket(Packet sendPacket, String packetDescription) {

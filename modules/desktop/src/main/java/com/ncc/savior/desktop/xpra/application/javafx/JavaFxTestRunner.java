@@ -33,7 +33,8 @@ public class JavaFxTestRunner extends Application {
 		root.getChildren().add(anchor);
 		primaryStage.setScene(new Scene(root, 1024, 768));
 		primaryStage.show();
-		JavaFxXpraWindowManager manager = new JavaFxXpraWindowManager(client, anchor);
+		JavaFxXpraWindowManager manager = new JavaFxXpraWindowManager(client, primaryStage, anchor);
+		client.addPacketListener(new JavaFxXpraPacketHandler(primaryStage.getScene()));
 		manager.setDebugOutput(true);
 		client.connect(new TcpConnectionFactory(),
 				new TcpConnectionFactory.TcpConnectionParameters("localhost", 10000));

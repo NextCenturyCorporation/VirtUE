@@ -14,8 +14,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  *
  */
-public class DrawPacket extends Packet {
-	private int windowId;
+public class DrawPacket extends WindowPacket implements IImagePacket {
 	private int x;
 	private int y;
 	private int width;
@@ -27,8 +26,7 @@ public class DrawPacket extends Packet {
 
 	protected DrawPacket(int windowId, int x, int y, int width, int height, ImageEncoding encoding, byte[] data,
 			int sequence, int rowstride) {
-		super(PacketType.DRAW);
-		this.windowId = windowId;
+		super(windowId, PacketType.DRAW);
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -40,8 +38,7 @@ public class DrawPacket extends Packet {
 	}
 
 	public DrawPacket(List<Object> list) {
-		super(PacketType.DRAW);
-		this.windowId = PacketUtils.asInt(list.get(1));
+		super(PacketUtils.asInt(list.get(1)), PacketType.DRAW);
 		this.x = PacketUtils.asInt(list.get(2));
 		this.y = PacketUtils.asInt(list.get(3));
 		this.width = PacketUtils.asInt(list.get(4));
@@ -65,10 +62,6 @@ public class DrawPacket extends Packet {
 		list.add(rowstride);
 	}
 
-	public int getWindowId() {
-		return windowId;
-	}
-
 	public int getX() {
 		return x;
 	}
@@ -85,10 +78,12 @@ public class DrawPacket extends Packet {
 		return height;
 	}
 
+	@Override
 	public ImageEncoding getEncoding() {
 		return encoding;
 	}
 
+	@Override
 	public byte[] getData() {
 		return data;
 	}

@@ -53,4 +53,12 @@ public class PacketUtils {
 		}
 		return null;
 	}
+
+	public static int asInt(List<Object> list, int i) {
+		return asInt(list.get(i));
+	}
+
+	public static long asLong(List<Object> list, int i) {
+		return asLong(list.get(i));
+	}
 }

@@ -1,13 +1,18 @@
 package com.ncc.savior.desktop.xpra.application.javafx;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.application.BaseXpraWindow;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
 import javafx.application.Platform;
@@ -16,18 +21,40 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 public class JavaFxWindow extends BaseXpraWindow {
+	private static final Logger logger = LoggerFactory.getLogger(JavaFxWindow.class);
 
 	private Canvas canvas;
 	private List<String> modifiers;
+	private Stage stage;
 
-	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, Canvas canvas) {
+	private List<String> type;
+
+	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, Canvas canvas, Stage stage) {
 		super(packet, packetSender);
 		modifiers = new ArrayList<String>(0);
 		modifiers.add("shift");
 		this.canvas = canvas;
+		this.stage = stage;
+		WindowMetadata metadata = packet.getMetadata();
+		String title = metadata.getTitle();
+		boolean skipTaskbar = metadata.getSkipTaskbar();
+		type = metadata.getWindowType();
+		logger.debug("NewWindow: type=" + type + " skipTaskbar=" + skipTaskbar + " title='" + title + "'");
+		logger.debug("NewWindowMetadat: " + metadata.toString());
+		if (type.contains("NORMAL")) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					stage.setTitle(title);
+				}
+			});
+		}
+
 		this.canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -62,20 +89,23 @@ public class JavaFxWindow extends BaseXpraWindow {
 			@Override
 			public void run() {
 				try {
-					Image img = new Image(new ByteArrayInputStream(packet.getData()));
-					GraphicsContext g = canvas.getGraphicsContext2D();
-					g.drawImage(img, packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
+					Image img = ImageEncoder.decodeImage(packet.getEncoding(), packet.getData());
+					if (img != null) {
+						GraphicsContext g = canvas.getGraphicsContext2D();
+						// g.setGlobalBlendMode(BlendMode.SCREEN);
+						// g.setGlobal
+						g.drawImage(img, packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 
-					if (debugOutput) {
-						g.setStroke(Color.BLUE);
-						g.setFill(Color.GREEN);
-						g.setLineWidth(2);
-						g.strokeRect(1, 1, canvas.getWidth() - 2, canvas.getHeight() - 2);
-						g.fillText("ID: " + id, 2, 10);
+						if (debugOutput) {
+							g.setStroke(Color.BLUE);
+							g.setFill(Color.GREEN);
+							g.setLineWidth(2);
+							g.strokeRect(1, 1, canvas.getWidth() - 2, canvas.getHeight() - 2);
+							g.fillText("ID: " + id, 2, 10);
+						}
+
+						sendDamageSequence(packet);
 					}
-
-					sendDamageSequence(packet);
-
 				} catch (Exception e) {
 					throw new RuntimeException("Failed decoding image: " + packet.getEncoding(), e);
 				}
@@ -86,12 +116,46 @@ public class JavaFxWindow extends BaseXpraWindow {
 
 	@Override
 	public void onWindowMoveResize(WindowMoveResizePacket packet) {
-		// TODO Auto-generated method stub
-
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				AnchorPane.setLeftAnchor(canvas, (double) packet.getX());
+				AnchorPane.setTopAnchor(canvas, (double) packet.getY());
+				canvas.setWidth(packet.getWidth());
+				canvas.setHeight(packet.getHeight());
+			}
+		});
 	}
 
 	public Canvas getCanvas() {
 		return canvas;
 	}
 
+	@Override
+	public void setWindowIcon(WindowIconPacket packet) {
+		Image icon = ImageEncoder.decodeImage(packet.getEncoding(), packet.getData());
+		if (icon != null) {
+			Platform.runLater(new Runnable() {
+
+				@Override
+				public void run() {
+					stage.getIcons().clear();
+					stage.getIcons().add(icon);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void updateWindowMetadata(WindowMetadataPacket packet) {
+		String title = packet.getMetadata().getTitle();
+		if (type.contains("NORMAL") && title != null) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					stage.setTitle(title);
+				}
+			});
+		}
+	}
 }

@@ -1,8 +1,10 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
 /**
  * Packet that client should send once it has received and drawn the data from a
@@ -11,15 +13,14 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
  *
  *
  */
-public class DamageSequencePacket extends Packet {
+public class DamageSequencePacket extends WindowPacket {
 	private int sequence;
-	private int windowId;
 	private int width;
 	private int height;
 	private long frametime;
 
 	public DamageSequencePacket(int sequence, int windowId, int width, int height, long frametime) {
-		super(PacketType.DAMAGE_SEQUENCE);
+		super(windowId, PacketType.DAMAGE_SEQUENCE);
 		this.sequence = sequence;
 		this.windowId = windowId;
 		this.width = width;
@@ -29,6 +30,14 @@ public class DamageSequencePacket extends Packet {
 
 	public DamageSequencePacket(DrawPacket packet) {
 		this(packet.getSequence(), packet.getWindowId(), packet.getWidth(), packet.getHeight(), packet.getSequence());
+	}
+
+	public DamageSequencePacket(List<Object> list) {
+		super(PacketUtils.asInt(list, 2), PacketType.DAMAGE_SEQUENCE);
+		this.sequence = PacketUtils.asInt(list, 1);
+		this.width = PacketUtils.asInt(list, 3);
+		this.height = PacketUtils.asInt(list, 4);
+		this.frametime = PacketUtils.asLong(list, 5);
 	}
 
 	@Override

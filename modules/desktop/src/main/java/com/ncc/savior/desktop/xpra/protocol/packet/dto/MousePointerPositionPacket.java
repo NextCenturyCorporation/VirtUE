@@ -19,15 +19,13 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
  *
  *
  */
-public class MousePointerPositionPacket extends Packet {
+public class MousePointerPositionPacket extends WindowPacket {
 
 	private List<Integer> position;
 	private List<String> modifiers;
-	private int windowId;
 
 	public MousePointerPositionPacket(int windowId, int x, int y, List<String> modifiers) {
-		super(PacketType.POINTER_POSITION);
-		this.windowId = windowId;
+		super(windowId, PacketType.POINTER_POSITION);
 		position = new ArrayList<Integer>(2);
 		position.add(x);
 		position.add(y);

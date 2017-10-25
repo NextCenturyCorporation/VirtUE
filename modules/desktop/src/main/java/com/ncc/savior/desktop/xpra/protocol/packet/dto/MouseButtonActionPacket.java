@@ -18,16 +18,14 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
  *
  *
  */
-public class MouseButtonActionPacket extends Packet {
+public class MouseButtonActionPacket extends WindowPacket {
 	private List<Integer> position;
 	private List<String> modifiers;
-	private int windowId;
 	private boolean pressed;
 	private int button;
 
 	public MouseButtonActionPacket(int windowId, int button, boolean pressed, int x, int y, List<String> modifiers) {
-		super(PacketType.BUTTON_ACTION);
-		this.windowId = windowId;
+		super(windowId, PacketType.BUTTON_ACTION);
 		this.button = button;
 		this.pressed = pressed;
 		this.position = new ArrayList<Integer>(2);

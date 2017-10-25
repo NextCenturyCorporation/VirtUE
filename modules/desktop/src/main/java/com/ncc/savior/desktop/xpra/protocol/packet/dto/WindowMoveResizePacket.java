@@ -13,17 +13,15 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  *
  */
-public class WindowMoveResizePacket extends Packet {
+public class WindowMoveResizePacket extends WindowPacket {
 
-	private int windowId;
 	private int x;
 	private int y;
 	private int width;
 	private int height;
 
 	protected WindowMoveResizePacket(int windowId, int x, int y, int width, int height) {
-		super(PacketType.LOST_WINDOW);
-		this.windowId = windowId;
+		super(windowId, PacketType.LOST_WINDOW);
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -42,10 +40,6 @@ public class WindowMoveResizePacket extends Packet {
 		list.add(y);
 		list.add(width);
 		list.add(height);
-	}
-
-	public int getWindowId() {
-		return windowId;
 	}
 
 	public int getX() {

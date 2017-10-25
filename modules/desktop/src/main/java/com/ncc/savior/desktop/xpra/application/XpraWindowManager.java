@@ -16,6 +16,8 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
 public abstract class XpraWindowManager implements IPacketHandler {
@@ -35,6 +37,8 @@ public abstract class XpraWindowManager implements IPacketHandler {
 		this.packetTypes.add(PacketType.LOST_WINDOW);
 		this.packetTypes.add(PacketType.WINDOW_MOVE_RESIZE);
 		this.packetTypes.add(PacketType.DRAW);
+		this.packetTypes.add(PacketType.WINDOW_ICON);
+		this.packetTypes.add(PacketType.WINDOW_METADATA);
 		this.client = client;
 		this.client.addPacketListener(this);
 		this.windows = new HashMap<Integer, IXpraWindow>();
@@ -48,6 +52,9 @@ public abstract class XpraWindowManager implements IPacketHandler {
 		case NEW_WINDOW:
 			onNewWindow((NewWindowPacket) (packet));
 			break;
+		case WINDOW_METADATA:
+			onMetadataUpdate((WindowMetadataPacket) packet);
+			break;
 		case LOST_WINDOW:
 			onLostWindow((LostWindowPacket) (packet));
 			break;
@@ -57,8 +64,43 @@ public abstract class XpraWindowManager implements IPacketHandler {
 		case DRAW:
 			onDraw((DrawPacket) packet);
 			break;
-		default:
+		case WINDOW_ICON:
+			onWindowIcon((WindowIconPacket) packet);
 			break;
+		default:
+
+			break;
+		}
+	}
+
+	private void onMetadataUpdate(WindowMetadataPacket packet) {
+		IXpraWindow window = windows.get(packet.getWindowId());
+		if (window != null) {
+			window.updateWindowMetadata(packet);
+		} else {
+			logger.error("Unable to find window to set icon on.  ID=" + packet.getWindowId() + " Packet=" + packet);
+		}
+	}
+
+	private void onWindowIcon(WindowIconPacket packet) {
+		IXpraWindow window = windows.get(packet.getWindowId());
+		if (window != null) {
+			window.setWindowIcon(packet);
+		} else {
+			logger.error("Unable to find window to set icon on.  ID=" + packet.getWindowId() + " Packet=" + packet);
+		}
+	}
+
+	@Override
+	public Set<PacketType> getValidPacketTypes() {
+		return packetTypes;
+	}
+
+	public void setDebugOutput(boolean debugOutput) {
+		this.debugOutput = debugOutput;
+		for (Entry<Integer, IXpraWindow> entry : windows.entrySet()) {
+			IXpraWindow window = entry.getValue();
+			window.setDebugOutput(debugOutput);
 		}
 	}
 
@@ -95,16 +137,6 @@ public abstract class XpraWindowManager implements IPacketHandler {
 
 	}
 
-	protected abstract void doRemoveWindow(LostWindowPacket lostWindowPacket, IXpraWindow window);
-
-	public void setDebugOutput(boolean debugOutput) {
-		this.debugOutput = debugOutput;
-		for (Entry<Integer, IXpraWindow> entry : windows.entrySet()) {
-			IXpraWindow window = entry.getValue();
-			window.setDebugOutput(debugOutput);
-		}
-	}
-
 	private void onNewWindow(NewWindowPacket packet) {
 		int id = packet.getWindowId();
 		IXpraWindow window = createNewWindow(packet, client.getPacketSender());
@@ -112,12 +144,9 @@ public abstract class XpraWindowManager implements IPacketHandler {
 		windows.put(id, window);
 	}
 
+	protected abstract void doRemoveWindow(LostWindowPacket lostWindowPacket, IXpraWindow window);
+
 	protected abstract void doWindowMoveResize(WindowMoveResizePacket packet);
 
 	protected abstract IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender iPacketSender);
-
-	@Override
-	public Set<PacketType> getValidPacketTypes() {
-		return packetTypes;
-	}
 }

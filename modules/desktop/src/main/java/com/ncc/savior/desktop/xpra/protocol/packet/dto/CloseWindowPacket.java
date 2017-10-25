@@ -11,13 +11,10 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  *
  */
-public class CloseWindowPacket extends Packet {
-	private int windowId;
+public class CloseWindowPacket extends WindowPacket {
 
 	protected CloseWindowPacket(int windowId) {
-		super(PacketType.CLOSE_WINDOW);
-		this.windowId = windowId;
-
+		super(windowId, PacketType.CLOSE_WINDOW);
 	}
 
 	public CloseWindowPacket(List<Object> list) {
@@ -28,10 +25,6 @@ public class CloseWindowPacket extends Packet {
 	@Override
 	protected void doAddToList(ArrayList<Object> list) {
 		list.add(windowId);
-	}
-
-	public int getWindowId() {
-		return windowId;
 	}
 
 	@Override
