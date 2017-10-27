@@ -90,6 +90,7 @@ public class InputStreamPacketReader implements IPacketReader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Built " + packet.toString() + " from " + list.toString());
 		}
+		// logger.debug("Recieve:" + packet.toString());
 		return packet;
 	}
 

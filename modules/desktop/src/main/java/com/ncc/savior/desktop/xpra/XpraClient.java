@@ -55,8 +55,7 @@ public class XpraClient {
 	private IConnection connection;
 	private IKeyMap keyMap;
 
-	public XpraClient(IKeyMap keymap) {
-		this.keyMap = keymap;
+	public XpraClient() {
 		internalPacketDistributer = new PacketDistributer();
 		packetReceivedListenerManager = new PacketListenerManager();
 		packetSentListenerManager = new PacketListenerManager();
@@ -211,5 +210,9 @@ public class XpraClient {
 
 	public IKeyMap getKeyMap() {
 		return keyMap;
+	}
+
+	public void setKeyMap(IKeyMap keyMap) {
+		this.keyMap = keyMap;
 	}
 }

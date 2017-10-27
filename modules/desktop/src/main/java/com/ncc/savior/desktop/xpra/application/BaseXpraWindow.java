@@ -24,6 +24,7 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 	protected IPacketSender packetSender;
 	protected IKeyMap keyMap;
 	protected IFocusNotifier focusNotifier;
+	protected boolean graphicsSet;
 
 	public BaseXpraWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap keyMap,
 			IFocusNotifier focusNotifier) {
@@ -31,6 +32,7 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 		this.packetSender = packetSender;
 		this.keyMap = keyMap;
 		this.focusNotifier = focusNotifier;
+		this.graphicsSet = false;
 	}
 
 	@Override

@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,10 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 	protected boolean debugOutput;
 	protected int focusedWindowId;
 
+	private Queue<Packet> packetQueue;
+
+	private boolean graphicsInit = false;;
+
 	public XpraWindowManager(XpraClient client) {
 		this.client = client;
 		this.packetTypes = new HashSet<PacketType>();
@@ -52,16 +58,35 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		this.packetTypes.add(PacketType.WINDOW_ICON);
 		this.packetTypes.add(PacketType.WINDOW_METADATA);
 		this.client = client;
-		this.client.addPacketListener(this);
 		this.windows = new HashMap<Integer, IXpraWindow>();
 		this.debugOutput = false;
+		this.graphicsInit = false;
+		this.packetQueue = new LinkedBlockingQueue<Packet>();
+	}
+
+	protected synchronized void setGraphicsInit() {
+		Packet packet = null;
+		while (null != (packet = packetQueue.poll())) {
+			internalHandlePacket(packet);
+		}
+		graphicsInit = true;
+		packetQueue = null;
 	}
 
 	@Override
-	public void handlePacket(Packet packet) {
-		switch(packet.getType()) {
+	public synchronized void handlePacket(Packet packet) {
+		if (!graphicsInit) {
+			packetQueue.add(packet);
+		} else {
+			internalHandlePacket(packet);
+		}
+	}
+
+	private void internalHandlePacket(Packet packet) {
+		switch (packet.getType()) {
 		case NEW_WINDOW_OVERRIDE_REDIRECT:
 			onNewWindowOverride((NewWindowOverrideRedirectPacket) packet);
+			break;
 		case NEW_WINDOW:
 			onNewWindow((NewWindowPacket) (packet));
 			break;

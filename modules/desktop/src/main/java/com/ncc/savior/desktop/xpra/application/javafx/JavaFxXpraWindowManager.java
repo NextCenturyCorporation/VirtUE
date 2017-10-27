@@ -30,13 +30,58 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 	protected Stage stage;
 	protected IKeyMap keyMap;
 
-
-
-	public JavaFxXpraWindowManager(XpraClient client, Stage primaryStage, AnchorPane anchor) {
+	public JavaFxXpraWindowManager(XpraClient client) {
 		super(client);
-		this.pane = anchor;
-		this.stage = primaryStage;
 		this.keyMap = client.getKeyMap();
+	}
+
+	@Override
+	protected void doWindowMoveResize(WindowMoveResizePacket packet) {
+		logger.warn("Window resize not implemented.  Packet=" + packet);
+	}
+
+	@Override
+	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
+		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyMap(),
+				/* IFocusNotifier */this);
+
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				Canvas canvas = new Canvas();
+				window.initJavaFx(canvas, stage);
+				canvas.setWidth(packet.getWidth());
+				canvas.setHeight(packet.getHeight());
+				pane.getChildren().add(canvas);
+				AnchorPane.setTopAnchor(canvas, (double) packet.getY());
+				AnchorPane.setLeftAnchor(canvas, (double) packet.getX());
+			}
+		});
+		try {
+			packetSender.sendPacket(new MapWindowPacket(packet));
+		} catch (IOException e) {
+			logger.error("Error sending MapWindowPacket. Packet=" + packet);
+		}
+		return window;
+	}
+
+	@Override
+	protected void doRemoveWindow(LostWindowPacket lostWindowPacket, IXpraWindow window) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				pane.getChildren().remove(((JavaFxWindow) window).getCanvas());
+			}
+		});
+	}
+
+	public void setStage(Stage stage) {
+		this.stage = stage;
+		initStage();
+		setGraphicsInit();
+	}
+
+	private void initStage() {
 		this.stage.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
@@ -56,53 +101,12 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 				int c = keyMap.getKeyCode(key);
 				List<String> mods = JavaFxUtils.getModifiers(event);
 				onKeyUp(0, c, u, mods);
-
 			}
 		});
 	}
 
-	@Override
-	protected void doWindowMoveResize(WindowMoveResizePacket packet) {
-		logger.warn("Window resize not implemented.  Packet=" + packet);
-
+	public void setAnchor(AnchorPane anchor) {
+		this.pane = anchor;
 	}
-
-	@Override
-	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
-		Canvas canvas = new Canvas();
-		JavaFxWindow window = new JavaFxWindow(packet, packetSender, canvas, stage, client.getKeyMap(),
-				/* IFocusNotifier */this);
-
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				canvas.setWidth(packet.getWidth());
-				canvas.setHeight(packet.getHeight());
-				pane.getChildren().add(canvas);
-				AnchorPane.setTopAnchor(canvas, (double) packet.getY());
-				AnchorPane.setLeftAnchor(canvas, (double) packet.getX());
-			}
-		});
-		try {
-			packetSender.sendPacket(new MapWindowPacket(packet));
-		} catch (IOException e) {
-			logger.error("Error sending MapWindowPacket. Packet=" + packet);
-		}
-		return window;
-	}
-
-	@Override
-	protected void doRemoveWindow(LostWindowPacket lostWindowPacket, IXpraWindow window) {
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				pane.getChildren().remove(((JavaFxWindow) window).getCanvas());
-			}
-		});
-
-	}
-
 
 }

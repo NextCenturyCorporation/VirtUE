@@ -34,19 +34,23 @@ public class JavaFxWindow extends BaseXpraWindow {
 
 	private List<String> type;
 
-	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, Canvas canvas, Stage stage, IKeyMap map, IFocusNotifier focusNotifier) {
+	private String title;
+
+	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap map, IFocusNotifier focusNotifier) {
 		super(packet, packetSender, map, focusNotifier);
-		logger.debug("ID: " + packet.getWindowId() + " Parent: " + packet.getMetadata().getParentId() + " "
-				+ packet.getType().toString() + " - "
-				+ packet.toString());
+		// logger.debug("ID: " + packet.getWindowId() + " Parent: " +
+		// packet.getMetadata().getParentId() + " "
+		// + packet.getType().toString() + " - "
+		// + packet.toString());
+
+		WindowMetadata metadata = packet.getMetadata();
+		title = metadata.getTitle();
+		type = metadata.getWindowType();
+	}
+
+	public void initJavaFx(Canvas canvas, Stage stage) {
 		this.canvas = canvas;
 		this.stage = stage;
-		WindowMetadata metadata = packet.getMetadata();
-		String title = metadata.getTitle();
-		type = metadata.getWindowType();
-		// logger.debug("NewWindow: type=" + type + " skipTaskbar=" + skipTaskbar + "
-		// title='" + title + "'");
-		// logger.debug("NewWindowMetadat: " + metadata.toString());
 		if (type.contains("NORMAL")) {
 			Platform.runLater(new Runnable() {
 				@Override
@@ -79,6 +83,7 @@ public class JavaFxWindow extends BaseXpraWindow {
 						modifiers);
 			}
 		});
+		graphicsSet = true;
 	}
 
 	@Override

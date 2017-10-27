@@ -16,7 +16,7 @@ public class TestClient {
         logger.debug("started");
         logger.info("info");
         logger.trace("trace");
-		XpraClient client = new XpraClient(null);
+		XpraClient client = new XpraClient();
 		File dir = DebugPacketHandler.getDefaultTimeBasedDirectory();
 		DebugPacketHandler debugHandler = new DebugPacketHandler(dir);
 		client.addPacketListener(debugHandler);
