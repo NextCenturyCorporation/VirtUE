@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -8,7 +9,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.dummy.KeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
@@ -64,7 +66,7 @@ public class HelloPacket extends Packet {
 
 	public static HelloPacket createDefaultRequest() {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-		int[] screen = new int[] { 3200, 1200 };
+		int[] screen = new int[] { 1200, 800 };
 		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
@@ -92,7 +94,6 @@ public class HelloPacket extends Packet {
 
 		// keyCodes are a list of list {int keyval, String keyname, int keycode, int
 		// group, int level}
-		map.put(XKBMAP_KEYCODES, KeyMap.getKeyboardList());
 
 		return new HelloPacket(map);
 	}
@@ -100,5 +101,17 @@ public class HelloPacket extends Packet {
 	@Override
 	public String toString() {
 		return "HelloPacket{" + "type=" + type + ", map=" + map + '}';
+	}
+
+	public void setKeyMap(IKeyMap keyMap) {
+		Collection<KeyCodeDto> keycodes = keyMap.getKeyCodes();
+
+		List<List<Object>> list = new ArrayList<List<Object>>();
+		for (KeyCodeDto kcc : keycodes) {
+			list.add(kcc.toList());
+		}
+
+		map.put(XKBMAP_KEYCODES, list);
+
 	}
 }

@@ -17,6 +17,7 @@ import com.ncc.savior.desktop.xpra.protocol.InputStreamPacketReader;
 import com.ncc.savior.desktop.xpra.protocol.OutputStreamPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.encoder.BencodeEncoder;
 import com.ncc.savior.desktop.xpra.protocol.encoder.IEncoder;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.packet.BasePacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketBuilder;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketDistributer;
@@ -52,8 +53,10 @@ public class XpraClient {
 	private PacketListenerManager packetReceivedListenerManager;
 	private PacketListenerManager packetSentListenerManager;
 	private IConnection connection;
+	private IKeyMap keyMap;
 
-	public XpraClient() {
+	public XpraClient(IKeyMap keymap) {
+		this.keyMap = keymap;
 		internalPacketDistributer = new PacketDistributer();
 		packetReceivedListenerManager = new PacketListenerManager();
 		packetSentListenerManager = new PacketListenerManager();
@@ -157,7 +160,9 @@ public class XpraClient {
 			};
 			Thread thread = new Thread(runnable);
 
-			packetSender.sendPacket(HelloPacket.createDefaultRequest());
+			HelloPacket helloPacket = HelloPacket.createDefaultRequest();
+			helloPacket.setKeyMap(keyMap);
+			packetSender.sendPacket(helloPacket);
 			// packetSender.sendPacket(new SetDeflatePacket(3));
 			thread.start();
 		} catch (IOException e) {
@@ -202,5 +207,9 @@ public class XpraClient {
 
 	public void removePacketSendListener(IPacketHandler handler) {
 		packetSentListenerManager.removePacketHandler(handler);
+	}
+
+	public IKeyMap getKeyMap() {
+		return keyMap;
 	}
 }

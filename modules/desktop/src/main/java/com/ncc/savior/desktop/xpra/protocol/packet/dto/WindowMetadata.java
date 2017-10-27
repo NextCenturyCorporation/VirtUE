@@ -74,6 +74,10 @@ public class WindowMetadata {
 		return getString("xid");
 	}
 
+	public int getParentId() {
+		return getInt("transient-for");
+	}
+
 	private List<String> getStringList(String key) {
 		Object ret = metadata.get(key);
 		if (ret != null) {

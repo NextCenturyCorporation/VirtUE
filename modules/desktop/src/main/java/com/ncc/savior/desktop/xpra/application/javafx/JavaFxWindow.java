@@ -1,13 +1,14 @@
 package com.ncc.savior.desktop.xpra.application.javafx;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.application.BaseXpraWindow;
+import com.ncc.savior.desktop.xpra.application.IFocusNotifier;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
@@ -29,23 +30,23 @@ public class JavaFxWindow extends BaseXpraWindow {
 	private static final Logger logger = LoggerFactory.getLogger(JavaFxWindow.class);
 
 	private Canvas canvas;
-	private List<String> modifiers;
 	private Stage stage;
 
 	private List<String> type;
 
-	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, Canvas canvas, Stage stage) {
-		super(packet, packetSender);
-		modifiers = new ArrayList<String>(0);
-		modifiers.add("shift");
+	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, Canvas canvas, Stage stage, IKeyMap map, IFocusNotifier focusNotifier) {
+		super(packet, packetSender, map, focusNotifier);
+		logger.debug("ID: " + packet.getWindowId() + " Parent: " + packet.getMetadata().getParentId() + " "
+				+ packet.getType().toString() + " - "
+				+ packet.toString());
 		this.canvas = canvas;
 		this.stage = stage;
 		WindowMetadata metadata = packet.getMetadata();
 		String title = metadata.getTitle();
-		boolean skipTaskbar = metadata.getSkipTaskbar();
 		type = metadata.getWindowType();
-		logger.debug("NewWindow: type=" + type + " skipTaskbar=" + skipTaskbar + " title='" + title + "'");
-		logger.debug("NewWindowMetadat: " + metadata.toString());
+		// logger.debug("NewWindow: type=" + type + " skipTaskbar=" + skipTaskbar + "
+		// title='" + title + "'");
+		// logger.debug("NewWindowMetadat: " + metadata.toString());
 		if (type.contains("NORMAL")) {
 			Platform.runLater(new Runnable() {
 				@Override
@@ -58,18 +59,22 @@ public class JavaFxWindow extends BaseXpraWindow {
 		this.canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
+				List<String> modifiers = JavaFxUtils.getModifiers(event);
 				onMouseMove((int) event.getSceneX(), (int) event.getSceneY(), modifiers);
 			}
 		});
 		this.canvas.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
+				List<String> modifiers = JavaFxUtils.getModifiers(event);
+				onWindowFocus();
 				onMousePress(event.getButton().ordinal(), (int) event.getSceneX(), (int) event.getSceneY(), modifiers);
 			}
 		});
 		this.canvas.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
+				List<String> modifiers = JavaFxUtils.getModifiers(event);
 				onMouseRelease(event.getButton().ordinal(), (int) event.getSceneX(), (int) event.getSceneY(),
 						modifiers);
 			}
@@ -78,7 +83,7 @@ public class JavaFxWindow extends BaseXpraWindow {
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+		logger.debug("Close window " + this.id);
 
 	}
 

@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MouseButtonActionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MousePointerPositionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
@@ -20,10 +22,15 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 	protected int id;
 	protected boolean debugOutput;
 	protected IPacketSender packetSender;
+	protected IKeyMap keyMap;
+	protected IFocusNotifier focusNotifier;
 
-	public BaseXpraWindow(NewWindowPacket packet, IPacketSender packetSender) {
+	public BaseXpraWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap keyMap,
+			IFocusNotifier focusNotifier) {
 		this.id = packet.getWindowId();
 		this.packetSender = packetSender;
+		this.keyMap = keyMap;
+		this.focusNotifier = focusNotifier;
 	}
 
 	@Override
@@ -49,6 +56,12 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 	protected void onMouseRelease(int button, int x, int y, List<String> modifiers) {
 		MouseButtonActionPacket sendPacket = new MouseButtonActionPacket(id, button, false, x, y, modifiers);
 		sendPacket(sendPacket, "mouse button action packet (released)");
+	}
+
+	protected void onWindowFocus() {
+		this.focusNotifier.notifyFocusedWindow(id);
+		FocusPacket sendPacket = new FocusPacket(id);
+		sendPacket(sendPacket, "focus packet");
 	}
 
 	private void sendPacket(Packet sendPacket, String packetDescription) {

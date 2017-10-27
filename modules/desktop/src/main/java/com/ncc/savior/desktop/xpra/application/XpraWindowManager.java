@@ -1,7 +1,9 @@
 package com.ncc.savior.desktop.xpra.application;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -13,21 +15,31 @@ import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.KeyActionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
-public abstract class XpraWindowManager implements IPacketHandler {
+public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifier {
 	private static final Logger logger = LoggerFactory.getLogger(XpraWindowManager.class);
 
-	private XpraClient client;
+	public static final String MOD_ALT_STRING = "alt";
+	public static final String MOD_CONTROL_STRING = "control";
+	public static final String MOD_SHIFT_STRING = "shift";
+	public static final String MOD_META_STRING = "meta";
+	public static final String MOD_SHORTCUT_STRING = "shortcut";
+
+	protected XpraClient client;
 	private HashSet<PacketType> packetTypes;
 	private HashMap<Integer, IXpraWindow> windows;
 
 	protected boolean debugOutput;
+	protected int focusedWindowId;
 
 	public XpraWindowManager(XpraClient client) {
 		this.client = client;
@@ -49,6 +61,7 @@ public abstract class XpraWindowManager implements IPacketHandler {
 	public void handlePacket(Packet packet) {
 		switch(packet.getType()) {
 		case NEW_WINDOW_OVERRIDE_REDIRECT:
+			onNewWindowOverride((NewWindowOverrideRedirectPacket) packet);
 		case NEW_WINDOW:
 			onNewWindow((NewWindowPacket) (packet));
 			break;
@@ -73,6 +86,30 @@ public abstract class XpraWindowManager implements IPacketHandler {
 		}
 	}
 
+	public void onWindowLostFocus() {
+		FocusPacket sendPacket = new FocusPacket(0);
+		this.notifyFocusedWindow(0);
+		sendPacket(sendPacket, "focus packet");
+	}
+
+	@Override
+	public Set<PacketType> getValidPacketTypes() {
+		return packetTypes;
+	}
+
+	public void setDebugOutput(boolean debugOutput) {
+		this.debugOutput = debugOutput;
+		for (Entry<Integer, IXpraWindow> entry : windows.entrySet()) {
+			IXpraWindow window = entry.getValue();
+			window.setDebugOutput(debugOutput);
+		}
+	}
+
+	@Override
+	public void notifyFocusedWindow(int windowId) {
+		this.focusedWindowId = windowId;
+	}
+
 	private void onMetadataUpdate(WindowMetadataPacket packet) {
 		IXpraWindow window = windows.get(packet.getWindowId());
 		if (window != null) {
@@ -88,19 +125,6 @@ public abstract class XpraWindowManager implements IPacketHandler {
 			window.setWindowIcon(packet);
 		} else {
 			logger.error("Unable to find window to set icon on.  ID=" + packet.getWindowId() + " Packet=" + packet);
-		}
-	}
-
-	@Override
-	public Set<PacketType> getValidPacketTypes() {
-		return packetTypes;
-	}
-
-	public void setDebugOutput(boolean debugOutput) {
-		this.debugOutput = debugOutput;
-		for (Entry<Integer, IXpraWindow> entry : windows.entrySet()) {
-			IXpraWindow window = entry.getValue();
-			window.setDebugOutput(debugOutput);
 		}
 	}
 
@@ -134,10 +158,39 @@ public abstract class XpraWindowManager implements IPacketHandler {
 			logger.error("Unable to find window to be closed.  ID=" + lostWindowPacket.getWindowId() + " Packet="
 					+ lostWindowPacket);
 		}
+	}
 
+	protected void onKeyDown(int keyval, int keycode, String keyname, List<String> mods) {
+		int id = focusedWindowId;
+		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, true, 0, mods);
+		sendPacket(sendPacket, "key action packet (pressed)");
+	}
+
+	protected void onKeyUp(int keyval, int keycode, String keyname, List<String> mods) {
+		int id = focusedWindowId;
+		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, false, 0, mods);
+		sendPacket(sendPacket, "key action packet (released)");
+	}
+
+	private void sendPacket(Packet sendPacket, String packetDescription) {
+		try {
+			client.getPacketSender().sendPacket(sendPacket);
+			if (logger.isDebugEnabled()) {
+				// logger.debug("Sending Packet=" + sendPacket.toString());
+			}
+		} catch (IOException e) {
+			logger.error("Error attempting to send damage packet=" + sendPacket, e);
+		}
 	}
 
 	private void onNewWindow(NewWindowPacket packet) {
+		int id = packet.getWindowId();
+		IXpraWindow window = createNewWindow(packet, client.getPacketSender());
+		window.setDebugOutput(debugOutput);
+		windows.put(id, window);
+	}
+
+	private void onNewWindowOverride(NewWindowOverrideRedirectPacket packet) {
 		int id = packet.getWindowId();
 		IXpraWindow window = createNewWindow(packet, client.getPacketSender());
 		window.setDebugOutput(debugOutput);

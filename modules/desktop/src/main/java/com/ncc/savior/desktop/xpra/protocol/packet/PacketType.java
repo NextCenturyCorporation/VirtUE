@@ -4,8 +4,10 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.HelloPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
@@ -60,11 +62,11 @@ public enum PacketType {
     SET_CURSORS("set-cursors"),
     SET_NOTIFY("set-notify"),
     SET_BELL("set-bell"),
-    MAP_WINDOW("map-window"),
+    MAP_WINDOW("map-window", MapWindowPacket.class),
     UNMAP_WINDOW("unmap-window"),
     CONFIGURE_WINDOW("configure-window"),
     CLOSE_WINDOW("close-window", CloseWindowPacket.class),
-    FOCUS("focus"),
+    FOCUS("focus", FocusPacket.class),
     BUTTON_ACTION("button-action"),
     POINTER_POSITION("pointer-position"),
     KEY_ACTION("key-action"),
