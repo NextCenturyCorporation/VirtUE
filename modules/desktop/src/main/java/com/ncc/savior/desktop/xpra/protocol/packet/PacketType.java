@@ -13,6 +13,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingEchoPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.ScrollPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.SetDeflatePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnknownPacket;
@@ -58,6 +59,7 @@ public enum PacketType {
     CONTROL("control"),
     INFO_RESPONSE("info-response"),
 	// Packets that are sent by the Client to the Server
+    SCROLL("scroll", ScrollPacket.class),
     SET_KEYBOARD_SYNC_ENABLED("set-keyboard-sync-enabled"),
     SET_CURSORS("set-cursors"),
     SET_NOTIFY("set-notify"),

@@ -5,8 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.desktop.xpra.application.BaseXpraWindow;
 import com.ncc.savior.desktop.xpra.application.IFocusNotifier;
+import com.ncc.savior.desktop.xpra.application.XpraWindow;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
@@ -22,11 +22,24 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class JavaFxWindow extends BaseXpraWindow {
+/**
+ * Controls a single window for a {@link JavaFxApplication}. A window is defined
+ * by the Xpra protocol and is considered any panel or screen that appears
+ * overtop another view. For example, tooltips, history, or settings panels are
+ * often their own window inside a single application. Applications typically
+ * contain a root window which displays the 'normal' view. Most windows (Besides
+ * the root window) are short lived and will be created and then destroyed in
+ * fairly short order.
+ *
+ *
+ */
+public class JavaFxWindow extends XpraWindow {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(JavaFxWindow.class);
 
 	private Canvas canvas;
@@ -35,6 +48,8 @@ public class JavaFxWindow extends BaseXpraWindow {
 	private List<String> type;
 
 	private String title;
+
+	private boolean closed;
 
 	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap map, IFocusNotifier focusNotifier) {
 		super(packet, packetSender, map, focusNotifier);
@@ -83,13 +98,18 @@ public class JavaFxWindow extends BaseXpraWindow {
 						modifiers);
 			}
 		});
+		this.canvas.setOnScroll(new EventHandler<ScrollEvent>() {
+			@Override
+			public void handle(ScrollEvent event) {
+				onMouseScroll(0, (int) event.getDeltaY(), (int) event.getSceneX(), (int) event.getSceneY());
+			}
+		});
 		graphicsSet = true;
 	}
 
 	@Override
-	public void close() {
-		logger.debug("Close window " + this.id);
-
+	public void doClose() {
+		closed = true;
 	}
 
 	@Override
@@ -99,8 +119,11 @@ public class JavaFxWindow extends BaseXpraWindow {
 			@Override
 			public void run() {
 				try {
+					if (closed) {
+						return;
+					}
 					Image img = ImageEncoder.decodeImage(packet.getEncoding(), packet.getData());
-					if (img != null) {
+					if (img != null && !closed) {
 						GraphicsContext g = canvas.getGraphicsContext2D();
 						// g.setGlobalBlendMode(BlendMode.SCREEN);
 						// g.setGlobal

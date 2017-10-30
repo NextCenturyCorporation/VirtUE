@@ -19,7 +19,14 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
 
+/**
+ * This is the abstract base class that manages all the {@link XpraApplication}s
+ * created by the connection. Most connections will have a single application,
+ * but some applications (browsers for example), can open many OS windows.
+ *
+ */
 public abstract class XpraApplicationManager {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(XpraApplicationManager.class);
 	protected XpraClient client;
 	protected Map<Integer, XpraApplication> applications;
@@ -84,7 +91,6 @@ public abstract class XpraApplicationManager {
 					onStartupComplete((StartupCompletePacket) packet);
 					break;
 				default:
-
 
 				}
 				if (packet instanceof WindowPacket) {

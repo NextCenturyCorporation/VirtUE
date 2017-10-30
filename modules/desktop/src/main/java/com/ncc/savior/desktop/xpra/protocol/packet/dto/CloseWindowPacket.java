@@ -13,7 +13,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  */
 public class CloseWindowPacket extends WindowPacket {
 
-	protected CloseWindowPacket(int windowId) {
+	public CloseWindowPacket(int windowId) {
 		super(windowId, PacketType.CLOSE_WINDOW);
 	}
 

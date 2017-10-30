@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra.application;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.KeyActionPacket;
@@ -27,7 +29,15 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
-public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifier {
+/**
+ * Manages a bunch of {@link XpraWindow}s for an {@link XpraApplication}. A
+ * window is defined by the Xpra protocol and is considered any panel or screen
+ * that appears overtop another view. For example, tooltips, history, or
+ * settings panels are often their own window inside a single application.
+ *
+ *
+ */
+public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifier, Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(XpraWindowManager.class);
 
 	public static final String MOD_ALT_STRING = "alt";
@@ -45,9 +55,11 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 
 	private Queue<Packet> packetQueue;
 
-	private boolean graphicsInit = false;;
+	private boolean graphicsInit = false;
 
-	public XpraWindowManager(XpraClient client) {
+	protected int baseWindowId;;
+
+	public XpraWindowManager(XpraClient client, int baseWindowId) {
 		this.client = client;
 		this.packetTypes = new HashSet<PacketType>();
 		this.packetTypes.add(PacketType.NEW_WINDOW);
@@ -62,6 +74,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		this.debugOutput = false;
 		this.graphicsInit = false;
 		this.packetQueue = new LinkedBlockingQueue<Packet>();
+		this.baseWindowId = baseWindowId;
 	}
 
 	protected synchronized void setGraphicsInit() {
@@ -135,6 +148,14 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		this.focusedWindowId = windowId;
 	}
 
+	@Override
+	public void close() throws IOException {
+		for (IXpraWindow win : windows.values()) {
+			win.close();
+		}
+		doClose();
+	}
+
 	private void onMetadataUpdate(WindowMetadataPacket packet) {
 		IXpraWindow window = windows.get(packet.getWindowId());
 		if (window != null) {
@@ -176,9 +197,20 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 	private void onLostWindow(LostWindowPacket lostWindowPacket) {
 		IXpraWindow window = windows.get(lostWindowPacket.getWindowId());
 		if (window != null) {
-			window.close();
+			try {
+				window.close();
+			} catch (IOException e) {
+				logger.error("Error attempting to close window.  Window=" + window);
+			}
 			doRemoveWindow(lostWindowPacket, window);
 			windows.remove(lostWindowPacket.getWindowId());
+			if (windows.isEmpty()) {
+				try {
+					this.close();
+				} catch (IOException e) {
+					logger.error("Error attempting to close WindowManager=" + this);
+				}
+			}
 		} else {
 			logger.error("Unable to find window to be closed.  ID=" + lostWindowPacket.getWindowId() + " Packet="
 					+ lostWindowPacket);
@@ -204,7 +236,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 				// logger.debug("Sending Packet=" + sendPacket.toString());
 			}
 		} catch (IOException e) {
-			logger.error("Error attempting to send damage packet=" + sendPacket, e);
+			logger.error("Error attempting to send packet=" + sendPacket, e);
 		}
 	}
 
@@ -227,4 +259,13 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 	protected abstract void doWindowMoveResize(WindowMoveResizePacket packet);
 
 	protected abstract IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender iPacketSender);
+
+	protected abstract void doClose();
+
+	public void CloseAllWindows() {
+		for (Entry<Integer, IXpraWindow> e : windows.entrySet()) {
+			Packet sendPacket = new CloseWindowPacket(e.getKey());
+			sendPacket(sendPacket, "close window packet");
+		}
+	}
 }

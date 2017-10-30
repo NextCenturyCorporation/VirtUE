@@ -8,6 +8,14 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
+/**
+ * JavaFX Application manager keeps track of and controls
+ * {@link JavaFxApplication}s. An Application is defined as window that has its
+ * own taskbar item. For example, each firefox window is considered an
+ * application.
+ *
+ *
+ */
 public class JavaFxApplicationManager extends XpraApplicationManager {
 
 	private Stage stage;
@@ -19,7 +27,7 @@ public class JavaFxApplicationManager extends XpraApplicationManager {
 	}
 
 	@Override
-	protected synchronized XpraApplication  createXpraApplication(NewWindowPacket packet) {
+	protected synchronized XpraApplication createXpraApplication(NewWindowPacket packet) {
 		int w = packet.getWidth();
 		int h = packet.getHeight();
 		JavaFxApplication app = new JavaFxApplication(client, w, h, packet.getWindowId());

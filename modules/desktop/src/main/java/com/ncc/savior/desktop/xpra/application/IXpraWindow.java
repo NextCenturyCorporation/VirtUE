@@ -1,13 +1,13 @@
 package com.ncc.savior.desktop.xpra.application;
 
+import java.io.Closeable;
+
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
-public interface IXpraWindow {
-
-	public void close();
+public interface IXpraWindow extends Closeable {
 
 	public void draw(DrawPacket packet);
 

@@ -23,6 +23,15 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+/**
+ * This class manages all the {@link JavaFxWindow} that need to be displayed in
+ * a single {@link JavaFxApplication}. A window is defined by the Xpra protocol
+ * and is considered any panel or screen that appears overtop another view. For
+ * example, tooltips, history, or settings panels are often their own window
+ * inside a single application.
+ *
+ *
+ */
 public class JavaFxXpraWindowManager extends XpraWindowManager {
 	private static final Logger logger = LoggerFactory.getLogger(JavaFxXpraWindowManager.class);
 
@@ -30,8 +39,8 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 	protected Stage stage;
 	protected IKeyMap keyMap;
 
-	public JavaFxXpraWindowManager(XpraClient client) {
-		super(client);
+	public JavaFxXpraWindowManager(XpraClient client, int baseWindowId) {
+		super(client, baseWindowId);
 		this.keyMap = client.getKeyMap();
 	}
 
@@ -42,8 +51,7 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	@Override
 	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
-		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyMap(),
-				/* IFocusNotifier */this);
+		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyMap(), /* IFocusNotifier */this);
 
 		Platform.runLater(new Runnable() {
 			@Override
@@ -67,12 +75,17 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	@Override
 	protected void doRemoveWindow(LostWindowPacket lostWindowPacket, IXpraWindow window) {
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				pane.getChildren().remove(((JavaFxWindow) window).getCanvas());
-			}
-		});
+		final AnchorPane myPane = pane;
+		if (myPane != null) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					JavaFxWindow w = (JavaFxWindow) window;
+					Canvas canvas = w.getCanvas();
+					myPane.getChildren().remove(canvas);
+				}
+			});
+		}
 	}
 
 	public void setStage(Stage stage) {
@@ -89,7 +102,9 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 				String u = keyMap.getUnicodeName(key);
 				int c = keyMap.getKeyCode(key);
 				List<String> mods = JavaFxUtils.getModifiers(event);
-				onKeyDown(0, c, u, mods);
+				if (u != null) {
+					onKeyDown(0, c, u, mods);
+				}
 			}
 		});
 
@@ -100,7 +115,9 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 				String u = keyMap.getUnicodeName(key);
 				int c = keyMap.getKeyCode(key);
 				List<String> mods = JavaFxUtils.getModifiers(event);
-				onKeyUp(0, c, u, mods);
+				if (u != null) {
+					onKeyUp(0, c, u, mods);
+				}
 			}
 		});
 	}
@@ -109,4 +126,18 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 		this.pane = anchor;
 	}
 
+	@Override
+	protected void doClose() {
+		this.pane = null;
+		final Stage myStage = JavaFxXpraWindowManager.this.stage;
+		JavaFxXpraWindowManager.this.stage = null;
+		if (myStage != null) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					myStage.close();
+				}
+			});
+		}
+	}
 }

@@ -16,8 +16,16 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.MousePointerPositionPacke
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 
-public abstract class BaseXpraWindow implements IXpraWindow {
-	private static final Logger logger = LoggerFactory.getLogger(BaseXpraWindow.class);
+/**
+ * Handles windows from the Xpra protocol. A window is defined by the Xpra
+ * protocol and is considered any panel or screen that appears overtop another
+ * view. For example, tooltips, history, or settings panels are often their own
+ * window inside a single application.
+ *
+ *
+ */
+public abstract class XpraWindow implements IXpraWindow {
+	private static final Logger logger = LoggerFactory.getLogger(XpraWindow.class);
 
 	protected int id;
 	protected boolean debugOutput;
@@ -26,7 +34,7 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 	protected IFocusNotifier focusNotifier;
 	protected boolean graphicsSet;
 
-	public BaseXpraWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap keyMap,
+	public XpraWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap keyMap,
 			IFocusNotifier focusNotifier) {
 		this.id = packet.getWindowId();
 		this.packetSender = packetSender;
@@ -60,6 +68,24 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 		sendPacket(sendPacket, "mouse button action packet (released)");
 	}
 
+	protected void onMouseScroll(int button, int distance, int x, int y) {
+		int delta = distance / 20;
+		if (delta > 0) {
+			button = 4;
+		} else {
+			button = 5;
+			delta = -delta;
+		}
+		if (x < 0 || y < 0) {
+			throw new IllegalArgumentException("Minus coordinates are not allowed: " + x + ", " + y);
+		}
+		// new WheelMotionPacket(id, button, distance, x, y);
+		for (int i = 0; i < delta; i++) {
+			sendPacket(new MouseButtonActionPacket(id, button, true, x, y), "mouse wheel packet");
+			sendPacket(new MouseButtonActionPacket(id, button, false, x, y), "mouse wheel packet");
+		}
+	}
+
 	protected void onWindowFocus() {
 		this.focusNotifier.notifyFocusedWindow(id);
 		FocusPacket sendPacket = new FocusPacket(id);
@@ -75,6 +101,13 @@ public abstract class BaseXpraWindow implements IXpraWindow {
 		} catch (IOException e) {
 			logger.error("Error attempting to send damage packet=" + sendPacket, e);
 		}
+	}
+
+	public abstract void doClose();
+
+	@Override
+	public void close() throws IOException {
+		doClose();
 	}
 
 }

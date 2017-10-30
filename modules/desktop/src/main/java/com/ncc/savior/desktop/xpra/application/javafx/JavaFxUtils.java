@@ -8,6 +8,11 @@ import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
+/**
+ * Utility methods for extracting information from JavaFX events
+ *
+ *
+ */
 public class JavaFxUtils {
 	public static List<String> getModifiers(KeyEvent event) {
 		List<String> mods = new ArrayList<String>();
