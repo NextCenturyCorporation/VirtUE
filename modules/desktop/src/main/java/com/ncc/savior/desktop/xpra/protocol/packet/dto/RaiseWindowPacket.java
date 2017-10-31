@@ -7,23 +7,22 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
 /**
- * This packet informs the server that this specific window has focus.
  *
  *
+ * Note: this class could be a window packet because it has a window ID
  */
-public class FocusPacket extends WindowPacket {
+public class RaiseWindowPacket extends WindowPacket {
 
-	public FocusPacket(int windowId) {
-		super(windowId, PacketType.FOCUS);
+	protected RaiseWindowPacket(int windowId) {
+		super(windowId, PacketType.RAISE_WINDOW);
 	}
 
-	public FocusPacket(List<Object> list) {
+	public RaiseWindowPacket(List<Object> list) {
 		this(PacketUtils.asInt(list.get(1)));
 	}
 
 	@Override
 	protected void doAddToList(ArrayList<Object> list) {
-		list.add(super.windowId);
+		list.add(windowId);
 	}
-
 }

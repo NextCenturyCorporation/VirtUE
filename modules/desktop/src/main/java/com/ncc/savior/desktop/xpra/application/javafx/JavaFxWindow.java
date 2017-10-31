@@ -127,6 +127,7 @@ public class JavaFxWindow extends XpraWindow {
 						GraphicsContext g = canvas.getGraphicsContext2D();
 						// g.setGlobalBlendMode(BlendMode.SCREEN);
 						// g.setGlobal
+						// logger.debug("ID:" + packet.getWindowId() + " Window:" + this.toString());
 						g.drawImage(img, packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 
 						if (debugOutput) {
@@ -190,5 +191,13 @@ public class JavaFxWindow extends XpraWindow {
 				}
 			});
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "JavaFxWindow [canvas=" + canvas + ", stage=" + stage + ", type=" + type + ", title=" + title
+				+ ", closed=" + closed + ", id=" + id + ", debugOutput=" + debugOutput + ", packetSender="
+				+ packetSender + ", keyMap=" + keyMap + ", focusNotifier=" + focusNotifier + ", graphicsSet="
+				+ graphicsSet + "]";
 	}
 }

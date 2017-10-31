@@ -16,6 +16,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
 /**
@@ -102,5 +103,16 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 			client.removePacketListener(applicationPacketHandler);
 		}
 		stage.close();
+	}
+
+	@Override
+	public String toString() {
+		return "JavaFxApplication [anchor=" + anchor + ", stage=" + stage + ", scene=" + scene + ", height=" + height
+				+ ", width=" + width + ", show=" + show + ", applicationPacketHandler=" + applicationPacketHandler
+				+ ", windowManager=" + windowManager + ", baseWindowId=" + baseWindowId + "]";
+	}
+
+	public Window getStage() {
+		return stage;
 	}
 }

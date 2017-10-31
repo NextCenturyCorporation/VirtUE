@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -46,9 +47,14 @@ public class CursorPacket extends Packet {
 		this.xHotspot = PacketUtils.asInt(list, 5);
 		this.yHotspot = PacketUtils.asInt(list, 6);
 		this.serial = PacketUtils.asInt(list, 7);
-		this.bytes = (byte[]) list.get(8);
-		if (list.size() > 9) {
-			this.name = PacketUtils.asString(list.get(9));
+		Object eight = list.get(8);
+		if (eight instanceof String) {
+			this.name = (String) eight;
+		} else {
+			this.bytes = (byte[]) eight;
+			if (list.size() > 9) {
+				this.name = PacketUtils.asString(list.get(9));
+			}
 		}
 	}
 
@@ -95,6 +101,13 @@ public class CursorPacket extends Packet {
 	@Override
 	protected void doAddToList(ArrayList<Object> list) {
 		throw new RuntimeException("Not implemented");
+	}
+
+	@Override
+	public String toString() {
+		return "CursorPacket [x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", xHotspot="
+				+ xHotspot + ", yHotspot=" + yHotspot + ", serial=" + serial + ", bytes=" + Arrays.toString(bytes)
+				+ ", name=" + name + ", empty=" + empty + ", type=" + type + "]";
 	}
 
 }

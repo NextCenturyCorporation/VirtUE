@@ -16,6 +16,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
 
@@ -33,6 +34,7 @@ public abstract class XpraApplicationManager {
 	protected Map<Integer, XpraApplication> windowIdsToApplications;
 	protected BruteForceKeyMap keyMap;
 	private boolean show = false;
+	private boolean setDebugOutput;
 
 	public XpraApplicationManager(XpraClient client) {
 		this.client = client;
@@ -43,27 +45,9 @@ public abstract class XpraApplicationManager {
 	}
 
 	public void setDebugOutput(boolean b) {
+		this.setDebugOutput = b;
 		for (XpraApplication app : applications.values()) {
 			app.setDebugOutput(true);
-		}
-	}
-
-	private void onNewWindow(NewWindowPacket packet) {
-		XpraApplication app = createXpraApplication(packet);
-		if (show) {
-			app.Show();
-		}
-		int baseWindowId = packet.getWindowId();
-		applications.put(baseWindowId, app);
-		windowIdsToApplications.put(baseWindowId, app);
-	}
-
-	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet);
-
-	protected void onLostWindow(LostWindowPacket packet) {
-		int id = packet.getWindowId();
-		if (applications.containsKey(id)) {
-			applications.remove(id);
 		}
 	}
 
@@ -77,9 +61,18 @@ public abstract class XpraApplicationManager {
 
 			@Override
 			public void handlePacket(Packet packet) {
+
 				switch (packet.getType()) {
 				case NEW_WINDOW:
-					onNewWindow((NewWindowPacket) packet);
+					NewWindowPacket p = (NewWindowPacket) packet;
+					int parentId = p.getMetadata().getParentId();
+					boolean isModal = p.getMetadata().getModal();
+					if (parentId > 0 && isModal) {
+						XpraApplication parent = applications.get(parentId);
+						onModal(p, parent);
+					} else {
+						onNewWindow(p);
+					}
 					break;
 				case LOST_WINDOW:
 					onLostWindow((LostWindowPacket) packet);
@@ -89,6 +82,9 @@ public abstract class XpraApplicationManager {
 					break;
 				case STARTUP_COMPLETE:
 					onStartupComplete((StartupCompletePacket) packet);
+					break;
+				case RAISE_WINDOW:
+					onRaiseWindow((RaiseWindowPacket) packet);
 					break;
 				default:
 
@@ -115,6 +111,10 @@ public abstract class XpraApplicationManager {
 		client.addPacketListener(handler);
 	}
 
+	protected void onRaiseWindow(RaiseWindowPacket packet) {
+		// do nothing here, window will handle it.
+	}
+
 	protected void onStartupComplete(StartupCompletePacket packet) {
 		show = true;
 		for (XpraApplication app : applications.values()) {
@@ -122,10 +122,43 @@ public abstract class XpraApplicationManager {
 		}
 	}
 
+	private void onNewWindow(NewWindowPacket packet) {
+		XpraApplication app = createXpraApplication(packet);
+		app.setDebugOutput(this.setDebugOutput);
+		if (show) {
+			app.Show();
+		}
+		int baseWindowId = packet.getWindowId();
+		applications.put(baseWindowId, app);
+		windowIdsToApplications.put(baseWindowId, app);
+	}
+
+	protected void onModal(NewWindowPacket packet, XpraApplication parent) {
+		// int parentId = packet.getMetadata().getParentId();
+		// int id = packet.getWindowId();
+		// windowIdsToApplications.put(id, windowIdsToApplications.get(parentId));
+
+		XpraApplication app = createXpraApplication(packet, parent);
+		app.setDebugOutput(this.setDebugOutput);
+		if (show) {
+			app.Show();
+		}
+		int baseWindowId = packet.getWindowId();
+		applications.put(baseWindowId, app);
+		windowIdsToApplications.put(baseWindowId, app);
+	}
+
 	protected void onNewWindowOverride(NewWindowOverrideRedirectPacket packet) {
 		int parentId = packet.getMetadata().getParentId();
 		int id = packet.getWindowId();
 		windowIdsToApplications.put(id, windowIdsToApplications.get(parentId));
+	}
+
+	protected void onLostWindow(LostWindowPacket packet) {
+		int id = packet.getWindowId();
+		if (applications.containsKey(id)) {
+			applications.remove(id);
+		}
 	}
 
 	protected void handleNonWindowPacket(Packet packet) {
@@ -139,4 +172,8 @@ public abstract class XpraApplicationManager {
 			app.handleWindowPacket(p);
 		}
 	}
+
+	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet);
+
+	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet, XpraApplication parent);
 }

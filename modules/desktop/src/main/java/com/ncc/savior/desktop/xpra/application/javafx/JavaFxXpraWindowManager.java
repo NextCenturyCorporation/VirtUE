@@ -13,6 +13,7 @@ import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
@@ -61,11 +62,17 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 				canvas.setWidth(packet.getWidth());
 				canvas.setHeight(packet.getHeight());
 				pane.getChildren().add(canvas);
-				AnchorPane.setTopAnchor(canvas, (double) packet.getY());
-				AnchorPane.setLeftAnchor(canvas, (double) packet.getX());
+				double x = packet.getX();
+				double y = packet.getY();
+
+				AnchorPane.setTopAnchor(canvas, y);
+				AnchorPane.setLeftAnchor(canvas, x);
 			}
 		});
 		try {
+			if (!(packet instanceof NewWindowOverrideRedirectPacket)) {
+				packet.overrideXy(0, 0);
+			}
 			packetSender.sendPacket(new MapWindowPacket(packet));
 		} catch (IOException e) {
 			logger.error("Error sending MapWindowPacket. Packet=" + packet);

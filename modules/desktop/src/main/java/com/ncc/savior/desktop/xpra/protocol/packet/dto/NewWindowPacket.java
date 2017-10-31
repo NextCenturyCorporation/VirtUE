@@ -93,4 +93,10 @@ public class NewWindowPacket extends WindowPacket {
 				+ height + ", metadata=" + metadata + ", otherData=" + otherData + ", type=" + type + "]";
 	}
 
+	public void overrideXy(int x, int y) {
+		this.x = x;
+		this.y = y;
+
+	}
+
 }

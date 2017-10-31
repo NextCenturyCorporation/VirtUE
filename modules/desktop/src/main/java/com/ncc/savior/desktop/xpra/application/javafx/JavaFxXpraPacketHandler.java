@@ -13,6 +13,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
@@ -31,6 +34,7 @@ import javafx.scene.image.WritableImage;
  *
  */
 public class JavaFxXpraPacketHandler implements IPacketHandler {
+	private static Logger logger = LoggerFactory.getLogger(JavaFxXpraPacketHandler.class);
 
 	private HashSet<PacketType> types;
 	private Scene scene;
@@ -46,6 +50,12 @@ public class JavaFxXpraPacketHandler implements IPacketHandler {
 		this.cursorNameMap.put("xterm", Cursor.TEXT);
 		this.cursorNameMap.put("sb_h_double_arrow", Cursor.H_RESIZE);
 		this.cursorNameMap.put("sb_v_double_arrow", Cursor.V_RESIZE);
+		this.cursorNameMap.put("col-resize", Cursor.H_RESIZE);
+		this.cursorNameMap.put("row-resize", Cursor.V_RESIZE);
+		this.cursorNameMap.put("n-resize", Cursor.N_RESIZE);
+		this.cursorNameMap.put("s-resize", Cursor.S_RESIZE);
+		this.cursorNameMap.put("w-resize", Cursor.W_RESIZE);
+		this.cursorNameMap.put("e-resize", Cursor.E_RESIZE);
 	}
 
 	@Override
@@ -62,18 +72,29 @@ public class JavaFxXpraPacketHandler implements IPacketHandler {
 
 	private void handleCursorPacket(CursorPacket packet) {
 		if (packet.isEmpty()) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					scene.setCursor(Cursor.DEFAULT);
+				}
+			});
 			return;
 		}
-
 		String name = packet.getName();
 		Cursor cursor = null;
 		// attempt to find a local system cursor
 		if (cursorNameMap.containsKey(name)) {
 			cursor = cursorNameMap.get(name);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Found cursor in cursor map.  name=" + name + " cursor=" + cursor + " Packet=" + packet);
+			}
 		} else {
 			try {
-				System.out.println(name);
+				// System.out.println(name);
 				cursor = Cursor.cursor(name);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Found cursor by name.  name=" + name + " cursor=" + cursor + " Packet=" + packet);
+				}
 
 			} catch (IllegalArgumentException e) {
 			}
@@ -87,20 +108,37 @@ public class JavaFxXpraPacketHandler implements IPacketHandler {
 					scene.setCursor(c);
 				}
 			});
+		} else if (packet.getBytes() != null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Cursor not found.  Attempting to build from bytes name=" + name + " bytes="
+						+ packet.getBytes() + " Packet=" + packet);
+			}
+			try {
+				BufferedImage bimg = cursorPacketToBufferedImage(packet);
+
+				WritableImage img = new WritableImage(packet.getWidth(), packet.getHeight());
+				img = SwingFXUtils.toFXImage(bimg, img);
+
+				final ImageCursor imgCursor = new ImageCursor(img, packet.getxHotspot(), packet.getyHotspot());
+
+				Platform.runLater(new Runnable() {
+
+					@Override
+					public void run() {
+						scene.setCursor(imgCursor);
+					}
+				});
+			} catch (RuntimeException e) {
+				logger.warn("Failed to draw cursor from image.  Packet=" + packet);
+			}
 		} else {
-
-			BufferedImage bimg = cursorPacketToBufferedImage(packet);
-
-			WritableImage img = new WritableImage(packet.getWidth(), packet.getHeight());
-			img = SwingFXUtils.toFXImage(bimg, img);
-
-			final ImageCursor imgCursor = new ImageCursor(img, packet.getxHotspot(), packet.getyHotspot());
-
+			if (logger.isTraceEnabled()) {
+				logger.trace("Unable to create cursor.  Setting default.  Packet=" + packet);
+			}
 			Platform.runLater(new Runnable() {
-
 				@Override
 				public void run() {
-					scene.setCursor(imgCursor);
+					scene.setCursor(Cursor.DEFAULT);
 				}
 			});
 		}
