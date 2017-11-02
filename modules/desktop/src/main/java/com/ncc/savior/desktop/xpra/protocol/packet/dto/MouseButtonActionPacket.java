@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
 /**
  * Packet to inform the server that a mouse button state has changed. Modifiers
@@ -36,6 +37,10 @@ public class MouseButtonActionPacket extends WindowPacket {
 
 	public MouseButtonActionPacket(int windowId, int button, boolean pressed, int x, int y) {
 		this(windowId, button, pressed, x, y, new ArrayList<String>(2));
+	}
+
+	public MouseButtonActionPacket(List<Object> list) {
+		this(PacketUtils.asInt(list.get(1)), PacketUtils.asInt(list.get(2)), PacketUtils.asBoolean(list.get(3)), PacketUtils.asInt(list.get(4)),PacketUtils.asInt(list.get(5)));
 	}
 
 	@Override

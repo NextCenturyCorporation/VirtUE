@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
 public class KeyActionPacket extends WindowPacket {
 
@@ -23,6 +24,12 @@ public class KeyActionPacket extends WindowPacket {
 		this.pressed = pressed;
 		this.group = group;
 		this.modifiers = modifiers;
+	}
+
+	public KeyActionPacket(List<Object> list) {
+		this(PacketUtils.asInt(list.get(1)), PacketUtils.asInt(list.get(2)), PacketUtils.asInt(list.get(3)),
+				PacketUtils.asString(list.get(4)), PacketUtils.asBoolean(list.get(5)), PacketUtils.asInt(list.get(6)),
+				PacketUtils.asStringList(list.get(7)));
 	}
 
 	@Override
