@@ -8,6 +8,8 @@ public interface IKeyMap {
 
 	int getKeyCode(int key);
 
-	String getUnicodeName(int keycode);
+	String getUnicodeName(int key);
+
+	KeyCodeDto getKeyCodeDto(int ordinal);
 
 }

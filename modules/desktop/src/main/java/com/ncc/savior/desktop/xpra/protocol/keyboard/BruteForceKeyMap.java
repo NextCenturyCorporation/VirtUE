@@ -22,14 +22,14 @@ public class BruteForceKeyMap implements IKeyMap {
 
 		for (KeyCode code : KeyCode.values()) {
 			KeyCodeDto container = new KeyCodeDto();
-			container.ordinal = code.ordinal();
+			container.setOrdinal(code.ordinal());
 			String string = code.toString();
 			if (string.length() == 1) {
-				container.keyCode = string.charAt(string.length() - 1);
+				container.setKeyCode(string.charAt(string.length() - 1));
 			} else if (code.isDigitKey()) {
-				container.keyCode = string.charAt(string.length() - 1);
+				container.setKeyCode(string.charAt(string.length() - 1));
 			}
-			container.keyName = code.getName();
+			container.setKeyName(code.getName());
 
 			// System.out.println(code.ordinal() + " : "+ container.toString());
 			// keycodesMap.put(code.ordinal(), container);
@@ -161,9 +161,9 @@ public class BruteForceKeyMap implements IKeyMap {
 
 	protected void add(int ordinal, int code, String name) {
 		KeyCodeDto c = new KeyCodeDto();
-		c.keyCode = code;
-		c.keyName = name;
-		c.ordinal = ordinal;
+		c.setKeyCode(code);
+		c.setKeyName(name);
+		c.setOrdinal(ordinal);
 		keycodesMap.put(ordinal, c);
 	}
 
@@ -180,7 +180,7 @@ public class BruteForceKeyMap implements IKeyMap {
 		if (code == null) {
 			return null;
 		}
-		return code.keyName;
+		return code.getKeyName();
 	}
 
 	public Set<Entry<Integer, KeyCodeDto>> getEntries() {
@@ -193,12 +193,17 @@ public class BruteForceKeyMap implements IKeyMap {
 		if (code == null) {
 			return -1;
 		}
-		return code.keyCode;
+		return code.getKeyCode();
 	}
 
 	@Override
 	public Collection<KeyCodeDto> getKeyCodes() {
 		return keycodesMap.values();
+	}
+
+	@Override
+	public KeyCodeDto getKeyCodeDto(int ordinal) {
+		return keycodesMap.get(ordinal);
 	}
 
 }

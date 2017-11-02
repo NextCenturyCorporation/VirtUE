@@ -6,8 +6,11 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.HelloPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.KeyActionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MouseButtonActionPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MousePointerPositionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
@@ -68,9 +71,9 @@ public enum PacketType {
     CONFIGURE_WINDOW("configure-window"),
     CLOSE_WINDOW("close-window", CloseWindowPacket.class),
     FOCUS("focus", FocusPacket.class),
-    BUTTON_ACTION("button-action"),
-    POINTER_POSITION("pointer-position"),
-    KEY_ACTION("key-action"),
+    BUTTON_ACTION("button-action", MouseButtonActionPacket.class),
+    POINTER_POSITION("pointer-position", MousePointerPositionPacket.class),
+    KEY_ACTION("key-action", KeyActionPacket.class),
     KEY_REPEAT("key-repeat"),
     LAYOUT_CHANGED("layout-changed"),
     KEYMAP_CHANGED("keymap-changed"),

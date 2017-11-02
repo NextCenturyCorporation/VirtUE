@@ -1,7 +1,6 @@
 package com.ncc.savior.desktop.xpra.application.javafx;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,9 @@ import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.IXpraWindow;
 import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
@@ -38,11 +39,17 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	protected AnchorPane pane;
 	protected Stage stage;
-	protected IKeyMap keyMap;
+	protected JavaFxKeyboard keyboard;
 
 	public JavaFxXpraWindowManager(XpraClient client, int baseWindowId) {
 		super(client, baseWindowId);
-		this.keyMap = client.getKeyMap();
+		IKeyboard kb = client.getKeyboard();
+		if (kb instanceof JavaFxKeyboard) {
+			this.keyboard = (JavaFxKeyboard) kb;
+		} else {
+			logger.error("Error attempting to set keyboard.  Keyboard is wrong class.  Class="
+					+ kb.getClass().getCanonicalName());
+		}
 	}
 
 	@Override
@@ -52,7 +59,7 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	@Override
 	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
-		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyMap(), /* IFocusNotifier */this);
+		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyboard(), /* IFocusNotifier */this);
 
 		Platform.runLater(new Runnable() {
 			@Override
@@ -105,12 +112,13 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 		this.stage.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				int key = event.getCode().ordinal();
-				String u = keyMap.getUnicodeName(key);
-				int c = keyMap.getKeyCode(key);
-				List<String> mods = JavaFxUtils.getModifiers(event);
-				if (u != null) {
-					onKeyDown(0, c, u, mods);
+				KeyCodeDto keycode = keyboard.getKeyCodeFromEvent(event);
+				// int key = event.getCode().ordinal();
+				// String u = keyMap.getUnicodeName(key);
+				// int c = keyMap.getKeyCode(key);
+				// List<String> mods = JavaFxUtils.getModifiers(event);
+				if (keycode != null) {
+					onKeyDown(keycode, keyboard.getModifiers(event));
 				}
 			}
 		});
@@ -118,12 +126,13 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 		this.stage.getScene().setOnKeyReleased(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				int key = event.getCode().ordinal();
-				String u = keyMap.getUnicodeName(key);
-				int c = keyMap.getKeyCode(key);
-				List<String> mods = JavaFxUtils.getModifiers(event);
-				if (u != null) {
-					onKeyUp(0, c, u, mods);
+				KeyCodeDto keycode = keyboard.getKeyCodeFromEvent(event);
+				// int key = event.getCode().ordinal();
+				// String u = keyMap.getUnicodeName(key);
+				// int c = keyMap.getKeyCode(key);
+				// List<String> mods = JavaFxUtils.getModifiers(event);
+				if (keycode != null) {
+					onKeyUp(keycode, keyboard.getModifiers(event));
 				}
 			}
 		});

@@ -36,4 +36,11 @@ public class KeyActionPacket extends WindowPacket {
 		list.add(keycode);
 		list.add(group);
 	}
+
+	@Override
+	public String toString() {
+		return "KeyActionPacket [keyval=" + keyval + ", keycode=" + keycode + ", keyname=" + keyname + ", pressed="
+				+ pressed + ", modifiers=" + modifiers + ", group=" + group + ", windowId=" + windowId + ", type="
+				+ type + "]";
+	}
 }

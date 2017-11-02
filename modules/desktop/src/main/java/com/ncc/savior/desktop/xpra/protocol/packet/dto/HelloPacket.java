@@ -92,6 +92,9 @@ public class HelloPacket extends Packet {
 		map.put(XKBMAP_LAYOUT, Locale.getDefault().getLanguage());
 		map.put(XKBMAP_VARIANT, Locale.getDefault().getVariant());
 
+		map.put(XKBMAP_LAYOUT, "");
+		map.put(XKBMAP_VARIANT, "");
+
 		// keyCodes are a list of list {int keyval, String keyname, int keycode, int
 		// group, int level}
 

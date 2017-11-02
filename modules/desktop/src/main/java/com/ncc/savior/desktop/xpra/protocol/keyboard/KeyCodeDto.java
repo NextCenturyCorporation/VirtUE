@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KeyCodeDto {
-	public int ordinal;
-	public int keyCode;
-	public String keyName;
+	private int javaFxOrdinal;
+	private int keyCode;
+	private String keyName;
+	private String str;
 
 	public int getKeyCode() {
 		return keyCode;
@@ -25,16 +26,24 @@ public class KeyCodeDto {
 	}
 
 	public int getOrdinal() {
-		return ordinal;
+		return javaFxOrdinal;
 	}
 
 	public void setOrdinal(int ordinal) {
-		this.ordinal = ordinal;
+		this.javaFxOrdinal = ordinal;
+	}
+
+	public String getStr() {
+		return str;
+	}
+
+	public void setStr(String str) {
+		this.str = str;
 	}
 
 	@Override
 	public String toString() {
-		return "KeyCodeContainer{" + "ordinal=" + ordinal + ", keyCode=" + keyCode + ", keyName='" + keyName + '\''
+		return "KeyCodeContainer{" + "ordinal=" + javaFxOrdinal + ", keyCode=" + keyCode + ", keyName='" + keyName + '\''
 				+ '}';
 	}
 
@@ -47,5 +56,15 @@ public class KeyCodeDto {
 		list.add(0);
 		list.add(0);
 		return list;
+	}
+
+	// HTML Xpra client always uses group=0;
+	public int getGroup() {
+		return 0;
+	}
+
+	// HTML Xpra client always uses keyVal as KeyCode
+	public int getKeyVal() {
+		return keyCode;
 	}
 }

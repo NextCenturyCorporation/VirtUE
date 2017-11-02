@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
@@ -30,15 +30,15 @@ public abstract class XpraWindow implements IXpraWindow {
 	protected int id;
 	protected boolean debugOutput;
 	protected IPacketSender packetSender;
-	protected IKeyMap keyMap;
 	protected IFocusNotifier focusNotifier;
 	protected boolean graphicsSet;
+	protected IKeyboard keyboard;
 
-	public XpraWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap keyMap,
+	public XpraWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
 			IFocusNotifier focusNotifier) {
 		this.id = packet.getWindowId();
 		this.packetSender = packetSender;
-		this.keyMap = keyMap;
+		this.keyboard = keyboard;
 		this.focusNotifier = focusNotifier;
 		this.graphicsSet = false;
 	}
