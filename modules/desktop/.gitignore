@@ -1,8 +1,8 @@
-bin
-build
-debug
-logs
-out
-gradle
-.gradle
+/bin/
+/build/
+/debug/
+/logs/
+/out/
+/gradle/
+.gradle/
 /bin1/
