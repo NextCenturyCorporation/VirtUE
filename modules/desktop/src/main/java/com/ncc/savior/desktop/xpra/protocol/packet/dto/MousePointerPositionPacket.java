@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
 /**
  * Packet to tell the server where the mouse is.
@@ -34,6 +35,10 @@ public class MousePointerPositionPacket extends WindowPacket {
 
 	public MousePointerPositionPacket(int windowId, int x, int y) {
 		this(windowId, x, y, new ArrayList<String>(0));
+	}
+
+	public MousePointerPositionPacket(List<Object> list) {
+		this(PacketUtils.asInt(list.get(1)), PacketUtils.asInt(list.get(2)), PacketUtils.asInt(list.get(3)));
 	}
 
 	@Override
