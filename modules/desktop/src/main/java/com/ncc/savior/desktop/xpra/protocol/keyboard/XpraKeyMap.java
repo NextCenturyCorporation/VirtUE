@@ -17,6 +17,7 @@ import javafx.scene.input.KeyCode;
  */
 public class XpraKeyMap implements IKeyMap {
 	private final Map<Integer, KeyCodeDto> keycodesMap = new HashMap<>();
+	private Map<Integer, KeyCodeDto> shiftKeyCodesMap = new HashMap<>();
 
 	public XpraKeyMap() {
 
@@ -144,57 +145,89 @@ public class XpraKeyMap implements IKeyMap {
 		add(KeyCode.Y.ordinal(), 89, "Y");
 		add(KeyCode.Z.ordinal(), 90, "Z");
 
-		add(KeyCode.OPEN_BRACKET.ordinal(), 0x005B);// , "[");
-		add(KeyCode.BACK_SLASH.ordinal(), 0x005C);// , "\\");
-		add(KeyCode.CLOSE_BRACKET.ordinal(), 0x005D);// , "]");
+		add(KeyCode.OPEN_BRACKET.ordinal(), 91);// , "[");
+		add(KeyCode.BACK_SLASH.ordinal(), 92);// , "\\");
+		add(KeyCode.CLOSE_BRACKET.ordinal(), 93);// , "]");
 		add(KeyCode.CIRCUMFLEX.ordinal(), 0x005E);// , "^");// asciicircum
 		add(KeyCode.UNDERSCORE.ordinal(), 0x005F);// , "_");
 		add(KeyCode.BACK_QUOTE.ordinal(), 0x0060);// , "`");// grave
-		//Lower case letters seem to work as is
+		// Lower case letters seem to work as is
 		add(KeyCode.BRACELEFT.ordinal(), 0x007B);// , "{");
-		//add(KeyCode..ordinal(),"bar"  0x007C,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"braceright"  0x007D,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"asciitilde"  0x007E,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"nobreakspace"  0x00A0,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"exclamdown"  0x00A1,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"cent"  0x00A2,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"sterling"  0x00A3,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"currency"  0x00A4,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"yen"  0x00A5,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"brokenbar"  0x00A6,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"section"  0x00A7,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"diaeresis"  0x00A8,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"copyright"  0x00A9,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"ordfeminine"  0x00AA,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"guillemotleft"  0x00AB,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"notsign"  0x00AC,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"hyphen"  0x00AD,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"registered"  0x00AE,"");
-//		add(KeyCode.BACK_QUOTE.ordinal(),"macron"  0x00AF,"");
-
+		// add(KeyCode..ordinal(),"bar" 0x007C,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"braceright" 0x007D,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"asciitilde" 0x007E,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"nobreakspace" 0x00A0,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"exclamdown" 0x00A1,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"cent" 0x00A2,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"sterling" 0x00A3,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"currency" 0x00A4,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"yen" 0x00A5,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"brokenbar" 0x00A6,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"section" 0x00A7,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"diaeresis" 0x00A8,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"copyright" 0x00A9,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"ordfeminine" 0x00AA,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"guillemotleft" 0x00AB,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"notsign" 0x00AC,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"hyphen" 0x00AD,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"registered" 0x00AE,"");
+		// add(KeyCode.BACK_QUOTE.ordinal(),"macron" 0x00AF,"");
 
 		add(KeyCode.UP.ordinal(), -1, "Up");
 		add(KeyCode.DOWN.ordinal(), -1, "Down");
 		add(KeyCode.LEFT.ordinal(), -1, "Left");
 		add(KeyCode.RIGHT.ordinal(), -1, "Right");
 
-		add(KeyCode.BACK_SLASH.ordinal(), 0x007C);// , "|");
-		add(KeyCode.A.ordinal(), 65, "A");
-		add(KeyCode.B.ordinal(), 66, "b");
-		add(KeyCode.C.ordinal(), 99, "C");
-		add(KeyCode.D.ordinal(), 100);// , "C");
-		add(KeyCode.E.ordinal(), 69);// , "C");
-		add(KeyCode.F.ordinal(), -1, "f");// , "C");
-		add(KeyCode.G.ordinal(), -1, "G");// , "C");
+		// add(KeyCode.BACK_SLASH.ordinal(), 0x007C);// , "|");
+		// add(KeyCode.A.ordinal(), 65, "A");
+		// add(KeyCode.B.ordinal(), 66, "b");
+		// add(KeyCode.C.ordinal(), 99, "C");
+		// add(KeyCode.D.ordinal(), 100);// , "C");
+		// add(KeyCode.E.ordinal(), 69);// , "C");
+		// add(KeyCode.F.ordinal(), -1, "f");// , "C");
+		// add(KeyCode.G.ordinal(), -1, "G");// , "C");
+
+
+		addShiftKeyCode(KeyCode.MINUS.ordinal(), 0x005f);
+		addShiftKeyCode(KeyCode.EQUALS.ordinal(), 0x002B);
+		addShiftKeyCode(KeyCode.OPEN_BRACKET.ordinal(), 0x007B);
+		addShiftKeyCode(KeyCode.SEMICOLON.ordinal(), 0x003A);
+		addShiftKeyCode(KeyCode.QUOTE.ordinal(), 0x0022);
+		addShiftKeyCode(KeyCode.COMMA.ordinal(), 0x003C);
+		addShiftKeyCode(KeyCode.PERIOD.ordinal(), 0x003E);
+
+		addShiftKeyCode(KeyCode.BACK_QUOTE.ordinal(), 0x007E);
+		addShiftKeyCode(KeyCode.BACK_SLASH.ordinal(), 220);
+		addShiftKeyCode(KeyCode.SLASH.ordinal(), 0x003F);
+		addShiftKeyCode(KeyCode.CLOSE_BRACKET.ordinal(), 0x007D);
+
+	}
+
+	private void add(int ordinal, int val, int code) {
+		add(ordinal, val, code, "U" + Integer.toHexString(code));
+
+	}
+
+	private void addShiftKeyCode(int ordinal, int i) {
+		String name = "U" + Integer.toHexString(i);
+		KeyCodeDto c = new KeyCodeDto();
+		c.setKeyCode(i);
+		c.setKeyName(name);
+		c.setOrdinal(ordinal);
+		shiftKeyCodesMap.put(ordinal, c);
 
 	}
 
 	protected void add(int ordinal, int code) {
-		add(ordinal, code, "U" + Integer.toHexString(code));
+		add(ordinal, code, code, "U" + Integer.toHexString(code));
 	}
 
 	protected void add(int ordinal, int code, String name) {
+		add(ordinal, code, code, name);
+	}
+	protected void add(int ordinal, int keyVal, int code, String name) {
 		KeyCodeDto c = new KeyCodeDto();
+		c.setKeyVal(keyVal);
 		c.setKeyCode(code);
 		c.setKeyName(name);
 		c.setOrdinal(ordinal);
@@ -208,9 +241,9 @@ public class XpraKeyMap implements IKeyMap {
 	// System.out.println(keycode + " : " + keycodesMap.get(keycode));
 	// }
 	@Override
-	public String getUnicodeName(int keycode) {
+	public String getUnicodeName(int keycode, boolean isShift) {
 
-		KeyCodeDto code = keycodesMap.get(keycode);
+		KeyCodeDto code = getCode(keycode, isShift);
 		if (code == null) {
 			return null;
 		}
@@ -222,8 +255,8 @@ public class XpraKeyMap implements IKeyMap {
 	}
 
 	@Override
-	public int getKeyCode(int key) {
-		KeyCodeDto code = keycodesMap.get(key);
+	public int getKeyCode(int key, boolean isShift) {
+		KeyCodeDto code = getCode(key, isShift);
 		if (code == null) {
 			return -1;
 		}
@@ -236,8 +269,15 @@ public class XpraKeyMap implements IKeyMap {
 	}
 
 	@Override
-	public KeyCodeDto getKeyCodeDto(int key) {
-		KeyCodeDto dto = keycodesMap.get(key);
+	public KeyCodeDto getKeyCodeDto(int key, boolean isShift) {
+		KeyCodeDto dto = getCode(key, isShift);
 		return dto;
+	}
+
+	private KeyCodeDto getCode(int keycode, boolean isShift) {
+		if (isShift && shiftKeyCodesMap.containsKey(keycode)) {
+			return shiftKeyCodesMap.get(keycode);
+		}
+		return keycodesMap.get(keycode);
 	}
 }

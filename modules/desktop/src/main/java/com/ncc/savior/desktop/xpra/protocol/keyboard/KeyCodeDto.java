@@ -6,6 +6,7 @@ import java.util.List;
 public class KeyCodeDto {
 	private int javaFxOrdinal;
 	private int keyCode;
+	private int keyVal;
 	private String keyName;
 	private String str;
 
@@ -43,8 +44,8 @@ public class KeyCodeDto {
 
 	@Override
 	public String toString() {
-		return "KeyCodeContainer{" + "ordinal=" + javaFxOrdinal + ", keyCode=" + keyCode + ", keyName='" + keyName + '\''
-				+ '}';
+		return "KeyCodeDto [javaFxOrdinal=" + javaFxOrdinal + ", keyCode=" + keyCode + ", keyName=" + keyName + ", str="
+				+ str + "]";
 	}
 
 
@@ -65,6 +66,10 @@ public class KeyCodeDto {
 
 	// HTML Xpra client always uses keyVal as KeyCode
 	public int getKeyVal() {
-		return keyCode;
+		return keyVal;
+	}
+
+	public void setKeyVal(int keyVal) {
+		this.keyVal = keyVal;
 	}
 }

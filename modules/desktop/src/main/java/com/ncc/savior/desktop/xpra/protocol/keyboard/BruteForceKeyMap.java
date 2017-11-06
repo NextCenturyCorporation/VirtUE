@@ -174,7 +174,7 @@ public class BruteForceKeyMap implements IKeyMap {
 	// System.out.println(keycode + " : " + keycodesMap.get(keycode));
 	// }
 	@Override
-	public String getUnicodeName(int keycode) {
+	public String getUnicodeName(int keycode, boolean isShift) {
 
 		KeyCodeDto code = keycodesMap.get(keycode);
 		if (code == null) {
@@ -188,7 +188,7 @@ public class BruteForceKeyMap implements IKeyMap {
 	}
 
 	@Override
-	public int getKeyCode(int key) {
+	public int getKeyCode(int key, boolean isShift) {
 		KeyCodeDto code = keycodesMap.get(key);
 		if (code == null) {
 			return -1;
@@ -202,7 +202,7 @@ public class BruteForceKeyMap implements IKeyMap {
 	}
 
 	@Override
-	public KeyCodeDto getKeyCodeDto(int ordinal) {
+	public KeyCodeDto getKeyCodeDto(int ordinal, boolean isShift) {
 		return keycodesMap.get(ordinal);
 	}
 

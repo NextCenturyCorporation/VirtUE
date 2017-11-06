@@ -64,13 +64,17 @@ public class JavaFxKeyboard implements IKeyboard {
 		//
 		// }
 		// code, shift, control, alt, meta, shortcut
+		// logger.debug(
+		// "Text=" + event.getText() + " name=" + event.getCode().name() + " name=" +
+		// event.getCode().getName());
+
 		if (!event.getCode().isModifierKey()) {
 			KeyCodeCombination kcc = new KeyCodeCombination(event.getCode(), getVal(event.isShiftDown()),
 					getVal(event.isControlDown()), getVal(event.isAltDown()), getVal(event.isMetaDown()),
 					getVal(event.isShortcutDown()));
 			// logger.debug(kcc.getDisplayText() + " : " + kcc.getName());
 		}
-		return keymap.getKeyCodeDto(ordinal);
+		return keymap.getKeyCodeDto(ordinal, event.isShiftDown());
 	}
 
 	private ModifierValue getVal(boolean isDown) {

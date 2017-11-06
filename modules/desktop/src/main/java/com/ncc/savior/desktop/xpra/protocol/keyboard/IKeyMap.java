@@ -6,10 +6,10 @@ public interface IKeyMap {
 
 	Collection<KeyCodeDto> getKeyCodes();
 
-	int getKeyCode(int key);
+	int getKeyCode(int key, boolean isShift);
 
-	String getUnicodeName(int key);
+	String getUnicodeName(int key, boolean isShift);
 
-	KeyCodeDto getKeyCodeDto(int ordinal);
+	KeyCodeDto getKeyCodeDto(int ordinal, boolean isShift);
 
 }
