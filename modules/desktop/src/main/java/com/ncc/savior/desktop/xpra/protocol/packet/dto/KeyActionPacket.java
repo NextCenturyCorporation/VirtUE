@@ -14,6 +14,7 @@ public class KeyActionPacket extends WindowPacket {
 	private boolean pressed;
 	private List<String> modifiers;
 	private int group;
+	private String str;
 
 	public KeyActionPacket(int windowId, int keyval, int keycode, String keyname, boolean pressed, int group,
 			List<String> modifiers) {
@@ -24,6 +25,19 @@ public class KeyActionPacket extends WindowPacket {
 		this.pressed = pressed;
 		this.group = group;
 		this.modifiers = modifiers;
+		this.str = keyname;
+	}
+
+	public KeyActionPacket(int windowId, int keyval, int keycode, String keyname, boolean pressed, int group,
+			List<String> modifiers, String str) {
+		super(windowId, PacketType.KEY_ACTION);
+		this.keyval = keyval;
+		this.keycode = keycode;
+		this.keyname = keyname;
+		this.pressed = pressed;
+		this.group = group;
+		this.modifiers = modifiers;
+		this.str = str;
 	}
 
 	public KeyActionPacket(List<Object> list) {
@@ -32,6 +46,8 @@ public class KeyActionPacket extends WindowPacket {
 				PacketUtils.asStringList(list.get(7)));
 	}
 
+	// var packet = ["key-action", this.topwindow, keyname, pressed, modifiers,
+	// keyval, str, keycode, group];
 	@Override
 	protected void doAddToList(ArrayList<Object> list) {
 		list.add(windowId);
@@ -39,7 +55,7 @@ public class KeyActionPacket extends WindowPacket {
 		list.add(pressed);
 		list.add(modifiers);
 		list.add(keyval);
-		list.add(keyname);
+		list.add(str);
 		list.add(keycode);
 		list.add(group);
 	}
