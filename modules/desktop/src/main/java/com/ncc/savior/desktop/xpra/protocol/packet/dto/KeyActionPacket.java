@@ -37,7 +37,11 @@ public class KeyActionPacket extends WindowPacket {
 		this.pressed = pressed;
 		this.group = group;
 		this.modifiers = modifiers;
-		this.str = str;
+		if (str == null) {
+			this.str = keyname;
+		} else {
+			this.str = str;
+		}
 	}
 
 	public KeyActionPacket(List<Object> list) {

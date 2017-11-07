@@ -35,7 +35,7 @@ public class XpraKeyMap implements IKeyMap {
 		add(KeyCode.CONTROL.ordinal(), -1, "Control_L");
 		add(KeyCode.META.ordinal(), -1, "Meta_L");
 		add(KeyCode.ALT.ordinal(), -1, "Alt_L");
-		add(KeyCode.SPACE.ordinal(), 32);
+		add(KeyCode.SPACE.ordinal(), 32, 32, "space", " ");
 		add(KeyCode.ALT_GRAPH.ordinal(), -1, "Alt_R");
 		// No meta right
 		add(KeyCode.CONTEXT_MENU.ordinal(), -1, "Menu_R");
@@ -74,16 +74,16 @@ public class XpraKeyMap implements IKeyMap {
 		// no keypad up
 		// no keypad prior/page up
 
-		add(KeyCode.NUMPAD0.ordinal(), -1, "KP0"); // 48??
-		add(KeyCode.NUMPAD1.ordinal(), -1, "KP1");
-		add(KeyCode.NUMPAD2.ordinal(), -1, "KP2");
-		add(KeyCode.NUMPAD3.ordinal(), -1, "KP3");
-		add(KeyCode.NUMPAD4.ordinal(), -1, "KP4");
-		add(KeyCode.NUMPAD5.ordinal(), -1, "KP5");
-		add(KeyCode.NUMPAD6.ordinal(), -1, "KP6");
-		add(KeyCode.NUMPAD7.ordinal(), -1, "KP7");
-		add(KeyCode.NUMPAD8.ordinal(), -1, "KP8");
-		add(KeyCode.NUMPAD9.ordinal(), -1, "KP9"); // 57??
+		add(KeyCode.NUMPAD0.ordinal(), -1, "KP_0"); // 48??
+		add(KeyCode.NUMPAD1.ordinal(), -1, "KP_1");
+		add(KeyCode.NUMPAD2.ordinal(), -1, "KP_2");
+		add(KeyCode.NUMPAD3.ordinal(), -1, "KP_3");
+		add(KeyCode.NUMPAD4.ordinal(), -1, "KP_4");
+		add(KeyCode.NUMPAD5.ordinal(), -1, "KP_5");
+		add(KeyCode.NUMPAD6.ordinal(), -1, "KP_6");
+		add(KeyCode.NUMPAD7.ordinal(), -1, "KP_7");
+		add(KeyCode.NUMPAD8.ordinal(), -1, "KP_8");
+		add(KeyCode.NUMPAD9.ordinal(), -1, "KP_9"); // 57??
 
 		for (int i = 1; i <= 20; i++) {
 			KeyCode code = KeyCode.valueOf("F" + i);
@@ -151,7 +151,6 @@ public class XpraKeyMap implements IKeyMap {
 		add(KeyCode.AT.ordinal(), 0x0040, "@");
 		add(KeyCode.ASTERISK.ordinal(), 0x002A, "*");
 		add(KeyCode.PLUS.ordinal(), 0x002B);// , "+");
-		add(KeyCode.SPACE.ordinal(), 0x0020, " ");
 		add(KeyCode.EXCLAMATION_MARK.ordinal(), 0x0021, "!");
 		add(KeyCode.QUOTEDBL.ordinal(), 0x0022);// , "\"");
 		add(KeyCode.NUMBER_SIGN.ordinal(), 0x0023, "#");

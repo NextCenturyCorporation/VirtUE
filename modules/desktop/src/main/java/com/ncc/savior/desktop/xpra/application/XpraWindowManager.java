@@ -218,7 +218,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		String keyname = key.getKeyName();
 		int group = key.getGroup();
 		int id = focusedWindowId;
-		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, true, group, mods);
+		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, true, group, mods, key.getStr());
 		// logger.debug(sendPacket.toString());
 		sendPacket(sendPacket, "key action packet (pressed)");
 	}
@@ -229,7 +229,8 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		String keyname = key.getKeyName();
 		int group = key.getGroup();
 		int id = focusedWindowId;
-		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, false, group, mods);
+		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, false, group, mods,
+				key.getStr());
 		sendPacket(sendPacket, "key action packet (released)");
 	}
 
