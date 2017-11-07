@@ -40,7 +40,8 @@ public class MouseButtonActionPacket extends WindowPacket {
 	}
 
 	public MouseButtonActionPacket(List<Object> list) {
-		this(PacketUtils.asInt(list.get(1)), PacketUtils.asInt(list.get(2)), PacketUtils.asBoolean(list.get(3)), PacketUtils.asInt(list.get(4)),PacketUtils.asInt(list.get(5)));
+		this(PacketUtils.asInt(list.get(1)), PacketUtils.asInt(list.get(2)), PacketUtils.asBoolean(list.get(3)),
+				PacketUtils.asInt(list.get(4)), PacketUtils.asInt(list.get(5)));
 	}
 
 	@Override
