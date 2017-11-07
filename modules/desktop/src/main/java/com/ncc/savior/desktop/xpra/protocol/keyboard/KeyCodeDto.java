@@ -3,8 +3,12 @@ package com.ncc.savior.desktop.xpra.protocol.keyboard;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Container class for keycodes for Xpra.
+ *
+ *
+ */
 public class KeyCodeDto {
-	private int javaFxOrdinal;
 	private int keyCode;
 	private int keyVal;
 	private String keyName;
@@ -26,14 +30,6 @@ public class KeyCodeDto {
 		this.keyName = keyName;
 	}
 
-	public int getOrdinal() {
-		return javaFxOrdinal;
-	}
-
-	public void setOrdinal(int ordinal) {
-		this.javaFxOrdinal = ordinal;
-	}
-
 	public String getStr() {
 		return str;
 	}
@@ -44,10 +40,8 @@ public class KeyCodeDto {
 
 	@Override
 	public String toString() {
-		return "KeyCodeDto [javaFxOrdinal=" + javaFxOrdinal + ", keyCode=" + keyCode + ", keyName=" + keyName + ", str="
-				+ str + "]";
+		return "KeyCodeDto [keyCode=" + keyCode + ", keyVal=" + keyVal + ", keyName=" + keyName + ", str=" + str + "]";
 	}
-
 
 	public List<Object> toList() {
 		final List<Object> list = new ArrayList<>(5);

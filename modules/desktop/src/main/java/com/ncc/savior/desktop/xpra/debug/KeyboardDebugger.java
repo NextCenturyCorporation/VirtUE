@@ -15,6 +15,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * Stand-alone application used only to debug and indentify keyboard presses.
+ *
+ *
+ */
 public class KeyboardDebugger extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(KeyboardDebugger.class);
 

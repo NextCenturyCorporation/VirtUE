@@ -19,23 +19,6 @@ public class BruteForceKeyMap implements IKeyMap {
 	private final Map<Integer, KeyCodeDto> keycodesMap = new HashMap<>();
 
 	public BruteForceKeyMap() {
-
-		for (KeyCode code : KeyCode.values()) {
-			KeyCodeDto container = new KeyCodeDto();
-			container.setOrdinal(code.ordinal());
-			String string = code.toString();
-			if (string.length() == 1) {
-				container.setKeyCode(string.charAt(string.length() - 1));
-			} else if (code.isDigitKey()) {
-				container.setKeyCode(string.charAt(string.length() - 1));
-			}
-			container.setKeyName(code.getName());
-
-			// System.out.println(code.ordinal() + " : "+ container.toString());
-			// keycodesMap.put(code.ordinal(), container);
-
-		}
-
 		add(KeyCode.DIGIT0.ordinal(), 48, "0");
 		add(KeyCode.DIGIT1.ordinal(), 49, "1");
 		add(KeyCode.DIGIT2.ordinal(), 50, "2");
@@ -74,7 +57,6 @@ public class BruteForceKeyMap implements IKeyMap {
 		add(KeyCode.Y.ordinal(), 89, "Y");
 		add(KeyCode.Z.ordinal(), 90, "Z");
 
-		// Works!
 		add(KeyCode.SPACE.ordinal(), 32);
 		add(KeyCode.ESCAPE.ordinal(), -1, "Escape");
 
@@ -163,18 +145,11 @@ public class BruteForceKeyMap implements IKeyMap {
 		KeyCodeDto c = new KeyCodeDto();
 		c.setKeyCode(code);
 		c.setKeyName(name);
-		c.setOrdinal(ordinal);
 		keycodesMap.put(ordinal, c);
 	}
 
-	// private static void map(int keycode, char c) {
-	// //keycode = (int)c;
-	// keycodesMap.put(keycode, String.format("U%s",
-	// Integer.toHexString(c).toUpperCase()));
-	// System.out.println(keycode + " : " + keycodesMap.get(keycode));
-	// }
 	@Override
-	public String getUnicodeName(int keycode, boolean isShift) {
+	public String getUnicodeName(int keycode) {
 
 		KeyCodeDto code = keycodesMap.get(keycode);
 		if (code == null) {
@@ -188,7 +163,7 @@ public class BruteForceKeyMap implements IKeyMap {
 	}
 
 	@Override
-	public int getKeyCode(int key, boolean isShift) {
+	public int getKeyCode(int key) {
 		KeyCodeDto code = keycodesMap.get(key);
 		if (code == null) {
 			return -1;
@@ -202,7 +177,7 @@ public class BruteForceKeyMap implements IKeyMap {
 	}
 
 	@Override
-	public KeyCodeDto getKeyCodeDto(int ordinal, boolean isShift) {
+	public KeyCodeDto getKeyCodeDto(int ordinal) {
 		return keycodesMap.get(ordinal);
 	}
 
