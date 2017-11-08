@@ -5,8 +5,10 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 
 public class PacketBuilderTest {
@@ -29,5 +31,13 @@ public class PacketBuilderTest {
 			}
 
 		}
+	}
+
+	@Test
+	public void testBuildCloseWindowPacket() {
+		CloseWindowPacket packet = new CloseWindowPacket(5);
+		List<Object> list = packet.toList();
+		Packet p = new PacketBuilder().buildPacket(list);
+		Assert.assertEquals(p, packet);
 	}
 }
