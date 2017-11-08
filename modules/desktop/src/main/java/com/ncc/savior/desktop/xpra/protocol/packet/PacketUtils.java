@@ -61,4 +61,12 @@ public class PacketUtils {
 	public static long asLong(List<Object> list, int i) {
 		return asLong(list.get(i));
 	}
+
+	@SuppressWarnings("unchecked")
+	public static List<String> asStringList(Object obj) {
+		if (obj instanceof List) {
+			return (obj == null ? null : (List<String>) obj);
+		}
+		return null;
+	}
 }
