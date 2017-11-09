@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.sidebar;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +7,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -20,8 +18,6 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
@@ -32,7 +28,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 public class SidebarApplication extends Application {
@@ -52,8 +47,6 @@ public class SidebarApplication extends Application {
 
 	private int width = 300;
 	private int height = 800;
-
-	private Popup openedPopup;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -120,7 +113,8 @@ public class SidebarApplication extends Application {
 			pane.setBorder(new Border(calloutDebugStroke));
 		}
 		for (VirtueDto virtue : virtueList) {
-			addVirtue(children, virtue, primaryStage);
+			VirtueMenuItem vmi = new VirtueMenuItem(virtue);
+			children.add(vmi.getNode());
 		}
 		ScrollPane scroll = new ScrollPane(pane);
 		scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
@@ -130,99 +124,7 @@ public class SidebarApplication extends Application {
 		return scroll;
 	}
 
-	private void addVirtue(ObservableList<Node> children, VirtueDto virtue, Stage primaryStage) {
-		Image image = new Image("images/saviorLogo.png");
-		ImageView view = new ImageView(image);
-		view.setFitWidth(24);
-		view.setFitHeight(24);
-		Label label = new Label(virtue.getName());
-		label.setPrefWidth(width);
-		label.setAlignment(Pos.CENTER);
 
-		HBox pane = new HBox();
-		HBox.setHgrow(view, Priority.NEVER);
-		HBox.setHgrow(label, Priority.ALWAYS);
-		pane.setPadding(new Insets(5, 20, 5, 20));
-		BorderStroke style = new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(0),
-				new BorderWidths(0, 0, 1, 0));
-		pane.setBorder(new Border(style));
-		pane.getChildren().add(view);
-		pane.getChildren().add(label);
-		Popup popup = new Popup();
-		VBox box = new VBox();
-		for (VirtueAppDto app : virtue.getApps()) {
-			URI uri = app.getIconUri();
-			Image appImage = null;
-			if (uri != null) {
-				try {
-					appImage = new Image(uri.toURL().openStream());
-				} catch (Exception e) {
-
-				}
-			}
-			if (image == null) {
-				appImage = new Image(app.getIconLocation());
-			}
-			Label appLabel;
-			if (image == null) {
-				appLabel = new Label(app.getName());
-			} else {
-				ImageView iv = new ImageView(appImage);
-				iv.setFitWidth(24);
-				iv.setFitHeight(24);
-				appLabel = new Label(app.getName(), iv);
-			}
-			box.getChildren().add(appLabel);
-			box.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE, null, null)));
-		}
-
-		popup.getContent().add(box);
-		pane.setOnMouseEntered(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				Bounds boundsInScreen = pane.localToScreen(pane.getBoundsInLocal());
-				popup.setX(boundsInScreen.getMaxX() - 5);
-				popup.setY(boundsInScreen.getMinY());
-				if (openedPopup != popup) {
-					if (openedPopup != null) {
-						openedPopup.hide();
-					}
-					popup.show(primaryStage);
-					openedPopup = popup;
-
-				}
-			}
-		});
-		pane.setOnMouseExited(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				// popup.hide();
-			}
-		});
-		box.setOnMouseEntered(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent arg0) {
-				if (openedPopup != popup) {
-					openedPopup.hide();
-					popup.show(primaryStage);
-					openedPopup = popup;
-				}
-			}
-		});
-		box.setOnMouseExited(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent arg0) {
-				popup.hide();
-			}
-		});
-		children.add(pane);
-		// pane.setAlignment(Pos.CENTER);
-		// pane.setPrefWidth(width);
-		// pane.setMinHeight(label.getHeight());
-		if (debug) {
-			label.setBorder(new Border(subSectionDebugStroke));
-		}
-	}
 
 	private List<VirtueDto> getVirtues() {
 		ArrayList<VirtueDto> virtue = new ArrayList<VirtueDto>();
