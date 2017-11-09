@@ -3,6 +3,7 @@ package com.ncc.savior.desktop.xpra.application.javafx;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.XpraApplication;
 import com.ncc.savior.desktop.xpra.application.XpraApplicationManager;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
@@ -24,10 +25,10 @@ public class JavaFxApplicationManager extends XpraApplicationManager {
 
 	private Stage stage;
 
-	public JavaFxApplicationManager(XpraClient client, Stage stage) {
+	public JavaFxApplicationManager(XpraClient client, Stage stage, JavaFxKeyboard keyboard) {
 		super(client);
 		this.stage = stage;
-		client.setKeyMap(keyMap);
+		client.setKeyboard(keyboard);
 	}
 
 	@Override

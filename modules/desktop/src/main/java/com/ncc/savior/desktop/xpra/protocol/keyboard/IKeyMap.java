@@ -2,12 +2,14 @@ package com.ncc.savior.desktop.xpra.protocol.keyboard;
 
 import java.util.Collection;
 
-public interface IKeyMap {
 
+public interface IKeyMap {
 	Collection<KeyCodeDto> getKeyCodes();
 
 	int getKeyCode(int key);
 
-	String getUnicodeName(int keycode);
+	String getUnicodeName(int key);
+
+	KeyCodeDto getKeyCodeDto(int key);
 
 }

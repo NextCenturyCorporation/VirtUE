@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
@@ -39,12 +40,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
  */
 public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifier, Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(XpraWindowManager.class);
-
-	public static final String MOD_ALT_STRING = "alt";
-	public static final String MOD_CONTROL_STRING = "control";
-	public static final String MOD_SHIFT_STRING = "shift";
-	public static final String MOD_META_STRING = "meta";
-	public static final String MOD_SHORTCUT_STRING = "shortcut";
 
 	protected XpraClient client;
 	private HashSet<PacketType> packetTypes;
@@ -217,15 +212,25 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		}
 	}
 
-	protected void onKeyDown(int keyval, int keycode, String keyname, List<String> mods) {
+	protected void onKeyDown(KeyCodeDto key, List<String> mods) {
+		int keyval = key.getKeyVal();
+		int keycode = key.getKeyCode();
+		String keyname = key.getKeyName();
+		int group = key.getGroup();
 		int id = focusedWindowId;
-		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, true, 0, mods);
+		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, true, group, mods, key.getStr());
+		// logger.debug(sendPacket.toString());
 		sendPacket(sendPacket, "key action packet (pressed)");
 	}
 
-	protected void onKeyUp(int keyval, int keycode, String keyname, List<String> mods) {
+	protected void onKeyUp(KeyCodeDto key, List<String> mods) {
+		int keyval = key.getKeyVal();
+		int keycode = key.getKeyCode();
+		String keyname = key.getKeyName();
+		int group = key.getGroup();
 		int id = focusedWindowId;
-		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, false, 0, mods);
+		KeyActionPacket sendPacket = new KeyActionPacket(id, keyval, keycode, keyname, false, group, mods,
+				key.getStr());
 		sendPacket(sendPacket, "key action packet (released)");
 	}
 
