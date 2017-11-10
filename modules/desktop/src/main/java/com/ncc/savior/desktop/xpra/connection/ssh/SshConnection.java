@@ -16,14 +16,14 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
 public class SshConnection extends BaseConnection {
 	private static final Logger logger = LoggerFactory.getLogger(SshConnection.class);
 
-	private Session session;
+	// private Session session;
 	private ChannelExec channel;
 	private InputStream in;
 	private OutputStream out;
 
 	public SshConnection(SshConnectionParameters p, Session session, ChannelExec channel) throws IOException {
 		super(p);
-		this.session = session;
+		// this.session = session;
 		this.channel = channel;
 
 		in = channel.getInputStream();

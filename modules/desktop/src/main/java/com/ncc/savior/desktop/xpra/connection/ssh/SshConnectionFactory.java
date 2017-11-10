@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
@@ -15,6 +14,7 @@ import com.ncc.savior.desktop.xpra.connection.IConnection;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 
 public class SshConnectionFactory extends BaseConnectionFactory {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(SshConnectionFactory.class);
 	private static final String DEFAULT_COMMAND_DIR = "/run/user/1000/xpra/";
 	private static final String DEFAULT_COMMAND_NAME = "run-xpra";
@@ -41,14 +41,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 		if (params instanceof SshConnectionParameters) {
 			try {
 				SshConnectionParameters p = (SshConnectionParameters) params;
-				JSch jsch = new JSch();
-				Session session;
-				session = jsch.getSession(p.getUser(), p.getHost(), p.getPort());
-				session.setServerAliveInterval(1000);
-				session.setServerAliveCountMax(15);
-				session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
-				session.setPassword(p.getPassword());
-				session.setConfig("StrictHostKeyChecking", "no");
+				Session session = JschUtils.getSession(p);
 				session.connect();
 				ChannelExec channel = (ChannelExec) session.openChannel("exec");
 				String command = getCommand(commandDir, commandName, commandMode, display);
