@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.application.IFocusNotifier;
 import com.ncc.savior.desktop.xpra.application.XpraWindow;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
@@ -51,8 +51,9 @@ public class JavaFxWindow extends XpraWindow {
 
 	private boolean closed;
 
-	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyMap map, IFocusNotifier focusNotifier) {
-		super(packet, packetSender, map, focusNotifier);
+	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
+			IFocusNotifier focusNotifier) {
+		super(packet, packetSender, keyboard, focusNotifier);
 		// logger.debug("ID: " + packet.getWindowId() + " Parent: " +
 		// packet.getMetadata().getParentId() + " "
 		// + packet.getType().toString() + " - "
@@ -196,8 +197,7 @@ public class JavaFxWindow extends XpraWindow {
 	@Override
 	public String toString() {
 		return "JavaFxWindow [canvas=" + canvas + ", stage=" + stage + ", type=" + type + ", title=" + title
-				+ ", closed=" + closed + ", id=" + id + ", debugOutput=" + debugOutput + ", packetSender="
-				+ packetSender + ", keyMap=" + keyMap + ", focusNotifier=" + focusNotifier + ", graphicsSet="
-				+ graphicsSet + "]";
+				+ ", closed=" + closed + ", id=" + id + ", graphicsSet=" + graphicsSet + ", keyboard=" + keyboard + "]";
 	}
+
 }

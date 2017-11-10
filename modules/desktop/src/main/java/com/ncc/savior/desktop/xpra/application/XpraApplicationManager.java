@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.BruteForceKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
@@ -32,13 +31,11 @@ public abstract class XpraApplicationManager {
 	protected XpraClient client;
 	protected Map<Integer, XpraApplication> applications;
 	protected Map<Integer, XpraApplication> windowIdsToApplications;
-	protected BruteForceKeyMap keyMap;
 	private boolean show = false;
 	private boolean setDebugOutput;
 
 	public XpraApplicationManager(XpraClient client) {
 		this.client = client;
-		this.keyMap = new BruteForceKeyMap();
 		this.applications = new HashMap<Integer, XpraApplication>();
 		this.windowIdsToApplications = new HashMap<Integer, XpraApplication>();
 		initPacketHandling();

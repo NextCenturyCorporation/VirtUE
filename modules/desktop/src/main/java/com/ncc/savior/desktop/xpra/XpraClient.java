@@ -17,7 +17,7 @@ import com.ncc.savior.desktop.xpra.protocol.InputStreamPacketReader;
 import com.ncc.savior.desktop.xpra.protocol.OutputStreamPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.encoder.BencodeEncoder;
 import com.ncc.savior.desktop.xpra.protocol.encoder.IEncoder;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.BasePacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketBuilder;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketDistributer;
@@ -53,7 +53,7 @@ public class XpraClient {
 	private PacketListenerManager packetReceivedListenerManager;
 	private PacketListenerManager packetSentListenerManager;
 	private IConnection connection;
-	private IKeyMap keyMap;
+	private IKeyboard keyboard;
 
 	public XpraClient() {
 		internalPacketDistributer = new PacketDistributer();
@@ -64,6 +64,7 @@ public class XpraClient {
 
 			@Override
 			public void handlePacket(Packet packet) {
+				logger.debug("Recieved Hello Packet=" + packet);
 				SetDeflatePacket sendPacket = new SetDeflatePacket(3);
 				try {
 					packetSender.sendPacket(sendPacket);
@@ -160,8 +161,9 @@ public class XpraClient {
 			Thread thread = new Thread(runnable);
 
 			HelloPacket helloPacket = HelloPacket.createDefaultRequest();
-			helloPacket.setKeyMap(keyMap);
+			helloPacket.setKeyMap(keyboard.getKeyMap());
 			packetSender.sendPacket(helloPacket);
+			logger.debug("Sent hello packet=" + helloPacket);
 			// packetSender.sendPacket(new SetDeflatePacket(3));
 			thread.start();
 		} catch (IOException e) {
@@ -208,11 +210,11 @@ public class XpraClient {
 		packetSentListenerManager.removePacketHandler(handler);
 	}
 
-	public IKeyMap getKeyMap() {
-		return keyMap;
+	public IKeyboard getKeyboard() {
+		return keyboard;
 	}
 
-	public void setKeyMap(IKeyMap keyMap) {
-		this.keyMap = keyMap;
+	public void setKeyboard(IKeyboard keyboard) {
+		this.keyboard = keyboard;
 	}
 }
