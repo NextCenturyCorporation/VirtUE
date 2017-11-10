@@ -5,6 +5,11 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.virtues.VirtueAppDto;
+import com.ncc.savior.desktop.virtues.VirtueDto;
+import com.ncc.savior.desktop.virtues.VirtueService;
+
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -36,8 +41,10 @@ public class VirtueMenuItem {
 	private BorderStroke subSectionDebugStroke = new BorderStroke(Color.YELLOW, BorderStrokeStyle.DOTTED,
 			new CornerRadii(0), new BorderWidths(2));
 	protected boolean showingMenu;
+	private VirtueService virtueService;
 
-	public VirtueMenuItem(VirtueDto virtue) {
+	public VirtueMenuItem(VirtueDto virtue, VirtueService virtueService) {
+		this.virtueService = virtueService;
 		this.virtue = virtue;
 		this.node = createNode();
 		this.contextMenu = createContextMenu();
@@ -93,6 +100,12 @@ public class VirtueMenuItem {
 				iv.setFitHeight(24);
 				menuItem = new MenuItem(app.getName(), iv);
 			}
+			menuItem.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(ActionEvent event) {
+					virtueService.connectAndStartApp(app);
+				}
+			});
 			menu.getItems().add(menuItem);
 		}
 		return menu;

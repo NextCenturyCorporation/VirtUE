@@ -1,4 +1,4 @@
-package com.ncc.savior.desktop.sidebar;
+package com.ncc.savior.desktop.virtues;
 
 import java.util.ArrayList;
 import java.util.List;
