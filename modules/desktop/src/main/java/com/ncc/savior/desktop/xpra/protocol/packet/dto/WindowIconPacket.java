@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.ImageEncoding;
@@ -61,5 +62,11 @@ public class WindowIconPacket extends WindowPacket implements IImagePacket {
 	@Override
 	public byte[] getData() {
 		return data;
+	}
+
+	@Override
+	public String toString() {
+		return "WindowIconPacket [width=" + width + ", height=" + height + ", encoding=" + encoding + ", data="
+				+ Arrays.toString(data) + "]";
 	}
 }
