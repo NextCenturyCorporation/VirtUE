@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra.protocol;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
@@ -10,6 +11,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
  *
  *
  */
-public interface IPacketReader {
+public interface IPacketReader extends Closeable {
     public Packet getNextPacket() throws IOException;
 }

@@ -32,6 +32,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.WindowEvent;
 
 public class VirtueMenuItem {
+	@SuppressWarnings("unused")
 	private static Logger logger = LoggerFactory.getLogger(VirtueMenuItem.class);
 	private VirtueDto virtue;
 	private boolean debug = false;

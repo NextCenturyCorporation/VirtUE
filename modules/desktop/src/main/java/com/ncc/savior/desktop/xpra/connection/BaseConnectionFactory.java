@@ -7,12 +7,11 @@ import org.slf4j.LoggerFactory;
 
 public abstract class BaseConnectionFactory {
     private static Logger logger = LoggerFactory.getLogger(BaseConnectionFactory.class);
-	private ConnectListenerManager listenerManager = new ConnectListenerManager();
 
 
-    public IConnection connect(IConnectionParameters params) {
+	public IConnection connect(IConnectionParameters params, ConnectListenerManager listenerManager) {
         try {
-			listenerManager.onBeforeConnectionAttempt(params);
+			listenerManager.onBeforeConnectAttempt(params);
         } catch (Exception e) {
             logger.warn("Error attempting to send beforeConnectionAttempt event!", e);
         }
@@ -21,27 +20,19 @@ public abstract class BaseConnectionFactory {
             connection = doConnect(params);
         } catch (IOException e) {
             try {
-				listenerManager.onConnectionFailure(params, e);
+				listenerManager.onConnectFailure(params, e);
             } catch (Exception e2) {
                 logger.warn("Error attempting to send onConnectionFailure event!", e2);
             }
         }
 
         try {
-			listenerManager.onConnectionSuccess(connection);
+			listenerManager.onConnectSuccess(connection);
         } catch (Exception e) {
             logger.warn("Error attempting to send onConnectionSuccess event!", e);
         }
         return connection;
     }
-
-	public void addListener(IConnectListener listener) {
-		listenerManager.addListener(listener);
-	}
-
-	public void removeListener(IConnectListener listener) {
-		listenerManager.removeListener(listener);
-	}
 
     protected abstract IConnection doConnect(IConnectionParameters params) throws IOException;
 }

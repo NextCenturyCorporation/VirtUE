@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.xpra;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ConnectListenerManager;
 import com.ncc.savior.desktop.xpra.connection.IConnectListener;
 import com.ncc.savior.desktop.xpra.connection.IConnection;
+import com.ncc.savior.desktop.xpra.connection.IConnectionErrorCallback;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
@@ -45,17 +47,21 @@ public class XpraClient {
 	private final IEncoder sendEncoder;
 	private PacketDistributer internalPacketDistributer;
 
-	private ConnectListenerManager connectListenerManager = new ConnectListenerManager();
+	private ConnectListenerManager connectListenerManager;
 
 	private OutputStreamPacketSender packetSender;
 	// private IPacketListener packetListener;
 	// private IPackatSender packetSender;
 	private PacketListenerManager packetReceivedListenerManager;
 	private PacketListenerManager packetSentListenerManager;
-	private IConnection connection;
+	// private IConnection connection;
 	private IKeyboard keyboard;
+	protected InputStreamPacketReader packetReader;
+	protected boolean stopReadThread;
+	private static int threadCount = 1;
 
 	public XpraClient() {
+		connectListenerManager = new ConnectListenerManager();
 		internalPacketDistributer = new PacketDistributer();
 		packetReceivedListenerManager = new PacketListenerManager();
 		packetSentListenerManager = new PacketListenerManager();
@@ -116,39 +122,32 @@ public class XpraClient {
 	}
 
 	public void connect(BaseConnectionFactory factory, IConnectionParameters params) {
-		// Make sure that factory calls the listeners registered to the client
-		factory.addListener(new IConnectListener() {
-			@Override
-			public void onConnectSuccess(IConnection connection) {
-				connectListenerManager.onConnectionSuccess(connection);
-			}
-
-			@Override
-			public void onConnectFailure(IConnectionParameters params, IOException e) {
-				connectListenerManager.onConnectionFailure(params, e);
-			}
-
-			@Override
-			public void onBeforeConnectAttempt(IConnectionParameters parameters) {
-				connectListenerManager.onBeforeConnectionAttempt(parameters);
-			}
-		});
-		connection = factory.connect(params);
+		factory.connect(params, connectListenerManager);
 	}
 
 	public void callOnSuccess(IConnection connection) {
+		// logger.debug("success on connection = " + connection + " client=" + this);
+		IConnectionErrorCallback errorCallback = new IConnectionErrorCallback() {
+			@Override
+			public void onError(String description, IOException e) {
+				onIoException(e);
+			}
+		};
+
 		try {
-			packetSender = new OutputStreamPacketSender(connection.getOutputStream(), sendEncoder);
+			packetSender = new OutputStreamPacketSender(connection.getOutputStream(), sendEncoder, errorCallback);
 			packetSender.setPacketListenerManager(packetSentListenerManager);
 			Runnable runnable = new Runnable() {
 
 				@Override
 				public void run() {
+					InputStream in=null;
 					try {
-						InputStreamPacketReader packetReader = new InputStreamPacketReader(connection.getInputStream(),
+						in = connection.getInputStream();
+						packetReader = new InputStreamPacketReader(in,
 								new PacketBuilder());
 						Packet packet = null;
-						while ((packet = packetReader.getNextPacket()) != null) {
+						while ((packet = packetReader.getNextPacket()) != null && !stopReadThread) {
 							internalPacketDistributer.handlePacket(packet);
 							packetReceivedListenerManager.handlePacket(packet);
 						}
@@ -158,13 +157,14 @@ public class XpraClient {
 					}
 				}
 			};
-			Thread thread = new Thread(runnable, "PacketReader");
+			Thread thread = new Thread(runnable, "PacketReader-" + threadCount++);
 
 			HelloPacket helloPacket = HelloPacket.createDefaultRequest();
 			helloPacket.setKeyMap(keyboard.getKeyMap());
 			packetSender.sendPacket(helloPacket);
 			// logger.debug("Sent hello packet=" + helloPacket);
 			// packetSender.sendPacket(new SetDeflatePacket(3));
+			thread.setDaemon(true);
 			thread.start();
 		} catch (IOException e) {
 			onIoException(e);
@@ -182,8 +182,21 @@ public class XpraClient {
 	}
 
 	private void onIoException(IOException e) {
-		logger.error("Found IOException for connection=" + connection, e);
-		// TODO figure out how this should work
+		if (packetSender != null) {
+			try {
+				packetSender.close();
+			} catch (IOException e1) {
+				logger.error("Error closing packetSender");
+			}
+		}
+		if (packetReader != null) {
+			try {
+				packetReader.close();
+			} catch (IOException e1) {
+				logger.error("Error closing packetReader");
+			}
+		}
+		stopReadThread = true;
 	}
 
 	public void addConnectListener(IConnectListener listener) {

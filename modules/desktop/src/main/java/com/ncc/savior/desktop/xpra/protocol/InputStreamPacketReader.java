@@ -42,6 +42,7 @@ public class InputStreamPacketReader implements IPacketReader {
 
 	private IEncoder bencoder;
 
+
 	public InputStreamPacketReader(InputStream in, PacketBuilder packetBuilder) {
 		this.in = in;
 		this.packetBuilder = packetBuilder;
@@ -170,6 +171,11 @@ public class InputStreamPacketReader implements IPacketReader {
 			}
 		}
 
+	}
+
+	@Override
+	public void close() throws IOException {
+		in.close();
 	}
 
 }
