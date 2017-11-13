@@ -33,7 +33,6 @@ public class XpraConnectionManager {
 		connectionFactoryMap = new HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory>();
 		connectionFactoryMap.put(TcpConnectionParameters.class, new TcpConnectionFactory());
 		connectionFactoryMap.put(SshConnectionParameters.class, new SshConnectionFactory());
-		// TODO add initiators
 		initiaterMap = new HashMap<Class<? extends IConnectionParameters>, IXpraInitiator.IXpraInitatorFactory>();
 		initiaterMap.put(SshConnectionParameters.class, new IXpraInitiator.IXpraInitatorFactory() {
 
@@ -63,7 +62,7 @@ public class XpraConnectionManager {
 	}
 
 	public XpraClient createClient(IConnectionParameters params) {
-		logger.debug("creating client with params=" + params);
+		// logger.debug("creating client with params=" + params);
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
@@ -71,15 +70,15 @@ public class XpraConnectionManager {
 			try {
 				IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
 				Set<Integer> servers = init.getXpraServers();
-				logger.debug("displays: " + servers);
+				// logger.debug("displays: " + servers);
 				if (!servers.contains(factory.getDisplay())) {
-					logger.debug("starting Xpra Display on " + factory.getDisplay());
+					// logger.debug("starting Xpra Display on " + factory.getDisplay());
 					int d = init.startXpraServer(factory.getDisplay());
-					logger.debug("Display " + d + " started");
+					// logger.debug("Display " + d + " started");
 				}
 			} catch (IOException e) {
 				// TODO do somehting smart
-				logger.error("Error trying to initiate Xpra", e);
+				// logger.error("Error trying to initiate Xpra", e);
 			}
 		}
 
@@ -89,24 +88,26 @@ public class XpraConnectionManager {
 		@SuppressWarnings("unused")
 		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, null, keyboard);
 		client.connect(factory, params);
-		logger.debug("Client connected with params" + params);
+		// logger.debug("Client connected with params" + params);
 		activeClientsMap.put(params, client);
 
 		return client;
 	}
 
 	public void startApplication(IConnectionParameters params, String startCommand) {
-		logger.debug("starting application with command=" + startCommand + " params=" + params);
+		// logger.debug("starting application with command=" + startCommand + " params="
+		// + params);
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
 			try {
 				IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
 				Set<Integer> servers = init.getXpraServers();
-				logger.debug("displays: " + servers);
+				// logger.debug("displays: " + servers);
 				int display;
 				if (!servers.isEmpty()) {
 					display = servers.iterator().next();
-					logger.debug("starting application on display=" + display + " command=" + startCommand);
+					// logger.debug("starting application on display=" + display + " command=" +
+					// startCommand);
 					init.startXpraApp(display, startCommand);
 				} else {
 					// TODO error?

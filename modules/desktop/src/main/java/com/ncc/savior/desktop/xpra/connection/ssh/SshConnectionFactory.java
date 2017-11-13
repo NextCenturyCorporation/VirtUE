@@ -45,7 +45,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 				session.connect();
 				ChannelExec channel = (ChannelExec) session.openChannel("exec");
 				String command = getCommand(commandDir, commandName, commandMode, display);
-				logger.debug("connecting with command=" + command);
+				// logger.debug("connecting with command=" + command);
 				channel.setCommand(command);
 				channel.connect();
 				return new SshConnection(p, session, channel);
