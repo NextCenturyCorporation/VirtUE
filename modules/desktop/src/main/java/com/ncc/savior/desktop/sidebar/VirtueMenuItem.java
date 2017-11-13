@@ -104,7 +104,14 @@ public class VirtueMenuItem {
 			menuItem.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(ActionEvent event) {
-					virtueService.connectAndStartApp(app);
+					Thread thread = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							virtueService.connectAndStartApp(app);
+						}
+					});
+					thread.setDaemon(true);
+					thread.start();
 				}
 			});
 			menu.getItems().add(menuItem);

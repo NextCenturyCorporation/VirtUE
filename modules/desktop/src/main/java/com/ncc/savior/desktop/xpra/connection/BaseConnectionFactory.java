@@ -35,4 +35,6 @@ public abstract class BaseConnectionFactory {
     }
 
     protected abstract IConnection doConnect(IConnectionParameters params) throws IOException;
+
+	public abstract int getDisplay();
 }

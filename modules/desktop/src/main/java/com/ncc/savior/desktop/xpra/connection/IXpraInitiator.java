@@ -21,10 +21,12 @@ public interface IXpraInitiator {
 	/**
 	 * Starts xpra server on a new display and returns that display.
 	 *
+	 * @param i
+	 *
 	 * @return
 	 * @throws IOException
 	 */
-	public int startXpraServer() throws IOException;
+	public int startXpraServer(int display) throws IOException;
 
 	/**
 	 * Attempts to stop an xpra server on a certain display.
@@ -51,4 +53,7 @@ public interface IXpraInitiator {
 	 */
 	public void startXpraApp(int display, String command) throws IOException;
 
+	public interface IXpraInitatorFactory {
+		public IXpraInitiator getXpraInitiator(IConnectionParameters params);
+	}
 }

@@ -102,7 +102,12 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 		if (applicationPacketHandler != null) {
 			client.removePacketListener(applicationPacketHandler);
 		}
-		stage.close();
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				stage.close();
+			}
+		});
 	}
 
 	@Override

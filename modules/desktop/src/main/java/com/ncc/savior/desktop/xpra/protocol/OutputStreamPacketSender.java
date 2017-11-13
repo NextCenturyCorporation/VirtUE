@@ -58,7 +58,8 @@ public class OutputStreamPacketSender implements IPacketSender {
 							packet = queue.take();
 							doSendPacket(packet);
 						} catch (InterruptedException e) {
-							logger.debug("Packet Sender was interrupted!", e);
+							// logger.debug("Packet Sender was interrupted!", e);
+							errorCallback.onError("PacketSender", new IOException(e));
 						} catch (IOException e) {
 							errorCallback.onError("PacketSender", e);
 						}

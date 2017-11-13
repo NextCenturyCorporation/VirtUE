@@ -9,17 +9,20 @@ public class VirtueAppDto {
 	private URI iconUri;
 	private String iconLocation;
 	private IConnectionParameters connectionParams;
+	private String startCommand;
 
-	public VirtueAppDto(String name, URI iconUri, IConnectionParameters conParams) {
+	public VirtueAppDto(String name, URI iconUri, String startCommand, IConnectionParameters conParams) {
 		super();
 		this.name = name;
 		this.iconUri = iconUri;
+		this.startCommand = startCommand;
 		this.connectionParams = conParams;
 	}
 
-	public VirtueAppDto(String name, String iconLocation, IConnectionParameters conParams) {
+	public VirtueAppDto(String name, String iconLocation, String startCommand, IConnectionParameters conParams) {
 		this.name = name;
 		this.iconLocation = iconLocation;
+		this.startCommand = startCommand;
 		this.connectionParams = conParams;
 	}
 
@@ -59,5 +62,9 @@ public class VirtueAppDto {
 	public String toString() {
 		return "VirtueAppDto [name=" + name + ", iconUri=" + iconUri + ", iconLocation=" + iconLocation
 				+ ", connectionParams=" + connectionParams + "]";
+	}
+
+	public String getStartCommand() {
+		return startCommand;
 	}
 }

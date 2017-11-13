@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -39,7 +40,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.SetDeflatePacket;
  * internals (like returning pings) is already handled.
  *
  */
-public class XpraClient {
+public class XpraClient implements Closeable {
 
 	// public static final String VERSION = "0.15.0";
 	public static final String VERSION = "2.1.2";
@@ -59,12 +60,14 @@ public class XpraClient {
 	protected InputStreamPacketReader packetReader;
 	protected boolean stopReadThread;
 	private static int threadCount = 1;
+	private Status status;
 
 	public XpraClient() {
 		connectListenerManager = new ConnectListenerManager();
 		internalPacketDistributer = new PacketDistributer();
 		packetReceivedListenerManager = new PacketListenerManager();
 		packetSentListenerManager = new PacketListenerManager();
+		status = Status.DISCONNECTED;
 
 		internalPacketDistributer.addPacketHandler(PacketType.HELLO, new BasePacketHandler(PacketType.HELLO) {
 
@@ -127,6 +130,7 @@ public class XpraClient {
 
 	public void callOnSuccess(IConnection connection) {
 		// logger.debug("success on connection = " + connection + " client=" + this);
+		status = Status.CONNECTED;
 		IConnectionErrorCallback errorCallback = new IConnectionErrorCallback() {
 			@Override
 			public void onError(String description, IOException e) {
@@ -141,11 +145,10 @@ public class XpraClient {
 
 				@Override
 				public void run() {
-					InputStream in=null;
+					InputStream in = null;
 					try {
 						in = connection.getInputStream();
-						packetReader = new InputStreamPacketReader(in,
-								new PacketBuilder());
+						packetReader = new InputStreamPacketReader(in, new PacketBuilder());
 						Packet packet = null;
 						while ((packet = packetReader.getNextPacket()) != null && !stopReadThread) {
 							internalPacketDistributer.handlePacket(packet);
@@ -182,21 +185,7 @@ public class XpraClient {
 	}
 
 	private void onIoException(IOException e) {
-		if (packetSender != null) {
-			try {
-				packetSender.close();
-			} catch (IOException e1) {
-				logger.error("Error closing packetSender");
-			}
-		}
-		if (packetReader != null) {
-			try {
-				packetReader.close();
-			} catch (IOException e1) {
-				logger.error("Error closing packetReader");
-			}
-		}
-		stopReadThread = true;
+		close();
 	}
 
 	public void addConnectListener(IConnectListener listener) {
@@ -227,7 +216,35 @@ public class XpraClient {
 		return keyboard;
 	}
 
+	public Status getStatus() {
+		return status;
+	}
+
 	public void setKeyboard(IKeyboard keyboard) {
 		this.keyboard = keyboard;
+	}
+
+	public static enum Status {
+		DISCONNECTED, CONNECTED, ERROR
+	}
+
+	@Override
+	public void close() {
+		this.status = XpraClient.Status.ERROR;
+		if (packetSender != null) {
+			try {
+				packetSender.close();
+			} catch (IOException e1) {
+				logger.error("Error closing packetSender");
+			}
+		}
+		if (packetReader != null) {
+			try {
+				packetReader.close();
+			} catch (IOException e1) {
+				logger.error("Error closing packetReader");
+			}
+		}
+		stopReadThread = true;
 	}
 }
