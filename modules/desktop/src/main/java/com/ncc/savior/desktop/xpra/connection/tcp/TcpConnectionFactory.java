@@ -21,7 +21,7 @@ public class TcpConnectionFactory extends BaseConnectionFactory {
 
     @Override
     protected IConnection doConnect(IConnectionParameters params) throws IOException {
-        if (params instanceof IConnectionParameters) {
+		if (params instanceof TcpConnectionParameters) {
             TcpConnectionParameters p = (TcpConnectionParameters) params;
             Socket socket = new Socket(p.getHost(), p.getPort());
             socket.setKeepAlive(true);

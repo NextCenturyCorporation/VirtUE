@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +29,58 @@ public class OutputStreamPacketSender implements IPacketSender {
 
 	private PacketListenerManager packetListenerManager;
 
+	private boolean threaded;
+
+	private ArrayBlockingQueue<Packet> queue;
+
+	private Thread sendingThread;
+
 	public OutputStreamPacketSender(OutputStream outputStream, IEncoder encoder) {
 		this.outputStream = outputStream;
 		this.encoder = encoder;
+		this.threaded = true;
+		if (threaded) {
+			this.queue = new ArrayBlockingQueue<Packet>(20);
+			Runnable packetSendingRunnable = new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						// use poll if we add a method to stop the thread
+						// queue.poll(1, TimeUnit.SECONDS);
+						Packet packet;
+						try {
+							packet = queue.take();
+							doSendPacket(packet);
+						} catch (InterruptedException | IOException e) {
+							logger.error("Handle me", e);
+						}
+
+					}
+				}
+			};
+			this.sendingThread = new Thread(packetSendingRunnable, "PacketSender");
+			sendingThread.setDaemon(true);
+			sendingThread.start();
+		}
 	}
 
 	@Override
-	public synchronized void sendPacket(Packet packet) throws IOException {
-		// logger.debug("Send: " + packet);
+	public void sendPacket(Packet packet) throws IOException {
+		if (threaded) {
+			try {
+				queue.put(packet);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			doSendPacket(packet);
+		}
+
+	}
+
+	public synchronized void doSendPacket(Packet packet) throws IOException {
+		// logger.debug("Sending: " + packet);
 		List<Object> list = packet.toList();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		encoder.encode(baos, list);
@@ -53,6 +98,7 @@ public class OutputStreamPacketSender implements IPacketSender {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Packet Sent: " + packet.toString());
 		}
+		// logger.debug("Sent: " + packet);
 		packetListenerManager.handlePacket(packet);
 	}
 
