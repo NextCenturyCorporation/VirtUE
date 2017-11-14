@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -22,7 +21,7 @@ public class RaiseWindowPacket extends WindowPacket {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(windowId);
 	}
 }

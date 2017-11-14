@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnMapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
 
 /**
@@ -42,6 +45,21 @@ public abstract class XpraApplication implements Closeable {
 		if (windowManager.getValidPacketTypes().contains(p.getType())) {
 			windowManager.handlePacket(p);
 		}
+	}
+
+	protected void onRestored(int x, int y, int width, int height) {
+		MapWindowPacket sendPacket = new MapWindowPacket(baseWindowId, x, y, width, height);
+		sendPacket(sendPacket, "Window restored");
+	}
+
+	protected void onMinimized() {
+		UnMapWindowPacket sendPacket = new UnMapWindowPacket(baseWindowId);
+		sendPacket(sendPacket, "window minimized");
+	}
+
+	protected void onSizeChange(int width, int height) {
+		ConfigureWindowPacket sendPacket = new ConfigureWindowPacket(baseWindowId, 0, 0, width, height);
+		sendPacket(sendPacket, "Configure Window");
 	}
 
 	public abstract void Show();

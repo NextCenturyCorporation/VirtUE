@@ -11,6 +11,8 @@ import com.ncc.savior.desktop.xpra.application.XpraApplication;
 import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -72,8 +74,37 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 						manager.CloseAllWindows();
 					}
 				});
+				stage.iconifiedProperty().addListener(new ChangeListener<Boolean>() {
+					@Override
+					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+							Boolean newValue) {
+						if (newValue) {
+							onMinimized();
+						} else {
+							onRestored((int) 0, (int) 0, (int) scene.getWidth(), (int) scene.getHeight());
+						}
+					}
+				});
+				scene.widthProperty().addListener(new ChangeListener<Number>() {
+					@Override
+					public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
+						onSceneSizeChange(newV.intValue(), (int) scene.getHeight());
+					}
+				});
+				scene.heightProperty().addListener(new ChangeListener<Number>() {
+					@Override
+					public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
+						onSceneSizeChange((int) scene.getWidth(), newV.intValue());
+					}
+
+				});
 			}
 		});
+	}
+
+	protected void onSceneSizeChange(int width, int height) {
+		windowManager.resizeWindow(baseWindowId, width, height);
+		onSizeChange(width, height);
 	}
 
 	public void setStage(Stage stage) {

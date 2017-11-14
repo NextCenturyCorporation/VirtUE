@@ -175,6 +175,8 @@ public class DebugPacketHandler implements IPacketHandler {
 					ImageIO.write(img, extension, file);
 				} catch (IOException e) {
 					logger.debug("Unable to draw image for DrawPacket=" + p);
+				} catch (RuntimeException e) {
+					logger.debug("Unknown error", e);
 				}
 			}
 		}).start();

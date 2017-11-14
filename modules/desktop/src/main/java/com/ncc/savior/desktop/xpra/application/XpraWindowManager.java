@@ -186,7 +186,6 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		} else {
 			logger.error("Unable to find window to be drawn to.  ID=" + packet.getWindowId() + " Packet=" + packet);
 		}
-
 	}
 
 	private void onLostWindow(LostWindowPacket lostWindowPacket) {
@@ -272,5 +271,10 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 			Packet sendPacket = new CloseWindowPacket(e.getKey());
 			sendPacket(sendPacket, "close window packet");
 		}
+	}
+
+	public void resizeWindow(int windowId, int width, int height) {
+		IXpraWindow window = windows.get(windowId);
+		window.resize(width, height);
 	}
 }

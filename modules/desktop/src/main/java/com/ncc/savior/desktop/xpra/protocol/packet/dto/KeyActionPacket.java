@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -53,7 +52,7 @@ public class KeyActionPacket extends WindowPacket {
 	// var packet = ["key-action", this.topwindow, keyname, pressed, modifiers,
 	// keyval, str, keycode, group];
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(windowId);
 		list.add(keyname);
 		list.add(pressed);

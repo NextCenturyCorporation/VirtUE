@@ -6,23 +6,23 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
 /**
- * This packet informs the server that this specific window has focus.
+ * Send when a window is minimized.
  *
  *
  */
-public class FocusPacket extends WindowPacket {
+public class UnMapWindowPacket extends WindowPacket {
 
-	public FocusPacket(int windowId) {
-		super(windowId, PacketType.FOCUS);
+	public UnMapWindowPacket(int windowId) {
+		super(windowId, PacketType.UNMAP_WINDOW);
 	}
 
-	public FocusPacket(List<Object> list) {
-		this(PacketUtils.asInt(list.get(1)));
+	public UnMapWindowPacket(List<Object> list) {
+		this(PacketUtils.asInt(list, 1));
 	}
 
 	@Override
 	protected void doAddToList(List<Object> list) {
-		list.add(super.windowId);
+		list.add(windowId);
 	}
 
 }

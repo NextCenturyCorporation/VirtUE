@@ -19,6 +19,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.SetDeflatePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnMapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnknownPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
@@ -67,7 +68,7 @@ public enum PacketType {
     SET_NOTIFY("set-notify"),
     SET_BELL("set-bell"),
     MAP_WINDOW("map-window", MapWindowPacket.class),
-    UNMAP_WINDOW("unmap-window"),
+    UNMAP_WINDOW("unmap-window", UnMapWindowPacket.class),
     CONFIGURE_WINDOW("configure-window"),
     CLOSE_WINDOW("close-window", CloseWindowPacket.class),
     FOCUS("focus", FocusPacket.class),

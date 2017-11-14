@@ -200,4 +200,14 @@ public class JavaFxWindow extends XpraWindow {
 				+ ", closed=" + closed + ", id=" + id + ", graphicsSet=" + graphicsSet + ", keyboard=" + keyboard + "]";
 	}
 
+	@Override
+	public void resize(int width, int height) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				canvas.setWidth(width);
+				canvas.setHeight(height);
+			}
+		});
+	}
 }

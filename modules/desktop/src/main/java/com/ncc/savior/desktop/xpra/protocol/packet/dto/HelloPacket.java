@@ -60,7 +60,7 @@ public class HelloPacket extends Packet {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(map);
 	}
 
