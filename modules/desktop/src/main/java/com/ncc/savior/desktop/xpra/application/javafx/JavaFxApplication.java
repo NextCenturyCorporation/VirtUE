@@ -9,8 +9,13 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.XpraApplication;
 import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
+import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket.MoveResizeDirection;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -20,7 +25,9 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
@@ -37,146 +44,216 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 	private AnchorPane anchor;
 	private Stage stage;
 	private Scene scene;
-	private int height;
-	private int width;
 	private boolean show;
 	private JavaFxXpraPacketHandler applicationPacketHandler;
 	private boolean draggingApp = false;
 
-	private InitiateMoveResizePacket initMoveResizePacket;
-
 	private boolean resizeTop;
-
 	private boolean resizeRight;
-
 	private boolean resizeBottom;
-
 	private boolean resizeLeft;
-	private int x;
+	private double clickSceneX;
+	private double clickSceneY;
 
-	private int y;
+	private boolean decorated;
 
-	public JavaFxApplication(XpraClient client, int x, int y, int initialWidth, int initialHeight, int baseWindowId) {
-		super(client, baseWindowId);
-		this.windowManager = new JavaFxXpraWindowManager(client, baseWindowId);
-		this.width = initialWidth;
-		this.height = initialHeight;
-		this.x = x;
-		this.y = y;
+	private JavaFxApplication parent;
 
+	protected double titleBarHeight;
+	protected double insetWidth;
+
+	public JavaFxApplication(XpraClient client, NewWindowPacket packet, JavaFxApplication parent) {
+		super(client, packet.getWindowId());
+		this.parent = parent;
+		init(packet);
 	}
 
-	protected void initXpraWindowManager(int width, int height) {
+	void init(NewWindowPacket packet) {
+		decorated = packet.getMetadata().getDecorations();
+
 		Group root = new Group();
-		this.anchor = new AnchorPane();
+		anchor = new AnchorPane();
 		root.getChildren().add(anchor);
-		this.scene = new Scene(root, width, height);
-		this.applicationPacketHandler = new JavaFxXpraPacketHandler(scene);
+		scene = new Scene(root, packet.getWidth(), packet.getHeight());
+		JavaFxXpraPacketHandler applicationPacketHandler = new JavaFxXpraPacketHandler(scene);
 		client.addPacketListener(applicationPacketHandler);
-		JavaFxXpraWindowManager wm = (JavaFxXpraWindowManager) windowManager;
+		windowManager = new JavaFxXpraWindowManager(client, packet.getWindowId());
+		windowManager.setDebugOutput(debugOutput);
 
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
+				WindowMetadata meta = packet.getMetadata();
+				boolean isModal = meta.getModal();
+				// StageStyle style = (isModal ? StageStyle.UTILITY : StageStyle.DECORATED);
+				// if (packet instanceof NewWindowOverrideRedirectPacket) {
+				// style = StageStyle.TRANSPARENT;
+				// }
+				StageStyle style = meta.getDecorations() ? StageStyle.DECORATED : StageStyle.TRANSPARENT;
+				if (meta.getWindowType().contains("MENU")) {
+					style = StageStyle.TRANSPARENT;
+				}
+				stage = new Stage(style);
+
+				if (packet instanceof NewWindowOverrideRedirectPacket) {
+					stage.setIconified(false);
+					stage.initModality(Modality.WINDOW_MODAL);
+				}
+				if (isModal && parent != null) {
+					stage.initModality(Modality.WINDOW_MODAL);
+					stage.initOwner(parent.getStage());
+					stage.setIconified(false);
+				}
+
 				stage.setScene(scene);
-				wm.setStage(stage);
-				wm.setAnchor(anchor);
-				stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+				((JavaFxXpraWindowManager) windowManager).setStage(stage);
+				((JavaFxXpraWindowManager) windowManager).setAnchor(anchor);
+				stage.setX(packet.getX());
+				stage.setY(packet.getY());
+				stage.show();
+				insetWidth = (stage.getWidth() - scene.getWidth()) / 2;
+				titleBarHeight = stage.getHeight() - scene.getHeight() - insetWidth;
+				((JavaFxXpraWindowManager) windowManager).setInsetWith((int) insetWidth);
+				((JavaFxXpraWindowManager) windowManager).setTitleBarHeight((int) titleBarHeight);
+				// stage.setWidth(packet.getWidth());
+				// stage.setHeight(packet.getHeight());
+				initEventHandlers();
+				IPacketSender sender = client.getPacketSender();
+				MapWindowPacket sendPacket = new MapWindowPacket(packet.getWindowId(), getScreenX(), getScreenY(),
+						packet.getWidth(), packet.getHeight());
 
-					@Override
-					public void handle(WindowEvent event) {
-						try {
-							JavaFxApplication.this.close();
-						} catch (IOException e) {
-							logger.error("Error attempting to close application." + JavaFxApplication.this);
-						}
-						XpraWindowManager manager = JavaFxApplication.super.windowManager;
-						manager.CloseAllWindows();
-					}
-				});
-				stage.iconifiedProperty().addListener(new ChangeListener<Boolean>() {
-					@Override
-					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
-							Boolean newValue) {
-						if (newValue) {
-							onMinimized();
-						} else {
-							onRestored((int) 0, (int) 0, (int) scene.getWidth(), (int) scene.getHeight());
-						}
-					}
-				});
-				scene.widthProperty().addListener(new ChangeListener<Number>() {
-					@Override
-					public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
-						onSceneSizeChange(newV.intValue(), (int) scene.getHeight());
-					}
-				});
-				scene.heightProperty().addListener(new ChangeListener<Number>() {
-					@Override
-					public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
-						onSceneSizeChange((int) scene.getWidth(), newV.intValue());
-					}
-				});
-				scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
-
-					@Override
-					public void handle(MouseEvent event) {
-						if (isMoveResizing()) {
-							// sendPacket(new ConfigureWindowPacket(id, (int) stage.getX(), (int)
-							// stage.getY(),
-							// (int) stage.getWidth(), (int) stage.getHeight()), "Configure Window");
-
-							clearInitMoveResize();
-						}
-					}
-				});
-
-				scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
-					@Override
-					public void handle(MouseEvent event) {
-						if (draggingApp) {
-							int sceneXStart = initMoveResizePacket.getxRoot();
-							int sceneYStart = initMoveResizePacket.getyRoot();
-							stage.setX(event.getScreenX() - sceneXStart);
-							stage.setY(event.getScreenY() - sceneYStart);
-						}
-						if (resizeTop) {
-							double ydelta = stage.getY() - event.getScreenY();
-							stage.setHeight(stage.getHeight() + ydelta);
-							stage.setY(event.getScreenY());
-						}
-						if (resizeLeft) {
-							double xdelta = stage.getX() - event.getScreenX();
-							stage.setWidth(stage.getWidth() + xdelta);
-							stage.setX(event.getScreenX());
-						}
-						if (resizeRight) {
-							double width = event.getScreenX() - stage.getX();
-							stage.setWidth(width);
-						}
-						if (resizeBottom) {
-							double height = event.getScreenY() - stage.getY();
-							stage.setHeight(height);
-						}
-					}
-				});
-				stage.setX(x);
-				stage.setY(y);
+				// ConfigureWindowPacket sendPacket = new
+				// ConfigureWindowPacket(packet.getWindowId(),
+				// (int) stage.getX(), (int) stage.getY(), (int) stage.getWidth(), (int)
+				// stage.getHeight());
+				try {
+					sender.sendPacket(sendPacket);
+				} catch (IOException e) {
+					logger.error("Error sending packet=" + packet);
+				}
 			}
 		});
 	}
 
-	protected void onSceneSizeChange(int width, int height) {
-		windowManager.resizeWindow(baseWindowId, width, height);
-		onSizeChange(width, height);
+	protected void initEventHandlers() {
+
+		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+			@Override
+			public void handle(WindowEvent event) {
+				try {
+					JavaFxApplication.this.close();
+				} catch (IOException e) {
+					logger.error("Error attempting to close application." + JavaFxApplication.this);
+				}
+				XpraWindowManager manager = JavaFxApplication.super.windowManager;
+				manager.CloseAllWindows();
+			}
+		});
+		stage.iconifiedProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				if (newValue) {
+					onMinimized();
+				} else {
+					onRestored((int) 0, (int) 0, (int) scene.getWidth(), (int) scene.getHeight());
+				}
+			}
+		});
+		scene.widthProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
+				onSceneSizeChange(newV.intValue(), (int) scene.getHeight());
+			}
+		});
+		scene.heightProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
+				onSceneSizeChange((int) scene.getWidth(), newV.intValue());
+			}
+		});
+		stage.xProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int) scene.getHeight());
+			}
+		});
+		stage.yProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int) scene.getHeight());
+			}
+		});
+		scene.setOnMousePressed(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				clickSceneX = event.getSceneX();
+				clickSceneY = event.getSceneY();
+			}
+		});
+		scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (isMoveResizing()) {
+					sendPacket(new MapWindowPacket(baseWindowId, getScreenX(), getScreenY(), (int) scene.getWidth(),
+							(int) scene.getHeight()), "Configure Window");
+
+					clearInitMoveResize();
+				}
+			}
+		});
+
+		scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (draggingApp) {
+					stage.setX(event.getScreenX() - clickSceneX);
+					stage.setY(event.getScreenY() - clickSceneY);
+				}
+				if (resizeTop) {
+					double ydelta = stage.getY() - event.getScreenY();
+					stage.setHeight(stage.getHeight() + ydelta);
+					stage.setY(event.getScreenY());
+				}
+				if (resizeLeft) {
+					double xdelta = stage.getX() - event.getScreenX();
+					stage.setWidth(stage.getWidth() + xdelta);
+					stage.setX(event.getScreenX());
+				}
+				if (resizeRight) {
+					double width = event.getScreenX() - stage.getX();
+					stage.setWidth(width);
+				}
+				if (resizeBottom) {
+					double height = event.getScreenY() - stage.getY();
+					stage.setHeight(height);
+				}
+			}
+		});
 	}
 
-	public void setStage(Stage stage) {
-		this.stage = stage;
-		initXpraWindowManager(width, height);
-		if (show) {
-			stage.show();
-		}
+	/**
+	 * Scene's Y coordinate in Screen coordinates
+	 *
+	 * @return
+	 */
+	protected int getScreenY() {
+		return (int) (stage.getY() + titleBarHeight);
+	}
+
+	/**
+	 * Scene's X coordinate in Screen coordinates
+	 *
+	 * @return
+	 */
+	protected int getScreenX() {
+		return (int) (stage.getX() + insetWidth);
+	}
+
+	protected void onSceneSizeChange(int width, int height) {
+		windowManager.resizeWindow(baseWindowId, width, height);
+		onLocationChange(getScreenX(), getScreenY(), width, height);
 	}
 
 	@Override
@@ -202,9 +279,11 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 
 	@Override
 	public String toString() {
-		return "JavaFxApplication [anchor=" + anchor + ", stage=" + stage + ", scene=" + scene + ", height=" + height
-				+ ", width=" + width + ", show=" + show + ", applicationPacketHandler=" + applicationPacketHandler
-				+ ", windowManager=" + windowManager + ", baseWindowId=" + baseWindowId + "]";
+		return "JavaFxApplication [anchor=" + anchor + ", stage=" + stage + ", scene=" + scene + ", show=" + show
+				+ ", applicationPacketHandler=" + applicationPacketHandler + ", draggingApp=" + draggingApp
+				+ ", resizeTop=" + resizeTop + ", resizeRight=" + resizeRight + ", resizeBottom=" + resizeBottom
+				+ ", resizeLeft=" + resizeLeft + ", clickSceneX=" + clickSceneX + ", clickSceneY=" + clickSceneY
+				+ ", decorated=" + decorated + ", parent=" + parent + ", baseWindowId=" + baseWindowId + "]";
 	}
 
 	public Window getStage() {
@@ -237,7 +316,7 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 		MoveResizeDirection dir = packet.getDirection();
 		if (dir.equals(MoveResizeDirection.MOVERESIZE_MOVE)) {
 			draggingApp = true;
-			initMoveResizePacket = packet;
+			// initMoveResizePacket = packet;
 		}
 		int dirInt = packet.getDirectionInt();
 		// MOVERESIZE_SIZE_TOPLEFT = 0
@@ -268,17 +347,30 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 	}
 
 	private void clearInitMoveResize() {
-		logger.debug("clear move resize");
 		draggingApp = false;
-		initMoveResizePacket = null;
+		// initMoveResizePacket = null;
 		resizeTop = false;
 		resizeBottom = false;
 		resizeLeft = false;
 		resizeRight = false;
+		// clickSceneX = 0;
+		// clickSceneY = 0;
 	}
 
 	protected boolean isMoveResizing() {
-		logger.debug(draggingApp + " " + resizeTop + " " + resizeRight + " " + resizeBottom + " " + resizeLeft);
 		return resizeBottom || resizeLeft || resizeRight || resizeTop || draggingApp;
+	}
+
+	@Override
+	public void setLocationSize(int x, int y, int width, int height) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				stage.setX(x - insetWidth);
+				stage.setY(y - titleBarHeight);
+				stage.setWidth(width + 2 * insetWidth);
+				stage.setHeight(height + insetWidth + titleBarHeight);
+			}
+		});
 	}
 }

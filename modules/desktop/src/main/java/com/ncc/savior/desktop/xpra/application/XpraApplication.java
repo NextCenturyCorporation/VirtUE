@@ -28,6 +28,7 @@ public abstract class XpraApplication implements Closeable {
 	protected XpraClient client;
 	protected XpraWindowManager windowManager;
 	protected int baseWindowId;
+	protected boolean debugOutput;
 
 	public XpraApplication(XpraClient client, int baseWindowId) {
 		this.client = client;
@@ -39,7 +40,10 @@ public abstract class XpraApplication implements Closeable {
 	}
 
 	public void setDebugOutput(boolean debugOutput) {
-		windowManager.setDebugOutput(debugOutput);
+		this.debugOutput = debugOutput;
+		if (windowManager != null) {
+			windowManager.setDebugOutput(debugOutput);
+		}
 	}
 
 	public void handleWindowPacket(WindowPacket p) {
@@ -56,11 +60,6 @@ public abstract class XpraApplication implements Closeable {
 	protected void onMinimized() {
 		UnMapWindowPacket sendPacket = new UnMapWindowPacket(baseWindowId);
 		sendPacket(sendPacket, "window minimized");
-	}
-
-	protected void onSizeChange(int width, int height) {
-		ConfigureWindowPacket sendPacket = new ConfigureWindowPacket(baseWindowId, 0, 0, width, height);
-		sendPacket(sendPacket, "Configure Window");
 	}
 
 	protected void onLocationChange(int x, int y, int width, int height) {
@@ -81,9 +80,9 @@ public abstract class XpraApplication implements Closeable {
 	protected void sendPacket(Packet sendPacket, String packetDescription) {
 		try {
 			client.getPacketSender().sendPacket(sendPacket);
-			if (logger.isDebugEnabled()) {
-				// logger.debug("Sending Packet=" + sendPacket.toString());
-			}
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("Sending Packet=" + sendPacket.toString());
+			// }
 		} catch (IOException e) {
 			logger.error("Error attempting to send packet=" + sendPacket, e);
 		}
@@ -94,4 +93,6 @@ public abstract class XpraApplication implements Closeable {
 	public abstract void restore();
 
 	public abstract void initiateMoveResize(InitiateMoveResizePacket packet);
+
+	public abstract void setLocationSize(int x, int y, int width, int height);
 }

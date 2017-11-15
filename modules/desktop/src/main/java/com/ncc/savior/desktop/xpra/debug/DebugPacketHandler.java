@@ -60,6 +60,11 @@ public class DebugPacketHandler implements IPacketHandler {
 
 	}
 
+	public static void clearDefaultDebugFolder() {
+		File dir = new File("debug");
+		deleteContents(dir);
+	}
+
 	public static File getDefaultTimeBasedDirectory() {
 		long timestamp = System.currentTimeMillis();
 		File dir = new File("debug/" + timestamp + "/packets/");

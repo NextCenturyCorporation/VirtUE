@@ -33,6 +33,10 @@ public class WindowMetadata {
 		return getInt("opacity");
 	}
 
+	public boolean getDecorations() {
+		return getBoolean("decorations", true);
+	}
+
 	public int getPid() {
 		return getInt("pid");
 	}
@@ -103,8 +107,12 @@ public class WindowMetadata {
 	// }
 
 	private boolean getBoolean(String key) {
+		return getBoolean(key, false);
+	}
+
+	private boolean getBoolean(String key, boolean defaultValue) {
 		Number num = (Number) metadata.get(key);
-		return (num == null ? false : num.intValue() > 0);
+		return (num == null ? defaultValue : num.intValue() > 0);
 	}
 
 	private int getInt(String key) {

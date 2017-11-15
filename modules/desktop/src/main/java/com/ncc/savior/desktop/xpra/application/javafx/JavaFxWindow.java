@@ -23,7 +23,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -82,7 +81,7 @@ public class JavaFxWindow extends XpraWindow {
 			@Override
 			public void handle(MouseEvent event) {
 				List<String> modifiers = JavaFxUtils.getModifiers(event);
-				onMouseMove((int) event.getSceneX(), (int) event.getSceneY(), modifiers);
+				onMouseMove((int) event.getScreenX(), (int) event.getScreenY(), modifiers);
 			}
 		});
 		this.canvas.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -90,14 +89,15 @@ public class JavaFxWindow extends XpraWindow {
 			public void handle(MouseEvent event) {
 				List<String> modifiers = JavaFxUtils.getModifiers(event);
 				onWindowFocus();
-				onMousePress(event.getButton().ordinal(), (int) event.getSceneX(), (int) event.getSceneY(), modifiers);
+				onMousePress(event.getButton().ordinal(), (int) event.getScreenX(), (int) event.getScreenY(),
+						modifiers);
 			}
 		});
 		this.canvas.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
 				List<String> modifiers = JavaFxUtils.getModifiers(event);
-				onMouseRelease(event.getButton().ordinal(), (int) event.getSceneX(), (int) event.getSceneY(),
+				onMouseRelease(event.getButton().ordinal(), (int) event.getScreenX(), (int) event.getScreenY(),
 						modifiers);
 			}
 		});
@@ -105,13 +105,13 @@ public class JavaFxWindow extends XpraWindow {
 			@Override
 			public void handle(MouseEvent event) {
 				List<String> modifiers = JavaFxUtils.getModifiers(event);
-				onMouseMove((int) event.getSceneX(), (int) event.getSceneY(), modifiers);
+				onMouseMove((int) event.getScreenX(), (int) event.getScreenY(), modifiers);
 			}
 		});
 		this.canvas.setOnScroll(new EventHandler<ScrollEvent>() {
 			@Override
 			public void handle(ScrollEvent event) {
-				onMouseScroll(0, (int) event.getDeltaY(), (int) event.getSceneX(), (int) event.getSceneY());
+				onMouseScroll(0, (int) event.getDeltaY(), (int) event.getScreenX(), (int) event.getScreenY());
 			}
 		});
 		graphicsSet = true;
@@ -124,6 +124,7 @@ public class JavaFxWindow extends XpraWindow {
 
 	@Override
 	public void draw(DrawPacket packet) {
+		// logger.debug("Draw: " + packet);
 		Platform.runLater(new Runnable() {
 
 			@Override
@@ -160,15 +161,15 @@ public class JavaFxWindow extends XpraWindow {
 
 	@Override
 	public void onWindowMoveResize(WindowMoveResizePacket packet) {
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				AnchorPane.setLeftAnchor(canvas, (double) packet.getX());
-				AnchorPane.setTopAnchor(canvas, (double) packet.getY());
-				canvas.setWidth(packet.getWidth());
-				canvas.setHeight(packet.getHeight());
-			}
-		});
+		// Platform.runLater(new Runnable() {
+		// @Override
+		// public void run() {
+		// AnchorPane.setLeftAnchor(canvas, (double) packet.getX());
+		// AnchorPane.setTopAnchor(canvas, (double) packet.getY());
+		// canvas.setWidth(packet.getWidth());
+		// canvas.setHeight(packet.getHeight());
+		// }
+		// });
 	}
 
 	public Canvas getCanvas() {

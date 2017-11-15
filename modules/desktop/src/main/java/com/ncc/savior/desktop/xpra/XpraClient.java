@@ -23,9 +23,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketBuilder;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketDistributer;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketListenerManager;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.HelloPacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingEchoPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingPacket;
@@ -83,21 +81,6 @@ public class XpraClient {
 				try {
 					packetSender.sendPacket(sendPacket);
 					// packetSender.sendPacket(new PingPacket(0));
-				} catch (IOException e) {
-					onIoException(e);
-				}
-			}
-		});
-
-		internalPacketDistributer.addPacketHandler(PacketType.NEW_WINDOW, new BasePacketHandler(PacketType.NEW_WINDOW) {
-
-			@Override
-			public void handlePacket(Packet packet) {
-				NewWindowPacket p = (NewWindowPacket) packet;
-				ConfigureWindowPacket sendPacket = new ConfigureWindowPacket(p.getWindowId(), p.getX(), p.getY(),
-						p.getWidth(), p.getHeight());
-				try {
-					packetSender.sendPacket(sendPacket);
 				} catch (IOException e) {
 					onIoException(e);
 				}

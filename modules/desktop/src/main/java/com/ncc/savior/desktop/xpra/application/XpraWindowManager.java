@@ -47,12 +47,9 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 
 	protected boolean debugOutput;
 	protected int focusedWindowId;
-
 	private Queue<Packet> packetQueue;
-
 	private boolean graphicsInit = false;
-
-	protected int baseWindowId;;
+	protected int baseWindowId;
 
 	public XpraWindowManager(XpraClient client, int baseWindowId) {
 		this.client = client;
@@ -182,7 +179,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 	private void onWindowMoveResize(WindowMoveResizePacket packet) {
 		IXpraWindow window = windows.get(packet.getWindowId());
 		if (window != null) {
-			doWindowMoveResize(packet);
+			// doWindowMoveResize(packet);
 			window.onWindowMoveResize(packet);
 		} else {
 			logger.error("Unable to find window to be drawn to.  ID=" + packet.getWindowId() + " Packet=" + packet);
@@ -261,7 +258,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 
 	protected abstract void doRemoveWindow(LostWindowPacket lostWindowPacket, IXpraWindow window);
 
-	protected abstract void doWindowMoveResize(WindowMoveResizePacket packet);
+	// protected abstract void doWindowMoveResize(WindowMoveResizePacket packet);
 
 	protected abstract IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender iPacketSender);
 

@@ -40,6 +40,7 @@ public class JavaFxTestRunner extends Application {
 		// performance penalty.
 		useDebugHandler = true;
 		if (useDebugHandler) {
+			DebugPacketHandler.clearDefaultDebugFolder();
 			File dir = DebugPacketHandler.getDefaultTimeBasedDirectory();
 			DebugPacketHandler debugHandler = new DebugPacketHandler(dir);
 			client.addPacketListener(debugHandler);

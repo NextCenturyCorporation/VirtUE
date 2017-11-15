@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
@@ -20,6 +21,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
 
 /**
@@ -94,6 +96,12 @@ public abstract class XpraApplicationManager {
 				case INITIATE_MOVERESIZE:
 					onInitMoveResize((InitiateMoveResizePacket) packet);
 					break;
+				case CONFIGURE_OVERRIDE_REDIRECT:
+					onConfigureRedirectOverride((ConfigureOverrideRedirectPacket) packet);
+					break;
+				case WINDOW_MOVE_RESIZE:
+					onWindowMoveResize((WindowMoveResizePacket) packet);
+					break;
 				default:
 
 				}
@@ -148,7 +156,6 @@ public abstract class XpraApplicationManager {
 
 	private void onNewWindow(NewWindowPacket packet) {
 		XpraApplication app = createXpraApplication(packet);
-		app.setDebugOutput(this.setDebugOutput);
 		if (show) {
 			app.Show();
 		}
@@ -182,6 +189,26 @@ public abstract class XpraApplicationManager {
 			xidToApplication.put(packet.getMetadata().getXid(), parent);
 		} else {
 			onNewWindow(packet);
+		}
+	}
+
+	protected void onConfigureRedirectOverride(ConfigureOverrideRedirectPacket packet) {
+		int wid = packet.getWindowId();
+		XpraApplication app = applications.get(wid);
+		if (app != null) {
+			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
+		} else {
+			logger.warn("Recieved packet with valid application. packet=" + packet);
+		}
+	}
+
+	protected void onWindowMoveResize(WindowMoveResizePacket packet) {
+		int wid = packet.getWindowId();
+		XpraApplication app = applications.get(wid);
+		if (app != null) {
+			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
+		} else {
+			logger.warn("Recieved packet with valid application. packet=" + packet);
 		}
 	}
 

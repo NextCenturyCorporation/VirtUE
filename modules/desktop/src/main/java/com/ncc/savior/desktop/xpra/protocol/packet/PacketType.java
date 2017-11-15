@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.xpra.protocol.packet;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
@@ -24,6 +25,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnMapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnknownPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
 /**
  * All the PacketTypes found in the Xpra documentation. Implemented classes
@@ -50,8 +52,8 @@ public enum PacketType {
     NEW_TRAY("new-tray"),
     LOST_WINDOW("lost-window", LostWindowPacket.class),
     RAISE_WINDOW("raise-window", RaiseWindowPacket.class),
-    CONFIGURE_OVERRIDE_REDIRECT("configure-override-redirect"),
-    WINDOW_MOVE_RESIZE("window-move-resize"),
+    CONFIGURE_OVERRIDE_REDIRECT("configure-override-redirect", ConfigureOverrideRedirectPacket.class),
+    WINDOW_MOVE_RESIZE("window-move-resize", WindowMoveResizePacket.class),
     WINDOW_RESIZED("window-resized"),
     WINDOW_ICON("window-icon", WindowIconPacket.class),
     WINDOW_METADATA("window-metadata",WindowMetadataPacket.class),

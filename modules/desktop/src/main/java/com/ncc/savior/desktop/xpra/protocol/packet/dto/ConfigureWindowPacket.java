@@ -41,6 +41,22 @@ public class ConfigureWindowPacket extends WindowPacket {
 		list.add(height);
     }
 
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
 	@Override
 	public String toString() {
 		return "ConfigureWindowPacket [windowId=" + windowId + ", x=" + x + ", y=" + y + ", width=" + width
