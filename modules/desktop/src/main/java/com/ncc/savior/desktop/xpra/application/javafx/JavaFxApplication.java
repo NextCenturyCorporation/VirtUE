@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.XpraApplication;
 import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket.MoveResizeDirection;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -16,6 +18,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -38,7 +41,17 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 	private int width;
 	private boolean show;
 	private JavaFxXpraPacketHandler applicationPacketHandler;
+	private boolean draggingApp = false;
 
+	private InitiateMoveResizePacket initMoveResizePacket;
+
+	private boolean resizeTop;
+
+	private boolean resizeRight;
+
+	private boolean resizeBottom;
+
+	private boolean resizeLeft;
 	private int x;
 
 	private int y;
@@ -102,6 +115,49 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 					@Override
 					public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
 						onSceneSizeChange((int) scene.getWidth(), newV.intValue());
+					}
+				});
+				scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
+
+					@Override
+					public void handle(MouseEvent event) {
+						if (isMoveResizing()) {
+							// sendPacket(new ConfigureWindowPacket(id, (int) stage.getX(), (int)
+							// stage.getY(),
+							// (int) stage.getWidth(), (int) stage.getHeight()), "Configure Window");
+
+							clearInitMoveResize();
+						}
+					}
+				});
+
+				scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
+					@Override
+					public void handle(MouseEvent event) {
+						if (draggingApp) {
+							int sceneXStart = initMoveResizePacket.getxRoot();
+							int sceneYStart = initMoveResizePacket.getyRoot();
+							stage.setX(event.getScreenX() - sceneXStart);
+							stage.setY(event.getScreenY() - sceneYStart);
+						}
+						if (resizeTop) {
+							double ydelta = stage.getY() - event.getScreenY();
+							stage.setHeight(stage.getHeight() + ydelta);
+							stage.setY(event.getScreenY());
+						}
+						if (resizeLeft) {
+							double xdelta = stage.getX() - event.getScreenX();
+							stage.setWidth(stage.getWidth() + xdelta);
+							stage.setX(event.getScreenX());
+						}
+						if (resizeRight) {
+							double width = event.getScreenX() - stage.getX();
+							stage.setWidth(width);
+						}
+						if (resizeBottom) {
+							double height = event.getScreenY() - stage.getY();
+							stage.setHeight(height);
+						}
 					}
 				});
 				stage.setX(x);
@@ -173,5 +229,56 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 				stage.setIconified(false);
 			}
 		});
+	}
+
+	@Override
+	public void initiateMoveResize(InitiateMoveResizePacket packet) {
+		clearInitMoveResize();
+		MoveResizeDirection dir = packet.getDirection();
+		if (dir.equals(MoveResizeDirection.MOVERESIZE_MOVE)) {
+			draggingApp = true;
+			initMoveResizePacket = packet;
+		}
+		int dirInt = packet.getDirectionInt();
+		// MOVERESIZE_SIZE_TOPLEFT = 0
+		// MOVERESIZE_SIZE_TOP = 1
+		// MOVERESIZE_SIZE_TOPRIGHT = 2
+		// MOVERESIZE_SIZE_RIGHT = 3
+		// MOVERESIZE_SIZE_BOTTOMRIGHT = 4
+		// MOVERESIZE_SIZE_BOTTOM = 5
+		// MOVERESIZE_SIZE_BOTTOMLEFT = 6
+		// MOVERESIZE_SIZE_LEFT = 7
+		if (dirInt >= 0 && dirInt <= 2) {
+			// top
+			resizeTop = true;
+		}
+		if (dirInt >= 2 && dirInt <= 4) {
+			// right
+			resizeRight = true;
+		}
+		if (dirInt >= 4 && dirInt <= 6) {
+			// bottom
+			resizeBottom = true;
+		}
+		if (dirInt == 0 || (dirInt >= 6 && dirInt <= 7)) {
+			// left
+			resizeLeft = true;
+		}
+
+	}
+
+	private void clearInitMoveResize() {
+		logger.debug("clear move resize");
+		draggingApp = false;
+		initMoveResizePacket = null;
+		resizeTop = false;
+		resizeBottom = false;
+		resizeLeft = false;
+		resizeRight = false;
+	}
+
+	protected boolean isMoveResizing() {
+		logger.debug(draggingApp + " " + resizeTop + " " + resizeRight + " " + resizeBottom + " " + resizeLeft);
+		return resizeBottom || resizeLeft || resizeRight || resizeTop || draggingApp;
 	}
 }

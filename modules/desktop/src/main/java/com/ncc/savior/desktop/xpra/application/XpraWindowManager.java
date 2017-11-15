@@ -21,7 +21,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.KeyActionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
@@ -65,7 +64,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		this.packetTypes.add(PacketType.DRAW);
 		this.packetTypes.add(PacketType.WINDOW_ICON);
 		this.packetTypes.add(PacketType.WINDOW_METADATA);
-		this.packetTypes.add(PacketType.INITIATE_MOVERESIZE);
+		// this.packetTypes.add(PacketType.INITIATE_MOVERESIZE);
 		this.client = client;
 		this.windows = new HashMap<Integer, IXpraWindow>();
 		this.debugOutput = false;
@@ -115,21 +114,9 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		case WINDOW_ICON:
 			onWindowIcon((WindowIconPacket) packet);
 			break;
-		case INITIATE_MOVERESIZE:
-			onInitiateMoveResize((InitiateMoveResizePacket) packet);
-			break;
 		default:
 
 			break;
-		}
-	}
-
-	private void onInitiateMoveResize(InitiateMoveResizePacket packet) {
-		IXpraWindow window = windows.get(packet.getWindowId());
-		if (window != null) {
-			window.initiateMoveResize(packet);
-		} else {
-			logger.error("Unable to find window to set icon on.  ID=" + packet.getWindowId() + " Packet=" + packet);
 		}
 	}
 

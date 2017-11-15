@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
@@ -90,6 +91,9 @@ public abstract class XpraApplicationManager {
 				case WINDOW_METADATA:
 					onMetadatPacket((WindowMetadataPacket) packet);
 					break;
+				case INITIATE_MOVERESIZE:
+					onInitMoveResize((InitiateMoveResizePacket) packet);
+					break;
 				default:
 
 				}
@@ -113,6 +117,11 @@ public abstract class XpraApplicationManager {
 			}
 		};
 		client.addPacketListener(handler);
+	}
+
+	protected void onInitMoveResize(InitiateMoveResizePacket packet) {
+		XpraApplication app = applications.get(packet.getWindowId());
+		app.initiateMoveResize(packet);
 	}
 
 	protected void onMetadatPacket(WindowMetadataPacket packet) {

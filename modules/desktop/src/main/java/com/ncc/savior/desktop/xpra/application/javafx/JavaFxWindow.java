@@ -10,8 +10,6 @@ import com.ncc.savior.desktop.xpra.application.XpraWindow;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket.MoveResizeDirection;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
@@ -53,17 +51,7 @@ public class JavaFxWindow extends XpraWindow {
 
 	private boolean closed;
 
-	private boolean draggingApp = false;
 
-	private InitiateMoveResizePacket initMoveResizePacket;
-
-	private boolean resizeTop;
-
-	private boolean resizeRight;
-
-	private boolean resizeBottom;
-
-	private boolean resizeLeft;
 
 	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
 			IFocusNotifier focusNotifier) {
@@ -108,13 +96,6 @@ public class JavaFxWindow extends XpraWindow {
 		this.canvas.setOnMouseReleased(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (isMoveResizing()) {
-					// sendPacket(new ConfigureWindowPacket(id, (int) stage.getX(), (int)
-					// stage.getY(),
-					// (int) stage.getWidth(), (int) stage.getHeight()), "Configure Window");
-
-					clearInitMoveResize();
-				}
 				List<String> modifiers = JavaFxUtils.getModifiers(event);
 				onMouseRelease(event.getButton().ordinal(), (int) event.getSceneX(), (int) event.getSceneY(),
 						modifiers);
@@ -123,40 +104,8 @@ public class JavaFxWindow extends XpraWindow {
 		this.canvas.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				boolean resizing = false;
-				if (draggingApp) {
-					int sceneXStart = initMoveResizePacket.getxRoot();
-					int sceneYStart = initMoveResizePacket.getyRoot();
-					stage.setX(event.getScreenX() - sceneXStart);
-					stage.setY(event.getScreenY() - sceneYStart);
-					resizing = true;
-				}
-				if (resizeTop) {
-					double ydelta = stage.getY() - event.getScreenY();
-					stage.setHeight(stage.getHeight() + ydelta);
-					stage.setY(event.getScreenY());
-					resizing = true;
-				}
-				if (resizeLeft) {
-					double xdelta = stage.getX() - event.getScreenX();
-					stage.setWidth(stage.getWidth() + xdelta);
-					stage.setX(event.getScreenX());
-					resizing = true;
-				}
-				if (resizeRight) {
-					double width = event.getScreenX() - stage.getX();
-					stage.setWidth(width);
-					resizing = true;
-				}
-				if (resizeBottom) {
-					double height = event.getScreenY() - stage.getY();
-					stage.setHeight(height);
-					resizing = true;
-				}
-				if (!resizing) {
-					List<String> modifiers = JavaFxUtils.getModifiers(event);
-					onMouseMove((int) event.getSceneX(), (int) event.getSceneY(), modifiers);
-				}
+				List<String> modifiers = JavaFxUtils.getModifiers(event);
+				onMouseMove((int) event.getSceneX(), (int) event.getSceneY(), modifiers);
 			}
 		});
 		this.canvas.setOnScroll(new EventHandler<ScrollEvent>() {
@@ -166,11 +115,6 @@ public class JavaFxWindow extends XpraWindow {
 			}
 		});
 		graphicsSet = true;
-	}
-
-	protected boolean isMoveResizing() {
-		logger.debug(draggingApp + " " + resizeTop + " " + resizeRight + " " + resizeBottom + " " + resizeLeft);
-		return resizeBottom || resizeLeft || resizeRight || resizeTop || draggingApp;
 	}
 
 	@Override
@@ -274,52 +218,5 @@ public class JavaFxWindow extends XpraWindow {
 				canvas.setHeight(height);
 			}
 		});
-	}
-
-	@Override
-	public void initiateMoveResize(InitiateMoveResizePacket packet) {
-		clearInitMoveResize();
-		MoveResizeDirection dir = packet.getDirection();
-		logger.debug(packet.toString());
-		if (dir.equals(MoveResizeDirection.MOVERESIZE_MOVE)) {
-			draggingApp = true;
-			initMoveResizePacket = packet;
-		}
-		int dirInt = packet.getDirectionInt();
-		// MOVERESIZE_SIZE_TOPLEFT = 0
-		// MOVERESIZE_SIZE_TOP = 1
-		// MOVERESIZE_SIZE_TOPRIGHT = 2
-		// MOVERESIZE_SIZE_RIGHT = 3
-		// MOVERESIZE_SIZE_BOTTOMRIGHT = 4
-		// MOVERESIZE_SIZE_BOTTOM = 5
-		// MOVERESIZE_SIZE_BOTTOMLEFT = 6
-		// MOVERESIZE_SIZE_LEFT = 7
-		if (dirInt >= 0 && dirInt <= 2) {
-			// top
-			resizeTop = true;
-		}
-		if (dirInt >= 2 && dirInt <= 4) {
-			// right
-			resizeRight = true;
-		}
-		if (dirInt >= 4 && dirInt <= 6) {
-			// bottom
-			resizeBottom = true;
-		}
-		if (dirInt == 0 || (dirInt >= 6 && dirInt <= 7)) {
-			// left
-			resizeLeft = true;
-		}
-
-	}
-
-	private void clearInitMoveResize() {
-		logger.debug("clear move resize");
-		draggingApp = false;
-		initMoveResizePacket = null;
-		resizeTop = false;
-		resizeBottom = false;
-		resizeLeft = false;
-		resizeRight = false;
 	}
 }

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnMapWindowPacket;
@@ -91,4 +92,6 @@ public abstract class XpraApplication implements Closeable {
 	public abstract void minimize();
 
 	public abstract void restore();
+
+	public abstract void initiateMoveResize(InitiateMoveResizePacket packet);
 }
