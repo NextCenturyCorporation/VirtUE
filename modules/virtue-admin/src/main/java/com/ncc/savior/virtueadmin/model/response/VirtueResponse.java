@@ -3,34 +3,34 @@ package com.ncc.savior.virtueadmin.model.response;
 import java.util.List;
 
 public class VirtueResponse {
-	private long id; 
-	private List<String> virtueList;
+	private long userToken; 
+	private List<Virtue> virtueList;
 	
 	
 	public VirtueResponse() {
 		super();
 	}
 
-	public VirtueResponse(long id, List<String> virtueList) {
+	public VirtueResponse(long id, List<Virtue> virtueList) {
 		super();
-		this.id = id;
+		this.userToken = id;
 		this.virtueList = virtueList;
 	}
 
-	public List<String> getVirtueList() {
+	public List<Virtue> getVirtueList() {
 		return virtueList;
 	}
 	
-	public void setVirtueList(List<String> virtueList) {
+	public void setVirtueList(List<Virtue> virtueList) {
 		this.virtueList = virtueList;
 	}
 	
 	public long getId() {
-		return id;
+		return userToken;
 	}
 	
-	public void setId(long id) {
-		this.id = id;
+	public void setId(long userToken) {
+		this.userToken = userToken;
 	} 
 	
 
