@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -105,8 +104,8 @@ public class CursorPacket extends Packet {
 	@Override
 	public String toString() {
 		return "CursorPacket [x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", xHotspot="
-				+ xHotspot + ", yHotspot=" + yHotspot + ", serial=" + serial + ", bytes=" + Arrays.toString(bytes)
-				+ ", name=" + name + ", empty=" + empty + ", type=" + type + "]";
+				+ xHotspot + ", yHotspot=" + yHotspot + ", serial=" + serial + ", bytes="
+				+ (bytes == null ? 0 : bytes.length) + ", name=" + name + ", empty=" + empty + ", type=" + type + "]";
 	}
 
 }

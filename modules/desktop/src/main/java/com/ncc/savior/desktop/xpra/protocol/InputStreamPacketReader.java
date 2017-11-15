@@ -79,6 +79,7 @@ public class InputStreamPacketReader implements IPacketReader {
 		}
 		IEncoder encoder = getEncoder(header);
 		List<Object> list = encoder.decode(input);
+		// logger.debug(list.toString());
 
 		for (Entry<Integer, byte[]> patch : patches.entrySet()) {
 			list.set(patch.getKey(), patch.getValue());

@@ -3,6 +3,7 @@ package com.ncc.savior.desktop.xpra.application;
 import java.io.Closeable;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
@@ -20,4 +21,6 @@ public interface IXpraWindow extends Closeable {
 	public void updateWindowMetadata(WindowMetadataPacket packet);
 
 	public void resize(int width, int height);
+
+	public void initiateMoveResize(InitiateMoveResizePacket packet);
 }

@@ -46,7 +46,7 @@ public class JavaFxTestRunner extends Application {
 			client.addPacketSendListener(debugHandler);
 		}
 		JavaFxKeyboard keyboard = new JavaFxKeyboard(new XpraKeyMap());
-		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, primaryStage, keyboard);
+		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, null, keyboard);
 
 		applicationManager.setDebugOutput(true);
 		client.addConnectListener(new IConnectListener() {

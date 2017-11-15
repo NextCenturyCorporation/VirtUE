@@ -69,8 +69,8 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 				canvas.setWidth(packet.getWidth());
 				canvas.setHeight(packet.getHeight());
 				pane.getChildren().add(canvas);
-				double x = packet.getX();
-				double y = packet.getY();
+				double x = packet.getX() - stage.getX();
+				double y = packet.getY() - stage.getY();
 
 				AnchorPane.setTopAnchor(canvas, y);
 				AnchorPane.setLeftAnchor(canvas, x);
@@ -78,7 +78,7 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 		});
 		try {
 			if (!(packet instanceof NewWindowOverrideRedirectPacket)) {
-				packet.overrideXy(0, 0);
+				// packet.overrideXy(0, 0);
 			}
 			packetSender.sendPacket(new MapWindowPacket(packet));
 		} catch (IOException e) {
@@ -144,7 +144,7 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	@Override
 	protected void doClose() {
-		this.pane = null;
+		// this.pane = null;
 		final Stage myStage = JavaFxXpraWindowManager.this.stage;
 		JavaFxXpraWindowManager.this.stage = null;
 		if (myStage != null) {

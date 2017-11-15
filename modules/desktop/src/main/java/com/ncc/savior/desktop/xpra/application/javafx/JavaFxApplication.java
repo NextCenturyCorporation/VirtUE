@@ -39,26 +39,33 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 	private boolean show;
 	private JavaFxXpraPacketHandler applicationPacketHandler;
 
-	public JavaFxApplication(XpraClient client, int initialWidth, int initialHeight, int baseWindowId) {
+	private int x;
+
+	private int y;
+
+	public JavaFxApplication(XpraClient client, int x, int y, int initialWidth, int initialHeight, int baseWindowId) {
 		super(client, baseWindowId);
 		this.windowManager = new JavaFxXpraWindowManager(client, baseWindowId);
 		this.width = initialWidth;
 		this.height = initialHeight;
+		this.x = x;
+		this.y = y;
 
 	}
 
-	protected void initXpraWindowManager(int x, int y) {
+	protected void initXpraWindowManager(int width, int height) {
 		Group root = new Group();
 		this.anchor = new AnchorPane();
 		root.getChildren().add(anchor);
-		this.scene = new Scene(root, x, y);
+		this.scene = new Scene(root, width, height);
 		this.applicationPacketHandler = new JavaFxXpraPacketHandler(scene);
 		client.addPacketListener(applicationPacketHandler);
+		JavaFxXpraWindowManager wm = (JavaFxXpraWindowManager) windowManager;
+
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				stage.setScene(scene);
-				JavaFxXpraWindowManager wm = (JavaFxXpraWindowManager) windowManager;
 				wm.setStage(stage);
 				wm.setAnchor(anchor);
 				stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -96,8 +103,9 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 					public void changed(ObservableValue<? extends Number> observable, Number oldV, Number newV) {
 						onSceneSizeChange((int) scene.getWidth(), newV.intValue());
 					}
-
 				});
+				stage.setX(x);
+				stage.setY(y);
 			}
 		});
 	}
@@ -145,5 +153,25 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 
 	public Window getStage() {
 		return stage;
+	}
+
+	@Override
+	public void minimize() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				stage.setIconified(true);
+			}
+		});
+	}
+
+	@Override
+	public void restore() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				stage.setIconified(false);
+			}
+		});
 	}
 }

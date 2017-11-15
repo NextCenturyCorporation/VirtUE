@@ -35,7 +35,13 @@ public class OutputStreamPacketSender implements IPacketSender {
 
 	@Override
 	public synchronized void sendPacket(Packet packet) throws IOException {
+		// if (!packet.getType().equals(PacketType.PING)) {
+		// if (!packet.getType().equals(PacketType.DAMAGE_SEQUENCE)) {
+		// if (!packet.getType().equals(PacketType.POINTER_POSITION)) {
 		// logger.debug("Send: " + packet);
+		// }
+		// }
+		// }
 		List<Object> list = packet.toList();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		encoder.encode(baos, list);

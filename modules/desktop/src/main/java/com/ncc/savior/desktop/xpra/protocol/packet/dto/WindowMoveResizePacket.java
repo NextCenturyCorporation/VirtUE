@@ -20,7 +20,7 @@ public class WindowMoveResizePacket extends WindowPacket {
 	private int height;
 
 	protected WindowMoveResizePacket(int windowId, int x, int y, int width, int height) {
-		super(windowId, PacketType.LOST_WINDOW);
+		super(windowId, PacketType.WINDOW_MOVE_RESIZE);
 		this.x = x;
 		this.y = y;
 		this.width = width;

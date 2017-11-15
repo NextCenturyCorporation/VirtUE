@@ -78,6 +78,10 @@ public class WindowMetadata {
 		return getInt("transient-for");
 	}
 
+	public boolean getIconic() {
+		return getBoolean("iconic");
+	}
+
 	private List<String> getStringList(String key) {
 		Object ret = metadata.get(key);
 		if (ret != null) {
@@ -100,7 +104,7 @@ public class WindowMetadata {
 
 	private boolean getBoolean(String key) {
 		Number num = (Number) metadata.get(key);
-		return num.intValue() > 0;
+		return (num == null ? false : num.intValue() > 0);
 	}
 
 	private int getInt(String key) {

@@ -6,6 +6,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.HelloPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.KeyActionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
@@ -59,6 +60,7 @@ public enum PacketType {
     NOTIFY_SHOW("notify-show"),
     NOTIFY_CLOSE("notify-close"),
 	DRAW("draw", DrawPacket.class),
+	INITIATE_MOVERESIZE("initiate-moveresize", InitiateMoveResizePacket.class),
     RPC_REPLY("rpc-reply"),
     CONTROL("control"),
     INFO_RESPONSE("info-response"),

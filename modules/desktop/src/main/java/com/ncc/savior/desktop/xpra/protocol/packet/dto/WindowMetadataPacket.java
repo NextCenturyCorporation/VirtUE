@@ -40,4 +40,10 @@ public class WindowMetadataPacket extends WindowPacket {
 	public WindowMetadata getMetadata() {
 		return metadata;
 	}
+
+	@Override
+	public String toString() {
+		return "WindowMetadataPacket [metadataRaw=" + metadataRaw + ", metadata=" + metadata + ", windowId=" + windowId
+				+ ", type=" + type + "]";
+	}
 }

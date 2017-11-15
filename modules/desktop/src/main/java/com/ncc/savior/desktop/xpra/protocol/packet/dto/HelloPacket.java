@@ -46,6 +46,8 @@ public class HelloPacket extends Packet {
 	private static final String XKBMAP_LAYOUT = "xkbmap_layout";
 	private static final String XKBMAP_VARIANT = "xkbmap_variant";
 	private static final String XKBMAP_KEYCODES = "xkbmap_keycodes";
+	private static final String SERVER_WINDOW_MOVE_RESIZE = "server-window-move-resize";
+	private static final String SERVER_WINDOW_RESIZE = "server-window-resize";
 
 	private Map<String, Object> map;
 
@@ -66,19 +68,21 @@ public class HelloPacket extends Packet {
 
 	public static HelloPacket createDefaultRequest() {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-		int[] screen = new int[] { 1200, 800 };
+		int[] screen = new int[] { 3200, 1200 };
 		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
 		map.put(DPI, 96);
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
-		map.put(SCREEN_SIZES, new int[][] { screen });
+		map.put(SCREEN_SIZES, new int[][] {});
 		map.put(ENCODINGS, encodings);
 		map.put(ZLIB, true);
 		map.put(CLIPBOARD, false);
 		map.put(NOTIFICATIONS, true);
 		map.put(CURSORS, true);
 		map.put(NAMED_CURSORS, true);
+		map.put(SERVER_WINDOW_MOVE_RESIZE, true);
+		map.put(SERVER_WINDOW_RESIZE, true);
 		map.put(BELL, true);
 		map.put(BENCODE, true);
 		map.put(RENCODE, false);
@@ -91,6 +95,17 @@ public class HelloPacket extends Packet {
 		map.put(KEYBOARD_SYNC, false);
 		map.put(XKBMAP_LAYOUT, Locale.getDefault().getLanguage());
 		map.put(XKBMAP_VARIANT, Locale.getDefault().getVariant());
+
+		map.put("wants_events", true);
+		map.put("share", true);
+		map.put("generic_window_types", true);
+		map.put("window.initiate-moveresize", true);
+
+		Map<String, Object> windowMap = new LinkedHashMap<String, Object>();
+		windowMap.put("raise", true);
+		windowMap.put("initiate-moveresize", true);
+		windowMap.put("resize-counter", true);
+		map.put("window", windowMap);
 
 		// map.put(XKBMAP_LAYOUT, "");
 		// map.put(XKBMAP_VARIANT, "");

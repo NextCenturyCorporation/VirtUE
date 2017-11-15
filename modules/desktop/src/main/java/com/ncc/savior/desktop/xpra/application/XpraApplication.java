@@ -62,6 +62,11 @@ public abstract class XpraApplication implements Closeable {
 		sendPacket(sendPacket, "Configure Window");
 	}
 
+	protected void onLocationChange(int x, int y, int width, int height) {
+		ConfigureWindowPacket sendPacket = new ConfigureWindowPacket(baseWindowId, x, y, width, height);
+		sendPacket(sendPacket, "Configure Window");
+	}
+
 	public abstract void Show();
 
 	public abstract void doClose() throws IOException;
@@ -82,4 +87,8 @@ public abstract class XpraApplication implements Closeable {
 			logger.error("Error attempting to send packet=" + sendPacket, e);
 		}
 	}
+
+	public abstract void minimize();
+
+	public abstract void restore();
 }
