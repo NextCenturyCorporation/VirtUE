@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.imageio.ImageIO;
 
@@ -41,7 +42,12 @@ public class DebugPacketHandler implements IPacketHandler {
 	private FileWriter pointerLog;
 	private FileWriter pingLog;
 
+	private LinkedBlockingQueue<DebugPackage> queue;
+
+	private Thread thread;
+
 	public DebugPacketHandler(File directory) {
+		this.queue = new LinkedBlockingQueue<DebugPackage>();
 		if (directory == null) {
 			directory = getDefaultTimeBasedDirectory();
 		}
@@ -57,7 +63,27 @@ public class DebugPacketHandler implements IPacketHandler {
 		} catch (IOException e) {
 			logger.warn("Unable to create Pointer Packet log FileWriter", e);
 		}
+		startWritingThread();
+	}
 
+	private void startWritingThread() {
+		thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true) {
+					DebugPackage p;
+					try {
+						p = queue.take();
+						doWritePacket(p);
+					} catch (InterruptedException e) {
+						logger.warn("");
+					}
+
+				}
+			}
+		}, "DebugWriter");
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	public static void clearDefaultDebugFolder() {
@@ -67,7 +93,7 @@ public class DebugPacketHandler implements IPacketHandler {
 
 	public static File getDefaultTimeBasedDirectory() {
 		long timestamp = System.currentTimeMillis();
-		File dir = new File("debug/" + timestamp + "/packets/");
+		File dir = new File("debug/" + timestamp + "/");
 		dir.mkdirs();
 		dir.mkdirs();
 		return dir;
@@ -88,8 +114,17 @@ public class DebugPacketHandler implements IPacketHandler {
 
 	@Override
 	public void handlePacket(Packet packet) {
-		long timestamp = System.currentTimeMillis();
+		DebugPackage p = new DebugPackage(packet, System.currentTimeMillis());
+		try {
+			queue.put(p);
+		} catch (InterruptedException e) {
+			logger.warn("Interrupted");
+		}
+	}
 
+	protected void doWritePacket(DebugPackage debugPackage) {
+		Packet packet = debugPackage.getPacket();
+		long timestamp = debugPackage.getTimestamp();
 		switch (packet.getType()) {
 		case WINDOW_ICON:
 		case DRAW:
@@ -170,21 +205,16 @@ public class DebugPacketHandler implements IPacketHandler {
 	}
 
 	private void writeImage(IImagePacket p, long timestamp) {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					String extension = getExtensionFromEncoding(p.getEncoding());
-					File file = new File(debugDirectory, timestamp + "." + extension);
-					BufferedImage img = ImageIO.read(new ByteArrayInputStream(p.getData()));
-					ImageIO.write(img, extension, file);
-				} catch (IOException e) {
-					logger.debug("Unable to draw image for DrawPacket=" + p);
-				} catch (RuntimeException e) {
-					logger.debug("Unknown error", e);
-				}
-			}
-		}).start();
+		try {
+			String extension = getExtensionFromEncoding(p.getEncoding());
+			File file = new File(debugDirectory, timestamp + "." + extension);
+			BufferedImage img = ImageIO.read(new ByteArrayInputStream(p.getData()));
+			ImageIO.write(img, extension, file);
+		} catch (IOException e) {
+			logger.debug("Unable to draw image for DrawPacket=" + p);
+		} catch (RuntimeException e) {
+			logger.debug("Unknown error", e);
+		}
 	}
 
 	private String getExtensionFromEncoding(ImageEncoding encoding) {
@@ -206,4 +236,32 @@ public class DebugPacketHandler implements IPacketHandler {
 		return types;
 	}
 
+	public static class DebugPackage {
+		private Packet packet;
+		private long timestamp;
+		private boolean fromServer;
+
+		public DebugPackage(Packet packet, long timestamp, boolean fromServer) {
+			this.packet = packet;
+			this.timestamp = timestamp;
+			this.fromServer = fromServer;
+		}
+
+		public DebugPackage(Packet packet, long timestamp) {
+			this.packet = packet;
+			this.timestamp = timestamp;
+		}
+
+		public Packet getPacket() {
+			return packet;
+		}
+
+		public long getTimestamp() {
+			return timestamp;
+		}
+
+		public boolean isFromServer() {
+			return fromServer;
+		}
+	}
 }

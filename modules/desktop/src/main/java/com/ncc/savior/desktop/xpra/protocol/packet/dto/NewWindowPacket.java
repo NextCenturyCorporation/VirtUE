@@ -30,6 +30,7 @@ public class NewWindowPacket extends WindowPacket {
 	protected NewWindowPacket(int windowId, int x, int y, int w, int h, Map<String, Object> metadata,
 			Map<String, Object> other) {
 		super(windowId, PacketType.NEW_WINDOW);
+
 		this.x = x;
 		this.y = y;
 		this.width = w;
@@ -38,6 +39,7 @@ public class NewWindowPacket extends WindowPacket {
 		this.metadata = new WindowMetadata(metadataRaw);
 		// Empty from what I've seen...
 		this.otherData = new HashMap<String, Object>();
+		fixXyIfFarOffBounds();
 	}
 
 	public NewWindowPacket(List<Object> list) {
@@ -96,6 +98,17 @@ public class NewWindowPacket extends WindowPacket {
 		this.x = x;
 		this.y = y;
 
+	}
+
+	private void fixXyIfFarOffBounds() {
+		int thresholdx = 4000;
+		if (x + thresholdx < 0) {
+			x = 0;
+		}
+		int thresholdy = 4000;
+		if (y + thresholdy < 0) {
+			y = 0;
+		}
 	}
 
 }
