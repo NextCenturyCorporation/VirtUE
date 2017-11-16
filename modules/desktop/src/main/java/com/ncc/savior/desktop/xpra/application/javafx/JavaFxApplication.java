@@ -300,6 +300,7 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 				stage.setMaximized(true);
 				stage.setMaxHeight(Screen.getPrimary().getVisualBounds().getHeight());
 				stage.setMinHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
 			}
 		});
 	}
@@ -320,7 +321,23 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 			@Override
 			public void run() {
 				stage.setIconified(false);
+				if (stage.isMaximized()) {
+					stage.setMaxHeight(Screen.getPrimary().getVisualBounds().getHeight());
+					stage.setMinHeight(Screen.getPrimary().getVisualBounds().getHeight());
+					stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				}
+			}
+		});
+	}
+
+	@Override
+	public void unMaximize() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				stage.setIconified(false);
 				stage.setMaximized(false);
+				stage.setMinHeight(10);
 			}
 		});
 	}

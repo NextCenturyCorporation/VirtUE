@@ -17,10 +17,7 @@ import com.ncc.savior.desktop.xpra.protocol.encoder.BencodeEncoder;
 import com.ncc.savior.desktop.xpra.protocol.encoder.IEncoder;
 import com.ncc.savior.desktop.xpra.protocol.encoder.RencodeEncoder;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketBuilder;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingPacket;
 
 /**
  * Read stream and convert to packets.
@@ -94,9 +91,10 @@ public class InputStreamPacketReader implements IPacketReader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Built " + packet.toString() + " from " + list.toString());
 		}
-		if (!(packet instanceof PingPacket) && !(packet instanceof DrawPacket) && !(packet instanceof CursorPacket)) {
-			logger.debug("Receive:" + packet.toString());
-		}
+		// if (!(packet instanceof PingPacket) && !(packet instanceof DrawPacket) &&
+		// !(packet instanceof CursorPacket)) {
+		// logger.debug("Receive:" + packet.toString());
+		// }
 		return packet;
 
 	}

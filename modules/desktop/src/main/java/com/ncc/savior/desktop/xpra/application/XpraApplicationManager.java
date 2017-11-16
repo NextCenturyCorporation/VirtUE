@@ -158,7 +158,7 @@ public abstract class XpraApplicationManager {
 			if (maximized) {
 				app.maximize();
 			} else {
-				app.restore();
+				app.unMaximize();
 			}
 		}
 	}
