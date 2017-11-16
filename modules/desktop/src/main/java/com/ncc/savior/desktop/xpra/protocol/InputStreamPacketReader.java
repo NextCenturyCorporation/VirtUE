@@ -91,8 +91,12 @@ public class InputStreamPacketReader implements IPacketReader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Built " + packet.toString() + " from " + list.toString());
 		}
-		// logger.debug("Recieve:" + packet.toString());
+		// if (!(packet instanceof PingPacket) && !(packet instanceof DrawPacket) &&
+		// !(packet instanceof CursorPacket)) {
+		// logger.debug("Receive:" + packet.toString());
+		// }
 		return packet;
+
 	}
 
 	private byte[] readBytes(int numBytes) throws IOException {

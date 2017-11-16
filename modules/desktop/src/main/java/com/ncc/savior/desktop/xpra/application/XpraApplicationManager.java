@@ -19,6 +19,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnMapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
@@ -65,7 +66,8 @@ public abstract class XpraApplicationManager {
 
 			@Override
 			public void handlePacket(Packet packet) {
-
+				// TODO We are using two methods of passing packets to the right instance and
+				// their uses is somewhat mixed. We may want to simplify.
 				switch (packet.getType()) {
 				case NEW_WINDOW:
 					NewWindowPacket p = (NewWindowPacket) packet;
@@ -102,6 +104,9 @@ public abstract class XpraApplicationManager {
 				case WINDOW_MOVE_RESIZE:
 					onWindowMoveResize((WindowMoveResizePacket) packet);
 					break;
+				case UNMAP_WINDOW:
+					onUnMapWindow((UnMapWindowPacket) packet);
+					break;
 				default:
 
 				}
@@ -125,6 +130,11 @@ public abstract class XpraApplicationManager {
 			}
 		};
 		client.addPacketListener(handler);
+	}
+
+	protected void onUnMapWindow(UnMapWindowPacket packet) {
+		XpraApplication app = applications.get(packet.getWindowId());
+		app.minimize();
 	}
 
 	protected void onInitMoveResize(InitiateMoveResizePacket packet) {

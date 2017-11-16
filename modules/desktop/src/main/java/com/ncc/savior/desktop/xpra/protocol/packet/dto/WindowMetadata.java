@@ -37,6 +37,10 @@ public class WindowMetadata {
 		return getBoolean("decorations", true);
 	}
 
+	public boolean getDecorations(boolean defaultValue) {
+		return getBoolean("decorations", defaultValue);
+	}
+
 	public int getPid() {
 		return getInt("pid");
 	}

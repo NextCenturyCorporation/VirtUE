@@ -25,4 +25,9 @@ public class FocusPacket extends WindowPacket {
 		list.add(super.windowId);
 	}
 
+	@Override
+	public String toString() {
+		return "FocusPacket [windowId=" + windowId + ", type=" + type + "]";
+	}
+
 }

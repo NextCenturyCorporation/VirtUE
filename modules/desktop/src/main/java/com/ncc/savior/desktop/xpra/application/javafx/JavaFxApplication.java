@@ -70,7 +70,6 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 
 	void init(NewWindowPacket packet) {
 		decorated = packet.getMetadata().getDecorations();
-
 		Group root = new Group();
 		anchor = new AnchorPane();
 		root.getChildren().add(anchor);
@@ -90,10 +89,7 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 				// if (packet instanceof NewWindowOverrideRedirectPacket) {
 				// style = StageStyle.TRANSPARENT;
 				// }
-				StageStyle style = meta.getDecorations() ? StageStyle.DECORATED : StageStyle.TRANSPARENT;
-				if (meta.getWindowType().contains("MENU")) {
-					style = StageStyle.TRANSPARENT;
-				}
+				StageStyle style = getStageStyle(meta);
 				stage = new Stage(style);
 
 				if (packet instanceof NewWindowOverrideRedirectPacket) {
@@ -157,7 +153,7 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 				if (newValue) {
 					onMinimized();
 				} else {
-					onRestored((int) 0, (int) 0, (int) scene.getWidth(), (int) scene.getHeight());
+					onRestored(getScreenX(), getScreenY(), (int) scene.getWidth(), (int) scene.getHeight());
 				}
 			}
 		});
@@ -176,13 +172,17 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 		stage.xProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int) scene.getHeight());
+				if (!stage.isIconified()) {
+					onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int) scene.getHeight());
+				}
 			}
 		});
 		stage.yProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int) scene.getHeight());
+				if (!stage.isIconified()) {
+					onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int) scene.getHeight());
+				}
 			}
 		});
 		scene.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -359,6 +359,17 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 
 	protected boolean isMoveResizing() {
 		return resizeBottom || resizeLeft || resizeRight || resizeTop || draggingApp;
+	}
+
+	private StageStyle getStageStyle(WindowMetadata meta) {
+		boolean defaultDecorations = true;
+		for (String type : meta.getWindowType()) {
+			if (noToolbarTypes.contains(type)) {
+				defaultDecorations = false;
+			}
+		}
+		StageStyle style = meta.getDecorations(defaultDecorations) ? StageStyle.DECORATED : StageStyle.TRANSPARENT;
+		return style;
 	}
 
 	@Override

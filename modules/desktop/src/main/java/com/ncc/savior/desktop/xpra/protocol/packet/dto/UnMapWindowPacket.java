@@ -25,4 +25,9 @@ public class UnMapWindowPacket extends WindowPacket {
 		list.add(windowId);
 	}
 
+	@Override
+	public String toString() {
+		return "UnMapWindowPacket [windowId=" + windowId + ", type=" + type + "]";
+	}
+
 }

@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.xpra.application;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,23 @@ public abstract class XpraApplication implements Closeable {
 	protected XpraWindowManager windowManager;
 	protected int baseWindowId;
 	protected boolean debugOutput;
+	protected static Set<String> noToolbarTypes;
+
+	static {
+		noToolbarTypes = new TreeSet<String>();
+		noToolbarTypes.add("MENU");
+		noToolbarTypes.add("SPLASHSCREEN");
+		noToolbarTypes.add("UTILITY");
+		noToolbarTypes.add("DOCK");
+		noToolbarTypes.add("DESKTOP");
+		noToolbarTypes.add("DROPDOWN_MENU");
+		noToolbarTypes.add("POPUP_MENU");
+		noToolbarTypes.add("TOOLTIP");
+		noToolbarTypes.add("NOTIFICATION");
+		noToolbarTypes.add("COMBO");
+		noToolbarTypes.add("DND");
+
+	}
 
 	public XpraApplication(XpraClient client, int baseWindowId) {
 		this.client = client;

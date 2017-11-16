@@ -35,7 +35,7 @@ public class OutputStreamPacketSender implements IPacketSender {
 
 	@Override
 	public synchronized void sendPacket(Packet packet) throws IOException {
-		// if (!packet.getType().equals(PacketType.PING)) {
+		// if (!packet.getType().equals(PacketType.PING_ECHO)) {
 		// if (!packet.getType().equals(PacketType.DAMAGE_SEQUENCE)) {
 		// if (!packet.getType().equals(PacketType.POINTER_POSITION)) {
 		// logger.debug("Send: " + packet);
