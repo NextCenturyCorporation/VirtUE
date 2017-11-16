@@ -114,4 +114,6 @@ public abstract class XpraApplication implements Closeable {
 	public abstract void initiateMoveResize(InitiateMoveResizePacket packet);
 
 	public abstract void setLocationSize(int x, int y, int width, int height);
+
+	public abstract void maximize();
 }

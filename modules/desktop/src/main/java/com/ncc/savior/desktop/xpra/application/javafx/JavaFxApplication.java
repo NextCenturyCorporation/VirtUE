@@ -26,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -291,6 +292,19 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 	}
 
 	@Override
+	public void maximize() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				stage.setIconified(false);
+				stage.setMaximized(true);
+				stage.setMaxHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				stage.setMinHeight(Screen.getPrimary().getVisualBounds().getHeight());
+			}
+		});
+	}
+
+	@Override
 	public void minimize() {
 		Platform.runLater(new Runnable() {
 			@Override
@@ -306,6 +320,7 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 			@Override
 			public void run() {
 				stage.setIconified(false);
+				stage.setMaximized(false);
 			}
 		});
 	}

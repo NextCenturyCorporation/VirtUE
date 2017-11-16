@@ -62,6 +62,10 @@ public class WindowMetadata {
 		return getBoolean("maximized");
 	}
 
+	public Boolean getMaximizedOrNull() {
+		return getBooleanOrNull("maximized");
+	}
+
 	public boolean getModal() {
 		return getBoolean("modal");
 	}
@@ -90,6 +94,10 @@ public class WindowMetadata {
 		return getBoolean("iconic");
 	}
 
+	public Boolean getIconicOrNull() {
+		return getBooleanOrNull("iconic");
+	}
+
 	private List<String> getStringList(String key) {
 		Object ret = metadata.get(key);
 		if (ret != null) {
@@ -112,6 +120,15 @@ public class WindowMetadata {
 
 	private boolean getBoolean(String key) {
 		return getBoolean(key, false);
+	}
+
+	private Boolean getBooleanOrNull(String key) {
+		Number num = (Number) metadata.get(key);
+		if (num == null) {
+			return null;
+		} else {
+			return num.intValue() > 0;
+		}
 	}
 
 	private boolean getBoolean(String key, boolean defaultValue) {

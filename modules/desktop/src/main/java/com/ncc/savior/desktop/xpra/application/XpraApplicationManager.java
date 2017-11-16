@@ -145,12 +145,22 @@ public abstract class XpraApplicationManager {
 	protected void onMetadatPacket(WindowMetadataPacket packet) {
 		WindowMetadata meta = packet.getMetadata();
 		XpraApplication app = applications.get(packet.getWindowId());
-		if (meta.getIconic()) {
-			app.minimize();
-		} else {
-			app.restore();
+		Boolean minimized = meta.getIconicOrNull();
+		if (minimized != null) {
+			if (minimized) {
+				app.minimize();
+			} else {
+				app.restore();
+			}
 		}
-
+		Boolean maximized = meta.getMaximizedOrNull();
+		if (maximized != null) {
+			if (maximized) {
+				app.maximize();
+			} else {
+				app.restore();
+			}
+		}
 	}
 
 	protected void onRaiseWindow(RaiseWindowPacket packet) {
