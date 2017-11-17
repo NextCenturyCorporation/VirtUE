@@ -5,3 +5,7 @@
 **/*~
 modules/*/build
 **/node_modules
+**/.terraform
+**/*.tfstate
+**/*.tfstate.backup
+/modules/ecosystem/directory-service/terraform.tfvars
