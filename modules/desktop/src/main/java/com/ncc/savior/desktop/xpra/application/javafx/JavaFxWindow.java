@@ -59,7 +59,6 @@ public class JavaFxWindow extends XpraWindow {
 		// packet.getMetadata().getParentId() + " "
 		// + packet.getType().toString() + " - "
 		// + packet.toString());
-
 		WindowMetadata metadata = packet.getMetadata();
 		title = metadata.getTitle();
 		type = metadata.getWindowType();

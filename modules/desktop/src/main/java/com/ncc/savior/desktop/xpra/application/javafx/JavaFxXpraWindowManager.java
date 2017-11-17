@@ -63,7 +63,6 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 	@Override
 	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
 		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyboard(), /* IFocusNotifier */this);
-
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {

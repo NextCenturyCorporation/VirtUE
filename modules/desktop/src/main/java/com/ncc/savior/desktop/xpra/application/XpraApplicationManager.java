@@ -37,7 +37,6 @@ public abstract class XpraApplicationManager {
 	protected XpraClient client;
 	protected Map<Integer, XpraApplication> applications;
 	protected Map<Integer, XpraApplication> windowIdsToApplications;
-	protected Map<String, XpraApplication> xidToApplication;
 	private boolean show = false;
 	private boolean setDebugOutput;
 
@@ -45,7 +44,6 @@ public abstract class XpraApplicationManager {
 		this.client = client;
 		this.applications = new HashMap<Integer, XpraApplication>();
 		this.windowIdsToApplications = new HashMap<Integer, XpraApplication>();
-		this.xidToApplication = new HashMap<String, XpraApplication>();
 		initPacketHandling();
 	}
 
@@ -66,8 +64,7 @@ public abstract class XpraApplicationManager {
 
 			@Override
 			public void handlePacket(Packet packet) {
-				// TODO We are using two methods of passing packets to the right instance and
-				// their uses is somewhat mixed. We may want to simplify.
+				// These are actions that need to be handled by the application, not the window.
 				switch (packet.getType()) {
 				case NEW_WINDOW:
 					NewWindowPacket p = (NewWindowPacket) packet;
@@ -110,6 +107,7 @@ public abstract class XpraApplicationManager {
 				default:
 
 				}
+				// these will be passed to their implementation of XpraWindow
 				if (packet instanceof WindowPacket) {
 					WindowPacket p = (WindowPacket) packet;
 					handleWindowPacket(p);
@@ -182,7 +180,6 @@ public abstract class XpraApplicationManager {
 		int baseWindowId = packet.getWindowId();
 		applications.put(baseWindowId, app);
 		windowIdsToApplications.put(baseWindowId, app);
-		xidToApplication.put(packet.getMetadata().getXid(), app);
 	}
 
 	protected void onModal(NewWindowPacket packet, XpraApplication parent) {
@@ -198,7 +195,6 @@ public abstract class XpraApplicationManager {
 		int baseWindowId = packet.getWindowId();
 		applications.put(baseWindowId, app);
 		windowIdsToApplications.put(baseWindowId, app);
-		xidToApplication.put(packet.getMetadata().getXid(), app);
 	}
 
 	protected void onNewWindowOverride(NewWindowOverrideRedirectPacket packet) {
@@ -206,7 +202,6 @@ public abstract class XpraApplicationManager {
 		XpraApplication parent = getParentApplication(packet.getWindowId(), packet.getMetadata());
 		if (parent != null) {
 			windowIdsToApplications.put(id, parent);
-			xidToApplication.put(packet.getMetadata().getXid(), parent);
 		} else {
 			onNewWindow(packet);
 		}
@@ -234,10 +229,6 @@ public abstract class XpraApplicationManager {
 
 	private XpraApplication getParentApplication(int windowId, WindowMetadata windowMetadata) {
 		XpraApplication parent = windowIdsToApplications.get(windowMetadata.getParentId());
-		if (parent == null) {
-			parent = xidToApplication.get(windowMetadata.getXid());
-			windowIdsToApplications.put(windowId, parent);
-		}
 		return parent;
 	}
 
