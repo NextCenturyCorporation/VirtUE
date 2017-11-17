@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+#wrapper { width: 100%; }
+#banner { background: $darkPurple; height: 34px;}
+nav ul {
+  margin: 0;
+  padding: 0;
+  li {
+    display: inline-block;
+    margin: 0;
+    &.active {
+      background-color: $royalPurple;
+    }
+    a {
+      color: $white;
+      display: block;
+      margin: 0;
+      padding: 0.65rem 2.4rem;
+
+    }
+  }
+}
+breadcrumbs {}

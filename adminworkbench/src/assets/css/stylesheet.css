@@ -1,3 +1,27 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+/* #1F2041 */
+/* #2E294E */
+/* #4B3F72 */
+/* #540D6E */
+/* #0D2C54 */
+/* #1B436F */
+/* #407097 */
+/* #3F99C0 */
+/* #0EAD69 */
+/* #7FB800 */
+/* #D7263D */
+/* #F6511D */
+/*#FFB400  */
+/* #FFD23F */
+/* #736F72 */
+/* #B2B2B2 */
+/* #9A8F97 */
+/* #C3BABA */
+/* #E9E3E6 */
+/* #FAFAFA */
+/* #3E3F4E */
+/* #000000 */
+/* FFFFFF */
 /**
  * MUI Colors module
  */
@@ -3303,4 +3327,43 @@ h4, h5, h6 {
   font-size: 14px;
   line-height: 18px;
   text-transform: uppercase;
+}
+
+/* line 1, ../scss/layout.scss */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* line 5, ../scss/layout.scss */
+#wrapper {
+  width: 100%;
+}
+
+/* line 6, ../scss/layout.scss */
+#banner {
+  background: #2e294e;
+  height: 34px;
+}
+
+/* line 7, ../scss/layout.scss */
+nav ul {
+  margin: 0;
+  padding: 0;
+}
+/* line 10, ../scss/layout.scss */
+nav ul li {
+  display: inline-block;
+  margin: 0;
+}
+/* line 13, ../scss/layout.scss */
+nav ul li.active {
+  background-color: #540d6e;
+}
+/* line 16, ../scss/layout.scss */
+nav ul li a {
+  color: white;
+  display: block;
+  margin: 0;
+  padding: 0.65rem 2.4rem;
 }

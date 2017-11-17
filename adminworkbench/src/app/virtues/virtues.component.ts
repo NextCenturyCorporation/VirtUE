@@ -1,10 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: 'app-virtues',
+  templateUrl: './virtues.component.html',
+  styleUrls: ['./virtues.component.css']
 })
-export class AppComponent {
-  title = 'Savior Adminstrator Workbench';
+export class VirtuesComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }
