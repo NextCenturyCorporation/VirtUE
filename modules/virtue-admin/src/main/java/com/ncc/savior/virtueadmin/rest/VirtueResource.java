@@ -25,8 +25,7 @@ public class VirtueResource {
 	{
 
 		List<Virtue> virtueList = new ArrayList<Virtue>();
-		
-		
+			
 		//Virtue 1
 		int id = 0x001;
 		String username = "Kyle Drumm"; 
