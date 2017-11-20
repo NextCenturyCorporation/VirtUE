@@ -5,6 +5,12 @@ import java.util.List;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
+/**
+ * {@link Packet} to tell the server or client the size and location of a given
+ * window.
+ *
+ *
+ */
 public class MapWindowPacket extends WindowPacket {
 	private int x;
 	private int y;
