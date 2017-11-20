@@ -98,7 +98,7 @@ public enum PacketType {
     SOUND_CONTROL("sound-control"),
     SHUTDOWN_SERVER("shutdown-server"),
     EXIT_SERVER("exit-server"),
-    DISCONNECT("disconnect"),
+    DISCONNECT("disconnect", DisconnectPacket.class),
 	SCREENSHOT("screenshot"),
 	UNKNOWN("UNKNOWN", UnknownPacket.class);
 	// @formatter:on

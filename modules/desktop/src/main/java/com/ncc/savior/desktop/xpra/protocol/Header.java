@@ -1,6 +1,6 @@
 package com.ncc.savior.desktop.xpra.protocol;
 
-import java.security.InvalidParameterException;
+import java.io.IOException;
 
 /**
  * The Xpra protocol sends Packets in one or more parts which contains a header
@@ -41,9 +41,9 @@ public class Header {
 	private final byte chunkIndex;
 	private final int size;
 
-	public Header(byte[] bytes) {
+	public Header(byte[] bytes) throws IOException {
 		if (bytes[0] != MAGIC_BYTE) {
-			throw new InvalidParameterException("Incorrect Magic Byte.  FirstByte=" + byteToString(bytes[0])
+			throw new IOException("Incorrect Magic Byte.  FirstByte=" + byteToString(bytes[0])
 					+ ", Expected=" + byteToString(MAGIC_BYTE));
 		}
 		// magicByte = bytes[0];
@@ -58,7 +58,8 @@ public class Header {
 		return Byte.toString(b) + "(" + String.format("%02X ", b) + ")";
 	}
 
-	public static Header createHeader(byte protocolFlags, byte compressionFlags, byte chunkIndex, long size) {
+	public static Header createHeader(byte protocolFlags, byte compressionFlags, byte chunkIndex, long size)
+			throws IOException {
 		byte[] bytes = new byte[HEADER_SIZE];
 		bytes[0] = MAGIC_BYTE;
 		bytes[1] = protocolFlags;

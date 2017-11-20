@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra.application;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
+import com.ncc.savior.desktop.xpra.protocol.packet.DisconnectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
@@ -103,6 +105,8 @@ public abstract class XpraApplicationManager {
 					break;
 				case UNMAP_WINDOW:
 					onUnMapWindow((UnMapWindowPacket) packet);
+				case DISCONNECT:
+					onDisconnect((DisconnectPacket) packet);
 					break;
 				default:
 
@@ -157,6 +161,17 @@ public abstract class XpraApplicationManager {
 				app.maximize();
 			} else {
 				app.unMaximize();
+			}
+		}
+	}
+
+	protected void onDisconnect(DisconnectPacket packet) {
+		client.close();
+		for (XpraApplication app : applications.values()) {
+			try {
+				app.close();
+			} catch (IOException e) {
+				logger.error("Error closing app=" + app);
 			}
 		}
 	}
