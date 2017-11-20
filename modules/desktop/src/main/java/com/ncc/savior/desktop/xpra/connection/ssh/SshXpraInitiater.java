@@ -13,6 +13,11 @@ import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.IXpraInitiator;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 
+/**
+ * Helper class that starts applications and controls Xpra over SSH.
+ *
+ *
+ */
 public class SshXpraInitiater implements IXpraInitiator {
 	private SshConnectionParameters params;
 
@@ -49,14 +54,14 @@ public class SshXpraInitiater implements IXpraInitiator {
 	}
 
 	@Override
-	public int startXpraServer() throws IOException {
+	public int startXpraServer(int display) throws IOException {
 		Session session = null;
 		ChannelExec channel = null;
-		int display = -1;
 		try {
 			session = getConnectedSession();
 			session.setTimeout(2000);
-			channel = getConnectedChannel("xpra start", session, null);
+			String command = (display > 0 ? "xpra start :" + display : "xpra start");
+			channel = getConnectedChannel(command, session, null);
 			InputStreamReader stream = new InputStreamReader(channel.getErrStream());
 			BufferedReader reader = new BufferedReader(stream);
 			String line;
@@ -67,7 +72,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 					String displayStr = line.substring(line.indexOf(prefix) + prefix.length());
 					display = Integer.parseInt(displayStr);
 				}
-				System.out.println(line);
+				// System.out.println(line);
 			}
 		} catch (JSchException | InterruptedException e) {
 			throw new IOException(e);
@@ -109,12 +114,12 @@ public class SshXpraInitiater implements IXpraInitiator {
 			session = getConnectedSession();
 			String fullCommand = "export DISPLAY=:" + display + ";" + command;
 			channel = getConnectedChannel(fullCommand, session, null);
-			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
-			BufferedReader reader = new BufferedReader(stream);
-			String line;
-			while ((line = reader.readLine()) != null) {
-				System.out.println(line);
-			}
+			// InputStreamReader stream = new InputStreamReader(channel.getInputStream());
+			// BufferedReader reader = new BufferedReader(stream);
+			// String line;
+			// while ((line = reader.readLine()) != null) {
+			// System.out.println(line);
+			// }
 		} catch (JSchException e) {
 			throw new IOException(e);
 		} finally {
@@ -133,9 +138,9 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private ChannelExec getConnectedChannel(String command, Session session, OutputStream out) throws JSchException {
 		ChannelExec channel = (ChannelExec) session.openChannel("exec");
 		channel.setCommand(command);
-		if (out != null) {
-			channel.setOutputStream(System.out);
-		}
+		// if (out != null) {
+		// channel.setOutputStream(System.out);
+		// }
 		channel.connect();
 		return channel;
 	}
@@ -167,7 +172,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		// displays = init.getXpraServers();
 		// System.out.println(displays);
 
-		int display = init.startXpraServer();
+		int display = init.startXpraServer(8);
 		System.out.println("started on " + display);
 
 		displays = init.getXpraServers();

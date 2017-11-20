@@ -66,7 +66,7 @@ public class JavaFxTestRunner extends Application {
 			}
 		});
 		client.connect(new SshConnectionFactory(),
-				new SshConnectionFactory.SshConnectionParameters("localhost", 22, "root", "password"));
+				new SshConnectionFactory.SshConnectionParameters("localhost", 23, "user", "password"));
 	}
 
 }

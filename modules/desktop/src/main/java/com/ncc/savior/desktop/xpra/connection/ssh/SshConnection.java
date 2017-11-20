@@ -13,6 +13,11 @@ import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.BaseConnection;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 
+/**
+ * Xpra connection implemented via SSH
+ *
+ *
+ */
 public class SshConnection extends BaseConnection {
 	private static final Logger logger = LoggerFactory.getLogger(SshConnection.class);
 

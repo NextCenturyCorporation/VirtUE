@@ -13,6 +13,11 @@ import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.IConnection;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 
+/**
+ * Factory class to create a {@link IConnection} using SSH.
+ *
+ *
+ */
 public class SshConnectionFactory extends BaseConnectionFactory {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(SshConnectionFactory.class);
@@ -45,6 +50,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 				session.connect();
 				ChannelExec channel = (ChannelExec) session.openChannel("exec");
 				String command = getCommand(commandDir, commandName, commandMode, display);
+				// logger.debug("connecting with command=" + command);
 				channel.setCommand(command);
 				channel.connect();
 				return new SshConnection(p, session, channel);
@@ -97,5 +103,10 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			return "SshConnectionParameters [port=" + port + ", host=" + host + ", user=" + user + ", password="
 					+ password + "]";
 		}
+	}
+
+	@Override
+	public int getDisplay() {
+		return display;
 	}
 }
