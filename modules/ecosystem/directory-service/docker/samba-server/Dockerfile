@@ -19,9 +19,12 @@ RUN yum -y update && \
 	yum -y install \
 		samba samba-dc \
 		krb5-server-ldap krb5-workstation \
+		bind-utils \
+		iproute \
 		procps-ng && \
 	yum clean all
 # Need procps-ng for ps command; can remove for production version.
+# iproute provides ip command; can remove for production version.
 RUN rm -rf /etc/samba/smb.conf /etc/krb5.conf /var/lib/samba/*
 
 ADD init-or-run-samba.sh /usr/local/sbin/init-or-run-samba
