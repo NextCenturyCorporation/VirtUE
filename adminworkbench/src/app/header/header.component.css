@@ -31,13 +31,3 @@ nav li a {
   padding: 0.65rem 2.4rem;
 
 }
-#breadcrumb {
-  clear: both;
-  display: block;
-  height: 24px;
-  margin:0;
-  padding: 0.65rem 1.5rem;
-}
-#breadcrumb span {
-  font-size: 1.1rem;
-}
