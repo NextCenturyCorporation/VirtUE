@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * Used to control and get status of xpra servers.
+ * Used to control and get status of xpra servers as well as start applications
+ * on a given Xpra display.
  *
  */
 public interface IXpraInitiator {

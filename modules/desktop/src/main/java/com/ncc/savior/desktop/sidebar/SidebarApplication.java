@@ -5,6 +5,12 @@ import com.ncc.savior.desktop.virtues.VirtueService;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+/**
+ * This is the main class to start just the sidebar application. This should be
+ * used only for testing.
+ *
+ *
+ */
 public class SidebarApplication extends Application {
 	public static void main(String[] args) {
 		launch(args);
@@ -16,6 +22,5 @@ public class SidebarApplication extends Application {
 		sidebar.start(primaryStage);
 
 	}
-
 
 }

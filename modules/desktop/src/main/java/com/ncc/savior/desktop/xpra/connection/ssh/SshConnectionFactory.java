@@ -13,6 +13,11 @@ import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.IConnection;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 
+/**
+ * Factory class to create a {@link IConnection} using SSH.
+ *
+ *
+ */
 public class SshConnectionFactory extends BaseConnectionFactory {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(SshConnectionFactory.class);

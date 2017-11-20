@@ -13,6 +13,11 @@ import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.IXpraInitiator;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 
+/**
+ * Helper class that starts applications and controls Xpra over SSH.
+ *
+ *
+ */
 public class SshXpraInitiater implements IXpraInitiator {
 	private SshConnectionParameters params;
 

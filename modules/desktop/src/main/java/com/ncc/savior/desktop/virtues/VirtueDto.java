@@ -3,6 +3,11 @@ package com.ncc.savior.desktop.virtues;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data Transfer Object (DTO) for a virtue.
+ *
+ *
+ */
 public class VirtueDto {
 	private String name;
 	private List<VirtueAppDto> apps;

@@ -31,7 +31,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+/**
+ * Class to start the utility sidebar of the Savior application
+ *
+ *
+ */
 public class Sidebar {
+	private static final int ICON_SIZE = 32;
 	private boolean debug = false;
 	private BorderStroke paneDebugStroke = new BorderStroke(Color.RED, BorderStrokeStyle.DOTTED, new CornerRadii(0),
 			new BorderWidths(2));
@@ -157,8 +163,8 @@ public class Sidebar {
 	private Node getLabel() {
 		Image image = new Image("images/saviorLogo.png");
 		ImageView view = new ImageView(image);
-		view.setFitWidth(32);
-		view.setFitHeight(32);
+		view.setFitWidth(ICON_SIZE);
+		view.setFitHeight(ICON_SIZE);
 		Label label = new Label("Savior VirtUE Desktop", view);
 		label.setPrefWidth(width);
 		label.setAlignment(Pos.CENTER);

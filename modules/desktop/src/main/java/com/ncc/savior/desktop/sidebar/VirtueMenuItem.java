@@ -31,6 +31,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.stage.WindowEvent;
 
+/**
+ * This represents a Virtue in the sidebar menu. It controls the sub menu when
+ * the virtue is selected.
+ *
+ *
+ */
 public class VirtueMenuItem {
 	@SuppressWarnings("unused")
 	private static Logger logger = LoggerFactory.getLogger(VirtueMenuItem.class);
