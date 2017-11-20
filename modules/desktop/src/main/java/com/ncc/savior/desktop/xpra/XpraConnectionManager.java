@@ -19,6 +19,7 @@ import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory.TcpConnectionParameters;
 
 public class XpraConnectionManager {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(XpraConnectionManager.class);
 	private HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory> connectionFactoryMap;
 	private HashMap<IConnectionParameters, XpraClient> activeClientsMap;
@@ -61,24 +62,19 @@ public class XpraConnectionManager {
 		return activeClientsMap.get(params);
 	}
 
-	public XpraClient createClient(IConnectionParameters params) {
+	public XpraClient createClient(IConnectionParameters params) throws IOException {
 		// logger.debug("creating client with params=" + params);
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
-			try {
-				IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
-				Set<Integer> servers = init.getXpraServers();
-				// logger.debug("displays: " + servers);
-				if (!servers.contains(factory.getDisplay())) {
-					// logger.debug("starting Xpra Display on " + factory.getDisplay());
-					init.startXpraServer(factory.getDisplay());
-					// logger.debug("Display " + d + " started");
-				}
-			} catch (IOException e) {
-				// TODO do somehting smart
-				// logger.error("Error trying to initiate Xpra", e);
+			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
+			Set<Integer> servers = init.getXpraServers();
+			// logger.debug("displays: " + servers);
+			if (!servers.contains(factory.getDisplay())) {
+				// logger.debug("starting Xpra Display on " + factory.getDisplay());
+				init.startXpraServer(factory.getDisplay());
+				// logger.debug("Display " + d + " started");
 			}
 		}
 
@@ -92,31 +88,24 @@ public class XpraConnectionManager {
 		return client;
 	}
 
-	public void startApplication(IConnectionParameters params, String startCommand) {
+	public void startApplication(IConnectionParameters params, String startCommand) throws IOException {
 		// logger.debug("starting application with command=" + startCommand + " params="
 		// + params);
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
-			try {
-				IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
-				Set<Integer> servers = init.getXpraServers();
-				// logger.debug("displays: " + servers);
-				int display;
-				if (!servers.isEmpty()) {
-					display = servers.iterator().next();
-					// logger.debug("starting application on display=" + display + " command=" +
-					// startCommand);
-					init.startXpraApp(display, startCommand);
-				} else {
-					// TODO error?
-				}
-
-			} catch (IOException e) {
-				// TODO do somehting smart
-				logger.error("Error trying to initiate Xpra", e);
+			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
+			Set<Integer> servers = init.getXpraServers();
+			// logger.debug("displays: " + servers);
+			int display;
+			if (!servers.isEmpty()) {
+				display = servers.iterator().next();
+				// logger.debug("starting application on display=" + display + " command=" +
+				// startCommand);
+				init.startXpraApp(display, startCommand);
+			} else {
+				throw new IOException("Error getting starting and getting display from Xpra.");
 			}
 		}
-
 	}
 
 }

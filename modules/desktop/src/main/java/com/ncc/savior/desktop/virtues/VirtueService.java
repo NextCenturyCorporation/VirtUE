@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.virtues;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class VirtueService {
 		this.connectionManager = new XpraConnectionManager(new JavaFxApplicationManagerFactory(keyboard));
 	}
 
-	public void connectAndStartApp(VirtueAppDto app) {
+	public void connectAndStartApp(VirtueAppDto app) throws IOException {
 		IConnectionParameters params = app.getConnectionParams();
 		// Do we have an existing client/connection for this params? If so, start a new
 		// app and be done with it.
@@ -47,13 +48,17 @@ public class VirtueService {
 
 		SshConnectionParameters sshConParam1 = new SshConnectionFactory.SshConnectionParameters("localhost", 22, "user",
 				"password");
+		SshConnectionParameters sshBadConParam = new SshConnectionFactory.SshConnectionParameters("badhost", 8000,
+				"user",
+				"password");
 
 		virtue.add(new VirtueDto("Web Browsers (SSH)", new VirtueAppDto("Chrome", "", "google-chrome", sshConParam1),
 				new VirtueAppDto("Firefox", "", "firefox", sshConParam1)));
 
 		virtue.add(new VirtueDto("Other (SSH)", new VirtueAppDto("GEdit", "", "gedit", sshConParam1),
 				new VirtueAppDto("Calculator", "", "gnome-calculator", sshConParam1),
-				new VirtueAppDto("Terminal", "", "gnome-terminal", sshConParam1)));
+				new VirtueAppDto("Terminal", "", "gnome-terminal", sshConParam1),
+				new VirtueAppDto("Error App", "", "error", sshBadConParam)));
 
 		// virtue.add(new VirtueDto("Microsoft Office", new VirtueAppDto("Word", ""),
 		// new VirtueAppDto("Excel", ""),
