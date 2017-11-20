@@ -1,0 +1,188 @@
+/* line 1, ../scss/layout.scss */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* line 5, ../scss/layout.scss */
+a {
+  color: #407097;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* line 10, ../scss/layout.scss */
+a:hover {
+  text-decoration: underline;
+}
+
+/* line 13, ../scss/layout.scss */
+#wrapper {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+/* line 14, ../scss/layout.scss */
+header {
+  background: #2e294e;
+  display: block;
+  height: 34px;
+  margin-bottom: 50px;
+}
+
+/* line 15, ../scss/layout.scss */
+content {
+  display: block;
+  margin: 4rem 1.6rem;
+  position: relative;
+}
+
+/* line 16, ../scss/layout.scss */
+#content-header {
+  position: relative;
+}
+
+/* line 18, ../scss/layout.scss */
+.border-top {
+  border-top: 1px solid #B2B2B2;
+}
+
+/* line 21, ../scss/layout.scss */
+.border-right {
+  border-right: 1px solid #B2B2B2;
+}
+
+/* line 24, ../scss/layout.scss */
+.border-bottom {
+  border-bottom: 1px solid #B2B2B2;
+}
+
+/* line 27, ../scss/layout.scss */
+.border-left {
+  border-left: 1px solid #B2B2B2;
+}
+
+/* line 30, ../scss/layout.scss */
+.padding-left-0 {
+  padding-left: 0;
+}
+
+/* line 33, ../scss/layout.scss */
+.padding-left-5 {
+  padding-left: 5px;
+}
+
+/* line 36, ../scss/layout.scss */
+.padding-left-10 {
+  padding-left: 10px;
+}
+
+/* line 39, ../scss/layout.scss */
+.padding-left-15 {
+  padding-left: 15px;
+}
+
+/* line 42, ../scss/layout.scss */
+.padding-left-20 {
+  padding-left: 20px;
+}
+
+/* line 45, ../scss/layout.scss */
+.padding-right-0 {
+  padding-right: 0;
+}
+
+/* line 48, ../scss/layout.scss */
+.padding-right-5 {
+  padding-right: 5px;
+}
+
+/* line 51, ../scss/layout.scss */
+.padding-right-10 {
+  padding-right: 10px;
+}
+
+/* line 54, ../scss/layout.scss */
+.padding-right-15 {
+  padding-right: 15px;
+}
+
+/* line 57, ../scss/layout.scss */
+.padding-right-20 {
+  padding-right: 20px;
+}
+
+/* line 61, ../scss/layout.scss */
+.clearfix {
+  content: ' ';
+  clear: both;
+  display: block;
+  height: 1px;
+}
+
+/* line 67, ../scss/layout.scss */
+.table-container {
+  display: table;
+  margin: 1rem 0 1rem;
+  padding: 0;
+  width: 100%;
+}
+
+/* line 74, ../scss/layout.scss */
+.table-header-row {
+  background-color: #E9E3E6;
+  display: table-row;
+}
+
+/* line 78, ../scss/layout.scss */
+.table-header {
+  display: inline-block;
+  font-weight: 600;
+  padding: 0.65rem;
+}
+
+/* line 83, ../scss/layout.scss */
+.table-row {
+  border-bottom: 1px solid #B2B2B2;
+  display: block;
+}
+
+/* line 87, ../scss/layout.scss */
+.table-cell {
+  display: inline-block;
+  font-weight: normal;
+  padding: 0.65rem;
+}
+
+/* line 92, ../scss/layout.scss */
+.paging {
+  font-size: 1.2rem;
+}
+
+/* line 95, ../scss/layout.scss */
+.paging .page-number {
+  text-align: left;
+}
+
+/* line 98, ../scss/layout.scss */
+.paging .page-controls {
+  text-align: center;
+}
+
+/* line 101, ../scss/layout.scss */
+.paging .page-item-total {
+  text-align: right;
+}
+
+/* line 105, ../scss/layout.scss */
+footer {
+  background: #e9e3e6;
+  display: block;
+  height: 34px;
+  margin-top: 50px;
+  padding: 1rem 1.2rem 0;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
