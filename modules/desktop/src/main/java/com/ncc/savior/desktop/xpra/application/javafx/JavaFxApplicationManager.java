@@ -11,7 +11,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 
 import javafx.application.Platform;
-import javafx.stage.Stage;
 
 /**
  * JavaFX Application manager keeps track of and controls
@@ -26,7 +25,7 @@ public class JavaFxApplicationManager extends XpraApplicationManager {
 	private static final Logger logger = LoggerFactory.getLogger(JavaFxApplicationManager.class);
 
 
-	public JavaFxApplicationManager(XpraClient client, Stage stage, JavaFxKeyboard keyboard) {
+	public JavaFxApplicationManager(XpraClient client, JavaFxKeyboard keyboard) {
 		super(client);
 		client.setKeyboard(keyboard);
 	}

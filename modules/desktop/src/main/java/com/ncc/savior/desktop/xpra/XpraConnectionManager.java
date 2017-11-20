@@ -7,7 +7,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplicationManager;
+import com.ncc.savior.desktop.xpra.application.XpraApplicationManager;
 import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.IXpraInitiator;
@@ -17,23 +17,23 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory.TcpConnectionParameters;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
 
-//TODO review JavaFX specific code here.
 public class XpraConnectionManager {
 	private static final Logger logger = LoggerFactory.getLogger(XpraConnectionManager.class);
 	private HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory> connectionFactoryMap;
 	private HashMap<IConnectionParameters, XpraClient> activeClientsMap;
-	private JavaFxKeyboard keyboard;
 	private HashMap<Class<? extends IConnectionParameters>, IXpraInitiator.IXpraInitatorFactory> initiaterMap;
+	private HashMap<IConnectionParameters, XpraApplicationManager> activeAppManagers;
+	private IApplicationManagerFactory applicationManagerFactory;
 
-	public XpraConnectionManager() {
-
+	public XpraConnectionManager(IApplicationManagerFactory appManagerFactory) {
+		this.applicationManagerFactory = appManagerFactory;
 		connectionFactoryMap = new HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory>();
+		// Set values by config?
 		connectionFactoryMap.put(TcpConnectionParameters.class, new TcpConnectionFactory());
 		connectionFactoryMap.put(SshConnectionParameters.class, new SshConnectionFactory());
 		initiaterMap = new HashMap<Class<? extends IConnectionParameters>, IXpraInitiator.IXpraInitatorFactory>();
+
 		initiaterMap.put(SshConnectionParameters.class, new IXpraInitiator.IXpraInitatorFactory() {
 
 			@Override
@@ -47,7 +47,7 @@ public class XpraConnectionManager {
 			}
 		});
 		activeClientsMap = new HashMap<IConnectionParameters, XpraClient>();
-		this.keyboard = new JavaFxKeyboard(new XpraKeyMap());
+		activeAppManagers = new HashMap<IConnectionParameters, XpraApplicationManager>();
 	}
 
 	/**
@@ -82,14 +82,12 @@ public class XpraConnectionManager {
 			}
 		}
 
-		// TODO the fact that i need to create a new JavaFxApplicationManager, but then
-		// never use it is probably an indication of an architectural problem. Think
-		// further about this.
-		@SuppressWarnings("unused")
-		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, null, keyboard);
+		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client);
+
 		client.connect(factory, params);
 		// logger.debug("Client connected with params" + params);
 		activeClientsMap.put(params, client);
+		activeAppManagers.put(params, applicationManager);
 
 		return client;
 	}

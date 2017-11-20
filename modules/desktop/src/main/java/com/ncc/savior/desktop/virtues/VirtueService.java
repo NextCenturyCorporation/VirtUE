@@ -6,17 +6,21 @@ import java.util.List;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.XpraClient.Status;
 import com.ncc.savior.desktop.xpra.XpraConnectionManager;
+import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
 
 public class VirtueService {
 	private XpraConnectionManager connectionManager;
 
 	public VirtueService() {
 		// TODO should be dependency injected
-		this.connectionManager = new XpraConnectionManager();
+		JavaFxKeyboard keyboard = new JavaFxKeyboard(new XpraKeyMap());
+		this.connectionManager = new XpraConnectionManager(new JavaFxApplicationManagerFactory(keyboard));
 	}
 
 	public void connectAndStartApp(VirtueAppDto app) {

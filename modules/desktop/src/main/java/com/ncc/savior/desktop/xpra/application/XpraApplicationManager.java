@@ -32,6 +32,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
  * created by the connection. Most connections will have a single application,
  * but some applications (browsers for example), can open many OS windows.
  *
+ *
  */
 public abstract class XpraApplicationManager {
 	@SuppressWarnings("unused")

@@ -157,12 +157,6 @@ public class XpraClient implements Closeable {
 		}
 	}
 
-	// TODO do we need both sendPAcket method and getPacketSEnder()? Which is
-	// better?
-	public void sendPacket(Packet packet) throws IOException {
-		this.packetSender.sendPacket(packet);
-	}
-
 	public IPacketSender getPacketSender() {
 		return packetSender;
 	}
