@@ -64,7 +64,7 @@ public class XpraClient {
 
 			@Override
 			public void handlePacket(Packet packet) {
-				logger.debug("Recieved Hello Packet=" + packet);
+				// logger.debug("Recieved Hello Packet=" + packet);
 				SetDeflatePacket sendPacket = new SetDeflatePacket(3);
 				try {
 					packetSender.sendPacket(sendPacket);
@@ -158,12 +158,12 @@ public class XpraClient {
 					}
 				}
 			};
-			Thread thread = new Thread(runnable);
+			Thread thread = new Thread(runnable, "PacketReader");
 
 			HelloPacket helloPacket = HelloPacket.createDefaultRequest();
 			helloPacket.setKeyMap(keyboard.getKeyMap());
 			packetSender.sendPacket(helloPacket);
-			logger.debug("Sent hello packet=" + helloPacket);
+			// logger.debug("Sent hello packet=" + helloPacket);
 			// packetSender.sendPacket(new SetDeflatePacket(3));
 			thread.start();
 		} catch (IOException e) {
