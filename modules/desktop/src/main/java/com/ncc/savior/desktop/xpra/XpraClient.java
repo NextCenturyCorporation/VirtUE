@@ -162,6 +162,7 @@ public class XpraClient implements Closeable {
 	}
 
 	private void onIoException(IOException e) {
+		logger.error("Error with Xpra connection", e);
 		close();
 	}
 
