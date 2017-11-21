@@ -27,7 +27,8 @@ RUN yum -y update && \
 # iproute provides ip command; can remove for production version.
 RUN rm -rf /etc/samba/smb.conf /etc/krb5.conf /var/lib/samba/*
 
-ADD init-or-run-samba.sh /usr/local/sbin/init-or-run-samba
+COPY init-or-run-samba.sh /usr/local/sbin/init-or-run-samba
 
 ENTRYPOINT ["/usr/local/sbin/init-or-run-samba"]
 
+# TODO: add winbind support

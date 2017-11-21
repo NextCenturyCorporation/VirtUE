@@ -8,4 +8,4 @@ modules/*/build
 **/.terraform
 **/*.tfstate
 **/*.tfstate.backup
-/modules/ecosystem/directory-service/terraform.tfvars
+/modules/ecosystem/directory-service/secrets.auto.tfvars

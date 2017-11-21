@@ -15,6 +15,14 @@ variable "sambaDomain" {
   default = "SAVIOR.NEXTCENTURY.COM"
 }
 
+variable "SAMBA_CONFIG_DIR" {
+  description = "Location of samba configuration files on host"
+}
+
+variable "DNS_SERVER" {
+  description = "IP address of DNS server the host uses, and therefore the AD DS forward to use"
+}
+
 resource "docker_container" "samba-server" {
   entrypoint = [ "/sbin/init" ]
   name = "saviordc"
@@ -22,19 +30,20 @@ resource "docker_container" "samba-server" {
   hostname = "saviordc"
   domainname = "${var.sambaDomain}"
   networks = ["savior_network"]
-  dns_search = [ "${var.sambaDomain}" ]
   dns = [ "127.0.0.1" ]
+  dns_search = [ "${var.sambaDomain}" ]
   # Need privileged for the xattr that samba needs to work
   privileged = true
   must_run = true
   env = [
 	"SAMBA_REALM=${var.sambaDomain}",
-	"SAMBA_ADMIN_PASSWORD=${var.sambaAdminPassword}"
+	"SAMBA_ADMIN_PASSWORD=${var.sambaAdminPassword}",
+	"SAMBA_DNS=${var.DNS_SERVER}",
   ]
-#  volumes {
-#	host_path = "${path.cwd}/samba-config"
-#	container_path = "/var/lib/samba"
-#  }
+  volumes {
+	host_path = "${var.SAMBA_CONFIG_DIR}"
+	container_path = "/var/lib/samba"
+  }
   publish_all_ports = true
   ports {
 	internal = 135
