@@ -5,6 +5,7 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './edit-virtue.component.html',
   styleUrls: ['./edit-virtue.component.css']
 })
+
 export class EditVirtueComponent implements OnInit {
 
   constructor() { }

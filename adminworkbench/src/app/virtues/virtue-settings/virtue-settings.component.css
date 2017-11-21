@@ -1,0 +1,37 @@
+
+.mui-tabs__bar {
+  background: transparent;
+  box-sizing: border-box;
+  padding: 0;
+}
+.mui-tabs__bar > li {
+  background: #C3BABA;;
+  border: none;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+.mui-tabs__bar > li.mui--is-active {
+  background: #FFF;
+  border-left: 1px solid #C3BABA;
+  border-top: 1px solid #C3BABA;
+  border-right: 1px solid #C3BABA;
+  border-bottom: 1px solid #FFF;
+}
+.mui-tabs__bar > li > a {
+  color: #3E3F4E;
+  cursor: pointer;
+  height: 32px;
+  line-height: 32px;
+  text-transform: capitalize;
+}
+.mui-tabs__bar li a:hover {
+  text-decoration: underline;
+}
+.mui-tabs__pane {
+  background: #FFF;
+  border-top:1px solid #C3BABA;
+  margin-top: -2px;
+}
+.tab_pane_content {
+  padding: 1.5rem;
+}

@@ -11,12 +11,16 @@ a:hover {
   text-decoration: underline;
 }
 h1 {
+  font-family: 'Raleway-bold';
   font-size: 2.8rem;
-  font-weight: bold;
 }
 h2 {
+  font-family: 'Raleway-semibold';
   font-size: 2.4rem;
-  font-weight: bold;
+}
+h3 {
+  font-family: 'Raleway-semibold';
+  font-size: 2.2rem;
 }
 #wrapper { width: 100%; height: 100vh; position: relative; }
 /* Header Global CSS */
@@ -28,7 +32,7 @@ breadcrumb {
   padding-bottom: 1.2rem;
   ol {
     list-style-type: none;
-    margin-left: 1.5rem;
+    margin-left: 2rem;
     padding: 0;
   }
   li {
@@ -46,7 +50,6 @@ breadcrumb {
 form {
   clear: both;
   display: block;
-  margin-top: 1rem;
 }
 form:after {
   clear: both;
@@ -68,7 +71,15 @@ input {
   width: inherit;
 }
 /* Content Global CSS */
-content { display: block; margin: 4rem 1.6rem; position: relative; }
+content {
+  display: block;
+  margin: 4rem 0;
+  position: relative;
+}
+content #content {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
 #content-header { position: relative;}
 .border-top {
   border-top: 1px solid #B2B2B2;
