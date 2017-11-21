@@ -8,14 +8,12 @@ resource "docker_container" "client-image" {
   domainname = "${docker_container.samba-server.domainname}"
   networks = ["savior_network"]
   command = ["/sbin/init"]
-  env = [
-	"SAMBA_REALM=${docker_container.samba-server.domainname}",
-  ]
   dns = [ "${docker_container.samba-server.ip_address}" ]
   dns_search = [ "${docker_container.samba-server.domainname}" ]
-  links = [ "${docker_container.samba-server.name}" ]
-  host {
-	host = "${docker_container.samba-server.name}.${docker_container.samba-server.domainname}"
-	ip = "${docker_container.samba-server.ip_address}"
+
+  # This avoids having to put the admin password in an environment
+  # variable or file or something accessible w/in the container.
+  provisioner "local-exec" {
+	command = "docker exec client1 net ads join -U administrator%${var.sambaAdminPassword}"
   }
 }

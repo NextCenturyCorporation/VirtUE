@@ -1,15 +1,6 @@
 # Start a samba domain controller
 #
 
-provider "docker" {
-  version = "~> 0.1"
-}
-
-variable "sambaAdminPassword" {
-  # Set this in terraform.tfvars and it will get automatically included
-  description = "Administrator for AD DC"
-}
-
 variable "sambaDomain" {
   description = "Domain name"
   default = "SAVIOR.NEXTCENTURY.COM"
@@ -24,12 +15,14 @@ variable "DNS_SERVER" {
 }
 
 resource "docker_container" "samba-server" {
-  entrypoint = [ "/sbin/init" ]
+  # to prevent samba configuration on startup, uncomment the following line
+  #entrypoint = [ "/sbin/init" ]
   name = "saviordc"
   image = "samba-savior"
   hostname = "saviordc"
   domainname = "${var.sambaDomain}"
   networks = ["savior_network"]
+  # need to use the AD DNS as the primary one
   dns = [ "127.0.0.1" ]
   dns_search = [ "${var.sambaDomain}" ]
   # Need privileged for the xattr that samba needs to work
