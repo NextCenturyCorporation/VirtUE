@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra.connection.ssh;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
@@ -74,12 +75,22 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 		private final String host;
 		private final String user;
 		private final String password;
+		private final File pem;
 
 		public SshConnectionParameters(String host, int port, String user, String password) {
 			this.host = host;
 			this.port = port;
 			this.user = user;
 			this.password = password;
+			this.pem = null;
+		}
+
+		public SshConnectionParameters(String host, int port, String user, File pem) {
+			this.host = host;
+			this.port = port;
+			this.pem = pem;
+			this.user = user;
+			this.password = null;
 		}
 
 		public int getPort() {
@@ -98,10 +109,14 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			return password;
 		}
 
+		public File getPem() {
+			return pem;
+		}
+
 		@Override
 		public String toString() {
 			return "SshConnectionParameters [port=" + port + ", host=" + host + ", user=" + user + ", password="
-					+ password + "]";
+					+ password + ", pem=" + pem + "]";
 		}
 	}
 
