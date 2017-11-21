@@ -1,0 +1,48 @@
+.virtue-titlebar {
+  clear: both;
+  display: block;
+  min-height:1rem;
+}
+.virtue-titlebar:after {
+  clear: both;
+  content: ' ';
+  display: block;
+  height: 1px;
+}
+.virtue-titlebar .virtue-title {
+  float: left;
+  margin: 0;
+}
+.virtue-titlebar .virtue-button {
+  background-color: #E9E3E6;
+  border: 1px solid #B2B2B2;
+  border-radius: 0;
+  display: block;
+  float: left;
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.virtue-form {
+  margin-top: 1.5rem;
+  padding: 1.5rem 0 1rem;
+}
+.virtue-form p {
+  display: block;
+  margin: 1rem 0;
+}
+
+.virtue-options {
+  display: block;
+  font-size: 1.1rem;
+  clear: both;
+}
+
+.virtue-settings {
+  background-color: #FAFAFA;
+  position: relative;
+  resize: horizontal;
+}
+.virtue-settings #handle {
+
+}

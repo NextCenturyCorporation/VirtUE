@@ -71,7 +71,7 @@ public class XpraClient implements Closeable {
 
 			@Override
 			public void handlePacket(Packet packet) {
-				// logger.debug("Recieved Hello Packet=" + packet);
+				logger.debug("Received Hello Packet=" + packet);
 				SetDeflatePacket sendPacket = new SetDeflatePacket(3);
 				try {
 					packetSender.sendPacket(sendPacket);
@@ -148,7 +148,7 @@ public class XpraClient implements Closeable {
 			HelloPacket helloPacket = HelloPacket.createDefaultRequest();
 			helloPacket.setKeyMap(keyboard.getKeyMap());
 			packetSender.sendPacket(helloPacket);
-			// logger.debug("Sent hello packet=" + helloPacket);
+			logger.debug("Sent hello packet=" + helloPacket);
 			// packetSender.sendPacket(new SetDeflatePacket(3));
 			thread.setDaemon(true);
 			thread.start();

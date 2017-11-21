@@ -1,0 +1,87 @@
+<div id="content-container">
+  <div id="content-header" class="virtue-titlebar">
+    <h1 class="virtue-title">Edit Virtue</h1>
+    <button class="virtue-button" disabled>Disable Virtue</button>
+  </div>
+
+  <div id="content-main">
+    <form class="border-top">
+      <div class="mui-col-md-8 padding-left-0 padding-right-20">
+
+      <div id="content" class="virtue-content">
+        <div class="form-item">
+          <input type="text" id="virtue-name" value="" placeholder="Virtue Name" />
+        </div>
+        <div class="virtue-titlebar">
+          <h2 class="virtue-title">Virtual Machines</h2>
+          <button class="virtue-button">Add VM</button>
+        </div>
+        <!-- if there are no virtue, show this message -->
+        <div class="table-container">
+          <div class="table-row">
+            <div class="table-cell border-top mui-col-md-12">
+              <p>No virtual machines have been added at this time. To add VM(s), click on the button "Add VM.</p>
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+        <!-- if there are virtue machines, show this list -->
+        <div class="table-container">
+          <div class="table-header-row">
+            <div class="table-header mui-col-md-5">Virtual Machine</div>
+            <div class="table-header mui-col-md-2">Image Size</div>
+            <div class="table-header mui-col-md-5">Applications</div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell mui-col-md-5">
+              <a href="#">Virtual Machine</a>
+              <!-- if this virtue is enabled show this menu -->
+              <span class="active virtue-options">Edit | Disable</span>
+
+              <!-- if this virtue is disabled show this menu -->
+              <span class="active virtue-options">Edit | Remove</span>
+            </div>
+            <div class="table-cell mui-col-md-2"># mb</div>
+            <div class="table-cell mui-col-md-5">List of Apps</div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+        <div class="paging">
+          <div class="page-number mui-col-md-4 padding-left-0">&nbsp;</div>
+          <div class="page-controls mui-col-md-4">&nbsp;</div>
+          <div class="page-item-total mui-col-md-4 padding-right-0"># Virtual Machine(s)</div>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+    </div>
+    <div id="settings" class="virtue-settings mui-col-md-4">
+      <div id="handle"></div>
+      <div class="virtue-titlebar">
+        <h3> Virtue Settings</h3>
+        <ul class="mui-tabs__bar">
+          <li class="mui--is-active"><a data-mui-toggle="tab" data-mui-controls="general">General</a></li>
+          <li><a data-mui-toggle="tab" data-mui-controls="network">Network</a></li>
+          <li><a data-mui-toggle="tab" data-mui-controls="resources">Resources</a></li>
+          <li><a data-mui-toggle="tab" data-mui-controls="sensors">Sensors</a></li>
+        </ul>
+        <div class="mui-tabs__pane mui--is-active" id="general">General settings stuff go there</div>
+        <div class="mui-tabs__pane" id="network">Network settings stuff go there</div>
+        <div class="mui-tabs__pane" id="resources">Resources settings stuff go there</div>
+        <div class="mui-tabs__pane" id="sensors">Sensors settings stuff go there</div>
+        <script>
+          var paneIds = ['general', 'network', 'resources', 'sensors'],
+              currPos = 0;
+
+          function activateNext() {
+            // increment id
+            currPos = (currPos + 1) % paneIds.length;
+
+            // activate tab
+            mui.tabs.activate(paneIds[currPos]);
+          }
+        </script>
+      </div>
+    </div>
+    </form>
+  </div>
+</div>

@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="virtues-titlebar">
     <h1 class="virtues-page-title">Virtues</h1>
-    <button class="virtues-button">Create New</button>
+    <button class="virtues-button" [routerLink]="['create-virtue']">Create New</button>
     <button class="virtues-button" disabled>Import Virtue</button>
   </div>
 
@@ -33,7 +33,7 @@
         </div>
         <div class="table-row">
           <div class="table-cell mui-col-md-5">
-            <a href="#">[Virtue Name]</a>
+            <a routerLink="edit-virtue">[Virtue Name]</a>
             <!-- if this virtue is enabled show this menu -->
             <span class="active virtue-options">Duplicate | Disable | Export</span>
 
