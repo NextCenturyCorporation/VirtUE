@@ -10,7 +10,7 @@ nav {
 nav span.navbar-brand {
   color: rgb(255,255,255);
   display: inline-block;
-  padding: 0.65rem 2.4rem 0.65rem 1.5rem;
+  padding: 0.47rem 2.4rem 0.47rem 1.5rem;
 }
 nav ul {
   display: inline-block;
@@ -28,6 +28,6 @@ nav li a {
   color: rgb(255,255,255);
   display: block;
   margin: 0;
-  padding: 0.65rem 2.4rem;
+  padding: 0.47rem 2.4rem 0.47rem;
 
 }

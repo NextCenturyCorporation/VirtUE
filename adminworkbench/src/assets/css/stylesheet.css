@@ -3595,34 +3595,33 @@ breadcrumb {
   display: block;
   font-size: 1.1rem;
   padding-top: 1.2rem;
-  padding-bottom: 1.2rem;
+  padding-left: 1.2rem;
 }
 /* line 68, ../scss/_layout.scss */
 breadcrumb ol {
   list-style-type: none;
-  margin-left: 2rem;
   padding: 0;
 }
-/* line 73, ../scss/_layout.scss */
+/* line 72, ../scss/_layout.scss */
 breadcrumb li {
   display: inline-block;
 }
-/* line 75, ../scss/_layout.scss */
+/* line 74, ../scss/_layout.scss */
 breadcrumb li:before {
   content: '>';
 }
-/* line 80, ../scss/_layout.scss */
+/* line 79, ../scss/_layout.scss */
 breadcrumb li:first-child:before {
   content: '';
 }
 
-/* line 85, ../scss/_layout.scss */
+/* line 84, ../scss/_layout.scss */
 form {
   clear: both;
   display: block;
 }
 
-/* line 89, ../scss/_layout.scss */
+/* line 88, ../scss/_layout.scss */
 form:after {
   clear: both;
   content: ' ';
@@ -3630,7 +3629,7 @@ form:after {
   height: 1px;
 }
 
-/* line 95, ../scss/_layout.scss */
+/* line 94, ../scss/_layout.scss */
 .form-item {
   clear: both;
   display: block;
@@ -3638,12 +3637,12 @@ form:after {
   padding: 0.5rem 0;
   width: 100%;
 }
-/* line 101, ../scss/_layout.scss */
+/* line 100, ../scss/_layout.scss */
 .form-item span {
   padding: 0;
 }
 
-/* line 106, ../scss/_layout.scss */
+/* line 105, ../scss/_layout.scss */
 input[type='text'] {
   box-sizing: border-box;
   height: 30px;
@@ -3651,7 +3650,7 @@ input[type='text'] {
   width: 100%;
 }
 
-/* line 112, ../scss/_layout.scss */
+/* line 111, ../scss/_layout.scss */
 input[type='button'] {
   display: inline-block;
   height: 30px;
@@ -3659,45 +3658,45 @@ input[type='button'] {
 }
 
 /* Content Global CSS */
-/* line 118, ../scss/_layout.scss */
+/* line 117, ../scss/_layout.scss */
 content {
   display: block;
   margin: 4rem 0;
   position: relative;
 }
 
-/* line 123, ../scss/_layout.scss */
+/* line 122, ../scss/_layout.scss */
 content #content {
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
 }
 
-/* line 127, ../scss/_layout.scss */
+/* line 126, ../scss/_layout.scss */
 #content-header {
   position: relative;
 }
 
-/* line 129, ../scss/_layout.scss */
+/* line 128, ../scss/_layout.scss */
 .paging {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 14px;
   font-size: 0.88rem;
   margin-top: 0.75rem;
 }
-/* line 134, ../scss/_layout.scss */
+/* line 133, ../scss/_layout.scss */
 .paging .page-number {
   text-align: left;
 }
-/* line 137, ../scss/_layout.scss */
+/* line 136, ../scss/_layout.scss */
 .paging .page-controls {
   text-align: center;
 }
-/* line 140, ../scss/_layout.scss */
+/* line 139, ../scss/_layout.scss */
 .paging .page-item-total {
   text-align: right;
 }
 
-/* line 145, ../scss/_layout.scss */
+/* line 144, ../scss/_layout.scss */
 .table-container {
   font-family: 'Raleway500', Arial, sans-serif;
   font-size: 14px;
@@ -3707,20 +3706,17 @@ content #content {
   width: 1005;
 }
 
-/* line 153, ../scss/_layout.scss */
+/* line 152, ../scss/_layout.scss */
 .table-header-group {
   border: 1px solid #B2B2B2;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
 }
 
-/* line 159, ../scss/_layout.scss */
+/* line 158, ../scss/_layout.scss */
 .table-header, .table-data {
   padding: 0.65rem;
 }
 
-/* line 162, ../scss/_layout.scss */
+/* line 161, ../scss/_layout.scss */
 .table-header {
   font-family: 'Raleway600', Arial, sans-serif;
   font-size: 14px;
@@ -3729,13 +3725,13 @@ content #content {
   align-items: flex-end;
 }
 
-/* line 168, ../scss/_layout.scss */
+/* line 167, ../scss/_layout.scss */
 .table-header span {
   margin-left: auto;
   margin-right: auto;
 }
 
-/* line 172, ../scss/_layout.scss */
+/* line 171, ../scss/_layout.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 14px;
@@ -3743,12 +3739,12 @@ content #content {
   display: table-cell;
 }
 
-/* line 178, ../scss/_layout.scss */
+/* line 177, ../scss/_layout.scss */
 .tab-pane-content {
   padding: 1.5rem;
 }
 
-/* line 181, ../scss/_layout.scss */
+/* line 180, ../scss/_layout.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
@@ -3756,21 +3752,21 @@ content #content {
 }
 
 /* Footer Global Layout */
-/* line 186, ../scss/_layout.scss */
+/* line 185, ../scss/_layout.scss */
 app-footer {
   margin-top: 50px;
   position: static;
   bottom: 0;
   width: 100%;
 }
-/* line 191, ../scss/_layout.scss */
+/* line 190, ../scss/_layout.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 195, ../scss/_layout.scss */
+/* line 194, ../scss/_layout.scss */
 footer {
   background: #e9e3e6;
   display: block;
@@ -3779,7 +3775,7 @@ footer {
   padding-bottom: 1rem;
 }
 
-/* line 202, ../scss/_layout.scss */
+/* line 201, ../scss/_layout.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 14px;

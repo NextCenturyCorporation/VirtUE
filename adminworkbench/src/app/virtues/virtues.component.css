@@ -1,6 +1,5 @@
 .virtues-titlebar {
   clear: both;
-  padding-left: 2rem;
   padding-bottom: 2rem;
 }
 .virtues-titlebar .virtues-page-title {
@@ -19,13 +18,9 @@
   padding: 0.5rem 0.7rem;
 }
 
-.virtue-list {
+/*.virtue-list {
   padding: 1.5rem 0 1rem;
-}
-.virtue-list p {
-  display: block;
-  margin: 1rem 0;
-}
+}*/
 
 .virtue-options {
   display: block;
