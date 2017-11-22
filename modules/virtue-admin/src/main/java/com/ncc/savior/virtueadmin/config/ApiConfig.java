@@ -13,6 +13,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
 import com.ncc.savior.virtueadmin.rest.VirtueRestService;
+import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 
 /*
@@ -28,6 +29,8 @@ public class ApiConfig extends ResourceConfig {
 		
 		/*Register all you webservice class here:*/
 		register(VirtueRestService.class); 
+		
+		register(WebServiceUtil.class);
 		
 	}
 
