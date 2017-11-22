@@ -91,7 +91,7 @@ public class VirtueRestService {
 	// This method returns all the virtues for a user with userToken
 	@GET
 	@Produces("application/json")
-	@Path(ResourceConstants.VIRTUE_GETALL)
+	@Path(ResourceConstants.VIRTUE_GETALL_BY_USERTOKEN)
 	public Response getAllVirtueByUser(@PathParam("userToken") int userToken) throws URISyntaxException {
 		Virtues virtues = new Virtues(); 	
 		virtues.setVirtues(new ArrayList<>(INMEMORYDB.values()));
