@@ -34,6 +34,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.ncc.savior.virtueadmin.model.Virtue;
 import com.ncc.savior.virtueadmin.model.Virtues;
 
+import templates.ResourceConstants;
+
 
 /*
  * VirtueRestService class exposes api about a virtue. 
@@ -89,17 +91,12 @@ public class VirtueRestService {
 	// This method returns all the virtues for a user with userToken
 	@GET
 	@Produces("application/json")
-	@Path("/user/{userToken}")
+	@Path(ResourceConstants.VIRTUE_GETALL)
 	public Response getAllVirtueByUser(@PathParam("userToken") int userToken) throws URISyntaxException {
 		Virtues virtues = new Virtues(); 	
 		virtues.setVirtues(new ArrayList<>(INMEMORYDB.values()));
 		
 		return Response.status(200).entity(virtues).build();
-
 	}
-	
-	
-	
-	
 
 }
