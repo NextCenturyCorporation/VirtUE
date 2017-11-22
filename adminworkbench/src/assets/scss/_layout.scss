@@ -1,0 +1,205 @@
+@import "fonts.scss";
+@import "variables.scss";
+@import "mixins.scss";
+@import "helpers.scss";
+html {
+  font-size: 13px;
+}
+body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+a {
+  color: #407097;
+  font-weight: 500;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+h1 {
+  @include ralewayBold;
+  font-size: 2.6rem;
+}
+h2 {
+  @include ralewaySemibold;
+  font-size: 2.2rem;
+}
+h3 {
+  @include ralewaySemibold;
+  font-size: 1.8rem;
+}
+h4 {
+  @include ralewaySemibold;
+  font-size: 1.4rem;
+}
+h5 {
+  @include ralewayBold;
+  font-size: 1.1rem;
+}
+p {
+  padding: 10px 0;
+}
+hr {
+  clear: both;
+  display: block;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 0;
+}
+
+#wrapper {
+  width: 100%;
+  position: relative;
+}
+/* Header Global CSS */
+header {
+  background: rgb(46,41,78);
+  display: block;
+  height: 34px;
+  margin-bottom: 50px;
+}
+breadcrumb {
+  display: block;
+  font-size: 1.1rem;
+  padding-top: 1.2rem;
+  padding-bottom: 1.2rem;
+  ol {
+    list-style-type: none;
+    margin-left: 2rem;
+    padding: 0;
+  }
+  li {
+   display: inline-block;
+     &:before {
+       content: '>';
+     }
+   }
+   li:first-child {
+     &:before {
+       content: '';
+     }
+   }
+ }
+form {
+  clear: both;
+  display: block;
+}
+form:after {
+  clear: both;
+  content: ' ';
+  display: block;
+  height: 1px;
+}
+.form-item {
+  clear: both;
+  display: block;
+  margin: 0;
+  padding: 0.5rem 0;
+  width: 100%;
+  span {
+    padding: 0;
+  }
+}
+
+input[type='text'] {
+  box-sizing: border-box;
+  height: 30px;
+  padding-left: 0.5rem;
+  width: 100%;
+}
+input[type='button'] {
+  display: inline-block;
+  height: 30px;
+  padding: 0.5rem 1rem;
+}
+/* Content Global CSS */
+content {
+  display: block;
+  margin: 4rem 0;
+  position: relative;
+}
+content #content {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+#content-header { position: relative;}
+
+.paging {
+  @include raleway;
+  font-size: 0.88rem;
+  margin-top: 0.75rem;
+
+  .page-number {
+    text-align: left;
+  }
+  .page-controls {
+    text-align: center;
+  }
+  .page-item-total {
+    text-align: right;
+  }
+}
+
+.table-container {
+  @include ralewayMedium;
+  display: table;
+  margin: 1rem 0 1rem;
+  padding: 0;
+  width: 1005
+}
+
+.table-header-group {
+  border: 1px solid #B2B2B2;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+.table-header, .table-data {
+  padding: 0.65rem;
+}
+.table-header {
+  @include ralewaySemibold;
+  background-color: #E9E3E6;
+  display: flex;
+  align-items: flex-end;
+}
+.table-header span {
+  margin-left: auto;
+  margin-right: auto;
+}
+.table-data {
+  @include raleway;
+  background-color: #FFF;
+  display: table-cell;
+}
+
+.tab-pane-content {
+    padding: 1.5rem;
+}
+.tab-pane-content:after {
+  @include clearfix;
+}
+
+/* Footer Global Layout */
+app-footer {
+  margin-top: 50px;
+  position: static;
+  bottom: 0;
+  width: 100%;
+  &:after {
+    @include clearfix;
+  }
+}
+footer {
+  background: rgb(233,227,230);
+  display: block;
+  height: 25px;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+#footer-content {
+  @include raleway;
+  font-size: 0.88rem;
+}

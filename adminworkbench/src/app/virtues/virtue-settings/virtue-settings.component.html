@@ -5,9 +5,9 @@
    <li><a data-mui-toggle="tab" data-mui-controls="sensors">Sensors</a></li>
  </ul>
  <div class="mui-tabs__pane mui--is-active" id="general">
-   <div class="tab_pane_content">
-     <h3>General settings stuff go there</h3>
-     <div class="form-item">
+   <div class="tab-pane-content">
+     <h4>General Settings</h4>
+     <div class="mui-row form-item">
        <span class="mui-col-md-4 label">Select Virtue Color</span>
        <span class="mui-col-md-6 float-right">
         <select name="virtue-color">
@@ -20,72 +20,192 @@
         </select>
       </span>
      </div>
-     <div class="form-item">
-       <span class="mui-col-md-4 label">Customize Icon</span>
-       <span class="mui-col-md-6 float-right">
+     <div class="mui-row form-item">
+       <span class="mui-col-md-4">Customize Icon</span>
+       <span class="mui-col-md-8 text-align-right">
          <input type="text" name="icon" /><input type="button" value="browse" />
        </span>
      </div>
-     <div class="form-item">
-       <p>Inter-Virtue Settings</p>
-       <div class="table-container mui-col-md-12">
-         <div class="table-row">
-           <div class="table-header mui-col-md-3">Virtue</div>
-           <div class="table-header mui-col-md-3 text-align-center">Read</div>
-           <div class="table-header mui-col-md-3 text-align-center">Write</div>
-           <div class="table-header mui-col-md-3 text-align-center">Open<br/>Browser</div>
+     <div class="mui-row form-item">
+       <h5>Inter-Virtue Settings</h5>
+       <div class="mui-col-md-12">
+         <div class="mui-row table-header-group">
+           <div class="table-header mui-col-md-6"><span>Virtue</span></div>
+           <div class="table-header mui-col-md-2 text-align-center"><span>Read</span></div>
+           <div class="table-header mui-col-md-2 text-align-center"><span>Write</span></div>
+           <div class="table-header mui-col-md-2 text-align-center"><span>Open Browser</span></div>
          </div>
-         <div class="table-row">
-           <div class="table-cell mui-col-md-3">Virtue Name</div>
-           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="read-[id]" /></div>
-           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="write-[id]" /></div>
-           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="browser-[id]" /></div>
+         <div class="mui-row">
+           <div class="table-data mui-col-md-6">Virtue Name</div>
+           <div class="table-data mui-col-md-2 text-align-center"><input type="checkbox" name="read-[id]" /></div>
+           <div class="table-data mui-col-md-2 text-align-center"><input type="checkbox" name="write-[id]" /></div>
+           <div class="table-data mui-col-md-2 text-align-center"><input type="checkbox" name="browser-[id]" /></div>
          </div>
        </div>
      </div>
    </div>
  </div>
  <div class="mui-tabs__pane" id="network">
-   <div class="tab_pane_content">
-     <h3>Network Settings </h3>
-     <div class="form-item">
-       <span class="mui-col-md-4 label">Remote IP Settings:</span>
-       <span class="mui-col-md-6 float-right"></span>
+   <div class="tab-pane-content">
+     <h4>Network Settings </h4>
+     <div class="mui-row form-item">
+       <span class="mui-col-md-5 label">Remote IP Settings:</span>
+       <span class="mui-col-md-7 text-align-right"><input type="text" name="remote_ip_settings" value="" /></span>
      </div>
-     <div class="form-item">
-       <span class="mui-col-md-4 label">Protocol:</span>
-       <span class="mui-col-md-6 float-right"></span>
+     <div class="mui-row form-item">
+       <span class="mui-col-md-5 label">Protocol:</span>
+       <span class="mui-col-md-7 text-align-right"><input type="text" name="remote_protocol" value="" /></span>
      </div>
-     <div class="form-item">
-       <span class="mui-col-md-4 label">Locol Protocol:</span>
-       <span class="mui-col-md-6 float-right"></span>
+     <div class="mui-row form-item">
+       <span class="mui-col-md-5 label">Local Protocol:</span>
+       <span class="mui-col-md-7 text-align-right"><input type="text" name="local_protocol" value="" /></span>
      </div>
      <hr />
-     <div class="form-item">
-       <p>Access Control List: <button>Add</button></p>
-       <div class="table-container mui-col-md-12">
-         <div class="table-row">
-           <div class="table-header mui-col-md-1">#</div>
-           <div class="table-header mui-col-md-5 text-align-center">Address</div>
-           <div class="table-header mui-col-md-3 text-align-center">Enable</div>
-           <div class="table-header mui-col-md-3 text-align-center">Options</div>
-         </div>
-         <div class="table-row">
-           <div class="table-cell mui-col-md-1">id</div>
-           <div class="table-cell mui-col-md-5 text-align-center">[address]</div>
-           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="access-enable-[id]" /></div>
-           <div class="table-cell mui-col-md-3 text-align-center"><input type="button" name="access-option-[id]" value="X" /></div>
+     <div class="mui-row">
+       <div class="mui-col-md-8"><h5 class="virtue-title">Access Control List</h5></div>
+       <div class="mui-col-md-4 text-align-right"><button class="virtue-button">Add</button></div>
+     </div>
+     <div class="mui-container-fluid">
+        <div class="mui-row">
+         <div class="mui-col-md-12">
+           <div class="mui-row table-header-group">
+             <div class="mui-col-md-1 table-header">#</div>
+             <div class="mui-col-md-7 table-header">Address</div>
+             <div class="mui-col-md-2 table-header text-align-center">Enable</div>
+             <div class="mui-col-md-2 table-header text-align-center">Options</div>
+           </div>
+           <div class="mui-row table-row">
+             <div class="mui-col-md-1 table-data">[id]</div>
+             <div class="mui-col-md-7 table-data">[address]</div>
+             <div class="mui-col-md-2 table-data text-align-center"><input type="checkbox" name="access-enable-[id]" /></div>
+             <div class="mui-col-md-2 table-data text-align-center"><input type="button" name="access-option-[id]" value="X" /></div>
+           </div>
          </div>
        </div>
      </div>
    </div>
  </div>
  <div class="mui-tabs__pane" id="resources">
-   <div class="tab_pane_content">Resources settings stuff go there</div>
+   <div class="tab-pane-content">
+     <h4>Resources</h4>
+     <div class="mui-row form-item">
+       <p><input type="checkbox" name="resources-global"> Use Global Settings</p>
+       <div class="mui-row form-item">
+         <h5>File System Permissions</h5>
+         <div class="mui-col-md-12">
+           <div class="mui-row table-header-group">
+             <div class="mui-col-md-4 table-header">Description</div>
+             <div class="mui-col-md-2 table-header text-align-center">Read</div>
+             <div class="mui-col-md-2 table-header text-align-center">Write</div>
+             <div class="mui-col-md-2 table-header text-align-center">Execute</div>
+             <div class="mui-col-md-2 table-header text-align-center">Enable</div>
+           </div>
+           <div class="mui-row">
+             <div class="mui-col-md-4 table-data">[description]</div>
+             <div class="mui-col-md-2 table-data text-align-center"><input type="checkbox" name="filesys-read-[id]" /></div>
+             <div class="mui-col-md-2 table-data text-align-center"><input type="checkbox" name="filesys-write-[id]" /></div>
+             <div class="mui-col-md-2 table-data text-align-center"><input type="checkbox" name="filesys-execute-[id]" /></div>
+             <div class="mui-col-md-2 table-data text-align-center"><input type="checkbox" name="filesys-enable-[id]" /></div>
+           </div>
+         </div>
+       </div>
+       <div class="mui-row form-item">
+         <h5>Printers</h5>
+         <div class="mui-col-md-12">
+           <div class="mui-row table-header-group">
+             <div class="mui-col-md-8 table-header">Description</div>
+             <div class="mui-col-md-2 table-header text-align-center">Status</div>
+             <div class="mui-col-md-2 table-header text-align-center">Enable</div>
+           </div>
+           <div class="mui-row">
+             <div class="mui-col-md-8 table-data">[printer info]</div>
+             <div class="mui-col-md-2 table-data text-align-center">[status]]</div>
+             <div class="mui-col-md-2 table-data text-align-center"><input type="checkbox" name="printer-enable-[id]" /></div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
  </div>
  <div class="mui-tabs__pane" id="sensors">
-   <div class="tab_pane_content">Sensors settings stuff go there</div>
+   <div class="tab-pane-content">
+     <h4>Sensor Settings</h4>
+     <p><input type="checkbox" name="resources-global"> Use Global Settings</p>
+     <div class="mui-row form-item">
+       <h5>Network Tools</h5>
+       <div class="mui-col-md-12">
+         <div class="mui-row table-header-group">
+           <div class="mui-col-md-4 table-header">Sensor Control</div>
+           <div class="mui-col-md-2 table-header text-align-center">Default</div>
+           <div class="mui-col-md-2 table-header text-align-center">Low</div>
+           <div class="mui-col-md-2 table-header text-align-center">High</div>
+           <div class="mui-col-md-2 table-header text-align-center">Highest</div>
+         </div>
+         <div class="mui-row">
+           <div class="mui-col-md-4 table-data">[network-controller]</div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="network-controller-[id]" value="default" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="network-controller-[id]" value="low" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="network-controller-[id]" value="high" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="network-controller-[id]" value="adversarial" /></div>
+         </div>
+       </div>
+     </div>
+     <div class="mui-row form-item">
+       <h5>Virtue Sensor Settings</h5>
+       <div class="mui-col-md-12">
+         <div class="mui-row table-header-group">
+           <div class="mui-col-md-4 table-header">Sensor Context</div>
+           <div class="mui-col-md-2 table-header text-align-center">Default</div>
+           <div class="mui-col-md-2 table-header text-align-center">Low</div>
+           <div class="mui-col-md-2 table-header text-align-center">High</div>
+           <div class="mui-col-md-2 table-header text-align-center">Highest</div>
+         </div>
+         <div class="mui-row">
+           <div class="mui-col-md-4 table-data">In-Resource (Unikernel)</div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="unikernel-[id]" value="default" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="unikernel-[id]" value="low" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="unikernel-[id]" value="high" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="unikernel-[id]" value="adversarial" /></div>
+         </div>
+         <div class="mui-row">
+           <div class="mui-col-md-4 table-data">In-Virtue Controller</div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="in-virtue-controller-[id]" value="default" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="in-virtue-controller-[id]" value="low" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="in-virtue-controller-[id]" value="high" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="in-virtue-controller-[id]" value="adversarial" /></div>
+         </div>
+       </div>
+     </div>
+     <div class="mui-row form-item">
+       <h5>Logging</h5>
+       <div class="mui-col-md-12">
+         <div class="mui-row table-header-group">
+           <div class="mui-col-md-4 table-header">Sensor Context</div>
+           <div class="mui-col-md-2 table-header text-align-center">Default</div>
+           <div class="mui-col-md-2 table-header text-align-center">Low</div>
+           <div class="mui-col-md-2 table-header text-align-center">High</div>
+           <div class="mui-col-md-2 table-header text-align-center">Highest</div>
+         </div>
+         <div class="mui-row">
+           <div class="mui-col-md-4 table-data">Aggregator</div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="aggregator-[id]" value="default" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="aggregator-[id]" value="low" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="aggregator-[id]" value="high" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="aggregator-[id]" value="adversarial" /></div>
+         </div>
+         <div class="mui-row">
+           <div class="mui-col-md-4 table-data">Archive</div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="archive-[id]" value="default" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="archive-[id]" value="low" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="archive-[id]" value="high" /></div>
+           <div class="mui-col-md-2 table-data text-align-center"><input type="radio" name="archive-[id]" value="adversarial" /></div>
+         </div>
+       </div>
+     </div>
+   </div>
  </div>
+
+
  <script>
    var paneIds = ['general', 'network', 'resources', 'sensors'],
        currPos = 0;

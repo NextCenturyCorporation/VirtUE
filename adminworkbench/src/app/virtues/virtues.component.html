@@ -5,34 +5,34 @@
     <button class="virtues-button" disabled>Import Virtue</button>
   </div>
 
-  <div id="content-main">
-    <div class="virtue-list">
+  <div id="content-main" >
+    <div id="content">
+      <div class="mui-container-fluid">
       <!-- if there are no virtues, show this message -->
-      <div class="table-container">
-        <div class="table-row">
-          <div class="table-cell border-top mui-col-md-12">
-            <p>No virtues have been created at this time. To create a virtue, click on the button "Create New" above.</p>
+        <div class="mui-row margin-top-10">
+          <div class="mui-col-md-12">
+            <p class="border-top border-bottom">
+              No virtues have been created at this time. To create a virtue, click on the button "Create New" above.
+            </p>
           </div>
-          <div class="clearfix"></div>
         </div>
-      </div>
 
       <!-- if there are virtues, show this list -->
-      <div class="virtues-filters">
-        <div class="virtues-filter mui-col-md-4 padding-left-0">All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a></div>
-        <div class="mui-col-md-4">&nbsp;</div>
-        <div class="mui-col-md-4 padding-right-0">&nbsp;</div>
-        <div class="clearfix"></div>
-      </div>
-      <div class="table-container">
-        <div class="table-header-row">
+      <div class="virtue-list">
+        <div class="virtues-filters">
+          <div class="virtues-filter mui-col-md-4 padding-left-0">All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a></div>
+          <div class="mui-col-md-4">&nbsp;</div>
+          <div class="mui-col-md-4 padding-right-0">&nbsp;</div>
+          <div class="clearfix"></div>
+        </div>
+        <div class="mui-row">
           <div class="table-header mui-col-md-5">Virtue Name</div>
           <div class="table-header mui-col-md-2">Virtual Machines</div>
           <div class="table-header mui-col-md-3">Created By</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
-        <div class="table-row">
-          <div class="table-cell mui-col-md-5">
+        <div class="mui-row">
+          <div class="table-data mui-col-md-5">
             <a routerLink="edit-virtue">[Virtue Name]</a>
             <!-- if this virtue is enabled show this menu -->
             <span class="active virtue-options">Duplicate | Disable | Export</span>
@@ -40,9 +40,9 @@
             <!-- if this virtue is disabled show this menu -->
             <span class="active virtue-options">Enable | Delete</span>
           </div>
-          <div class="table-cell mui-col-md-2">[Virtual Machines]</div>
-          <div class="table-cell mui-col-md-3">[Created By]</div>
-          <div class="table-cell mui-col-md-2">[Status]<br />[Date]</div>
+          <div class="table-data mui-col-md-2">[Virtual Machines]</div>
+          <div class="table-data mui-col-md-3">[Created By]</div>
+          <div class="table-data mui-col-md-2">[Status]<br />[Date]</div>
           <div class="clearfix"></div>
         </div>
       </div>
@@ -52,6 +52,7 @@
         <div class="page-item-total mui-col-md-4 padding-right-0"># Virtues</div>
         <div class="clearfix"></div>
       </div>
+    </div>
     </div>
   </div>
 </div>

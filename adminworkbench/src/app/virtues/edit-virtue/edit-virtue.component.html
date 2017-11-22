@@ -16,48 +16,53 @@
           primary-component-initialratio="0.8">
 
           <div class="split-pane-content-primary">
-            <div class="form-item">
-              <input type="text" id="virtue-name" value="" placeholder="Virtue Name" />
-            </div>
-            <div class="virtue-titlebar">
-                  <h2 class="virtue-title">Virtual Machines</h2>
-                  <button class="virtue-button" onclick="activateModal()">Add VM</button>
-                </div>
-            <!-- if there are no virtue, show this message -->
-            <div class="table-container">
-                  <div class="table-row">
-                    <div class="table-cell border-top mui-col-md-12">
-                      <p>No virtual machines have been added at this time. To add VM(s), click on the button "Add VM.</p>
-                    </div>
-                    <div class="clearfix"></div>
-                  </div>
-                </div>
-            <!-- if there are virtue machines, show this list -->
-            <div class="table-container">
-                  <div class="table-header-row">
-                    <div class="table-header mui-col-md-5">Virtual Machine</div>
-                    <div class="table-header mui-col-md-2">Image Size</div>
-                    <div class="table-header mui-col-md-5">Applications</div>
-                  </div>
-                  <div class="table-row">
-                    <div class="table-cell mui-col-md-5">
-                      <a href="#">Virtual Machine</a>
-                      <!-- if this virtue is enabled show this menu -->
-                      <span class="active virtue-options">Edit | Disable</span>
 
-                      <!-- if this virtue is disabled show this menu -->
-                      <span class="active virtue-options">Edit | Remove</span>
-                    </div>
-                    <div class="table-cell mui-col-md-2"># mb</div>
-                    <div class="table-cell mui-col-md-5">List of Apps</div>
-                    <div class="clearfix"></div>
-                  </div>
+            <div class="mui-row form-item margin-top-15">
+              <div class="mui-col-md-12 padding-left-0 padding-right-0">
+                <input type="text" id="virtue-name" value="" placeholder="Virtue Name" />
+              </div>
+            </div>
+            <div class="mui-row virtue-titlebar">
+              <div class="mui-col-md-12">
+                <h2 class="virtue-title">Virtual Machines</h2>
+                <button class="virtue-button" onclick="activateModal()">Add VM</button>
+              </div>
+            </div>
+            <!-- if there are no virtue, show this message -->
+            <div class="mui-row margin-top-10">
+              <div class="mui-col-md-12">
+                <p class="border-top border-bottom">
+                  No virtual machines have been added at this time. To add VM(s), click on the button "Add VM".
+                </p>
+              </div>
+            </div>
+            <!-- if there are virtue machines, show this list -->
+            <div class="mui-container-fluid virtue-list">
+              <div class="mui-row table-header-group">
+                <div class="table-header mui-col-md-5">Virtual Machine</div>
+                <div class="table-header mui-col-md-2">Image Size</div>
+                <div class="table-header mui-col-md-5">Applications</div>
+              </div>
+              <div class="mui-row">
+                <div class="table-data mui-col-md-5">
+                  <a href="#">[ Virtual Machine ]</a>
+                  <!-- if this virtue is enabled show this menu -->
+                  <span class="active virtue-options">Edit | Disable</span>
+                  <!-- if this virtue is disabled show this menu -->
+                  <span class="active virtue-options">Edit | Remove</span>
                 </div>
-            <div class="paging">
-              <div class="page-number mui-col-md-4 padding-left-0">&nbsp;</div>
-              <div class="page-controls mui-col-md-4">&nbsp;</div>
-              <div class="page-item-total mui-col-md-4 padding-right-0"># Virtual Machine(s)</div>
-              <div class="clearfix"></div>
+                <div class="table-data mui-col-md-2"># mb</div>
+                <div class="table-data mui-col-md-5">List of Apps</div>
+                <div class="clearfix"></div>
+              </div>
+            </div>
+            <div class="mui-container-fluid">
+              <div class="mui-row paging">
+                <div class="mui-col-md-4 page-number padding-left-0">&nbsp;</div>
+                <div class="mui-col-md-4 page-controls">&nbsp;</div>
+                <div class="mui-col-md-4 page-item-total padding-right-0"># Virtual Machine(s)</div>
+                <div class="clearfix"></div>
+              </div>
             </div>
           </div>
 

@@ -1,5 +1,7 @@
 .virtues-titlebar {
-  padding-bottom: 20px;
+  clear: both;
+  padding-left: 2rem;
+  padding-bottom: 2rem;
 }
 .virtues-titlebar .virtues-page-title {
   display: block;
@@ -18,7 +20,6 @@
 }
 
 .virtue-list {
-  margin-top: 1.5rem;
   padding: 1.5rem 0 1rem;
 }
 .virtue-list p {
@@ -28,6 +29,7 @@
 
 .virtue-options {
   display: block;
-  font-size: 1.1rem;
+  font-family: 'Raleway-medium', Arial, sans-serif;
+  font-size: 0.88rem;
   clear: both;
 }

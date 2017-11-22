@@ -32,6 +32,19 @@
   border-top:1px solid #C3BABA;
   margin-top: -2px;
 }
-.tab_pane_content {
-  padding: 1.5rem;
+
+.tab-pane-content {
+  overflow-y: scroll;
+}
+.tab-pane-content h3, .tab-pane-content h4, .tab-pane-content h5  {
+  margin-top: 0;
+}
+.tab-pane-content .table-header,
+.tab-pane-content .table-data {
+  font-size: 12px;
+}
+
+.table-header:first-child span {
+  margin-left: 0;
+  margin-right: 0;
 }
