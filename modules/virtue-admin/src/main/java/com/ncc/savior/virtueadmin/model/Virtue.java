@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.model.response;
+package com.ncc.savior.virtueadmin.model;
 
 import java.util.List;
 

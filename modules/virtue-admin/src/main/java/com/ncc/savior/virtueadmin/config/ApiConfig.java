@@ -1,22 +1,18 @@
 package com.ncc.savior.virtueadmin.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import com.ncc.savior.virtueadmin.rest.VirtueRestService;
 
-@Configuration 
-public class ApiConfig {
+
+@Component
+public class ApiConfig extends ResourceConfig {
 	
-	@Bean
-	public ObjectMapper objectMapper() {
-		return new ObjectMapper(); 
-	}
-	
-	@Bean
-	public ObjectWriter objecWriter(ObjectMapper objectMapper) {
-		return objectMapper.writerWithDefaultPrettyPrinter(); 
+	public ApiConfig() {
+		
+		register(VirtueRestService.class); 
+		
 	}
 
 }
