@@ -1,7 +1,22 @@
+/* 
+*  Virtue.java
+*  
+*  VirtUE - Savior Project
+*  Created by Wole OMitowoju 11/16/2017
+*  
+*  Copyright (c) 2017 Next Century Corporation. All rights reserved.
+*/
+
 package com.ncc.savior.virtueadmin.model;
+
 
 import java.util.List;
 
+/*
+ * Virtue class models a virtual unit with the user, applications etc. 
+ * 
+ * 
+ */
 public class Virtue {
 	
 	/*The unique identifier for this Virtue. Format is

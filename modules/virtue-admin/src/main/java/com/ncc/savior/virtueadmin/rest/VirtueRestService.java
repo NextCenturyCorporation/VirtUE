@@ -1,3 +1,13 @@
+//
+/* 
+*  VirtueRestService.java
+*  
+*  VirtUE - Savior Project
+*  Created by Wole OMitowoju 11/16/2017
+*  
+*  Copyright (c) 2017 Next Century Corporation. All rights reserved.
+*/
+
 package com.ncc.savior.virtueadmin.rest;
 
 import javax.ws.rs.Path;
@@ -25,6 +35,10 @@ import com.ncc.savior.virtueadmin.model.Virtue;
 import com.ncc.savior.virtueadmin.model.Virtues;
 
 
+/*
+ * VirtueRestService class exposes api about a virtue. 
+ * 
+ */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "virtues")
 @Path("/virtues")
@@ -72,16 +86,13 @@ public class VirtueRestService {
 	}
 	
 	
+	// This method returns all the virtues for a user with userToken
 	@GET
 	@Produces("application/json")
-	//@Path("/user/{userToken}")
-	//public Response getAllVirtueByUser(@PathParam("userToken") int userToken) throws URISyntaxException {
-	public Response getAllVirtueByUser() throws URISyntaxException {
+	@Path("/user/{userToken}")
+	public Response getAllVirtueByUser(@PathParam("userToken") int userToken) throws URISyntaxException {
 		Virtues virtues = new Virtues(); 	
 		virtues.setVirtues(new ArrayList<>(INMEMORYDB.values()));
-		
-		System.out.println("HELLLLLLLLOOOOOOOO");
-		//return virtues;
 		
 		return Response.status(200).entity(virtues).build();
 
