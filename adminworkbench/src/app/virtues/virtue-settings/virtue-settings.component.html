@@ -5,10 +5,80 @@
    <li><a data-mui-toggle="tab" data-mui-controls="sensors">Sensors</a></li>
  </ul>
  <div class="mui-tabs__pane mui--is-active" id="general">
-   <div class="tab_pane_content">General settings stuff go there</div>
+   <div class="tab_pane_content">
+     <h3>General settings stuff go there</h3>
+     <div class="form-item">
+       <span class="mui-col-md-4 label">Select Virtue Color</span>
+       <span class="mui-col-md-6 float-right">
+        <select name="virtue-color">
+          <option>Purple</option>
+          <option>Red</option>
+          <option>Blue</option>
+          <option>Green</option>
+          <option>Yellow</option>
+          <option>Orange</option>
+        </select>
+      </span>
+     </div>
+     <div class="form-item">
+       <span class="mui-col-md-4 label">Customize Icon</span>
+       <span class="mui-col-md-6 float-right">
+         <input type="text" name="icon" /><input type="button" value="browse" />
+       </span>
+     </div>
+     <div class="form-item">
+       <p>Inter-Virtue Settings</p>
+       <div class="table-container mui-col-md-12">
+         <div class="table-row">
+           <div class="table-header mui-col-md-3">Virtue</div>
+           <div class="table-header mui-col-md-3 text-align-center">Read</div>
+           <div class="table-header mui-col-md-3 text-align-center">Write</div>
+           <div class="table-header mui-col-md-3 text-align-center">Open<br/>Browser</div>
+         </div>
+         <div class="table-row">
+           <div class="table-cell mui-col-md-3">Virtue Name</div>
+           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="read-[id]" /></div>
+           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="write-[id]" /></div>
+           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="browser-[id]" /></div>
+         </div>
+       </div>
+     </div>
+   </div>
  </div>
  <div class="mui-tabs__pane" id="network">
-   <div class="tab_pane_content">Network settings stuff go there</div>
+   <div class="tab_pane_content">
+     <h3>Network Settings </h3>
+     <div class="form-item">
+       <span class="mui-col-md-4 label">Remote IP Settings:</span>
+       <span class="mui-col-md-6 float-right"></span>
+     </div>
+     <div class="form-item">
+       <span class="mui-col-md-4 label">Protocol:</span>
+       <span class="mui-col-md-6 float-right"></span>
+     </div>
+     <div class="form-item">
+       <span class="mui-col-md-4 label">Locol Protocol:</span>
+       <span class="mui-col-md-6 float-right"></span>
+     </div>
+     <hr />
+     <div class="form-item">
+       <p>Access Control List: <button>Add</button></p>
+       <div class="table-container mui-col-md-12">
+         <div class="table-row">
+           <div class="table-header mui-col-md-1">#</div>
+           <div class="table-header mui-col-md-5 text-align-center">Address</div>
+           <div class="table-header mui-col-md-3 text-align-center">Enable</div>
+           <div class="table-header mui-col-md-3 text-align-center">Options</div>
+         </div>
+         <div class="table-row">
+           <div class="table-cell mui-col-md-1">id</div>
+           <div class="table-cell mui-col-md-5 text-align-center">[address]</div>
+           <div class="table-cell mui-col-md-3 text-align-center"><input type="checkbox" name="access-enable-[id]" /></div>
+           <div class="table-cell mui-col-md-3 text-align-center"><input type="button" name="access-option-[id]" value="X" /></div>
+         </div>
+       </div>
+     </div>
+   </div>
  </div>
  <div class="mui-tabs__pane" id="resources">
    <div class="tab_pane_content">Resources settings stuff go there</div>
