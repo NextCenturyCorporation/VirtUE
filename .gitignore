@@ -9,3 +9,4 @@ modules/*/build
 **/*.tfstate
 **/*.tfstate.backup
 /modules/ecosystem/directory-service/secrets.auto.tfvars
+modules/ecosystem/directory-service/samba-config

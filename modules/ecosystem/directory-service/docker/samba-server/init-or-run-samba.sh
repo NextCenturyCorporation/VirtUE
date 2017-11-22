@@ -65,6 +65,11 @@ if [ ! -f "${INITFILE}" ]; then
 			   --realm=${SAMBA_REALM} \
 			   --domain=${SAMBA_REALM/.*/} \
 			   --adminpass="${SAMBA_ADMIN_PASSWORD}" \
+			   --option="server schannel = yes" \
+			   --option="kerberos method = secrets and keytab" \
+			   --option="lm interval = 0" \
+			   --option="server signing = mandatory" \
+			   --option="show add printer wizard = no" \
 			   "${SAMBA_DNS_OPTION}" \
 			   ${SAMBA_PROVISION_OPTIONS}
 	cp -f /var/lib/samba/private/krb5.conf /etc
