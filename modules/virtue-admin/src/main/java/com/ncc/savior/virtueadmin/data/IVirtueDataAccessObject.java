@@ -2,9 +2,10 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.List;
 
-import com.ncc.savior.virtueadmin.model.Role;
+import com.ncc.savior.virtueadmin.model.Application;
 import com.ncc.savior.virtueadmin.model.User;
-import com.ncc.savior.virtueadmin.model.Virtue;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 /**
  * Interface for virtues backend data store.
@@ -13,10 +14,16 @@ import com.ncc.savior.virtueadmin.model.Virtue;
  */
 public interface IVirtueDataAccessObject {
 
-	List<Role> getRolesForUser(User user);
+	List<VirtueTemplate> getTemplatesForUser(User user);
 
-	List<Virtue> getVirtuesForUser(User user);
+	List<VirtueInstance> getVirtuesForUser(User user);
 
-	Role getRole(String roleId);
+	VirtueTemplate getTemplate(String templateId);
+
+	VirtueInstance getVirtue(String virtueId);
+
+	List<Application> getApplicationsForVirtue(User user, String virtueId);
+
+	void addVirtueForUser(User user, VirtueInstance virtue);
 
 }

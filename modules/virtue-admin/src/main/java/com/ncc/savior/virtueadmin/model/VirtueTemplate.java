@@ -4,19 +4,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Data Transfer Object (DTO) for roles.
+ * Data Transfer Object (DTO) for templates.
  * 
  *
  */
-public class Role {
+public class VirtueTemplate {
 	private String id;
 	private String name;
 	private String version;
 	private Set<String> applicationIds;
+	private Set<Application> applications;
 	private Set<String> startingResourceIds;
 	private Set<String> startingTransducerIds;
 
-	public Role(String id, String name, String version, Set<String> applicationIds, Set<String> startingResourceIds,
+	public VirtueTemplate(String id, String name, String version, Set<String> applicationIds, Set<String> startingResourceIds,
 			Set<String> startingTransducerIds) {
 		super();
 		this.id = id;
@@ -25,9 +26,10 @@ public class Role {
 		this.applicationIds = applicationIds;
 		this.startingResourceIds = startingResourceIds;
 		this.startingTransducerIds = startingTransducerIds;
+		this.applications = new HashSet<Application>();
 	}
 
-	public Role(String id, String name, String version, Set<String> applicationIds) {
+	public VirtueTemplate(String id, String name, String version, Set<String> applicationIds) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -35,6 +37,7 @@ public class Role {
 		this.applicationIds = applicationIds;
 		this.startingResourceIds = new HashSet<String>();
 		this.startingTransducerIds = new HashSet<String>();
+		this.applications = new HashSet<Application>();
 	}
 
 	public String getId() {
@@ -59,6 +62,10 @@ public class Role {
 
 	public Set<String> getStartingTransducerIds() {
 		return startingTransducerIds;
+	}
+
+	public Set<Application> getApplications() {
+		return applications;
 	}
 
 }

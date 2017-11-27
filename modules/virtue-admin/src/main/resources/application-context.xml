@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<bean name="virtueDao" class="com.ncc.savior.virtueadmin.data.InMemoryVirtueDao">
+	</bean>
+	<bean name="infrastructureService"
+		class="com.ncc.savior.virtueadmin.infrastructure.VirtualBoxInfrastructureService">
+		<constructor-arg value="74568791-b69b-4bc4-a172-47c6e805b7a8" />
+		<constructor-arg value="10.0.2.9" />
+		<constructor-arg value="22" />
+	</bean>
+	<bean name="userService" class="com.ncc.savior.virtueadmin.service.VirtueUserService">
+		<constructor-arg ref="infrastructureService" />
+		<constructor-arg ref="virtueDao" />
+	</bean>
+	
+	<bean name="restService" class="com.ncc.savior.virtueadmin.rest.VirtueRestService">
+<!-- 		<constructor-arg ref="userService" /> -->
+	</bean>
+
+
+
+</beans>  
