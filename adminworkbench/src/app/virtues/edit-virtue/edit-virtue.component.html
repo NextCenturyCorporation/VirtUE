@@ -5,7 +5,7 @@
   </div>
 
   <div id="content-main" class="border-top">
-    <form>
+    <form id="edit-virtue" method="post">
       <div id="content" class="virtue-content">
         <vertical-split-pane
           primary-component-minsize="60"
@@ -32,7 +32,7 @@
             <div class="mui-row margin-top-10">
               <div class="mui-col-md-12">
                 <p class="border-top border-bottom">
-                  No virtual machines have been added at this time. To add VM(s), click on the button "Add VM".
+                  No virtual machines are attached this virtue. To add VM(s), click on the button "Add VM".
                 </p>
               </div>
             </div>
@@ -43,7 +43,7 @@
                 <div class="table-header mui-col-md-2">Image Size</div>
                 <div class="table-header mui-col-md-5">Applications</div>
               </div>
-              <div class="mui-row">
+              <div class="mui-row border-bottom">
                 <div class="table-data mui-col-md-5">
                   <a href="#">[ Virtual Machine ]</a>
                   <!-- if this virtue is enabled show this menu -->
@@ -75,7 +75,17 @@
             </div>
           </div>
         </vertical-split-pane>
+        <div class="mui-row border-top">
+          <div class="mui-col-md-4">&nbsp;</div>
+          <div class="mui-col-md-4 form-item text-align-center">
+            <button class="button-delete" type="submit" disabled>Delete</button>
+            <button class="button-submit" type="submit">Save</button>
+            <button class="button-cancel" type="cancel">Cancel</button>
+          </div>
+          <div class="mui-col-md-4"></div>
+        </div>
       </div>
+
     </form>
   </div>
 </div>

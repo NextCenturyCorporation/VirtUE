@@ -1,3 +1,90 @@
-<p>
-  create-virtue works!
-</p>
+<div id="content-container">
+  <div id="content-header" class="virtue-titlebar">
+    <h1 class="virtue-title">Create Virtue</h1>
+  </div>
+
+  <div id="content-main" class="border-top">
+    <form id="create-virtue" method="post">
+      <div id="content" class="virtue-content">
+        <vertical-split-pane
+          primary-component-minsize="60"
+          secondary-component-minsize="40"
+          [primary-component-toggled-off]="false"
+          [secondary-component-toggled-off]="someCondition"
+          local-storage-key="split-pane"
+          primary-component-initialratio="0.8">
+
+          <div class="split-pane-content-primary">
+
+            <div class="mui-row form-item margin-top-15">
+              <div class="mui-col-md-12 padding-left-0 padding-right-0">
+                <input type="text" id="virtue-name" value="" placeholder="Virtue Name" />
+              </div>
+            </div>
+            <div class="mui-row virtue-titlebar">
+              <div class="mui-col-md-12">
+                <h2 class="virtue-title">Virtual Machines</h2>
+                <button class="virtue-button" onclick="activateModal()">Add VM</button>
+              </div>
+            </div>
+            <!-- if there are no virtue, show this message -->
+            <div class="mui-row margin-top-10">
+              <div class="mui-col-md-12">
+                <p class="border-top border-bottom">
+                  No virtual machines are attached to this virtue. To add VM(s), click on the button "Add VM".
+                </p>
+              </div>
+            </div>
+            <!-- if there are virtue machines, show this list -->
+            <div class="mui-container-fluid virtue-list">
+              <div class="mui-row table-header-group">
+                <div class="table-header mui-col-md-5">Virtual Machine</div>
+                <div class="table-header mui-col-md-2">Image Size</div>
+                <div class="table-header mui-col-md-5">Applications</div>
+              </div>
+              <div class="mui-row border-bottom">
+                <div class="table-data mui-col-md-5">
+                  <a class="edit" href="#">[ Virtual Machine ]</a>
+                  <!-- if this virtue is enabled show this menu -->
+                  <span class="active virtue-options">Edit | Disable</span>
+                  <!-- if this virtue is disabled show this menu -->
+                  <span class="active virtue-options">Edit | Remove</span>
+                </div>
+                <div class="table-data mui-col-md-2"># mb</div>
+                <div class="table-data mui-col-md-5">List of Apps</div>
+                <div class="clearfix"></div>
+              </div>
+            </div>
+            <div class="mui-container-fluid">
+              <div class="mui-row paging">
+                <div class="mui-col-md-4 page-number padding-left-0">&nbsp;</div>
+                <div class="mui-col-md-4 page-controls">&nbsp;</div>
+                <div class="mui-col-md-4 page-item-total padding-right-0"># Virtual Machine(s)</div>
+                <div class="clearfix"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="split-pane-content-secondary">
+            <div id="settings" class="virtue-settings">
+              <div class="virtue-titlebar">
+                <h3> Virtue Settings</h3>
+              </div>
+              <app-virtue-settings></app-virtue-settings>
+            </div>
+          </div>
+        </vertical-split-pane>
+        <div class="mui-row border-top">
+          <div class="mui-col-md-4">&nbsp;</div>
+          <div class="mui-col-md-4 form-item text-align-center">
+            <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Create Another Virtue</span>
+            <button class="button-submit" type="submit">Create Virtue</button>
+            <button class="button-cancel" type="cancel">Cancel</button>
+          </div>
+          <div class="mui-col-md-4"></div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

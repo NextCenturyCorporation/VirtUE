@@ -43,6 +43,31 @@
 .tab-pane-content .table-data {
   font-size: 12px;
 }
+
+input[type='color'] {
+  width: 20px;
+}
+.upload-file-input {
+  display: inline-block;
+  width: 15rem;
+}
+.upload-button {
+  background-color: #E9E3E6;
+  border: 1px solid #B2B2B2;
+  border-radius: 0;
+  display: inline-block;
+  margin: 0;
+  padding: 0.45rem 0.7rem;
+  text-align: center;
+  width: 4rem;
+}
+a .fa {
+  color: #736F72;
+}
+ .fa {
+   font-size: 1.2rem;
+ }
+
 .table-header-group {
   border: 1px solid #B2B2B2;
   display: flex;

@@ -8,23 +8,14 @@
    <div class="tab-pane-content">
      <h4>General Settings</h4>
      <div class="mui-row form-item">
-       <span class="mui-col-md-4 label">Select Virtue Color</span>
-       <span class="mui-col-md-6 float-right">
-        <select name="virtue-color">
-          <option>Purple</option>
-          <option>Red</option>
-          <option>Blue</option>
-          <option>Green</option>
-          <option>Yellow</option>
-          <option>Orange</option>
-        </select>
-      </span>
+       <div class="mui-col-md-4 padding-left-0"><label>Select Virtue Color</label></div>
+       <div class="mui-col-md-6 float-right"><input id="virtue-color" type="color" value="#4B3F72" /></div>
      </div>
      <div class="mui-row form-item">
-       <span class="mui-col-md-4">Customize Icon</span>
-       <span class="mui-col-md-8 text-align-right">
-         <input type="text" name="icon" /><input type="button" value="browse" />
-       </span>
+       <div class="mui-col-md-4 padding-left-0"><label>Customize Icon</label></div>
+       <div class="mui-col-md-8 icon-upload">
+         <input type="text" id="icon-file" class="upload-file-input" name="icon" /><input class="upload-button" type="upload-button" value="browse" />
+       </div>
      </div>
      <div class="mui-row form-item">
        <h5>Inter-Virtue Settings</h5>
@@ -69,16 +60,16 @@
         <div class="mui-row">
          <div class="mui-col-md-12">
            <div class="mui-row table-header-group">
-             <div class="mui-col-md-1 table-header">#</div>
+             <div class="mui-col-md-1 table-header"><span>#</span></div>
              <div class="mui-col-md-7 table-header">Address</div>
-             <div class="mui-col-md-2 table-header text-align-center">Enable</div>
-             <div class="mui-col-md-2 table-header text-align-center">Options</div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Enable</span></div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Options</span></div>
            </div>
            <div class="mui-row table-row">
              <div class="mui-col-md-1 table-data">[id]</div>
              <div class="mui-col-md-7 table-data">[address]</div>
              <div class="mui-col-md-2 table-data text-align-center"><input type="checkbox" name="access-enable-[id]" /></div>
-             <div class="mui-col-md-2 table-data text-align-center"><input type="button" name="access-option-[id]" value="X" /></div>
+             <div class="mui-col-md-2 table-data text-align-center"><a href="#"><span class="fa fa-trash" aria-hidden="true"></span></a></div>
            </div>
          </div>
        </div>
@@ -95,10 +86,10 @@
          <div class="mui-col-md-12">
            <div class="mui-row table-header-group">
              <div class="mui-col-md-4 table-header">Description</div>
-             <div class="mui-col-md-2 table-header text-align-center">Read</div>
-             <div class="mui-col-md-2 table-header text-align-center">Write</div>
-             <div class="mui-col-md-2 table-header text-align-center">Execute</div>
-             <div class="mui-col-md-2 table-header text-align-center">Enable</div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Read</span></div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Write</span></div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Execute</span></div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Enable</span></div>
            </div>
            <div class="mui-row">
              <div class="mui-col-md-4 table-data">[description]</div>
@@ -114,8 +105,8 @@
          <div class="mui-col-md-12">
            <div class="mui-row table-header-group">
              <div class="mui-col-md-8 table-header">Description</div>
-             <div class="mui-col-md-2 table-header text-align-center">Status</div>
-             <div class="mui-col-md-2 table-header text-align-center">Enable</div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Status</span></div>
+             <div class="mui-col-md-2 table-header text-align-center"><span>Enable</span></div>
            </div>
            <div class="mui-row">
              <div class="mui-col-md-8 table-data">[printer info]</div>
@@ -136,10 +127,10 @@
        <div class="mui-col-md-12">
          <div class="mui-row table-header-group">
            <div class="mui-col-md-4 table-header">Sensor Control</div>
-           <div class="mui-col-md-2 table-header text-align-center">Default</div>
-           <div class="mui-col-md-2 table-header text-align-center">Low</div>
-           <div class="mui-col-md-2 table-header text-align-center">High</div>
-           <div class="mui-col-md-2 table-header text-align-center">Highest</div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>Default</span></div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>Low</span></div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>High</span></div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>Highest</span></div>
          </div>
          <div class="mui-row">
            <div class="mui-col-md-4 table-data">[network-controller]</div>
@@ -155,10 +146,10 @@
        <div class="mui-col-md-12">
          <div class="mui-row table-header-group">
            <div class="mui-col-md-4 table-header">Sensor Context</div>
-           <div class="mui-col-md-2 table-header text-align-center">Default</div>
-           <div class="mui-col-md-2 table-header text-align-center">Low</div>
-           <div class="mui-col-md-2 table-header text-align-center">High</div>
-           <div class="mui-col-md-2 table-header text-align-center">Highest</div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>Default</span></div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>Low</span></div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>High</span></div>
+           <div class="mui-col-md-2 table-header text-align-center"><span>Highest</span></div>
          </div>
          <div class="mui-row">
            <div class="mui-col-md-4 table-data">In-Resource (Unikernel)</div>
