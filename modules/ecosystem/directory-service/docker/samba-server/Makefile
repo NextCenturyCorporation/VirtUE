@@ -1,4 +1,10 @@
+NAME = savior-server
 FEDORA_VERSION = latest
 
-build:
-	docker build -t samba-savior:$(FEDORA_VERSION) --build-arg FEDORA_VERSION=$(FEDORA_VERSION) .
+.PHONY: build
+
+build: .image.date
+
+.image.date: Dockerfile Makefile init-or-run-samba.sh
+	docker build -t $(NAME) --build-arg FEDORA_VERSION=$(FEDORA_VERSION) .
+	touch -d `docker inspect --format '{{.Created}}' $(NAME)` $@

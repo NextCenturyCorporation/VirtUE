@@ -10,3 +10,5 @@ modules/*/build
 **/*.tfstate.backup
 /modules/ecosystem/directory-service/secrets.auto.tfvars
 modules/ecosystem/directory-service/samba-config
+/modules/ecosystem/directory-service/docker/samba-client/.image.date
+/modules/ecosystem/directory-service/docker/samba-server/.image.date

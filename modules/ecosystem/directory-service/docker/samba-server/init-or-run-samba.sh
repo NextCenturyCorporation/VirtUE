@@ -74,6 +74,9 @@ if [ ! -f "${INITFILE}" ]; then
 			   ${SAMBA_PROVISION_OPTIONS}
 	cp -f /var/lib/samba/private/krb5.conf /etc
 
+	# save a copy for external debugging
+	cp -f /etc/samba/smb.conf /var/lib/samba/smb-copy.conf
+
 	echo "$0: initialized at $(date)" > "${INITFILE}"
 	echo "$0: initialized"
 else
