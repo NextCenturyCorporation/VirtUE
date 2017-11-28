@@ -4,10 +4,12 @@ import java.util.List;
 
 import com.ncc.savior.virtueadmin.data.IVirtueDataAccessObject;
 import com.ncc.savior.virtueadmin.infrastructure.IInfrastructureService;
-import com.ncc.savior.virtueadmin.model.Application;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * Service to handle user available functions of the JHU API.
@@ -22,6 +24,7 @@ public class VirtueUserService {
 	public VirtueUserService(IInfrastructureService infrastructure, IVirtueDataAccessObject virtueDatabase) {
 		this.infrastructure = infrastructure;
 		this.virtueDatabase = virtueDatabase;
+		this.infrastructure.addStateUpdateListener(new StateUpdateListener());
 	}
 
 	public List<VirtueTemplate> getVirtueTemplates(User user, boolean expandIds) {
@@ -44,8 +47,8 @@ public class VirtueUserService {
 		}
 	}
 
-	public List<Application> getApplicationsForVirtue(User user, String virtueId) {
-		List<Application> list = virtueDatabase.getApplicationsForVirtue(user, virtueId);
+	public List<ApplicationDefinition> getApplicationsForVirtue(User user, String virtueId) {
+		List<ApplicationDefinition> list = virtueDatabase.getApplicationsForVirtue(user, virtueId);
 		return list;
 	}
 
@@ -88,7 +91,7 @@ public class VirtueUserService {
 		infrastructure.destroyVirtue(virtue);
 	}
 
-	public Application startApplication(User user, String virtueId, String applicationId) {
+	public ApplicationDefinition startApplication(User user, String virtueId, String applicationId) {
 		return null;
 	}
 
@@ -96,4 +99,16 @@ public class VirtueUserService {
 
 	}
 
+	/**
+	 * Used to help with asynchronous actions
+	 */
+	public class StateUpdateListener {
+		void updateVirtueState(String virtueId, VirtueState state) {
+			virtueDatabase.updateVirtueState(virtueId, state);
+		}
+
+		void updateVmState(String virtueId, String vmId, VmState state) {
+			virtueDatabase.updateVmState(virtueId, vmId, state);
+		}
+	}
 }

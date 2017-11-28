@@ -5,14 +5,14 @@ package com.ncc.savior.virtueadmin.model;
  * 
  *
  */
-public class Application {
+public class ApplicationDefinition {
 	private String id;
 	private String name;
 	private String version;
 	private OS os;
 	private String launchCommand;
 
-	public Application(String id, String name, String version, OS os) {
+	public ApplicationDefinition(String id, String name, String version, OS os) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -20,7 +20,7 @@ public class Application {
 		this.os = os;
 	}
 
-	public Application(String id, String displayName, String version, OS os, String launchCommand) {
+	public ApplicationDefinition(String id, String displayName, String version, OS os, String launchCommand) {
 		this.id=id;
 		this.name=displayName;
 		this.version=version;

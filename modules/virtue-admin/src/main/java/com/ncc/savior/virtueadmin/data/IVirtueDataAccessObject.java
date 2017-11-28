@@ -2,10 +2,12 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.List;
 
-import com.ncc.savior.virtueadmin.model.Application;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * Interface for virtues backend data store.
@@ -22,8 +24,11 @@ public interface IVirtueDataAccessObject {
 
 	VirtueInstance getVirtue(String virtueId);
 
-	List<Application> getApplicationsForVirtue(User user, String virtueId);
+	List<ApplicationDefinition> getApplicationsForVirtue(User user, String virtueId);
 
 	void addVirtueForUser(User user, VirtueInstance virtue);
 
+	void updateVirtueState(String virtueId, VirtueState state);
+
+	void updateVmState(String virtueId, String vmId, VmState state);
 }

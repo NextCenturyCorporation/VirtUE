@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ncc.savior.virtueadmin.model.Application;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -170,11 +170,11 @@ public class VirtueRestService {
 	@GET
 	@Produces("application/json")
 	@Path("user/virtue/{virtueId}/{applicationId}/launch")
-	public Application launchApplication(@PathParam("virtueId") String virtueId,
+	public ApplicationDefinition launchApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
 		try {
 			User user = getUserFromSecurity();
-			Application app = userService.startApplication(user, virtueId, applicationId);
+			ApplicationDefinition app = userService.startApplication(user, virtueId, applicationId);
 			return app;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException

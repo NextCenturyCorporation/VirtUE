@@ -9,7 +9,7 @@
 
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.Set;
+import java.util.Map;
 
 /*
  * Virtue class models a virtual unit with the user, applications etc. 
@@ -18,90 +18,56 @@ import java.util.Set;
  */
 public class VirtueInstance {
 
-	/*
-	 * The unique identifier for this Virtue. Format is implementation-specific.
-	 * Must be unique across all instances
-	 */
 	private String id;
-
+	private String name;
 	private String username;
-
 	private String templateid;
-
-	private Set<String> applications;
-
-	private Set<String> transducers;
-
+	private Map<String, VirtualMachine> vms;
+	// private Set<String> transducers;
 	private VirtueState state;
 
-	private String ipAddress;
-
-	public VirtueInstance(String id, String username, String templateid, Set<String> applications,
-			Set<String> transducers,
-			String ipAddress) {
+	public VirtueInstance(String id, String name, String username, String templateid, Map<String, VirtualMachine> vms,
+			VirtueState state) {
 		super();
 		this.id = id;
+		this.name = name;
 		this.username = username;
 		this.templateid = templateid;
-		this.applications = applications;
-		this.transducers = transducers;
-		this.ipAddress = ipAddress;
+		this.vms = vms;
+		this.state = state;
 	}
 
 	public String getId() {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getTemplateid() {
-		return templateid;
-	}
-
-	public void setTemplateid(String templateid) {
-		this.templateid = templateid;
+	public String getName() {
+		return name;
 	}
 
 	public String getUsername() {
 		return username;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public String getTemplateid() {
+		return templateid;
 	}
 
-	public Set<String> getApplications() {
-		return applications;
-	}
-
-	public void setApplications(Set<String> applications) {
-		this.applications = applications;
-	}
-
-	public Set<String> getTransducers() {
-		return transducers;
-	}
-
-	public void setTransducers(Set<String> transducers) {
-		this.transducers = transducers;
+	public Map<String, VirtualMachine> getVms() {
+		return vms;
 	}
 
 	public VirtueState getState() {
 		return state;
 	}
 
+	@Override
+	public String toString() {
+		return "VirtueInstance [id=" + id + ", name=" + name + ", username=" + username + ", templateid=" + templateid
+				+ ", vms=" + vms + ", state=" + state + "]";
+	}
+
 	public void setState(VirtueState state) {
 		this.state = state;
 	}
-
-	public String getIpAddress() {
-		return ipAddress;
-	}
-
-	public void setIpAddress(String ipAddress) {
-		this.ipAddress = ipAddress;
-	}
-
 }
