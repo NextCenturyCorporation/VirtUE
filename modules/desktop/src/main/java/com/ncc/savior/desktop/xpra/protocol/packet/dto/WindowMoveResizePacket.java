@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -19,27 +18,30 @@ public class WindowMoveResizePacket extends WindowPacket {
 	private int y;
 	private int width;
 	private int height;
+	private int resizeCounter;
 
-	protected WindowMoveResizePacket(int windowId, int x, int y, int width, int height) {
-		super(windowId, PacketType.LOST_WINDOW);
+	protected WindowMoveResizePacket(int windowId, int x, int y, int width, int height, int resizeCounter) {
+		super(windowId, PacketType.WINDOW_MOVE_RESIZE);
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		this.resizeCounter = resizeCounter;
 	}
 
 	public WindowMoveResizePacket(List<Object> list) {
 		this(PacketUtils.asInt(list.get(1)), PacketUtils.asInt(list.get(2)), PacketUtils.asInt(list.get(3)),
-				PacketUtils.asInt(list.get(4)), PacketUtils.asInt(list.get(5)));
+				PacketUtils.asInt(list.get(4)), PacketUtils.asInt(list.get(5)), PacketUtils.asInt(list, 6));
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(windowId);
 		list.add(x);
 		list.add(y);
 		list.add(width);
 		list.add(height);
+		list.add(resizeCounter);
 	}
 
 	public int getX() {
@@ -58,10 +60,14 @@ public class WindowMoveResizePacket extends WindowPacket {
 		return height;
 	}
 
+	public int getResizeCounter() {
+		return resizeCounter;
+	}
+
 	@Override
 	public String toString() {
-		return "WindowMoveResizePacket [windowId=" + windowId + ", x=" + x + ", y=" + y + ", width=" + width
-				+ ", height=" + height + ", type=" + type + "]";
+		return "WindowMoveResizePacket [x=" + x + ", y=" + y + ", width=" + width + ", height=" + height
+				+ ", resizeCounter=" + resizeCounter + ", windowId=" + windowId + ", type=" + type + "]";
 	}
 
 }

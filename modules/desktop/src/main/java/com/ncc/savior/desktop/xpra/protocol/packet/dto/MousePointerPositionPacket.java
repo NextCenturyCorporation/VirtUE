@@ -42,7 +42,7 @@ public class MousePointerPositionPacket extends WindowPacket {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(windowId);
 		list.add(position);
 		list.add(modifiers);

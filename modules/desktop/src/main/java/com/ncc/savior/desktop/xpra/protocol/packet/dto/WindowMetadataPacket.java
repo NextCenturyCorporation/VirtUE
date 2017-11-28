@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public class WindowMetadataPacket extends WindowPacket {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(windowId);
 		list.add(metadataRaw);
 	}
@@ -40,5 +39,11 @@ public class WindowMetadataPacket extends WindowPacket {
 
 	public WindowMetadata getMetadata() {
 		return metadata;
+	}
+
+	@Override
+	public String toString() {
+		return "WindowMetadataPacket [metadataRaw=" + metadataRaw + ", metadata=" + metadata + ", windowId=" + windowId
+				+ ", type=" + type + "]";
 	}
 }

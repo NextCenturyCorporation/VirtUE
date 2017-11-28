@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.xpra.connection.IConnectionErrorCallback;
 import com.ncc.savior.desktop.xpra.protocol.encoder.IEncoder;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketListenerManager;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
@@ -28,14 +30,72 @@ public class OutputStreamPacketSender implements IPacketSender {
 
 	private PacketListenerManager packetListenerManager;
 
-	public OutputStreamPacketSender(OutputStream outputStream, IEncoder encoder) {
+	private boolean threaded;
+
+	private ArrayBlockingQueue<Packet> queue;
+
+	private Thread sendingThread;
+
+	protected boolean stopSendingThread = false;
+
+	private static int threadCount = 1;
+
+	public OutputStreamPacketSender(OutputStream outputStream, IEncoder encoder,
+			IConnectionErrorCallback errorCallback) {
 		this.outputStream = outputStream;
 		this.encoder = encoder;
+		this.threaded = true;
+		if (threaded) {
+			this.queue = new ArrayBlockingQueue<Packet>(20);
+			Runnable packetSendingRunnable = new Runnable() {
+				@Override
+				public void run() {
+					while (!stopSendingThread) {
+						// use poll if we add a method to stop the thread
+						// queue.poll(1, TimeUnit.SECONDS);
+						Packet packet;
+						try {
+							packet = queue.take();
+							doSendPacket(packet);
+						} catch (InterruptedException e) {
+							// logger.debug("Packet Sender was interrupted!", e);
+							errorCallback.onError("PacketSender", new IOException(e));
+						} catch (IOException e) {
+							errorCallback.onError("PacketSender", e);
+						}
+
+					}
+				}
+			};
+			this.sendingThread = new Thread(packetSendingRunnable, "PacketSender-" + threadCount++);
+			sendingThread.setDaemon(true);
+			sendingThread.start();
+		}
 	}
 
 	@Override
-	public synchronized void sendPacket(Packet packet) throws IOException {
+
+	public void sendPacket(Packet packet) throws IOException {
+		if (threaded) {
+			try {
+				queue.put(packet);
+			} catch (InterruptedException e) {
+				logger.debug("Packet Sender interrupted.  This may be intentionally by a close().", e);
+			}
+		} else {
+			doSendPacket(packet);
+		}
+
+	}
+
+	public synchronized void doSendPacket(Packet packet) throws IOException {
+		// if (!packet.getType().equals(PacketType.PING_ECHO)) {
+		// if (!packet.getType().equals(PacketType.DAMAGE_SEQUENCE)) {
+		// if (!packet.getType().equals(PacketType.POINTER_POSITION)) {
 		// logger.debug("Send: " + packet);
+		// }
+		// }
+		// }
 		List<Object> list = packet.toList();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		encoder.encode(baos, list);
@@ -53,11 +113,22 @@ public class OutputStreamPacketSender implements IPacketSender {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Packet Sent: " + packet.toString());
 		}
+		// logger.debug("Sent: " + packet);
 		packetListenerManager.handlePacket(packet);
 	}
 
 	public void setPacketListenerManager(PacketListenerManager packetSentListenerManager) {
 		this.packetListenerManager = packetSentListenerManager;
+
+	}
+
+	@Override
+	public void close() throws IOException {
+		outputStream.close();
+		if (threaded && sendingThread != null) {
+			stopSendingThread = true;
+			sendingThread.interrupt();
+		}
 
 	}
 }

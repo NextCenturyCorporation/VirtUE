@@ -10,7 +10,7 @@ import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.connection.IConnectListener;
 import com.ncc.savior.desktop.xpra.connection.IConnection;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
-import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
+import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.debug.DebugPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
@@ -40,13 +40,14 @@ public class JavaFxTestRunner extends Application {
 		// performance penalty.
 		useDebugHandler = true;
 		if (useDebugHandler) {
+			DebugPacketHandler.clearDefaultDebugFolder();
 			File dir = DebugPacketHandler.getDefaultTimeBasedDirectory();
 			DebugPacketHandler debugHandler = new DebugPacketHandler(dir);
 			client.addPacketListener(debugHandler);
 			client.addPacketSendListener(debugHandler);
 		}
 		JavaFxKeyboard keyboard = new JavaFxKeyboard(new XpraKeyMap());
-		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, primaryStage, keyboard);
+		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, keyboard);
 
 		applicationManager.setDebugOutput(true);
 		client.addConnectListener(new IConnectListener() {
@@ -65,8 +66,8 @@ public class JavaFxTestRunner extends Application {
 				logger.info("Attempting to connect...");
 			}
 		});
-		client.connect(new TcpConnectionFactory(),
-				new TcpConnectionFactory.TcpConnectionParameters("localhost", 10000));
+		client.connect(new SshConnectionFactory(),
+				new SshConnectionFactory.SshConnectionParameters("localhost", 23, "user", "password"));
 	}
 
 }

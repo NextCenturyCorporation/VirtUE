@@ -92,7 +92,7 @@ public abstract class XpraWindow implements IXpraWindow {
 		sendPacket(sendPacket, "focus packet");
 	}
 
-	private void sendPacket(Packet sendPacket, String packetDescription) {
+	protected void sendPacket(Packet sendPacket, String packetDescription) {
 		try {
 			packetSender.sendPacket(sendPacket);
 			if (logger.isDebugEnabled()) {
