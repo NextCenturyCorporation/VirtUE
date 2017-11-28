@@ -40,13 +40,14 @@ public class JavaFxTestRunner extends Application {
 		// performance penalty.
 		useDebugHandler = true;
 		if (useDebugHandler) {
+			DebugPacketHandler.clearDefaultDebugFolder();
 			File dir = DebugPacketHandler.getDefaultTimeBasedDirectory();
 			DebugPacketHandler debugHandler = new DebugPacketHandler(dir);
 			client.addPacketListener(debugHandler);
 			client.addPacketSendListener(debugHandler);
 		}
 		JavaFxKeyboard keyboard = new JavaFxKeyboard(new XpraKeyMap());
-		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, primaryStage, keyboard);
+		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, keyboard);
 
 		applicationManager.setDebugOutput(true);
 		client.addConnectListener(new IConnectListener() {

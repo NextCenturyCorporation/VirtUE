@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -22,8 +21,13 @@ public class FocusPacket extends WindowPacket {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(super.windowId);
+	}
+
+	@Override
+	public String toString() {
+		return "FocusPacket [windowId=" + windowId + ", type=" + type + "]";
 	}
 
 }

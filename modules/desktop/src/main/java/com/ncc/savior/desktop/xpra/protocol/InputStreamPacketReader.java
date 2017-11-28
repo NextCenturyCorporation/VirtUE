@@ -80,6 +80,7 @@ public class InputStreamPacketReader implements IPacketReader {
 		}
 		IEncoder encoder = getEncoder(header);
 		List<Object> list = encoder.decode(input);
+		// logger.debug(list.toString());
 
 		for (Entry<Integer, byte[]> patch : patches.entrySet()) {
 			list.set(patch.getKey(), patch.getValue());
@@ -91,8 +92,12 @@ public class InputStreamPacketReader implements IPacketReader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Built " + packet.toString() + " from " + list.toString());
 		}
+		// if (!(packet instanceof PingPacket) && !(packet instanceof DrawPacket) &&
+		// !(packet instanceof CursorPacket)) {
 		// logger.debug("Receive:" + packet.toString());
+		// }
 		return packet;
+
 	}
 
 	private byte[] readBytes(int numBytes) throws IOException {

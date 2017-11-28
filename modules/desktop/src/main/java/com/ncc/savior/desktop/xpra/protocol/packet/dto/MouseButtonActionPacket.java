@@ -45,7 +45,7 @@ public class MouseButtonActionPacket extends WindowPacket {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(windowId);
 		list.add(button);
 		list.add(pressed);

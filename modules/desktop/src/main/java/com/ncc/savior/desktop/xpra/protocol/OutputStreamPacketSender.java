@@ -74,6 +74,7 @@ public class OutputStreamPacketSender implements IPacketSender {
 	}
 
 	@Override
+
 	public void sendPacket(Packet packet) throws IOException {
 		if (threaded) {
 			try {
@@ -88,7 +89,13 @@ public class OutputStreamPacketSender implements IPacketSender {
 	}
 
 	public synchronized void doSendPacket(Packet packet) throws IOException {
-		// logger.debug("Sending: " + packet);
+		// if (!packet.getType().equals(PacketType.PING_ECHO)) {
+		// if (!packet.getType().equals(PacketType.DAMAGE_SEQUENCE)) {
+		// if (!packet.getType().equals(PacketType.POINTER_POSITION)) {
+		// logger.debug("Send: " + packet);
+		// }
+		// }
+		// }
 		List<Object> list = packet.toList();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		encoder.encode(baos, list);

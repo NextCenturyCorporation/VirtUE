@@ -22,6 +22,6 @@ public class TestClient {
 		client.addPacketListener(debugHandler);
 		client.addPacketSendListener(debugHandler);
         client.connect(new TcpConnectionFactory(), new TcpConnectionFactory.TcpConnectionParameters("localhost", 10000));
-
+		client.close();
     }
 }

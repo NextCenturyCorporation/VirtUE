@@ -1,5 +1,8 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 
 import org.slf4j.Logger;
@@ -9,12 +12,15 @@ import com.ncc.savior.desktop.virtues.VirtueAppDto;
 import com.ncc.savior.desktop.virtues.VirtueDto;
 import com.ncc.savior.desktop.virtues.VirtueService;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -113,8 +119,26 @@ public class VirtueMenuItem {
 					Thread thread = new Thread(new Runnable() {
 						@Override
 						public void run() {
-							virtueService.connectAndStartApp(app);
+							try {
+								virtueService.connectAndStartApp(app);
+							} catch (IOException e) {
+								logger.error("Error starting " + app.getName(), e);
+								Platform.runLater(new Runnable() {
+									@Override
+									public void run() {
+										Alert alert = new Alert(AlertType.ERROR);
+										alert.setTitle("Error starting " + app.getName());
+										alert.setHeaderText(
+												"Error starting '" + app.getName() + "'");
+
+										String text = stacktraceToString(e);
+										alert.setContentText(text);
+										alert.showAndWait();
+									}
+								});
+							}
 						}
+
 					});
 					thread.setDaemon(true);
 					thread.start();
@@ -123,6 +147,15 @@ public class VirtueMenuItem {
 			menu.getItems().add(menuItem);
 		}
 		return menu;
+	}
+
+	private String stacktraceToString(IOException e) {
+		String text;
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		text = sw.toString(); // stack trace as a string
+		return text;
 	}
 
 	private void addEventHandlers() {

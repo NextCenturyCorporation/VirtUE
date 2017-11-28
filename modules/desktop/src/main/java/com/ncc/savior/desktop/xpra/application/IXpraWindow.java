@@ -18,4 +18,6 @@ public interface IXpraWindow extends Closeable {
 	public void setWindowIcon(WindowIconPacket packet);
 
 	public void updateWindowMetadata(WindowMetadataPacket packet);
+
+	public void resize(int width, int height);
 }

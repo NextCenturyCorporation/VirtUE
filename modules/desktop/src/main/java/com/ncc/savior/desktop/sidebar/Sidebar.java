@@ -155,10 +155,6 @@ public class Sidebar {
 		return pane;
 	}
 
-	// private Node getMinimizeMaximize() {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
 
 	private Node getLabel() {
 		Image image = new Image("images/saviorLogo.png");

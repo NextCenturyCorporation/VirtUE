@@ -1,11 +1,13 @@
 package com.ncc.savior.desktop.xpra.protocol.packet;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.FocusPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.HelloPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.KeyActionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
@@ -19,9 +21,11 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.SetDeflatePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnMapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnknownPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
 /**
  * All the PacketTypes found in the Xpra documentation. Implemented classes
@@ -48,8 +52,8 @@ public enum PacketType {
     NEW_TRAY("new-tray"),
     LOST_WINDOW("lost-window", LostWindowPacket.class),
     RAISE_WINDOW("raise-window", RaiseWindowPacket.class),
-    CONFIGURE_OVERRIDE_REDIRECT("configure-override-redirect"),
-    WINDOW_MOVE_RESIZE("window-move-resize"),
+    CONFIGURE_OVERRIDE_REDIRECT("configure-override-redirect", ConfigureOverrideRedirectPacket.class),
+    WINDOW_MOVE_RESIZE("window-move-resize", WindowMoveResizePacket.class),
     WINDOW_RESIZED("window-resized"),
     WINDOW_ICON("window-icon", WindowIconPacket.class),
     WINDOW_METADATA("window-metadata",WindowMetadataPacket.class),
@@ -58,6 +62,7 @@ public enum PacketType {
     NOTIFY_SHOW("notify-show"),
     NOTIFY_CLOSE("notify-close"),
 	DRAW("draw", DrawPacket.class),
+	INITIATE_MOVERESIZE("initiate-moveresize", InitiateMoveResizePacket.class),
     RPC_REPLY("rpc-reply"),
     CONTROL("control"),
     INFO_RESPONSE("info-response"),
@@ -67,7 +72,7 @@ public enum PacketType {
     SET_NOTIFY("set-notify"),
     SET_BELL("set-bell"),
     MAP_WINDOW("map-window", MapWindowPacket.class),
-    UNMAP_WINDOW("unmap-window"),
+    UNMAP_WINDOW("unmap-window", UnMapWindowPacket.class),
     CONFIGURE_WINDOW("configure-window"),
     CLOSE_WINDOW("close-window", CloseWindowPacket.class),
     FOCUS("focus", FocusPacket.class),

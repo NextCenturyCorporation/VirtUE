@@ -4,6 +4,11 @@ import java.net.URI;
 
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 
+/**
+ * Data Transfer Object (DTO) for an application inside a virtue.
+ *
+ *
+ */
 public class VirtueAppDto {
 	private String name;
 	private URI iconUri;

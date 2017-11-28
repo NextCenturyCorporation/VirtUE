@@ -26,9 +26,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketBuilder;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketDistributer;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketListenerManager;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.HelloPacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingEchoPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.PingPacket;
@@ -97,21 +95,6 @@ public class XpraClient implements Closeable {
 				}
 			}
 		});
-
-		internalPacketDistributer.addPacketHandler(PacketType.NEW_WINDOW, new BasePacketHandler(PacketType.NEW_WINDOW) {
-
-			@Override
-			public void handlePacket(Packet packet) {
-				NewWindowPacket p = (NewWindowPacket) packet;
-				ConfigureWindowPacket sendPacket = new ConfigureWindowPacket(p.getWindowId(), p.getX(), p.getY(),
-						p.getWidth(), p.getHeight());
-				try {
-					packetSender.sendPacket(sendPacket);
-				} catch (IOException e) {
-					onIoException(e);
-				}
-			}
-		});
 		sendEncoder = new BencodeEncoder();
 		BaseConnectListener listener = new BaseConnectListener() {
 
@@ -174,17 +157,12 @@ public class XpraClient implements Closeable {
 		}
 	}
 
-	// TODO do we need both sendPAcket method and getPacketSEnder()? Which is
-	// better?
-	public void sendPacket(Packet packet) throws IOException {
-		this.packetSender.sendPacket(packet);
-	}
-
 	public IPacketSender getPacketSender() {
 		return packetSender;
 	}
 
 	private void onIoException(IOException e) {
+		logger.error("Error with Xpra connection", e);
 		close();
 	}
 
