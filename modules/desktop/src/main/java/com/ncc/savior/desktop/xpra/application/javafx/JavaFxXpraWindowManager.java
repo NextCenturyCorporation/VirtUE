@@ -16,7 +16,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -41,6 +40,10 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 	protected Stage stage;
 	protected JavaFxKeyboard keyboard;
 
+	private int insetWidth;
+
+	private int titleBarHeight;
+
 	public JavaFxXpraWindowManager(XpraClient client, int baseWindowId) {
 		super(client, baseWindowId);
 		IKeyboard kb = client.getKeyboard();
@@ -52,15 +55,14 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 		}
 	}
 
-	@Override
-	protected void doWindowMoveResize(WindowMoveResizePacket packet) {
-		logger.warn("Window resize not implemented.  Packet=" + packet);
-	}
+	// @Override
+	// protected void doWindowMoveResize(WindowMoveResizePacket packet) {
+	// logger.warn("Window resize not implemented. Packet=" + packet);
+	// }
 
 	@Override
 	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
 		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyboard(), /* IFocusNotifier */this);
-
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -69,17 +71,19 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 				canvas.setWidth(packet.getWidth());
 				canvas.setHeight(packet.getHeight());
 				pane.getChildren().add(canvas);
-				double x = packet.getX();
-				double y = packet.getY();
-
+				double x = packet.getX() - stage.getX();
+				double y = packet.getY() - stage.getY();
+				if (packet instanceof NewWindowOverrideRedirectPacket) {
+					x -= insetWidth;
+					y -= titleBarHeight;
+				}
+				// double x = packet.getX();
+				// double y = packet.getY();
 				AnchorPane.setTopAnchor(canvas, y);
 				AnchorPane.setLeftAnchor(canvas, x);
 			}
 		});
 		try {
-			if (!(packet instanceof NewWindowOverrideRedirectPacket)) {
-				packet.overrideXy(0, 0);
-			}
 			packetSender.sendPacket(new MapWindowPacket(packet));
 		} catch (IOException e) {
 			logger.error("Error sending MapWindowPacket. Packet=" + packet);
@@ -144,7 +148,7 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	@Override
 	protected void doClose() {
-		this.pane = null;
+		// this.pane = null;
 		final Stage myStage = JavaFxXpraWindowManager.this.stage;
 		JavaFxXpraWindowManager.this.stage = null;
 		if (myStage != null) {
@@ -155,5 +159,13 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 				}
 			});
 		}
+	}
+
+	public void setInsetWith(int insetWidth) {
+		this.insetWidth = insetWidth;
+	}
+
+	public void setTitleBarHeight(int titleBarHeight) {
+		this.titleBarHeight = titleBarHeight;
 	}
 }

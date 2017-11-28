@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
@@ -16,7 +15,7 @@ public class DisconnectPacket extends Packet {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		// do nothing
 	}
 

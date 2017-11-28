@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class WindowIconPacket extends WindowPacket implements IImagePacket {
 	}
 
 	@Override
-	protected void doAddToList(ArrayList<Object> list) {
+	protected void doAddToList(List<Object> list) {
 		list.add(windowId);
 		list.add(width);
 		list.add(height);

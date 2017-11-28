@@ -22,8 +22,12 @@ import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 public class SshConnectionFactory extends BaseConnectionFactory {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(SshConnectionFactory.class);
-	private static final String DEFAULT_COMMAND_DIR = "/run/user/1000/xpra/";
-	private static final String DEFAULT_COMMAND_NAME = "run-xpra";
+	// private static final String DEFAULT_COMMAND_DIR = "/run/user/1000/xpra/";
+	// private static final String DEFAULT_COMMAND_NAME = "run-xpra";
+
+	private static final String DEFAULT_COMMAND_DIR = "";
+	private static final String DEFAULT_COMMAND_NAME = "xpra";
+
 	private static final String DEFAULT_COMMAND_MODE = "_proxy";
 	private static final int DEFAULT_DISPLAY = 8;
 	private String commandDir;

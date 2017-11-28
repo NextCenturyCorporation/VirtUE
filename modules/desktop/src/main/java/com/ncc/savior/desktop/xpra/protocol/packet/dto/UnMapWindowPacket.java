@@ -6,19 +6,18 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
 /**
- * Packet sent by client requesting that a window be closed.
+ * Send when a window is minimized.
  *
  *
  */
-public class CloseWindowPacket extends WindowPacket {
+public class UnMapWindowPacket extends WindowPacket {
 
-	public CloseWindowPacket(int windowId) {
-		super(windowId, PacketType.CLOSE_WINDOW);
+	public UnMapWindowPacket(int windowId) {
+		super(windowId, PacketType.UNMAP_WINDOW);
 	}
 
-	public CloseWindowPacket(List<Object> list) {
-		this(PacketUtils.asInt(list.get(1)));
-
+	public UnMapWindowPacket(List<Object> list) {
+		this(PacketUtils.asInt(list, 1));
 	}
 
 	@Override
@@ -28,6 +27,7 @@ public class CloseWindowPacket extends WindowPacket {
 
 	@Override
 	public String toString() {
-		return "CloseWindowPacket [windowId=" + windowId + ", type=" + type + "]";
+		return "UnMapWindowPacket [windowId=" + windowId + ", type=" + type + "]";
 	}
+
 }
