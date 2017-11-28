@@ -15,6 +15,11 @@ import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
 
+/**
+ * Interface for backend web service.
+ *
+ *
+ */
 public class VirtueService {
 	private XpraConnectionManager connectionManager;
 
