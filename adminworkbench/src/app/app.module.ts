@@ -8,6 +8,8 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { HomeComponent } from './home/home.component';
 import { ConfigComponent } from './config/config.component';
+import { DialogComponent } from './config/dialog/dialog.component';
+import { ModalComponent } from './config/modal/modal.component';
 import { UsersComponent } from './users/users.component';
 import { VirtuesComponent } from './virtues/virtues.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
@@ -74,6 +76,8 @@ const appRoutes: Routes = [
     HomeComponent,
     VirtuesComponent,
     ConfigComponent,
+    DialogComponent,
+    ModalComponent,
     UsersComponent,
     VirtuesComponent,
     CreateVirtueComponent,

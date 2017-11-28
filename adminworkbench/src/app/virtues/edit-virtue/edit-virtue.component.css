@@ -83,6 +83,10 @@ vertical-split-pane:after {
   min-height: 480px;
   overflow-y: scroll;
 }
+.icon-upload {
+  display: block;
+  min-width: 300px;
+}
 .virtue-list .mui-row {
   border-bottom: 1px solid #B2B2B2;
 }
