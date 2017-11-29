@@ -2,10 +2,9 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.util.List;
 
-import com.ncc.savior.desktop.virtues.VirtueDto;
-import com.ncc.savior.desktop.virtues.VirtueDto.VirtueDtoComparator;
 import com.ncc.savior.desktop.virtues.VirtueService;
-import com.ncc.savior.virtueadmin.model.VirtueState;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
 
 import javafx.stage.Stage;
 
@@ -15,7 +14,7 @@ public class SidebarController {
 	private Sidebar sidebar;
 	private Thread virtuePollThread;
 	private boolean terminatePollThread = false;
-	private List<VirtueDto> currentVirtues;
+	private List<DesktopVirtue> currentVirtues;
 	private long pollPeriodMillis = 500;
 	private VirtueChangeHandler changeHandler;
 
@@ -26,7 +25,7 @@ public class SidebarController {
 	}
 
 	public void init(Stage primaryStage) throws Exception {
-		List<VirtueDto> initialVirtues = virtueService.getVirtuesForUser();
+		List<DesktopVirtue> initialVirtues = virtueService.getVirtuesForUser();
 		currentVirtues = initialVirtues;
 		sidebar.start(primaryStage, initialVirtues);
 
@@ -39,7 +38,7 @@ public class SidebarController {
 			@Override
 			public void run() {
 				while (!terminatePollThread) {
-					List<VirtueDto> virtues = virtueService.getVirtuesForUser();
+					List<DesktopVirtue> virtues = virtueService.getVirtuesForUser();
 					detectChangesAndReport(currentVirtues, virtues);
 					currentVirtues = virtues;
 					try {
@@ -55,33 +54,38 @@ public class SidebarController {
 		virtuePollThread.start();
 	}
 
-	protected void detectChangesAndReport(List<VirtueDto> currentVirtues, List<VirtueDto> virtues) {
-		VirtueDtoComparator comparator = new VirtueDto.VirtueDtoComparator();
+	protected void detectChangesAndReport(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues) {
+		DesktopVirtueComparator comparator = new DesktopVirtue.DesktopVirtueComparator();
 		currentVirtues.sort(comparator);
 		virtues.sort(comparator);
 		int cindex = 0;
 		int nindex = 0;
 
 		if (currentVirtues.isEmpty()) {
-			for (VirtueDto virtue : virtues) {
+			for (DesktopVirtue virtue : virtues) {
 				reportAddedVirtue(virtue);
 			}
 			return;
 		}
 
 		if (virtues.isEmpty()) {
-			for (VirtueDto virtue : currentVirtues) {
+			for (DesktopVirtue virtue : currentVirtues) {
 				reportRemovedVirtue(virtue);
 			}
 			return;
 		}
 
 		while ((cindex < currentVirtues.size() && nindex < virtues.size())) {
-			VirtueDto cv = currentVirtues.get(cindex);
-			VirtueDto nv = virtues.get(nindex);
-			int compare = cv.getId().compareTo(nv.getId());
+			DesktopVirtue cv = currentVirtues.get(cindex);
+			DesktopVirtue nv = virtues.get(nindex);
+			int compare;
+			if (cv.getId()!=null) {
+			 compare = cv.getId().compareTo(nv.getId());
+			}else {
+				compare = nv.getId() == null ? 0 : -1;
+			}
 			if (0 == compare) {
-				if (!cv.getName().equals(nv.getName()) || detectStatusChange(cv, nv)) {
+				if (!cv.getName().equals(nv.getName())) {
 					reportChangedVirtue(nv);
 				}
 				cindex++;
@@ -96,40 +100,40 @@ public class SidebarController {
 		}
 	}
 
-	private boolean detectStatusChange(VirtueDto cv, VirtueDto nv) {
-		VirtueState cs = cv.getStatus();
-		VirtueState ns = nv.getStatus();
-		if (cs == null) {
-			if (ns == null) {
-				return false;
-			}else {
-			return !ns.equals(cs);
-			}
-		}else {
-			return !cs.equals(ns);
-		}
+	// private boolean detectStatusChange(DesktopVirtue cv, DesktopVirtue nv) {
+	// VirtueState cs = cv.getStatus();
+	// VirtueState ns = nv.getStatus();
+	// if (cs == null) {
+	// if (ns == null) {
+	// return false;
+	// } else {
+	// return !ns.equals(cs);
+	// }
+	// } else {
+	// return !cs.equals(ns);
+	// }
+	//
+	// }
 
-	}
-
-	protected void reportRemovedVirtue(VirtueDto virtue) {
+	protected void reportRemovedVirtue(DesktopVirtue virtue) {
 		changeHandler.removeVirtue(virtue);
 	}
 
-	protected void reportAddedVirtue(VirtueDto virtue) {
+	protected void reportAddedVirtue(DesktopVirtue virtue) {
 		changeHandler.addVirtue(virtue);
 	}
 
-	protected void reportChangedVirtue(VirtueDto virtue) {
+	protected void reportChangedVirtue(DesktopVirtue virtue) {
 		changeHandler.changeVirtue(virtue);
 	}
 
 	public static interface VirtueChangeHandler {
 
-		void removeVirtue(VirtueDto virtue);
+		void removeVirtue(DesktopVirtue virtue);
 
-		void changeVirtue(VirtueDto virtue);
+		void changeVirtue(DesktopVirtue virtue);
 
-		void addVirtue(VirtueDto virtue);
+		void addVirtue(DesktopVirtue virtue);
 
 	}
 

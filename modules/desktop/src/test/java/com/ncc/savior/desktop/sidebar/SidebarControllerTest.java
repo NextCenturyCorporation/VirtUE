@@ -1,14 +1,16 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
-import com.ncc.savior.desktop.virtues.VirtueAppDto;
-import com.ncc.savior.desktop.virtues.VirtueDto;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
 public class SidebarControllerTest {
 
@@ -20,35 +22,35 @@ public class SidebarControllerTest {
 		VirtueChangeHandler vch = new VirtueChangeHandler() {
 
 			@Override
-			public void removeVirtue(VirtueDto virtue) {
+			public void removeVirtue(DesktopVirtue virtue) {
 				deleted.add(virtue.getId());
 			}
 
 			@Override
-			public void changeVirtue(VirtueDto virtue) {
+			public void changeVirtue(DesktopVirtue virtue) {
 				changed.add(virtue.getId());
 			}
 
 			@Override
-			public void addVirtue(VirtueDto virtue) {
+			public void addVirtue(DesktopVirtue virtue) {
 				added.add(virtue.getId());
 			}
 		};
 		SidebarController sc = new SidebarController(null, null);
 		sc.setVirtueChangeHandler(vch);
-		List<VirtueAppDto> apps = new ArrayList<VirtueAppDto>();
-		VirtueDto v1 = new VirtueDto("1", "1", "1", apps);
-		VirtueDto v2 = new VirtueDto("2", "2", "2", apps);
-		VirtueDto v3 = new VirtueDto("3", "3", "3", apps);
-		VirtueDto v3_2 = new VirtueDto("3", "3-2", "3", apps);
-		VirtueDto v4 = new VirtueDto("4", "4", "4", apps);
-		VirtueDto v5 = new VirtueDto("5", "5", "5", apps);
-		VirtueDto v7 = new VirtueDto("7", "7", "7", apps);
-		VirtueDto v7_2 = new VirtueDto("7", "7-2", "7", apps);
-		VirtueDto v9 = new VirtueDto("9", "9", "9", apps);
-		VirtueDto v10 = new VirtueDto("10", "10", "10", apps);
-		List<VirtueDto> cv = new ArrayList<VirtueDto>();
-		List<VirtueDto> nv = new ArrayList<VirtueDto>();
+		Map<String, DesktopVirtueApplication> apps = new HashMap<String, DesktopVirtueApplication>();
+		DesktopVirtue v1 = new DesktopVirtue("1", "1", "1", apps);
+		DesktopVirtue v2 = new DesktopVirtue("2", "2", "2", apps);
+		DesktopVirtue v3 = new DesktopVirtue("3", "3", "3", apps);
+		DesktopVirtue v3_2 = new DesktopVirtue("3", "3-2", "3", apps);
+		DesktopVirtue v4 = new DesktopVirtue("4", "4", "4", apps);
+		DesktopVirtue v5 = new DesktopVirtue("5", "5", "5", apps);
+		DesktopVirtue v7 = new DesktopVirtue("7", "7", "7", apps);
+		DesktopVirtue v7_2 = new DesktopVirtue("7", "7-2", "7", apps);
+		DesktopVirtue v9 = new DesktopVirtue("9", "9", "9", apps);
+		DesktopVirtue v10 = new DesktopVirtue("10", "10", "10", apps);
+		List<DesktopVirtue> cv = new ArrayList<DesktopVirtue>();
+		List<DesktopVirtue> nv = new ArrayList<DesktopVirtue>();
 		nv.add(v3_2);
 		nv.add(v7_2);
 		nv.add(v5);

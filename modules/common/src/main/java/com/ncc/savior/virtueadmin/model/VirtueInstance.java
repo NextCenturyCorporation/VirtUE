@@ -10,9 +10,7 @@
 package com.ncc.savior.virtueadmin.model;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /*
@@ -29,10 +27,11 @@ public class VirtueInstance {
 	private Map<String, VirtualMachine> vms;
 	// private Set<String> transducers;
 	private VirtueState state;
-	private Set<ApplicationDefinition> applications;
+	private Map<String, ApplicationDefinition> applications;
 
-	public VirtueInstance(String id, String name, String username, String templateId, Set<ApplicationDefinition> apps,
-			Map<String, VirtualMachine> vms, VirtueState state) {
+	public VirtueInstance(String id, String name, String username, String templateId,
+			Map<String, ApplicationDefinition> apps,
+			Map<String, VirtualMachine> vms) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -40,7 +39,6 @@ public class VirtueInstance {
 		this.templateId = templateId;
 		this.applications = apps;
 		this.vms = vms;
-		this.state = state;
 	}
 
 	/**
@@ -54,17 +52,16 @@ public class VirtueInstance {
 
 	public VirtueInstance(VirtueTemplate template, String username) {
 		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
-				getApplicationsFromTemplate(template), new HashMap<String, VirtualMachine>(),
-				VirtueState.UNPROVISIONED);
+				getApplicationsFromTemplate(template), new HashMap<String, VirtualMachine>());
 
 	}
 
-	private static Set<ApplicationDefinition> getApplicationsFromTemplate(VirtueTemplate template) {
-		HashSet<ApplicationDefinition> set = new HashSet<ApplicationDefinition>();
+	private static Map<String, ApplicationDefinition> getApplicationsFromTemplate(VirtueTemplate template) {
+		Map<String, ApplicationDefinition> map = new HashMap<String, ApplicationDefinition>();
 		for (VirtualMachineTemplate vmTemp : template.getVmTemplates()) {
-			set.addAll(vmTemp.getApplications());
+			map.putAll(vmTemp.getApplications());
 		}
-		return set;
+		return map;
 	}
 
 	public String getId() {
@@ -105,7 +102,7 @@ public class VirtueInstance {
 		return templateId;
 	}
 
-	public Set<ApplicationDefinition> getApplications() {
+	public Map<String, ApplicationDefinition> getApplications() {
 		return applications;
 	}
 
@@ -134,8 +131,17 @@ public class VirtueInstance {
 		this.templateId = templateId;
 	}
 
-	protected void setApplications(Set<ApplicationDefinition> applications) {
+	protected void setApplications(Map<String, ApplicationDefinition> applications) {
 		this.applications = applications;
+	}
+
+	public VirtualMachine findVmByApplicationId(String applicationId) {
+		for (VirtualMachine vm :vms.values()) {
+			if (vm.getApplications().containsKey(applicationId)) {
+				return vm;
+			}
+		}
+		return null;
 	}
 
 }

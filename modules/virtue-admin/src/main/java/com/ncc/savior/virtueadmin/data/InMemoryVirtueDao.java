@@ -2,10 +2,8 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -17,6 +15,8 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
 /**
  * Virtue Backend data store implementation using in-memory java data
@@ -50,13 +50,13 @@ public class InMemoryVirtueDao implements IVirtueDataAccessObject {
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
 				OS.LINUX, "gnome-calculator");
 
-		Set<ApplicationDefinition> applications = new HashSet<ApplicationDefinition>();
+		Map<String, ApplicationDefinition> applications = new HashMap<String, ApplicationDefinition>();
 		applicationIdToApplication.put(chrome.getId(), chrome);
 		applicationIdToApplication.put(firefox.getId(), firefox);
 		applicationIdToApplication.put(calculator.getId(), calculator);
-		applications.add(chrome);
-		applications.add(firefox);
-		applications.add(calculator);
+		applications.put(chrome.getId(), chrome);
+		applications.put(firefox.getId(), firefox);
+		applications.put(calculator.getId(), calculator);
 		List<VirtualMachineTemplate> vmTemplates = new ArrayList<VirtualMachineTemplate>();
 		vmTemplates.add(new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Default", OS.LINUX, "default",
 				applications));
@@ -142,6 +142,41 @@ public class InMemoryVirtueDao implements IVirtueDataAccessObject {
 				vm.setState(state);
 			}
 		}
+	}
+
+	@Override
+	public List<DesktopVirtue> getVirtueListForUser(User user) {
+		List<VirtueTemplate> templates = getTemplatesForUser(user);
+		List<VirtueInstance> activeVirtues = getVirtuesForUser(user);
+
+		List<DesktopVirtue> list = new ArrayList<DesktopVirtue>();
+
+		for (VirtueTemplate template : templates) {
+			boolean templateHasInstance = false;
+			for (VirtueInstance instance : activeVirtues) {
+				if (instance.getTemplateid().equals(template.getId())) {
+					templateHasInstance = true;
+					break;
+				}
+			}
+			if (!templateHasInstance) {
+				Map<String, DesktopVirtueApplication> apps = new HashMap<String, DesktopVirtueApplication>();
+				for (ApplicationDefinition app : template.getApplications().values()) {
+					apps.put(app.getId(), new DesktopVirtueApplication(app.getId(), app.getName(), app.getVersion(),
+							app.getOs(), null, -1));
+				}
+				list.add(new DesktopVirtue(null, template.getName(), template.getId(), apps));
+			}
+		}
+		for (VirtueInstance instance : activeVirtues) {
+			Map<String, DesktopVirtueApplication> apps = new HashMap<String, DesktopVirtueApplication>();
+			for (ApplicationDefinition app : instance.getApplications().values()) {
+				apps.put(app.getId(), new DesktopVirtueApplication(app.getId(), app.getName(), app.getVersion(),
+						app.getOs(), null, -1));
+			}
+			list.add(new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateid(), apps));
+		}
+		return list;
 	}
 
 }

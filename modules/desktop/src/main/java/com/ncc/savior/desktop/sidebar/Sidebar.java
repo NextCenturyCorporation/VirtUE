@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
-import com.ncc.savior.desktop.virtues.VirtueDto;
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -62,7 +62,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.virtueService = virtueService;
 	}
 
-	public void start(Stage stage, List<VirtueDto> initialVirtues) throws Exception {
+	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
 		stage.setTitle("Savior");
 
 		VBox pane = new VBox();
@@ -116,7 +116,7 @@ public class Sidebar implements VirtueChangeHandler {
 		return pane;
 	}
 
-	private Node initialVirtueList(Stage primaryStage, List<VirtueDto> initialVirtues) {
+	private Node initialVirtueList(Stage primaryStage, List<DesktopVirtue> initialVirtues) {
 		virtuePane = new VBox();
 		virtuePane.setPrefWidth(width);
 		virtuePane.setAlignment(Pos.BOTTOM_CENTER);
@@ -124,7 +124,7 @@ public class Sidebar implements VirtueChangeHandler {
 		if (debug) {
 			virtuePane.setBorder(new Border(calloutDebugStroke));
 		}
-		for (VirtueDto virtue : initialVirtues) {
+		for (DesktopVirtue virtue : initialVirtues) {
 			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
 			children.add(vmi.getNode());
 			virtueIdToVmi.put(virtue.getId(), vmi);
@@ -178,13 +178,13 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	@Override
-	public void changeVirtue(VirtueDto virtue) {
+	public void changeVirtue(DesktopVirtue virtue) {
 		VirtueMenuItem vmi = virtueIdToVmi.get(virtue.getId());
 		vmi.updateVirtue(virtue);
 	}
 
 	@Override
-	public void addVirtue(VirtueDto virtue) {
+	public void addVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
 		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
 		virtueIdToVmi.put(virtue.getId(), vmi);
@@ -198,7 +198,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
-	public void removeVirtue(VirtueDto virtue) {
+	public void removeVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
 		VirtueMenuItem vmi = virtueIdToVmi.remove(virtue.getId());
 		Platform.runLater(new Runnable() {

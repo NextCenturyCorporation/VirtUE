@@ -1,16 +1,16 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.Set;
+import java.util.Map;
 
 public class VirtualMachineTemplate {
 	private String id;
 	private String name;
 	private OS os;
 	private String templatePath;
-	private Set<ApplicationDefinition> applications;
+	private Map<String, ApplicationDefinition> applications;
 
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
-			Set<ApplicationDefinition> applications) {
+			Map<String, ApplicationDefinition> applications) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -42,7 +42,7 @@ public class VirtualMachineTemplate {
 		return templatePath;
 	}
 
-	public Set<ApplicationDefinition> getApplications() {
+	public Map<String, ApplicationDefinition> getApplications() {
 		return applications;
 	}
 
@@ -62,7 +62,7 @@ public class VirtualMachineTemplate {
 		this.templatePath = templatePath;
 	}
 
-	protected void setApplications(Set<ApplicationDefinition> applications) {
+	protected void setApplications(Map<String, ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 

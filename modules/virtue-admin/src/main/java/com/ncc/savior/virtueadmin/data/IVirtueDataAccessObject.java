@@ -8,6 +8,7 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
  * Interface for virtues backend data store.
@@ -31,4 +32,6 @@ public interface IVirtueDataAccessObject {
 	void updateVirtueState(String virtueId, VirtueState state);
 
 	void updateVmState(String virtueId, String vmId, VmState state);
+
+	List<DesktopVirtue> getVirtueListForUser(User user);
 }

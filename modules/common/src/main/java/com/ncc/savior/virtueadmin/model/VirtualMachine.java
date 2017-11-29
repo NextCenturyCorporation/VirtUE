@@ -1,18 +1,19 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.Set;
+import java.util.Map;
 
 public class VirtualMachine {
 	private String id;
 	private String name;
-	private Set<ApplicationDefinition> applications;
+	// app ID to application
+	private Map<String, ApplicationDefinition> applications;
 	private OS os;
 	private VmState state;
 	private String hostname;
 	private int sshPort;
 	private String infrastructureId;
 
-	public VirtualMachine(String id, String name, Set<ApplicationDefinition> applications, VmState state, OS os,
+	public VirtualMachine(String id, String name, Map<String, ApplicationDefinition> applications, VmState state, OS os,
 			String infrastructureId, String hostname, int sshPort) {
 		super();
 		this.id = id;
@@ -40,7 +41,7 @@ public class VirtualMachine {
 		return name;
 	}
 
-	public Set<ApplicationDefinition> getApplications() {
+	public Map<String, ApplicationDefinition> getApplications() {
 		return applications;
 	}
 
@@ -77,7 +78,7 @@ public class VirtualMachine {
 		this.name = name;
 	}
 
-	protected void setApplications(Set<ApplicationDefinition> applications) {
+	protected void setApplications(Map<String, ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 

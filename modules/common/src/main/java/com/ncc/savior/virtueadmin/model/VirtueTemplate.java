@@ -1,7 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Data Transfer Object (DTO) for templates.
@@ -12,18 +12,18 @@ public class VirtueTemplate {
 	private String id;
 	private String name;
 	private String version;
-	private Set<ApplicationDefinition> applications;
+	private Map<String, ApplicationDefinition> applications;
 	private List<VirtualMachineTemplate> vmTemplates;
 
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
-	public VirtueTemplate(String id, String name, String version, Set<ApplicationDefinition> applications,
+	public VirtueTemplate(String id, String name, String version, Map<String, ApplicationDefinition> applications2,
 			List<VirtualMachineTemplate> vmTemplates) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
-		this.applications = applications;
+		this.applications = applications2;
 		this.vmTemplates = vmTemplates;
 	}
 
@@ -46,7 +46,7 @@ public class VirtueTemplate {
 		return version;
 	}
 
-	public Set<ApplicationDefinition> getApplications() {
+	public Map<String, ApplicationDefinition> getApplications() {
 		return applications;
 	}
 
@@ -67,7 +67,7 @@ public class VirtueTemplate {
 		this.version = version;
 	}
 
-	protected void setApplications(Set<ApplicationDefinition> applications) {
+	protected void setApplications(Map<String, ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 

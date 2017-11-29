@@ -15,7 +15,7 @@
 		<constructor-arg value="localhost" />
 		<constructor-arg value="22" />
 	</bean>
-	<bean name="userService" class="com.ncc.savior.virtueadmin.service.VirtueUserService">
+	<bean name="desktopService" class="com.ncc.savior.virtueadmin.service.DesktopVirtueService">
 		<constructor-arg ref="infrastructureService" />
 		<constructor-arg ref="virtueDao" />
 	</bean>

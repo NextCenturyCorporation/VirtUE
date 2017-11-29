@@ -2,10 +2,9 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.service.VirtueUserService.StateUpdateListener;
+import com.ncc.savior.virtueadmin.service.IStateUpdateListener;
 
 /**
  * Interface for working with different backend infrastructure models and
@@ -14,17 +13,19 @@ import com.ncc.savior.virtueadmin.service.VirtueUserService.StateUpdateListener;
  *
  */
 public interface IInfrastructureService {
+	void addStateUpdateListener(IStateUpdateListener stateUpdateListener);
 
-	VirtueInstance provisionTemplate(User user, VirtueTemplate template, boolean useAlreadyProvisioned);
+	/**
+	 * Get a provisioned instance of a template. The provisioned instance could come
+	 * from a pre-provisioned pool or created.
+	 * 
+	 * @param user
+	 * 
+	 * @param template
+	 * @return
+	 */
+	VirtueInstance getProvisionedVirtueFromTemplate(User user, VirtueTemplate template);
 
-	boolean launchVirtue(VirtueInstance virtue);
-
-	boolean stopVirtue(VirtueInstance virtue);
-
-	boolean destroyVirtue(VirtueInstance virtue);
-
-	VirtualMachine provisionVm(VirtualMachineTemplate vmTemplate);
-
-	void addStateUpdateListener(StateUpdateListener stateUpdateListener);
+	VirtualMachine startVm(VirtualMachine vm);
 
 }
