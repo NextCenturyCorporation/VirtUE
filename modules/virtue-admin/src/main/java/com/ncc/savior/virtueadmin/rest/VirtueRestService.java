@@ -42,7 +42,6 @@ public class VirtueRestService {
 
 	public VirtueRestService() {
 		// this.userService = userService;
-		System.out.println("const");
 	}
 
 	@Autowired
@@ -55,7 +54,8 @@ public class VirtueRestService {
 	public List<VirtueInstance> getAllVirtueByUser() throws URISyntaxException {
 		try {
 			User user = getUserFromSecurity();
-			List<VirtueInstance> virtues = userService.getVirtues(user);
+			// List<VirtueInstance> virtues = userService.getVirtues(user);
+			List<VirtueInstance> virtues = userService.getVirtuesIncludingUnprovisioned(user);
 			return virtues;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException

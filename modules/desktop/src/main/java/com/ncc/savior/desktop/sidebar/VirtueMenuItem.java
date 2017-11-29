@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.virtues.VirtueAppDto;
 import com.ncc.savior.desktop.virtues.VirtueDto;
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -60,7 +61,7 @@ public class VirtueMenuItem {
 		this.virtueService = virtueService;
 		this.virtue = virtue;
 		this.node = createNode();
-		this.contextMenu = createContextMenu();
+		contextMenu = createContextMenu();
 		addEventHandlers();
 	}
 
@@ -69,7 +70,8 @@ public class VirtueMenuItem {
 		ImageView view = new ImageView(image);
 		view.setFitWidth(24);
 		view.setFitHeight(24);
-		label = new Label(virtue.getName());
+
+		label = new Label(getLabel(virtue));
 		// label.setPrefWidth(width);
 		label.setAlignment(Pos.CENTER);
 
@@ -83,6 +85,11 @@ public class VirtueMenuItem {
 		pane.getChildren().add(view);
 		pane.getChildren().add(label);
 		return pane;
+	}
+
+	private String getLabel(VirtueDto virtue) {
+		String status = virtue.getStatus() == null ? "NOT PROVISIONED" : virtue.getStatus().toString();
+		return virtue.getName() + " (" + status + ")";
 	}
 
 	private ContextMenu createContextMenu() {
@@ -128,8 +135,7 @@ public class VirtueMenuItem {
 									public void run() {
 										Alert alert = new Alert(AlertType.ERROR);
 										alert.setTitle("Error starting " + app.getName());
-										alert.setHeaderText(
-												"Error starting '" + app.getName() + "'");
+										alert.setHeaderText("Error starting '" + app.getName() + "'");
 
 										String text = stacktraceToString(e);
 										alert.setContentText(text);
@@ -146,6 +152,23 @@ public class VirtueMenuItem {
 			});
 			menu.getItems().add(menuItem);
 		}
+
+		menu.setOnShown(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				showingMenu = true;
+			}
+		});
+		menu.setOnHidden(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				showingMenu = false;
+			}
+		});
+		// contextMenu.seton
+		// pane.setAlignment(Pos.CENTER);
+		// pane.setPrefWidth(width);
+		// pane.setMinHeight(label.getHeight());
 		return menu;
 	}
 
@@ -164,29 +187,40 @@ public class VirtueMenuItem {
 
 			@Override
 			public void handle(MouseEvent event) {
-				if (showingMenu) {
-					contextMenu.hide();
-				} else {
-					contextMenu.show(node, Side.RIGHT, -3, 0);
+				VirtueState status = virtue.getStatus();
+				if (status == null) {
+					virtueService.provisionVirtue(virtue);
+					return;
 				}
+				switch (status) {
+				case RUNNING:
+					if (showingMenu) {
+						contextMenu.hide();
+					} else {
+						contextMenu.show(node, Side.RIGHT, -3, 0);
+					}
+					break;
+				case STOPPED:
+					virtueService.startVirtue(virtue);
+					break;
+				case UNPROVISIONED:
+					virtueService.provisionVirtue(virtue);
+					return;
+				case STOPPING:
+				case RESUMING:
+				case PAUSED:
+				case PAUSING:
+				case LAUNCHING:
+				case CREATING:
+				case DELETING:
+					// do nothing
+					break;
+				default:
+					break;
+				}
+
 			}
 		});
-		contextMenu.setOnShown(new EventHandler<WindowEvent>() {
-			@Override
-			public void handle(WindowEvent event) {
-				showingMenu = true;
-			}
-		});
-		contextMenu.setOnHidden(new EventHandler<WindowEvent>() {
-			@Override
-			public void handle(WindowEvent event) {
-				showingMenu = false;
-			}
-		});
-		// contextMenu.seton
-		// pane.setAlignment(Pos.CENTER);
-		// pane.setPrefWidth(width);
-		// pane.setMinHeight(label.getHeight());
 		if (debug) {
 			label.setBorder(new Border(subSectionDebugStroke));
 		}
@@ -194,5 +228,16 @@ public class VirtueMenuItem {
 
 	public Node getNode() {
 		return node;
+	}
+
+	public void updateVirtue(VirtueDto virtue) {
+		this.virtue = virtue;
+		String text = getLabel(virtue);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				label.setText(text);
+			}
+		});
 	}
 }

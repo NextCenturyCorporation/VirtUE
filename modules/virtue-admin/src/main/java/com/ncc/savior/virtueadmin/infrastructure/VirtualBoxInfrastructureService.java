@@ -8,7 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -34,12 +38,16 @@ public class VirtualBoxInfrastructureService implements IInfrastructureService {
 	private int sshPort;
 	private String vmName;
 	private List<StateUpdateListener> stateUpdateListeners;
+	private ScheduledExecutorService executorService;
+	private Random rand;
 
 	public VirtualBoxInfrastructureService(String vmName, String hostname, int sshPort) {
 		this.vmName = vmName;
 		this.hostname = hostname;
 		this.sshPort = sshPort;
 		stateUpdateListeners = new ArrayList<StateUpdateListener>();
+		executorService = new ScheduledThreadPoolExecutor(1);
+		this.rand = new Random();
 	}
 
 	@Override
@@ -51,8 +59,8 @@ public class VirtualBoxInfrastructureService implements IInfrastructureService {
 			vms.put(vm.getId(), vm);
 		}
 		VirtueInstance virtue = new VirtueInstance(UUID.randomUUID().toString(), template.getName(), user.getUsername(),
-				template.getId(), vms, VirtueState.CREATING);
-		virtue.setState(VirtueState.STOPPED);
+				template.getId(), template.getApplications(), vms, VirtueState.CREATING);
+		setStatusLater(virtue, VirtueState.STOPPED);
 		return virtue;
 	}
 
@@ -81,7 +89,7 @@ public class VirtualBoxInfrastructureService implements IInfrastructureService {
 				vm.getInfrastructureId());
 		try {
 			Process p = Runtime.getRuntime().exec(command);
-	
+
 			p.waitFor();
 			return true;
 		} catch (IOException | InterruptedException e) {
@@ -97,7 +105,24 @@ public class VirtualBoxInfrastructureService implements IInfrastructureService {
 		for (VirtualMachine vm : map.values()) {
 			success &= launchVm(vm);
 		}
+		setStatusLater(virtue, VirtueState.RUNNING);
 		return success;
+	}
+
+	private void setStatusLater(VirtueInstance virtue, VirtueState state) {
+		executorService.execute(new Runnable() {
+			@Override
+			public void run() {
+				executorService.schedule(new Runnable() {
+					@Override
+					public void run() {
+						for (StateUpdateListener listener:stateUpdateListeners) {
+							listener.updateVirtueState(virtue.getId(), state);
+						}
+					}
+				}, rand.nextInt(5000) + 500, TimeUnit.MILLISECONDS);
+			}
+		});
 	}
 
 	public boolean launchVm(VirtualMachine vm) {

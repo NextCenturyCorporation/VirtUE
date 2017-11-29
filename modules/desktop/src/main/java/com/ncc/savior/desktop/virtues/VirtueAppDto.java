@@ -63,10 +63,14 @@ public class VirtueAppDto {
 		this.connectionParams = connectionParams;
 	}
 
+	public void setStartCommand(String startCommand) {
+		this.startCommand = startCommand;
+	}
+
 	@Override
 	public String toString() {
 		return "VirtueAppDto [name=" + name + ", iconUri=" + iconUri + ", iconLocation=" + iconLocation
-				+ ", connectionParams=" + connectionParams + "]";
+				+ ", connectionParams=" + connectionParams + ", startCommand=" + startCommand + "]";
 	}
 
 	public String getStartCommand() {

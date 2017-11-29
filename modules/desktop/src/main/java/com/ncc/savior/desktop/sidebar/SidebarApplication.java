@@ -18,9 +18,12 @@ public class SidebarApplication extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Sidebar sidebar = new Sidebar(new VirtueService());
-		sidebar.start(primaryStage);
-
+		// TODO use configuration for api
+		//Plumbing and depedency injection
+		VirtueService virtueService = new VirtueService("http://localhost:8080/virtues/");
+		Sidebar sidebar = new Sidebar(virtueService);
+		SidebarController controller = new SidebarController(virtueService, sidebar);
+		controller.init(primaryStage);
 	}
 
 }

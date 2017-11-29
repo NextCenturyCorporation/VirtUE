@@ -13,9 +13,14 @@ repositories {
 mainClassName = "com.ncc.savior.desktop.xpra.application.javafx.JavaFxTestRunner"
 
 dependencies {
+	compile project(':common')
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
+	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.26'
+	compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.2'
+	compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.2'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

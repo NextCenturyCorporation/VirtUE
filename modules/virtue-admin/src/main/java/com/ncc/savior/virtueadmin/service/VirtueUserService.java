@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.virtueadmin.data.IVirtueDataAccessObject;
@@ -37,6 +38,31 @@ public class VirtueUserService {
 		return list;
 	}
 
+	public List<VirtueInstance> getVirtuesIncludingUnprovisioned(User user) {
+		List<VirtueTemplate> templates = virtueDatabase.getTemplatesForUser(user);
+		List<VirtueInstance> list = virtueDatabase.getVirtuesForUser(user);
+		ArrayList<VirtueInstance> newInstances = new ArrayList<VirtueInstance>();
+		for (VirtueTemplate template : templates) {
+			boolean templateHasInstance = false;
+			for (VirtueInstance instance : list) {
+				if (instance.getTemplateid().equals(template.getId())) {
+					templateHasInstance = true;
+					break;
+				}
+			}
+			if (!templateHasInstance) {
+				VirtueInstance instance = new VirtueInstance(template, user.getUsername());
+				newInstances.add(instance);
+			}
+		}
+
+		for (VirtueInstance instance : newInstances) {
+			virtueDatabase.addVirtueForUser(user, instance);
+			list.add(instance);
+		}
+		return list;
+	}
+
 	public VirtueInstance getVirtue(User user, String virtueId) {
 		// TODO more authorization checking
 		VirtueInstance virtue = virtueDatabase.getVirtue(virtueId);
@@ -69,6 +95,8 @@ public class VirtueUserService {
 	public VirtueInstance launchVirtue(User user, String virtueId) {
 		VirtueInstance virtue = virtueDatabase.getVirtue(virtueId);
 		if (infrastructure.launchVirtue(virtue)) {
+			virtue.setState(VirtueState.LAUNCHING);
+			virtueDatabase.updateVirtueState(virtueId, VirtueState.LAUNCHING);
 			return virtue;
 		} else {
 			// TODO better exception
@@ -103,11 +131,11 @@ public class VirtueUserService {
 	 * Used to help with asynchronous actions
 	 */
 	public class StateUpdateListener {
-		void updateVirtueState(String virtueId, VirtueState state) {
+		public void updateVirtueState(String virtueId, VirtueState state) {
 			virtueDatabase.updateVirtueState(virtueId, state);
 		}
 
-		void updateVmState(String virtueId, String vmId, VmState state) {
+		public void updateVmState(String virtueId, String vmId, VmState state) {
 			virtueDatabase.updateVmState(virtueId, vmId, state);
 		}
 	}
