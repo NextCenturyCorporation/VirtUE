@@ -56,6 +56,12 @@ public class VirtueInstance {
 
 	}
 
+	public VirtueInstance(VirtueTemplate template, String username, Map<String, VirtualMachine> vms) {
+		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
+				getApplicationsFromTemplate(template), vms);
+
+	}
+
 	private static Map<String, ApplicationDefinition> getApplicationsFromTemplate(VirtueTemplate template) {
 		Map<String, ApplicationDefinition> map = new HashMap<String, ApplicationDefinition>();
 		for (VirtualMachineTemplate vmTemp : template.getVmTemplates()) {
@@ -74,10 +80,6 @@ public class VirtueInstance {
 
 	public String getUsername() {
 		return username;
-	}
-
-	public String getTemplateid() {
-		return templateId;
 	}
 
 	public Map<String, VirtualMachine> getVms() {

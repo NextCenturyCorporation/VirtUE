@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -91,7 +91,7 @@ public class VirtueMenuItem {
 
 	private ContextMenu createContextMenu() {
 		ContextMenu menu = new ContextMenu();
-		for (DesktopVirtueApplication app : virtue.getApps().values()) {
+		for (ApplicationDefinition app : virtue.getApps().values()) {
 			// URI uri = null;// TODO fix icon, app.getIconUri();
 			// Image appImage = null;
 			// if (uri != null) {

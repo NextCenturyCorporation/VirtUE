@@ -13,6 +13,7 @@ import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplicationManagerFa
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
@@ -68,13 +69,14 @@ public class VirtueService {
 		return list;
 	}
 
-	public void startApplication(DesktopVirtue virtue, DesktopVirtueApplication app) throws IOException {
+	public void startApplication(DesktopVirtue virtue, ApplicationDefinition appDefn) throws IOException {
 		// TODO check to see if we have an XPRA connection
 		String virtueId = virtue.getId();
+		DesktopVirtueApplication app;
 		if (virtueId == null) {
-			app = desktopResourceService.startApplicationFromTemplate(virtue.getTemplateId(), app);
+			app = desktopResourceService.startApplicationFromTemplate(virtue.getTemplateId(), appDefn);
 		} else {
-			app = desktopResourceService.startApplication(virtueId, app);
+			app = desktopResourceService.startApplication(virtueId, appDefn);
 		}
 		ensureConnection(app);
 	}

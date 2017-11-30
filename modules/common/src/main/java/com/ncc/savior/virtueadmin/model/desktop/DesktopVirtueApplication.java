@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.model.desktop;
 
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 
 public class DesktopVirtueApplication {
@@ -21,7 +22,12 @@ public class DesktopVirtueApplication {
 	}
 
 	protected DesktopVirtueApplication() {
-		
+
+	}
+
+	public DesktopVirtueApplication(ApplicationDefinition application, String hostname, int sshPort) {
+		this(application.getId(), application.getName(), application.getVersion(), application.getOs(), hostname,
+				sshPort);
 	}
 
 	public String getId() {

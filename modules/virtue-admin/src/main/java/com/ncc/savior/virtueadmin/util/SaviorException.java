@@ -14,6 +14,11 @@ public class SaviorException extends RuntimeException {
 
 	public static final int UNKNOWN_ERROR = 255;
 	public static final int INVALID_TEMPATE_ID = 12;
+	public static final int VIRTUE_ID_NOT_FOUND = 255;
+	public static final int APPLICATION_ID_NOT_FOUND = 255;
+	public static final int VIRTUE_TEMPLATE_ID_NOT_FOUND = 255;
+	public static final int VM_TEMPLATE_NOT_FOUND = 255;
+
 	private int errorCode;
 
 	public SaviorException(int errorCode, String message) {

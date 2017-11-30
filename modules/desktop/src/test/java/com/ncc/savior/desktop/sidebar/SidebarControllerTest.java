@@ -9,8 +9,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
 public class SidebarControllerTest {
 
@@ -38,7 +38,7 @@ public class SidebarControllerTest {
 		};
 		SidebarController sc = new SidebarController(null, null);
 		sc.setVirtueChangeHandler(vch);
-		Map<String, DesktopVirtueApplication> apps = new HashMap<String, DesktopVirtueApplication>();
+		Map<String, ApplicationDefinition> apps = new HashMap<String, ApplicationDefinition>();
 		DesktopVirtue v1 = new DesktopVirtue("1", "1", "1", apps);
 		DesktopVirtue v2 = new DesktopVirtue("2", "2", "2", apps);
 		DesktopVirtue v3 = new DesktopVirtue("3", "3", "3", apps);

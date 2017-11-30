@@ -12,7 +12,7 @@ package com.ncc.savior.virtueadmin.rest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -42,11 +42,11 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue")
-	public List<DesktopVirtue> getAllVirtueByUser() throws URISyntaxException {
+	public Set<DesktopVirtue> getAllVirtueByUser() throws URISyntaxException {
 		try {
 			User user = getUserFromSecurity();
 			// List<VirtueInstance> virtues = userService.getVirtues(user);
-			List<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser(user);
+			Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser(user);
 			return virtues;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException

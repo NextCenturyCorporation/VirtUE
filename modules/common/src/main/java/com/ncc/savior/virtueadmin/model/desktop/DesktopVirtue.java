@@ -4,13 +4,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+
 public class DesktopVirtue {
 	private String id;
 	private String name;
 	private String templateId;
-	private Map<String, DesktopVirtueApplication> apps;
+	private Map<String, ApplicationDefinition> apps;
 
-	public DesktopVirtue(String id, String name, String templateId, Map<String, DesktopVirtueApplication> apps) {
+	public DesktopVirtue(String id, String name, String templateId, Map<String, ApplicationDefinition> apps) {
 		super();
 		this.name = name;
 		this.apps = apps;
@@ -21,7 +23,7 @@ public class DesktopVirtue {
 	public DesktopVirtue(String id, String name, String templateId) {
 		super();
 		this.name = name;
-		this.apps = new HashMap<String, DesktopVirtueApplication>();
+		this.apps = new HashMap<String, ApplicationDefinition>();
 		this.id = id;
 		this.templateId = templateId;
 	}
@@ -38,11 +40,11 @@ public class DesktopVirtue {
 		this.name = name;
 	}
 
-	public Map<String, DesktopVirtueApplication> getApps() {
+	public Map<String, ApplicationDefinition> getApps() {
 		return apps;
 	}
 
-	public void setApps(Map<String, DesktopVirtueApplication> apps) {
+	public void setApps(Map<String, ApplicationDefinition> apps) {
 		this.apps = apps;
 	}
 
@@ -71,6 +73,16 @@ public class DesktopVirtue {
 
 		@Override
 		public int compare(DesktopVirtue o1, DesktopVirtue o2) {
+			if (o1.getId() == null) {
+				if (o2.getId() == null) {
+					return 0;
+				} else {
+					return -1;
+				}
+			}
+			if (o2.getId() == null) {
+				return 1;
+			}
 			int compare = o1.getId().compareTo(o2.getId());
 			if (compare == 0) {
 				compare = o1.getName().compareTo(o2.getName());

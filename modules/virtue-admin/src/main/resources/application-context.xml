@@ -7,23 +7,29 @@
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<bean name="virtueDao" class="com.ncc.savior.virtueadmin.data.InMemoryVirtueDao">
-	</bean>
-	<bean name="infrastructureService"
-		class="com.ncc.savior.virtueadmin.infrastructure.VirtualBoxInfrastructureService">
-		<constructor-arg value="74568791-b69b-4bc4-a172-47c6e805b7a8" />
+	<bean name="vmManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineVmManager">
 		<constructor-arg value="localhost" />
 		<constructor-arg value="22" />
+		<constructor-arg value="LINUX" />
 	</bean>
-	<bean name="desktopService" class="com.ncc.savior.virtueadmin.service.DesktopVirtueService">
-		<constructor-arg ref="infrastructureService" />
-		<constructor-arg ref="virtueDao" />
+	<bean name="appManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager">
 	</bean>
 	
-	<bean name="restService" class="com.ncc.savior.virtueadmin.rest.VirtueRestService">
-<!-- 		<constructor-arg ref="userService" /> -->
+	<bean name="virtueDao"
+		class="com.ncc.savior.virtueadmin.data.InMemoryActiveVirtueDao">
 	</bean>
-
-
-
+	<bean name="activeVirtueManager" class="com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager">
+		<constructor-arg ref="vmManager" />
+		<constructor-arg ref="virtueDao" />
+	</bean>
+	<bean name="templateManager" class="com.ncc.savior.virtueadmin.data.InMemoryTemplateManager">
+	</bean>
+	<bean name="desktopService"
+		class="com.ncc.savior.virtueadmin.service.DesktopVirtueService">
+		<constructor-arg ref="activeVirtueManager" />
+		<constructor-arg ref="templateManager" />
+		<constructor-arg ref="appManager" />
+	</bean>
 </beans>  

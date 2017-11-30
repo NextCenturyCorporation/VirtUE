@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
@@ -48,16 +49,17 @@ public class DesktopResourceService {
 		return instance;
 	}
 
-	public DesktopVirtueApplication startApplication(String virtueId, DesktopVirtueApplication app) throws IOException {
-		WebTarget target = baseApi.path("virtue").path(virtueId).path(app.getId()).path("start");
+	public DesktopVirtueApplication startApplication(String virtueId, ApplicationDefinition appDefn)
+			throws IOException {
+		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
 		return returnedApp;
 
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, DesktopVirtueApplication app)
+	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
 			throws IOException {
-		WebTarget target = baseApi.path("template").path(templateId).path(app.getId()).path("start");
+		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
 		return returnedApp;
 	}
