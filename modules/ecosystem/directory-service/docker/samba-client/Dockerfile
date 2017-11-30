@@ -10,7 +10,7 @@ RUN yum -y update && \
 	yum -y install samba samba-client krb5-workstation
 # debug tools
 RUN yum -y update && \
-	yum -y install bind-utils iproute procps-ng && \
+	yum -y install bind-utils iproute nmap procps-ng && \
 	yum clean all
 
 RUN mv -f /etc/samba/smb.conf /etc/samba/smb.conf-orig && \

@@ -18,7 +18,7 @@ resource "docker_container" "samba-server" {
   # to prevent samba configuration on startup, uncomment the following line
   #entrypoint = [ "/sbin/init" ]
   name = "saviordc"
-  image = "samba-savior"
+  image = "savior-dc"
   hostname = "saviordc"
   domainname = "${var.sambaDomain}"
   networks = ["savior_network"]

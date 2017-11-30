@@ -7,7 +7,8 @@
 
 set -e
 
-INITFILE=/var/lib/samba/private/.initialized
+SAMBA_CONFIG_DIR="${SAMBA_CONFIG_DIR:-/var/lib/samba}"
+INITFILE="${SAMBA_CONFIG_DIR}/private/.initialized"
 
 printHelp() {
 	echo "$0: usage: $0 [--init-only] [-- <sambaArgs>]"
@@ -15,7 +16,8 @@ printHelp() {
 	cat<<EOF
 	SAMBA_ADMIN_PASSWORD	REQUIRED: Administrator account password
 	SAMBA_DNS				DNS to forward requests to (default: 127.0.0.11 (the docker server))
-	SAMBA_REALM				Domain name (e.g., SUBDOMAIN.COMPANY.COM)
+	SAMBA_REALM				Domain name (e.g., SUBDOMAIN.COMPANY.COM) (default: SAVIOR.NEXTCENTURY.COM)
+	SAMBA_CONFIG_DIR		Where samba config files live (default: /var/lib/samba)
 	SAMBA_PROVISION_OPTIONS Extra options for the 'samba-tool domain provision' command
 	SAMBA_OPTIONS			Extra options for samba (default: --interactive)
 EOF
@@ -57,11 +59,12 @@ if [ ! -f "${INITFILE}" ]; then
 		SAMBA_DNS_OPTION="--option=dns forwarder = ${SAMBA_DNS}"
 		echo "$0: info: SAMBA_DNS_OPTION="${SAMBA_DNS_OPTION}
 	fi
-	rm -rf /etc/samba/smb.conf /etc/krb5.conf /var/lib/samba/*
+	rm -rf /etc/samba/smb.conf /etc/krb5.conf "${SAMBA_CONFIG_DIR}"/*
 	samba-tool domain provision \
 			   --server-role=dc \
 			   --use-rfc2307 \
 			   --dns-backend=SAMBA_INTERNAL \
+			   --targetdir="${SAMBA_CONFIG_DIR}" \
 			   --realm=${SAMBA_REALM} \
 			   --domain=${SAMBA_REALM/.*/} \
 			   --adminpass="${SAMBA_ADMIN_PASSWORD}" \
@@ -74,9 +77,6 @@ if [ ! -f "${INITFILE}" ]; then
 			   ${SAMBA_PROVISION_OPTIONS}
 	cp -f /var/lib/samba/private/krb5.conf /etc
 
-	# save a copy for external debugging
-	cp -f /etc/samba/smb.conf /var/lib/samba/smb-copy.conf
-
 	echo "$0: initialized at $(date)" > "${INITFILE}"
 	echo "$0: initialized"
 else
@@ -87,5 +87,8 @@ fi
 if [ $runSamba -eq 1 ]; then
 	echo "$0: running Samba AD DC server"
 	# need input from /dev/null, otherwise samba will exit immediately if run by docker
-	exec samba $sambaArgs < /dev/null
+	exec samba \
+		 --configfile="${SAMBA_CONFIG_DIR}"/etc/smb.conf \
+		 $sambaArgs \
+		 < /dev/null
 fi

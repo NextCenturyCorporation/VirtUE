@@ -1,4 +1,4 @@
-NAME = savior-server
+NAME = savior-dc
 FEDORA_VERSION = latest
 
 .PHONY: build
