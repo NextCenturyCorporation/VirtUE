@@ -47,12 +47,9 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 
 	protected boolean debugOutput;
 	protected int focusedWindowId;
-
 	private Queue<Packet> packetQueue;
-
 	private boolean graphicsInit = false;
-
-	protected int baseWindowId;;
+	protected int baseWindowId;
 
 	public XpraWindowManager(XpraClient client, int baseWindowId) {
 		this.client = client;
@@ -64,6 +61,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		this.packetTypes.add(PacketType.DRAW);
 		this.packetTypes.add(PacketType.WINDOW_ICON);
 		this.packetTypes.add(PacketType.WINDOW_METADATA);
+		// this.packetTypes.add(PacketType.INITIATE_MOVERESIZE);
 		this.client = client;
 		this.windows = new HashMap<Integer, IXpraWindow>();
 		this.debugOutput = false;
@@ -181,12 +179,11 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 	private void onWindowMoveResize(WindowMoveResizePacket packet) {
 		IXpraWindow window = windows.get(packet.getWindowId());
 		if (window != null) {
-			doWindowMoveResize(packet);
+			// doWindowMoveResize(packet);
 			window.onWindowMoveResize(packet);
 		} else {
 			logger.error("Unable to find window to be drawn to.  ID=" + packet.getWindowId() + " Packet=" + packet);
 		}
-
 	}
 
 	private void onLostWindow(LostWindowPacket lostWindowPacket) {
@@ -261,7 +258,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 
 	protected abstract void doRemoveWindow(LostWindowPacket lostWindowPacket, IXpraWindow window);
 
-	protected abstract void doWindowMoveResize(WindowMoveResizePacket packet);
+	// protected abstract void doWindowMoveResize(WindowMoveResizePacket packet);
 
 	protected abstract IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender iPacketSender);
 
@@ -271,6 +268,13 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		for (Entry<Integer, IXpraWindow> e : windows.entrySet()) {
 			Packet sendPacket = new CloseWindowPacket(e.getKey());
 			sendPacket(sendPacket, "close window packet");
+		}
+	}
+
+	public void resizeWindow(int windowId, int width, int height) {
+		IXpraWindow window = windows.get(windowId);
+		if (window != null) {
+			window.resize(width, height);
 		}
 	}
 }

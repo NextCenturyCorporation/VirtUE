@@ -1,0 +1,57 @@
+<div id="content-container">
+  <div id="content-header" class="mui-container-fluid titlebar">
+    <h1 class="title">Virtues</h1>
+    <button [routerLink]="['create-virtue']">Create New</button>
+    <button disabled>Import Virtue</button>
+  </div>
+
+  <div id="content-main">
+    <div id="content">
+      <div class="mui-container-fluid">
+        <!-- if there are no virtues, show this message -->
+        <div class="mui-row margin-top-10">
+          <div class="mui-col-md-12 padding-left-0">
+            <p class="virtues-message">
+              No virtues have been created at this time. To create a virtue, click on the button "Create New" above.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- if there are virtues, show this list -->
+      <div class="mui-container-fluid">
+        <div class="mui-row virtues-filters">
+          <div class="virtues-filter mui-col-md-12 padding-left-0">All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a></div>
+        </div>
+      </div>
+      <div class="mui-container-fluid table-container">
+        <div class="mui-row table-header-group">
+          <div class="table-header mui-col-md-5">Virtue Name</div>
+          <div class="table-header mui-col-md-2">Virtual Machines</div>
+          <div class="table-header mui-col-md-3">Created By</div>
+          <div class="table-header mui-col-md-2">Date</div>
+        </div>
+        <div class="mui-row table-row">
+          <div class="table-data mui-col-md-5">
+            <a class="edit" routerLink="edit-virtue">[Virtue Name]</a>
+            <!-- if this virtue is enabled show this menu -->
+            <span class="active virtue-options">Duplicate | Disable | Export</span>
+
+            <!-- if this virtue is disabled show this menu -->
+            <span class="active virtue-options">Enable | Delete</span>
+          </div>
+          <div class="table-data mui-col-md-2">[Virtual Machines]</div>
+          <div class="table-data mui-col-md-3">[Created By]</div>
+          <div class="table-data mui-col-md-2">[Status]<br />[Date]</div>
+          <div class="clearfix"></div>
+        </div>
+      </div>
+      <div class="paging">
+        <div class="page-number mui-col-md-4">Page # of #</div>
+        <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
+        <div class="page-item-total mui-col-md-4"># Virtues</div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
+</div>

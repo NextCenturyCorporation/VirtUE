@@ -33,6 +33,14 @@ public class WindowMetadata {
 		return getInt("opacity");
 	}
 
+	public boolean getDecorations() {
+		return getBoolean("decorations", true);
+	}
+
+	public boolean getDecorations(boolean defaultValue) {
+		return getBoolean("decorations", defaultValue);
+	}
+
 	public int getPid() {
 		return getInt("pid");
 	}
@@ -52,6 +60,10 @@ public class WindowMetadata {
 
 	public boolean getMaximized() {
 		return getBoolean("maximized");
+	}
+
+	public Boolean getMaximizedOrNull() {
+		return getBooleanOrNull("maximized");
 	}
 
 	public boolean getModal() {
@@ -78,6 +90,14 @@ public class WindowMetadata {
 		return getInt("transient-for");
 	}
 
+	public boolean getIconic() {
+		return getBoolean("iconic");
+	}
+
+	public Boolean getIconicOrNull() {
+		return getBooleanOrNull("iconic");
+	}
+
 	private List<String> getStringList(String key) {
 		Object ret = metadata.get(key);
 		if (ret != null) {
@@ -99,8 +119,21 @@ public class WindowMetadata {
 	// }
 
 	private boolean getBoolean(String key) {
+		return getBoolean(key, false);
+	}
+
+	private Boolean getBooleanOrNull(String key) {
 		Number num = (Number) metadata.get(key);
-		return num.intValue() > 0;
+		if (num == null) {
+			return null;
+		} else {
+			return num.intValue() > 0;
+		}
+	}
+
+	private boolean getBoolean(String key, boolean defaultValue) {
+		Number num = (Number) metadata.get(key);
+		return (num == null ? defaultValue : num.intValue() > 0);
 	}
 
 	private int getInt(String key) {

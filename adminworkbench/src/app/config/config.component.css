@@ -1,0 +1,59 @@
+.config-split-pane {
+  border-bottom: 1px solid #B2B2B2;
+  border-right: 1px solid #B2B2B2;
+  border-top: 1px solid #B2B2B2;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 748px;
+}
+.vertical-tabs {
+  background-color: #E9E3E6;
+  border-left: 1px solid #b2b2b2;
+  border-right: 1px solid #b2b2b2;
+  min-width: 236px;
+  padding: 0 1.5rem;
+}
+.vertical-tabs .mui-tabs__bar {
+  border: 1px solid #b2b2b2;
+  padding: 0;
+}
+.vertical-tabs .mui-tabs__bar li {
+  background-color: #f2f1f2;
+  border-bottom: 1px solid #b2b2b2;
+  display: block;
+  padding: 0;
+}
+.vertical-tabs .mui-tabs__bar li:last-child {
+  border-bottom: none;
+}
+.vertical-tabs .mui-tabs__bar li.mui--is-active {
+  background-color: #FFF;
+}
+.vertical-tabs .mui-tabs__bar li a {
+  color: #3E3F4E;
+  cursor: pointer;
+  line-height: 48px;
+  text-transform: none;
+}
+.vertical-tabs .mui-tabs__bar li a span.fa {
+  float: right;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 48px;
+  color: #9A8F97;
+}
+.vertical-tabs .mui-tabs__bar li.mui--is-active a span.fa {
+  color:#40709A;
+}
+.vertical-tabs .mui-tabs__bar li a:hover {
+  background-color: rgba(255,255,255,0.65);
+}
+.vertical-tabs-content {
+  border-right: rgba(0,0,0,0.12);
+  height: 100%;
+}
+#vm-list {
+  border: 1px solid #B2B2B2;
+  overflow-y: scroll;
+}

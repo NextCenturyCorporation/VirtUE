@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConnectListenerManager {
+public class ConnectListenerManager implements IConnectListener {
 	protected final List<IConnectListener> listeners = new ArrayList<>();
 
 	public void addListener(IConnectListener listener) {
@@ -19,7 +19,8 @@ public class ConnectListenerManager {
 		}
 	}
 
-	public void onBeforeConnectionAttempt(IConnectionParameters parameters) {
+	@Override
+	public void onBeforeConnectAttempt(IConnectionParameters parameters) {
 		synchronized (listeners) {
 			for (IConnectListener l : listeners) {
 				l.onBeforeConnectAttempt(parameters);
@@ -27,7 +28,8 @@ public class ConnectListenerManager {
 		}
 	}
 
-	public void onConnectionSuccess(IConnection conn) {
+	@Override
+	public void onConnectSuccess(IConnection conn) {
 		synchronized (listeners) {
 			for (IConnectListener l : listeners) {
 				l.onConnectSuccess(conn);
@@ -35,7 +37,8 @@ public class ConnectListenerManager {
 		}
 	}
 
-	public void onConnectionFailure(IConnectionParameters params, IOException e) {
+	@Override
+	public void onConnectFailure(IConnectionParameters params, IOException e) {
 		synchronized (listeners) {
 			for (IConnectListener l : listeners) {
 				l.onConnectFailure(params, e);

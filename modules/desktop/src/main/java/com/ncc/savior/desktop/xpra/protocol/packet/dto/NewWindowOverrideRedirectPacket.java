@@ -6,7 +6,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 
 /**
  * New window override redirect packets indicate there is a new window that is
- * not enclosed in a previous window.
+ * enclosed in a previous window.
  *
  *
  */

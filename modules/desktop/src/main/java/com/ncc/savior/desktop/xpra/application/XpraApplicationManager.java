@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra.application;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,19 +11,27 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
+import com.ncc.savior.desktop.xpra.protocol.packet.DisconnectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.StartupCompletePacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.UnMapWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
 
 /**
  * This is the abstract base class that manages all the {@link XpraApplication}s
  * created by the connection. Most connections will have a single application,
  * but some applications (browsers for example), can open many OS windows.
+ *
  *
  */
 public abstract class XpraApplicationManager {
@@ -58,7 +67,7 @@ public abstract class XpraApplicationManager {
 
 			@Override
 			public void handlePacket(Packet packet) {
-
+				// These are actions that need to be handled by the application, not the window.
 				switch (packet.getType()) {
 				case NEW_WINDOW:
 					NewWindowPacket p = (NewWindowPacket) packet;
@@ -83,9 +92,27 @@ public abstract class XpraApplicationManager {
 				case RAISE_WINDOW:
 					onRaiseWindow((RaiseWindowPacket) packet);
 					break;
+				case WINDOW_METADATA:
+					onMetadatPacket((WindowMetadataPacket) packet);
+					break;
+				case INITIATE_MOVERESIZE:
+					onInitMoveResize((InitiateMoveResizePacket) packet);
+					break;
+				case CONFIGURE_OVERRIDE_REDIRECT:
+					onConfigureRedirectOverride((ConfigureOverrideRedirectPacket) packet);
+					break;
+				case WINDOW_MOVE_RESIZE:
+					onWindowMoveResize((WindowMoveResizePacket) packet);
+					break;
+				case UNMAP_WINDOW:
+					onUnMapWindow((UnMapWindowPacket) packet);
+				case DISCONNECT:
+					onDisconnect((DisconnectPacket) packet);
+					break;
 				default:
 
 				}
+				// these will be passed to their implementation of XpraWindow
 				if (packet instanceof WindowPacket) {
 					WindowPacket p = (WindowPacket) packet;
 					handleWindowPacket(p);
@@ -108,6 +135,48 @@ public abstract class XpraApplicationManager {
 		client.addPacketListener(handler);
 	}
 
+	protected void onUnMapWindow(UnMapWindowPacket packet) {
+		XpraApplication app = applications.get(packet.getWindowId());
+		app.minimize();
+	}
+
+	protected void onInitMoveResize(InitiateMoveResizePacket packet) {
+		XpraApplication app = applications.get(packet.getWindowId());
+		app.initiateMoveResize(packet);
+	}
+
+	protected void onMetadatPacket(WindowMetadataPacket packet) {
+		WindowMetadata meta = packet.getMetadata();
+		XpraApplication app = applications.get(packet.getWindowId());
+		Boolean minimized = meta.getIconicOrNull();
+		if (minimized != null) {
+			if (minimized) {
+				app.minimize();
+			} else {
+				app.restore();
+			}
+		}
+		Boolean maximized = meta.getMaximizedOrNull();
+		if (maximized != null) {
+			if (maximized) {
+				app.maximize();
+			} else {
+				app.unMaximize();
+			}
+		}
+	}
+
+	protected void onDisconnect(DisconnectPacket packet) {
+		client.close();
+		for (XpraApplication app : applications.values()) {
+			try {
+				app.close();
+			} catch (IOException e) {
+				logger.error("Error closing app=" + app);
+			}
+		}
+	}
+
 	protected void onRaiseWindow(RaiseWindowPacket packet) {
 		// do nothing here, window will handle it.
 	}
@@ -121,7 +190,6 @@ public abstract class XpraApplicationManager {
 
 	private void onNewWindow(NewWindowPacket packet) {
 		XpraApplication app = createXpraApplication(packet);
-		app.setDebugOutput(this.setDebugOutput);
 		if (show) {
 			app.Show();
 		}
@@ -146,9 +214,38 @@ public abstract class XpraApplicationManager {
 	}
 
 	protected void onNewWindowOverride(NewWindowOverrideRedirectPacket packet) {
-		int parentId = packet.getMetadata().getParentId();
 		int id = packet.getWindowId();
-		windowIdsToApplications.put(id, windowIdsToApplications.get(parentId));
+		XpraApplication parent = getParentApplication(packet.getWindowId(), packet.getMetadata());
+		if (parent != null) {
+			windowIdsToApplications.put(id, parent);
+		} else {
+			onNewWindow(packet);
+		}
+	}
+
+	protected void onConfigureRedirectOverride(ConfigureOverrideRedirectPacket packet) {
+		int wid = packet.getWindowId();
+		XpraApplication app = applications.get(wid);
+		if (app != null) {
+			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
+		} else {
+			logger.warn("Recieved packet with valid application. packet=" + packet);
+		}
+	}
+
+	protected void onWindowMoveResize(WindowMoveResizePacket packet) {
+		int wid = packet.getWindowId();
+		XpraApplication app = applications.get(wid);
+		if (app != null) {
+			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
+		} else {
+			logger.warn("Recieved packet with valid application. packet=" + packet);
+		}
+	}
+
+	private XpraApplication getParentApplication(int windowId, WindowMetadata windowMetadata) {
+		XpraApplication parent = windowIdsToApplications.get(windowMetadata.getParentId());
+		return parent;
 	}
 
 	protected void onLostWindow(LostWindowPacket packet) {

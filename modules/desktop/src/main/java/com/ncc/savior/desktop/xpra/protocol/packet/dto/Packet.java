@@ -24,7 +24,7 @@ public abstract class Packet {
         return list;
     }
 
-    protected abstract void doAddToList(ArrayList<Object> list);
+	protected abstract void doAddToList(List<Object> list);
 
 	public PacketType getType() {
 		return type;
