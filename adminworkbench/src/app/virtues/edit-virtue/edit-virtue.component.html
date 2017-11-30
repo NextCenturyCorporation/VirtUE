@@ -4,9 +4,9 @@
     <button class="virtue-button" disabled>Disable Virtue</button>
   </div>
 
-  <div id="content-main" class="border-top">
+  <div id="content-main">
     <form id="edit-virtue" method="post">
-      <div id="content" class="virtue-content">
+      <div id="content" class="border-top virtue-content">
         <vertical-split-pane
           primary-component-minsize="60"
           secondary-component-minsize="40"
@@ -37,13 +37,13 @@
               </div>
             </div>
             <!-- if there are virtue machines, show this list -->
-            <div class="mui-container-fluid virtue-list">
+            <div class="mui-container-fluid table-container">
               <div class="mui-row table-header-group">
                 <div class="table-header mui-col-md-5">Virtual Machine</div>
                 <div class="table-header mui-col-md-2">Image Size</div>
                 <div class="table-header mui-col-md-5">Applications</div>
               </div>
-              <div class="mui-row border-bottom">
+              <div class="mui-row table-row">
                 <div class="table-data mui-col-md-5">
                   <a href="#">[ Virtual Machine ]</a>
                   <!-- if this virtue is enabled show this menu -->

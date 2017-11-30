@@ -53,6 +53,8 @@
 }
 
 vertical-split-pane {
+  border-top: 1px solid #b2b2b2;
+  border-right: 1px solid #b2b2b2;
   display: flex;
   flex-direction: column;
   align-content: stretch;
@@ -79,7 +81,8 @@ vertical-split-pane:after {
   padding-right: 1.2rem;
 }
 .split-pane-content-secondary {
-  max-height: 700px;
+  background-color: rgba(233,227,230,0.5);
+  height: 100%;
   min-height: 480px;
   overflow-y: scroll;
 }

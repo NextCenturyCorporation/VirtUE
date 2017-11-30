@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { BreadcrumbsModule } from 'ng2-breadcrumbs';
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
+import { MatDialogModule } from '@angular/material';
 
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
@@ -16,6 +17,7 @@ import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.com
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { FooterComponent } from './footer/footer.component';
+import { DialogDemoComponent } from './dialog-demo/dialog-demo.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -63,8 +65,6 @@ const appRoutes: Routes = [
       }
     ]
   }
-
-
   // { path: '**', component: PageNotFoundComponent }
 ];
 

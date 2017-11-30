@@ -3,8 +3,8 @@
     <h1>Global Settings</h1>
   </div>
 
-  <div id="content-main" class="border-top">
-    <div id="content" class="content">
+  <div id="content-main">
+    <div id="content" class="mui-container-fluid">
         <div class="mui-row config-split-pane">
           <div class="mui-col-md-3 vertical-tabs">
             <div class="margin-top-20">&nbsp;</div>
@@ -146,40 +146,7 @@
             <div class="tab-pane-content">
               <div class="titlebar">
                 <h2 class="title">Resources</h2>
-                <script>
-                  // turn on (returns overlay element)
-                  var overlayEl = mui.overlay('on');
-
-                  // set overlay options
-                  var options = {
-                    'keyboard': true, // teardown when <esc> key is pressed (default: true)
-                    'static': false, // maintain overlay when clicked (default: false)
-                    'onclose': function() {} // execute function when overlay is closed
-                  };
-                  mui.overlay('on', options);
-
-                  // initialize with child element
-                  var childEl = document.createElement('div');
-                  mui.overlay('on', childEl);
-
-                  // options and child element
-                  mui.overlay('on', options, childEl);
-
-                  // teardown (automatically detaches children)
-                  mui.overlay('off');
-                  function activateModal() {
-                    // initialize modal element
-                    var modalEl = document.createElement('div');
-                    modalEl.style.width = '400px';
-                    modalEl.style.height = '300px';
-                    modalEl.style.margin = '100px auto';
-                    modalEl.style.backgroundColor = '#fff';
-
-                    // show modal
-                    mui.overlay('on', modalEl);
-                  }
-                </script>
-                <button class="float-right" onclick="activateModal()">Add Resource</button>
+                <button class="float-right">Add Resource</button>
               </div>
               <form id="config-permissions" method="post">
                 <h3>File System Permissions</h3>
@@ -225,11 +192,7 @@
                   </div>
                   <div class="mui-col-md-4"></div>
                 </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-12">
-                    <p>&nbsp;</p>
-                  </div>
-                </div>
+
               </form>
             </div>
           </div>
@@ -260,7 +223,7 @@
                     <div class="mui-col-md-1 table-data text-align-center"><span>&nbsp;</span></div>
                   </div>
                   <div class="mui-row table-row">
-                    <div class="mui-col-md-6 table-data">[ in-resource (Unikernel) ]</div>
+                    <div class="mui-col-md-6 table-data">In-resource (Unikernel)</div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="off" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="default" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="low" /></span></div>
@@ -269,7 +232,7 @@
                     <div class="mui-col-md-1 table-data text-align-center"><span>&nbsp;</span></div>
                   </div>
                   <div class="mui-row table-row">
-                    <div class="mui-col-md-6 table-data">[ In-Virtue Controller ]</div>
+                    <div class="mui-col-md-6 table-data">In-Virtue Controller</div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="off" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="default" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="low" /></span></div>
@@ -278,7 +241,7 @@
                     <div class="mui-col-md-1 table-data text-align-center"><span>&nbsp;</span></div>
                   </div>
                   <div class="mui-row table-row">
-                    <div class="mui-col-md-6 table-data">[ Logging ]</div>
+                    <div class="mui-col-md-6 table-data">Logging</div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="off" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="default" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="low" /></span></div>
@@ -287,7 +250,7 @@
                     <div class="mui-col-md-1 table-data text-align-center"><span>&nbsp;</span></div>
                   </div>
                   <div class="mui-row table-row">
-                    <div class="mui-col-md-6 table-data"><span class="fa fa-level-up fa-rotate-90 margin-right-10"></span>[ Aggregator ]</div>
+                    <div class="mui-col-md-6 table-data"><span class="fa fa-level-up fa-rotate-90 margin-right-10"></span>Aggregator</div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="off" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="default" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="low" /></span></div>
@@ -296,7 +259,7 @@
                     <div class="mui-col-md-1 table-data text-align-center"><span>&nbsp;</span></div>
                   </div>
                   <div class="mui-row table-row">
-                    <div class="mui-col-md-6 table-data"><span class="fa fa-level-up fa-rotate-90 margin-right-10"></span>[ Archive ]</div>
+                    <div class="mui-col-md-6 table-data"><span class="fa fa-level-up fa-rotate-90 margin-right-10"></span>Archive</div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="off" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="default" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="low" /></span></div>
@@ -305,7 +268,7 @@
                     <div class="mui-col-md-1 table-data text-align-center"><span>&nbsp;</span></div>
                   </div>
                   <div class="mui-row table-row">
-                    <div class="mui-col-md-6 table-data">[ Certificates Infrastructure ]</div>
+                    <div class="mui-col-md-6 table-data">Certificates Infrastructure</div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="off" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="default" /></span></div>
                     <div class="mui-col-md-1 table-data text-align-center"><span><input type="radio" name="input-id" value="low" /></span></div>
@@ -321,11 +284,7 @@
                   </div>
                   <div class="mui-col-md-4"></div>
                 </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-12">
-                    <p>&nbsp;</p>
-                  </div>
-                </div>
+
               </form>
             </div>
           </div>
