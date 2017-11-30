@@ -24,7 +24,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
  * 
  *
  */
-public class InMemoryVirtueDao implements IVirtueDataAccessObject {
+public class InMemoryVirtueDao implements IVirtueDefinitionsDataAccessObject {
 
 	private HashMap<String, List<VirtueTemplate>> userToTemplates;
 	private HashMap<String, List<VirtueInstance>> userToActiveVirtues;

@@ -15,7 +15,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  * 
  *
  */
-public interface IVirtueDataAccessObject {
+public interface IVirtueDefinitionsDataAccessObject {
 
 	List<VirtueTemplate> getTemplatesForUser(User user);
 

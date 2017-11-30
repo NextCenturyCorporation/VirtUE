@@ -5,7 +5,6 @@ import java.io.StringWriter;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import javax.xml.ws.WebServiceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,44 +15,48 @@ import org.slf4j.LoggerFactory;
  * 
  *
  */
-public class WebServiceUtil implements ExceptionMapper<WebServiceException>{
+public class WebServiceUtil implements ExceptionMapper<SaviorException> {
+	private static final String HEADER_ERROR_CODE = "ErrorCode";
 	private static final Logger logger = LoggerFactory.getLogger(WebServiceUtil.class);
 
-	public static WebServiceException createWebserviceException(Logger myLogger, String message, Exception e) {
+	public static SaviorException createWebserviceException(Logger myLogger, String message, Exception e) {
+		if (e instanceof SaviorException) {
+			return (SaviorException) e;
+		}
 		if (myLogger != null) {
 			myLogger.error(message, e);
 		}
-		WebServiceException exception;
+		SaviorException exception;
 		if (message == null) {
-			exception = new WebServiceException(e);
+			exception = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error", e);
 		} else {
-			exception = new WebServiceException(message, e);
+			exception = new SaviorException(SaviorException.UNKNOWN_ERROR, message, e);
 		}
 		return exception;
 	}
 
-	public static WebServiceException createWebserviceException(String message, Exception e) {
+	public static SaviorException createWebserviceException(String message, Exception e) {
 		return createWebserviceException(logger, message, e);
 	}
 
-	public static WebServiceException createWebserviceException(Exception e) {
+	public static SaviorException createWebserviceException(Exception e) {
 		return createWebserviceException(logger, null, e);
 	}
 
-	public static WebServiceException createWebserviceException(Logger myLogger, Exception e) {
+	public static SaviorException createWebserviceException(Logger myLogger, Exception e) {
 		return createWebserviceException(myLogger, null, e);
 	}
 
 	@Override
-	public Response toResponse(WebServiceException exception) {
-		//TODO need to be smarter
+	public Response toResponse(SaviorException exception) {
+		// TODO need to be smarter
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
-		if (exception.getLocalizedMessage()!=null) {
+		if (exception.getLocalizedMessage() != null) {
 			pw.println(exception.getLocalizedMessage());
 		}
 		exception.printStackTrace(pw);
-		String message = sw.toString(); // stack trace as a string
-		return Response.status(400).entity(message).build();
+		String message = "Error Code:" + exception.getErrorCode() + " " + sw.toString(); // stack trace as a string
+		return Response.status(400).entity(message).header(HEADER_ERROR_CODE, exception.getErrorCode()).build();
 	}
 }

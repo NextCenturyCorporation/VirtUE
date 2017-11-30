@@ -7,7 +7,7 @@ import java.util.Set;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
-import com.ncc.savior.virtueadmin.data.IVirtueDataAccessObject;
+import com.ncc.savior.virtueadmin.data.IVirtueDefinitionsDataAccessObject;
 import com.ncc.savior.virtueadmin.infrastructure.IInfrastructureService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
@@ -18,12 +18,13 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 public class DesktopVirtueService {
 	private IInfrastructureService infrastructure;
-	private IVirtueDataAccessObject virtueDatabase;
+	private IVirtueDefinitionsDataAccessObject virtueDatabase;
 
-	public DesktopVirtueService(IInfrastructureService infrastructure, IVirtueDataAccessObject virtueDatabase) {
+	public DesktopVirtueService(IInfrastructureService infrastructure, IVirtueDefinitionsDataAccessObject virtueDatabase) {
 		this.infrastructure = infrastructure;
 		this.virtueDatabase = virtueDatabase;
 		this.infrastructure.addStateUpdateListener(new StateUpdateListener());
@@ -57,6 +58,9 @@ public class DesktopVirtueService {
 	public DesktopVirtueApplication startApplicationFromTemplate(User user, String templateId, String applicationId)
 			throws IOException {
 		VirtueTemplate template = virtueDatabase.getTemplate(templateId);
+		if (template==null) {
+			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
+		}
 		VirtueInstance instance = infrastructure.getProvisionedVirtueFromTemplate(user, template);
 		return startVmAndApplication(applicationId, instance);
 	}
