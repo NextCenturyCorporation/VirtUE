@@ -3797,27 +3797,36 @@ content #content-header {
 content #content-main {
   padding: 0 1.1rem;
 }
-
+/* line 206, ../scss/_layout.scss */
+content #content {
+  display: block;
+}
 /* line 208, ../scss/_layout.scss */
+content #content.content {
+  border-top: 1px solid #b2b2b2;
+  padding-top: 1.1rem;
+}
+
+/* line 215, ../scss/_layout.scss */
 .paging {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
   margin-top: 0.75rem;
 }
-/* line 213, ../scss/_layout.scss */
+/* line 220, ../scss/_layout.scss */
 .paging .page-number {
   text-align: left;
 }
-/* line 216, ../scss/_layout.scss */
+/* line 223, ../scss/_layout.scss */
 .paging .page-controls {
   text-align: center;
 }
-/* line 219, ../scss/_layout.scss */
+/* line 226, ../scss/_layout.scss */
 .paging .page-item-total {
   text-align: right;
 }
 
-/* line 223, ../scss/_layout.scss */
+/* line 230, ../scss/_layout.scss */
 .table-container, .data-list {
   font-family: 'Raleway500', Arial, sans-serif;
   border-top: 1px solid #B2B2B2;
@@ -3829,7 +3838,7 @@ content #content-main {
   overflow-x: hidden;
 }
 
-/* line 234, ../scss/_layout.scss */
+/* line 241, ../scss/_layout.scss */
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;
   display: flex;
@@ -3837,21 +3846,21 @@ content #content-main {
   align-items: stretch;
 }
 
-/* line 240, ../scss/_layout.scss */
+/* line 247, ../scss/_layout.scss */
 .table-row {
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 242, ../scss/_layout.scss */
+/* line 249, ../scss/_layout.scss */
 .table-row:last-child {
   border-bottom: none;
 }
 
-/* line 246, ../scss/_layout.scss */
+/* line 253, ../scss/_layout.scss */
 .table-header, .table-data {
   padding: 0.65rem;
 }
 
-/* line 249, ../scss/_layout.scss */
+/* line 256, ../scss/_layout.scss */
 .table-header {
   font-family: 'Raleway600', Arial, sans-serif;
   background-color: #E9E3E6;
@@ -3859,71 +3868,70 @@ content #content-main {
   align-items: flex-end;
 }
 
-/* line 255, ../scss/_layout.scss */
+/* line 262, ../scss/_layout.scss */
 .table-header span {
   margin-left: auto;
   margin-right: auto;
 }
 
-/* line 259, ../scss/_layout.scss */
+/* line 266, ../scss/_layout.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
 
-/* line 265, ../scss/_layout.scss */
+/* line 272, ../scss/_layout.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 270, ../scss/_layout.scss */
+/* line 277, ../scss/_layout.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 274, ../scss/_layout.scss */
+/* line 281, ../scss/_layout.scss */
 .titlebar {
   display: block;
-  font-size: 14px;
   position: relative;
 }
-/* line 279, ../scss/_layout.scss */
-.titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
+/* line 285, ../scss/_layout.scss */
+.titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
   margin-top: 0;
 }
-/* line 280, ../scss/_layout.scss */
+/* line 286, ../scss/_layout.scss */
 .titlebar h2 {
   font-size: 28px;
 }
-/* line 281, ../scss/_layout.scss */
+/* line 287, ../scss/_layout.scss */
 .titlebar h3 {
   font-size: 24px;
 }
-/* line 282, ../scss/_layout.scss */
+/* line 288, ../scss/_layout.scss */
 .titlebar h4 {
   font-size: 20px;
 }
-/* line 283, ../scss/_layout.scss */
+/* line 289, ../scss/_layout.scss */
 .titlebar h5 {
   font-size: 18px;
 }
-/* line 285, ../scss/_layout.scss */
+/* line 291, ../scss/_layout.scss */
 .titlebar:after {
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 292, ../scss/_layout.scss */
+/* line 298, ../scss/_layout.scss */
 .titlebar .title {
   display: inline-block;
 }
-/* line 296, ../scss/_layout.scss */
+/* line 302, ../scss/_layout.scss */
 .titlebar button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
@@ -3933,7 +3941,7 @@ content #content-main {
   padding: 0.5rem 0.7rem;
 }
 
-/* line 306, ../scss/_layout.scss */
+/* line 312, ../scss/_layout.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3941,19 +3949,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 313, ../scss/_layout.scss */
+/* line 319, ../scss/_layout.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 316, ../scss/_layout.scss */
+/* line 322, ../scss/_layout.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 320, ../scss/_layout.scss */
+/* line 326, ../scss/_layout.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3962,7 +3970,7 @@ footer {
   position: relative;
 }
 
-/* line 327, ../scss/_layout.scss */
+/* line 333, ../scss/_layout.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;

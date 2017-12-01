@@ -203,6 +203,13 @@ content {
   #content-main {
     padding: 0 1.1rem;
   }
+  #content {
+    display: block;
+    &.content {
+      border-top: 1px solid #b2b2b2;
+      padding-top: 1.1rem;
+    }
+  }
 }
 
 .paging {
@@ -273,10 +280,9 @@ content {
 
 .titlebar {
   display: block;
-  font-size: 14px;
   position: relative;
 
-  h2, h3, h4, h5 { margin-top: 0; }
+  h1, h2, h3, h4, h5 { margin-top: 0; }
   h2 { font-size: 28px; }
   h3 { font-size: 24px; }
   h4 { font-size: 20px; }
