@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.sidebar;
 
+import com.ncc.savior.desktop.virtues.DesktopResourceService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 
 import javafx.application.Application;
@@ -18,9 +19,12 @@ public class SidebarApplication extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Sidebar sidebar = new Sidebar(new VirtueService());
-		sidebar.start(primaryStage);
-
+		// TODO use configuration for api
+		//Plumbing and depedency injection
+		VirtueService virtueService = new VirtueService(new DesktopResourceService("http://localhost:8080/desktop/"));
+		Sidebar sidebar = new Sidebar(virtueService);
+		SidebarController controller = new SidebarController(virtueService, sidebar);
+		controller.init(primaryStage);
 	}
 
 }

@@ -1,9 +1,12 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.ncc.savior.desktop.virtues.VirtueDto;
+import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -36,7 +39,7 @@ import javafx.stage.Stage;
  *
  *
  */
-public class Sidebar {
+public class Sidebar implements VirtueChangeHandler {
 	private static final int ICON_SIZE = 32;
 	private boolean debug = false;
 	private BorderStroke paneDebugStroke = new BorderStroke(Color.RED, BorderStrokeStyle.DOTTED, new CornerRadii(0),
@@ -51,12 +54,15 @@ public class Sidebar {
 	private int width = 300;
 	private int height = 800;
 	private VirtueService virtueService;
+	private VBox virtuePane;
+	private Map<String, VirtueMenuItem> virtueIdToVmi;
 
 	public Sidebar(VirtueService virtueService) {
+		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
 	}
 
-	public void start(Stage stage) throws Exception {
+	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
 		stage.setTitle("Savior");
 
 		VBox pane = new VBox();
@@ -68,7 +74,7 @@ public class Sidebar {
 		children.add(getLabel());// , 1, 1);
 		// pane.add(getMinimizeMaximize());
 		children.add(getUserIcon());// , 1, 3);
-		Node vlist = getVirtueList(stage);
+		Node vlist = initialVirtueList(stage, initialVirtues);
 		children.add(vlist);// , 1, 4);
 		// Region region = new Region();
 		// region.setBorder(new Border(sectionDebugStroke));
@@ -110,29 +116,25 @@ public class Sidebar {
 		return pane;
 	}
 
-	private Node getVirtueList(Stage primaryStage) {
-		VBox pane = new VBox();
-		pane.setPrefWidth(width);
-		pane.setAlignment(Pos.BOTTOM_CENTER);
-		List<VirtueDto> virtueList = getVirtues();
-		ObservableList<Node> children = pane.getChildren();
+	private Node initialVirtueList(Stage primaryStage, List<DesktopVirtue> initialVirtues) {
+		virtuePane = new VBox();
+		virtuePane.setPrefWidth(width);
+		virtuePane.setAlignment(Pos.BOTTOM_CENTER);
+		ObservableList<Node> children = virtuePane.getChildren();
 		if (debug) {
-			pane.setBorder(new Border(calloutDebugStroke));
+			virtuePane.setBorder(new Border(calloutDebugStroke));
 		}
-		for (VirtueDto virtue : virtueList) {
+		for (DesktopVirtue virtue : initialVirtues) {
 			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
 			children.add(vmi.getNode());
+			virtueIdToVmi.put(virtue.getId(), vmi);
 		}
-		ScrollPane scroll = new ScrollPane(pane);
+		ScrollPane scroll = new ScrollPane(virtuePane);
 		scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
 		scroll.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 		scroll.prefHeight(height);
 
 		return scroll;
-	}
-
-	private List<VirtueDto> getVirtues() {
-		return virtueService.getVirtuesForUser();
 	}
 
 	private Node getUserIcon() {
@@ -155,7 +157,6 @@ public class Sidebar {
 		return pane;
 	}
 
-
 	private Node getLabel() {
 		Image image = new Image("images/saviorLogo.png");
 		ImageView view = new ImageView(image);
@@ -174,5 +175,37 @@ public class Sidebar {
 			pane.setBorder(new Border(sectionDebugStroke));
 		}
 		return label;
+	}
+
+	@Override
+	public void changeVirtue(DesktopVirtue virtue) {
+		VirtueMenuItem vmi = virtueIdToVmi.get(virtue.getId());
+		vmi.updateVirtue(virtue);
+	}
+
+	@Override
+	public void addVirtue(DesktopVirtue virtue) {
+		ObservableList<Node> children = virtuePane.getChildren();
+		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
+		virtueIdToVmi.put(virtue.getId(), vmi);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				children.add(vmi.getNode());
+			}
+		});
+	}
+
+	@SuppressWarnings("unlikely-arg-type")
+	@Override
+	public void removeVirtue(DesktopVirtue virtue) {
+		ObservableList<Node> children = virtuePane.getChildren();
+		VirtueMenuItem vmi = virtueIdToVmi.remove(virtue.getId());
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				children.remove(vmi);
+			}
+		});
 	}
 }
