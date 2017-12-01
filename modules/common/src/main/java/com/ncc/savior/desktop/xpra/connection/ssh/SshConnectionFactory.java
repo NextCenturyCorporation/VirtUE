@@ -122,6 +122,52 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			return "SshConnectionParameters [port=" + port + ", host=" + host + ", user=" + user + ", password="
 					+ password + ", pem=" + pem + "]";
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((host == null) ? 0 : host.hashCode());
+			result = prime * result + ((password == null) ? 0 : password.hashCode());
+			result = prime * result + ((pem == null) ? 0 : pem.hashCode());
+			result = prime * result + port;
+			result = prime * result + ((user == null) ? 0 : user.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SshConnectionParameters other = (SshConnectionParameters) obj;
+			if (host == null) {
+				if (other.host != null)
+					return false;
+			} else if (!host.equals(other.host))
+				return false;
+			if (password == null) {
+				if (other.password != null)
+					return false;
+			} else if (!password.equals(other.password))
+				return false;
+			if (pem == null) {
+				if (other.pem != null)
+					return false;
+			} else if (!pem.equals(other.pem))
+				return false;
+			if (port != other.port)
+				return false;
+			if (user == null) {
+				if (other.user != null)
+					return false;
+			} else if (!user.equals(other.user))
+				return false;
+			return true;
+		}
 	}
 
 	@Override
