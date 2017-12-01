@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -38,7 +40,13 @@ public class SidebarController {
 			@Override
 			public void run() {
 				while (!terminatePollThread) {
-					List<DesktopVirtue> virtues = virtueService.getVirtuesForUser();
+					List<DesktopVirtue> virtues;
+					try {
+						virtues = virtueService.getVirtuesForUser();
+					} catch (IOException e1) {
+						// TODO do something with connection errors.
+						virtues = new ArrayList<DesktopVirtue>(0);
+					}
 					detectChangesAndReport(currentVirtues, virtues);
 					currentVirtues = virtues;
 					try {
@@ -79,9 +87,15 @@ public class SidebarController {
 			DesktopVirtue cv = currentVirtues.get(cindex);
 			DesktopVirtue nv = virtues.get(nindex);
 			int compare;
-			if (cv.getId()!=null) {
-			 compare = cv.getId().compareTo(nv.getId());
-			}else {
+			if (cv.getId() != null) {
+				// if current virtue doesn't have an ID, a new one with an ID could override it.
+				compare = cv.getTemplateId().compareTo(nv.getTemplateId());
+				if (compare == 0) {
+					// Alter current such that subsequence virtues matching the template will be
+					// added.
+					cv.setId(nv.getId());
+				}
+			} else {
 				compare = nv.getId() == null ? 0 : -1;
 			}
 			if (0 == compare) {

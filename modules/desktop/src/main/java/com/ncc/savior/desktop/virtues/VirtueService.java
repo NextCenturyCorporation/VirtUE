@@ -58,14 +58,9 @@ public class VirtueService {
 		}
 	}
 
-	public List<DesktopVirtue> getVirtuesForUser() {
+	public List<DesktopVirtue> getVirtuesForUser() throws IOException {
 		List<DesktopVirtue> list = null;
-		try {
-			list = desktopResourceService.getVirtues();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		list = desktopResourceService.getVirtues();
 		return list;
 	}
 
