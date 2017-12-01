@@ -9,16 +9,27 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
+/**
+ * Simple {@link IApplicationManager} implementation that uses the
+ * {@link SshXpraInitiater} to start applications on a default display.
+ * 
+ *
+ */
+// TODO credentials need to be added somewhere.
 public class SimpleApplicationManager implements IApplicationManager {
+
+	private static final String DEFAULT_PASSWORD = "password";
+	private static final String DEFAULT_USER = "user";
+	private static final int DEFAULT_DISPLAY = 45;
 
 	@Override
 	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app) {
 		try {
 			SshConnectionParameters params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(),
-					vm.getSshPort(), "user", "password");
+					vm.getSshPort(), DEFAULT_USER, DEFAULT_PASSWORD);
 			SshXpraInitiater initiator = new SshXpraInitiater(params);
 			Set<Integer> displays = initiator.getXpraServers();
-			int display = 45;
+			int display = DEFAULT_DISPLAY;
 			if (displays.isEmpty()) {
 				initiator.startXpraServer(display);
 			} else {

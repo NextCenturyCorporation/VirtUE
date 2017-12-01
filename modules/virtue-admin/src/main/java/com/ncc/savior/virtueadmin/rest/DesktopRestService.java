@@ -1,17 +1,6 @@
-//
-/* 
-*  VirtueRestService.java
-*  
-*  VirtUE - Savior Project
-*  Created by Wole OMitowoju 11/16/2017
-*  
-*  Copyright (c) 2017 Next Century Corporation. All rights reserved.
-*/
-
 package com.ncc.savior.virtueadmin.rest;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Set;
 
 import javax.ws.rs.GET;
@@ -27,8 +16,9 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
-/*
- * VirtueRestService class exposes api about a virtue. 
+/**
+ * Rest resource that handles endpoints specifically for the desktop
+ * application.
  * 
  */
 
@@ -38,14 +28,20 @@ public class DesktopRestService {
 	@Autowired
 	private DesktopVirtueService desktopService;
 
-	// This method returns all the virtues for a user with userToken
+	/**
+	 * Gets all virtues as {@link DesktopVirtue}s for the user including Virtues
+	 * that have not been provisioned yet, but the user has the ability to
+	 * provision.
+	 * 
+	 * @return
+	 * 
+	 */
 	@GET
 	@Produces("application/json")
 	@Path("virtue")
-	public Set<DesktopVirtue> getAllVirtueByUser() throws URISyntaxException {
+	public Set<DesktopVirtue> getAllVirtueByUser() {
 		try {
 			User user = getUserFromSecurity();
-			// List<VirtueInstance> virtues = userService.getVirtues(user);
 			Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser(user);
 			return virtues;
 		} catch (RuntimeException e) {
@@ -56,6 +52,13 @@ public class DesktopRestService {
 		}
 	}
 
+	/**
+	 * Starts an application on a given virtue for the requesting user.
+	 * 
+	 * @param virtueId
+	 * @param applicationId
+	 * @return
+	 */
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}/start")
@@ -72,6 +75,14 @@ public class DesktopRestService {
 		}
 	}
 
+	/**
+	 * Starts the given application after provisioning a new virtue from the given
+	 * template.
+	 * 
+	 * @param templateId
+	 * @param applicationId
+	 * @return
+	 */
 	@GET
 	@Produces("application/json")
 	@Path("template/{templateId}/{applicationId}/start")

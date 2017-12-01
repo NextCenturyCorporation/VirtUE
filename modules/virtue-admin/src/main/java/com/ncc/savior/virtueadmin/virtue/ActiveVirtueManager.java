@@ -14,6 +14,13 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * Implementation of {@link IActiveVirtueManager}.
+ * 
+ * See interface for more descriptions.
+ * 
+ *
+ */
 public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	private IVmManager vmManager;
@@ -26,8 +33,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	}
 
 	@Override
-	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(Set<String> templateIds) {
-		Map<String, Set<VirtueInstance>> virtues = virtueDao.getVirtuesFromTemplateIds(templateIds);
+	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(User user, Set<String> templateIds) {
+		Map<String, Set<VirtueInstance>> virtues = virtueDao.getVirtuesFromTemplateIds(user, templateIds);
 		return virtues;
 	}
 

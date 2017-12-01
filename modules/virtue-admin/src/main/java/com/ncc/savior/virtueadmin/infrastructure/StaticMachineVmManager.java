@@ -14,7 +14,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * Virtual machine manager that assumes it has a single VM which will fulfill
  * all templates and is already running.
  * 
- *
+ * See interface for function comments.
  */
 public class StaticMachineVmManager extends BaseVmManager implements IVmManager {
 	private String hostname;
@@ -62,8 +62,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		Map<String, VirtualMachine> vms = new HashMap<String, VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-					VmState.RUNNING, os,
-					UUID.randomUUID().toString(), hostname, sshPort);
+					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort);
 			vms.put(vm.getId(), vm);
 		}
 		return vms;

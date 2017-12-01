@@ -1,13 +1,3 @@
-//
-/* 
-*  VirtueRestService.java
-*  
-*  VirtUE - Savior Project
-*  Created by Wole OMitowoju 11/16/2017
-*  
-*  Copyright (c) 2017 Next Century Corporation. All rights reserved.
-*/
-
 package com.ncc.savior.virtueadmin.rest;
 
 import javax.ws.rs.Path;

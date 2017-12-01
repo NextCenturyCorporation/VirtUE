@@ -5,6 +5,12 @@ import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * 
+ * Abstract class that handles the management of {@link IStateUpdateListener}s.
+ * 
+ *
+ */
 public abstract class BaseVmManager implements IVmManager {
 
 	private Set<IStateUpdateListener> stateUpdateListeners;

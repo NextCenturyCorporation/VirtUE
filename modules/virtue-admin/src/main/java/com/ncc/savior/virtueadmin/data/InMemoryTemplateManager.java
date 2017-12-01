@@ -16,6 +16,14 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * Implementation of {@link ITemplateManager} that stores all the template data
+ * in memory. This implementation is for testing and demo purpose only and
+ * should not be used in production.
+ * 
+ * See interface for function comments.
+ *
+ */
 public class InMemoryTemplateManager implements ITemplateManager {
 
 	private Map<String, VirtueTemplate> templates;
@@ -163,6 +171,19 @@ public class InMemoryTemplateManager implements ITemplateManager {
 				userToTemplateId.put(user.getUsername(), list);
 			}
 			list.add(virtueTemplateId);
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+					"Unable to find Virtue Template Id=" + virtueTemplateId);
+		}
+	}
+
+	@Override
+	public void revokeVirtueTemplateFromUser(User user, String virtueTemplateId) {
+		if (templates.containsKey(virtueTemplateId)) {
+			Collection<String> list = userToTemplateId.get(user.getUsername());
+			if (list != null) {
+				list.remove(virtueTemplateId);
+			}
 		} else {
 			throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
 					"Unable to find Virtue Template Id=" + virtueTemplateId);

@@ -16,6 +16,13 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * Virtual Box based implementation of {@link IVmManager}.
+ * 
+ * See interface for function comments.
+ * 
+ *
+ */
 public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(VirtualBoxVmManager.class);
