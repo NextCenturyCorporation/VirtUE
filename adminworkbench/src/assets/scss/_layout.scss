@@ -8,6 +8,7 @@ html {
 body {
   margin: 0;
   padding: 0;
+  position: relative;
 }
 a {
   color: #407097;
@@ -47,6 +48,51 @@ hr {
   margin-top: 2rem;
   margin-bottom: 2rem;
   padding: 0;
+}
+
+.cdk-overlay-container {
+  position: absolute;
+  top:0;
+  left: 0;
+  width: 100%;
+
+  .cdk-overlay-backdrop {
+    display: block;
+    height: 100%;
+    position:relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+  }
+}
+
+.mat-dialog-container {
+  background: $white;
+  box-shadow: none;
+}
+app-dialogs {
+  display: block;
+  position: relative;
+  padding: 1.2rem;
+  text-align: center;
+
+  .mat-dialog-title {
+    text-align: left;
+  }
+  .mat-dialog-title {
+    margin: 0;
+  }
+  .mat-dialog-actions {
+    display: block;
+  }
+  button[type='submit'] {
+    background-color: $grayBlue;
+    border-radius: 0;
+    color: $white;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    margin-right: 10px;
+  }
 }
 
 #wrapper {

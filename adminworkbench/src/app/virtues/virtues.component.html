@@ -35,10 +35,10 @@
           <div class="table-data mui-col-md-5">
             <a class="edit" routerLink="edit-virtue">[Virtue Name]</a>
             <!-- if this virtue is enabled show this menu -->
-            <span class="active virtue-options">Duplicate | Disable | Export</span>
+            <span class="active virtue-options">Duplicate | <a mat-button (click)="openDialog('1','disable')">Disable</a> | Export</span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span class="active virtue-options">Enable | Delete</span>
+            <span class="active virtue-options">Enable | <a mat-button (click)="openDialog('1','delete')">Delete</a></span>
           </div>
           <div class="table-data mui-col-md-2">[Virtual Machines]</div>
           <div class="table-data mui-col-md-3">[Created By]</div>

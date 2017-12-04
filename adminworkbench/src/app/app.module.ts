@@ -1,7 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatDialog } from '@angular/material';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
 
 import { BreadcrumbsModule } from 'ng2-breadcrumbs';
@@ -19,7 +20,7 @@ import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settin
 import { FooterComponent } from './footer/footer.component';
 import { AddUserComponent } from './users/add-user/add-user.component';
 import { EditUserComponent } from './users/edit-user/edit-user.component';
-import { DialogTestComponent } from './dialog-test/dialog-test.component';
+import { DialogsComponent } from './dialogs/dialogs.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -44,18 +45,20 @@ const appRoutes: Routes = [
     VirtuesComponent,
     ConfigComponent,
     UsersComponent,
-    VirtuesComponent,
-    CreateVirtueComponent,
-    EditVirtueComponent,
-    VirtueSettingsComponent,
     AddUserComponent,
     EditUserComponent,
-    DialogTestComponent
+    VirtuesComponent,
+    VirtueSettingsComponent,
+    CreateVirtueComponent,
+    EditVirtueComponent,
+    DialogsComponent
   ],
   imports: [
     BreadcrumbsModule,
-    BrowserAnimationsModule,
     BrowserModule,
+    FormsModule,
+    MatDialogModule,
+    BrowserAnimationsModule,
     SplitPaneModule,
     RouterModule.forRoot(appRoutes)
   ],
@@ -63,7 +66,8 @@ const appRoutes: Routes = [
     RouterModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [DialogsComponent]
 })
 
 export class AppModule { }
