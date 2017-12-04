@@ -75,13 +75,14 @@ if [ ! -f "${INITFILE}" ]; then
 			   --option="show add printer wizard = no" \
 			   "${SAMBA_DNS_OPTION}" \
 			   ${SAMBA_PROVISION_OPTIONS}
-	cp -f /var/lib/samba/private/krb5.conf /etc
-
 	echo "$0: initialized at $(date)" > "${INITFILE}"
 	echo "$0: initialized"
 else
 	echo "$0: already initialized"
 fi
+
+[ -e /etc/krb5.conf ] && echo "$0: kerberos config already exists, overwriting"
+cp -f --backup=existing /var/lib/samba/private/krb5.conf /etc
 
 # run
 if [ $runSamba -eq 1 ]; then
