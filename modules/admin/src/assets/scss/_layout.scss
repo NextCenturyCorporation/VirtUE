@@ -70,20 +70,21 @@ hr {
   background: $white;
   box-shadow: none;
 }
-app-dialogs {
-  display: block;
-  position: relative;
-  padding: 1.2rem;
-  text-align: center;
-
-  .mat-dialog-title {
-    text-align: left;
-  }
-  .mat-dialog-title {
-    margin: 0;
-  }
-  .mat-dialog-actions {
+mat-dialog-container {
+  app-dialogs {
     display: block;
+    position: relative;
+    padding: 1.2rem;
+    text-align: center;
+    .mat-dialog-title {
+      text-align: left;
+    }
+    .mat-dialog-title {
+      margin: 0;
+    }
+    .mat-dialog-actions {
+      display: block;
+    }
   }
   button[type='submit'] {
     background-color: $grayBlue;
@@ -275,8 +276,6 @@ content {
 }
 .table-container, .data-list {
   @include ralewayMedium;
-  border-top: 1px solid #B2B2B2;
-  border-bottom: 1px solid #B2B2B2;
   max-height: 540px;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -284,6 +283,19 @@ content {
   overflow-x: hidden;
 }
 
+.table-container {
+  border: 1px solid #B2B2B2;
+}
+
+.data-list {
+  border-top: 1px solid #B2B2B2;
+  border-bottom: 1px solid #B2B2B2;
+  .table-header-group {
+    border-right: 1px solid #B2B2B2;
+    border-bottom: 1px solid #B2B2B2;
+    border-left: 1px solid #B2B2B2;
+  }
+}
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;
   display: flex;
@@ -342,15 +354,17 @@ content {
   }
 
   .title {
-    display: inline-block;
+    display: block;
+    float: left;
   }
 
   button {
    background-color: #E9E3E6;
    border: 1px solid #B2B2B2;
    border-radius: 0;
-   display: inline-block;
-   margin: 0 0 0 1.5rem;
+   display: block;
+   float: left;
+   margin: 0.25rem 0 0 1.5rem;
    padding: 0.5rem 0.7rem;
  }
 }

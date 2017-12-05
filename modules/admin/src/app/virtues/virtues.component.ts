@@ -19,12 +19,6 @@ export class VirtuesComponent implements OnInit {
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    if (dialogType == 'delete') {
-      console.log('user wants to delete virtue #' + id);
-    } else if (dialogType == 'disable'){
-      console.log('user wants to disable virtue #' + id);
-    }
-
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
     });

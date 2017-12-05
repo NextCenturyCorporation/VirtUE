@@ -25,7 +25,7 @@
             <div class="mui-row virtue-titlebar">
               <div class="mui-col-md-12">
                 <h2 class="virtue-title">Virtual Machines</h2>
-                <button class="virtue-button" onclick="activateModal()">Add VM</button>
+                <button mat-button class="virtue-button" (click)="activateModal('add')">Add VM</button>
               </div>
             </div>
             <!-- if there are no virtue, show this message -->
@@ -37,7 +37,7 @@
               </div>
             </div>
             <!-- if there are virtue machines, show this list -->
-            <div class="mui-container-fluid table-container">
+            <div class="mui-container-fluid data-list">
               <div class="mui-row table-header-group">
                 <div class="table-header mui-col-md-5">Virtual Machine</div>
                 <div class="table-header mui-col-md-2">Image Size</div>
@@ -45,11 +45,13 @@
               </div>
               <div class="mui-row table-row">
                 <div class="table-data mui-col-md-5">
-                  <a href="#">[ Virtual Machine ]</a>
-                  <!-- if this virtue is enabled show this menu -->
-                  <span class="active virtue-options">Edit | Disable</span>
-                  <!-- if this virtue is disabled show this menu -->
-                  <span class="active virtue-options">Edit | Remove</span>
+                  <a mat-button (click)="activateModal('edit')">[ Virtual Machine ]</a>
+                  <span class="active virtue-options">
+                    <a (click)="activateModal('edit')">Edit</a> | <a href="#">Disable</a>
+                  </span>
+                  <span class="active virtue-options">
+                    <a (click)="activateModal('edit')">Edit</a> | <a href="#">Remove</a>
+                  </span>
                 </div>
                 <div class="table-data mui-col-md-2"># mb</div>
                 <div class="table-data mui-col-md-5">List of Apps</div>
@@ -78,7 +80,7 @@
         <div class="mui-row border-top">
           <div class="mui-col-md-4">&nbsp;</div>
           <div class="mui-col-md-4 form-item text-align-center">
-            <button class="button-delete" type="submit" disabled>Delete</button>
+            <button mat-button (click)="deleteVirtue()" disabled>Delete</button>
             <button class="button-submit" type="submit">Save</button>
             <button class="button-cancel" type="cancel">Cancel</button>
           </div>

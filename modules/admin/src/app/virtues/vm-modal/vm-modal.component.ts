@@ -3,23 +3,22 @@ import { MatDialogRef } from '@angular/material';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
 @Component({
-  selector: 'app-dialogs',
-  templateUrl: './dialogs.component.html',
-  styleUrls: ['./dialogs.component.css']
+  selector: 'app-vm-modal',
+  templateUrl: './vm-modal.component.html',
+  styleUrls: ['./vm-modal.component.css']
 })
-export class DialogsComponent implements OnInit {
+export class VmModalComponent implements OnInit {
 
-  form: FormGroup;
-  
   constructor(
     //private formBuilder: FormBuilder,
-    private dialogRef: MatDialogRef<DialogsComponent>
+    private dialogRef: MatDialogRef<VmModalComponent>
   ) {}
 
   ngOnInit() {
   }
 
-  confirmSelection() {
+  saveVMList() {
     this.dialogRef.close();
   }
+
 }

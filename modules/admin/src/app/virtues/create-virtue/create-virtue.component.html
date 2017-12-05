@@ -24,7 +24,7 @@
             <div class="mui-row virtue-titlebar">
               <div class="mui-col-md-12">
                 <h3 class="virtue-title">Virtual Machines</h3>
-                <button class="virtue-button" onclick="activateModal()">Add VM</button>
+                <button mat-button class="virtue-button" (click)="activateModal()">Add VM</button>
               </div>
             </div>
             <!-- if there are no virtue, show this message -->
@@ -36,7 +36,7 @@
               </div>
             </div>
             <!-- if there are virtue machines, show this list -->
-            <div class="mui-container-fluid table-container">
+            <div class="mui-container-fluid data-list">
               <div class="mui-row table-header-group">
                 <div class="table-header mui-col-md-5">Virtual Machine</div>
                 <div class="table-header mui-col-md-2">Image Size</div>
