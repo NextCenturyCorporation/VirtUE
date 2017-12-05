@@ -4,3 +4,4 @@
 **/*~
 modules/*/build
 **/node_modules
+**/src/assets/.sass-cache/*
