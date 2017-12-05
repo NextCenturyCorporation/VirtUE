@@ -21,7 +21,6 @@ resource "docker_container" "samba-server" {
   image = "savior-dc"
   hostname = "saviordc"
   domainname = "${var.sambaDomain}"
-  networks = ["${docker_network.savior_network.name}"]
   # need to use the AD DNS as the primary one
   dns = [ "127.0.0.1" ]
   dns_search = [ "${var.sambaDomain}" ]
@@ -57,11 +56,5 @@ resource "docker_container" "samba-server" {
   ports {
 	internal = 445
 	external = 445
-  }
-
-  # Can't directly disable the default docker bridge network. See
-  # https://github.com/terraform-providers/terraform-provider-docker/issues/10
-  provisioner "local-exec" {
-	command = "docker network disconnect ${var.docker_default_network} ${self.name}"
   }
 }
