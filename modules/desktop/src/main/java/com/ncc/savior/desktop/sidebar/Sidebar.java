@@ -133,7 +133,8 @@ public class Sidebar implements VirtueChangeHandler {
 		for (DesktopVirtue virtue : initialVirtues) {
 			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
 			children.add(vmi.getNode());
-			virtueIdToVmi.put(virtue.getId(), vmi);
+			String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+			virtueIdToVmi.put(id, vmi);
 		}
 		ScrollPane scroll = new ScrollPane(virtuePane);
 		scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
@@ -219,7 +220,6 @@ public class Sidebar implements VirtueChangeHandler {
 		});
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
@@ -231,7 +231,7 @@ public class Sidebar implements VirtueChangeHandler {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				children.remove(finalVmi);
+				children.remove(finalVmi.getNode());
 			}
 		});
 	}

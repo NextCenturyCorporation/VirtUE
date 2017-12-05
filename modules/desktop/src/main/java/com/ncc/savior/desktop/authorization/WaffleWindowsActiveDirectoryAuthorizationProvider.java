@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import waffle.windows.auth.IWindowsCredentialsHandle;
 import waffle.windows.auth.IWindowsIdentity;
+import waffle.windows.auth.IWindowsImpersonationContext;
 import waffle.windows.auth.impl.WindowsAccountImpl;
 import waffle.windows.auth.impl.WindowsAuthProviderImpl;
 import waffle.windows.auth.impl.WindowsCredentialsHandleImpl;
@@ -17,30 +18,55 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 	final String DEFAULT_SECURITY_PACKAGE = "Negotiate";
 	private WindowsAuthProviderImpl auth;
 
-	private String current;
+	private IWindowsIdentity impersonatedUser;
 
 	public WaffleWindowsActiveDirectoryAuthorizationProvider() {
 		auth = new WindowsAuthProviderImpl();
-		current = WindowsAccountImpl.getCurrentUsername();
 	}
 
 	@Override
 	public DesktopUser getCurrentUsername() {
-		String fqd = current;
-		return DesktopUser.fromFullyQualifiedDomainName(fqd);
+		IWindowsImpersonationContext imp = null;
+		if (impersonatedUser != null) {
+			imp = impersonatedUser.impersonate();
+		}
+		String fqd = WindowsAccountImpl.getCurrentUsername();
+		DesktopUser user = DesktopUser.fromFullyQualifiedDomainName(fqd);
+		if (imp != null) {
+			imp.revertToSelf();
+		}
+		return user;
+
 	}
 
 	@Override
 	public DesktopUser login(String domain, String username, String password) {
-		IWindowsIdentity id = auth.logonDomainUser(username, domain, password);
-		current = id.getFqn();
-		id.impersonate();
-		logger.debug("impersonating new user" + WindowsAccountImpl.getCurrentUsername());
-		return new DesktopUser(domain, username);
+		if (impersonatedUser != null) {
+			impersonatedUser.dispose();
+		}
+		impersonatedUser = auth.logonDomainUser(username, domain, password);
+		IWindowsImpersonationContext imp = null;
+		imp = impersonatedUser.impersonate();
+		logger.debug("impersonating new user: " + WindowsAccountImpl.getCurrentUsername());
+		DesktopUser user = new DesktopUser(domain, username);
+		imp.revertToSelf();
+		return user;
+	}
+
+	public void logout() {
+		if (impersonatedUser!=null) {
+			impersonatedUser.dispose();
+			impersonatedUser = null;
+		}
 	}
 
 	@Override
 	public byte[] getNewToken() {
+		IWindowsImpersonationContext imp = null;
+		if (impersonatedUser != null) {
+			imp = impersonatedUser.impersonate();
+		}
+		String current = WindowsAccountImpl.getCurrentUsername();
 		IWindowsCredentialsHandle clientCredentials = WindowsCredentialsHandleImpl.getCurrent(DEFAULT_SECURITY_PACKAGE);
 		clientCredentials.initialize();
 		WindowsSecurityContextImpl clientContext = new WindowsSecurityContextImpl();
@@ -49,6 +75,9 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 		clientContext.setSecurityPackage(DEFAULT_SECURITY_PACKAGE);
 		clientContext.initialize(null, null, current);
 		byte[] token = clientContext.getToken();
+		if (imp != null) {
+			imp.revertToSelf();
+		}
 		return token;
 	}
 

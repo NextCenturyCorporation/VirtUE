@@ -24,6 +24,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
 public class DesktopResourceService {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(DesktopResourceService.class);
 	private Client client;
 	private ObjectMapper jsonMapper;
@@ -86,7 +87,6 @@ public class DesktopResourceService {
 	private void addAuthorization(Builder builder) {
 		// Temporary implementation until we really tie in active directory.
 		String username = authService.getUser().getUsername();
-		logger.debug("adding user to authorization: " + username);
 		builder.header("X-Authorization", username);
 	}
 }
