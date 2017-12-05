@@ -1,5 +1,8 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 /**
  * Class to represent a user that has been authenticated by the security
  * service. What we want in here is TDB.
@@ -9,10 +12,16 @@ package com.ncc.savior.virtueadmin.model;
 public class User {
 	private static User testUser;
 	private String username;
+	private Collection<String> authorities;
 
 	static {
-		testUser = new User();
-		testUser.username = "testUser";
+		testUser = new User("testUser", new ArrayList<String>());
+		// testUser.username = "testUser";
+	}
+
+	public User(String name, Collection<String> authorities) {
+		this.username = name;
+		this.authorities = authorities;
 	}
 
 	public static User testUser() {
@@ -21,5 +30,9 @@ public class User {
 
 	public String getUsername() {
 		return username;
+	}
+
+	public Collection<String> getAuthorities() {
+		return authorities;
 	}
 }

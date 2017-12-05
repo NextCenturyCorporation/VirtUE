@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -56,8 +58,11 @@ public class Sidebar implements VirtueChangeHandler {
 	private VirtueService virtueService;
 	private VBox virtuePane;
 	private Map<String, VirtueMenuItem> virtueIdToVmi;
+	private AuthorizationService authService;
+	private Label userLabel;
 
-	public Sidebar(VirtueService virtueService) {
+	public Sidebar(VirtueService virtueService, AuthorizationService authService) {
+		this.authService = authService;
 		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
 	}
@@ -74,6 +79,7 @@ public class Sidebar implements VirtueChangeHandler {
 		children.add(getLabel());// , 1, 1);
 		// pane.add(getMinimizeMaximize());
 		children.add(getUserIcon());// , 1, 3);
+		children.add(getUserNameLabel());
 		Node vlist = initialVirtueList(stage, initialVirtues);
 		children.add(vlist);// , 1, 4);
 		// Region region = new Region();
@@ -140,6 +146,14 @@ public class Sidebar implements VirtueChangeHandler {
 	private Node getUserIcon() {
 		Image image = new Image("images/defaultUserIcon.png");
 		ImageView iv = new ImageView(image);
+		iv.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				DesktopUser user = authService.login("HQ", "kdrumm_test", "");
+				Sidebar.this.userLabel.setText(user.getUsername());
+			}
+		});
 
 		int size = 96;
 		int paddingSize = 5;
@@ -177,6 +191,14 @@ public class Sidebar implements VirtueChangeHandler {
 		return label;
 	}
 
+	private Node getUserNameLabel() {
+		if (userLabel == null) {
+			String username = authService.getUser().getUsername();
+			userLabel = new Label(username);
+		}
+		return userLabel;
+	}
+
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
 		VirtueMenuItem vmi = virtueIdToVmi.get(virtue.getId());
@@ -187,7 +209,8 @@ public class Sidebar implements VirtueChangeHandler {
 	public void addVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
 		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
-		virtueIdToVmi.put(virtue.getId(), vmi);
+		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+		virtueIdToVmi.put(id, vmi);
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -201,10 +224,14 @@ public class Sidebar implements VirtueChangeHandler {
 	public void removeVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
 		VirtueMenuItem vmi = virtueIdToVmi.remove(virtue.getId());
+		if (vmi == null) {
+			vmi = virtueIdToVmi.remove(virtue.getTemplateId());
+		}
+		VirtueMenuItem finalVmi = vmi;
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				children.remove(vmi);
+				children.remove(finalVmi);
 			}
 		});
 	}

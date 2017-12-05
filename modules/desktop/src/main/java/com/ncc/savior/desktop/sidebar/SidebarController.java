@@ -69,20 +69,6 @@ public class SidebarController {
 		int cindex = 0;
 		int nindex = 0;
 
-		if (currentVirtues.isEmpty()) {
-			for (DesktopVirtue virtue : virtues) {
-				reportAddedVirtue(virtue);
-			}
-			return;
-		}
-
-		if (virtues.isEmpty()) {
-			for (DesktopVirtue virtue : currentVirtues) {
-				reportRemovedVirtue(virtue);
-			}
-			return;
-		}
-
 		while ((cindex < currentVirtues.size() && nindex < virtues.size())) {
 			DesktopVirtue cv = currentVirtues.get(cindex);
 			DesktopVirtue nv = virtues.get(nindex);
@@ -96,7 +82,7 @@ public class SidebarController {
 					cv.setId(nv.getId());
 				}
 			} else {
-				compare = nv.getId() == null ? 0 : -1;
+				compare = nv.getId() == null ? cv.getTemplateId().compareTo(nv.getTemplateId()) : -1;
 			}
 			if (0 == compare) {
 				if (!cv.getName().equals(nv.getName())) {
@@ -111,6 +97,19 @@ public class SidebarController {
 				reportRemovedVirtue(cv);
 				cindex++;
 			}
+		}
+
+		// when one of the lists has been fulled processed, we must process the rest on
+		// the other list.
+		while (cindex < currentVirtues.size()) {
+			DesktopVirtue v = currentVirtues.get(cindex);
+			reportRemovedVirtue(v);
+			cindex++;
+		}
+		while (nindex < virtues.size()) {
+			DesktopVirtue v = virtues.get(nindex);
+			reportAddedVirtue(v);
+			nindex++;
 		}
 	}
 
