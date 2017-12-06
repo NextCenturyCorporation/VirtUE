@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.sidebar;
 
+import com.ncc.savior.configuration.PropertyManager;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.virtues.DesktopResourceService;
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -24,10 +25,11 @@ public class SidebarApplication extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		// TODO use configuration for api
 		// Plumbing and depedency injection
+		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
+		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
 		AuthorizationService authService = new AuthorizationService();
-		DesktopResourceService drs = new DesktopResourceService(authService, "http://localhost:8080/desktop/");
+		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl);
 		IApplicationManagerFactory appManager = new JavaFxApplicationManagerFactory(
 				new JavaFxKeyboard(new XpraKeyMap()));
 		VirtueService virtueService = new VirtueService(drs, appManager);
@@ -35,5 +37,4 @@ public class SidebarApplication extends Application {
 		SidebarController controller = new SidebarController(virtueService, sidebar);
 		controller.init(primaryStage);
 	}
-
 }

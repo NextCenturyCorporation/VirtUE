@@ -48,7 +48,8 @@ public class VirtueService {
 
 	public void ensureConnection(DesktopVirtueApplication app) throws IOException {
 		// TODO fix hardcoded
-		SshConnectionParameters params = new SshConnectionParameters(app.getHostname(), 22, "user", "password");
+		SshConnectionParameters params = new SshConnectionParameters(app.getHostname(), app.getPort(), "user",
+				"password");
 		XpraClient client = connectionManager.getExistingClient(params);
 		if (client == null || client.getStatus() == Status.ERROR) {
 			client = connectionManager.createClient(params);

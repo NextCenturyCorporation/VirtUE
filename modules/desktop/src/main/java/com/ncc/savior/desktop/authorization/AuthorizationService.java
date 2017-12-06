@@ -52,7 +52,7 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser getUser() {
-		return authProvider.getCurrentUsername();
+		return authProvider.getCurrentUser();
 	}
 
 	public DesktopUser login(String domain, String username, String password) {

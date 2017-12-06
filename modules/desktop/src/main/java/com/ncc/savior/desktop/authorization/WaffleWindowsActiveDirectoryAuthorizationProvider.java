@@ -25,7 +25,7 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 	}
 
 	@Override
-	public DesktopUser getCurrentUsername() {
+	public DesktopUser getCurrentUser() {
 		IWindowsImpersonationContext imp = null;
 		if (impersonatedUser != null) {
 			imp = impersonatedUser.impersonate();
@@ -61,7 +61,7 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 	}
 
 	@Override
-	public byte[] getNewToken() {
+	public byte[] getCurrentToken() {
 		IWindowsImpersonationContext imp = null;
 		if (impersonatedUser != null) {
 			imp = impersonatedUser.impersonate();

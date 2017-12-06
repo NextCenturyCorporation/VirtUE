@@ -34,7 +34,7 @@ public class JavaGssActiveDirectoryAuthorizationProvider implements IActiveDirec
 	}
 
 	@Override
-	public DesktopUser getCurrentUsername() {
+	public DesktopUser getCurrentUser() {
 		LoginContext lc;
 		try {
 			lc = new LoginContext("SignedOnUserLoginContext");
@@ -107,7 +107,7 @@ public class JavaGssActiveDirectoryAuthorizationProvider implements IActiveDirec
 	}
 
 	@Override
-	public byte[] getNewToken() {
+	public byte[] getCurrentToken() {
 		// TODO Auto-generated method stub
 		return null;
 	}

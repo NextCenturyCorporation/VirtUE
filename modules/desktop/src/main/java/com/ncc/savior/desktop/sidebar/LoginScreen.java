@@ -93,6 +93,7 @@ public class LoginScreen extends Stage {
 				if (forceSuccessfulLoginOrQuit) {
 					System.exit(0);
 				} else {
+					triggerLoginCancelListener();
 					close();
 				}
 			}
@@ -117,6 +118,12 @@ public class LoginScreen extends Stage {
 		}
 	}
 
+	protected void triggerLoginCancelListener() {
+		for (ILoginEventListener listener : loginListeners) {
+			listener.onCancel();
+		}
+	}
+
 	protected void triggerLoginFailureListener(String username, String domain, RuntimeException e) {
 		for (ILoginEventListener listener : loginListeners) {
 			listener.onLoginFailure(username, domain, e);
@@ -125,7 +132,10 @@ public class LoginScreen extends Stage {
 
 	public static interface ILoginEventListener {
 		public void onLoginSuccess(DesktopUser user);
+
 		public void onLoginFailure(String username, String domain, RuntimeException e);
+
+		public void onCancel();
 	}
 
 }

@@ -13,11 +13,16 @@ import waffle.windows.auth.impl.WindowsSecurityContextImpl;
 
 //http://www.javahabit.com/2015/09/27/waffle-windows-single-sign-on/
 
+/**
+ * Waffle test application
+ *
+ *
+ */
 public class WaffleWindows {
 	public static void main(String[] args) {
 		final IWindowsAuthProvider auth = new WindowsAuthProviderImpl();
 		WindowsAccountImpl.getCurrentUsername();
-		IWindowsAccount a = auth.lookupAccount("kdrumm");
+		IWindowsAccount a = auth.lookupAccount("");
 		System.out.println(a.getFqn());
 		test();
 

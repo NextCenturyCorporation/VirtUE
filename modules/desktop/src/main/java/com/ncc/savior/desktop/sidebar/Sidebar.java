@@ -170,6 +170,11 @@ public class Sidebar implements VirtueChangeHandler {
 					public void onLoginFailure(String username, String domain, RuntimeException e) {
 						// do nothing
 					}
+
+					@Override
+					public void onCancel() {
+						// do nothing
+					}
 				});
 				loginScreen.start(stage);
 			}

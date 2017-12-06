@@ -11,6 +11,11 @@ import waffle.windows.auth.impl.WindowsAuthProviderImpl;
 import waffle.windows.auth.impl.WindowsCredentialsHandleImpl;
 import waffle.windows.auth.impl.WindowsSecurityContextImpl;
 
+/**
+ * Waffle test application
+ *
+ *
+ */
 public class WaffleGetToken {
 	public static void main(String[] args) {
 		try {
