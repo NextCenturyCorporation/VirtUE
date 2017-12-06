@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.sidebar.LoginScreen.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -60,6 +61,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private Map<String, VirtueMenuItem> virtueIdToVmi;
 	private AuthorizationService authService;
 	private Label userLabel;
+	private Stage stage;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService) {
 		this.authService = authService;
@@ -69,6 +71,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
 		stage.setTitle("Savior");
+		this.stage = stage;
 
 		VBox pane = new VBox();
 		if (debug) {
@@ -151,8 +154,24 @@ public class Sidebar implements VirtueChangeHandler {
 
 			@Override
 			public void handle(MouseEvent event) {
-				DesktopUser user = authService.login("HQ", "kdrumm_test", "");
-				Sidebar.this.userLabel.setText(user.getUsername());
+				LoginScreen loginScreen = new LoginScreen(authService, false);
+				loginScreen.addLoginEventListener(new ILoginEventListener() {
+					@Override
+					public void onLoginSuccess(DesktopUser user) {
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								userLabel.setText(user.getUsername());
+							}
+						});
+					}
+
+					@Override
+					public void onLoginFailure(String username, String domain, RuntimeException e) {
+						// do nothing
+					}
+				});
+				loginScreen.start(stage);
 			}
 		});
 
