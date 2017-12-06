@@ -27,6 +27,8 @@ public class PropertyManager {
 	private static final Logger logger = LoggerFactory.getLogger(PropertyManager.class);
 	public static final String PROPERTY_DESKTOP_API_PATH = "desktop.API.path";
 	public static final String PROPERTY_LOCATION_KEY = "savior.property.path";
+	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "./savior-user.properties";
+	public static final String PROPERTY_REQUIRED_DOMAIN = "savior.domain";
 	private Properties props;
 	private boolean warnOnMissingFile = false;
 
@@ -113,7 +115,10 @@ public class PropertyManager {
 			extraPropsLocation = envLocation;
 		}
 		String defaultPropsLocation = SAVIOR_DEFAULT_PROPERTY_LOCATION;
-		PropertyManager props = new PropertyManager(debugOutput, extraPropsLocation, defaultPropsLocation,
+		String defaultUserLocation = SAVIOR_DEFAULT_USER_PROPERTY_LOCATION;
+		;
+		PropertyManager props = new PropertyManager(debugOutput, extraPropsLocation, defaultUserLocation,
+				defaultPropsLocation,
 				defaultsPath);
 		return props;
 	}

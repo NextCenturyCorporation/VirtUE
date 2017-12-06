@@ -28,7 +28,8 @@ public class SidebarApplication extends Application {
 		// Plumbing and depedency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
 		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
-		AuthorizationService authService = new AuthorizationService();
+		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
+		AuthorizationService authService = new AuthorizationService(requiredDomain);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl);
 		IApplicationManagerFactory appManager = new JavaFxApplicationManagerFactory(
 				new JavaFxKeyboard(new XpraKeyMap()));

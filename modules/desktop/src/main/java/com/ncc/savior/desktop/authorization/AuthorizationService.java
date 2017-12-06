@@ -13,10 +13,16 @@ public class AuthorizationService {
 
 	private OS os;
 	private IActiveDirectoryAuthorizationProvider authProvider;
+	private String requiredDomain;
 
-	public AuthorizationService() {
+	public AuthorizationService(String requiredDomain) {
+		this.requiredDomain = requiredDomain;
 		this.os = getOs();
 		this.authProvider = createAuthProvider();
+	}
+
+	public AuthorizationService() {
+		this(null);
 	}
 
 	private IActiveDirectoryAuthorizationProvider createAuthProvider() {
@@ -56,11 +62,20 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser login(String domain, String username, String password) {
-		return authProvider.login(domain, username, password);
+		if (requiredDomain != null && requiredDomain.equals(domain)) {
+			return authProvider.login(domain, username, password);
+		} else {
+			String msg = "Cannot login.  Domain (" + domain + ") is not the required domain (" + requiredDomain + ")";
+			throw new RuntimeException(msg);
+		}
 	}
 
 	public void logout() {
 		authProvider.logout();
+	}
+
+	public String getRequiredDomain() {
+		return requiredDomain;
 	}
 
 }

@@ -96,6 +96,11 @@ public class Sidebar implements VirtueChangeHandler {
 		stage.getIcons().add(icon);
 		stage.setScene(scene);
 		stage.show();
+		DesktopUser user = authService.getUser();
+		String reqDomain = authService.getRequiredDomain();
+		if (reqDomain != null && !reqDomain.equals(user.getDomain())) {
+			new LoginScreen(authService, true).start(stage);
+		}
 	}
 
 	private Node getLogout() {
@@ -162,6 +167,8 @@ public class Sidebar implements VirtueChangeHandler {
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
+								virtuePane.getChildren().clear();
+								virtueIdToVmi.clear();
 								userLabel.setText(user.getUsername());
 							}
 						});
@@ -252,12 +259,14 @@ public class Sidebar implements VirtueChangeHandler {
 		if (vmi == null) {
 			vmi = virtueIdToVmi.remove(virtue.getTemplateId());
 		}
-		VirtueMenuItem finalVmi = vmi;
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				children.remove(finalVmi.getNode());
-			}
-		});
+		if (vmi != null) {
+			VirtueMenuItem finalVmi = vmi;
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					children.remove(finalVmi.getNode());
+				}
+			});
+		}
 	}
 }

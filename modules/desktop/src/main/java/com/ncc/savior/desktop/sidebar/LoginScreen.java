@@ -21,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -32,11 +33,14 @@ public class LoginScreen extends Stage {
 	private final boolean forceSuccessfulLoginOrQuit;
 	private Set<ILoginEventListener> loginListeners;
 
+	private Label warningLbl;
+
 	public LoginScreen(AuthorizationService authService, boolean forceSuccessfulLoginOrQuit) {
 		super(StageStyle.UTILITY);
 		this.authService = authService;
 		this.forceSuccessfulLoginOrQuit = forceSuccessfulLoginOrQuit;
 		loginListeners = new HashSet<ILoginEventListener>();
+		this.setResizable(false);
 	}
 
 	public void start(Stage owner) {
@@ -44,7 +48,7 @@ public class LoginScreen extends Stage {
 		initModality(Modality.APPLICATION_MODAL);
 		setTitle("Login");
 		Group root = new Group();
-		Scene scene = new Scene(root, 250, 150);
+		Scene scene = new Scene(root, 250, 180);
 		setScene(scene);
 
 		GridPane gridpane = new GridPane();
@@ -61,6 +65,7 @@ public class LoginScreen extends Stage {
 		Label passwordLbl = new Label("Password: ");
 		gridpane.add(passwordLbl, 0, 3);
 		final TextField domainFld = new TextField("");
+
 		gridpane.add(domainFld, 1, 1);
 		final TextField userNameFld = new TextField("");
 		gridpane.add(userNameFld, 1, 2);
@@ -68,7 +73,6 @@ public class LoginScreen extends Stage {
 		final PasswordField passwordFld = new PasswordField();
 		passwordFld.setText("");
 		gridpane.add(passwordFld, 1, 3);
-
 		Button login = new Button("Login");
 		login.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -82,7 +86,8 @@ public class LoginScreen extends Stage {
 					triggerLoginSuccessListener(user);
 					close();
 				} catch (Win32Exception t) {
-					logger.error("failure", t);
+					logger.error("login failed", t);
+					warningLbl.setText("Login Failed: " + t.getMessage());
 				}
 
 			}
@@ -107,9 +112,21 @@ public class LoginScreen extends Stage {
 		});
 		gridpane.add(login, 0, 4);
 		gridpane.add(cancelClose, 1, 4);
+		warningLbl = new Label("");
 		GridPane.setHalignment(login, HPos.RIGHT);
-		root.getChildren().add(gridpane);
+		warningLbl.setMaxWidth(scene.getWidth());
+		warningLbl.setWrapText(true);
+
+		VBox base = new VBox();
+		base.getChildren().add(gridpane);
+		base.getChildren().add(warningLbl);
+		root.getChildren().add(base);
 		this.show();
+		if (authService.getRequiredDomain() != null) {
+			domainFld.setText(authService.getRequiredDomain());
+			domainFld.setEditable(false);
+			userNameFld.requestFocus();
+		}
 	}
 
 	private void onCancel() {
