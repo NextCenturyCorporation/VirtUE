@@ -12,6 +12,7 @@ body {
 }
 a {
   color: #407097;
+  cursor: pointer;
   @include ralewayMedium;
   text-decoration: none;
 }
@@ -180,9 +181,10 @@ input[type='text'], input[type='password'] {
 }
 button, input[type='button'] {
   border: none;
+  cursor: pointer;
   display: inline-block;
   min-height: 30px;
-  padding: 0.5rem 1rem 0.7rem;
+  padding: 0.65rem 1rem;
 }
 button {
  &.button-submit {
@@ -365,7 +367,7 @@ content {
    display: block;
    float: left;
    margin: 0.25rem 0 0 1.5rem;
-   padding: 0.5rem 0.7rem;
+   padding: 0.65rem 0.7rem;
  }
 }
 

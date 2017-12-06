@@ -13,20 +13,11 @@ export class EditVirtueComponent implements OnInit {
 
   constructor(public dialog: MatDialog) {}
 
-  activateModal(modal): void {
+  activateModal(id): void {
     let dialogRef = this.dialog.open(VmModalComponent, {
         width: '960px'
       });
-    // if (modal == 'add') {
-    //   let dialogRef = this.dialog.open(VmModalComponent, {
-    //     width: '800px'
-    //   });
-    // } else {
-    //   let dialogRef = this.dialog.open(VmModalComponent, {
-    //     width: '800px'
-    //   });
-    // }
-
+    
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
     dialogRef.afterClosed().subscribe(result => {

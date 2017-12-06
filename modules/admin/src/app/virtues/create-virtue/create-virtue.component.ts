@@ -11,7 +11,7 @@ export class CreateVirtueComponent implements OnInit {
 
   constructor(public dialog: MatDialog) {}
 
-  activateModal(): void {
+  activateModal(id): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
       width: '960px'
