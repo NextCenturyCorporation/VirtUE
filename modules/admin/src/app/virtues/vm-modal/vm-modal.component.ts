@@ -14,11 +14,11 @@ export class VmModalComponent implements OnInit {
     private dialogRef: MatDialogRef<VmModalComponent>
   ) {}
 
-  ngOnInit() {
-  }
-
   saveVMList() {
     this.dialogRef.close();
+  }
+
+  ngOnInit() {
   }
 
 }

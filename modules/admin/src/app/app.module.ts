@@ -22,6 +22,7 @@ import { AddUserComponent } from './users/add-user/add-user.component';
 import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { DialogsComponent } from './dialogs/dialogs.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
+import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -53,7 +54,8 @@ const appRoutes: Routes = [
     CreateVirtueComponent,
     EditVirtueComponent,
     DialogsComponent,
-    VmModalComponent
+    VmModalComponent,
+    VirtueModalComponent
   ],
   imports: [
     BreadcrumbsModule,
@@ -71,7 +73,8 @@ const appRoutes: Routes = [
   bootstrap: [AppComponent],
   entryComponents: [
     VmModalComponent,
-    DialogsComponent
+    DialogsComponent,
+    VirtueModalComponent
   ]
 })
 

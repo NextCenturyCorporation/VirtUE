@@ -33,10 +33,14 @@
           <div class="table-data mui-col-md-3">
             <a class="edit" routerLink="edit-user">[ Name ]</a>
             <!-- if this user is enabled show this menu -->
-            <span class="active account-options">Duplicate | Disable</span>
+            <span class="active account-options">
+              <a href="#">Duplicate</a> | <a href="#">Disable</a>
+            </span>
 
             <!-- if this user is disabled show this menu -->
-            <span class="active account-options">Enable | Delete</span>
+            <span class="active account-options">
+              <a href="#">Enable</a> | <a class="edit" (click)="openDialog(1,'delete','user account')">Delete</a>
+            </span>
           </div>
           <div class="table-data mui-col-md-7">[Virtue 1, Virtue 2, Virtue 3, Virtue N...]</div>
           <div class="table-data mui-col-md-2">[Status]<br />[Date]</div>
