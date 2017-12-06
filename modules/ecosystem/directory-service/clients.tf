@@ -13,6 +13,6 @@ resource "docker_container" "client-image" {
   # This avoids having to put the admin password in an environment
   # variable or file or something accessible w/in the container.
   provisioner "local-exec" {
-	command = "docker exec ${docker_container.client-image.name} net ads join -U administrator%${var.sambaAdminPassword}"
+	command = "docker exec ${self.name} net ads join -U administrator%${var.sambaAdminPassword}"
   }
 }

@@ -12,3 +12,4 @@ modules/*/build
 modules/ecosystem/directory-service/samba-config
 /modules/ecosystem/directory-service/docker/samba-client/.image.date
 /modules/ecosystem/directory-service/docker/samba-server/.image.date
+samba-config-*

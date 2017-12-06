@@ -57,4 +57,11 @@ resource "docker_container" "samba-server" {
 	internal = 445
 	external = 445
   }
+
+  # Don't let the terraform consider the container ready until samba
+  # is actually up and running.
+  provisioner "local-exec" {
+	# test readiness using DNS (port 53)
+	command = "while ! nc -z ${self.ip_address} 53; do echo -n .; sleep 5; done"
+  }
 }
