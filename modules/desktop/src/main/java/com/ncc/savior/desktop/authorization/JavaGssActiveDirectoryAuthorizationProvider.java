@@ -111,4 +111,10 @@ public class JavaGssActiveDirectoryAuthorizationProvider implements IActiveDirec
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void logout() {
+		// TODO Auto-generated method stub
+
+	}
 }

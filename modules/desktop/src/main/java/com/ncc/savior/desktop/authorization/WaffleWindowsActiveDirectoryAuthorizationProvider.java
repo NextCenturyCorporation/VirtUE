@@ -53,6 +53,7 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 		return user;
 	}
 
+	@Override
 	public void logout() {
 		if (impersonatedUser!=null) {
 			impersonatedUser.dispose();

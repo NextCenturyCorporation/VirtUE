@@ -59,4 +59,8 @@ public class AuthorizationService {
 		return authProvider.login(domain, username, password);
 	}
 
+	public void logout() {
+		authProvider.logout();
+	}
+
 }

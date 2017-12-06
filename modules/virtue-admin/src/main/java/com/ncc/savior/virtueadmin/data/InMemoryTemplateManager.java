@@ -164,7 +164,8 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	@Override
 	public VirtueTemplate getTemplate(User user, String templateId) {
-		if (userToTemplateId.get(user.getUsername()).contains(templateId)) {
+		Collection<String> userTemplates = userToTemplateId.get(user.getUsername());
+		if (userTemplates != null && userTemplates.contains(templateId)) {
 			return getTemplate(templateId);
 		}
 		return null;

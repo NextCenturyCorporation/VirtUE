@@ -35,4 +35,10 @@ public interface IActiveDirectoryAuthorizationProvider {
 	 */
 	byte[] getCurrentToken();
 
+	/**
+	 * Attempt to logout of the current user. This is not guaranteed to log out
+	 * particularly in cases where the user is logged into the OS itself.
+	 */
+	void logout();
+
 }

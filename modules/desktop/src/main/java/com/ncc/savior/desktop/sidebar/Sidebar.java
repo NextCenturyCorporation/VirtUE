@@ -109,6 +109,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void handle(MouseEvent event) {
 				// do cleanup stuff.
+				authService.logout();
 				Platform.exit();
 			}
 		});

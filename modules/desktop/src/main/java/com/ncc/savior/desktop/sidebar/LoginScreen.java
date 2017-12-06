@@ -1,7 +1,7 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +21,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class LoginScreen extends Stage {
 	private static Logger logger = LoggerFactory.getLogger(LoginScreen.class);
@@ -33,17 +33,18 @@ public class LoginScreen extends Stage {
 	private Set<ILoginEventListener> loginListeners;
 
 	public LoginScreen(AuthorizationService authService, boolean forceSuccessfulLoginOrQuit) {
+		super(StageStyle.UTILITY);
 		this.authService = authService;
 		this.forceSuccessfulLoginOrQuit = forceSuccessfulLoginOrQuit;
-		loginListeners = new TreeSet<ILoginEventListener>();
+		loginListeners = new HashSet<ILoginEventListener>();
 	}
 
 	public void start(Stage owner) {
 		initOwner(owner);
 		initModality(Modality.APPLICATION_MODAL);
-		setTitle("title");
+		setTitle("Login");
 		Group root = new Group();
-		Scene scene = new Scene(root, 250, 150, Color.WHITE);
+		Scene scene = new Scene(root, 250, 150);
 		setScene(scene);
 
 		GridPane gridpane = new GridPane();
@@ -65,7 +66,7 @@ public class LoginScreen extends Stage {
 		gridpane.add(userNameFld, 1, 2);
 
 		final PasswordField passwordFld = new PasswordField();
-		passwordFld.setText("password");
+		passwordFld.setText("");
 		gridpane.add(passwordFld, 1, 3);
 
 		Button login = new Button("Login");
@@ -93,15 +94,27 @@ public class LoginScreen extends Stage {
 				if (forceSuccessfulLoginOrQuit) {
 					System.exit(0);
 				} else {
-					triggerLoginCancelListener();
-					close();
+					onCancel();
 				}
 			}
 		});
+		this.setOnCloseRequest(e -> {
+			if (forceSuccessfulLoginOrQuit) {
+				e.consume();
+			} else {
+				onCancel();
+			}
+		});
 		gridpane.add(login, 0, 4);
+		gridpane.add(cancelClose, 1, 4);
 		GridPane.setHalignment(login, HPos.RIGHT);
 		root.getChildren().add(gridpane);
 		this.show();
+	}
+
+	private void onCancel() {
+		triggerLoginCancelListener();
+		close();
 	}
 
 	public void addLoginEventListener(ILoginEventListener listener) {
