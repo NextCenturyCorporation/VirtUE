@@ -1,0 +1,148 @@
+<div class="mui-row margin-bottom-10">
+  <div class="mui-col-md-4 text-align-right">
+    <label>File Share Type:</label>
+  </div>
+  <div class="mui-col-md-4">
+    <mat-form-field>
+      <mat-select [(ngModel)]="fsValue" name="fileShareType">
+        <mat-option *ngFor="let fsType of fileShareTypes" [value]="fsType.value">{{ fsType.viewValue }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="mui-col-md-4">
+    &nbsp;
+  </div>
+</div>
+<!-- BEGIN if file share type is NFS //-->
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        <label>File Share Name:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-form-field>
+           <input matInput name="fileShareName" value="">
+        </mat-form-field>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        <label>Server Address:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-form-field>
+           <input matInput name="serverAddress" value="">
+        </mat-form-field>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        <label>Folder:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-form-field>
+           <input matInput name="folder" value="">
+        </mat-form-field>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        <label>Share Permissions:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-checkbox name="sharePermission" value="R">Read</mat-checkbox>
+        <mat-checkbox name="sharePermission" value="W">Write</mat-checkbox>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4">&nbsp;</div>
+      <div class="mui-col-md-4">
+           <mat-checkbox name="adCredentials" value="true">Use Active Directory Credentials</mat-checkbox>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+<!-- END if file share type is NFS //-->
+<!-- BEGIN if file share type is CIFS //-->
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        <label>File Share Name:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-form-field>
+           <input matInput name="fileShareName" value="">
+        </mat-form-field>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        <label>Drive:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-form-field>
+           <input matInput name="serverAddress" value="">
+        </mat-form-field>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        <label>Folder:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-form-field>
+           <input matInput name="folder" value="">
+        </mat-form-field>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4 text-align-right">
+        &nbsp;
+      </div>
+      <div class="mui-col-md-4">
+        <mat-checkbox name="reconnect" value="true">Reconnect at sign-on</mat-checkbox>
+        <mat-checkbox name="diffCredentials" value="true">Connect using different credentials</mat-checkbox>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="mui-row margin-bottom-10">
+      <div class="mui-col-md-4"><label>Share Permissions:</label></div>
+      <div class="mui-col-md-4">
+        <mat-checkbox name="sharePermission" value="R">Read</mat-checkbox>
+        <mat-checkbox name="sharePermission" value="W">Write</mat-checkbox>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+<!-- END if file share type is CIFS //-->

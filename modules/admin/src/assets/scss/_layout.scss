@@ -45,76 +45,12 @@ p {
 hr {
   clear: both;
   display: block;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
   padding: 0;
 }
 
-.cdk-overlay-container {
-  position: absolute;
-  top:0;
-  left: 0;
-  width: 100%;
 
-  .cdk-overlay-backdrop {
-    display: block;
-    height: 100%;
-    position:relative;
-    top: auto;
-    left: auto;
-    width: 100%;
-  }
-}
-
-.mat-dialog-container {
-  background: $white;
-  box-shadow: none;
-}
-.mat-dialog-container {
-  app-dialogs {
-    display: block;
-    position: relative;
-    padding: 1.2rem;
-    text-align: center;
-  }
-  .mat-dialog-title {
-    border-bottom: 1px solid $mediumGray;
-    display: block;
-    margin: 0;
-    padding-bottom: 1rem;
-    text-align: left;
-    text-transform: capitalize;
-  }
-  .mat-dialog-content {
-    padding: 1rem 2rem;
-    text-align: left;
-  }
-  .mat-dialog-actions {
-    border-top: 1px solid $mediumGray;
-    display: block;
-    padding-top: 1.5rem;
-    text-align: center;
-  }
-
-  button, button[type='submit'] {
-    border-radius: 0;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    margin-right: 10px;
-  }
-  button {
-    background-color: $lightGray;
-    border:1px solid $mediumGray;
-    &.button {
-      padding: 0.4rem 1rem;
-    }
-  }
-  button[type='submit'] {
-    background-color: $grayBlue;
-    color: $white;
-  }
-
-}
 .app-icon-white {
   background-image: url(/assets/images/app-icon-white.png) no-repeat;
 }
@@ -204,7 +140,7 @@ button, input[type='button'] {
   border: none;
   cursor: pointer;
   display: inline-block;
-  min-height: 30px;
+  height: 30px;
   padding: 0.65rem 1rem;
 }
 button {
@@ -218,6 +154,15 @@ button {
     background-color: none;
     border: none;
     border-radius: 0;
+    color: $grayBlue;
+  }
+  &.button-trash {
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    width: 18px;
+  }
+  .fa {
     color: $grayBlue;
   }
 }

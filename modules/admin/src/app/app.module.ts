@@ -2,6 +2,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -14,6 +19,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
 import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
 import { ConfigAppVmComponent } from './config/config-app-vm/config-app-vm.component';
+import { ConfigResourcesComponent } from './config/config-resources/config-resources.component';
 import { UsersComponent } from './users/users.component';
 import { VirtuesComponent } from './virtues/virtues.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
@@ -25,6 +31,9 @@ import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { DialogsComponent } from './dialogs/dialogs.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
+import { ResourceModalComponent } from './config/resource-modal/resource-modal.component';
+import { FileShareComponent } from './config/resource-modal/file-share/file-share.component';
+import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -50,6 +59,7 @@ const appRoutes: Routes = [
     ConfigComponent,
     ConfigActiveDirComponent,
     ConfigAppVmComponent,
+    ConfigResourcesComponent,
     UsersComponent,
     AddUserComponent,
     EditUserComponent,
@@ -60,12 +70,20 @@ const appRoutes: Routes = [
     DialogsComponent,
     VirtueModalComponent,
     VmModalComponent,
+    ResourceModalComponent,
+    FileShareComponent,
+    PrintersComponent,
   ],
   imports: [
     BreadcrumbsModule,
     BrowserModule,
     FormsModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
+    MatInputModule,
+    MatRadioModule,
+    MatSelectModule,
     BrowserAnimationsModule,
     SplitPaneModule,
     RouterModule.forRoot(appRoutes)
@@ -78,7 +96,8 @@ const appRoutes: Routes = [
   entryComponents: [
     VmModalComponent,
     DialogsComponent,
-    VirtueModalComponent
+    VirtueModalComponent,
+    ResourceModalComponent
   ]
 })
 
