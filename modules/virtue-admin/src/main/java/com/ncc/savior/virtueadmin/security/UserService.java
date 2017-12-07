@@ -19,14 +19,17 @@ public class UserService {
 
 	private static User getUserFromSpringContext() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		Collection<? extends GrantedAuthority> groups = auth.getAuthorities();
-		Collection<String> myGroups = new ArrayList<String>(groups.size());
-		for (GrantedAuthority group : groups) {
-			String groupStr = group.getAuthority();
-			myGroups.add(groupStr);
+		if (auth != null) {
+			Collection<? extends GrantedAuthority> groups = auth.getAuthorities();
+			Collection<String> myGroups = new ArrayList<String>(groups.size());
+			for (GrantedAuthority group : groups) {
+				String groupStr = group.getAuthority();
+				myGroups.add(groupStr);
+			}
+			User user = new User(auth.getName(), myGroups);
+			return user;
 		}
-		User user = new User(auth.getName(), myGroups);
-		return user;
+		return User.anonymousUser();
 	}
 
 }
