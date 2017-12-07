@@ -15,7 +15,7 @@ variable "saviorvcPort" {
 }
 
 variable "tomcatConfigDir" {
-  description = "The configuration directory for tomcat."
+  description = "The configuration directory for tomcat (inside its container)."
   default = "/usr/local/tomcat/conf"
 }
 
@@ -36,6 +36,7 @@ resource "docker_container" "saviorvc" {
   domainname = "${docker_container.samba-server.domainname}"
   dns = [ "${docker_container.samba-server.ip_address}" ]
   dns_search = [ "${docker_container.samba-server.domainname}" ]
+  networks = ["${docker_network.savior_network.name}"]
   publish_all_ports = true
   ports {
 	internal = 443

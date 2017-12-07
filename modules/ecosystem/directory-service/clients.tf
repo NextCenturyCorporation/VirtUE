@@ -7,6 +7,7 @@ resource "docker_container" "client-image" {
   image = "savior-client"
   domainname = "${docker_container.samba-server.domainname}"
   command = ["/sbin/init"]
+  networks = ["${docker_network.savior_network.name}"]
   dns = [ "${docker_container.samba-server.ip_address}" ]
   dns_search = [ "${docker_container.samba-server.domainname}" ]
 

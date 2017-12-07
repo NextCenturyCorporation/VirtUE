@@ -21,6 +21,7 @@ resource "docker_container" "samba-server" {
   image = "savior-dc"
   hostname = "saviordc"
   domainname = "${var.sambaDomain}"
+  networks = ["${docker_network.savior_network.name}"]
   # need to use the AD DNS as the primary one
   dns = [ "127.0.0.1" ]
   dns_search = [ "${var.sambaDomain}" ]
@@ -62,6 +63,6 @@ resource "docker_container" "samba-server" {
   # is actually up and running.
   provisioner "local-exec" {
 	# test readiness using DNS (port 53)
-	command = "while ! nc -z ${self.ip_address} 53; do echo -n .; sleep 5; done"
+	command = "while ! nc -z $(docker inspect --format '{{.NetworkSettings.Networks.${docker_network.savior_network.name}.IPAddress}}' ${self.name}) 53; do sleep 5; done"
   }
 }

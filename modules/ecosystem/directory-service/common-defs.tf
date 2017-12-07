@@ -10,3 +10,8 @@ variable "sambaAdminPassword" {
   # Set this in terraform.tfvars and it will get automatically included
   description = "Administrator for AD DC"
 }
+
+variable "docker_default_network" {
+  description = "Name of default docker network"
+  default = "bridge"
+}
