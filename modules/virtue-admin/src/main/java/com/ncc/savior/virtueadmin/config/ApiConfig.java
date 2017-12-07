@@ -32,7 +32,7 @@ public class ApiConfig extends ResourceConfig {
 		/*Register all you webservice class here:*/
 		register(DesktopRestService.class);
 		register(VirtueRestService.class); 
-		register(HelloResource.class); 
+		//register(HelloResource.class); 
 		register(WebServiceUtil.class);
 		
 	}

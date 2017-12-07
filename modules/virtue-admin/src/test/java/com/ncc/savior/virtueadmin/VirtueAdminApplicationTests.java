@@ -11,6 +11,8 @@ public class VirtueAdminApplicationTests {
 
 	@Test
 	public void contextLoads() {
+		
+		System.out.println("****!!!!!!!****!!!!!!!****");
 	}
 
 }
