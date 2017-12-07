@@ -44,41 +44,7 @@
 
           <div class="mui-tabs__pane" id="appVMs">
             <div class="tab-pane-content">
-              <div class="titlebar">
-                <h2 class="title">Application VMs</h2>
-                <button class="float-right" value="import" disabled>Import VM</button>
-              </div>
-              <form id="config-app-vms" method="post">
-                <div id="vm-list" class="table-container padding-left-15">
-                  <div class="mui-row table-header-row">
-                    <div class="mui-col-md-1 table-header"><span><input type="checkbox" name="all" /></span></div>
-                    <div class="mui-col-md-3 table-header">Virtual Machine</div>
-                    <div class="mui-col-md-2 table-header">Image Size</div>
-                    <div class="mui-col-md-6 table-header">Applications</div>
-                  </div>
-                  <div class="mui-row border-bottom">
-                    <div class="mui-col-md-1 table-data text-align-center"><span><input type="checkbox" name="all" /></span></div>
-                    <div class="mui-col-md-3 table-data">[ Virtual Machine Name ]</div>
-                    <div class="mui-col-md-2 table-data">[ Image Size ] MB</div>
-                    <div class="mui-col-md-6 table-data">[ App 1 ], [ App 2 ], [ App 3 ], [ App N ]...</div>
-                  </div>
-                </div>
-                <div class="mui-row">
-                  <div class="mui-col-md-12"><button name="delete" value="delete" disabled>Delete Selected</button></div>
-                </div>
-                <div class="mui-row">
-                  <div class="mui-col-md-4">&nbsp;</div>
-                  <div class="mui-col-md-4 form-item text-align-center">
-                    <button class="button-submit" type="submit">Save</button>
-                  </div>
-                  <div class="mui-col-md-4"></div>
-                </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-12">
-                    <p>&nbsp;</p>
-                  </div>
-                </div>
-              </form>
+              <app-config-app-vm></app-config-app-vm>
             </div>
           </div>
 

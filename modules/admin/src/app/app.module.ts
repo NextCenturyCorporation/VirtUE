@@ -13,6 +13,7 @@ import { HeaderComponent } from './header/header.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
 import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
+import { ConfigAppVmComponent } from './config/config-app-vm/config-app-vm.component';
 import { UsersComponent } from './users/users.component';
 import { VirtuesComponent } from './virtues/virtues.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
@@ -48,6 +49,7 @@ const appRoutes: Routes = [
     VirtuesComponent,
     ConfigComponent,
     ConfigActiveDirComponent,
+    ConfigAppVmComponent,
     UsersComponent,
     AddUserComponent,
     EditUserComponent,
@@ -57,7 +59,7 @@ const appRoutes: Routes = [
     EditVirtueComponent,
     DialogsComponent,
     VirtueModalComponent,
-    VmModalComponent,    
+    VmModalComponent,
   ],
   imports: [
     BreadcrumbsModule,
