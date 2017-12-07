@@ -38,67 +38,7 @@
         <div class="mui-col-md-9 vertical-tabs-content">
           <div class="mui-tabs__pane mui--is-active" id="activeDirectories">
             <div class="tab-pane-content">
-              <div class="titlebar">
-                <h2>Active Directories</h2>
-              </div>
-              <form id="config-active-directories" method="post">
-                <h3>Connection Details</h3>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-3 text-align-right"><label for="directoryName">Directory Name:</label></div>
-                  <div class="mui-col-md-4"><input name="directoryName" type="text" value="" /></div>
-                  <div class="mui-col-md-4">&nbsp;</div>
-                </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-3 text-align-right"><label for="directoryType">Select Directory Type:</label></div>
-                  <div class="mui-col-md-4">
-                    <div class="select-container">
-                      <span class="fa fa-angle-down"></span>
-                      <select name="directoryType">
-                        <option>Active Directory</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="mui-col-md-4">&nbsp;</div>
-                </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-3 text-align-right"><label for="domain">Domain:</label></div>
-                  <div class="mui-col-md-4"><input name="domain" type="text" value="" /></div>
-                  <div class="mui-col-md-4">&nbsp;</div>
-                </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-3 text-align-right"><label for="hostIPAddress">Host/IP Address:</label></div>
-                  <div class="mui-col-md-4"><input name="hostIPAddress" type="text" value="" /></div>
-                  <div class="mui-col-md-2 text-align-right"><label for="port">Port:</label></div>
-                  <div class="mui-col-md-2"><input name="port" type="text" value="" /></div>
-                </div>
-                <hr />
-                <h3>Log-in Information</h3>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-3 text-align-right"><label for="username">Administrator Username:</label></div>
-                  <div class="mui-col-md-4"><input name="username" type="text" value="" /></div>
-                  <div class="mui-col-md-4">&nbsp;</div>
-                </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-3 text-align-right"><label for="password">Password:</label></div>
-                  <div class="mui-col-md-4">
-                    <input name="password" type="password" value="" />
-                  </div>
-                  <div class="mui-col-md-4">&nbsp;</div>
-                </div>
-                <hr />
-                <div class="mui-row">
-                  <div class="mui-col-md-4">&nbsp;</div>
-                  <div class="mui-col-md-4 form-item text-align-center">
-                    <button class="button-submit" type="submit">Save</button>
-                  </div>
-                  <div class="mui-col-md-4"></div>
-                </div>
-                <div class="mui-row form-item">
-                  <div class="mui-col-md-12">
-                    <p>&nbsp;</p>
-                  </div>
-                </div>
-              </form>
+              <app-config-active-dir></app-config-active-dir>
             </div>
           </div>
 

@@ -12,6 +12,7 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
+import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
 import { UsersComponent } from './users/users.component';
 import { VirtuesComponent } from './virtues/virtues.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
@@ -46,6 +47,7 @@ const appRoutes: Routes = [
     DashboardComponent,
     VirtuesComponent,
     ConfigComponent,
+    ConfigActiveDirComponent,
     UsersComponent,
     AddUserComponent,
     EditUserComponent,
@@ -54,8 +56,8 @@ const appRoutes: Routes = [
     CreateVirtueComponent,
     EditVirtueComponent,
     DialogsComponent,
-    VmModalComponent,
-    VirtueModalComponent
+    VirtueModalComponent,
+    VmModalComponent,    
   ],
   imports: [
     BreadcrumbsModule,
