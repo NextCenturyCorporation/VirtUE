@@ -25,7 +25,8 @@ export class ConfigResourcesComponent implements OnInit {
       data:  {
           dialogText: text,
           dialogType: type
-        }
+        },
+      hasBackdrop: false
     });
 
     this.screenWidth = (window.screen.width);

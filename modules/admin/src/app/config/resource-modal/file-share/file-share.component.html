@@ -4,7 +4,7 @@
   </div>
   <div class="mui-col-md-4">
     <mat-form-field>
-      <mat-select [(ngModel)]="fsValue" name="fileShareType">
+      <mat-select [(ngModel)]="fsValue" name="fileShareType" [(value)]="selected">
         <mat-option *ngFor="let fsType of fileShareTypes" [value]="fsType.value">{{ fsType.viewValue }}</mat-option>
       </mat-select>
     </mat-form-field>
@@ -14,6 +14,7 @@
   </div>
 </div>
 <!-- BEGIN if file share type is NFS //-->
+<div id="nfs" *ngIf="selected == 'NFS'">
     <div class="mui-row margin-bottom-10">
       <div class="mui-col-md-4 text-align-right">
         <label>File Share Name:</label>
@@ -78,8 +79,10 @@
         &nbsp;
       </div>
     </div>
+  </div>
 <!-- END if file share type is NFS //-->
 <!-- BEGIN if file share type is CIFS //-->
+<div id="cifs" *ngIf="selected == 'CIFS'">
     <div class="mui-row margin-bottom-10">
       <div class="mui-col-md-4 text-align-right">
         <label>File Share Name:</label>
@@ -145,4 +148,5 @@
         &nbsp;
       </div>
     </div>
+  </div>
 <!-- END if file share type is CIFS //-->

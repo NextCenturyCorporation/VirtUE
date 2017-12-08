@@ -277,7 +277,8 @@ content {
   }
 }
 .table-header, .table-data {
-  padding: 0.65rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
 }
 .table-header {
   @include ralewaySemibold;
@@ -286,13 +287,18 @@ content {
   align-items: flex-end;
 }
 .table-header span {
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 .table-data {
   @include raleway;
   background-color: #FFF;
   display: table-cell;
+}
+.table-data span {
+  margin-left: 10px;
+  margin-right: 10px;
+  text-align: left;
 }
 
 .tab-pane-content {
