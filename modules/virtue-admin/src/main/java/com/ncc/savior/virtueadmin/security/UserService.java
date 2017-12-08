@@ -9,6 +9,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ncc.savior.virtueadmin.model.User;
 
+/**
+ * User Service provides the {@link User} object from the Spring Security
+ * modules. This is the instance that should be used by the rest of the system
+ * to get the user.
+ * 
+ *
+ */
 public class UserService {
 
 	public static User getCurrentUser() {

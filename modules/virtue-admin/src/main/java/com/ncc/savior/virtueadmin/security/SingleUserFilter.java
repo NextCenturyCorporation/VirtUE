@@ -17,15 +17,23 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Filter that injects user and roles from a property file to the user object
+ * for Spring Security. ALL requests will be granted this user if this module is
+ * used. Do NOT use in production.
+ *
+ */
 public class SingleUserFilter extends OncePerRequestFilter {
 
+	private static final String PROPERTY_SINGLEUSER_AUTHORITIES = "savior.security.singleuser.authorities";
+	private static final String PROPERTY_SINGLEUSER_NAME = "savior.security.singleuser.name";
 	private String username;
 	private List<GrantedAuthority> authorities;
 
 	public SingleUserFilter(Environment env) {
-		username = env.getProperty("savior.security.singleuser.name");
+		username = env.getProperty(PROPERTY_SINGLEUSER_NAME);
 		authorities = new ArrayList<GrantedAuthority>();
-		String authoritiesString = env.getProperty("savior.security.singleuser.authorities");
+		String authoritiesString = env.getProperty(PROPERTY_SINGLEUSER_AUTHORITIES);
 		for (String a : authoritiesString.split(",")) {
 			authorities.add(new SimpleGrantedAuthority(a));
 		}

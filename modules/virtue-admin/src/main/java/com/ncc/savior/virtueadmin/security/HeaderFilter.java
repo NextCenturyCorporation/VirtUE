@@ -15,13 +15,20 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Pulls username and some role information from header. Not for production use!
+ * 
+ * The username is given ROLE_USER by default. If the X-admin header is present,
+ * the user will be given ROLE_ADMIN. If the X-noroles header is present, the
+ * user will get no roles.
+ * 
+ *
+ */
 public class HeaderFilter extends OncePerRequestFilter {
-
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
-
+		// do nothing
 	}
 
 	@Override
@@ -38,17 +45,13 @@ public class HeaderFilter extends OncePerRequestFilter {
 		}
 
 		Authentication authentication = new AbstractAuthenticationToken(authorities) {
-			
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public Object getPrincipal() {
 				return name;
 			}
-			
+
 			@Override
 			public Object getCredentials() {
 				return name;

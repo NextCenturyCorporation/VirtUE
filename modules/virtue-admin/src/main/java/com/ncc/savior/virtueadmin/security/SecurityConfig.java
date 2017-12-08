@@ -6,6 +6,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,9 +25,38 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * A property configurable Spring Security configuration. There are multiple
+ * modes for authentication that can be set via the
+ * 'savior.security.authentication' property.
+ * <ul>
+ * <li>HEADER - All connections will be granted the username and roles from
+ * specific headers in the request. See {@link HeaderFilter} for details. The
+ * client is fully trusted and thus this mode should not be used in production.
+ * <li>SINGLEUSER - All connections will be granted the username and roles of a
+ * user configured the security property file. This mode should not be used in
+ * production. See {@link SingleUserFilter} for details.
+ * <li>ACTIVEDIRECTORY - not fully implemented
+ * <li>LDAP - not fully implemented
+ * 
+ *
+ */
 @EnableWebSecurity
-@PropertySource("classpath:savior-server-security.properties")
+@PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
+
+	private static final String AUTH_MODULE_LDAP = "LDAP";
+
+	private static final String AUTH_MODULE_ACTIVEDIRECTORY = "ACTIVEDIRECTORY";
+
+	private static final String AUTH_MODULE_SINGLEUSER = "SINGLEUSER";
+
+	private static final String AUTH_MODULE_DUMMY = "HEADER";
+
+	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+	private static final String PROPERTY_AUTH_MODULE = "savior.security.authentication";
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -35,7 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	Environment env;
 
-	@Value("${savior.security.authentication:ERROR}")
+	@Value("${" + PROPERTY_AUTH_MODULE + ":ERROR}")
 	private String authModuleName;
 
 	@Value("${savior.security.ad.domain:ERROR}")
@@ -47,8 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
 
-	@Bean
-	public ActiveDirectoryLdapAuthenticationProvider activeDirectoryLdapAuthenticationProvider() {
+	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
 		provider.setConvertSubErrorCodesToExceptions(true);
@@ -67,13 +97,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// auth.inMemoryAuthentication().withUser(User.testUser().getUsername()).password("").roles("USER");
 		// auth.inMemoryAuthentication().withUser("kdrumm").roles("USER", "ADMIN");
 
-		if (authModuleName.equalsIgnoreCase("DUMMY")) {
+		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
 			auth.authenticationProvider(new PassThroughAuthenticationProvider());
-		} else if (authModuleName.equalsIgnoreCase("SINGLEUSER")) {
+		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
 			auth.authenticationProvider(new PassThroughAuthenticationProvider());
-		} else if (authModuleName.equalsIgnoreCase("ACTIVEDIRECTORY")) {
-			auth.authenticationProvider(activeDirectoryLdapAuthenticationProvider());
-		} else if (authModuleName.equalsIgnoreCase("LDAP")) {
+		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_ACTIVEDIRECTORY)) {
+			auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider());
+		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_LDAP)) {
 			auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
 		} else {
 			throw new SaviorException(-1,
@@ -84,10 +114,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		// http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll();
-		if (authModuleName.equalsIgnoreCase("DUMMY")) {
+		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
 			http.addFilterAt(new HeaderFilter(), AbstractPreAuthenticatedProcessingFilter.class);
-		} else if (authModuleName.equalsIgnoreCase("SINGLEUSER")) {
+			printDevModuleWarning(authModuleName);
+		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
 			http.addFilterAt(new SingleUserFilter(env), AbstractPreAuthenticatedProcessingFilter.class);
+			printDevModuleWarning(authModuleName);
 		}
 		// Set what roles are required to view each urls
 		http.authorizeRequests().antMatchers("/desktop/**").hasRole("USER").antMatchers("/admin/**").hasRole("ADMIN")
@@ -101,6 +133,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			// causes all requests to need to be over https.
 			http.requiresChannel().anyRequest().requiresSecure();
 		}
+	}
+
+	private void printDevModuleWarning(String authModuleName) {
+		logger.warn("***** INSECURE AUTHORIZATION WARNING *****");
+		logger.warn("Spring Security has been configured to use " + authModuleName
+				+ " which is not intended for production use.  If you did not intend to use this module, please change the '"
+				+ PROPERTY_AUTH_MODULE + "' property in your security property file (usually "
+				+ DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES + ").");
+		logger.warn("***** INSECURE AUTHORIZATION WARNING *****");
 	}
 
 	private AccessDeniedHandler getAccessDeniedHandler() {
