@@ -42,8 +42,13 @@ resource "docker_container" "saviorvc" {
 	internal = 443
 	external = "${var.saviorvcPort}"
   }
+  volumes {
+	host_path = "${path.module}/tomcat"
+	container_path = "/var/lib/ssk"
+  }
+  #entrypoint = [ "/sbin/init" ]
 
   provisioner "local-exec" {
-	command = "./register-service.sh ${self.name} ${var.sambaAdminPassword} ${var.tomcatConfigDir}/tomcat.keytab"
+	command = "./register-service.sh ${self.name} ${docker_network.savior_network.name} ${var.sambaAdminPassword} ${var.tomcatConfigDir}/tomcat.keytab"
   }
 }

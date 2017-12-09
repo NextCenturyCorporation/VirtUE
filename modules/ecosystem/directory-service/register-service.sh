@@ -3,17 +3,18 @@
 # Register a service with the DS and make a kerberos keytab for it
 #
 
-usage="usage: $0 container adminPassword keytabPath"
+usage="usage: $0 container network adminPassword keytabPath"
 
-if [ ! $# -eq 3 ]; then
+if [ ! $# -eq 4 ]; then
 	echo "$0: error: invalid arguments" 1>&2
 	echo "$0: ${usage}" 1>&2
 	exit -1
 fi
 
 container=$1
-adminPassword=$2
-keytabPath=$3
+network=$2
+adminPassword=$3
+keytabPath=$4
 
 set -e
 
@@ -25,10 +26,10 @@ realm=${SAMBA_DOMAIN/.*/}
 #
 # Set up DNS
 #
-serviceIp=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container)
+serviceIp=$(docker inspect --format "{{.NetworkSettings.Networks.${network}.IPAddress}}" $container)
 addcHostname=$(docker inspect --format '{{.Config.Hostname}}' $ADDC_CONTAINER)
 serviceSubnet=$(echo $serviceIp | sed 's/\.[^.]*$//')
-zone=$(echo $serviceSubnet | rev).in-addr.arpa
+zone=$(echo $serviceSubnet | awk -F . '{ print $3 "." $2 "." $1 }').in-addr.arpa
 lastOctet=${serviceIp/*./}
 serviceHostname=$(docker inspect --format '{{.Config.Hostname}}' $container)
 serviceFqdn=${serviceHostname}.${SAMBA_DOMAIN,,}

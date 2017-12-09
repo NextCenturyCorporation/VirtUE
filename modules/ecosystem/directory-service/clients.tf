@@ -17,3 +17,20 @@ resource "docker_container" "client-image" {
 	command = "docker exec ${self.name} net ads join -U administrator%${var.sambaAdminPassword}"
   }
 }
+
+resource "docker_container" "firefox-image" {
+  name = "savior-firefox"
+  hostname = "ff"
+  image = "savior-firefox"
+  domainname = "${docker_container.samba-server.domainname}"
+  command = ["/usr/sbin/sshd", "-D"]
+  networks = ["${docker_network.savior_network.name}"]
+  dns = [ "${docker_container.samba-server.ip_address}" ]
+  dns_search = [ "${docker_container.samba-server.domainname}" ]
+
+  # This avoids having to put the admin password in an environment
+  # variable or file or something accessible w/in the container.
+  provisioner "local-exec" {
+	command = "docker exec ${self.name} net ads join -U administrator%${var.sambaAdminPassword}"
+  }
+}

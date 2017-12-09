@@ -60,6 +60,8 @@ if [ ! -f "${INITFILE}" ]; then
 		echo "$0: info: SAMBA_DNS_OPTION="${SAMBA_DNS_OPTION}
 	fi
 	rm -rf /etc/samba/smb.conf /etc/krb5.conf "${SAMBA_CONFIG_DIR}"/*
+	# TODO: generate a certificate for LDAPS and change "ldap server
+	# require strong auth" to "yes".
 	samba-tool domain provision \
 			   --server-role=dc \
 			   --use-rfc2307 \
@@ -73,6 +75,7 @@ if [ ! -f "${INITFILE}" ]; then
 			   --option="lm interval = 0" \
 			   --option="server signing = mandatory" \
 			   --option="show add printer wizard = no" \
+			   --option="ldap server require strong auth = no" \
 			   "${SAMBA_DNS_OPTION}" \
 			   ${SAMBA_PROVISION_OPTIONS}
 	echo "$0: initialized at $(date)" > "${INITFILE}"
