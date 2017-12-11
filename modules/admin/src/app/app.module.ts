@@ -20,6 +20,7 @@ import { ConfigComponent } from './config/config.component';
 import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
 import { ConfigAppVmComponent } from './config/config-app-vm/config-app-vm.component';
 import { ConfigResourcesComponent } from './config/config-resources/config-resources.component';
+import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 import { UsersComponent } from './users/users.component';
 import { VirtuesComponent } from './virtues/virtues.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
@@ -73,6 +74,7 @@ const appRoutes: Routes = [
     ResourceModalComponent,
     FileShareComponent,
     PrintersComponent,
+    ConfigSensorsComponent,
   ],
   imports: [
     BreadcrumbsModule,
