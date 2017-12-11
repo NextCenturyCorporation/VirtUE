@@ -1,29 +1,47 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+
+import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 
 /**
  * Data Transfer Object (DTO) for templates.
  * 
  *
  */
+@Entity
 public class VirtueTemplate {
+	@Id
 	private String id;
 	private String name;
 	private String version;
-	private Map<String, ApplicationDefinition> applications;
-	private List<VirtualMachineTemplate> vmTemplates;
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL)
+	@ElementCollection(targetClass = ApplicationDefinition.class)
+	private Collection<ApplicationDefinition> applications;
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL)
+	@ElementCollection(targetClass = VirtualMachineTemplate.class)
+	private Collection<VirtualMachineTemplate> vmTemplates;
 
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
-	public VirtueTemplate(String id, String name, String version, Map<String, ApplicationDefinition> applications2,
-			List<VirtualMachineTemplate> vmTemplates) {
+	public VirtueTemplate(String id, String name, String version, Collection<ApplicationDefinition> applications,
+			Collection<VirtualMachineTemplate> vmTemplates) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
-		this.applications = applications2;
+		this.applications = applications;
 		this.vmTemplates = vmTemplates;
 	}
 
@@ -46,11 +64,11 @@ public class VirtueTemplate {
 		return version;
 	}
 
-	public Map<String, ApplicationDefinition> getApplications() {
+	public Collection<ApplicationDefinition> getApplications() {
 		return applications;
 	}
 
-	public List<VirtualMachineTemplate> getVmTemplates() {
+	public Collection<VirtualMachineTemplate> getVmTemplates() {
 		return vmTemplates;
 	}
 
@@ -67,7 +85,7 @@ public class VirtueTemplate {
 		this.version = version;
 	}
 
-	protected void setApplications(Map<String, ApplicationDefinition> applications) {
+	protected void setApplications(Collection<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 

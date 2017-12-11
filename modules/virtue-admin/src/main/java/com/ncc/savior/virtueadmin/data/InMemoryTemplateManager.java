@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -47,19 +47,19 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
 				OS.LINUX, "gnome-calculator");
 
-		Map<String, ApplicationDefinition> appsAll = new LinkedHashMap<String, ApplicationDefinition>();
-		Map<String, ApplicationDefinition> appsBrowsers = new LinkedHashMap<String, ApplicationDefinition>();
-		Map<String, ApplicationDefinition> appsMath = new LinkedHashMap<String, ApplicationDefinition>();
-		Map<String, ApplicationDefinition> appChromeIsBetterThanFirefox = new LinkedHashMap<String, ApplicationDefinition>();
+		Collection<ApplicationDefinition> appsAll = new LinkedList< ApplicationDefinition>();
+		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<  ApplicationDefinition>();
+		Collection<ApplicationDefinition> appsMath = new LinkedList<  ApplicationDefinition>();
+		Collection<ApplicationDefinition> appChromeIsBetterThanFirefox = new LinkedList<ApplicationDefinition>();
 
-		appsAll.put(chrome.getId(), chrome);
-		appsAll.put(firefox.getId(), firefox);
-		appsAll.put(calculator.getId(), calculator);
-		appsBrowsers.put(chrome.getId(), chrome);
-		appsBrowsers.put(firefox.getId(), firefox);
-		appChromeIsBetterThanFirefox.put(chrome.getId(), chrome);
-		appChromeIsBetterThanFirefox.put(calculator.getId(), calculator);
-		appsMath.put(calculator.getId(), calculator);
+		appsAll.add(chrome);
+		appsAll.add(firefox);
+		appsAll.add(calculator);
+		appsBrowsers.add(chrome);
+		appsBrowsers.add(firefox);
+		appChromeIsBetterThanFirefox.add(chrome);
+		appChromeIsBetterThanFirefox.add(calculator);
+		appsMath.add(calculator);
 
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
 				OS.LINUX, "Linux Browsers", appsBrowsers);
@@ -143,17 +143,17 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	@Override
 	public void addVirtueTemplate(VirtueTemplate template) {
-		Set<String> appIds = template.getApplications().keySet();
-		verifyAppsExist(appIds);
-		List<VirtualMachineTemplate> vmts = template.getVmTemplates();
+		Collection<ApplicationDefinition> apps = template.getApplications();
+		verifyAppsExist(apps);
+		Collection<VirtualMachineTemplate> vmts = template.getVmTemplates();
 		verifyVmTemplatesExist(vmts);
 		templates.put(template.getId(), template);
 	}
 
 	@Override
 	public void addVmTemplate(VirtualMachineTemplate vmTemplate) {
-		Set<String> appIds = vmTemplate.getApplications().keySet();
-		verifyAppsExist(appIds);
+		Collection<ApplicationDefinition> apps = vmTemplate.getApplications();
+		verifyAppsExist(apps);
 		vmTemplates.put(vmTemplate.getId(), vmTemplate);
 	}
 
@@ -194,22 +194,22 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		return templates.get(templateId);
 	}
 
-	private void verifyVmTemplatesExist(List<VirtualMachineTemplate> vmts) {
+	private void verifyVmTemplatesExist(Collection<VirtualMachineTemplate> vmts) {
 		for (VirtualMachineTemplate vmt : vmts) {
 			if (!vmTemplates.containsKey(vmt.getId())) {
 				throw new SaviorException(SaviorException.VM_TEMPLATE_NOT_FOUND,
 						"VM Template ID=" + vmt.getId() + " not found.");
 			}
-			Set<String> appIds = vmt.getApplications().keySet();
+			Collection<ApplicationDefinition> appIds = vmt.getApplications();
 			verifyAppsExist(appIds);
 		}
 	}
 
-	private void verifyAppsExist(Set<String> appIds) {
-		for (String appId : appIds) {
-			if (!applications.containsKey(appId)) {
+	private void verifyAppsExist(Collection<ApplicationDefinition> apps) {
+		for (ApplicationDefinition app : apps) {
+			if (!applications.containsKey(app.getId())) {
 				throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
-						"Application ID=" + appId + " not found.");
+						"Application ID=" + app + " not found.");
 			}
 		}
 	}

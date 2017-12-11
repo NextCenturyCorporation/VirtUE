@@ -25,9 +25,14 @@ repositories {
 
 dependencies {
 	compile project(':common')
-	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
 	compile('org.springframework.boot:spring-boot-starter-web')
+	
+	compile group: 'org.springframework.data', name: 'spring-data-commons', version: '1.13.9.RELEASE'
+	compile group: 'org.springframework.data', name: 'spring-data-commons-core', version: '1.4.1.RELEASE'
+	compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '1.11.9.RELEASE'
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '1.5.9.RELEASE'
+	
 	runtime('com.h2database:h2')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	

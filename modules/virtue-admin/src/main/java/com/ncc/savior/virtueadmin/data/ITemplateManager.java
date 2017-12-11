@@ -19,14 +19,14 @@ public interface ITemplateManager {
 	 * 
 	 * @return
 	 */
-	Collection<VirtueTemplate> getAllVirtueTemplates();
+	Iterable<VirtueTemplate> getAllVirtueTemplates();
 
 	/**
 	 * Returns all {@link VirtualMachineTemplate} in the data store.
 	 * 
 	 * @return
 	 */
-	Collection<VirtualMachineTemplate> getAllVirtualMachineTemplates();
+	Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates();
 
 	/**
 	 * Returns all the {@link VirtueTemplate} that the given user has access to.

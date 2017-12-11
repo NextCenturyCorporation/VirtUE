@@ -1,6 +1,6 @@
 package com.ncc.savior.virtueadmin.virtue;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,8 +51,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	@Override
 	public VirtueInstance provisionTemplate(User user, VirtueTemplate template) {
-		List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
-		Map<String, VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(vmTemplates);
+		Collection<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
+		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(vmTemplates);
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		virtueDao.addVirtue(vi);
 		return vi;

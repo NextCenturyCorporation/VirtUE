@@ -1,8 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.OS;
@@ -57,13 +56,13 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public Map<String, VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
 			Collection<VirtualMachineTemplate> vmTemplates) {
-		Map<String, VirtualMachine> vms = new HashMap<String, VirtualMachine>();
+		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
 					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort);
-			vms.put(vm.getId(), vm);
+			vms.add(vm);
 		}
 		return vms;
 	}

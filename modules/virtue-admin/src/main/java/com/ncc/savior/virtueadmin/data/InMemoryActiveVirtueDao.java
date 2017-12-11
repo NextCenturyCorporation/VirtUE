@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.data;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -52,10 +53,12 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void updateVmState(String vmId, VmState state) {
 		for (VirtueInstance instance : virtues.values()) {
-			Map<String, VirtualMachine> vms = instance.getVms();
-			if (vms.containsKey(vmId)) {
-				vms.get(vmId).setState(state);
+			Collection<VirtualMachine> vms = instance.getVms();
+			for (VirtualMachine vm : vms) {
+				if (vm.getId().equals(vmId)) {
+					vm.setState(state);
 				break;
+			}
 			}
 		}
 	}
@@ -64,8 +67,8 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
 		VirtueInstance virtue = virtues.get(virtueId);
 		if (virtue != null) {
-			for (VirtualMachine vm : virtue.getVms().values()) {
-				ApplicationDefinition app = vm.getApplications().get(applicationId);
+			for (VirtualMachine vm : virtue.getVms()) {
+				ApplicationDefinition app = vm.findApplicationById(applicationId);
 				if (app != null) {
 					return vm;
 				}

@@ -1,11 +1,19 @@
 package com.ncc.savior.virtueadmin.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
 /**
  * Application Data Transfer Object (DTO).
  * 
  *
  */
+@Entity
 public class ApplicationDefinition {
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Id
 	private String id;
 	private String name;
 	private String version;

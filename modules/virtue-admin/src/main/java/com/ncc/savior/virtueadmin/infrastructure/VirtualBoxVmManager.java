@@ -165,7 +165,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public Map<String, VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		// TODO Auto-generated method stub
 		return null;
