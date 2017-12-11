@@ -46,7 +46,7 @@ export class ConfigResourcesComponent implements OnInit {
     });
 
     dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
-
+    
   }
 
   ngOnInit() {}

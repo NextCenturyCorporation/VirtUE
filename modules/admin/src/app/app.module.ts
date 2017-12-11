@@ -1,14 +1,45 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatDialogModule } from '@angular/material';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatInputModule } from '@angular/material/input';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
+
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { AppOverlayContainer } from './appOverlayContainer';
+import { OverlayModule } from '@angular/cdk/overlay';
+
+import {
+  MatAutocompleteModule,
+  MatButtonModule,
+  MatButtonToggleModule,
+  MatCardModule,
+  MatCheckboxModule,
+  MatChipsModule,
+  MatDatepickerModule,
+  MatDialogModule,
+  MatExpansionModule,
+  MatFormFieldModule,
+  MatGridListModule,
+  MatIconModule,
+  MatInputModule,
+  MatListModule,
+  MatMenuModule,
+  MatNativeDateModule,
+  MatProgressBarModule,
+  MatProgressSpinnerModule,
+  MatRadioModule,
+  MatRippleModule,
+  MatSelectModule,
+  MatSidenavModule,
+  MatSliderModule,
+  MatSlideToggleModule,
+  MatSnackBarModule,
+  MatStepperModule,
+  MatTableModule,
+  MatTabsModule,
+  MatToolbarModule,
+  MatTooltipModule,
+} from '@angular/material';
 
 import { BreadcrumbsModule } from 'ng2-breadcrumbs';
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
@@ -91,9 +122,12 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes)
   ],
   exports: [
+    OverlayModule,
     RouterModule
   ],
-  providers: [],
+  providers: [
+    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
+  ],
   bootstrap: [AppComponent],
   entryComponents: [
     VmModalComponent,
@@ -102,5 +136,4 @@ const appRoutes: Routes = [
     ResourceModalComponent
   ]
 })
-
 export class AppModule { }
