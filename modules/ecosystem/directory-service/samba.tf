@@ -1,11 +1,6 @@
 # Start a samba domain controller
 #
 
-variable "sambaDomain" {
-  description = "Domain name"
-  default = "SAVIOR.NEXTCENTURY.COM"
-}
-
 variable "SAMBA_CONFIG_DIR" {
   description = "Location of samba configuration files on host"
 }
@@ -37,6 +32,11 @@ resource "docker_container" "samba-server" {
 	host_path = "${var.SAMBA_CONFIG_DIR}"
 	container_path = "/var/lib/samba"
   }
+  # for debugging
+  volumes {
+	host_path = "/etc/resolv.conf"
+	container_path = "/etc/resolv.conf-host"
+  }
   publish_all_ports = true
   ports {
 	internal = 135
@@ -63,6 +63,10 @@ resource "docker_container" "samba-server" {
   # is actually up and running.
   provisioner "local-exec" {
 	# test readiness using DNS (port 53)
-	command = "while ! nc -z $(docker inspect --format '{{.NetworkSettings.Networks.${docker_network.savior_network.name}.IPAddress}}' ${self.name}) 53; do sleep 5; done"
+	command =<<EOF
+while ! nc -z $(docker inspect --format '{{(index .NetworkSettings.Networks "${docker_network.savior_network.name}").IPAddress}}' ${self.name}) 53; do
+  sleep 5;
+done
+EOF
   }
 }

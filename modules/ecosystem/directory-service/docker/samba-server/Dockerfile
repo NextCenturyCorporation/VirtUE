@@ -7,8 +7,6 @@ FROM fedora:${FEDORA_VERSION}
 LABEL description="Image for SAVIOR samba server" \
 	  name="savior-client"
 
-ARG SAMBA_REALM=SAVIOR.NEXTCENTURY.COM
-
 # Make a layer with some level of updates so we don't have to update
 # everything from the base OS image every time.
 RUN yum -y update

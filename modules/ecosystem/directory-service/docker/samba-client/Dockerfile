@@ -15,7 +15,5 @@ RUN yum -y update && \
 
 RUN mv -f /etc/samba/smb.conf /etc/samba/smb.conf-orig && \
 	mv -f /etc/krb5.conf /etc/krb5.conf-orig
-COPY smb.conf /etc/samba
-COPY krb5.conf /etc
 
 CMD ["/usr/sbin/init"]

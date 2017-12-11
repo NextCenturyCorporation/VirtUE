@@ -5,10 +5,15 @@
 
 usage="usage: $0 container network adminPassword keytabPath"
 
+function error() {
+	retval=$1
+	shift
+	echo -e "$0: error: $@" 1>&2
+	exit $retval
+}
+
 if [ ! $# -eq 4 ]; then
-	echo "$0: error: invalid arguments" 1>&2
-	echo "$0: ${usage}" 1>&2
-	exit -1
+	error -1 "invalid arguments\n\t${usage}"
 fi
 
 container=$1
@@ -20,13 +25,14 @@ set -e
 
 SAMBA_CONFIG_DIR=${SAMBA_CONFIG_DIR:-/var/lib/samba}
 ADDC_CONTAINER=${ADDC_CONTAINER:-saviordc}
-SAMBA_DOMAIN=${SAMBA_DOMAIN:-SAVIOR.NEXTCENTURY.COM}
+SAMBA_DOMAIN=$network
 realm=${SAMBA_DOMAIN/.*/}
 
 #
 # Set up DNS
 #
-serviceIp=$(docker inspect --format "{{.NetworkSettings.Networks.${network}.IPAddress}}" $container)
+serviceIp=$(docker inspect --format "{{(index .NetworkSettings.Networks \"${network}\").IPAddress}}" $container)
+[ "<no value>" == "$serviceIp" ] && error 1 "Could not find IP address for container '$container' in network '$network'"
 addcHostname=$(docker inspect --format '{{.Config.Hostname}}' $ADDC_CONTAINER)
 serviceSubnet=$(echo $serviceIp | sed 's/\.[^.]*$//')
 zone=$(echo $serviceSubnet | awk -F . '{ print $3 "." $2 "." $1 }').in-addr.arpa

@@ -15,3 +15,8 @@ variable "docker_default_network" {
   description = "Name of default docker network"
   default = "bridge"
 }
+
+variable "sambaDomain" {
+  description = "Domain name"
+  default = "SAVIOR.LOCAL"
+}

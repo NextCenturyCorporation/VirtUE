@@ -1,4 +1,4 @@
-SUBDIRS := samba-client samba-server
+SUBDIRS := samba-client samba-server savior-firefox
 
 BUILD_TARGETS = $(addprefix build-,$(SUBDIRS))
 
@@ -8,3 +8,5 @@ build: $(BUILD_TARGETS)
 
 build-%: %
 	$(MAKE) -C $< build
+
+build-savior-firefox: | build-samba-client

@@ -26,3 +26,10 @@ COPY id_rsa.pub /home/ff/.ssh/authorized_keys
 RUN chown -R ff:ff ~ff/.ssh
 
 CMD ["/usr/sbin/sshd", "-D"]
+
+
+# TODO
+# add this:
+# user_pref("network.negotiate-auth.trusted-uris", "172.18.0.4");
+# to pref.js in ~/.mozilla/*.default*
+# but need to substitute the address of saviorvc (or maybe saviorvc would work)

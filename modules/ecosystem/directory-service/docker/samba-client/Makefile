@@ -4,6 +4,6 @@ NAME = savior-client
 
 build: .image.date
 
-.image.date: Dockerfile Makefile krb5.conf smb.conf
+.image.date: Dockerfile Makefile
 	docker build -t $(NAME) .
 	touch -d `docker inspect --format '{{.Created}}' $(NAME)` $@

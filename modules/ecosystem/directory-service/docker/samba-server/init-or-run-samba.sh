@@ -15,15 +15,14 @@ printHelp() {
 	echo "$0: environment variables used:"
 	cat<<EOF
 	SAMBA_ADMIN_PASSWORD	REQUIRED: Administrator account password
+	SAMBA_REALM				REQUIRED: Domain name (e.g., SUBDOMAIN.COMPANY.COM)
 	SAMBA_DNS				DNS to forward requests to (default: 127.0.0.11 (the docker server))
-	SAMBA_REALM				Domain name (e.g., SUBDOMAIN.COMPANY.COM) (default: SAVIOR.NEXTCENTURY.COM)
 	SAMBA_CONFIG_DIR		Where samba config files live (default: /var/lib/samba)
 	SAMBA_PROVISION_OPTIONS Extra options for the 'samba-tool domain provision' command
 	SAMBA_OPTIONS			Extra options for samba (default: --interactive)
 EOF
 }
 
-SAMBA_REALM=${SAMBA_REALM:-SAVIOR.NEXTCENTURY.COM}
 SAMBA_DNS=${SAMBA_DNS:-127.0.0.11}
 SAMBA_PROVISION_OPTIONS=${SAMBA_PROVISION_OPTIONS:-}
 sambaArgs=${SAMBA_OPTIONS:---interactive}
@@ -51,15 +50,24 @@ esac
 if [ ! -f "${INITFILE}" ]; then
 	echo "$0: initializing..."
 
+	fatalError=0
 	if [ -z "${SAMBA_ADMIN_PASSWORD}" ]; then
 		echo "$0: error: Domain not initialized, so environment variable SAMBA_ADMIN_PASSWORD must be set" 1>&2
+		fatalError=1
+	fi
+	if [ -z "${SAMBA_REALM}" ]; then
+		echo "$0: error: Domain not initialized, so environment variable SAMBA_REALM must be set" 1>&2
+		fatalError=1
+	fi
+	if [ 1 -eq $fatalError ]; then
 		exit 2
 	fi
+
 	if [ -n "${SAMBA_DNS}" ]; then
 		SAMBA_DNS_OPTION="--option=dns forwarder = ${SAMBA_DNS}"
 		echo "$0: info: SAMBA_DNS_OPTION="${SAMBA_DNS_OPTION}
 	fi
-	rm -rf /etc/samba/smb.conf /etc/krb5.conf "${SAMBA_CONFIG_DIR}"/*
+	rm -rfv /etc/samba/smb.conf /etc/krb5.conf "${SAMBA_CONFIG_DIR}"/*
 	# TODO: generate a certificate for LDAPS and change "ldap server
 	# require strong auth" to "yes".
 	samba-tool domain provision \
