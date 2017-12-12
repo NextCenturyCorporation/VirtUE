@@ -66,6 +66,7 @@ import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.componen
 import { ResourceModalComponent } from './config/resource-modal/resource-modal.component';
 import { FileShareComponent } from './config/resource-modal/file-share/file-share.component';
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
+import { JsonFilterPipe } from './data/json-filter.pipe';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -106,6 +107,7 @@ const appRoutes: Routes = [
     FileShareComponent,
     PrintersComponent,
     ConfigSensorsComponent,
+    JsonFilterPipe,
   ],
   imports: [
     BreadcrumbsModule,
@@ -123,6 +125,7 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes)
   ],
   exports: [
+    JsonFilterPipe,
     OverlayModule,
     RouterModule
   ],
