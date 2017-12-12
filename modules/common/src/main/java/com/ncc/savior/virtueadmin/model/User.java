@@ -11,8 +11,11 @@ public class User {
 	private String username;
 
 	static {
-		testUser = new User();
-		testUser.username = "testUser";
+		testUser = new User("testUser");
+	}
+
+	public User(String username) {
+		this.username = username;
 	}
 
 	public static User testUser() {

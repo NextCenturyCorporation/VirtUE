@@ -4,14 +4,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 /**
  * Data Transfer Object (DTO) for templates.
@@ -26,9 +21,7 @@ public class VirtueTemplate {
 	private String version;
 	@ManyToMany()
 	private Collection<VirtualMachineTemplate> vmTemplates;
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@ManyToMany(mappedBy = "UserName", cascade = CascadeType.MERGE)
-	@ElementCollection(targetClass = UserName.class)
+	@ManyToMany()
 	private Collection<UserName> userNames;
 
 	// private Set<String> startingResourceIds;

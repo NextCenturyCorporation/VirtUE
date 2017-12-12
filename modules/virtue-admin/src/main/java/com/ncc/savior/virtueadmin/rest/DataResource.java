@@ -10,6 +10,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
@@ -21,6 +23,7 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 @Path("/data")
 public class DataResource {
+	private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
 	@Autowired
 	private ITemplateManager templateManager;
 
@@ -30,6 +33,7 @@ public class DataResource {
 	@GET
 	@Path("templates/preload")
 	public Response preloadTemplates() {
+		logger.info("attempting to preload data");
 		ApplicationDefinition chrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome", "1.0",
 				OS.LINUX, "google-chrome");
 		ApplicationDefinition firefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
@@ -80,19 +84,24 @@ public class DataResource {
 		templateManager.addApplicationDefinition(chrome);
 		//
 		// templateManager.addVmTemplate(vmAll);
-		// templateManager.addVmTemplate(vmMath);
+		templateManager.addVmTemplate(vmMath);
 		templateManager.addVmTemplate(vmBrowser);
 
-		// templateManager.addVirtueTemplate(virtueAllVms);
 		templateManager.addVirtueTemplate(virtueSingleBrowsers);
 		// templateManager.addVirtueTemplate(virtueSingleAll);
 
-		// templateManager.assignVirtueTemplateToUser(User.testUser(),
-		// virtueAllVms.getId());
+		User kdrumm = new User("kdrumm");
+		User wole = new User("wole");
 		templateManager.assignVirtueTemplateToUser(User.testUser(), virtueSingleBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(kdrumm, virtueSingleBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(wole, virtueSingleBrowsers.getId());
 
 		templateManager.addVmTemplate(vmAll);
 		templateManager.addVirtueTemplate(virtueSingleAll);
+		templateManager.addVirtueTemplate(virtueAllVms);
+
+		templateManager.assignVirtueTemplateToUser(User.testUser(), virtueAllVms.getId());
+		logger.info("Data preloaded");
 		return Response.noContent().entity("success").build();
 	}
 }
