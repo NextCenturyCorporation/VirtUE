@@ -1,25 +1,39 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.UserName;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
+@Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
 
+	@Autowired
 	private VirtueTemplateRepository vtRepository;
+	@Autowired
 	private ApplicationDefinitionRepository appRepository;
+	@Autowired
 	private VirtualMachineTemplateRepository vmtRepository;
+	@Autowired
+	private UserNameRepository userRepo;
 
 	public SpringJpaTemplateManager(VirtueTemplateRepository vtRepository,
-			VirtualMachineTemplateRepository vmtRepository, ApplicationDefinitionRepository appRepository) {
+			VirtualMachineTemplateRepository vmtRepository, ApplicationDefinitionRepository appRepository,
+			UserNameRepository userRep) {
 		this.vtRepository = vtRepository;
 		this.vmtRepository = vmtRepository;
 		this.appRepository = appRepository;
+		this.userRepo = userRep;
 	}
 
 	@Override
@@ -35,14 +49,22 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(User user) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<VirtueTemplate> templates = vtRepository.findByUserNames(new UserName(user.getUsername()));
+		Map<String, VirtueTemplate> ret = new HashMap<String, VirtueTemplate>();
+		for (VirtueTemplate t : templates) {
+			ret.put(t.getId(), t);
+		}
+		return ret;
 	}
 
 	@Override
 	public Collection<String> getVirtueTemplateIdsForUser(User user) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<VirtueTemplate> templates = vtRepository.findByUserNames(new UserName(user.getUsername()));
+		Collection<String> ret = new HashSet<String>();
+		for (VirtueTemplate t : templates) {
+			ret.add(t.getId());
+		}
+		return ret;
 	}
 
 	@Override
@@ -52,8 +74,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public VirtueTemplate getTemplate(User user, String templateId) {
-		// TODO Auto-generated method stub
-		return null;
+		return vtRepository.findByUserNamesAndId(new UserName(user.getUsername()), templateId);
 	}
 
 	@Override
@@ -73,14 +94,24 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void assignVirtueTemplateToUser(User user, String virtueTemplateId) {
-		// TODO Auto-generated method stub
-
+		UserName username = new UserName(user.getUsername());
+		// TODO this seems inefficient, but it errors if the username does not exist.
+		userRepo.save(username);
+		VirtueTemplate vt = vtRepository.findOne(virtueTemplateId);
+		vt.retrieveUserNames().add(username);
+		vtRepository.save(vt);
 	}
 
 	@Override
 	public void revokeVirtueTemplateFromUser(User user, String virtueTemplateId) {
-		// TODO Auto-generated method stub
+		VirtueTemplate vt = vtRepository.findOne(virtueTemplateId);
+		vt.retrieveUserNames().remove(new UserName(user.getUsername()));
+		vtRepository.save(vt);
+	}
 
+	@Override
+	public Iterable<ApplicationDefinition> getAllApplications() {
+		return appRepository.findAll();
 	}
 
 }

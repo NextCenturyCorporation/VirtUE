@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
 	xsi:schemaLocation="
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/data/jpa
+    	http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+    	http://www.springframework.org/schema/data/repository
+        http://www.springframework.org/schema/data/repository/spring-repository-1.5.xsd">
 
 	<bean name="vmManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineVmManager">
@@ -16,7 +21,7 @@
 	<bean name="appManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager">
 	</bean>
-	
+
 	<bean name="virtueDao"
 		class="com.ncc.savior.virtueadmin.data.InMemoryActiveVirtueDao">
 	</bean>
@@ -24,8 +29,19 @@
 		<constructor-arg ref="vmManager" />
 		<constructor-arg ref="virtueDao" />
 	</bean>
-	<bean name="templateManager" class="com.ncc.savior.virtueadmin.data.InMemoryTemplateManager">
+	<!-- <bean name="templateManager" class="com.ncc.savior.virtueadmin.data.InMemoryTemplateManager"> -->
+	<!-- </bean> -->
+
+	<bean name="templateManager"
+		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaTemplateManager">
 	</bean>
+
+	<jpa:repositories base-package="com.ncc.savior.virtueadmin.data.jpa" />
+
+	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService">
+		<constructor-arg ref="templateManager" />
+	</bean>
+
 	<bean name="desktopService"
 		class="com.ncc.savior.virtueadmin.service.DesktopVirtueService">
 		<constructor-arg ref="activeVirtueManager" />

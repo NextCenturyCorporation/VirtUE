@@ -47,9 +47,9 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
 				OS.LINUX, "gnome-calculator");
 
-		Collection<ApplicationDefinition> appsAll = new LinkedList< ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<  ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsMath = new LinkedList<  ApplicationDefinition>();
+		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
+		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
+		Collection<ApplicationDefinition> appsMath = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appChromeIsBetterThanFirefox = new LinkedList<ApplicationDefinition>();
 
 		appsAll.add(chrome);
@@ -73,17 +73,17 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
-				"1.0", appsAll, vmtsSingleAll);
+				"1.0", vmtsSingleAll);
 		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
-				"1.0", appsBrowsers, vmtsBrowsers);
+				"1.0", vmtsBrowsers);
 		List<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
 		vmts.add(vmBrowser);
 		vmts.add(vmAll);
 		vmts.add(vmMath);
 		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
-				appsAll, vmts);
+				vmts);
 
 		addApplicationDefinition(calculator);
 		addApplicationDefinition(firefox);
@@ -212,6 +212,11 @@ public class InMemoryTemplateManager implements ITemplateManager {
 						"Application ID=" + app + " not found.");
 			}
 		}
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getAllApplications() {
+		return applications.values();
 	}
 
 }

@@ -12,6 +12,8 @@ package com.ncc.savior.virtueadmin.config;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
+import com.ncc.savior.virtueadmin.rest.AdminResource;
+import com.ncc.savior.virtueadmin.rest.DataResource;
 import com.ncc.savior.virtueadmin.rest.DesktopRestService;
 import com.ncc.savior.virtueadmin.rest.HelloResource;
 import com.ncc.savior.virtueadmin.rest.VirtueRestService;
@@ -32,7 +34,9 @@ public class ApiConfig extends ResourceConfig {
 		/*Register all you webservice class here:*/
 		register(DesktopRestService.class);
 		register(VirtueRestService.class); 
+		register(DataResource.class);
 		register(HelloResource.class); 
+		register(AdminResource.class);
 		register(WebServiceUtil.class);
 		
 	}

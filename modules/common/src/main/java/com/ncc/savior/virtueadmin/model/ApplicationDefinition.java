@@ -1,8 +1,6 @@
 package com.ncc.savior.virtueadmin.model;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
@@ -12,7 +10,6 @@ import javax.persistence.Id;
  */
 @Entity
 public class ApplicationDefinition {
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id
 	private String id;
 	private String name;

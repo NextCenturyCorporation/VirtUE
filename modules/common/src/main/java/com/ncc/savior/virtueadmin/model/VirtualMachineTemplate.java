@@ -5,25 +5,19 @@ import java.util.Collection;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import javax.persistence.ManyToMany;
 
 @Entity
 public class VirtualMachineTemplate {
 
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id
 	private String id;
 	private String name;
 	private OS os;
 	private String templatePath;
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "VirtualMachineTemplate", cascade = CascadeType.ALL)
 	@ElementCollection(targetClass = ApplicationDefinition.class)
 	private Collection<ApplicationDefinition> applications;
 
