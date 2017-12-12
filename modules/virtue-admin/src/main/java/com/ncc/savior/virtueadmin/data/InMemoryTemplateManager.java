@@ -219,4 +219,22 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		return applications.values();
 	}
 
+	@Override
+	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) {
+		VirtualMachineTemplate vm = this.vmTemplates.get(vmTemplateId);
+		ApplicationDefinition app = this.applications.get(applicationId);
+		if (vm != null && app != null) {
+			vm.getApplications().add(app);
+		}
+	}
+
+	@Override
+	public void assingVmTemplateToVirtueTemplate(String virtueTemplateId, String vmTemplateId) {
+		VirtualMachineTemplate vm = this.vmTemplates.get(vmTemplateId);
+		VirtueTemplate virtue = this.templates.get(virtueTemplateId);
+		if (virtue != null && vm != null) {
+			virtue.getVmTemplates().add(vm);
+		}
+	}
+
 }

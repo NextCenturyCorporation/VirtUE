@@ -2,13 +2,11 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
@@ -26,11 +24,10 @@ public class VirtueTemplate {
 	private String id;
 	private String name;
 	private String version;
-	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "VirtueTemplate", cascade = CascadeType.ALL)
-	@ElementCollection(targetClass = VirtualMachineTemplate.class)
+	@ManyToMany()
 	private Collection<VirtualMachineTemplate> vmTemplates;
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@ManyToMany(mappedBy = "UserName", cascade = CascadeType.ALL)
+	@ManyToMany(mappedBy = "UserName", cascade = CascadeType.MERGE)
 	@ElementCollection(targetClass = UserName.class)
 	private Collection<UserName> userNames;
 
@@ -88,8 +85,8 @@ public class VirtueTemplate {
 		this.version = version;
 	}
 
-	protected void setVmTemplates(List<VirtualMachineTemplate> vmTemplates) {
-		this.vmTemplates = vmTemplates;
+	public void setVmTemplates(Collection<VirtualMachineTemplate> hashSet) {
+		this.vmTemplates = hashSet;
 	}
 
 	@Override

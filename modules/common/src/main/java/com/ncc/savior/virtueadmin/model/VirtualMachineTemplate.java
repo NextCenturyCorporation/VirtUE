@@ -2,10 +2,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
 
-import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
@@ -17,8 +14,7 @@ public class VirtualMachineTemplate {
 	private String name;
 	private OS os;
 	private String templatePath;
-	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "VirtualMachineTemplate", cascade = CascadeType.ALL)
-	@ElementCollection(targetClass = ApplicationDefinition.class)
+	@ManyToMany()
 	private Collection<ApplicationDefinition> applications;
 
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
@@ -74,7 +70,7 @@ public class VirtualMachineTemplate {
 		this.templatePath = templatePath;
 	}
 
-	protected void setApplications(Collection<ApplicationDefinition> applications) {
+	public void setApplications(Collection<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 

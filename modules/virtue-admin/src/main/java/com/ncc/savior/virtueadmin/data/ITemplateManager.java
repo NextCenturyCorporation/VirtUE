@@ -83,6 +83,10 @@ public interface ITemplateManager {
 	 */
 	void addVirtueTemplate(VirtueTemplate template);
 
+	void assignApplicationToVmTemplate(String vmTemplateId, String applicationId);
+
+	void assingVmTemplateToVirtueTemplate(String virtueTemplate, String vmTemplateId);
+
 	/**
 	 * Assigns a virtue to a user such that the user now has the ability to use that
 	 * {@link VirtueTemplate} from the id.

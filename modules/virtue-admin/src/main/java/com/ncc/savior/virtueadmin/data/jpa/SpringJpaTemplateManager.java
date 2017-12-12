@@ -17,6 +17,8 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 @Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
+	// EntityManagerFactory emf = Persistence.createEntityManagerFactory("PetShop");
+	// EntityManager em = emf.createEntityManager();
 
 	@Autowired
 	private VirtueTemplateRepository vtRepository;
@@ -84,12 +86,33 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void addVmTemplate(VirtualMachineTemplate vmTemplate) {
+		Collection<ApplicationDefinition> apps = vmTemplate.getApplications();
+		vmTemplate.setApplications(new HashSet<ApplicationDefinition>());
+		// Adding empty template and then adding applications (that are already in db)
+		// seems to work better for jpa
+		vmTemplate = vmtRepository.save(vmTemplate);
+		for (ApplicationDefinition app : apps) {
+
+			// assignApplicationToVmTemplate(vmTemplate.getId(), app.getId());
+			ApplicationDefinition manageredApp = appRepository.findOne(app.getId());
+			vmTemplate.getApplications().add(manageredApp);
+		}
 		vmtRepository.save(vmTemplate);
 	}
 
 	@Override
 	public void addVirtueTemplate(VirtueTemplate template) {
+		Collection<VirtualMachineTemplate> vms = template.getVmTemplates();
+		template.setVmTemplates(new HashSet<VirtualMachineTemplate>());
 		vtRepository.save(template);
+		// adding empty template and then adding vmtempaltes (that are already in db)
+		// seem to work better for jpa
+		for (VirtualMachineTemplate vmt : vms) {
+			assingVmTemplateToVirtueTemplate(template.getId(), vmt.getId());
+			// VirtualMachineTemplate managedVmt = vmtRepository.findOne(vmt.getId());
+			// template.getVmTemplates().add(managedVmt);
+		}
+		// vtRepository.save(template);
 	}
 
 	@Override
@@ -112,6 +135,26 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public Iterable<ApplicationDefinition> getAllApplications() {
 		return appRepository.findAll();
+	}
+
+	@Override
+	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) {
+		VirtualMachineTemplate vmt = vmtRepository.findOne(vmTemplateId);
+		ApplicationDefinition app = appRepository.findOne(applicationId);
+		if (vmt != null && app != null) {
+			vmt.getApplications().add(app);
+			vmtRepository.save(vmt);
+		}
+	}
+
+	@Override
+	public void assingVmTemplateToVirtueTemplate(String virtueTemplateId, String vmTemplateId) {
+		VirtueTemplate vt = vtRepository.findOne(virtueTemplateId);
+		VirtualMachineTemplate vmt = vmtRepository.findOne(vmTemplateId);
+		if (vmt != null && vt != null) {
+			vt.getVmTemplates().add(vmt);
+			vtRepository.save(vt);
+		}
 	}
 
 }
