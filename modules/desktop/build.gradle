@@ -10,7 +10,7 @@ repositories {
     mavenCentral()
 }
 
-mainClassName = "com.ncc.savior.desktop.xpra.application.javafx.JavaFxTestRunner"
+mainClassName = "com.ncc.savior.desktop.sidebar.SidebarApplication"
 
 dependencies {
 	compile project(':common')

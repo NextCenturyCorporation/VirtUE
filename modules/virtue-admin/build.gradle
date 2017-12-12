@@ -22,6 +22,7 @@ repositories {
 	mavenCentral()
 }
 
+mainClassName = "com.ncc.savior.virtueadmin.VirtueAdminApplication"
 
 dependencies {
 	compile project(':common')
