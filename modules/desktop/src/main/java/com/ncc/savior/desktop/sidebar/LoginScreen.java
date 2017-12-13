@@ -20,6 +20,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -74,24 +76,25 @@ public class LoginScreen extends Stage {
 		passwordFld.setText("");
 		gridpane.add(passwordFld, 1, 3);
 		Button login = new Button("Login");
-		login.setOnAction(new EventHandler<ActionEvent>() {
+		EventHandler<ActionEvent> attemptLogin = new EventHandler<ActionEvent>() {
 
 			@Override
 			public void handle(ActionEvent event) {
-				try {
-					String domain = domainFld.getText();
-					String username = userNameFld.getText();
-					DesktopUser user = authService.login(domain, username, passwordFld.getText());
-					logger.debug("Login to domain=" + domain + " user=" + username + " was successful!");
-					triggerLoginSuccessListener(user);
-					close();
-				} catch (Win32Exception t) {
-					logger.error("login failed", t);
-					warningLbl.setText("Login Failed: " + t.getMessage());
-				}
-
+				doLogin(domainFld, userNameFld, passwordFld);
 			}
-		});
+		};
+		login.setOnAction(attemptLogin);
+		EventHandler<KeyEvent> textFieldLoginEventHandler = new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (KeyCode.ENTER.equals(event.getCode())) {
+					doLogin(domainFld, userNameFld, passwordFld);
+				}
+			}
+		};
+		passwordFld.setOnKeyReleased(textFieldLoginEventHandler);
+		userNameFld.setOnKeyReleased(textFieldLoginEventHandler);
+		domainFld.setOnKeyReleased(textFieldLoginEventHandler);
 		Button cancelClose = new Button(forceSuccessfulLoginOrQuit ? "Close" : "Cancel");
 		cancelClose.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -132,6 +135,20 @@ public class LoginScreen extends Stage {
 	private void onCancel() {
 		triggerLoginCancelListener();
 		close();
+	}
+
+	private void doLogin(final TextField domainFld, final TextField userNameFld, final PasswordField passwordFld) {
+		String domain = domainFld.getText();
+		String username = userNameFld.getText();
+		try {
+			DesktopUser user = authService.login(domain, username, passwordFld.getText());
+			logger.debug("Login to domain=" + domain + " user=" + username + " was successful!");
+			triggerLoginSuccessListener(user);
+			close();
+		} catch (Win32Exception t) {
+			logger.error("login failed", t);
+			warningLbl.setText("Login Failed: " + t.getMessage());
+		}
 	}
 
 	public void addLoginEventListener(ILoginEventListener listener) {
