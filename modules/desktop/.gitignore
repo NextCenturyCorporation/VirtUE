@@ -7,5 +7,4 @@
 .gradle/
 /bin1/
 /certs/*
-/database/
 savior-user.properties
