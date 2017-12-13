@@ -13,20 +13,26 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 
-/*
- * Virtue class models a virtual unit with the user, applications etc. 
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+
+/**
+ * Virtue class models a virtual unit with the user, applications etc.
  * 
  * 
  */
 public class VirtueInstance {
-
+	@Id
 	private String id;
 	private String name;
 	private String username;
 	private String templateId;
+	@OneToMany
 	private Collection<VirtualMachine> vms;
 	// private Set<String> transducers;
 	private VirtueState state;
+	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
 
 	public VirtueInstance(String id, String name, String username, String templateId,

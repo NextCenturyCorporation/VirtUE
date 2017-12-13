@@ -89,7 +89,7 @@ public class DesktopVirtueService {
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
 		Collection<ApplicationDefinition> apps = template.getApplications();
 		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
-		for (ApplicationDefinition app : template.getApplications()) {
+		for (ApplicationDefinition app : apps) {
 			appsMap.put(app.getId(), app);
 		}
 		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap);
@@ -98,7 +98,7 @@ public class DesktopVirtueService {
 	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
 		Collection<ApplicationDefinition> apps = instance.getApplications();
 		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
-		for (ApplicationDefinition app : instance.getApplications()) {
+		for (ApplicationDefinition app : apps) {
 			appsMap.put(app.getId(), app);
 		}
 		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap);

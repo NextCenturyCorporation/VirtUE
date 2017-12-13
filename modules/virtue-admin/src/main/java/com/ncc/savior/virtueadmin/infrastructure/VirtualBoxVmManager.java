@@ -117,6 +117,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private Map<String, String> getVms() {
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_LIST);
 		try {

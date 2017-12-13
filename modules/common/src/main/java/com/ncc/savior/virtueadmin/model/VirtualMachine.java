@@ -2,10 +2,15 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
 
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+
 public class VirtualMachine {
+	@Id
 	private String id;
 	private String name;
 	// app ID to application
+	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
 	private OS os;
 	private VmState state;

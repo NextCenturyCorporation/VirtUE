@@ -17,9 +17,6 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 @Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
-	// EntityManagerFactory emf = Persistence.createEntityManagerFactory("PetShop");
-	// EntityManager em = emf.createEntityManager();
-
 	@Autowired
 	private VirtueTemplateRepository vtRepository;
 	@Autowired
