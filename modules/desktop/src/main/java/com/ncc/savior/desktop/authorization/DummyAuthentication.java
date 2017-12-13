@@ -2,14 +2,17 @@ package com.ncc.savior.desktop.authorization;
 
 public class DummyAuthentication implements IActiveDirectoryAuthorizationProvider {
 
+	private DesktopUser currentUser;
+
 	@Override
 	public DesktopUser getCurrentUser() {
-		return null;
+		return currentUser;
 	}
 
 	@Override
 	public DesktopUser login(String domain, String username, String password) {
-		return new DesktopUser(domain, username);
+		currentUser = new DesktopUser(domain, username);
+		return currentUser;
 	}
 
 	@Override
