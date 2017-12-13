@@ -11,18 +11,23 @@
         <!-- if there are no virtues, show this message -->
         <div class="mui-row margin-top-10">
           <div class="mui-col-md-12 padding-left-0">
-            <form id="filter">
-              <p><label>Filter Data:</label>
+          <form id="filter">
+            <div class="mui-row">
+              <div class="mui-col-md-1"><label>Filter Data:</label></div>
+              <div class="mui-col-md-3">
                 <mat-form-field>
                   <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected">
-                    <mat-option *ngFor="let sensor of sensors | filter: sensorValue" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
+                    <mat-option *ngFor="let sensor of sensors" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
-              <br />
-              {{ selected }}
-            </p>
-            </form>
+              </div>
+            </div>
+          </form>{{ selected }}
+          <br/>
+          <div class="mui-row">
+            <div class="mui-col-md-2"><input type="text" [(ngModel)]="filteredList" /><br /><br /></div>
+          </div>
           <div class="mui-container-fluid">
             <div class="mui-row">
               <div class="mui-col-md-2 table-header">Timestamp</div>
@@ -31,7 +36,7 @@
               <div class="mui-col-md-1 table-header">Level</div>
             </div>
             <div class="table-container">
-              <div class="mui-row" *ngFor="let d of jsonData | filter: selected">
+              <div class="mui-row" *ngFor="let d of jsonData | filter:filteredList:'message'">
                 <div class="mui-col-md-2 table-data">{{d.timestamp|date:"MM/dd/yyyy, h:mm a"}}</div>
                 <div class="mui-col-md-3 table-data">{{d.sensor}}</div>
                 <div class="mui-col-md-6 table-data">{{d.message}}</div>

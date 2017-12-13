@@ -1,0 +1,7 @@
+<mat-form-field>
+  <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected">
+    <mat-option *ngFor="let sensor of sensors" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<input type="text" [(ngModel)]="term" />

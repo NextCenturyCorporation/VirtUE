@@ -8,7 +8,8 @@ import 'rxjs/add/operator/catch';
 
 export class DataService {
 
-  private jsonfile: string = './assets/json/sample_data.json';
+  private jsonfile: string = './assets/json/example.json';
+  //private jsonfile: string = './assets/json/sample_data.json';
   constructor( private http: Http ){}
 
   getData() : Observable<any> {
@@ -16,9 +17,4 @@ export class DataService {
       .map((res: Response) => res.json())
       .catch((error:any) => Observable.throw(error.json().error || 'Server error'));;
   }
-}
-
-export class PagingService {
-  getResults() {}
-
 }
