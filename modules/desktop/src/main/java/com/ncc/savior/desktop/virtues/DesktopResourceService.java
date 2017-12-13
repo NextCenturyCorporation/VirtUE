@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -86,7 +87,10 @@ public class DesktopResourceService {
 
 	private void addAuthorization(Builder builder) {
 		// Temporary implementation until we really tie in active directory.
-		String username = authService.getUser().getUsername();
-		builder.header("X-Authorization", username);
+		DesktopUser user = authService.getUser();
+		if (user != null) {
+			String username = user.getUsername();
+			builder.header("X-Authorization", username);
+		}
 	}
 }

@@ -29,6 +29,7 @@ public class PropertyManager {
 	public static final String PROPERTY_LOCATION_KEY = "savior.property.path";
 	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "./savior-user.properties";
 	public static final String PROPERTY_REQUIRED_DOMAIN = "savior.domain";
+	public static final String PROPERTY_DUMMY_AUTHORIZATION = "savior.desktop.security.dummy";
 	private Properties props;
 	private boolean warnOnMissingFile = false;
 
@@ -118,9 +119,19 @@ public class PropertyManager {
 		String defaultUserLocation = SAVIOR_DEFAULT_USER_PROPERTY_LOCATION;
 		;
 		PropertyManager props = new PropertyManager(debugOutput, extraPropsLocation, defaultUserLocation,
-				defaultPropsLocation,
-				defaultsPath);
+				defaultPropsLocation, defaultsPath);
 		return props;
+	}
+
+	public boolean getBoolean(String property, boolean defaultValue) {
+		String strVal = getProperty(property, null);
+		boolean value = false;
+		try {
+			value = Boolean.valueOf(strVal);
+		} catch (RuntimeException e) {
+			value = defaultValue;
+		}
+		return value;
 	}
 
 }

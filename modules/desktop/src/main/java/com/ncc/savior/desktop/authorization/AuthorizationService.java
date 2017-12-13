@@ -14,18 +14,23 @@ public class AuthorizationService {
 	private OS os;
 	private IActiveDirectoryAuthorizationProvider authProvider;
 	private String requiredDomain;
+	private boolean dummySecurity;
 
-	public AuthorizationService(String requiredDomain) {
+	public AuthorizationService(String requiredDomain, boolean dummySecurity) {
 		this.requiredDomain = requiredDomain;
+		this.dummySecurity = dummySecurity;
 		this.os = getOs();
 		this.authProvider = createAuthProvider();
 	}
 
 	public AuthorizationService() {
-		this(null);
+		this(null, false);
 	}
 
 	private IActiveDirectoryAuthorizationProvider createAuthProvider() {
+		if (dummySecurity) {
+			return new DummyAuthentication();
+		}
 		switch (os) {
 		case WINDOWS:
 			return new WaffleWindowsActiveDirectoryAuthorizationProvider();

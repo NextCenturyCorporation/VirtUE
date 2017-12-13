@@ -29,13 +29,14 @@ public class SidebarApplication extends Application {
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
 		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
-		AuthorizationService authService = new AuthorizationService(requiredDomain);
+		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
+		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl);
 		IApplicationManagerFactory appManager = new JavaFxApplicationManagerFactory(
 				new JavaFxKeyboard(new XpraKeyMap()));
 		VirtueService virtueService = new VirtueService(drs, appManager);
 		Sidebar sidebar = new Sidebar(virtueService, authService);
-		SidebarController controller = new SidebarController(virtueService, sidebar);
+		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		controller.init(primaryStage);
 	}
 }

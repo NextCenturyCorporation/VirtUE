@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
@@ -19,18 +20,19 @@ public class SidebarController {
 	private List<DesktopVirtue> currentVirtues;
 	private long pollPeriodMillis = 500;
 	private VirtueChangeHandler changeHandler;
+	private AuthorizationService authService;
 
-	public SidebarController(VirtueService virtueService, Sidebar sidebar) {
+	public SidebarController(VirtueService virtueService, Sidebar sidebar, AuthorizationService authService) {
 		this.sidebar = sidebar;
 		this.changeHandler = sidebar;
 		this.virtueService = virtueService;
+		this.authService = authService;
 	}
 
 	public void init(Stage primaryStage) throws Exception {
 		List<DesktopVirtue> initialVirtues = virtueService.getVirtuesForUser();
 		currentVirtues = initialVirtues;
 		sidebar.start(primaryStage, initialVirtues);
-
 		startVirtuePoll();
 	}
 
@@ -40,15 +42,18 @@ public class SidebarController {
 			@Override
 			public void run() {
 				while (!terminatePollThread) {
-					List<DesktopVirtue> virtues;
-					try {
-						virtues = virtueService.getVirtuesForUser();
-					} catch (IOException e1) {
-						// TODO do something with connection errors.
-						virtues = new ArrayList<DesktopVirtue>(0);
+					if (authService.getUser() != null) {
+						List<DesktopVirtue> virtues;
+						try {
+
+							virtues = virtueService.getVirtuesForUser();
+						} catch (IOException e1) {
+							// TODO do something with connection errors.
+							virtues = new ArrayList<DesktopVirtue>(0);
+						}
+						detectChangesAndReport(currentVirtues, virtues);
+						currentVirtues = virtues;
 					}
-					detectChangesAndReport(currentVirtues, virtues);
-					currentVirtues = virtues;
 					try {
 						Thread.sleep(pollPeriodMillis);
 					} catch (InterruptedException e) {

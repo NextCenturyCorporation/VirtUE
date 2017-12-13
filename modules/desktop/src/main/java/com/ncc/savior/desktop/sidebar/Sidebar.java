@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.LoginScreen.ILoginEventListener;
@@ -43,6 +46,7 @@ import javafx.stage.Stage;
  *
  */
 public class Sidebar implements VirtueChangeHandler {
+	private static final Logger logger = LoggerFactory.getLogger(Sidebar.class);
 	private static final int ICON_SIZE = 32;
 	private boolean debug = false;
 	private BorderStroke paneDebugStroke = new BorderStroke(Color.RED, BorderStrokeStyle.DOTTED, new CornerRadii(0),
@@ -98,8 +102,30 @@ public class Sidebar implements VirtueChangeHandler {
 		stage.show();
 		DesktopUser user = authService.getUser();
 		String reqDomain = authService.getRequiredDomain();
-		if (reqDomain != null && !reqDomain.equals(user.getDomain())) {
-			new LoginScreen(authService, true).start(stage);
+		if (user == null || (reqDomain != null && !reqDomain.equals(user.getDomain()))) {
+			LoginScreen login = new LoginScreen(authService, true);
+			login.addLoginEventListener(new ILoginEventListener() {
+				@Override
+				public void onLoginSuccess(DesktopUser user) {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							userLabel.setText(user.getUsername());
+						}
+					});
+				}
+
+				@Override
+				public void onLoginFailure(String username, String domain, RuntimeException e) {
+					logger.warn("Login failure for domain=" + domain + " username=" + username, e);
+				}
+
+				@Override
+				public void onCancel() {
+					// do nothing, handled elsewhere
+				}
+			});
+			login.start(stage);
 		}
 	}
 
@@ -226,7 +252,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private Node getUserNameLabel() {
 		if (userLabel == null) {
-			String username = authService.getUser().getUsername();
+			DesktopUser user = authService.getUser();
+			String username = user == null ? "" : user.getUsername();
 			userLabel = new Label(username);
 		}
 		return userLabel;

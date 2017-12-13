@@ -36,7 +36,7 @@ public class SidebarControllerTest {
 				added.add(virtue.getId());
 			}
 		};
-		SidebarController sc = new SidebarController(null, null);
+		SidebarController sc = new SidebarController(null, null, null);
 		sc.setVirtueChangeHandler(vch);
 		Map<String, ApplicationDefinition> apps = new HashMap<String, ApplicationDefinition>();
 		DesktopVirtue v1 = new DesktopVirtue("1", "1", "1", apps);

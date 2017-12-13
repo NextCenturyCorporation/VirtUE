@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
@@ -41,10 +42,15 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * 
  *
  */
+
 @EnableWebSecurity
-@PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES)
+@PropertySources({
+    @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
+    @PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true)
+})
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-	static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
+	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
+	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2 = "file:savior-server-security-site.properties";
 
 	private static final String AUTH_MODULE_LDAP = "LDAP";
 
@@ -140,7 +146,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.warn("Spring Security has been configured to use " + authModuleName
 				+ " which is not intended for production use.  If you did not intend to use this module, please change the '"
 				+ PROPERTY_AUTH_MODULE + "' property in your security property file (usually "
-				+ DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES + ").");
+				+ DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES + " or " + DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2
+				+ ").");
 		logger.warn("***** INSECURE AUTHORIZATION WARNING *****");
 	}
 
