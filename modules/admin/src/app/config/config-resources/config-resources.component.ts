@@ -25,7 +25,8 @@ export class ConfigResourcesComponent implements OnInit {
       data:  {
           dialogText: text,
           dialogType: type
-        }
+        },
+      hasBackdrop: false
     });
 
     this.screenWidth = (window.screen.width);
@@ -45,7 +46,7 @@ export class ConfigResourcesComponent implements OnInit {
     });
 
     dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
-
+    
   }
 
   ngOnInit() {}

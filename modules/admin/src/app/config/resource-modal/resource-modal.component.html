@@ -8,7 +8,7 @@
       </div>
       <div class="mui-col-md-4">
         <mat-form-field>
-          <mat-select [(ngModel)]="resourceValue" name="resourceType">
+          <mat-select [(ngModel)]="resourceValue" name="resourceType" [(value)]="selected">
             <mat-option *ngFor="let r of resources" [value]="r.value">{{ r.viewValue }}</mat-option>
           </mat-select>
         </mat-form-field>
@@ -19,7 +19,10 @@
     </div>
     <hr />
 
-    <app-file-share></app-file-share>
+    <app-file-share *ngIf="selected == 'File Share'"></app-file-share>
+
+    <app-printers *ngIf="selected == 'Printers'"></app-printers>
+
   </div>
 </div>
 

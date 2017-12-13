@@ -15,13 +15,9 @@ export class ResourceModalComponent implements OnInit {
     {value: 'File Share', viewValue: 'File Share'},
     {value: 'Printers', viewValue: 'Printers'}
   ];
-  fsValue: string;
-  fileShareTypes = [
-    {value: 'NFS', viewValue: 'NFS'},
-    {value: 'CIFS', viewValue: 'Windows (CIFS)'},
-  ];
 
-  constructor( public dialogRef: MatDialogRef<ResourceModalComponent>) {  }
+  constructor( public dialogRef: MatDialogRef<ResourceModalComponent> ) {  }
+
 
   saveResource() {
     this.dialogRef.close();
