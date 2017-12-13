@@ -3,3 +3,12 @@ app-dialog-test {
   top: 0;
   width: 100%
 }
+.table-container {
+  margin: 0 -15px 10px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.table-container .mui-row {
+  margin-left: 0;
+  margin-right: 0;
+}

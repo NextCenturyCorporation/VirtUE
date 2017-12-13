@@ -11,10 +11,14 @@ export class VirtuesComponent implements OnInit {
 
   constructor(public dialog: MatDialog) {}
 
-  openDialog(id,dialogType): void {
+  openDialog(id,type,text): void {
 
     let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px'
+      width: '450px',
+      data:  {
+          dialogText: text,
+          dialogType: type
+        }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });

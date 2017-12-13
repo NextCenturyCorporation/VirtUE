@@ -1,0 +1,44 @@
+#printer-list {
+  border: 1px solid #b2b2b2;
+  display: block;
+  height: 280px;
+  margin-top: 10px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+#printer-list .printer-item {
+  border-bottom: 1px solid #b2b2b2;
+  display: block;
+  /*padding: 10px 5px;*/
+}
+#printer-list .printer-item .mat-checkbox {
+  box-sizing: border-box;
+  display: block;
+  margin: 0;
+  padding: 12px 10px;
+}
+#printer-list .printer-item .mat-checkbox-label {
+  width: inherit;
+}
+#printer-list .printer-item .mat-checkbox:hover {
+  background-color: rgba(63,153,192,0.25);
+}
+.printer-icon, .printer-name, .printer-loc {
+  display: block;
+  float: left;
+}
+.printer-icon {
+    background: url(/assets/images/networked-printer.png) no-repeat left top;
+    background-size: contain;
+    height: 23px;
+    margin: 0 5px;
+    width: 26px;
+}
+.printer-name {
+   width: 260px;
+ }
+.printer-loc {
+  float: right;
+  width: auto%;
+}

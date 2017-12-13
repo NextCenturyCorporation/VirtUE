@@ -44,11 +44,15 @@
               </div>
               <div class="mui-row table-row">
                 <div class="table-data mui-col-md-5">
-                  <a class="edit" href="#">[ Virtual Machine ]</a>
+                  <a class="edit" mat-button (click)="activateModal(id)">[ Virtual Machine ]</a>
                   <!-- if this virtue is enabled show this menu -->
-                  <span class="active virtue-options">Edit | Disable</span>
+                  <span class="active virtue-options">
+                    <a class="edit" mat-button (click)="activateModal(id)">Edit</a> | <a href="#">Disable</a>
+                  </span>
                   <!-- if this virtue is disabled show this menu -->
-                  <span class="active virtue-options">Edit | Remove</span>
+                  <span class="active virtue-options">
+                    <a class="edit" mat-button (click)="activateModal(id)">Edit</a> | <a href="#">Remove</a>
+                  </span>
                 </div>
                 <div class="table-data mui-col-md-2"># mb</div>
                 <div class="table-data mui-col-md-5">List of Apps</div>

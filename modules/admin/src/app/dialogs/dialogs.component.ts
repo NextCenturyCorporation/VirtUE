@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialogRef } from '@angular/material';
+import { Component, OnInit, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
 @Component({
@@ -10,16 +10,15 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 export class DialogsComponent implements OnInit {
 
   form: FormGroup;
-  
-  constructor(
-    //private formBuilder: FormBuilder,
-    private dialogRef: MatDialogRef<DialogsComponent>
-  ) {}
 
-  ngOnInit() {
+  constructor( public dialogRef: MatDialogRef<DialogsComponent>, @Inject( MAT_DIALOG_DATA ) public data: any ) {
+    console.log('data', this.data);
   }
 
   confirmSelection() {
     this.dialogRef.close();
+  }
+
+  ngOnInit() {
   }
 }

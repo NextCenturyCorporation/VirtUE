@@ -13,6 +13,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'application'
 
 group = 'com.ncc.savior'
 version = '0.0.1-SNAPSHOT'
@@ -22,6 +23,7 @@ repositories {
 	mavenCentral()
 }
 
+mainClassName = "com.ncc.savior.virtueadmin.VirtueAdminApplication"
 
 dependencies {
 	compile project(':common')
@@ -70,3 +72,4 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
 	compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.2'
 }
+

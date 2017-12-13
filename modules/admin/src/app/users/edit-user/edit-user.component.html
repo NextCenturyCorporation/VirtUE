@@ -22,7 +22,7 @@
                 <div class="titlebar margin-top-20">
                   <br />
                   <h3 class="title">Virtues</h3>
-                  <button>Add Virtue</button>
+                  <button mat-button (click)="activateModal(0,'add')">Add Virtue</button>
                 </div>
               </div>
 
@@ -46,9 +46,9 @@
                     <div class="table-data mui-col-md-4">
                       <div class="virtue-color margin-right-10"></div>
                       <div class="virtue-name">
-                        <a class="edit" routerLink="edit-user">[ Name ]</a>
+                        <a class="edit" (click)="activateModal(1,'edit')">[ Virtue Name ]</a>
                         <!-- This should show if hovered over -->
-                        <span class="active virtue-options">remove</span>
+                        <span class="active virtue-options"><a href="#">Remove</a></span>
                       </div>
                     </div>
                     <div class="table-data mui-col-md-8">[App 1, App 2, App 3, Apps N...]</div>

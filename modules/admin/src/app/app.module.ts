@@ -1,9 +1,45 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { MatDialogModule } from '@angular/material';
+import { FormsModule } from '@angular/forms';import { BrowserModule } from '@angular/platform-browser';
+import { HttpModule } from '@angular/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
+
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { AppOverlayContainer } from './appOverlayContainer';
+import { OverlayModule } from '@angular/cdk/overlay';
+
+import {
+  MatAutocompleteModule,
+  MatButtonModule,
+  MatButtonToggleModule,
+  MatCardModule,
+  MatCheckboxModule,
+  MatChipsModule,
+  MatDatepickerModule,
+  MatDialogModule,
+  MatExpansionModule,
+  MatFormFieldModule,
+  MatGridListModule,
+  MatIconModule,
+  MatInputModule,
+  MatListModule,
+  MatMenuModule,
+  MatNativeDateModule,
+  MatProgressBarModule,
+  MatProgressSpinnerModule,
+  MatRadioModule,
+  MatRippleModule,
+  MatSelectModule,
+  MatSidenavModule,
+  MatSliderModule,
+  MatSlideToggleModule,
+  MatSnackBarModule,
+  MatStepperModule,
+  MatTableModule,
+  MatTabsModule,
+  MatToolbarModule,
+  MatTooltipModule,
+} from '@angular/material';
 
 import { BreadcrumbsModule } from 'ng2-breadcrumbs';
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
@@ -12,6 +48,10 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
+import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
+import { ConfigAppVmComponent } from './config/config-app-vm/config-app-vm.component';
+import { ConfigResourcesComponent } from './config/config-resources/config-resources.component';
+import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 import { UsersComponent } from './users/users.component';
 import { VirtuesComponent } from './virtues/virtues.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
@@ -22,6 +62,11 @@ import { AddUserComponent } from './users/add-user/add-user.component';
 import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { DialogsComponent } from './dialogs/dialogs.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
+import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
+import { ResourceModalComponent } from './config/resource-modal/resource-modal.component';
+import { FileShareComponent } from './config/resource-modal/file-share/file-share.component';
+import { PrintersComponent } from './config/resource-modal/printers/printers.component';
+import { JsonFilterPipe } from './data/json-filter.pipe';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -45,6 +90,9 @@ const appRoutes: Routes = [
     DashboardComponent,
     VirtuesComponent,
     ConfigComponent,
+    ConfigActiveDirComponent,
+    ConfigAppVmComponent,
+    ConfigResourcesComponent,
     UsersComponent,
     AddUserComponent,
     EditUserComponent,
@@ -53,26 +101,43 @@ const appRoutes: Routes = [
     CreateVirtueComponent,
     EditVirtueComponent,
     DialogsComponent,
-    VmModalComponent
+    VirtueModalComponent,
+    VmModalComponent,
+    ResourceModalComponent,
+    FileShareComponent,
+    PrintersComponent,
+    ConfigSensorsComponent,
+    JsonFilterPipe,
   ],
   imports: [
     BreadcrumbsModule,
     BrowserModule,
     FormsModule,
+    HttpModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
+    MatInputModule,
+    MatRadioModule,
+    MatSelectModule,
     BrowserAnimationsModule,
     SplitPaneModule,
     RouterModule.forRoot(appRoutes)
   ],
   exports: [
+    JsonFilterPipe,
+    OverlayModule,
     RouterModule
   ],
-  providers: [],
+  providers: [
+    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
+  ],
   bootstrap: [AppComponent],
   entryComponents: [
     VmModalComponent,
-    DialogsComponent
+    DialogsComponent,
+    VirtueModalComponent,
+    ResourceModalComponent
   ]
 })
-
 export class AppModule { }
