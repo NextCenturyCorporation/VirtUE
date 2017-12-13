@@ -25,7 +25,7 @@ public class PropertyManager {
 	private static final String DEFAULT_PROPERTIES_PATH = "default.properties";
 	private static final String SAVIOR_DEFAULT_PROPERTY_LOCATION = "./savior.properties";
 	private static final Logger logger = LoggerFactory.getLogger(PropertyManager.class);
-	public static final String PROPERTY_DESKTOP_API_PATH = "desktop.API.path";
+	public static final String PROPERTY_DESKTOP_API_PATH = "savior.desktop.api.path";
 	public static final String PROPERTY_LOCATION_KEY = "savior.property.path";
 	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "./savior-user.properties";
 	public static final String PROPERTY_REQUIRED_DOMAIN = "savior.domain";
