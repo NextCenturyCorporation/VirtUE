@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.security.UserService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
@@ -100,7 +101,7 @@ public class DesktopRestService {
 	}
 
 	private User getUserFromSecurity() {
-		// TODO hook up to Spring Security at some point.
-		return User.testUser();
+		User user = UserService.getCurrentUser();
+		return user;
 	}
 }

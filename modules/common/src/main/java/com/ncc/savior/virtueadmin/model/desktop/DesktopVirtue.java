@@ -75,7 +75,7 @@ public class DesktopVirtue {
 		public int compare(DesktopVirtue o1, DesktopVirtue o2) {
 			if (o1.getId() == null) {
 				if (o2.getId() == null) {
-					return 0;
+					return o1.getTemplateId().compareTo(o2.getTemplateId());
 				} else {
 					return -1;
 				}

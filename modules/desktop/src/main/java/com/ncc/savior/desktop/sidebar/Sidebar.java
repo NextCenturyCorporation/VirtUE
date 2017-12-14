@@ -4,6 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.sidebar.LoginScreen.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -40,6 +46,7 @@ import javafx.stage.Stage;
  *
  */
 public class Sidebar implements VirtueChangeHandler {
+	private static final Logger logger = LoggerFactory.getLogger(Sidebar.class);
 	private static final int ICON_SIZE = 32;
 	private boolean debug = false;
 	private BorderStroke paneDebugStroke = new BorderStroke(Color.RED, BorderStrokeStyle.DOTTED, new CornerRadii(0),
@@ -56,14 +63,19 @@ public class Sidebar implements VirtueChangeHandler {
 	private VirtueService virtueService;
 	private VBox virtuePane;
 	private Map<String, VirtueMenuItem> virtueIdToVmi;
+	private AuthorizationService authService;
+	private Label userLabel;
+	private Stage stage;
 
-	public Sidebar(VirtueService virtueService) {
+	public Sidebar(VirtueService virtueService, AuthorizationService authService) {
+		this.authService = authService;
 		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
 	}
 
 	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
 		stage.setTitle("Savior");
+		this.stage = stage;
 
 		VBox pane = new VBox();
 		if (debug) {
@@ -74,6 +86,7 @@ public class Sidebar implements VirtueChangeHandler {
 		children.add(getLabel());// , 1, 1);
 		// pane.add(getMinimizeMaximize());
 		children.add(getUserIcon());// , 1, 3);
+		children.add(getUserNameLabel());
 		Node vlist = initialVirtueList(stage, initialVirtues);
 		children.add(vlist);// , 1, 4);
 		// Region region = new Region();
@@ -87,6 +100,33 @@ public class Sidebar implements VirtueChangeHandler {
 		stage.getIcons().add(icon);
 		stage.setScene(scene);
 		stage.show();
+		DesktopUser user = authService.getUser();
+		String reqDomain = authService.getRequiredDomain();
+		if (user == null || (reqDomain != null && !reqDomain.equals(user.getDomain()))) {
+			LoginScreen login = new LoginScreen(authService, true);
+			login.addLoginEventListener(new ILoginEventListener() {
+				@Override
+				public void onLoginSuccess(DesktopUser user) {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							userLabel.setText(user.getUsername());
+						}
+					});
+				}
+
+				@Override
+				public void onLoginFailure(String username, String domain, RuntimeException e) {
+					logger.warn("Login failure for domain=" + domain + " username=" + username, e);
+				}
+
+				@Override
+				public void onCancel() {
+					// do nothing, handled elsewhere
+				}
+			});
+			login.start(stage);
+		}
 	}
 
 	private Node getLogout() {
@@ -100,6 +140,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void handle(MouseEvent event) {
 				// do cleanup stuff.
+				authService.logout();
 				Platform.exit();
 			}
 		});
@@ -127,7 +168,8 @@ public class Sidebar implements VirtueChangeHandler {
 		for (DesktopVirtue virtue : initialVirtues) {
 			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
 			children.add(vmi.getNode());
-			virtueIdToVmi.put(virtue.getId(), vmi);
+			String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+			virtueIdToVmi.put(id, vmi);
 		}
 		ScrollPane scroll = new ScrollPane(virtuePane);
 		scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
@@ -140,6 +182,37 @@ public class Sidebar implements VirtueChangeHandler {
 	private Node getUserIcon() {
 		Image image = new Image("images/defaultUserIcon.png");
 		ImageView iv = new ImageView(image);
+		iv.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				LoginScreen loginScreen = new LoginScreen(authService, false);
+				loginScreen.addLoginEventListener(new ILoginEventListener() {
+					@Override
+					public void onLoginSuccess(DesktopUser user) {
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								virtuePane.getChildren().clear();
+								virtueIdToVmi.clear();
+								userLabel.setText(user.getUsername());
+							}
+						});
+					}
+
+					@Override
+					public void onLoginFailure(String username, String domain, RuntimeException e) {
+						// do nothing
+					}
+
+					@Override
+					public void onCancel() {
+						// do nothing
+					}
+				});
+				loginScreen.start(stage);
+			}
+		});
 
 		int size = 96;
 		int paddingSize = 5;
@@ -177,6 +250,15 @@ public class Sidebar implements VirtueChangeHandler {
 		return label;
 	}
 
+	private Node getUserNameLabel() {
+		if (userLabel == null) {
+			DesktopUser user = authService.getUser();
+			String username = user == null ? "" : user.getUsername();
+			userLabel = new Label(username);
+		}
+		return userLabel;
+	}
+
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
 		VirtueMenuItem vmi = virtueIdToVmi.get(virtue.getId());
@@ -187,7 +269,8 @@ public class Sidebar implements VirtueChangeHandler {
 	public void addVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
 		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
-		virtueIdToVmi.put(virtue.getId(), vmi);
+		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+		virtueIdToVmi.put(id, vmi);
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -196,16 +279,21 @@ public class Sidebar implements VirtueChangeHandler {
 		});
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
 		VirtueMenuItem vmi = virtueIdToVmi.remove(virtue.getId());
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				children.remove(vmi);
-			}
-		});
+		if (vmi == null) {
+			vmi = virtueIdToVmi.remove(virtue.getTemplateId());
+		}
+		if (vmi != null) {
+			VirtueMenuItem finalVmi = vmi;
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					children.remove(finalVmi.getNode());
+				}
+			});
+		}
 	}
 }
