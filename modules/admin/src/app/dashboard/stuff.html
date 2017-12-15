@@ -1,4 +1,12 @@
-[
+<mat-form-field>
+  <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected">
+    <mat-option *ngFor="let sensor of sensors" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<input type="text" [(ngModel)]="term" />
+
+jsonData = [
  {
    "timestamp": "2017-12-05T19:57:01.052901",
    "sensor": "f8f6b0bf-eef4-448a-b42a-54f403f839c0",
