@@ -3973,11 +3973,12 @@ input.mat-input-element {
   display: block;
   font-size: inherit;
   line-height: 1rem;
+  outline: none;
   padding-left: 5px;
   width: inherit;
 }
 
-/* line 99, ../scss/_material.scss */
+/* line 100, ../scss/_material.scss */
 .mat-option .mat-option-text {
   display: block;
   line-height: 1.5rem;
@@ -3985,24 +3986,24 @@ input.mat-input-element {
   width: inherit;
 }
 
-/* line 105, ../scss/_material.scss */
+/* line 106, ../scss/_material.scss */
 .mat-option-ripple.mat-ripple {
   display: none;
 }
 
-/* line 108, ../scss/_material.scss */
+/* line 109, ../scss/_material.scss */
 .mat-select-content {
   margin: 0;
   max-width: 180px;
 }
 
-/* line 112, ../scss/_material.scss */
+/* line 113, ../scss/_material.scss */
 .mat-select .mat-select-arrow-wrapper {
   background-color: #eee;
   display: block;
 }
 
-/* line 116, ../scss/_material.scss */
+/* line 117, ../scss/_material.scss */
 .mat-select-panel.mat-primary {
   background-color: #fff;
   margin-top: 31px;
@@ -4011,7 +4012,7 @@ input.mat-input-element {
   max-width: 180px;
 }
 
-/* line 123, ../scss/_material.scss */
+/* line 124, ../scss/_material.scss */
 .cdk-overlay-container {
   height: 100%;
   left: 0;
@@ -4021,14 +4022,14 @@ input.mat-input-element {
   z-index: 1000;
 }
 
-/* line 131, ../scss/_material.scss */
+/* line 132, ../scss/_material.scss */
 .cdk-overlay-backdrop, .cdk-overlay-pane {
   position: absolute;
   pointer-events: auto;
   z-index: 1000;
 }
 
-/* line 136, ../scss/_material.scss */
+/* line 137, ../scss/_material.scss */
 .cdk-overlay-pane {
   margin-left: 16px;
   margin-top: 6px;
