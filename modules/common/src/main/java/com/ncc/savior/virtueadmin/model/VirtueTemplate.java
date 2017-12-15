@@ -14,9 +14,12 @@ public class VirtueTemplate {
 	private String version;
 	private Map<String, ApplicationDefinition> applications;
 	private List<VirtualMachineTemplate> vmTemplates;
+	
+	private String awsTemplateName; 
 
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
+	
 	public VirtueTemplate(String id, String name, String version, Map<String, ApplicationDefinition> applications2,
 			List<VirtualMachineTemplate> vmTemplates) {
 		super();
@@ -25,7 +28,21 @@ public class VirtueTemplate {
 		this.version = version;
 		this.applications = applications2;
 		this.vmTemplates = vmTemplates;
+		this.setAwsTemplateName("");
 	}
+	
+	
+	public VirtueTemplate(String id, String name, String version, Map<String, ApplicationDefinition> applications2,
+			List<VirtualMachineTemplate> vmTemplates, String awsTemplateName) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.version = version;
+		this.applications = applications2;
+		this.vmTemplates = vmTemplates;
+		this.awsTemplateName = awsTemplateName; 
+	}
+		
 
 	/**
 	 * Used for jackson deserialization
@@ -79,6 +96,14 @@ public class VirtueTemplate {
 	public String toString() {
 		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", applications=" + applications
 				+ ", vmTemplates=" + vmTemplates + "]";
+	}
+
+	public String getAwsTemplateName() {
+		return awsTemplateName;
+	}
+
+	public void setAwsTemplateName(String awsTemplateName) {
+		this.awsTemplateName = awsTemplateName;
 	}
 
 }

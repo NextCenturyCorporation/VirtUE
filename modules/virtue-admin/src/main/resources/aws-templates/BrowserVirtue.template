@@ -1,0 +1,39 @@
+{   
+   
+   "Description": "Create an EC2 instance running the latest Amazon Linux AMI.",
+    "Parameters": 
+    {},
+        
+    "Resources": {
+        "Ec2Instance": 
+        {
+            "Properties": 
+            {
+                "ImageId": "ami-5cbe7326",
+                "InstanceType" : "t2.small",
+                "Tags" : 
+                [
+                    {"Key" : "Name", "Value" : "W Instance"}
+                ]
+            },
+
+            "Type": "AWS::EC2::Instance"
+        }
+    },
+
+    "Outputs": 
+    {
+        "InstanceId": 
+        {
+            "Description": "The InstanceId of the newly created EC2 instance",
+            "Value": 
+            {
+                "Ref": "Ec2Instance"
+            }
+        }
+    },
+
+
+   "AWSTemplateFormatVersion": "2010-09-09"
+
+}

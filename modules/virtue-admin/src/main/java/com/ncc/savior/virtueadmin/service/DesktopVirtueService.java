@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
+import com.ncc.savior.virtueadmin.infrastructure.AwsManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
@@ -26,12 +27,14 @@ public class DesktopVirtueService {
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
 	private IApplicationManager applicationManager;
+	private AwsManager awsManager; 
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager) {
+			IApplicationManager applicationManager,AwsManager awsManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
+		this.awsManager = awsManager; 
 	}
 
 	/**
@@ -107,5 +110,24 @@ public class DesktopVirtueService {
 		// app.getOs(), null, -1));
 		// }
 		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), apps);
+	}
+
+	public VirtueInstance createVirtueFromTemplate(User user, String templateId) {
+
+		//Now get the template for this id and create the machine on aws. 
+		VirtueTemplate template = templateManager.getTemplate(user, templateId);
+		try {
+			return awsManager.createVirtue(user, template);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	public void deleteVirtue(User user, String instanceId) {
+		// TODO Auto-generated method stub
+		
 	}
 }

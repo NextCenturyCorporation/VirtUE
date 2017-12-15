@@ -33,10 +33,20 @@
 	</bean>
 	<bean name="templateManager" class="com.ncc.savior.virtueadmin.data.InMemoryTemplateManager">
 	</bean>
+	
+	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">
+		<constructor-arg ref="vmManager" />
+		<constructor-arg ref="virtueDao" />
+		
+
+	</bean>
+	
 	<bean name="desktopService"
 		class="com.ncc.savior.virtueadmin.service.DesktopVirtueService">
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="appManager" />
+		<constructor-arg ref="awsManager" />
 	</bean>
+	
 </beans>  

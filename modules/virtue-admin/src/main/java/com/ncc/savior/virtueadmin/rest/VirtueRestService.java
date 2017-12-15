@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "virtues")
-@Path("/virtues")
+@Path("/backend")
 public class VirtueRestService {
 
 	public VirtueRestService() {
@@ -23,9 +23,17 @@ public class VirtueRestService {
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
+	@Path("Hello")
 	public String getHello() {
+		
 		return "Hello";
+		
 	}
+	
+	
+	
+
+	
 
 	// @Autowired
 	// private VirtueUserService userService;

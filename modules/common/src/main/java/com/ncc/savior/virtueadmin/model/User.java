@@ -11,13 +11,17 @@ import java.util.Collection;
  */
 public class User {
 	private static User testUser;
-	private static User anonymousUser;
+	private static User anonymousUser;	
+	private static User adminUser;
+
 	private String username;
 	private Collection<String> authorities;
 
 	static {
 		testUser = new User("testUser", new ArrayList<String>());
 		anonymousUser = new User("anonymous", new ArrayList<String>());
+		adminUser = new User("admin", new ArrayList<String>());
+		
 	}
 
 	public User(String name, Collection<String> authorities) {
@@ -40,4 +44,10 @@ public class User {
 	public static User anonymousUser() {
 		return anonymousUser;
 	}
+
+	public static User adminUser() {
+		return adminUser;
+	}
+	
+	
 }

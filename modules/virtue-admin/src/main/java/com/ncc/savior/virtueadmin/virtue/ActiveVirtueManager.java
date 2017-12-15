@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
+import com.ncc.savior.virtueadmin.infrastructure.AwsManager;
 import com.ncc.savior.virtueadmin.infrastructure.IStateUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.User;
@@ -25,6 +26,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	private IVmManager vmManager;
 	private IActiveVirtueDao virtueDao;
+	
+	private AwsManager awsManager; 
 
 	public ActiveVirtueManager(IVmManager vmManager, IActiveVirtueDao virtueDao) {
 		this.vmManager = vmManager;
@@ -68,4 +71,26 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 			updateVmState(vmId, state);
 		}
 	}
+	
+	
+	/*Creates virtue from template*/
+	public VirtueInstance createVirtueFromTemplate(User user, VirtueTemplate template){
+		
+		VirtueInstance virtueInstance = null; 
+		try {
+			return  awsManager.createVirtue(user, template);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		return null;	
+	}
+	
+	
+	public void deleteVirtueInstance(VirtueInstance virtueInstance) {
+		
+		awsManager.deleteVirtue(virtueInstance); 
+	}
+	
 }
