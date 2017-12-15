@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -36,16 +34,7 @@ public class DesktopResourceService {
 
 	public DesktopResourceService(AuthorizationService authService, String baseApiUri) {
 		this.authService = authService;
-		if (true) {
-			client = ClientBuilder.newBuilder().hostnameVerifier(new HostnameVerifier() {
-				@Override
-				public boolean verify(String hostname, SSLSession session) {
-					return true;
-				}
-			}).build();
-		} else {
-			client = ClientBuilder.newClient();
-		}
+		client = ClientBuilder.newClient();
 		jsonMapper = new ObjectMapper();
 		baseApi = client.target(baseApiUri);
 	}
