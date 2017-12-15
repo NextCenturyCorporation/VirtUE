@@ -15,12 +15,10 @@
               <p><label>Filter Data:</label>
                 <mat-form-field>
                   <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected">
-                    <mat-option *ngFor="let sensor of sensors | filter: sensorValue" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
+                    <mat-option *ngFor="let sensor of sensors" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
                   </mat-select>
                 </mat-form-field>
-
               <br />
-              {{ selected }}
             </p>
             </form>
           <div class="mui-container-fluid">
@@ -31,7 +29,7 @@
               <div class="mui-col-md-1 table-header">Level</div>
             </div>
             <div class="table-container">
-              <div class="mui-row" *ngFor="let d of jsonData | filter: selected">
+              <div class="mui-row" *ngFor="let d of jsonData | filter:selected:'message'">
                 <div class="mui-col-md-2 table-data">{{d.timestamp|date:"MM/dd/yyyy, h:mm a"}}</div>
                 <div class="mui-col-md-3 table-data">{{d.sensor}}</div>
                 <div class="mui-col-md-6 table-data">{{d.message}}</div>

@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { JsonFilterPipe } from '../data/json-filter.pipe';
 import { DataService } from '../data/data.service';
+import { JsonFilterPipe } from '../data/json-filter.pipe';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,19 +12,23 @@ import { DataService } from '../data/data.service';
 
 export class DashboardComponent implements OnInit {
 
-  jsonData = [];
   form: FormGroup;
   sensorValue: string;
   sensors = [
+    {value: '', viewValue: 'Select One'},
     {value: ' 0000 ', viewValue: 'DEFAULT'},
-    {value: 'CHR', viewValue: 'CHR'},
-    {value: 'DIR', viewValue: 'DIR'},
-    {value: 'FIFO', viewValue: 'FIFO'},
-    {value: 'IPv4', viewValue: 'IPv4'},
-    {value: 'REG', viewValue: 'REG'},
+    {value: 'chr', viewValue: 'CHR'},
+    {value: 'dir', viewValue: 'DIR'},
+    {value: 'fifo', viewValue: 'FIFO'},
+    {value: 'ipv4', viewValue: 'IPv4'},
+    {value: 'reg', viewValue: 'REG'},
     {value: 'unix', viewValue: 'Unix'},
   ];
 
+  jsonResult: string;
+  jsonData = [];
+
+  // constructor(){}
   constructor( private dataService: DataService ){}
 
   ngOnInit() {
