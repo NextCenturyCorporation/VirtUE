@@ -53,34 +53,47 @@ public class VirtueMenuItem {
 			new CornerRadii(0), new BorderWidths(2));
 	protected boolean showingMenu;
 	private VirtueService virtueService;
+	private ImageView statusSpinner;
+	private Image statusImage;
 
-	public VirtueMenuItem(DesktopVirtue virtue, VirtueService virtueService) {
+	public VirtueMenuItem(DesktopVirtue virtue, VirtueService virtueService, Image statusImage, int width) {
 		this.virtueService = virtueService;
 		this.virtue = virtue;
-		this.node = createNode();
+		this.statusImage=statusImage;
+		this.node = createNode(width);
 		contextMenu = createContextMenu();
 		addEventHandlers();
+		logger.debug("loaded");
 	}
 
-	private Node createNode() {
+	private Node createNode(int width) {
 		Image image = new Image("images/saviorLogo.png");
 		ImageView view = new ImageView(image);
+		statusSpinner = new ImageView();
 		view.setFitWidth(24);
 		view.setFitHeight(24);
+		statusSpinner.setFitWidth(24);
+		statusSpinner.setFitHeight(24);
+		statusSpinner.setVisible(false);
 
 		label = new Label(getLabel(virtue));
-		// label.setPrefWidth(width);
-		label.setAlignment(Pos.CENTER);
+		label.setPrefWidth(width);
+		label.setAlignment(Pos.CENTER_LEFT);
 
 		HBox pane = new HBox();
+		pane.setMaxWidth(width);
+		pane.setPrefWidth(width);
 		HBox.setHgrow(view, Priority.NEVER);
 		HBox.setHgrow(label, Priority.ALWAYS);
 		pane.setPadding(new Insets(5, 20, 5, 20));
 		BorderStroke style = new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(0),
 				new BorderWidths(0, 0, 1, 0));
 		pane.setBorder(new Border(style));
+		// HBox hbox = new HBox();
 		pane.getChildren().add(view);
 		pane.getChildren().add(label);
+		// pane.getChildren().add(hbox);
+		pane.getChildren().add(statusSpinner);
 		return pane;
 	}
 
@@ -109,7 +122,7 @@ public class VirtueMenuItem {
 			// }
 			MenuItem menuItem = null;
 			// if (appImage == null) {
-				menuItem = new MenuItem(app.getName());
+			menuItem = new MenuItem(app.getName());
 			// }
 			// else {
 			// ImageView iv = new ImageView(appImage);
@@ -124,7 +137,10 @@ public class VirtueMenuItem {
 						@Override
 						public void run() {
 							try {
+								statusSpinner.setImage(statusImage);
+								statusSpinner.setVisible(true);
 								virtueService.startApplication(virtue, app);
+								statusSpinner.setVisible(false);
 							} catch (IOException e) {
 								logger.error("Error starting " + app.getName(), e);
 								Platform.runLater(new Runnable() {

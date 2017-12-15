@@ -267,4 +267,17 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		}
 	}
 
+	@Override
+	public Collection<String> getUsers() {
+		return userToTemplateId.keySet();
+	}
+
+	@Override
+	public void clear() {
+		templates.clear();
+		vmTemplates.clear();
+		userToTemplateId.clear();
+		applications.clear();
+	}
+
 }

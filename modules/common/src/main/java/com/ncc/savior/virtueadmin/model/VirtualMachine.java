@@ -2,9 +2,11 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
+@Entity
 public class VirtualMachine {
 	@Id
 	private String id;

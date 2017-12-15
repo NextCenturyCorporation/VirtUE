@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
@@ -22,6 +23,7 @@ import javax.persistence.OneToMany;
  * 
  * 
  */
+@Entity
 public class VirtueInstance {
 	@Id
 	private String id;

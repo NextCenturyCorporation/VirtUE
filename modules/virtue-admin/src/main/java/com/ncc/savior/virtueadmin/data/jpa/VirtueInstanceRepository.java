@@ -9,6 +9,6 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 
 public interface VirtueInstanceRepository extends CrudRepository<VirtueInstance, String> {
 
-	List<VirtueInstance> findByUserAndTemplateIdIn(String username, Collection<String> templateIds);
+	List<VirtueInstance> findByUsernameAndTemplateIdIn(String username, Collection<String> templateIds);
 
 }

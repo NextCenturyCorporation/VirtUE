@@ -31,7 +31,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(User user, Set<String> templateIds) {
-		List<VirtueInstance> virtueInstances = virtueRepository.findByUserAndTemplateIdIn(user.getUsername(),
+		List<VirtueInstance> virtueInstances = virtueRepository.findByUsernameAndTemplateIdIn(user.getUsername(),
 				templateIds);
 		Map<String, Set<VirtueInstance>> templateIdToVirtueInstances = new HashMap<String, Set<VirtueInstance>>();
 		for (VirtueInstance vi : virtueInstances) {

@@ -66,11 +66,13 @@ public class Sidebar implements VirtueChangeHandler {
 	private AuthorizationService authService;
 	private Label userLabel;
 	private Stage stage;
+	private Image statusImage;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService) {
 		this.authService = authService;
 		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
+		this.statusImage = new Image("images/loading.gif");
 	}
 
 	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
@@ -166,7 +168,7 @@ public class Sidebar implements VirtueChangeHandler {
 			virtuePane.setBorder(new Border(calloutDebugStroke));
 		}
 		for (DesktopVirtue virtue : initialVirtues) {
-			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
+			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, statusImage, width);
 			children.add(vmi.getNode());
 			String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 			virtueIdToVmi.put(id, vmi);
@@ -268,7 +270,7 @@ public class Sidebar implements VirtueChangeHandler {
 	@Override
 	public void addVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
-		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
+		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, statusImage, width);
 		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 		virtueIdToVmi.put(id, vmi);
 		Platform.runLater(new Runnable() {

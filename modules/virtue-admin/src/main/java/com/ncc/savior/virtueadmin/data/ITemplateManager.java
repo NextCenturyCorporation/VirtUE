@@ -107,4 +107,8 @@ public interface ITemplateManager {
 	void revokeVirtueTemplateFromUser(User user, String virtueTemplateId);
 
 	Iterable<ApplicationDefinition> getAllApplications();
+
+	Collection<String> getUsers();
+
+	void clear();
 }

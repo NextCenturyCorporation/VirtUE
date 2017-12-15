@@ -1,8 +1,10 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +154,25 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 			vt.getVmTemplates().add(vmt);
 			vtRepository.save(vt);
 		}
+	}
+
+	@Override
+	public Collection<String> getUsers() {
+		Collection<String> users = new ArrayList<String>();
+		Iterator<UserName> itr = userRepo.findAll().iterator();
+		while (itr.hasNext()) {
+			UserName user = itr.next();
+			users.add(user.getUsername());
+		}
+		return users;
+	}
+
+	@Override
+	public void clear() {
+		vtRepository.deleteAll();
+		vmtRepository.deleteAll();
+		appRepository.deleteAll();
+		userRepo.deleteAll();
 	}
 
 }
