@@ -45,7 +45,7 @@ dependencies {
     compile 'com.amazonaws:aws-java-sdk-s3'
     compile 'com.amazonaws:aws-java-sdk-ec2'    
     compile 'com.amazonaws:aws-java-sdk-cloudformation'
-    
+    compile 'com.amazonaws:aws-java-sdk-simpledb'
     
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-jersey')

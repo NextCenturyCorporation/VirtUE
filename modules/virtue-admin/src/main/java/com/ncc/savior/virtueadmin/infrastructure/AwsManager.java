@@ -23,8 +23,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.amazonaws.AmazonClientException;
@@ -43,6 +45,13 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.simpledb.AmazonSimpleDB;
+import com.amazonaws.services.simpledb.AmazonSimpleDBClientBuilder;
 
 
 
@@ -51,9 +60,74 @@ public class AwsManager {
     ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 	private StaticMachineVmManager vmManager;
 	private IActiveVirtueDao virtueDao; 
+	
+	
+    private AmazonEC2      ec2;
+    private AmazonS3       s3;
+    //private AmazonSimpleDB sdb;
+    private AmazonCloudFormation stackbuilder; 
+    
+	String stackName = "SaviorStack-1";
+
+    
+    
+    /**
+     * The only information needed to create a client are security credentials
+     * consisting of the AWS Access Key ID and Secret Access Key. All other
+     * configuration, such as the service endpoints, are performed
+     * automatically. Client parameters, such as proxies, can be specified in an
+     * optional ClientConfiguration object when constructing a client.
+     *
+     * @see com.amazonaws.auth.BasicAWSCredentials
+     * @see com.amazonaws.auth.PropertiesCredentials
+     * @see com.amazonaws.ClientConfiguration
+     */
+    private void init() throws Exception {
+
+        /*
+         * The ProfileCredentialsProvider will return your [virtue]
+         * credential profile by reading from the credentials file located at
+         * (/Users/womitowoju/.aws/credentials).
+         */
+        ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+        
+        try {
+            credentialsProvider.getCredentials();
+        } catch (Exception e) {
+            throw new AmazonClientException(
+                    "Cannot load the credentials from the credential profiles file. " +
+                    "Please make sure that your credentials file is at the correct " +
+                    "location (/Users/womitowoju/.aws/credentials), and is in valid format.",
+                    e);
+        }
+        ec2 = AmazonEC2ClientBuilder.standard()
+            .withCredentials(credentialsProvider)
+            .withRegion("us-east-1")
+            .build();
+        s3  = AmazonS3ClientBuilder.standard()
+            .withCredentials(credentialsProvider)
+            .withRegion("us-east-1")
+            .build();
+		stackbuilder = AmazonCloudFormationClientBuilder.standard()
+				.withCredentials(credentialsProvider).withRegion(Regions.US_EAST_1).build();
+        /*
+        sdb = AmazonSimpleDBClientBuilder.standard()
+            .withCredentials(credentialsProvider)
+            .withRegion("us-east-1")
+            .build();
+       */
+    }
+
     
     AwsManager(StaticMachineVmManager staticMachineVmManager, IActiveVirtueDao virtueDao)
     {
+        try {
+			init();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
     		this.vmManager = staticMachineVmManager; 
     		this.virtueDao = virtueDao; 
     }
@@ -72,14 +146,12 @@ public class AwsManager {
 					+ "location (/Users/womitowoju/.aws/credentials), and is in valid format.", e);
 		}
 
-		AmazonCloudFormation stackbuilder = AmazonCloudFormationClientBuilder.standard()
-				.withCredentials(credentialsProvider).withRegion(Regions.US_EAST_1).build();
 
 		System.out.println("===========================================");
 		System.out.println("Getting Started with AWS CloudFormation");
 		System.out.println("===========================================\n");
 
-		String stackName = "WoleStack-10";
+		//String stackName = "SaviorStack-1";
 		String logicalResourceName = "SampleNotificationTopic";
 
 		String myCloudFormationFromFile = convertStreamToString(
@@ -90,8 +162,6 @@ public class AwsManager {
 			CreateStackRequest createRequest = new CreateStackRequest();
 			createRequest.setStackName(stackName);
 			createRequest.setTemplateBody(myCloudFormationFromFile);
-
-			// createRequest.setTemplateBody(myCloudFormation);
 
 			System.out.println("Creating a stack called " + createRequest.getStackName() + ".");
 			stackbuilder.createStack(createRequest);
@@ -115,6 +185,7 @@ public class AwsManager {
 				}
 			}
 
+			/*
 			// Lookup a resource by its logical name
 			DescribeStackResourcesRequest logicalNameResourceRequest = new DescribeStackResourcesRequest();
 			logicalNameResourceRequest.setStackName(stackName);
@@ -126,10 +197,19 @@ public class AwsManager {
 				System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
 						resource.getLogicalResourceId(), resource.getPhysicalResourceId());
 			}
+			*/
 			
-	        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
-	        //ec2.describeInsta
+			//EC2 Querying....
+            DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
+            List<Reservation> reservations = describeInstancesRequest.getReservations();
+            Set<Instance> instances = new HashSet<Instance>();
 
+            for (Reservation reservation : reservations) {
+                instances.addAll(reservation.getInstances());
+            }
+
+            System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
+			
 
 			/*
 			// Delete the stack
@@ -242,5 +322,41 @@ public class AwsManager {
 
         return stackStatus + " (" + stackReason + ")";
     }
+
+
+	public String deleteVirtue(User user, String instanceId)  throws Exception{
+		
+		// Delete the stack
+
+		DeleteStackRequest deleteRequest = new DeleteStackRequest();
+		deleteRequest.setStackName(stackName);
+		System.out.println("Deleting the stack called " + deleteRequest.getStackName() + ".");
+		stackbuilder.deleteStack(deleteRequest);
+
+		// Wait for stack to be deleted
+		// Note that you could used SNS notifications on the original CreateStack call
+		// to track the progress of the stack deletion
+		try {
+			
+			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
+					+ waitForCompletion(stackbuilder, stackName));
+			
+		} catch (AmazonServiceException ase) {
+			System.out.println("Caught an AmazonServiceException, which means your request made it "
+					+ "to AWS CloudFormation, but was rejected with an error response for some reason.");
+			System.out.println("Error Message:    " + ase.getMessage());
+			System.out.println("HTTP Status Code: " + ase.getStatusCode());
+			System.out.println("AWS Error Code:   " + ase.getErrorCode());
+			System.out.println("Error Type:       " + ase.getErrorType());
+			System.out.println("Request ID:       " + ase.getRequestId());
+		} catch (AmazonClientException ace) {
+			System.out.println("Caught an AmazonClientException, which means the client encountered "
+					+ "a serious internal problem while trying to communicate with AWS CloudFormation, "
+					+ "such as not being able to access the network.");
+			System.out.println("Error Message: " + ace.getMessage());
+		}
+		
+		return instanceId;
+	}
 
 }

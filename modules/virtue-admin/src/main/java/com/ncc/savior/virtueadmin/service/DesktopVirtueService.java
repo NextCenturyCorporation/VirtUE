@@ -126,8 +126,16 @@ public class DesktopVirtueService {
 		return null;
 	}
 
-	public void deleteVirtue(User user, String instanceId) {
-		// TODO Auto-generated method stub
+	public String deleteVirtue(User user, String instanceId) {
+		//Now get the template for this id and create the machine on aws. 
+		try {
+			return awsManager.deleteVirtue(user, instanceId);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return instanceId;
 		
 	}
 }
