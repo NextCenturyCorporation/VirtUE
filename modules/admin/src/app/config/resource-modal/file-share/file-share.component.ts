@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
+import { FormGroup, FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-file-share',
@@ -7,6 +9,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FileShareComponent implements OnInit {
 
+  fsValue: string;
+  fileShareTypes = [
+    {value: 'NFS', viewValue: 'NFS'},
+    {value: 'CIFS', viewValue: 'Windows (CIFS)'},
+  ];
+  
   constructor() { }
 
   ngOnInit() {

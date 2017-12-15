@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
@@ -19,18 +20,24 @@ public class SidebarController {
 	private List<DesktopVirtue> currentVirtues;
 	private long pollPeriodMillis = 500;
 	private VirtueChangeHandler changeHandler;
+	private AuthorizationService authService;
 
-	public SidebarController(VirtueService virtueService, Sidebar sidebar) {
+	public SidebarController(VirtueService virtueService, Sidebar sidebar, AuthorizationService authService) {
 		this.sidebar = sidebar;
 		this.changeHandler = sidebar;
 		this.virtueService = virtueService;
+		this.authService = authService;
 	}
 
 	public void init(Stage primaryStage) throws Exception {
-		List<DesktopVirtue> initialVirtues = virtueService.getVirtuesForUser();
+		List<DesktopVirtue> initialVirtues;
+		if (authService.getUser()!=null) {
+			initialVirtues = virtueService.getVirtuesForUser();
+		}else {
+			initialVirtues=new ArrayList<DesktopVirtue>();
+		}
 		currentVirtues = initialVirtues;
 		sidebar.start(primaryStage, initialVirtues);
-
 		startVirtuePoll();
 	}
 
@@ -40,15 +47,18 @@ public class SidebarController {
 			@Override
 			public void run() {
 				while (!terminatePollThread) {
-					List<DesktopVirtue> virtues;
-					try {
-						virtues = virtueService.getVirtuesForUser();
-					} catch (IOException e1) {
-						// TODO do something with connection errors.
-						virtues = new ArrayList<DesktopVirtue>(0);
+					if (authService.getUser() != null) {
+						List<DesktopVirtue> virtues;
+						try {
+
+							virtues = virtueService.getVirtuesForUser();
+						} catch (IOException e1) {
+							// TODO do something with connection errors.
+							virtues = new ArrayList<DesktopVirtue>(0);
+						}
+						detectChangesAndReport(currentVirtues, virtues);
+						currentVirtues = virtues;
 					}
-					detectChangesAndReport(currentVirtues, virtues);
-					currentVirtues = virtues;
 					try {
 						Thread.sleep(pollPeriodMillis);
 					} catch (InterruptedException e) {
@@ -69,20 +79,6 @@ public class SidebarController {
 		int cindex = 0;
 		int nindex = 0;
 
-		if (currentVirtues.isEmpty()) {
-			for (DesktopVirtue virtue : virtues) {
-				reportAddedVirtue(virtue);
-			}
-			return;
-		}
-
-		if (virtues.isEmpty()) {
-			for (DesktopVirtue virtue : currentVirtues) {
-				reportRemovedVirtue(virtue);
-			}
-			return;
-		}
-
 		while ((cindex < currentVirtues.size() && nindex < virtues.size())) {
 			DesktopVirtue cv = currentVirtues.get(cindex);
 			DesktopVirtue nv = virtues.get(nindex);
@@ -96,7 +92,7 @@ public class SidebarController {
 					cv.setId(nv.getId());
 				}
 			} else {
-				compare = nv.getId() == null ? 0 : -1;
+				compare = nv.getId() == null ? cv.getTemplateId().compareTo(nv.getTemplateId()) : -1;
 			}
 			if (0 == compare) {
 				if (!cv.getName().equals(nv.getName())) {
@@ -111,6 +107,19 @@ public class SidebarController {
 				reportRemovedVirtue(cv);
 				cindex++;
 			}
+		}
+
+		// when one of the lists has been fulled processed, we must process the rest on
+		// the other list.
+		while (cindex < currentVirtues.size()) {
+			DesktopVirtue v = currentVirtues.get(cindex);
+			reportRemovedVirtue(v);
+			cindex++;
+		}
+		while (nindex < virtues.size()) {
+			DesktopVirtue v = virtues.get(nindex);
+			reportAddedVirtue(v);
+			nindex++;
 		}
 	}
 

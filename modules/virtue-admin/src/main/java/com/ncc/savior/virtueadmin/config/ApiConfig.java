@@ -10,6 +10,8 @@
 package com.ncc.savior.virtueadmin.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Component;
 
 import com.ncc.savior.virtueadmin.rest.AdminResource;
@@ -19,7 +21,6 @@ import com.ncc.savior.virtueadmin.rest.HelloResource;
 import com.ncc.savior.virtueadmin.rest.VirtueRestService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
-
 /*
  * ApiConfig is responsible for registering all the webserivce 
  * apis. 
@@ -27,18 +28,20 @@ import com.ncc.savior.virtueadmin.util.WebServiceUtil;
  * 
  */
 @Component
+@PropertySources({ @PropertySource(value = "classpath:savior-server.properties", ignoreResourceNotFound = true),
+		@PropertySource(value = "file:savior-server.properties", ignoreResourceNotFound = true) })
 public class ApiConfig extends ResourceConfig {
-	
+
 	public ApiConfig() {
-		
-		/*Register all you webservice class here:*/
+
+		/* Register all you webservice class here: */
 		register(DesktopRestService.class);
 		register(VirtueRestService.class); 
 		register(DataResource.class);
 		register(HelloResource.class); 
 		register(AdminResource.class);
 		register(WebServiceUtil.class);
-		
+
 	}
 
 }

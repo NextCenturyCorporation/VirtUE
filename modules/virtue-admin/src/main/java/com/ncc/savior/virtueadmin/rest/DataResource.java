@@ -90,11 +90,11 @@ public class DataResource {
 		templateManager.addVirtueTemplate(virtueSingleBrowsers);
 		// templateManager.addVirtueTemplate(virtueSingleAll);
 
-		User kdrumm = new User("kdrumm");
-		User wole = new User("wole");
+		User user1 = new User("user1", new ArrayList<>());
+		User user2 = new User("user2", new ArrayList<>());
 		templateManager.assignVirtueTemplateToUser(User.testUser(), virtueSingleBrowsers.getId());
-		templateManager.assignVirtueTemplateToUser(kdrumm, virtueSingleBrowsers.getId());
-		templateManager.assignVirtueTemplateToUser(wole, virtueSingleBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(user1, virtueSingleBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(user2, virtueSingleBrowsers.getId());
 
 		templateManager.addVmTemplate(vmAll);
 		templateManager.addVirtueTemplate(virtueSingleAll);

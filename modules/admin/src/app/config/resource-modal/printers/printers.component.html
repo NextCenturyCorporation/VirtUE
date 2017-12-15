@@ -1,3 +1,17 @@
-<p>
-  printers works!
-</p>
+<div class="mui-row margin-bottom-10">
+  <div class="mui-col-md-12">
+    <label [ngStyle]="{'padding-bottom': '10px'}">File Shared Printer:</label>
+  </div>
+</div>
+<div id="printer-list">
+  <div class="mui-row printer-item" *ngFor="let p of printers">
+    <div class="mui-col-md-12">
+       <mat-checkbox name="printers" value="{{ p.value }}">
+        <span class="printer-icon"></span>
+        <span class="printer-name">{{ p.viewValue }}</span>
+        <span class="printer-loc">{{ p.printerLoc }}</span>
+       </mat-checkbox>
+    </div>
+
+  </div>
+</div>

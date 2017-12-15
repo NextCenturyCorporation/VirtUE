@@ -72,7 +72,8 @@ public class DesktopVirtueService {
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
 		applicationManager.startApplicationOnVm(vm, application);
-		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort());
+		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
+				vm.getUserName(), vm.getPrivateKey());
 		return dva;
 	}
 

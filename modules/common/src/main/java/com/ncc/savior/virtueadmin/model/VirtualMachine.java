@@ -17,9 +17,13 @@ public class VirtualMachine {
 	private String hostname;
 	private int sshPort;
 	private String infrastructureId;
+	private String userName;
+	private String privateKey;
+
 
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
-			String infrastructureId, String hostname, int sshPort) {
+			String infrastructureId, String hostname, int sshPort, String userName, String privateKey) {
+
 		super();
 		this.id = id;
 		this.name = name;
@@ -29,6 +33,9 @@ public class VirtualMachine {
 		this.infrastructureId = infrastructureId;
 		this.hostname = hostname;
 		this.sshPort = sshPort;
+		this.userName = userName;
+		this.privateKey = privateKey;
+
 	}
 
 	/**
@@ -74,9 +81,25 @@ public class VirtualMachine {
 		this.state = state;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public String getPrivateKey() {
+		return privateKey;
+	}
+
 	// Below setters are for jackson deserialization
 	protected void setId(String id) {
 		this.id = id;
+	}
+
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
+
+	protected void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	protected void setName(String name) {
