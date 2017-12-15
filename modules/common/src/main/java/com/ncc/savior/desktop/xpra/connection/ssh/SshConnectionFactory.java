@@ -29,7 +29,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 	private static final String DEFAULT_COMMAND_NAME = "xpra";
 
 	private static final String DEFAULT_COMMAND_MODE = "_proxy";
-	private static final int DEFAULT_DISPLAY = 8;
+	private static final int DEFAULT_DISPLAY = 45;
 	private String commandDir;
 	private String commandName;
 	private String commandMode;
@@ -55,7 +55,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 				session.connect();
 				ChannelExec channel = (ChannelExec) session.openChannel("exec");
 				String command = getCommand(commandDir, commandName, commandMode, display);
-				// logger.debug("connecting with command=" + command);
+				logger.debug("connecting with command=" + command);
 				channel.setCommand(command);
 				channel.connect();
 				return new SshConnection(p, session, channel);
@@ -167,6 +167,11 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			} else if (!user.equals(other.user))
 				return false;
 			return true;
+		}
+
+		@Override
+		public String getConnectionKey() {
+			return host + "-" + port + "-" + user;
 		}
 	}
 

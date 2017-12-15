@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.virtues;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -47,12 +49,29 @@ public class VirtueService {
 	// }
 
 	public void ensureConnection(DesktopVirtueApplication app) throws IOException {
-		// TODO fix hardcoded
-		SshConnectionParameters params = new SshConnectionParameters(app.getHostname(), app.getPort(), "user",
-				"password");
-		XpraClient client = connectionManager.getExistingClient(params);
-		if (client == null || client.getStatus() == Status.ERROR) {
-			client = connectionManager.createClient(params);
+		File file = null;
+		try {
+			String key = app.getPrivateKey();
+
+			SshConnectionParameters params = null;
+			if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
+				File pem = File.createTempFile(app.getName(), ".pem");
+				FileWriter writer = new FileWriter(pem);
+				writer.write(key);
+				writer.close();
+				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
+			} else {
+				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(),
+						key);
+			}
+			XpraClient client = connectionManager.getExistingClient(params);
+			if (client == null || client.getStatus() == Status.ERROR) {
+				client = connectionManager.createClient(params);
+			}
+		} finally {
+			if (file != null && file.exists()) {
+				file.delete();
+			}
 		}
 	}
 

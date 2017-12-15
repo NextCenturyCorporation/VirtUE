@@ -10,8 +10,11 @@ public class DesktopVirtueApplication {
 	private OS os;
 	private String hostname;
 	private int port;
+	private String userName;
+	private String privateKey;
 
-	public DesktopVirtueApplication(String id, String name, String version, OS os, String hostname, int port) {
+	public DesktopVirtueApplication(String id, String name, String version, OS os, String hostname, int port,
+			String userName, String privateKey) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -19,15 +22,18 @@ public class DesktopVirtueApplication {
 		this.os = os;
 		this.hostname = hostname;
 		this.port = port;
+		this.userName = userName;
+		this.privateKey = privateKey;
 	}
 
 	protected DesktopVirtueApplication() {
 
 	}
 
-	public DesktopVirtueApplication(ApplicationDefinition application, String hostname, int sshPort) {
+	public DesktopVirtueApplication(ApplicationDefinition application, String hostname, int sshPort, String userName,
+			String privateKey) {
 		this(application.getId(), application.getName(), application.getVersion(), application.getOs(), hostname,
-				sshPort);
+				sshPort, userName, privateKey);
 	}
 
 	public String getId() {
@@ -78,9 +84,26 @@ public class DesktopVirtueApplication {
 		this.port = port;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getPrivateKey() {
+		return privateKey;
+	}
+
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
+
 	@Override
 	public String toString() {
 		return "DesktopVirtueApplication [id=" + id + ", name=" + name + ", version=" + version + ", os=" + os
-				+ ", hostname=" + hostname + ", port=" + port + "]";
+				+ ", hostname=" + hostname + ", port=" + port + ", userName=" + userName + ", privateKey=" + privateKey
+				+ "]";
 	}
 }

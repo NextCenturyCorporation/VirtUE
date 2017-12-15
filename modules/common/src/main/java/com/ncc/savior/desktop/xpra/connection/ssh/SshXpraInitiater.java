@@ -19,6 +19,12 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
  *
  */
 public class SshXpraInitiater implements IXpraInitiator {
+	private static final String SUDO_OR_NOTHING = "";
+	private static final String XPRA_CMD = SUDO_OR_NOTHING + " xpra";
+	private static final String XPRA_STOP = XPRA_CMD + " stop";
+	private static final String XPRA_START = XPRA_CMD + " start";
+	private static final String XPRA_LIST = XPRA_CMD + " list";
+
 	private SshConnectionParameters params;
 
 	public SshXpraInitiater(SshConnectionParameters params) {
@@ -32,7 +38,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		Set<Integer> set = new TreeSet<Integer>();
 		try {
 			session = getConnectedSession();
-			channel = getConnectedChannel("xpra list", session, null);
+			channel = getConnectedChannel(XPRA_LIST, session, null);
 			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			BufferedReader reader = new BufferedReader(stream);
 			String line;
@@ -60,9 +66,10 @@ public class SshXpraInitiater implements IXpraInitiator {
 		try {
 			session = getConnectedSession();
 			session.setTimeout(2000);
-			String command = (display > 0 ? "xpra start :" + display : "xpra start");
+			String command = (display > 0 ? XPRA_START + " :" + display : XPRA_START);
 			channel = getConnectedChannel(command, session, null);
-			InputStreamReader stream = new InputStreamReader(channel.getErrStream());
+			channel.setErrStream(System.err);
+			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			BufferedReader reader = new BufferedReader(stream);
 			String line;
 			Thread.sleep(500);
@@ -89,7 +96,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		boolean success = false;
 		try {
 			session = getConnectedSession();
-			channel = getConnectedChannel("xpra stop :" + display, session, null);
+			channel = getConnectedChannel(XPRA_STOP + " :" + display, session, null);
 			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			BufferedReader reader = new BufferedReader(stream);
 			String line;
@@ -112,7 +119,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		ChannelExec channel = null;
 		try {
 			session = getConnectedSession();
-			String fullCommand = "export DISPLAY=:" + display + ";" + command;
+			String fullCommand = "export DISPLAY=:" + display + ";" + SUDO_OR_NOTHING + command;
 			channel = getConnectedChannel(fullCommand, session, null);
 			// InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			// BufferedReader reader = new BufferedReader(stream);
@@ -138,9 +145,8 @@ public class SshXpraInitiater implements IXpraInitiator {
 	private ChannelExec getConnectedChannel(String command, Session session, OutputStream out) throws JSchException {
 		ChannelExec channel = (ChannelExec) session.openChannel("exec");
 		channel.setCommand(command);
-		// if (out != null) {
-		// channel.setOutputStream(System.out);
-		// }
+		channel.setErrStream(System.err);
+
 		channel.connect();
 		return channel;
 	}

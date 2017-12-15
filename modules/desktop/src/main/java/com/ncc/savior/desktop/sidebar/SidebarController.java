@@ -30,7 +30,12 @@ public class SidebarController {
 	}
 
 	public void init(Stage primaryStage) throws Exception {
-		List<DesktopVirtue> initialVirtues = virtueService.getVirtuesForUser();
+		List<DesktopVirtue> initialVirtues;
+		if (authService.getUser()!=null) {
+			initialVirtues = virtueService.getVirtuesForUser();
+		}else {
+			initialVirtues=new ArrayList<DesktopVirtue>();
+		}
 		currentVirtues = initialVirtues;
 		sidebar.start(primaryStage, initialVirtues);
 		startVirtuePoll();

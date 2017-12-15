@@ -4,6 +4,7 @@
 !gradle/wrapper/gradle-wrapper.jar
 /database/
 /logs/
+/certs/
 
 ### STS ###
 .apt_generated
