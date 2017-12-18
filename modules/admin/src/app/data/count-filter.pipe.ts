@@ -1,14 +1,14 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'filter'
+  name: 'count'
 })
-export class JsonFilterPipe implements PipeTransform {
+export class CountFilterPipe implements PipeTransform {
 
   transform(value: any, filterString: string, propName: string) {
 
     if (value.length === 0 || filterString === '') {
-      return value;
+      return value.length;
     }
     const resultArray = [];
     var resultCount;
@@ -17,11 +17,10 @@ export class JsonFilterPipe implements PipeTransform {
     for (const item of value) {
       if (item[propName].toLowerCase().match(filterString)) {
         resultArray.push(item);
-        resultCount = resultArray.length;
       }
     }
 
-    return resultArray;
+    return resultArray.length;
   }
 
 }

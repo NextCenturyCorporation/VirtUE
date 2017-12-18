@@ -12,7 +12,8 @@
         <div class="mui-row margin-top-10">
           <div class="mui-col-md-12 padding-left-0">
             <form id="filter">
-              <p><label>Filter Data:</label>
+              <p>
+                <label>Filter by:</label>
                 <mat-form-field>
                   <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected">
                     <mat-option *ngFor="let sensor of sensors" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
@@ -34,6 +35,12 @@
                 <div class="mui-col-md-3 table-data">{{d.sensor}}</div>
                 <div class="mui-col-md-6 table-data">{{d.message}}</div>
                 <div class="mui-col-md-1 table-data border-bottom">{{d.level}}</div>
+              </div>
+            </div>
+
+            <div class="mui-row">
+              <div class="mui-col-md-12 text-align-center">
+                <p>{{ jsonData | count:selected:'message' }} <span *ngIf="(selected !== '')">{{ selected | uppercase }}</span> results</p>
               </div>
             </div>
           </div>

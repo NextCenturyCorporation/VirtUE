@@ -67,6 +67,7 @@ import { ResourceModalComponent } from './config/resource-modal/resource-modal.c
 import { FileShareComponent } from './config/resource-modal/file-share/file-share.component';
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { JsonFilterPipe } from './data/json-filter.pipe';
+import { CountFilterPipe } from './data/count-filter.pipe';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -108,6 +109,7 @@ const appRoutes: Routes = [
     PrintersComponent,
     ConfigSensorsComponent,
     JsonFilterPipe,
+    CountFilterPipe,
   ],
   imports: [
     BreadcrumbsModule,
@@ -130,7 +132,7 @@ const appRoutes: Routes = [
     RouterModule
   ],
   providers: [
-    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
+    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer(),  },
   ],
   bootstrap: [AppComponent],
   entryComponents: [
