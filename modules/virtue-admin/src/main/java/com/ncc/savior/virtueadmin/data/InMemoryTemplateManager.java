@@ -85,6 +85,11 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
 				appsAll, vmts);
 
+		List<VirtualMachineTemplate> vmsMath = new ArrayList<VirtualMachineTemplate>();
+		vmsMath.add(vmMath);
+		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
+				appsMath, vmsMath);
+
 		addApplicationDefinition(calculator);
 		addApplicationDefinition(firefox);
 		addApplicationDefinition(chrome);
@@ -96,9 +101,31 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		addVirtueTemplate(virtueAllVms);
 		addVirtueTemplate(virtueSingleBrowsers);
 		addVirtueTemplate(virtueSingleAll);
+		addVirtueTemplate(virtueMath);
 
-		assignVirtueTemplateToUser(User.testUser(), virtueAllVms.getId());
-		assignVirtueTemplateToUser(User.testUser(), virtueSingleBrowsers.getId());
+		User user = new User("user", new ArrayList<String>());
+		User user2 = new User("user2", new ArrayList<String>());
+		User user3 = new User("user3", new ArrayList<String>());
+		User admin = new User("admin", new ArrayList<String>());
+		User kdrumm = new User("kdrumm", new ArrayList<String>());
+		User kdrummTest = new User("kdrumm_test", new ArrayList<String>());
+
+		assignVirtueTemplateToUser(user, virtueAllVms.getId());
+		assignVirtueTemplateToUser(user, virtueSingleBrowsers.getId());
+
+		assignVirtueTemplateToUser(kdrumm, virtueAllVms.getId());
+		assignVirtueTemplateToUser(kdrumm, virtueSingleBrowsers.getId());
+
+		assignVirtueTemplateToUser(kdrummTest, virtueMath.getId());
+
+		assignVirtueTemplateToUser(user2, virtueSingleBrowsers.getId());
+
+		assignVirtueTemplateToUser(user3, virtueMath.getId());
+
+		assignVirtueTemplateToUser(admin, virtueAllVms.getId());
+		assignVirtueTemplateToUser(admin, virtueSingleBrowsers.getId());
+		assignVirtueTemplateToUser(admin, virtueSingleAll.getId());
+		assignVirtueTemplateToUser(admin, virtueMath.getId());
 
 	}
 
@@ -116,9 +143,11 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(User user) {
 		Map<String, VirtueTemplate> map = new LinkedHashMap<String, VirtueTemplate>();
 		Collection<String> templateIds = userToTemplateId.get(user.getUsername());
-		for (String templateId : templateIds) {
-			VirtueTemplate template = templates.get(templateId);
-			map.put(template.getId(), template);
+		if (templateIds != null) {
+			for (String templateId : templateIds) {
+				VirtueTemplate template = templates.get(templateId);
+				map.put(template.getId(), template);
+			}
 		}
 		return map;
 	}
@@ -135,7 +164,8 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	@Override
 	public VirtueTemplate getTemplate(User user, String templateId) {
-		if (userToTemplateId.get(user.getUsername()).contains(templateId)) {
+		Collection<String> userTemplates = userToTemplateId.get(user.getUsername());
+		if (userTemplates != null && userTemplates.contains(templateId)) {
 			return getTemplate(templateId);
 		}
 		return null;

@@ -14,7 +14,6 @@ public class HelloResource {
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	@Path("/")
 	public Response getHello() throws URISyntaxException {
 		return Response.status(200).entity("Hello World").build();
 	}

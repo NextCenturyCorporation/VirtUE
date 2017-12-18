@@ -14,12 +14,11 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 
 import com.ncc.savior.virtueadmin.entity.VirtueEntity;
 import com.ncc.savior.virtueadmin.repository.VirtueRepository;
 
-@Component
+//@Component
 public class H2Bootstrap implements CommandLineRunner{
 
 	@Autowired

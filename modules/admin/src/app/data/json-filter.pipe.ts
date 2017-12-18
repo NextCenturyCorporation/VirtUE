@@ -11,17 +11,13 @@ export class JsonFilterPipe implements PipeTransform {
       return value;
     }
     const resultArray = [];
-    var resultCount;
-
 
     for (const item of value) {
       if (item[propName].toLowerCase().match(filterString)) {
         resultArray.push(item);
-        resultCount = resultArray.length;
       }
     }
 
     return resultArray;
   }
-
 }

@@ -6,13 +6,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.XpraClient.Status;
 import com.ncc.savior.desktop.xpra.XpraConnectionManager;
-import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -23,15 +21,14 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
  *
  */
 public class VirtueService {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(VirtueService.class);
 	private XpraConnectionManager connectionManager;
 	private DesktopResourceService desktopResourceService;
 
-	public VirtueService(DesktopResourceService desktopResourceService) {
-		// TODO should be dependency injected
+	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger) {
 		this.desktopResourceService = desktopResourceService;
-		JavaFxKeyboard keyboard = new JavaFxKeyboard(new XpraKeyMap());
-		this.connectionManager = new XpraConnectionManager(new JavaFxApplicationManagerFactory(keyboard));
+		this.connectionManager = new XpraConnectionManager(appManger);
 	}
 
 	// public void connectAndStartApp(DesktopVirtue app) throws IOException {
@@ -51,7 +48,8 @@ public class VirtueService {
 
 	public void ensureConnection(DesktopVirtueApplication app) throws IOException {
 		// TODO fix hardcoded
-		SshConnectionParameters params = new SshConnectionParameters(app.getHostname(), 22, "user", "password");
+		SshConnectionParameters params = new SshConnectionParameters(app.getHostname(), app.getPort(), "user",
+				"password");
 		XpraClient client = connectionManager.getExistingClient(params);
 		if (client == null || client.getStatus() == Status.ERROR) {
 			client = connectionManager.createClient(params);

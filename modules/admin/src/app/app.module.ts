@@ -66,6 +66,7 @@ import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.componen
 import { ResourceModalComponent } from './config/resource-modal/resource-modal.component';
 import { FileShareComponent } from './config/resource-modal/file-share/file-share.component';
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
+
 import { JsonFilterPipe } from './data/json-filter.pipe';
 import { CountFilterPipe } from './data/count-filter.pipe';
 
@@ -80,7 +81,7 @@ const appRoutes: Routes = [
   { path: 'virtues/create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
   { path: 'virtues/edit-virtue', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
   { path: 'virtues/virtue-settings', component: VirtueSettingsComponent }
-  // { path: '**', component: PageNotFoundComponent }
+  //{ path: '**', component: PageNotFoundComponent }
 ];
 
 @NgModule({
