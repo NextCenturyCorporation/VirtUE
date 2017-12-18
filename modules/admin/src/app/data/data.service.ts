@@ -7,12 +7,7 @@ import 'rxjs/add/operator/catch';
 @Injectable()
 
 export class DataService {
-
-<<<<<<< HEAD
-  // private jsonfile: string = './assets/json/example.json';
-=======
   //private jsonfile: string = './assets/json/example.json';
->>>>>>> master
   private jsonfile: string = './assets/json/sample_data.json';
   constructor( private http: Http ){}
 

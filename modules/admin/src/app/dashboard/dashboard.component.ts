@@ -1,14 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-<<<<<<< HEAD
 import { DataService } from '../data/data.service';
 import { JsonFilterPipe } from '../data/json-filter.pipe';
 import { CountFilterPipe } from '../data/count-filter.pipe';
-=======
-import { Pipe, PipeTransform } from '@angular/core';
-import { DataService } from '../data/data.service';
-import { JsonFilterPipe } from '../data/json-filter.pipe';
->>>>>>> master
 
 @Component({
   selector: 'app-dashboard',
