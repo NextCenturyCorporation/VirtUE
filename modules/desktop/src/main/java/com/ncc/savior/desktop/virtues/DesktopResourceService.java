@@ -2,9 +2,13 @@ package com.ncc.savior.desktop.virtues;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -32,11 +36,23 @@ public class DesktopResourceService {
 	private WebTarget baseApi;
 	private AuthorizationService authService;
 
-	public DesktopResourceService(AuthorizationService authService, String baseApiUri) {
+	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames) {
 		this.authService = authService;
-		client = ClientBuilder.newClient();
+		if (allowAllHostnames) {
+			try {
+				client = getIgnoreSSLClient();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			client = ClientBuilder.newClient();
+		}
 		jsonMapper = new ObjectMapper();
 		baseApi = client.target(baseApiUri);
+	}
+
+	public DesktopResourceService(AuthorizationService authService, String baseApiUri) {
+		this(authService, baseApiUri, false);
 	}
 
 	public List<DesktopVirtue> getVirtues() throws IOException {
@@ -65,6 +81,31 @@ public class DesktopResourceService {
 		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
 		return returnedApp;
+	}
+
+	public static Client getIgnoreSSLClient() throws Exception {
+		SSLContext sslcontext = SSLContext.getInstance("TLS");
+		sslcontext.init(null, new TrustManager[] { new X509TrustManager() {
+
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate[0];
+			}
+
+			@Override
+			public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+					throws java.security.cert.CertificateException {
+
+			}
+
+			@Override
+			public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
+					throws java.security.cert.CertificateException {
+
+			}
+
+		} }, new java.security.SecureRandom());
+		return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier((s1, s2) -> true).build();
 	}
 
 	private InputStream getListOfClass(String path, String method) throws IOException {

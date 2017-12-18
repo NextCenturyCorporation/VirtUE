@@ -30,8 +30,9 @@ public class SidebarApplication extends Application {
 		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
 		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
+		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization);
-		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl);
+		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager = new JavaFxApplicationManagerFactory(
 				new JavaFxKeyboard(new XpraKeyMap()));
 		VirtueService virtueService = new VirtueService(drs, appManager);
