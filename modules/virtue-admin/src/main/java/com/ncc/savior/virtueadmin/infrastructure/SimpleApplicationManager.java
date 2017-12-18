@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
@@ -18,15 +19,29 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 // TODO credentials need to be added somewhere.
 public class SimpleApplicationManager implements IApplicationManager {
 
-	private static final String DEFAULT_PASSWORD = "password";
-	private static final String DEFAULT_USER = "user";
 	private static final int DEFAULT_DISPLAY = 45;
+	private String defaultPassword;
+	private File defaultCertificate;
+
+	public SimpleApplicationManager(String defaultPassword) {
+		this.defaultPassword = defaultPassword;
+	}
+
+	public SimpleApplicationManager(File defaultCertificate) {
+		this.defaultCertificate = defaultCertificate;
+	}
 
 	@Override
 	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app) {
 		try {
-			SshConnectionParameters params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(),
-					vm.getSshPort(), DEFAULT_USER, DEFAULT_PASSWORD);
+			SshConnectionParameters params = null;
+			if (defaultCertificate != null) {
+				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
+						vm.getUserName(), defaultCertificate);
+			} else {
+				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
+						vm.getUserName(), defaultPassword);
+			}
 			SshXpraInitiater initiator = new SshXpraInitiater(params);
 			Set<Integer> displays = initiator.getXpraServers();
 			int display = DEFAULT_DISPLAY;

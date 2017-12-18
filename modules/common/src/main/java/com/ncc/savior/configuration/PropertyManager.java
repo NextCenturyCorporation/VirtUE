@@ -30,6 +30,7 @@ public class PropertyManager {
 	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "./savior-user.properties";
 	public static final String PROPERTY_REQUIRED_DOMAIN = "savior.domain";
 	public static final String PROPERTY_DUMMY_AUTHORIZATION = "savior.desktop.security.dummy";
+	public static final String PROPERTY_DEFAULT_PEM = "savior.desktop.defaultPem";
 	private Properties props;
 	private boolean warnOnMissingFile = false;
 

@@ -22,9 +22,9 @@ public class XpraConnectionManager {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(XpraConnectionManager.class);
 	private HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory> connectionFactoryMap;
-	private HashMap<IConnectionParameters, XpraClient> activeClientsMap;
+	private HashMap<String, XpraClient> activeClientsMap;
 	private HashMap<Class<? extends IConnectionParameters>, IXpraInitiator.IXpraInitatorFactory> initiaterMap;
-	private HashMap<IConnectionParameters, XpraApplicationManager> activeAppManagers;
+	private HashMap<String, XpraApplicationManager> activeAppManagers;
 	private IApplicationManagerFactory applicationManagerFactory;
 
 	public XpraConnectionManager(IApplicationManagerFactory appManagerFactory) {
@@ -47,8 +47,8 @@ public class XpraConnectionManager {
 								+ params.getClass().getCanonicalName());
 			}
 		});
-		activeClientsMap = new HashMap<IConnectionParameters, XpraClient>();
-		activeAppManagers = new HashMap<IConnectionParameters, XpraApplicationManager>();
+		activeClientsMap = new HashMap<String, XpraClient>();
+		activeAppManagers = new HashMap<String, XpraApplicationManager>();
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class XpraConnectionManager {
 	 */
 
 	public XpraClient getExistingClient(IConnectionParameters params) {
-		return activeClientsMap.get(params);
+		return activeClientsMap.get(params.getConnectionKey());
 	}
 
 	public XpraClient createClient(IConnectionParameters params) throws IOException {
@@ -72,8 +72,9 @@ public class XpraConnectionManager {
 			Set<Integer> servers = init.getXpraServers();
 			// logger.debug("displays: " + servers);
 			if (!servers.contains(factory.getDisplay())) {
+				logger.error("Server does not have expected display running on XPRA.  Display=" + factory.getDisplay());
 				// logger.debug("starting Xpra Display on " + factory.getDisplay());
-				init.startXpraServer(factory.getDisplay());
+				// init.startXpraServer(factory.getDisplay());
 				// logger.debug("Display " + d + " started");
 			}
 		}
@@ -82,8 +83,8 @@ public class XpraConnectionManager {
 
 		client.connect(factory, params);
 		// logger.debug("Client connected with params" + params);
-		activeClientsMap.put(params, client);
-		activeAppManagers.put(params, applicationManager);
+		activeClientsMap.put(params.getConnectionKey(), client);
+		activeAppManagers.put(params.getConnectionKey(), applicationManager);
 
 		return client;
 	}

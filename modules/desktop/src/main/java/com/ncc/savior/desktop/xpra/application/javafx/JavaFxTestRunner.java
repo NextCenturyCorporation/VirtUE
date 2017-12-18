@@ -66,8 +66,14 @@ public class JavaFxTestRunner extends Application {
 				logger.info("Attempting to connect...");
 			}
 		});
+		// client.connect(new SshConnectionFactory(),
+		// new SshConnectionFactory.SshConnectionParameters("localhost", 23, "user",
+		// "password"));
+
 		client.connect(new SshConnectionFactory(),
-				new SshConnectionFactory.SshConnectionParameters("localhost", 23, "user", "password"));
+				new SshConnectionFactory.SshConnectionParameters("ec2-52-23-199-83.compute-1.amazonaws.com", 22,
+						"admin", new File("./certs/vrtu.pem")));
+
 	}
 
 }

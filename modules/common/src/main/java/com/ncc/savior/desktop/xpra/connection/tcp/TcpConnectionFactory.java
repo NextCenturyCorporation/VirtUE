@@ -54,6 +54,11 @@ public class TcpConnectionFactory extends BaseConnectionFactory {
 		public String toString() {
 			return "TcpConnectionParameters [port=" + port + ", host=" + host + "]";
 		}
+
+		@Override
+		public String getConnectionKey() {
+			return host + "-" + port;
+		}
 	}
 
 	/**
