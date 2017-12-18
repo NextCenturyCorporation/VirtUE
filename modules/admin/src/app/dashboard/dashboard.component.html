@@ -4,41 +4,24 @@
   </div>
 
   <div id="content-main">
-
-
     <div id="content">
       <div class="mui-container-fluid">
         <!-- if there are no virtues, show this message -->
         <div class="mui-row margin-top-10">
           <div class="mui-col-md-12 padding-left-0">
-<<<<<<< HEAD
             <form id="filter">
               <p>
                 <label>Filter by:</label>
-=======
-          <form id="filter">
-            <div class="mui-row">
-              <div class="mui-col-md-1"><label>Filter Data:</label></div>
-              <div class="mui-col-md-3">
->>>>>>> master
                 <mat-form-field>
                   <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected">
                     <mat-option *ngFor="let sensor of sensors" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
                   </mat-select>
                 </mat-form-field>
-<<<<<<< HEAD
-              <br />
             </p>
             </form>
-=======
-              </div>
-            </div>
-          </form>
-          <br/>
           <div class="mui-row">
             <div class="mui-col-md-2"><br /><br /></div>
           </div>
->>>>>>> master
           <div class="mui-container-fluid">
             <div class="mui-row">
               <div class="mui-col-md-2 table-header">Timestamp</div>
