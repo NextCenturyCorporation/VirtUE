@@ -7,6 +7,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.application.XpraApplicationManager;
 import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
@@ -62,7 +63,7 @@ public class XpraConnectionManager {
 		return activeClientsMap.get(params.getConnectionKey());
 	}
 
-	public XpraClient createClient(IConnectionParameters params) throws IOException {
+	public XpraClient createClient(IConnectionParameters params, RgbColor color) throws IOException {
 		// logger.debug("creating client with params=" + params);
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
@@ -79,9 +80,9 @@ public class XpraConnectionManager {
 			}
 		}
 
-		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client);
-
+		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.connect(factory, params);
+
 		// logger.debug("Client connected with params" + params);
 		activeClientsMap.put(params.getConnectionKey(), client);
 		activeAppManagers.put(params.getConnectionKey(), applicationManager);

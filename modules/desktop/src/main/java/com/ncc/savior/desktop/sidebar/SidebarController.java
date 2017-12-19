@@ -95,7 +95,7 @@ public class SidebarController {
 				compare = nv.getId() == null ? cv.getTemplateId().compareTo(nv.getTemplateId()) : -1;
 			}
 			if (0 == compare) {
-				if (!cv.getName().equals(nv.getName())) {
+				if (!cv.getName().equals(nv.getName()) || !cv.getId().equals(nv.getId())) {
 					reportChangedVirtue(nv);
 				}
 				cindex++;

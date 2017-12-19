@@ -53,10 +53,12 @@ public class VirtueMenuItem {
 			new CornerRadii(0), new BorderWidths(2));
 	protected boolean showingMenu;
 	private VirtueService virtueService;
+	private RgbColor color;
 
-	public VirtueMenuItem(DesktopVirtue virtue, VirtueService virtueService) {
+	public VirtueMenuItem(DesktopVirtue virtue, VirtueService virtueService, RgbColor color) {
 		this.virtueService = virtueService;
 		this.virtue = virtue;
+		this.color = color;
 		this.node = createNode();
 		contextMenu = createContextMenu();
 		addEventHandlers();
@@ -76,8 +78,15 @@ public class VirtueMenuItem {
 		HBox.setHgrow(view, Priority.NEVER);
 		HBox.setHgrow(label, Priority.ALWAYS);
 		pane.setPadding(new Insets(5, 20, 5, 20));
-		BorderStroke style = new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(0),
-				new BorderWidths(0, 0, 1, 0));
+		BorderStroke style;
+		if (color == null) {
+			 style= new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(0),
+					new BorderWidths(0, 0, 1, 0));
+		} else {
+			Color c = Color.color(this.color.getRed(), color.getGreen(), color.getBlue());
+			style = new BorderStroke(c, BorderStrokeStyle.SOLID, new CornerRadii(0),
+					new BorderWidths(2, 2, 2, 2));
+		}
 		pane.setBorder(new Border(style));
 		pane.getChildren().add(view);
 		pane.getChildren().add(label);
@@ -109,7 +118,7 @@ public class VirtueMenuItem {
 			// }
 			MenuItem menuItem = null;
 			// if (appImage == null) {
-				menuItem = new MenuItem(app.getName());
+			menuItem = new MenuItem(app.getName());
 			// }
 			// else {
 			// ImageView iv = new ImageView(appImage);
@@ -124,7 +133,7 @@ public class VirtueMenuItem {
 						@Override
 						public void run() {
 							try {
-								virtueService.startApplication(virtue, app);
+								virtueService.startApplication(virtue, app, color);
 							} catch (IOException e) {
 								logger.error("Error starting " + app.getName(), e);
 								Platform.runLater(new Runnable() {

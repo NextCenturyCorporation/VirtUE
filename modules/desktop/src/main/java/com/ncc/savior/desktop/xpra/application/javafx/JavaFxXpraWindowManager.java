@@ -22,6 +22,7 @@ import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -44,6 +45,8 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	private int titleBarHeight;
 
+	private Color color;
+
 	public JavaFxXpraWindowManager(XpraClient client, int baseWindowId) {
 		super(client, baseWindowId);
 		IKeyboard kb = client.getKeyboard();
@@ -63,6 +66,7 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 	@Override
 	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
 		JavaFxWindow window = new JavaFxWindow(packet, packetSender, client.getKeyboard(), /* IFocusNotifier */this);
+		window.setColor(color);
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -167,5 +171,9 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 
 	public void setTitleBarHeight(int titleBarHeight) {
 		this.titleBarHeight = titleBarHeight;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 }

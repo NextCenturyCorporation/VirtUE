@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.application.IFocusNotifier;
+import com.ncc.savior.desktop.xpra.application.XpraApplication;
 import com.ncc.savior.desktop.xpra.application.XpraWindow;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
@@ -50,6 +51,7 @@ public class JavaFxWindow extends XpraWindow {
 
 	private boolean closed;
 
+	private Color color;
 
 
 	public JavaFxWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
@@ -140,6 +142,12 @@ public class JavaFxWindow extends XpraWindow {
 						// logger.debug("ID:" + packet.getWindowId() + " Window:" + this.toString());
 						g.drawImage(img, packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 
+						if (color != null && isMainWindow()) {
+							g.setStroke(color);
+							// g.setFill(Color.GREEN);
+							g.setLineWidth(1);
+							g.strokeRect(0, 0, canvas.getWidth(), canvas.getHeight());
+						}
 						if (debugOutput) {
 							g.setStroke(Color.BLUE);
 							g.setFill(Color.GREEN);
@@ -156,6 +164,15 @@ public class JavaFxWindow extends XpraWindow {
 			}
 		});
 
+	}
+
+	protected boolean isMainWindow() {
+		for (String type : this.type) {
+			if (XpraApplication.noToolbarTypes.contains(type)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -218,5 +235,9 @@ public class JavaFxWindow extends XpraWindow {
 				canvas.setHeight(height);
 			}
 		});
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 }

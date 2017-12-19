@@ -31,7 +31,7 @@ public abstract class XpraApplication implements Closeable {
 	protected XpraWindowManager windowManager;
 	protected int baseWindowId;
 	protected boolean debugOutput;
-	protected static Set<String> noToolbarTypes;
+	public static Set<String> noToolbarTypes;
 
 	static {
 		noToolbarTypes = new TreeSet<String>();
@@ -46,7 +46,6 @@ public abstract class XpraApplication implements Closeable {
 		noToolbarTypes.add("NOTIFICATION");
 		noToolbarTypes.add("COMBO");
 		noToolbarTypes.add("DND");
-
 	}
 
 	public XpraApplication(XpraClient client, int baseWindowId) {

@@ -1,6 +1,8 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -66,11 +68,25 @@ public class Sidebar implements VirtueChangeHandler {
 	private AuthorizationService authService;
 	private Label userLabel;
 	private Stage stage;
+	private ArrayList<RgbColor> colorList;
+	private Iterator<RgbColor> colorItr;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService) {
 		this.authService = authService;
 		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
+		colorList = new ArrayList<RgbColor>();
+		colorList.add(new RgbColor(1, 0, 0, .5));
+		colorList.add(new RgbColor(0, 1, 0, .5));
+		colorList.add(new RgbColor(0, 0, 1, .5));
+		// colorList.add(Color.YELLOW);
+		// colorList.add(Color.ORANGE);
+		// colorList.add(Color.PURPLE);
+		// colorList.add(Color.CYAN);
+		// colorList.add(Color.BISQUE);
+		// colorList.add(Color.DARKSALMON);
+		colorList.add(null);
+		colorItr = colorList.iterator();
 	}
 
 	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
@@ -166,7 +182,7 @@ public class Sidebar implements VirtueChangeHandler {
 			virtuePane.setBorder(new Border(calloutDebugStroke));
 		}
 		for (DesktopVirtue virtue : initialVirtues) {
-			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
+			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, getNextColor());
 			children.add(vmi.getNode());
 			String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 			virtueIdToVmi.put(id, vmi);
@@ -268,7 +284,7 @@ public class Sidebar implements VirtueChangeHandler {
 	@Override
 	public void addVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();
-		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
+		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, getNextColor());
 		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 		virtueIdToVmi.put(id, vmi);
 		Platform.runLater(new Runnable() {
@@ -295,5 +311,12 @@ public class Sidebar implements VirtueChangeHandler {
 				}
 			});
 		}
+	}
+
+	private RgbColor getNextColor() {
+		if (!colorItr.hasNext()) {
+			colorItr = colorList.iterator();
+		}
+		return colorItr.next();
 	}
 }
