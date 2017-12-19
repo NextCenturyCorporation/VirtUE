@@ -89,7 +89,7 @@ public class Sidebar implements VirtueChangeHandler {
 		// colorList.add(Color.CYAN);
 		// colorList.add(Color.BISQUE);
 		// colorList.add(Color.DARKSALMON);
-		colorList.add(null);
+		// colorList.add(null);
 		colorItr = colorList.iterator();
 	}
 
