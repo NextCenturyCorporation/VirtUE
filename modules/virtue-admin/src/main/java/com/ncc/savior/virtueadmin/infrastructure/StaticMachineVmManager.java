@@ -36,7 +36,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 
 	private static String getKeyFromFile(File privateKey) {
 		FileReader reader = null;
-		if (!privateKey.isFile()) {
+		if (privateKey == null || !privateKey.isFile()) {
 			return "";
 		}
 		try {

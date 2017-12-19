@@ -11,6 +11,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
 
 /**
  * JavaFX Application manager keeps track of and controls
@@ -23,7 +24,7 @@ import javafx.application.Platform;
 public class JavaFxApplicationManager extends XpraApplicationManager {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(JavaFxApplicationManager.class);
-
+	private Color color;
 
 	public JavaFxApplicationManager(XpraClient client, JavaFxKeyboard keyboard) {
 		super(client);
@@ -36,7 +37,7 @@ public class JavaFxApplicationManager extends XpraApplicationManager {
 	}
 
 	private XpraApplication createNewJavaFxXpraApplication(NewWindowPacket packet, JavaFxApplication parent) {
-		JavaFxApplication app = new JavaFxApplication(client, packet, parent);
+		JavaFxApplication app = new JavaFxApplication(client, packet, parent, color);
 		return app;
 	}
 
@@ -59,5 +60,9 @@ public class JavaFxApplicationManager extends XpraApplicationManager {
 			p = (JavaFxApplication) parent;
 		}
 		return createNewJavaFxXpraApplication(packet, p);
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 }

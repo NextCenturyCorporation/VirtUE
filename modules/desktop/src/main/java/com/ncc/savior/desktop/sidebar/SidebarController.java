@@ -82,20 +82,21 @@ public class SidebarController {
 		while ((cindex < currentVirtues.size() && nindex < virtues.size())) {
 			DesktopVirtue cv = currentVirtues.get(cindex);
 			DesktopVirtue nv = virtues.get(nindex);
-			int compare;
-			if (cv.getId() != null) {
-				// if current virtue doesn't have an ID, a new one with an ID could override it.
-				compare = cv.getTemplateId().compareTo(nv.getTemplateId());
-				if (compare == 0) {
-					// Alter current such that subsequence virtues matching the template will be
-					// added.
+			int compare = comparator.compare(cv, nv);
+			boolean updatedId = false;
+			if (compare != 0) {
+				if (cv.getId() != null && nv.getId() == null) {
 					cv.setId(nv.getId());
+					updatedId = true;
+					compare = 0;
+				} else if (cv.getId() == null && nv.getId() != null) {
+					cv.setId(nv.getId());
+					updatedId = true;
+					compare = 0;
 				}
-			} else {
-				compare = nv.getId() == null ? cv.getTemplateId().compareTo(nv.getTemplateId()) : -1;
 			}
 			if (0 == compare) {
-				if (!cv.getName().equals(nv.getName())) {
+				if (!cv.getName().equals(nv.getName()) || updatedId) {
 					reportChangedVirtue(nv);
 				}
 				cindex++;

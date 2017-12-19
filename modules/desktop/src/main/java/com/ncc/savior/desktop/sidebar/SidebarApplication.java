@@ -13,8 +13,8 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 /**
- * This is the main class to start just the sidebar application. This should be
- * used only for testing.
+ * This is the main class to start just the sidebar application. This may or may
+ * not end up being the starting point for the Desktop application.
  *
  *
  */
