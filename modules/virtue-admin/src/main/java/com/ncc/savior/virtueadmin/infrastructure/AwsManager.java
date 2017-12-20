@@ -149,8 +149,9 @@ public class AwsManager implements ICloudManager {
 		System.out.println("===========================================\n");
 
 		VirtueInstance vi = null;
+		String vmUsername = "admin";
 
-		stackName = baseStack_Name + user.getUsername() + "-" + System.getProperty("user.name") + "-"
+		stackName = baseStack_Name + vmUsername + "-" + System.getProperty("user.name") + "-"
 				+ UUID.randomUUID().toString();
 		String logicalResourceName = "SampleNotificationTopic";
 
@@ -227,14 +228,14 @@ public class AwsManager implements ICloudManager {
 						System.out.println("Found it!!!!!!!!!!!!!!");
 						VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
 								template.getApplications(), VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(),
-								ec2Instance.getPublicDnsName(), SSH_PORT, user.getUsername(), this.privateKey,
+								ec2Instance.getPublicDnsName(), SSH_PORT, vmUsername, this.privateKey,
 								ec2Instance.getPublicIpAddress());
 						vms.add(vm);
 					}
 				}
 			}
 
-			vi = new VirtueInstance(template, user.getUsername(), vms);
+			vi = new VirtueInstance(template, vmUsername, vms);
 
 		} catch (AmazonServiceException ase) {
 

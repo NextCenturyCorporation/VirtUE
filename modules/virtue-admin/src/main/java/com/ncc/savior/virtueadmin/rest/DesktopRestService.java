@@ -104,7 +104,6 @@ public class DesktopRestService {
 
 	private User getUserFromSecurity() {
 		User user = UserService.getCurrentUser();
-	
-		return User.adminUser();
+		return user;
 	}
 }

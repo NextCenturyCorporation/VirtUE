@@ -51,6 +51,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
 		// return vmManager.startVirtualMachine(vm);
 		// assume started
+		// cloudManager.startVirtualMachine(vm);
 		logger.debug("**TODO**: need to implement start vm in cloud manager.  It is assumed vms are started now");
 		vm.setState(VmState.RUNNING);
 		return vm;
