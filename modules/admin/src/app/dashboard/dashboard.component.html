@@ -1,4 +1,4 @@
-<div id="content-container">
+<div id="content-container" class="dashboard">
   <div id="content-header" class="titlebar">
     <h1 class="title">Dashboard</h1>
   </div>
@@ -12,8 +12,8 @@
             <form id="filter">
               <p>
                 <label>Filter by:</label>
-                <mat-form-field>
-                  <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected">
+                <mat-form-field id="dashboard-filter">
+                  <mat-select [(ngModel)]="sensorValue" name="sensorFilter" [(value)]="selected" disableRipple>
                     <mat-option *ngFor="let sensor of sensors" [value]="sensor.value">{{ sensor.viewValue }}</mat-option>
                   </mat-select>
                 </mat-form-field>

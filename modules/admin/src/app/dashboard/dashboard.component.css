@@ -12,3 +12,11 @@ app-dialog-test {
   margin-left: 0;
   margin-right: 0;
 }
+
+.dashboard .mat-select-panel {
+  background-color: #FFF;
+  border:1px solid #b2b2b2;
+  left:80px;
+  position: absolute;
+  top: 108px;
+}
