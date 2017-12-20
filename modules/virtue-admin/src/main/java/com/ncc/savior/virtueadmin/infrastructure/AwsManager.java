@@ -162,7 +162,8 @@ public class AwsManager implements ICloudManager {
 
 		VirtueInstance vi  = null; 
 
-		stackName =  baseStack_Name + user.getUsername(); 
+		stackName = baseStack_Name + user.getUsername() + "-" + System.getProperty("user.name") + "-"
+				+ UUID.randomUUID().toString();
 		String logicalResourceName = "SampleNotificationTopic";
 
 		String myCloudFormationFromFile = convertStreamToString(

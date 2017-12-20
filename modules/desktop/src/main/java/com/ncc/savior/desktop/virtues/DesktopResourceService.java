@@ -92,9 +92,13 @@ public class DesktopResourceService {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder);
 		Response response = builder.method(method);
+		if (response.getStatus() == 200) {
 		InputStream in = (InputStream) response.getEntity();
 		T instance = jsonMapper.readValue(in, klass);
 		return instance;
+		} else {
+			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
+		}
 	}
 
 	private void addAuthorization(Builder builder) {

@@ -59,7 +59,9 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	@Override
 	public VirtueInstance provisionTemplate(User user, VirtueTemplate template) {
 		try {
-			return cloudManager.createVirtue(user, template);
+			VirtueInstance vi = cloudManager.createVirtue(user, template);
+			virtueDao.addVirtue(vi);
+			return vi;
 		} catch (Exception e) {
 			// TODO fix cloud manager to not throw exception. Throw something more specific.
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "unknown error creating virtue.");
