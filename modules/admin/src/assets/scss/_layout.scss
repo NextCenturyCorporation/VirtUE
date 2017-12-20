@@ -144,7 +144,7 @@ button, input[type='button'] {
   cursor: pointer;
   display: inline-block;
   height: 30px;
-  padding: 0.65rem 1rem;
+  padding: 0.55rem 1rem 0.6rem;
 }
 button {
  &.button-submit {
@@ -342,7 +342,7 @@ content {
    display: block;
    float: left;
    margin: 0.25rem 0 0 1.5rem;
-   padding: 0.65rem 0.7rem;
+   padding: 0.55rem 0.7rem 0.6rem;
  }
 }
 
