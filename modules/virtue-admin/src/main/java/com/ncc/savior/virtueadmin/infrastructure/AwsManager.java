@@ -20,14 +20,18 @@ import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import org.bouncycastle.util.IPAddress;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -56,10 +60,10 @@ import com.amazonaws.services.simpledb.AmazonSimpleDBClientBuilder;
 
 
 
-public class AwsManager {
-    ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
-	private StaticMachineVmManager vmManager;
-	private IActiveVirtueDao virtueDao; 
+public class AwsManager implements ICloudManager {
+    private static final int SSH_PORT = 22;
+	ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+	private String privateKey; 
 	
 	
     private AmazonEC2      ec2;
@@ -67,7 +71,9 @@ public class AwsManager {
     //private AmazonSimpleDB sdb;
     private AmazonCloudFormation stackbuilder; 
     
-	String stackName = "SaviorStack-1";
+	String baseStack_Name = "SaviorStack-";
+
+	String stackName; 
 
     
     
@@ -119,7 +125,7 @@ public class AwsManager {
     }
 
     
-    AwsManager(StaticMachineVmManager staticMachineVmManager, IActiveVirtueDao virtueDao)
+    AwsManager(File privatekeyfile)
     {
         try {
 			init();
@@ -128,16 +134,24 @@ public class AwsManager {
 			e.printStackTrace();
 		}
 
-    		this.vmManager = staticMachineVmManager; 
-    		this.virtueDao = virtueDao; 
+    		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile); 
     }
 
+	/* (non-Javadoc)
+	 * @see com.ncc.savior.virtueadmin.infrastructure.ICloudManager#deleteVirtue(com.ncc.savior.virtueadmin.model.VirtueInstance)
+	 */
+	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see com.ncc.savior.virtueadmin.infrastructure.ICloudManager#createVirtue(com.ncc.savior.virtueadmin.model.User, com.ncc.savior.virtueadmin.model.VirtueTemplate)
+	 */
+	@Override
 	public VirtueInstance createVirtue(User user, VirtueTemplate template) throws Exception {
+		
 		try {
 			credentialsProvider.getCredentials();
 		} catch (Exception e) {
@@ -151,7 +165,9 @@ public class AwsManager {
 		System.out.println("Getting Started with AWS CloudFormation");
 		System.out.println("===========================================\n");
 
-		//String stackName = "SaviorStack-1";
+		VirtueInstance vi  = null; 
+
+		stackName =  baseStack_Name + user.getUsername(); 
 		String logicalResourceName = "SampleNotificationTopic";
 
 		String myCloudFormationFromFile = convertStreamToString(
@@ -173,6 +189,8 @@ public class AwsManager {
 					+ waitForCompletion(stackbuilder, stackName));
 
 			// Show all the stacks for this account along with the resources for each stack
+            List<StackResource> ec2InstancesResourcesCreated = new ArrayList<StackResource>();
+
 			for (Stack stack : stackbuilder.describeStacks(new DescribeStacksRequest()).getStacks()) {
 				System.out.println("Stack : " + stack.getStackName() + " [" + stack.getStackStatus().toString() + "]");
 
@@ -180,8 +198,15 @@ public class AwsManager {
 				stackResourceRequest.setStackName(stack.getStackName());
 				for (StackResource resource : stackbuilder.describeStackResources(stackResourceRequest)
 						.getStackResources()) {
-					System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
+					
+					if(resource.getResourceType().equals("AWS::EC2::Instance"))
+					{
+						ec2InstancesResourcesCreated.add(resource); 
+						System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
 							resource.getLogicalResourceId(), resource.getPhysicalResourceId());
+					}
+					
+					
 				}
 			}
 
@@ -208,31 +233,55 @@ public class AwsManager {
                 instances.addAll(reservation.getInstances());
             }
 
+            
+            Map<String, VirtualMachine> vms = new HashMap<String, VirtualMachine>();
+
             System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
 			
-
-			/*
-			// Delete the stack
-			DeleteStackRequest deleteRequest = new DeleteStackRequest();
-			deleteRequest.setStackName(stackName);
-			System.out.println("Deleting the stack called " + deleteRequest.getStackName() + ".");
-			stackbuilder.deleteStack(deleteRequest);
-
-			// Wait for stack to be deleted
-			// Note that you could used SNS notifications on the original CreateStack call
-			// to track the progress of the stack deletion
-			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
-					+ waitForCompletion(stackbuilder, stackName));
-			*/
-
+            for(Instance ec2Instance : instances)
+            {
+            		for(StackResource sr : ec2InstancesResourcesCreated)
+            		{
+            			//String ec2InstanceId = ec2Instance.getInstanceId(); 
+            			//String myResourceID = sr.getPhysicalResourceId(); 
+            			if(ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId()))
+            			{
+            	            System.out.println("Found it!!!!!!!!!!!!!!");
+            				VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),template.getApplications(),
+            						VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(), ec2Instance.getPublicDnsName(), SSH_PORT, 
+            						user.getUsername(), this.privateKey, ec2Instance.getPublicIpAddress());
+            				vms.put(vm.getId(), vm);  
+            			}
+            		}
+            }
+            
+            vi = new VirtueInstance(template, user.getUsername(), vms);
+ 
 		} catch (AmazonServiceException ase) {
-			System.out.println("Caught an AmazonServiceException, which means your request made it "
-					+ "to AWS CloudFormation, but was rejected with an error response for some reason.");
-			System.out.println("Error Message:    " + ase.getMessage());
-			System.out.println("HTTP Status Code: " + ase.getStatusCode());
-			System.out.println("AWS Error Code:   " + ase.getErrorCode());
-			System.out.println("Error Type:       " + ase.getErrorType());
-			System.out.println("Request ID:       " + ase.getRequestId());
+			
+			if (ase.getErrorCode().equals("AlreadyExistsException")) {
+				System.out.println("Stack already exist");
+				//EC2 Querying....
+	            DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
+	            List<Reservation> reservations = describeInstancesRequest.getReservations();
+	            Set<Instance> instances = new HashSet<Instance>();
+
+	            for (Reservation reservation : reservations) {
+	                instances.addAll(reservation.getInstances());
+	            }
+
+	            System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
+
+			} else {
+				System.out.println("Caught an AmazonServiceException, which means your request made it "
+						+ "to AWS CloudFormation, but was rejected with an error response for some reason.");
+				System.out.println("Error Message:    " + ase.getMessage());
+				System.out.println("HTTP Status Code: " + ase.getStatusCode());
+				System.out.println("AWS Error Code:   " + ase.getErrorCode());
+				System.out.println("Error Type:       " + ase.getErrorType());
+				System.out.println("Request ID:       " + ase.getRequestId());
+			}
+			
 		} catch (AmazonClientException ace) {
 			System.out.println("Caught an AmazonClientException, which means the client encountered "
 					+ "a serious internal problem while trying to communicate with AWS CloudFormation, "
@@ -250,13 +299,48 @@ public class AwsManager {
 		
 	
 		
-		
-		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
-		virtueDao.addVirtue(vi);
 		*/
 		
-		return null;
 
+
+		
+		return vi;
+	}
+
+	public String deleteVirtue(User user, String instanceId)  throws Exception{
+		
+		// Delete the stack
+
+		DeleteStackRequest deleteRequest = new DeleteStackRequest();
+		String userStackName = baseStack_Name + user.getUsername(); 
+		deleteRequest.setStackName(userStackName);
+		System.out.println("Deleting the stack called " + deleteRequest.getStackName() + ".");
+		stackbuilder.deleteStack(deleteRequest);
+
+		// Wait for stack to be deleted
+		// Note that you could used SNS notifications on the original CreateStack call
+		// to track the progress of the stack deletion
+		try {
+			
+			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
+					+ waitForCompletion(stackbuilder, stackName));
+			
+		} catch (AmazonServiceException ase) {
+			System.out.println("Caught an AmazonServiceException, which means your request made it "
+					+ "to AWS CloudFormation, but was rejected with an error response for some reason.");
+			System.out.println("Error Message:    " + ase.getMessage());
+			System.out.println("HTTP Status Code: " + ase.getStatusCode());
+			System.out.println("AWS Error Code:   " + ase.getErrorCode());
+			System.out.println("Error Type:       " + ase.getErrorType());
+			System.out.println("Request ID:       " + ase.getRequestId());
+		} catch (AmazonClientException ace) {
+			System.out.println("Caught an AmazonClientException, which means the client encountered "
+					+ "a serious internal problem while trying to communicate with AWS CloudFormation, "
+					+ "such as not being able to access the network.");
+			System.out.println("Error Message: " + ace.getMessage());
+		}
+		
+		return instanceId;
 	}
 	
     // Convert a stream into a single, newline separated string
@@ -322,41 +406,5 @@ public class AwsManager {
 
         return stackStatus + " (" + stackReason + ")";
     }
-
-
-	public String deleteVirtue(User user, String instanceId)  throws Exception{
-		
-		// Delete the stack
-
-		DeleteStackRequest deleteRequest = new DeleteStackRequest();
-		deleteRequest.setStackName(stackName);
-		System.out.println("Deleting the stack called " + deleteRequest.getStackName() + ".");
-		stackbuilder.deleteStack(deleteRequest);
-
-		// Wait for stack to be deleted
-		// Note that you could used SNS notifications on the original CreateStack call
-		// to track the progress of the stack deletion
-		try {
-			
-			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
-					+ waitForCompletion(stackbuilder, stackName));
-			
-		} catch (AmazonServiceException ase) {
-			System.out.println("Caught an AmazonServiceException, which means your request made it "
-					+ "to AWS CloudFormation, but was rejected with an error response for some reason.");
-			System.out.println("Error Message:    " + ase.getMessage());
-			System.out.println("HTTP Status Code: " + ase.getStatusCode());
-			System.out.println("AWS Error Code:   " + ase.getErrorCode());
-			System.out.println("Error Type:       " + ase.getErrorType());
-			System.out.println("Request ID:       " + ase.getRequestId());
-		} catch (AmazonClientException ace) {
-			System.out.println("Caught an AmazonClientException, which means the client encountered "
-					+ "a serious internal problem while trying to communicate with AWS CloudFormation, "
-					+ "such as not being able to access the network.");
-			System.out.println("Error Message: " + ace.getMessage());
-		}
-		
-		return instanceId;
-	}
 
 }

@@ -9,7 +9,7 @@
         {
             "Properties": 
             {
-                "ImageId": "ami-5cbe7326",
+                "ImageId": "ami-e6e7999c",
                 "InstanceType" : "t2.small",
                 "Tags" : 
                 [

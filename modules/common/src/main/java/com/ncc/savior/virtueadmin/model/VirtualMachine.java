@@ -14,9 +14,10 @@ public class VirtualMachine {
 	private String infrastructureId;
 	private String userName;
 	private String privateKey;
+	private String ipAddress; 
 
 	public VirtualMachine(String id, String name, Map<String, ApplicationDefinition> applications, VmState state, OS os,
-			String infrastructureId, String hostname, int sshPort, String userName, String privateKey) {
+			String infrastructureId, String hostname, int sshPort, String userName, String privateKey, String ipAddress) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -28,6 +29,7 @@ public class VirtualMachine {
 		this.sshPort = sshPort;
 		this.userName = userName;
 		this.privateKey = privateKey;
+		this.ipAddress = ipAddress; 
 
 	}
 
@@ -124,5 +126,13 @@ public class VirtualMachine {
 		return "VirtualMachine [id=" + id + ", name=" + name + ", applications=" + applications + ", os=" + os
 				+ ", state=" + state + ", hostname=" + hostname + ", sshPort=" + sshPort + ", infrastructureId="
 				+ infrastructureId + "]";
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 }

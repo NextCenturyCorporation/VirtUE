@@ -117,7 +117,7 @@ public class DesktopVirtueService {
 		//Now get the template for this id and create the machine on aws. 
 		VirtueTemplate template = templateManager.getTemplate(user, templateId);
 		try {
-			return awsManager.createVirtue(user, template);
+			VirtueInstance vrtInstance =  awsManager.createVirtue(user, template);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

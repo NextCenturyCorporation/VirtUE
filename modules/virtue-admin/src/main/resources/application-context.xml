@@ -35,8 +35,7 @@
 	</bean>
 	
 	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">
-		<constructor-arg ref="vmManager" />
-		<constructor-arg ref="virtueDao" />
+		<constructor-arg ref="defaultPem" />
 	</bean>
 	
 	<bean name="desktopService"

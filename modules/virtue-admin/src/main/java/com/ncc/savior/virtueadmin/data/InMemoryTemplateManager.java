@@ -132,11 +132,17 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		assignVirtueTemplateToUser(user3, virtueMath.getId());
 
+		System.out.println("VirtueAllVms  - " + virtueAllVms.getId());
 		assignVirtueTemplateToUser(admin, virtueAllVms.getId());
+		
+		System.out.println("virtueSingleBrowsers  - " + virtueSingleBrowsers.getId());
 		assignVirtueTemplateToUser(admin, virtueSingleBrowsers.getId());
+		
+		System.out.println("virtueSingleAll  - " + virtueSingleAll.getId());
 		assignVirtueTemplateToUser(admin, virtueSingleAll.getId());
+		
+		System.out.println("virtueMath  - " + virtueMath.getId());		
 		assignVirtueTemplateToUser(admin, virtueMath.getId());
-
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
-import com.ncc.savior.virtueadmin.infrastructure.AwsManager;
+import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.IStateUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.User;
@@ -27,7 +27,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	private IVmManager vmManager;
 	private IActiveVirtueDao virtueDao;
 	
-	private AwsManager awsManager; 
+	private ICloudManager awsManager; 
 
 	public ActiveVirtueManager(IVmManager vmManager, IActiveVirtueDao virtueDao) {
 		this.vmManager = vmManager;
