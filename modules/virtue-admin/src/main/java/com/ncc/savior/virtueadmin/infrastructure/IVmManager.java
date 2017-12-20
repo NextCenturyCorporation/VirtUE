@@ -1,7 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
-import java.util.Map;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -95,5 +94,5 @@ public interface IVmManager {
 	 * @param vmTemplates
 	 * @return
 	 */
-	public Map<String, VirtualMachine> provisionVirtualMachineTemplates(Collection<VirtualMachineTemplate> vmTemplates);
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(Collection<VirtualMachineTemplate> vmTemplates);
 }

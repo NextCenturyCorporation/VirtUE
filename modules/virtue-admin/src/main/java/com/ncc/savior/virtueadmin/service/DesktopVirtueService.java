@@ -1,6 +1,8 @@
 package com.ncc.savior.virtueadmin.service;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -85,27 +87,21 @@ public class DesktopVirtueService {
 	}
 
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
-		Map<String, ApplicationDefinition> apps = template.getApplications();
-		// Map<String, DesktopVirtueApplication> apps = new HashMap<String,
-		// DesktopVirtueApplication>();
-		// for (ApplicationDefinition app : template.getApplications().values()) {
-		// apps.put(app.getId(),
-		// new DesktopVirtueApplication(app.getId(), app.getName(), app.getVersion(),
-		// app.getOs(), null, -1));
-		// }
-		return new DesktopVirtue(null, template.getName(), template.getId(), apps);
+		Collection<ApplicationDefinition> apps = template.getApplications();
+		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
+		for (ApplicationDefinition app : apps) {
+			appsMap.put(app.getId(), app);
+		}
+		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap);
 	}
 
 	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
-		Map<String, ApplicationDefinition> apps = instance.getApplications();
-		// Map<String, DesktopVirtueApplication> apps = new HashMap<String,
-		// DesktopVirtueApplication>();
-		// for (ApplicationDefinition app : instance.getApplications().values()) {
-		// apps.put(app.getId(), new DesktopVirtueApplication(app.getId(),
-		// app.getName(), app.getVersion(),
-		// app.getOs(), null, -1));
-		// }
-		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), apps);
+		Collection<ApplicationDefinition> apps = instance.getApplications();
+		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
+		for (ApplicationDefinition app : apps) {
+			appsMap.put(app.getId(), app);
+		}
+		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap);
 	}
 
 

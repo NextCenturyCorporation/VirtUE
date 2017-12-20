@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -38,6 +37,9 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 
 	static String getKeyFromFile(File privateKey) {
 		FileReader reader = null;
+		if (privateKey == null || !privateKey.isFile()) {
+			return "";
+		}
 		try {
 			reader = new FileReader(privateKey);
 			char[] cbuf = new char[4096];
@@ -95,13 +97,14 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public Map<String, VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
 			Collection<VirtualMachineTemplate> vmTemplates) {
-		Map<String, VirtualMachine> vms = new HashMap<String, VirtualMachine>();
+		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
 					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
-			vms.put(vm.getId(), vm);
+			vms.add(vm);
+
 		}
 		return vms;
 	}

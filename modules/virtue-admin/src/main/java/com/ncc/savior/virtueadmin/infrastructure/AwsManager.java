@@ -14,10 +14,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,104 +48,94 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 
-
-
-
 public class AwsManager implements ICloudManager {
-    private static final int SSH_PORT = 22;
+	private static final int SSH_PORT = 22;
 	AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
-	private String privateKey; 
-	
-	
-    private AmazonEC2      ec2;
-    private AmazonS3       s3;
-    //private AmazonSimpleDB sdb;
-    private AmazonCloudFormation stackbuilder; 
-    
+	private String privateKey;
+
+	private AmazonEC2 ec2;
+	private AmazonS3 s3;
+	// private AmazonSimpleDB sdb;
+	private AmazonCloudFormation stackbuilder;
+
 	String baseStack_Name = "SaviorStack-";
 
-	String stackName; 
+	String stackName;
 
-    
-    
-    AwsManager(File privatekeyfile)
-	{
+	AwsManager(File privatekeyfile) {
 		// credentialsProvider =new BasicCredentialsProvider();
 		// credentialsProvider.setCredentials(new Authscope, credentials);
-	    try {
+		try {
 			init();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
-			this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile); 
+
+		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
 	}
 
-
 	/**
-     * The only information needed to create a client are security credentials
-     * consisting of the AWS Access Key ID and Secret Access Key. All other
-     * configuration, such as the service endpoints, are performed
-     * automatically. Client parameters, such as proxies, can be specified in an
-     * optional ClientConfiguration object when constructing a client.
-     *
-     * @see com.amazonaws.auth.BasicAWSCredentials
-     * @see com.amazonaws.auth.PropertiesCredentials
-     * @see com.amazonaws.ClientConfiguration
-     */
-    private void init() throws Exception {
+	 * The only information needed to create a client are security credentials
+	 * consisting of the AWS Access Key ID and Secret Access Key. All other
+	 * configuration, such as the service endpoints, are performed automatically.
+	 * Client parameters, such as proxies, can be specified in an optional
+	 * ClientConfiguration object when constructing a client.
+	 *
+	 * @see com.amazonaws.auth.BasicAWSCredentials
+	 * @see com.amazonaws.auth.PropertiesCredentials
+	 * @see com.amazonaws.ClientConfiguration
+	 */
+	private void init() throws Exception {
 
-        /*
-         * The ProfileCredentialsProvider will return your [virtue]
-         * credential profile by reading from the credentials file located at
-         * (/Users/womitowoju/.aws/credentials).
-         */
-        ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
-        
-        try {
-            credentialsProvider.getCredentials();
-        } catch (Exception e) {
-            throw new AmazonClientException(
-                    "Cannot load the credentials from the credential profiles file. " +
-                    "Please make sure that your credentials file is at the correct " +
-                    "location (/Users/womitowoju/.aws/credentials), and is in valid format.",
-                    e);
-        }
-        ec2 = AmazonEC2ClientBuilder.standard()
-            .withCredentials(credentialsProvider)
-            .withRegion("us-east-1")
-            .build();
-        s3  = AmazonS3ClientBuilder.standard()
-            .withCredentials(credentialsProvider)
-            .withRegion("us-east-1")
-            .build();
-		stackbuilder = AmazonCloudFormationClientBuilder.standard()
-				.withCredentials(credentialsProvider).withRegion(Regions.US_EAST_1).build();
-        /*
-        sdb = AmazonSimpleDBClientBuilder.standard()
-            .withCredentials(credentialsProvider)
-            .withRegion("us-east-1")
-            .build();
-       */
-    }
+		/*
+		 * The ProfileCredentialsProvider will return your [virtue] credential profile
+		 * by reading from the credentials file located at
+		 * (/Users/womitowoju/.aws/credentials).
+		 */
+		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 
-    
-    /* (non-Javadoc)
-	 * @see com.ncc.savior.virtueadmin.infrastructure.ICloudManager#deleteVirtue(com.ncc.savior.virtueadmin.model.VirtueInstance)
+		try {
+			credentialsProvider.getCredentials();
+		} catch (Exception e) {
+			throw new AmazonClientException("Cannot load the credentials from the credential profiles file. "
+					+ "Please make sure that your credentials file is at the correct "
+					+ "location (/Users/womitowoju/.aws/credentials), and is in valid format.", e);
+		}
+		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
+		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
+		stackbuilder = AmazonCloudFormationClientBuilder.standard().withCredentials(credentialsProvider)
+				.withRegion(Regions.US_EAST_1).build();
+		/*
+		 * sdb = AmazonSimpleDBClientBuilder.standard()
+		 * .withCredentials(credentialsProvider) .withRegion("us-east-1") .build();
+		 */
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.ncc.savior.virtueadmin.infrastructure.ICloudManager#deleteVirtue(com.ncc.
+	 * savior.virtueadmin.model.VirtueInstance)
 	 */
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ncc.savior.virtueadmin.infrastructure.ICloudManager#createVirtue(com.ncc.savior.virtueadmin.model.User, com.ncc.savior.virtueadmin.model.VirtueTemplate)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.ncc.savior.virtueadmin.infrastructure.ICloudManager#createVirtue(com.ncc.
+	 * savior.virtueadmin.model.User,
+	 * com.ncc.savior.virtueadmin.model.VirtueTemplate)
 	 */
 	@Override
 	public VirtueInstance createVirtue(User user, VirtueTemplate template) throws Exception {
-		
+
 		try {
 			credentialsProvider.getCredentials();
 		} catch (Exception e) {
@@ -155,12 +144,11 @@ public class AwsManager implements ICloudManager {
 					+ "location (/Users/womitowoju/.aws/credentials), and is in valid format.", e);
 		}
 
-
 		System.out.println("===========================================");
 		System.out.println("Getting Started with AWS CloudFormation");
 		System.out.println("===========================================\n");
 
-		VirtueInstance vi  = null; 
+		VirtueInstance vi = null;
 
 		stackName = baseStack_Name + user.getUsername() + "-" + System.getProperty("user.name") + "-"
 				+ UUID.randomUUID().toString();
@@ -185,7 +173,7 @@ public class AwsManager implements ICloudManager {
 					+ waitForCompletion(stackbuilder, stackName));
 
 			// Show all the stacks for this account along with the resources for each stack
-            List<StackResource> ec2InstancesResourcesCreated = new ArrayList<StackResource>();
+			List<StackResource> ec2InstancesResourcesCreated = new ArrayList<StackResource>();
 
 			for (Stack stack : stackbuilder.describeStacks(new DescribeStacksRequest()).getStacks()) {
 				System.out.println("Stack : " + stack.getStackName() + " [" + stack.getStackStatus().toString() + "]");
@@ -194,79 +182,74 @@ public class AwsManager implements ICloudManager {
 				stackResourceRequest.setStackName(stack.getStackName());
 				for (StackResource resource : stackbuilder.describeStackResources(stackResourceRequest)
 						.getStackResources()) {
-					
-					if(resource.getResourceType().equals("AWS::EC2::Instance"))
-					{
-						ec2InstancesResourcesCreated.add(resource); 
+
+					if (resource.getResourceType().equals("AWS::EC2::Instance")) {
+						ec2InstancesResourcesCreated.add(resource);
 						System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
-							resource.getLogicalResourceId(), resource.getPhysicalResourceId());
+								resource.getLogicalResourceId(), resource.getPhysicalResourceId());
 					}
-					
-					
+
 				}
 			}
 
 			/*
-			// Lookup a resource by its logical name
-			DescribeStackResourcesRequest logicalNameResourceRequest = new DescribeStackResourcesRequest();
-			logicalNameResourceRequest.setStackName(stackName);
-			logicalNameResourceRequest.setLogicalResourceId(logicalResourceName);
-			System.out.format("Looking up resource name %1$s from stack %2$s\n",
-					logicalNameResourceRequest.getLogicalResourceId(), logicalNameResourceRequest.getStackName());
-			for (StackResource resource : stackbuilder.describeStackResources(logicalNameResourceRequest)
-					.getStackResources()) {
-				System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
-						resource.getLogicalResourceId(), resource.getPhysicalResourceId());
+			 * // Lookup a resource by its logical name DescribeStackResourcesRequest
+			 * logicalNameResourceRequest = new DescribeStackResourcesRequest();
+			 * logicalNameResourceRequest.setStackName(stackName);
+			 * logicalNameResourceRequest.setLogicalResourceId(logicalResourceName);
+			 * System.out.format("Looking up resource name %1$s from stack %2$s\n",
+			 * logicalNameResourceRequest.getLogicalResourceId(),
+			 * logicalNameResourceRequest.getStackName()); for (StackResource resource :
+			 * stackbuilder.describeStackResources(logicalNameResourceRequest)
+			 * .getStackResources()) { System.out.format("    %1$-40s %2$-25s %3$s\n",
+			 * resource.getResourceType(), resource.getLogicalResourceId(),
+			 * resource.getPhysicalResourceId()); }
+			 */
+
+			// EC2 Querying....
+			DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
+			List<Reservation> reservations = describeInstancesRequest.getReservations();
+			Set<Instance> instances = new HashSet<Instance>();
+
+			for (Reservation reservation : reservations) {
+				instances.addAll(reservation.getInstances());
 			}
-			*/
-			
-			//EC2 Querying....
-            DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
-            List<Reservation> reservations = describeInstancesRequest.getReservations();
-            Set<Instance> instances = new HashSet<Instance>();
 
-            for (Reservation reservation : reservations) {
-                instances.addAll(reservation.getInstances());
-            }
+			Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 
-            
-            Map<String, VirtualMachine> vms = new HashMap<String, VirtualMachine>();
+			System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
 
-            System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
-			
-            for(Instance ec2Instance : instances)
-            {
-            		for(StackResource sr : ec2InstancesResourcesCreated)
-            		{
-            			//String ec2InstanceId = ec2Instance.getInstanceId(); 
-            			//String myResourceID = sr.getPhysicalResourceId(); 
-            			if(ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId()))
-            			{
-            	            System.out.println("Found it!!!!!!!!!!!!!!");
-            				VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),template.getApplications(),
-            						VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(), ec2Instance.getPublicDnsName(), SSH_PORT, 
-            						user.getUsername(), this.privateKey, ec2Instance.getPublicIpAddress());
-            				vms.put(vm.getId(), vm);  
-            			}
-            		}
-            }
-            
-            vi = new VirtueInstance(template, user.getUsername(), vms);
- 
+			for (Instance ec2Instance : instances) {
+				for (StackResource sr : ec2InstancesResourcesCreated) {
+					// String ec2InstanceId = ec2Instance.getInstanceId();
+					// String myResourceID = sr.getPhysicalResourceId();
+					if (ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId())) {
+						System.out.println("Found it!!!!!!!!!!!!!!");
+						VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
+								template.getApplications(), VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(),
+								ec2Instance.getPublicDnsName(), SSH_PORT, user.getUsername(), this.privateKey,
+								ec2Instance.getPublicIpAddress());
+						vms.add(vm);
+					}
+				}
+			}
+
+			vi = new VirtueInstance(template, user.getUsername(), vms);
+
 		} catch (AmazonServiceException ase) {
-			
+
 			if (ase.getErrorCode().equals("AlreadyExistsException")) {
 				System.out.println("Stack already exist");
-				//EC2 Querying....
-	            DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
-	            List<Reservation> reservations = describeInstancesRequest.getReservations();
-	            Set<Instance> instances = new HashSet<Instance>();
+				// EC2 Querying....
+				DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
+				List<Reservation> reservations = describeInstancesRequest.getReservations();
+				Set<Instance> instances = new HashSet<Instance>();
 
-	            for (Reservation reservation : reservations) {
-	                instances.addAll(reservation.getInstances());
-	            }
+				for (Reservation reservation : reservations) {
+					instances.addAll(reservation.getInstances());
+				}
 
-	            System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
+				System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
 
 			} else {
 				System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -277,38 +260,35 @@ public class AwsManager implements ICloudManager {
 				System.out.println("Error Type:       " + ase.getErrorType());
 				System.out.println("Request ID:       " + ase.getRequestId());
 			}
-			
+
 		} catch (AmazonClientException ace) {
 			System.out.println("Caught an AmazonClientException, which means the client encountered "
 					+ "a serious internal problem while trying to communicate with AWS CloudFormation, "
 					+ "such as not being able to access the network.");
 			System.out.println("Error Message: " + ace.getMessage());
 		}
-		
-		//List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
+
+		// List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
 		/*
-		Map<String, VirtualMachine> vms = new HashMap<String, VirtualMachine>();
+		 * Map<String, VirtualMachine> vms = new HashMap<String, VirtualMachine>();
+		 * 
+		 * VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(),
+		 * template.getName(), template.getApplications(), VmState.RUNNING, OS.LINUX,
+		 * UUID.randomUUID().toString(), "", 22); vms.put(vm.getId(), vm);
+		 * 
+		 * 
+		 * 
+		 */
 
-		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(), template.getApplications(),
-					VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(), "", 22);
-		vms.put(vm.getId(), vm);
-		
-	
-		
-		*/
-		
-
-
-		
 		return vi;
 	}
 
-	public String deleteVirtue(User user, String instanceId)  throws Exception{
-		
+	public String deleteVirtue(User user, String instanceId) throws Exception {
+
 		// Delete the stack
 
 		DeleteStackRequest deleteRequest = new DeleteStackRequest();
-		String userStackName = baseStack_Name + user.getUsername(); 
+		String userStackName = baseStack_Name + user.getUsername();
 		deleteRequest.setStackName(userStackName);
 		System.out.println("Deleting the stack called " + deleteRequest.getStackName() + ".");
 		stackbuilder.deleteStack(deleteRequest);
@@ -317,10 +297,10 @@ public class AwsManager implements ICloudManager {
 		// Note that you could used SNS notifications on the original CreateStack call
 		// to track the progress of the stack deletion
 		try {
-			
+
 			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
 					+ waitForCompletion(stackbuilder, stackName));
-			
+
 		} catch (AmazonServiceException ase) {
 			System.out.println("Caught an AmazonServiceException, which means your request made it "
 					+ "to AWS CloudFormation, but was rejected with an error response for some reason.");
@@ -335,72 +315,71 @@ public class AwsManager implements ICloudManager {
 					+ "such as not being able to access the network.");
 			System.out.println("Error Message: " + ace.getMessage());
 		}
-		
+
 		return instanceId;
 	}
-	
-    // Convert a stream into a single, newline separated string
-    public static String convertStreamToString(InputStream in) throws Exception {
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        StringBuilder stringbuilder = new StringBuilder();
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-          stringbuilder.append(line + "\n");
-        }
-        in.close();
-        return stringbuilder.toString();
-      }
-    
-    
-    // Wait for a stack to complete transitioning
-    // End stack states are:
-    //    CREATE_COMPLETE
-    //    CREATE_FAILED
-    //    DELETE_FAILED
-    //    ROLLBACK_FAILED
-    // OR the stack no longer exists
-    public static String waitForCompletion(AmazonCloudFormation stackbuilder, String stackName) throws Exception {
+	// Convert a stream into a single, newline separated string
+	public static String convertStreamToString(InputStream in) throws Exception {
 
-        DescribeStacksRequest wait = new DescribeStacksRequest();
-        wait.setStackName(stackName);
-        Boolean completed = false;
-        String  stackStatus = "Unknown";
-        String  stackReason = "";
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		StringBuilder stringbuilder = new StringBuilder();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			stringbuilder.append(line + "\n");
+		}
+		in.close();
+		return stringbuilder.toString();
+	}
 
-        System.out.print("Waiting");
+	// Wait for a stack to complete transitioning
+	// End stack states are:
+	// CREATE_COMPLETE
+	// CREATE_FAILED
+	// DELETE_FAILED
+	// ROLLBACK_FAILED
+	// OR the stack no longer exists
+	public static String waitForCompletion(AmazonCloudFormation stackbuilder, String stackName) throws Exception {
 
-        while (!completed) {
-            List<Stack> stacks = stackbuilder.describeStacks(wait).getStacks();
-            if (stacks.isEmpty())
-            {
-                completed   = true;
-                stackStatus = "NO_SUCH_STACK";
-                stackReason = "Stack has been deleted";
-            } else {
-                for (Stack stack : stacks) {
-                    if (stack.getStackStatus().equals(StackStatus.CREATE_COMPLETE.toString()) ||
-                            stack.getStackStatus().equals(StackStatus.CREATE_FAILED.toString()) ||
-                            stack.getStackStatus().equals(StackStatus.ROLLBACK_FAILED.toString()) ||
-                            stack.getStackStatus().equals(StackStatus.DELETE_FAILED.toString())) {
-                        completed = true;
-                        stackStatus = stack.getStackStatus();
-                        stackReason = stack.getStackStatusReason();
-                    }
-                }
-            }
+		DescribeStacksRequest wait = new DescribeStacksRequest();
+		wait.setStackName(stackName);
+		Boolean completed = false;
+		String stackStatus = "Unknown";
+		String stackReason = "";
 
-            // Show we are waiting
-            System.out.print(".");
+		System.out.print("Waiting");
 
-            // Not done yet so sleep for 10 seconds.
-            if (!completed) Thread.sleep(10000);
-        }
+		while (!completed) {
+			List<Stack> stacks = stackbuilder.describeStacks(wait).getStacks();
+			if (stacks.isEmpty()) {
+				completed = true;
+				stackStatus = "NO_SUCH_STACK";
+				stackReason = "Stack has been deleted";
+			} else {
+				for (Stack stack : stacks) {
+					if (stack.getStackStatus().equals(StackStatus.CREATE_COMPLETE.toString())
+							|| stack.getStackStatus().equals(StackStatus.CREATE_FAILED.toString())
+							|| stack.getStackStatus().equals(StackStatus.ROLLBACK_FAILED.toString())
+							|| stack.getStackStatus().equals(StackStatus.DELETE_FAILED.toString())) {
+						completed = true;
+						stackStatus = stack.getStackStatus();
+						stackReason = stack.getStackStatusReason();
+					}
+				}
+			}
 
-        // Show we are done
-        System.out.print("done\n");
+			// Show we are waiting
+			System.out.print(".");
 
-        return stackStatus + " (" + stackReason + ")";
-    }
+			// Not done yet so sleep for 10 seconds.
+			if (!completed)
+				Thread.sleep(10000);
+		}
+
+		// Show we are done
+		System.out.print("done\n");
+
+		return stackStatus + " (" + stackReason + ")";
+	}
 
 }

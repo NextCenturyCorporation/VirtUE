@@ -73,22 +73,24 @@ public class DesktopVirtue {
 
 		@Override
 		public int compare(DesktopVirtue o1, DesktopVirtue o2) {
-			if (o1.getId() == null) {
-				if (o2.getId() == null) {
-					return o1.getTemplateId().compareTo(o2.getTemplateId());
-				} else {
+			int tempComp = String.CASE_INSENSITIVE_ORDER.compare(o1.getTemplateId(), o2.getTemplateId());
+			if (tempComp != 0) {
+				return tempComp;
+			} else {
+				String id1 = o1.getId();
+				String id2 = o2.getId();
+				if (id1 == null) {
+					if (id2 == null) {
+						return 0;
+					} else {
+						return 1;
+					}
+				}
+				if (id2 == null) {
 					return -1;
 				}
+				return String.CASE_INSENSITIVE_ORDER.compare(o1.getId(), o2.getId());
 			}
-			if (o2.getId() == null) {
-				return 1;
-			}
-			int compare = o1.getId().compareTo(o2.getId());
-			if (compare == 0) {
-				compare = o1.getName().compareTo(o2.getName());
-			}
-			return compare;
 		}
-
 	}
 }

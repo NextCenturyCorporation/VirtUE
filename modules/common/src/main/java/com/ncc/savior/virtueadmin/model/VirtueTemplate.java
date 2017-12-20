@@ -1,48 +1,52 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 /**
  * Data Transfer Object (DTO) for templates.
  * 
  *
  */
+@Entity
 public class VirtueTemplate {
+	@Id
 	private String id;
 	private String name;
 	private String version;
-	private Map<String, ApplicationDefinition> applications;
-	private List<VirtualMachineTemplate> vmTemplates;
-	
-	private String awsTemplateName; 
+	@ManyToMany()
+	private Collection<VirtualMachineTemplate> vmTemplates;
+	@ManyToMany()
+	private Collection<UserName> userNames;
+
+	private String awsTemplateName;
 
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
-	
-	public VirtueTemplate(String id, String name, String version, Map<String, ApplicationDefinition> applications2,
-			List<VirtualMachineTemplate> vmTemplates) {
+
+	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
-		this.applications = applications2;
 		this.vmTemplates = vmTemplates;
 		this.setAwsTemplateName("");
 	}
-	
-	
-	public VirtueTemplate(String id, String name, String version, Map<String, ApplicationDefinition> applications2,
-			List<VirtualMachineTemplate> vmTemplates, String awsTemplateName) {
+
+	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
+			String awsTemplateName) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
-		this.applications = applications2;
 		this.vmTemplates = vmTemplates;
-		this.awsTemplateName = awsTemplateName; 
+		this.awsTemplateName = awsTemplateName;
 	}
-		
 
 	/**
 	 * Used for jackson deserialization
@@ -63,11 +67,15 @@ public class VirtueTemplate {
 		return version;
 	}
 
-	public Map<String, ApplicationDefinition> getApplications() {
-		return applications;
+	public Collection<ApplicationDefinition> getApplications() {
+		Set<ApplicationDefinition> apps = new HashSet<ApplicationDefinition>();
+		for (VirtualMachineTemplate temp : getVmTemplates()) {
+			apps.addAll(temp.getApplications());
+		}
+		return apps;
 	}
 
-	public List<VirtualMachineTemplate> getVmTemplates() {
+	public Collection<VirtualMachineTemplate> getVmTemplates() {
 		return vmTemplates;
 	}
 
@@ -84,18 +92,18 @@ public class VirtueTemplate {
 		this.version = version;
 	}
 
-	protected void setApplications(Map<String, ApplicationDefinition> applications) {
-		this.applications = applications;
-	}
-
-	protected void setVmTemplates(List<VirtualMachineTemplate> vmTemplates) {
-		this.vmTemplates = vmTemplates;
+	public void setVmTemplates(Collection<VirtualMachineTemplate> hashSet) {
+		this.vmTemplates = hashSet;
 	}
 
 	@Override
 	public String toString() {
-		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", applications=" + applications
-				+ ", vmTemplates=" + vmTemplates + "]";
+		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
+				+ "]";
+	}
+
+	public Collection<UserName> retrieveUserNames() {
+		return userNames;
 	}
 
 	public String getAwsTemplateName() {

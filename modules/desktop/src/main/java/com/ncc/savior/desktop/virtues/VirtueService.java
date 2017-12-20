@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.XpraClient.Status;
@@ -31,6 +32,7 @@ public class VirtueService {
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
+
 	}
 
 	// public void connectAndStartApp(DesktopVirtue app) throws IOException {
@@ -48,7 +50,8 @@ public class VirtueService {
 	// connectionManager.startApplication(params, app.getStartCommand());
 	// }
 
-	public void ensureConnection(DesktopVirtueApplication app) throws IOException {
+	public void ensureConnection(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
+			throws IOException {
 		File file = null;
 		try {
 			String key = app.getPrivateKey();
@@ -66,7 +69,7 @@ public class VirtueService {
 			}
 			XpraClient client = connectionManager.getExistingClient(params);
 			if (client == null || client.getStatus() == Status.ERROR) {
-				client = connectionManager.createClient(params);
+				client = connectionManager.createClient(params, color);
 			}
 		} finally {
 			if (file != null && file.exists()) {
@@ -81,7 +84,8 @@ public class VirtueService {
 		return list;
 	}
 
-	public void startApplication(DesktopVirtue virtue, ApplicationDefinition appDefn) throws IOException {
+	public void startApplication(DesktopVirtue virtue, ApplicationDefinition appDefn, RgbColor color)
+			throws IOException {
 		// TODO check to see if we have an XPRA connection
 		String virtueId = virtue.getId();
 		DesktopVirtueApplication app;
@@ -90,6 +94,6 @@ public class VirtueService {
 		} else {
 			app = desktopResourceService.startApplication(virtueId, appDefn);
 		}
-		ensureConnection(app);
+		ensureConnection(app, virtue, color);
 	}
 }

@@ -19,14 +19,14 @@ public interface ITemplateManager {
 	 * 
 	 * @return
 	 */
-	Collection<VirtueTemplate> getAllVirtueTemplates();
+	Iterable<VirtueTemplate> getAllVirtueTemplates();
 
 	/**
 	 * Returns all {@link VirtualMachineTemplate} in the data store.
 	 * 
 	 * @return
 	 */
-	Collection<VirtualMachineTemplate> getAllVirtualMachineTemplates();
+	Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates();
 
 	/**
 	 * Returns all the {@link VirtueTemplate} that the given user has access to.
@@ -83,6 +83,10 @@ public interface ITemplateManager {
 	 */
 	void addVirtueTemplate(VirtueTemplate template);
 
+	void assignApplicationToVmTemplate(String vmTemplateId, String applicationId);
+
+	void assingVmTemplateToVirtueTemplate(String virtueTemplate, String vmTemplateId);
+
 	/**
 	 * Assigns a virtue to a user such that the user now has the ability to use that
 	 * {@link VirtueTemplate} from the id.
@@ -101,4 +105,10 @@ public interface ITemplateManager {
 	 * @param virtueTemplateId
 	 */
 	void revokeVirtueTemplateFromUser(User user, String virtueTemplateId);
+
+	Iterable<ApplicationDefinition> getAllApplications();
+
+	Collection<String> getUsers();
+
+	void clear();
 }

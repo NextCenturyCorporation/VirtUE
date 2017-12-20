@@ -50,6 +50,12 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-jersey')
 	compile('org.springframework.boot:spring-boot-starter-web')
+
+	
+	compile group: 'org.springframework.data', name: 'spring-data-commons', version: '1.13.9.RELEASE'
+	compile group: 'org.springframework.data', name: 'spring-data-commons-core', version: '1.4.1.RELEASE'
+	compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '1.11.9.RELEASE'
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '1.5.9.RELEASE'
 	compile group: 'org.springframework.security', name: 'spring-security-core', version: '4.2.3.RELEASE'
 	compile group: 'org.springframework.security', name: 'spring-security-config', version: '4.2.3.RELEASE'
 	compile group: 'org.springframework.security', name: 'spring-security-web', version: '4.2.3.RELEASE'
@@ -82,7 +88,6 @@ dependencies {
 	//compile group: 'ch.qos.logback', name: 'logback-core', version: '0.9.15'
 	//compile group: 'org.slf4j', name: 'slf4j-api', version: '1.5.6'
 
-	
 	runtime('com.h2database:h2')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	

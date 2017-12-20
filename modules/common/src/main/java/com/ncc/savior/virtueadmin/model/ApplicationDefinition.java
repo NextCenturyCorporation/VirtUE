@@ -1,11 +1,16 @@
 package com.ncc.savior.virtueadmin.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
 /**
  * Application Data Transfer Object (DTO).
  * 
  *
  */
+@Entity
 public class ApplicationDefinition {
+	@Id
 	private String id;
 	private String name;
 	private String version;

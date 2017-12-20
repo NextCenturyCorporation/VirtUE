@@ -1,8 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Pipe, PipeTransform } from '@angular/core';
 import { DataService } from '../data/data.service';
 import { JsonFilterPipe } from '../data/json-filter.pipe';
+import { CountFilterPipe } from '../data/count-filter.pipe';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,6 +14,16 @@ import { JsonFilterPipe } from '../data/json-filter.pipe';
 export class DashboardComponent implements OnInit {
 
   form: FormGroup;
+
+  columnSearch: string;
+  columns = [
+    {value: '', viewValue: 'Select Column'},
+    {value: 'timestamp', viewValue: 'Timestamp'},
+    {value: 'sensor', viewValue: 'Sensor'},
+    {value: 'message', viewValue: 'Message'},
+    {value: 'level', viewValue: 'level'}
+  ];
+
   sensorValue: string;
   sensors = [
     {value: '', viewValue: 'Select One'},

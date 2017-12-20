@@ -13,8 +13,8 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 /**
- * This is the main class to start just the sidebar application. This should be
- * used only for testing.
+ * This is the main class to start just the sidebar application. This may or may
+ * not end up being the starting point for the Desktop application.
  *
  *
  */
@@ -30,8 +30,9 @@ public class SidebarApplication extends Application {
 		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
 		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
+		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization);
-		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl);
+		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager = new JavaFxApplicationManagerFactory(
 				new JavaFxKeyboard(new XpraKeyMap()));
 		VirtueService virtueService = new VirtueService(drs, appManager);
