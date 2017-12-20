@@ -179,17 +179,23 @@ public class AwsManager implements ICloudManager {
 			for (Stack stack : stackbuilder.describeStacks(new DescribeStacksRequest()).getStacks()) {
 				System.out.println("Stack : " + stack.getStackName() + " [" + stack.getStackStatus().toString() + "]");
 
-				DescribeStackResourcesRequest stackResourceRequest = new DescribeStackResourcesRequest();
-				stackResourceRequest.setStackName(stack.getStackName());
-				for (StackResource resource : stackbuilder.describeStackResources(stackResourceRequest)
-						.getStackResources()) {
-
-					if (resource.getResourceType().equals("AWS::EC2::Instance")) {
-						ec2InstancesResourcesCreated.add(resource);
-						System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
-								resource.getLogicalResourceId(), resource.getPhysicalResourceId());
+				if(stackName.equals(stack.getStackName()))
+				{			
+					DescribeStackResourcesRequest stackResourceRequest = new DescribeStackResourcesRequest();
+					stackResourceRequest.setStackName(stack.getStackName());
+					for (StackResource resource : stackbuilder.describeStackResources(stackResourceRequest)
+							.getStackResources()) {
+	
+						/*Let's save the ec2 instance resource  - we will use it later for 
+						 * getting more information about the instance such as dns, ip address etc. 
+						 */
+						if (resource.getResourceType().equals("AWS::EC2::Instance")) {
+							ec2InstancesResourcesCreated.add(resource);
+							System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
+									resource.getLogicalResourceId(), resource.getPhysicalResourceId());
+						}
+	
 					}
-
 				}
 			}
 
