@@ -28,7 +28,7 @@
 		class="com.ncc.savior.virtueadmin.data.InMemoryActiveVirtueDao">
 	</bean>
 	<bean name="activeVirtueManager" class="com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager">
-		<constructor-arg ref="vmManager" />
+		<constructor-arg ref="awsManager" />
 		<constructor-arg ref="virtueDao" />
 	</bean>
 	<bean name="templateManager" class="com.ncc.savior.virtueadmin.data.InMemoryTemplateManager">
@@ -43,7 +43,6 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="appManager" />
-		<constructor-arg ref="awsManager" />
 	</bean>
 	
 </beans>  

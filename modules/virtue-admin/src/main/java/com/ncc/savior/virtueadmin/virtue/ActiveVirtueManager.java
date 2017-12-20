@@ -1,19 +1,20 @@
 package com.ncc.savior.virtueadmin.virtue;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.IStateUpdateListener;
-import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * Implementation of {@link IActiveVirtueManager}.
@@ -23,15 +24,14 @@ import com.ncc.savior.virtueadmin.model.VmState;
  *
  */
 public class ActiveVirtueManager implements IActiveVirtueManager {
+	private final static Logger logger = LoggerFactory.getLogger(ActiveVirtueManager.class);
 
-	private IVmManager vmManager;
 	private IActiveVirtueDao virtueDao;
-	
-	private ICloudManager awsManager; 
+	private ICloudManager cloudManager;
 
-	public ActiveVirtueManager(IVmManager vmManager, IActiveVirtueDao virtueDao) {
-		this.vmManager = vmManager;
-		vmManager.addStateUpdateListener(new VmUpdateListener());
+	public ActiveVirtueManager(ICloudManager cloudManager, IActiveVirtueDao virtueDao) {
+		this.cloudManager = cloudManager;
+		// cloudManager.addStateUpdateListener(new VmUpdateListener());
 		this.virtueDao = virtueDao;
 	}
 
@@ -49,16 +49,27 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
-		return vmManager.startVirtualMachine(vm);
+		// return vmManager.startVirtualMachine(vm);
+		// assume started
+		logger.debug("**TODO**: need to implement start vm in cloud manager.  It is assumed vms are started now");
+		vm.setState(VmState.RUNNING);
+		return vm;
 	}
 
 	@Override
 	public VirtueInstance provisionTemplate(User user, VirtueTemplate template) {
-		List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
-		Map<String, VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(vmTemplates);
-		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
-		virtueDao.addVirtue(vi);
-		return vi;
+		try {
+			return cloudManager.createVirtue(user, template);
+		} catch (Exception e) {
+			// TODO fix cloud manager to not throw exception. Throw something more specific.
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "unknown error creating virtue.");
+		}
+		// List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
+		// Map<String, VirtualMachine> vms =
+		// vmManager.provisionVirtualMachineTemplates(vmTemplates);
+		// VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
+		// virtueDao.addVirtue(vi);
+		// return vi;
 	}
 
 	protected void updateVmState(String vmId, VmState state) {
@@ -71,26 +82,19 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 			updateVmState(vmId, state);
 		}
 	}
-	
-	
-	/*Creates virtue from template*/
-	public VirtueInstance createVirtueFromTemplate(User user, VirtueTemplate template){
-		
-		VirtueInstance virtueInstance = null; 
-		try {
-			return  awsManager.createVirtue(user, template);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
-		return null;	
+
+	@Override
+	public void deleteVirtue(User user, String instanceId) {
+		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId);
+		if (vi == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+					"Virtue id=" + instanceId + " was not found");
+		}
+		if (vi.getUsername().equals(user.getUsername())) {
+			cloudManager.deleteVirtue(vi);
+		} else {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
+					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
+		}
 	}
-	
-	
-	public void deleteVirtueInstance(VirtueInstance virtueInstance) {
-		
-		awsManager.deleteVirtue(virtueInstance); 
-	}
-	
 }

@@ -20,7 +20,10 @@ public class User {
 	static {
 		testUser = new User("testUser", new ArrayList<String>());
 		anonymousUser = new User("anonymous", new ArrayList<String>());
-		adminUser = new User("admin", new ArrayList<String>());
+		ArrayList<String> adminAuths = new ArrayList<String>();
+		adminAuths.add("ROLE_ADMIN");
+		adminAuths.add("ROLE_USER");
+		adminUser = new User("admin", adminAuths);
 		
 	}
 

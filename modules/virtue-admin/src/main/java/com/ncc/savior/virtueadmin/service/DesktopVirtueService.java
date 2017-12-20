@@ -27,14 +27,14 @@ public class DesktopVirtueService {
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
 	private IApplicationManager applicationManager;
-	private AwsManager awsManager; 
+	private AwsManager awsManager;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager,AwsManager awsManager) {
+			IApplicationManager applicationManager, AwsManager awsManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
-		this.awsManager = awsManager; 
+		this.awsManager = awsManager;
 	}
 
 	/**
@@ -80,11 +80,7 @@ public class DesktopVirtueService {
 
 	public DesktopVirtueApplication startApplicationFromTemplate(User user, String templateId, String applicationId)
 			throws IOException {
-		VirtueTemplate template = templateManager.getTemplate(user, templateId);
-		if (template == null) {
-			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
-		}
-		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
+		VirtueInstance instance = createVirtue(user, templateId);
 		return startApplication(user, instance.getId(), applicationId);
 	}
 
@@ -112,30 +108,17 @@ public class DesktopVirtueService {
 		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), apps);
 	}
 
-	public VirtueInstance createVirtueFromTemplate(User user, String templateId) {
 
-		//Now get the template for this id and create the machine on aws. 
-		VirtueTemplate template = templateManager.getTemplate(user, templateId);
-		try {
-			VirtueInstance vrtInstance =  awsManager.createVirtue(user, template);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return null;
+	public void deleteVirtue(User user, String instanceId) {
+		activeVirtueManager.deleteVirtue(user, instanceId);
 	}
 
-	public String deleteVirtue(User user, String instanceId) {
-		//Now get the template for this id and create the machine on aws. 
-		try {
-			return awsManager.deleteVirtue(user, instanceId);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public VirtueInstance createVirtue(User user, String templateId) {
+		VirtueTemplate template = templateManager.getTemplate(user, templateId);
+		if (template == null) {
+			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
 		}
-		
-		return instanceId;
-		
+		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
+		return instance;
 	}
 }

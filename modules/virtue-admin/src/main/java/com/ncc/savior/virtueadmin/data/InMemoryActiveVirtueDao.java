@@ -83,4 +83,9 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public void addVirtue(VirtueInstance vi) {
 		virtues.put(vi.getId(), vi);
 	}
+
+	@Override
+	public VirtueInstance getVirtueInstance(String virtueId) {
+		return virtues.get(virtueId);
+	}
 }

@@ -9,16 +9,6 @@
 
 package com.ncc.savior.virtueadmin.infrastructure;
 
-import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
-import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.User;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
@@ -31,10 +21,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.bouncycastle.util.IPAddress;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -46,7 +35,6 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.Stack;
 import com.amazonaws.services.cloudformation.model.StackResource;
 import com.amazonaws.services.cloudformation.model.StackStatus;
-
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
@@ -54,15 +42,19 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.simpledb.AmazonSimpleDB;
-import com.amazonaws.services.simpledb.AmazonSimpleDBClientBuilder;
+import com.ncc.savior.virtueadmin.model.OS;
+import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VmState;
 
 
 
 
 public class AwsManager implements ICloudManager {
     private static final int SSH_PORT = 22;
-	ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+	AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 	private String privateKey; 
 	
 	
@@ -77,7 +69,22 @@ public class AwsManager implements ICloudManager {
 
     
     
-    /**
+    AwsManager(File privatekeyfile)
+	{
+		// credentialsProvider =new BasicCredentialsProvider();
+		// credentialsProvider.setCredentials(new Authscope, credentials);
+	    try {
+			init();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+			this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile); 
+	}
+
+
+	/**
      * The only information needed to create a client are security credentials
      * consisting of the AWS Access Key ID and Secret Access Key. All other
      * configuration, such as the service endpoints, are performed
@@ -125,19 +132,7 @@ public class AwsManager implements ICloudManager {
     }
 
     
-    AwsManager(File privatekeyfile)
-    {
-        try {
-			init();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-    		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile); 
-    }
-
-	/* (non-Javadoc)
+    /* (non-Javadoc)
 	 * @see com.ncc.savior.virtueadmin.infrastructure.ICloudManager#deleteVirtue(com.ncc.savior.virtueadmin.model.VirtueInstance)
 	 */
 	@Override
