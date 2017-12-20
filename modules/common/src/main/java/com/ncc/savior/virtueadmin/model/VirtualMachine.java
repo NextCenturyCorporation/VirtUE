@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -20,6 +21,7 @@ public class VirtualMachine {
 	private int sshPort;
 	private String infrastructureId;
 	private String userName;
+	@Column(length = 6000)
 	private String privateKey;
 	private String ipAddress;
 

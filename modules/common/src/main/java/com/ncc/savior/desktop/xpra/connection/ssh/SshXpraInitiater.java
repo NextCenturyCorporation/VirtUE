@@ -79,7 +79,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 					String displayStr = line.substring(line.indexOf(prefix) + prefix.length());
 					display = Integer.parseInt(displayStr);
 				}
-				// System.out.println(line);
+				System.out.println(line);
 			}
 		} catch (JSchException | InterruptedException e) {
 			throw new IOException(e);

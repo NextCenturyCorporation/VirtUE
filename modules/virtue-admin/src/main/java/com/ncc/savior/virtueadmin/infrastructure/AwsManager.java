@@ -149,8 +149,8 @@ public class AwsManager implements ICloudManager {
 		System.out.println("===========================================\n");
 
 		VirtueInstance vi = null;
-		String vmUsername = "admin";
-
+		String vmUsername = user.getUsername();
+		String sshLoginUsername = "admin";
 		stackName = baseStack_Name + vmUsername + "-" + System.getProperty("user.name") + "-"
 				+ UUID.randomUUID().toString();
 		String logicalResourceName = "SampleNotificationTopic";
@@ -226,9 +226,10 @@ public class AwsManager implements ICloudManager {
 					// String myResourceID = sr.getPhysicalResourceId();
 					if (ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId())) {
 						System.out.println("Found it!!!!!!!!!!!!!!");
+
 						VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
 								template.getApplications(), VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(),
-								ec2Instance.getPublicDnsName(), SSH_PORT, vmUsername, this.privateKey,
+								ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, this.privateKey,
 								ec2Instance.getPublicIpAddress());
 						vms.add(vm);
 					}

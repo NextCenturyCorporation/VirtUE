@@ -91,4 +91,9 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public VirtueInstance getVirtueInstance(String virtueId) {
 		return virtues.get(virtueId);
 	}
+
+	@Override
+	public Iterable<VirtueInstance> getAllActiveVirtues() {
+		return virtues.values();
+	}
 }

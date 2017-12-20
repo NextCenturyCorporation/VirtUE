@@ -91,12 +91,11 @@ public class VirtueMenuItem {
 		pane.setPadding(new Insets(5, 20, 5, 20));
 		BorderStroke style;
 		if (color == null) {
-			 style= new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(0),
+			style = new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, new CornerRadii(0),
 					new BorderWidths(0, 0, 1, 0));
 		} else {
 			Color c = Color.color(this.color.getRed(), color.getGreen(), color.getBlue());
-			style = new BorderStroke(c, BorderStrokeStyle.SOLID, new CornerRadii(0),
-					new BorderWidths(2, 2, 2, 2));
+			style = new BorderStroke(c, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2, 2, 2, 2));
 		}
 		pane.setBorder(new Border(style));
 		// HBox hbox = new HBox();
@@ -108,7 +107,11 @@ public class VirtueMenuItem {
 	}
 
 	private String getLabel(DesktopVirtue virtue) {
-		return virtue.getName();
+		String name = virtue.getName();
+		if (virtue.getId() != null) {
+			name = name + "-" + virtue.getId();
+		}
+		return name;
 	}
 
 	private ContextMenu createContextMenu() {
@@ -156,6 +159,7 @@ public class VirtueMenuItem {
 								Platform.runLater(new Runnable() {
 									@Override
 									public void run() {
+										statusSpinner.setVisible(false);
 										Alert alert = new Alert(AlertType.ERROR);
 										alert.setTitle("Error starting " + app.getName());
 										alert.setHeaderText("Error starting '" + app.getName() + "'");
