@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -40,8 +41,12 @@ import com.amazonaws.services.cloudformation.model.StackResource;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.amazonaws.services.ec2.model.InstanceStatusDetails;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -232,8 +237,8 @@ public class AwsManager implements ICloudManager {
 
 			for (Reservation reservation : reservations) {
 				instances.addAll(reservation.getInstances());
-			}
 
+			}
 
 			Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 
@@ -244,6 +249,8 @@ public class AwsManager implements ICloudManager {
 			}
 
 			vms = getNewInstances(template, sshLoginUsername, ec2InstancesResourcesCreated, instances, vms);
+
+			waitForReachability(ec2InstancesResourcesCreated);
 
 			vi = new VirtueInstance(template, clientUser, vms);
 			vi.setId(uuid);
@@ -295,9 +302,44 @@ public class AwsManager implements ICloudManager {
 		return vi;
 	}
 
+	private void waitForReachability(List<StackResource> ec2InstancesResourcesCreated) {
+		Set<String> instanceIds = new HashSet<String>();
+		for (StackResource instance : ec2InstancesResourcesCreated) {
+			instanceIds.add(instance.getPhysicalResourceId());
+		}
+		while (true) {
+			DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
+			describeInstanceStatusRequest.setInstanceIds(instanceIds);
+			DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
+			Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
+			boolean okToStopWaiting = true;
+			while (itr.hasNext()) {
+				InstanceStatus status = itr.next();
+				logger.debug(status.getInstanceStatus().toString());
+				logger.debug(status.getSystemStatus().toString());
+				List<InstanceStatusDetails> details = status.getInstanceStatus().getDetails();
+				for (InstanceStatusDetails detail : details) {
+					if (detail.getName().equals("reachability") && detail.getStatus().equals("initializing")) {
+						okToStopWaiting = false;
+						break;
+					}
+				}
+			}
+			if (okToStopWaiting) {
+				break;
+			} else {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	private String getStackName(String clientUser, String serverUser, String uuid) {
-		String stackName = baseStack_Name + clientUser + "-" + serverUser + "-"
-				+ uuid;
+		String stackName = baseStack_Name + clientUser + "-" + serverUser + "-" + uuid;
 		return stackName;
 	}
 
@@ -306,8 +348,8 @@ public class AwsManager implements ICloudManager {
 		// This only works for single VM virtues
 		for (Instance ec2Instance : instances) {
 			if (ec2Instance.getState().getCode() < 33) {
-				System.out.println(
-						"After ID:" + ec2Instance.getInstanceId() + " - " + ec2Instance.getState().getName());
+				System.out
+						.println("After ID:" + ec2Instance.getInstanceId() + " - " + ec2Instance.getState().getName());
 			}
 			for (StackResource sr : ec2InstancesResourcesCreated) {
 				// String ec2InstanceId = ec2Instance.getInstanceId();
@@ -352,7 +394,6 @@ public class AwsManager implements ICloudManager {
 		// Note that you could used SNS notifications on the original CreateStack call
 		// to track the progress of the stack deletion
 		try {
-
 
 			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
 					+ waitForCompletion(stackbuilder, stackName));
