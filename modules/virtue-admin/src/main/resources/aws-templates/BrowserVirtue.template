@@ -9,11 +9,11 @@
         {
             "Properties": 
             {
-                "ImageId": "ami-e6e7999c",
+                "ImageId": "ami-134b3069",
                 "InstanceType" : "t2.small",
                 "Tags" : 
                 [
-                    {"Key" : "Name", "Value" : "W Instance"}
+                    {"Key" : "Name", "Value" : "Last Jedi"}
                 ]
             },
 
