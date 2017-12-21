@@ -61,6 +61,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public VirtueInstance provisionTemplate(User user, VirtueTemplate template) {
 		try {
 			VirtueInstance vi = cloudManager.createVirtue(user, template);
+			logger.debug("From template=" + template);
+			logger.debug("  created instance=" + vi);
 			virtueDao.addVirtue(vi);
 			return vi;
 		} catch (Exception e) {

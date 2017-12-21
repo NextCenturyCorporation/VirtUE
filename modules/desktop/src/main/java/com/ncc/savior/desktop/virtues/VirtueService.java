@@ -67,8 +67,10 @@ public class VirtueService {
 				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(),
 						key);
 			}
+			logger.debug("verifying connection to " + app.getHostname() + " with color " + color.toString());
 			XpraClient client = connectionManager.getExistingClient(params);
 			if (client == null || client.getStatus() == Status.ERROR) {
+				logger.debug("needed new connection");
 				client = connectionManager.createClient(params, color);
 			}
 		} finally {

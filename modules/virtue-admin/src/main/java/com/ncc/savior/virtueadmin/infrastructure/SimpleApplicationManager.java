@@ -19,7 +19,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 // TODO credentials need to be added somewhere.
 public class SimpleApplicationManager implements IApplicationManager {
 
-	private static final int DEFAULT_DISPLAY = 45;
+	private static final int DEFAULT_DISPLAY = 55;
 	private String defaultPassword;
 	private File defaultCertificate;
 
@@ -50,7 +50,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 			} else {
 				display = displays.iterator().next();
 			}
-
+			initiator.getXpraServers();
 			initiator.startXpraApp(display, app.getLaunchCommand());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

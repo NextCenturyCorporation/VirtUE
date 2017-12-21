@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -28,6 +31,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
+import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
@@ -49,6 +53,7 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 public class AwsManager implements ICloudManager {
+	private static final Logger logger = LoggerFactory.getLogger(AwsManager.class);
 	private static final int SSH_PORT = 22;
 	AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 	private String privateKey;
@@ -59,8 +64,6 @@ public class AwsManager implements ICloudManager {
 	private AmazonCloudFormation stackbuilder;
 
 	String baseStack_Name = "SaviorStack-";
-
-	String stackName;
 
 	AwsManager(File privatekeyfile) {
 		// credentialsProvider =new BasicCredentialsProvider();
@@ -149,29 +152,38 @@ public class AwsManager implements ICloudManager {
 		System.out.println("===========================================\n");
 
 		VirtueInstance vi = null;
-		String vmUsername = user.getUsername();
+		String clientUser = user.getUsername();
+		String serverUser = System.getProperty("user.name");
 		String sshLoginUsername = "admin";
-		stackName = baseStack_Name + vmUsername + "-" + System.getProperty("user.name") + "-"
-				+ UUID.randomUUID().toString();
+		String uuid = UUID.randomUUID().toString();
+		String stackName = getStackName(clientUser, serverUser, uuid);
 		String logicalResourceName = "SampleNotificationTopic";
 
 		String myCloudFormationFromFile = convertStreamToString(
 				AwsManager.class.getResourceAsStream("/aws-templates/BrowserVirtue.template"));
 
 		try {
+			Set<Instance> is = getAllInstances();
+			System.out.println("You have " + is.size() + " Amazon EC2 instance(s) running.");
+			for (Instance i : is) {
+				if (i.getState().getCode() < 33) {
+					System.out.println("Prior ID:" + i.getInstanceId() + " - " + i.getState().getName());
+				}
+			}
 			// Create a stack
 			CreateStackRequest createRequest = new CreateStackRequest();
 			createRequest.setStackName(stackName);
 			createRequest.setTemplateBody(myCloudFormationFromFile);
 
 			System.out.println("Creating a stack called " + createRequest.getStackName() + ".");
-			stackbuilder.createStack(createRequest);
+			CreateStackResult result = stackbuilder.createStack(createRequest);
+			String stackId = result.getStackId();
 
 			// Wait for stack to be created
 			// Note that you could use SNS notifications on the CreateStack call to track
 			// the progress of the stack creation
-			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
-					+ waitForCompletion(stackbuilder, stackName));
+			String wait = waitForCompletion(stackbuilder, stackName);
+			System.out.println("Stack creation completed, the stack " + stackName + " completed with " + wait);
 
 			// Show all the stacks for this account along with the resources for each stack
 			List<StackResource> ec2InstancesResourcesCreated = new ArrayList<StackResource>();
@@ -179,22 +191,22 @@ public class AwsManager implements ICloudManager {
 			for (Stack stack : stackbuilder.describeStacks(new DescribeStacksRequest()).getStacks()) {
 				System.out.println("Stack : " + stack.getStackName() + " [" + stack.getStackStatus().toString() + "]");
 
-				if(stackName.equals(stack.getStackName()))
-				{			
+				if (stackName.equals(stack.getStackName())) {
 					DescribeStackResourcesRequest stackResourceRequest = new DescribeStackResourcesRequest();
 					stackResourceRequest.setStackName(stack.getStackName());
 					for (StackResource resource : stackbuilder.describeStackResources(stackResourceRequest)
 							.getStackResources()) {
-	
-						/*Let's save the ec2 instance resource  - we will use it later for 
-						 * getting more information about the instance such as dns, ip address etc. 
+
+						/*
+						 * Let's save the ec2 instance resource - we will use it later for getting more
+						 * information about the instance such as dns, ip address etc.
 						 */
 						if (resource.getResourceType().equals("AWS::EC2::Instance")) {
 							ec2InstancesResourcesCreated.add(resource);
 							System.out.format("    %1$-40s %2$-25s %3$s\n", resource.getResourceType(),
 									resource.getLogicalResourceId(), resource.getPhysicalResourceId());
 						}
-	
+
 					}
 				}
 			}
@@ -222,27 +234,19 @@ public class AwsManager implements ICloudManager {
 				instances.addAll(reservation.getInstances());
 			}
 
+
 			Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 
 			System.out.println("You have " + instances.size() + " Amazon EC2 instance(s) running.");
 
-			for (Instance ec2Instance : instances) {
-				for (StackResource sr : ec2InstancesResourcesCreated) {
-					// String ec2InstanceId = ec2Instance.getInstanceId();
-					// String myResourceID = sr.getPhysicalResourceId();
-					if (ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId())) {
-						System.out.println("Found it!!!!!!!!!!!!!!");
-
-						VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
-								template.getApplications(), VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(),
-								ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, this.privateKey,
-								ec2Instance.getPublicIpAddress());
-						vms.add(vm);
-					}
-				}
+			for (StackResource sr : ec2InstancesResourcesCreated) {
+				System.out.println(sr.getLogicalResourceId() + " - " + sr.getPhysicalResourceId());
 			}
 
-			vi = new VirtueInstance(template, vmUsername, vms);
+			vms = getNewInstances(template, sshLoginUsername, ec2InstancesResourcesCreated, instances, vms);
+
+			vi = new VirtueInstance(template, clientUser, vms);
+			vi.setId(uuid);
 
 		} catch (AmazonServiceException ase) {
 
@@ -291,6 +295,49 @@ public class AwsManager implements ICloudManager {
 		return vi;
 	}
 
+	private String getStackName(String clientUser, String serverUser, String uuid) {
+		String stackName = baseStack_Name + clientUser + "-" + serverUser + "-"
+				+ uuid;
+		return stackName;
+	}
+
+	private Collection<VirtualMachine> getNewInstances(VirtueTemplate template, String sshLoginUsername,
+			List<StackResource> ec2InstancesResourcesCreated, Set<Instance> instances, Collection<VirtualMachine> vms) {
+		// This only works for single VM virtues
+		for (Instance ec2Instance : instances) {
+			if (ec2Instance.getState().getCode() < 33) {
+				System.out.println(
+						"After ID:" + ec2Instance.getInstanceId() + " - " + ec2Instance.getState().getName());
+			}
+			for (StackResource sr : ec2InstancesResourcesCreated) {
+				// String ec2InstanceId = ec2Instance.getInstanceId();
+				// String myResourceID = sr.getPhysicalResourceId();
+
+				if (ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId())) {
+					System.out.println("Found it!!!!!!!!!!!!!!");
+
+					VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
+							template.getApplications(), VmState.RUNNING, OS.LINUX, UUID.randomUUID().toString(),
+							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, this.privateKey,
+							ec2Instance.getPublicIpAddress());
+					vms.add(vm);
+				}
+			}
+		}
+		return vms;
+	}
+
+	private Set<Instance> getAllInstances() {
+		DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
+		List<Reservation> reservations = describeInstancesRequest.getReservations();
+		Set<Instance> instances = new HashSet<Instance>();
+
+		for (Reservation reservation : reservations) {
+			instances.addAll(reservation.getInstances());
+		}
+		return instances;
+	}
+
 	public String deleteVirtue(User user, String instanceId) throws Exception {
 
 		// Delete the stack
@@ -300,11 +347,12 @@ public class AwsManager implements ICloudManager {
 		deleteRequest.setStackName(userStackName);
 		System.out.println("Deleting the stack called " + deleteRequest.getStackName() + ".");
 		stackbuilder.deleteStack(deleteRequest);
-
+		String stackName = null;// TODO need to find stack appropriately
 		// Wait for stack to be deleted
 		// Note that you could used SNS notifications on the original CreateStack call
 		// to track the progress of the stack deletion
 		try {
+
 
 			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
 					+ waitForCompletion(stackbuilder, stackName));

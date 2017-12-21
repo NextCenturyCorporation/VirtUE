@@ -103,7 +103,6 @@ public class DesktopVirtueApplication {
 	@Override
 	public String toString() {
 		return "DesktopVirtueApplication [id=" + id + ", name=" + name + ", version=" + version + ", os=" + os
-				+ ", hostname=" + hostname + ", port=" + port + ", userName=" + userName + ", privateKey=" + privateKey
-				+ "]";
+				+ ", hostname=" + hostname + ", port=" + port + ", userName=" + userName + "]";
 	}
 }

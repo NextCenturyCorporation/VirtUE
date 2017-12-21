@@ -29,7 +29,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 	private static final String DEFAULT_COMMAND_NAME = "xpra";
 
 	private static final String DEFAULT_COMMAND_MODE = "_proxy";
-	private static final int DEFAULT_DISPLAY = 45;
+	private static final int DEFAULT_DISPLAY = 55;
 	private String commandDir;
 	private String commandName;
 	private String commandMode;

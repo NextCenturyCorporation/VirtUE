@@ -72,6 +72,7 @@ public class DesktopResourceService {
 			throws IOException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
+		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 
 	}
@@ -80,6 +81,7 @@ public class DesktopResourceService {
 			throws IOException {
 		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
+		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 	}
 
@@ -127,6 +129,7 @@ public class DesktopResourceService {
 		T instance = jsonMapper.readValue(in, klass);
 		return instance;
 		} else {
+			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
 			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
 		}
 	}
