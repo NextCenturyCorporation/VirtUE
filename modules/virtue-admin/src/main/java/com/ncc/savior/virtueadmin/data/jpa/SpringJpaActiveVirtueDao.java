@@ -94,4 +94,14 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 		return virtueRepository.findAll();
 	}
 
+	@Override
+	public void clear() {
+		Iterable<VirtueInstance> virtues = virtueRepository.findAll();
+		// for (VirtueInstance virtue : virtues) {
+		// vmRepository.delete(virtue.getVms());
+		// }
+		virtueRepository.delete(virtues);
+
+	}
+
 }

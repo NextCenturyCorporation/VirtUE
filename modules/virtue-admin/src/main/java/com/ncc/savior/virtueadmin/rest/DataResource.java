@@ -16,7 +16,9 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -29,6 +31,11 @@ public class DataResource {
 	private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
 	@Autowired
 	private ITemplateManager templateManager;
+
+	// TODO find where second version comes from so we can use @Autowired
+	@Qualifier("virtueDao")
+	@Autowired
+	private IActiveVirtueDao activeVirtueDao;
 
 	public DataResource() {
 	}
@@ -195,9 +202,16 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("clear/")
-	public String clearDatabase() {
+	@Path("templates/clear/")
+	public String clearTemplatesDatabase() {
 		templateManager.clear();
+		return "database cleared.";
+	}
+
+	@GET
+	@Path("active/clear/")
+	public String clearActiveDatabase() {
+		activeVirtueDao.clear();
 		return "database cleared.";
 	}
 

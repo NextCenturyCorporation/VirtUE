@@ -96,4 +96,9 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtues.values();
 	}
+
+	@Override
+	public void clear() {
+		virtues.clear();
+	}
 }

@@ -55,4 +55,6 @@ public interface IActiveVirtueDao {
 
 	Iterable<VirtueInstance> getAllActiveVirtues();
 
+	void clear();
+
 }
