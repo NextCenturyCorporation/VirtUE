@@ -56,4 +56,6 @@ public interface IActiveVirtueManager {
 
 	void deleteVirtue(User user, String instanceId);
 
+	Iterable<VirtueInstance> getAllActiveVirtues();
+
 }

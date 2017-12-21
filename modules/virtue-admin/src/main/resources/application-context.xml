@@ -20,7 +20,7 @@
 		<constructor-arg ref="defaultPem" />
 		<constructor-arg value="LINUX" />
 	</bean>
-	
+
 	<bean name="defaultPem" class="java.io.File">
 		<constructor-arg value="${savior.staticVm.pem}" />
 	</bean>
@@ -29,8 +29,12 @@
 		<constructor-arg ref="defaultPem" />
 	</bean>
 
+	<!-- <bean name="virtueDao" -->
+	<!-- class="com.ncc.savior.virtueadmin.data.InMemoryActiveVirtueDao"> -->
+	<!-- </bean> -->
+
 	<bean name="virtueDao"
-		class="com.ncc.savior.virtueadmin.data.InMemoryActiveVirtueDao">
+		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaActiveVirtueDao">
 	</bean>
 	<bean name="activeVirtueManager" class="com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager">
 		<constructor-arg ref="awsManager" />
@@ -47,6 +51,7 @@
 
 	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService">
 		<constructor-arg ref="templateManager" />
+		<constructor-arg ref="activeVirtueManager" />
 	</bean>
 
 	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">
@@ -58,5 +63,5 @@
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="appManager" />
 	</bean>
-	
+
 </beans>  

@@ -106,10 +106,26 @@ public class AdminResource {
 		}
 	}
 
+	@GET
+	@Produces("application/json")
 	@Path("application")
 	public Iterable<ApplicationDefinition> getAllApplicationDefinitions() {
 		try {
 			return adminService.getAllApplicationTemplates();
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("virtues")
+	public Iterable<VirtueInstance> getAllActiveVirtues() {
+		try {
+			return adminService.getAllActiveVirtues();
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception

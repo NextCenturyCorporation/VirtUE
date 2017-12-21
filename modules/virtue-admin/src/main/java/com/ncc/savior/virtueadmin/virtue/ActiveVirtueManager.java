@@ -65,7 +65,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 			return vi;
 		} catch (Exception e) {
 			// TODO fix cloud manager to not throw exception. Throw something more specific.
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "unknown error creating virtue.");
+			logger.error("error creating virtue!", e);
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "unknown error creating virtue.", e);
 		}
 		// List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
 		// Map<String, VirtualMachine> vms =
@@ -99,5 +100,10 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
 		}
+	}
+
+	@Override
+	public Iterable<VirtueInstance> getAllActiveVirtues() {
+		return virtueDao.getAllActiveVirtues();
 	}
 }
