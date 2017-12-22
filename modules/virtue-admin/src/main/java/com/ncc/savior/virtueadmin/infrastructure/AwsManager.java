@@ -182,7 +182,7 @@ public class AwsManager implements ICloudManager {
 			// Note that you could use SNS notifications on the CreateStack call to track
 			// the progress of the stack creation
 			String wait = waitForCompletion(stackbuilder, stackName);
-			System.out.println("Stack creation completed, the stack " + stackName + " completed with " + wait);
+			logger.trace("Stack creation completed, the stack " + stackName + " completed with " + wait);
 
 			// Show all the stacks for this account along with the resources for each stack
 			List<StackResource> createdEc2Instances = new ArrayList<StackResource>();
@@ -434,9 +434,9 @@ public class AwsManager implements ICloudManager {
 		// Note that you could used SNS notifications on the original CreateStack call
 		// to track the progress of the stack deletion
 		try {
-
-			System.out.println("Stack creation completed, the stack " + stackName + " completed with "
-					+ waitForCompletion(stackbuilder, stackName));
+			String status = waitForCompletion(stackbuilder, stackName);
+			logger.trace("Stack creation completed, the stack " + stackName + " completed with "
+					+ status);
 
 		} catch (AmazonServiceException ase) {
 			logger.error("Caught an AmazonServiceException, which means your request made it "
