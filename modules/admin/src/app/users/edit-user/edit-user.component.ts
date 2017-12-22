@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
@@ -14,8 +15,9 @@ export class EditUserComponent implements OnInit {
   submitBtn: any;
   dialogWidth: any;
   fullImagePath: string;
+  user: { id: number };
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog, private router: ActivatedRoute) {}
 
   activateModal(id,mode): void {
 
@@ -50,6 +52,9 @@ export class EditUserComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.user = {
+      id: this.router.snapshot.params['id']
+    };
   }
 
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
@@ -11,13 +12,15 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 
 export class EditVirtueComponent implements OnInit {
 
-  constructor(public dialog: MatDialog) {}
+  virtue: { id: number };
+
+  constructor(public dialog: MatDialog, private router: ActivatedRoute) {}
 
   activateModal(id): void {
     let dialogRef = this.dialog.open(VmModalComponent, {
         width: '960px'
       });
-    
+
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -36,6 +39,9 @@ export class EditVirtueComponent implements OnInit {
     });
   }
   ngOnInit() {
+    this.virtue = {
+      id: this.router.snapshot.params['id']
+    };
   }
 
 }
