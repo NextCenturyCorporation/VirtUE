@@ -1,30 +1,30 @@
 header {
   margin-bottom: 20px;
 }
-nav {
+mat-toolbar {
   clear: both;
   display: block;
   height: 35px;
   width: 100%;
 }
-nav span.navbar-brand {
+mat-toolbar span.navbar-brand {
   color: rgb(255,255,255);
   display: inline-block;
   padding: 0.47rem 2.4rem 0.47rem 1.5rem;
 }
-nav ul {
+mat-toolbar ul {
   display: inline-block;
   margin: 0;
   padding: 0;
 }
-nav li {
+mat-toolbar li {
   display: inline-block;
   margin: 0;
 }
-nav li.active {
+mat-toolbar li.active {
   background-color: #540D6E
 }
-nav li a {
+mat-toolbar li a {
   color: rgb(255,255,255);
   display: block;
   margin: 0;

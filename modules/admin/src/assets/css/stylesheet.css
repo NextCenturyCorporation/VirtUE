@@ -3473,23 +3473,24 @@ breadcrumb ol {
 /* line 82, ../scss/_layout.scss */
 breadcrumb li {
   display: inline-block;
+  margin-right: 6px;
 }
-/* line 84, ../scss/_layout.scss */
+/* line 85, ../scss/_layout.scss */
 breadcrumb li:before {
   content: '>';
 }
-/* line 89, ../scss/_layout.scss */
+/* line 90, ../scss/_layout.scss */
 breadcrumb li:first-child:before {
   content: '';
 }
 
-/* line 94, ../scss/_layout.scss */
+/* line 95, ../scss/_layout.scss */
 form {
   clear: both;
   display: block;
 }
 
-/* line 98, ../scss/_layout.scss */
+/* line 99, ../scss/_layout.scss */
 form:after {
   clear: both;
   content: ' ';
@@ -3497,7 +3498,7 @@ form:after {
   height: 1px;
 }
 
-/* line 104, ../scss/_layout.scss */
+/* line 105, ../scss/_layout.scss */
 .form-item {
   clear: both;
   display: block;
@@ -3505,24 +3506,24 @@ form:after {
   padding: 0.5rem 0;
   width: 100%;
 }
-/* line 110, ../scss/_layout.scss */
+/* line 111, ../scss/_layout.scss */
 .form-item span {
   padding: 0;
 }
 
-/* line 114, ../scss/_layout.scss */
+/* line 115, ../scss/_layout.scss */
 label {
   font-family: 'Raleway600';
   margin: 0;
   padding: 0;
 }
 
-/* line 119, ../scss/_layout.scss */
+/* line 120, ../scss/_layout.scss */
 input, select {
   border: 1px solid #B2B2B2;
 }
 
-/* line 122, ../scss/_layout.scss */
+/* line 123, ../scss/_layout.scss */
 input[type="color"] {
   -webkit-appearance: none;
   border: 1px solid #B2B2B2;
@@ -3532,17 +3533,17 @@ input[type="color"] {
   padding-bottom: 2px;
 }
 
-/* line 130, ../scss/_layout.scss */
+/* line 131, ../scss/_layout.scss */
 input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 
-/* line 133, ../scss/_layout.scss */
+/* line 134, ../scss/_layout.scss */
 input[type="color"]::-webkit-color-swatch {
   border: none;
 }
 
-/* line 136, ../scss/_layout.scss */
+/* line 137, ../scss/_layout.scss */
 input[type='text'], input[type='password'] {
   box-sizing: border-box;
   height: 30px;
@@ -3550,7 +3551,7 @@ input[type='text'], input[type='password'] {
   width: 100%;
 }
 
-/* line 142, ../scss/_layout.scss */
+/* line 143, ../scss/_layout.scss */
 button, input[type='button'] {
   border: none;
   cursor: pointer;
@@ -3559,33 +3560,33 @@ button, input[type='button'] {
   padding: 0.55rem 1rem 0.6rem;
 }
 
-/* line 150, ../scss/_layout.scss */
+/* line 151, ../scss/_layout.scss */
 button.button-submit {
   background-color: #407097;
   border-radius: 0;
   color: white;
   text-shadow: 1px 1px #3E3F4E;
 }
-/* line 156, ../scss/_layout.scss */
+/* line 157, ../scss/_layout.scss */
 button.button-delete, button.button-cancel {
   background-color: none;
   border: none;
   border-radius: 0;
   color: #407097;
 }
-/* line 162, ../scss/_layout.scss */
+/* line 163, ../scss/_layout.scss */
 button.button-trash {
   height: 20px;
   margin: 0;
   padding: 0;
   width: 18px;
 }
-/* line 168, ../scss/_layout.scss */
+/* line 169, ../scss/_layout.scss */
 button .fa {
   color: #407097;
 }
 
-/* line 172, ../scss/_layout.scss */
+/* line 173, ../scss/_layout.scss */
 select {
   background-color: white;
   -webkit-appearance: none;
@@ -3602,13 +3603,13 @@ select {
   width: 100%;
 }
 
-/* line 185, ../scss/_layout.scss */
+/* line 186, ../scss/_layout.scss */
 .select-container {
   height: 35px;
   position: relative;
   width: 100%;
 }
-/* line 190, ../scss/_layout.scss */
+/* line 191, ../scss/_layout.scss */
 .select-container .fa {
   font-size: 1.4rem;
   font-weight: 700;
@@ -3618,69 +3619,69 @@ select {
   top: 7px;
 }
 
-/* line 200, ../scss/_layout.scss */
+/* line 201, ../scss/_layout.scss */
 [disabled] {
   color: #b2b2b2;
 }
 
-/* line 203, ../scss/_layout.scss */
+/* line 204, ../scss/_layout.scss */
 app-root {
   height: inherit;
 }
 
 /* Content Global CSS */
-/* line 207, ../scss/_layout.scss */
+/* line 208, ../scss/_layout.scss */
 content {
   display: block;
   min-height: 560px;
   margin: 4rem 0 1rem;
   position: relative;
 }
-/* line 212, ../scss/_layout.scss */
+/* line 213, ../scss/_layout.scss */
 content:after {
   clear: both;
   content: ' ';
   display: block;
 }
-/* line 217, ../scss/_layout.scss */
+/* line 218, ../scss/_layout.scss */
 content #content-header {
   padding: 0 1.1rem 1rem 1.1rem;
   position: relative;
 }
-/* line 221, ../scss/_layout.scss */
+/* line 222, ../scss/_layout.scss */
 content #content-main {
   padding: 0 1.1rem;
 }
-/* line 224, ../scss/_layout.scss */
+/* line 225, ../scss/_layout.scss */
 content #content {
   display: block;
 }
-/* line 226, ../scss/_layout.scss */
+/* line 227, ../scss/_layout.scss */
 content #content.content {
   border-top: 1px solid #b2b2b2;
   padding-top: 1.1rem;
 }
 
-/* line 233, ../scss/_layout.scss */
+/* line 234, ../scss/_layout.scss */
 .paging {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
   margin-top: 0.75rem;
 }
-/* line 238, ../scss/_layout.scss */
+/* line 239, ../scss/_layout.scss */
 .paging .page-number {
   text-align: left;
 }
-/* line 241, ../scss/_layout.scss */
+/* line 242, ../scss/_layout.scss */
 .paging .page-controls {
   text-align: center;
 }
-/* line 244, ../scss/_layout.scss */
+/* line 245, ../scss/_layout.scss */
 .paging .page-item-total {
   text-align: right;
 }
 
-/* line 248, ../scss/_layout.scss */
+/* line 249, ../scss/_layout.scss */
 .table-container, .data-list {
   font-family: 'Raleway500', Arial, sans-serif;
   max-height: 540px;
@@ -3690,24 +3691,24 @@ content #content.content {
   overflow-x: hidden;
 }
 
-/* line 257, ../scss/_layout.scss */
+/* line 258, ../scss/_layout.scss */
 .table-container {
   border: 1px solid #B2B2B2;
 }
 
-/* line 261, ../scss/_layout.scss */
+/* line 262, ../scss/_layout.scss */
 .data-list {
   border-top: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 264, ../scss/_layout.scss */
+/* line 265, ../scss/_layout.scss */
 .data-list .table-header-group {
   border-right: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
   border-left: 1px solid #B2B2B2;
 }
 
-/* line 270, ../scss/_layout.scss */
+/* line 271, ../scss/_layout.scss */
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;
   display: flex;
@@ -3715,22 +3716,22 @@ content #content.content {
   align-items: stretch;
 }
 
-/* line 276, ../scss/_layout.scss */
+/* line 277, ../scss/_layout.scss */
 .table-row {
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 278, ../scss/_layout.scss */
+/* line 279, ../scss/_layout.scss */
 .table-row:last-child {
   border-bottom: none;
 }
 
-/* line 282, ../scss/_layout.scss */
+/* line 283, ../scss/_layout.scss */
 .table-header, .table-data {
   padding-top: 0.65rem;
   padding-bottom: 0.65rem;
 }
 
-/* line 286, ../scss/_layout.scss */
+/* line 287, ../scss/_layout.scss */
 .table-header {
   font-family: 'Raleway600', Arial, sans-serif;
   background-color: #E9E3E6;
@@ -3738,78 +3739,78 @@ content #content.content {
   align-items: flex-end;
 }
 
-/* line 292, ../scss/_layout.scss */
+/* line 293, ../scss/_layout.scss */
 .table-header span {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-/* line 296, ../scss/_layout.scss */
+/* line 297, ../scss/_layout.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
 
-/* line 301, ../scss/_layout.scss */
+/* line 302, ../scss/_layout.scss */
 .table-data span {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
 }
 
-/* line 307, ../scss/_layout.scss */
+/* line 308, ../scss/_layout.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 312, ../scss/_layout.scss */
+/* line 313, ../scss/_layout.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 316, ../scss/_layout.scss */
+/* line 317, ../scss/_layout.scss */
 .titlebar {
   display: block;
   position: relative;
 }
-/* line 320, ../scss/_layout.scss */
+/* line 321, ../scss/_layout.scss */
 .titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
   margin-top: 0;
 }
-/* line 321, ../scss/_layout.scss */
+/* line 322, ../scss/_layout.scss */
 .titlebar h2 {
   font-size: 28px;
 }
-/* line 322, ../scss/_layout.scss */
+/* line 323, ../scss/_layout.scss */
 .titlebar h3 {
   font-size: 24px;
 }
-/* line 323, ../scss/_layout.scss */
+/* line 324, ../scss/_layout.scss */
 .titlebar h4 {
   font-size: 20px;
 }
-/* line 324, ../scss/_layout.scss */
+/* line 325, ../scss/_layout.scss */
 .titlebar h5 {
   font-size: 18px;
 }
-/* line 326, ../scss/_layout.scss */
+/* line 327, ../scss/_layout.scss */
 .titlebar:after {
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 333, ../scss/_layout.scss */
+/* line 334, ../scss/_layout.scss */
 .titlebar .title {
   display: block;
   float: left;
 }
-/* line 338, ../scss/_layout.scss */
+/* line 339, ../scss/_layout.scss */
 .titlebar button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
@@ -3820,7 +3821,7 @@ content #content.content {
   padding: 0.55rem 0.7rem 0.6rem;
 }
 
-/* line 349, ../scss/_layout.scss */
+/* line 350, ../scss/_layout.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3828,19 +3829,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 356, ../scss/_layout.scss */
+/* line 357, ../scss/_layout.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 359, ../scss/_layout.scss */
+/* line 360, ../scss/_layout.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 363, ../scss/_layout.scss */
+/* line 364, ../scss/_layout.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3849,7 +3850,7 @@ footer {
   position: relative;
 }
 
-/* line 370, ../scss/_layout.scss */
+/* line 371, ../scss/_layout.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;

@@ -81,6 +81,7 @@ breadcrumb {
   }
   li {
    display: inline-block;
+   margin-right: 6px;
      &:before {
        content: '>';
      }

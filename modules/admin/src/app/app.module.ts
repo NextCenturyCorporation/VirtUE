@@ -72,17 +72,21 @@ import { CountFilterPipe } from './data/count-filter.pipe';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent, data: {breadcrumb: 'Home'} },
-  { path: 'config', component: ConfigComponent, data: {breadcrumb: 'Configuration'} },
-  { path: 'users', component: UsersComponent, data: {breadcrumb: 'Users'} },
-  { path: 'users/add-user', component: AddUserComponent, data: {breadcrumb: 'Add User Account'} },
-  { path: 'users/edit-user', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} },
-  { path: 'virtues', component: VirtuesComponent, data: {breadcrumb: 'Virtues'} },
-  { path: 'virtues/create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
-  { path: 'virtues/edit-virtue', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
-  { path: 'virtues/virtue-settings', component: VirtueSettingsComponent }
+  { path: 'dashboard', component: DashboardComponent, data: {breadcrumb: 'Home'}, pathMatch: 'full' },
+  { path: 'config', component: ConfigComponent, data: {breadcrumb: 'Configuration'}, pathMatch: 'full' },
+  { path: 'users', component: UsersComponent, data: {breadcrumb: 'Users'}, children: [
+    { path: '', component:  UsersComponent },
+    { path: 'add-user', component: AddUserComponent, data: {breadcrumb: 'Add User Account'} },
+    { path: 'edit-user/:id', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} }
+  ] },
+  { path: 'virtues', component: VirtuesComponent, data: {breadcrumb: 'Virtues'}, children: [
+    { path: 'create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
+    { path: 'edit-virtue', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} }
+  ], pathMatch: 'full' },
+  { path: 'virtues/virtue-settings', component: VirtueSettingsComponent, pathMatch: 'full' }
   //{ path: '**', component: PageNotFoundComponent }
 ];
+
 
 @NgModule({
   declarations: [
@@ -123,6 +127,7 @@ const appRoutes: Routes = [
     MatInputModule,
     MatRadioModule,
     MatSelectModule,
+    MatToolbarModule,
     BrowserAnimationsModule,
     SplitPaneModule,
     RouterModule.forRoot(appRoutes)
