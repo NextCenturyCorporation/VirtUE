@@ -14,6 +14,7 @@ export class HeaderComponent implements OnInit {
     {value: 'Users', link: '/users'},
     {value: 'Virtues', link: '/virtues'}
   ];
+
   ngOnInit() {}
 
 }
