@@ -123,6 +123,7 @@ const appRoutes: Routes = [
     MatInputModule,
     MatRadioModule,
     MatSelectModule,
+    MatToolbarModule,
     BrowserAnimationsModule,
     SplitPaneModule,
     RouterModule.forRoot(appRoutes)
