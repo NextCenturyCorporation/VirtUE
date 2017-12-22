@@ -1,0 +1,20 @@
+@import '~@angular/material/theming';
+@include mat-core();
+@include variables;
+
+$custom-primary: mat-palette($darkPurple);
+$custom-accent: mat-palette($lightBlue);
+$custom-warn: mat-palette($red);
+
+$custom-theme: mat-theme($custom-primary, $custom-accent, $custom-warn);
+@include angular-material-theme($custom-theme);
+
+// ALTERNATE THEME
+$alt-primary: mat-palette($purplishGray);
+$alt-accent: mat-palette($lightGray);
+
+$alt-theme: mat-palette($alt-primary, $alt-accent);
+
+.alternative {
+  @include angular-material-theme();
+}
