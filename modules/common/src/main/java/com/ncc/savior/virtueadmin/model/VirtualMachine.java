@@ -12,11 +12,8 @@ public class VirtualMachine {
 	@Id
 	private String id;
 	private String name;
-	// app ID to application
-	@ManyToMany
-	private Collection<ApplicationDefinition> applications;
-	private OS os;
 	private VmState state;
+	private OS os;
 	private String hostname;
 	private int sshPort;
 	private String infrastructureId;
@@ -24,6 +21,9 @@ public class VirtualMachine {
 	@Column(length = 6000)
 	private String privateKey;
 	private String ipAddress;
+	// app ID to application
+	@ManyToMany
+	private Collection<ApplicationDefinition> applications;
 
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
 			String infrastructureId, String hostname, int sshPort, String userName, String privateKey,
@@ -133,9 +133,9 @@ public class VirtualMachine {
 
 	@Override
 	public String toString() {
-		return "VirtualMachine [id=" + id + ", name=" + name + ", applications=" + applications + ", os=" + os
-				+ ", state=" + state + ", hostname=" + hostname + ", sshPort=" + sshPort + ", infrastructureId="
-				+ infrastructureId + "]";
+		return "VirtualMachine [id=" + id + ", name=" + name + ", state=" + state + ", os=" + os + ", hostname="
+				+ hostname + ", sshPort=" + sshPort + ", infrastructureId=" + infrastructureId + ", userName="
+				+ userName + ", ipAddress=" + ipAddress + ", applications=" + applications + "]";
 	}
 
 	public String getIpAddress() {
