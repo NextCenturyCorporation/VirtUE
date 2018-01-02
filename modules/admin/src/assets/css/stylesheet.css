@@ -3861,30 +3861,19 @@ footer {
 }
 
 /* line 1, ../scss/_material.scss */
-.app-overlay-container {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-/* line 6, ../scss/_material.scss */
-.app-overlay-container .cdk-overlay-backdrop {
-  position: relative;
-}
-
-/* line 10, ../scss/_material.scss */
 .mat-dialog-container {
   background: white;
   box-shadow: none;
 }
 
-/* line 15, ../scss/_material.scss */
+/* line 6, ../scss/_material.scss */
 .mat-dialog-container app-dialogs {
   display: block;
   position: relative;
   padding: 1.2rem;
   text-align: center;
 }
-/* line 21, ../scss/_material.scss */
+/* line 12, ../scss/_material.scss */
 .mat-dialog-container .mat-dialog-title {
   border-bottom: 1px solid #b2b2b2;
   display: block;
@@ -3893,101 +3882,129 @@ footer {
   text-align: left;
   text-transform: capitalize;
 }
-/* line 29, ../scss/_material.scss */
+/* line 20, ../scss/_material.scss */
 .mat-dialog-container .mat-dialog-content {
   padding: 1rem 2rem;
   text-align: left;
 }
-/* line 33, ../scss/_material.scss */
+/* line 24, ../scss/_material.scss */
 .mat-dialog-container .mat-dialog-actions {
   border-top: 1px solid #b2b2b2;
   display: block;
   padding-top: 1.5rem;
   text-align: center;
 }
-/* line 40, ../scss/_material.scss */
+/* line 31, ../scss/_material.scss */
 .mat-dialog-container button, .mat-dialog-container button[type='submit'] {
   border-radius: 0;
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   margin-right: 10px;
 }
-/* line 46, ../scss/_material.scss */
+/* line 37, ../scss/_material.scss */
 .mat-dialog-container button {
   background-color: #e9e3e6;
   border: 1px solid #b2b2b2;
 }
-/* line 49, ../scss/_material.scss */
+/* line 40, ../scss/_material.scss */
 .mat-dialog-container button.button {
   padding: 0.4rem 1rem;
 }
-/* line 53, ../scss/_material.scss */
+/* line 44, ../scss/_material.scss */
 .mat-dialog-container button[type='submit'] {
   background-color: #407097;
   color: white;
 }
 
-/* line 60, ../scss/_material.scss */
+/* line 51, ../scss/_material.scss */
 .mat-input-placeholder-wrapper {
   position: absolute;
   left: 0;
   top: 0;
 }
 
-/* line 68, ../scss/_material.scss */
+/* line 59, ../scss/_material.scss */
 input.mat-input-element {
   border: 1px solid #b2b2b2;
   padding: 5px;
 }
 
-/* line 73, ../scss/_material.scss */
+/* line 64, ../scss/_material.scss */
 .mat-checkbox .mat-checkbox-label {
   margin-right: 20px;
 }
-/* line 77, ../scss/_material.scss */
+/* line 68, ../scss/_material.scss */
 .mat-checkbox .mat-checkbox-inner-container {
   margin-right: 0;
   width: 15px;
 }
-/* line 81, ../scss/_material.scss */
+/* line 72, ../scss/_material.scss */
 .mat-checkbox .mat-checkbox-input {
   margin-top: 3px;
 }
-/* line 84, ../scss/_material.scss */
+/* line 75, ../scss/_material.scss */
 .mat-checkbox .mat-checkbox-frame {
   border-width: 0;
 }
 
-/* line 90, ../scss/_material.scss */
+/* line 81, ../scss/_material.scss */
 .mat-radio-label .mat-radio-container {
   display: none;
 }
 
-/* line 96, ../scss/_material.scss */
+/* line 86, ../scss/_material.scss */
+.mat-autocomplete-panel {
+  overflow: none;
+  overflow-x: none;
+  overflow-y: scroll;
+}
+/* line 90, ../scss/_material.scss */
+.mat-autocomplete-panel .mat-option {
+  border-bottom: 1px solid #BFBFBF;
+  clear: both;
+  cursor: pointer;
+  display: block;
+  padding: 5px;
+  width: 100%;
+}
+
+/* line 99, ../scss/_material.scss */
 .mat-select {
   border: 1px solid #b2b2b2;
   padding: 5px;
 }
 
-/* line 100, ../scss/_material.scss */
+/* line 103, ../scss/_material.scss */
 .mat-select-panel {
   background-color: #FFF;
   box-shadow: none;
   border: 1px solid #b2b2b2;
 }
-/* line 105, ../scss/_material.scss */
+/* line 108, ../scss/_material.scss */
 .mat-select-panel .mat-option {
   border-bottom: thin solid #b2b2b2;
   display: block;
   width: 100%;
 }
-/* line 109, ../scss/_material.scss */
+/* line 112, ../scss/_material.scss */
 .mat-select-panel .mat-option:hover {
   cursor: pointer;
 }
-/* line 112, ../scss/_material.scss */
+/* line 115, ../scss/_material.scss */
 .mat-select-panel .mat-option .mat-option-text {
   padding-left: 15px;
+}
+
+/* line 1, ../scss/_cdk.scss */
+.app-overlay-container {
+  left: 0;
+  top: 0;
+  position: fixed;
+  z-index: 1000;
+}
+/* line 7, ../scss/_cdk.scss */
+.app-overlay-container .cdk-overlay-pane {
+  background-color: #FFF;
 }
 
 /* line 2, ../scss/_helpers.scss */

@@ -1,5 +1,9 @@
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';import { BrowserModule } from '@angular/platform-browser';
+import {
+  FormsModule,
+  ReactiveFormsModule
+} from '@angular/forms';
+import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Routes, RouterModule } from '@angular/router';
@@ -132,7 +136,9 @@ const appRoutes: Routes = [
     BreadcrumbsModule,
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     HttpModule,
+    MatAutocompleteModule,
     MatDialogModule,
     MatFormFieldModule,
     MatCheckboxModule,
