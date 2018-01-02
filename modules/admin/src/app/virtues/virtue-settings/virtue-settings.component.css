@@ -5,16 +5,16 @@
   padding: 0;
 }
 .mui-tabs__bar > li {
-  background: #C3BABA;;
+  background: #BFBFBF;;
   border: none;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
 }
 .mui-tabs__bar > li.mui--is-active {
   background: #FFF;
-  border-left: 1px solid #C3BABA;
-  border-top: 1px solid #C3BABA;
-  border-right: 1px solid #C3BABA;
+  border-left: 1px solid #BFBFBF;
+  border-top: 1px solid #BFBFBF;
+  border-right: 1px solid #BFBFBF;
   border-bottom: 1px solid #FFF;
 }
 .mui-tabs__bar > li > a {
@@ -29,7 +29,8 @@
 }
 .mui-tabs__pane {
   background: #FFF;
-  border-top:1px solid #C3BABA;
+  border-top:1px solid #BFBFBF;
+  border-left:1px solid #BFBFBF;
   margin-top: -2px;
 }
 
@@ -59,7 +60,7 @@ input[type='color'] {
   margin: 0;
   padding: 0.45rem 0.7rem;
   text-align: center;
-  width: 4rem;
+  width: auto;
 }
 a .fa {
   color: #736F72;

@@ -9,12 +9,17 @@
      <h4>General Settings</h4>
      <div class="mui-row form-item">
        <div class="mui-col-md-4 padding-left-0"><label>Select Virtue Color</label></div>
-       <div class="mui-col-md-6 float-right"><input id="virtue-color" type="color" value="#4B3F72" /></div>
+       <div class="mui-col-md-6 float-right">
+         <input id="virtue-color" type="color" value="#4B3F72" />
+       </div>
      </div>
      <div class="mui-row form-item">
        <div class="mui-col-md-4 padding-left-0"><label>Customize Icon</label></div>
        <div class="mui-col-md-8 icon-upload">
-         <input type="text" id="icon-file" class="upload-file-input" name="icon" /><input class="upload-button" type="upload-button" value="browse" />
+         <mat-form-field>
+           <input matInput type="text" id="icon-file" class="upload-file-input" name="icon" />
+         </mat-form-field>
+         <button mat-button class="upload-button">upload</button>
        </div>
      </div>
      <div class="mui-row form-item">
