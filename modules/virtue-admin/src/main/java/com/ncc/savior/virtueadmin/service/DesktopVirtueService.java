@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
-import com.ncc.savior.virtueadmin.infrastructure.AwsManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
+import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -29,14 +29,14 @@ public class DesktopVirtueService {
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
 	private IApplicationManager applicationManager;
-	private AwsManager awsManager;
+	private ICloudManager cloudManager;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager, AwsManager awsManager) {
+			IApplicationManager applicationManager, ICloudManager cloudManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
-		this.awsManager = awsManager;
+		this.cloudManager = cloudManager;
 	}
 
 	/**

@@ -210,20 +210,6 @@ public class AwsManager implements ICloudManager {
 				}
 			}
 
-			/*
-			 * // Lookup a resource by its logical name DescribeStackResourcesRequest
-			 * logicalNameResourceRequest = new DescribeStackResourcesRequest();
-			 * logicalNameResourceRequest.setStackName(stackName);
-			 * logicalNameResourceRequest.setLogicalResourceId(logicalResourceName);
-			 * System.out.format("Looking up resource name %1$s from stack %2$s\n",
-			 * logicalNameResourceRequest.getLogicalResourceId(),
-			 * logicalNameResourceRequest.getStackName()); for (StackResource resource :
-			 * stackbuilder.describeStackResources(logicalNameResourceRequest)
-			 * .getStackResources()) { System.out.format("    %1$-40s %2$-25s %3$s\n",
-			 * resource.getResourceType(), resource.getLogicalResourceId(),
-			 * resource.getPhysicalResourceId()); }
-			 */
-
 			// EC2 Querying....
 			Set<Instance> allInstances = getAllInstances();
 
