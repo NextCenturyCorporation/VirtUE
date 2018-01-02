@@ -61,15 +61,20 @@ docker exec $ADDC_CONTAINER \
 #
 # nuke any existing service account
 docker exec $ADDC_CONTAINER \
-	   samba-tool user delete $serviceHostname \
+	   samba-tool user delete http-${serviceHostname} \
 	   -U administrator --password="${adminPassword}" \
 	   >& /dev/null || true
 
 docker exec $ADDC_CONTAINER \
-	   samba-tool user create --random-password $serviceHostname \
+	   samba-tool user create --random-password http-${serviceHostname} \
 	   -U administrator --password="${adminPassword}"
+
+# nuke any existing service name
 docker exec $ADDC_CONTAINER \
-	   samba-tool spn add HTTP/${serviceFqdn} ${serviceHostname} \
+	   samba-tool spn delete HTTP/${serviceFqdn} \
+	   -U administrator --password="${adminPassword}" >& /dev/null || true
+docker exec $ADDC_CONTAINER \
+	   samba-tool spn add HTTP/${serviceFqdn} http-${serviceHostname} \
 	   -U administrator --password="${adminPassword}"
 
 #
@@ -83,13 +88,14 @@ newKeytab=/tmp/${container}.${$}.keytab
 # previous ones did not
 docker exec $ADDC_CONTAINER \
 	   samba-tool domain exportkeytab "$newKeytab" \
-	   --principal=HTTP/${serviceFqdn} \
+	   --principal=HTTP/${serviceFqdn}@${SAMBA_DOMAIN} \
 	   --configfile="${SAMBA_CONFIG_DIR}/etc/smb.conf" \
 	   -U administrator --password="${adminPassword}"
 
 # copy the keytab to the service container
 tempKeytab=$(mktemp)
 docker cp "${ADDC_CONTAINER}:${newKeytab}" "${tempKeytab}"
+docker exec $container mkdir -p "$(dirname ${keytabPath})"
 docker cp "${tempKeytab}" "${container}:${keytabPath}"
 docker exec $ADDC_CONTAINER rm "$newKeytab"
 rm "${tempKeytab}"

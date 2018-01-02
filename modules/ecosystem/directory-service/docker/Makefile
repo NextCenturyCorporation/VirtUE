@@ -6,7 +6,7 @@ BUILD_TARGETS = $(addprefix build-,$(SUBDIRS))
 
 build: $(BUILD_TARGETS)
 
-build-%: %
+$(BUILD_TARGETS): build-%: %
 	$(MAKE) -C $< build
 
 build-savior-firefox: | build-samba-client

@@ -92,8 +92,11 @@ else
 	echo "$0: already initialized"
 fi
 
-[ -e /etc/krb5.conf ] && echo "$0: kerberos config already exists, overwriting"
+[ -e /etc/krb5.conf ] && echo "$0: kerberos config krb5.conf already exists, overwriting"
 cp -f --backup=existing /var/lib/samba/private/krb5.conf /etc
+
+[ -e /var/kerberos/krb5kdc/kdc.conf ] && echo "$0: kerberos config kdc.conf already exists, overwriting"
+cp -f --backup=existing /var/lib/samba/private/kdc.conf /var/kerberos/krb5kdc
 
 # run
 if [ $runSamba -eq 1 ]; then

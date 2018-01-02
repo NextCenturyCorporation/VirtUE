@@ -14,6 +14,14 @@ locals {
 	"0" = "savior-client"
 	"1" = "savior-firefox"
   }
+  clientCommand = {
+	"0" = "/sbin/init"
+	"1" = "/usr/sbin/sshd,-D"
+  }
+  clientScript = {
+	"0" = "true"
+	"1" = "./configure-firefox.sh savior-firefox ${docker_container.saviorvc.name} ${docker_network.savior_network.name}"
+  }
 }
 
 resource "docker_container" "clients" {
@@ -22,7 +30,7 @@ resource "docker_container" "clients" {
   hostname = "${lookup(local.clientHostnames, count.index)}"
   image = "${lookup(local.clientImages, count.index)}"
   domainname = "${docker_container.samba-server.domainname}"
-  command = ["/sbin/init"]
+  command = "${split(",", lookup(local.clientCommand, count.index))}"
   networks = ["${docker_network.savior_network.name}"]
   dns = [ "${docker_container.samba-server.ip_address}" ]
   dns_search = [ "${docker_container.samba-server.domainname}" ]
@@ -58,7 +66,7 @@ EOF
 	default_keytab_name = FILE:/etc/krb5.keytab
 
 [realms]
-	SAVIOR = {
+	${upper(docker_container.samba-server.domainname)} = {
 		kdc = ${docker_container.samba-server.hostname}.${docker_container.samba-server.domainname}
 		admin_server = ${docker_container.samba-server.hostname}.${docker_container.samba-server.domainname}
 	}
@@ -69,5 +77,9 @@ EOF
   # variable or file or something accessible w/in the container.
   provisioner "local-exec" {
 	command = "docker exec ${self.name} net ads join -U administrator%${var.sambaAdminPassword}"
+  }
+
+  provisioner "local-exec" {
+	command = "${lookup(local.clientScript, count.index)}"
   }
 }
