@@ -14,6 +14,7 @@ export class ConfigResourcesComponent implements OnInit {
   leftPosition: any;
   dialogWidth: any;
 
+  
   constructor(public dialog: MatDialog) {}
 
   openDialog(id,type,text): void {
@@ -46,7 +47,7 @@ export class ConfigResourcesComponent implements OnInit {
     });
 
     dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
-    
+
   }
 
   ngOnInit() {}

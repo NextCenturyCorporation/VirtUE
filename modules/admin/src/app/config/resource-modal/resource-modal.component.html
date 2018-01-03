@@ -8,7 +8,7 @@
       </div>
       <div class="mui-col-md-4">
         <mat-form-field>
-          <mat-select [(ngModel)]="resourceValue" name="resourceType" [(value)]="selected">
+          <mat-select [(ngModel)]="resourceValue" name="resourceType" [(value)]="selected" disableRipple>
             <mat-option *ngFor="let r of resources" [value]="r.value">{{ r.viewValue }}</mat-option>
           </mat-select>
         </mat-form-field>

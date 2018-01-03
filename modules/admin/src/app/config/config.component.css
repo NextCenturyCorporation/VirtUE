@@ -1,3 +1,17 @@
+
+::ng-deep  .config .cdk-overlay-pane {
+  max-width: 180px;
+  position: absolute;
+  left: 724px;
+  top: 170px;
+}
+::ng-deep .config .mat-select-pane {
+   border:1px solid #b2b2b2;
+   padding: 5px;
+   position: absolute;
+}
+
+
 .config-split-pane {
   border-bottom: 1px solid #B2B2B2;
   border-right: 1px solid #B2B2B2;

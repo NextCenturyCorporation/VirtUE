@@ -36,13 +36,17 @@
       <div class="mui-col-md-2 table-data"><span>[ location ]</span></div>
       <div class="mui-col-md-2 table-data"><span>[ status ]</span></div>
       <div class="mui-col-md-1 table-data text-align-center"><span><input type="checkbox" name="input-id" value="enable" /></span></div>
-      <div class="mui-col-md-1 table-data text-align-center"><button (click)="openDialog(1,'delete','Printer')" class="button-trash"><span class="fa fa-trash"></span></button></div>
+      <div class="mui-col-md-1 table-data text-align-center">
+        <button mat-button (click)="openDialog(1,'delete','Printer')" class="button-trash">
+          <span class="fa fa-trash"></span>
+        </button>
+      </div>
     </div>
   </div>
   <div class="mui-row">
     <div class="mui-col-md-4">&nbsp;</div>
     <div class="mui-col-md-4 form-item text-align-center">
-      <button class="button-submit" type="submit">Save</button>
+      <button mat-button class="button-submit" type="submit">Save</button>
     </div>
     <div class="mui-col-md-4"></div>
   </div>
