@@ -99,6 +99,8 @@ public class DesktopRestService {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
+	
+	
 
 	private User getUserFromSecurity() {
 		User user = UserService.getCurrentUser();

@@ -72,6 +72,7 @@ public class DesktopResourceService {
 			throws IOException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
+		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 
 	}
@@ -80,6 +81,7 @@ public class DesktopResourceService {
 			throws IOException {
 		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
+		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 	}
 
@@ -122,9 +124,14 @@ public class DesktopResourceService {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder);
 		Response response = builder.method(method);
+		if (response.getStatus() == 200) {
 		InputStream in = (InputStream) response.getEntity();
 		T instance = jsonMapper.readValue(in, klass);
 		return instance;
+		} else {
+			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
+			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
+		}
 	}
 
 	private void addAuthorization(Builder builder) {

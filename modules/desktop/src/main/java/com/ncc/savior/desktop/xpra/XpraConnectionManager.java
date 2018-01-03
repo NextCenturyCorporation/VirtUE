@@ -70,12 +70,13 @@ public class XpraConnectionManager {
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
 			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
+			// logger.debug("getting servers");
 			Set<Integer> servers = init.getXpraServers();
 			// logger.debug("displays: " + servers);
 			if (!servers.contains(factory.getDisplay())) {
 				logger.error("Server does not have expected display running on XPRA.  Display=" + factory.getDisplay());
 				// logger.debug("starting Xpra Display on " + factory.getDisplay());
-				// init.startXpraServer(factory.getDisplay());
+				int d = init.startXpraServer(factory.getDisplay());
 				// logger.debug("Display " + d + " started");
 			}
 		}

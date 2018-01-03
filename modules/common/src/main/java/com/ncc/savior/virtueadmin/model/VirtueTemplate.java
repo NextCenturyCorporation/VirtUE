@@ -24,14 +24,28 @@ public class VirtueTemplate {
 	@ManyToMany()
 	private Collection<UserName> userNames;
 
+	private String awsTemplateName;
+
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
+
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.vmTemplates = vmTemplates;
+		this.setAwsTemplateName("");
+	}
+
+	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
+			String awsTemplateName) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.version = version;
+		this.vmTemplates = vmTemplates;
+		this.awsTemplateName = awsTemplateName;
 	}
 
 	/**
@@ -90,6 +104,14 @@ public class VirtueTemplate {
 
 	public Collection<UserName> retrieveUserNames() {
 		return userNames;
+	}
+
+	public String getAwsTemplateName() {
+		return awsTemplateName;
+	}
+
+	public void setAwsTemplateName(String awsTemplateName) {
+		this.awsTemplateName = awsTemplateName;
 	}
 
 }

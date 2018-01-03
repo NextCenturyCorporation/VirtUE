@@ -72,24 +72,27 @@ public class Sidebar implements VirtueChangeHandler {
 	private ArrayList<RgbColor> colorList;
 	private Iterator<RgbColor> colorItr;
 
-	public Sidebar(VirtueService virtueService, AuthorizationService authService) {
+	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors) {
 		this.authService = authService;
 		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
 		this.statusImage = new Image("images/loading.gif");
 		colorList = new ArrayList<RgbColor>();
-		colorList.add(new RgbColor(1, 0, 0, .5));
-		colorList.add(new RgbColor(0, 1, 0, .5));
-		colorList.add(new RgbColor(0, 0, 1, .5));
-		colorList.add(new RgbColor(1, 1, 0, .5));
-		colorList.add(new RgbColor(138d / 255, 43d / 255, 226d / 255, .5));
-		colorList.add(new RgbColor(1, 165d / 255, 0, .5));
-		// colorList.add(Color.ORANGE);
-		// colorList.add(Color.PURPLE);
-		// colorList.add(Color.CYAN);
-		// colorList.add(Color.BISQUE);
-		// colorList.add(Color.DARKSALMON);
-		// colorList.add(null);
+		if (useColors) {
+			colorList.add(new RgbColor(1, 0, 0, .5));
+			colorList.add(new RgbColor(0, 1, 0, .5));
+			colorList.add(new RgbColor(0, 0, 1, .5));
+			colorList.add(new RgbColor(1, 1, 0, .5));
+			colorList.add(new RgbColor(138d / 255, 43d / 255, 226d / 255, .5));
+			colorList.add(new RgbColor(1, 165d / 255, 0, .5));
+		} else {
+			// colorList.add(Color.ORANGE);
+			// colorList.add(Color.PURPLE);
+			// colorList.add(Color.CYAN);
+			// colorList.add(Color.BISQUE);
+			// colorList.add(Color.DARKSALMON);
+			colorList.add(null);
+		}
 		colorItr = colorList.iterator();
 	}
 

@@ -78,7 +78,29 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void addVirtue(VirtueInstance vi) {
+		for (VirtualMachine vm : vi.getVms()) {
+			vmRepository.save(vm);
+		}
 		virtueRepository.save(vi);
+	}
+
+	@Override
+	public VirtueInstance getVirtueInstance(String virtueId) {
+		return virtueRepository.findOne(virtueId);
+	}
+
+	@Override
+	public Iterable<VirtueInstance> getAllActiveVirtues() {
+		return virtueRepository.findAll();
+	}
+
+	@Override
+	public void clear() {
+		Iterable<VirtueInstance> virtues = virtueRepository.findAll();
+		// for (VirtueInstance virtue : virtues) {
+		// vmRepository.delete(virtue.getVms());
+		// }
+		virtueRepository.delete(virtues);
 
 	}
 

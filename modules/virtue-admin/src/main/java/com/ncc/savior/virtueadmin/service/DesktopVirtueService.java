@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
+import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -28,12 +29,14 @@ public class DesktopVirtueService {
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
 	private IApplicationManager applicationManager;
+	private ICloudManager cloudManager;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager) {
+			IApplicationManager applicationManager, ICloudManager cloudManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
+		this.cloudManager = cloudManager;
 	}
 
 	/**
@@ -79,11 +82,7 @@ public class DesktopVirtueService {
 
 	public DesktopVirtueApplication startApplicationFromTemplate(User user, String templateId, String applicationId)
 			throws IOException {
-		VirtueTemplate template = templateManager.getTemplate(user, templateId);
-		if (template == null) {
-			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
-		}
-		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
+		VirtueInstance instance = createVirtue(user, templateId);
 		return startApplication(user, instance.getId(), applicationId);
 	}
 
@@ -103,5 +102,19 @@ public class DesktopVirtueService {
 			appsMap.put(app.getId(), app);
 		}
 		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap);
+	}
+
+
+	public void deleteVirtue(User user, String instanceId) {
+		activeVirtueManager.deleteVirtue(user, instanceId);
+	}
+
+	public VirtueInstance createVirtue(User user, String templateId) {
+		VirtueTemplate template = templateManager.getTemplate(user, templateId);
+		if (template == null) {
+			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
+		}
+		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
+		return instance;
 	}
 }

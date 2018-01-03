@@ -81,4 +81,9 @@ public class ApplicationDefinition {
 		this.launchCommand = launchCommand;
 	}
 
+	@Override
+	public String toString() {
+		return "ApplicationDefinition [id=" + id + ", name=" + name + ", version=" + version + ", os=" + os
+				+ ", launchCommand=" + launchCommand + "]";
+	}
 }

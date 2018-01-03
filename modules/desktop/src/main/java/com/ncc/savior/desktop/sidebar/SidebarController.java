@@ -88,7 +88,7 @@ public class SidebarController {
 				if (cv.getId() != null && nv.getId() == null) {
 					cv.setId(nv.getId());
 					updatedId = true;
-					compare = 0;
+					compare = 1;
 				} else if (cv.getId() == null && nv.getId() != null) {
 					cv.setId(nv.getId());
 					updatedId = true;

@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -11,21 +12,22 @@ public class VirtualMachine {
 	@Id
 	private String id;
 	private String name;
-	// app ID to application
-	@ManyToMany
-	private Collection<ApplicationDefinition> applications;
-	private OS os;
 	private VmState state;
+	private OS os;
 	private String hostname;
 	private int sshPort;
 	private String infrastructureId;
 	private String userName;
+	@Column(length = 6000)
 	private String privateKey;
-
+	private String ipAddress;
+	// app ID to application
+	@ManyToMany
+	private Collection<ApplicationDefinition> applications;
 
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
-			String infrastructureId, String hostname, int sshPort, String userName, String privateKey) {
-
+			String infrastructureId, String hostname, int sshPort, String userName, String privateKey,
+			String ipAddress) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -37,6 +39,7 @@ public class VirtualMachine {
 		this.sshPort = sshPort;
 		this.userName = userName;
 		this.privateKey = privateKey;
+		this.ipAddress = ipAddress;
 
 	}
 
@@ -130,13 +133,21 @@ public class VirtualMachine {
 
 	@Override
 	public String toString() {
-		return "VirtualMachine [id=" + id + ", name=" + name + ", applications=" + applications + ", os=" + os
-				+ ", state=" + state + ", hostname=" + hostname + ", sshPort=" + sshPort + ", infrastructureId="
-				+ infrastructureId + "]";
+		return "VirtualMachine [id=" + id + ", name=" + name + ", state=" + state + ", os=" + os + ", hostname="
+				+ hostname + ", sshPort=" + sshPort + ", infrastructureId=" + infrastructureId + ", userName="
+				+ userName + ", ipAddress=" + ipAddress + ", applications=" + applications + "]";
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	protected void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	public ApplicationDefinition findApplicationById(String applicationId) {
-		for(ApplicationDefinition app:applications) {
+		for (ApplicationDefinition app : applications) {
 			if (app.getId().equals(applicationId)) {
 				return app;
 			}

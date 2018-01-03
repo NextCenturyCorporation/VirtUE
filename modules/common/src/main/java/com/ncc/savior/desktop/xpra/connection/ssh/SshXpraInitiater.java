@@ -7,6 +7,9 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -19,6 +22,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
  *
  */
 public class SshXpraInitiater implements IXpraInitiator {
+	private static final Logger logger = LoggerFactory.getLogger(SshXpraInitiater.class);
 	private static final String SUDO_OR_NOTHING = "";
 	private static final String XPRA_CMD = SUDO_OR_NOTHING + " xpra";
 	private static final String XPRA_STOP = XPRA_CMD + " stop";
@@ -65,21 +69,23 @@ public class SshXpraInitiater implements IXpraInitiator {
 		ChannelExec channel = null;
 		try {
 			session = getConnectedSession();
-			session.setTimeout(2000);
+			session.setTimeout(10000);
 			String command = (display > 0 ? XPRA_START + " :" + display : XPRA_START);
+			// command = "sudo systemctl enable xpra.socket;" + command;
 			channel = getConnectedChannel(command, session, null);
 			channel.setErrStream(System.err);
 			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			BufferedReader reader = new BufferedReader(stream);
+			channel.connect();
 			String line;
-			Thread.sleep(500);
+			Thread.sleep(300);
 			while ((line = reader.readLine()) != null) {
 				String prefix = "available on display :";
 				if (line.contains(prefix)) {
 					String displayStr = line.substring(line.indexOf(prefix) + prefix.length());
 					display = Integer.parseInt(displayStr);
 				}
-				// System.out.println(line);
+				// logger.debug(line);
 			}
 		} catch (JSchException | InterruptedException e) {
 			throw new IOException(e);
