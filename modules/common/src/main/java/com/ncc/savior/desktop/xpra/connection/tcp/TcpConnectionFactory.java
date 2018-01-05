@@ -59,13 +59,18 @@ public class TcpConnectionFactory extends BaseConnectionFactory {
 		public String getConnectionKey() {
 			return host + "-" + port;
 		}
+
+		@Override
+		public void setDisplay(int display) {
+			// not used
+		}
 	}
 
 	/**
 	 * Not used for TCP connections.
 	 */
-	@Override
-	public int getDisplay() {
-		return -1;
-	}
+	// @Override
+	// public int getDisplay() {
+	// return -1;
+	// }
 }

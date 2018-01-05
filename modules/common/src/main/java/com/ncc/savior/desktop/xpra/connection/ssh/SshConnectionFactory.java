@@ -29,21 +29,19 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 	private static final String DEFAULT_COMMAND_NAME = "xpra";
 
 	private static final String DEFAULT_COMMAND_MODE = "_proxy";
-	private static final int DEFAULT_DISPLAY = 55;
+	// private static final int DEFAULT_DISPLAY = 55;
 	private String commandDir;
 	private String commandName;
 	private String commandMode;
-	private int display;
 
 	public SshConnectionFactory() {
-		this(DEFAULT_COMMAND_DIR, DEFAULT_COMMAND_NAME, DEFAULT_COMMAND_MODE, DEFAULT_DISPLAY);
+		this(DEFAULT_COMMAND_DIR, DEFAULT_COMMAND_NAME, DEFAULT_COMMAND_MODE);
 	}
 
-	public SshConnectionFactory(String commandDir, String commandName, String commandMode, int display) {
+	public SshConnectionFactory(String commandDir, String commandName, String commandMode) {
 		this.commandDir = commandDir;
 		this.commandName = commandName;
 		this.commandMode = commandMode;
-		this.display = display;
 	}
 
 	@Override
@@ -54,7 +52,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 				Session session = JschUtils.getSession(p);
 				session.connect();
 				ChannelExec channel = (ChannelExec) session.openChannel("exec");
-				String command = getCommand(commandDir, commandName, commandMode, display);
+				String command = getCommand(commandDir, commandName, commandMode, p.getDisplay());
 				logger.debug("connecting with command=" + command);
 				channel.setCommand(command);
 				channel.connect();
@@ -80,6 +78,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 		private final String user;
 		private final String password;
 		private final File pem;
+		private int display;
 
 		public SshConnectionParameters(String host, int port, String user, String password) {
 			this.host = host;
@@ -173,10 +172,18 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 		public String getConnectionKey() {
 			return host + "-" + port + "-" + user;
 		}
+
+		public int getDisplay() {
+			return display;
+		}
+
+		public void setDisplay(int display) {
+			this.display = display;
+		}
 	}
 
-	@Override
-	public int getDisplay() {
-		return display;
-	}
+	// @Override
+	// public int getDisplay() {
+	// return display;
+	// }
 }

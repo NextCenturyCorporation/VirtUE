@@ -42,6 +42,7 @@ import com.amazonaws.services.cloudformation.model.StackResource;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
@@ -49,7 +50,9 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceStatusSummary;
+import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -218,7 +221,10 @@ public class AwsManager implements ICloudManager {
 					allInstances);
 
 			// waitForReachability(createdEc2Instances);
+			renameAllVms(vms, "VRTU-" + serverUser + "-" + clientUser);
 			waitForAllVmsRunning(vms);
+
+			// rebootAllVms(vms);
 
 			vi = new VirtueInstance(template, clientUser, vms);
 			vi.setId(uuid);
@@ -227,8 +233,10 @@ public class AwsManager implements ICloudManager {
 			if (ase.getErrorCode().equals("AlreadyExistsException")) {
 				logger.error("Stack already exist", ase);
 			} else {
-				logger.error("Caught an AmazonServiceException, which means your request made it "
-						+ "to AWS CloudFormation, but was rejected with an error response for some reason.", ase);
+				logger.error(
+						"Caught an AmazonServiceException, which means your request made it "
+								+ "to AWS CloudFormation, but was rejected with an error response for some reason.",
+						ase);
 				logger.error("  Error Message:    " + ase.getMessage());
 				logger.error("  HTTP Status Code: " + ase.getStatusCode());
 				logger.error("  AWS Error Code:   " + ase.getErrorCode());
@@ -256,6 +264,31 @@ public class AwsManager implements ICloudManager {
 		 */
 
 		return vi;
+	}
+
+	private void renameAllVms(Collection<VirtualMachine> vms, String prefix) {
+		for (VirtualMachine vm : vms) {
+			CreateTagsRequest ctr = new CreateTagsRequest();
+			ctr.withResources(vm.getInfrastructureId());
+			Collection<Tag> tags= new ArrayList<Tag>();
+			tags.add(new Tag("Name", prefix + "-" + vm.getName()));
+			ctr.setTags(tags);
+			ec2.createTags(ctr);
+		}
+
+	}
+
+	private void rebootAllVms(Collection<VirtualMachine> vms) {
+		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
+		for (VirtualMachine vm : vms) {
+			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
+		}
+		RebootInstancesRequest reboot = new RebootInstancesRequest();
+		reboot.setInstanceIds(instanceIdsToVm.keySet());
+		ec2.rebootInstances(reboot);
+		updateStatusOnVms(vms);
+
+		waitForAllVmsRunning(vms);
 	}
 
 	private void printTraceRunningInstances() {
@@ -323,14 +356,14 @@ public class AwsManager implements ICloudManager {
 	}
 
 	private VmState getRunningStateFromStatus(InstanceStatusSummary vmStatus, String instanceId) {
-			switch (vmStatus.getStatus()) {
-			case "ok":
-				return VmState.RUNNING;
-			case "initializing":
-				return VmState.LAUNCHING;
-			default:
-				logger.error("Unknown status from AWS. Code=" + vmStatus.getStatus() + " instanceId=" + instanceId);
-			}
+		switch (vmStatus.getStatus()) {
+		case "ok":
+			return VmState.RUNNING;
+		case "initializing":
+			return VmState.LAUNCHING;
+		default:
+			logger.error("Unknown status from AWS. Code=" + vmStatus.getStatus() + " instanceId=" + instanceId);
+		}
 		// }
 		return VmState.ERROR;
 	}
@@ -421,8 +454,7 @@ public class AwsManager implements ICloudManager {
 		// to track the progress of the stack deletion
 		try {
 			String status = waitForCompletion(stackbuilder, stackName);
-			logger.trace("Stack creation completed, the stack " + stackName + " completed with "
-					+ status);
+			logger.trace("Stack creation completed, the stack " + stackName + " completed with " + status);
 
 		} catch (AmazonServiceException ase) {
 			logger.error("Caught an AmazonServiceException, which means your request made it "

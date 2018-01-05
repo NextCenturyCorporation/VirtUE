@@ -31,6 +31,7 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 			imp = impersonatedUser.impersonate();
 		}
 		String fqd = WindowsAccountImpl.getCurrentUsername();
+
 		DesktopUser user = DesktopUser.fromFullyQualifiedDomainName(fqd);
 		if (imp != null) {
 			imp.revertToSelf();
