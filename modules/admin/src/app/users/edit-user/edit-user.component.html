@@ -9,14 +9,14 @@
           <div class="mui-col-md-9">
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
-                <input type="text"
-                  ng-model="selected"
-                  placeholder="Type the first or last name and select"
-                  uib-typeahead=""
-                  typeahead-loading=""
-                  typeahead-popup-template-url=""
-                  typeahead-no-results="noResults" class="form-control" /><br />
-                  <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ user.id }}</span>
+                <mat-form-field>
+                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="users" [matAutocomplete]="auto">
+                  <mat-autocomplete #auto="matAutocomplete">
+                    <mat-option *ngFor="let user of activeDirUsers" [value]="user">
+                      {{ user }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
                 </div>
               </div>
               <div class="mui-row">

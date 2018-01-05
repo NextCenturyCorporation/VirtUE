@@ -1,4 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { Observable } from 'rxjs/Observable';
+import { startWith } from 'rxjs/operators/startWith';
+import { map } from 'rxjs/operators/map';
+
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
@@ -15,6 +20,21 @@ export class AddUserComponent implements OnInit {
   submitBtn: any;
   dialogWidth: any;
   fullImagePath: string;
+  users = new FormControl();
+  activeDirUsers = [
+    'Anthony Wong',
+    'Binoy Ravindran',
+    'Chris Long',
+    'Kara Cartwright',
+    'Kyle Drumm',
+    'Mike Day',
+    'Patrick Dwyer',
+    'Pierre Olivier',
+    'Ruslan Nikolaev',
+    'Sophie Kim',
+    'Wole Omitowoju'
+  ];
+
 
   constructor(public dialog: MatDialog) {}
   activateModal(id,mode): void {

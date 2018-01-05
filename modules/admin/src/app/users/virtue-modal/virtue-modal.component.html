@@ -5,15 +5,11 @@
     <div class="mui-row">
       <div class="mui-col-md-4 padding-left-0"><label>Select Virtue</label></div>
       <div class="mui-col-md-6 padding-right-0">
-        <div class="select-container">
-          <span class="fa fa-angle-down"></span>
-          <select name="Virtue">
-            <option>Virtue 1</option>
-            <option>Virtue 2</option>
-            <option>Virtue 3</option>
-            <option>Virtue n</option>
-          </select>
-        </div>
+        <mat-form-field>
+          <mat-select name="virtues" placeholder="Select a Virtue">
+            <mat-option *ngFor="let option of virtues" [value]="option">{{ option }}</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
       <div class="mui-col-md-2">
       <button class="button">Add</button></div>

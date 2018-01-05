@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { Observable } from 'rxjs/Observable';
+import { startWith } from 'rxjs/operators/startWith';
+import { map } from 'rxjs/operators/map';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
@@ -16,6 +20,20 @@ export class EditUserComponent implements OnInit {
   dialogWidth: any;
   fullImagePath: string;
   user: { id: number };
+  users = new FormControl();
+  activeDirUsers = [
+    'Anthony Wong',
+    'Binoy Ravindran',
+    'Chris Long',
+    'Kara Cartwright',
+    'Kyle Drumm',
+    'Mike Day',
+    'Patrick Dwyer',
+    'Pierre Olivier',
+    'Ruslan Nikolaev',
+    'Sophie Kim',
+    'Wole Omitowoju'
+  ];
 
   constructor(public dialog: MatDialog, private router: ActivatedRoute) {}
 
