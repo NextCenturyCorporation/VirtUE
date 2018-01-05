@@ -10,6 +10,14 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 export class VirtueModalComponent implements OnInit {
 
   form: FormGroup;
+  virtues = [
+    'Microsoft Office',
+    'Microsoft Outlook',
+    'Adobe Suite',
+    'Developer Bundle',
+    'Admin Bundle',
+    'Project Management'
+  ];
 
   constructor( public dialogRef: MatDialogRef<VirtueModalComponent>, @Inject( MAT_DIALOG_DATA ) public data: any ) {
     console.log('data', this.data);
