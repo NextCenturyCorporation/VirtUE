@@ -59,7 +59,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 					}
 					set.add(display);
 				}
-				System.out.println(line);
+				// System.out.println(line);
 			}
 		} catch (JSchException e) {
 			throw new IOException(e);

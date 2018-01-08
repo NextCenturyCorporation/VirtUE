@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,12 +72,15 @@ public class Sidebar implements VirtueChangeHandler {
 	private Image statusImage;
 	private ArrayList<RgbColor> colorList;
 	private Iterator<RgbColor> colorItr;
+	private ImageView userImageView;
+	private String style;
 
-	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors) {
+	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors, String style) {
 		this.authService = authService;
 		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
 		this.statusImage = new Image("images/loading.gif");
+		this.style = style;
 		colorList = new ArrayList<RgbColor>();
 		if (useColors) {
 			colorList.add(new RgbColor(1, 0, 0, .5));
@@ -119,12 +123,20 @@ public class Sidebar implements VirtueChangeHandler {
 		VBox.setVgrow(vlist, Priority.ALWAYS);
 		Scene scene = new Scene(pane, width, height);
 		Image icon = new Image("images/saviorLogo.png");
+		URL resource = getClass().getResource("/" + style + ".css");
+		if (resource != null) {
+			scene.getStylesheets().add(resource.toExternalForm());
+		}
 		stage.getIcons().clear();
 		stage.getIcons().add(icon);
 		stage.setScene(scene);
 		stage.show();
 		DesktopUser user = authService.getUser();
+
 		String reqDomain = authService.getRequiredDomain();
+		if (user != null && user.getImage() != null) {
+			userImageView.setImage(user.getImage());
+		}
 		if (user == null || (reqDomain != null && !reqDomain.equals(user.getDomain()))) {
 			LoginScreen login = new LoginScreen(authService, true);
 			login.addLoginEventListener(new ILoginEventListener() {
@@ -134,6 +146,9 @@ public class Sidebar implements VirtueChangeHandler {
 						@Override
 						public void run() {
 							userLabel.setText(user.getUsername());
+							if (user.getImage() != null) {
+								userImageView.setImage(user.getImage());
+							}
 						}
 					});
 				}
@@ -204,8 +219,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private Node getUserIcon() {
 		Image image = new Image("images/defaultUserIcon.png");
-		ImageView iv = new ImageView(image);
-		iv.setOnMouseClicked(new EventHandler<MouseEvent>() {
+		userImageView = new ImageView(image);
+		userImageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
 
 			@Override
 			public void handle(MouseEvent event) {
@@ -219,6 +234,9 @@ public class Sidebar implements VirtueChangeHandler {
 								virtuePane.getChildren().clear();
 								virtueIdToVmi.clear();
 								userLabel.setText(user.getUsername());
+								if (user.getImage() != null) {
+									userImageView.setImage(user.getImage());
+								}
 							}
 						});
 					}
@@ -239,10 +257,11 @@ public class Sidebar implements VirtueChangeHandler {
 
 		int size = 96;
 		int paddingSize = 5;
-		iv.setFitWidth(size);
-		iv.setFitHeight(size);
+		// userImageView.setFitWidth(size);
+		userImageView.setFitHeight(size);
+		userImageView.setPreserveRatio(true);
 		GridPane pane = new GridPane();
-		pane.getChildren().add(iv);
+		pane.getChildren().add(userImageView);
 		pane.setPrefWidth(width);
 		pane.setMinHeight(size + 2 * paddingSize);
 		pane.setAlignment(Pos.BOTTOM_CENTER);

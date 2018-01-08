@@ -85,44 +85,44 @@ public class DataResource {
 		appsAll.addAll(appsDrawing);
 		appsAll.addAll(appsMath);
 
-		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
-				OS.LINUX, "Linux Browsers", appsBrowsers);
+		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
+				OS.LINUX, "Browsers", appsBrowsers);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux All", OS.LINUX,
-				"Linux All", appsAll);
+		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX, "All",
+				appsAll);
 
-		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
-				"Linux Math", appsMath);
+		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
+				"Math", appsMath);
 
-		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Drawing",
-				OS.LINUX, "Linux Drawing", appsDrawing);
+		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
+				"Drawing", appsDrawing);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Linux LibreOffice", OS.LINUX, "Linux LibreOffice", appsLibreOffice);
+				"LibreOffice", OS.LINUX, "LibreOffice", appsLibreOffice);
 
 		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
-		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
+		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Single VM Virtue",
 				"1.0", vmtsSingleAll);
 
 		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
-		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue", "1.0",
+		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Browser Virtue", "1.0",
 				vmtsBrowsers);
 
 		List<VirtualMachineTemplate> vmtsLibre = new ArrayList<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
-		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Linux LibreOffice Virtue", "1.0",
+		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "LibreOffice Virtue", "1.0",
 				vmtsLibre);
 
 		List<VirtualMachineTemplate> vmtsDrawing = new ArrayList<VirtualMachineTemplate>();
 		vmtsDrawing.add(vmDrawing);
-		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Drawing Virtue", "1.0",
+		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Drawing Virtue", "1.0",
 				vmtsDrawing);
 
 		List<VirtualMachineTemplate> vmtsMath = new ArrayList<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
-		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
+		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0",
 				vmtsMath);
 
 		for (ApplicationDefinition app : appsAll) {

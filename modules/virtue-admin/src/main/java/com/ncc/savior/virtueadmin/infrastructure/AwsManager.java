@@ -221,7 +221,7 @@ public class AwsManager implements ICloudManager {
 					allInstances);
 
 			// waitForReachability(createdEc2Instances);
-			renameAllVms(vms, "VRTU-" + serverUser + "-" + clientUser);
+			renameAllVms(vms, "VRTU-" + clientUser + "-" + serverUser);
 			waitForAllVmsRunning(vms);
 
 			// rebootAllVms(vms);

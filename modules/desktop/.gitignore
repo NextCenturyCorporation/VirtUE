@@ -8,3 +8,4 @@
 /bin1/
 /certs/*
 savior-user.properties
+/src/main/resources/images/user/*
