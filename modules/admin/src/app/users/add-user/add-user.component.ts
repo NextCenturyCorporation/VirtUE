@@ -56,7 +56,7 @@ export class AddUserComponent implements OnInit {
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath
       },
-      panelClass: 'virtue-modal-overlay';
+      panelClass: 'virtue-modal-overlay'
     });
 
     this.screenWidth = (window.screen.width);
