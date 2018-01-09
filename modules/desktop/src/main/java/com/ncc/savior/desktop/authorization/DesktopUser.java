@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.authorization;
 
+import javafx.scene.image.Image;
+
 /**
  * Model object for the user on a desktop used for the desktop app.
  *
@@ -9,6 +11,7 @@ public class DesktopUser {
 	private static final String DOMAIN_SEPARATOR = "\\";
 	private String username;
 	private String domain;
+	private Image image;
 
 	public DesktopUser(String domain, String username) {
 		this.domain = domain;
@@ -36,5 +39,13 @@ public class DesktopUser {
 			String user = fqd.substring(index+1);
 			return new DesktopUser(domain, user);
 		}
+	}
+
+	public void setImage(Image img) {
+		image = img;
+	}
+
+	public Image getImage() {
+		return image;
 	}
 }

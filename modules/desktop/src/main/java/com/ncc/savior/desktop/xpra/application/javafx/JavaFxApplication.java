@@ -107,6 +107,9 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 					stage.initOwner(parent.getStage());
 					stage.setIconified(false);
 				}
+				if (meta.getFullscreen()) {
+					stage.setFullScreen(true);
+				}
 
 				stage.setScene(scene);
 				((JavaFxXpraWindowManager) windowManager).setStage(stage);
@@ -116,6 +119,12 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 				stage.show();
 				insetWidth = (stage.getWidth() - scene.getWidth()) / 2;
 				titleBarHeight = stage.getHeight() - scene.getHeight() - insetWidth;
+				if (meta.getFullscreen()) {
+					stage.setX(0);
+					stage.setY(0);
+					insetWidth = 0;
+					titleBarHeight = 0;
+				}
 				((JavaFxXpraWindowManager) windowManager).setInsetWith((int) insetWidth);
 				((JavaFxXpraWindowManager) windowManager).setTitleBarHeight((int) titleBarHeight);
 				// stage.setWidth(packet.getWidth());

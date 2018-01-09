@@ -1,5 +1,8 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -84,7 +87,9 @@ public class HelloPacket extends Packet {
 		map.put(DESKTOP_SIZE, screen);
 		map.put(DPI, 96);
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
-		map.put(SCREEN_SIZES, new int[][] {});
+		// map.put(SCREEN_SIZES, new int[][] {});
+		int[][] screenSizes = getMonitorSizes();
+		map.put(SCREEN_SIZES, screenSizes);
 		map.put(ENCODINGS, encodings);
 		map.put(ZLIB, true);
 		map.put(CLIPBOARD, false);
@@ -141,5 +146,19 @@ public class HelloPacket extends Packet {
 
 		map.put(XKBMAP_KEYCODES, list);
 
+	}
+
+	private static int[][] getMonitorSizes() {
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] gs = ge.getScreenDevices();
+		int[][] monitors = new int[gs.length][];
+		for (int i = 0; i < gs.length; i++) {
+			DisplayMode dm = gs[i].getDisplayMode();
+			int[] display = new int[] { dm.getWidth(), dm.getHeight() };
+			// sb.append(i + ", width: " + dm.getWidth() + ", height: " + dm.getHeight() +
+			// "\n");
+			monitors[i] = display;
+		}
+		return monitors;
 	}
 }

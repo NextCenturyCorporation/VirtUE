@@ -73,12 +73,16 @@ public class XpraConnectionManager {
 			// logger.debug("getting servers");
 			Set<Integer> servers = init.getXpraServers();
 			// logger.debug("displays: " + servers);
-			if (!servers.contains(factory.getDisplay())) {
-				logger.error("Server does not have expected display running on XPRA.  Display=" + factory.getDisplay());
-				// logger.debug("starting Xpra Display on " + factory.getDisplay());
-				int d = init.startXpraServer(factory.getDisplay());
-				// logger.debug("Display " + d + " started");
+			if (servers.size() >= 1) {
+				params.setDisplay(servers.iterator().next());
 			}
+			// if (!servers.contains(factory.getDisplay())) {
+			// logger.error("Server does not have expected display running on XPRA.
+			// Display=" + factory.getDisplay());
+			// // logger.debug("starting Xpra Display on " + factory.getDisplay());
+			// int d = init.startXpraServer(factory.getDisplay());
+			// // logger.debug("Display " + d + " started");
+			// }
 		}
 
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);

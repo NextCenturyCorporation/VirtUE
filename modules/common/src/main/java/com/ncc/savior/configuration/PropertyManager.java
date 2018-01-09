@@ -33,6 +33,7 @@ public class PropertyManager {
 	public static final String PROPERTY_DEFAULT_PEM = "savior.desktop.defaultPem";
 	public static final String PROPERTY_ALLOW_INSECURE_SSL = "savior.desktop.allowInsecureSsl";
 	public static final String PROPERTY_USE_COLORS = "savior.desktop.useColors";
+	public static final String PROPERTY_STYLE = "savior.desktop.style";
 	private Properties props;
 	private boolean warnOnMissingFile = false;
 

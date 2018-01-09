@@ -81,6 +81,10 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 					x -= insetWidth;
 					y -= titleBarHeight;
 				}
+				if (packet.getMetadata().getFullscreen()) {
+					x = 0;
+					y = 0;
+				}
 				// double x = packet.getX();
 				// double y = packet.getY();
 				AnchorPane.setTopAnchor(canvas, y);

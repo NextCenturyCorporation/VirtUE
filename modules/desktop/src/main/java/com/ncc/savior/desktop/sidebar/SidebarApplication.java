@@ -32,12 +32,13 @@ public class SidebarApplication extends Application {
 		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
+		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager = new JavaFxApplicationManagerFactory(
 				new JavaFxKeyboard(new XpraKeyMap()));
 		VirtueService virtueService = new VirtueService(drs, appManager);
-		Sidebar sidebar = new Sidebar(virtueService, authService, useColors);
+		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		controller.init(primaryStage);
 	}
