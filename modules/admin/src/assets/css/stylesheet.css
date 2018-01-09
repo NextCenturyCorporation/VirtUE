@@ -3997,14 +3997,10 @@ input.mat-input-element {
 
 /* line 1, ../scss/_cdk.scss */
 .app-overlay-container {
+  position: absolute;
   left: 0;
   top: 0;
-  position: fixed;
-  z-index: 1000;
-}
-/* line 7, ../scss/_cdk.scss */
-.app-overlay-container .cdk-overlay-pane {
-  background-color: #FFF;
+  z-index: 0;
 }
 
 /* line 2, ../scss/_helpers.scss */
