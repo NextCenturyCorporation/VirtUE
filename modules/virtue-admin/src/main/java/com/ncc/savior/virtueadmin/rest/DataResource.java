@@ -117,7 +117,7 @@ public class DataResource {
 
 		List<VirtualMachineTemplate> vmtsLibre = new ArrayList<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
-		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Documents Virtue", "1.0",
+		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0",
 				vmtsLibre);
 
 		List<VirtualMachineTemplate> vmtsDrawing = new ArrayList<VirtualMachineTemplate>();
