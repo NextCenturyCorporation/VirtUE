@@ -101,7 +101,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
-		stage.setTitle("Savior");
+		stage.setTitle("SAVIOR");
 		this.stage = stage;
 
 		VBox pane = new VBox();
@@ -277,7 +277,7 @@ public class Sidebar implements VirtueChangeHandler {
 		ImageView view = new ImageView(image);
 		view.setFitWidth(ICON_SIZE);
 		view.setFitHeight(ICON_SIZE);
-		Label label = new Label("Savior VirtUE Desktop", view);
+		Label label = new Label("SAVIOR Desktop", view);
 		label.setPrefWidth(width);
 		label.setAlignment(Pos.CENTER);
 		GridPane pane = new GridPane();
