@@ -62,6 +62,10 @@ public class DataResource {
 				"gimp");
 		ApplicationDefinition pinta = new ApplicationDefinition(UUID.randomUUID().toString(), "Pinta", "1.0", OS.LINUX,
 				"pinta");
+		ApplicationDefinition gedit = new ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
+				"gedit");
+		ApplicationDefinition eclipse = new ApplicationDefinition(UUID.randomUUID().toString(), "Eclipse", "1.0",
+				OS.LINUX, "eclipse");
 
 		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
@@ -100,24 +104,25 @@ public class DataResource {
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"LibreOffice", OS.LINUX, "LibreOffice", appsLibreOffice);
 
+
 		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
-		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Single VM Virtue",
+		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue",
 				"1.0", vmtsSingleAll);
 
 		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
-		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Browser Virtue", "1.0",
+		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue", "1.0",
 				vmtsBrowsers);
 
 		List<VirtualMachineTemplate> vmtsLibre = new ArrayList<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
-		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "LibreOffice Virtue", "1.0",
+		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Documents Virtue", "1.0",
 				vmtsLibre);
 
 		List<VirtualMachineTemplate> vmtsDrawing = new ArrayList<VirtualMachineTemplate>();
 		vmtsDrawing.add(vmDrawing);
-		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Drawing Virtue", "1.0",
+		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Artist Virtue", "1.0",
 				vmtsDrawing);
 
 		List<VirtualMachineTemplate> vmtsMath = new ArrayList<VirtualMachineTemplate>();
@@ -149,6 +154,7 @@ public class DataResource {
 		User browser = new User("browser", new ArrayList<String>());
 		User nerd = new User("nerd", new ArrayList<String>());
 		User artist = new User("artist", new ArrayList<String>());
+		User developer = new User("developer", new ArrayList<String>());
 
 		templateManager.assignVirtueTemplateToUser(admin, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueSingleAll.getId());
@@ -166,6 +172,8 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(nerd, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueMath.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(developer, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(developer, virtueMath.getId());
 
 		logger.info("Data preloaded");
 		return Response.ok().entity("success").build();
