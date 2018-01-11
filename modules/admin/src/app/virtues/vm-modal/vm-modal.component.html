@@ -1,0 +1,43 @@
+<form>
+<h2 mat-dialog-title>Manage Virtual Machines</h2>
+<div mat-dialog-content>
+  <p>Select virtual machines ot include in the virtue.</p>
+  <div class="mui-container-fluid mui-col-md-12 table-container">
+    <div class="mui-row table-header-group">
+      <div class="mui-col-md-5 table-header">
+        <span class="float-left"><input type="checkbox" value="selectAll" /></span>
+        <span class="float-left text-align-left">Virtual Machine</span>
+      </div>
+      <div class="mui-col-md-2 table-header">
+        Image Size
+      </div>
+      <div class="mui-col-md-5 table-header">
+        Applications
+      </div>
+    </div>
+    <div class="scrolling-list">
+      <div class="mui-row">
+        <div class="mui-col-md-5 table-data">
+          <span class="float-left"><input type="checkbox" value="vm-#" /></span>
+          <span class="float-left">[ Virtual Machine Name ]</span>
+        </div>
+        <div class="mui-col-md-2 table-data">
+          # MB
+        </div>
+        <div class="mui-col-md-5 table-data">
+          App 1, App 2, App 3, App N
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button class="button" type="submit" (click)="saveVMList();">
+  Save
+  </button>
+  <button mat-button type="button" mat-dialog-close>
+    Cancel
+  </button>
+</div>
+</form>

@@ -1,0 +1,91 @@
+
+.border-top {
+  border-top: rgba(0,0,0,0.12);
+}
+.border-right {
+  border-right: rgba(0,0,0,0.12);
+}
+.border-bottom {
+  border-bottom: rgba(0,0,0,0.12);
+}
+.border-left {
+  border-left: rgba(0,0,0,0.12);
+}
+
+.clearfix {
+  content: ' ';
+  clear: both;
+  display: block;
+  height: 1px;
+}
+
+.flex-box {
+  display: flex;
+  &.flex-column {
+    height: 100%;
+    flex-direction: column;
+    align-content: stretch;
+  }
+  &.flex-row {
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.float-left {
+  float: left;
+}
+.float-right {
+  float: right;
+}
+
+@for $i from 0 to 4 {
+  .margin-#{$i} { margin: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .margin-left-#{$i} { margin-left: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .margin-right-#{$i} { margin-right: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .margin-top-#{$i} { margin-top: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .margin-bottom-#{$i} { margin-bottom: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .padding-#{$i} { padding: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .padding-left-#{$i} { padding-left: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .padding-right-#{$i} { padding-right: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .padding-top-#{$i} { padding-top: #{$i * 5}; }
+}
+
+@for $i from 0 to 4 {
+  .padding-bottom-#{$i} { padding-bottom: #{$i * 5}; }
+}
+
+.text-align-left {
+  text-align: left;
+}
+.text-align-center {
+  text-align: center;
+}
+.text-align-right {
+  text-align: right;
+}

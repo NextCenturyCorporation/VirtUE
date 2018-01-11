@@ -25,6 +25,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -63,8 +64,11 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 	protected double titleBarHeight;
 	protected double insetWidth;
 
-	public JavaFxApplication(XpraClient client, NewWindowPacket packet, JavaFxApplication parent) {
+	private Color color;
+
+	public JavaFxApplication(XpraClient client, NewWindowPacket packet, JavaFxApplication parent, Color color) {
 		super(client, packet.getWindowId());
+		this.color = color;
 		this.parent = parent;
 		init(packet);
 	}
@@ -78,6 +82,7 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 		JavaFxXpraPacketHandler applicationPacketHandler = new JavaFxXpraPacketHandler(scene);
 		client.addPacketListener(applicationPacketHandler);
 		windowManager = new JavaFxXpraWindowManager(client, packet.getWindowId());
+		((JavaFxXpraWindowManager) windowManager).setColor(color);
 		windowManager.setDebugOutput(debugOutput);
 
 		Platform.runLater(new Runnable() {

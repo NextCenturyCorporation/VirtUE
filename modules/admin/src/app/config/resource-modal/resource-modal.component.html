@@ -1,0 +1,37 @@
+<form id="resources">
+<h2 mat-dialog-title>Add New Resource</h2>
+<div mat-dialog-content class="mui-row">
+  <div class="mui-col-md-12">
+    <div class="mui-row border-top margin-bottom-20">
+      <div class="mui-col-md-4 text-align-right">
+        <label>Resource Type:</label>
+      </div>
+      <div class="mui-col-md-4">
+        <mat-form-field>
+          <mat-select [(ngModel)]="resourceValue" name="resourceType" [(value)]="selected" disableRipple>
+            <mat-option *ngFor="let r of resources" [value]="r.value">{{ r.viewValue }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="mui-col-md-4">
+        &nbsp;
+      </div>
+    </div>
+    <hr />
+
+    <app-file-share *ngIf="selected == 'File Share'"></app-file-share>
+
+    <app-printers *ngIf="selected == 'Printers'"></app-printers>
+
+  </div>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button class="button" type="submit" (click)="saveResource();">
+  Add
+  </button>
+  <button mat-button type="button" mat-dialog-close>
+    Cancel
+  </button>
+</div>
+</form>

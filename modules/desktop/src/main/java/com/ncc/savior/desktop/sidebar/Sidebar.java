@@ -1,9 +1,20 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import com.ncc.savior.desktop.virtues.VirtueDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.sidebar.LoginScreen.ILoginEventListener;
+import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -36,7 +47,8 @@ import javafx.stage.Stage;
  *
  *
  */
-public class Sidebar {
+public class Sidebar implements VirtueChangeHandler {
+	private static final Logger logger = LoggerFactory.getLogger(Sidebar.class);
 	private static final int ICON_SIZE = 32;
 	private boolean debug = false;
 	private BorderStroke paneDebugStroke = new BorderStroke(Color.RED, BorderStrokeStyle.DOTTED, new CornerRadii(0),
@@ -51,13 +63,42 @@ public class Sidebar {
 	private int width = 300;
 	private int height = 800;
 	private VirtueService virtueService;
+	private VBox virtuePane;
+	private Map<String, VirtueMenuItem> virtueIdToVmi;
+	private AuthorizationService authService;
+	private Label userLabel;
+	private Stage stage;
+	private Image statusImage;
+	private ArrayList<RgbColor> colorList;
+	private Iterator<RgbColor> colorItr;
 
-	public Sidebar(VirtueService virtueService) {
+	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors) {
+		this.authService = authService;
+		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
 		this.virtueService = virtueService;
+		this.statusImage = new Image("images/loading.gif");
+		colorList = new ArrayList<RgbColor>();
+		if (useColors) {
+			colorList.add(new RgbColor(1, 0, 0, .5));
+			colorList.add(new RgbColor(0, 1, 0, .5));
+			colorList.add(new RgbColor(0, 0, 1, .5));
+			colorList.add(new RgbColor(1, 1, 0, .5));
+			colorList.add(new RgbColor(138d / 255, 43d / 255, 226d / 255, .5));
+			colorList.add(new RgbColor(1, 165d / 255, 0, .5));
+		} else {
+			// colorList.add(Color.ORANGE);
+			// colorList.add(Color.PURPLE);
+			// colorList.add(Color.CYAN);
+			// colorList.add(Color.BISQUE);
+			// colorList.add(Color.DARKSALMON);
+			colorList.add(null);
+		}
+		colorItr = colorList.iterator();
 	}
 
-	public void start(Stage stage) throws Exception {
+	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
 		stage.setTitle("Savior");
+		this.stage = stage;
 
 		VBox pane = new VBox();
 		if (debug) {
@@ -68,7 +109,8 @@ public class Sidebar {
 		children.add(getLabel());// , 1, 1);
 		// pane.add(getMinimizeMaximize());
 		children.add(getUserIcon());// , 1, 3);
-		Node vlist = getVirtueList(stage);
+		children.add(getUserNameLabel());
+		Node vlist = initialVirtueList(stage, initialVirtues);
 		children.add(vlist);// , 1, 4);
 		// Region region = new Region();
 		// region.setBorder(new Border(sectionDebugStroke));
@@ -81,6 +123,33 @@ public class Sidebar {
 		stage.getIcons().add(icon);
 		stage.setScene(scene);
 		stage.show();
+		DesktopUser user = authService.getUser();
+		String reqDomain = authService.getRequiredDomain();
+		if (user == null || (reqDomain != null && !reqDomain.equals(user.getDomain()))) {
+			LoginScreen login = new LoginScreen(authService, true);
+			login.addLoginEventListener(new ILoginEventListener() {
+				@Override
+				public void onLoginSuccess(DesktopUser user) {
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							userLabel.setText(user.getUsername());
+						}
+					});
+				}
+
+				@Override
+				public void onLoginFailure(String username, String domain, RuntimeException e) {
+					logger.warn("Login failure for domain=" + domain + " username=" + username, e);
+				}
+
+				@Override
+				public void onCancel() {
+					// do nothing, handled elsewhere
+				}
+			});
+			login.start(stage);
+		}
 	}
 
 	private Node getLogout() {
@@ -94,6 +163,7 @@ public class Sidebar {
 			@Override
 			public void handle(MouseEvent event) {
 				// do cleanup stuff.
+				authService.logout();
 				Platform.exit();
 			}
 		});
@@ -110,20 +180,21 @@ public class Sidebar {
 		return pane;
 	}
 
-	private Node getVirtueList(Stage primaryStage) {
-		VBox pane = new VBox();
-		pane.setPrefWidth(width);
-		pane.setAlignment(Pos.BOTTOM_CENTER);
-		List<VirtueDto> virtueList = getVirtues();
-		ObservableList<Node> children = pane.getChildren();
+	private Node initialVirtueList(Stage primaryStage, List<DesktopVirtue> initialVirtues) {
+		virtuePane = new VBox();
+		virtuePane.setPrefWidth(width);
+		virtuePane.setAlignment(Pos.BOTTOM_CENTER);
+		ObservableList<Node> children = virtuePane.getChildren();
 		if (debug) {
-			pane.setBorder(new Border(calloutDebugStroke));
+			virtuePane.setBorder(new Border(calloutDebugStroke));
 		}
-		for (VirtueDto virtue : virtueList) {
-			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService);
+		for (DesktopVirtue virtue : initialVirtues) {
+			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, statusImage, width, getNextColor());
 			children.add(vmi.getNode());
+			String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+			virtueIdToVmi.put(id, vmi);
 		}
-		ScrollPane scroll = new ScrollPane(pane);
+		ScrollPane scroll = new ScrollPane(virtuePane);
 		scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
 		scroll.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 		scroll.prefHeight(height);
@@ -131,13 +202,40 @@ public class Sidebar {
 		return scroll;
 	}
 
-	private List<VirtueDto> getVirtues() {
-		return virtueService.getVirtuesForUser();
-	}
-
 	private Node getUserIcon() {
 		Image image = new Image("images/defaultUserIcon.png");
 		ImageView iv = new ImageView(image);
+		iv.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
+			@Override
+			public void handle(MouseEvent event) {
+				LoginScreen loginScreen = new LoginScreen(authService, false);
+				loginScreen.addLoginEventListener(new ILoginEventListener() {
+					@Override
+					public void onLoginSuccess(DesktopUser user) {
+						Platform.runLater(new Runnable() {
+							@Override
+							public void run() {
+								virtuePane.getChildren().clear();
+								virtueIdToVmi.clear();
+								userLabel.setText(user.getUsername());
+							}
+						});
+					}
+
+					@Override
+					public void onLoginFailure(String username, String domain, RuntimeException e) {
+						// do nothing
+					}
+
+					@Override
+					public void onCancel() {
+						// do nothing
+					}
+				});
+				loginScreen.start(stage);
+			}
+		});
 
 		int size = 96;
 		int paddingSize = 5;
@@ -154,7 +252,6 @@ public class Sidebar {
 		}
 		return pane;
 	}
-
 
 	private Node getLabel() {
 		Image image = new Image("images/saviorLogo.png");
@@ -174,5 +271,66 @@ public class Sidebar {
 			pane.setBorder(new Border(sectionDebugStroke));
 		}
 		return label;
+	}
+
+	private Node getUserNameLabel() {
+		if (userLabel == null) {
+			DesktopUser user = authService.getUser();
+			String username = user == null ? "" : user.getUsername();
+			userLabel = new Label(username);
+		}
+		return userLabel;
+	}
+
+	@Override
+	public void changeVirtue(DesktopVirtue virtue) {
+		VirtueMenuItem vmi = virtueIdToVmi.get(virtue.getId());
+		if (vmi == null) {
+			vmi = virtueIdToVmi.get(virtue.getTemplateId());
+			if (virtue.getId() != null) {
+				virtueIdToVmi.remove(virtue.getTemplateId());
+				virtueIdToVmi.put(virtue.getId(), vmi);
+			}
+		}
+		vmi.updateVirtue(virtue);
+	}
+
+	@Override
+	public void addVirtue(DesktopVirtue virtue) {
+		ObservableList<Node> children = virtuePane.getChildren();
+		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, statusImage, width, getNextColor());
+		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+		virtueIdToVmi.put(id, vmi);
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				children.add(vmi.getNode());
+			}
+		});
+	}
+
+	@Override
+	public void removeVirtue(DesktopVirtue virtue) {
+		ObservableList<Node> children = virtuePane.getChildren();
+		VirtueMenuItem vmi = virtueIdToVmi.remove(virtue.getId());
+		if (vmi == null) {
+			vmi = virtueIdToVmi.remove(virtue.getTemplateId());
+		}
+		if (vmi != null) {
+			VirtueMenuItem finalVmi = vmi;
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					children.remove(finalVmi.getNode());
+				}
+			});
+		}
+	}
+
+	private RgbColor getNextColor() {
+		if (!colorItr.hasNext()) {
+			colorItr = colorList.iterator();
+		}
+		return colorItr.next();
 	}
 }

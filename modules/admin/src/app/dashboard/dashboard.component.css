@@ -1,0 +1,22 @@
+app-dialog-test {
+  position: absolute;
+  top: 0;
+  width: 100%
+}
+.table-container {
+  margin: 0 -15px 10px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.table-container .mui-row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.dashboard .mat-select-panel {
+  background-color: #FFF;
+  border:1px solid #b2b2b2;
+  left:80px;
+  position: absolute;
+  top: 108px;
+}

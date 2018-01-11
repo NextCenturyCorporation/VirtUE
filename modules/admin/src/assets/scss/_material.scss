@@ -1,0 +1,119 @@
+.mat-dialog-container {
+  background: $white;
+  box-shadow: none;
+}
+.mat-dialog-container {
+  app-dialogs {
+    display: block;
+    position: relative;
+    padding: 1.2rem;
+    text-align: center;
+  }
+  .mat-dialog-title {
+    border-bottom: 1px solid $mediumGray;
+    display: block;
+    margin: 0;
+    padding-bottom: 1rem;
+    text-align: left;
+    text-transform: capitalize;
+  }
+  .mat-dialog-content {
+    padding: 1rem 2rem;
+    text-align: left;
+  }
+  .mat-dialog-actions {
+    border-top: 1px solid $mediumGray;
+    display: block;
+    padding-top: 1.5rem;
+    text-align: center;
+  }
+
+  button, button[type='submit'] {
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    margin-right: 10px;
+  }
+  button {
+    background-color: $lightGray;
+    border:1px solid $mediumGray;
+    &.button {
+      padding: 0.4rem 1rem;
+    }
+  }
+  button[type='submit'] {
+    background-color: $grayBlue;
+    color: $white;
+  }
+}
+
+
+.mat-input-placeholder-wrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.mat-input-wrapper {
+}
+input.mat-input-element {
+  border: 1px solid #b2b2b2;
+  padding: 5px;
+}
+.mat-checkbox {
+  .mat-checkbox-label {
+    margin-right: 20px;
+  }
+
+  .mat-checkbox-inner-container {
+    margin-right: 0;
+    width: 15px;
+  }
+  .mat-checkbox-input {
+    margin-top:3px;
+  }
+  .mat-checkbox-frame {
+    border-width: 0;
+  }
+}
+
+.mat-radio-label {
+  .mat-radio-container {
+    display: none;
+  }
+}
+
+.mat-autocomplete-panel {
+  overflow: none;
+  overflow-x: none;
+  overflow-y: scroll;
+  .mat-option {
+    border-bottom: 1px solid #BFBFBF;
+    clear:both;
+    cursor: pointer;
+    display: block;
+    padding: 5px;
+    width: 100%;
+  }
+}
+.mat-select {
+  border: 1px solid #b2b2b2;
+  padding: 5px;
+}
+.mat-select-panel {
+  background-color: #FFF;
+  box-shadow: none;
+  border: 1px solid #b2b2b2;
+
+  .mat-option {
+    border-bottom: thin solid #b2b2b2;
+    display: block;
+    width: 100%;
+    &:hover {
+      cursor: pointer;
+    }
+    .mat-option-text {
+      padding-left: 15px;
+    }
+  }
+}
