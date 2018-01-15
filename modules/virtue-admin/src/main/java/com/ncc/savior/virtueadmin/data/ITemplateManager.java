@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
@@ -50,7 +51,7 @@ public interface ITemplateManager {
 	 * @param applicationId
 	 * @return
 	 */
-	ApplicationDefinition getApplicationDefinition(String applicationId);
+	Optional<ApplicationDefinition> getApplicationDefinition(String applicationId);
 
 	/**
 	 * Returns a template for the given id if the given user has been assigned that

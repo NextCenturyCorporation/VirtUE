@@ -76,7 +76,7 @@ public class JpaTest {
 			log.info("");
 
 			// fetch an individual customer by ID
-			VirtueTemplate virtueTemplate = vtRepository.findOne("id");
+			VirtueTemplate virtueTemplate = vtRepository.findById("id").get();
 			log.info("Customer found with findOne(1L):");
 			log.info("--------------------------------");
 			log.info(virtueTemplate == null ? "null" : virtueTemplate.toString());

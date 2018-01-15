@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -69,8 +71,8 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public ApplicationDefinition getApplicationDefinition(String applicationId) {
-		return appRepository.findOne(applicationId);
+	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
+		return appRepository.findById(applicationId);
 	}
 
 	@Override
@@ -91,10 +93,9 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		// seems to work better for jpa
 		vmTemplate = vmtRepository.save(vmTemplate);
 		for (ApplicationDefinition app : apps) {
-
 			// assignApplicationToVmTemplate(vmTemplate.getId(), app.getId());
-			ApplicationDefinition manageredApp = appRepository.findOne(app.getId());
-			vmTemplate.getApplications().add(manageredApp);
+			Optional<ApplicationDefinition> manageredApp = appRepository.findById(app.getId());
+			vmTemplate.getApplications().add(manageredApp.get());
 		}
 		vmtRepository.save(vmTemplate);
 	}
@@ -119,14 +120,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		UserName username = new UserName(user.getUsername());
 		// TODO this seems inefficient, but it errors if the username does not exist.
 		userRepo.save(username);
-		VirtueTemplate vt = vtRepository.findOne(virtueTemplateId);
+		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
 		vt.retrieveUserNames().add(username);
 		vtRepository.save(vt);
 	}
 
 	@Override
 	public void revokeVirtueTemplateFromUser(User user, String virtueTemplateId) {
-		VirtueTemplate vt = vtRepository.findOne(virtueTemplateId);
+		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
 		vt.retrieveUserNames().remove(new UserName(user.getUsername()));
 		vtRepository.save(vt);
 	}
@@ -137,23 +138,20 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) {
-		VirtualMachineTemplate vmt = vmtRepository.findOne(vmTemplateId);
-		ApplicationDefinition app = appRepository.findOne(applicationId);
-		if (vmt != null && app != null) {
-			vmt.getApplications().add(app);
-			vmtRepository.save(vmt);
-		}
+	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) throws NoSuchElementException {
+		VirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
+		ApplicationDefinition app = appRepository.findById(applicationId).get();
+		vmt.getApplications().add(app);
+		vmtRepository.save(vmt);
 	}
 
 	@Override
-	public void assingVmTemplateToVirtueTemplate(String virtueTemplateId, String vmTemplateId) {
-		VirtueTemplate vt = vtRepository.findOne(virtueTemplateId);
-		VirtualMachineTemplate vmt = vmtRepository.findOne(vmTemplateId);
-		if (vmt != null && vt != null) {
-			vt.getVmTemplates().add(vmt);
-			vtRepository.save(vt);
-		}
+	public void assingVmTemplateToVirtueTemplate(String virtueTemplateId, String vmTemplateId)
+			throws NoSuchElementException {
+		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
+		VirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
+		vt.getVmTemplates().add(vmt);
+		vtRepository.save(vt);
 	}
 
 	@Override

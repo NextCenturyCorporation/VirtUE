@@ -1,10 +1,14 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.8.RELEASE'
+		springBootVersion = '2.0.0.M7'
+		springSecurityVersion = '5.0.0.RELEASE'
+        springDataVersion = '2.0.2.RELEASE'
 	}
 	
 	repositories {
 		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
 	}
 	
 	dependencies {
@@ -17,7 +21,7 @@ apply plugin: "io.spring.dependency-management"
 
 dependencyManagement {
   imports {
-      mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.248'
+      mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.263'
   }
 }
 
@@ -33,6 +37,7 @@ sourceCompatibility = 1.8
 
 repositories {
 	mavenCentral()
+    maven { url "https://repo.spring.io/milestone" }
 }
 
 mainClassName = "com.ncc.savior.virtueadmin.VirtueAdminApplication"
@@ -42,24 +47,25 @@ dependencies {
 
 	compile project(':common')
 	
+    compile 'com.amazonaws:aws-java-sdk:1.9.6'
     compile 'com.amazonaws:aws-java-sdk-s3'
     compile 'com.amazonaws:aws-java-sdk-ec2'    
     compile 'com.amazonaws:aws-java-sdk-cloudformation'
     compile 'com.amazonaws:aws-java-sdk-simpledb'
-    
-	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	compile('org.springframework.boot:spring-boot-starter-jersey')
-	compile('org.springframework.boot:spring-boot-starter-web')
 
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
+
+    compile 'org.springframework:spring-context:5.0.2.RELEASE'
 	
-	compile group: 'org.springframework.data', name: 'spring-data-commons', version: '1.13.9.RELEASE'
-	compile group: 'org.springframework.data', name: 'spring-data-commons-core', version: '1.4.1.RELEASE'
-	compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '1.11.9.RELEASE'
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '1.5.9.RELEASE'
-	compile group: 'org.springframework.security', name: 'spring-security-core', version: '4.2.3.RELEASE'
-	compile group: 'org.springframework.security', name: 'spring-security-config', version: '4.2.3.RELEASE'
-	compile group: 'org.springframework.security', name: 'spring-security-web', version: '4.2.3.RELEASE'
-	compile group: 'org.springframework.security', name: 'spring-security-ldap', version: '4.2.3.RELEASE'
+	compile group: 'org.springframework.data', name: 'spring-data-commons', version: springDataVersion
+    //	compile group: 'org.springframework.data', name: 'spring-data-commons-core', version: springDataVersion
+	compile group: 'org.springframework.data', name: 'spring-data-jpa', version: springDataVersion
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
+	compile group: 'org.springframework.security', name: 'spring-security-core', version: springSecurityVersion
+	compile group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion
+	compile group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion
+	compile group: 'org.springframework.security', name: 'spring-security-ldap', version: springSecurityVersion
 	//compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.7'
 	
 	compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.5'

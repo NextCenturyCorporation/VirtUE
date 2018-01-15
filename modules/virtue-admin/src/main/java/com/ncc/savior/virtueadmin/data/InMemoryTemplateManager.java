@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -175,8 +176,8 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public ApplicationDefinition getApplicationDefinition(String applicationId) {
-		return applications.get(applicationId);
+	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
+		return Optional.of(applications.get(applicationId));
 	}
 
 	@Override

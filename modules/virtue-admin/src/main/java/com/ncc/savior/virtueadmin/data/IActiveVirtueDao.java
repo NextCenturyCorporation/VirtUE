@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.data;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.User;
@@ -51,7 +52,7 @@ public interface IActiveVirtueDao {
 	 */
 	void addVirtue(VirtueInstance vi);
 
-	VirtueInstance getVirtueInstance(String virtueId);
+	Optional<VirtueInstance> getVirtueInstance(String virtueId);
 
 	Iterable<VirtueInstance> getAllActiveVirtues();
 

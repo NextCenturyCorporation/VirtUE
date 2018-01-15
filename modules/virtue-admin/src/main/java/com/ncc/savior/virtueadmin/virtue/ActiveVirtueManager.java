@@ -91,7 +91,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	@Override
 	public void deleteVirtue(User user, String instanceId) {
-		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId);
+		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
