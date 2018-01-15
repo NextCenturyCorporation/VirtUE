@@ -2,9 +2,10 @@ package com.ncc.savior.virtueadmin.rest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
@@ -100,27 +101,27 @@ public class DataResource {
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Linux LibreOffice", OS.LINUX, "Linux LibreOffice", appsLibreOffice);
 
-		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
 				"1.0", vmtsSingleAll);
 
-		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue", "1.0",
 				vmtsBrowsers);
 
-		List<VirtualMachineTemplate> vmtsLibre = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsLibre = new HashSet<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
 		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Linux LibreOffice Virtue", "1.0",
 				vmtsLibre);
 
-		List<VirtualMachineTemplate> vmtsDrawing = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsDrawing = new HashSet<VirtualMachineTemplate>();
 		vmtsDrawing.add(vmDrawing);
 		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Drawing Virtue", "1.0",
 				vmtsDrawing);
 
-		List<VirtualMachineTemplate> vmtsMath = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsMath = new HashSet<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
 				vmtsMath);

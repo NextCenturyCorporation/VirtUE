@@ -99,21 +99,20 @@ public class AwsManager implements ICloudManager {
 	 * @see com.amazonaws.auth.PropertiesCredentials
 	 * @see com.amazonaws.ClientConfiguration
 	 */
-	private void init() throws Exception {
+	private void init() throws AmazonClientException {
 
 		/*
 		 * The ProfileCredentialsProvider will return your [virtue] credential profile
-		 * by reading from the credentials file located at
-		 * (/Users/womitowoju/.aws/credentials).
+		 * by reading from the credentials file located at (~/.aws/credentials).
 		 */
 		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 
 		try {
 			credentialsProvider.getCredentials();
-		} catch (Exception e) {
+		} catch (RuntimeException e) {
 			throw new AmazonClientException("Cannot load the credentials from the credential profiles file. "
 					+ "Please make sure that your credentials file is at the correct "
-					+ "location (/Users/womitowoju/.aws/credentials), and is in valid format.", e);
+					+ "location ("+ System.getProperty("user.home") + "/.aws/credentials), and is in valid format.", e);
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
 		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();

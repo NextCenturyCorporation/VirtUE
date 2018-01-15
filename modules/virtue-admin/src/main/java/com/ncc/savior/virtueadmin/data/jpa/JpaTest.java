@@ -1,7 +1,9 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -36,7 +38,7 @@ public class JpaTest {
 					userRep);
 
 			// save a couple of customers
-			ArrayList<VirtualMachineTemplate> vmts1 = new ArrayList<VirtualMachineTemplate>();
+			Set<VirtualMachineTemplate> vmts1 = new HashSet<VirtualMachineTemplate>();
 			ArrayList<ApplicationDefinition> apps1 = new ArrayList<ApplicationDefinition>();
 			ApplicationDefinition a1 = new ApplicationDefinition(UUID.randomUUID().toString(), "testApp", "V1",
 					OS.LINUX);

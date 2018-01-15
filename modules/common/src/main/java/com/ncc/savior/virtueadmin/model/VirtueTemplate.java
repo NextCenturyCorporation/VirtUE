@@ -20,25 +20,20 @@ public class VirtueTemplate {
 	private String name;
 	private String version;
 	@ManyToMany()
-	private Collection<VirtualMachineTemplate> vmTemplates;
+	private Set<VirtualMachineTemplate> vmTemplates;
 	@ManyToMany()
-	private Collection<UserName> userNames;
+	private Set<UserName> userNames;
 
 	private String awsTemplateName;
 
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
 
-	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.version = version;
-		this.vmTemplates = vmTemplates;
-		this.setAwsTemplateName("");
+	public VirtueTemplate(String id, String name, String version, Set<VirtualMachineTemplate> vmTemplates) {
+		this(id, name, version, vmTemplates, "");
 	}
 
-	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
+	public VirtueTemplate(String id, String name, String version, Set<VirtualMachineTemplate> vmTemplates,
 			String awsTemplateName) {
 		super();
 		this.id = id;
@@ -92,8 +87,8 @@ public class VirtueTemplate {
 		this.version = version;
 	}
 
-	public void setVmTemplates(Collection<VirtualMachineTemplate> hashSet) {
-		this.vmTemplates = hashSet;
+	public void setVmTemplates(Set<VirtualMachineTemplate> vmTemplates) {
+		this.vmTemplates = vmTemplates;
 	}
 
 	@Override

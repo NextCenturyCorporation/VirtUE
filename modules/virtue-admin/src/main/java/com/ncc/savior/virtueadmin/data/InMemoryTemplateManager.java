@@ -5,11 +5,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -73,7 +74,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
 				"Linux Math", appsMath);
 
-		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 
 		// Let's load the cloudformation template file and store it in the virtue.
@@ -84,18 +85,18 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
 				"1.0", vmtsSingleAll, awsCloudformationTemplate);
 
-		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
 				"1.0", vmtsBrowsers);
-		List<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmts = new HashSet<VirtualMachineTemplate>();
 		vmts.add(vmBrowser);
 		vmts.add(vmAll);
 		vmts.add(vmMath);
 		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
 				vmts, awsCloudformationTemplate);
 
-		List<VirtualMachineTemplate> vmsMath = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmsMath = new HashSet<VirtualMachineTemplate>();
 		vmsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
 				vmsMath);
