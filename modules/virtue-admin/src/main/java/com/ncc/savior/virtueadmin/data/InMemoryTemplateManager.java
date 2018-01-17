@@ -1,5 +1,8 @@
 package com.ncc.savior.virtueadmin.data;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -31,7 +34,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	private Map<String, Collection<String>> userToTemplateId;
 	private Map<String, ApplicationDefinition> applications;
 
-	public InMemoryTemplateManager() {
+	public InMemoryTemplateManager() throws Exception {
 		templates = new LinkedHashMap<String, VirtueTemplate>();
 		vmTemplates = new LinkedHashMap<String, VirtualMachineTemplate>();
 		userToTemplateId = new LinkedHashMap<String, Collection<String>>();
@@ -39,7 +42,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		initTestDatabase();
 	}
 
-	private void initTestDatabase() {
+	private void initTestDatabase() throws Exception {
 		ApplicationDefinition chrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome", "1.0",
 				OS.LINUX, "google-chrome");
 		ApplicationDefinition firefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
@@ -72,8 +75,15 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
+
+		// Let's load the cloudformation template file and store it in the virtue.
+		String awsCloudformationTemplate = convertStreamToString(
+				InMemoryTemplateManager.class.getResourceAsStream("/aws-templates/BrowserVirtue.template"));
+
+		// Add a virtue with the initialized virtual machine.
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
-				"1.0", vmtsSingleAll);
+				"1.0", vmtsSingleAll, awsCloudformationTemplate);
+
 		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
@@ -83,7 +93,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		vmts.add(vmAll);
 		vmts.add(vmMath);
 		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
-				vmts);
+				vmts, awsCloudformationTemplate);
 
 		List<VirtualMachineTemplate> vmsMath = new ArrayList<VirtualMachineTemplate>();
 		vmsMath.add(vmMath);
@@ -122,11 +132,17 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		assignVirtueTemplateToUser(user3, virtueMath.getId());
 
+		System.out.println("VirtueAllVms  - " + virtueAllVms.getId());
 		assignVirtueTemplateToUser(admin, virtueAllVms.getId());
-		assignVirtueTemplateToUser(admin, virtueSingleBrowsers.getId());
-		assignVirtueTemplateToUser(admin, virtueSingleAll.getId());
-		assignVirtueTemplateToUser(admin, virtueMath.getId());
 
+		System.out.println("virtueSingleBrowsers  - " + virtueSingleBrowsers.getId());
+		assignVirtueTemplateToUser(admin, virtueSingleBrowsers.getId());
+
+		System.out.println("virtueSingleAll  - " + virtueSingleAll.getId());
+		assignVirtueTemplateToUser(admin, virtueSingleAll.getId());
+
+		System.out.println("virtueMath  - " + virtueMath.getId());
+		assignVirtueTemplateToUser(admin, virtueMath.getId());
 	}
 
 	@Override
@@ -242,6 +258,20 @@ public class InMemoryTemplateManager implements ITemplateManager {
 						"Application ID=" + app + " not found.");
 			}
 		}
+	}
+
+	/* Aws Specific methods */
+	// Convert a stream into a single, newline separated string
+	public static String convertStreamToString(InputStream in) throws Exception {
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		StringBuilder stringbuilder = new StringBuilder();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			stringbuilder.append(line + "\n");
+		}
+		in.close();
+		return stringbuilder.toString();
 	}
 
 	@Override

@@ -128,7 +128,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			printDevModuleWarning(authModuleName);
 		}
 		// Set what roles are required to view each urls
-		http.authorizeRequests().antMatchers("/desktop/**").hasRole("USER").antMatchers("/admin/**").hasRole("ADMIN")
+		http.authorizeRequests().antMatchers("/desktop/**").hasRole("USER").antMatchers("/admin2/**").hasRole("ADMIN")
 				.antMatchers("/").permitAll();
 		http.exceptionHandling().accessDeniedHandler(getAccessDeniedHandler());
 

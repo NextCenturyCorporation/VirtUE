@@ -51,4 +51,10 @@ public interface IActiveVirtueDao {
 	 */
 	void addVirtue(VirtueInstance vi);
 
+	VirtueInstance getVirtueInstance(String virtueId);
+
+	Iterable<VirtueInstance> getAllActiveVirtues();
+
+	void clear();
+
 }

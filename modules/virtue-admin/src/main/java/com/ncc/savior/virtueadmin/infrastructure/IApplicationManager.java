@@ -15,5 +15,5 @@ public interface IApplicationManager {
 	 * @param vm
 	 * @param application
 	 */
-	void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition application);
+	void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition application, int maxTries);
 }

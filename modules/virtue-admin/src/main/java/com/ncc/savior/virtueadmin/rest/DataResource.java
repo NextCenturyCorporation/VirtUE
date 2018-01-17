@@ -16,7 +16,9 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -29,6 +31,11 @@ public class DataResource {
 	private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
 	@Autowired
 	private ITemplateManager templateManager;
+
+	// TODO find where second version comes from so we can use @Autowired
+	@Qualifier("virtueDao")
+	@Autowired
+	private IActiveVirtueDao activeVirtueDao;
 
 	public DataResource() {
 	}
@@ -55,6 +62,10 @@ public class DataResource {
 				"gimp");
 		ApplicationDefinition pinta = new ApplicationDefinition(UUID.randomUUID().toString(), "Pinta", "1.0", OS.LINUX,
 				"pinta");
+		ApplicationDefinition gedit = new ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
+				"gedit");
+		ApplicationDefinition eclipse = new ApplicationDefinition(UUID.randomUUID().toString(), "Eclipse", "1.0",
+				OS.LINUX, "eclipse");
 
 		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
@@ -78,44 +89,45 @@ public class DataResource {
 		appsAll.addAll(appsDrawing);
 		appsAll.addAll(appsMath);
 
-		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
-				OS.LINUX, "Linux Browsers", appsBrowsers);
+		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
+				OS.LINUX, "Browsers", appsBrowsers);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux All", OS.LINUX,
-				"Linux All", appsAll);
+		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX, "All",
+				appsAll);
 
-		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
-				"Linux Math", appsMath);
+		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
+				"Math", appsMath);
 
-		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Drawing",
-				OS.LINUX, "Linux Drawing", appsDrawing);
+		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
+				"Drawing", appsDrawing);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Linux LibreOffice", OS.LINUX, "Linux LibreOffice", appsLibreOffice);
+				"LibreOffice", OS.LINUX, "LibreOffice", appsLibreOffice);
+
 
 		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
-		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
+		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue",
 				"1.0", vmtsSingleAll);
 
 		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
-		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue", "1.0",
+		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue", "1.0",
 				vmtsBrowsers);
 
 		List<VirtualMachineTemplate> vmtsLibre = new ArrayList<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
-		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Linux LibreOffice Virtue", "1.0",
+		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0",
 				vmtsLibre);
 
 		List<VirtualMachineTemplate> vmtsDrawing = new ArrayList<VirtualMachineTemplate>();
 		vmtsDrawing.add(vmDrawing);
-		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Drawing Virtue", "1.0",
+		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Artist Virtue", "1.0",
 				vmtsDrawing);
 
 		List<VirtualMachineTemplate> vmtsMath = new ArrayList<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
-		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
+		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0",
 				vmtsMath);
 
 		for (ApplicationDefinition app : appsAll) {
@@ -142,6 +154,7 @@ public class DataResource {
 		User browser = new User("browser", new ArrayList<String>());
 		User nerd = new User("nerd", new ArrayList<String>());
 		User artist = new User("artist", new ArrayList<String>());
+		User developer = new User("developer", new ArrayList<String>());
 
 		templateManager.assignVirtueTemplateToUser(admin, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueSingleAll.getId());
@@ -159,6 +172,8 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(nerd, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueMath.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(developer, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(developer, virtueMath.getId());
 
 		logger.info("Data preloaded");
 		return Response.ok().entity("success").build();
@@ -195,9 +210,16 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("clear/")
-	public String clearDatabase() {
+	@Path("templates/clear/")
+	public String clearTemplatesDatabase() {
 		templateManager.clear();
+		return "database cleared.";
+	}
+
+	@GET
+	@Path("active/clear/")
+	public String clearActiveDatabase() {
+		activeVirtueDao.clear();
 		return "database cleared.";
 	}
 

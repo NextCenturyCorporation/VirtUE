@@ -29,12 +29,13 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	private OS os;
 	private String userName;
 	private String privateKey;
+	private String ipAddress; 
 
 	public StaticMachineVmManager(String hostname, int sshPort, String userName, File privateKey, OS os) {
 		this(hostname, sshPort, userName, getKeyFromFile(privateKey), os);
 	}
 
-	private static String getKeyFromFile(File privateKey) {
+	static String getKeyFromFile(File privateKey) {
 		FileReader reader = null;
 		if (privateKey == null || !privateKey.isFile()) {
 			return "";
@@ -69,7 +70,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	@Override
 	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, hostname);
+				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
 		return vm;
 	}
 
@@ -101,9 +102,9 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey,
-					hostname);
+					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
 			vms.add(vm);
+
 		}
 		return vms;
 	}
