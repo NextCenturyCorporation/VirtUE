@@ -328,7 +328,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 		};
 
-		((SwingXpraWindowManager) windowManager).setMouseListeners(mouseAdapter);
+		((SwingXpraWindowManager) windowManager).setMouseAdapter(mouseAdapter);
 		// scene.setOnMousePressed(new EventHandler<MouseEvent>() {
 		// @Override
 		// public void handle(MouseEvent event) {
