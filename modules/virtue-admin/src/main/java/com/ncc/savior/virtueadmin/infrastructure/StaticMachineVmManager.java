@@ -69,7 +69,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	@Override
 	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey);
+				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, hostname);
 		return vm;
 	}
 
@@ -101,7 +101,8 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey);
+					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey,
+					hostname);
 			vms.add(vm);
 		}
 		return vms;
