@@ -1,0 +1,573 @@
+package com.ncc.savior.desktop.xpra.application.swing;
+
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Frame;
+import java.awt.Window;
+import java.awt.Window.Type;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.Closeable;
+import java.io.IOException;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.desktop.xpra.XpraClient;
+import com.ncc.savior.desktop.xpra.application.XpraApplication;
+import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
+import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket.MoveResizeDirection;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
+
+/**
+ * Controls a JavaFX Application. An Application is defined as window that has
+ * its own taskbar item. For example, each firefox window is considered an
+ * application.
+ *
+ *
+ */
+public class SwingApplication extends XpraApplication implements Closeable {
+	private static final Logger logger = LoggerFactory.getLogger(SwingApplication.class);
+
+	private boolean show;
+	private SwingXpraPacketHandler applicationPacketHandler;
+	private boolean draggingApp = false;
+
+	private boolean resizeTop;
+	private boolean resizeRight;
+	private boolean resizeBottom;
+	private boolean resizeLeft;
+	private int clickSceneX;
+	private int clickSceneY;
+
+	private boolean decorated;
+	private boolean taskbar;
+
+	private SwingApplication parent;
+
+	protected int titleBarHeight;
+	protected int insetWidth;
+
+	private Color color;
+
+	private JFrame frame;
+
+	private MouseAdapter mouseAdapter;
+
+	public SwingApplication(XpraClient client, NewWindowPacket packet, SwingApplication parent, Color color) {
+		super(client, packet.getWindowId());
+		this.color = color;
+		this.parent = parent;
+		init(packet);
+	}
+
+	void init(NewWindowPacket packet) {
+		decorated = packet.getMetadata().getDecorations();
+		// Group root = new Group();
+		// anchor = new AnchorPane();
+		// root.getChildren().add(anchor);
+		// scene = new Scene(root, packet.getWidth(), packet.getHeight());
+		taskbar = isTaskbar(packet.getMetadata());
+		frame = new JFrame();
+		frame.setSize(packet.getWidth(), packet.getHeight());
+		SwingXpraPacketHandler applicationPacketHandler = new SwingXpraPacketHandler(frame);
+		client.addPacketListener(applicationPacketHandler);
+		windowManager = new SwingXpraWindowManager(client, packet.getWindowId());
+		((SwingXpraWindowManager) windowManager).setColor(color);
+		windowManager.setDebugOutput(debugOutput);
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				WindowMetadata meta = packet.getMetadata();
+				boolean isModal = meta.getModal();
+				// StageStyle style = (isModal ? StageStyle.UTILITY : StageStyle.DECORATED);
+				// if (packet instanceof NewWindowOverrideRedirectPacket) {
+				// style = StageStyle.TRANSPARENT;
+				// }
+				decorated = isDecorated(meta);
+
+				frame.setType(taskbar ? Type.NORMAL : Type.UTILITY);
+				frame.setUndecorated(!decorated);
+				// TODO
+				if (packet instanceof NewWindowOverrideRedirectPacket) {
+					frame.setState(JFrame.NORMAL);
+					// TODO stage.initModality(Modality.WINDOW_MODAL);
+				}
+				// TODO
+				// if (isModal && parent != null) {
+				// stage.initModality(Modality.WINDOW_MODAL);
+				// stage.initOwner(parent.getStage());
+				// stage.setIconified(false);
+				// }
+				if (meta.getFullscreen()) {
+					frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+				}
+
+				// stage.setScene(scene);
+				logger.warn("Need to implement container");
+				Container container = frame.getContentPane();
+				// frame.setContentPane(container);
+				((SwingXpraWindowManager) windowManager).setFrame(frame);
+				((SwingXpraWindowManager) windowManager).setContainer(container);
+				// stage.setX(packet.getX());
+				// stage.setY(packet.getY());
+				frame.setLocation(packet.getX(), packet.getY());
+				frame.setVisible(true);
+				insetWidth = (frame.getWidth() - container.getWidth()) / 2;
+				titleBarHeight = frame.getHeight() - container.getHeight() - insetWidth;
+				if (meta.getFullscreen()) {
+					frame.setLocation(0, 0);
+					insetWidth = 0;
+					titleBarHeight = 0;
+				}
+				((SwingXpraWindowManager) windowManager).setInsetWith(insetWidth);
+				((SwingXpraWindowManager) windowManager).setTitleBarHeight(titleBarHeight);
+				// stage.setWidth(packet.getWidth());
+				// stage.setHeight(packet.getHeight());
+				initEventHandlers();
+				IPacketSender sender = client.getPacketSender();
+				MapWindowPacket sendPacket = new MapWindowPacket(packet.getWindowId(), getScreenX(), getScreenY(),
+						packet.getWidth(), packet.getHeight());
+
+				// ConfigureWindowPacket sendPacket = new
+				// ConfigureWindowPacket(packet.getWindowId(),
+				// (int) stage.getX(), (int) stage.getY(), (int) stage.getWidth(), (int)
+				// stage.getHeight());
+				try {
+					sender.sendPacket(sendPacket);
+				} catch (IOException e) {
+					logger.error("Error sending packet=" + packet);
+				}
+			}
+		});
+	}
+
+	protected boolean isTaskbar(WindowMetadata meta) {
+		boolean tb = !meta.getSkipTaskbar();
+		if (meta.getWindowType().contains("MENU")) {
+			tb = false;
+		}
+		return tb;
+	}
+
+	protected void initEventHandlers() {
+		frame.addWindowListener(new WindowListener() {
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e) {
+				onMinimized();
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				onRestored(getScreenX(), getScreenY(), frame.getWidth(), frame.getHeight());
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				try {
+					SwingApplication.this.close();
+				} catch (IOException ex) {
+					logger.error("Error attempting to close application." + SwingApplication.this, ex);
+				}
+				XpraWindowManager manager = SwingApplication.super.windowManager;
+				manager.CloseAllWindows();
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// logger.info("closed");
+
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		frame.addComponentListener(new ComponentListener() {
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		logger.warn("ApplicationWindow resize not implemented yet");
+		// TODO resize
+		// scene.widthProperty().addListener(new ChangeListener<Number>() {
+		// @Override
+		// public void changed(ObservableValue<? extends Number> observable, Number
+		// oldV, Number newV) {
+		// onSceneSizeChange(newV.intValue(), (int) scene.getHeight());
+		// }
+		// });
+		// scene.heightProperty().addListener(new ChangeListener<Number>() {
+		// @Override
+		// public void changed(ObservableValue<? extends Number> observable, Number
+		// oldV, Number newV) {
+		// onSceneSizeChange((int) scene.getWidth(), newV.intValue());
+		// }
+		// });
+		// stage.xProperty().addListener(new ChangeListener<Number>() {
+		// @Override
+		// public void changed(ObservableValue<? extends Number> observable, Number
+		// oldValue, Number newValue) {
+		// if (!stage.isIconified()) {
+		// onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int)
+		// scene.getHeight());
+		// }
+		// }
+		// });
+		// stage.yProperty().addListener(new ChangeListener<Number>() {
+		// @Override
+		// public void changed(ObservableValue<? extends Number> observable, Number
+		// oldValue, Number newValue) {
+		// if (!stage.isIconified()) {
+		// onLocationChange(getScreenX(), getScreenY(), (int) scene.getWidth(), (int)
+		// scene.getHeight());
+		// }
+		// }
+		// });
+		logger.warn("ApplicationWindow mouse click not implemented yet");
+		mouseAdapter = new MouseAdapter() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (isMoveResizing()) {
+					logger.warn("Here, should be scene instead of frame/stage");
+					sendPacket(
+							new MapWindowPacket(baseWindowId, getScreenX(), getScreenY(),
+									(int) frame.getContentPane().getWidth(), (int) frame.getContentPane().getHeight()),
+							"Configure Window");
+
+					clearInitMoveResize();
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				clickSceneX = e.getX();
+				clickSceneY = e.getY();
+			}
+
+			@Override
+			public void mouseDragged(MouseEvent event) {
+				if (draggingApp) {
+					logger.debug("setting location");
+					frame.setLocation((event.getXOnScreen() - clickSceneX), (event.getYOnScreen() - clickSceneY));
+				}
+				int nW = frame.getWidth();
+				int nH = frame.getHeight();
+				int nX = frame.getX();
+				int nY = frame.getY();
+				if (resizeTop) {
+					int ydelta = frame.getY() - event.getYOnScreen();
+					nH = frame.getHeight() + ydelta;
+					nY = event.getYOnScreen();
+				}
+				if (resizeLeft) {
+					int xdelta = frame.getX() - event.getXOnScreen();
+					nW = frame.getWidth() + xdelta;
+					nX = event.getXOnScreen();
+				}
+				if (resizeRight) {
+					nW = event.getXOnScreen() - frame.getX();
+				}
+				if (resizeBottom) {
+					nH = event.getYOnScreen() - frame.getY();
+				}
+				frame.setSize(nW, nH);
+				frame.setLocation(nX, nY);
+			}
+
+		};
+
+		((SwingXpraWindowManager) windowManager).setMouseListeners(mouseAdapter);
+		// scene.setOnMousePressed(new EventHandler<MouseEvent>() {
+		// @Override
+		// public void handle(MouseEvent event) {
+		// clickSceneX = event.getSceneX();
+		// clickSceneY = event.getSceneY();
+		// }
+		// });
+		// scene.setOnMouseReleased(new EventHandler<MouseEvent>() {
+		// @Override
+		// public void handle(MouseEvent event) {
+		// if (isMoveResizing()) {
+		// sendPacket(new MapWindowPacket(baseWindowId, getScreenX(), getScreenY(),
+		// (int) scene.getWidth(),
+		// (int) scene.getHeight()), "Configure Window");
+		//
+		// clearInitMoveResize();
+		// }
+		// }
+		// });
+
+		// scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
+		// @Override
+		// public void handle(MouseEvent event) {
+		// if (draggingApp) {
+		// stage.setX(event.getScreenX() - clickSceneX);
+		// stage.setY(event.getScreenY() - clickSceneY);
+		// }
+		// if (resizeTop) {
+		// double ydelta = stage.getY() - event.getScreenY();
+		// stage.setHeight(stage.getHeight() + ydelta);
+		// stage.setY(event.getScreenY());
+		// }
+		// if (resizeLeft) {
+		// double xdelta = stage.getX() - event.getScreenX();
+		// stage.setWidth(stage.getWidth() + xdelta);
+		// stage.setX(event.getScreenX());
+		// }
+		// if (resizeRight) {
+		// double width = event.getScreenX() - stage.getX();
+		// stage.setWidth(width);
+		// }
+		// if (resizeBottom) {
+		// double height = event.getScreenY() - stage.getY();
+		// stage.setHeight(height);
+		// }
+		// }
+		// });
+	}
+
+	/**
+	 * Scene's Y coordinate in Screen coordinates
+	 *
+	 * @return
+	 */
+	protected int getScreenY() {
+		return (frame.getY() + titleBarHeight);
+	}
+
+	/**
+	 * Scene's X coordinate in Screen coordinates
+	 *
+	 * @return
+	 */
+	protected int getScreenX() {
+		return (frame.getX() + insetWidth);
+	}
+
+	protected void onSceneSizeChange(int width, int height) {
+		windowManager.resizeWindow(baseWindowId, width, height);
+		onLocationChange(getScreenX(), getScreenY(), width, height);
+	}
+
+	@Override
+	public void Show() {
+		show = true;
+		if (frame != null) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					frame.setVisible(true);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void doClose() throws IOException {
+		if (applicationPacketHandler != null) {
+			client.removePacketListener(applicationPacketHandler);
+		}
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				frame.setVisible(false);
+				frame.dispose();
+			}
+		});
+	}
+
+	public Window getWindow() {
+		return frame;
+	}
+
+	@Override
+	public void maximize() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				logger.warn("Maximize not implemented yet...maybe");
+				frame.setState(Frame.MAXIMIZED_BOTH);
+				// stage.setIconified(false);
+				// stage.setMaximized(true);
+				// stage.setMaxHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				// stage.setMinHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				// stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
+			}
+		});
+	}
+
+	@Override
+	public void minimize() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				frame.setState(JFrame.ICONIFIED);
+			}
+		});
+	}
+
+	@Override
+	public void restore() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// stage.setIconified(false);
+				// if (stage.isMaximized()) {
+				// stage.setMaxHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				// stage.setMinHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				// stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
+				// }
+				logger.warn("SwingApplication does not remember maximize settings when restored");
+				frame.setState(JFrame.NORMAL);
+			}
+		});
+	}
+
+	@Override
+	public void unMaximize() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				frame.setState(JFrame.NORMAL);
+				// stage.setIconified(false);
+				// stage.setMaximized(false);
+				// stage.setMinHeight(10);
+			}
+		});
+	}
+
+	@Override
+	public void initiateMoveResize(InitiateMoveResizePacket packet) {
+		clearInitMoveResize();
+		MoveResizeDirection dir = packet.getDirection();
+		if (dir.equals(MoveResizeDirection.MOVERESIZE_MOVE)) {
+			draggingApp = true;
+			logger.debug("moving...");
+			// initMoveResizePacket = packet;
+		}
+		int dirInt = packet.getDirectionInt();
+		// MOVERESIZE_SIZE_TOPLEFT = 0
+		// MOVERESIZE_SIZE_TOP = 1
+		// MOVERESIZE_SIZE_TOPRIGHT = 2
+		// MOVERESIZE_SIZE_RIGHT = 3
+		// MOVERESIZE_SIZE_BOTTOMRIGHT = 4
+		// MOVERESIZE_SIZE_BOTTOM = 5
+		// MOVERESIZE_SIZE_BOTTOMLEFT = 6
+		// MOVERESIZE_SIZE_LEFT = 7
+		if (dirInt >= 0 && dirInt <= 2) {
+			// top
+			resizeTop = true;
+		}
+		if (dirInt >= 2 && dirInt <= 4) {
+			// right
+			resizeRight = true;
+		}
+		if (dirInt >= 4 && dirInt <= 6) {
+			// bottom
+			resizeBottom = true;
+		}
+		if (dirInt == 0 || (dirInt >= 6 && dirInt <= 7)) {
+			// left
+			resizeLeft = true;
+		}
+
+	}
+
+	private void clearInitMoveResize() {
+		logger.debug("not moving");
+		draggingApp = false;
+		// initMoveResizePacket = null;
+		resizeTop = false;
+		resizeBottom = false;
+		resizeLeft = false;
+		resizeRight = false;
+		// clickSceneX = 0;
+		// clickSceneY = 0;
+	}
+
+	protected boolean isMoveResizing() {
+		return resizeBottom || resizeLeft || resizeRight || resizeTop || draggingApp;
+	}
+
+	private boolean isDecorated(WindowMetadata meta) {
+		boolean defaultDecorations = true;
+		for (String type : meta.getWindowType()) {
+			if (noToolbarTypes.contains(type)) {
+				defaultDecorations = false;
+			}
+		}
+		boolean decorated = meta.getDecorations(defaultDecorations) ? true : false;
+		return decorated;
+	}
+
+	@Override
+	public void setLocationSize(int x, int y, int width, int height) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// stage.setX(x - insetWidth);
+				// stage.setY(y - titleBarHeight);
+				frame.setLocation((x - insetWidth), (y - titleBarHeight));
+				// stage.setWidth(width + 2 * insetWidth);
+				// stage.setHeight(height + insetWidth + titleBarHeight);
+				frame.setSize((width + 2 * insetWidth), (height + insetWidth + titleBarHeight));
+			}
+		});
+	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+}
