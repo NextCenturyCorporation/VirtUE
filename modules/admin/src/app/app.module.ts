@@ -76,6 +76,11 @@ import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
+import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
+import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
+import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
+import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
+
 import { DialogsComponent } from './dialogs/dialogs.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
@@ -85,7 +90,7 @@ import { CountFilterPipe } from './data/count-filter.pipe';
 const appRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent, data: {breadcrumb: 'Dashboard'} },
-  { path: 'config', component: ConfigComponent, data: {breadcrumb: 'Configuration'} },
+  { path: 'config', component: ConfigComponent, data: {breadcrumb: 'Settings'} },
   { path: 'users', component: UsersComponent, data: {breadcrumb: 'Users'}, children: [
     { path: '', component:  UserListComponent },
     { path: 'add', component: AddUserComponent, data: {breadcrumb: 'Add User Account'} },
@@ -96,6 +101,12 @@ const appRoutes: Routes = [
     { path: 'create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
     { path: 'edit/:id', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
     { path: 'virtue-settings', component: VirtueSettingsComponent }
+  ] },
+  { path: 'virtual-machines', component: VirtualMachinesComponent, data: {breadcrumb: 'Virtual Machines'}, children: [
+    { path: '', component: VmListComponent },
+    { path: '', component: VmListComponent, data: {breadcrumb: 'Virtual Machines'} },
+    { path: '', component: VmBuildComponent, data: {breadcrumb: 'Build Virtual Machine'} },
+    { path: '', component: VmEditComponent, data: {breadcrumb: 'Edit Virtual Machine'} },
   ] },
   { path: '**', component: PageNotFoundComponent }
 ];
@@ -131,6 +142,10 @@ const appRoutes: Routes = [
     JsonFilterPipe,
     CountFilterPipe,
     PageNotFoundComponent,
+    VirtualMachinesComponent,
+    VmListComponent,
+    VmBuildComponent,
+    VmEditComponent,
   ],
   imports: [
     BreadcrumbsModule,

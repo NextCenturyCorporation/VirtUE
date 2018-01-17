@@ -3995,14 +3995,6 @@ input.mat-input-element {
   padding-left: 15px;
 }
 
-/* line 1, ../scss/_cdk.scss */
-.app-overlay-container {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 0;
-}
-
 /* line 2, ../scss/_helpers.scss */
 .border-top {
   border-top: rgba(0, 0, 0, 0.12);
