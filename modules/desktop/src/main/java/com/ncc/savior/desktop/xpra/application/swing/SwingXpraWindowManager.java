@@ -178,10 +178,10 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 			public void keyPressed(KeyEvent e) {
 				List<String> mods = SwingUtils.getModifiers(e);
 				KeyCodeDto key = SwingUtils.getKeyCodeFromEvent(e, keyboard);
-				logger.debug("Key: " + key + " mods=" + mods + " char=" + e.getKeyChar());
-				if (key == null) {
-					logger.warn("Key didn't work " + e.getKeyCode() + "-" + e.getKeyChar());
-				}
+				// logger.debug("Key: " + key + " mods=" + mods + " char=" + e.getKeyChar());
+				// if (key == null) {
+				// logger.warn("Key didn't work " + e.getKeyCode() + "-" + e.getKeyChar());
+				// }
 				onKeyDown(key, mods);
 			}
 		};

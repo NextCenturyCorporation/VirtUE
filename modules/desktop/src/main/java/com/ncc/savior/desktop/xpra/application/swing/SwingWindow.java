@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -143,7 +144,11 @@ public class SwingWindow extends XpraWindow {
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent event) {
-				onMouseScroll(0, event.getWheelRotation(), (int) event.getXOnScreen(), (int) event.getYOnScreen());
+				// XonScreen seems to always give 0.
+				Point locOS = canvas.getLocationOnScreen();
+				int x = (int) (event.getX() + locOS.getX());
+				int y = (int) (event.getY() + locOS.getY());
+				onMouseScroll(0, (int) (event.getPreciseWheelRotation() * -20), x, y);
 
 			}
 		});

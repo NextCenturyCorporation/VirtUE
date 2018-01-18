@@ -70,6 +70,7 @@ public abstract class XpraWindow implements IXpraWindow {
 
 	protected void onMouseScroll(int button, int distance, int x, int y) {
 		int delta = distance / 20;
+		// logger.debug("Scrolling delta=" + delta + " _ " + id + " " + x + " " + y);
 		if (delta > 0) {
 			button = 4;
 		} else {
