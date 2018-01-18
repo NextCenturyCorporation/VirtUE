@@ -23,10 +23,10 @@ import javafx.scene.input.KeyCode;
  *
  *
  */
-public class XpraKeyMap implements IKeyMap {
+public class JavaFxXpraKeyMap implements IKeyMap {
 	private final Map<Integer, KeyCodeDto> keycodesMap = new HashMap<>();
 
-	public XpraKeyMap() {
+	public JavaFxXpraKeyMap() {
 
 		add(KeyCode.ESCAPE.ordinal(), -1, "Escape");
 		add(KeyCode.TAB.ordinal(), -1, "Tab");

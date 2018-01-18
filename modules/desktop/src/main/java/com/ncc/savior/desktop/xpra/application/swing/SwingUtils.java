@@ -5,6 +5,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 
 /**
  * Utility methods for extracting information from JavaFX events
@@ -76,5 +78,10 @@ public class SwingUtils {
 			mods.add(MOD_NUM_LOCK);
 		}
 
+	}
+
+	public static KeyCodeDto getKeyCodeFromEvent(KeyEvent e, SwingKeyboard keyboard) {
+		KeyCodeDto code = keyboard.getKeyCodeFromEvent(e);
+		return code;
 	}
 }

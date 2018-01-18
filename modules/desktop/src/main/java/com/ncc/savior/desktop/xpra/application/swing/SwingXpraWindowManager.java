@@ -4,8 +4,11 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Window;
 import java.awt.Window.Type;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -19,15 +22,12 @@ import com.ncc.savior.desktop.xpra.application.IXpraWindow;
 import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
-
-
-
-
 
 /**
  * This class manages all the {@link SwingWindow} that need to be displayed in a
@@ -80,7 +80,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 				canvas.addMouseListener(mouseAdapter);
 				canvas.addMouseMotionListener(mouseAdapter);
 
-//				int baseWindowId = SwingXpraWindowManager.this.baseWindowId;
+				// int baseWindowId = SwingXpraWindowManager.this.baseWindowId;
 				boolean isMainWindow = baseWindowId == packet.getWindowId();
 				Window myFrame;
 				Container myPane;
@@ -161,7 +161,32 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 	}
 
 	private void initStage() {
-		logger.warn("Keypress not implemented!");
+		KeyAdapter keyAdapter = new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				List<String> mods = SwingUtils.getModifiers(e);
+				KeyCodeDto key = SwingUtils.getKeyCodeFromEvent(e, keyboard);
+				onKeyUp(key, mods);
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				List<String> mods = SwingUtils.getModifiers(e);
+				KeyCodeDto key = SwingUtils.getKeyCodeFromEvent(e, keyboard);
+				logger.debug("Key: " + key + " mods=" + mods + " char=" + e.getKeyChar());
+				if (key == null) {
+					logger.warn("Key didn't work " + e.getKeyCode() + "-" + e.getKeyChar());
+				}
+				onKeyDown(key, mods);
+			}
+		};
+		this.baseFrame.addKeyListener(keyAdapter);
+
 		// this.frame.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 		// @Override
 		// public void handle(KeyEvent event) {

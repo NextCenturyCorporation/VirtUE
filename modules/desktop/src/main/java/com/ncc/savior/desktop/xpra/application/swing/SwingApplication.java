@@ -327,7 +327,6 @@ public class SwingApplication extends XpraApplication implements Closeable {
 			@Override
 			public void mouseDragged(MouseEvent event) {
 				if (draggingApp) {
-					logger.debug("setting location");
 					frame.setLocation((event.getXOnScreen() - clickSceneX), (event.getYOnScreen() - clickSceneY));
 				}
 				int nW = frame.getWidth();

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -36,7 +36,7 @@ public class KeyboardDebugger extends Application {
 		VBox vbox = new VBox(canvas);
 
 		Scene scene = new Scene(vbox, 200, 100);
-		JavaFxKeyboard keyboard = new JavaFxKeyboard(new XpraKeyMap());
+		JavaFxKeyboard keyboard = new JavaFxKeyboard(new JavaFxXpraKeyMap());
 
 		scene.setOnKeyTyped(new EventHandler<KeyEvent>() {
 			@Override

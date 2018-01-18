@@ -8,8 +8,9 @@ import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.application.swing.SwingApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -41,9 +42,9 @@ public class SidebarApplication extends Application {
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager;
 		if (swing) {
-			appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new XpraKeyMap()));
+			appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
 		} else {
-			appManager = new JavaFxApplicationManagerFactory(new JavaFxKeyboard(new XpraKeyMap()));
+			appManager = new JavaFxApplicationManagerFactory(new JavaFxKeyboard(new JavaFxXpraKeyMap()));
 		}
 
 		VirtueService virtueService = new VirtueService(drs, appManager);

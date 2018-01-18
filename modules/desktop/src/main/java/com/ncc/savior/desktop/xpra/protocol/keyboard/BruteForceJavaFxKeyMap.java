@@ -14,11 +14,11 @@ import javafx.scene.input.KeyCode;
  *
  *
  */
-public class BruteForceKeyMap implements IKeyMap {
+public class BruteForceJavaFxKeyMap implements IKeyMap {
 
 	private final Map<Integer, KeyCodeDto> keycodesMap = new HashMap<>();
 
-	public BruteForceKeyMap() {
+	public BruteForceJavaFxKeyMap() {
 		add(KeyCode.DIGIT0.ordinal(), 48, "0");
 		add(KeyCode.DIGIT1.ordinal(), 49, "1");
 		add(KeyCode.DIGIT2.ordinal(), 50, "2");

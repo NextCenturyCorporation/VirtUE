@@ -135,7 +135,6 @@ public class SwingWindow extends XpraWindow {
 
 			@Override
 			public void mouseDragged(MouseEvent event) {
-				logger.debug("mouse move");
 				List<String> modifiers = SwingUtils.getModifiers(event);
 				onMouseMove((int) event.getXOnScreen(), (int) event.getYOnScreen(), modifiers);
 			}
