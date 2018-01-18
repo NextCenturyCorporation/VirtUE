@@ -229,7 +229,7 @@ public abstract class XpraApplicationManager {
 		if (app != null) {
 			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 		} else {
-			logger.warn("Recieved packet with valid application. packet=" + packet);
+			logger.warn("Received packet with invalid application. packet=" + packet);
 		}
 	}
 
@@ -239,7 +239,7 @@ public abstract class XpraApplicationManager {
 		if (app != null) {
 			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 		} else {
-			logger.warn("Recieved packet with valid application. packet=" + packet);
+			logger.warn("Received packet with invalid application. packet=" + packet);
 		}
 	}
 

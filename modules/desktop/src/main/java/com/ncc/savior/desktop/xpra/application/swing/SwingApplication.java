@@ -1,8 +1,11 @@
 package com.ncc.savior.desktop.xpra.application.swing;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.Window.Type;
 import java.awt.event.ComponentEvent;
@@ -74,14 +77,15 @@ public class SwingApplication extends XpraApplication implements Closeable {
 	}
 
 	void init(NewWindowPacket packet) {
-		decorated = packet.getMetadata().getDecorations();
+		decorated = isDecorated(packet.getMetadata()) && !(packet instanceof NewWindowOverrideRedirectPacket);
 		// Group root = new Group();
 		// anchor = new AnchorPane();
 		// root.getChildren().add(anchor);
 		// scene = new Scene(root, packet.getWidth(), packet.getHeight());
-		taskbar = isTaskbar(packet.getMetadata());
+		taskbar = isTaskbar(packet.getMetadata()) && !(packet instanceof NewWindowOverrideRedirectPacket);
 		frame = new JFrame();
-		frame.setSize(packet.getWidth(), packet.getHeight());
+		frame.getContentPane().setSize(packet.getWidth(), packet.getHeight());
+		frame.getContentPane().setPreferredSize(new Dimension(packet.getWidth(), packet.getHeight()));
 		SwingXpraPacketHandler applicationPacketHandler = new SwingXpraPacketHandler(frame);
 		client.addPacketListener(applicationPacketHandler);
 		windowManager = new SwingXpraWindowManager(client, packet.getWindowId());
@@ -98,7 +102,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// if (packet instanceof NewWindowOverrideRedirectPacket) {
 				// style = StageStyle.TRANSPARENT;
 				// }
-				decorated = isDecorated(meta);
+				decorated = isDecorated(meta) && !(packet instanceof NewWindowOverrideRedirectPacket);
 
 				frame.setType(taskbar ? Type.NORMAL : Type.UTILITY);
 				frame.setUndecorated(!decorated);
@@ -118,26 +122,55 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				}
 
 				// stage.setScene(scene);
-				logger.warn("Need to implement container");
+				// logger.warn("Need to implement container");
 				Container container = frame.getContentPane();
 				// frame.setContentPane(container);
 				((SwingXpraWindowManager) windowManager).setFrame(frame);
 				((SwingXpraWindowManager) windowManager).setContainer(container);
 				// stage.setX(packet.getX());
 				// stage.setY(packet.getY());
-				frame.setLocation(packet.getX(), packet.getY());
+
+				frame.pack();
+				try {
+					if (!decorated) {
+						frame.getContentPane().setBackground(new Color(0, 0, 0, 0));
+						frame.setBackground(new Color(0, 0, 0, 0));
+					}
+				} catch (Throwable t) {
+					logger.error("", t);
+				}
 				frame.setVisible(true);
 				insetWidth = (frame.getWidth() - container.getWidth()) / 2;
 				titleBarHeight = frame.getHeight() - container.getHeight() - insetWidth;
+				// frame.setSize(insetWidth * 2 + packet.getWidth(), insetWidth + titleBarHeight
+				// + packet.getHeight());
+				int x = packet.getX();
+				int y = packet.getY();
+				// if (x < insetWidth) {
+				// x = insetWidth;
+				// }
+				// if (y < titleBarHeight) {
+				// y = titleBarHeight;
+				// }
+				frame.getContentPane().setSize(packet.getWidth(), packet.getHeight());
+				frame.getContentPane().setPreferredSize(new Dimension(packet.getWidth(), packet.getHeight()));
+
 				if (meta.getFullscreen()) {
-					frame.setLocation(0, 0);
+					x = 0;
+					y = 0;
 					insetWidth = 0;
 					titleBarHeight = 0;
 				}
+				frame.setLocation(x - insetWidth, y - titleBarHeight);
 				((SwingXpraWindowManager) windowManager).setInsetWith(insetWidth);
 				((SwingXpraWindowManager) windowManager).setTitleBarHeight(titleBarHeight);
 				// stage.setWidth(packet.getWidth());
 				// stage.setHeight(packet.getHeight());
+				frame.setSize(packet.getWidth() + insetWidth * 2, packet.getHeight() + insetWidth + titleBarHeight);
+				frame.pack();
+				// logger.debug("Frame: " + frame.getSize() + " container=" +
+				// frame.getContentPane().getSize() + " packet="
+				// + packet.getWidth());
 				initEventHandlers();
 				IPacketSender sender = client.getPacketSender();
 				MapWindowPacket sendPacket = new MapWindowPacket(packet.getWindowId(), getScreenX(), getScreenY(),
@@ -216,30 +249,27 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 			@Override
 			public void componentShown(ComponentEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void componentResized(ComponentEvent e) {
-				// TODO Auto-generated method stub
-
+				Component c = e.getComponent();
+				c = ((JFrame) c).getContentPane();
+				onSceneSizeChange(c.getWidth(), c.getHeight());
 			}
 
 			@Override
 			public void componentMoved(ComponentEvent e) {
-				// TODO Auto-generated method stub
-
+				Component c = e.getComponent();
+				c = ((JFrame) c).getContentPane();
+				Point l = c.getLocationOnScreen();
+				onLocationChange((int) l.getX(), (int) l.getY(), c.getWidth(), c.getHeight());
 			}
 
 			@Override
 			public void componentHidden(ComponentEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 		});
-		logger.warn("ApplicationWindow resize not implemented yet");
-		// TODO resize
 		// scene.widthProperty().addListener(new ChangeListener<Number>() {
 		// @Override
 		// public void changed(ObservableValue<? extends Number> observable, Number
@@ -274,13 +304,11 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		// }
 		// }
 		// });
-		logger.warn("ApplicationWindow mouse click not implemented yet");
 		mouseAdapter = new MouseAdapter() {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (isMoveResizing()) {
-					logger.warn("Here, should be scene instead of frame/stage");
 					sendPacket(
 							new MapWindowPacket(baseWindowId, getScreenX(), getScreenY(),
 									(int) frame.getContentPane().getWidth(), (int) frame.getContentPane().getHeight()),

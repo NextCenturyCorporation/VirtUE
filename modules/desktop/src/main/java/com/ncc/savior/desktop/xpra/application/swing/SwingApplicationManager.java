@@ -51,6 +51,7 @@ public class SwingApplicationManager extends XpraApplicationManager {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				logger.debug("focusing window" + this.toString());
 				app.getFrame().requestFocus();
 			}
 		});

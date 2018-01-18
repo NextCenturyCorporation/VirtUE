@@ -1,8 +1,10 @@
 package com.ncc.savior.desktop.xpra.application.swing;
 
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -10,6 +12,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.List;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -44,7 +47,6 @@ public class SwingWindow extends XpraWindow {
 	private static final Logger logger = LoggerFactory.getLogger(SwingWindow.class);
 
 	private JCanvas canvas;
-	private JFrame frame;
 
 	private List<String> type;
 
@@ -53,6 +55,8 @@ public class SwingWindow extends XpraWindow {
 	private boolean closed;
 
 	private Color color;
+
+	private Window window;
 
 	public SwingWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
 			IFocusNotifier focusNotifier) {
@@ -66,14 +70,22 @@ public class SwingWindow extends XpraWindow {
 		type = metadata.getWindowType();
 	}
 
-	public void initSwing(JCanvas canvas, JFrame frame) {
+	private void setTitle(Window window, String title) {
+		this.title = title;
+		if (window instanceof JFrame) {
+			((JFrame) window).setTitle(title);
+		} else if (window instanceof JDialog) {
+			((Dialog) window).setTitle(title);
+		}
+	}
+	public void initSwing(JCanvas canvas, JFrame frame, JDialog dialog) {
 		this.canvas = canvas;
-		this.frame = frame;
+		this.window = dialog == null ? frame : dialog;
 		if (type.contains("NORMAL")) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					frame.setTitle(title);
+					setTitle(window, title);
 				}
 			});
 		}
@@ -183,6 +195,10 @@ public class SwingWindow extends XpraWindow {
 	@Override
 	public void doClose() {
 		closed = true;
+		if (window != null) {
+			window.setVisible(false);
+			window.dispose();
+		}
 	}
 
 	@Override
@@ -263,7 +279,7 @@ public class SwingWindow extends XpraWindow {
 
 				@Override
 				public void run() {
-					frame.setIconImage(icon);
+					window.setIconImage(icon);
 					// stage.getIcons().clear();
 					// stage.getIcons().add(icon);
 				}
@@ -278,7 +294,7 @@ public class SwingWindow extends XpraWindow {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					frame.setTitle(title);
+					setTitle(window, packet.getMetadata().getTitle());
 				}
 			});
 		}
@@ -289,8 +305,8 @@ public class SwingWindow extends XpraWindow {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				canvas.setWidth(width);
-				canvas.setHeight(height);
+				canvas.getParent().setSize(width, height);
+				canvas.setsize(width, height);
 			}
 		});
 	}
