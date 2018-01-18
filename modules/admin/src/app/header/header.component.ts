@@ -12,7 +12,7 @@ export class HeaderComponent implements OnInit {
     {value: 'Dashboard', link: '/dashboard'},
     {value: 'Settings', link: '/config'},
     {value: 'Users', link: '/users'},
-    {value: 'Virtual Machines', link: '/virtual-machines'}
+    {value: 'Virtual Machines', link: '/vm'},
     {value: 'Virtues', link: '/virtues'}
   ];
 

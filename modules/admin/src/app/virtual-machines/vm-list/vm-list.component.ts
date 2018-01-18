@@ -7,7 +7,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class VmListComponent implements OnInit {
 
+  enabledVmMenu = false;
+  disabledVmMenu = false;
+
   constructor() { }
+
+  showMenu(menu) {
+    if (menu === 'enabled') {
+      this.enabledVmMenu = true;
+    } else {
+      this.disabledVmMenu = true;
+    }
+  }
 
   ngOnInit() {
   }

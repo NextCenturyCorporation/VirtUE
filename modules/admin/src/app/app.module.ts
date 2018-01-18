@@ -102,11 +102,10 @@ const appRoutes: Routes = [
     { path: 'edit/:id', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
     { path: 'virtue-settings', component: VirtueSettingsComponent }
   ] },
-  { path: 'virtual-machines', component: VirtualMachinesComponent, data: {breadcrumb: 'Virtual Machines'}, children: [
+  { path: 'vm', component: VirtualMachinesComponent, data: {breadcrumb: 'Virtual Machines'}, children: [
     { path: '', component: VmListComponent },
-    { path: '', component: VmListComponent, data: {breadcrumb: 'Virtual Machines'} },
-    { path: '', component: VmBuildComponent, data: {breadcrumb: 'Build Virtual Machine'} },
-    { path: '', component: VmEditComponent, data: {breadcrumb: 'Edit Virtual Machine'} },
+    { path: 'vm-build', component: VmBuildComponent, data: {breadcrumb: 'Build Virtual Machine'} },
+    { path: 'edit/:id', component: VmEditComponent, data: {breadcrumb: 'Edit Virtual Machine'} },
   ] },
   { path: '**', component: PageNotFoundComponent }
 ];

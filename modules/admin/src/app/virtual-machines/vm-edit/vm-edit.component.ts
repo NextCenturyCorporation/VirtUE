@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-vm-edit',
@@ -7,9 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class VmEditComponent implements OnInit {
 
-  constructor() { }
+  vm: { id: number };
+
+  constructor(private router: ActivatedRoute) { }
 
   ngOnInit() {
+    this.vm = {
+      id: this.router.snapshot.params['id']
+    };
   }
 
 }
