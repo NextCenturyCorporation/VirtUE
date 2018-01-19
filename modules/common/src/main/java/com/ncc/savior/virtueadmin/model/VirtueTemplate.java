@@ -1,8 +1,8 @@
 package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -62,15 +62,12 @@ public class VirtueTemplate {
 		return version;
 	}
 
-	public Collection<ApplicationDefinition> getApplications() {
-		Set<ApplicationDefinition> apps = new HashSet<ApplicationDefinition>();
-		for (VirtualMachineTemplate temp : getVmTemplates()) {
-			apps.addAll(temp.getApplications());
-		}
-		return apps;
+	public Set<ApplicationDefinition> getApplications() {
+		return getVmTemplates().stream().flatMap(vmTemplate -> vmTemplate.getApplications().parallelStream())
+				.collect(Collectors.toSet());
 	}
 
-	public Collection<VirtualMachineTemplate> getVmTemplates() {
+	public Set<VirtualMachineTemplate> getVmTemplates() {
 		return vmTemplates;
 	}
 

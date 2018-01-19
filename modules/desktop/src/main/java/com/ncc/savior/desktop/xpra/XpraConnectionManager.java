@@ -76,7 +76,7 @@ public class XpraConnectionManager {
 			if (!servers.contains(factory.getDisplay())) {
 				logger.error("Server does not have expected display running on XPRA.  Display=" + factory.getDisplay());
 				// logger.debug("starting Xpra Display on " + factory.getDisplay());
-				int d = init.startXpraServer(factory.getDisplay());
+				// int d = init.startXpraServer(factory.getDisplay());
 				// logger.debug("Display " + d + " started");
 			}
 		}
