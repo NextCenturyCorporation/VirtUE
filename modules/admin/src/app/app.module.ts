@@ -8,6 +8,8 @@ import { HttpModule } from '@angular/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Routes, RouterModule } from '@angular/router';
 
+import { JsondataService } from './data/jsondata.service';
+
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { AppOverlayContainer } from './appOverlayContainer';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -170,7 +172,8 @@ const appRoutes: Routes = [
     RouterModule
   ],
   providers: [
-    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer(),  },
+    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
+    JsondataService,
   ],
   bootstrap: [AppComponent],
   entryComponents: [

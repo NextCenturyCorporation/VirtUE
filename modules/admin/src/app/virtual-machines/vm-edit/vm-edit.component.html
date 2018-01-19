@@ -1,3 +1,56 @@
-<p>
-  vm-edit works!
-</p>
+<div id="content-container">
+  <div id="content-header" class="titlebar">
+    <h2 class="title">Edit Virtual Machine</h2>
+  </div>
+
+  <div id="content-main" class="border-top">
+    <div id="content">
+
+      <form id="build-vm-form" method="post">
+        <div class="mui-container-fluid">
+          <div class="mui-row">
+            <div class="mui-col-md-6">
+              <mat-form-field>
+                <input matInput name="vmName" value="{{ vm_name }}" />
+                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ vm.id }}</span>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="mui-row">
+            <div class="mui-col-md-2">
+              <label for="operatingSystem">Select Operating System:</label>
+            </div>
+            <div class="mui-col-md-4">
+              <mat-form-field class="form-field">
+                <mat-select [(ngModel)]="osValue" name="operatingSystem" placeholder="Select One" [(value)]="selected" disableRipple>
+                  <mat-option *ngFor="let os of osList" [value]="os.os_info">{{ os.os_name }} </mat-option>
+                </mat-select>
+                <a *ngIf="selected" href="{{ selected }}" title="Package List: {{ selected }}" target="_blank"><span class="fa fa-info-circle"></span> </a>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="mui-row">
+            <div class="mui-col-md-2">
+              <label for="vmPackages">Packages/Apps:</label>
+            </div>
+            <div class="mui-col-md-4">
+              <mat-form-field>
+                <textarea rows="10" matInput name="vmPackages" placeholder="List each packages on a new line"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div class="mui-row border-top">
+          <div class="mui-col-md-4">&nbsp;</div>
+          <div class="mui-col-md-4 form-item text-align-center">
+            <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Build Another VM</span>
+            <button class="button-submit" type="submit">Build VM</button>
+            <button class="button-cancel" type="cancel">Cancel</button>
+          </div>
+          <div class="mui-col-md-4"></div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 export class VmEditComponent implements OnInit {
 
   vm: { id: number };
+  vm_name: string = 'test';
 
   constructor(private router: ActivatedRoute) { }
 

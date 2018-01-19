@@ -65,9 +65,8 @@ hr {
 }
 /* Header Global CSS */
 header {
-  background: rgb(46,41,78);
   display: block;
-  height: 34px;
+  height: 32px;
   margin-bottom: 50px;
 }
 breadcrumb {
@@ -324,6 +323,7 @@ content {
   h5 { font-size: 18px; }
 
   &:after {
+    border-bottom: 1px solid $mediumGray;
     clear: both;
     content:' ';
     display: block;
@@ -345,7 +345,11 @@ content {
    padding: 0.55rem 0.7rem 0.6rem;
  }
 }
-
+.no-data-message {
+  display: block;
+  border-top: 1px solid #b2b2b2;
+  border-bottom: 1px solid #b2b2b2;
+}
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;

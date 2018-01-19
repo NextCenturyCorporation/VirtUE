@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { JsondataService } from '../data/jsondata.service'
 
 @Component({
   selector: 'app-vm-list',
@@ -7,20 +8,66 @@ import { Component, OnInit } from '@angular/core';
 })
 export class VmListComponent implements OnInit {
 
-  enabledVmMenu = false;
-  disabledVmMenu = false;
+  noListData = false;
+  vms = [
+     {
+       "vm_name": "Chrome",
+       "vm_os": "Debian",
+       "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
+       "vm_timestamp": "2017-12-05T19:57:01.052901",
+       "vm_status": "enabled"
+     },
+     {
+       "vm_name": "GIMP",
+       "vm_os": "Debian",
+       "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
+       "vm_timestamp": "2017-12-05T19:57:01.052901",
+       "vm_status": "enabled"
+     },
+     {
+       "vm_name": "LastPass",
+       "vm_os": "Debian",
+       "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
+       "vm_timestamp": "2017-12-05T19:57:01.052901",
+       "vm_status": "enabled"
+     },
+     {
+       "vm_name": "Microsoft Word",
+       "vm_os": "Windows",
+       "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
+       "vm_timestamp": "2017-12-05T19:57:01.052901",
+       "vm_status": "enabled"
+     },
+     {
+       "vm_name": "Microsoft Excel",
+       "vm_os": "Windows",
+       "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
+       "vm_timestamp": "2017-12-05T19:57:01.052901",
+       "vm_status": "enabled"
+     },
+     {
+       "vm_name": "Microsoft PowerPoint",
+       "vm_os": "Windows",
+       "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
+       "vm_timestamp": "2017-12-05T19:57:01.052901",
+       "vm_status": "enabled"
+     },
+     {
+       "vm_name": "Microsoft Teams",
+       "vm_os": "Windows",
+       "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
+       "vm_timestamp": "2017-12-05T19:57:01.052901",
+       "vm_status": "enabled"
+     }
+  ];
 
-  constructor() { }
 
-  showMenu(menu) {
-    if (menu === 'enabled') {
-      this.enabledVmMenu = true;
-    } else {
-      this.disabledVmMenu = true;
-    }
-  }
+  constructor(  ) { }
+
+
 
   ngOnInit() {
+
   }
 
 }

@@ -80,6 +80,9 @@
   .padding-bottom-#{$i} { padding-bottom: #{$i * 5}; }
 }
 
+.font-color-gray {
+    color: $darkGray;
+}
 .text-align-left {
   text-align: left;
 }
