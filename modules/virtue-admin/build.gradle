@@ -30,6 +30,13 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
+eclipse {
+	classpath {
+		defaultOutputDir = file('ecbuild')
+		downloadJavadoc = true
+	}
+}
+
 group = 'com.ncc.savior'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
@@ -38,13 +45,13 @@ sourceCompatibility = 1.8
 repositories {
 	mavenCentral()
     maven { url "https://repo.spring.io/milestone" }
+    mavenLocal()
 }
 
 mainClassName = "com.ncc.savior.virtueadmin.VirtueAdminApplication"
 
 
 dependencies {
-
 	compile project(':common')
 	
     compile 'com.amazonaws:aws-java-sdk:1.9.6'
@@ -66,6 +73,8 @@ dependencies {
 	compile group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion
 	compile group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion
 	compile group: 'org.springframework.security', name: 'spring-security-ldap', version: springSecurityVersion
+    compile 'org.springframework.security.kerberos:spring-security-kerberos-client:1.0.3.BUILD-SNAPSHOT'
+    compile 'org.springframework.security.kerberos:spring-security-kerberos-web:1.0.3.BUILD-SNAPSHOT'
 	//compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.7'
 	
 	compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.5'
