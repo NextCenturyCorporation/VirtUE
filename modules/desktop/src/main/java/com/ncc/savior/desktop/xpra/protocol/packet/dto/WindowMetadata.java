@@ -25,6 +25,10 @@ public class WindowMetadata {
 		return getBoolean("fullscreen");
 	}
 
+	public Boolean getFullscreenOrNull() {
+		return getBooleanOrNull("fullscreen");
+	}
+
 	public int getGroupLeaderXid() {
 		return getInt("group-leader-xid");
 	}

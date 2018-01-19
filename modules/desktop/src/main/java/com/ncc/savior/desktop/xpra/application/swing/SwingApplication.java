@@ -73,6 +73,8 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 	private Rectangle fullScreenBounds;
 
+	private boolean fullscreen;
+
 	public SwingApplication(XpraClient client, NewWindowPacket packet, SwingApplication parent, Color color) {
 		super(client, packet.getWindowId());
 		this.color = color;
@@ -123,7 +125,10 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// stage.setIconified(false);
 				// }
 				if (meta.getFullscreen()) {
+					fullscreen = true;
 					fullscreenWindow();
+				} else {
+					fullscreen = false;
 				}
 
 				// stage.setScene(scene);
@@ -191,14 +196,14 @@ public class SwingApplication extends XpraApplication implements Closeable {
 					logger.error("Error sending packet=" + packet);
 				}
 			}
-
-			private void fullscreenWindow() {
-				frame.setMaximizedBounds(fullScreenBounds);
-				frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-				frame.setUndecorated(true);
-				frame.requestFocus();
-			}
 		});
+	}
+
+	private void fullscreenWindow() {
+		frame.setMaximizedBounds(fullScreenBounds);
+		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		frame.setUndecorated(true);
+		frame.requestFocus();
 	}
 
 	protected boolean isTaskbar(WindowMetadata meta) {
@@ -483,7 +488,6 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// stage.setMinHeight(Screen.getPrimary().getVisualBounds().getHeight());
 				// stage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
 				// }
-				logger.warn("SwingApplication does not remember maximize settings when restored");
 				frame.setState(JFrame.NORMAL);
 			}
 		});
@@ -505,6 +509,9 @@ public class SwingApplication extends XpraApplication implements Closeable {
 	@Override
 	public void initiateMoveResize(InitiateMoveResizePacket packet) {
 		clearInitMoveResize();
+		if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) == JFrame.MAXIMIZED_BOTH) {
+			return;
+		}
 		MoveResizeDirection dir = packet.getDirection();
 		if (dir.equals(MoveResizeDirection.MOVERESIZE_MOVE)) {
 			draggingApp = true;
@@ -581,5 +588,57 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 	public JFrame getFrame() {
 		return frame;
+	}
+
+	@Override
+	public void fullscreen() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					if (!fullscreen) {
+						fullscreen = true;
+						JFrame myFrame = frame;
+						// if (decorated) {
+						// myFrame = new JFrame();
+						// myFrame.getContentPane().add(frame.getContentPane());
+						// myFrame.setUndecorated(true);
+						// myFrame.setVisible(true);
+						// }
+						myFrame.setMaximizedBounds(fullScreenBounds);
+						myFrame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+						// if (decorated) {
+						// frame.setResizable(false);
+						// frame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+						// }
+						frame.requestFocus();
+					}
+				} catch (Throwable t) {
+					logger.error("err", t);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void notFullScreen() {
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+
+				try {
+					if (fullscreen) {
+						fullscreen = false;
+						frame.setExtendedState(frame.getExtendedState() & ~JFrame.MAXIMIZED_BOTH);
+						// if (decorated) {
+						// frame.getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
+						// }
+					}
+				} catch (Throwable t) {
+					logger.error("err", t);
+				}
+			}
+		});
 	}
 }

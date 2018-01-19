@@ -95,6 +95,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 					// myPane = ((JDialog) myFrame).getContentPane();
 
 					myFrame = new JFrame();
+					myFrame.setFocusableWindowState(false);
 					myFrame.setType(Type.UTILITY);
 					((JFrame) myFrame).setUndecorated(true);
 					myFrame.setSize(packet.getWidth(), packet.getHeight());

@@ -164,6 +164,14 @@ public abstract class XpraApplicationManager {
 				app.unMaximize();
 			}
 		}
+		Boolean fullscreen = meta.getFullscreenOrNull();
+		if (fullscreen != null) {
+			if (fullscreen) {
+				app.fullscreen();
+			} else {
+				app.notFullScreen();
+			}
+		}
 	}
 
 	protected void onDisconnect(DisconnectPacket packet) {

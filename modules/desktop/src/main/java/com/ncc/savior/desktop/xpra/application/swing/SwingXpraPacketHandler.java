@@ -54,14 +54,19 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 		this.cursorNameMap.put("hand2", Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		this.cursorNameMap.put("left_ptr", Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		this.cursorNameMap.put("xterm", Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-		// this.cursorNameMap.put("sb_h_double_arrow", Cursor.H_RESIZE);
-		// this.cursorNameMap.put("sb_v_double_arrow", Cursor.V_RESIZE);
-		// this.cursorNameMap.put("col-resize", Cursor.H_RESIZE);
-		// this.cursorNameMap.put("row-resize", Cursor.V_RESIZE);
-		// this.cursorNameMap.put("n-resize", Cursor.N_RESIZE);
-		// this.cursorNameMap.put("s-resize", Cursor.S_RESIZE);
-		// this.cursorNameMap.put("w-resize", Cursor.W_RESIZE);
-		// this.cursorNameMap.put("e-resize", Cursor.E_RESIZE);
+		this.cursorNameMap.put("sb_h_double_arrow", Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+		this.cursorNameMap.put("sb_v_double_arrow", Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+		// this.cursorNameMap.put("col-resize", Cursor.getPredefinedCursor(Cursor.);
+		// this.cursorNameMap.put("row-resize", Cursor.getPredefinedCursor(Cursor.);
+		this.cursorNameMap.put("text", Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+		this.cursorNameMap.put("n-resize",  Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+		this.cursorNameMap.put("s-resize",  Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
+		this.cursorNameMap.put("w-resize",  Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+		this.cursorNameMap.put("e-resize",  Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+		this.cursorNameMap.put("ne-resize", Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR));
+		this.cursorNameMap.put("se-resize", Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR));
+		this.cursorNameMap.put("nw-resize", Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
+		this.cursorNameMap.put("sw-resize", Cursor.getPredefinedCursor(Cursor.SW_RESIZE_CURSOR));
 	}
 
 	@Override
@@ -88,6 +93,7 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 		}
 		String name = packet.getName();
 		Cursor cursor = null;
+		// logger.info("CURSOR: " + name + " : " + packet);
 		// attempt to find a local system cursor
 		if (cursorNameMap.containsKey(name)) {
 			cursor = cursorNameMap.get(name);

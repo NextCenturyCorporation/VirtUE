@@ -223,7 +223,6 @@ public class SwingWindow extends XpraWindow {
 						// g.setGlobal
 						// logger.debug("ID:" + packet.getWindowId() + " Window:" + this.toString());
 						g.drawImage(img, packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight(), null);
-
 						if (color != null && isMainWindow()) {
 							g.setColor(color);
 							// g.setFill(Color.GREEN);
