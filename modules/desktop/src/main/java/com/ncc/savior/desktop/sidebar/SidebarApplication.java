@@ -29,7 +29,7 @@ public class SidebarApplication extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		boolean swing = true;
+
 		// Plumbing and depedency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
 		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
@@ -37,6 +37,7 @@ public class SidebarApplication extends Application {
 		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
+		boolean swing = props.getBoolean(PropertyManager.PROPERTY_SWING, true);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
