@@ -5,15 +5,17 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.Window.Type;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -69,6 +71,8 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 	private MouseAdapter mouseAdapter;
 
+	private Rectangle fullScreenBounds;
+
 	public SwingApplication(XpraClient client, NewWindowPacket packet, SwingApplication parent, Color color) {
 		super(client, packet.getWindowId());
 		this.color = color;
@@ -91,6 +95,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		windowManager = new SwingXpraWindowManager(client, packet.getWindowId());
 		((SwingXpraWindowManager) windowManager).setColor(color);
 		windowManager.setDebugOutput(debugOutput);
+		fullScreenBounds = frame.getMaximizedBounds();
 
 		SwingUtilities.invokeLater(new Runnable() {
 
@@ -118,7 +123,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// stage.setIconified(false);
 				// }
 				if (meta.getFullscreen()) {
-					frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+					fullscreenWindow();
 				}
 
 				// stage.setScene(scene);
@@ -186,6 +191,13 @@ public class SwingApplication extends XpraApplication implements Closeable {
 					logger.error("Error sending packet=" + packet);
 				}
 			}
+
+			private void fullscreenWindow() {
+				frame.setMaximizedBounds(fullScreenBounds);
+				frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+				frame.setUndecorated(true);
+				frame.requestFocus();
+			}
 		});
 	}
 
@@ -198,14 +210,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 	}
 
 	protected void initEventHandlers() {
-		frame.addWindowListener(new WindowListener() {
-
-			@Override
-			public void windowOpened(WindowEvent e) {
-				// TODO Auto-generated method stub
-
-			}
-
+		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowIconified(WindowEvent e) {
 				onMinimized();
@@ -216,11 +221,10 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				onRestored(getScreenX(), getScreenY(), frame.getWidth(), frame.getHeight());
 			}
 
-			@Override
-			public void windowDeactivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-
-			}
+			// public void windowOpened(WindowEvent e)
+			// public void windowDeactivated(WindowEvent e)
+			// public void windowClosed(WindowEvent e)
+			// public void windowActivated(WindowEvent e)
 
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -232,24 +236,11 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				XpraWindowManager manager = SwingApplication.super.windowManager;
 				manager.CloseAllWindows();
 			}
-
-			@Override
-			public void windowClosed(WindowEvent e) {
-				// logger.info("closed");
-
-			}
-
-			@Override
-			public void windowActivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-
-			}
 		});
-		frame.addComponentListener(new ComponentListener() {
+		frame.addComponentListener(new ComponentAdapter() {
 
-			@Override
-			public void componentShown(ComponentEvent e) {
-			}
+			// public void componentShown(ComponentEvent e)
+			// public void componentHidden(ComponentEvent e)
 
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -264,10 +255,6 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				c = ((JFrame) c).getContentPane();
 				Point l = c.getLocationOnScreen();
 				onLocationChange((int) l.getX(), (int) l.getY(), c.getWidth(), c.getHeight());
-			}
-
-			@Override
-			public void componentHidden(ComponentEvent e) {
 			}
 		});
 		// scene.widthProperty().addListener(new ChangeListener<Number>() {
@@ -464,8 +451,8 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				logger.warn("Maximize not implemented yet...maybe");
-				frame.setState(Frame.MAXIMIZED_BOTH);
+				frame.setMaximizedBounds(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds());
+				frame.setExtendedState(frame.getExtendedState() | Frame.MAXIMIZED_BOTH);
 				// stage.setIconified(false);
 				// stage.setMaximized(true);
 				// stage.setMaxHeight(Screen.getPrimary().getVisualBounds().getHeight());
@@ -507,7 +494,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				frame.setState(JFrame.NORMAL);
+				frame.setExtendedState(~JFrame.MAXIMIZED_BOTH & frame.getExtendedState());
 				// stage.setIconified(false);
 				// stage.setMaximized(false);
 				// stage.setMinHeight(10);
@@ -521,7 +508,6 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		MoveResizeDirection dir = packet.getDirection();
 		if (dir.equals(MoveResizeDirection.MOVERESIZE_MOVE)) {
 			draggingApp = true;
-			logger.debug("moving...");
 			// initMoveResizePacket = packet;
 		}
 		int dirInt = packet.getDirectionInt();
@@ -553,7 +539,6 @@ public class SwingApplication extends XpraApplication implements Closeable {
 	}
 
 	private void clearInitMoveResize() {
-		logger.debug("not moving");
 		draggingApp = false;
 		// initMoveResizePacket = null;
 		resizeTop = false;
