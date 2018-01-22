@@ -18,6 +18,6 @@ import org.springframework.context.annotation.ImportResource;
 public class VirtueAdminApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VirtueAdminApplicationX.class, args);
+		SpringApplication.run(VirtueAdminApplication.class, args);
 	}
 }
