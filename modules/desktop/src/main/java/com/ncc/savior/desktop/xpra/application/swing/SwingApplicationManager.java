@@ -52,7 +52,7 @@ public class SwingApplicationManager extends XpraApplicationManager {
 			@Override
 			public void run() {
 				logger.debug("focusing window" + this.toString());
-				app.getFrame().requestFocus();
+				app.getWindowFrame().requestFocus();
 			}
 		});
 	}

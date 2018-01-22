@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
@@ -42,11 +41,11 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 	private static Logger logger = LoggerFactory.getLogger(SwingXpraPacketHandler.class);
 
 	private HashSet<PacketType> types;
-	private JFrame frame;
+	private WindowFrame frame;
 
 	private Map<String, Cursor> cursorNameMap;
 
-	public SwingXpraPacketHandler(JFrame frame) {
+	public SwingXpraPacketHandler(WindowFrame frame) {
 		types = new HashSet<PacketType>();
 		types.add(PacketType.CURSOR);
 		this.frame = frame;
@@ -86,7 +85,7 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					frame.getWindow().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
 			});
 			return;
@@ -102,7 +101,6 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 			}
 		} else {
 			try {
-				// System.out.println(name);
 				cursor = Cursor.getSystemCustomCursor(name);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Found cursor by name.  name=" + name + " cursor=" + cursor + " Packet=" + packet);
@@ -119,7 +117,7 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 
 				@Override
 				public void run() {
-					frame.setCursor(c);
+					frame.getWindow().setCursor(c);
 				}
 			});
 		} else if (packet.getBytes() != null) {
@@ -137,7 +135,7 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 
 					@Override
 					public void run() {
-						frame.setCursor(imgCursor);
+						frame.getWindow().setCursor(imgCursor);
 					}
 				});
 			} catch (RuntimeException e) {
@@ -150,7 +148,7 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					frame.setCursor(Cursor.getDefaultCursor());
+					frame.getWindow().setCursor(Cursor.getDefaultCursor());
 				}
 			});
 		}

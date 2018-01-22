@@ -1,11 +1,9 @@
 package com.ncc.savior.desktop.xpra.application.swing;
 
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -13,8 +11,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.List;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
@@ -57,7 +53,7 @@ public class SwingWindow extends XpraWindow {
 
 	private Color color;
 
-	private Window window;
+	private WindowFrame window;
 
 	public SwingWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
 			IFocusNotifier focusNotifier) {
@@ -71,22 +67,14 @@ public class SwingWindow extends XpraWindow {
 		type = metadata.getWindowType();
 	}
 
-	private void setTitle(Window window, String title) {
-		this.title = title;
-		if (window instanceof JFrame) {
-			((JFrame) window).setTitle(title);
-		} else if (window instanceof JDialog) {
-			((Dialog) window).setTitle(title);
-		}
-	}
-	public void initSwing(JCanvas canvas, JFrame frame, JDialog dialog) {
+	public void initSwing(JCanvas canvas, WindowFrame frame) {
 		this.canvas = canvas;
-		this.window = dialog == null ? frame : dialog;
+		this.window = frame;
 		if (type.contains("NORMAL")) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					setTitle(window, title);
+					window.setTitle(title);
 				}
 			});
 		}
@@ -201,7 +189,7 @@ public class SwingWindow extends XpraWindow {
 		closed = true;
 		if (window != null) {
 			window.setVisible(false);
-			window.dispose();
+			window.getWindow().dispose();
 		}
 	}
 
@@ -297,7 +285,7 @@ public class SwingWindow extends XpraWindow {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					setTitle(window, packet.getMetadata().getTitle());
+					window.setTitle(packet.getMetadata().getTitle());
 				}
 			});
 		}

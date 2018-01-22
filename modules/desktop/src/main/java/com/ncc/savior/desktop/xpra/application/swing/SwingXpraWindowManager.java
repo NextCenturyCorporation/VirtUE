@@ -10,8 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.io.IOException;
 import java.util.List;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
@@ -42,7 +40,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 	private static final Logger logger = LoggerFactory.getLogger(SwingXpraWindowManager.class);
 
 	protected Container pane;
-	protected JFrame baseFrame;
+	protected WindowFrame baseFrame;
 	protected SwingKeyboard keyboard;
 
 	private int insetWidth;
@@ -82,7 +80,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 
 				// int baseWindowId = SwingXpraWindowManager.this.baseWindowId;
 				boolean isMainWindow = baseWindowId == packet.getWindowId();
-				Window myFrame;
+				WindowFrame myFrame;
 				Container myPane;
 				if (isMainWindow) {
 					myFrame = baseFrame;
@@ -93,26 +91,22 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 					// ((JDialog)myFrame).setUndecorated(true);
 					// myFrame.setSize(packet.getWidth(), packet.getHeight());
 					// myPane = ((JDialog) myFrame).getContentPane();
-
-					myFrame = new JFrame();
-					myFrame.setFocusableWindowState(false);
+					// TODO set OWNER?
+					myFrame = WindowFrame.createWindow(packet, null);
+					myFrame.getWindow().setFocusableWindowState(false);
 					myFrame.setType(Type.UTILITY);
-					((JFrame) myFrame).setUndecorated(true);
+					myFrame.setUndecorated(true);
 					myFrame.setSize(packet.getWidth(), packet.getHeight());
-					myPane = ((JFrame) myFrame).getContentPane();
+					myPane = myFrame.getContentPane();
 
 					myPane.setSize(packet.getWidth(), packet.getHeight());
 					myFrame.setLocation(packet.getX(), packet.getY());
 					myFrame.setVisible(true);
 				}
-				if (myFrame instanceof JFrame) {
-					window.initSwing(canvas, (JFrame) myFrame, null);
-				} else if (myFrame instanceof JDialog) {
-					window.initSwing(canvas, baseFrame, (JDialog) myFrame);
-				}
+				window.initSwing(canvas, myFrame);
 				myPane.add(canvas);
-				double x = packet.getX() - myFrame.getX();
-				double y = packet.getY() - myFrame.getY();
+				double x = packet.getX() - myFrame.getWindow().getX();
+				double y = packet.getY() - myFrame.getWindow().getY();
 				if (packet instanceof NewWindowOverrideRedirectPacket) {
 					x -= insetWidth;
 					y -= titleBarHeight;
@@ -150,7 +144,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 		}
 	}
 
-	public void setFrame(JFrame frame) {
+	public void setFrame(WindowFrame frame) {
 		this.baseFrame = frame;
 		initStage();
 		setGraphicsInit();
@@ -186,7 +180,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 				onKeyDown(key, mods);
 			}
 		};
-		this.baseFrame.addKeyListener(keyAdapter);
+		this.baseFrame.getWindow().addKeyListener(keyAdapter);
 
 		// this.frame.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
 		// @Override
@@ -220,16 +214,18 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 	@Override
 	protected void doClose() {
 		// this.pane = null;
-		final JFrame myFrame = SwingXpraWindowManager.this.baseFrame;
-		SwingXpraWindowManager.this.baseFrame = null;
-		if (myFrame != null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					myFrame.setVisible(false);
-					myFrame.dispose();
-				}
-			});
+		if (SwingXpraWindowManager.this.baseFrame != null) {
+			final Window myFrame = SwingXpraWindowManager.this.baseFrame.getWindow();
+			SwingXpraWindowManager.this.baseFrame = null;
+			if (myFrame != null) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						myFrame.setVisible(false);
+						myFrame.dispose();
+					}
+				});
+			}
 		}
 	}
 

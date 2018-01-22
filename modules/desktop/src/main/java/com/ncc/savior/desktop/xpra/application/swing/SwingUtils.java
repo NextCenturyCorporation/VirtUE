@@ -69,7 +69,6 @@ public class SwingUtils {
 		// Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK);
 		boolean numlock = false;
 		// Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_NUM_LOCK);
-		// System.out.println(capslock + " : " + numlock);
 		numlock = true;
 		if (capslock) {
 			mods.add(MOD_CAPS_LOCK);

@@ -73,7 +73,7 @@ public abstract class XpraApplicationManager {
 					NewWindowPacket p = (NewWindowPacket) packet;
 					int parentId = p.getMetadata().getParentId();
 					boolean isModal = p.getMetadata().getModal();
-					if (parentId > 0 && isModal) {
+					if (parentId > 0 /* && isModal8 */) {
 						XpraApplication parent = applications.get(parentId);
 						onModal(p, parent);
 					} else {
