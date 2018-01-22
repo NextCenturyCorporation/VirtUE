@@ -6,7 +6,7 @@ import 'rxjs/add/operator/catch';
 
 @Injectable()
 export class JsondataService {
-  private jsonfile: string = any;
+  private jsonfile: string = './assets/json/vm-list.json';
   constructor( private http: Http ){}
 
   getData() : Observable<any> {

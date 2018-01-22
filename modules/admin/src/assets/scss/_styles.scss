@@ -244,11 +244,13 @@ content {
     text-align: right;
   }
 }
+
+
 .table-container, .data-list {
   @include ralewayMedium;
-  max-height: 540px;
   margin-top: 10px;
   margin-bottom: 10px;
+  max-height: 1024px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -296,11 +298,18 @@ content {
   @include raleway;
   background-color: #FFF;
   display: table-cell;
-}
-.table-data span {
-  margin-left: 10px;
-  margin-right: 10px;
-  text-align: left;
+  span {
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: left;
+  }
+  .menu-options {
+    clear: both;
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin: 0;
+  }
 }
 
 .tab-pane-content {
