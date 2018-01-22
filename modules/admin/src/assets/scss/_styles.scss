@@ -66,7 +66,7 @@ hr {
 /* Header Global CSS */
 header {
   display: block;
-  height: 32px;
+  height: 34px;
   margin-bottom: 50px;
 }
 breadcrumb {
@@ -250,7 +250,7 @@ content {
   @include ralewayMedium;
   margin-top: 10px;
   margin-bottom: 10px;
-  max-height: 1024px;
+  max-height: 960px;
   overflow-y: scroll;
   overflow-x: hidden;
 }

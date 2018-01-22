@@ -1,3 +1,4 @@
+@import url(~@angular/material/prebuilt-themes/deeppurple-amber.css);
 /**
  * MUI Colors module
  */
@@ -3453,7 +3454,7 @@ hr {
 /* line 67, ../scss/_styles.scss */
 header {
   display: block;
-  height: 32px;
+  height: 34px;
   margin-bottom: 50px;
 }
 
@@ -3684,7 +3685,7 @@ content #content.content {
   font-family: 'Raleway500', Arial, sans-serif;
   margin-top: 10px;
   margin-bottom: 10px;
-  max-height: 1024px;
+  max-height: 960px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -3872,160 +3873,6 @@ footer {
   position: absolute;
   width: 100%;
   z-index: 100;
-}
-
-/* line 1, ../scss/_material.scss */
-.mat-dialog-container {
-  background: white;
-  box-shadow: none;
-}
-
-/* line 6, ../scss/_material.scss */
-.mat-dialog-container app-dialogs {
-  display: block;
-  position: relative;
-  padding: 1.2rem;
-  text-align: center;
-}
-/* line 12, ../scss/_material.scss */
-.mat-dialog-container .mat-dialog-title {
-  border-bottom: 1px solid #b2b2b2;
-  display: block;
-  margin: 0;
-  padding-bottom: 1rem;
-  text-align: left;
-  text-transform: capitalize;
-}
-/* line 20, ../scss/_material.scss */
-.mat-dialog-container .mat-dialog-content {
-  padding: 1rem 2rem;
-  text-align: left;
-}
-/* line 24, ../scss/_material.scss */
-.mat-dialog-container .mat-dialog-actions {
-  border-top: 1px solid #b2b2b2;
-  display: block;
-  padding-top: 1.5rem;
-  text-align: center;
-}
-/* line 30, ../scss/_material.scss */
-.mat-dialog-container button, .mat-dialog-container button[type='submit'] {
-  border-radius: 0;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  margin-right: 10px;
-}
-/* line 36, ../scss/_material.scss */
-.mat-dialog-container button {
-  background-color: #e9e3e6;
-  border: 1px solid #b2b2b2;
-}
-/* line 39, ../scss/_material.scss */
-.mat-dialog-container button.button {
-  padding: 0.4rem 1rem;
-}
-/* line 43, ../scss/_material.scss */
-.mat-dialog-container button[type='submit'] {
-  background-color: #407097;
-  color: white;
-}
-
-/* line 49, ../scss/_material.scss */
-mat-form-field {
-  clear: both;
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-/* line 57, ../scss/_material.scss */
-.mat-form-field-placeholder-wrapper {
-  top: 0;
-}
-
-/* line 60, ../scss/_material.scss */
-.mat-input-placeholder {
-  color: #B2B2B2;
-  padding: 5px;
-}
-
-/* line 65, ../scss/_material.scss */
-input.mat-input-element {
-  border: 1px solid #b2b2b2;
-  padding: 5px;
-  width: 100%;
-}
-
-/* line 70, ../scss/_material.scss */
-textarea.mat-input-element {
-  border: 1px solid #b2b2b2;
-  padding: 5px;
-  width: 100%;
-}
-
-/* line 76, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-label {
-  margin-right: 20px;
-}
-/* line 80, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-inner-container {
-  margin-right: 0;
-  width: 15px;
-}
-/* line 84, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-input {
-  margin-top: 3px;
-}
-/* line 87, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-frame {
-  border-width: 0;
-}
-
-/* line 93, ../scss/_material.scss */
-.mat-radio-label .mat-radio-container {
-  display: none;
-}
-
-/* line 98, ../scss/_material.scss */
-.mat-autocomplete-panel {
-  overflow: none;
-  overflow-x: none;
-  overflow-y: scroll;
-}
-/* line 102, ../scss/_material.scss */
-.mat-autocomplete-panel .mat-option {
-  border-bottom: 1px solid #BFBFBF;
-  clear: both;
-  cursor: pointer;
-  display: block;
-  padding: 5px;
-  width: 100%;
-}
-
-/* line 111, ../scss/_material.scss */
-.mat-select {
-  border: 1px solid #b2b2b2;
-  padding: 5px;
-}
-
-/* line 115, ../scss/_material.scss */
-.mat-select-panel {
-  background-color: #FFF;
-  box-shadow: none;
-  border: 1px solid #b2b2b2;
-}
-/* line 120, ../scss/_material.scss */
-.mat-select-panel .mat-option {
-  border-bottom: thin solid #b2b2b2;
-  display: block;
-  width: 100%;
-}
-/* line 124, ../scss/_material.scss */
-.mat-select-panel .mat-option:hover {
-  cursor: pointer;
-}
-/* line 127, ../scss/_material.scss */
-.mat-select-panel .mat-option .mat-option-text {
-  padding-left: 15px;
 }
 
 /* line 2, ../scss/_helpers.scss */
@@ -4301,4 +4148,194 @@ textarea.mat-input-element {
 /* line 92, ../scss/_helpers.scss */
 .text-align-right {
   text-align: right;
+}
+
+/* line 1, ../scss/_material.scss */
+button, button[type='submit'] {
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  margin-right: 10px;
+}
+
+/* line 7, ../scss/_material.scss */
+button {
+  background-color: #E9E3E6;
+  border: 1px solid #B2B2B2;
+}
+/* line 10, ../scss/_material.scss */
+button.button {
+  padding: 0.4rem 1rem;
+}
+
+/* line 14, ../scss/_material.scss */
+button[type='submit'] {
+  background-color: #407097;
+  color: #FFF;
+}
+
+/* line 19, ../scss/_material.scss */
+.mat-dialog-container {
+  background: #FFF;
+  box-shadow: none;
+}
+
+/* line 24, ../scss/_material.scss */
+.mat-dialog-container app-dialogs {
+  display: block;
+  position: relative;
+  padding: 1.2rem;
+  text-align: center;
+}
+/* line 30, ../scss/_material.scss */
+.mat-dialog-container .mat-dialog-title {
+  border-bottom: 1px solid #B2B2B2;
+  display: block;
+  margin: 0;
+  padding-bottom: 1rem;
+  text-align: left;
+  text-transform: capitalize;
+}
+/* line 38, ../scss/_material.scss */
+.mat-dialog-container .mat-dialog-content {
+  padding: 1rem 2rem;
+  text-align: left;
+}
+/* line 42, ../scss/_material.scss */
+.mat-dialog-container .mat-dialog-actions {
+  border-top: 1px solid #B2B2B2;
+  display: block;
+  padding-top: 1.5rem;
+  text-align: center;
+}
+
+/* line 51, ../scss/_material.scss */
+mat-form-field {
+  clear: both;
+  line-height: 1.25;
+  margin-bottom: 15px;
+  width: 100%;
+}
+/* line 57, ../scss/_material.scss */
+mat-form-field span.mat-input-placeholder-wrapper.mat-form-field-placeholder-wrapper {
+  padding-top: 0;
+  box-sizing: border-box;
+  top: 0;
+}
+/* line 62, ../scss/_material.scss */
+mat-form-field span.mat-input-placeholder-wrapper.mat-form-field-placeholder-wrapper .mat-input-placeholder {
+  top: 0;
+  color: #B2B2B2;
+  padding: 5px;
+}
+/* line 69, ../scss/_material.scss */
+mat-form-field .mat-input-wrapper.mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+/* line 73, ../scss/_material.scss */
+mat-form-field .mat-form-field-underline {
+  display: none;
+}
+/* line 77, ../scss/_material.scss */
+mat-form-field .mat-form-field-infix {
+  padding: 0;
+  border-top: none;
+}
+
+/* line 84, ../scss/_material.scss */
+input.mat-input-element {
+  border: 1px solid #b2b2b2;
+  box-sizing: border-box;
+  padding: 5px;
+  width: 100%;
+}
+
+/* TEXTAREA */
+/* line 92, ../scss/_material.scss */
+textarea.mat-input-element {
+  border: 1px solid #b2b2b2;
+  box-sizing: border-box;
+  padding: 5px;
+  width: 100%;
+}
+
+/*CHECKBOX */
+/* line 100, ../scss/_material.scss */
+mat-checkbox {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* line 103, ../scss/_material.scss */
+mat-checkbox .mat-checkbox-frame {
+  border-color: #3E3F4E;
+  border-width: thin;
+}
+/* line 109, ../scss/_material.scss */
+mat-checkbox.mat-accent.mat-checkbox-checked .mat-checkbox-frame {
+  border-color: #3E3F4E;
+  border-width: thin;
+}
+/* line 113, ../scss/_material.scss */
+mat-checkbox.mat-accent.mat-checkbox-checked .mat-checkbox-background {
+  background-color: #407097;
+}
+
+/* RADIO */
+/* line 122, ../scss/_material.scss */
+mat-radio-button.mat-radio-button .mat-radio-outer-circle {
+  border-color: #3E3F4E;
+  border-width: thin;
+}
+/* line 127, ../scss/_material.scss */
+mat-radio-button.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+  border-color: #3E3F4E;
+}
+/* line 130, ../scss/_material.scss */
+mat-radio-button.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-inner-circle {
+  background-color: #407097;
+}
+
+/* AUTOCOMPLETE */
+/* line 137, ../scss/_material.scss */
+.mat-autocomplete-panel {
+  overflow: none;
+  overflow-x: none;
+  overflow-y: scroll;
+}
+/* line 141, ../scss/_material.scss */
+.mat-autocomplete-panel .mat-option {
+  border-bottom: 1px solid #BFBFBF;
+  clear: both;
+  cursor: pointer;
+  display: block;
+  padding: 5px;
+  width: 100%;
+}
+
+/* SELECT */
+/* line 153, ../scss/_material.scss */
+mat-select.mat-select {
+  border: 1px solid #b2b2b2;
+  box-sizing: border-box;
+  padding: 5px;
+}
+/* line 158, ../scss/_material.scss */
+mat-select .mat-select-panel {
+  background-color: #FFF;
+  box-shadow: none;
+  border: 1px solid #b2b2b2;
+}
+/* line 163, ../scss/_material.scss */
+mat-select .mat-select-panel .mat-option {
+  border-bottom: thin solid #b2b2b2;
+  display: block;
+  width: 100%;
+}
+/* line 167, ../scss/_material.scss */
+mat-select .mat-select-panel .mat-option:hover {
+  cursor: pointer;
+}
+/* line 170, ../scss/_material.scss */
+mat-select .mat-select-panel .mat-option .mat-option-text {
+  padding-left: 15px;
 }
