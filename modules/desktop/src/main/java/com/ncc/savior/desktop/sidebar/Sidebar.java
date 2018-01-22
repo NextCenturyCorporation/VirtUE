@@ -180,6 +180,7 @@ public class Sidebar implements VirtueChangeHandler {
 				// do cleanup stuff.
 				authService.logout();
 				Platform.exit();
+				System.exit(0);
 			}
 		});
 		HBox.setHgrow(button, Priority.ALWAYS);

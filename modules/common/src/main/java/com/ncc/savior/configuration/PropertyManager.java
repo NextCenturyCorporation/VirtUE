@@ -131,6 +131,9 @@ public class PropertyManager {
 	public boolean getBoolean(String property, boolean defaultValue) {
 		String strVal = getProperty(property, null);
 		boolean value = false;
+		if (strVal == null) {
+			return defaultValue;
+		}
 		try {
 			value = Boolean.valueOf(strVal);
 		} catch (RuntimeException e) {
