@@ -38,7 +38,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
 
 /**
- * Controls a JavaFX Application. An Application is defined as window that has
+ * Controls a SwingFX Application. An Application is defined as window that has
  * its own taskbar item. For example, each firefox window is considered an
  * application.
  *
@@ -47,7 +47,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
 public class SwingApplication extends XpraApplication implements Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(SwingApplication.class);
 
-	private boolean show;
+	// private boolean show;
 	private SwingXpraPacketHandler applicationPacketHandler;
 	private boolean draggingApp = false;
 
@@ -107,7 +107,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 			@Override
 			public void run() {
 				WindowMetadata meta = packet.getMetadata();
-				boolean isModal = meta.getModal();
+				// boolean isModal = meta.getModal();
 				// StageStyle style = (isModal ? StageStyle.UTILITY : StageStyle.DECORATED);
 				// if (packet instanceof NewWindowOverrideRedirectPacket) {
 				// style = StageStyle.TRANSPARENT;
@@ -178,8 +178,8 @@ public class SwingApplication extends XpraApplication implements Closeable {
 					titleBarHeight = 0;
 				}
 				frame.setLocation(x - insetWidth, y - titleBarHeight);
-				((SwingXpraWindowManager) windowManager).setInsetWith(insetWidth);
-				((SwingXpraWindowManager) windowManager).setTitleBarHeight(titleBarHeight);
+				// ((SwingXpraWindowManager) windowManager).setInsetWith(insetWidth);
+				// ((SwingXpraWindowManager) windowManager).setTitleBarHeight(titleBarHeight);
 				// stage.setWidth(packet.getWidth());
 				// stage.setHeight(packet.getHeight());
 				frame.setSize(packet.getWidth() + insetWidth * 2, packet.getHeight() + insetWidth + titleBarHeight);
@@ -222,7 +222,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 	}
 
 	protected void initEventHandlers() {
-		frame.getWindow().addWindowListener(new WindowAdapter() {
+		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowIconified(WindowEvent e) {
 				onMinimized();
@@ -249,7 +249,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				manager.CloseAllWindows();
 			}
 		});
-		frame.getWindow().addComponentListener(new ComponentAdapter() {
+		frame.addComponentListener(new ComponentAdapter() {
 
 			// public void componentShown(ComponentEvent e)
 			// public void componentHidden(ComponentEvent e)
@@ -437,7 +437,6 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 	@Override
 	public void Show() {
-		show = true;
 		if (frame != null) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
@@ -457,7 +456,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 			@Override
 			public void run() {
 				frame.setVisible(false);
-				frame.getWindow().dispose();
+				frame.dispose();
 			}
 		});
 	}
@@ -613,9 +612,16 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				try {
 					if (!fullscreen) {
 						fullscreen = true;
-						frame.setMaximizedBounds(fullScreenBounds);
-						frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-						frame.requestFocus();
+
+						frame.switchToFullscreen();
+						titleBarHeight = 0;
+						insetWidth = 0;
+						onSceneSizeChange(frame.getWindow().getWidth(), frame.getWindow().getHeight());
+
+						// frame.setMaximizedBounds(fullScreenBounds);
+						// frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+						// frame.requestFocus();
+
 					}
 				} catch (Throwable t) {
 					logger.error("err", t);
@@ -634,7 +640,12 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				try {
 					if (fullscreen) {
 						fullscreen = false;
-						frame.setExtendedState(frame.getExtendedState() & ~JFrame.MAXIMIZED_BOTH);
+						frame.switchFromFullscreen();
+						insetWidth = frame.getWindow().getInsets().left;
+						titleBarHeight = frame.getWindow().getInsets().top;
+						onSceneSizeChange(frame.getWindow().getWidth() - insetWidth * 2,
+								frame.getWindow().getHeight() - insetWidth - titleBarHeight);
+						// frame.setExtendedState(frame.getExtendedState() & ~JFrame.MAXIMIZED_BOTH);
 						// if (decorated) {
 						// frame.getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
 						// }

@@ -3,9 +3,19 @@ package com.ncc.savior.desktop.xpra.application.swing;
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Window;
+import java.awt.event.ComponentListener;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 
+/**
+ * Implementation of {@link WindowFrame} that uses a {@link JFrame}. This is for
+ * most base windows.
+ *
+ *
+ */
 public class NormalWindowFrame extends WindowFrame {
 
 	private JFrame frame;
@@ -60,4 +70,53 @@ public class NormalWindowFrame extends WindowFrame {
 		frame.setIconImage(icon);
 	}
 
+	@Override
+	protected Window doSwitchToFullscreen(Window window, Window previousWindow) {
+		JFrame jf;
+		if (window == null) {
+			jf = new JFrame();
+			jf.setExtendedState(JFrame.MAXIMIZED_BOTH);
+			jf.setUndecorated(true);
+			copyListeners(previousWindow, jf);
+			// add listeners
+		} else {
+			jf = (JFrame) window;
+		}
+		jf.setVisible(true);
+		jf.setIconImage(frame.getIconImage());
+		jf.setTitle(frame.getTitle());
+		frame = jf;
+		return jf;
+	}
+
+	@Override
+	protected Window doSwitchFromFullscreen(Window window, Window previousWindow) {
+		JFrame jf;
+		if (window == null) {
+			jf = new JFrame();
+			jf.setExtendedState(JFrame.NORMAL);
+			jf.setUndecorated(false);
+			copyListeners(previousWindow, jf);
+			// add listeners
+		} else {
+			jf = (JFrame) window;
+		}
+		jf.setVisible(true);
+		jf.setIconImage(frame.getIconImage());
+		jf.setTitle(frame.getTitle());
+		frame = jf;
+		return jf;
+	}
+
+	private void copyListeners(Window from, Window to) {
+		for (KeyListener kl : from.getKeyListeners()) {
+			to.addKeyListener(kl);
+		}
+		for (WindowListener wl : from.getWindowListeners()) {
+			to.addWindowListener(wl);
+		}
+		for (ComponentListener cl : from.getComponentListeners()) {
+			to.addComponentListener(cl);
+		}
+	}
 }

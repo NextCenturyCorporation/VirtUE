@@ -10,7 +10,13 @@ import javax.swing.JComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Custom implementation of a Canvas where we can draw on the screen using the
+ *
+ *
+ */
 public class JCanvas extends JComponent {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(JCanvas.class);
 
 	Image img;

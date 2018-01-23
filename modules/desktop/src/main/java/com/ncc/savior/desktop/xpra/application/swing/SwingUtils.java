@@ -9,7 +9,7 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 
 /**
- * Utility methods for extracting information from JavaFX events
+ * Utility methods for extracting information from Swing events
  *
  *
  */

@@ -140,47 +140,7 @@ public class SwingWindow extends XpraWindow {
 
 			}
 		});
-		// logger.warn("Mouse move on canvas not implemented");
-		// this.canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
-		// @Override
-		// public void handle(MouseEvent event) {
-		// List<String> modifiers = JavaFxUtils.getModifiers(event);
-		// onMouseMove((int) event.getScreenX(), (int) event.getScreenY(), modifiers);
-		// }
-		// });
-		// this.canvas.setOnMousePressed(new EventHandler<MouseEvent>() {
-		// @Override
-		// public void handle(MouseEvent event) {
-		// List<String> modifiers = JavaFxUtils.getModifiers(event);
-		// onWindowFocus();
-		// onMousePress(event.getButton().ordinal(), (int) event.getScreenX(), (int)
-		// event.getScreenY(),
-		// modifiers);
-		// }
-		// });
-		// this.canvas.setOnMouseReleased(new EventHandler<MouseEvent>() {
-		// @Override
-		// public void handle(MouseEvent event) {
-		// List<String> modifiers = JavaFxUtils.getModifiers(event);
-		// onMouseRelease(event.getButton().ordinal(), (int) event.getScreenX(), (int)
-		// event.getScreenY(),
-		// modifiers);
-		// }
-		// });
-		// this.canvas.setOnMouseDragged(new EventHandler<MouseEvent>() {
-		// @Override
-		// public void handle(MouseEvent event) {
-		// List<String> modifiers = JavaFxUtils.getModifiers(event);
-		// onMouseMove((int) event.getScreenX(), (int) event.getScreenY(), modifiers);
-		// }
-		// });
-		// this.canvas.setOnScroll(new EventHandler<ScrollEvent>() {
-		// @Override
-		// public void handle(ScrollEvent event) {
-		// onMouseScroll(0, (int) event.getDeltaY(), (int) event.getScreenX(), (int)
-		// event.getScreenY());
-		// }
-		// });
+
 		graphicsSet = true;
 	}
 
@@ -189,7 +149,7 @@ public class SwingWindow extends XpraWindow {
 		closed = true;
 		if (window != null) {
 			window.setVisible(false);
-			window.getWindow().dispose();
+			window.dispose();
 		}
 	}
 

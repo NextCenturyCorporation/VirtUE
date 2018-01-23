@@ -24,7 +24,6 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MapWindowPacket;
-import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 
 /**
@@ -43,9 +42,9 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 	protected WindowFrame baseFrame;
 	protected SwingKeyboard keyboard;
 
-	private int insetWidth;
-
-	private int titleBarHeight;
+	// private int insetWidth;
+	//
+	// private int titleBarHeight;
 
 	private Color color;
 
@@ -105,16 +104,16 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 				}
 				window.initSwing(canvas, myFrame);
 				myPane.add(canvas);
-				double x = packet.getX() - myFrame.getWindow().getX();
-				double y = packet.getY() - myFrame.getWindow().getY();
-				if (packet instanceof NewWindowOverrideRedirectPacket) {
-					x -= insetWidth;
-					y -= titleBarHeight;
-				}
-				if (packet.getMetadata().getFullscreen()) {
-					x = 0;
-					y = 0;
-				}
+				// double x = packet.getX() - myFrame.getWindow().getX();
+				// double y = packet.getY() - myFrame.getWindow().getY();
+				// if (packet instanceof NewWindowOverrideRedirectPacket) {
+				// x -= insetWidth;
+				// y -= titleBarHeight;
+				// }
+				// if (packet.getMetadata().getFullscreen()) {
+				// x = 0;
+				// y = 0;
+				// }
 				// double x = packet.getX();
 				// double y = packet.getY();
 				// AnchorPane.setTopAnchor(canvas, y);
@@ -180,62 +179,36 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 				onKeyDown(key, mods);
 			}
 		};
-		this.baseFrame.getWindow().addKeyListener(keyAdapter);
+		this.baseFrame.addKeyListener(keyAdapter);
 
-		// this.frame.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
-		// @Override
-		// public void handle(KeyEvent event) {
-		// KeyCodeDto keycode = keyboard.getKeyCodeFromEvent(event);
-		// // int key = event.getCode().ordinal();
-		// // String u = keyMap.getUnicodeName(key);
-		// // int c = keyMap.getKeyCode(key);
-		// // List<String> mods = JavaFxUtils.getModifiers(event);
-		// if (keycode != null) {
-		// onKeyDown(keycode, keyboard.getModifiers(event));
-		// }
-		// }
-		// });
-		//
-		// this.frame.getScene().setOnKeyReleased(new EventHandler<KeyEvent>() {
-		// @Override
-		// public void handle(KeyEvent event) {
-		// KeyCodeDto keycode = keyboard.getKeyCodeFromEvent(event);
-		// // int key = event.getCode().ordinal();
-		// // String u = keyMap.getUnicodeName(key);
-		// // int c = keyMap.getKeyCode(key);
-		// // List<String> mods = JavaFxUtils.getModifiers(event);
-		// if (keycode != null) {
-		// onKeyUp(keycode, keyboard.getModifiers(event));
-		// }
-		// }
-		// });
 	}
 
 	@Override
 	protected void doClose() {
 		// this.pane = null;
 		if (SwingXpraWindowManager.this.baseFrame != null) {
-			final Window myFrame = SwingXpraWindowManager.this.baseFrame.getWindow();
+			WindowFrame myBaseFrame = SwingXpraWindowManager.this.baseFrame;
+			final Window myFrame = myBaseFrame.getWindow();
 			SwingXpraWindowManager.this.baseFrame = null;
 			if (myFrame != null) {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
 						myFrame.setVisible(false);
-						myFrame.dispose();
+						myBaseFrame.dispose();
 					}
 				});
 			}
 		}
 	}
 
-	public void setInsetWith(int insetWidth) {
-		this.insetWidth = insetWidth;
-	}
-
-	public void setTitleBarHeight(int titleBarHeight) {
-		this.titleBarHeight = titleBarHeight;
-	}
+	// public void setInsetWith(int insetWidth) {
+	// this.insetWidth = insetWidth;
+	// }
+	//
+	// public void setTitleBarHeight(int titleBarHeight) {
+	// this.titleBarHeight = titleBarHeight;
+	// }
 
 	public void setColor(Color color) {
 		this.color = color;

@@ -10,15 +10,14 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.XpraApplication;
 import com.ncc.savior.desktop.xpra.application.XpraApplicationManager;
-import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplication;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 
 
 /**
- * JavaFX Application manager keeps track of and controls
- * {@link JavaFxApplication}s. An Application is defined as window that has its
+ * Swing Application manager keeps track of and controls
+ * {@link SwingApplication}s. An Application is defined as window that has its
  * own taskbar item. For example, each firefox window is considered an
  * application.
  *
