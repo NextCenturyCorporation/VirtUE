@@ -1,9 +1,5 @@
 /* add-user.component.css */
-::ng-deep  .cdk-overlay-pane {
-  position: absolute;
-}
-::ng-deep .mat-autocomplete-panel {
-}
+
 .virtue-color {
   background-color: #4B3F72;
   display: inline-block;

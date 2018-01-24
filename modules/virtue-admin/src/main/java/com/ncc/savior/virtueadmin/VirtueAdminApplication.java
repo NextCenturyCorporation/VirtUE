@@ -1,3 +1,8 @@
+/**
+ * VirtueAdminApplication.java - Spring is initialized here.
+ * 
+ * 
+ */
 package com.ncc.savior.virtueadmin;
 
 import org.springframework.boot.SpringApplication;
@@ -13,6 +18,6 @@ import org.springframework.context.annotation.ImportResource;
 public class VirtueAdminApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VirtueAdminApplication.class, args);
+		SpringApplication.run(VirtueAdminApplicationX.class, args);
 	}
 }

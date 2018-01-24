@@ -1,10 +1,7 @@
-header {
-  margin-bottom: 20px;
-}
 mat-toolbar {
   clear: both;
   display: block;
-  height: 35px;
+  height: 32px;
   width: 100%;
 }
 mat-toolbar span.navbar-brand {

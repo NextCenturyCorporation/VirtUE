@@ -65,9 +65,8 @@ hr {
 }
 /* Header Global CSS */
 header {
-  background: rgb(46,41,78);
   display: block;
-  height: 34px;
+  height: 32px;
   margin-bottom: 50px;
 }
 breadcrumb {
@@ -245,11 +244,13 @@ content {
     text-align: right;
   }
 }
+
+
 .table-container, .data-list {
   @include ralewayMedium;
-  max-height: 540px;
   margin-top: 10px;
   margin-bottom: 10px;
+  max-height: 1024px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -297,11 +298,18 @@ content {
   @include raleway;
   background-color: #FFF;
   display: table-cell;
-}
-.table-data span {
-  margin-left: 10px;
-  margin-right: 10px;
-  text-align: left;
+  span {
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: left;
+  }
+  .menu-options {
+    clear: both;
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin: 0;
+  }
 }
 
 .tab-pane-content {
@@ -324,6 +332,7 @@ content {
   h5 { font-size: 18px; }
 
   &:after {
+    border-bottom: 1px solid $mediumGray;
     clear: both;
     content:' ';
     display: block;
@@ -345,7 +354,11 @@ content {
    padding: 0.55rem 0.7rem 0.6rem;
  }
 }
-
+.no-data-message {
+  display: block;
+  border-top: 1px solid #b2b2b2;
+  border-bottom: 1px solid #b2b2b2;
+}
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
