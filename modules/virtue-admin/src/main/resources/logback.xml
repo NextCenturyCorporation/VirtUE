@@ -114,8 +114,20 @@
         <appender-ref ref="INFO"/>
     </logger>
 
+<!-- 	<logger name="org.hibernate" additivity="false"> -->
+<!--         <level value="ERROR"/> -->
+<!--         <if condition='p("logback.printToConsole").contains("enabled")'-->
+<!--           <then> -->
+<!--             <appender-ref ref="CONSOLE" /> -->
+<!--           </then> -->
+<!--         </if>--> -->
+<!--         <appender-ref ref="CONSOLE"/> -->
+<!--         <appender-ref ref="DEBUG"/> -->
+<!--         <appender-ref ref="INFO"/> -->
+<!--     </logger> -->
+
     <root>
-        <level value="ERROR"/>
+        <level value="WARN"/>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="INFO"/>
