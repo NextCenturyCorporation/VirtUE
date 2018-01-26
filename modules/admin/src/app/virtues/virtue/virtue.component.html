@@ -26,23 +26,26 @@
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-5">Virtue Name</div>
-          <div class="table-header mui-col-md-2">Virtual Machines</div>
-          <div class="table-header mui-col-md-3">Created By</div>
+          <div class="table-header mui-col-md-4">Virtue Name</div>
+          <div class="table-header mui-col-md-1">OS</div>
+          <div class="table-header mui-col-md-3">Virtual Machines</div>
+          <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
-        <div class="mui-row table-row">
-          <div class="table-data mui-col-md-5">
-            <a class="edit" [routerLink]="['edit',3]">[Virtue Name]</a>
+        <div *ngFor="let virtue of virtues" class="mui-row table-row">
+          <div class="table-data mui-col-md-4">
+            <a class="edit" [routerLink]="['edit',virtue.virtue_id]">{{ virtue.virtue_name }}</a>
             <!-- if this virtue is enabled show this menu -->
-            <span class="active virtue-options">Duplicate | <a mat-button (click)="openDialog('1','disable')">Disable</a> | Export</span>
+            <span class="active virtue-options">Duplicate | <a mat-button (click)="openDialog('virtue.virtue_id','disable')">Disable</a> | Export</span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span class="active virtue-options">Enable | <a mat-button (click)="openDialog('1','delete','virtue')">Delete</a></span>
+            <span class="active virtue-options">Enable | <a mat-button (click)="openDialog('virtue.virtue_id','delete','virtue')">Delete</a></span>
           </div>
-          <div class="table-data mui-col-md-2">[Virtual Machines]</div>
-          <div class="table-data mui-col-md-3">[Created By]</div>
-          <div class="table-data mui-col-md-2">[Status]<br />[Date]</div>
+
+          <div class="table-data mui-col-md-1">{{ virtue.virtue_os }}</div>
+          <div class="table-data mui-col-md-3">{{ virtue.virtue_vms }}</div>
+          <div class="table-data mui-col-md-2">{{ virtue.virtue_creator }}</div>
+          <div class="table-data mui-col-md-2">{{ virtue.virtue_status }}<br />{{ virtue.virtue_timestamp }}</div>
           <div class="clearfix"></div>
         </div>
       </div>

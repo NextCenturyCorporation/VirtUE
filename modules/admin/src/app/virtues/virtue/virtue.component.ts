@@ -1,15 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { DataService } from '../../data/data.service';
+import { JsonFilterPipe } from '../../data/json-filter.pipe';
+import { CountFilterPipe } from '../../data/count-filter.pipe';
 
 @Component({
   selector: 'app-virtue',
+  providers: [ DataService ],
   templateUrl: './virtue.component.html',
   styleUrls: ['./virtue.component.css']
 })
 export class VirtueComponent implements OnInit {
 
-  constructor(public dialog: MatDialog) {}
+  virtues = [];
+  virtueTotal : number;
+
+  constructor(
+    private dataService: DataService,
+    public dialog: MatDialog,
+  ) {}
 
   openDialog(id,type,text): void {
 
@@ -29,6 +39,8 @@ export class VirtueComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.dataService.getData('virtues')
+      .subscribe(resJsonData => this.virtues = resJsonData)
   }
 
 }

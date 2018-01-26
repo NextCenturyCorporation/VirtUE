@@ -10,10 +10,10 @@
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="users" [matAutocomplete]="auto" >
+                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" >
                   <mat-autocomplete #auto="matAutocomplete" id="ad-autocomplete" panel="">
-                    <mat-option *ngFor="let user of activeDirUsers" [value]="user">
-                      {{ user }}
+                    <mat-option *ngFor="let adUser of filteredUsers | async" [value]="adUser.name">
+                      {{ adUser.name }}
                     </mat-option>
                   </mat-autocomplete>
                 </mat-form-field>

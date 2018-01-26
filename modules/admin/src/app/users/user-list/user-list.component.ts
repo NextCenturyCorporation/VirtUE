@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { JsondataService } from '../../data/jsondata.service';
 
 @Component({
   selector: 'app-user-list',
@@ -9,7 +10,14 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 })
 export class UserListComponent implements OnInit {
 
-  constructor(public dialog: MatDialog){}
+  saviorUsers: string;
+  appUserList: appUsers[];
+
+  // constructor( private dataService: DataService ){}
+  constructor(
+    private jsondataService: JsondataService,
+    public dialog: MatDialog
+  ) {}
 
   openDialog(id,type,text): void {
 
@@ -28,6 +36,12 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  ngOnInit(){}
+  getJSON(src): void {
+    this.jsondataService.getJSON(src).subscribe(appUsers => this.appUserList = appUsers);
+  }
+
+  ngOnInit(){
+    this.getJSON('appUsers');
+  }
 
 }

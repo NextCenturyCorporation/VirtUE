@@ -1,14 +1,15 @@
 import { NgModule } from '@angular/core';
+import {AppRoutingModule } from './app-routing.module';
 import {
   FormsModule,
   ReactiveFormsModule
 } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpModule } from '@angular/http';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Routes, RouterModule } from '@angular/router';
 
-import { JsondataService } from './data/jsondata.service';
+import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
+
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { AppOverlayContainer } from './appOverlayContainer';
@@ -89,28 +90,7 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { JsonFilterPipe } from './data/json-filter.pipe';
 import { CountFilterPipe } from './data/count-filter.pipe';
 
-const appRoutes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent, data: {breadcrumb: 'Dashboard'} },
-  { path: 'config', component: ConfigComponent, data: {breadcrumb: 'Settings'} },
-  { path: 'users', component: UsersComponent, data: {breadcrumb: 'Users'}, children: [
-    { path: '', component:  UserListComponent },
-    { path: 'add', component: AddUserComponent, data: {breadcrumb: 'Add User Account'} },
-    { path: 'edit/:id', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} }
-  ] },
-  { path: 'virtues', component: VirtuesComponent, data: {breadcrumb: 'Virtues'}, children: [
-    { path: '', component: VirtueComponent },
-    { path: 'create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
-    { path: 'edit/:id', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
-    { path: 'virtue-settings', component: VirtueSettingsComponent }
-  ] },
-  { path: 'vm', component: VirtualMachinesComponent, data: {breadcrumb: 'Virtual Machines'}, children: [
-    { path: '', component: VmListComponent },
-    { path: 'vm-build', component: VmBuildComponent, data: {breadcrumb: 'Build Virtual Machine'} },
-    { path: 'edit/:id', component: VmEditComponent, data: {breadcrumb: 'Edit Virtual Machine'} },
-  ] },
-  { path: '**', component: PageNotFoundComponent }
-];
+import { JsondataService } from './data/jsondata.service';
 
 
 @NgModule({
@@ -149,10 +129,12 @@ const appRoutes: Routes = [
     VmEditComponent,
   ],
   imports: [
+    AppRoutingModule,
     BreadcrumbsModule,
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
+    HttpClientModule,
     HttpModule,
     MatAutocompleteModule,
     MatDialogModule,
@@ -163,17 +145,15 @@ const appRoutes: Routes = [
     MatSelectModule,
     MatToolbarModule,
     BrowserAnimationsModule,
-    SplitPaneModule,
-    RouterModule.forRoot(appRoutes)
+    SplitPaneModule
   ],
   exports: [
     JsonFilterPipe,
-    OverlayModule,
-    RouterModule
+    OverlayModule
   ],
   providers: [
     { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
-    JsondataService,
+    JsondataService
   ],
   bootstrap: [AppComponent],
   entryComponents: [
