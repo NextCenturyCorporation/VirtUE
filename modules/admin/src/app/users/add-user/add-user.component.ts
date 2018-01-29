@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { MatDialog, MatDialogRef } from '@angular/material';
 
 import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { JsondataService } from '../../shared/jsondata.service';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 export class AdUsers {
@@ -27,22 +28,13 @@ export class AddUserComponent implements OnInit {
   fullImagePath: string;
 
   adUserCtrl: FormControl;
-  filteredUsers: Observables<any[]>;
-  activeDirUsers: AdUsers [] = [
-    { name:'Anthony Wong', username:'awong' },
-    { name:'Binoy Ravindran', username:'bravindran' },
-    { name:'Chris Long', username:'clong' },
-    { name:'Kara Cartwright', username:'kcartwright' },
-    { name:'Kyle Drumm', username:'kdrumm' },
-    { name:'Mike Day', username:'mday' },
-    { name:'Patrick Dwyer', username:'pdwyer' },
-    { name:'Pierre Olivier', username:'polivier' },
-    { name:'Ruslan Nikolaev', username:'rnikolaev' },
-    { name:'Sophie Kim', username:'skim' },
-    { name:'Wole Omitowoju', username:'womitowoju' },
-  ];
+  filteredUsers: Observable<any[]>;
+  activeDirUsers=[];
 
-  constructor(public dialog: MatDialog) {
+  constructor(
+    public dialog: MatDialog,
+    private jsondataService: JsondataService
+  ) {
     this.adUserCtrl = new FormControl();
     this.filteredUsers = this.adUserCtrl.valueChanges
       .pipe(
@@ -86,6 +78,11 @@ export class AddUserComponent implements OnInit {
   // dialogRef.afterClosed().subscribe();
 
   }
+  // Gets AD user for autocomplete field
+  getJSON(src): void {
+    this.jsondataService.getJSON('adUsers').subscribe(adUsers => this.activeDirUsers = adUsers);
+  }
+  // filters the AD list as you type
   filterUsers(username: string) {
     return this.activeDirUsers.filter(adUser =>
       adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);

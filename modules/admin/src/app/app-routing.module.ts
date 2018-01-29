@@ -8,7 +8,7 @@ import { UserListComponent } from './users/user-list/user-list.component';
 import { AddUserComponent } from './users/add-user/add-user.component';
 import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { VirtuesComponent } from './virtues/virtues.component';
-import { VirtueComponent } from './virtues/virtue/virtue.component';
+import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
@@ -28,7 +28,7 @@ const routes: Routes = [
     { path: 'edit/:id', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} }
   ] },
   { path: 'virtues', component: VirtuesComponent, data: {breadcrumb: 'Virtues'}, children: [
-    { path: '', component: VirtueComponent },
+    { path: '', component: VirtueListComponent },
     { path: 'create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
     { path: 'edit/:id', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
     { path: 'virtue-settings', component: VirtueSettingsComponent }

@@ -17,30 +17,29 @@ export class JsondataService {
   private vmList : string = './assets/json/vm_list.json';
   private activeDirectory : string = './assets/json/ad_users.json';
   private appUsers : string = './assets/json/savior_users.json';
-  private dashboardData : string = './assets/json/sample_data.json';
+  private dashboardData : string = '../assets/json/sample_data.json';
+  private jsonfile: string = './assets/json/ad_users.json';
 
-  private jsonfile: string;
-  // private jsonfile: string = './assets/json/app_users.json';
 
   getDataSrc(data) {
     switch(data) {
     case 'virtues':
-        return this.jsonfile = this.virtueList;
+        this.jsonfile = this.virtueList;
         break;
     case 'vms':
-        return this.jsonfile = this.vmList;
+        this.jsonfile = this.vmList;
         break;
     case 'adUsers':
-        return this.jsonfile = this.activeDirectory;
+        this.jsonfile = this.activeDirectory;
         break;
     case 'appUsers':
-        return this.jsonfile = this.appUsers;
+        this.jsonfile = this.appUsers;
         break;
     case 'dashboard':
-        return this.jsonfile = this.dashboardData;
+        this.jsonfile = this.dashboardData;
         break;
-    // default:
-    //     return this.jsonfile = '';
+    default:
+        return;
     }
     console.log(data);
   }
@@ -51,12 +50,13 @@ export class JsondataService {
 
   getJSON(dataSource:string): Observable<any> {
     this.getDataSrc(dataSource);
+    // return this.http.get(this.jsonfile);
     return this.http.get<any>(this.jsonfile);
   }
 
   getDataById(id:number, dataSource:string): Observable<any> {
     this.getDataSrc(dataSource);
-    
+
     console.log('SOURCE: ' + dataSource);
     console.log('JSON File: ' + this.jsonfile);
 
@@ -85,7 +85,7 @@ export class JsondataService {
 
   /** Log a HeroService message with the MessageService */
   private log(message: string) {
-    this.messageService.add('HeroService: ' + message);
+    // this.messageService.add('HeroService: ' + message);
   }
 
 }

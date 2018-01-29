@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { JsondataService } from '../../data/jsondata.service';
+
+import { JsondataService } from '../../shared/jsondata.service';
+import { JsonFilterPipe } from '../../shared/json-filter.pipe';
+import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 @Component({
   selector: 'app-user-list',
@@ -11,7 +14,7 @@ import { JsondataService } from '../../data/jsondata.service';
 export class UserListComponent implements OnInit {
 
   saviorUsers: string;
-  appUserList: appUsers[];
+  appUserList=[];
 
   // constructor( private dataService: DataService ){}
   constructor(

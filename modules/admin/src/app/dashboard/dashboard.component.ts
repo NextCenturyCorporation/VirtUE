@@ -1,16 +1,15 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-// import { JsondataService } from '../data/jsondata.service';
-import { DataService } from '../data/data.service';
-import { JsonFilterPipe } from '../data/json-filter.pipe';
-import { CountFilterPipe } from '../data/count-filter.pipe';
+import { JsondataService } from '../shared/jsondata.service';
+// import { DataService } from '../shared/data.service';
+import { JsonFilterPipe } from '../shared/json-filter.pipe';
+import { CountFilterPipe } from '../shared/count-filter.pipe';
 
 @Component({
   selector: 'app-dashboard',
-  providers: [ DataService ],
-  // providers: [ JsondataService ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
+  providers: [ JsondataService ]
 })
 
 export class DashboardComponent implements OnInit {
@@ -42,13 +41,12 @@ export class DashboardComponent implements OnInit {
   jsonData = [];
 
   // constructor(){}
-  constructor( private dataService: DataService ){}
-  // constructor( private jsondataService: JsondataService ){}
+  constructor(
+    private jsondataService: JsondataService
+  ){}
 
   ngOnInit() {
-    this.dataService.getData('dashboard')
+    this.jsondataService.getJSON('dashboard')
     .subscribe(resJsonData => this.jsonData = resJsonData);
-    // this.jsondataService.getJSON('dashboard')
-    // .subscribe(resJsonData => this.jsonData = resJsonData);
   }
 }

@@ -1,23 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { DataService } from '../../data/data.service';
-import { JsonFilterPipe } from '../../data/json-filter.pipe';
-import { CountFilterPipe } from '../../data/count-filter.pipe';
+import { JsondataService } from '../../shared/jsondata.service';
+import { JsonFilterPipe } from '../../shared/json-filter.pipe';
+import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 @Component({
-  selector: 'app-virtue',
-  providers: [ DataService ],
-  templateUrl: './virtue.component.html',
-  styleUrls: ['./virtue.component.css']
+  selector: 'app-virtue-list',
+  providers: [ JsondataService ],
+  templateUrl: './virtue-list.component.html',
+  styleUrls: ['./virtue-list.component.css']
 })
-export class VirtueComponent implements OnInit {
+export class VirtueListComponent implements OnInit {
 
   virtues = [];
   virtueTotal : number;
 
   constructor(
-    private dataService: DataService,
+    private jsondataService: JsondataService,
     public dialog: MatDialog,
   ) {}
 
@@ -39,7 +39,7 @@ export class VirtueComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.dataService.getData('virtues')
+    this.jsondataService.getJSON('virtues')
       .subscribe(resJsonData => this.virtues = resJsonData)
   }
 

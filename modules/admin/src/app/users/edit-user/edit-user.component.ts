@@ -3,7 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { SaviorUser } from '../savior-user';
-import { JsondataService } from '../../data/jsondata.service';
+import { JsondataService } from '../../shared/jsondata.service';
 
 import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
@@ -30,20 +30,8 @@ export class EditUserComponent implements OnInit {
   fullImagePath: string;
 
   adUserCtrl: FormControl;
-  filteredUsers: Observables<any[]>;
-  activeDirUsers: AdUsers [] = [
-    { name:'Anthony Wong', username:'awong' },
-    { name:'Binoy Ravindran', username:'bravindran' },
-    { name:'Chris Long', username:'clong' },
-    { name:'Kara Cartwright', username:'kcartwright' },
-    { name:'Kyle Drumm', username:'kdrumm' },
-    { name:'Mike Day', username:'mday' },
-    { name:'Patrick Dwyer', username:'pdwyer' },
-    { name:'Pierre Olivier', username:'polivier' },
-    { name:'Ruslan Nikolaev', username:'rnikolaev' },
-    { name:'Sophie Kim', username:'skim' },
-    { name:'Wole Omitowoju', username:'womitowoju' },
-  ];
+  filteredUsers: Observable<any[]>;
+  activeDirUsers=[];
 
   constructor(
     public dialog: MatDialog,
@@ -57,8 +45,8 @@ export class EditUserComponent implements OnInit {
         map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
         // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
     );
-    this.route.params.subscribe(userId => this.saviorUserId = userId.id));
-    console.log('Savior User: '+this.saviorUserId);
+    // this.route.params.subscribe(userId => this.saviorUserId = userId.id));
+    console.log('Savior User: ' + this.saviorUserId);
   }
 
   activateModal(id,mode): void {
@@ -92,20 +80,16 @@ export class EditUserComponent implements OnInit {
 
     // dialogRef.afterClosed().subscribe();
   }
+  // Gets AD user for autocomplete field
+  getJSON(src): void {
+    this.jsondataService.getJSON('adUsers').subscribe(adUsers => this.activeDirUsers = adUsers);
+  }
 
   filterUsers(username: string) {
     return this.activeDirUsers.filter(adUser =>
       adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
   }
 
-  getUser(): void {
-    const id = this.saviorUserId;
-    this.jsondataService.getDataById(id, 'appUsers')
-      .subscribe(saviorUser => this.appUser = saviorUser).match(this.appUser.app_user_id===id);
-  }
-
-  ngOnInit() {
-    this.getUser();
-  }
+  ngOnInit() {}
 
 }

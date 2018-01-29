@@ -73,7 +73,7 @@ import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
 
 import { VirtuesComponent } from './virtues/virtues.component';
-import { VirtueComponent } from './virtues/virtue/virtue.component';
+import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
@@ -87,10 +87,9 @@ import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
 import { DialogsComponent } from './dialogs/dialogs.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
-import { JsonFilterPipe } from './data/json-filter.pipe';
-import { CountFilterPipe } from './data/count-filter.pipe';
-
-import { JsondataService } from './data/jsondata.service';
+import { JsonFilterPipe } from './shared/json-filter.pipe';
+import { CountFilterPipe } from './shared/count-filter.pipe';
+import { JsondataService } from './shared/jsondata.service';
 
 
 @NgModule({
@@ -109,7 +108,7 @@ import { JsondataService } from './data/jsondata.service';
     AddUserComponent,
     EditUserComponent,
     VirtuesComponent,
-    VirtueComponent,
+    VirtueListComponent,
     VirtueSettingsComponent,
     CreateVirtueComponent,
     EditVirtueComponent,
