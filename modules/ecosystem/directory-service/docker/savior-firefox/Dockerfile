@@ -8,6 +8,7 @@ RUN yum -y update
 # misses gtk3
 RUN yum -y update && \
 	yum -y install \
+		deltarpm \
 		bzip2 \
 		firefox \
 		gtk3 \

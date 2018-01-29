@@ -7,7 +7,7 @@ LABEL description="Baseline for SAVIOR client" \
 # runs when we need to change what we need to be installed.
 RUN yum -y update
 RUN yum -y update && \
-	yum -y install samba samba-client krb5-workstation
+	yum -y install deltarpm samba samba-client krb5-workstation
 # debug tools
 RUN yum -y update && \
 	yum -y install bind-utils iproute nmap procps-ng && \

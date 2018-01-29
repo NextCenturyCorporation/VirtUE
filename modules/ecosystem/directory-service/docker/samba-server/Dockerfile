@@ -15,6 +15,7 @@ RUN yum -y update
 # we're up to date.)
 RUN yum -y update && \
 	yum -y install \
+		deltarpm \
 		samba samba-dc \
 		krb5-server-ldap krb5-workstation \
 		bind-utils \
