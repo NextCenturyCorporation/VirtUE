@@ -1,0 +1,74 @@
+[
+ {
+   "virtue_id": 40,
+   "virtue_name": "Browsers (Windows)",
+   "virtue_os": "Windows",
+   "virtue_vms": "Chrome, Firefox, Internet Explorer",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ },
+ {
+   "virtue_id": 41,
+   "virtue_name": "Browsers (Linux)",
+   "virtue_os": "Linux",
+   "virtue_vms": "Chrome, Firefox, Konquerer",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ },
+ {
+   "virtue_id": 42,
+   "virtue_name": "Full Stack Developer Suite",
+   "virtue_os": "Linux",
+   "virtue_vms": "Bluefish, Eclipse, Git,",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ },
+ {
+   "virtue_id": 43,
+   "virtue_name": "Web Developer Suite",
+   "virtue_os": "Linux",
+   "virtue_vms": "Eclipse, Gimp, Git, Sketch, Sublime",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ },
+ {
+   "virtue_id": 44,
+   "virtue_name": "Web Developer Suite",
+   "virtue_os": "Windows",
+   "virtue_vms": "Adobe, Atom, Git, Sketch, Sublime",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ },
+ {
+   "virtue_id": 45,
+   "virtue_name": "Microsoft Office",
+   "virtue_os": "Windows",
+   "virtue_vms": "Microsoft Excel, Microsoft PowerPoint, Microsoft Teams, Microsoft Word",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ },
+ {
+   "virtue_id": 46,
+   "virtue_name": "Email",
+   "virtue_os": "Windows",
+   "virtue_vms": "Microsoft Outlook",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ },
+ {
+   "virtue_id": 47,
+   "virtue_name": "Email",
+   "virtue_os": "Linux",
+   "virtue_vms": "Microsoft Outlook",
+   "virtue_creator": "clong",
+   "virtue_timestamp": "2017-12-05T19:57:01.052901",
+   "virtue_status": "enabled"
+ }
+]

@@ -1,6 +1,6 @@
 <div id="content-container">
   <div id="content-header" class="mui-container-fluid titlebar">
-    <h2 class="title">Edit User Account</h2>
+    <h2 class="title">Edit User Account: {{ saviorUserId }}</h2>
   </div>
   <div id="content-main">
     <div id="content" class="content">
@@ -10,14 +10,18 @@
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="users" [matAutocomplete]="auto">
-                  <mat-autocomplete #auto="matAutocomplete">
-                    <mat-option *ngFor="let user of activeDirUsers" [value]="user">
-                      {{ user }}
+                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" >
+                  <mat-autocomplete #auto="matAutocomplete" id="ad-autocomplete" panel="">
+                    <mat-option *ngFor="let adUser of filteredUsers | async" [value]="adUser.name">
+                      {{ adUser.name }}
                     </mat-option>
                   </mat-autocomplete>
-                </mat-form-field>
+                </mat-form-field><br/>
+                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ saviorUserId }}</span>
                 </div>
+              </div>
+              <div *ngFor="let i of appUser" class="mui-row">
+              {{ i.name }}<br>
               </div>
               <div class="mui-row">
                 <div class="titlebar margin-top-20">

@@ -6,14 +6,15 @@
     <div id="content" class="content">
       <div class="mui-container-fluid">
         <div class="mui-row">
+
           <div class="mui-col-md-9">
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="users" [matAutocomplete]="auto" >
+                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" >
                   <mat-autocomplete #auto="matAutocomplete" id="ad-autocomplete" panel="">
-                    <mat-option *ngFor="let user of activeDirUsers" [value]="user">
-                      {{ user }}
+                    <mat-option *ngFor="let adUser of filteredUsers | async" [value]="adUser.name">
+                      {{ adUser.name }}
                     </mat-option>
                   </mat-autocomplete>
                 </mat-form-field>
@@ -63,6 +64,17 @@
                   <div class="clearfix"></div>
                 </div>
               </div>
+              <div class="mui-row">
+                <hr />
+                <div class="mui-col-md-4">&nbsp;</div>
+                <div class="mui-col-md-4 form-item text-align-center">
+                  <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Add Another User</span>
+                  <button class="button-submit" type="submit" (click)="addNewUser()" >Add User</button>
+                  <button class="button-cancel" type="cancel">Cancel</button>
+                </div>
+                <div class="mui-col-md-4"></div>
+              </div>
+            </div>
           </div>
         </div>
 
