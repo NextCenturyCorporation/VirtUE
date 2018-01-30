@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.security.UserService;
@@ -79,8 +80,10 @@ public class AdminResource {
 		}
 	}
 
+	@GET
+	@Produces("application/json")
 	@Path("virtualMachine/template")
-	public Iterable<VirtueTemplate> getAllVmTemplates() {
+	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
 		try {
 			return adminService.getAllVmTemplates();
 		} catch (RuntimeException e) {
