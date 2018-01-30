@@ -43,7 +43,6 @@ export class AddUserComponent implements OnInit {
         // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
     );
   }
-
   activateModal(id,mode): void {
 
   this.dialogWidth = 600;

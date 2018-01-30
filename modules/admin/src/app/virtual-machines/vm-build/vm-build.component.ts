@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { JsondataService } from '../../shared/jsondata.service';
 
 @Component({
   selector: 'app-vm-build',
@@ -16,9 +17,20 @@ export class VmBuildComponent implements OnInit {
     { "id":13, "os_name":"Red Hat Linux", "os_info":"https://access.redhat.com/downloads" },
     { "id":14, "os_name":"Windows", "os_info":"https://www.microsoft.com/en-us/windows/" }
   ];
-  constructor() { }
+
+  constructor(
+    private jsondataService: JsondataService
+  ) { }
 
   ngOnInit() {
+  }
+
+  onBuildVM(name,os,packages) {
+    const buildDate: Date = new Date();
+    const pkgs = packages.replace(/\n/g,'|');
+    const vmFields='{"vm_name":"'+name+'"},{"vm_os":"'+os+'"},{"vm_packages":"'+pkgs+'"},{"vm_timestamp":"'+buildDate+'"},{"vm_status":"disabled"}';
+    // console.log('new values: '+name+','+os+','+pkgs+','+buildDate);
+    // this.jsondataService.addNewData('vms',vmFields);
   }
 
 }

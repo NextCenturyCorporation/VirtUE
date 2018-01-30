@@ -24,11 +24,12 @@
     "@angular/platform-browser-dynamic": "^5.0.5",
     "@angular/platform-server": "^5.0.5",
     "@angular/router": "^5.0.5",
+    "@firebase/app": "^0.1.7",
     "core-js": "^2.4.1",
     "material": "^0.2.6",
     "ng2-breadcrumbs": "^0.1.281",
     "ng2-split-pane": "^1.4.0",
-    "rxjs": "^5.4.2",
+    "rxjs": "^5.5.6",
     "zone.js": "^0.8.14"
   },
   "devDependencies": {

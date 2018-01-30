@@ -24,5 +24,7 @@ export class VmListComponent implements OnInit {
 
     this.vmLength = this.vms.length;
   }
-
+  addVM(name: string, status: string) {
+    this.vms.push({name: name, status: status});
+  }
 }

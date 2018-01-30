@@ -6,6 +6,9 @@ import { JsondataService } from '../../shared/jsondata.service';
 import { JsonFilterPipe } from '../../shared/json-filter.pipe';
 import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
+import { Observable } from 'rxjs/Observable';
+
+
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
