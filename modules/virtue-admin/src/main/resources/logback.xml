@@ -115,12 +115,7 @@
     </logger>
 
 <!-- 	<logger name="org.hibernate" additivity="false"> -->
-<!--         <level value="ERROR"/> -->
-<!--         <if condition='p("logback.printToConsole").contains("enabled")'-->
-<!--           <then> -->
-<!--             <appender-ref ref="CONSOLE" /> -->
-<!--           </then> -->
-<!--         </if>--> -->
+<!--         <level value="DEBUG"/> -->
 <!--         <appender-ref ref="CONSOLE"/> -->
 <!--         <appender-ref ref="DEBUG"/> -->
 <!--         <appender-ref ref="INFO"/> -->
