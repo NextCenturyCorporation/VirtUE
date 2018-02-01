@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.security;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -8,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,14 +18,28 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosTicketValidator;
+import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
+import org.springframework.security.kerberos.client.ldap.KerberosLdapContextSource;
+import org.springframework.security.kerberos.web.authentication.SpnegoAuthenticationProcessingFilter;
+import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -51,6 +68,7 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2 = "file:savior-server-security-site.properties";
+	private static final XLogger LOGGER = XLoggerFactory.getXLogger(SecurityConfig.class);
 
 	private static final String AUTH_MODULE_LDAP = "LDAP";
 
@@ -84,6 +102,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
 
+	@Value("${savior.security.ldap}")
+	private String ldapURL;
+	
+	@Value("${savior.virtueadmin.principal}")
+	private String servicePrincipal;
+	
+	@Value("${savior.virtueadmin.keytab}")
+	private File keytabLocation;
+
+
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
@@ -92,8 +120,109 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return provider;
 	}
 
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		LOGGER.entry();
+		AuthenticationManager authenticationManagerBean = super.authenticationManagerBean();
+		LOGGER.exit(authenticationManagerBean);
+		return authenticationManagerBean;
+	}
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		LOGGER.entry(http);
+		http
+			.exceptionHandling()
+				.authenticationEntryPoint(spnegoEntryPoint())
+				.and()
+			.authorizeRequests()
+				.antMatchers("/", "/home").permitAll()
+				.anyRequest().authenticated()
+				.and()
+			.formLogin()
+				.loginPage("/login").permitAll()
+				.and()
+			.logout()
+				.permitAll()
+				.and()
+			.addFilterBefore(
+					spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
+					BasicAuthenticationFilter.class);
+		LOGGER.exit();
+	}
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		LOGGER.entry(auth);
+		auth
+//			.authenticationProvider(activeDirectoryLdapAuthenticationProvider())
+			.authenticationProvider(kerberosServiceAuthenticationProvider());
+		LOGGER.exit();
+	}
+
+	@Bean
+	public SpnegoEntryPoint spnegoEntryPoint() {
+		LOGGER.entry();
+		SpnegoEntryPoint spnegoEntryPoint = new SpnegoEntryPoint("/login");
+		LOGGER.exit(spnegoEntryPoint);
+		return spnegoEntryPoint;
+	}
+
+	@Bean
+	public SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter(
+			AuthenticationManager authenticationManager) {
+		LOGGER.entry(authenticationManager);
+		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
+		filter.setAuthenticationManager(authenticationManager);
+		LOGGER.exit(filter);
+		return filter;
+	}
+
+	@Bean
+	public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() {
+		LOGGER.entry();
+		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
+		provider.setTicketValidator(sunJaasKerberosTicketValidator());
+		provider.setUserDetailsService(new DummyUserDetailsService());
+		LOGGER.exit(provider);
+		return provider;
+	}
+
+	@Bean
+	public SunJaasKerberosTicketValidator sunJaasKerberosTicketValidator() {
+		LOGGER.entry();
+		SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
+		ticketValidator.setServicePrincipal(servicePrincipal);
+		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabLocation));
+		ticketValidator.setDebug(true);
+		LOGGER.exit(ticketValidator);
+		return ticketValidator;
+	}
+
+	@Bean
+	public KerberosLdapContextSource kerberosLdapContextSource() {
+		LOGGER.entry();
+		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(ldapURL);
+		contextSource.setLoginConfig(loginConfig());
+		LOGGER.exit(contextSource);
+		return contextSource;
+	}
+
+	@Bean
+	public SunJaasKrb5LoginConfig loginConfig() {
+		LOGGER.entry();
+		SunJaasKrb5LoginConfig loginConfig = new SunJaasKrb5LoginConfig();
+		loginConfig.setKeyTabLocation(new FileSystemResource(keytabLocation));
+		loginConfig.setServicePrincipal(servicePrincipal);
+		loginConfig.setDebug(true);
+		loginConfig.setIsInitiator(true);
+		LOGGER.exit(loginConfig);
+		return loginConfig;
+	}
+	
+	//@Autowired
+	private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		// auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
 		// auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
 		// auth.inMemoryAuthentication().withUser("user2").password("password").roles("USER");
@@ -117,8 +246,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 	}
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	protected void oldconfigure(HttpSecurity http) throws Exception {
 		// http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll();
 		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
 			http.addFilterAt(new HeaderFilter(), AbstractPreAuthenticatedProcessingFilter.class);
@@ -161,4 +289,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		};
 	}
+
+	static class DummyUserDetailsService implements UserDetailsService {
+
+		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+			return new User(username, "notUsed", true, true, true, true,
+					AuthorityUtils.createAuthorityList("ROLE_USER"));
+		}
+
+	}
+
 }

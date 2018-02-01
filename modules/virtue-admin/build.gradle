@@ -69,6 +69,8 @@ dependencies {
     //	compile group: 'org.springframework.data', name: 'spring-data-commons-core', version: springDataVersion
 	compile group: 'org.springframework.data', name: 'spring-data-jpa', version: springDataVersion
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
+	// needed for test pages from sec-server-win-auth sample project
+	compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
 	compile group: 'org.springframework.security', name: 'spring-security-core', version: springSecurityVersion
 	compile group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion
 	compile group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion
@@ -95,6 +97,7 @@ dependencies {
 	compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
 	compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'
 	compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
 	
 	
