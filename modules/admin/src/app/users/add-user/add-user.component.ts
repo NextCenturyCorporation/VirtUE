@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 
-import { JsondataService } from '../../shared/jsondata.service';
+import { JsondataService } from '../../shared/services/jsondata.service';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 export class AdUsers {

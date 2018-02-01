@@ -3,7 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { SaviorUser } from '../savior-user';
-import { JsondataService } from '../../shared/jsondata.service';
+import { JsondataService } from '../../shared/services/jsondata.service';
 
 import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';

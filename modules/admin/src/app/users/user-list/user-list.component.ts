@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { JsondataService } from '../../shared/jsondata.service';
+import { JsondataService } from '../../shared/services/jsondata.service';
 import { JsonFilterPipe } from '../../shared/json-filter.pipe';
 import { CountFilterPipe } from '../../shared/count-filter.pipe';
 

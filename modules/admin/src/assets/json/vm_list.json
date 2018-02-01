@@ -1,66 +1,145 @@
-[
-  {
-    "vm_id": 30,
-    "vm_name": "Adobe Create Suite",
-    "vm_os": "Windows",
-    "vm_packages": "{ 'Acrobat', 'Illustrator', 'InDesign', 'PhotoShop',}",
-    "vm_timestamp": "2017-12-05T19:57:01.052901",
-    "vm_status": "enabled"
-  },
-  {
-   "vm_id": 31,
-   "vm_name": "Chrome",
-   "vm_os": "Debian",
-   "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
-   "vm_timestamp": "2017-12-05T19:57:01.052901",
-   "vm_status": "enabled"
- },
- {
-   "vm_id": 32,
-   "vm_name": "GIMP",
-   "vm_os": "Debian",
-   "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
-   "vm_timestamp": "2017-12-05T19:57:01.052901",
-   "vm_status": "enabled"
- },
- {
-   "vm_id": 33,
-   "vm_name": "LastPass",
-   "vm_os": "Debian",
-   "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
-   "vm_timestamp": "2017-12-05T19:57:01.052901",
-   "vm_status": "enabled"
- },
- {
-   "vm_id": 34,
-   "vm_name": "Microsoft Word",
-   "vm_os": "Windows",
-   "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
-   "vm_timestamp": "2017-12-05T19:57:01.052901",
-   "vm_status": "enabled"
- },
- {
-   "vm_id": 35,
-   "vm_name": "Microsoft Excel",
-   "vm_os": "Windows",
-   "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
-   "vm_timestamp": "2017-12-05T19:57:01.052901",
-   "vm_status": "enabled"
- },
- {
-   "vm_id": 36,
-   "vm_name": "Microsoft PowerPoint",
-   "vm_os": "Windows",
-   "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
-   "vm_timestamp": "2017-12-05T19:57:01.052901",
-   "vm_status": "enabled"
- },
- {
-   "vm_id": 37,
-   "vm_name": "Microsoft Teams",
-   "vm_os": "Windows",
-   "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
-   "vm_timestamp": "2017-12-05T19:57:01.052901",
-   "vm_status": "enabled"
- }
-]
+[{
+  "id": "13d3d2e2-d1a5-4879-822f-b875466b93e4",
+  "name": "Math",
+  "os": "LINUX",
+  "templatePath": "Math",
+  "applications": [{
+    "id": "5cfc3bd3-b414-4cb9-9cf5-26738be0a066",
+    "name": "Calculator",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "gnome-calculator"
+  }]
+}, {
+  "id": "bd3d540b-d375-4b2f-a7b7-e14159fcb60b",
+  "name": "Browsers",
+  "os": "LINUX",
+  "templatePath": "Browsers",
+  "applications": [{
+    "id": "db2fd10a-c46b-4795-a3d4-a0c5ef8de5ea",
+    "name": "Chrome",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "google-chrome"
+  }, {
+    "id": "fde40cef-5b32-44e7-8a2e-9266a9e3ac64",
+    "name": "Firefox",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "firefox"
+  }]
+}, {
+  "id": "f05251c4-b3b3-4b88-9afc-4f580b70b953",
+  "name": "LibreOffice",
+  "os": "LINUX",
+  "templatePath": "LibreOffice",
+  "applications": [{
+    "id": "9026d8ff-1eda-47e7-a517-0dbe2ada6efa",
+    "name": "LibreOffice Calc",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "localc"
+  }, {
+    "id": "15c45fa4-ef17-48cf-847f-e788f82f147f",
+    "name": "LibreOffice Draw",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "lodraw"
+  }, {
+    "id": "f292c015-aa8c-4724-8015-bd7fedaa4e31",
+    "name": "LibreOffice Impress",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "loimpress"
+  }, {
+    "id": "0986e242-6a4d-4c2a-8ae4-46dfcca2b018",
+    "name": "LibreOffice Writer",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "lowriter"
+  }]
+}, {
+  "id": "be0ca662-5203-4ef4-876a-9999cb30308e",
+  "name": "Drawing",
+  "os": "LINUX",
+  "templatePath": "Drawing",
+  "applications": [{
+    "id": "8ff080ed-5105-415e-b50f-b929e262b57f",
+    "name": "GIMP",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "gimp"
+  }, {
+    "id": "095defbf-bbaa-4d9c-a722-589c5fdd8f41",
+    "name": "Pinta",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "pinta"
+  }]
+}, {
+  "id": "fcddc476-a6aa-4ffa-bfb6-a310b04ed5ad",
+  "name": "All",
+  "os": "LINUX",
+  "templatePath": "All",
+  "applications": [{
+    "id": "db2fd10a-c46b-4795-a3d4-a0c5ef8de5ea",
+    "name": "Chrome",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "google-chrome"
+  }, {
+    "id": "fde40cef-5b32-44e7-8a2e-9266a9e3ac64",
+    "name": "Firefox",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "firefox"
+  }, {
+    "id": "9026d8ff-1eda-47e7-a517-0dbe2ada6efa",
+    "name": "LibreOffice Calc",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "localc"
+  }, {
+    "id": "15c45fa4-ef17-48cf-847f-e788f82f147f",
+    "name": "LibreOffice Draw",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "lodraw"
+  }, {
+    "id": "f292c015-aa8c-4724-8015-bd7fedaa4e31",
+    "name": "LibreOffice Impress",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "loimpress"
+  }, {
+    "id": "0986e242-6a4d-4c2a-8ae4-46dfcca2b018",
+    "name": "LibreOffice Writer",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "lowriter"
+  }, {
+    "id": "5cfc3bd3-b414-4cb9-9cf5-26738be0a066",
+    "name": "Calculator",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "gnome-calculator"
+  }, {
+    "id": "8ff080ed-5105-415e-b50f-b929e262b57f",
+    "name": "GIMP",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "gimp"
+  }, {
+    "id": "095defbf-bbaa-4d9c-a722-589c5fdd8f41",
+    "name": "Pinta",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "pinta"
+  }, {
+    "id": "5cfc3bd3-b414-4cb9-9cf5-26738be0a066",
+    "name": "Calculator",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "gnome-calculator"
+  }]
+}]

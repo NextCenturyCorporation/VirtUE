@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { JsondataService } from '../shared/jsondata.service';
+import { JsondataService } from '../shared/services/jsondata.service';
 // import { DataService } from '../shared/data.service';
 import { JsonFilterPipe } from '../shared/json-filter.pipe';
 import { CountFilterPipe } from '../shared/count-filter.pipe';

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { JsondataService } from '../../shared/jsondata.service';
+import { JsondataService } from '../../shared/services/jsondata.service';
 
 @Component({
   selector: 'app-vm-build',

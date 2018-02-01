@@ -90,8 +90,8 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { JsonFilterPipe } from './shared/json-filter.pipe';
 import { CountFilterPipe } from './shared/count-filter.pipe';
 
-// import { FirebaseService } from './shared/firebase.service';
-import { JsondataService } from './shared/jsondata.service';
+import { VirtuesService } from './shared/services/virtues.service';
+import { JsondataService } from './shared/services/jsondata.service';
 
 
 @NgModule({
@@ -154,7 +154,8 @@ import { JsondataService } from './shared/jsondata.service';
   ],
   providers: [
     { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
-    JsondataService
+    JsondataService,
+    VirtuesService
   ],
   bootstrap: [AppComponent],
   entryComponents: [

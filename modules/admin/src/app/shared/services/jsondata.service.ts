@@ -18,8 +18,14 @@ export class JsondataService {
   private activeDirectory : string = './assets/json/ad_users.json';
   private appUsers : string = './assets/json/savior_users.json';
   private dashboardData : string = '../assets/json/sample_data.json';
+  private apps: string = './assets/json/application.json';
+
   private jsonfile: string = './assets/json/ad_users.json';
 
+  // http://localhost:8080/admin/virtue/template
+  // http://localhost:8080/admin/virtualMachine/template
+  // http://localhost:8080/admin/application
+  // http://localhost:8080/admin/virtues
 
   getDataSrc(data) {
     switch(data) {
@@ -65,7 +71,7 @@ export class JsondataService {
     // .pipe(tap(_ => this.log(`fetched item id=${id}`)));
   }
 
-  
+
   /**
    * Handle Http operation that failed.
    * Let the app continue.

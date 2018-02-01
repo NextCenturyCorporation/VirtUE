@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
+import { Observable } from 'rxjs/observable';
+
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { JsondataService } from '../../shared/jsondata.service';
+
+import { VirtueModel } from '../../shared/models/virtue.model';
+import { VirtuesService } from '../../shared/services/virtues.service';
 import { JsonFilterPipe } from '../../shared/json-filter.pipe';
 import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 @Component({
   selector: 'app-virtue-list',
-  providers: [ JsondataService ],
+  providers: [ VirtuesService ],
   templateUrl: './virtue-list.component.html',
   styleUrls: ['./virtue-list.component.css']
 })
@@ -15,9 +19,10 @@ export class VirtueListComponent implements OnInit {
 
   virtues = [];
   virtueTotal : number;
+  os: Observable<Array<VirtuesService>>;
 
   constructor(
-    private jsondataService: JsondataService,
+    private virtuesService: VirtuesService,
     public dialog: MatDialog,
   ) {}
 
@@ -39,8 +44,9 @@ export class VirtueListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.jsondataService.getJSON('virtues')
-      .subscribe(resJsonData => this.virtues = resJsonData)
+    this.virtuesService.list()
+      .subscribe(virtueList => this.virtues = virtueList);
   }
+
 
 }
