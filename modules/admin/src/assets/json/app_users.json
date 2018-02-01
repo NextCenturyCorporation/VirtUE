@@ -1,0 +1,18 @@
+[
+  {
+    "app_user_id": 30,
+    "app_user_name": "Sophie Kim",
+    "app_user_ad_id": "skim",
+    "app_user_virtues": "Web Developer Suite, Microsoft Office, Email",
+    "app_user_timestamp": "2017-12-05T19:57:01.052901",
+    "app_user_status": "enabled"
+  },
+  {
+    "app_user_id": 31,
+    "app_user_name": "Chris Long",
+    "app_user_ad_id": "clong",
+    "app_user_virtues": "Full Stack Devloper Suite, Microsoft Office, Email",
+    "app_user_timestamp": "2017-12-05T19:57:01.052901",
+    "app_user_status": "enabled"
+  }
+]

@@ -1,5 +1,23 @@
+button, button[type='submit'] {
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  margin-right: 10px;
+}
+button {
+  background-color: #E9E3E6;
+  border:1px solid #B2B2B2;
+  &.button {
+    padding: 0.4rem 1rem;
+  }
+}
+button[type='submit'] {
+  background-color: #407097;
+  color: #FFF;
+}
+
 .mat-dialog-container {
-  background: $white;
+  background: #FFF;
   box-shadow: none;
 }
 .mat-dialog-container {
@@ -10,7 +28,7 @@
     text-align: center;
   }
   .mat-dialog-title {
-    border-bottom: 1px solid $mediumGray;
+    border-bottom: 1px solid #B2B2B2;
     display: block;
     margin: 0;
     padding-bottom: 1rem;
@@ -22,79 +40,100 @@
     text-align: left;
   }
   .mat-dialog-actions {
-    border-top: 1px solid $mediumGray;
+    border-top: 1px solid #B2B2B2;
     display: block;
     padding-top: 1.5rem;
     text-align: center;
   }
-  button, button[type='submit'] {
-    border-radius: 0;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    margin-right: 10px;
-  }
-  button {
-    background-color: $lightGray;
-    border:1px solid $mediumGray;
-    &.button {
-      padding: 0.4rem 1rem;
-    }
-  }
-  button[type='submit'] {
-    background-color: $grayBlue;
-    color: $white;
-  }
+
 }
 
 mat-form-field {
   clear: both;
+  line-height: 1.25;
   margin-bottom: 15px;
   width: 100%;
-  input, select {
 
+  span.mat-input-placeholder-wrapper.mat-form-field-placeholder-wrapper {
+    padding-top: 0;
+    box-sizing: border-box;
+    top: 0;
+
+    .mat-input-placeholder {
+      top: 0;
+      color: #B2B2B2;
+      padding:5px;
+    }
+  }
+
+  .mat-input-wrapper.mat-form-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  .mat-form-field-underline {
+    display: none;
+  }
+
+  .mat-form-field-infix {
+    padding: 0;
+    border-top: none;
   }
 }
-.mat-form-field-placeholder-wrapper {
-  top:0;
-}
-.mat-input-placeholder {
-  color: #B2B2B2;
-  padding:5px;
-}
+
 
 input.mat-input-element {
   border: 1px solid #b2b2b2;
+  box-sizing: border-box;
   padding: 5px;
   width: 100%;
 }
+
+/* TEXTAREA */
 textarea.mat-input-element {
   border: 1px solid #b2b2b2;
+  box-sizing: border-box;
   padding: 5px;
   width: 100%;
 }
-.mat-checkbox {
-  .mat-checkbox-label {
-    margin-right: 20px;
-  }
 
-  .mat-checkbox-inner-container {
-    margin-right: 0;
-    width: 15px;
-  }
-  .mat-checkbox-input {
-    margin-top:3px;
-  }
+/*CHECKBOX */
+mat-checkbox {
+  margin-left: auto;
+  margin-right: auto;
   .mat-checkbox-frame {
-    border-width: 0;
+    border-color: #3E3F4E;
+    border-width: thin;
+  }
+
+  &.mat-accent.mat-checkbox-checked {
+    .mat-checkbox-frame {
+      border-color: #3E3F4E;
+      border-width: thin;
+    }
+    .mat-checkbox-background {
+      background-color: #407097;
+    }
+  }
+
+}
+
+/* RADIO */
+mat-radio-button.mat-radio-button {
+  .mat-radio-outer-circle {
+    border-color: #3E3F4E;
+    border-width: thin;
+  }
+  &.mat-accent.mat-radio-checked {
+    .mat-radio-outer-circle {
+      border-color: #3E3F4E;
+    }
+    .mat-radio-inner-circle {
+      background-color: #407097;
+    }
   }
 }
 
-.mat-radio-label {
-  .mat-radio-container {
-    display: none;
-  }
-}
-
+/* AUTOCOMPLETE */
 .mat-autocomplete-panel {
   overflow: none;
   overflow-x: none;
@@ -104,28 +143,36 @@ textarea.mat-input-element {
     clear:both;
     cursor: pointer;
     display: block;
+    font-size: 1.1rem;
+    height: auto;
+    line-height: 1.25;
     padding: 5px;
     width: 100%;
   }
 }
-.mat-select {
-  border: 1px solid #b2b2b2;
-  padding: 5px;
-}
-.mat-select-panel {
-  background-color: #FFF;
-  box-shadow: none;
-  border: 1px solid #b2b2b2;
 
-  .mat-option {
-    border-bottom: thin solid #b2b2b2;
-    display: block;
-    width: 100%;
-    &:hover {
-      cursor: pointer;
-    }
-    .mat-option-text {
-      padding-left: 15px;
+/* SELECT */
+mat-select {
+  &.mat-select {
+    border: 1px solid #b2b2b2;
+    box-sizing: border-box;
+    padding: 5px;
+  }
+  .mat-select-panel {
+    background-color: #FFF;
+    box-shadow: none;
+    border: 1px solid #b2b2b2;
+
+    .mat-option {
+      border-bottom: thin solid #b2b2b2;
+      display: block;
+      width: 100%;
+      &:hover {
+        cursor: pointer;
+      }
+      .mat-option-text {
+        padding-left: 15px;
+      }
     }
   }
 }

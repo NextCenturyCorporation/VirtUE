@@ -1,33 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-
 import { JsondataService } from '../../shared/jsondata.service';
 import { JsonFilterPipe } from '../../shared/json-filter.pipe';
 import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
-import { Observable } from 'rxjs/Observable';
-
-
 @Component({
-  selector: 'app-user-list',
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  selector: 'app-virtue-list',
+  providers: [ JsondataService ],
+  templateUrl: './virtue-list.component.html',
+  styleUrls: ['./virtue-list.component.css']
 })
-export class UserListComponent implements OnInit {
+export class VirtueListComponent implements OnInit {
 
-  saviorUsers: string;
-  appUserList=[];
+  virtues = [];
+  virtueTotal : number;
 
-  // constructor( private dataService: DataService ){}
   constructor(
     private jsondataService: JsondataService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
   ) {}
 
   openDialog(id,type,text): void {
 
-    let dialogRef = this.dialog.open( DialogsComponent, {
+    let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {
           dialogText: text,
@@ -38,16 +34,13 @@ export class UserListComponent implements OnInit {
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog to delete {{data.dialogText}} was closed');
+      console.log('The dialog was closed');
     });
   }
 
-  getJSON(src): void {
-    this.jsondataService.getJSON(src).subscribe(appUsers => this.appUserList = appUsers);
-  }
-
-  ngOnInit(){
-    this.getJSON('appUsers');
+  ngOnInit() {
+    this.jsondataService.getJSON('virtues')
+      .subscribe(resJsonData => this.virtues = resJsonData)
   }
 
 }

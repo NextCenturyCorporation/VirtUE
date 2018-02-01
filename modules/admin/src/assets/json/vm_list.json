@@ -1,5 +1,14 @@
 [
- {
+  {
+    "vm_id": 30,
+    "vm_name": "Adobe Create Suite",
+    "vm_os": "Windows",
+    "vm_packages": "{ 'Acrobat', 'Illustrator', 'InDesign', 'PhotoShop',}",
+    "vm_timestamp": "2017-12-05T19:57:01.052901",
+    "vm_status": "enabled"
+  },
+  {
+   "vm_id": 31,
    "vm_name": "Chrome",
    "vm_os": "Debian",
    "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
@@ -7,6 +16,7 @@
    "vm_status": "enabled"
  },
  {
+   "vm_id": 32,
    "vm_name": "GIMP",
    "vm_os": "Debian",
    "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
@@ -14,6 +24,7 @@
    "vm_status": "enabled"
  },
  {
+   "vm_id": 33,
    "vm_name": "LastPass",
    "vm_os": "Debian",
    "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
@@ -21,6 +32,7 @@
    "vm_status": "enabled"
  },
  {
+   "vm_id": 34,
    "vm_name": "Microsoft Word",
    "vm_os": "Windows",
    "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
@@ -28,6 +40,7 @@
    "vm_status": "enabled"
  },
  {
+   "vm_id": 35,
    "vm_name": "Microsoft Excel",
    "vm_os": "Windows",
    "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
@@ -35,6 +48,7 @@
    "vm_status": "enabled"
  },
  {
+   "vm_id": 36,
    "vm_name": "Microsoft PowerPoint",
    "vm_os": "Windows",
    "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",
@@ -42,6 +56,7 @@
    "vm_status": "enabled"
  },
  {
+   "vm_id": 37,
    "vm_name": "Microsoft Teams",
    "vm_os": "Windows",
    "vm_packages": "{'package 1', 'package 2', 'package 3', 'package n...'}",

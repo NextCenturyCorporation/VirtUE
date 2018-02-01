@@ -1,37 +1,47 @@
-mat-toolbar {
+mat-toolbar.mat-primary {
+  background: rgb(46,41,78)
+}
+.mat-toolbar {
   clear: both;
   display: block;
-  height: 32px;
+  height: 34px;
   width: 100%;
+  padding: 0;
 }
-mat-toolbar span.navbar-brand {
+.mat-toolbar-single-row {
+  padding: 0 16px;
+}
+.mat-toolbar span.navbar-brand {
   color: rgb(255,255,255);
   display: inline-block;
-  padding: 0.47rem 2.4rem 0.47rem 1.5rem;
+  padding: 0 2.4rem 0 1.5rem;
 }
-mat-toolbar ul {
+.mat-toolbar ul {
   display: inline-block;
   margin: 0;
   padding: 0;
 }
-mat-toolbar li {
+.mat-toolbar li {
   display: inline-block;
+  font-size: 1.1rem;
   margin: 0;
 }
-mat-toolbar li.active {
+.mat-toolbar li.active {
   background-color: #540D6E
 }
-mat-toolbar li a {
+.mat-toolbar li a {
   color: rgb(255,255,255);
   display: block;
   margin: 0;
-  padding: 0.47rem 2.4rem 0.47rem;
+  /* padding: 0.47rem 2.4rem 0.47rem; */
+  padding: 0 2.4rem;
 }
-mat-toolbar span.navbar-brand {
+.mat-toolbar span.navbar-brand {
   background: url(/assets/images/app-icon-white.png) no-repeat;
-  background-size: 16%;
+  background-size: 15%;
   background-position: center left;
   display: inline-block;
+  font-size: 1.1rem;
   padding-left: 30px;
-  width: 70px;
+  width: auto;
 }

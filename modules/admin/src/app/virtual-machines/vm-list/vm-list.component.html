@@ -35,12 +35,12 @@
         <div *ngFor="let vm of vms" class="mui-row table-row">
           <div class="table-data mui-col-md-4">
             <div class="mini-menu">
-              <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.vm_name }}</a>
+              <a class="edit" [routerLink]="['edit',vm.vm_id]">{{ vm.vm_name }}</a>
               <!-- if this virtue is enabled show this menu -->
-              <span class="menu-options"><a mat-button (click)="openDialog(vm.id,'disable','VM')">Disable</a> | Duplicate | Export</span>
+              <span class="menu-options"><a mat-button (click)="openDialog(vm.vm_id,'disable','Virtual Machine')">Disable</a> | Duplicate | Export</span>
 
               <!-- if this virtue is disabled show this menu -->
-              <span class="menu-options">Enable | <a mat-button (click)="openDialog('vm.id','delete','VM')">Delete</a></span>
+              <span class="menu-options">Enable | <a mat-button (click)="openDialog('vm.vm_id','delete','Virtual Machine')">Delete</a></span>
           </div>
           </div>
           <div class="table-data mui-col-md-2">{{ vm.vm_os }}</div>

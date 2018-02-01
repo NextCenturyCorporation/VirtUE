@@ -1,9 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+
+import { SaviorUser } from '../savior-user';
+import { JsondataService } from '../../shared/jsondata.service';
+
 import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
-import { ActivatedRoute } from '@angular/router';
+
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
@@ -12,30 +17,37 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.css']
 })
-export class EditUserComponent implements OnInit {
 
+export class EditUserComponent implements OnInit {
+  @Input() appUser : SaviorUser;
+
+  // appUser: string;
+  saviorUserId: number;
   screenWidth: any;
   leftPosition: any;
   submitBtn: any;
   dialogWidth: any;
   fullImagePath: string;
-  user: { id: number };
-  users = new FormControl();
-  activeDirUsers = [
-    'Anthony Wong',
-    'Binoy Ravindran',
-    'Chris Long',
-    'Kara Cartwright',
-    'Kyle Drumm',
-    'Mike Day',
-    'Patrick Dwyer',
-    'Pierre Olivier',
-    'Ruslan Nikolaev',
-    'Sophie Kim',
-    'Wole Omitowoju'
-  ];
 
-  constructor(public dialog: MatDialog, private router: ActivatedRoute) {}
+  adUserCtrl: FormControl;
+  filteredUsers: Observable<any[]>;
+  activeDirUsers=[];
+
+  constructor(
+    public dialog: MatDialog,
+    private jsondataService: JsondataService,
+    private route: ActivatedRoute
+  ) {
+    this.adUserCtrl = new FormControl();
+    this.filteredUsers = this.adUserCtrl.valueChanges
+      .pipe(
+        startWith(''),
+        map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
+        // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
+    );
+    // this.route.params.subscribe(userId => this.saviorUserId = userId.id));
+    console.log('Savior User: ' + this.saviorUserId);
+  }
 
   activateModal(id,mode): void {
 
@@ -55,12 +67,12 @@ export class EditUserComponent implements OnInit {
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath
-      }
+      },
+      panelClass: 'virtue-modal-overlay'
     });
 
     this.screenWidth = (window.screen.width);
     this.leftPosition = ((window.screen.width)-this.dialogWidth)/2;
-
     // console.log(this.screenWidth);
     // console.log(this.leftPosition);
 
@@ -68,11 +80,16 @@ export class EditUserComponent implements OnInit {
 
     // dialogRef.afterClosed().subscribe();
   }
-
-  ngOnInit() {
-    this.user = {
-      id: this.router.snapshot.params['id']
-    };
+  // Gets AD user for autocomplete field
+  getJSON(src): void {
+    this.jsondataService.getJSON('adUsers').subscribe(adUsers => this.activeDirUsers = adUsers);
   }
+
+  filterUsers(username: string) {
+    return this.activeDirUsers.filter(adUser =>
+      adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
+  }
+
+  ngOnInit() {}
 
 }

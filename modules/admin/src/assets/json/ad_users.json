@@ -1,0 +1,13 @@
+[
+  { "name":"Anthony Wong", "ad_id":"awong", "company":"Two Six Labs", "ad_class":"Contractor" },
+  { "name":"Binoy Ravindran", "ad_id":"bravindran", "company":"Virginia Tech", "ad_class":"Contractor" },
+  { "name":"Chris Long", "ad_id":"clong", "company":"Next Century Corp", "ad_class":"Staff" },
+  { "name":"Kara Cartwright", "ad_id":"kcartwright", "company":"Next Century Corp", "ad_class":"Staff" },
+  { "name":"Kyle Drumm", "ad_id":"kdrumm", "company":"Next Century Corp", "ad_class":"Staff" },
+  { "name":"Mike Day", "ad_id":"mday", "company":"Two Six Labs", "ad_class":"Contractor" },
+  { "name":"Patrick Dwyer", "ad_id":"pdwyer", "company":"Two Six Labs", "ad_class":"Contractor" },
+  { "name":"Pierre Olivier", "ad_id":"polivier", "company":"Virginia Tech", "ad_class":"Contractor" },
+  { "name":"Ruslan Nikolaev", "ad_id":"rnikolaev", "company":"Virginia Tech", "ad_class":"Contractor" },
+  { "name":"Sophie Kim", "ad_id":"skim", "company":"Next Century Corp", "ad_class":"Staff" },
+  { "name":"Wole Omitowoju", "ad_id":"womitowoju", "company":"Next Century Corp", "ad_class":"Staff" },
+]

@@ -19,7 +19,7 @@
       <!-- if there are virtues, show this list -->
       <div class="mui-container-fluid">
         <div class="mui-row virtues-filters">
-          <div class="virtues-filter mui-col-md-12 padding-left-0">All User Accounts | <a href="#">Active Accounts</a> | <a href="#">Disabled Accounts</a></div>
+          <div class="virtues-filter mui-col-md-12 padding-left-0">All User Accounts | <a href="#">Active Accounts</a> | <a>Disabled Accounts</a></div>
         </div>
       </div>
       <div class="mui-container-fluid data-list">
@@ -28,21 +28,27 @@
           <div class="table-header mui-col-md-7">Virtues</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
-        <div class="mui-row table-row">
+
+        <ul>
+          <li class="text" style="display:unset" *ngFor="let item of items | async">
+            1.{{item.app_user_name}}
+          </li>
+        </ul>
+        <div class="mui-row table-row" *ngFor="let su of appUserList ">
           <div class="table-data mui-col-md-3">
-            <a class="edit" [routerLink]="['edit',2]">[ Name ]</a>
+            <a class="edit" [routerLink]="['edit',su.app_user_id]">{{ su.app_user_name }}</a>
             <!-- if this user is enabled show this menu -->
             <span class="active account-options">
-        <a href="#">Duplicate</a> | <a href="#">Disable</a>
-      </span>
+              <a href="#">Duplicate</a> | <a [routerLink]="['edit',su.app_user_id]">Disable</a>
+            </span>
 
             <!-- if this user is disabled show this menu -->
             <span class="active account-options">
-        <a href="#">Enable</a> | <a class="edit" (click)="openDialog(1,'delete','user account')">Delete</a>
-      </span>
+              <a href="#">Enable</a> | <a class="edit" (click)="openDialog(su.app_user_id,'delete','user account')">Delete</a>
+            </span>
           </div>
-          <div class="table-data mui-col-md-7">[Virtue 1, Virtue 2, Virtue 3, Virtue N...]</div>
-          <div class="table-data mui-col-md-2">[Status]<br />[Date]</div>
+          <div class="table-data mui-col-md-7">{{ su.app_user_virtues }}</div>
+          <div class="table-data mui-col-md-2">{{ su.app_user_status}}<br />{{ su.app_user_timestamp}}</div>
           <div class="clearfix"></div>
         </div>
       </div>
