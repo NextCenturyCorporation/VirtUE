@@ -44,10 +44,8 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  */
 
 @EnableWebSecurity
-@PropertySources({
-    @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
-    @PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true)
-})
+@PropertySources({ @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
+		@PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true) })
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2 = "file:savior-server-security-site.properties";
@@ -119,17 +117,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+
 		// http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll();
 		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
+			http.csrf().disable();
 			http.addFilterAt(new HeaderFilter(), AbstractPreAuthenticatedProcessingFilter.class);
 			printDevModuleWarning(authModuleName);
 		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
+			http.csrf().disable();
 			http.addFilterAt(new SingleUserFilter(env), AbstractPreAuthenticatedProcessingFilter.class);
 			printDevModuleWarning(authModuleName);
 		}
 		// Set what roles are required to view each urls
 		http.authorizeRequests().antMatchers("/desktop/**").hasRole("USER").antMatchers("/admin2/**").hasRole("ADMIN")
-				.antMatchers("/").permitAll();
+				.antMatchers("/admin/**").permitAll().antMatchers("/").permitAll();
 		http.exceptionHandling().accessDeniedHandler(getAccessDeniedHandler());
 
 		if (forceHttps) {

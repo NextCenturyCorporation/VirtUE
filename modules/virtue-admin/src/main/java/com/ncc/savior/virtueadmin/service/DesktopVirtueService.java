@@ -110,7 +110,7 @@ public class DesktopVirtueService {
 	}
 
 	public VirtueInstance createVirtue(User user, String templateId) {
-		VirtueTemplate template = templateManager.getTemplate(user, templateId);
+		VirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
 		if (template == null) {
 			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
 		}
