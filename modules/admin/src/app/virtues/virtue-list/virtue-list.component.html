@@ -1,15 +1,15 @@
 <div id="content-container">
-  <div id="content-header" class="mui-container-fluid titlebar">
+  <div id="content-header" class="titlebar">
     <h1 class="title">Virtues</h1>
-    <button [routerLink]="['create-virtue']">Create New</button>
-    <button disabled>Import Virtue</button>
+    <button class="titlebar-button" [routerLink]="['create-virtue']">Create New</button>
+    <button class="titlebar-button" disabled>Import Virtue</button>
   </div>
 
   <div id="content-main">
     <div id="content">
       <div class="mui-container-fluid">
         <!-- if there are no virtues, show this message -->
-        <div class="mui-row margin-top-10">
+        <div class="mui-row margin-top-10" *ngIf="virtues.length < 1">
           <div class="mui-col-md-12 padding-left-0">
             <p class="no-data-message">
               No virtues have been created at this time. To create a virtue, click on the button "Create New" above.

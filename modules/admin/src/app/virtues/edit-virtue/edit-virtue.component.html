@@ -1,7 +1,7 @@
 <div id="content-container">
-  <div id="content-header" class="virtue-titlebar">
-    <h1 class="virtue-title">Edit Virtue</h1>
-    <button class="virtue-button" disabled>Disable Virtue</button>
+  <div id="content-header" class="titlebar">
+    <h1 class="title">Edit Virtue</h1>
+    <button class="titlebar-button" disabled>Disable Virtue</button>
   </div>
 
   <div id="content-main">
@@ -18,21 +18,22 @@
           <div class="split-pane-content-primary">
 
             <div class="mui-row form-item margin-top-15">
-              <div class="mui-col-md-12 padding-left-0 padding-right-0">
-                <input type="text" id="virtue-name" value="" placeholder="Virtue Name" /><br />
-                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ virtue.id }}</span>
+              <div class="mui-col-md-12">
+                <!-- [(ngModel)]="virtue.name" -->
+                <input type="text" placeholder="Virtue Name" /><br />
+                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ virtueId.id }}</span>
               </div>
             </div>
-            <div class="mui-row virtue-titlebar">
+            <div class="mui-row titlebar">
               <div class="mui-col-md-12">
-                <h2 class="virtue-title">Virtual Machines</h2>
-                <button mat-button class="virtue-button" (click)="activateModal(1)">Add VM</button>
+                <h2 class="title">Virtual Machines</h2>
+                <button mat-button class="titlebar-button" (click)="activateModal(1)">Add VM</button>
               </div>
             </div>
             <!-- if there are no virtue, show this message -->
             <div class="mui-row margin-top-10">
               <div class="mui-col-md-12">
-                <p class="border-top border-bottom">
+                <p class="no-data-message">
                   No virtual machines are attached this virtue. To add VM(s), click on the button "Add VM".
                 </p>
               </div>

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs/Rx';
 
 @Component({
   selector: 'app-virtues',
@@ -6,9 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class VirtuesComponent implements OnInit {
 
-  constructor() {}
+  
 
-  ngOnInit() {
-  }
+  constructor( private router: ActivatedRoute ) {}
+
+  ngOnInit() {  }
 
 }

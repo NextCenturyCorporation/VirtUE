@@ -16,7 +16,7 @@ import { CountFilterPipe } from '../../shared/count-filter.pipe';
   styleUrls: ['./virtue-list.component.css']
 })
 export class VirtueListComponent implements OnInit {
-
+  title = 'Virtues';
   virtues = [];
   virtueTotal : number;
   os: Observable<Array<VirtuesService>>;
@@ -44,7 +44,7 @@ export class VirtueListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.virtuesService.list()
+    this.virtuesService.listVirtues()
       .subscribe(virtueList => this.virtues = virtueList);
   }
 
