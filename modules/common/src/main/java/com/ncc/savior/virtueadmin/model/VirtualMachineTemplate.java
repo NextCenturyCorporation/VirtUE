@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 public class VirtualMachineTemplate {
 
@@ -17,6 +19,7 @@ public class VirtualMachineTemplate {
 	private String templatePath;
 	@ManyToMany()
 	private Collection<ApplicationDefinition> applications;
+	@ColumnDefault("true")
 	private boolean enabled;
 	private Date lastModification;
 	private String lastEditor;

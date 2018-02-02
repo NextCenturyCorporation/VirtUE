@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
+import org.hibernate.annotations.ColumnDefault;
+
 /**
  * Data Transfer Object (DTO) for templates.
  * 
@@ -24,6 +26,7 @@ public class VirtueTemplate {
 	private Collection<VirtualMachineTemplate> vmTemplates;
 	@ManyToMany()
 	private Collection<UserName> userNames;
+	@ColumnDefault("true")
 	private boolean enabled;
 	private Date lastModification;
 	private String lastEditor;
