@@ -1,12 +1,15 @@
 package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+
+import org.hibernate.annotations.ColumnDefault;
 
 /**
  * Data Transfer Object (DTO) for templates.
@@ -23,36 +26,49 @@ public class VirtueTemplate {
 	private Collection<VirtualMachineTemplate> vmTemplates;
 	@ManyToMany()
 	private Collection<UserName> userNames;
+	@ColumnDefault("true")
+	private boolean enabled;
+	private Date lastModification;
+	private String lastEditor;
 
 	private String awsTemplateName;
 
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
 
-	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates) {
+	/**
+	 * Used for jackson deserialization
+	 * 
+	 * @param template
+	 * @param templateId
+	 */
+	public VirtueTemplate(String templateId, VirtueTemplate template) {
 		super();
-		this.id = id;
-		this.name = name;
-		this.version = version;
-		this.vmTemplates = vmTemplates;
-		this.setAwsTemplateName("");
+		this.id = templateId;
+		this.name = template.getName();
+		this.version = template.getVersion();
+		this.vmTemplates = template.getVmTemplates();
+		this.enabled = template.isEnabled();
+		this.lastModification = template.getLastModification();
+		this.lastEditor = template.getLastEditor();
+		this.awsTemplateName = template.getAwsTemplateName();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
-			String awsTemplateName) {
+			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.vmTemplates = vmTemplates;
+		this.enabled = enabled;
+		this.lastModification = lastModification;
+		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 	}
 
-	/**
-	 * Used for jackson deserialization
-	 */
 	protected VirtueTemplate() {
-
+		super();
 	}
 
 	public String getId() {
@@ -99,7 +115,8 @@ public class VirtueTemplate {
 	@Override
 	public String toString() {
 		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
-				+ "]";
+				+ ", userNames=" + userNames + ", enabled=" + enabled + ", lastModification=" + lastModification
+				+ ", lastEditor=" + lastEditor + ", awsTemplateName=" + awsTemplateName + "]";
 	}
 
 	public Collection<UserName> retrieveUserNames() {
@@ -112,6 +129,30 @@ public class VirtueTemplate {
 
 	public void setAwsTemplateName(String awsTemplateName) {
 		this.awsTemplateName = awsTemplateName;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public Date getLastModification() {
+		return lastModification;
+	}
+
+	public void setLastModification(Date lastModification) {
+		this.lastModification = lastModification;
+	}
+
+	public String getLastEditor() {
+		return lastEditor;
+	}
+
+	public void setLastEditor(String lastEditor) {
+		this.lastEditor = lastEditor;
 	}
 
 }

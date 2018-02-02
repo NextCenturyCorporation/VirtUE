@@ -108,4 +108,9 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtueDao.getAllActiveVirtues();
 	}
+
+	@Override
+	public VirtueInstance getActiveVirtue(String virtueId) {
+		return virtueDao.getVirtueInstance(virtueId);
+	}
 }
