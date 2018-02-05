@@ -9,5 +9,5 @@
   { "name":"Pierre Olivier", "ad_id":"polivier", "company":"Virginia Tech", "ad_class":"Contractor" },
   { "name":"Ruslan Nikolaev", "ad_id":"rnikolaev", "company":"Virginia Tech", "ad_class":"Contractor" },
   { "name":"Sophie Kim", "ad_id":"skim", "company":"Next Century Corp", "ad_class":"Staff" },
-  { "name":"Wole Omitowoju", "ad_id":"womitowoju", "company":"Next Century Corp", "ad_class":"Staff" },
+  { "name":"Wole Omitowoju", "ad_id":"womitowoju", "company":"Next Century Corp", "ad_class":"Staff" }
 ]

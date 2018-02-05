@@ -16,7 +16,6 @@ import { Observable } from 'rxjs/Rx';
 
 export class EditVirtueComponent implements OnInit {
 
-
   virtue: { id: string, name: string }[] = [];
   // @Input() virtue: { name: string, vmTemplates: string }
   // @Input() id: number;
@@ -24,10 +23,16 @@ export class EditVirtueComponent implements OnInit {
   public virtueId : { id: string };
 
   constructor(
-    public dialog: MatDialog,
     private router: ActivatedRoute,
-    private virtuesService: VirtuesService
+    private virtuesService: VirtuesService,
+    public dialog: MatDialog
   ) {}
+
+  ngOnInit() {
+    this.virtueId = {
+      id: this.router.snapshot.params['id']
+    };
+  }
 
   activateModal(id): void {
     let dialogRef = this.dialog.open(VmModalComponent, {
@@ -40,6 +45,7 @@ export class EditVirtueComponent implements OnInit {
       // console.log('This modal was closed');
     });
   }
+
   deleteVirtue(id): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
         width: '450px'
@@ -51,13 +57,4 @@ export class EditVirtueComponent implements OnInit {
       // console.log('This dialog was closed');
     });
   }
-  ngOnInit() {
-    this.virtueId = {
-      id: this.router.snapshot.params['id']
-    };
-    // console.log(this.virtueId.id);
-    // this.virtue = this.virtuesService.getVirtue(this.virtueId.id);
-    // console.log(this.virtue.name);
-  }
-
 }

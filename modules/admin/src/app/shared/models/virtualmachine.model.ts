@@ -1,4 +1,4 @@
-export class ApplicationsModel {
+export class ApplicationModel {
   id: string;
   name: string;
   version: string;

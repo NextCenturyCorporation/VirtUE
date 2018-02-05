@@ -1,9 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
+import {  Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { SaviorUser } from '../savior-user';
-import { JsondataService } from '../../shared/services/jsondata.service';
+import { UserModel } from '../../shared/models/user.model';
+import { UsersService } from '../../shared/services/users.service';
 
 import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
@@ -15,14 +15,15 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 @Component({
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
-  styleUrls: ['./edit-user.component.css']
+  styleUrls: ['./edit-user.component.css'],
+  providers: [ UsersService ]
 })
 
 export class EditUserComponent implements OnInit {
-  @Input() appUser : SaviorUser;
+  @Input() appUser : UserModel;
 
   // appUser: string;
-  saviorUserId: number;
+  saviorUserId: {id:number};
   screenWidth: any;
   leftPosition: any;
   submitBtn: any;
@@ -35,18 +36,25 @@ export class EditUserComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
-    private jsondataService: JsondataService,
-    private route: ActivatedRoute
+    private usersService: UsersService,
+    private router: ActivatedRoute,
   ) {
     this.adUserCtrl = new FormControl();
+    this.usersService.getAdUsers().subscribe(adUsers => this.activeDirUsers = adUsers);
     this.filteredUsers = this.adUserCtrl.valueChanges
       .pipe(
         startWith(''),
         map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
-        // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
     );
-    // this.route.params.subscribe(userId => this.saviorUserId = userId.id));
-    console.log('Savior User: ' + this.saviorUserId);
+    console.log(this.filteredUsers);
+  }
+
+  ngOnInit() {
+    this.saviorUserId = {
+      id: this.router.snapshot.params['id']
+    };
+    // this.getAdUsers();
+    this.getAppUser();
   }
 
   activateModal(id,mode): void {
@@ -77,19 +85,22 @@ export class EditUserComponent implements OnInit {
     // console.log(this.leftPosition);
 
     dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
-
     // dialogRef.afterClosed().subscribe();
   }
+
   // Gets AD user for autocomplete field
-  getJSON(src): void {
-    this.jsondataService.getJSON('adUsers').subscribe(adUsers => this.activeDirUsers = adUsers);
+  getAppUser() {
+    this.usersService.selectedUser.emit(this.appUser);
+     // this.usersService.getUser(this.saviorUserId.id).emit();
+     // console.log(this.saviorUserId);
+  }
+  getAdUsers(): void {
+    this.usersService.getAdUsers().subscribe(adUsers => this.activeDirUsers = adUsers);
   }
 
   filterUsers(username: string) {
     return this.activeDirUsers.filter(adUser =>
       adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
   }
-
-  ngOnInit() {}
 
 }

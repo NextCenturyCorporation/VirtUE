@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { JsondataService } from '../../shared/services/jsondata.service';
-import { JsonFilterPipe } from '../../shared/json-filter.pipe';
-import { CountFilterPipe } from '../../shared/count-filter.pipe';
+import { UsersService } from '../../shared/services/users.service';
+// import { JsonFilterPipe } from '../../shared/json-filter.pipe';
+// import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -12,7 +12,8 @@ import { Observable } from 'rxjs/Observable';
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  styleUrls: ['./user-list.component.css'],
+  providers: [ UsersService ]
 })
 export class UserListComponent implements OnInit {
 
@@ -21,7 +22,7 @@ export class UserListComponent implements OnInit {
 
   // constructor( private dataService: DataService ){}
   constructor(
-    private jsondataService: JsondataService,
+    private usersService: UsersService,
     public dialog: MatDialog
   ) {}
 
@@ -42,12 +43,12 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  getJSON(src): void {
-    this.jsondataService.getJSON(src).subscribe(appUsers => this.appUserList = appUsers);
+  getUsers(): void {
+    this.usersService.listUsers().subscribe(appUsers => this.appUserList = appUsers);
   }
 
   ngOnInit(){
-    this.getJSON('appUsers');
+    this.getUsers();
   }
 
 }
