@@ -117,4 +117,10 @@ public class JavaGssActiveDirectoryAuthorizationProvider implements IActiveDirec
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public String getAuthorizationTicket(String spn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

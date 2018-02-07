@@ -41,4 +41,6 @@ public interface IActiveDirectoryAuthorizationProvider {
 	 */
 	void logout();
 
+	String getAuthorizationTicket(String targetHost);
+
 }

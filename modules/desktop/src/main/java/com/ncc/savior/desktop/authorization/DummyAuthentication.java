@@ -25,4 +25,10 @@ public class DummyAuthentication implements IActiveDirectoryAuthorizationProvide
 		// do nothing
 	}
 
+	@Override
+	public String getAuthorizationTicket(String spn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.authorization;
 
+import java.util.Base64;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +82,17 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 			imp.revertToSelf();
 		}
 		return token;
+	}
+
+	@Override
+	public String getAuthorizationTicket(String targetHost) {
+		if (null == targetHost || targetHost.trim().isEmpty()) {
+			return null;
+		}
+		byte[] token = WindowsSecurityContextImpl.getCurrent(DEFAULT_SECURITY_PACKAGE, "HTTP/" + targetHost).getToken();
+		byte[] encoded = Base64.getEncoder().encode(token);
+		String encodedStr = new String(encoded);
+		return DEFAULT_SECURITY_PACKAGE + " " + encodedStr;
 	}
 
 }

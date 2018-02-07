@@ -18,6 +18,9 @@ public class AuthorizationService {
 
 	public AuthorizationService(String requiredDomain, boolean dummySecurity) {
 		this.requiredDomain = requiredDomain;
+		if (this.requiredDomain.equals("")) {
+			this.requiredDomain = null;
+		}
 		this.dummySecurity = dummySecurity;
 		this.os = getOs();
 		this.authProvider = createAuthProvider();
@@ -81,6 +84,10 @@ public class AuthorizationService {
 
 	public String getRequiredDomain() {
 		return requiredDomain;
+	}
+
+	public String getAuthorizationTicket(String targetHost) {
+		return authProvider.getAuthorizationTicket(targetHost);
 	}
 
 }
