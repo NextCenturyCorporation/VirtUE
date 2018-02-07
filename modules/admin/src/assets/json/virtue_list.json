@@ -19,8 +19,14 @@
       "version": "1.0",
       "os": "LINUX",
       "launchCommand": "firefox"
-    }]
+    }],
+    "enabled": true,
+    "lastModification": null,
+    "lastEditor": null
   }],
+  "enabled": true,
+  "lastModification": "1/1/2018 10:00:00 AM",
+  "lastEditor": "kdrumm",
   "awsTemplateName": "",
   "applications": [{
     "id": "fde40cef-5b32-44e7-8a2e-9266a9e3ac64",
@@ -104,8 +110,14 @@
       "version": "1.0",
       "os": "LINUX",
       "launchCommand": "gnome-calculator"
-    }]
+    }],
+    "enabled": true,
+    "lastModification": "1/5/2018 10:00:00 AM",
+    "lastEditor": "kdrumm"
   }],
+  "enabled": true,
+  "lastModification": "1/1/2018 10:00:00 AM",
+  "lastEditor": "kdrumm",
   "awsTemplateName": "",
   "applications": [{
     "id": "8ff080ed-5105-415e-b50f-b929e262b57f",
@@ -114,35 +126,11 @@
     "os": "LINUX",
     "launchCommand": "gimp"
   }, {
-    "id": "0986e242-6a4d-4c2a-8ae4-46dfcca2b018",
-    "name": "LibreOffice Writer",
-    "version": "1.0",
-    "os": "LINUX",
-    "launchCommand": "lowriter"
-  }, {
     "id": "db2fd10a-c46b-4795-a3d4-a0c5ef8de5ea",
     "name": "Chrome",
     "version": "1.0",
     "os": "LINUX",
     "launchCommand": "google-chrome"
-  }, {
-    "id": "f292c015-aa8c-4724-8015-bd7fedaa4e31",
-    "name": "LibreOffice Impress",
-    "version": "1.0",
-    "os": "LINUX",
-    "launchCommand": "loimpress"
-  }, {
-    "id": "15c45fa4-ef17-48cf-847f-e788f82f147f",
-    "name": "LibreOffice Draw",
-    "version": "1.0",
-    "os": "LINUX",
-    "launchCommand": "lodraw"
-  }, {
-    "id": "095defbf-bbaa-4d9c-a722-589c5fdd8f41",
-    "name": "Pinta",
-    "version": "1.0",
-    "os": "LINUX",
-    "launchCommand": "pinta"
   }, {
     "id": "fde40cef-5b32-44e7-8a2e-9266a9e3ac64",
     "name": "Firefox",
@@ -150,17 +138,41 @@
     "os": "LINUX",
     "launchCommand": "firefox"
   }, {
-    "id": "9026d8ff-1eda-47e7-a517-0dbe2ada6efa",
-    "name": "LibreOffice Calc",
+    "id": "15c45fa4-ef17-48cf-847f-e788f82f147f",
+    "name": "LibreOffice Draw",
     "version": "1.0",
     "os": "LINUX",
-    "launchCommand": "localc"
+    "launchCommand": "lodraw"
+  }, {
+    "id": "0986e242-6a4d-4c2a-8ae4-46dfcca2b018",
+    "name": "LibreOffice Writer",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "lowriter"
   }, {
     "id": "5cfc3bd3-b414-4cb9-9cf5-26738be0a066",
     "name": "Calculator",
     "version": "1.0",
     "os": "LINUX",
     "launchCommand": "gnome-calculator"
+  }, {
+    "id": "095defbf-bbaa-4d9c-a722-589c5fdd8f41",
+    "name": "Pinta",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "pinta"
+  }, {
+    "id": "f292c015-aa8c-4724-8015-bd7fedaa4e31",
+    "name": "LibreOffice Impress",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "loimpress"
+  }, {
+    "id": "9026d8ff-1eda-47e7-a517-0dbe2ada6efa",
+    "name": "LibreOffice Calc",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "localc"
   }]
 }, {
   "id": "a2907b6a-2b2e-4cec-a8a3-c09ad64eff68",
@@ -183,21 +195,27 @@
       "version": "1.0",
       "os": "LINUX",
       "launchCommand": "pinta"
-    }]
+    }],
+    "enabled": true,
+    "lastModification": "1/15/2018 10:00:00 AM",
+    "lastEditor": "kdrumm"
   }],
+  "enabled": true,
+  "lastModification": "1/5/2018 10:00:00 AM",
+  "lastEditor": "kdrumm",
   "awsTemplateName": "",
   "applications": [{
-    "id": "8ff080ed-5105-415e-b50f-b929e262b57f",
-    "name": "GIMP",
-    "version": "1.0",
-    "os": "LINUX",
-    "launchCommand": "gimp"
-  }, {
     "id": "095defbf-bbaa-4d9c-a722-589c5fdd8f41",
     "name": "Pinta",
     "version": "1.0",
     "os": "LINUX",
     "launchCommand": "pinta"
+  }, {
+    "id": "8ff080ed-5105-415e-b50f-b929e262b57f",
+    "name": "GIMP",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "gimp"
   }]
 }, {
   "id": "50226091-e439-448d-a9e7-178bee0e14d6",
@@ -232,15 +250,21 @@
       "version": "1.0",
       "os": "LINUX",
       "launchCommand": "lowriter"
-    }]
+    }],
+    "enabled": true,
+    "lastModification": "1/5/2018 10:00:00 AM",
+    "lastEditor": "kdrumm"
   }],
+  "enabled": true,
+  "lastModification": "1/10/2018 10:00:00 AM",
+  "lastEditor": "kdrumm",
   "awsTemplateName": "",
   "applications": [{
-    "id": "9026d8ff-1eda-47e7-a517-0dbe2ada6efa",
-    "name": "LibreOffice Calc",
+    "id": "f292c015-aa8c-4724-8015-bd7fedaa4e31",
+    "name": "LibreOffice Impress",
     "version": "1.0",
     "os": "LINUX",
-    "launchCommand": "localc"
+    "launchCommand": "loimpress"
   }, {
     "id": "0986e242-6a4d-4c2a-8ae4-46dfcca2b018",
     "name": "LibreOffice Writer",
@@ -254,11 +278,11 @@
     "os": "LINUX",
     "launchCommand": "lodraw"
   }, {
-    "id": "f292c015-aa8c-4724-8015-bd7fedaa4e31",
-    "name": "LibreOffice Impress",
+    "id": "9026d8ff-1eda-47e7-a517-0dbe2ada6efa",
+    "name": "LibreOffice Calc",
     "version": "1.0",
     "os": "LINUX",
-    "launchCommand": "loimpress"
+    "launchCommand": "localc"
   }]
 }, {
   "id": "94aa918f-2423-4de9-8444-d7d377d1a3ca",
@@ -275,8 +299,14 @@
       "version": "1.0",
       "os": "LINUX",
       "launchCommand": "gnome-calculator"
-    }]
+    }],
+    "enabled": true,
+    "lastModification": null,
+    "lastEditor": null
   }],
+  "enabled": true,
+  "lastModification": "1/5/2018 10:00:00 AM",
+  "lastEditor": "kdrumm",
   "awsTemplateName": "",
   "applications": [{
     "id": "5cfc3bd3-b414-4cb9-9cf5-26738be0a066",

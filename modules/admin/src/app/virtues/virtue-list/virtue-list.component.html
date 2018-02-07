@@ -19,7 +19,7 @@
       </div>
 
       <!-- if there are virtues, show this list -->
-      <div class="mui-container-fluid">
+      <div class="mui-container-fluid" *ngIf="virtues.length > 0">
         <div class="mui-row virtues-filters">
           <div class="virtues-filter mui-col-md-12 padding-left-0">All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a></div>
         </div>
@@ -46,8 +46,8 @@
           <div class="table-data mui-col-md-3">
              <span [ngStyle]="{'margin-left':0}" *ngFor="let app of virtue.applications">{{ app.name }}</span>
           </div>
-          <div class="table-data mui-col-md-2">virtue.userinfo</div>
-          <div class="table-data mui-col-md-2">virtue.status<br />virtue.timestamp</div>
+          <div class="table-data mui-col-md-2">{{virtue.lastEditor}}</div>
+          <div class="table-data mui-col-md-2">{{virtue.enabled? 'Enabled' : 'Disabled'}}<br />{{virtue.lastModification}}</div>
           <div class="clearfix"></div>
         </div>
       </div>

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
+import { UserModel } from '../../shared/models/user.model';
 import { UsersService } from '../../shared/services/users.service';
 // import { JsonFilterPipe } from '../../shared/json-filter.pipe';
 // import { CountFilterPipe } from '../../shared/count-filter.pipe';
@@ -17,8 +18,10 @@ import { Observable } from 'rxjs/Observable';
 })
 export class UserListComponent implements OnInit {
 
+  @Output() selectedUser = new EventEmitter<UserModel>();
+
   saviorUsers: string;
-  appUserList=[];
+  appUserList = [];
 
   // constructor( private dataService: DataService ){}
   constructor(
@@ -45,6 +48,12 @@ export class UserListComponent implements OnInit {
 
   getUsers(): void {
     this.usersService.listUsers().subscribe(appUsers => this.appUserList = appUsers);
+    // this.appUserList = this.usersService.listUsers();
+  }
+
+  onSelected(id) {
+    this.usersService.selectedUser.emit(id);
+    console.log(id);
   }
 
   ngOnInit(){

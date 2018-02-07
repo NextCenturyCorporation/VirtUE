@@ -1,6 +1,7 @@
-import {  Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { HttpParams } from '@angular/common/http';
 
 import { UserModel } from '../../shared/models/user.model';
 import { UsersService } from '../../shared/services/users.service';
@@ -20,9 +21,9 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 })
 
 export class EditUserComponent implements OnInit {
-  @Input() appUser : UserModel;
+  @Input() appUserById : UserModel;
 
-  // appUser: string;
+  appUser: string;
   saviorUserId: {id:number};
   screenWidth: any;
   leftPosition: any;
@@ -54,7 +55,7 @@ export class EditUserComponent implements OnInit {
       id: this.router.snapshot.params['id']
     };
     // this.getAdUsers();
-    this.getAppUser();
+    this.getAppUser(this.saviorUserId.id);
   }
 
   activateModal(id,mode): void {
@@ -88,13 +89,14 @@ export class EditUserComponent implements OnInit {
     // dialogRef.afterClosed().subscribe();
   }
 
-  // Gets AD user for autocomplete field
-  getAppUser() {
-    this.usersService.selectedUser.emit(this.appUser);
-     // this.usersService.getUser(this.saviorUserId.id).emit();
-     // console.log(this.saviorUserId);
+  getAppUser(appUserId) {
+    console.log(appUserId);
+    // this.usersService.getUser(id).subscribe(appUser => this.appUser = appUser);
+    this.usersService.getUser(appUserId).subscribe(appUser => this.appUser = appUser);
   }
+
   getAdUsers(): void {
+    // Gets AD user for autocomplete field
     this.usersService.getAdUsers().subscribe(adUsers => this.activeDirUsers = adUsers);
   }
 

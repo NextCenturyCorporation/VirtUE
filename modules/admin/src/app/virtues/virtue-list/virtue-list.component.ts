@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { Observable } from 'rxjs/observable';
+import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
@@ -44,8 +44,10 @@ export class VirtueListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.virtuesService.listVirtues()
-      .subscribe(virtueList => this.virtues = virtueList);
+    this.virtuesService.getVirtues()
+      .subscribe(
+        virtueList => {this.virtues = virtueList} 
+      );
   }
 
 

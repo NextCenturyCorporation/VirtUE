@@ -31,7 +31,7 @@
 
         <div class="mui-row table-row" *ngFor="let su of appUserList ">
           <div class="table-data mui-col-md-3">
-            <a class="edit" [routerLink]="['edit',su.id]">{{ su.name }}</a>
+            <a class="edit" (click)="onSelected(su.id)" [routerLink]="['edit',su.id]">{{ su.name }}</a>
             <!-- if this user is enabled show this menu -->
             <span class="active account-options">
               <a href="#">Duplicate</a> | <a [routerLink]="['edit',su.id]">Disable</a>

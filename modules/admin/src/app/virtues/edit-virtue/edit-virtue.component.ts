@@ -1,11 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+
+import { VirtueModel } from '../../shared/models/virtue.model';
+import { VirtuesService } from '../../shared/services/virtues.service';
+
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { VirtueModel } from '../../shared/models/virtue.model';
-import { VirtuesService } from '../../shared/services/virtues.service';
-import { Observable } from 'rxjs/Rx';
+
 
 @Component({
   selector: 'app-edit-virtue',
@@ -16,22 +19,30 @@ import { Observable } from 'rxjs/Rx';
 
 export class EditVirtueComponent implements OnInit {
 
-  virtue: { id: string, name: string }[] = [];
-  // @Input() virtue: { name: string, vmTemplates: string }
-  // @Input() id: number;
-
-  public virtueId : { id: string };
+  @Input() virtue: VirtueModel;
+  virtueData = [];
+  // virtue: { id: string, name: string }[] = [];
+  virtueId : { id: string };
 
   constructor(
-    private router: ActivatedRoute,
+    private route: ActivatedRoute,
     private virtuesService: VirtuesService,
+    private location: Location,
     public dialog: MatDialog
   ) {}
 
   ngOnInit() {
     this.virtueId = {
-      id: this.router.snapshot.params['id']
+      id: this.route.snapshot.params['id']
     };
+    this.getThisVirtue();
+    // console.log('Virtue: ' + this.virtues );
+  }
+
+  getThisVirtue() {
+    const id = this.virtueId.id;
+    return this.virtuesService.getVirtue(id)
+      .subscribe( data => this.virtueData = data );
   }
 
   activateModal(id): void {
