@@ -137,7 +137,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.authenticationEntryPoint(spnegoEntryPoint())
 				.and()
 			.authorizeRequests()
-				.antMatchers("/", "/home").permitAll()
+				.antMatchers("/", "/home").permitAll().antMatchers("/api/admin/**").authenticated().antMatchers("/api/data/**").authenticated()
 				.anyRequest().authenticated()
 				.and()
 			.formLogin()
