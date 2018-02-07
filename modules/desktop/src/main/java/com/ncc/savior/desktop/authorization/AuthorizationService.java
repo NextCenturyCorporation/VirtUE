@@ -66,7 +66,11 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser getUser() {
-		return authProvider.getCurrentUser();
+		DesktopUser user = authProvider.getCurrentUser();
+		if (requiredDomain != null && !requiredDomain.toUpperCase().equals(user.getDomain().toUpperCase())) {
+			return null;
+		}
+		return user;
 	}
 
 	public DesktopUser login(String domain, String username, String password) {
