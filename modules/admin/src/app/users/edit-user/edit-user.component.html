@@ -28,15 +28,16 @@
                 </div>
               </div>
 
-              <!-- if there are no virtues, show this message -->
-              <div *ngIf="appUser.virtues.length < 1" class="mui-row">
+              <!-- if there are no virtues, show this message   *ngIf="appUser.virtues.length < 1"  -->
+              <div  class="mui-row">
                 <div class="mui-col-md-12 padding-left-0">
                   <p class="virtue-message">
                     No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
                   </p>
                 </div>
               </div>
-              <div *ngIf="appUser.virtues"  class="mui-row">
+               <!-- *ngIf="appUser.virtues"  -->
+              <div class="mui-row">
                 <div class="table-container">
                   <div class="mui-row table-header-group">
                     <div class="table-header mui-col-md-4">

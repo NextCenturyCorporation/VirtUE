@@ -39,12 +39,12 @@ export class VirtueModalComponent implements OnInit {
       .subscribe(virtues => this.virtues = virtues);
   }
 
-  onAddVirtues() {
-    const selVirtue = this.userVirtueRef.nativeElement.value;
-    // const newVirtue = new UserVirtue(selVirtue);
-    this.virtuesService.addUserVirtues(selVirtue);
-    console.log(selVirtue);
-  }
+  // onAddVirtues() {
+  //   const selVirtue = this.userVirtueRef.nativeElement.value;
+  //   // const newVirtue = new UserVirtue(selVirtue);
+  //   this.virtuesService.addUserVirtues(selVirtue);
+  //   console.log(selVirtue);
+  // }
 
   save() {
     this.dialogRef.close();

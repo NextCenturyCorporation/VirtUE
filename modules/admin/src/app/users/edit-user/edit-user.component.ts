@@ -23,7 +23,7 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 export class EditUserComponent implements OnInit {
   @Input() user: User;
 
-  saviorUserId: {id:number};
+  saviorUserId: {id:string};
   screenWidth: any;
   leftPosition: any;
   submitBtn: any;
@@ -47,35 +47,31 @@ export class EditUserComponent implements OnInit {
         startWith(''),
         map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
     );
-    console.log(this.filteredUsers);
+    // console.log(this.filteredUsers);
   }
 
   ngOnInit() {
     this.saviorUserId = {
       id: this.router.snapshot.params['id']
     };
-    // this.getAdUsers();
+    this.getAdUsers();
     this.getThisUser(this.saviorUserId.id);
   }
 
   getThisUser() {
     const id = this.saviorUserId.id;
-    const vms = [];
-    const apps = [];
-
-    // Use this for local values
-    this.appUser = this.usersService.getLocalObj(id);
 
     // Use this when you connect to AWS
-    // this.usersService.getUser(id).subscribe(
-    //   data => { this.appUser = data }
-    // );
+    this.usersService.getUser(id).subscribe(
+      data => { this.appUser = data }
+    );
     // console.log(this.appUser.name);
   }
 
   getAdUsers(): void {
     // Gets AD user for autocomplete field
-    this.usersService.getAdUsers().subscribe(adUsers => this.activeDirUsers = adUsers);
+    this.usersService.getAdUsers()
+      .subscribe(adUsers => this.activeDirUsers = adUsers);
   }
 
   filterUsers(username: string) {
@@ -107,8 +103,6 @@ export class EditUserComponent implements OnInit {
 
     this.screenWidth = (window.screen.width);
     this.leftPosition = ((window.screen.width)-this.dialogWidth)/2;
-    // console.log(this.screenWidth);
-    // console.log(this.leftPosition);
 
     dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
     // dialogRef.afterClosed().subscribe();

@@ -32,8 +32,8 @@ export class UserListComponent implements OnInit {
   }
 
   getUsers(): void {
-    this.usersService.listUsers().subscribe(appUsers => this.appUserList = appUsers);
-    // this.appUserList = this.usersService.listUsers();
+    this.usersService.getUsers()
+      .subscribe(appUsers => this.appUserList = appUsers);
   }
 
   onSelected(id) {

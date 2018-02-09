@@ -23,7 +23,7 @@ export class VirtualMachineService {
 
   public getVmList(): Observable<Array<VirtualMachine>> {
     return this.httpClient.get<Array<VirtualMachine>>(this.jsondata);
-    console.log(this.jsondata);
+    
   }
 
   public getVm(id: string): Observable<any> {
