@@ -61,10 +61,8 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  */
 
 @EnableWebSecurity
-@PropertySources({
-    @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
-    @PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true)
-})
+@PropertySources({ @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
+		@PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true) })
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2 = "file:savior-server-security-site.properties";
@@ -104,13 +102,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Value("${savior.security.ldap}")
 	private String ldapURL;
-	
+
 	@Value("${savior.virtueadmin.principal}")
 	private String servicePrincipal;
-	
+
 	@Value("${savior.virtueadmin.keytab}")
 	private File keytabLocation;
-
 
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
@@ -132,39 +129,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		LOGGER.entry(http);
-		http
-			.exceptionHandling()
-				.authenticationEntryPoint(spnegoEntryPoint())
-				.and()
-			.authorizeRequests()
-				.antMatchers("/", "/home").permitAll().antMatchers("/api/admin/**").authenticated().antMatchers("/api/data/**").authenticated()
-				.anyRequest().authenticated()
-				.and()
-			.formLogin()
-				.loginPage("/login").permitAll()
-				.and()
-			.logout()
-				.permitAll()
-				.and()
-			.addFilterBefore(
-					spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
-					BasicAuthenticationFilter.class);
+		http.
+		exceptionHandling().authenticationEntryPoint(spnegoEntryPoint()).and().authorizeRequests()
+				.antMatchers("/", "/home").permitAll()
+				.antMatchers("/admin/**").authenticated().antMatchers("/data/**").authenticated()
+				.anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll().and().logout()
+				.permitAll().and().addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
+						BasicAuthenticationFilter.class);
 		LOGGER.exit();
 	}
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		LOGGER.entry(auth);
-		auth
-//			.authenticationProvider(activeDirectoryLdapAuthenticationProvider())
-			.authenticationProvider(kerberosServiceAuthenticationProvider());
+		auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
+				.authenticationProvider(kerberosServiceAuthenticationProvider());
 		LOGGER.exit();
 	}
 
 	@Bean
 	public SpnegoEntryPoint spnegoEntryPoint() {
 		LOGGER.entry();
-		SpnegoEntryPoint spnegoEntryPoint = new SpnegoEntryPoint("/login");
+		SpnegoEntryPoint spnegoEntryPoint = new SpnegoEntryPoint();
 		LOGGER.exit(spnegoEntryPoint);
 		return spnegoEntryPoint;
 	}
@@ -220,8 +206,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		LOGGER.exit(loginConfig);
 		return loginConfig;
 	}
-	
-	//@Autowired
+
+	// @Autowired
 	private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		// auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
 		// auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
