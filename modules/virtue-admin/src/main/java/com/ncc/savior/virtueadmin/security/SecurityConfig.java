@@ -131,17 +131,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		LOGGER.entry(http);
-		http.
-		exceptionHandling().authenticationEntryPoint(spnegoEntryPoint()).and().authorizeRequests()
-				.antMatchers("/").authenticated()
-				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
-				.antMatchers("/desktop/**").hasRole(USER_ROLE)
-				.antMatchers("/data/**").permitAll()
-				.anyRequest().authenticated().and()
-				.formLogin().loginPage("/login").permitAll().and()
-				.logout()
-				.permitAll().and().addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
+		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
+			http.addFilterAt(new HeaderFilter(), AbstractPreAuthenticatedProcessingFilter.class);
+			printDevModuleWarning(authModuleName);
+		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
+			http.addFilterAt(new SingleUserFilter(env), AbstractPreAuthenticatedProcessingFilter.class);
+			printDevModuleWarning(authModuleName);
+		}
+		
+		http.exceptionHandling().authenticationEntryPoint(spnegoEntryPoint()).accessDeniedHandler(getAccessDeniedHandler()).and().authorizeRequests().antMatchers("/")
+				.authenticated().antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**")
+				.hasRole(USER_ROLE).antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
+				.loginPage("/login").permitAll().and().logout().permitAll().and()
+				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
+		
+		if (forceHttps) {
+			// sets port mapping for insecure to secure. Although this line isn't necessary
+			// as it has 8080:8443 and 80:443 by default
+			http.portMapper().http(8080).mapsTo(8443);
+			// causes all requests to need to be over https.
+			http.requiresChannel().anyRequest().requiresSecure();
+		}
 		LOGGER.exit();
 	}
 
@@ -213,7 +224,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return loginConfig;
 	}
 
-	// @Autowired
+	@Autowired
 	private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		// auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
 		// auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
@@ -229,35 +240,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
 			auth.authenticationProvider(new PassThroughAuthenticationProvider());
 		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_ACTIVEDIRECTORY)) {
-			auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider());
-		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_LDAP)) {
-			auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
+			// auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider());
 		} else {
 			throw new SaviorException(-1,
 					"Configuration error!  Need to set 'savior.security.authentication' in security property file");
-		}
-	}
-
-	protected void oldconfigure(HttpSecurity http) throws Exception {
-		// http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll();
-		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
-			http.addFilterAt(new HeaderFilter(), AbstractPreAuthenticatedProcessingFilter.class);
-			printDevModuleWarning(authModuleName);
-		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
-			http.addFilterAt(new SingleUserFilter(env), AbstractPreAuthenticatedProcessingFilter.class);
-			printDevModuleWarning(authModuleName);
-		}
-		// Set what roles are required to view each urls
-		http.authorizeRequests().antMatchers("/desktop/**").hasRole("USER").antMatchers("/admin2/**").hasRole("ADMIN")
-				.antMatchers("/").permitAll();
-		http.exceptionHandling().accessDeniedHandler(getAccessDeniedHandler());
-
-		if (forceHttps) {
-			// sets port mapping for insecure to secure. Although this line isn't necessary
-			// as it has 8080:8443 and 80:443 by default
-			http.portMapper().http(8080).mapsTo(8443);
-			// causes all requests to need to be over https.
-			http.requiresChannel().anyRequest().requiresSecure();
 		}
 	}
 
