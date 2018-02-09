@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { VirtueModel } from '../../shared/models/virtue.model';
+import { Virtue } from '../../shared/models/virtue.model';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { JsonFilterPipe } from '../../shared/json-filter.pipe';
 import { CountFilterPipe } from '../../shared/count-filter.pipe';
@@ -46,7 +46,7 @@ export class VirtueListComponent implements OnInit {
   ngOnInit() {
     this.virtuesService.getVirtues()
       .subscribe(
-        virtueList => {this.virtues = virtueList} 
+        virtueList => {this.virtues = virtueList}
       );
   }
 

@@ -2,8 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
-import { VirtueModel } from '../../shared/models/virtue.model';
+import { Virtue } from '../../shared/models/virtue.model';
+import { Application } from '../../shared/models/application.model';
 import { VirtuesService } from '../../shared/services/virtues.service';
+import { VirtualMachineService } from '../../shared/services/vm.service';
 
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
@@ -14,19 +16,21 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
   selector: 'app-edit-virtue',
   templateUrl: './edit-virtue.component.html',
   styleUrls: ['./edit-virtue.component.css'],
-  providers: [ VirtuesService ]
+  providers: [ VirtuesService, VirtualMachineService ]
 })
 
 export class EditVirtueComponent implements OnInit {
 
-  @Input() virtue: VirtueModel;
+  @Input() virtue: Virtue;
+  @Input() appVm: Application;
   virtueData = [];
-  // virtue: { id: string, name: string }[] = [];
+  virtueVmList = [];
   virtueId : { id: string };
 
   constructor(
     private route: ActivatedRoute,
     private virtuesService: VirtuesService,
+    private vmService: VirtualMachineService,
     private location: Location,
     public dialog: MatDialog
   ) {}
@@ -36,14 +40,18 @@ export class EditVirtueComponent implements OnInit {
       id: this.route.snapshot.params['id']
     };
     this.getThisVirtue();
-    // console.log('Virtue: ' + this.virtues );
   }
 
   getThisVirtue() {
     const id = this.virtueId.id;
-    return this.virtuesService.getVirtue(id)
-      .subscribe( data => this.virtueData = data );
+    this.virtuesService.getVirtue(id).subscribe(
+      data => { this.virtueData = data }
+    );
+    this.virtueVmList = this.virtueData['vmTemplates'];
+
+    console.log(this.virtueVmList);
   }
+
 
   activateModal(id): void {
     let dialogRef = this.dialog.open(VmModalComponent, {

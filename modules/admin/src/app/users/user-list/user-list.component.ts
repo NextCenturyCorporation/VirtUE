@@ -1,14 +1,12 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+
+import { User } from '../../shared/models/user.model';
+import { UsersService } from '../../shared/services/users.service';
+
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-
-import { UserModel } from '../../shared/models/user.model';
-import { UsersService } from '../../shared/services/users.service';
-// import { JsonFilterPipe } from '../../shared/json-filter.pipe';
-// import { CountFilterPipe } from '../../shared/count-filter.pipe';
-
-import { Observable } from 'rxjs/Observable';
-
 
 @Component({
   selector: 'app-user-list',
@@ -17,17 +15,30 @@ import { Observable } from 'rxjs/Observable';
   providers: [ UsersService ]
 })
 export class UserListComponent implements OnInit {
-
-  @Output() selectedUser = new EventEmitter<UserModel>();
+  @Input() user: User;
 
   saviorUsers: string;
   appUserList = [];
 
-  // constructor( private dataService: DataService ){}
   constructor(
+    private route: ActivatedRoute,
     private usersService: UsersService,
+    private location: Location,
     public dialog: MatDialog
   ) {}
+
+  ngOnInit(){
+    this.getUsers();
+  }
+
+  getUsers(): void {
+    this.usersService.listUsers().subscribe(appUsers => this.appUserList = appUsers);
+    // this.appUserList = this.usersService.listUsers();
+  }
+
+  onSelected(id) {
+
+  }
 
   openDialog(id,type,text): void {
 
@@ -44,20 +55,6 @@ export class UserListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog to delete {{data.dialogText}} was closed');
     });
-  }
-
-  getUsers(): void {
-    this.usersService.listUsers().subscribe(appUsers => this.appUserList = appUsers);
-    // this.appUserList = this.usersService.listUsers();
-  }
-
-  onSelected(id) {
-    this.usersService.selectedUser.emit(id);
-    console.log(id);
-  }
-
-  ngOnInit(){
-    this.getUsers();
   }
 
 }

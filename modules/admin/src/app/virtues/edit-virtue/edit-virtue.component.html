@@ -19,8 +19,7 @@
 
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
-                {{ virtueData.name }}
-                <!-- <input type="text" placeholder="Virtue Name" /> -->
+                <input type="text" [(value)]="virtueData.name" placeholder="Virtue Name" />
                 <br />
                 <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ virtueId.id }}</span>
               </div>
@@ -32,32 +31,38 @@
               </div>
             </div>
             <!-- if there are no virtue, show this message -->
-            <div class="mui-row margin-top-10">
+            <div *ngIf="" class="mui-row margin-top-10">
               <div class="mui-col-md-12">
                 <p class="no-data-message">
                   No virtual machines are attached this virtue. To add VM(s), click on the button "Add VM".
                 </p>
               </div>
             </div>
-            <!-- if there are virtue machines, show this list -->
-            <div class="mui-container-fluid data-list">
+            <!-- if there are virtual machines, show this list -->
+            <div *ngIf="(virtueData.vmTemplates)" class="mui-container-fluid data-list">
               <div class="mui-row table-header-group">
-                <div class="table-header mui-col-md-5">Virtual Machine</div>
-                <div class="table-header mui-col-md-2">Image Size</div>
-                <div class="table-header mui-col-md-5">Applications</div>
+                <div class="table-header mui-col-md-5">Application VM</div>
+                <div class="table-header mui-col-md-2">OS</div>
+                <div class="table-header mui-col-md-3">Applications</div>
+                <div class="table-header mui-col-md-2">Enabled</div>
               </div>
-              <div class="mui-row table-row">
+              <div class="mui-row table-row" *ngFor="let vm of virtueData.vmTemplates">
                 <div class="table-data mui-col-md-5">
-                  <a mat-button (click)="activateModal(1)">[ Virtual Machine ]</a>
-                  <span class="active virtue-options">
-                    <a (click)="activateModal('1')">Edit</a> | <a href="#">Disable</a>
+                  <a mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
+                  <span [ngClass]="vm.enabled ? 'active menu-options' : 'menu-options'">
+                    <a (click)="activateModal(vm.id)">Edit</a> | <a href="#">Disable</a>
                   </span>
-                  <span class="active virtue-options">
-                    <a (click)="activateModal(1)">Edit</a> | <a href="#">Remove</a>
+                  <span [ngClass]="vm.enabled ? 'menu-options' : 'active menu-options'">
+                    <a (click)="activateModal(vm.id)">Edit</a> | <a href="#">Remove</a>
                   </span>
                 </div>
-                <div class="table-data mui-col-md-2"># mb</div>
-                <div class="table-data mui-col-md-5">List of Apps</div>
+                <div class="table-data mui-col-md-2">{{ vm.os }} </div>
+                <div class="table-data mui-col-md-3">
+                  <ul class="padding-left-5">
+                    <li *ngFor="let app of vm.applications">{{ app.name }}</li>
+                  </ul>
+                </div>
+                <div class="table-data mui-col-md-2">{{ vm.enabled ? 'Enabled':'Disabled' }} </div>
                 <div class="clearfix"></div>
               </div>
             </div>

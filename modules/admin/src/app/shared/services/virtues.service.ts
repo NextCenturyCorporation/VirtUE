@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { VirtueModel } from '../models/virtue.model';
+import { Virtue } from '../models/virtue.model';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type':'application/json' })
@@ -15,38 +15,34 @@ const httpHeader = {
 
 export class VirtuesService {
 
-  // private jsondata = 'http://localhost:8080/admin/virtue/template';
-  private jsondata = './assets/json/virtue_list.json';
+  private jsondata = 'http://localhost:8080/admin/virtue/template';
+  // private jsondata = './assets/json/virtue_list.json';
 
   constructor( private httpClient: HttpClient ) {  }
 
-  public getVirtues(): Observable<Array<VirtueModel>> {
-    return this.httpClient.get<Array<VirtueModel>>(this.jsondata);
+  public getVirtues(): Observable<Array<Virtue>> {
+    return this.httpClient.get<Array<Virtue>>(this.jsondata);
   }
 
-  public getVirtue(id: string): Observable<VirtueModel> {
-    // return this.httpClient.get<VirtueModel>(`${this.jsondata}/${id}`);
-    const url = `${this.jsondata}/${id}`;
-    return this.httpClient.get<VirtueModel>(url).pipe(
-      tap(_ => console.log(`fetched virtue id=${id}`)),
-      catchError(this.handleError<VirtueModel>(`getVirtue id=${id}`))
-    );
+  public getVirtue(id: string): Observable<any> {
+    const src = `${this.jsondata}/${id}`;
+    return this.httpClient.get<Virtue>(src);
   }
 
-  // public createVirtue(virtue: any[]): Observable<VirtueModel> {
-  //   return this.httpClient.post<VirtueModel>(this.jsondata, virtue);
+  // public createVirtue(virtue: any[]): Observable<Virtue> {
+  //   return this.httpClient.post<Virtue>(this.jsondata, virtue);
   // }
 
-  public createVirtue(virtue: VirtueModel) {
+  public createVirtue(virtue: Virtue) {
     return this.httpClient.post( this.jsondata, virtue );
   }
 /**
-  public deleteVirtue(virtue: VirtueModel): Observable<VirtueModel> {
-    return this.httpClient.delete<VirtueModel>(`${this.jsondata}/${virtue.id}`);
+  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
+    return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
   }
 
-  public update(virtue: VirtueModel): Observable<VirtueModel> {
-    return this.httpClient.put<VirtueModel>(`${this.jsondata}/${virtue.id}`,virtue);
+  public update(virtue: Virtue): Observable<Virtue> {
+    return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
   }
 */
   /**

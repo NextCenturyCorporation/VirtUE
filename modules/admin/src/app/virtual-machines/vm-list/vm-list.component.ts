@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { JsondataService } from '../../shared/services/jsondata.service';
+import { VirtualMachineService } from '../../shared/services/vm.service';
 import { JsonFilterPipe } from '../../shared/json-filter.pipe';
 import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 @Component({
   selector: 'app-vm-list',
-  providers: [ JsondataService ],
+  providers: [ VirtualMachineService ],
   templateUrl: './vm-list.component.html',
   styleUrls: ['./vm-list.component.css']
 })
@@ -16,15 +16,18 @@ export class VmListComponent implements OnInit {
   vms = [];
   vmLength : number;
 
-  constructor( private jsondataService: JsondataService ) { }
+  constructor( private vmService: VirtualMachineService ) { }
 
   ngOnInit() {
-    this.jsondataService.getJSON('vms')
-    .subscribe(resJsonData => this.vms = resJsonData);
+    this.getVmList();
+  }
 
-    this.vmLength = this.vms.length;
+  getVmList() {
+    this.vmService.getVmList()
+      .subscribe(vmlist => this.vms = vmlist);
   }
-  addVM(name: string, status: string) {
-    this.vms.push({name: name, status: status});
-  }
+
+  // addVM(name: string, status: string) {
+  //   this.vms.push({name: name, status: status});
+  // }
 }

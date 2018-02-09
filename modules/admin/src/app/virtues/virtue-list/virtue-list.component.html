@@ -36,10 +36,10 @@
           <div class="table-data mui-col-md-3">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
             <!-- if this virtue is enabled show this menu -->
-            <span class="active virtue-options">Duplicate | <a mat-button (click)="openDialog('virtue.id','disable')">Disable</a> | Export</span>
+            <span [ngClass]="virtue.enabled ? 'active menu-options':'menu-options'">Duplicate | <a mat-button (click)="openDialog('virtue.id','disable')">Disable</a> | Export</span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span class="active virtue-options">Enable | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
+            <span [ngClass]="virtue.enabled ? 'menu-options':'active menu-options'">Enable | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
           </div>
 
           <div class="table-data mui-col-md-2">{{ virtue.vmTemplates[0].os }} </div>
@@ -47,7 +47,10 @@
              <span [ngStyle]="{'margin-left':0}" *ngFor="let app of virtue.applications">{{ app.name }}</span>
           </div>
           <div class="table-data mui-col-md-2">{{virtue.lastEditor}}</div>
-          <div class="table-data mui-col-md-2">{{virtue.enabled? 'Enabled' : 'Disabled'}}<br />{{virtue.lastModification}}</div>
+          <div class="table-data mui-col-md-2">
+            {{virtue.enabled? 'Enabled' : 'Disabled'}}<br />
+            {{virtue.lastModification}}
+          </div>
           <div class="clearfix"></div>
         </div>
       </div>

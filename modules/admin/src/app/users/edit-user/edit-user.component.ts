@@ -3,7 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 
-import { UserModel } from '../../shared/models/user.model';
+import { User } from '../../shared/models/user.model';
 import { UsersService } from '../../shared/services/users.service';
 
 import { Observable } from 'rxjs/Observable';
@@ -21,9 +21,8 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 })
 
 export class EditUserComponent implements OnInit {
-  @Input() appUserById : UserModel;
+  @Input() user: User;
 
-  appUser: string;
   saviorUserId: {id:number};
   screenWidth: any;
   leftPosition: any;
@@ -33,7 +32,8 @@ export class EditUserComponent implements OnInit {
 
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
-  activeDirUsers=[];
+  activeDirUsers = [];
+  appUser = [];
 
   constructor(
     public dialog: MatDialog,
@@ -55,7 +55,32 @@ export class EditUserComponent implements OnInit {
       id: this.router.snapshot.params['id']
     };
     // this.getAdUsers();
-    this.getAppUser(this.saviorUserId.id);
+    this.getThisUser(this.saviorUserId.id);
+  }
+
+  getThisUser() {
+    const id = this.saviorUserId.id;
+    const vms = [];
+    const apps = [];
+
+    // Use this for local values
+    this.appUser = this.usersService.getLocalObj(id);
+
+    // Use this when you connect to AWS
+    // this.usersService.getUser(id).subscribe(
+    //   data => { this.appUser = data }
+    // );
+    // console.log(this.appUser.name);
+  }
+
+  getAdUsers(): void {
+    // Gets AD user for autocomplete field
+    this.usersService.getAdUsers().subscribe(adUsers => this.activeDirUsers = adUsers);
+  }
+
+  filterUsers(username: string) {
+    return this.activeDirUsers.filter(adUser =>
+      adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
   }
 
   activateModal(id,mode): void {
@@ -88,21 +113,4 @@ export class EditUserComponent implements OnInit {
     dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
     // dialogRef.afterClosed().subscribe();
   }
-
-  getAppUser(appUserId) {
-    console.log(appUserId);
-    // this.usersService.getUser(id).subscribe(appUser => this.appUser = appUser);
-    this.usersService.getUser(appUserId).subscribe(appUser => this.appUser = appUser);
-  }
-
-  getAdUsers(): void {
-    // Gets AD user for autocomplete field
-    this.usersService.getAdUsers().subscribe(adUsers => this.activeDirUsers = adUsers);
-  }
-
-  filterUsers(username: string) {
-    return this.activeDirUsers.filter(adUser =>
-      adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
-  }
-
 }

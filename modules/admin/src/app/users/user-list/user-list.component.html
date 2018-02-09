@@ -42,7 +42,11 @@
               <a href="#">Enable</a> | <a class="edit" (click)="openDialog(su.id,'delete','user account')">Delete</a>
             </span>
           </div>
-          <div class="table-data mui-col-md-7">{{ su.virtues }}</div>
+          <div class="table-data mui-col-md-7">
+            <ul>
+              <li *ngFor="let virtue of su.virtues">{{ virtue.name }}</li>
+            </ul>
+          </div>
           <div class="table-data mui-col-md-2">{{ su.status}}<br />{{ su.modifiedDate}}</div>
           <div class="clearfix"></div>
         </div>

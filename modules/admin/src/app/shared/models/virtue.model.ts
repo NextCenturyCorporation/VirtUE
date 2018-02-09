@@ -1,26 +1,27 @@
-import { ApplicationModel } from './virtualmachine.model';
+import { Application } from './application.model';
+import { VirtualMachine } from './vm.model';
 
-export class VirtueModel {
+export class Virtue {
   id: string;
   name: string;
   version: string;
-  vmTemplates: ApplicationModel[];
+  vmTemplates: VirtualMachine[];
   enabled: boolean;
   lastModification: string;
   lastEditor: string;
   awsTemplateName: string;
-  applications: string;
+  applications: Application[];
 
   public VirtueTemplate(
     id: string,
     name: string,
     version: string,
-    vmTemplates: ApplicationModel[],
+    vmTemplates: VirtualMachine[],
     enabled: boolean,
     lastModification: string,
     lastEditor: string,
     awsTemplateName:string,
-    applications: string
+    applications: Application[]
   ) {
 		this.id = id;
 		this.name = name;

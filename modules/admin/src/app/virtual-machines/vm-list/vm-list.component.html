@@ -9,7 +9,7 @@
     <div id="content">
       <div class="mui-container-fluid">
         <!-- if there are no virtues, show this message -->
-        <div *ngIf="noListData" class="mui-row margin-top-10">
+        <div class="mui-row margin-top-10">
           <div class="mui-col-md-12 padding-left-0">
             <p class="no-data-message">
               No virtual machines have been built at this time. To build a virtual machine, click on the button "Build VM" above.
@@ -28,25 +28,31 @@
         <div class="mui-row table-header-group">
           <div class="table-header mui-col-md-4">Virtual Machine Name</div>
           <div class="table-header mui-col-md-2">OS</div>
-          <div class="table-header mui-col-md-2">Linked Virtues</div>
-          <div class="table-header mui-col-md-2">Created By</div>
-          <div class="table-header mui-col-md-2">Date</div>
+          <div class="table-header mui-col-md-2">Applications</div>
+          <div class="table-header mui-col-md-2">Last Modified By</div>
+          <div class="table-header mui-col-md-2">Modified Date</div>
         </div>
         <div *ngFor="let vm of vms" class="mui-row table-row">
           <div class="table-data mui-col-md-4">
             <div class="mini-menu">
-              <a class="edit" [routerLink]="['edit',vm.vm_id]">{{ vm.vm_name }}</a>
+              <a class="edit" [routerLink]="['edit',vm.vm_id]">{{ vm.name }}</a>
               <!-- if this virtue is enabled show this menu -->
-              <span class="menu-options"><a mat-button (click)="openDialog(vm.vm_id,'disable','Virtual Machine')">Disable</a> | Duplicate | Export</span>
+              <span class="menu-options"><a mat-button (click)="openDialog(vm.id,'disable','Virtual Machine')">Disable</a> | Duplicate | Export</span>
 
               <!-- if this virtue is disabled show this menu -->
-              <span class="menu-options">Enable | <a mat-button (click)="openDialog('vm.vm_id','delete','Virtual Machine')">Delete</a></span>
+              <span class="menu-options">Enable | <a mat-button (click)="openDialog('vm.id','delete','Virtual Machine')">Delete</a></span>
           </div>
           </div>
-          <div class="table-data mui-col-md-2">{{ vm.vm_os }}</div>
-          <div class="table-data mui-col-md-2">{{ vm.vm_packages }}</div>
-          <div class="table-data mui-col-md-2">[Created By]</div>
-          <div class="table-data mui-col-md-2">{{ vm.vm_status }}<br />{{ vm.vm_timestamp }}</div>
+          <div class="table-data mui-col-md-2">{{ vm.os }}</div>
+          <div class="table-data mui-col-md-2">
+            <ul>
+              <ng-container *ngFor="let app of vm.applications; let i=index">
+              <li>{{ app.name }}</li>
+              </ng-container>
+            </ul>
+          </div>
+          <div class="table-data mui-col-md-2">{{ vm.lastEditor }}</div>
+          <div class="table-data mui-col-md-2">{{ vm.enabled }}<br />{{ vm.modifiedDate }}</div>
           <div class="clearfix"></div>
         </div>
       </div>

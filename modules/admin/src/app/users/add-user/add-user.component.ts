@@ -30,6 +30,7 @@ export class AddUserComponent implements OnInit {
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
   activeDirUsers=[];
+  virtues: Virtue[];
 
   constructor(
     public dialog: MatDialog,
