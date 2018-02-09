@@ -79,6 +79,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	private static final String PROPERTY_AUTH_MODULE = "savior.security.authentication";
+	private static final String ADMIN_ROLE = "ADMIN";
+	private static final String USER_ROLE = "USER";
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -131,9 +133,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		LOGGER.entry(http);
 		http.
 		exceptionHandling().authenticationEntryPoint(spnegoEntryPoint()).and().authorizeRequests()
-				.antMatchers("/", "/home").permitAll()
-				.antMatchers("/admin/**").authenticated().antMatchers("/data/**").authenticated()
-				.anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll().and().logout()
+				.antMatchers("/").authenticated()
+				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+				.antMatchers("/desktop/**").hasRole(USER_ROLE)
+				.antMatchers("/data/**").permitAll()
+				.anyRequest().authenticated().and()
+				.formLogin().loginPage("/login").permitAll().and()
+				.logout()
 				.permitAll().and().addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
 		LOGGER.exit();

@@ -22,4 +22,13 @@ public class HelloResource {
 		
 		return Response.status(200).entity("Hello World "+user.getUsername()).build();
 	}
+	
+	@GET
+	@Path("/login")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getLogin() throws URISyntaxException {
+		User user = UserService.getCurrentUser();
+		
+		return Response.status(200).entity("Hello World "+user.getUsername()).build();
+	}
 }
