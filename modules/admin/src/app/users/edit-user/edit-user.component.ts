@@ -55,16 +55,16 @@ export class EditUserComponent implements OnInit {
       id: this.router.snapshot.params['id']
     };
     this.getAdUsers();
-    this.getThisUser(this.saviorUserId.id);
+    // this.getThisUser(this.saviorUserId.id);
   }
 
   getThisUser() {
     const id = this.saviorUserId.id;
 
     // Use this when you connect to AWS
-    this.usersService.getUser(id).subscribe(
-      data => { this.appUser = data }
-    );
+    // this.usersService.getUser(id).subscribe(
+    //   data => { this.appUser = data }
+    // );
     // console.log(this.appUser.name);
   }
 

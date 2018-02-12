@@ -5,7 +5,6 @@ import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Application } from '../models/application.model';
 import { VirtualMachine } from '../models/vm.model';
 
 const httpHeader = {
@@ -23,26 +22,35 @@ export class VirtualMachineService {
 
   public getVmList(): Observable<Array<VirtualMachine>> {
     return this.httpClient.get<Array<VirtualMachine>>(this.jsondata);
-    
   }
 
-  public getVm(id: string): Observable<any> {
+  public getVM(id: string): Observable<any> {
     const src = `${this.jsondata}/${id}`;
     return this.httpClient.get<VirtualMachine>(src);
   }
 
-  public getApps(id: string): Observable<any> {
-    const src = `${this.jsondata}/${id}`;
-    return this.httpClient.get<Application>(src);
-  }
-  // public createVirtue(vm: ApplicationModel): Observable<ApplicationModel> {
-  //   return this.httpClient.post<ApplicationModel>(this.jsondata, vm);
+  // public createVirtue(virtue: any[]): Observable<Virtue> {
+  //   return this.httpClient.post<Virtue>(this.jsondata, virtue);
   // }
 
-  public createVM(vm: VirtualMachine) {
+  public createVirtue(vm: VirtualMachine) {
     return this.httpClient.post( this.jsondata, vm );
   }
+/**
+  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
+    return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
+  }
 
+  public update(virtue: Virtue): Observable<Virtue> {
+    return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
+  }
+*/
+  /**
+   * Handle Http operation that failed.
+   * Let the app continue.
+   * @ param operation - name of the operation that failed
+   * @ param result - optional value to return as the observable result
+   */
   private handleError<T> (operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
 
