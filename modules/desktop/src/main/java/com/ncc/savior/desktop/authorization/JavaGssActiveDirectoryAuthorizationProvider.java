@@ -107,7 +107,7 @@ public class JavaGssActiveDirectoryAuthorizationProvider implements IActiveDirec
 	}
 
 	@Override
-	public byte[] getCurrentToken() {
+	public byte[] getCurrentToken(String principal) {
 		// TODO Auto-generated method stub
 		return null;
 	}

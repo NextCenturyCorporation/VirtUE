@@ -16,7 +16,7 @@ public class DummyAuthentication implements IActiveDirectoryAuthorizationProvide
 	}
 
 	@Override
-	public byte[] getCurrentToken() {
+	public byte[] getCurrentToken(String principal) {
 		return null;
 	}
 

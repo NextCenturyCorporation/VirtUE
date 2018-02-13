@@ -18,7 +18,7 @@ public class AuthorizationService {
 
 	public AuthorizationService(String requiredDomain, boolean dummySecurity) {
 		this.requiredDomain = requiredDomain;
-		if (this.requiredDomain.equals("")) {
+		if (this.requiredDomain != null && this.requiredDomain.equals("")) {
 			this.requiredDomain = null;
 		}
 		this.dummySecurity = dummySecurity;
@@ -74,7 +74,7 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser login(String domain, String username, String password) {
-		if (requiredDomain != null && requiredDomain.equals(domain)) {
+		if (requiredDomain == null || requiredDomain.equals(domain)) {
 			return authProvider.login(domain, username, password);
 		} else {
 			String msg = "Cannot login.  Domain (" + domain + ") is not the required domain (" + requiredDomain + ")";
