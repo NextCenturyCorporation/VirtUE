@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 
-import { JsondataService } from '../../shared/services/jsondata.service';
+import { UsersService } from '../../shared/services/users.service';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 export class AdUsers {
@@ -16,7 +16,8 @@ export class AdUsers {
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
-  styleUrls: ['./add-user.component.css']
+  styleUrls: ['./add-user.component.css'],
+  providers: [ UsersService ]
 })
 
 export class AddUserComponent implements OnInit {
@@ -33,7 +34,7 @@ export class AddUserComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
-    private jsondataService: JsondataService
+    private usersService: UsersService
   ) {
     this.adUserCtrl = new FormControl();
     this.filteredUsers = this.adUserCtrl.valueChanges
@@ -78,8 +79,12 @@ export class AddUserComponent implements OnInit {
 
   }
   // Gets AD user for autocomplete field
-  getJSON(src): void {
-    this.jsondataService.getJSON('adUsers').subscribe(adUsers => this.activeDirUsers = adUsers);
+  getUsers() {
+    this.usersService.getUsers().subscribe(
+      adUsers => {
+        this.activeDirUsers = adUsers;
+      }
+    );
   }
   // filters the AD list as you type
   filterUsers(username: string) {

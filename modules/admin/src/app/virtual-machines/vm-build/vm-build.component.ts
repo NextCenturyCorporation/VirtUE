@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { JsondataService } from '../../shared/services/jsondata.service';
+import { VirtualMachineService } from '../../shared/services/vm.service';
 
 @Component({
   selector: 'app-vm-build',
   templateUrl: './vm-build.component.html',
-  styleUrls: ['./vm-build.component.css']
+  styleUrls: ['./vm-build.component.css'],
+  providers: [ VirtualMachineService ]
 })
 export class VmBuildComponent implements OnInit {
   osValue: string;
@@ -19,16 +20,16 @@ export class VmBuildComponent implements OnInit {
   ];
 
   constructor(
-    private jsondataService: JsondataService
+    private vmService: VirtualMachineService
   ) { }
 
   ngOnInit() {
   }
 
   onBuildVM(name,os,packages) {
-    const buildDate: Date = new Date();
-    const pkgs = packages.replace(/\n/g,'|');
-    const vmFields='{"vm_name":"'+name+'"},{"vm_os":"'+os+'"},{"vm_packages":"'+pkgs+'"},{"vm_timestamp":"'+buildDate+'"},{"vm_status":"disabled"}';
+    // const buildDate: Date = new Date();
+    // const pkgs = packages.replace(/\n/g,'|');
+    // const vmFields='{"vm_name":"'+name+'"},{"vm_os":"'+os+'"},{"vm_packages":"'+pkgs+'"},{"vm_timestamp":"'+buildDate+'"},{"vm_status":"disabled"}';
     // console.log('new values: '+name+','+os+','+pkgs+','+buildDate);
     // this.jsondataService.addNewData('vms',vmFields);
   }
