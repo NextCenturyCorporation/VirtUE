@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.service;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
@@ -43,11 +44,13 @@ public class AdminService {
 	}
 
 	public VirtueTemplate getVirtueTemplate(User user, String templateId) {
-		return templateManager.getVirtueTemplate(templateId);
+		Optional<VirtueTemplate> opt = templateManager.getVirtueTemplate(templateId);
+		return opt.isPresent() ? opt.get() : null;
 	}
 
 	public VirtualMachineTemplate getVmTemplate(User user, String templateId) {
-		return templateManager.getVmTemplate(templateId);
+		Optional<VirtualMachineTemplate> opt = templateManager.getVmTemplate(templateId);
+		return opt.isPresent() ? opt.get() : null;
 	}
 
 	public VirtueInstance getActiveVirtue(User user, String virtueId) {
@@ -55,7 +58,8 @@ public class AdminService {
 	}
 
 	public ApplicationDefinition getApplicationDefinition(User user, String templateId) {
-		return templateManager.getApplicationDefinition(templateId);
+		Optional<ApplicationDefinition> opt = templateManager.getApplicationDefinition(templateId);
+		return opt.isPresent() ? opt.get() : null;
 	}
 
 	public VirtueTemplate createNewVirtueTemplate(User user, VirtueTemplate template) {

@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.virtue;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -91,7 +92,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	@Override
 	public void deleteVirtue(User user, String instanceId) {
-		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId);
+		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
@@ -111,6 +112,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	@Override
 	public VirtueInstance getActiveVirtue(String virtueId) {
-		return virtueDao.getVirtueInstance(virtueId);
+		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
+		return opt.isPresent() ? opt.get() : null;
 	}
 }

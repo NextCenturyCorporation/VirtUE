@@ -30,13 +30,19 @@ public class DummyAuthentication implements IActiveDirectoryAuthorizationProvide
 	}
 
 	@Override
-	public byte[] getCurrentToken() {
+	public byte[] getCurrentToken(String principal) {
 		return null;
 	}
 
 	@Override
 	public void logout() {
 		// do nothing
+	}
+
+	@Override
+	public String getAuthorizationTicket(String spn) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

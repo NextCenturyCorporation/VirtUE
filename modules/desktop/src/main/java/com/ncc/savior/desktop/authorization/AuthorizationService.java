@@ -18,6 +18,9 @@ public class AuthorizationService {
 
 	public AuthorizationService(String requiredDomain, boolean dummySecurity) {
 		this.requiredDomain = requiredDomain;
+		if (this.requiredDomain != null && this.requiredDomain.equals("")) {
+			this.requiredDomain = null;
+		}
 		this.dummySecurity = dummySecurity;
 		this.os = getOs();
 		this.authProvider = createAuthProvider();
@@ -63,11 +66,15 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser getUser() {
-		return authProvider.getCurrentUser();
+		DesktopUser user = authProvider.getCurrentUser();
+		if (requiredDomain != null && !requiredDomain.toUpperCase().equals(user.getDomain().toUpperCase())) {
+			return null;
+		}
+		return user;
 	}
 
 	public DesktopUser login(String domain, String username, String password) {
-		if (requiredDomain != null && requiredDomain.equals(domain)) {
+		if (requiredDomain == null || requiredDomain.equals(domain)) {
 			return authProvider.login(domain, username, password);
 		} else {
 			String msg = "Cannot login.  Domain (" + domain + ") is not the required domain (" + requiredDomain + ")";
@@ -81,6 +88,10 @@ public class AuthorizationService {
 
 	public String getRequiredDomain() {
 		return requiredDomain;
+	}
+
+	public String getAuthorizationTicket(String targetHost) {
+		return authProvider.getAuthorizationTicket(targetHost);
 	}
 
 }

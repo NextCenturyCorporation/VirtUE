@@ -33,12 +33,16 @@ public interface IActiveDirectoryAuthorizationProvider {
 	 *
 	 * @return
 	 */
-	byte[] getCurrentToken();
+	byte[] getCurrentToken(String serverPrinc);
 
 	/**
 	 * Attempt to logout of the current user. This is not guaranteed to log out
 	 * particularly in cases where the user is logged into the OS itself.
 	 */
 	void logout();
+
+	String getAuthorizationTicket(String targetHost);
+
+
 
 }

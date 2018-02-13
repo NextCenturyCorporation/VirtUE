@@ -2,10 +2,11 @@ package com.ncc.savior.virtueadmin.rest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
@@ -109,28 +110,28 @@ public class DataResource {
 				"LibreOffice", OS.LINUX, "LibreOffice", appsLibreOffice, true, now, systemName);
 
 
-		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		String allTemplate = "default-template";
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue",
 				"1.0", vmtsSingleAll, allTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue", "1.0",
 				vmtsBrowsers, allTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsLibre = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsLibre = new HashSet<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
 		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0",
 				vmtsLibre, allTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsDrawing = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsDrawing = new HashSet<VirtualMachineTemplate>();
 		vmtsDrawing.add(vmDrawing);
 		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Artist Virtue", "1.0",
 				vmtsDrawing, allTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsMath = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsMath = new HashSet<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0",
 				vmtsMath, allTemplate, true, now, systemName);

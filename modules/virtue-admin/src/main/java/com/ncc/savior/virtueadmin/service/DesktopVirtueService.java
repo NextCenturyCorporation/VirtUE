@@ -71,7 +71,7 @@ public class DesktopVirtueService {
 
 	public DesktopVirtueApplication startApplication(User user, String virtueId, String applicationId)
 			throws IOException {
-		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId);
+		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
 		applicationManager.startApplicationOnVm(vm, application, 5);

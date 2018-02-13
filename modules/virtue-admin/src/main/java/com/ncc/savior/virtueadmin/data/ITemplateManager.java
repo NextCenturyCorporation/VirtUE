@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
@@ -75,6 +76,7 @@ public interface ITemplateManager {
 	 * 
 	 * @return
 	 */
+	
 	Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates();
 
 	Iterable<ApplicationDefinition> getAllApplications();
@@ -85,11 +87,12 @@ public interface ITemplateManager {
 	 * @param applicationId
 	 * @return
 	 */
-	ApplicationDefinition getApplicationDefinition(String applicationId);
+	Optional<ApplicationDefinition> getApplicationDefinition(String applicationId);
+//	ApplicationDefinition getApplicationDefinition(String applicationId);
 
-	VirtueTemplate getVirtueTemplate(String templateId);
+	Optional<VirtueTemplate> getVirtueTemplate(String templateId);
 
-	VirtualMachineTemplate getVmTemplate(String templateId);
+	Optional<VirtualMachineTemplate> getVmTemplate(String templateId);
 
 	/**
 	 * Adds a new {@link ApplicationDefinition} to the data store.

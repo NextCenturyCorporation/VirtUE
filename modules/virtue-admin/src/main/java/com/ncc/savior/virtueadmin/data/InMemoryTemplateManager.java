@@ -5,12 +5,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -77,7 +80,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
 				"Linux Math", appsMath, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 
 		// Let's load the cloudformation template file and store it in the virtue.
@@ -88,7 +91,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
 				"1.0", vmtsSingleAll, awsCloudformationTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
 				"1.0", vmtsBrowsers, awsCloudformationTemplate, true, now, systemName);
@@ -99,7 +102,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
 				vmts, awsCloudformationTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmsMath = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmsMath = new HashSet<VirtualMachineTemplate>();
 		vmsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
 				vmsMath, awsCloudformationTemplate, true, now, systemName);
@@ -178,8 +181,8 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public ApplicationDefinition getApplicationDefinition(String applicationId) {
-		return applications.get(applicationId);
+	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
+		return Optional.of(applications.get(applicationId));
 	}
 
 	@Override
@@ -330,12 +333,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public VirtueTemplate getVirtueTemplate(String templateId) {
+	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public VirtualMachineTemplate getVmTemplate(String templateId) {
+	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
 		throw new RuntimeException("not implemented");
 	}
 

@@ -229,6 +229,7 @@ public class Sidebar implements VirtueChangeHandler {
 				loginScreen.addLoginEventListener(new ILoginEventListener() {
 					@Override
 					public void onLoginSuccess(DesktopUser user) {
+						try {
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -240,6 +241,9 @@ public class Sidebar implements VirtueChangeHandler {
 								}
 							}
 						});
+						} catch (Throwable t) {
+							logger.debug("Error applying changes to login success.", t);
+						}
 					}
 
 					@Override
