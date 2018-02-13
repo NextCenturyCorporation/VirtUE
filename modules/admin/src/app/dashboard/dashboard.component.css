@@ -1,12 +1,7 @@
 app-dashboard {
   position: relative;
 }
-/deep/ #cdk-overlay-0 {
-  position: absolute;
-  top: 74px !important;
-  left: 75px;
-  z-index: 0;
-}
+
 .table-container {
   margin: 0 -15px 10px;
   overflow-x: hidden;
@@ -15,4 +10,7 @@ app-dashboard {
 .table-container .mui-row {
   margin-left: 0;
   margin-right: 0;
+}
+/deep/ .mat-form-field-underline {
+  display: none;
 }

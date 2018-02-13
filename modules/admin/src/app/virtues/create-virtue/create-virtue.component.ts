@@ -1,15 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
+import { VirtuesService } from '../../shared/services/virtues.service';
 
 @Component({
   selector: 'app-create-virtue',
   templateUrl: './create-virtue.component.html',
-  styleUrls: ['./create-virtue.component.css']
+  styleUrls: ['./create-virtue.component.css'],
+  providers: [ VirtuesService ]
 })
 export class CreateVirtueComponent implements OnInit {
 
-  constructor(public dialog: MatDialog) {}
+  constructor(
+    private virtuesService: VirtuesService,
+    public dialog: MatDialog
+  ) {}
 
   activateModal(id): void {
 
@@ -22,6 +27,10 @@ export class CreateVirtueComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('This modal was closed');
     });
+  }
+
+  onSave() {
+
   }
 
   ngOnInit() {

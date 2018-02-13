@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.virtue;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -107,5 +108,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	@Override
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtueDao.getAllActiveVirtues();
+	}
+
+	@Override
+	public VirtueInstance getActiveVirtue(String virtueId) {
+		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
+		return opt.isPresent() ? opt.get() : null;
 	}
 }

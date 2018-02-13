@@ -3,7 +3,7 @@
     <span class="navbar-brand">Savior VirtUE</span>
     <ul class="nav navbar-nav">
         <li *ngFor="let n of navigation" class="nav-item" routerLinkActive="active">
-          <a class="nav-link" routerLink="{{ n.link }}">{{ n.value }}</a>
+          <a class="nav-link" routerLink="{{ n.link }}" title="{{ n.value }}">{{ n.value }}</a>
         </li>
     </ul>
   </mat-toolbar>

@@ -1,0 +1,9 @@
+/deep/
+.mat-form-field-infix {
+  padding: 0;
+  border-top: none;
+}
+/deep/
+.mat-form-field-underline {
+ display: none;
+}
