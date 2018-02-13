@@ -1,7 +1,11 @@
-app-dialog-test {
+app-dashboard {
+  position: relative;
+}
+/deep/ #cdk-overlay-0 {
   position: absolute;
-  top: 0;
-  width: 100%
+  top: 74px !important;
+  left: 75px;
+  z-index: 0;
 }
 .table-container {
   margin: 0 -15px 10px;
@@ -11,12 +15,4 @@ app-dialog-test {
 .table-container .mui-row {
   margin-left: 0;
   margin-right: 0;
-}
-
-.dashboard .mat-select-panel {
-  background-color: #FFF;
-  border:1px solid #b2b2b2;
-  left:80px;
-  position: absolute;
-  top: 108px;
 }

@@ -27,7 +27,6 @@
     padding-top: 1.5rem;
     text-align: center;
   }
-
   button, button[type='submit'] {
     border-radius: 0;
     -webkit-border-radius: 0;
@@ -47,18 +46,31 @@
   }
 }
 
+mat-form-field {
+  clear: both;
+  margin-bottom: 15px;
+  width: 100%;
+  input, select {
 
-.mat-input-placeholder-wrapper {
-  position: absolute;
-  left: 0;
-  top: 0;
+  }
+}
+.mat-form-field-placeholder-wrapper {
+  top:0;
+}
+.mat-input-placeholder {
+  color: #B2B2B2;
+  padding:5px;
 }
 
-.mat-input-wrapper {
-}
 input.mat-input-element {
   border: 1px solid #b2b2b2;
   padding: 5px;
+  width: 100%;
+}
+textarea.mat-input-element {
+  border: 1px solid #b2b2b2;
+  padding: 5px;
+  width: 100%;
 }
 .mat-checkbox {
   .mat-checkbox-label {

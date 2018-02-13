@@ -129,8 +129,15 @@
         <appender-ref ref="INFO"/>
     </logger>
 
+<!-- 	<logger name="org.hibernate" additivity="false"> -->
+<!--         <level value="DEBUG"/> -->
+<!--         <appender-ref ref="CONSOLE"/> -->
+<!--         <appender-ref ref="DEBUG"/> -->
+<!--         <appender-ref ref="INFO"/> -->
+<!--     </logger> -->
+
     <root>
-        <level value="ERROR"/>
+        <level value="WARN"/>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="INFO"/>

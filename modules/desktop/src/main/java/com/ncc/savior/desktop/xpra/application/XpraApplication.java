@@ -117,4 +117,8 @@ public abstract class XpraApplication implements Closeable {
 	public abstract void maximize();
 
 	public abstract void unMaximize();
+
+	public abstract void fullscreen();
+
+	public abstract void notFullScreen();
 }

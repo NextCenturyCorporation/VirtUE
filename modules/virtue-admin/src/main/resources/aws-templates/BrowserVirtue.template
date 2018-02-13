@@ -9,12 +9,12 @@
         {
             "Properties": 
             {
-                "ImageId": "ami-a2b2c9d8",
+                "ImageId": "ami-2b500951",
                 "InstanceType" : "t2.small",
                 "SecurityGroups" : ["ssh_default_vpc", "default" ],
                 "Tags" : 
                 [
-                    {"Key" : "Name", "Value" : "Last Jedi"}
+                    {"Key" : "Name", "Value" : "Virtue creation in process"}
                 ]
             },
 

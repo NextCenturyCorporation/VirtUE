@@ -63,6 +63,10 @@ public class DataResource {
 				"gimp");
 		ApplicationDefinition pinta = new ApplicationDefinition(UUID.randomUUID().toString(), "Pinta", "1.0", OS.LINUX,
 				"pinta");
+		ApplicationDefinition gedit = new ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
+				"gedit");
+		ApplicationDefinition eclipse = new ApplicationDefinition(UUID.randomUUID().toString(), "Eclipse", "1.0",
+				OS.LINUX, "eclipse");
 
 		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
@@ -86,44 +90,45 @@ public class DataResource {
 		appsAll.addAll(appsDrawing);
 		appsAll.addAll(appsMath);
 
-		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
-				OS.LINUX, "Linux Browsers", appsBrowsers);
+		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
+				OS.LINUX, "Browsers", appsBrowsers);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux All", OS.LINUX,
-				"Linux All", appsAll);
+		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX, "All",
+				appsAll);
 
-		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
-				"Linux Math", appsMath);
+		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
+				"Math", appsMath);
 
-		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Drawing",
-				OS.LINUX, "Linux Drawing", appsDrawing);
+		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
+				"Drawing", appsDrawing);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Linux LibreOffice", OS.LINUX, "Linux LibreOffice", appsLibreOffice);
+				"LibreOffice", OS.LINUX, "LibreOffice", appsLibreOffice);
+
 
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
-		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
+		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue",
 				"1.0", vmtsSingleAll);
 
 		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
-		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue", "1.0",
+		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue", "1.0",
 				vmtsBrowsers);
 
 		Set<VirtualMachineTemplate> vmtsLibre = new HashSet<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
-		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Linux LibreOffice Virtue", "1.0",
+		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0",
 				vmtsLibre);
 
 		Set<VirtualMachineTemplate> vmtsDrawing = new HashSet<VirtualMachineTemplate>();
 		vmtsDrawing.add(vmDrawing);
-		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Drawing Virtue", "1.0",
+		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Artist Virtue", "1.0",
 				vmtsDrawing);
 
 		Set<VirtualMachineTemplate> vmtsMath = new HashSet<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
-		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
+		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0",
 				vmtsMath);
 
 		for (ApplicationDefinition app : appsAll) {
@@ -150,6 +155,7 @@ public class DataResource {
 		User browser = new User("browser", new ArrayList<String>());
 		User nerd = new User("nerd", new ArrayList<String>());
 		User artist = new User("artist", new ArrayList<String>());
+		User developer = new User("developer", new ArrayList<String>());
 
 		templateManager.assignVirtueTemplateToUser(admin, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueSingleAll.getId());
@@ -167,6 +173,8 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(nerd, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueMath.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(developer, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(developer, virtueMath.getId());
 
 		logger.info("Data preloaded");
 		return Response.ok().entity("success").build();

@@ -35,7 +35,6 @@ export class AddUserComponent implements OnInit {
     'Wole Omitowoju'
   ];
 
-
   constructor(public dialog: MatDialog) {}
   activateModal(id,mode): void {
 
@@ -56,7 +55,8 @@ export class AddUserComponent implements OnInit {
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath
-      }
+      },
+      panelClass: 'virtue-modal-overlay'
     });
 
     this.screenWidth = (window.screen.width);
@@ -68,6 +68,8 @@ export class AddUserComponent implements OnInit {
     dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
 
     // dialogRef.afterClosed().subscribe();
+
+
   }
 
   ngOnInit() {

@@ -72,8 +72,8 @@ public abstract class XpraApplicationManager {
 				case NEW_WINDOW:
 					NewWindowPacket p = (NewWindowPacket) packet;
 					int parentId = p.getMetadata().getParentId();
-					boolean isModal = p.getMetadata().getModal();
-					if (parentId > 0 && isModal) {
+					// boolean isModal = p.getMetadata().getModal();
+					if (parentId > 0 /* && isModal8 */) {
 						XpraApplication parent = applications.get(parentId);
 						onModal(p, parent);
 					} else {
@@ -164,6 +164,14 @@ public abstract class XpraApplicationManager {
 				app.unMaximize();
 			}
 		}
+		Boolean fullscreen = meta.getFullscreenOrNull();
+		if (fullscreen != null) {
+			if (fullscreen) {
+				app.fullscreen();
+			} else {
+				app.notFullScreen();
+			}
+		}
 	}
 
 	protected void onDisconnect(DisconnectPacket packet) {
@@ -229,7 +237,7 @@ public abstract class XpraApplicationManager {
 		if (app != null) {
 			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 		} else {
-			logger.warn("Recieved packet with valid application. packet=" + packet);
+			logger.warn("Received packet with invalid application. packet=" + packet);
 		}
 	}
 
@@ -239,7 +247,7 @@ public abstract class XpraApplicationManager {
 		if (app != null) {
 			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 		} else {
-			logger.warn("Recieved packet with valid application. packet=" + packet);
+			logger.warn("Received packet with invalid application. packet=" + packet);
 		}
 	}
 

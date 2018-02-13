@@ -74,7 +74,7 @@ public class DesktopVirtueService {
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
-		applicationManager.startApplicationOnVm(vm, application);
+		applicationManager.startApplicationOnVm(vm, application, 5);
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
 				vm.getUserName(), vm.getPrivateKey());
 		return dva;

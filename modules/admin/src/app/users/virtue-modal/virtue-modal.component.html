@@ -3,10 +3,10 @@
 <div mat-dialog-content>
   <div class="mui-container-fluid mui-col-md-12">
     <div class="mui-row">
-      <div class="mui-col-md-4 padding-left-0"><label>Select Virtue</label></div>
+      <div class="mui-col-md-4 padding-left-0"><label>Select a Virtue</label></div>
       <div class="mui-col-md-6 padding-right-0">
         <mat-form-field>
-          <mat-select name="virtues" placeholder="Select a Virtue">
+          <mat-select name="virtues" panelClass="select-virtue-class">
             <mat-option *ngFor="let option of virtues" [value]="option">{{ option }}</mat-option>
           </mat-select>
         </mat-form-field>

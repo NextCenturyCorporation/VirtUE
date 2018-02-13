@@ -10,7 +10,7 @@
     <property name="ROLLING_FILE_MAX_NUM" value="5"/>
     <property name="ROLLING_FILE_MAX_SIZE" value="5MB"/>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${DEFAULT_PATTERN}</pattern>
         </encoder>
