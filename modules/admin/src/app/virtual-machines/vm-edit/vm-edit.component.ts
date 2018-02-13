@@ -21,8 +21,8 @@ export class VmEditComponent implements OnInit {
 
   vmId: { id: string };
   vmData = [];
-  appList : [];
-  appsInput: string;
+  appList = [];
+  appsInput = '';
   osValue: string;
   osInfo: string;
   osList = [
@@ -63,17 +63,17 @@ export class VmEditComponent implements OnInit {
     for (var i in osList) {
       if (os === this.osList[i].os) {
         return this.osList[i].info;
-        break;
       }
     }
   }
   getAppList(apps) {
     for (var i in apps){
       if (apps[i].name){
+        console.log(apps[i].name);
         this.appsInput += apps[i].name + '\n';
       }
+      this.appsInput.trim();
     }
-    console.log(this.appsInput);
   }
 
 }
