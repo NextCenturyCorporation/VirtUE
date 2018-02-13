@@ -1,5 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder } from '@angular/forms';
+
 import { VirtualMachineService } from '../../shared/services/vm.service';
+import { VirtualMachine } from '../../shared/models/vm.model';
+import { Application } from '../../shared/models/application.model';
+
 import { MatDialogRef } from '@angular/material';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
@@ -10,8 +15,16 @@ import { FormGroup, FormBuilder } from '@angular/forms';
   providers: [ VirtualMachineService ]
 })
 export class VmModalComponent implements OnInit {
+  @Input() vmInput : VirtualMachine;
+  @Input() appInput : Application;
 
+  form: FormGroup;
+  checked = false;
+  indeterminate = false;
+
+  selectedVms : string;
   vmList = [];
+  appList = [];
 
   constructor(
     private vmService: VirtualMachineService,
@@ -25,10 +38,22 @@ export class VmModalComponent implements OnInit {
   getVmList() {
     this.vmService.getVmList()
       .subscribe(
-        data => {this.vmList = data}
+        data => {
+          this.vmList = data;
+        }
       );
   }
 
+  addVms(id: string): void {
+    id = id.trim();
+    if (!id){
+      this.appList.push(VirtualMachine);
+    }
+  }
+
+  cancelModal() {
+    this.dialogRef.close();
+  }
   saveVMList() {
     this.dialogRef.close();
   }
