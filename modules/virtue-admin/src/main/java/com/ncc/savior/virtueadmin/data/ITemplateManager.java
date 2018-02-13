@@ -115,7 +115,7 @@ public interface ITemplateManager {
 	 */
 	void addVirtueTemplate(VirtueTemplate template);
 
-	Collection<String> getUsers();
+	Collection<String> getUsersWithTemplate();
 
 	void clear();
 

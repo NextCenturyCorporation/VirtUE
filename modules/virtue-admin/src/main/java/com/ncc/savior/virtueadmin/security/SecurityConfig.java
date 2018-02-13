@@ -2,6 +2,9 @@ package com.ncc.savior.virtueadmin.security;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,7 +28,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,6 +45,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
@@ -90,6 +95,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	Environment env;
 
+	@Autowired
+	IUserManager userManager;
+
 	@Value("${" + PROPERTY_AUTH_MODULE + ":ERROR}")
 	private String authModuleName;
 
@@ -138,14 +146,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			http.addFilterAt(new SingleUserFilter(env), AbstractPreAuthenticatedProcessingFilter.class);
 			printDevModuleWarning(authModuleName);
 		}
-		
-		http.exceptionHandling().authenticationEntryPoint(spnegoEntryPoint()).accessDeniedHandler(getAccessDeniedHandler()).and().authorizeRequests().antMatchers("/")
+
+		http.exceptionHandling().authenticationEntryPoint(spnegoEntryPoint())
+				.accessDeniedHandler(getAccessDeniedHandler()).and()
+				.authorizeRequests().antMatchers("/")
 				.authenticated().antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**")
 				.hasRole(USER_ROLE).antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
 				.loginPage("/login").permitAll().and().logout().permitAll().and()
 				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
-		
+
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
@@ -268,13 +278,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		};
 	}
 
-	static class DummyUserDetailsService implements UserDetailsService {
+	class DummyUserDetailsService implements UserDetailsService {
 
-		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-			return new User(username, "notUsed", true, true, true, true,
-					AuthorityUtils.createAuthorityList("ROLE_USER"));
+		public UserDetails loadUserByUsername(String fqdn) throws UsernameNotFoundException {
+			String username = null;
+			if (fqdn==null) {
+				cannotFindUser("No username supplied");
+				 return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
+			}
+			if (fqdn.indexOf("@")!=-1) {
+				 username = fqdn.substring(0,fqdn.indexOf("@"));
+			}
+			
+			com.ncc.savior.virtueadmin.model.User user = userManager.getUser(username);
+			if (user ==null) {
+				cannotFindUser("Unable to find user="+username+ " in user database.");
+				return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
+			}
+			Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+			for (String a : user.getAuthorities()) {
+				authorities.add(new SimpleGrantedAuthority(a));
+			}
+			return new User(user.getUsername(), "notUsed", true, true, true, true, authorities);
 		}
 
 	}
 
+	public void cannotFindUser(String string) {
+		logger.warn(string);
+	}
 }

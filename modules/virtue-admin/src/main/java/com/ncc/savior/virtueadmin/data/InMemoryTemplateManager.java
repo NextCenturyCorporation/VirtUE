@@ -305,7 +305,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Collection<String> getUsers() {
+	public Collection<String> getUsersWithTemplate() {
 		return userToTemplateId.keySet();
 	}
 
