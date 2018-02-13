@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { JsondataService } from '../shared/services/jsondata.service';
-// import { DataService } from '../shared/data.service';
+import { DashboardService } from '../shared/services/dashboard.service';
+
 import { JsonFilterPipe } from '../shared/json-filter.pipe';
 import { CountFilterPipe } from '../shared/count-filter.pipe';
 
@@ -9,7 +9,7 @@ import { CountFilterPipe } from '../shared/count-filter.pipe';
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  providers: [ JsondataService ]
+  providers: [ DashboardService ]
 })
 
 export class DashboardComponent implements OnInit {
@@ -42,11 +42,11 @@ export class DashboardComponent implements OnInit {
 
   // constructor(){}
   constructor(
-    private jsondataService: JsondataService
+    private dashboardService: DashboardService
   ){}
 
   ngOnInit() {
-    this.jsondataService.getJSON('dashboard')
-    .subscribe(resJsonData => this.jsonData = resJsonData);
+    this.dashboardService.getList()
+    .subscribe(data => this.jsonData = data);
   }
 }
