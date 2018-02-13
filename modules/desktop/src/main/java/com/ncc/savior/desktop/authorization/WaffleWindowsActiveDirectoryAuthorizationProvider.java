@@ -88,7 +88,7 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 					.getCurrent(DEFAULT_SECURITY_PACKAGE);
 			clientCredentials.initialize();
 			WindowsSecurityContextImpl clientContext = new WindowsSecurityContextImpl();
-			clientContext.setPrincipalName("kdrumm@AD.VIRTUE.NCCDO.COM");
+			clientContext.setPrincipalName(current);
 			clientContext.setCredentialsHandle(clientCredentials);
 			clientContext.setSecurityPackage(DEFAULT_SECURITY_PACKAGE);
 			clientContext.initialize(null, null, serverPrinc);
