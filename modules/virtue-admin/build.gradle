@@ -46,6 +46,7 @@ repositories {
 	mavenCentral()
     maven { url "https://repo.spring.io/milestone" }
     mavenLocal()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }
 
 mainClassName = "com.ncc.savior.virtueadmin.VirtueAdminApplication"
@@ -75,8 +76,10 @@ dependencies {
 	compile group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion
 	compile group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion
 	compile group: 'org.springframework.security', name: 'spring-security-ldap', version: springSecurityVersion
-    compile 'org.springframework.security.kerberos:spring-security-kerberos-client:1.0.3.BUILD-SNAPSHOT'
-    compile 'org.springframework.security.kerberos:spring-security-kerberos-web:1.0.3.BUILD-SNAPSHOT'
+    //compile 'org.springframework.security.kerberos:spring-security-kerberos-client:1.0.3.BUILD-SNAPSHOT'
+    //compile 'org.springframework.security.kerberos:spring-security-kerberos-web:1.0.3.BUILD-SNAPSHOT'
+    compile 'io.github.chrislong:spring-security-kerberos-client:1.0.4.BUILD-SNAPSHOT'
+    compile 'io.github.chrislong:spring-security-kerberos-web:1.0.4.BUILD-SNAPSHOT'
 	//compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.7'
 	
 	compile group: 'org.apache.directory.server', name: 'apacheds-core', version: '1.5.5'
