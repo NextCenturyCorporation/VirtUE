@@ -408,6 +408,9 @@ public class AdminResource {
 
 	private User getUserFromSecurity() {
 		User user = UserService.getCurrentUser();
+		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have ADMIN role");
+		}
 		return user;
 	}
 }
