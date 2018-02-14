@@ -60,7 +60,6 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * user configured the security property file. This mode should not be used in
  * production. See {@link SingleUserFilter} for details.
  * <li>ACTIVEDIRECTORY - not fully implemented
- * <li>LDAP - not fully implemented
  * 
  *
  */
@@ -72,8 +71,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2 = "file:savior-server-security-site.properties";
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(SecurityConfig.class);
-
-	private static final String AUTH_MODULE_LDAP = "LDAP";
 
 	private static final String AUTH_MODULE_ACTIVEDIRECTORY = "ACTIVEDIRECTORY";
 
@@ -148,8 +145,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		http.exceptionHandling().authenticationEntryPoint(spnegoEntryPoint())
-				.accessDeniedHandler(getAccessDeniedHandler()).and()
-				.authorizeRequests().antMatchers("/")
+				.accessDeniedHandler(getAccessDeniedHandler()).and().authorizeRequests().antMatchers("/")
 				.authenticated().antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**")
 				.hasRole(USER_ROLE).antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
 				.loginPage("/login").permitAll().and().logout().permitAll().and()
@@ -236,15 +232,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		// auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
-		// auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
-		// auth.inMemoryAuthentication().withUser("user2").password("password").roles("USER");
-		// auth.inMemoryAuthentication().withUser("user3").password("password").roles("USER");
-		// auth.inMemoryAuthentication().withUser("admin").password("password").roles("USER",
-		// "ADMIN");
-		// auth.inMemoryAuthentication().withUser(User.testUser().getUsername()).password("").roles("USER");
-		// auth.inMemoryAuthentication().withUser("kdrumm").roles("USER", "ADMIN");
-
 		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
 			auth.authenticationProvider(new PassThroughAuthenticationProvider());
 		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
@@ -282,18 +269,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		public UserDetails loadUserByUsername(String fqdn) throws UsernameNotFoundException {
 			String username = null;
-			if (fqdn==null) {
-				cannotFindUser("No username supplied");
-				 return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
+			if (fqdn == null) {
+				return cannotFindUser(username, "No username supplied");
 			}
-			if (fqdn.indexOf("@")!=-1) {
-				 username = fqdn.substring(0,fqdn.indexOf("@"));
+			if (fqdn.indexOf("@") != -1) {
+				username = fqdn.substring(0, fqdn.indexOf("@"));
 			}
-			
+
 			com.ncc.savior.virtueadmin.model.User user = userManager.getUser(username);
-			if (user ==null) {
-				cannotFindUser("Unable to find user="+username+ " in user database.");
-				return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
+			if (user == null) {
+				return cannotFindUser(username, "Unable to find user=" + username + " in user database.");
 			}
 			Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 			for (String a : user.getAuthorities()) {
@@ -304,7 +289,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	}
 
-	public void cannotFindUser(String string) {
+	public User cannotFindUser(String username, String string) {
 		logger.warn(string);
+		return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
 	}
 }

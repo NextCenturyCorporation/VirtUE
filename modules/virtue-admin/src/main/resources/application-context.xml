@@ -56,6 +56,7 @@
 	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService">
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="activeVirtueManager" />
+		<constructor-arg ref="userManager" />
 	</bean>
 
 	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">

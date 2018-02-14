@@ -12,4 +12,6 @@ public interface IUserManager {
 
 	void clear();
 
+	void removeUser(User user);
+
 }

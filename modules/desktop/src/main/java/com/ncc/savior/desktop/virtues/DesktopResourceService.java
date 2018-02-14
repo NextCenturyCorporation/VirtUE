@@ -42,7 +42,6 @@ public class DesktopResourceService {
 	private WebTarget baseApi;
 	private AuthorizationService authService;
 	private String targetHost;
-	private boolean printResponse;
 
 	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames) {
 		try {
