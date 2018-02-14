@@ -1,3 +1,4 @@
+@import url(~@angular/material/prebuilt-themes/deeppurple-amber.css);
 /**
  * MUI Colors module
  */
@@ -3362,19 +3363,19 @@ h4, h5, h6 {
 /* #3E3F4E */
 /* #000000 */
 /* FFFFFF */
-/* line 4, ../scss/_layout.scss */
+/* line 4, ../scss/_styles.scss */
 html {
   font-size: 13px;
 }
 
-/* line 7, ../scss/_layout.scss */
+/* line 7, ../scss/_styles.scss */
 body {
   margin: 0;
   padding: 0;
   position: relative;
 }
 
-/* line 12, ../scss/_layout.scss */
+/* line 12, ../scss/_styles.scss */
 a {
   color: #407097;
   cursor: pointer;
@@ -3382,47 +3383,48 @@ a {
   text-decoration: none;
 }
 
-/* line 18, ../scss/_layout.scss */
+/* line 18, ../scss/_styles.scss */
 a:hover {
   text-decoration: underline;
 }
 
-/* line 21, ../scss/_layout.scss */
+/* line 21, ../scss/_styles.scss */
 h1 {
   font-family: 'Raleway700', Arial, sans-serif;
   font-size: 2.6rem;
 }
 
-/* line 25, ../scss/_layout.scss */
+/* line 25, ../scss/_styles.scss */
 h2 {
   font-family: 'Raleway600', Arial, sans-serif;
   font-size: 2.2rem;
 }
 
-/* line 29, ../scss/_layout.scss */
+/* line 29, ../scss/_styles.scss */
 h3 {
   font-family: 'Raleway600', Arial, sans-serif;
   font-size: 1.8rem;
 }
 
-/* line 33, ../scss/_layout.scss */
+/* line 33, ../scss/_styles.scss */
 h4 {
   font-family: 'Raleway600', Arial, sans-serif;
   font-size: 1.4rem;
 }
 
-/* line 37, ../scss/_layout.scss */
+/* line 37, ../scss/_styles.scss */
 h5 {
   font-family: 'Raleway700', Arial, sans-serif;
   font-size: 1.1rem;
 }
 
-/* line 42, ../scss/_layout.scss */
+/* line 42, ../scss/_styles.scss */
 p {
+  margin: 10px 0;
   padding: 10px 0;
 }
 
-/* line 45, ../scss/_layout.scss */
+/* line 46, ../scss/_styles.scss */
 hr {
   clear: both;
   display: block;
@@ -3431,12 +3433,12 @@ hr {
   padding: 0;
 }
 
-/* line 54, ../scss/_layout.scss */
+/* line 55, ../scss/_styles.scss */
 .app-icon-white {
   background-image: url(/assets/images/app-icon-white.png) no-repeat;
 }
 
-/* line 57, ../scss/_layout.scss */
+/* line 58, ../scss/_styles.scss */
 #wrapper {
   display: block;
   margin: 0;
@@ -3444,53 +3446,54 @@ hr {
   position: relative;
 }
 
-/* line 63, ../scss/_layout.scss */
+/* line 64, ../scss/_styles.scss */
 #content-container {
   position: relative;
+  padding: 0 25px;
 }
 
 /* Header Global CSS */
-/* line 67, ../scss/_layout.scss */
+/* line 69, ../scss/_styles.scss */
 header {
-  background: #2e294e;
+  background-color: #2E294E;
   display: block;
   height: 34px;
   margin-bottom: 50px;
 }
 
-/* line 73, ../scss/_layout.scss */
+/* line 75, ../scss/_styles.scss */
 breadcrumb {
   display: block;
   font-size: 0.9rem;
-  padding-top: 1.2rem;
-  padding-left: 1.2rem;
+  margin-top: 1.2rem;
+  margin-left: 20px;
 }
-/* line 78, ../scss/_layout.scss */
+/* line 80, ../scss/_styles.scss */
 breadcrumb ol {
   list-style-type: none;
   padding: 0;
 }
-/* line 82, ../scss/_layout.scss */
+/* line 84, ../scss/_styles.scss */
 breadcrumb li {
   display: inline-block;
   margin-right: 6px;
 }
-/* line 85, ../scss/_layout.scss */
+/* line 87, ../scss/_styles.scss */
 breadcrumb li:before {
   content: '>';
 }
-/* line 90, ../scss/_layout.scss */
+/* line 92, ../scss/_styles.scss */
 breadcrumb li:first-child:before {
   content: '';
 }
 
-/* line 95, ../scss/_layout.scss */
+/* line 97, ../scss/_styles.scss */
 form {
   clear: both;
   display: block;
 }
 
-/* line 99, ../scss/_layout.scss */
+/* line 101, ../scss/_styles.scss */
 form:after {
   clear: both;
   content: ' ';
@@ -3498,32 +3501,31 @@ form:after {
   height: 1px;
 }
 
-/* line 105, ../scss/_layout.scss */
+/* line 107, ../scss/_styles.scss */
 .form-item {
   clear: both;
   display: block;
-  margin: 0;
   padding: 0.5rem 0;
   width: 100%;
 }
-/* line 111, ../scss/_layout.scss */
+/* line 112, ../scss/_styles.scss */
 .form-item span {
   padding: 0;
 }
 
-/* line 115, ../scss/_layout.scss */
+/* line 116, ../scss/_styles.scss */
 label {
   font-family: 'Raleway600';
   margin: 0;
   padding: 0;
 }
 
-/* line 120, ../scss/_layout.scss */
+/* line 121, ../scss/_styles.scss */
 input, select {
   border: 1px solid #B2B2B2;
 }
 
-/* line 123, ../scss/_layout.scss */
+/* line 124, ../scss/_styles.scss */
 input[type="color"] {
   -webkit-appearance: none;
   border: 1px solid #B2B2B2;
@@ -3532,17 +3534,17 @@ input[type="color"] {
   padding: 2px;
 }
 
-/* line 130, ../scss/_layout.scss */
+/* line 131, ../scss/_styles.scss */
 input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 
-/* line 133, ../scss/_layout.scss */
+/* line 134, ../scss/_styles.scss */
 input[type="color"]::-webkit-color-swatch {
   border: none;
 }
 
-/* line 136, ../scss/_layout.scss */
+/* line 137, ../scss/_styles.scss */
 input[type='text'], input[type='password'] {
   box-sizing: border-box;
   height: 30px;
@@ -3550,7 +3552,7 @@ input[type='text'], input[type='password'] {
   width: 100%;
 }
 
-/* line 142, ../scss/_layout.scss */
+/* line 143, ../scss/_styles.scss */
 button, input[type='button'] {
   border: none;
   cursor: pointer;
@@ -3559,33 +3561,33 @@ button, input[type='button'] {
   padding: 0.55rem 1rem 0.6rem;
 }
 
-/* line 150, ../scss/_layout.scss */
+/* line 151, ../scss/_styles.scss */
 button.button-submit {
   background-color: #407097;
   border-radius: 0;
   color: white;
   text-shadow: 1px 1px #3E3F4E;
 }
-/* line 156, ../scss/_layout.scss */
+/* line 157, ../scss/_styles.scss */
 button.button-delete, button.button-cancel {
   background-color: none;
   border: none;
   border-radius: 0;
   color: #407097;
 }
-/* line 162, ../scss/_layout.scss */
+/* line 163, ../scss/_styles.scss */
 button.button-trash {
   height: 20px;
   margin: 0;
   padding: 0;
   width: 18px;
 }
-/* line 168, ../scss/_layout.scss */
+/* line 169, ../scss/_styles.scss */
 button .fa {
   color: #407097;
 }
 
-/* line 172, ../scss/_layout.scss */
+/* line 173, ../scss/_styles.scss */
 select {
   background-color: white;
   -webkit-appearance: none;
@@ -3602,13 +3604,13 @@ select {
   width: 100%;
 }
 
-/* line 185, ../scss/_layout.scss */
+/* line 186, ../scss/_styles.scss */
 .select-container {
   height: 35px;
   position: relative;
   width: 100%;
 }
-/* line 190, ../scss/_layout.scss */
+/* line 191, ../scss/_styles.scss */
 .select-container .fa {
   font-size: 1.4rem;
   font-weight: 700;
@@ -3618,96 +3620,89 @@ select {
   top: 7px;
 }
 
-/* line 200, ../scss/_layout.scss */
+/* line 201, ../scss/_styles.scss */
 [disabled] {
   color: #b2b2b2;
 }
 
-/* line 203, ../scss/_layout.scss */
+/* line 204, ../scss/_styles.scss */
 app-root {
   height: inherit;
 }
 
 /* Content Global CSS */
-/* line 207, ../scss/_layout.scss */
+/* line 208, ../scss/_styles.scss */
 content {
   display: block;
   min-height: 560px;
   margin: 4rem 0 1rem;
   position: relative;
 }
-/* line 212, ../scss/_layout.scss */
+/* line 213, ../scss/_styles.scss */
 content:after {
   clear: both;
   content: ' ';
   display: block;
 }
-/* line 217, ../scss/_layout.scss */
-content #content-header {
-  padding: 0 1.1rem 1rem 1.1rem;
-  position: relative;
-}
-/* line 221, ../scss/_layout.scss */
+/* line 218, ../scss/_styles.scss */
 content #content-main {
-  padding: 0 1.1rem;
+  padding: 0;
 }
-/* line 224, ../scss/_layout.scss */
+/* line 221, ../scss/_styles.scss */
 content #content {
   display: block;
 }
-/* line 226, ../scss/_layout.scss */
+/* line 223, ../scss/_styles.scss */
 content #content.content {
-  border-top: 1px solid #b2b2b2;
   padding-top: 1.1rem;
 }
 
-/* line 233, ../scss/_layout.scss */
+/* line 230, ../scss/_styles.scss */
 .paging {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
   margin-top: 0.75rem;
 }
-/* line 238, ../scss/_layout.scss */
+/* line 235, ../scss/_styles.scss */
 .paging .page-number {
   text-align: left;
 }
-/* line 241, ../scss/_layout.scss */
+/* line 238, ../scss/_styles.scss */
 .paging .page-controls {
   text-align: center;
 }
-/* line 244, ../scss/_layout.scss */
+/* line 241, ../scss/_styles.scss */
 .paging .page-item-total {
   text-align: right;
 }
 
-/* line 248, ../scss/_layout.scss */
+/* line 247, ../scss/_styles.scss */
 .table-container, .data-list {
   font-family: 'Raleway500', Arial, sans-serif;
-  max-height: 540px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0;
+  max-height: 960px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
 
-/* line 257, ../scss/_layout.scss */
+/* line 255, ../scss/_styles.scss */
 .table-container {
   border: 1px solid #B2B2B2;
 }
 
-/* line 261, ../scss/_layout.scss */
+/* line 259, ../scss/_styles.scss */
 .data-list {
   border-top: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 264, ../scss/_layout.scss */
+/* line 262, ../scss/_styles.scss */
 .data-list .table-header-group {
   border-right: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
   border-left: 1px solid #B2B2B2;
 }
 
-/* line 270, ../scss/_layout.scss */
+/* line 268, ../scss/_styles.scss */
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;
   display: flex;
@@ -3715,22 +3710,22 @@ content #content.content {
   align-items: stretch;
 }
 
-/* line 276, ../scss/_layout.scss */
+/* line 274, ../scss/_styles.scss */
 .table-row {
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 278, ../scss/_layout.scss */
+/* line 276, ../scss/_styles.scss */
 .table-row:last-child {
   border-bottom: none;
 }
 
-/* line 282, ../scss/_layout.scss */
+/* line 280, ../scss/_styles.scss */
 .table-header, .table-data {
   padding-top: 0.65rem;
   padding-bottom: 0.65rem;
 }
 
-/* line 286, ../scss/_layout.scss */
+/* line 284, ../scss/_styles.scss */
 .table-header {
   font-family: 'Raleway600', Arial, sans-serif;
   background-color: #E9E3E6;
@@ -3738,89 +3733,110 @@ content #content.content {
   align-items: flex-end;
 }
 
-/* line 292, ../scss/_layout.scss */
+/* line 290, ../scss/_styles.scss */
 .table-header span {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-/* line 296, ../scss/_layout.scss */
+/* line 294, ../scss/_styles.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
-
-/* line 301, ../scss/_layout.scss */
+/* line 298, ../scss/_styles.scss */
 .table-data span {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
 }
+/* line 303, ../scss/_styles.scss */
+.table-data .menu-options {
+  clear: both;
+  display: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0;
+}
+/* line 309, ../scss/_styles.scss */
+.table-data .menu-options.active {
+  display: block;
+}
 
-/* line 307, ../scss/_layout.scss */
+/* line 315, ../scss/_styles.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 312, ../scss/_layout.scss */
+/* line 320, ../scss/_styles.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 316, ../scss/_layout.scss */
+/* line 323, ../scss/_styles.scss */
 .titlebar {
+  clear: both;
   display: block;
-  position: relative;
+  margin-top: 1.1rem;
+  margin-bottom: 1.2rem;
+  min-height: 1rem;
 }
-/* line 320, ../scss/_layout.scss */
-.titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
-  margin-top: 0;
-}
-/* line 321, ../scss/_layout.scss */
-.titlebar h2 {
-  font-size: 28px;
-}
-/* line 322, ../scss/_layout.scss */
-.titlebar h3 {
-  font-size: 24px;
-}
-/* line 323, ../scss/_layout.scss */
-.titlebar h4 {
-  font-size: 20px;
-}
-/* line 324, ../scss/_layout.scss */
-.titlebar h5 {
-  font-size: 18px;
-}
-/* line 326, ../scss/_layout.scss */
+/* line 330, ../scss/_styles.scss */
 .titlebar:after {
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 333, ../scss/_layout.scss */
-.titlebar .title {
-  display: block;
-  float: left;
+/* line 336, ../scss/_styles.scss */
+.titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
+  margin-top: 0;
 }
-/* line 338, ../scss/_layout.scss */
-.titlebar button {
+/* line 337, ../scss/_styles.scss */
+.titlebar h2 {
+  font-size: 28px;
+}
+/* line 338, ../scss/_styles.scss */
+.titlebar h3 {
+  font-size: 24px;
+}
+/* line 339, ../scss/_styles.scss */
+.titlebar h4 {
+  font-size: 20px;
+}
+/* line 340, ../scss/_styles.scss */
+.titlebar h5 {
+  font-size: 18px;
+}
+/* line 342, ../scss/_styles.scss */
+.titlebar .title {
+  float: left;
+  margin: 0;
+}
+/* line 346, ../scss/_styles.scss */
+.titlebar .titlebar-button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
   border-radius: 0;
   display: block;
   float: left;
-  margin: 0.25rem 0 0 1.5rem;
-  padding: 0.55rem 0.7rem 0.6rem;
+  margin: 0 0 0 1.5rem;
+  padding: 0.5rem 0.7rem;
 }
 
-/* line 349, ../scss/_layout.scss */
+/* line 357, ../scss/_styles.scss */
+.no-data-message {
+  display: block;
+  border-top: 1px solid #b2b2b2;
+  border-bottom: 1px solid #b2b2b2;
+}
+
+/* line 362, ../scss/_styles.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3828,19 +3844,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 356, ../scss/_layout.scss */
+/* line 369, ../scss/_styles.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 359, ../scss/_layout.scss */
+/* line 372, ../scss/_styles.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 363, ../scss/_layout.scss */
+/* line 376, ../scss/_styles.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3849,7 +3865,7 @@ footer {
   position: relative;
 }
 
-/* line 370, ../scss/_layout.scss */
+/* line 383, ../scss/_styles.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
@@ -3858,153 +3874,6 @@ footer {
   position: absolute;
   width: 100%;
   z-index: 100;
-}
-
-/* line 1, ../scss/_material.scss */
-.mat-dialog-container {
-  background: white;
-  box-shadow: none;
-}
-
-/* line 6, ../scss/_material.scss */
-.mat-dialog-container app-dialogs {
-  display: block;
-  position: relative;
-  padding: 1.2rem;
-  text-align: center;
-}
-/* line 12, ../scss/_material.scss */
-.mat-dialog-container .mat-dialog-title {
-  border-bottom: 1px solid #b2b2b2;
-  display: block;
-  margin: 0;
-  padding-bottom: 1rem;
-  text-align: left;
-  text-transform: capitalize;
-}
-/* line 20, ../scss/_material.scss */
-.mat-dialog-container .mat-dialog-content {
-  padding: 1rem 2rem;
-  text-align: left;
-}
-/* line 24, ../scss/_material.scss */
-.mat-dialog-container .mat-dialog-actions {
-  border-top: 1px solid #b2b2b2;
-  display: block;
-  padding-top: 1.5rem;
-  text-align: center;
-}
-/* line 31, ../scss/_material.scss */
-.mat-dialog-container button, .mat-dialog-container button[type='submit'] {
-  border-radius: 0;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  margin-right: 10px;
-}
-/* line 37, ../scss/_material.scss */
-.mat-dialog-container button {
-  background-color: #e9e3e6;
-  border: 1px solid #b2b2b2;
-}
-/* line 40, ../scss/_material.scss */
-.mat-dialog-container button.button {
-  padding: 0.4rem 1rem;
-}
-/* line 44, ../scss/_material.scss */
-.mat-dialog-container button[type='submit'] {
-  background-color: #407097;
-  color: white;
-}
-
-/* line 51, ../scss/_material.scss */
-.mat-input-placeholder-wrapper {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-/* line 59, ../scss/_material.scss */
-input.mat-input-element {
-  border: 1px solid #b2b2b2;
-  padding: 5px;
-}
-
-/* line 64, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-label {
-  margin-right: 20px;
-}
-/* line 68, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-inner-container {
-  margin-right: 0;
-  width: 15px;
-}
-/* line 72, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-input {
-  margin-top: 3px;
-}
-/* line 75, ../scss/_material.scss */
-.mat-checkbox .mat-checkbox-frame {
-  border-width: 0;
-}
-
-/* line 81, ../scss/_material.scss */
-.mat-radio-label .mat-radio-container {
-  display: none;
-}
-
-/* line 86, ../scss/_material.scss */
-.mat-autocomplete-panel {
-  overflow: none;
-  overflow-x: none;
-  overflow-y: scroll;
-}
-/* line 90, ../scss/_material.scss */
-.mat-autocomplete-panel .mat-option {
-  border-bottom: 1px solid #BFBFBF;
-  clear: both;
-  cursor: pointer;
-  display: block;
-  padding: 5px;
-  width: 100%;
-}
-
-/* line 99, ../scss/_material.scss */
-.mat-select {
-  border: 1px solid #b2b2b2;
-  padding: 5px;
-}
-
-/* line 103, ../scss/_material.scss */
-.mat-select-panel {
-  background-color: #FFF;
-  box-shadow: none;
-  border: 1px solid #b2b2b2;
-}
-/* line 108, ../scss/_material.scss */
-.mat-select-panel .mat-option {
-  border-bottom: thin solid #b2b2b2;
-  display: block;
-  width: 100%;
-}
-/* line 112, ../scss/_material.scss */
-.mat-select-panel .mat-option:hover {
-  cursor: pointer;
-}
-/* line 115, ../scss/_material.scss */
-.mat-select-panel .mat-option .mat-option-text {
-  padding-left: 15px;
-}
-
-/* line 1, ../scss/_cdk.scss */
-.app-overlay-container {
-  left: 0;
-  top: 0;
-  position: fixed;
-  z-index: 1000;
-}
-/* line 7, ../scss/_cdk.scss */
-.app-overlay-container .cdk-overlay-pane {
-  background-color: #FFF;
 }
 
 /* line 2, ../scss/_helpers.scss */
@@ -4263,16 +4132,214 @@ input.mat-input-element {
 }
 
 /* line 83, ../scss/_helpers.scss */
+.font-color-gray {
+  color: #736f72;
+}
+
+/* line 86, ../scss/_helpers.scss */
 .text-align-left {
   text-align: left;
 }
 
-/* line 86, ../scss/_helpers.scss */
+/* line 89, ../scss/_helpers.scss */
 .text-align-center {
   text-align: center;
 }
 
-/* line 89, ../scss/_helpers.scss */
+/* line 92, ../scss/_helpers.scss */
 .text-align-right {
   text-align: right;
+}
+
+/* line 1, ../scss/_material.scss */
+button, button[type='submit'] {
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  margin-right: 10px;
+}
+
+/* line 7, ../scss/_material.scss */
+button {
+  background-color: #E9E3E6;
+  border: 1px solid #B2B2B2;
+}
+/* line 10, ../scss/_material.scss */
+button.button {
+  padding: 0.4rem 1rem;
+}
+
+/* line 14, ../scss/_material.scss */
+button[type='submit'] {
+  background-color: #407097;
+  color: #FFF;
+}
+
+/* line 19, ../scss/_material.scss */
+.mat-dialog-container {
+  background: #FFF;
+  box-shadow: none;
+}
+
+/* line 24, ../scss/_material.scss */
+.mat-dialog-container app-dialogs {
+  display: block;
+  position: relative;
+  padding: 1.2rem;
+  text-align: center;
+}
+/* line 30, ../scss/_material.scss */
+.mat-dialog-container .mat-dialog-title {
+  border-bottom: 1px solid #B2B2B2;
+  display: block;
+  margin: 0;
+  padding-bottom: 1rem;
+  text-align: left;
+  text-transform: capitalize;
+}
+/* line 38, ../scss/_material.scss */
+.mat-dialog-container .mat-dialog-content {
+  padding: 1rem 2rem;
+  text-align: left;
+}
+/* line 42, ../scss/_material.scss */
+.mat-dialog-container .mat-dialog-actions {
+  border-top: 1px solid #B2B2B2;
+  display: block;
+  padding-top: 1.5rem;
+  text-align: center;
+}
+
+/* line 51, ../scss/_material.scss */
+mat-form-field {
+  clear: both;
+  line-height: 1.25;
+  margin-bottom: 15px;
+  width: 100%;
+}
+/* line 57, ../scss/_material.scss */
+mat-form-field span.mat-input-placeholder-wrapper.mat-form-field-placeholder-wrapper {
+  padding-top: 0;
+  box-sizing: border-box;
+  top: 0;
+}
+/* line 62, ../scss/_material.scss */
+mat-form-field span.mat-input-placeholder-wrapper.mat-form-field-placeholder-wrapper .mat-input-placeholder {
+  top: 0;
+  color: #B2B2B2;
+  padding: 5px;
+}
+/* line 69, ../scss/_material.scss */
+mat-form-field .mat-input-wrapper.mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+/* line 73, ../scss/_material.scss */
+mat-form-field .mat-form-field-underline {
+  display: none;
+}
+/* line 77, ../scss/_material.scss */
+mat-form-field .mat-form-field-infix {
+  padding: 0;
+  border-top: none;
+}
+
+/* line 84, ../scss/_material.scss */
+input.mat-input-element {
+  border: 1px solid #b2b2b2;
+  box-sizing: border-box;
+  padding: 5px;
+  width: 100%;
+}
+
+/* TEXTAREA */
+/* line 92, ../scss/_material.scss */
+textarea.mat-input-element {
+  border: 1px solid #b2b2b2;
+  box-sizing: border-box;
+  padding: 5px;
+  width: 100%;
+}
+
+/*CHECKBOX */
+/* line 100, ../scss/_material.scss */
+mat-checkbox {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* line 103, ../scss/_material.scss */
+mat-checkbox .mat-checkbox-frame {
+  border-color: #3E3F4E;
+  border-width: thin;
+}
+/* line 109, ../scss/_material.scss */
+mat-checkbox.mat-accent.mat-checkbox-checked .mat-checkbox-frame {
+  border-color: #3E3F4E;
+  border-width: thin;
+}
+/* line 113, ../scss/_material.scss */
+mat-checkbox.mat-accent.mat-checkbox-checked .mat-checkbox-background {
+  background-color: #407097;
+}
+
+/* RADIO */
+/* line 122, ../scss/_material.scss */
+mat-radio-button.mat-radio-button .mat-radio-outer-circle {
+  border-color: #3E3F4E;
+  border-width: thin;
+}
+/* line 127, ../scss/_material.scss */
+mat-radio-button.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-outer-circle {
+  border-color: #3E3F4E;
+}
+/* line 130, ../scss/_material.scss */
+mat-radio-button.mat-radio-button.mat-accent.mat-radio-checked .mat-radio-inner-circle {
+  background-color: #407097;
+}
+
+/* AUTOCOMPLETE */
+/* line 137, ../scss/_material.scss */
+.mat-autocomplete-panel {
+  overflow: none;
+  overflow-x: none;
+  overflow-y: scroll;
+}
+/* line 141, ../scss/_material.scss */
+.mat-autocomplete-panel .mat-option {
+  border-bottom: 1px solid #BFBFBF;
+  clear: both;
+  cursor: pointer;
+  display: block;
+  font-size: 1.1rem;
+  height: auto;
+  line-height: 1.25;
+  padding: 5px;
+  width: 100%;
+}
+
+/* SELECT */
+/* line 156, ../scss/_material.scss */
+mat-select.mat-select {
+  border: 1px solid #b2b2b2;
+  box-sizing: border-box;
+  padding: 5px;
+}
+/* line 161, ../scss/_material.scss */
+mat-select .mat-select-panel {
+  background-color: #FFF;
+  box-shadow: none;
+  border: 1px solid #b2b2b2;
+}
+/* line 166, ../scss/_material.scss */
+mat-select .mat-select-panel .mat-option {
+  border-bottom: thin solid #b2b2b2;
+  display: block;
+  width: 100%;
+}
+/* line 170, ../scss/_material.scss */
+mat-select .mat-select-panel .mat-option:hover {
+  cursor: pointer;
+}
+/* line 173, ../scss/_material.scss */
+mat-select .mat-select-panel .mat-option .mat-option-text {
+  padding-left: 15px;
 }

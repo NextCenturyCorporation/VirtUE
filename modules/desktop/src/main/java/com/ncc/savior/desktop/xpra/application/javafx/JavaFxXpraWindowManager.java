@@ -81,6 +81,10 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 					x -= insetWidth;
 					y -= titleBarHeight;
 				}
+				if (packet.getMetadata().getFullscreen()) {
+					x = 0;
+					y = 0;
+				}
 				// double x = packet.getX();
 				// double y = packet.getY();
 				AnchorPane.setTopAnchor(canvas, y);
@@ -121,11 +125,13 @@ public class JavaFxXpraWindowManager extends XpraWindowManager {
 			@Override
 			public void handle(KeyEvent event) {
 				KeyCodeDto keycode = keyboard.getKeyCodeFromEvent(event);
+
 				// int key = event.getCode().ordinal();
 				// String u = keyMap.getUnicodeName(key);
 				// int c = keyMap.getKeyCode(key);
 				// List<String> mods = JavaFxUtils.getModifiers(event);
 				if (keycode != null) {
+					logger.debug(keycode.toString());
 					onKeyDown(keycode, keyboard.getModifiers(event));
 				}
 			}

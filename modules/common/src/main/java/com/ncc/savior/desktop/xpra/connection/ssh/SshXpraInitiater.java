@@ -50,7 +50,13 @@ public class SshXpraInitiater implements IXpraInitiator {
 				String prefix = "LIVE session at :";
 				if (line.contains(prefix)) {
 					String displayStr = line.substring(line.indexOf(prefix) + prefix.length());
-					int display = Integer.parseInt(displayStr);
+					int display;
+					try {
+						display = Integer.parseInt(displayStr);
+					} catch (NumberFormatException e) {
+						logger.debug("failed to parse number from line=" + line);
+						display = Integer.parseInt(displayStr.split(" ")[0]);
+					}
 					set.add(display);
 				}
 				// System.out.println(line);
@@ -85,7 +91,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 					String displayStr = line.substring(line.indexOf(prefix) + prefix.length());
 					display = Integer.parseInt(displayStr);
 				}
-				// logger.debug(line);
+				logger.debug(line);
 			}
 		} catch (JSchException | InterruptedException e) {
 			throw new IOException(e);
@@ -123,9 +129,14 @@ public class SshXpraInitiater implements IXpraInitiator {
 	public void startXpraApp(int display, String command) throws IOException {
 		Session session = null;
 		ChannelExec channel = null;
+		if (display < 0) {
+			logger.warn("unable to start application due to no display!");
+			return;
+		}
 		try {
 			session = getConnectedSession();
 			String fullCommand = "export DISPLAY=:" + display + ";" + SUDO_OR_NOTHING + command;
+			logger.debug("cmd: " + fullCommand);
 			channel = getConnectedChannel(fullCommand, session, null);
 			// InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			// BufferedReader reader = new BufferedReader(stream);

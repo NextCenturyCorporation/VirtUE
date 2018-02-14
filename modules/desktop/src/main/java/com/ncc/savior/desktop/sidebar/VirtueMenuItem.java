@@ -103,6 +103,7 @@ public class VirtueMenuItem {
 		pane.getChildren().add(label);
 		// pane.getChildren().add(hbox);
 		pane.getChildren().add(statusSpinner);
+		HBox.setMargin(label, new Insets(0, 0, 0, 5));
 		return pane;
 	}
 

@@ -58,4 +58,6 @@ public interface IActiveVirtueManager {
 
 	Iterable<VirtueInstance> getAllActiveVirtues();
 
+	VirtueInstance getActiveVirtue(String virtueId);
+
 }

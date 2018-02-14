@@ -13,7 +13,7 @@ import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.debug.DebugPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -46,7 +46,7 @@ public class JavaFxTestRunner extends Application {
 			client.addPacketListener(debugHandler);
 			client.addPacketSendListener(debugHandler);
 		}
-		JavaFxKeyboard keyboard = new JavaFxKeyboard(new XpraKeyMap());
+		JavaFxKeyboard keyboard = new JavaFxKeyboard(new JavaFxXpraKeyMap());
 		JavaFxApplicationManager applicationManager = new JavaFxApplicationManager(client, keyboard);
 
 		applicationManager.setDebugOutput(true);

@@ -17,7 +17,7 @@
           <div class="split-pane-content-primary">
 
             <div class="mui-row form-item margin-top-15">
-              <div class="mui-col-md-12 padding-left-0 padding-right-0">
+              <div class="mui-col-md-12">
                 <input type="text" id="virtue-name" value="" placeholder="Virtue Name" />
               </div>
             </div>
@@ -82,7 +82,7 @@
           <div class="mui-col-md-4">&nbsp;</div>
           <div class="mui-col-md-4 form-item text-align-center">
             <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Create Another Virtue</span>
-            <button class="button-submit" type="submit">Create Virtue</button>
+            <button (click)="createVirtue()" class="button-submit" type="submit">Create Virtue</button>
             <button class="button-cancel" type="cancel">Cancel</button>
           </div>
           <div class="mui-col-md-4"></div>

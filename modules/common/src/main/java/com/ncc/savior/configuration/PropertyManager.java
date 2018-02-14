@@ -33,6 +33,8 @@ public class PropertyManager {
 	public static final String PROPERTY_DEFAULT_PEM = "savior.desktop.defaultPem";
 	public static final String PROPERTY_ALLOW_INSECURE_SSL = "savior.desktop.allowInsecureSsl";
 	public static final String PROPERTY_USE_COLORS = "savior.desktop.useColors";
+	public static final String PROPERTY_STYLE = "savior.desktop.style";
+	public static final String PROPERTY_SWING = "savior.desktop.swing";
 	private Properties props;
 	private boolean warnOnMissingFile = false;
 
@@ -129,6 +131,9 @@ public class PropertyManager {
 	public boolean getBoolean(String property, boolean defaultValue) {
 		String strVal = getProperty(property, null);
 		boolean value = false;
+		if (strVal == null) {
+			return defaultValue;
+		}
 		try {
 			value = Boolean.valueOf(strVal);
 		} catch (RuntimeException e) {

@@ -43,8 +43,9 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		try {
 			reader = new FileReader(privateKey);
 			char[] cbuf = new char[4096];
-			reader.read(cbuf);
-			return new String(cbuf);
+			int n = reader.read(cbuf);
+			String s = new String(cbuf, 0, n);
+			return s;
 		} catch (IOException e) {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
 					"Error attempting to read file=" + privateKey.getAbsolutePath(), e);

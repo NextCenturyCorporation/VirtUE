@@ -40,17 +40,6 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
-		return vtRepository.findAll();
-
-	}
-
-	@Override
-	public Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates() {
-		return vmtRepository.findAll();
-	}
-
-	@Override
 	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(User user) {
 		Collection<VirtueTemplate> templates = vtRepository.findByUserNames(new UserName(user.getUsername()));
 		Map<String, VirtueTemplate> ret = new HashMap<String, VirtueTemplate>();
@@ -70,14 +59,44 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		return ret;
 	}
 
+	public VirtueTemplate getVirtueTemplateForUser(User user, String templateId) {
+		return vtRepository.findByUserNamesAndId(new UserName(user.getUsername()), templateId);
+	}
+
+	@Override
+	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
+		return vtRepository.findAll();
+
+	}
+
+	@Override
+	public Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates() {
+		return vmtRepository.findAll();
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getAllApplications() {
+		return appRepository.findAll();
+	}
+
 	@Override
 	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
 		return appRepository.findById(applicationId);
 	}
 
+	// @Override
+	// public ApplicationDefinition getApplicationDefinition(String applicationId) {
+	// return appRepository.findOne(applicationId);
+	// }
+
 	@Override
-	public VirtueTemplate getTemplate(User user, String templateId) {
-		return vtRepository.findByUserNamesAndId(new UserName(user.getUsername()), templateId);
+	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
+		return vmtRepository.findById(templateId);
+	}
+
+	@Override
+	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
+		return vtRepository.findById(templateId);
 	}
 
 	@Override
@@ -133,16 +152,13 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Iterable<ApplicationDefinition> getAllApplications() {
-		return appRepository.findAll();
-	}
-
-	@Override
 	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) throws NoSuchElementException {
 		VirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
 		ApplicationDefinition app = appRepository.findById(applicationId).get();
-		vmt.getApplications().add(app);
-		vmtRepository.save(vmt);
+		if (vmt != null && app != null) {
+			vmt.getApplications().add(app);
+			vmtRepository.save(vmt);
+		}
 	}
 
 	@Override
@@ -171,6 +187,21 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		vmtRepository.deleteAll();
 		appRepository.deleteAll();
 		userRepo.deleteAll();
+	}
+
+	@Override
+	public void deleteApplicationDefinition(String templateId) {
+		appRepository.deleteById(templateId);
+	}
+
+	@Override
+	public void deleteVmTemplate(String templateId) {
+		vmtRepository.deleteById(templateId);
+	}
+
+	@Override
+	public void deleteVirtueTemplate(String templateId) {
+		vtRepository.deleteById(templateId);
 	}
 
 }

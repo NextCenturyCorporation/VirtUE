@@ -1,3 +1,11 @@
+/* virtue-modal.component.css */
+::ng-deep .cdk-overlay-pane {
+  position: absolute;
+}
+::ng-deep .virtue-modal-overlay {
+  left: 33%;
+  top: 10%;
+}
 div[id^='virtue-'] span {
   display:block;
   padding: 0.75rem 0;

@@ -1,12 +1,15 @@
 import { NgModule } from '@angular/core';
+import {AppRoutingModule } from './app-routing.module';
 import {
   FormsModule,
   ReactiveFormsModule
 } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+
 import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
+
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Routes, RouterModule } from '@angular/router';
 
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { AppOverlayContainer } from './appOverlayContainer';
@@ -70,35 +73,25 @@ import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
 
 import { VirtuesComponent } from './virtues/virtues.component';
-import { VirtueComponent } from './virtues/virtue/virtue.component';
+import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
+import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
+import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
+import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
+import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
+
 import { DialogsComponent } from './dialogs/dialogs.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
-import { JsonFilterPipe } from './data/json-filter.pipe';
-import { CountFilterPipe } from './data/count-filter.pipe';
+import { JsonFilterPipe } from './shared/json-filter.pipe';
+import { CountFilterPipe } from './shared/count-filter.pipe';
 
-const appRoutes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent, data: {breadcrumb: 'Dashboard'} },
-  { path: 'config', component: ConfigComponent, data: {breadcrumb: 'Configuration'} },
-  { path: 'users', component: UsersComponent, data: {breadcrumb: 'Users'}, children: [
-    { path: '', component:  UserListComponent },
-    { path: 'add', component: AddUserComponent, data: {breadcrumb: 'Add User Account'} },
-    { path: 'edit/:id', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} }
-  ] },
-  { path: 'virtues', component: VirtuesComponent, data: {breadcrumb: 'Virtues'}, children: [
-    { path: '', component: VirtueComponent },
-    { path: 'create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
-    { path: 'edit/:id', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
-    { path: 'virtue-settings', component: VirtueSettingsComponent }
-  ] },
-  { path: '**', component: PageNotFoundComponent }
-];
+import { VirtuesService } from './shared/services/virtues.service';
+import { JsondataService } from './shared/services/jsondata.service';
 
 
 @NgModule({
@@ -117,7 +110,7 @@ const appRoutes: Routes = [
     AddUserComponent,
     EditUserComponent,
     VirtuesComponent,
-    VirtueComponent,
+    VirtueListComponent,
     VirtueSettingsComponent,
     CreateVirtueComponent,
     EditVirtueComponent,
@@ -131,12 +124,18 @@ const appRoutes: Routes = [
     JsonFilterPipe,
     CountFilterPipe,
     PageNotFoundComponent,
+    VirtualMachinesComponent,
+    VmListComponent,
+    VmBuildComponent,
+    VmEditComponent,
   ],
   imports: [
+    AppRoutingModule,
     BreadcrumbsModule,
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
+    HttpClientModule,
     HttpModule,
     MatAutocompleteModule,
     MatDialogModule,
@@ -147,16 +146,16 @@ const appRoutes: Routes = [
     MatSelectModule,
     MatToolbarModule,
     BrowserAnimationsModule,
-    SplitPaneModule,
-    RouterModule.forRoot(appRoutes)
+    SplitPaneModule
   ],
   exports: [
     JsonFilterPipe,
-    OverlayModule,
-    RouterModule
+    OverlayModule
   ],
   providers: [
-    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer(),  },
+    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
+    JsondataService,
+    VirtuesService
   ],
   bootstrap: [AppComponent],
   entryComponents: [

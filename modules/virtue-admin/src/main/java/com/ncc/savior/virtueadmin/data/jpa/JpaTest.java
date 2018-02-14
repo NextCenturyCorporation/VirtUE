@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.data.jpa;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -43,10 +44,14 @@ public class JpaTest {
 			ApplicationDefinition a1 = new ApplicationDefinition(UUID.randomUUID().toString(), "testApp", "V1",
 					OS.LINUX);
 			apps1.add(a1);
+			boolean enabled = true;
+			Date now = new Date();
+			String systemUser = "system";
 			VirtualMachineTemplate vmt1 = new VirtualMachineTemplate(UUID.randomUUID().toString(), "test", OS.LINUX,
-					"myTemplatePath", apps1);
+					"myTemplatePath", apps1, enabled, now, systemUser);
 			vmts1.add(vmt1);
-			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1);
+			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1,
+					"default-template", enabled, now, systemUser);
 
 			tm.addApplicationDefinition(a1);
 			tm.addVmTemplate(vmt1);
