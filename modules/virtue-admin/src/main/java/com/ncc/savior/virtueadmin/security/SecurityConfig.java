@@ -14,6 +14,7 @@ import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -59,7 +60,7 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * 
  *
  */
-
+@Profile("AD")
 @EnableWebSecurity
 @PropertySources({ @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
 		@PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true) })
@@ -270,6 +271,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	static class DummyUserDetailsService implements UserDetailsService {
 
+		@Override
 		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 			return new User(username, "notUsed", true, true, true, true,
 					AuthorityUtils.createAuthorityList("ROLE_USER"));
