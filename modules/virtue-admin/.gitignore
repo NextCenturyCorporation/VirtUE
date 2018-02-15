@@ -5,6 +5,7 @@
 /database/
 /logs/
 /certs/
+application*.properties
 
 
 ### STS ###
