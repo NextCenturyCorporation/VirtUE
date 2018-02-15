@@ -18,7 +18,7 @@ import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -120,12 +120,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		addVirtueTemplate(virtueSingleAll);
 		addVirtueTemplate(virtueMath);
 
-		User user = new User("user", new ArrayList<String>());
-		User user2 = new User("user2", new ArrayList<String>());
-		User user3 = new User("user3", new ArrayList<String>());
-		User admin = new User("admin", new ArrayList<String>());
-		User kdrumm = new User("kdrumm", new ArrayList<String>());
-		User kdrummTest = new User("kdrumm_test", new ArrayList<String>());
+		VirtueUser user = new VirtueUser("user", new ArrayList<String>());
+		VirtueUser user2 = new VirtueUser("user2", new ArrayList<String>());
+		VirtueUser user3 = new VirtueUser("user3", new ArrayList<String>());
+		VirtueUser admin = new VirtueUser("admin", new ArrayList<String>());
+		VirtueUser kdrumm = new VirtueUser("kdrumm", new ArrayList<String>());
+		VirtueUser kdrummTest = new VirtueUser("kdrumm_test", new ArrayList<String>());
 
 		assignVirtueTemplateToUser(user, virtueAllVms.getId());
 		assignVirtueTemplateToUser(user, virtueSingleBrowsers.getId());
@@ -163,7 +163,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(User user) {
+	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(VirtueUser user) {
 		Map<String, VirtueTemplate> map = new LinkedHashMap<String, VirtueTemplate>();
 		Collection<String> templateIds = userToTemplateId.get(user.getUsername());
 		if (templateIds != null) {
@@ -176,7 +176,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Collection<String> getVirtueTemplateIdsForUser(User user) {
+	public Collection<String> getVirtueTemplateIdsForUser(VirtueUser user) {
 		return userToTemplateId.get(user.getUsername());
 	}
 
@@ -186,7 +186,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public VirtueTemplate getVirtueTemplateForUser(User user, String templateId) {
+	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
 		Collection<String> userTemplates = userToTemplateId.get(user.getUsername());
 		if (userTemplates != null && userTemplates.contains(templateId)) {
 			return getTemplate(templateId);
@@ -216,7 +216,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void assignVirtueTemplateToUser(User user, String virtueTemplateId) {
+	public void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId) {
 		if (templates.containsKey(virtueTemplateId)) {
 			Collection<String> list = userToTemplateId.get(user.getUsername());
 			if (list == null) {
@@ -231,7 +231,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void revokeVirtueTemplateFromUser(User user, String virtueTemplateId) {
+	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
 		if (templates.containsKey(virtueTemplateId)) {
 			Collection<String> list = userToTemplateId.get(user.getUsername());
 			if (list != null) {

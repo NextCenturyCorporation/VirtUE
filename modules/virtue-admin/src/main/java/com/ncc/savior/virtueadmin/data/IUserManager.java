@@ -1,17 +1,17 @@
 package com.ncc.savior.virtueadmin.data;
 
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 public interface IUserManager {
 
-	void addUser(User admin);
+	void addUser(VirtueUser admin);
 
-	User getUser(String username);
+	VirtueUser getUser(String username);
 
-	Iterable<User> getAllUsers();
+	Iterable<VirtueUser> getAllUsers();
 
 	void clear();
 
-	void removeUser(User user);
+	void removeUser(VirtueUser user);
 
 }

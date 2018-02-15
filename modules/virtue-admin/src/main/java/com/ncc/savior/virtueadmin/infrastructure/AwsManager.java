@@ -58,7 +58,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -156,7 +156,7 @@ public class AwsManager implements ICloudManager {
 	 * com.ncc.savior.virtueadmin.model.VirtueTemplate)
 	 */
 	@Override
-	public VirtueInstance createVirtue(User user, VirtueTemplate template) throws Exception {
+	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 
 		try {
 			credentialsProvider.getCredentials();
@@ -445,7 +445,7 @@ public class AwsManager implements ICloudManager {
 		return instances;
 	}
 
-	public String deleteVirtue(User user, String instanceId) throws Exception {
+	public String deleteVirtue(VirtueUser user, String instanceId) throws Exception {
 
 		// Delete the stack
 

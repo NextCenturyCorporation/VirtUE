@@ -9,7 +9,7 @@
 
 package com.ncc.savior.virtueadmin.infrastructure;
 
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
@@ -17,6 +17,6 @@ public interface ICloudManager {
 
 	void deleteVirtue(VirtueInstance virtueInstance);
 
-	VirtueInstance createVirtue(User user, VirtueTemplate template) throws Exception;
+	VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception;
 
 }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
@@ -31,7 +31,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	private VirtueInstanceRepository virtueRepository;
 
 	@Override
-	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(User user, Set<String> templateIds) {
+	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds) {
 		List<VirtueInstance> virtueInstances = virtueRepository.findByUsernameAndTemplateIdIn(user.getUsername(),
 				templateIds);
 		Map<String, Set<VirtueInstance>> templateIdToVirtueInstances = new HashMap<String, Set<VirtueInstance>>();

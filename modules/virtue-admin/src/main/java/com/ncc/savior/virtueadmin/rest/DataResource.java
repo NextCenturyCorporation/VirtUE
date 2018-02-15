@@ -2,8 +2,8 @@ package com.ncc.savior.virtueadmin.rest;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +25,7 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
@@ -161,15 +161,15 @@ public class DataResource {
 		adminRoles.add("ROLE_USER");
 		adminRoles.add("ROLE_ADMIN");
 
-		User admin = new User("admin", adminRoles);
-		User presenter = new User("presenter", userRoles);
-		User office = new User("office", userRoles);
-		User math = new User("math", userRoles);
-		User drawing = new User("drawing", userRoles);
-		User browser = new User("browser", userRoles);
-		User nerd = new User("nerd", userRoles);
-		User artist = new User("artist", userRoles);
-		User developer = new User("developer", userRoles);
+		VirtueUser admin = new VirtueUser("admin", adminRoles);
+		VirtueUser presenter = new VirtueUser("presenter", userRoles);
+		VirtueUser office = new VirtueUser("office", userRoles);
+		VirtueUser math = new VirtueUser("math", userRoles);
+		VirtueUser drawing = new VirtueUser("drawing", userRoles);
+		VirtueUser browser = new VirtueUser("browser", userRoles);
+		VirtueUser nerd = new VirtueUser("nerd", userRoles);
+		VirtueUser artist = new VirtueUser("artist", userRoles);
+		VirtueUser developer = new VirtueUser("developer", userRoles);
 
 		userManager.addUser(admin);
 		userManager.addUser(presenter);
@@ -208,8 +208,8 @@ public class DataResource {
 	@Path("user/{sourceUser}/{newUser}")
 	public Response assignUser(@PathParam("sourceUser") String sourceUserName,
 			@PathParam("newUser") String newUserName) {
-		User source = userManager.getUser(sourceUserName);
-		User newUser = userManager.getUser(newUserName);
+		VirtueUser source = userManager.getUser(sourceUserName);
+		VirtueUser newUser = userManager.getUser(newUserName);
 		if (newUser == null) {
 			Collection<String> auth = source.getAuthorities();
 			//need this verbose code to cause the authorities fetch
@@ -217,7 +217,7 @@ public class DataResource {
 			for (String a:auth) {
 				newAuth.add(a);
 			}
-			newUser = new User(newUserName, source.getAuthorities());
+			newUser = new VirtueUser(newUserName, source.getAuthorities());
 			userManager.addUser(newUser);
 		}
 		Collection<String> ids = templateManager.getVirtueTemplateIdsForUser(source);
@@ -232,7 +232,7 @@ public class DataResource {
 	@Path("user/{sourceUser}")
 	@Produces("application/json")
 	public Map<String, VirtueTemplate> assignUser(@PathParam("sourceUser") String sourceUserName) {
-		User source = new User(sourceUserName, new ArrayList<String>());
+		VirtueUser source = new VirtueUser(sourceUserName, new ArrayList<String>());
 		Map<String, VirtueTemplate> ids = templateManager.getVirtueTemplatesForUser(source);
 		return ids;
 	}
@@ -247,7 +247,7 @@ public class DataResource {
 	@GET
 	@Path("user/")
 	@Produces("application/json")
-	public Iterable<User> getUsers() {
+	public Iterable<VirtueUser> getUsers() {
 		return userManager.getAllUsers();
 	}
 
