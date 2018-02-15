@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
+import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -16,11 +17,13 @@ public class AdminService {
 
 	private IActiveVirtueManager virtueManager;
 	private ITemplateManager templateManager;
+	private IUserManager userManager;
 
-	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager) {
+	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
+		this.userManager = userManager;
 	}
 
 	public AdminService(ITemplateManager templateManager) {
@@ -116,5 +119,22 @@ public class AdminService {
 
 	public void deleteVirtue(User user, String templateId) {
 		templateManager.deleteVirtueTemplate(templateId);
+	}
+
+	public User createUpdateUser(User user, User newUser) {
+		userManager.addUser(newUser);
+		return newUser;
+	}
+
+	public User getUser(User user, String usernameToRetrieve) {
+		return userManager.getUser(usernameToRetrieve);
+	}
+
+	public void removeUser(User user, String usernameToRemove) {
+		userManager.removeUser(user);
+	}
+
+	public Iterable<User> getAllUsers(User user) {
+		return userManager.getAllUsers();
 	}
 }

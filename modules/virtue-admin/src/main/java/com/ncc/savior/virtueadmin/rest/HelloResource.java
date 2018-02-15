@@ -29,6 +29,15 @@ public class HelloResource {
 	public Response getLogin() throws URISyntaxException {
 		User user = UserService.getCurrentUser();
 		
-		return Response.status(200).entity("Hello World "+user.getUsername()).build();
+		return Response.status(200).entity("User needs to login.  Login Disabled. " + user.getUsername()).build();
+	}
+
+	@GET
+	@Path("/error")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getError() throws URISyntaxException {
+		User user = UserService.getCurrentUser();
+
+		return Response.status(400).entity("Error for " + user.getUsername()).build();
 	}
 }

@@ -18,6 +18,7 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.security.UserService;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
@@ -324,10 +325,92 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
+	
+	@POST
+	@Produces("application/json")
+	@Path("user/")
+	public User createUpdateUser(User newUser) {
+		try {
+			User user = getUserFromSecurity();
+			return adminService.createUpdateUser(user, newUser);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@PUT
+	@Produces("application/json")
+	@Path("user/{username}")
+	public User updateUser(@PathParam("username") String username, User newUser) {
+		try {
+			User user = getUserFromSecurity();
+			if (!newUser.getUsername().equals(username)) {
+				throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+						"Given user doesn't match username in path.  Username=" + username + ". NewUser=" + newUser);
+			}
+			return adminService.createUpdateUser(user, newUser);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("user/{username}")
+	public User getUser(@PathParam("username") String usernameToRetrieve) {
+		try {
+			User user = getUserFromSecurity();
+			User returnedUser = user= adminService.getUser(user, usernameToRetrieve);
+			return returnedUser;
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+	
+	@GET
+	@Produces("application/json")
+	@Path("user")
+	public Iterable<User> getAllUsers() {
+		try {
+			User user = getUserFromSecurity();
+			return adminService.getAllUsers(user);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@DELETE
+	@Produces("application/json")
+	@Path("user/{username}")
+	public void removeUser(@PathParam("username") String usernameToRemove) {
+		try {
+			User user = getUserFromSecurity();
+			adminService.removeUser(user, usernameToRemove);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
 
 	private User getUserFromSecurity() {
 		User user = UserService.getCurrentUser();
-
-		return User.adminUser();
+		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have ADMIN role");
+		}
+		return user;
 	}
 }

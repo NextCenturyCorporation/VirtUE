@@ -70,7 +70,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		Date now = new Date();
 		String systemName = "system";
-		String allTemplate = "default-template";
+//		String allTemplate = "default-template";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
 				OS.LINUX, "Linux Browsers", appsBrowsers, true, now, systemName);
 
@@ -305,7 +305,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Collection<String> getUsers() {
+	public Collection<String> getUsersWithTemplate() {
 		return userToTemplateId.keySet();
 	}
 

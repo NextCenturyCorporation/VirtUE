@@ -45,11 +45,13 @@ export class EditVirtueComponent implements OnInit {
   getThisVirtue() {
     const id = this.virtueId.id;
     this.virtuesService.getVirtue(id).subscribe(
-      data => { this.virtueData = data }
+      data => {
+        this.virtueData = data;
+        this.virtueVmList = data.vmTemplates;
+        // console.log(this.virtueVmList);
+      }
     );
-    this.virtueVmList = this.virtueData['vmTemplates'];
 
-    console.log(this.virtueVmList);
   }
 
 
