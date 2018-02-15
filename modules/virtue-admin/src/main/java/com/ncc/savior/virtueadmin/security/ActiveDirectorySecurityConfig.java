@@ -122,7 +122,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		logger.entry();
 		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
 		provider.setTicketValidator(sunJaasKerberosTicketValidator());
-		provider.setUserDetailsService(new DummyUserDetailsService());
+		provider.setUserDetailsService(new DatabaseUserDetailsService());
 		logger.exit(provider);
 		return provider;
 	}

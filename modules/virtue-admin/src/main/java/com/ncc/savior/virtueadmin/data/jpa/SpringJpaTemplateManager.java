@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
-import com.ncc.savior.virtueadmin.model.UserName;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
@@ -28,11 +27,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Autowired
 	private VirtualMachineTemplateRepository vmtRepository;
 	@Autowired
-	private UserNameRepository userRepo;
+	private UserRepository userRepo;
 
 	public SpringJpaTemplateManager(VirtueTemplateRepository vtRepository,
 			VirtualMachineTemplateRepository vmtRepository, ApplicationDefinitionRepository appRepository,
-			UserNameRepository userRep) {
+			UserRepository userRep) {
 		this.vtRepository = vtRepository;
 		this.vmtRepository = vmtRepository;
 		this.appRepository = appRepository;
@@ -41,7 +40,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(User user) {
-		Collection<VirtueTemplate> templates = vtRepository.findByUserNames(new UserName(user.getUsername()));
+		Collection<VirtueTemplate> templates = vtRepository.findByUsers(user);
 		Map<String, VirtueTemplate> ret = new HashMap<String, VirtueTemplate>();
 		for (VirtueTemplate t : templates) {
 			ret.put(t.getId(), t);
@@ -51,7 +50,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public Collection<String> getVirtueTemplateIdsForUser(User user) {
-		Collection<VirtueTemplate> templates = vtRepository.findByUserNames(new UserName(user.getUsername()));
+		Collection<VirtueTemplate> templates = vtRepository.findByUsers(user);
 		Collection<String> ret = new HashSet<String>();
 		for (VirtueTemplate t : templates) {
 			ret.add(t.getId());
@@ -60,7 +59,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	public VirtueTemplate getVirtueTemplateForUser(User user, String templateId) {
-		return vtRepository.findByUserNamesAndId(new UserName(user.getUsername()), templateId);
+		return vtRepository.findByUsersAndId(user, templateId);
 	}
 
 	@Override
@@ -136,18 +135,18 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void assignVirtueTemplateToUser(User user, String virtueTemplateId) {
-		UserName username = new UserName(user.getUsername());
+//		UserName username = new UserName(user.getUsername());
 		// TODO this seems inefficient, but it errors if the username does not exist.
-		userRepo.save(username);
 		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-		vt.retrieveUserNames().add(username);
+		Collection<User> users = vt.getUsers();
+		users.add(user);
 		vtRepository.save(vt);
 	}
 
 	@Override
 	public void revokeVirtueTemplateFromUser(User user, String virtueTemplateId) {
 		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-		vt.retrieveUserNames().remove(new UserName(user.getUsername()));
+		vt.retrieveUsers().remove(user);
 		vtRepository.save(vt);
 	}
 
@@ -171,12 +170,15 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Collection<String> getUsers() {
-		Collection<String> users = new ArrayList<String>();
-		Iterator<UserName> itr = userRepo.findAll().iterator();
-		while (itr.hasNext()) {
-			UserName user = itr.next();
-			users.add(user.getUsername());
+	public Collection<String> getUsersWithTemplate() {
+		Set<String> users = new HashSet<String>();
+		Iterable<VirtueTemplate> itr = vtRepository.findAll();
+		Iterator<VirtueTemplate> i = itr.iterator();
+		while (i.hasNext()) {
+			VirtueTemplate t = i.next();
+			for (User u:t.getUsers()) {
+			users.add(u.getUsername());
+			}
 		}
 		return users;
 	}

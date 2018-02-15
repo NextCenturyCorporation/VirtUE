@@ -32,7 +32,7 @@ public class JpaTest {
 
 	@Bean
 	public CommandLineRunner demo(VirtueTemplateRepository vtRepository, VirtualMachineTemplateRepository vmtRepository,
-			ApplicationDefinitionRepository appRepository, UserNameRepository userRep) {
+			ApplicationDefinitionRepository appRepository, UserRepository userRep) {
 		return (args) -> {
 			System.out.println("**************************************");
 			SpringJpaTemplateManager tm = new SpringJpaTemplateManager(vtRepository, vmtRepository, appRepository,

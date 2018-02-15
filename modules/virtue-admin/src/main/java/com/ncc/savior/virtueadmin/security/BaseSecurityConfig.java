@@ -1,6 +1,9 @@
 package com.ncc.savior.virtueadmin.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -14,12 +17,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.AccessDeniedHandler;
+
+import com.ncc.savior.virtueadmin.data.IUserManager;
 
 public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES_CLASSPATH = "classpath:savior-server-security.properties";
@@ -31,13 +37,14 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
-	private String type;
 
 	@Autowired
 	protected Environment env;
+	
+	@Autowired
+	IUserManager userManager;
 
 	protected BaseSecurityConfig(String type) {
-		this.type = type;
 		logger.info("Security configuration enabled. Type=" + type);
 	}
 
@@ -77,13 +84,32 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		};
 	}
 
-	static class DummyUserDetailsService implements UserDetailsService {
+	class DatabaseUserDetailsService implements UserDetailsService {
 
-		@Override
-		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-			return new User(username, "notUsed", true, true, true, true,
-					AuthorityUtils.createAuthorityList("ROLE_USER"));
+		public UserDetails loadUserByUsername(String fqdn) throws UsernameNotFoundException {
+			String username = null;
+			if (fqdn == null) {
+				return cannotFindUser(username, "No username supplied");
+			}
+			if (fqdn.indexOf("@") != -1) {
+				username = fqdn.substring(0, fqdn.indexOf("@"));
+			}
+
+			com.ncc.savior.virtueadmin.model.User user = userManager.getUser(username);
+			if (user == null) {
+				return cannotFindUser(username, "Unable to find user=" + username + " in user database.");
+			}
+			Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+			for (String a : user.getAuthorities()) {
+				authorities.add(new SimpleGrantedAuthority(a));
+			}
+			return new User(user.getUsername(), "notUsed", true, true, true, true, authorities);
 		}
 
+	}
+
+	public User cannotFindUser(String username, String string) {
+		logger.warn(string);
+		return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
 	}
 }

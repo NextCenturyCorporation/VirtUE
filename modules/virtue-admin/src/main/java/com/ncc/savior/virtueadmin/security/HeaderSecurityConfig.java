@@ -39,6 +39,7 @@ public class HeaderSecurityConfig extends BaseSecurityConfig {
 		super("Header");
 	}
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(HeaderSecurityConfig.class);
 
 	@Bean
