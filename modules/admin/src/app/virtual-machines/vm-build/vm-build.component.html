@@ -11,7 +11,7 @@
           <div class="mui-row">
             <div class="mui-col-md-6">
               <mat-form-field>
-                <input matInput name="vmName" placeholder="Virtual Machine Name" />
+                <input matInput #vm_name placeholder="Virtual Machine Name"  />
               </mat-form-field>
             </div>
           </div>
@@ -21,8 +21,8 @@
             </div>
             <div class="mui-col-md-4">
               <mat-form-field class="form-field">
-                <mat-select [(ngModel)]="osValue" name="operatingSystem" placeholder="Select One" [(value)]="selected" disableRipple>
-                  <mat-option *ngFor="let os of osList" [value]="os.os_info">{{ os.os_name }} </mat-option>
+                <mat-select [(ngModel)]="osValue" #vm_os [ngModelOptions]="{standalone: true}" placeholder="Select One" [(value)]="selected" disableRipple>
+                  <mat-option *ngFor="let os of osList" [value]="os.os_name">{{ os.os_name }} </mat-option>
                 </mat-select>
                 <a *ngIf="selected" href="{{ selected }}" title="Package List: {{ selected }}" target="_blank"><span class="fa fa-info-circle"></span> </a>
               </mat-form-field>
@@ -34,7 +34,7 @@
             </div>
             <div class="mui-col-md-4">
               <mat-form-field>
-                <textarea rows="10" matInput name="vmPackages" placeholder="List each packages on a new line"></textarea>
+                <textarea rows="10" matInput #vm_packages placeholder="List each packages on a new line"></textarea>
               </mat-form-field>
             </div>
           </div>
@@ -43,7 +43,7 @@
           <div class="mui-col-md-4">&nbsp;</div>
           <div class="mui-col-md-4 form-item text-align-center">
             <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Build Another VM</span>
-            <button class="button-submit" type="submit">Build VM</button>
+            <button class="button-submit" type="submit" (click)="onBuildVM(vm_name.value,selected,vm_packages.value)">Build VM</button>
             <button class="button-cancel" type="cancel">Cancel</button>
           </div>
           <div class="mui-col-md-4"></div>

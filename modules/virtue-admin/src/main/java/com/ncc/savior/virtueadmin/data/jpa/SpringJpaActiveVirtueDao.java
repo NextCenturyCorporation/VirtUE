@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,23 +48,22 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void updateVmState(String vmId, VmState state) {
-		VirtualMachine vm = vmRepository.findOne(vmId);
-		if (vm != null) {
-			vm.setState(state);
-		} else {
+		Optional<VirtualMachine> vm = vmRepository.findById(vmId);
+		if (!vm.isPresent()) {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Unable to find virtual machine with id=" + vmId);
-		}
-		vmRepository.save(vm);
+		} 
+		vm.get().setState(state);
+		vmRepository.save(vm.get());
 	}
 
 	@Override
 	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
 		// TODO could be more efficient
-		VirtueInstance virtue = virtueRepository.findOne(virtueId);
-		if (virtue == null) {
+		Optional<VirtueInstance> virtue = virtueRepository.findById(virtueId);
+		if (!virtue.isPresent()) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue with id=" + virtueId);
 		}
-		Collection<VirtualMachine> vms = virtue.getVms();
+		Collection<VirtualMachine> vms = virtue.get().getVms();
 		for (VirtualMachine vm : vms) {
 			Collection<ApplicationDefinition> apps = vm.getApplications();
 			for (ApplicationDefinition app : apps) {
@@ -85,8 +85,8 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public VirtueInstance getVirtueInstance(String virtueId) {
-		return virtueRepository.findOne(virtueId);
+	public Optional<VirtueInstance> getVirtueInstance(String virtueId) {
+		return virtueRepository.findById(virtueId);
 	}
 
 	@Override
@@ -96,12 +96,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void clear() {
-		Iterable<VirtueInstance> virtues = virtueRepository.findAll();
-		// for (VirtueInstance virtue : virtues) {
-		// vmRepository.delete(virtue.getVms());
-		// }
-		virtueRepository.delete(virtues);
-
+		virtueRepository.deleteAll();
 	}
 
 }

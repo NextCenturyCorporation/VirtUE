@@ -33,7 +33,12 @@ public class UserService {
 				String groupStr = group.getAuthority();
 				myGroups.add(groupStr);
 			}
-			User user = new User(auth.getName(), myGroups);
+			String authName = auth.getName();
+			String name=authName;
+			if (authName.indexOf("@")!=-1) {
+				name=authName.substring(0,authName.indexOf("@"));
+			}
+			User user = new User(name, myGroups);
 			return user;
 		}
 		return User.anonymousUser();

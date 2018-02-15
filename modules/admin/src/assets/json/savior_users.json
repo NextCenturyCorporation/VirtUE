@@ -1,0 +1,42 @@
+[
+ {
+   "app_user_id": 20,
+   "app_user_name": "Sophie Kim",
+   "app_user_ad_id": "skim",
+   "app_user_virtues": "",
+   "app_user_timestamp": "2018-01-05T19:57:01.052901",
+   "app_user_status": "enabled"
+ },
+ {
+   "app_user_id": 21,
+   "app_user_name": "Chris Long",
+   "app_user_ad_id": "clong",
+   "app_user_virtues": "",
+   "app_user_timestamp": "2018-01-05T19:57:01.052901",
+   "app_user_status": "enabled"
+ },
+ {
+   "app_user_id": 22,
+   "app_user_name": "Kara Cartwright",
+   "app_user_ad_id": "kartwright",
+   "app_user_virtues": "",
+   "app_user_timestamp": "2018-01-05T19:57:01.052901",
+   "app_user_status": "enabled"
+ },
+ {
+   "app_user_id": 23,
+   "app_user_name": "Patrick Dwyer",
+   "app_user_ad_id": "pdwyer",
+   "app_user_virtues": "",
+   "app_user_timestamp": "2018-01-05T19:57:01.052901",
+   "app_user_status": "enabled"
+ },
+ {
+   "app_user_id": 24,
+   "app_user_name": "Ruslan ",
+   "app_user_ad_id": "ruslan",
+   "app_user_virtues": "",
+   "app_user_timestamp": "2018-01-05T19:57:01.052901",
+   "app_user_status": "enabled"
+ }
+]

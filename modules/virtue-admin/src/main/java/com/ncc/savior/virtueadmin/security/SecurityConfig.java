@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.security;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -8,21 +9,38 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosTicketValidator;
+import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
+import org.springframework.security.kerberos.client.ldap.KerberosLdapContextSource;
+import org.springframework.security.kerberos.web.authentication.SpnegoAuthenticationProcessingFilter;
+import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -42,15 +60,14 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * 
  *
  */
-
+@Profile("AD")
 @EnableWebSecurity
-@PropertySources({
-    @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
-    @PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true)
-})
+@PropertySources({ @PropertySource(SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
+		@PropertySource(value = SecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true) })
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
 	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2 = "file:savior-server-security-site.properties";
+	private static final XLogger LOGGER = XLoggerFactory.getXLogger(SecurityConfig.class);
 
 	private static final String AUTH_MODULE_LDAP = "LDAP";
 
@@ -63,6 +80,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 	private static final String PROPERTY_AUTH_MODULE = "savior.security.authentication";
+	private static final String ADMIN_ROLE = "ADMIN";
+	private static final String USER_ROLE = "USER";
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -84,6 +103,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
 
+	@Value("${savior.security.ldap}")
+	private String ldapURL;
+
+	@Value("${savior.virtueadmin.principal}")
+	private String servicePrincipal;
+
+	@Value("${savior.virtueadmin.keytab}")
+	private File keytabLocation;
+
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
@@ -92,8 +120,113 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return provider;
 	}
 
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		LOGGER.entry();
+		AuthenticationManager authenticationManagerBean = super.authenticationManagerBean();
+		LOGGER.exit(authenticationManagerBean);
+		return authenticationManagerBean;
+	}
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		LOGGER.entry(http);
+		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
+			http.addFilterAt(new HeaderFilter(), AbstractPreAuthenticatedProcessingFilter.class);
+			printDevModuleWarning(authModuleName);
+		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
+			http.addFilterAt(new SingleUserFilter(env), AbstractPreAuthenticatedProcessingFilter.class);
+			printDevModuleWarning(authModuleName);
+		}
+		
+		http.exceptionHandling().authenticationEntryPoint(spnegoEntryPoint()).accessDeniedHandler(getAccessDeniedHandler()).and().authorizeRequests().antMatchers("/")
+				.authenticated().antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**")
+				.hasRole(USER_ROLE).antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
+				.loginPage("/login").permitAll().and().logout().permitAll().and()
+				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
+						BasicAuthenticationFilter.class);
+		
+		if (forceHttps) {
+			// sets port mapping for insecure to secure. Although this line isn't necessary
+			// as it has 8080:8443 and 80:443 by default
+			http.portMapper().http(8080).mapsTo(8443);
+			// causes all requests to need to be over https.
+			http.requiresChannel().anyRequest().requiresSecure();
+		}
+		LOGGER.exit();
+	}
+
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		LOGGER.entry(auth);
+		auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
+				.authenticationProvider(kerberosServiceAuthenticationProvider());
+		LOGGER.exit();
+	}
+
+	@Bean
+	public SpnegoEntryPoint spnegoEntryPoint() {
+		LOGGER.entry();
+		SpnegoEntryPoint spnegoEntryPoint = new SpnegoEntryPoint();
+		LOGGER.exit(spnegoEntryPoint);
+		return spnegoEntryPoint;
+	}
+
+	@Bean
+	public SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter(
+			AuthenticationManager authenticationManager) {
+		LOGGER.entry(authenticationManager);
+		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
+		filter.setAuthenticationManager(authenticationManager);
+		LOGGER.exit(filter);
+		return filter;
+	}
+
+	@Bean
+	public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() {
+		LOGGER.entry();
+		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
+		provider.setTicketValidator(sunJaasKerberosTicketValidator());
+		provider.setUserDetailsService(new DummyUserDetailsService());
+		LOGGER.exit(provider);
+		return provider;
+	}
+
+	@Bean
+	public SunJaasKerberosTicketValidator sunJaasKerberosTicketValidator() {
+		LOGGER.entry();
+		SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
+		ticketValidator.setServicePrincipal(servicePrincipal);
+		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabLocation));
+		ticketValidator.setDebug(true);
+		LOGGER.exit(ticketValidator);
+		return ticketValidator;
+	}
+
+	@Bean
+	public KerberosLdapContextSource kerberosLdapContextSource() {
+		LOGGER.entry();
+		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(ldapURL);
+		contextSource.setLoginConfig(loginConfig());
+		LOGGER.exit(contextSource);
+		return contextSource;
+	}
+
+	@Bean
+	public SunJaasKrb5LoginConfig loginConfig() {
+		LOGGER.entry();
+		SunJaasKrb5LoginConfig loginConfig = new SunJaasKrb5LoginConfig();
+		loginConfig.setKeyTabLocation(new FileSystemResource(keytabLocation));
+		loginConfig.setServicePrincipal(servicePrincipal);
+		loginConfig.setDebug(true);
+		loginConfig.setIsInitiator(true);
+		LOGGER.exit(loginConfig);
+		return loginConfig;
+	}
+
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		// auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
 		// auth.inMemoryAuthentication().withUser("user").password("password").roles("USER");
 		// auth.inMemoryAuthentication().withUser("user2").password("password").roles("USER");
@@ -108,36 +241,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
 			auth.authenticationProvider(new PassThroughAuthenticationProvider());
 		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_ACTIVEDIRECTORY)) {
-			auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider());
-		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_LDAP)) {
-			auth.ldapAuthentication().userDnPatterns("uid={0},ou=people").groupSearchBase("ou=groups");
+			// auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider());
 		} else {
 			throw new SaviorException(-1,
 					"Configuration error!  Need to set 'savior.security.authentication' in security property file");
-		}
-	}
-
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		// http.authorizeRequests().anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll();
-		if (authModuleName.equalsIgnoreCase(AUTH_MODULE_DUMMY)) {
-			http.addFilterAt(new HeaderFilter(), AbstractPreAuthenticatedProcessingFilter.class);
-			printDevModuleWarning(authModuleName);
-		} else if (authModuleName.equalsIgnoreCase(AUTH_MODULE_SINGLEUSER)) {
-			http.addFilterAt(new SingleUserFilter(env), AbstractPreAuthenticatedProcessingFilter.class);
-			printDevModuleWarning(authModuleName);
-		}
-		// Set what roles are required to view each urls
-		http.authorizeRequests().antMatchers("/desktop/**").hasRole("USER").antMatchers("/admin2/**").hasRole("ADMIN")
-				.antMatchers("/").permitAll();
-		http.exceptionHandling().accessDeniedHandler(getAccessDeniedHandler());
-
-		if (forceHttps) {
-			// sets port mapping for insecure to secure. Although this line isn't necessary
-			// as it has 8080:8443 and 80:443 by default
-			http.portMapper().http(8080).mapsTo(8443);
-			// causes all requests to need to be over https.
-			http.requiresChannel().anyRequest().requiresSecure();
 		}
 	}
 
@@ -161,4 +268,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		};
 	}
+
+	static class DummyUserDetailsService implements UserDetailsService {
+
+		@Override
+		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+			return new User(username, "notUsed", true, true, true, true,
+					AuthorityUtils.createAuthorityList("ROLE_USER"));
+		}
+
+	}
+
 }

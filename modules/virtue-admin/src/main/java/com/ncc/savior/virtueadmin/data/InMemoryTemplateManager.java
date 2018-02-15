@@ -5,11 +5,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -64,16 +68,19 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		appChromeIsBetterThanFirefox.add(calculator);
 		appsMath.add(calculator);
 
+		Date now = new Date();
+		String systemName = "system";
+		String allTemplate = "default-template";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
-				OS.LINUX, "Linux Browsers", appsBrowsers);
+				OS.LINUX, "Linux Browsers", appsBrowsers, true, now, systemName);
 
 		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux All", OS.LINUX,
-				"Linux All", appsAll);
+				"Linux All", appsAll, true, now, systemName);
 
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
-				"Linux Math", appsMath);
+				"Linux Math", appsMath, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsSingleAll = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 
 		// Let's load the cloudformation template file and store it in the virtue.
@@ -82,23 +89,23 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		// Add a virtue with the initialized virtual machine.
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
-				"1.0", vmtsSingleAll, awsCloudformationTemplate);
+				"1.0", vmtsSingleAll, awsCloudformationTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmtsBrowsers = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
-				"1.0", vmtsBrowsers);
+				"1.0", vmtsBrowsers, awsCloudformationTemplate, true, now, systemName);
 		List<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
 		vmts.add(vmBrowser);
 		vmts.add(vmAll);
 		vmts.add(vmMath);
 		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
-				vmts, awsCloudformationTemplate);
+				vmts, awsCloudformationTemplate, true, now, systemName);
 
-		List<VirtualMachineTemplate> vmsMath = new ArrayList<VirtualMachineTemplate>();
+		Set<VirtualMachineTemplate> vmsMath = new HashSet<VirtualMachineTemplate>();
 		vmsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
-				vmsMath);
+				vmsMath, awsCloudformationTemplate, true, now, systemName);
 
 		addApplicationDefinition(calculator);
 		addApplicationDefinition(firefox);
@@ -174,12 +181,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public ApplicationDefinition getApplicationDefinition(String applicationId) {
-		return applications.get(applicationId);
+	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
+		return Optional.of(applications.get(applicationId));
 	}
 
 	@Override
-	public VirtueTemplate getTemplate(User user, String templateId) {
+	public VirtueTemplate getVirtueTemplateForUser(User user, String templateId) {
 		Collection<String> userTemplates = userToTemplateId.get(user.getUsername());
 		if (userTemplates != null && userTemplates.contains(templateId)) {
 			return getTemplate(templateId);
@@ -308,6 +315,31 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		vmTemplates.clear();
 		userToTemplateId.clear();
 		applications.clear();
+	}
+
+	@Override
+	public void deleteApplicationDefinition(String templateId) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public void deleteVmTemplate(String templateId) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public void deleteVirtueTemplate(String templateId) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
+		throw new RuntimeException("not implemented");
 	}
 
 }

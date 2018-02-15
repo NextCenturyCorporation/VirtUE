@@ -4,4 +4,15 @@
 **/*~
 modules/*/build
 **/node_modules
+**/.terraform
+**/*.tfstate
+**/*.tfstate.backup
+/modules/ecosystem/directory-service/secrets.auto.tfvars
+modules/ecosystem/directory-service/samba-config
+/modules/ecosystem/directory-service/docker/samba-client/.image.date
+/modules/ecosystem/directory-service/docker/samba-server/.image.date
+samba-config-*
+/modules/ecosystem/directory-service/docker/savior-firefox/id_rsa
+/modules/ecosystem/directory-service/docker/savior-firefox/id_rsa.pub
+/modules/ecosystem/directory-service/docker/savior-firefox/.image.date
 **/src/assets/.sass-cache/*

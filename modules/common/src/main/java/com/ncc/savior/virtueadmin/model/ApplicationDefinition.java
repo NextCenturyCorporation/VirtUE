@@ -40,6 +40,14 @@ public class ApplicationDefinition {
 
 	}
 
+	public ApplicationDefinition(String templateId, ApplicationDefinition appDef) {
+		this.id = templateId;
+		this.name = appDef.getName();
+		this.version = appDef.getVersion();
+		this.os = appDef.getOs();
+		this.launchCommand = appDef.getLaunchCommand();
+	}
+
 	public String getId() {
 		return id;
 	}
@@ -65,19 +73,19 @@ public class ApplicationDefinition {
 		this.id = id;
 	}
 
-	protected void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
-	protected void setVersion(String version) {
+	public void setVersion(String version) {
 		this.version = version;
 	}
 
-	protected void setOs(OS os) {
+	public void setOs(OS os) {
 		this.os = os;
 	}
 
-	protected void setLaunchCommand(String launchCommand) {
+	public void setLaunchCommand(String launchCommand) {
 		this.launchCommand = launchCommand;
 	}
 

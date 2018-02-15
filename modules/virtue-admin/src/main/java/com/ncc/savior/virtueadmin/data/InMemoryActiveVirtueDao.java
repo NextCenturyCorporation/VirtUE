@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -88,8 +89,8 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public VirtueInstance getVirtueInstance(String virtueId) {
-		return virtues.get(virtueId);
+	public Optional<VirtueInstance> getVirtueInstance(String virtueId) {
+		return Optional.of(virtues.get(virtueId));
 	}
 
 	@Override

@@ -6,8 +6,11 @@ import com.ncc.savior.desktop.virtues.DesktopResourceService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplicationManagerFactory;
+import com.ncc.savior.desktop.xpra.application.swing.SwingApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.XpraKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyMap;
+import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -25,6 +28,8 @@ public class SidebarApplication extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+
+
 		// Plumbing and depedency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
 		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
@@ -32,11 +37,17 @@ public class SidebarApplication extends Application {
 		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
+		boolean swing = props.getBoolean(PropertyManager.PROPERTY_SWING, true);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
-		IApplicationManagerFactory appManager = new JavaFxApplicationManagerFactory(
-				new JavaFxKeyboard(new XpraKeyMap()));
+		IApplicationManagerFactory appManager;
+		if (swing) {
+			appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
+		} else {
+			appManager = new JavaFxApplicationManagerFactory(new JavaFxKeyboard(new JavaFxXpraKeyMap()));
+		}
+
 		VirtueService virtueService = new VirtueService(drs, appManager);
 		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);

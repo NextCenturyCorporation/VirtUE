@@ -1,0 +1,9 @@
+server:
+    port: 8081
+app:
+    ad-domain: SAVIOR.LOCAL
+    ad-server: ldap://saviordc.SAVIOR.LOCAL/
+    service-principal: HTTP/saviorvc.savior.local
+    keytab-location: /usr/local/tomcat/conf/tomcat.keytab
+    ldap-search-base: dc=savior,dc=local
+    ldap-search-filter: "(| (userPrincipalName={0}) (sAMAccountName={0}))"

@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# ssh into savior-firefox
+#
+ip=$(docker inspect --format '{{(index .NetworkSettings.Networks "SAVIOR.LOCAL").IPAddress}}' savior-firefox)
+ssh-keygen -f "$HOME/.ssh/known_hosts" -R $ip
+exec ssh -X -i id_rsa ff@$ip "${@}"

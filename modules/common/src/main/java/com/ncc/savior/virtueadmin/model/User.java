@@ -10,8 +10,8 @@ import java.util.Collection;
  *
  */
 public class User {
-	private static User testUser;
-	private static User anonymousUser;	
+	private static final User testUser;
+	private static final User anonymousUser;	
 	private static User adminUser;
 
 	private String username;

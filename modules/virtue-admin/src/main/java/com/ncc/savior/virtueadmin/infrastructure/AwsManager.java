@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -42,6 +43,7 @@ import com.amazonaws.services.cloudformation.model.StackResource;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
@@ -102,21 +104,25 @@ public class AwsManager implements ICloudManager {
 	 * @see com.amazonaws.auth.PropertiesCredentials
 	 * @see com.amazonaws.ClientConfiguration
 	 */
-	private void init() throws Exception {
+	private void init() throws AmazonClientException {
 
 		/*
 		 * The ProfileCredentialsProvider will return your [virtue] credential profile
-		 * by reading from the credentials file located at
-		 * (/Users/womitowoju/.aws/credentials).
+		 * by reading from the credentials file located at (~/.aws/credentials).
 		 */
-		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+		AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 
 		try {
 			credentialsProvider.getCredentials();
+
 		} catch (Exception e) {
-			throw new AmazonClientException("Cannot load the credentials from the credential profiles file. "
-					+ "Please make sure that your credentials file is at the correct "
-					+ "location (/Users/womitowoju/.aws/credentials), and is in valid format.", e);
+			logger.warn("Cannot load the credentials from the credential profiles file. ", e);
+			try {
+				credentialsProvider = new PropertiesFileCredentialsProvider("aws.properties");
+			} catch (Exception e2) {
+				logger.warn("Cannot load credentials from credentials file: aws.properties", e2);
+				throw new AmazonEC2Exception("Cannot load credentials.  Use cli or aws.properties");
+			}
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
 		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
@@ -270,7 +276,7 @@ public class AwsManager implements ICloudManager {
 		for (VirtualMachine vm : vms) {
 			CreateTagsRequest ctr = new CreateTagsRequest();
 			ctr.withResources(vm.getInfrastructureId());
-			Collection<Tag> tags= new ArrayList<Tag>();
+			Collection<Tag> tags = new ArrayList<Tag>();
 			tags.add(new Tag("Name", prefix + "-" + vm.getName()));
 			ctr.setTags(tags);
 			ec2.createTags(ctr);

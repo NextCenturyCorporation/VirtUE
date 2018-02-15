@@ -435,4 +435,20 @@ public class JavaFxApplication extends XpraApplication implements Closeable {
 			}
 		});
 	}
+
+	@Override
+	public void fullscreen() {
+		stage.setFullScreen(true);
+		stage.setX(0);
+		stage.setY(0);
+		insetWidth = 0;
+		titleBarHeight = 0;
+	}
+
+	@Override
+	public void notFullScreen() {
+		stage.setFullScreen(false);
+		insetWidth = (stage.getWidth() - scene.getWidth()) / 2;
+		titleBarHeight = stage.getHeight() - scene.getHeight() - insetWidth;
+	}
 }

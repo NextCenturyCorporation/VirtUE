@@ -71,7 +71,7 @@ public class DesktopVirtueService {
 
 	public DesktopVirtueApplication startApplication(User user, String virtueId, String applicationId)
 			throws IOException {
-		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId);
+		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
 		applicationManager.startApplicationOnVm(vm, application, 5);
@@ -110,7 +110,7 @@ public class DesktopVirtueService {
 	}
 
 	public VirtueInstance createVirtue(User user, String templateId) {
-		VirtueTemplate template = templateManager.getTemplate(user, templateId);
+		VirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
 		if (template == null) {
 			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
 		}

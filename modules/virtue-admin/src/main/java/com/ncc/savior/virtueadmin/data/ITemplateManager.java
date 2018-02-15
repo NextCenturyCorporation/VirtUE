@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.User;
@@ -15,18 +16,14 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
  */
 public interface ITemplateManager {
 	/**
-	 * Returns all {@link VirtueTemplate} in the data store.
+	 * Returns a template for the given id if the given user has been assigned that
+	 * virtue template.
 	 * 
+	 * @param user
+	 * @param templateId
 	 * @return
 	 */
-	Iterable<VirtueTemplate> getAllVirtueTemplates();
-
-	/**
-	 * Returns all {@link VirtualMachineTemplate} in the data store.
-	 * 
-	 * @return
-	 */
-	Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates();
+	VirtueTemplate getVirtueTemplateForUser(User user, String templateId);
 
 	/**
 	 * Returns all the {@link VirtueTemplate} that the given user has access to.
@@ -43,45 +40,6 @@ public interface ITemplateManager {
 	 * @return
 	 */
 	Collection<String> getVirtueTemplateIdsForUser(User user);
-
-	/**
-	 * Returns all the {@link ApplicationDefinition}s in the data store.
-	 * 
-	 * @param applicationId
-	 * @return
-	 */
-	ApplicationDefinition getApplicationDefinition(String applicationId);
-
-	/**
-	 * Returns a template for the given id if the given user has been assigned that
-	 * virtue template.
-	 * 
-	 * @param user
-	 * @param templateId
-	 * @return
-	 */
-	VirtueTemplate getTemplate(User user, String templateId);
-
-	/**
-	 * Adds a new {@link ApplicationDefinition} to the data store.
-	 * 
-	 * @param app
-	 */
-	void addApplicationDefinition(ApplicationDefinition app);
-
-	/**
-	 * Adds a new {@link VirtualMachineTemplate} to the data store.
-	 * 
-	 * @param vmTemplate
-	 */
-	void addVmTemplate(VirtualMachineTemplate vmTemplate);
-
-	/**
-	 * adds a new {@link VirtueTemplate} to the data store.
-	 * 
-	 * @param template
-	 */
-	void addVirtueTemplate(VirtueTemplate template);
 
 	void assignApplicationToVmTemplate(String vmTemplateId, String applicationId);
 
@@ -106,9 +64,64 @@ public interface ITemplateManager {
 	 */
 	void revokeVirtueTemplateFromUser(User user, String virtueTemplateId);
 
+	/**
+	 * Returns all {@link VirtueTemplate} in the data store.
+	 * 
+	 * @return
+	 */
+	Iterable<VirtueTemplate> getAllVirtueTemplates();
+
+	/**
+	 * Returns all {@link VirtualMachineTemplate} in the data store.
+	 * 
+	 * @return
+	 */
+	
+	Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates();
+
 	Iterable<ApplicationDefinition> getAllApplications();
+
+	/**
+	 * Returns all the {@link ApplicationDefinition}s in the data store.
+	 * 
+	 * @param applicationId
+	 * @return
+	 */
+	Optional<ApplicationDefinition> getApplicationDefinition(String applicationId);
+//	ApplicationDefinition getApplicationDefinition(String applicationId);
+
+	Optional<VirtueTemplate> getVirtueTemplate(String templateId);
+
+	Optional<VirtualMachineTemplate> getVmTemplate(String templateId);
+
+	/**
+	 * Adds a new {@link ApplicationDefinition} to the data store.
+	 * 
+	 * @param app
+	 */
+	void addApplicationDefinition(ApplicationDefinition app);
+
+	/**
+	 * Adds a new {@link VirtualMachineTemplate} to the data store.
+	 * 
+	 * @param vmTemplate
+	 */
+	void addVmTemplate(VirtualMachineTemplate vmTemplate);
+
+	/**
+	 * adds a new {@link VirtueTemplate} to the data store.
+	 * 
+	 * @param template
+	 */
+	void addVirtueTemplate(VirtueTemplate template);
 
 	Collection<String> getUsers();
 
 	void clear();
+
+	void deleteApplicationDefinition(String templateId);
+
+	void deleteVmTemplate(String templateId);
+
+	void deleteVirtueTemplate(String templateId);
 }

@@ -180,6 +180,7 @@ public class Sidebar implements VirtueChangeHandler {
 				// do cleanup stuff.
 				authService.logout();
 				Platform.exit();
+				System.exit(0);
 			}
 		});
 		HBox.setHgrow(button, Priority.ALWAYS);
@@ -228,6 +229,7 @@ public class Sidebar implements VirtueChangeHandler {
 				loginScreen.addLoginEventListener(new ILoginEventListener() {
 					@Override
 					public void onLoginSuccess(DesktopUser user) {
+						try {
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -239,6 +241,9 @@ public class Sidebar implements VirtueChangeHandler {
 								}
 							}
 						});
+						} catch (Throwable t) {
+							logger.debug("Error applying changes to login success.", t);
+						}
 					}
 
 					@Override
