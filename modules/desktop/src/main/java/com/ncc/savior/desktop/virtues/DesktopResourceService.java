@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.virtues;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +42,6 @@ public class DesktopResourceService {
 	private WebTarget baseApi;
 	private AuthorizationService authService;
 	private String targetHost;
-	private boolean printResponse;
 
 	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames) {
 		try {
@@ -73,19 +71,17 @@ public class DesktopResourceService {
 
 	public List<DesktopVirtue> getVirtues() throws IOException {
 		List<DesktopVirtue> instances;
-		InputStream in = null;
-		BufferedInputStream bin = null;
 		try {
-			in = getListOfClass("virtue", "GET");
-			bin = new BufferedInputStream(in);
-			if (printResponse) {
-				bin.mark(1024 * 128);
-				String data = streamToString(bin);
-				bin.reset();
-				logger.debug("response: " + data);
+			Response r = getListOfClass("virtue", "GET");
+			InputStream in = (InputStream) r.getEntity();
+			if (r.getStatus() >= 400) {
+				String data = streamToString(in);
+				logger.error("response (" + r.getStatus() + "): " + data);
+				instances = new ArrayList<DesktopVirtue>();
+			} else {
+				instances = jsonMapper.readValue(in, new TypeReference<List<DesktopVirtue>>() {
+				});
 			}
-			instances = jsonMapper.readValue(bin, new TypeReference<List<DesktopVirtue>>() {
-			});
 		} catch (IOException | ProcessingException e) {
 
 			logger.error("error attmepting to get virtues.", e);
@@ -94,7 +90,7 @@ public class DesktopResourceService {
 		return instances;
 	}
 
-	private String streamToString(BufferedInputStream bin) {
+	private String streamToString(InputStream bin) {
 		StringBuilder result = new StringBuilder();
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
@@ -154,17 +150,12 @@ public class DesktopResourceService {
 		return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier((s1, s2) -> true).build();
 	}
 
-	private InputStream getListOfClass(String path, String method) throws IOException {
+	private Response getListOfClass(String path, String method) throws IOException {
 		WebTarget target = baseApi.path(path);
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
-		if (response.getStatus() >= 400) {
-			logger.warn("Response code: " + response.getStatus());
-		}
-
-		InputStream in = (InputStream) response.getEntity();
-		return in;
+		return response;
 	}
 
 	private <T> T getClass(WebTarget target, String method, Class<T> klass) throws IOException {

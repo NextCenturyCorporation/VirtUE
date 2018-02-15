@@ -3,7 +3,7 @@ package com.ncc.savior.virtueadmin.virtue;
 import java.util.Map;
 import java.util.Set;
 
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -24,7 +24,7 @@ public interface IActiveVirtueManager {
 	 * @param keySet
 	 * @return
 	 */
-	Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(User user, Set<String> keySet);
+	Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> keySet);
 
 	/**
 	 * Returns {@link VirtualMachine} that contains the given application in the
@@ -52,9 +52,9 @@ public interface IActiveVirtueManager {
 	 * @param template
 	 * @return
 	 */
-	VirtueInstance provisionTemplate(User user, VirtueTemplate template);
+	VirtueInstance provisionTemplate(VirtueUser user, VirtueTemplate template);
 
-	void deleteVirtue(User user, String instanceId);
+	void deleteVirtue(VirtueUser user, String instanceId);
 
 	Iterable<VirtueInstance> getAllActiveVirtues();
 

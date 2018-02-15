@@ -46,12 +46,17 @@
 	<bean name="templateManager"
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaTemplateManager">
 	</bean>
+	
+	<bean name="userManager"
+		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaUserManager">
+	</bean>
 
 	<jpa:repositories base-package="com.ncc.savior.virtueadmin.data.jpa" />
 
 	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService">
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="activeVirtueManager" />
+		<constructor-arg ref="userManager" />
 	</bean>
 
 	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">

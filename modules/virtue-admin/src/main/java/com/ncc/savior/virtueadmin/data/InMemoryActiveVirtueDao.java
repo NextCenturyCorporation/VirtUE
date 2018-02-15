@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
@@ -31,7 +31,7 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(User user, Set<String> templateIds) {
+	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds) {
 		Map<String, Set<VirtueInstance>> map = new LinkedHashMap<String, Set<VirtueInstance>>();
 		if (templateIds == null || templateIds.isEmpty()) {
 			return map;

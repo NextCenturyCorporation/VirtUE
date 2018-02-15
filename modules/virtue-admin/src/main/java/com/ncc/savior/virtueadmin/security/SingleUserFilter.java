@@ -59,7 +59,9 @@ public class SingleUserFilter extends OncePerRequestFilter {
 			public Object getCredentials() {
 				return username;
 			}
+
 		};
+		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		filterChain.doFilter(request, response);
 	}

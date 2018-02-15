@@ -8,7 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.UserService;
 
 
@@ -18,7 +18,7 @@ public class HelloResource {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getHello() throws URISyntaxException {
-		User user = UserService.getCurrentUser();
+		VirtueUser user = UserService.getCurrentUser();
 		
 		return Response.status(200).entity("Hello World "+user.getUsername()).build();
 	}
@@ -27,8 +27,17 @@ public class HelloResource {
 	@Path("/login")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getLogin() throws URISyntaxException {
-		User user = UserService.getCurrentUser();
+		VirtueUser user = UserService.getCurrentUser();
 		
-		return Response.status(200).entity("Hello World "+user.getUsername()).build();
+		return Response.status(200).entity("User needs to login.  Login Disabled. " + user.getUsername()).build();
+	}
+
+	@GET
+	@Path("/error")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getError() throws URISyntaxException {
+		VirtueUser user = UserService.getCurrentUser();
+
+		return Response.status(400).entity("Error for " + user.getUsername()).build();
 	}
 }

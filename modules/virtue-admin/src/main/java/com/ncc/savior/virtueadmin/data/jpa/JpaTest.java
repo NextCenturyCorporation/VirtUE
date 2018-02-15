@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
@@ -32,7 +32,7 @@ public class JpaTest {
 
 	@Bean
 	public CommandLineRunner demo(VirtueTemplateRepository vtRepository, VirtualMachineTemplateRepository vmtRepository,
-			ApplicationDefinitionRepository appRepository, UserNameRepository userRep) {
+			ApplicationDefinitionRepository appRepository, UserRepository userRep) {
 		return (args) -> {
 			System.out.println("**************************************");
 			SpringJpaTemplateManager tm = new SpringJpaTemplateManager(vtRepository, vmtRepository, appRepository,
@@ -57,7 +57,7 @@ public class JpaTest {
 			tm.addVmTemplate(vmt1);
 			tm.addVirtueTemplate(vt1);
 
-			User user = User.testUser();
+			VirtueUser user = VirtueUser.testUser();
 			// userRep.save(new UserName(user.getUsername()));
 
 			Map<String, VirtueTemplate> testVts = tm.getVirtueTemplatesForUser(user);

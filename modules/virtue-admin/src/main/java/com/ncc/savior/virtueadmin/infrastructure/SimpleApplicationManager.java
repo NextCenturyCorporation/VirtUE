@@ -23,7 +23,6 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 // TODO credentials need to be added somewhere.
 public class SimpleApplicationManager implements IApplicationManager {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleApplicationManager.class);
-	private static final int DEFAULT_DISPLAY = 55;
 	private static Random rand = new Random();
 	private String defaultPassword;
 	private File defaultCertificate;
