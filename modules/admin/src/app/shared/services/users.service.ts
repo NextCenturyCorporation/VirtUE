@@ -37,7 +37,7 @@ export class UsersService {
   }
 
   public getUser(id: string): Observable<User> {
-    const src = `${this.jsondata}/${id}`;
+    const src = `${this.jsondata}/?id=${id}`;
     return this.http.get<User>(src);
   }
 

@@ -15,8 +15,8 @@ const httpHeader = {
 
 export class VirtuesService {
 
-  private jsondata = 'http://localhost:8080/admin/virtue/template';
-  // private jsondata = './assets/json/virtue_list.json';
+  // private jsondata = 'http://localhost:8080/admin/virtue/template';
+  private jsondata = './assets/json/virtue_list.json';
 
   constructor( private httpClient: HttpClient ) {  }
 
@@ -25,7 +25,8 @@ export class VirtuesService {
   }
 
   public getVirtue(id: string): Observable<any> {
-    const src = `${this.jsondata}/${id}`;
+    // const src = `${this.jsondata}/${id}`;
+    const src = `${this.jsondata}/?id=${id}`;
     return this.httpClient.get<Virtue>(src);
   }
 

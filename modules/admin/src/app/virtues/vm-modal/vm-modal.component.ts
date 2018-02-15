@@ -1,12 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Application } from '../../shared/models/application.model';
 
-import { MatDialogRef } from '@angular/material';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 
 @Component({
   selector: 'app-vm-modal',
@@ -19,17 +19,18 @@ export class VmModalComponent implements OnInit {
   @Input() appInput : Application;
 
   form: FormGroup;
+  virtueId: string;
   checked = false;
-  indeterminate = false;
-
-  selectedVms : string;
+  addVms = new EventEmitter();
   vmList = [];
-  appList = [];
+  selVmList = [];
 
   constructor(
+    private route: ActivatedRoute,
     private vmService: VirtualMachineService,
-    private dialogRef: MatDialogRef<VmModalComponent>
-  ) {}
+    private dialogRef: MatDialogRef<VmModalComponent>,
+    @Inject( MAT_DIALOG_DATA ) public data: any
+  ) {  }
 
   ngOnInit() {
     this.getVmList();
@@ -43,9 +44,22 @@ export class VmModalComponent implements OnInit {
         }
       );
   }
-
-  addVms(id: string): void {
-    id = id.trim();
+  selectAll(event) {
+    if(event){
+      this.checked = true;
+    } else {
+      tthis.checked = false;
+    }
+  }
+  cbVmList(event, sel) {
+    if(event){
+      this.selVmList.push(sel);
+    } else {
+      this.selVmList.remove(sel);
+    }
+    console.log(this.selVmList);
+  }
+  onAddVms(): void {
     if (!id){
       this.appList.push(VirtualMachine);
     }

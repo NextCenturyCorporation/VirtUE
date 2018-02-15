@@ -91,6 +91,7 @@ import { JsonFilterPipe } from './shared/json-filter.pipe';
 import { CountFilterPipe } from './shared/count-filter.pipe';
 
 import { VirtuesService } from './shared/services/virtues.service';
+import { TestChildComponent } from './virtues/test-child/test-child.component';
 
 
 @NgModule({
@@ -127,6 +128,7 @@ import { VirtuesService } from './shared/services/virtues.service';
     VmListComponent,
     VmBuildComponent,
     VmEditComponent,
+    TestChildComponent,
   ],
   imports: [
     AppRoutingModule,

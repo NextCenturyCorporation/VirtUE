@@ -3,6 +3,7 @@ import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
+import { VirtualMachine } from '../../shared/models/vm.model';
 
 @Component({
   selector: 'app-create-virtue',
@@ -11,9 +12,38 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
   providers: [ VirtuesService, VirtualMachineService ]
 })
 export class CreateVirtueComponent implements OnInit {
+  vms = VirtualMachine;
+  // test = [
+  //   {
+  //     id: 'T1E-2S-3T4',
+  //     name: 'Alpha ',
+  //     os: 'LINUX',
+  //     templatePath: 'TESTVM',
+  //     applications: [{
+  //       id: 'TEST-1-APP',
+  //       name: 'TEST APP',
+  //       version: '1.0',
+  //       os: 'LINUX',
+  //       launchCommand: 'TESTAPP'
+  //     }]
+  //   },
+  //   {
+  //     id: 'T1E-2S-3T4',
+  //     name: 'Beta',
+  //     os: 'LINUX',
+  //     templatePath: 'TESTVM',
+  //     applications: [{
+  //       id: 'TEST-1-APP',
+  //       name: 'TEST APP',
+  //       version: '1.0',
+  //       os: 'LINUX',
+  //       launchCommand: 'TESTAPP'
+  //     }]
+  //   }
+  // ];
 
   vmList = [];
-  // appList = [];
+  appList = [];
   selVmsList = [];
   // selVmsList = [
   //   'bd3d540b-d375-4b2f-a7b7-e14159fcb60b',
@@ -40,8 +70,8 @@ export class CreateVirtueComponent implements OnInit {
       data => {
         for (var sel in selectedVm) {
           for (var i in data) {
-            if (data[i].id === selectedVm[sel]){
-              this.vmList.push(data[i]);
+            if (selectedVm.length > 0 && data[i].id === selectedVm[sel]){
+              this.vmList.push(data[i].applications);
             }
           }
         }
@@ -49,10 +79,13 @@ export class CreateVirtueComponent implements OnInit {
     );
   }
 
-  activateModal(id): void {
+  activateModal(id: string): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
-      width: '960px'
+      width: '960px',
+      data:  {
+          vms: id
+        }
     });
 
     dialogRef.updatePosition({ top: '5%', left: '20%' });

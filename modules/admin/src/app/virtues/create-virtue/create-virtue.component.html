@@ -24,13 +24,13 @@
             <div class="mui-row titlebar">
               <div class="mui-col-md-12">
                 <h3 class="title">Virtual Machines</h3>
-                <button mat-button class="titlebar-button" (click)="activateModal()">Add VM</button>
+                <button mat-button class="titlebar-button" (click)="activateModal('test')">Add VM</button>
               </div>
             </div>
             <!-- if there are no virtue, show this message -->
             <div *ngIf="vmList.length < 1" class="mui-row margin-top-10">
               <div class="mui-col-md-12">
-                <p>
+                <p class="no-data-message">
                   No virtual machines are attached to this virtue. To add VM(s), click on the button "Add VM".
                 </p>
               </div>
@@ -46,11 +46,11 @@
                 <div class="table-data mui-col-md-5">
                   <a class="edit" mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
                   <!-- if this virtue is enabled show this menu -->
-                  <span class="active virtue-options">
+                  <span class="active menu-options">
                     <a class="edit" mat-button (click)="activateModal(vm.id)">Edit</a> | <a href="#">Disable</a>
                   </span>
                   <!-- if this virtue is disabled show this menu -->
-                  <span class="active virtue-options">
+                  <span class="active menu-options">
                     <a class="edit" mat-button (click)="activateModal(vm.id)">Edit</a> | <a href="#">Remove</a>
                   </span>
                 </div>
