@@ -31,8 +31,8 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
  */
 @Profile({ "singleuser", "default" })
 @EnableWebSecurity
-@PropertySources({ @PropertySource(HeaderSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
-		@PropertySource(value = HeaderSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true) })
+@PropertySources({ @PropertySource(HeaderSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES_CLASSPATH),
+		@PropertySource(value = HeaderSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES_WORKING_DIR, ignoreResourceNotFound = true) })
 public class SingleUserSecurityConfig extends BaseSecurityConfig {
 
 	protected SingleUserSecurityConfig() {

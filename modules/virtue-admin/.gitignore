@@ -6,6 +6,7 @@
 /logs/
 /certs/
 /application*.properties
+/savior-server*.properties
 
 
 ### STS ###
@@ -30,3 +31,4 @@ dist/
 nbdist/
 .nb-gradle/
 /ecbuild/
+

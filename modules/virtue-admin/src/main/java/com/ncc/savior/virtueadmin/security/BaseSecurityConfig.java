@@ -22,8 +22,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
-	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES = "classpath:savior-server-security.properties";
-	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2 = "file:savior-server-security-site.properties";
+	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES_CLASSPATH = "classpath:savior-server-security.properties";
+	protected static final String DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES_WORKING_DIR = "file:savior-server-security.properties";
 
 	private static Logger logger = LoggerFactory.getLogger(BaseSecurityConfig.class);
 	protected static final String ADMIN_ROLE = "ADMIN";

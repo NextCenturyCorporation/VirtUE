@@ -42,10 +42,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  */
 @Profile({ "ad", "activedirectory" })
 @EnableWebSecurity
-@PropertySources({ @PropertySource(BaseSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES),
-		@PropertySource(value = BaseSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES2, ignoreResourceNotFound = true) })
+@PropertySources({ @PropertySource(BaseSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES_CLASSPATH),
+		@PropertySource(value = BaseSecurityConfig.DEFAULT_SAVIOR_SERVER_SECURITY_PROPERTIES_WORKING_DIR, ignoreResourceNotFound = true) })
 public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
-	protected ActiveDirectorySecurityConfig(String type) {
+	protected ActiveDirectorySecurityConfig() {
 		super("ActiveDirectory");
 	}
 
