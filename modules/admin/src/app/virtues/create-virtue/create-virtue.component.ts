@@ -13,34 +13,6 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 })
 export class CreateVirtueComponent implements OnInit {
   vms = VirtualMachine;
-  // test = [
-  //   {
-  //     id: 'T1E-2S-3T4',
-  //     name: 'Alpha ',
-  //     os: 'LINUX',
-  //     templatePath: 'TESTVM',
-  //     applications: [{
-  //       id: 'TEST-1-APP',
-  //       name: 'TEST APP',
-  //       version: '1.0',
-  //       os: 'LINUX',
-  //       launchCommand: 'TESTAPP'
-  //     }]
-  //   },
-  //   {
-  //     id: 'T1E-2S-3T4',
-  //     name: 'Beta',
-  //     os: 'LINUX',
-  //     templatePath: 'TESTVM',
-  //     applications: [{
-  //       id: 'TEST-1-APP',
-  //       name: 'TEST APP',
-  //       version: '1.0',
-  //       os: 'LINUX',
-  //       launchCommand: 'TESTAPP'
-  //     }]
-  //   }
-  // ];
 
   vmList = [];
   appList = [];
@@ -58,7 +30,7 @@ export class CreateVirtueComponent implements OnInit {
 
   ngOnInit() {
     if (this.selVmsList.length > 0){
-    this.getVmList();
+      this.getVmList();
     }
   }
 
@@ -66,37 +38,40 @@ export class CreateVirtueComponent implements OnInit {
     // loop through the selected VM list
     const selectedVm = this.selVmsList;
     this.vmService.getVmList()
-    .subscribe(
-      data => {
+      .subscribe(
+        data => {
         for (var sel in selectedVm) {
           for (var i in data) {
-            if (selectedVm.length > 0 && data[i].id === selectedVm[sel]){
-              this.vmList.push(data[i].applications);
+            if (selectedVm[sel] === data[i].id) {
+              this.vmList.push(data[i]);
+              break;
             }
           }
         }
-      }
-    );
+    });
+  }
+
+  removeVm(id: string, vm: VirtualMachine): void {
+    this.vmList = this.vmList.filter(vm => vm.id !== id);
+    console.log(this.vmList);
   }
 
   activateModal(id: string): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
-      width: '960px',
-      data:  {
-          vms: id
-        }
+      width: '750px'
     });
 
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('This modal was closed');
+    const vms = dialogRef.componentInstance.addVms.subscribe((data) => {
+      this.selVmsList = data;
+      this.getVmList();
     });
-  }
 
-  onSave() {
-
+    dialogRef.afterClosed().subscribe(() => {
+      vms.unsubscribe();
+    });
   }
 
 }

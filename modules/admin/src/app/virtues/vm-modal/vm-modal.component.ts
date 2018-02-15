@@ -48,27 +48,33 @@ export class VmModalComponent implements OnInit {
     if(event){
       this.checked = true;
     } else {
-      tthis.checked = false;
+      this.checked = false;
     }
   }
   cbVmList(event, sel) {
     if(event){
       this.selVmList.push(sel);
     } else {
-      this.selVmList.remove(sel);
+      this.removeVm(sel);
     }
-    console.log(this.selVmList);
+    // console.log(this.selVmList);
   }
+  removeVm(sel) {
+    this.selVmList.splice(sel, 1);
+  }
+
+  clearVmList() {
+    this.selVmList = [];
+    // console.log(this.selVmList);
+  }
+
   onAddVms(): void {
-    if (!id){
-      this.appList.push(VirtualMachine);
-    }
+    this.addVms.emit(this.selVmList);
+    this.dialogRef.close();
   }
 
   cancelModal() {
-    this.dialogRef.close();
-  }
-  saveVMList() {
+    this.clearVmList();
     this.dialogRef.close();
   }
 

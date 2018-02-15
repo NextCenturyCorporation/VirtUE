@@ -50,8 +50,8 @@
                     <a class="edit" mat-button (click)="activateModal(vm.id)">Edit</a> | <a href="#">Disable</a>
                   </span>
                   <!-- if this virtue is disabled show this menu -->
-                  <span class="active menu-options">
-                    <a class="edit" mat-button (click)="activateModal(vm.id)">Edit</a> | <a href="#">Remove</a>
+                  <span class="active menu-options">{{ vm.id }}
+                    <a class="edit" mat-button (click)="activateModal(vm.id)">Edit</a> | <a mat-button (click)="removeVm(vm.id)">Remove</a>
                   </span>
                 </div>
                 <div class="table-data mui-col-md-2">{{ vm.os }}</div>
