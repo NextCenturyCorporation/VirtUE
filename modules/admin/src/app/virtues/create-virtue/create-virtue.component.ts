@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
+import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { VirtualMachine } from '../../shared/models/vm.model';
@@ -13,7 +14,8 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 })
 export class CreateVirtueComponent implements OnInit {
   vms = VirtualMachine;
-
+  hovering = false;
+  activeClass: string = '';
   vmList = [];
   appList = [];
   selVmsList = [];
@@ -50,10 +52,14 @@ export class CreateVirtueComponent implements OnInit {
         }
     });
   }
+  // showMenu($event){
+  //   // console.log($event);
+  //   this.active = $event.type == 'mouseover' ? 'active' : '';
+  // }
 
   removeVm(id: string, vm: VirtualMachine): void {
     this.vmList = this.vmList.filter(vm => vm.id !== id);
-    console.log(this.vmList);
+    // console.log(this.vmList);
   }
 
   activateModal(id: string): void {

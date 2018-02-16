@@ -8,7 +8,8 @@
         <span class="float-left">
           <mat-checkbox
             name="selectAll"
-            (change)="selectAll($event.checked)" ></mat-checkbox>
+            (change)="selectAll($event.checked)"
+            [disabled]="disabled" ></mat-checkbox>
         </span>
         <span class="float-left text-align-left">Virtual Machine</span>
       </div>

@@ -21,6 +21,7 @@ export class VmModalComponent implements OnInit {
   form: FormGroup;
   virtueId: string;
   checked = false;
+  disabled = false;
   addVms = new EventEmitter();
   vmList = [];
   selVmList = [];
@@ -47,9 +48,15 @@ export class VmModalComponent implements OnInit {
   selectAll(event) {
     if(event){
       this.checked = true;
+      const vms = this.vmList;
+      for (var i in vms){
+        this.selVmList.push(vms[i].id);
+      }
     } else {
       this.checked = false;
+      this.clearVmList();
     }
+    // console.log(this.selVmList);
   }
   cbVmList(event, sel) {
     if(event){
@@ -57,7 +64,6 @@ export class VmModalComponent implements OnInit {
     } else {
       this.removeVm(sel);
     }
-    // console.log(this.selVmList);
   }
   removeVm(sel) {
     this.selVmList.splice(sel, 1);

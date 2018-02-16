@@ -3739,19 +3739,24 @@ content #content.content {
   margin-right: 10px;
 }
 
-/* line 294, ../scss/_styles.scss */
+/* line 295, ../scss/_styles.scss */
+.table-row.active .menu-options {
+  display: block;
+}
+
+/* line 299, ../scss/_styles.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
-/* line 298, ../scss/_styles.scss */
+/* line 303, ../scss/_styles.scss */
 .table-data span {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
 }
-/* line 303, ../scss/_styles.scss */
+/* line 308, ../scss/_styles.scss */
 .table-data .menu-options {
   clear: both;
   display: none;
@@ -3759,26 +3764,22 @@ content #content.content {
   font-weight: 600;
   margin: 0;
 }
-/* line 309, ../scss/_styles.scss */
-.table-data .menu-options.active {
-  display: block;
-}
 
-/* line 315, ../scss/_styles.scss */
+/* line 317, ../scss/_styles.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 320, ../scss/_styles.scss */
+/* line 322, ../scss/_styles.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 323, ../scss/_styles.scss */
+/* line 325, ../scss/_styles.scss */
 .titlebar {
   clear: both;
   display: block;
@@ -3786,39 +3787,39 @@ content #content.content {
   margin-bottom: 1.2rem;
   min-height: 1rem;
 }
-/* line 330, ../scss/_styles.scss */
+/* line 332, ../scss/_styles.scss */
 .titlebar:after {
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 336, ../scss/_styles.scss */
+/* line 338, ../scss/_styles.scss */
 .titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
   margin-top: 0;
 }
-/* line 337, ../scss/_styles.scss */
+/* line 339, ../scss/_styles.scss */
 .titlebar h2 {
   font-size: 28px;
 }
-/* line 338, ../scss/_styles.scss */
+/* line 340, ../scss/_styles.scss */
 .titlebar h3 {
   font-size: 24px;
 }
-/* line 339, ../scss/_styles.scss */
+/* line 341, ../scss/_styles.scss */
 .titlebar h4 {
   font-size: 20px;
 }
-/* line 340, ../scss/_styles.scss */
+/* line 342, ../scss/_styles.scss */
 .titlebar h5 {
   font-size: 18px;
 }
-/* line 342, ../scss/_styles.scss */
+/* line 344, ../scss/_styles.scss */
 .titlebar .title {
   float: left;
   margin: 0;
 }
-/* line 346, ../scss/_styles.scss */
+/* line 348, ../scss/_styles.scss */
 .titlebar .titlebar-button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
@@ -3829,14 +3830,14 @@ content #content.content {
   padding: 0.5rem 0.7rem;
 }
 
-/* line 357, ../scss/_styles.scss */
+/* line 359, ../scss/_styles.scss */
 .no-data-message {
   display: block;
   border-top: 1px solid #b2b2b2;
   border-bottom: 1px solid #b2b2b2;
 }
 
-/* line 362, ../scss/_styles.scss */
+/* line 364, ../scss/_styles.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3844,19 +3845,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 369, ../scss/_styles.scss */
+/* line 371, ../scss/_styles.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 372, ../scss/_styles.scss */
+/* line 374, ../scss/_styles.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 376, ../scss/_styles.scss */
+/* line 378, ../scss/_styles.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3865,7 +3866,7 @@ footer {
   position: relative;
 }
 
-/* line 383, ../scss/_styles.scss */
+/* line 385, ../scss/_styles.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;

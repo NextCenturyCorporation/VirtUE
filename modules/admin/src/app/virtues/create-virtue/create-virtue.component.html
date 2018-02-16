@@ -42,16 +42,16 @@
                 <div class="table-header mui-col-md-2">OS</div>
                 <div class="table-header mui-col-md-5">Applications</div>
               </div>
-              <div *ngFor="let vm of vmList" class="mui-row table-row">
+              <div *ngFor="let vm of vmList" class="mui-row table-row" app-active-class>
                 <div class="table-data mui-col-md-5">
                   <a class="edit" mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
                   <!-- if this virtue is enabled show this menu -->
-                  <span class="active menu-options">
-                    <a class="edit" mat-button (click)="activateModal(vm.id)">Edit</a> | <a href="#">Disable</a>
+                  <span class="menu-options" *ngIf="vm.enabled">
+                    <a href="#">Disable</a>
                   </span>
                   <!-- if this virtue is disabled show this menu -->
-                  <span class="active menu-options">{{ vm.id }}
-                    <a class="edit" mat-button (click)="activateModal(vm.id)">Edit</a> | <a mat-button (click)="removeVm(vm.id)">Remove</a>
+                  <span class="menu-options" *ngIf="vm.enabled===false">
+                    <a mat-button (click)="removeVm(vm.id)">Remove</a>
                   </span>
                 </div>
                 <div class="table-data mui-col-md-2">{{ vm.os }}</div>
