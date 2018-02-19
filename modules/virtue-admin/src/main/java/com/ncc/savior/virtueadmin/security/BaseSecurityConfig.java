@@ -95,7 +95,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				username = fqdn.substring(0, fqdn.indexOf("@"));
 			}
 
-			com.ncc.savior.virtueadmin.model.User user = userManager.getUser(username);
+			com.ncc.savior.virtueadmin.model.VirtueUser user = userManager.getUser(username);
 			if (user == null) {
 				return cannotFindUser(username, "Unable to find user=" + username + " in user database.");
 			}

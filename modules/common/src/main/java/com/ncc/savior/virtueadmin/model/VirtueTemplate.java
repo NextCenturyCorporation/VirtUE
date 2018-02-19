@@ -27,7 +27,7 @@ public class VirtueTemplate {
 	@ManyToMany()
 	private Collection<VirtualMachineTemplate> vmTemplates;
 	@ManyToMany()
-	private Collection<User> users;
+	private Collection<VirtueUser> users;
 	@ColumnDefault("true")
 	private boolean enabled;
 	private Date lastModification;
@@ -77,7 +77,7 @@ public class VirtueTemplate {
 		return id;
 	}
 
-	public Collection<User> getUsers() {
+	public Collection<VirtueUser> getUsers() {
 		return users;
 	}
 
@@ -154,7 +154,7 @@ public class VirtueTemplate {
 		this.lastEditor = lastEditor;
 	}
 
-	public List<User> retrieveUsers() {
-		return new ArrayList<User>(users);
+	public List<VirtueUser> retrieveUsers() {
+		return new ArrayList<VirtueUser>(users);
 	}
 }

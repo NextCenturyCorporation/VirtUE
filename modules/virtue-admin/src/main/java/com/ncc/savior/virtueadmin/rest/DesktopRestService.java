@@ -10,7 +10,7 @@ import javax.ws.rs.Produces;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.security.UserService;
@@ -42,7 +42,7 @@ public class DesktopRestService {
 	@Path("virtue")
 	public Set<DesktopVirtue> getAllVirtueByUser() {
 		try {
-			User user = getUserFromSecurity();
+			VirtueUser user = getUserFromSecurity();
 			Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser(user);
 			return virtues;
 		} catch (RuntimeException e) {
@@ -66,7 +66,7 @@ public class DesktopRestService {
 	public DesktopVirtueApplication startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
 		try {
-			User user = getUserFromSecurity();
+			VirtueUser user = getUserFromSecurity();
 			return desktopService.startApplication(user, virtueId, applicationId);
 		} catch (RuntimeException | IOException e) {
 			// TODO fix createWebserviceException
@@ -90,7 +90,7 @@ public class DesktopRestService {
 	public DesktopVirtueApplication startApplicationFromTemplate(@PathParam("templateId") String templateId,
 			@PathParam("applicationId") String applicationId) {
 		try {
-			User user = getUserFromSecurity();
+			VirtueUser user = getUserFromSecurity();
 			return desktopService.startApplicationFromTemplate(user, templateId, applicationId);
 		} catch (RuntimeException | IOException e) {
 			// TODO fix createWebserviceException
@@ -102,8 +102,8 @@ public class DesktopRestService {
 	
 	
 
-	private User getUserFromSecurity() {
-		User user = UserService.getCurrentUser();
+	private VirtueUser getUserFromSecurity() {
+		VirtueUser user = UserService.getCurrentUser();
 		return user;
 	}
 }

@@ -14,10 +14,10 @@ import javax.persistence.Id;
  *
  */
 @Entity
-public class User {
-	private static final User testUser;
-	private static final User anonymousUser;	
-	private static User adminUser;
+public class VirtueUser {
+	private static final VirtueUser testUser;
+	private static final VirtueUser anonymousUser;	
+	private static VirtueUser adminUser;
 
 	@Id
 	private String username;
@@ -25,25 +25,25 @@ public class User {
 	private Collection<String> authorities;
 
 	static {
-		testUser = new User("testUser", new ArrayList<String>());
-		anonymousUser = new User("anonymous", new ArrayList<String>());
+		testUser = new VirtueUser("testUser", new ArrayList<String>());
+		anonymousUser = new VirtueUser("anonymous", new ArrayList<String>());
 		ArrayList<String> adminAuths = new ArrayList<String>();
 		adminAuths.add("ROLE_ADMIN");
 		adminAuths.add("ROLE_USER");
-		adminUser = new User("admin", adminAuths);
+		adminUser = new VirtueUser("admin", adminAuths);
 		
 	}
 	
-	protected User() {
+	protected VirtueUser() {
 		
 	}
 
-	public User(String name, Collection<String> authorities) {
+	public VirtueUser(String name, Collection<String> authorities) {
 		this.username = name;
 		this.authorities = authorities;
 	}
 
-	public static User testUser() {
+	public static VirtueUser testUser() {
 		return testUser;
 	}
 
@@ -55,11 +55,11 @@ public class User {
 		return authorities;
 	}
 
-	public static User anonymousUser() {
+	public static VirtueUser anonymousUser() {
 		return anonymousUser;
 	}
 
-	public static User adminUser() {
+	public static VirtueUser adminUser() {
 		return adminUser;
 	}
 

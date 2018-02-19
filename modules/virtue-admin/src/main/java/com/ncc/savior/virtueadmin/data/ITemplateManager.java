@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
@@ -23,7 +23,7 @@ public interface ITemplateManager {
 	 * @param templateId
 	 * @return
 	 */
-	VirtueTemplate getVirtueTemplateForUser(User user, String templateId);
+	VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId);
 
 	/**
 	 * Returns all the {@link VirtueTemplate} that the given user has access to.
@@ -31,7 +31,7 @@ public interface ITemplateManager {
 	 * @param user
 	 * @return
 	 */
-	Map<String, VirtueTemplate> getVirtueTemplatesForUser(User user);
+	Map<String, VirtueTemplate> getVirtueTemplatesForUser(VirtueUser user);
 
 	/**
 	 * Returns all the {@link VirtueTemplate} ids that the given user has access to.
@@ -39,7 +39,7 @@ public interface ITemplateManager {
 	 * @param user
 	 * @return
 	 */
-	Collection<String> getVirtueTemplateIdsForUser(User user);
+	Collection<String> getVirtueTemplateIdsForUser(VirtueUser user);
 
 	void assignApplicationToVmTemplate(String vmTemplateId, String applicationId);
 
@@ -52,7 +52,7 @@ public interface ITemplateManager {
 	 * @param user
 	 * @param virtueTemplateId
 	 */
-	void assignVirtueTemplateToUser(User user, String virtueTemplateId);
+	void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId);
 
 	/**
 	 * Removes the given virtue from the list of virtues that the user has the
@@ -62,7 +62,7 @@ public interface ITemplateManager {
 	 * @param user
 	 * @param virtueTemplateId
 	 */
-	void revokeVirtueTemplateFromUser(User user, String virtueTemplateId);
+	void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId);
 
 	/**
 	 * Returns all {@link VirtueTemplate} in the data store.

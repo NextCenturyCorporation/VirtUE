@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
@@ -26,7 +26,7 @@ public interface IActiveVirtueDao {
 	 * @param templateIds
 	 * @return
 	 */
-	Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(User user, Set<String> templateIds);
+	Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds);
 
 	/**
 	 * Updates the state of a given VM.
