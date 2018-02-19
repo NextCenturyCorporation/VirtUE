@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
 
@@ -50,10 +52,12 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/").authenticated().antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/admin/**").hasRole(ADMIN_ROLE)
 				.antMatchers("/desktop/**").hasRole(USER_ROLE).antMatchers("/data/**").permitAll().anyRequest()
 				.authenticated().and().formLogin().loginPage("/login").permitAll().and().logout().permitAll();
 
+//		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+		
 		doConfigure(http);
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
@@ -79,9 +83,15 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			public void handle(HttpServletRequest request, HttpServletResponse response,
 					AccessDeniedException accessDeniedException) throws IOException, ServletException {
 				response.setStatus(401);
-				response.getWriter().write("401 - Access Denied");
+				response.getWriter().write("401 - Access Denied - "+accessDeniedException.getLocalizedMessage());
+				logger.debug("access denied", accessDeniedException);
 			}
 		};
+	}
+	
+	@Bean
+	public DatabaseUserDetailsService userDetailsService() {
+		return new DatabaseUserDetailsService();
 	}
 
 	class DatabaseUserDetailsService implements UserDetailsService {

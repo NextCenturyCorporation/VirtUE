@@ -15,7 +15,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider;
 import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
 import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosTicketValidator;
 import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
 import org.springframework.security.kerberos.client.ldap.KerberosLdapContextSource;
@@ -94,10 +96,26 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		logger.entry(auth);
-		auth.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
-				.authenticationProvider(kerberosServiceAuthenticationProvider());
+		auth
+		//.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
+				.authenticationProvider(kerberosServiceAuthenticationProvider())
+				// for username/password
+				.authenticationProvider(kerberosAuthenticationProvider())
+				;
 		logger.exit();
 	}
+
+	// For username/password
+	@Bean
+	public KerberosAuthenticationProvider kerberosAuthenticationProvider() {
+		KerberosAuthenticationProvider provider = new KerberosAuthenticationProvider();
+		SunJaasKerberosClient client = new SunJaasKerberosClient();
+		client.setDebug(true);
+		provider.setKerberosClient(client);
+		provider.setUserDetailsService(userDetailsService());
+		return provider;
+	}
+	
 
 	@Bean
 	public SpnegoEntryPoint spnegoEntryPoint() {
@@ -122,7 +140,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		logger.entry();
 		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
 		provider.setTicketValidator(sunJaasKerberosTicketValidator());
-		provider.setUserDetailsService(new DatabaseUserDetailsService());
+		provider.setUserDetailsService(userDetailsService());
 		logger.exit(provider);
 		return provider;
 	}
@@ -165,6 +183,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				.accessDeniedHandler(getAccessDeniedHandler()).and()
 				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
+		http.csrf().disable();
 
 	}
 
