@@ -110,8 +110,10 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 			return null;
 		}
 		String serverPrinc = "HTTP/" + targetHost;
-		byte[] token2 = WindowsSecurityContextImpl.getCurrent(DEFAULT_SECURITY_PACKAGE, "HTTP/" + targetHost)
-				.getToken();
+		// byte[] token2 =
+		// WindowsSecurityContextImpl.getCurrent(DEFAULT_SECURITY_PACKAGE, "HTTP/" +
+		// targetHost)
+		// .getToken();
 		byte[] token = getCurrentToken(serverPrinc);
 		byte[] encoded = Base64.getEncoder().encode(token);
 		String encodedStr = new String(encoded);
