@@ -93,12 +93,18 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser login(String domain, String username, String password) {
-		if (requiredDomain == null || requiredDomain.equals(domain)) {
-			return authProvider.login(domain, username, password);
-		} else {
-			String msg = "Cannot login.  Domain (" + domain + ") is not the required domain (" + requiredDomain + ")";
-			throw new RuntimeException(msg);
+		if (!dummySecurity && !(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
+			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
+			// if (requiredDomain == null || requiredDomain.equals(domain)) {
+			// return authProvider.login(domain, username, password);
+			// } else {
+			// String msg = "Cannot login. Domain (" + domain + ") is not the required
+			// domain (" + requiredDomain
+			// + ")";
+			// throw new RuntimeException(msg);
+			// }
 		}
+		return authProvider.login(domain, username, password);
 	}
 
 	public void logout() {
