@@ -2,9 +2,13 @@ package com.ncc.savior.desktop.authorization;
 
 import javax.ws.rs.client.Invocation.Builder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.virtueadmin.model.OS;
 
 public class AuthorizationService {
+	private static final Logger logger = LoggerFactory.getLogger(AuthorizationService.class);
 	private static final String PROPERTY_OS_NAME = "os.name";
 	private static final String OS_STRING_AIX = "aix";
 	private static final String OS_STRING_LINUX = "nux";
@@ -55,6 +59,15 @@ public class AuthorizationService {
 		try {
 			user = authProvider.getCurrentUser();
 		} catch (InvalidUserLoginException e) {
+			logger.warn(
+					"Error testing Single-Sign-On authentication provider.  Falling back to username/password authentication.",
+					e);
+			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
+			return;
+		} catch (RuntimeException e) {
+			logger.warn(
+					"Error testing Single-Sign-On authentication provider.  Falling back to username/password authentication.",
+					e);
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 			return;
 		}
