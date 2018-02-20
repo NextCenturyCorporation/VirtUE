@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -36,7 +37,6 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 public class DesktopResourceService {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(DesktopResourceService.class);
-	private static final String HEADER_AUTHORIZATION = "Authorization";
 	private Client client;
 	private ObjectMapper jsonMapper;
 	private WebTarget baseApi;
@@ -150,7 +150,7 @@ public class DesktopResourceService {
 		return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier((s1, s2) -> true).build();
 	}
 
-	private Response getListOfClass(String path, String method) throws IOException {
+	private Response getListOfClass(String path, String method) throws IOException, InvalidUserLoginException {
 		WebTarget target = baseApi.path(path);
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder, targetHost);
@@ -158,7 +158,8 @@ public class DesktopResourceService {
 		return response;
 	}
 
-	private <T> T getClass(WebTarget target, String method, Class<T> klass) throws IOException {
+	private <T> T getClass(WebTarget target, String method, Class<T> klass)
+			throws IOException, InvalidUserLoginException {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
@@ -172,14 +173,13 @@ public class DesktopResourceService {
 		}
 	}
 
-	private void addAuthorization(Builder builder, String targetHost) {
+	private void addAuthorization(Builder builder, String targetHost) throws InvalidUserLoginException {
 		// Temporary implementation until we really tie in active directory.
 		DesktopUser user = authService.getUser();
 
-		String ticket = authService.getAuthorizationTicket(targetHost);
-		if (ticket != null) {
-			builder.header(HEADER_AUTHORIZATION, ticket);
-		} else if (user != null) {
+		authService.addAuthorizationTicket(builder, targetHost);
+
+		if (user != null) {
 			String username = user.getUsername();
 			builder.header("X-Authorization", username);
 		}

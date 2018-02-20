@@ -25,7 +25,7 @@ public class PropertyManager {
 	private static final String DEFAULT_PROPERTIES_PATH = "default.properties";
 	private static final String SAVIOR_DEFAULT_PROPERTY_LOCATION = "./savior.properties";
 	private static final Logger logger = LoggerFactory.getLogger(PropertyManager.class);
-	public static final String PROPERTY_DESKTOP_API_PATH = "savior.desktop.api.path";
+	public static final String PROPERTY_DESKTOP_API_PATH = "savior.api.path.desktop";
 	public static final String PROPERTY_LOCATION_KEY = "savior.property.path";
 	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "./savior-user.properties";
 	public static final String PROPERTY_REQUIRED_DOMAIN = "savior.domain";
@@ -35,6 +35,9 @@ public class PropertyManager {
 	public static final String PROPERTY_USE_COLORS = "savior.desktop.useColors";
 	public static final String PROPERTY_STYLE = "savior.desktop.style";
 	public static final String PROPERTY_SWING = "savior.desktop.swing";
+	public static final String PROPERTY_LOGIN_API_PATH = "savior.api.path.login";
+	public static final String PROPERTY_LOGOUT_API_PATH = "savior.api.path.logout";
+	public static final String PROPERTY_BASE_API_PATH = "savior.api.path.base";
 	private Properties props;
 	private boolean warnOnMissingFile = false;
 
