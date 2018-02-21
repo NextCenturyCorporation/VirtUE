@@ -48,11 +48,11 @@ export class EditVirtueComponent implements OnInit {
     const id = this.virtueId.id;
     this.virtuesService.getVirtue(id).subscribe(
       data => {
-        for (var i in data) {
-          if (data[i].id === id) {
-            this.virtueData = data[i];
-            this.virtueVmList = data[i].vmTemplates;
-            // console.log(data[i].name);
+        for (let vObj of data) {
+          if (vObj.id === id) {
+            this.virtueData = vObj;
+            this.virtueVmList = vObj.vmTemplates;
+            // console.log(vObj.name);
             break;
           }
         }
