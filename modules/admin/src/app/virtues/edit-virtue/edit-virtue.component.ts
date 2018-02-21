@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { Observable } from 'rxjs/Observable';
 
 import { Virtue } from '../../shared/models/virtue.model';
 import { Application } from '../../shared/models/application.model';
@@ -73,13 +74,10 @@ export class EditVirtueComponent implements OnInit {
     });
   }
 
-  virtueStatus(id: string, virtue: Virtue):void {
-    const virtueObj = this.virtueData.filter(virtue => virtue.id === id);
-    virtueObj.map((_, i) => {
-      virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;
-      console.log(virtueObj);
-    });
-    // this.virtuesService.updateVirtue(id, virtueObj);
+  virtueStatus(virtue: Virtue):void {
+    console.log(this.virtueData.enabled);
+    this.virtueData.enabled ? this.virtueData.enabled = false : this.virtueData.enabled = true;
+    this.virtuesService.updateVirtue(this.virtueId.id, this.virtueData);
   }
 
   deleteVirtue(id): void {

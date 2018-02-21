@@ -83,10 +83,10 @@ export class CreateVirtueComponent implements OnInit {
     // console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt } `);
     console.log('New Virtue: ');
     console.log(newVirtue);
-    // this.virtuesService.createVirtue({newVirtue} as Virtue)
-    //   .subscribe(data => {
-    //     this.virtues.push(data);
-    //   });
+    this.virtuesService.createVirtue({newVirtue} as Virtue)
+    .subscribe(data => {
+      this.virtues.push(data);
+    });
   }
   getAppList() {
     const vms = this.vmList;
