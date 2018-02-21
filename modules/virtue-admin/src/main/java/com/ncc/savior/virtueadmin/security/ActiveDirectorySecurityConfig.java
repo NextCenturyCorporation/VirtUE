@@ -27,20 +27,7 @@ import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAu
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
- * A property configurable Spring Security configuration. There are multiple
- * modes for authentication that can be set via the
- * 'savior.security.authentication' property.
- * <ul>
- * <li>HEADER - All connections will be granted the username and roles from
- * specific headers in the request. See {@link HeaderFilter} for details. The
- * client is fully trusted and thus this mode should not be used in production.
- * <li>SINGLEUSER - All connections will be granted the username and roles of a
- * user configured the security property file. This mode should not be used in
- * production. See {@link SingleUserFilter} for details.
- * <li>ACTIVEDIRECTORY - not fully implemented
- * <li>LDAP - not fully implemented
- * 
- *
+ * Security configuration for using Active Directory for Authentication.
  */
 @Profile({ "ad", "activedirectory" })
 @EnableWebSecurity
@@ -97,11 +84,10 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		logger.entry(auth);
 		auth
-		//.authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
+				// .authenticationProvider(getActiveDirectoryLdapAuthenticationProvider())
 				.authenticationProvider(kerberosServiceAuthenticationProvider())
 				// for username/password
-				.authenticationProvider(kerberosAuthenticationProvider())
-				;
+				.authenticationProvider(kerberosAuthenticationProvider());
 		logger.exit();
 	}
 
@@ -115,7 +101,6 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		provider.setUserDetailsService(userDetailsService());
 		return provider;
 	}
-	
 
 	@Bean
 	public SpnegoEntryPoint spnegoEntryPoint() {

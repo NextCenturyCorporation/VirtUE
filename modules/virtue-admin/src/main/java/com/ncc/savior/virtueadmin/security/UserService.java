@@ -13,8 +13,6 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
  * User Service provides the {@link VirtueUser} object from the Spring Security
  * modules. This is the instance that should be used by the rest of the system
  * to get the user.
- * 
- *
  */
 public class UserService {
 
