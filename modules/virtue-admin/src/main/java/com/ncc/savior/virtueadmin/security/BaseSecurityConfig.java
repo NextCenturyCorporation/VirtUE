@@ -55,6 +55,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.authenticated().and().formLogin().loginPage("/login").permitAll().and().logout().permitAll();
 
 		doConfigure(http);
+
+		http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
@@ -86,6 +88,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	class DatabaseUserDetailsService implements UserDetailsService {
 
+		@Override
 		public UserDetails loadUserByUsername(String fqdn) throws UsernameNotFoundException {
 			String username = null;
 			if (fqdn == null) {
