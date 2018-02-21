@@ -73,6 +73,15 @@ export class EditVirtueComponent implements OnInit {
     });
   }
 
+  virtueStatus(id: string, virtue: Virtue):void {
+    const virtueObj = this.virtueData.filter(virtue => virtue.id === id);
+    virtueObj.map((_, i) => {
+      virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;
+      console.log(virtueObj);
+    });
+    // this.virtuesService.updateVirtue(id, virtueObj);
+  }
+
   deleteVirtue(id): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
         width: '450px'

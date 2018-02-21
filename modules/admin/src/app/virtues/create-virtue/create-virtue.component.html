@@ -18,7 +18,7 @@
 
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
-                <input type="text" id="virtue-name" value="" placeholder="Virtue Name" />
+                <input type="text" #virtueName value="" placeholder="Virtue Name" />
               </div>
             </div>
             <div class="mui-row titlebar">
@@ -47,11 +47,11 @@
                   <a class="edit" mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
                   <!-- if this virtue is enabled show this menu -->
                   <span class="menu-options" *ngIf="vm.enabled">
-                    <a href="#">Disable</a>
+                    <a href="#">Disable</a> | <a mat-button (click)="removeVm(vm.id)">Remove</a>
                   </span>
                   <!-- if this virtue is disabled show this menu -->
                   <span class="menu-options" *ngIf="vm.enabled===false">
-                    <a mat-button (click)="removeVm(vm.id)">Remove</a>
+                    <a href="#">Enable</a> | <a mat-button (click)="removeVm(vm.id)">Remove</a>
                   </span>
                 </div>
                 <div class="table-data mui-col-md-2">{{ vm.os }}</div>
@@ -83,10 +83,12 @@
           </div>
         </vertical-split-pane>
         <div class="mui-row border-top">
-          <div class="mui-col-md-4">&nbsp;</div>
+          <div class="mui-col-md-4">
+            <input #editor type="hidden" value="system" />
+          </div>
           <div class="mui-col-md-4 form-item text-align-center">
             <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Create Another Virtue</span>
-            <button (click)="createVirtue()" class="button-submit" type="submit">Create Virtue</button>
+            <button (click)="createVirtue(virtueName.value,editor.value)" class="button-submit" type="submit">Create Virtue</button>
             <button class="button-cancel" type="cancel">Cancel</button>
           </div>
           <div class="mui-col-md-4"></div>

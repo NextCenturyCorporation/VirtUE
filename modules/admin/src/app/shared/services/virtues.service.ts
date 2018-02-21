@@ -15,8 +15,8 @@ const httpHeader = {
 
 export class VirtuesService {
 
-  // private jsondata = 'http://localhost:8080/admin/virtue/template';
-  private jsondata = './assets/json/virtue_list.json';
+  private jsondata = 'http://localhost:8080/admin/virtue/template';
+  // private jsondata = './assets/json/virtue_list.json';
 
   constructor( private httpClient: HttpClient ) {  }
 
@@ -30,20 +30,20 @@ export class VirtuesService {
     return this.httpClient.get<Virtue>(src);
   }
 
-  // public createVirtue(virtue: any[]): Observable<Virtue> {
-  //   return this.httpClient.post<Virtue>(this.jsondata, virtue);
-  // }
-
-  public createVirtue(virtue: Virtue) {
+  public createVirtue(virtue: Virtue): Observable<any> {
     return this.httpClient.post( this.jsondata, virtue );
+    // return this.httpClient.post<Virtue>(this.jsondata, virtue);
   }
+
+  public updateVirtue(id: string, virtue: Virtue): Observable<any>{
+    const src = `${this.jsondata}/?id=${id}`;
+    return this.httpClient.put(src, virtue);
+    // return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
+  }
+
 /**
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
     return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
-  }
-
-  public update(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
   }
 */
   /**

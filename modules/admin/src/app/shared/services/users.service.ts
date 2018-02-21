@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs/observable';
+import { Observable } from 'rxjs/Observable';
 import { User } from '../models/user.model';
 import { Virtue } from '../models/virtue.model';
 import { VirtuesService } from '../services/virtues.service';

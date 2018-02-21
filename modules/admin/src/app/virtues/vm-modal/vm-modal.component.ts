@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { VirtualMachineService } from '../../shared/services/vm.service';

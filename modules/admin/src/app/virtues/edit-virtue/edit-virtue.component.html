@@ -1,9 +1,8 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="title">Edit Virtue</h1>
-    <button class="titlebar-button" disabled>Disable Virtue</button>
+    <button (click)="virtueStatus(virtueData.id)" class="titlebar-button">{{ virtueData.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button>
   </div>
-
   <div id="content-main">
     <form id="edit-virtue" method="post">
       <div id="content" class="border-top virtue-content">
