@@ -89,7 +89,7 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 
 import { JsonFilterPipe } from './shared/json-filter.pipe';
 import { CountFilterPipe } from './shared/count-filter.pipe';
-
+import { ActiveClassDirective } from './shared/directives/active-class.directive';
 import { VirtuesService } from './shared/services/virtues.service';
 
 
@@ -127,6 +127,7 @@ import { VirtuesService } from './shared/services/virtues.service';
     VmListComponent,
     VmBuildComponent,
     VmEditComponent,
+    ActiveClassDirective
   ],
   imports: [
     AppRoutingModule,

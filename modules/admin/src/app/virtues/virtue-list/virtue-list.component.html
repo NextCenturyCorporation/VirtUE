@@ -32,14 +32,14 @@
           <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
-        <div *ngFor="let virtue of virtues" class="mui-row table-row">
+        <div *ngFor="let virtue of virtues" class="mui-row table-row" app-active-class>
           <div class="table-data mui-col-md-3">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
             <!-- if this virtue is enabled show this menu -->
-            <span [ngClass]="virtue.enabled ? 'active menu-options':'menu-options'">Duplicate | <a mat-button (click)="openDialog('virtue.id','disable')">Disable</a> | Export</span>
+            <span *ngIf="virtue.enabled" class="menu-options">Duplicate | <a mat-button (click)="virtueStatus(virtue.id)">Disable</a> | Export</span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span [ngClass]="virtue.enabled ? 'menu-options':'active menu-options'">Enable | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
+            <span *ngIf="virtue.enabled==false" class="menu-options"><a mat-button (click)="virtueStatus(virtue.id)">Enable</a> | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
           </div>
 
           <div class="table-data mui-col-md-2">{{ virtue.vmTemplates[0].os }} </div>
@@ -48,8 +48,8 @@
           </div>
           <div class="table-data mui-col-md-2">{{virtue.lastEditor}}</div>
           <div class="table-data mui-col-md-2">
-            {{virtue.enabled? 'Enabled' : 'Disabled'}}<br />
-            {{virtue.lastModification}}
+            {{virtue.enabled ? 'Enabled' : 'Disabled'}}<br />
+            {{virtue.lastModification | date:'short' }}
           </div>
           <div class="clearfix"></div>
         </div>

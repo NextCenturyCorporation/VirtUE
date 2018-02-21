@@ -5,6 +5,7 @@ import { HttpParams } from '@angular/common/http';
 
 import { User } from '../../shared/models/user.model';
 import { UsersService } from '../../shared/services/users.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
 
 import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
@@ -17,13 +18,14 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.css'],
-  providers: [ UsersService ]
+  providers: [ UsersService, VirtuesService ]
 })
 
 export class EditUserComponent implements OnInit {
   @Input() user: User;
 
   saviorUserId: {id: string};
+  selectedUser: string;
   screenWidth: any;
   leftPosition: any;
   submitBtn: any;
@@ -34,14 +36,20 @@ export class EditUserComponent implements OnInit {
   filteredUsers: Observable<any[]>;
   activeDirUsers = [];
   appUser = [];
+  selectedApps = [];
 
   constructor(
-    public dialog: MatDialog,
-    private usersService: UsersService,
     private router: ActivatedRoute,
+    private usersService: UsersService,
+    private virtuesService: VirtuesService,
+    public dialog: MatDialog
   ) {
+    this.usersService.getAdUsers().subscribe(
+      adUsers => {
+        this.activeDirUsers = adUsers;
+      }
+    );
     this.adUserCtrl = new FormControl();
-    this.usersService.getAdUsers().subscribe(adUsers => this.activeDirUsers = adUsers);
     this.filteredUsers = this.adUserCtrl.valueChanges
       .pipe(
         startWith(''),
@@ -55,17 +63,23 @@ export class EditUserComponent implements OnInit {
       id: this.router.snapshot.params['id']
     };
     this.getAdUsers();
-    // this.getThisUser(this.saviorUserId.id);
+    this.getThisUser();
   }
 
   getThisUser() {
     const id = this.saviorUserId.id;
-
-    // Use this when you connect to AWS
-    // this.usersService.getUser(id).subscribe(
-    //   data => { this.appUser = data }
-    // );
-    // console.log(this.appUser.name);
+    this.usersService.getUser(id).subscribe(
+      data => {
+        for (let i in data) {
+          if (data[i].id === id) {
+            this.appUser = data[i];
+            this.selectedUser = data[i].name;
+            this.selectedApps = data[i].virtues;
+            break;
+          }
+        }
+      }
+    );
   }
 
   getAdUsers(): void {
@@ -74,9 +88,9 @@ export class EditUserComponent implements OnInit {
       .subscribe(adUsers => this.activeDirUsers = adUsers);
   }
 
-  filterUsers(username: string) {
+  filterUsers(name: string) {
     return this.activeDirUsers.filter(adUser =>
-      adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
+      adUser.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
   }
 
   activateModal(id, mode): void {

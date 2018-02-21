@@ -23,6 +23,7 @@ export class EditVirtueComponent implements OnInit {
 
   @Input() virtue: Virtue;
   @Input() appVm: Application;
+
   virtueData = [];
   virtueVmList = [];
   virtueId: { id: string };
@@ -46,16 +47,21 @@ export class EditVirtueComponent implements OnInit {
     const id = this.virtueId.id;
     this.virtuesService.getVirtue(id).subscribe(
       data => {
-        this.virtueData = data;
-        this.virtueVmList = data.vmTemplates;
-        // console.log(this.virtueVmList);
+        for (let i in data) {
+          if (data[i].id === id) {
+            this.virtueData = data[i];
+            this.virtueVmList = data[i].vmTemplates;
+            // console.log(data[i].name);
+            break;
+          }
+        }
       }
     );
 
   }
 
-
   activateModal(id): void {
+    let virtueId = id;
     let dialogRef = this.dialog.open(VmModalComponent, {
         width: '960px'
       });
@@ -65,6 +71,15 @@ export class EditVirtueComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       // console.log('This modal was closed');
     });
+  }
+
+  virtueStatus(id: string, virtue: Virtue): void {
+    const virtueObj = this.virtueData.filter(virtue => virtue.id === id);
+    virtueObj.map((_, i) => {
+      virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;
+      console.log(virtueObj);
+    });
+    // this.virtuesService.updateVirtue(id, virtueObj);
   }
 
   deleteVirtue(id): void {

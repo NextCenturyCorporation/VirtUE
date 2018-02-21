@@ -1,11 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Application } from '../../shared/models/application.model';
 
-import { MatDialogRef } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 
 @Component({
   selector: 'app-vm-modal',
@@ -18,17 +19,19 @@ export class VmModalComponent implements OnInit {
   @Input() appInput: Application;
 
   form: FormGroup;
+  virtueId: string;
   checked = false;
-  indeterminate = false;
-
-  selectedVms: string;
+  disabled = false;
+  addVms = new EventEmitter();
   vmList = [];
-  appList = [];
+  selVmList = [];
 
   constructor(
+    private route: ActivatedRoute,
     private vmService: VirtualMachineService,
-    private dialogRef: MatDialogRef<VmModalComponent>
-  ) {}
+    private dialogRef: MatDialogRef<VmModalComponent>,
+    @Inject( MAT_DIALOG_DATA ) public data: any
+  ) {  }
 
   ngOnInit() {
     this.getVmList();
@@ -42,18 +45,42 @@ export class VmModalComponent implements OnInit {
         }
       );
   }
-
-  addVms(id: string): void {
-    id = id.trim();
-    if (!id) {
-      this.appList.push(VirtualMachine);
+  selectAll(event) {
+    if (event) {
+      this.checked = true;
+      const vms = this.vmList;
+      for (let i of vms) {
+        this.selVmList.push(vms[i].id);
+      }
+    } else {
+      this.checked = false;
+      this.clearVmList();
     }
+    // console.log(this.selVmList);
+  }
+  cbVmList(event, sel) {
+    if (event) {
+      this.selVmList.push(sel);
+    } else {
+      this.removeVm(sel);
+    }
+  }
+  removeVm(sel) {
+    this.selVmList.splice(sel, 1);
+  }
+
+  clearVmList() {
+    this.selVmList = [];
+    // console.log(this.selVmList);
+  }
+
+  onAddVms(): void {
+    this.addVms.emit(this.selVmList);
+    this.dialogRef.close();
   }
 
   cancelModal() {
-    this.dialogRef.close();
-  }
-  saveVMList() {
+    this.clearVmList();
     this.dialogRef.close();
   }
 

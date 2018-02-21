@@ -10,8 +10,8 @@
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">{{ appUser.name }}
                 <mat-form-field>
-                  <input type="text" placeholder="" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" [value]="appUser.name">
-                  <mat-autocomplete #auto="matAutocomplete" id="ad-autocomplete" panel="">
+                  <input type="text" placeholder="" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" />
+                  <mat-autocomplete mat-selected-item="appUser.name" #auto="matAutocomplete" id="ad-autocomplete" panel="">
                     <mat-option *ngFor="let adUser of activeDirUsers" [value]="adUser.name">
                       {{ adUser.name }}
                     </mat-option>
@@ -24,12 +24,12 @@
               <div class="mui-row">
                 <div class="titlebar margin-top-20">
                   <h3 class="title">Virtues</h3>
-                  <button class="button" mat-button (click)="activateModal(0,'add')">Add Virtue</button>
+                  <button class="titlebar-button" mat-button (click)="activateModal(0,'add')">Add Virtue</button>
                 </div>
               </div>
 
               <!-- if there are no virtues, show this message   *ngIf="appUser.virtues.length < 1"  -->
-              <div  class="mui-row">
+              <div *ngIf="selectedApps.length < 1" class="mui-row">
                 <div class="mui-col-md-12 padding-left-0">
                   <p class="virtue-message">
                     No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
@@ -37,7 +37,7 @@
                 </div>
               </div>
                <!-- *ngIf="appUser.virtues"  -->
-              <div class="mui-row">
+              <div *ngIf="selectedApps.length > 0" class="mui-row">
                 <div class="table-container">
                   <div class="mui-row table-header-group">
                     <div class="table-header mui-col-md-4">

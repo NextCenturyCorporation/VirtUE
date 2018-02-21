@@ -25,24 +25,25 @@ export class VirtuesService {
   }
 
   public getVirtue(id: string): Observable<any> {
-    const src = `${this.jsondata}/${id}`;
+    // const src = `${this.jsondata}/${id}`;
+    const src = `${this.jsondata}/?id=${id}`;
     return this.httpClient.get<Virtue>(src);
   }
 
-  // public createVirtue(virtue: any[]): Observable<Virtue> {
-  //   return this.httpClient.post<Virtue>(this.jsondata, virtue);
-  // }
-
-  public createVirtue(virtue: Virtue) {
+  public createVirtue(virtue: Virtue): Observable<any> {
     return this.httpClient.post( this.jsondata, virtue );
+    // return this.httpClient.post<Virtue>(this.jsondata, virtue);
   }
+
+  public updateVirtue(id: string, virtue: Virtue): Observable<any> {
+    const src = `${this.jsondata}/?id=${id}`;
+    return this.httpClient.put(src, virtue);
+    // return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
+  }
+
 /**
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
     return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
-  }
-
-  public update(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
   }
 */
   /**
