@@ -48,24 +48,25 @@ export class CreateVirtueComponent implements OnInit {
     this.vmService.getVmList()
       .subscribe(
         data => {
-        for (var sel in selectedVm) {
-          for (var i in data) {
-            if (selectedVm[sel] === data[i].id) {
-              this.vmList.push(data[i]);
+        for (let sel of selectedVm) {
+          for (let vm of data) {
+            if (sel === vm.id) {
+              this.vmList.push(vm);
               break;
             }
           }
         }
+        // console.log(this.vmList);
     });
   }
 
   createVirtue(virtueName: string) {
     this.getAppList();
-    let dt = new Date();
-    let vms = this.vmList;
-    for (var i in vms){
+    const dt = new Date();
+    const vms = this.vmList;
+    for (let vm of vms){
       console.log('VMs: ');
-      console.log(vms[i]);
+      console.log(vm);
     }
     console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt.getTime() } `);
     let user = [{ 'username': 'admin','authorities':['ROLE_USER','ROLE_ADMIN'] }]
@@ -83,27 +84,27 @@ export class CreateVirtueComponent implements OnInit {
     // console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt } `);
     console.log('New Virtue: ');
     console.log(newVirtue);
-    this.virtuesService.createVirtue({newVirtue} as Virtue)
-    .subscribe(data => {
-      this.virtues.push(data);
-    });
+    // this.virtuesService.createVirtue({newVirtue} as Virtue)
+    // .subscribe(data => {
+    //   this.virtues.push(data);
+    // });
   }
   getAppList() {
-    const vms = this.vmList;
+    let vms = this.vmList;
     let apps = [];
-    for (var i in vms) {
-      apps = vms[i].applications;
-      for (var a in apps ) {
+    for (let vm of vms) {
+      apps = vm.applications;
+      for (let app of apps) {
         this.appList.push({
-          'id':apps[a].id,
-          'name':apps[a].name,
-          'version':apps[a].version,
-          'os':apps[a].os,
-          'launchCommand':apps[a].launchCommand
+          'id':app.id,
+          'name':app.name,
+          'version':app.version,
+          'os':app.os,
+          'launchCommand':app.launchCommand
         });
       }
     }
-    // console.log('getAppList():'+this.appList[1].name);
+    console.log('getAppList():'+this.appList[0].name);
     // return this.appList;
   }
 

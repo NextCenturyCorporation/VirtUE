@@ -20,7 +20,7 @@ export class Virtue {
     version: string,
     vmTemplates: VirtualMachine[],
     users: Users[],
-    enabled: any,
+    enabled: boolean,
     lastModification: any,
     lastEditor: string,
     awsTemplateName:string,
