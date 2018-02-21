@@ -11,7 +11,7 @@ export class CountFilterPipe implements PipeTransform {
       return value.length;
     }
     const resultArray = [];
-    var resultCount;
+    let resultCount;
 
 
     for (const item of value) {

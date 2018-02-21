@@ -6,7 +6,6 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 import { Application } from '../../shared/models/application.model';
 
 import { MatDialogRef } from '@angular/material';
-import { FormGroup, FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-vm-modal',
@@ -15,14 +14,14 @@ import { FormGroup, FormBuilder } from '@angular/forms';
   providers: [ VirtualMachineService ]
 })
 export class VmModalComponent implements OnInit {
-  @Input() vmInput : VirtualMachine;
-  @Input() appInput : Application;
+  @Input() vmInput: VirtualMachine;
+  @Input() appInput: Application;
 
   form: FormGroup;
   checked = false;
   indeterminate = false;
 
-  selectedVms : string;
+  selectedVms: string;
   vmList = [];
   appList = [];
 
@@ -46,7 +45,7 @@ export class VmModalComponent implements OnInit {
 
   addVms(id: string): void {
     id = id.trim();
-    if (!id){
+    if (!id) {
       this.appList.push(VirtualMachine);
     }
   }

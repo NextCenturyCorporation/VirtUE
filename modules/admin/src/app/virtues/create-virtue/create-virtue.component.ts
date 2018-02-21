@@ -27,8 +27,8 @@ export class CreateVirtueComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    if (this.selVmsList.length > 0){
-    this.getVmList();
+    if (this.selVmsList.length > 0) {
+      this.getVmList();
     }
   }
 
@@ -38,9 +38,9 @@ export class CreateVirtueComponent implements OnInit {
     this.vmService.getVmList()
     .subscribe(
       data => {
-        for (var sel in selectedVm) {
-          for (var i in data) {
-            if (data[i].id === selectedVm[sel]){
+        for (let sel in selectedVm) {
+          for (let i in data) {
+            if (data[i].id === selectedVm[sel]) {
               this.vmList.push(data[i]);
             }
           }

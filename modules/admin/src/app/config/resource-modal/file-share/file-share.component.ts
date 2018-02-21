@@ -14,7 +14,7 @@ export class FileShareComponent implements OnInit {
     {value: 'NFS', viewValue: 'NFS'},
     {value: 'CIFS', viewValue: 'Windows (CIFS)'},
   ];
-  
+
   constructor() { }
 
   ngOnInit() {

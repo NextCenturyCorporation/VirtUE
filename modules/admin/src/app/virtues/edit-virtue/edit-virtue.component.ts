@@ -25,7 +25,7 @@ export class EditVirtueComponent implements OnInit {
   @Input() appVm: Application;
   virtueData = [];
   virtueVmList = [];
-  virtueId : { id: string };
+  virtueId: { id: string };
 
   constructor(
     private route: ActivatedRoute,
