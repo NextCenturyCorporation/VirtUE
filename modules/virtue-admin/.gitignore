@@ -6,7 +6,7 @@
 /logs/
 /certs/
 /application*.properties
-/savior-server*.properties
+/*.properties
 
 
 ### STS ###
