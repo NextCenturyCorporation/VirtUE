@@ -42,7 +42,7 @@
                 <div class="table-header mui-col-md-2">OS</div>
                 <div class="table-header mui-col-md-5">Applications</div>
               </div>
-              <div *ngFor="let vm of vmList" class="mui-row table-row" app-active-class>
+              <div *ngFor="let vm of vmList" class="mui-row table-row" appActiveClass>
                 <div class="table-data mui-col-md-5">
                   <a class="edit" mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
                   <!-- if this virtue is enabled show this menu -->

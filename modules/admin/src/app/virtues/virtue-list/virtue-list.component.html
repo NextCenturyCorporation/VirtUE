@@ -32,7 +32,7 @@
           <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
-        <div *ngFor="let virtue of virtues" class="mui-row table-row" app-active-class>
+        <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-3">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
             <!-- if this virtue is enabled show this menu -->

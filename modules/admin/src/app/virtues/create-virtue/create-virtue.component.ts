@@ -21,7 +21,7 @@ export class CreateVirtueComponent implements OnInit {
   virtues: Virtue[];
   vms = VirtualMachine;
   hovering = false;
-  activeClass: string = '';
+  activeClass: string;
   vmList = [];
   appList = [];
   selVmsList = [];
@@ -37,7 +37,7 @@ export class CreateVirtueComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    if (this.selVmsList.length > 0){
+    if (this.selVmsList.length > 0) {
       this.getVmList();
     }
   }
@@ -109,7 +109,7 @@ export class CreateVirtueComponent implements OnInit {
   }
 
   removeVm(id: string, vm: VirtualMachine): void {
-    this.vmList = this.vmList.filter(vm => vm.id !== id);
+    this.vmList = this.vmList.filter(data => vm.id !== id);
     // console.log(this.vmList);
   }
 

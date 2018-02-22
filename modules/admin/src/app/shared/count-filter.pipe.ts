@@ -11,8 +11,6 @@ export class CountFilterPipe implements PipeTransform {
       return value.length;
     }
     const resultArray = [];
-    var resultCount;
-
 
     for (const item of value) {
       if (item[propName].toLowerCase().match(filterString)) {
