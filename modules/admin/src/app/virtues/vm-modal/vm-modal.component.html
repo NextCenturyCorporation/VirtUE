@@ -21,12 +21,12 @@
       </div>
     </div>
     <div class="scrolling-list">
-      <div *ngFor="let vm of vmList" class="mui-row table-row">
+      <div *ngFor="let vm of storedVmList" class="mui-row table-row">
         <div class="mui-col-md-5 table-data">
           <span class="float-left">
             <mat-checkbox
               name="cbVm"
-              [checked]="checked"
+              [checked]="vm.checked" 
               (change)="cbVmList($event.checked, vm.id)"
               value="{{vm.id}}" ></mat-checkbox>
           </span>

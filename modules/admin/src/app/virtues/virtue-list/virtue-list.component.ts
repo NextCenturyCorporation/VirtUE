@@ -20,8 +20,6 @@ import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 export class VirtueListComponent implements OnInit {
   virtue: Virtue[];
-
-
   title = 'Virtues';
   virtues = [];
   virtueTotal: number;

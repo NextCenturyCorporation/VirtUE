@@ -25,13 +25,20 @@ export class VmModalComponent implements OnInit {
   addVms = new EventEmitter();
   vmList = [];
   selVmList = [];
+  storedVmList = [];
+
 
   constructor(
     private route: ActivatedRoute,
     private vmService: VirtualMachineService,
     private dialogRef: MatDialogRef<VmModalComponent>,
     @Inject( MAT_DIALOG_DATA ) public data: any
-  ) {  }
+  ) {
+    if (this.data['selectedList'].length > 0) {
+        this.selVmList = this.data['selectedList'];
+        console.log('VM List shared with modal: ' + this.selVmList);
+      }
+    }
 
   ngOnInit() {
     this.getVmList();
@@ -39,12 +46,34 @@ export class VmModalComponent implements OnInit {
 
   getVmList() {
     this.vmService.getVmList()
-      .subscribe(
-        data => {
-          this.vmList = data;
+    .subscribe( data => {
+      this.vmList = data;
+      // console.log(data);
+      for (let vm of data) {
+        let storedVm = {
+          id: vm.id,
+          name: vm.name,
+          os: vm.os,
+          templatePath: vm.templatePath,
+          applications: vm.applications,
+          checked: this.checked
         }
-      );
+        if (this.selVmList.length > 0) {
+          for (let sel of this.selVmList) {
+            if (storedVm['id'] === sel) {
+              storedVm['checked'] = true;
+              break;
+            } else {
+              storedVm['checked'] = false;
+            }
+          }
+        }
+        this.storedVmList.push(storedVm);
+      }
+      this.selVmList = [];
+    });
   }
+
   selectAll(event) {
     if (event) {
       this.checked = true;
@@ -58,6 +87,7 @@ export class VmModalComponent implements OnInit {
     }
     // console.log(this.selVmList);
   }
+
   cbVmList(event, sel) {
     if (event) {
       this.selVmList.push(sel);
@@ -65,6 +95,7 @@ export class VmModalComponent implements OnInit {
       this.removeVm(sel);
     }
   }
+
   removeVm(sel) {
     this.selVmList.splice(sel, 1);
   }
@@ -75,6 +106,7 @@ export class VmModalComponent implements OnInit {
   }
 
   onAddVms(): void {
+    console.log(this.selVmList);
     this.addVms.emit(this.selVmList);
     this.dialogRef.close();
   }
