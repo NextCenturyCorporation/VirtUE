@@ -8,7 +8,11 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Virtue } from '../models/virtue.model';
 
 const httpHeader = {
+<<<<<<< HEAD
   headers: new HttpHeaders ({ 'Content-Type': 'application/json' })
+=======
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+>>>>>>> VRTU-217-ngLint
 };
 
 @Injectable()

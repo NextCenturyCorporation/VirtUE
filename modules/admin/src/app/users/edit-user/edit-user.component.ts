@@ -55,7 +55,6 @@ export class EditUserComponent implements OnInit {
         startWith(''),
         map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
     );
-    // console.log(this.filteredUsers);
   }
 
   ngOnInit() {
@@ -68,18 +67,17 @@ export class EditUserComponent implements OnInit {
 
   getThisUser() {
     const id = this.saviorUserId.id;
-    this.usersService.getUser(id).subscribe(
-      data => {
-        for (let user of data) {
-          if (user.id === id) {
-            this.appUser = user;
-            this.selectedUser = user.name;
-            this.selectedApps = user.virtues;
-            break;
-          }
+    this.usersService.getUser(id)
+    .subscribe( data => {
+      for (let user of data) {
+        if (user.id === id) {
+          this.appUser = user;
+          this.selectedUser = user.name;
+          this.selectedApps = user.virtues;
+          break;
         }
       }
-    );
+    });
   }
 
   getAdUsers(): void {

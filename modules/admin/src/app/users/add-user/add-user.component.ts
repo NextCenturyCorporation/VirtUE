@@ -68,12 +68,12 @@ export class AddUserComponent implements OnInit {
   });
 
   this.screenWidth = (window.screen.width);
-  this.leftPosition = ( (window.screen.width) - this.dialogWidth) / 2;
+  this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
 
   // console.log(this.screenWidth);
   // console.log(this.leftPosition);
 
-  dialogRef.updatePosition( { top: '5%', left: this.leftPosition + 'px' } );
+  dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
 
   // dialogRef.afterClosed().subscribe();
 

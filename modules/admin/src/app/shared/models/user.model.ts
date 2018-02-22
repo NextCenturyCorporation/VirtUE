@@ -20,14 +20,14 @@ export class User {
     modifiedDate: string,
     status: boolean
   ) {
-      this.id = id;
-      this.name = name;
-      this.ad_id = ad_id;
-      this.username = username;
-      this.authorities = authorities;
-      this.virtues = virtues;
-      this.modifiedDate = modifiedDate;
-      this.status = status;
-      }
-  constructor(){}
+    this.id = id;
+    this.name = name;
+    this.ad_id = ad_id;
+    this.username = username;
+    this.authorities = authorities;
+    this.virtues = virtues;
+    this.modifiedDate = modifiedDate;
+    this.status = status;
+  }
+  constructor() { }
 }

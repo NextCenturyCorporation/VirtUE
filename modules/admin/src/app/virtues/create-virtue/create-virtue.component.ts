@@ -25,10 +25,6 @@ export class CreateVirtueComponent implements OnInit {
   vmList = [];
   appList = [];
   selVmsList = [];
-  // selVmsList = [
-  //   'bd3d540b-d375-4b2f-a7b7-e14159fcb60b',
-  //   'be0ca662-5203-4ef4-876a-9999cb30308e'
-  // ];
 
   constructor(
     private virtuesService: VirtuesService,
@@ -46,17 +42,15 @@ export class CreateVirtueComponent implements OnInit {
     // loop through the selected VM list
     const selectedVm = this.selVmsList;
     this.vmService.getVmList()
-      .subscribe(
-        data => {
-        for (let sel of selectedVm) {
-          for (let vm of data) {
-            if (sel === vm.id) {
-              this.vmList.push(vm);
-              break;
-            }
+    .subscribe( data => {
+      for (let sel of selectedVm) {
+        for (let vm of data) {
+          if (sel === vm.id) {
+            this.vmList.push(vm);
+            break;
           }
         }
-        // console.log(this.vmList);
+      }
     });
   }
 
@@ -69,11 +63,11 @@ export class CreateVirtueComponent implements OnInit {
       console.log(vm);
     }
     console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt.getTime() } `);
-    let user = [{ 'username': 'admin','authorities':['ROLE_USER','ROLE_ADMIN'] }]
+    let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
     let newVirtue = [ {
       // 'id': 'TEST',
       'name': virtueName,
-      'version':'1.0',
+      'version': '1.0',
       'vmTemplates': this.vmList,
       'users': user,
       'enabled': true,

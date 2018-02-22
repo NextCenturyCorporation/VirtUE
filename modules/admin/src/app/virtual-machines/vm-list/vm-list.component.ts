@@ -14,7 +14,7 @@ export class VmListComponent implements OnInit {
   noListData = false;
   vmlist: string;
   vms = [];
-  vmLength : number;
+  vmLength: number;
 
   constructor( private vmService: VirtualMachineService ) { }
 

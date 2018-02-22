@@ -6,7 +6,11 @@ import { Virtue } from '../models/virtue.model';
 import { VirtuesService } from '../services/virtues.service';
 
 const httpOption = {
+<<<<<<< HEAD
   headers: new HttpHeaders ({ 'Content-Type': 'application/json' })
+=======
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+>>>>>>> VRTU-217-ngLint
 };
 
 @Injectable()
@@ -50,7 +54,11 @@ export class UsersService {
   }
 
   public update(user: User): Observable<User> {
+<<<<<<< HEAD
     // return this.http.put<User>(`${this.jsondata}/${user.id}`,user);
+=======
+    return this.http.put<User>(`${this.jsondata}/${user.id}`, user);
+>>>>>>> VRTU-217-ngLint
   }
 
 

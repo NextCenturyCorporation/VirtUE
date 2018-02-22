@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Rx';
   templateUrl: './virtues.component.html'
 })
 
+
 export class VirtuesComponent implements OnInit {
 
   constructor( private router: ActivatedRoute ) {}

@@ -26,16 +26,16 @@ export class Virtue {
     awsTemplateName: string,
     applications: Application[]
   ) {
-this.id = id;
-this.name = name;
-this.version = version;
-this.vmTemplates = vmTemplates;
-this.users = users;
-this.enabled = enabled;
-this.lastModification = lastModification;
-this.lastEditor = lastEditor;
-this.awsTemplateName = awsTemplateName;
-this.applications = applications;
-}
-  constructor() {}
+    this.id = id;
+    this.name = name;
+    this.version = version;
+    this.vmTemplates = vmTemplates;
+    this.users = users;
+    this.enabled = enabled;
+    this.lastModification = lastModification;
+    this.lastEditor = lastEditor;
+    this.awsTemplateName = awsTemplateName;
+    this.applications = applications;
+  }
+  constructor() { }
 }
