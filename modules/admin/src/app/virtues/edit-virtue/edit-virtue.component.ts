@@ -27,7 +27,7 @@ export class EditVirtueComponent implements OnInit {
 
   virtueData = [];
   virtueVmList = [];
-  virtueId : { id: string };
+  virtueId: { id: string };
 
   constructor(
     private route: ActivatedRoute,
@@ -75,8 +75,8 @@ export class EditVirtueComponent implements OnInit {
   }
 
   virtueStatus(virtue: Virtue):void {
-    console.log(this.virtueData.enabled);
-    this.virtueData.enabled ? this.virtueData.enabled = false : this.virtueData.enabled = true;
+    // console.log(this.virtueData['enabled']);
+    this.virtueData['enabled'] ? this.virtueData['enabled'] = false : this.virtueData['enabled'] = true;
     this.virtuesService.updateVirtue(this.virtueId.id, this.virtueData);
   }
 

@@ -8,8 +8,8 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Virtue } from '../models/virtue.model';
 
 const httpHeader = {
-  headers: new HttpHeaders({ 'Content-Type':'application/json' })
-}
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
 
 @Injectable()
 
@@ -35,7 +35,7 @@ export class VirtuesService {
     // return this.httpClient.post<Virtue>(this.jsondata, virtue);
   }
 
-  public updateVirtue(id: string, virtue: Virtue): Observable<any>{
+  public updateVirtue(id: string, virtue: Virtue): Observable<any> {
     const src = `${this.jsondata}/?id=${id}`;
     return this.httpClient.put(src, virtue);
     // return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);

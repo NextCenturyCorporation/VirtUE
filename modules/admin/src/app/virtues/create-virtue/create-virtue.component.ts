@@ -37,7 +37,7 @@ export class CreateVirtueComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    if (this.selVmsList.length > 0){
+    if (this.selVmsList.length > 0) {
       this.getVmList();
     }
   }
@@ -69,11 +69,11 @@ export class CreateVirtueComponent implements OnInit {
       console.log(vm);
     }
     console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt.getTime() } `);
-    let user = [{ 'username': 'admin','authorities':['ROLE_USER','ROLE_ADMIN'] }]
+    let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
     let newVirtue = [ {
       // 'id': 'TEST',
       'name': virtueName,
-      'version':'1.0',
+      'version': '1.0',
       'vmTemplates': this.vmList,
       'users': user,
       'enabled': true,

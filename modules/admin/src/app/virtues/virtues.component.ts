@@ -8,8 +8,6 @@ import { Observable } from 'rxjs/Rx';
 })
 export class VirtuesComponent implements OnInit {
 
-  
-
   constructor( private router: ActivatedRoute ) {}
 
   ngOnInit() {  }

@@ -8,6 +8,6 @@ export class Users {
   ) {
     this.username = username;
     this.authorities = authorities;
-	}
-  constructor(){}
+  }
+  constructor() {}
 }

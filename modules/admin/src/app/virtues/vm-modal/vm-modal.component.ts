@@ -15,8 +15,8 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
   providers: [ VirtualMachineService ]
 })
 export class VmModalComponent implements OnInit {
-  @Input() vmInput : VirtualMachine;
-  @Input() appInput : Application;
+  @Input() vmInput: VirtualMachine;
+  @Input() appInput: Application;
 
   form: FormGroup;
   virtueId: string;
@@ -46,10 +46,10 @@ export class VmModalComponent implements OnInit {
       );
   }
   selectAll(event) {
-    if(event){
+    if (event) {
       this.checked = true;
       const vms = this.vmList;
-      for (var i in vms){
+      for (let i of vms) {
         this.selVmList.push(vms[i].id);
       }
     } else {
@@ -59,7 +59,7 @@ export class VmModalComponent implements OnInit {
     // console.log(this.selVmList);
   }
   cbVmList(event, sel) {
-    if(event){
+    if (event) {
       this.selVmList.push(sel);
     } else {
       this.removeVm(sel);

@@ -8,8 +8,8 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { VirtualMachine } from '../models/vm.model';
 
 const httpHeader = {
-  headers: new HttpHeaders({ 'Content-Type':'application/json' })
-}
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
 
 @Injectable()
 

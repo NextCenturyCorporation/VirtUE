@@ -6,8 +6,8 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 const httpHeader = {
-  headers: new HttpHeaders({ 'Content-Type':'application/json' })
-}
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
 
 @Injectable()
 

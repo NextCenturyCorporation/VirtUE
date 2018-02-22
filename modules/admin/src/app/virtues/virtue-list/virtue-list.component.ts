@@ -24,7 +24,7 @@ export class VirtueListComponent implements OnInit {
 
   title = 'Virtues';
   virtues = [];
-  virtueTotal : number;
+  virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
 
   constructor(
@@ -36,11 +36,12 @@ export class VirtueListComponent implements OnInit {
   ngOnInit() {
     this.virtuesService.getVirtues()
       .subscribe(
-        virtueList => {this.virtues = virtueList}
+        virtueList => {this.virtues = virtueList; }
       );
   }
 
-  openDialog(id,type,text): void {
+  openDialog(id, type, text): void {
+
 
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
@@ -57,7 +58,8 @@ export class VirtueListComponent implements OnInit {
     });
   }
 
-  virtueStatus(id: string, virtue: Virtue):void {
+
+  virtueStatus(id: string, virtue: Virtue): void {
     const virtueObj = this.virtues.filter(virtue => virtue.id === id);
     virtueObj.map((_, i) => {
       virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;

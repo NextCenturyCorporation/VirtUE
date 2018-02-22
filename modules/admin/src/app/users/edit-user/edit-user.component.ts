@@ -24,7 +24,7 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 export class EditUserComponent implements OnInit {
   @Input() user: User;
 
-  saviorUserId: {id:string};
+  saviorUserId: {id: string};
   selectedUser: string;
   screenWidth: any;
   leftPosition: any;
@@ -70,11 +70,11 @@ export class EditUserComponent implements OnInit {
     const id = this.saviorUserId.id;
     this.usersService.getUser(id).subscribe(
       data => {
-        for (var i in data){
-          if (data[i].id === id){
+        for (let i in data) {
+          if (data[i].id === id) {
             this.appUser = data[i];
             this.selectedUser = data[i].name;
-            this.selectedApps = data[i].virtues
+            this.selectedApps = data[i].virtues;
             break;
           }
         }
@@ -93,19 +93,19 @@ export class EditUserComponent implements OnInit {
       adUser.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
   }
 
-  activateModal(id,mode): void {
+  activateModal(id, mode): void {
 
     this.dialogWidth = 600;
     this.fullImagePath = './assets/images/app-icon-white.png';
 
-    if (mode=='add') {
+    if (mode === 'add') {
       this.submitBtn = 'Add Virtues';
     } else {
       this.submitBtn = 'Update List';
     }
 
     let dialogRef = this.dialog.open( VirtueModalComponent, {
-      width: this.dialogWidth+'px',
+      width: this.dialogWidth + 'px',
       data: {
         id: id,
         dialogMode: mode,
@@ -116,9 +116,9 @@ export class EditUserComponent implements OnInit {
     });
 
     this.screenWidth = (window.screen.width);
-    this.leftPosition = ((window.screen.width)-this.dialogWidth)/2;
+    this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
 
-    dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
+    dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
   }
 }

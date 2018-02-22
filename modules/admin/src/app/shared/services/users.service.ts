@@ -6,8 +6,8 @@ import { Virtue } from '../models/virtue.model';
 import { VirtuesService } from '../services/virtues.service';
 
 const httpOption = {
-  headers: new HttpHeaders({ 'Content-Type':'application/json' })
-}
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
 
 @Injectable()
 
@@ -27,7 +27,7 @@ export class UsersService {
 
   // use this when running locally only
   private userData = [];
-  //User services
+  // User services
   public getAdUsers(): Observable<Array<User>> {
     return this.http.get<Array<User>>(this.adUsers);
   }
@@ -50,7 +50,7 @@ export class UsersService {
   }
 
   public update(user: User): Observable<User> {
-    return this.http.put<User>(`${this.jsondata}/${user.id}`,user);
+    return this.http.put<User>(`${this.jsondata}/${user.id}`, user);
   }
 
 
