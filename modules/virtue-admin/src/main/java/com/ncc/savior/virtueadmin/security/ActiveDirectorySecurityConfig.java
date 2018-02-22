@@ -169,7 +169,5 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
 		http.csrf().disable();
-
 	}
-
 }
