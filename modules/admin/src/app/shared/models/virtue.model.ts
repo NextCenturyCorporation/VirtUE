@@ -3,25 +3,23 @@ import { Users } from './users.model';
 import { VirtualMachine } from './vm.model';
 
 export class Virtue {
-  id: string;
+  id: any;
   name: string;
   version: string;
   vmTemplates: VirtualMachine[];
   users: Users[];
   enabled: boolean;
-  lastModification: any;
   lastEditor: string;
   awsTemplateName: string;
   applications: Application[];
 
   public Virtue(
-    id: string,
+    id: any,
     name: string,
     version: string,
     vmTemplates: VirtualMachine[],
     users: Users[],
     enabled: boolean,
-    lastModification: any,
     lastEditor: string,
     awsTemplateName: string,
     applications: Application[]
@@ -32,7 +30,6 @@ export class Virtue {
     this.vmTemplates = vmTemplates;
     this.users = users;
     this.enabled = enabled;
-    this.lastModification = lastModification;
     this.lastEditor = lastEditor;
     this.awsTemplateName = awsTemplateName;
     this.applications = applications;

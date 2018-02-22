@@ -14,7 +14,7 @@ import { VirtualMachine } from '../../shared/models/vm.model';
   selector: 'app-create-virtue',
   templateUrl: './create-virtue.component.html',
   styleUrls: ['./create-virtue.component.css'],
-  providers: [ VirtuesService, VirtualMachineService ]
+  providers: [VirtuesService, VirtualMachineService]
 })
 export class CreateVirtueComponent implements OnInit {
   users: Users[];
@@ -30,7 +30,7 @@ export class CreateVirtueComponent implements OnInit {
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit() {
     if (this.selVmsList.length > 0) {
@@ -42,29 +42,29 @@ export class CreateVirtueComponent implements OnInit {
     // loop through the selected VM list
     const selectedVm = this.selVmsList;
     this.vmService.getVmList()
-    .subscribe( data => {
-      for (let sel of selectedVm) {
-        for (let vm of data) {
-          if (sel === vm.id) {
-            this.vmList.push(vm);
-            break;
+      .subscribe(data => {
+        for (let sel of selectedVm) {
+          for (let vm of data) {
+            if (sel === vm.id) {
+              this.vmList.push(vm);
+              break;
+            }
           }
         }
-      }
-    });
+      });
   }
 
   createVirtue(virtueName: string) {
     this.getAppList();
     const dt = new Date();
     const vms = this.vmList;
-    for (let vm of vms){
+    for (let vm of vms) {
       console.log('VMs: ');
       console.log(vm);
     }
-    console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt.getTime() } `);
+    console.log(`Virtue Name: ${virtueName} | Create Date: ${dt.getTime()} `);
     let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
-    let newVirtue = [ {
+    let newVirtue = [{
       // 'id': 'TEST',
       'name': virtueName,
       'version': '1.0',
@@ -74,7 +74,7 @@ export class CreateVirtueComponent implements OnInit {
       'lastModification': dt.getTime(),
       'lastEditor': 'skim',
       'applications': this.appList
-    } ];
+    }];
     // console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt } `);
     console.log('New Virtue: ');
     console.log(newVirtue);
@@ -90,15 +90,15 @@ export class CreateVirtueComponent implements OnInit {
       apps = vm.applications;
       for (let app of apps) {
         this.appList.push({
-          'id':app.id,
-          'name':app.name,
-          'version':app.version,
-          'os':app.os,
-          'launchCommand':app.launchCommand
+          'id': app.id,
+          'name': app.name,
+          'version': app.version,
+          'os': app.os,
+          'launchCommand': app.launchCommand
         });
       }
     }
-    console.log('getAppList():'+this.appList[0].name);
+    console.log('getAppList():' + this.appList[0].name);
     // return this.appList;
   }
 

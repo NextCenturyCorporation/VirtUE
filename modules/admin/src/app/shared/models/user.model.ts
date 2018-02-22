@@ -1,7 +1,7 @@
 import { Virtue } from './virtue.model';
 
 export class User {
-  id: string;
+  id: any;
   name: string;
   ad_id: string;
   username: string;
@@ -11,7 +11,7 @@ export class User {
   status: boolean;
 
   public UserTemplate(
-    id: string,
+    id: any,
     name: string,
     ad_id: string,
     username: string,

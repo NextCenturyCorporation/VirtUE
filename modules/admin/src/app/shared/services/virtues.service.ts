@@ -8,11 +8,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Virtue } from '../models/virtue.model';
 
 const httpHeader = {
-<<<<<<< HEAD
-  headers: new HttpHeaders ({ 'Content-Type': 'application/json' })
-=======
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
->>>>>>> VRTU-217-ngLint
 };
 
 @Injectable()
@@ -22,7 +18,7 @@ export class VirtuesService {
   private jsondata = 'http://localhost:8080/admin/virtue/template';
   // private jsondata = './assets/json/virtue_list.json';
 
-  constructor( private httpClient: HttpClient ) {  }
+  constructor(private httpClient: HttpClient) { }
 
   public getVirtues(): Observable<Array<Virtue>> {
     return this.httpClient.get<Array<Virtue>>(this.jsondata);
@@ -35,7 +31,7 @@ export class VirtuesService {
   }
 
   public createVirtue(virtue: Virtue): Observable<any> {
-    return this.httpClient.post( this.jsondata, virtue );
+    return this.httpClient.post(this.jsondata, virtue);
     // return this.httpClient.post<Virtue>(this.jsondata, virtue);
   }
 
@@ -45,18 +41,18 @@ export class VirtuesService {
     // return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
   }
 
-/**
-  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
-  }
-*/
+  /**
+    public deleteVirtue(virtue: Virtue): Observable<Virtue> {
+      return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
+    }
+  */
   /**
    * Handle Http operation that failed.
    * Let the app continue.
    * @ param operation - name of the operation that failed
    * @ param result - optional value to return as the observable result
    */
-  private handleError<T> (operation = 'operation', result?: T) {
+  private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
 
       // TODO: send the error to remote logging infrastructure

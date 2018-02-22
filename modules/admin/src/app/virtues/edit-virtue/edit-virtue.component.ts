@@ -17,7 +17,7 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
   selector: 'app-edit-virtue',
   templateUrl: './edit-virtue.component.html',
   styleUrls: ['./edit-virtue.component.css'],
-  providers: [ VirtuesService, VirtualMachineService ]
+  providers: [VirtuesService, VirtualMachineService]
 })
 
 export class EditVirtueComponent implements OnInit {
@@ -35,7 +35,7 @@ export class EditVirtueComponent implements OnInit {
     private vmService: VirtualMachineService,
     private location: Location,
     public dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.virtueId = {
@@ -64,8 +64,8 @@ export class EditVirtueComponent implements OnInit {
   activateModal(id): void {
     let virtueId = id;
     let dialogRef = this.dialog.open(VmModalComponent, {
-        width: '960px'
-      });
+      width: '960px'
+    });
 
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
@@ -74,16 +74,16 @@ export class EditVirtueComponent implements OnInit {
     });
   }
 
-  virtueStatus(virtue: Virtue):void {
+  virtueStatus(virtue: Virtue): void {
     // console.log(this.virtueData['enabled']);
     this.virtueData['enabled'] ? this.virtueData['enabled'] = false : this.virtueData['enabled'] = true;
-    this.virtuesService.updateVirtue(this.virtueId.id, this.virtueData);
+    // this.virtuesService.updateVirtue(this.virtueId.id, this.virtueData);
   }
 
   deleteVirtue(id): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
-        width: '450px'
-      });
+      width: '450px'
+    });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
