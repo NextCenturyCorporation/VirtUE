@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
+import { Observable } from 'rxjs/Observable';
 
 import { Virtue } from '../../shared/models/virtue.model';
 import { Application } from '../../shared/models/application.model';
@@ -16,16 +17,17 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
   selector: 'app-edit-virtue',
   templateUrl: './edit-virtue.component.html',
   styleUrls: ['./edit-virtue.component.css'],
-  providers: [ VirtuesService, VirtualMachineService ]
+  providers: [VirtuesService, VirtualMachineService]
 })
 
 export class EditVirtueComponent implements OnInit {
 
   @Input() virtue: Virtue;
   @Input() appVm: Application;
+
   virtueData = [];
   virtueVmList = [];
-  virtueId : { id: string };
+  virtueId: { id: string };
 
   constructor(
     private route: ActivatedRoute,
@@ -33,7 +35,7 @@ export class EditVirtueComponent implements OnInit {
     private vmService: VirtualMachineService,
     private location: Location,
     public dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.virtueId = {
@@ -46,19 +48,24 @@ export class EditVirtueComponent implements OnInit {
     const id = this.virtueId.id;
     this.virtuesService.getVirtue(id).subscribe(
       data => {
-        this.virtueData = data;
-        this.virtueVmList = data.vmTemplates;
-        // console.log(this.virtueVmList);
+        for (let vObj of data) {
+          if (vObj.id === id) {
+            this.virtueData = vObj;
+            this.virtueVmList = vObj.vmTemplates;
+            // console.log(vObj.name);
+            break;
+          }
+        }
       }
     );
 
   }
 
-
   activateModal(id): void {
+    let virtueId = id;
     let dialogRef = this.dialog.open(VmModalComponent, {
-        width: '960px'
-      });
+      width: '960px'
+    });
 
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
@@ -67,10 +74,16 @@ export class EditVirtueComponent implements OnInit {
     });
   }
 
+  virtueStatus(virtue: Virtue): void {
+    // console.log(this.virtueData['enabled']);
+    this.virtueData['enabled'] ? this.virtueData['enabled'] = false : this.virtueData['enabled'] = true;
+    // this.virtuesService.updateVirtue(this.virtueId.id, this.virtueData);
+  }
+
   deleteVirtue(id): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
-        width: '450px'
-      });
+      width: '450px'
+    });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 

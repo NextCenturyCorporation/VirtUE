@@ -43,7 +43,7 @@ export class DashboardComponent implements OnInit {
   // constructor(){}
   constructor(
     private dashboardService: DashboardService
-  ){}
+  ) {}
 
   ngOnInit() {
     this.dashboardService.getList()

@@ -62,6 +62,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
 		doConfigure(http);
+
+		http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default

@@ -8,15 +8,15 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { VirtualMachine } from '../models/vm.model';
 
 const httpHeader = {
-  headers: new HttpHeaders({ 'Content-Type':'application/json' })
-}
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
 
 @Injectable()
 
 export class VirtualMachineService {
 
-  private jsondata = 'http://localhost:8080/admin/virtualMachine/template';
-  // private jsondata = './assets/json/vm_list.json';
+  // private jsondata = 'http://localhost:8080/admin/virtualMachine/template';
+  private jsondata = './assets/json/vm_list.json';
 
   constructor( private httpClient: HttpClient ) {  }
 

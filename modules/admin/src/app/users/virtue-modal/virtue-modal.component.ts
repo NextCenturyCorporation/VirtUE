@@ -22,8 +22,8 @@ export class VirtueModalComponent implements OnInit {
   userVirtues = [];
 
   constructor(
-    private usersService : UsersService,
-    private virtuesService : VirtuesService,
+    private usersService: UsersService,
+    private virtuesService: VirtuesService,
     public dialogRef: MatDialogRef<VirtueModalComponent>,
     @Inject( MAT_DIALOG_DATA ) public data: any
    ) {

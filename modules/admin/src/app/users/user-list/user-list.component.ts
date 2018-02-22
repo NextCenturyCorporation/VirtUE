@@ -27,7 +27,7 @@ export class UserListComponent implements OnInit {
     public dialog: MatDialog
   ) {}
 
-  ngOnInit(){
+  ngOnInit() {
     this.getUsers();
   }
 
@@ -40,9 +40,9 @@ export class UserListComponent implements OnInit {
 
   }
 
-  openDialog(id,type,text): void {
+  openDialog(id, type, text): void {
 
-    let dialogRef = this.dialog.open( DialogsComponent, {
+    const dialogRef = this.dialog.open( DialogsComponent, {
       width: '450px',
       data:  {
           dialogText: text,
