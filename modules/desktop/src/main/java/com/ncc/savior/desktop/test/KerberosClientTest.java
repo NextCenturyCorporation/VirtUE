@@ -82,7 +82,7 @@ public class KerberosClientTest {
 	}
 
 	private static String getToken2(String serverPrincipal) {
-		IWindowsImpersonationContext imp = null;
+		// IWindowsImpersonationContext imp = null;
 		String current = WindowsAccountImpl.getCurrentUsername();
 		IWindowsCredentialsHandle clientCredentials = WindowsCredentialsHandleImpl.getCurrent(securityPackage);
 		clientCredentials.initialize();
@@ -92,9 +92,9 @@ public class KerberosClientTest {
 		clientContext.setSecurityPackage(securityPackage);
 		clientContext.initialize(null, null, serverPrincipal);
 		byte[] b = clientContext.getToken();
-		if (imp != null) {
-			imp.revertToSelf();
-		}
+		// if (imp != null) {
+		// imp.revertToSelf();
+		// }
 		String token = Base64.getEncoder().encodeToString(b);
 		System.out.println("Token2=" + token);
 		return token;
