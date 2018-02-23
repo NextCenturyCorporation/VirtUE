@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
     <property name="DEFAULT_PATTERN" value="%d{yyyy.MM.dd HH:mm:ss.SSS} %-5p [%c{20}][%t] - %m%n"/>
+    <property name="FULL_CLASS_PATTERN" value="%d{yyyy.MM.dd HH:mm:ss.SSS} %-5p [%c][%t] - %m%n"/>
     <!-- Comment out the property, logback.printToConsole to stop printing to console -->
     <!--<property name="logback.printToConsole" value="disabled"/>-->
     <property name="logback.syslog" value="enabled"/>
@@ -107,20 +108,36 @@
     </logger>
     -->
 
-    <logger name="com" additivity="false">
+	<logger name="org.springframework.security" additivity="false">
         <level value="ERROR"/>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="INFO"/>
     </logger>
 
+<!-- 	<logger name="org.springframework" additivity="false"> -->
+<!--         <level value="INFO"/> -->
+<!--         <appender-ref ref="CONSOLE"/> -->
+<!--         <appender-ref ref="DEBUG"/> -->
+<!--         <appender-ref ref="INFO"/> -->
+<!--     </logger> -->
+
+    <logger name="com" additivity="false">
+        <level value="ERROR"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG"/>
+        <appender-ref ref="INFO"/>
+    </logger>
+    
+<!--     <logger name="org.springframework.security" additivity="false"> -->
+<!--         <level value="DEBUG"/> -->
+<!--         <appender-ref ref="CONSOLE"/> -->
+<!--         <appender-ref ref="DEBUG"/> -->
+<!--         <appender-ref ref="INFO"/> -->
+<!--     </logger> -->
+
 <!-- 	<logger name="org.hibernate" additivity="false"> -->
-<!--         <level value="ERROR"/> -->
-<!--         <if condition='p("logback.printToConsole").contains("enabled")'-->
-<!--           <then> -->
-<!--             <appender-ref ref="CONSOLE" /> -->
-<!--           </then> -->
-<!--         </if>--> -->
+<!--         <level value="DEBUG"/> -->
 <!--         <appender-ref ref="CONSOLE"/> -->
 <!--         <appender-ref ref="DEBUG"/> -->
 <!--         <appender-ref ref="INFO"/> -->

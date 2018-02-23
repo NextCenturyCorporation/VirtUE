@@ -21,7 +21,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * Filter that injects user and roles from a property file to the user object
  * for Spring Security. ALL requests will be granted this user if this module is
  * used. Do NOT use in production.
- *
  */
 public class SingleUserFilter extends OncePerRequestFilter {
 
@@ -59,7 +58,9 @@ public class SingleUserFilter extends OncePerRequestFilter {
 			public Object getCredentials() {
 				return username;
 			}
+
 		};
+		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		filterChain.doFilter(request, response);
 	}

@@ -1,7 +1,12 @@
 package com.ncc.savior.desktop.virtues;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.InvalidParameterException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +29,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -35,8 +41,16 @@ public class DesktopResourceService {
 	private ObjectMapper jsonMapper;
 	private WebTarget baseApi;
 	private AuthorizationService authService;
+	private String targetHost;
 
 	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames) {
+		try {
+			this.targetHost = new URI(baseApiUri).getHost();
+		} catch (URISyntaxException e1) {
+			String error = "Unable to get Subject Principal Name from baseUrl=" + baseApiUri;
+			logger.error(error, e1);
+			throw new InvalidParameterException(error);
+		}
 		this.authService = authService;
 		if (allowAllHostnames) {
 			try {
@@ -58,14 +72,40 @@ public class DesktopResourceService {
 	public List<DesktopVirtue> getVirtues() throws IOException {
 		List<DesktopVirtue> instances;
 		try {
-			InputStream in = getListOfClass("virtue", "GET");
-			instances = jsonMapper.readValue(in, new TypeReference<List<DesktopVirtue>>() {
-			});
+			Response r = getListOfClass("virtue", "GET");
+			InputStream in = (InputStream) r.getEntity();
+			if (r.getStatus() >= 400) {
+				String data = streamToString(in);
+				logger.error("response (" + r.getStatus() + "): " + data);
+				instances = new ArrayList<DesktopVirtue>();
+			} else {
+				instances = jsonMapper.readValue(in, new TypeReference<List<DesktopVirtue>>() {
+				});
+			}
 		} catch (IOException | ProcessingException e) {
-			logger.error("error attmepting to get virtues", e);
+
+			logger.error("error attmepting to get virtues.", e);
 			instances = new ArrayList<DesktopVirtue>();
 		}
 		return instances;
+	}
+
+	private String streamToString(InputStream bin) {
+		StringBuilder result = new StringBuilder();
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
+			String line;
+			boolean flag = false;
+			String newLine = System.getProperty("line.separator");
+			while ((line = reader.readLine()) != null) {
+				result.append(flag ? newLine : "").append(line);
+				flag = true;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result.toString();
 	}
 
 	public DesktopVirtueApplication startApplication(String virtueId, ApplicationDefinition appDefn)
@@ -110,33 +150,35 @@ public class DesktopResourceService {
 		return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier((s1, s2) -> true).build();
 	}
 
-	private InputStream getListOfClass(String path, String method) throws IOException {
+	private Response getListOfClass(String path, String method) throws IOException, InvalidUserLoginException {
 		WebTarget target = baseApi.path(path);
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
-		addAuthorization(builder);
+		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
-
-		InputStream in = (InputStream) response.getEntity();
-		return in;
+		return response;
 	}
 
-	private <T> T getClass(WebTarget target, String method, Class<T> klass) throws IOException {
+	private <T> T getClass(WebTarget target, String method, Class<T> klass)
+			throws IOException, InvalidUserLoginException {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
-		addAuthorization(builder);
+		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
 		if (response.getStatus() == 200) {
-		InputStream in = (InputStream) response.getEntity();
-		T instance = jsonMapper.readValue(in, klass);
-		return instance;
+			InputStream in = (InputStream) response.getEntity();
+			T instance = jsonMapper.readValue(in, klass);
+			return instance;
 		} else {
 			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
 			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
 		}
 	}
 
-	private void addAuthorization(Builder builder) {
+	private void addAuthorization(Builder builder, String targetHost) throws InvalidUserLoginException {
 		// Temporary implementation until we really tie in active directory.
 		DesktopUser user = authService.getUser();
+
+		authService.addAuthorizationTicket(builder, targetHost);
+
 		if (user != null) {
 			String username = user.getUsername();
 			builder.header("X-Authorization", username);

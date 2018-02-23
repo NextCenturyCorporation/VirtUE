@@ -7,24 +7,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 /**
- * User Service provides the {@link User} object from the Spring Security
+ * User Service provides the {@link VirtueUser} object from the Spring Security
  * modules. This is the instance that should be used by the rest of the system
  * to get the user.
- * 
- *
  */
 public class UserService {
 
-	public static User getCurrentUser() {
+	public static VirtueUser getCurrentUser() {
 		// TODO hook up to Spring Security at some point.
 		// return User.testUser();
 		return getUserFromSpringContext();
 	}
 
-	private static User getUserFromSpringContext() {
+	private static VirtueUser getUserFromSpringContext() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null) {
 			Collection<? extends GrantedAuthority> groups = auth.getAuthorities();
@@ -33,10 +31,12 @@ public class UserService {
 				String groupStr = group.getAuthority();
 				myGroups.add(groupStr);
 			}
-			User user = new User(auth.getName(), myGroups);
+			String name = auth.getName();
+			
+			VirtueUser user = new VirtueUser(name, myGroups);
 			return user;
 		}
-		return User.anonymousUser();
+		return VirtueUser.anonymousUser();
 	}
 
 }

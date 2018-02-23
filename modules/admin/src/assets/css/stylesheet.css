@@ -3420,10 +3420,11 @@ h5 {
 
 /* line 42, ../scss/_styles.scss */
 p {
+  margin: 10px 0;
   padding: 10px 0;
 }
 
-/* line 45, ../scss/_styles.scss */
+/* line 46, ../scss/_styles.scss */
 hr {
   clear: both;
   display: block;
@@ -3432,12 +3433,12 @@ hr {
   padding: 0;
 }
 
-/* line 54, ../scss/_styles.scss */
+/* line 55, ../scss/_styles.scss */
 .app-icon-white {
   background-image: url(/assets/images/app-icon-white.png) no-repeat;
 }
 
-/* line 57, ../scss/_styles.scss */
+/* line 58, ../scss/_styles.scss */
 #wrapper {
   display: block;
   margin: 0;
@@ -3445,13 +3446,14 @@ hr {
   position: relative;
 }
 
-/* line 63, ../scss/_styles.scss */
+/* line 64, ../scss/_styles.scss */
 #content-container {
   position: relative;
+  padding: 0 25px;
 }
 
 /* Header Global CSS */
-/* line 67, ../scss/_styles.scss */
+/* line 69, ../scss/_styles.scss */
 header {
   background-color: #2E294E;
   display: block;
@@ -3459,39 +3461,39 @@ header {
   margin-bottom: 50px;
 }
 
-/* line 73, ../scss/_styles.scss */
+/* line 75, ../scss/_styles.scss */
 breadcrumb {
   display: block;
   font-size: 0.9rem;
-  padding-top: 1.2rem;
-  padding-left: 1.2rem;
+  margin-top: 1.2rem;
+  margin-left: 20px;
 }
-/* line 78, ../scss/_styles.scss */
+/* line 80, ../scss/_styles.scss */
 breadcrumb ol {
   list-style-type: none;
   padding: 0;
 }
-/* line 82, ../scss/_styles.scss */
+/* line 84, ../scss/_styles.scss */
 breadcrumb li {
   display: inline-block;
   margin-right: 6px;
 }
-/* line 85, ../scss/_styles.scss */
+/* line 87, ../scss/_styles.scss */
 breadcrumb li:before {
   content: '>';
 }
-/* line 90, ../scss/_styles.scss */
+/* line 92, ../scss/_styles.scss */
 breadcrumb li:first-child:before {
   content: '';
 }
 
-/* line 95, ../scss/_styles.scss */
+/* line 97, ../scss/_styles.scss */
 form {
   clear: both;
   display: block;
 }
 
-/* line 99, ../scss/_styles.scss */
+/* line 101, ../scss/_styles.scss */
 form:after {
   clear: both;
   content: ' ';
@@ -3499,32 +3501,31 @@ form:after {
   height: 1px;
 }
 
-/* line 105, ../scss/_styles.scss */
+/* line 107, ../scss/_styles.scss */
 .form-item {
   clear: both;
   display: block;
-  margin: 0;
   padding: 0.5rem 0;
   width: 100%;
 }
-/* line 111, ../scss/_styles.scss */
+/* line 112, ../scss/_styles.scss */
 .form-item span {
   padding: 0;
 }
 
-/* line 115, ../scss/_styles.scss */
+/* line 116, ../scss/_styles.scss */
 label {
   font-family: 'Raleway600';
   margin: 0;
   padding: 0;
 }
 
-/* line 120, ../scss/_styles.scss */
+/* line 121, ../scss/_styles.scss */
 input, select {
   border: 1px solid #B2B2B2;
 }
 
-/* line 123, ../scss/_styles.scss */
+/* line 124, ../scss/_styles.scss */
 input[type="color"] {
   -webkit-appearance: none;
   border: 1px solid #B2B2B2;
@@ -3533,17 +3534,17 @@ input[type="color"] {
   padding: 2px;
 }
 
-/* line 130, ../scss/_styles.scss */
+/* line 131, ../scss/_styles.scss */
 input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 
-/* line 133, ../scss/_styles.scss */
+/* line 134, ../scss/_styles.scss */
 input[type="color"]::-webkit-color-swatch {
   border: none;
 }
 
-/* line 136, ../scss/_styles.scss */
+/* line 137, ../scss/_styles.scss */
 input[type='text'], input[type='password'] {
   box-sizing: border-box;
   height: 30px;
@@ -3551,7 +3552,7 @@ input[type='text'], input[type='password'] {
   width: 100%;
 }
 
-/* line 142, ../scss/_styles.scss */
+/* line 143, ../scss/_styles.scss */
 button, input[type='button'] {
   border: none;
   cursor: pointer;
@@ -3560,33 +3561,33 @@ button, input[type='button'] {
   padding: 0.55rem 1rem 0.6rem;
 }
 
-/* line 150, ../scss/_styles.scss */
+/* line 151, ../scss/_styles.scss */
 button.button-submit {
   background-color: #407097;
   border-radius: 0;
   color: white;
   text-shadow: 1px 1px #3E3F4E;
 }
-/* line 156, ../scss/_styles.scss */
+/* line 157, ../scss/_styles.scss */
 button.button-delete, button.button-cancel {
   background-color: none;
   border: none;
   border-radius: 0;
   color: #407097;
 }
-/* line 162, ../scss/_styles.scss */
+/* line 163, ../scss/_styles.scss */
 button.button-trash {
   height: 20px;
   margin: 0;
   padding: 0;
   width: 18px;
 }
-/* line 168, ../scss/_styles.scss */
+/* line 169, ../scss/_styles.scss */
 button .fa {
   color: #407097;
 }
 
-/* line 172, ../scss/_styles.scss */
+/* line 173, ../scss/_styles.scss */
 select {
   background-color: white;
   -webkit-appearance: none;
@@ -3603,13 +3604,13 @@ select {
   width: 100%;
 }
 
-/* line 185, ../scss/_styles.scss */
+/* line 186, ../scss/_styles.scss */
 .select-container {
   height: 35px;
   position: relative;
   width: 100%;
 }
-/* line 190, ../scss/_styles.scss */
+/* line 191, ../scss/_styles.scss */
 .select-container .fa {
   font-size: 1.4rem;
   font-weight: 700;
@@ -3619,95 +3620,89 @@ select {
   top: 7px;
 }
 
-/* line 200, ../scss/_styles.scss */
+/* line 201, ../scss/_styles.scss */
 [disabled] {
   color: #b2b2b2;
 }
 
-/* line 203, ../scss/_styles.scss */
+/* line 204, ../scss/_styles.scss */
 app-root {
   height: inherit;
 }
 
 /* Content Global CSS */
-/* line 207, ../scss/_styles.scss */
+/* line 208, ../scss/_styles.scss */
 content {
   display: block;
   min-height: 560px;
   margin: 4rem 0 1rem;
   position: relative;
 }
-/* line 212, ../scss/_styles.scss */
+/* line 213, ../scss/_styles.scss */
 content:after {
   clear: both;
   content: ' ';
   display: block;
 }
-/* line 217, ../scss/_styles.scss */
-content #content-header {
-  padding: 0 1.1rem 1rem 1.1rem;
-  position: relative;
+/* line 218, ../scss/_styles.scss */
+content #content-main {
+  padding: 0;
 }
 /* line 221, ../scss/_styles.scss */
-content #content-main {
-  padding: 0 1.1rem;
-}
-/* line 224, ../scss/_styles.scss */
 content #content {
   display: block;
 }
-/* line 226, ../scss/_styles.scss */
+/* line 223, ../scss/_styles.scss */
 content #content.content {
   padding-top: 1.1rem;
 }
 
-/* line 233, ../scss/_styles.scss */
+/* line 230, ../scss/_styles.scss */
 .paging {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
   margin-top: 0.75rem;
 }
-/* line 238, ../scss/_styles.scss */
+/* line 235, ../scss/_styles.scss */
 .paging .page-number {
   text-align: left;
 }
-/* line 241, ../scss/_styles.scss */
+/* line 238, ../scss/_styles.scss */
 .paging .page-controls {
   text-align: center;
 }
-/* line 244, ../scss/_styles.scss */
+/* line 241, ../scss/_styles.scss */
 .paging .page-item-total {
   text-align: right;
 }
 
-/* line 250, ../scss/_styles.scss */
+/* line 247, ../scss/_styles.scss */
 .table-container, .data-list {
   font-family: 'Raleway500', Arial, sans-serif;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0;
   max-height: 960px;
   overflow-y: scroll;
   overflow-x: hidden;
 }
 
-/* line 259, ../scss/_styles.scss */
+/* line 255, ../scss/_styles.scss */
 .table-container {
   border: 1px solid #B2B2B2;
 }
 
-/* line 263, ../scss/_styles.scss */
+/* line 259, ../scss/_styles.scss */
 .data-list {
   border-top: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 266, ../scss/_styles.scss */
+/* line 262, ../scss/_styles.scss */
 .data-list .table-header-group {
   border-right: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
   border-left: 1px solid #B2B2B2;
 }
 
-/* line 272, ../scss/_styles.scss */
+/* line 268, ../scss/_styles.scss */
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;
   display: flex;
@@ -3715,22 +3710,22 @@ content #content.content {
   align-items: stretch;
 }
 
-/* line 278, ../scss/_styles.scss */
+/* line 274, ../scss/_styles.scss */
 .table-row {
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 280, ../scss/_styles.scss */
+/* line 276, ../scss/_styles.scss */
 .table-row:last-child {
   border-bottom: none;
 }
 
-/* line 284, ../scss/_styles.scss */
+/* line 280, ../scss/_styles.scss */
 .table-header, .table-data {
   padding-top: 0.65rem;
   padding-bottom: 0.65rem;
 }
 
-/* line 288, ../scss/_styles.scss */
+/* line 284, ../scss/_styles.scss */
 .table-header {
   font-family: 'Raleway600', Arial, sans-serif;
   background-color: #E9E3E6;
@@ -3738,41 +3733,46 @@ content #content.content {
   align-items: flex-end;
 }
 
-/* line 294, ../scss/_styles.scss */
+/* line 290, ../scss/_styles.scss */
 .table-header span {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-/* line 298, ../scss/_styles.scss */
+/* line 295, ../scss/_styles.scss */
+.table-row.active .menu-options {
+  display: block;
+}
+
+/* line 299, ../scss/_styles.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
-/* line 302, ../scss/_styles.scss */
+/* line 303, ../scss/_styles.scss */
 .table-data span {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
 }
-/* line 307, ../scss/_styles.scss */
+/* line 308, ../scss/_styles.scss */
 .table-data .menu-options {
   clear: both;
-  display: block;
+  display: none;
   font-size: 0.88rem;
   font-weight: 600;
   margin: 0;
 }
 
-/* line 316, ../scss/_styles.scss */
+/* line 317, ../scss/_styles.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 321, ../scss/_styles.scss */
+/* line 322, ../scss/_styles.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
@@ -3781,61 +3781,63 @@ content #content.content {
 
 /* line 325, ../scss/_styles.scss */
 .titlebar {
+  clear: both;
   display: block;
-  position: relative;
-}
-/* line 329, ../scss/_styles.scss */
-.titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
-  margin-top: 0;
-}
-/* line 330, ../scss/_styles.scss */
-.titlebar h2 {
-  font-size: 28px;
-}
-/* line 331, ../scss/_styles.scss */
-.titlebar h3 {
-  font-size: 24px;
+  margin-top: 1.1rem;
+  margin-bottom: 1.2rem;
+  min-height: 1rem;
 }
 /* line 332, ../scss/_styles.scss */
-.titlebar h4 {
-  font-size: 20px;
-}
-/* line 333, ../scss/_styles.scss */
-.titlebar h5 {
-  font-size: 18px;
-}
-/* line 335, ../scss/_styles.scss */
 .titlebar:after {
-  border-bottom: 1px solid #b2b2b2;
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 343, ../scss/_styles.scss */
+/* line 338, ../scss/_styles.scss */
+.titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
+  margin-top: 0;
+}
+/* line 339, ../scss/_styles.scss */
+.titlebar h2 {
+  font-size: 28px;
+}
+/* line 340, ../scss/_styles.scss */
+.titlebar h3 {
+  font-size: 24px;
+}
+/* line 341, ../scss/_styles.scss */
+.titlebar h4 {
+  font-size: 20px;
+}
+/* line 342, ../scss/_styles.scss */
+.titlebar h5 {
+  font-size: 18px;
+}
+/* line 344, ../scss/_styles.scss */
 .titlebar .title {
-  display: block;
   float: left;
+  margin: 0;
 }
 /* line 348, ../scss/_styles.scss */
-.titlebar button {
+.titlebar .titlebar-button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
   border-radius: 0;
   display: block;
   float: left;
-  margin: 0.25rem 0 0 1.5rem;
-  padding: 0.55rem 0.7rem 0.6rem;
+  margin: 0 0 0 1.5rem;
+  padding: 0.5rem 0.7rem;
 }
 
-/* line 358, ../scss/_styles.scss */
+/* line 359, ../scss/_styles.scss */
 .no-data-message {
   display: block;
   border-top: 1px solid #b2b2b2;
   border-bottom: 1px solid #b2b2b2;
 }
 
-/* line 363, ../scss/_styles.scss */
+/* line 364, ../scss/_styles.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3843,19 +3845,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 370, ../scss/_styles.scss */
+/* line 371, ../scss/_styles.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 373, ../scss/_styles.scss */
+/* line 374, ../scss/_styles.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 377, ../scss/_styles.scss */
+/* line 378, ../scss/_styles.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3864,7 +3866,7 @@ footer {
   position: relative;
 }
 
-/* line 384, ../scss/_styles.scss */
+/* line 385, ../scss/_styles.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;

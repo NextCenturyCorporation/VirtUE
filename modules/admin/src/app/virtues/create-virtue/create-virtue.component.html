@@ -17,45 +17,49 @@
           <div class="split-pane-content-primary">
 
             <div class="mui-row form-item margin-top-15">
-              <div class="mui-col-md-12 padding-left-0 padding-right-0">
-                <input type="text" id="virtue-name" value="" placeholder="Virtue Name" />
+              <div class="mui-col-md-12">
+                <input type="text" #virtueName value="" placeholder="Virtue Name" />
               </div>
             </div>
-            <div class="mui-row virtue-titlebar">
+            <div class="mui-row titlebar">
               <div class="mui-col-md-12">
-                <h3 class="virtue-title">Virtual Machines</h3>
-                <button mat-button class="virtue-button" (click)="activateModal()">Add VM</button>
+                <h3 class="title">Virtual Machines</h3>
+                <button mat-button class="titlebar-button" (click)="activateModal('test')">Add VM</button>
               </div>
             </div>
             <!-- if there are no virtue, show this message -->
-            <div class="mui-row margin-top-10">
+            <div *ngIf="vmList.length < 1" class="mui-row margin-top-10">
               <div class="mui-col-md-12">
-                <p class="border-top border-bottom">
+                <p class="no-data-message">
                   No virtual machines are attached to this virtue. To add VM(s), click on the button "Add VM".
                 </p>
               </div>
             </div>
             <!-- if there are virtue machines, show this list -->
-            <div class="mui-container-fluid data-list">
+            <div *ngIf="vmList.length > 0" class="mui-container-fluid data-list">
               <div class="mui-row table-header-group">
                 <div class="table-header mui-col-md-5">Virtual Machine</div>
-                <div class="table-header mui-col-md-2">Image Size</div>
+                <div class="table-header mui-col-md-2">OS</div>
                 <div class="table-header mui-col-md-5">Applications</div>
               </div>
-              <div class="mui-row table-row">
+              <div *ngFor="let vm of vmList" class="mui-row table-row" appActiveClass>
                 <div class="table-data mui-col-md-5">
-                  <a class="edit" mat-button (click)="activateModal(id)">[ Virtual Machine ]</a>
+                  <a class="edit" mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
                   <!-- if this virtue is enabled show this menu -->
-                  <span class="active virtue-options">
-                    <a class="edit" mat-button (click)="activateModal(id)">Edit</a> | <a href="#">Disable</a>
+                  <span class="menu-options" *ngIf="vm.enabled">
+                    <a href="#">Disable</a> | <a mat-button (click)="removeVm(vm.id)">Remove</a>
                   </span>
                   <!-- if this virtue is disabled show this menu -->
-                  <span class="active virtue-options">
-                    <a class="edit" mat-button (click)="activateModal(id)">Edit</a> | <a href="#">Remove</a>
+                  <span class="menu-options" *ngIf="vm.enabled===false">
+                    <a href="#">Enable</a> | <a mat-button (click)="removeVm(vm.id)">Remove</a>
                   </span>
                 </div>
-                <div class="table-data mui-col-md-2"># mb</div>
-                <div class="table-data mui-col-md-5">List of Apps</div>
+                <div class="table-data mui-col-md-2">{{ vm.os }}</div>
+                <div class="table-data mui-col-md-5">
+                  <ul>
+                    <li *ngFor="let app of vm.applications">{{ app.name }}</li>
+                  </ul>
+                </div>
                 <div class="clearfix"></div>
               </div>
             </div>
@@ -79,10 +83,12 @@
           </div>
         </vertical-split-pane>
         <div class="mui-row border-top">
-          <div class="mui-col-md-4">&nbsp;</div>
+          <div class="mui-col-md-4">
+            <input #editor type="hidden" value="system" />
+          </div>
           <div class="mui-col-md-4 form-item text-align-center">
             <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Create Another Virtue</span>
-            <button class="button-submit" type="submit">Create Virtue</button>
+            <button (click)="createVirtue(virtueName.value,editor.value)" class="button-submit" type="submit">Create Virtue</button>
             <button class="button-cancel" type="cancel">Cancel</button>
           </div>
           <div class="mui-col-md-4"></div>

@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
@@ -12,7 +16,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueCompa
 import javafx.stage.Stage;
 
 public class SidebarController {
-
+	private static final Logger logger = LoggerFactory.getLogger(SidebarController.class);
 	private VirtueService virtueService;
 	private Sidebar sidebar;
 	private Thread virtuePollThread;
@@ -31,11 +35,11 @@ public class SidebarController {
 
 	public void init(Stage primaryStage) throws Exception {
 		List<DesktopVirtue> initialVirtues;
-		if (authService.getUser()!=null) {
-			initialVirtues = virtueService.getVirtuesForUser();
-		}else {
-			initialVirtues=new ArrayList<DesktopVirtue>();
-		}
+		// if (authService.getUser() != null) {
+		// initialVirtues = virtueService.getVirtuesForUser();
+		// } else {
+			initialVirtues = new ArrayList<DesktopVirtue>();
+		// }
 		currentVirtues = initialVirtues;
 		sidebar.start(primaryStage, initialVirtues);
 		startVirtuePoll();
@@ -46,23 +50,31 @@ public class SidebarController {
 
 			@Override
 			public void run() {
+				String previousUser = null;
 				while (!terminatePollThread) {
-					if (authService.getUser() != null) {
-						List<DesktopVirtue> virtues;
-						try {
-
-							virtues = virtueService.getVirtuesForUser();
-						} catch (IOException e1) {
-							// TODO do something with connection errors.
-							virtues = new ArrayList<DesktopVirtue>(0);
-						}
-						detectChangesAndReport(currentVirtues, virtues);
-						currentVirtues = virtues;
-					}
 					try {
+						DesktopUser currentUser = authService.getUser();
+						if (currentUser != null) {
+							List<DesktopVirtue> virtues;
+							try {
+
+								virtues = virtueService.getVirtuesForUser();
+							} catch (IOException e1) {
+								// TODO do something with connection errors.
+								virtues = new ArrayList<DesktopVirtue>(0);
+							}
+							if (!currentUser.getUsername().equals(previousUser)) {
+								currentVirtues.clear();
+								previousUser = currentUser.getUsername();
+							}
+							detectChangesAndReport(currentVirtues, virtues);
+							currentVirtues = virtues;
+
+						}
+
 						Thread.sleep(pollPeriodMillis);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
+					} catch (Throwable t) {
+						logger.error("error in virtue polling thread", t);
 					}
 				}
 			}

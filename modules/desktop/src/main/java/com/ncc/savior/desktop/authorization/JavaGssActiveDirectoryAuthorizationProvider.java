@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import javax.ws.rs.client.Invocation.Builder;
 
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
@@ -107,13 +108,19 @@ public class JavaGssActiveDirectoryAuthorizationProvider implements IActiveDirec
 	}
 
 	@Override
-	public byte[] getCurrentToken() {
+	public byte[] getCurrentToken(String principal) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void logout() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addAuthorizationTicket(Builder builder, String targetHost) throws InvalidUserLoginException {
 		// TODO Auto-generated method stub
 
 	}

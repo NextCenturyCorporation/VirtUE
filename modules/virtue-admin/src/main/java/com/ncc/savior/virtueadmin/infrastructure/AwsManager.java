@@ -58,7 +58,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -104,26 +104,25 @@ public class AwsManager implements ICloudManager {
 	 * @see com.amazonaws.auth.PropertiesCredentials
 	 * @see com.amazonaws.ClientConfiguration
 	 */
-	private void init() throws Exception {
+	private void init() throws AmazonClientException {
 
 		/*
 		 * The ProfileCredentialsProvider will return your [virtue] credential profile
-		 * by reading from the credentials file located at
-		 * (/Users/womitowoju/.aws/credentials).
+		 * by reading from the credentials file located at (~/.aws/credentials).
 		 */
 		AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 
 		try {
 			credentialsProvider.getCredentials();
+
 		} catch (Exception e) {
 			logger.warn("Cannot load the credentials from the credential profiles file. ", e);
 			try {
-			credentialsProvider = new PropertiesFileCredentialsProvider("aws.properties");
+				credentialsProvider = new PropertiesFileCredentialsProvider("aws.properties");
 			} catch (Exception e2) {
 				logger.warn("Cannot load credentials from credentials file: aws.properties", e2);
 				throw new AmazonEC2Exception("Cannot load credentials.  Use cli or aws.properties");
 			}
-
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
 		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
@@ -157,7 +156,7 @@ public class AwsManager implements ICloudManager {
 	 * com.ncc.savior.virtueadmin.model.VirtueTemplate)
 	 */
 	@Override
-	public VirtueInstance createVirtue(User user, VirtueTemplate template) throws Exception {
+	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 
 		try {
 			credentialsProvider.getCredentials();
@@ -446,7 +445,7 @@ public class AwsManager implements ICloudManager {
 		return instances;
 	}
 
-	public String deleteVirtue(User user, String instanceId) throws Exception {
+	public String deleteVirtue(VirtueUser user, String instanceId) throws Exception {
 
 		// Delete the stack
 

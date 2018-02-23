@@ -89,9 +89,8 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 
 import { JsonFilterPipe } from './shared/json-filter.pipe';
 import { CountFilterPipe } from './shared/count-filter.pipe';
-
-// import { FirebaseService } from './shared/firebase.service';
-import { JsondataService } from './shared/jsondata.service';
+import { ActiveClassDirective } from './shared/directives/active-class.directive';
+import { VirtuesService } from './shared/services/virtues.service';
 
 
 @NgModule({
@@ -128,6 +127,7 @@ import { JsondataService } from './shared/jsondata.service';
     VmListComponent,
     VmBuildComponent,
     VmEditComponent,
+    ActiveClassDirective
   ],
   imports: [
     AppRoutingModule,
@@ -149,12 +149,11 @@ import { JsondataService } from './shared/jsondata.service';
     SplitPaneModule
   ],
   exports: [
-    JsonFilterPipe,
     OverlayModule
   ],
   providers: [
     { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
-    JsondataService
+    VirtuesService
   ],
   bootstrap: [AppComponent],
   entryComponents: [

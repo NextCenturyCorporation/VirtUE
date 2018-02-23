@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.sidebar.LoginScreen.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -138,33 +139,37 @@ public class Sidebar implements VirtueChangeHandler {
 			userImageView.setImage(user.getImage());
 		}
 		if (user == null || (reqDomain != null && !reqDomain.equals(user.getDomain()))) {
-			LoginScreen login = new LoginScreen(authService, true);
-			login.addLoginEventListener(new ILoginEventListener() {
-				@Override
-				public void onLoginSuccess(DesktopUser user) {
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							userLabel.setText(user.getUsername());
-							if (user.getImage() != null) {
-								userImageView.setImage(user.getImage());
-							}
-						}
-					});
-				}
-
-				@Override
-				public void onLoginFailure(String username, String domain, RuntimeException e) {
-					logger.warn("Login failure for domain=" + domain + " username=" + username, e);
-				}
-
-				@Override
-				public void onCancel() {
-					// do nothing, handled elsewhere
-				}
-			});
-			login.start(stage);
+			initiateLoginScreen(stage);
 		}
+	}
+
+	private void initiateLoginScreen(Stage stage) {
+		LoginScreen login = new LoginScreen(authService, true);
+		login.addLoginEventListener(new ILoginEventListener() {
+			@Override
+			public void onLoginSuccess(DesktopUser user) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						userLabel.setText(user.getUsername());
+						if (user.getImage() != null) {
+							userImageView.setImage(user.getImage());
+						}
+					}
+				});
+			}
+
+			@Override
+			public void onLoginFailure(String username, String domain, RuntimeException e) {
+				logger.warn("Login failure for domain=" + domain + " username=" + username, e);
+			}
+
+			@Override
+			public void onCancel() {
+				// do nothing, handled elsewhere
+			}
+		});
+		login.start(stage);
 	}
 
 	private Node getLogout() {
@@ -229,6 +234,7 @@ public class Sidebar implements VirtueChangeHandler {
 				loginScreen.addLoginEventListener(new ILoginEventListener() {
 					@Override
 					public void onLoginSuccess(DesktopUser user) {
+						try {
 						Platform.runLater(new Runnable() {
 							@Override
 							public void run() {
@@ -240,6 +246,9 @@ public class Sidebar implements VirtueChangeHandler {
 								}
 							}
 						});
+						} catch (Throwable t) {
+							logger.debug("Error applying changes to login success.", t);
+						}
 					}
 
 					@Override
@@ -295,7 +304,12 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private Node getUserNameLabel() {
 		if (userLabel == null) {
-			DesktopUser user = authService.getUser();
+			DesktopUser user;
+			try {
+				user = authService.getUser();
+			} catch (InvalidUserLoginException e) {
+				user = null;
+			}
 			String username = user == null ? "" : user.getUsername();
 			userLabel = new Label(username);
 		}

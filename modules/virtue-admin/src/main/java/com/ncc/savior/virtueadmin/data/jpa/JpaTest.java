@@ -1,7 +1,10 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -13,7 +16,7 @@ import org.springframework.context.annotation.Bean;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
@@ -29,28 +32,32 @@ public class JpaTest {
 
 	@Bean
 	public CommandLineRunner demo(VirtueTemplateRepository vtRepository, VirtualMachineTemplateRepository vmtRepository,
-			ApplicationDefinitionRepository appRepository, UserNameRepository userRep) {
+			ApplicationDefinitionRepository appRepository, UserRepository userRep) {
 		return (args) -> {
 			System.out.println("**************************************");
 			SpringJpaTemplateManager tm = new SpringJpaTemplateManager(vtRepository, vmtRepository, appRepository,
 					userRep);
 
 			// save a couple of customers
-			ArrayList<VirtualMachineTemplate> vmts1 = new ArrayList<VirtualMachineTemplate>();
+			Set<VirtualMachineTemplate> vmts1 = new HashSet<VirtualMachineTemplate>();
 			ArrayList<ApplicationDefinition> apps1 = new ArrayList<ApplicationDefinition>();
 			ApplicationDefinition a1 = new ApplicationDefinition(UUID.randomUUID().toString(), "testApp", "V1",
 					OS.LINUX);
 			apps1.add(a1);
+			boolean enabled = true;
+			Date now = new Date();
+			String systemUser = "system";
 			VirtualMachineTemplate vmt1 = new VirtualMachineTemplate(UUID.randomUUID().toString(), "test", OS.LINUX,
-					"myTemplatePath", apps1);
+					"myTemplatePath", apps1, enabled, now, systemUser);
 			vmts1.add(vmt1);
-			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1);
+			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1,
+					"default-template", enabled, now, systemUser);
 
 			tm.addApplicationDefinition(a1);
 			tm.addVmTemplate(vmt1);
 			tm.addVirtueTemplate(vt1);
 
-			User user = User.testUser();
+			VirtueUser user = VirtueUser.testUser();
 			// userRep.save(new UserName(user.getUsername()));
 
 			Map<String, VirtueTemplate> testVts = tm.getVirtueTemplatesForUser(user);
@@ -74,7 +81,7 @@ public class JpaTest {
 			log.info("");
 
 			// fetch an individual customer by ID
-			VirtueTemplate virtueTemplate = vtRepository.findOne("id");
+			VirtueTemplate virtueTemplate = vtRepository.findById("id").get();
 			log.info("Customer found with findOne(1L):");
 			log.info("--------------------------------");
 			log.info(virtueTemplate == null ? "null" : virtueTemplate.toString());

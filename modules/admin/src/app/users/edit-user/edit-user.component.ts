@@ -1,9 +1,11 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { HttpParams } from '@angular/common/http';
 
-import { SaviorUser } from '../savior-user';
-import { JsondataService } from '../../shared/jsondata.service';
+import { User } from '../../shared/models/user.model';
+import { UsersService } from '../../shared/services/users.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
 
 import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
@@ -15,14 +17,15 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 @Component({
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
-  styleUrls: ['./edit-user.component.css']
+  styleUrls: ['./edit-user.component.css'],
+  providers: [ UsersService, VirtuesService ]
 })
 
 export class EditUserComponent implements OnInit {
-  @Input() appUser : SaviorUser;
+  @Input() user: User;
 
-  // appUser: string;
-  saviorUserId: number;
+  saviorUserId: {id: string};
+  selectedUser: string;
   screenWidth: any;
   leftPosition: any;
   submitBtn: any;
@@ -31,37 +34,76 @@ export class EditUserComponent implements OnInit {
 
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
-  activeDirUsers=[];
+  activeDirUsers = [];
+  appUser = [];
+  selectedApps = [];
 
   constructor(
-    public dialog: MatDialog,
-    private jsondataService: JsondataService,
-    private route: ActivatedRoute
+    private router: ActivatedRoute,
+    private usersService: UsersService,
+    private virtuesService: VirtuesService,
+    public dialog: MatDialog
   ) {
+    this.usersService.getAdUsers().subscribe(
+      adUsers => {
+        this.activeDirUsers = adUsers;
+      }
+    );
     this.adUserCtrl = new FormControl();
     this.filteredUsers = this.adUserCtrl.valueChanges
       .pipe(
         startWith(''),
         map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
-        // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
     );
-    // this.route.params.subscribe(userId => this.saviorUserId = userId.id));
-    console.log('Savior User: ' + this.saviorUserId);
   }
 
-  activateModal(id,mode): void {
+  ngOnInit() {
+    this.saviorUserId = {
+      id: this.router.snapshot.params['id']
+    };
+    this.getAdUsers();
+    this.getThisUser();
+  }
+
+  getThisUser() {
+    // const id = this.saviorUserId.id;
+    // this.usersService.getUser(id)
+    // .subscribe( data => {
+    //   for (let user of data) {
+    //     if (user.id === id) {
+    //       this.appUser = user;
+    //       this.selectedUser = user.name;
+    //       this.selectedApps = user.virtues;
+    //       break;
+    //     }
+    //   }
+    // });
+  }
+
+  getAdUsers(): void {
+    // Gets AD user for autocomplete field
+    this.usersService.getAdUsers()
+      .subscribe(adUsers => this.activeDirUsers = adUsers);
+  }
+
+  filterUsers(name: string) {
+    return this.activeDirUsers.filter(adUser =>
+      adUser.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
+  }
+
+  activateModal(id, mode): void {
 
     this.dialogWidth = 600;
     this.fullImagePath = './assets/images/app-icon-white.png';
 
-    if (mode=='add') {
+    if (mode === 'add') {
       this.submitBtn = 'Add Virtues';
     } else {
       this.submitBtn = 'Update List';
     }
 
-    let dialogRef = this.dialog.open( VirtueModalComponent, {
-      width: this.dialogWidth+'px',
+    const dialogRef = this.dialog.open( VirtueModalComponent, {
+      width: this.dialogWidth + 'px',
       data: {
         id: id,
         dialogMode: mode,
@@ -72,24 +114,9 @@ export class EditUserComponent implements OnInit {
     });
 
     this.screenWidth = (window.screen.width);
-    this.leftPosition = ((window.screen.width)-this.dialogWidth)/2;
-    // console.log(this.screenWidth);
-    // console.log(this.leftPosition);
+    this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
 
-    dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
-
+    dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
   }
-  // Gets AD user for autocomplete field
-  getJSON(src): void {
-    this.jsondataService.getJSON('adUsers').subscribe(adUsers => this.activeDirUsers = adUsers);
-  }
-
-  filterUsers(username: string) {
-    return this.activeDirUsers.filter(adUser =>
-      adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
-  }
-
-  ngOnInit() {}
-
 }

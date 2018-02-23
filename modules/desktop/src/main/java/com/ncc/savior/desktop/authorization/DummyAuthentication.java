@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.authorization;
 
 import java.io.InputStream;
 
+import javax.ws.rs.client.Invocation.Builder;
+
 import javafx.scene.image.Image;
 
 public class DummyAuthentication implements IActiveDirectoryAuthorizationProvider {
@@ -30,7 +32,7 @@ public class DummyAuthentication implements IActiveDirectoryAuthorizationProvide
 	}
 
 	@Override
-	public byte[] getCurrentToken() {
+	public byte[] getCurrentToken(String principal) {
 		return null;
 	}
 
@@ -39,4 +41,9 @@ public class DummyAuthentication implements IActiveDirectoryAuthorizationProvide
 		// do nothing
 	}
 
+	@Override
+	public void addAuthorizationTicket(Builder builder, String targetHost) throws InvalidUserLoginException {
+		// do nothing
+
+	}
 }

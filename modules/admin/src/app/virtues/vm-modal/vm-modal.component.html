@@ -1,31 +1,44 @@
-<form>
+<form name="vm-list">
 <h2 mat-dialog-title>Manage Virtual Machines</h2>
 <div mat-dialog-content>
-  <p>Select virtual machines ot include in the virtue.</p>
+  <p>Select virtual machines to include in the virtue.</p>
   <div class="mui-container-fluid mui-col-md-12 table-container">
     <div class="mui-row table-header-group">
       <div class="mui-col-md-5 table-header">
-        <span class="float-left"><input type="checkbox" value="selectAll" /></span>
+        <span class="float-left">
+          <mat-checkbox
+            name="selectAll"
+            (change)="selectAll($event.checked)"
+            [disabled]="disabled" ></mat-checkbox>
+        </span>
         <span class="float-left text-align-left">Virtual Machine</span>
       </div>
       <div class="mui-col-md-2 table-header">
-        Image Size
+        OS
       </div>
       <div class="mui-col-md-5 table-header">
         Applications
       </div>
     </div>
     <div class="scrolling-list">
-      <div class="mui-row">
+      <div *ngFor="let vm of vmList" class="mui-row table-row">
         <div class="mui-col-md-5 table-data">
-          <span class="float-left"><input type="checkbox" value="vm-#" /></span>
-          <span class="float-left">[ Virtual Machine Name ]</span>
+          <span class="float-left">
+            <mat-checkbox
+              name="cbVm"
+              [checked]="checked"
+              (change)="cbVmList($event.checked, vm.id)"
+              value="{{vm.id}}" ></mat-checkbox>
+          </span>
+          <span class="float-left">{{ vm.name }}</span>
         </div>
         <div class="mui-col-md-2 table-data">
-          # MB
+          {{ vm.os }}
         </div>
         <div class="mui-col-md-5 table-data">
-          App 1, App 2, App 3, App N
+          <ul>
+            <li *ngFor="let app of vm.applications">{{ app.name }}</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -33,10 +46,10 @@
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button class="button" type="submit" (click)="saveVMList();">
-  Save
+  <button mat-button class="button" type="submit" (click)="onAddVms();">
+  Add VMs
   </button>
-  <button mat-button type="button" mat-dialog-close>
+  <button mat-button type="button" (click)="cancelModal();" mat-dialog-close>
     Cancel
   </button>
 </div>

@@ -1,6 +1,6 @@
 <div id="content-container">
   <div id="content-header" class="mui-container-fluid titlebar">
-    <h2 class="title">Edit User Account: {{ saviorUserId }}</h2>
+    <h2 class="title">Edit User Account</h2>
   </div>
   <div id="content-main">
     <div id="content" class="content">
@@ -8,55 +8,59 @@
         <div class="mui-row">
           <div class="mui-col-md-9">
             <div class="mui-row">
-              <div class="mui-col-md-12 form-item">
+              <div class="mui-col-md-12 form-item">{{ appUser.name }}
                 <mat-form-field>
-                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" >
-                  <mat-autocomplete #auto="matAutocomplete" id="ad-autocomplete" panel="">
-                    <mat-option *ngFor="let adUser of filteredUsers | async" [value]="adUser.name">
+                  <input type="text" placeholder="" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" />
+                  <mat-autocomplete mat-selected-item="appUser.name" #auto="matAutocomplete" id="ad-autocomplete" panel="">
+                    <mat-option *ngFor="let adUser of activeDirUsers" [value]="adUser.name">
                       {{ adUser.name }}
                     </mat-option>
                   </mat-autocomplete>
-                </mat-form-field><br/>
-                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ saviorUserId }}</span>
-                </div>
-              </div>
-              <div *ngFor="let i of appUser" class="mui-row">
-              {{ i.name }}<br>
-              </div>
-              <div class="mui-row">
-                <div class="titlebar margin-top-20">
-                  <br />
-                  <h3 class="title">Virtues</h3>
-                  <button mat-button (click)="activateModal(0,'add')">Add Virtue</button>
+                </mat-form-field>
+                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ saviorUserId.id }}</span>
                 </div>
               </div>
 
-              <!-- if there are no virtues, show this message -->
               <div class="mui-row">
+                <div class="titlebar margin-top-20">
+                  <h3 class="title">Virtues</h3>
+                  <button class="titlebar-button" mat-button (click)="activateModal(0,'add')">Add Virtue</button>
+                </div>
+              </div>
+
+              <!-- if there are no virtues, show this message   *ngIf="appUser.virtues.length < 1"  -->
+              <div *ngIf="selectedApps.length < 1" class="mui-row">
                 <div class="mui-col-md-12 padding-left-0">
                   <p class="virtue-message">
                     No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
                   </p>
                 </div>
               </div>
-              <div class="mui-row">
+               <!-- *ngIf="appUser.virtues"  -->
+              <div *ngIf="selectedApps.length > 0" class="mui-row">
                 <div class="table-container">
                   <div class="mui-row table-header-group">
                     <div class="table-header mui-col-md-4">
-                      <div class="text-align-left margin-left-20 margin-right-0 padding-left-10">Virtue Name</div>
+                      <div class="text-align-left"><span>Virtue Name</span></div>
                     </div>
                     <div class="table-header mui-col-md-8">Applications</div>
                   </div>
-                  <div class="mui-row table-row">
+                  <div *ngFor="let virtue of appUser.virtues" class="mui-row table-row">
                     <div class="table-data mui-col-md-4">
                       <div class="virtue-color margin-right-10"></div>
                       <div class="virtue-name">
-                        <a class="edit" (click)="activateModal(1,'edit')">[ Virtue Name ]</a>
+                        <a class="edit" (click)="activateModal(1,'edit')">{{ virtue.name }}</a>
                         <!-- This should show if hovered over -->
-                        <span class="active virtue-options"><a href="#">Remove</a></span>
+                        <span [ngClass]="virtue.enabled ? 'menu-options':'menu-options'"><a href="#">Remove</a></span>
                       </div>
                     </div>
-                    <div class="table-data mui-col-md-8">[App 1, App 2, App 3, Apps N...]</div>
+                    <div class="table-data mui-col-md-8">
+                      <div class="mui-col-md-4" *ngFor="let apps of virtue.vmTemplates">
+                        <ul>
+                          <li *ngFor="let app of apps.applications">{{ app.name }}</li>
+                        </ul>
+                      </div>
+                    </div>
                     <div class="clearfix"></div>
                   </div>
                 </div>

@@ -5,6 +5,8 @@
 /database/
 /logs/
 /certs/
+/application*.properties
+/*.properties
 
 
 ### STS ###
@@ -28,3 +30,5 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+/ecbuild/
+

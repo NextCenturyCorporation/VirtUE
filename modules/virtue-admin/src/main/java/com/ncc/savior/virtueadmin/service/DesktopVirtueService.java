@@ -11,7 +11,7 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -47,7 +47,7 @@ public class DesktopVirtueService {
 	 * @return
 	 * 
 	 */
-	public Set<DesktopVirtue> getDesktopVirtuesForUser(User user) {
+	public Set<DesktopVirtue> getDesktopVirtuesForUser(VirtueUser user) {
 		Map<String, VirtueTemplate> templates = templateManager.getVirtueTemplatesForUser(user);
 		Map<String, Set<VirtueInstance>> templateIdToActiveVirtues = activeVirtueManager.getVirtuesFromTemplateIds(user,
 				templates.keySet());
@@ -69,9 +69,9 @@ public class DesktopVirtueService {
 		return virtues;
 	}
 
-	public DesktopVirtueApplication startApplication(User user, String virtueId, String applicationId)
+	public DesktopVirtueApplication startApplication(VirtueUser user, String virtueId, String applicationId)
 			throws IOException {
-		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId);
+		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
 		applicationManager.startApplicationOnVm(vm, application, 5);
@@ -80,7 +80,7 @@ public class DesktopVirtueService {
 		return dva;
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(User user, String templateId, String applicationId)
+	public DesktopVirtueApplication startApplicationFromTemplate(VirtueUser user, String templateId, String applicationId)
 			throws IOException {
 		VirtueInstance instance = createVirtue(user, templateId);
 		return startApplication(user, instance.getId(), applicationId);
@@ -105,12 +105,12 @@ public class DesktopVirtueService {
 	}
 
 
-	public void deleteVirtue(User user, String instanceId) {
+	public void deleteVirtue(VirtueUser user, String instanceId) {
 		activeVirtueManager.deleteVirtue(user, instanceId);
 	}
 
-	public VirtueInstance createVirtue(User user, String templateId) {
-		VirtueTemplate template = templateManager.getTemplate(user, templateId);
+	public VirtueInstance createVirtue(VirtueUser user, String templateId) {
+		VirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
 		if (template == null) {
 			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
 		}

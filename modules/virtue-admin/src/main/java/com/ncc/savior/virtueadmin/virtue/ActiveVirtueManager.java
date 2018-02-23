@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.virtue;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.IStateUpdateListener;
-import com.ncc.savior.virtueadmin.model.User;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -36,7 +37,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	}
 
 	@Override
-	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(User user, Set<String> templateIds) {
+	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds) {
 		Map<String, Set<VirtueInstance>> virtues = virtueDao.getVirtuesFromTemplateIds(user, templateIds);
 		return virtues;
 	}
@@ -58,7 +59,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	}
 
 	@Override
-	public VirtueInstance provisionTemplate(User user, VirtueTemplate template) {
+	public VirtueInstance provisionTemplate(VirtueUser user, VirtueTemplate template) {
 		try {
 			VirtueInstance vi = cloudManager.createVirtue(user, template);
 			logger.debug("From template=" + template);
@@ -90,8 +91,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	}
 
 	@Override
-	public void deleteVirtue(User user, String instanceId) {
-		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId);
+	public void deleteVirtue(VirtueUser user, String instanceId) {
+		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
@@ -107,5 +108,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	@Override
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtueDao.getAllActiveVirtues();
+	}
+
+	@Override
+	public VirtueInstance getActiveVirtue(String virtueId) {
+		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
+		return opt.isPresent() ? opt.get() : null;
 	}
 }

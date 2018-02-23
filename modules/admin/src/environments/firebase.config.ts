@@ -6,7 +6,7 @@ export const FirebaseConfig = {
     projectId: 'savior-virtue',
     storageBucket: 'savior-virtue.appspot.com',
     messagingSenderId: '279646907206'
-  }  
+  }
 };
 // export const FirebaseConfig = {
 //     firebase: {

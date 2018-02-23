@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.ncc.savior.virtueadmin.model.UserName;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 public interface VirtueTemplateRepository extends CrudRepository<VirtueTemplate, String> {
 
-	Collection<VirtueTemplate> findByUserNames(UserName username);
+	Collection<VirtueTemplate> findByUsers(VirtueUser user);
 
-	VirtueTemplate findByUserNamesAndId(UserName userName, String templateId);
+	VirtueTemplate findByUsersAndId(VirtueUser user, String templateId);
 }

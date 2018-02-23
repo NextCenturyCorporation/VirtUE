@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 
-import { JsondataService } from '../../shared/jsondata.service';
+import { UsersService } from '../../shared/services/users.service';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 export class AdUsers {
@@ -16,7 +16,8 @@ export class AdUsers {
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
-  styleUrls: ['./add-user.component.css']
+  styleUrls: ['./add-user.component.css'],
+  providers: [ UsersService ]
 })
 
 export class AddUserComponent implements OnInit {
@@ -29,11 +30,11 @@ export class AddUserComponent implements OnInit {
 
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
-  activeDirUsers=[];
+  activeDirUsers = [];
 
   constructor(
     public dialog: MatDialog,
-    private jsondataService: JsondataService
+    private usersService: UsersService
   ) {
     this.adUserCtrl = new FormControl();
     this.filteredUsers = this.adUserCtrl.valueChanges
@@ -43,20 +44,20 @@ export class AddUserComponent implements OnInit {
         // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
     );
   }
-  activateModal(id,mode): void {
+  activateModal(id, mode): void {
 
   this.dialogWidth = 600;
 
   this.fullImagePath = './assets/images/app-icon-white.png';
 
-  if (mode=='add') {
+  if (mode === 'add') {
     this.submitBtn = 'Add Virtues';
   } else {
     this.submitBtn = 'Update List';
   }
 
-  let dialogRef = this.dialog.open( VirtueModalComponent, {
-    width: this.dialogWidth+'px',
+  const dialogRef = this.dialog.open( VirtueModalComponent, {
+    width: this.dialogWidth + 'px',
     data: {
       id: id,
       dialogMode: mode,
@@ -67,19 +68,23 @@ export class AddUserComponent implements OnInit {
   });
 
   this.screenWidth = (window.screen.width);
-  this.leftPosition = ((window.screen.width)-this.dialogWidth)/2;
+  this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
 
   // console.log(this.screenWidth);
   // console.log(this.leftPosition);
 
-  dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
+  dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
 
   // dialogRef.afterClosed().subscribe();
 
   }
   // Gets AD user for autocomplete field
-  getJSON(src): void {
-    this.jsondataService.getJSON('adUsers').subscribe(adUsers => this.activeDirUsers = adUsers);
+  getUsers() {
+    this.usersService.getUsers().subscribe(
+      adUsers => {
+        this.activeDirUsers = adUsers;
+      }
+    );
   }
   // filters the AD list as you type
   filterUsers(username: string) {

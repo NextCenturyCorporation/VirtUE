@@ -1,33 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+
+import { User } from '../../shared/models/user.model';
+import { UsersService } from '../../shared/services/users.service';
+
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-
-import { JsondataService } from '../../shared/jsondata.service';
-import { JsonFilterPipe } from '../../shared/json-filter.pipe';
-import { CountFilterPipe } from '../../shared/count-filter.pipe';
-
-import { Observable } from 'rxjs/Observable';
-
 
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  styleUrls: ['./user-list.component.css'],
+  providers: [ UsersService ]
 })
 export class UserListComponent implements OnInit {
+  @Input() user: User;
 
   saviorUsers: string;
-  appUserList=[];
+  appUserList = [];
 
-  // constructor( private dataService: DataService ){}
   constructor(
-    private jsondataService: JsondataService,
+    private route: ActivatedRoute,
+    private usersService: UsersService,
+    private location: Location,
     public dialog: MatDialog
   ) {}
 
-  openDialog(id,type,text): void {
+  ngOnInit() {
+    this.getUsers();
+  }
 
-    let dialogRef = this.dialog.open( DialogsComponent, {
+  getUsers(): void {
+    this.usersService.getUsers()
+      .subscribe(appUsers => this.appUserList = appUsers);
+  }
+
+  onSelected(id) {
+
+  }
+
+  openDialog(id, type, text): void {
+
+    const dialogRef = this.dialog.open( DialogsComponent, {
       width: '450px',
       data:  {
           dialogText: text,
@@ -40,14 +55,6 @@ export class UserListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog to delete {{data.dialogText}} was closed');
     });
-  }
-
-  getJSON(src): void {
-    this.jsondataService.getJSON(src).subscribe(appUsers => this.appUserList = appUsers);
-  }
-
-  ngOnInit(){
-    this.getJSON('appUsers');
   }
 
 }

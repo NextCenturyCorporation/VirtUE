@@ -1,33 +1,53 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
+import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
+
+import { Virtue } from '../../shared/models/virtue.model';
+import { UsersService } from '../../shared/services/users.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
+
+import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 
 @Component({
   selector: 'app-virtue-modal',
   templateUrl: './virtue-modal.component.html',
-  styleUrls: ['./virtue-modal.component.css']
+  styleUrls: ['./virtue-modal.component.css'],
+  providers: [ UsersService, VirtuesService ]
 })
 export class VirtueModalComponent implements OnInit {
 
-  form: FormGroup;
-  virtues = [
-    'Microsoft Office',
-    'Microsoft Outlook',
-    'Adobe Suite',
-    'Developer Bundle',
-    'Admin Bundle',
-    'Project Management'
-  ];
+  @ViewChild('userVirtue') userVirtueRef: ElementRef;
 
-  constructor( public dialogRef: MatDialogRef<VirtueModalComponent>, @Inject( MAT_DIALOG_DATA ) public data: any ) {
+  form: FormGroup;
+  virtues = [];
+  userVirtues = [];
+
+  constructor(
+    private usersService: UsersService,
+    private virtuesService: VirtuesService,
+    public dialogRef: MatDialogRef<VirtueModalComponent>,
+    @Inject( MAT_DIALOG_DATA ) public data: any
+   ) {
     console.log('data', this.data);
   }
 
-  save() {
-    this.dialogRef.close();
+  ngOnInit() {
+    this.getVirtues();
   }
 
-  ngOnInit() {
+  getVirtues() {
+    this.virtuesService.getVirtues()
+      .subscribe(virtues => this.virtues = virtues);
+  }
+
+  // onAddVirtues() {
+  //   const selVirtue = this.userVirtueRef.nativeElement.value;
+  //   // const newVirtue = new UserVirtue(selVirtue);
+  //   this.virtuesService.addUserVirtues(selVirtue);
+  //   console.log(selVirtue);
+  // }
+
+  save() {
+    this.dialogRef.close();
   }
 
 }

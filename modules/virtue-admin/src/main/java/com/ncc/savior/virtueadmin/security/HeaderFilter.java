@@ -21,8 +21,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * The username is given ROLE_USER by default. If the X-admin header is present,
  * the user will be given ROLE_ADMIN. If the X-noroles header is present, the
  * user will get no roles.
- * 
- *
  */
 public class HeaderFilter extends OncePerRequestFilter {
 
@@ -35,29 +33,31 @@ public class HeaderFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		String name = request.getHeader("X-Authorization");
-		ArrayList<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-		authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-		if (request.getHeader("X-admin") != null) {
-			authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-		}
-		if (request.getHeader("X-noroles") != null) {
-			authorities.clear();
-		}
-
-		Authentication authentication = new AbstractAuthenticationToken(authorities) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Object getPrincipal() {
-				return name;
+		if (name != null) {
+			ArrayList<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+			authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+			if (request.getHeader("X-admin") != null) {
+				authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+			}
+			if (request.getHeader("X-noroles") != null) {
+				authorities.clear();
 			}
 
-			@Override
-			public Object getCredentials() {
-				return name;
-			}
-		};
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+			Authentication authentication = new AbstractAuthenticationToken(authorities) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Object getPrincipal() {
+					return name;
+				}
+
+				@Override
+				public Object getCredentials() {
+					return name;
+				}
+			};
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		}
 		filterChain.doFilter(request, response);
 	}
 
