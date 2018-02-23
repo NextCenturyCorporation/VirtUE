@@ -65,11 +65,6 @@ public class UserDataService {
 
 	// Stop running virtue application not yet supported
 
-	public void deleteVirtue(String virtueId) {
-		// TODO Auto-generated method stub
-
-	}
-
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = UserService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {

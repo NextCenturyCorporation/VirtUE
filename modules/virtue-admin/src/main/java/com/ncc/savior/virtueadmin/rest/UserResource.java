@@ -27,7 +27,7 @@ import com.ncc.savior.virtueadmin.util.WebServiceUtil;
  */
 
 @Path("/user")
-public class UserRestService {
+public class UserResource {
 
 	@Autowired
 	private DesktopVirtueService desktopService;
@@ -53,7 +53,7 @@ public class UserRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/{templateId}")
-	public VirtueTemplate getAllVirtueByUser(@PathParam("templateId") String templateId) {
+	public VirtueTemplate getVirtueTemplateByUser(@PathParam("templateId") String templateId) {
 		try {
 			VirtueTemplate vt = userVirtueService.getVirtueTemplate(templateId);
 			return vt;
@@ -68,7 +68,7 @@ public class UserRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/")
-	public Collection<VirtueTemplate> getAllVirtueByUser() {
+	public Collection<VirtueTemplate> getAllVirtueTemplatesByUser() {
 		try {
 			Collection<VirtueTemplate> vts = userVirtueService.getVirtueTemplatesForUser();
 			return vts;

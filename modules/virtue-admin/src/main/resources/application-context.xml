@@ -46,7 +46,7 @@
 	<bean name="templateManager"
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaTemplateManager">
 	</bean>
-	
+
 	<bean name="userManager"
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaUserManager">
 	</bean>
@@ -62,14 +62,19 @@
 	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">
 		<constructor-arg ref="defaultPem" />
 	</bean>
-<!-- 	<bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineCloudManager"> -->
-<!-- 		<constructor-arg ref="vmManager" /> -->
-<!-- 	</bean> -->
+	<!-- <bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineCloudManager"> -->
+	<!-- <constructor-arg ref="vmManager" /> -->
+	<!-- </bean> -->
 	<bean name="desktopService"
 		class="com.ncc.savior.virtueadmin.service.DesktopVirtueService">
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="appManager" />
+	</bean>
+
+	<bean name="userService" class="com.ncc.savior.virtueadmin.service.UserDataService">
+		<constructor-arg ref="activeVirtueManager" />
+		<constructor-arg ref="templateManager" />
 	</bean>
 
 </beans>  
