@@ -11,11 +11,10 @@ import javax.ws.rs.Produces;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.security.UserService;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -44,8 +43,7 @@ public class AdminResource {
 	@Path("application")
 	public ApplicationDefinition createNewApplicationDefinition(ApplicationDefinition appDef) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.createNewApplicationDefinition(user, appDef);
+			return adminService.createNewApplicationDefinition( appDef);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -59,8 +57,7 @@ public class AdminResource {
 	@Path("application")
 	public Iterable<ApplicationDefinition> getAllApplicationDefinitions() {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.getAllApplicationTemplates(user);
+			return adminService.getAllApplicationTemplates();
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -74,8 +71,7 @@ public class AdminResource {
 	@Path("application/{id}")
 	public ApplicationDefinition getApplicationDefinition(@PathParam("id") String templateId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.getApplicationDefinition(user, templateId);
+			return adminService.getApplicationDefinition( templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -90,8 +86,7 @@ public class AdminResource {
 	public ApplicationDefinition updateApplicationDefinitions(@PathParam("id") String templateId,
 			ApplicationDefinition appDef) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.updateApplicationDefinitions(user, templateId, appDef);
+			return adminService.updateApplicationDefinitions( templateId, appDef);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -104,8 +99,7 @@ public class AdminResource {
 	@Path("application/{id}")
 	public void deleteApplicationDefinitions(@PathParam("id") String templateId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			adminService.deleteApplicationDefinition(user, templateId);
+			adminService.deleteApplicationDefinition( templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -119,8 +113,7 @@ public class AdminResource {
 	@Path("virtualMachine/template/")
 	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate templateId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.createVmTemplate(user, templateId);
+			return adminService.createVmTemplate(templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -134,8 +127,7 @@ public class AdminResource {
 	@Path("virtualMachine/template/{id}")
 	public VirtualMachineTemplate getVmTemplate(@PathParam("id") String templateId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.getVmTemplate(user, templateId);
+			return adminService.getVmTemplate( templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -149,8 +141,7 @@ public class AdminResource {
 	@Path("virtualMachine/template")
 	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.getAllVmTemplates(user);
+			return adminService.getAllVmTemplates();
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -164,8 +155,7 @@ public class AdminResource {
 	@Path("virtualMachine/template/{id}")
 	public VirtualMachineTemplate updateVmTemplate(@PathParam("id") String templateId, VirtualMachineTemplate vmt) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.updateVmTemplate(user, templateId, vmt);
+			return adminService.updateVmTemplate( templateId, vmt);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -178,8 +168,7 @@ public class AdminResource {
 	@Path("virtualMachine/template/{id}")
 	public void deleteVmTemplate(@PathParam("id") String templateId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			adminService.deleteVmTemplate(user, templateId);
+			adminService.deleteVmTemplate( templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -193,8 +182,7 @@ public class AdminResource {
 	@Path("virtue/template")
 	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate(user, template);
+			VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate( template);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -215,8 +203,7 @@ public class AdminResource {
 	@Path("virtue/template")
 	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			Iterable<VirtueTemplate> virtueTemplates = adminService.getAllVirtueTemplates(user);
+			Iterable<VirtueTemplate> virtueTemplates = adminService.getAllVirtueTemplates();
 			return virtueTemplates;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -231,8 +218,7 @@ public class AdminResource {
 	@Path("virtue/template/{id}")
 	public VirtueTemplate getVirtueTemplate(@PathParam("id") String templateId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			VirtueTemplate virtueTemplate = adminService.getVirtueTemplate(user, templateId);
+			VirtueTemplate virtueTemplate = adminService.getVirtueTemplate( templateId);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -247,8 +233,7 @@ public class AdminResource {
 	@Path("virtue/template/{id}")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(user, templateId, template);
+			VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate( templateId, template);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -262,8 +247,7 @@ public class AdminResource {
 	@Path("deletevirtue/instance/{instanceId}")
 	public void deleteVirtue(@PathParam("instanceId") String instanceId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			adminService.deleteVirtue(user, instanceId);
+			adminService.deleteVirtue(instanceId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -286,8 +270,7 @@ public class AdminResource {
 	@Path("createvirtue/type/{templateId}")
 	public VirtueInstance createVirtueFromTemplate(@PathParam("templateId") String templateId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return desktopService.createVirtue(user, templateId);
+			return desktopService.createVirtue(templateId);
 		} catch (Exception e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -301,8 +284,7 @@ public class AdminResource {
 	@Path("virtues")
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.getAllActiveVirtues(user);
+			return adminService.getAllActiveVirtues();
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -316,8 +298,7 @@ public class AdminResource {
 	@Path("virtues/{id}")
 	public VirtueInstance getActiveVirtue(@PathParam("id") String virtueId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.getActiveVirtue(user, virtueId);
+			return adminService.getActiveVirtue(virtueId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -325,14 +306,13 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
-	
+
 	@POST
 	@Produces("application/json")
 	@Path("user/")
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.createUpdateUser(user, newUser);
+			return adminService.createUpdateUser(newUser);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -346,12 +326,11 @@ public class AdminResource {
 	@Path("user/{username}")
 	public VirtueUser updateUser(@PathParam("username") String username, VirtueUser newUser) {
 		try {
-			VirtueUser user = getUserFromSecurity();
 			if (!newUser.getUsername().equals(username)) {
 				throw new SaviorException(SaviorException.UNKNOWN_ERROR,
 						"Given user doesn't match username in path.  Username=" + username + ". NewUser=" + newUser);
 			}
-			return adminService.createUpdateUser(user, newUser);
+			return adminService.createUpdateUser(newUser);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -365,8 +344,7 @@ public class AdminResource {
 	@Path("user/{username}")
 	public VirtueUser getUser(@PathParam("username") String usernameToRetrieve) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			VirtueUser returnedUser = user= adminService.getUser(user, usernameToRetrieve);
+			VirtueUser returnedUser = adminService.getUser(usernameToRetrieve);
 			return returnedUser;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -375,14 +353,13 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
-	
+
 	@GET
 	@Produces("application/json")
 	@Path("user")
 	public Iterable<VirtueUser> getAllUsers() {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return adminService.getAllUsers(user);
+			return adminService.getAllUsers();
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -396,21 +373,12 @@ public class AdminResource {
 	@Path("user/{username}")
 	public void removeUser(@PathParam("username") String usernameToRemove) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			adminService.removeUser(user, usernameToRemove);
+			adminService.removeUser(usernameToRemove);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
 			// Needs to create ExceptionMapper for jersey.
 			throw WebServiceUtil.createWebserviceException(e);
 		}
-	}
-
-	private VirtueUser getUserFromSecurity() {
-		VirtueUser user = UserService.getCurrentUser();
-		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have ADMIN role");
-		}
-		return user;
 	}
 }

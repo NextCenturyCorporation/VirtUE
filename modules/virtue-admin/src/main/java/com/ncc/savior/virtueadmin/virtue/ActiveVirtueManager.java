@@ -83,12 +83,12 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 		virtueDao.updateVmState(vmId, state);
 	}
 
-	private class VmUpdateListener implements IStateUpdateListener {
-		@Override
-		public void updateVmState(String vmId, VmState state) {
-			updateVmState(vmId, state);
-		}
-	}
+//	private class VmUpdateListener implements IStateUpdateListener {
+//		@Override
+//		public void updateVmState(String vmId, VmState state) {
+//			updateVmState(vmId, state);
+//		}
+//	}
 
 	@Override
 	public void deleteVirtue(VirtueUser user, String instanceId) {

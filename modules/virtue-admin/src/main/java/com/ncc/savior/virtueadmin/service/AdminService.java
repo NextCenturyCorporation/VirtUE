@@ -8,6 +8,8 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.security.UserService;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -30,58 +32,62 @@ public class AdminService {
 		this.templateManager = templateManager;
 	}
 
-	public Iterable<VirtueTemplate> getAllVirtueTemplates(VirtueUser user) {
+	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
 		return templateManager.getAllVirtueTemplates();
 	}
 
-	public Iterable<VirtualMachineTemplate> getAllVmTemplates(VirtueUser user) {
+	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
 		return templateManager.getAllVirtualMachineTemplates();
 	}
 
-	public Iterable<ApplicationDefinition> getAllApplicationTemplates(VirtueUser user) {
+	public Iterable<ApplicationDefinition> getAllApplicationTemplates() {
 		return templateManager.getAllApplications();
 	}
 
-	public Iterable<VirtueInstance> getAllActiveVirtues(VirtueUser user) {
+	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtueManager.getAllActiveVirtues();
 	}
 
-	public VirtueTemplate getVirtueTemplate(VirtueUser user, String templateId) {
+	public VirtueTemplate getVirtueTemplate(String templateId) {
 		Optional<VirtueTemplate> opt = templateManager.getVirtueTemplate(templateId);
 		return opt.isPresent() ? opt.get() : null;
 	}
 
-	public VirtualMachineTemplate getVmTemplate(VirtueUser user, String templateId) {
+	public VirtualMachineTemplate getVmTemplate(String templateId) {
 		Optional<VirtualMachineTemplate> opt = templateManager.getVmTemplate(templateId);
 		return opt.isPresent() ? opt.get() : null;
 	}
 
-	public VirtueInstance getActiveVirtue(VirtueUser user, String virtueId) {
+	public VirtueInstance getActiveVirtue(String virtueId) {
 		return virtueManager.getActiveVirtue(virtueId);
 	}
 
-	public ApplicationDefinition getApplicationDefinition(VirtueUser user, String templateId) {
+	public ApplicationDefinition getApplicationDefinition(String templateId) {
 		Optional<ApplicationDefinition> opt = templateManager.getApplicationDefinition(templateId);
 		return opt.isPresent() ? opt.get() : null;
 	}
 
-	public VirtueTemplate createNewVirtueTemplate(VirtueUser user, VirtueTemplate template) {
+	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
+		verifyAndReturnUser();
 		String id = UUID.randomUUID().toString();
-		return updateVirtueTemplate(user, id, template);
+		return updateVirtueTemplate(id, template);
 	}
 
-	public ApplicationDefinition createNewApplicationDefinition(VirtueUser user, ApplicationDefinition appDef) {
+	public ApplicationDefinition createNewApplicationDefinition(ApplicationDefinition appDef) {
+		verifyAndReturnUser();
 		String id = UUID.randomUUID().toString();
-		return updateApplicationDefinitions(user, id, appDef);
+		return updateApplicationDefinitions(id, appDef);
 	}
 
-	public VirtualMachineTemplate createVmTemplate(VirtueUser user, VirtualMachineTemplate vmTemplate) {
+	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate vmTemplate) {
+		verifyAndReturnUser();
 		String id = UUID.randomUUID().toString();
-		return updateVmTemplate(user, id, vmTemplate);
+		return updateVmTemplate( id, vmTemplate);
 	}
 
-	public ApplicationDefinition updateApplicationDefinitions(VirtueUser user, String templateId,
+	public ApplicationDefinition updateApplicationDefinitions(String templateId,
 			ApplicationDefinition appDef) {
+		verifyAndReturnUser();
 		if (!templateId.equals(appDef.getId())) {
 			appDef = new ApplicationDefinition(templateId, appDef);
 		}
@@ -89,7 +95,8 @@ public class AdminService {
 		return appDef;
 	}
 
-	public VirtueTemplate updateVirtueTemplate(VirtueUser user, String templateId, VirtueTemplate template) {
+	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
+		VirtueUser user = verifyAndReturnUser();
 		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
 		}
@@ -99,7 +106,8 @@ public class AdminService {
 		return template;
 	}
 
-	public VirtualMachineTemplate updateVmTemplate(VirtueUser user, String templateId, VirtualMachineTemplate vmTemplate) {
+	public VirtualMachineTemplate updateVmTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
+		VirtueUser user = verifyAndReturnUser();
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
 		}
@@ -109,32 +117,47 @@ public class AdminService {
 		return vmTemplate;
 	}
 
-	public void deleteApplicationDefinition(VirtueUser user, String templateId) {
+	public void deleteApplicationDefinition(String templateId) {
+		verifyAndReturnUser();
 		templateManager.deleteApplicationDefinition(templateId);
 	}
 
-	public void deleteVmTemplate(VirtueUser user, String templateId) {
+	public void deleteVmTemplate(String templateId) {
+		verifyAndReturnUser();
 		templateManager.deleteVmTemplate(templateId);
 	}
 
-	public void deleteVirtue(VirtueUser user, String templateId) {
+	public void deleteVirtue(String templateId) {
+		verifyAndReturnUser();
 		templateManager.deleteVirtueTemplate(templateId);
 	}
 
-	public VirtueUser createUpdateUser(VirtueUser user, VirtueUser newUser) {
+	public VirtueUser createUpdateUser(VirtueUser newUser) {
+		verifyAndReturnUser();
 		userManager.addUser(newUser);
 		return newUser;
 	}
 
-	public VirtueUser getUser(VirtueUser user, String usernameToRetrieve) {
+	public VirtueUser getUser(String usernameToRetrieve) {
+		verifyAndReturnUser();
 		return userManager.getUser(usernameToRetrieve);
 	}
 
-	public void removeUser(VirtueUser user, String usernameToRemove) {
-		userManager.removeUser(user);
+	public void removeUser(String usernameToRemove) {
+		verifyAndReturnUser();
+		userManager.removeUser(usernameToRemove);
 	}
 
-	public Iterable<VirtueUser> getAllUsers(VirtueUser user) {
+	public Iterable<VirtueUser> getAllUsers() {
+		verifyAndReturnUser();
 		return userManager.getAllUsers();
+	}
+
+	private VirtueUser verifyAndReturnUser() {
+		VirtueUser user = UserService.getCurrentUser();
+		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have ADMIN role");
+		}
+		return user;
 	}
 }

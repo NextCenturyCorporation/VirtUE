@@ -18,16 +18,20 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
+
+/**
+ * Test and bootstrapping endpoint.  This needs to be removed before production deployment.
+ *
+ */
 
 @Path("/data")
 public class DataResource {
@@ -38,8 +42,6 @@ public class DataResource {
 	@Autowired
 	private IUserManager userManager;
 
-	// TODO find where second version comes from so we can use @Autowired
-	@Qualifier("virtueDao")
 	@Autowired
 	private IActiveVirtueDao activeVirtueDao;
 

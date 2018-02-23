@@ -39,4 +39,9 @@ public class SpringJpaUserManager implements IUserManager {
 		userRepo.delete(user);
 	}
 
+	@Override
+	public void removeUser(String usernameToRemove) {
+		userRepo.deleteById(usernameToRemove);
+	}
+
 }
