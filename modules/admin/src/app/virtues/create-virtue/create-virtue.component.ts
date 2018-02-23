@@ -19,7 +19,7 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 export class CreateVirtueComponent implements OnInit {
   users: Users[];
   virtues: Virtue[];
-  vms = VirtualMachine;
+  vms : VirtualMachine[];
   hovering = false;
   activeClass: string;
   vmList = [];
@@ -34,6 +34,7 @@ export class CreateVirtueComponent implements OnInit {
 
   ngOnInit() {
     if (this.selVmsList.length > 0) {
+      console.log('ngOnInit() selVmsList:' + this.selVmsList);
       this.getVmList();
     }
   }
@@ -42,27 +43,28 @@ export class CreateVirtueComponent implements OnInit {
     // loop through the selected VM list
     const selectedVm = this.selVmsList;
     this.vmService.getVmList()
-      .subscribe(data => {
-        for (let sel of selectedVm) {
-          for (let vm of data) {
-            if (sel === vm.id) {
-              this.vmList.push(vm);
-              break;
-            }
+    .subscribe(data => {
+      for (let sel of selectedVm) {
+        for (let vm of data) {
+          if (sel === vm.id) {
+            this.vmList.push(vm);
+            console.log('VM List: ' + vm);
+            break;
           }
         }
-      });
+      }
+    });
+    console.log('VM List: ' + this.vmList)
   }
 
   createVirtue(virtueName: string) {
     this.getAppList();
-    const dt = new Date();
     const vms = this.vmList;
     for (let vm of vms) {
       console.log('VMs: ');
       console.log(vm);
     }
-    console.log(`Virtue Name: ${virtueName} | Create Date: ${dt.getTime()} `);
+    console.log(`Virtue Name: ${virtueName} `);
     let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
     let newVirtue = [{
       // 'id': 'TEST',
@@ -71,7 +73,6 @@ export class CreateVirtueComponent implements OnInit {
       'vmTemplates': this.vmList,
       'users': user,
       'enabled': true,
-      'lastModification': dt.getTime(),
       'lastEditor': 'skim',
       'applications': this.appList
     }];
@@ -90,7 +91,6 @@ export class CreateVirtueComponent implements OnInit {
       apps = vm.applications;
       for (let app of apps) {
         this.appList.push({
-          'id': app.id,
           'name': app.name,
           'version': app.version,
           'os': app.os,
@@ -110,13 +110,16 @@ export class CreateVirtueComponent implements OnInit {
   activateModal(id: string): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
-      width: '750px'
+      width: '750px',
+      data: {
+        selectedList: this.selVmsList
+      }
     });
 
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
     const vms = dialogRef.componentInstance.addVms.subscribe((data) => {
-      this.selVmsList = data;
+      this.selVmsList = this.selVmsList + data;
       this.getVmList();
     });
 
