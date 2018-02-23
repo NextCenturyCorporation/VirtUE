@@ -59,11 +59,16 @@ public class UserDataService {
 
 	// Stop virtue not yet supported
 
-	// Destroy virtue not yet supported
+	// Destroy virtue is found in DesktopVirtueService
 
 	// Launch Virtue application found in DesktopVirtueService
 
 	// Stop running virtue application not yet supported
+
+	public void deleteVirtue(String virtueId) {
+		// TODO Auto-generated method stub
+
+	}
 
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = UserService.getCurrentUser();

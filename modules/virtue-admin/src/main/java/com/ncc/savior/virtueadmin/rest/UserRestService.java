@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.rest;
 import java.io.IOException;
 import java.util.Collection;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -16,10 +17,12 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.UserDataService;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
- * Rest resource that handles endpoints specifically to satisfy API
+ * Rest resource that handles endpoints specifically to satisfy API for a given
+ * user.
  * 
  */
 
@@ -122,10 +125,56 @@ public class UserRestService {
 		}
 	}
 
+	// Launch virtue is currently unnecessary
+	@POST
+	@Produces("application/json")
+	@Path("virtue/{virtueId}/")
+	public void launchVirtue(@PathParam("virtueId") String virtueId) {
+		try {
+			throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED,
+					"Launch virtue not yet implemented.  Virtues are lauched when created.");
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	// Stop virtue not yet supported
+	@POST
+	@Produces("application/json")
+	@Path("virtue/{virtueId}/stop")
+	public void stopVirtue(@PathParam("virtueId") String virtueId) {
+		try {
+			throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED,
+					"Stop virtue not yet implemented.  Virtues must be stopped and destroyed manually");
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@DELETE
+	@Produces("application/json")
+	@Path("virtue/{virtueId}/")
+	public void deleteVirtue(@PathParam("virtueId") String virtueId) {
+		try {
+			desktopService.deleteVirtue(virtueId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
 	@POST
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}")
-	public void createVirtue(@PathParam("virtueId") String virtueId,
+	public void startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
 		try {
 			desktopService.startApplication(virtueId, applicationId);
@@ -137,11 +186,19 @@ public class UserRestService {
 		}
 	}
 
-	// Launch virtue is currently unnecessary
-
-	// Stop virtue not yet supported
-
-	// Destroy virtue not yet supported
-
 	// Stop running virtue application not yet supported
+	@DELETE
+	@Produces("application/json")
+	@Path("virtue/{virtueId}/{applicationId}")
+	public void stopApplication(@PathParam("virtueId") String virtueId,
+			@PathParam("applicationId") String applicationId) {
+		try {
+			desktopService.stopApplication(virtueId, applicationId);
+		} catch (RuntimeException | IOException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
 }

@@ -87,6 +87,10 @@ public class DesktopVirtueService {
 		return startApplication(instance.getId(), applicationId);
 	}
 
+	public void stopApplication(String virtueId, String applicationId) throws IOException {
+		throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED, "Stop application is not yet implemented.");
+	}
+
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
 		verifyAndReturnUser();
 		Collection<ApplicationDefinition> apps = template.getApplications();
@@ -108,8 +112,8 @@ public class DesktopVirtueService {
 	}
 
 
-	public void deleteVirtue(VirtueUser user, String instanceId) {
-		verifyAndReturnUser();
+	public void deleteVirtue(String instanceId) {
+		VirtueUser user = verifyAndReturnUser();
 		activeVirtueManager.deleteVirtue(user, instanceId);
 	}
 
