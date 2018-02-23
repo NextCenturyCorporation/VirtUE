@@ -45,8 +45,8 @@ public class DesktopVirtueService {
 	 * @return
 	 * 
 	 */
-	public Set<DesktopVirtue> getDesktopVirtuesForUser(VirtueUser user) {
-		verifyAndReturnUser();
+	public Set<DesktopVirtue> getDesktopVirtuesForUser() {
+		VirtueUser user = verifyAndReturnUser();
 		Map<String, VirtueTemplate> templates = templateManager.getVirtueTemplatesForUser(user);
 		Map<String, Set<VirtueInstance>> templateIdToActiveVirtues = activeVirtueManager.getVirtuesFromTemplateIds(user,
 				templates.keySet());
@@ -68,7 +68,7 @@ public class DesktopVirtueService {
 		return virtues;
 	}
 
-	public DesktopVirtueApplication startApplication(VirtueUser user, String virtueId, String applicationId)
+	public DesktopVirtueApplication startApplication(String virtueId, String applicationId)
 			throws IOException {
 		verifyAndReturnUser();
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
@@ -80,11 +80,11 @@ public class DesktopVirtueService {
 		return dva;
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(VirtueUser user, String templateId, String applicationId)
+	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, String applicationId)
 			throws IOException {
 		verifyAndReturnUser();
 		VirtueInstance instance = createVirtue(templateId);
-		return startApplication(user, instance.getId(), applicationId);
+		return startApplication(instance.getId(), applicationId);
 	}
 
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {

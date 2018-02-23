@@ -24,7 +24,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
  *
  */
 public class SwingApplicationManager extends XpraApplicationManager {
-	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(SwingApplicationManager.class);
 	private Color color;
 

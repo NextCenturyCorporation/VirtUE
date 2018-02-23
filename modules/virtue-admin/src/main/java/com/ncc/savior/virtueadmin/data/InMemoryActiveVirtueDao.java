@@ -1,16 +1,18 @@
 package com.ncc.savior.virtueadmin.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -49,6 +51,27 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 			}
 		}
 		return map;
+	}
+
+	@Override
+	public Collection<VirtueInstance> getVirtuesForUser(VirtueUser user) {
+		List<VirtueInstance> result = new ArrayList<VirtueInstance>();
+		Collection<VirtueInstance> vs = virtues.values();
+		for (VirtueInstance v : vs) {
+			if (v.getUsername().equals(user.getUsername())) {
+				result.add(v);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public VirtueInstance getVirtueInstance(VirtueUser user, String instanceId) {
+		VirtueInstance vi = virtues.get(instanceId);
+		if (vi != null && vi.getUsername().equals(user.getUsername())) {
+			return vi;
+		}
+		return null;
 	}
 
 	@Override

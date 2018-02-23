@@ -35,7 +35,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
  *
  */
 public abstract class XpraApplicationManager {
-	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(XpraApplicationManager.class);
 	protected XpraClient client;
 	protected Map<Integer, XpraApplication> applications;

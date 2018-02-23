@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.virtue;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +39,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds) {
 		Map<String, Set<VirtueInstance>> virtues = virtueDao.getVirtuesFromTemplateIds(user, templateIds);
 		return virtues;
+	}
+
+	@Override
+	public Collection<VirtueInstance> getVirtuesForUser(VirtueUser user) {
+		return virtueDao.getVirtuesForUser(user);
 	}
 
 	@Override
@@ -112,5 +118,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public VirtueInstance getActiveVirtue(String virtueId) {
 		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
 		return opt.isPresent() ? opt.get() : null;
+	}
+
+	@Override
+	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
+		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
+		return vi;
 	}
 }
