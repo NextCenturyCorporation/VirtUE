@@ -14,9 +14,9 @@ import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 @Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
@@ -58,6 +58,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		return ret;
 	}
 
+	@Override
 	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
 		return vtRepository.findByUsersAndId(user, templateId);
 	}

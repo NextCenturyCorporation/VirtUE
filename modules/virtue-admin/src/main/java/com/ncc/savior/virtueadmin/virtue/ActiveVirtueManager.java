@@ -102,11 +102,21 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 					"Virtue id=" + instanceId + " was not found");
 		}
 		if (vi.getUsername().equals(user.getUsername())) {
-			cloudManager.deleteVirtue(vi);
+
 		} else {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
 		}
+	}
+
+	@Override
+	public void adminDeleteVirtue(String instanceId) {
+		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
+		if (vi == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+					"Virtue id=" + instanceId + " was not found");
+		}
+		cloudManager.deleteVirtue(vi);
 	}
 
 	@Override

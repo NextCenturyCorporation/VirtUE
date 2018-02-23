@@ -243,11 +243,12 @@ public class AdminResource {
 		}
 	}
 
-	@GET
-	@Path("deletevirtue/instance/{instanceId}")
-	public void deleteVirtue(@PathParam("instanceId") String instanceId) {
+	@DELETE
+	@Produces("application/json")
+	@Path("virtue/template/{id}")
+	public void deleteVirtueTemplate(@PathParam("id") String templateId) {
 		try {
-			adminService.deleteVirtue(instanceId);
+			adminService.deleteVirtueTemplate(templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -299,6 +300,19 @@ public class AdminResource {
 	public VirtueInstance getActiveVirtue(@PathParam("id") String virtueId) {
 		try {
 			return adminService.getActiveVirtue(virtueId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Path("deletevirtue/instance/{instanceId}")
+	public void deleteVirtue(@PathParam("instanceId") String instanceId) {
+		try {
+			adminService.deleteVirtue(instanceId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -374,6 +388,36 @@ public class AdminResource {
 	public void removeUser(@PathParam("username") String usernameToRemove) {
 		try {
 			adminService.removeUser(usernameToRemove);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@POST
+	@Produces("application/json")
+	@Path("user/{username}/assign/{templateId}")
+	public void assignTemplateToUser(@PathParam("username") String username,
+			@PathParam("templateId") String templateId) {
+		try {
+			adminService.assignTemplateToUser(templateId, username);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@POST
+	@Produces("application/json")
+	@Path("user/{username}/revoke/{templateId}")
+	public void revokeTemplateToUser(@PathParam("username") String username,
+			@PathParam("templateId") String templateId) {
+		try {
+			adminService.revokeTemplateFromUser(templateId, username);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception

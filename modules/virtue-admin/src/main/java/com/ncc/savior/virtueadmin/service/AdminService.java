@@ -7,12 +7,12 @@ import java.util.UUID;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.security.UserService;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.security.UserService;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
 public class AdminService {
@@ -21,7 +21,8 @@ public class AdminService {
 	private ITemplateManager templateManager;
 	private IUserManager userManager;
 
-	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager) {
+	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager,
+			IUserManager userManager) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
@@ -82,11 +83,10 @@ public class AdminService {
 	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate vmTemplate) {
 		verifyAndReturnUser();
 		String id = UUID.randomUUID().toString();
-		return updateVmTemplate( id, vmTemplate);
+		return updateVmTemplate(id, vmTemplate);
 	}
 
-	public ApplicationDefinition updateApplicationDefinitions(String templateId,
-			ApplicationDefinition appDef) {
+	public ApplicationDefinition updateApplicationDefinitions(String templateId, ApplicationDefinition appDef) {
 		verifyAndReturnUser();
 		if (!templateId.equals(appDef.getId())) {
 			appDef = new ApplicationDefinition(templateId, appDef);
@@ -127,9 +127,14 @@ public class AdminService {
 		templateManager.deleteVmTemplate(templateId);
 	}
 
-	public void deleteVirtue(String templateId) {
+	public void deleteVirtueTemplate(String templateId) {
 		verifyAndReturnUser();
 		templateManager.deleteVirtueTemplate(templateId);
+	}
+
+	public void deleteVirtue(String instanceId) {
+		verifyAndReturnUser();
+		virtueManager.adminDeleteVirtue(instanceId);
 	}
 
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
@@ -153,10 +158,30 @@ public class AdminService {
 		return userManager.getAllUsers();
 	}
 
+	public void assignTemplateToUser(String templateId, String username) {
+		verifyAndReturnUser();
+		VirtueUser user = userManager.getUser(username);
+		if (user != null) {
+			templateManager.assignVirtueTemplateToUser(user, templateId);
+		} else {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
+		}
+	}
+
+	public void revokeTemplateFromUser(String templateId, String username) {
+		verifyAndReturnUser();
+		VirtueUser user = userManager.getUser(username);
+		if (user != null) {
+			templateManager.revokeVirtueTemplateFromUser(user, templateId);
+		} else {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
+		}
+	}
+
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = UserService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have ADMIN role");
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
 		}
 		return user;
 	}

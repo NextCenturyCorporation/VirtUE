@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 /**
  * Manages and stores all template information and definitions.
