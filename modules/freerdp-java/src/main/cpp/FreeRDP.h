@@ -21,18 +21,18 @@ public:
 	virtual bool postConnect() = 0;
 
 	virtual bool contextNew(rdpContext* context);
-	virtual bool contextFree(rdpContext* context);
+	virtual void contextFree(rdpContext* context);
 
 protected:
 	freerdp* instance;
 	// If we ever need high performance, we could use shared_mutex from boost
 	static std::mutex instanceMapLock;
-	static std::map<freerdp&, FreeRDP&> instanceMap;
-	static FreeRDP& getInstance(const freerdp& rdp) const;
+	static std::map<const freerdp*, FreeRDP*> instanceMap;
+	static FreeRDP& getInstance(const freerdp* rdp);
 
 	virtual void registerCallbacks();
-	static bool _preConnect(freerdp* instance);
-	static bool _postConnect(freerdp* instance);
+	static int _preConnect(freerdp* instance);
+	static int _postConnect(freerdp* instance);
 };
 
 

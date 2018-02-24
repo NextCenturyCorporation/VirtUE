@@ -8,30 +8,33 @@
 
 #include "FreeRDP.h"
 
-FreeRDP& FreeRDP::getInstance(const freerdp& rdp) const {
+FreeRDP& FreeRDP::getInstance(const freerdp* rdp) {
 	std::lock_guard<std::mutex> lock(instanceMapLock);
-	return instanceMap[rdp];
+	return *instanceMap[rdp];
 }
 
 FreeRDP::FreeRDP() {
 	instance = freerdp_new();
 	std::lock_guard<std::mutex> lock(instanceMapLock);
-	instanceMap[*instance] = *this;
+	instanceMap[instance] = this;
 	registerCallbacks();
 }
 
 FreeRDP::~FreeRDP() {
-	std::lock_guard<std::mutex> lock(instanceMapLock);
-	instanceMap.erase(*instance);
-	freerdp_free(instance);
+	if (instance) {
+		std::lock_guard<std::mutex> lock(instanceMapLock);
+		instanceMap.erase(instance);
+		freerdp_free(instance);
+		instance = 0;
+	}
 }
 
 bool FreeRDP::contextNew(rdpContext* context) {
 	return freerdp_context_new(instance);
 }
 
-bool FreeRDP::contextFree(rdpContext* context) {
-	return freerdp_context_free(instance);
+void FreeRDP::contextFree(rdpContext* context) {
+	freerdp_context_free(instance);
 }
 
 void FreeRDP::registerCallbacks() {
@@ -39,12 +42,10 @@ void FreeRDP::registerCallbacks() {
 	instance->PostConnect = FreeRDP::_postConnect;
 }
 
-bool FreeRDP::_preConnect(freerdp* instance) {
-	return FreeRDP::getInstance(*instance).preConnect();
+int FreeRDP::_preConnect(freerdp* instance) {
+	return FreeRDP::getInstance(instance).preConnect();
 }
 
-bool FreeRDP::_postConnect(freerdp* instance) {
-	return FreeRDP::getInstance(*instance).postConnect();
+int FreeRDP::_postConnect(freerdp* instance) {
+	return FreeRDP::getInstance(instance).postConnect();
 }
-
-bogus;
