@@ -1,5 +1,10 @@
 package com.ncc.savior.virtueadmin.rest;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -9,10 +14,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.userdetails.User;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.AdminService;
@@ -43,7 +51,7 @@ public class AdminResource {
 	@Path("application")
 	public ApplicationDefinition createNewApplicationDefinition(ApplicationDefinition appDef) {
 		try {
-			return adminService.createNewApplicationDefinition( appDef);
+			return adminService.createNewApplicationDefinition(appDef);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -71,7 +79,7 @@ public class AdminResource {
 	@Path("application/{id}")
 	public ApplicationDefinition getApplicationDefinition(@PathParam("id") String templateId) {
 		try {
-			return adminService.getApplicationDefinition( templateId);
+			return adminService.getApplicationDefinition(templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -86,7 +94,7 @@ public class AdminResource {
 	public ApplicationDefinition updateApplicationDefinitions(@PathParam("id") String templateId,
 			ApplicationDefinition appDef) {
 		try {
-			return adminService.updateApplicationDefinitions( templateId, appDef);
+			return adminService.updateApplicationDefinitions(templateId, appDef);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -99,7 +107,7 @@ public class AdminResource {
 	@Path("application/{id}")
 	public void deleteApplicationDefinitions(@PathParam("id") String templateId) {
 		try {
-			adminService.deleteApplicationDefinition( templateId);
+			adminService.deleteApplicationDefinition(templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -127,7 +135,7 @@ public class AdminResource {
 	@Path("virtualMachine/template/{id}")
 	public VirtualMachineTemplate getVmTemplate(@PathParam("id") String templateId) {
 		try {
-			return adminService.getVmTemplate( templateId);
+			return adminService.getVmTemplate(templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -155,7 +163,7 @@ public class AdminResource {
 	@Path("virtualMachine/template/{id}")
 	public VirtualMachineTemplate updateVmTemplate(@PathParam("id") String templateId, VirtualMachineTemplate vmt) {
 		try {
-			return adminService.updateVmTemplate( templateId, vmt);
+			return adminService.updateVmTemplate(templateId, vmt);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -168,7 +176,7 @@ public class AdminResource {
 	@Path("virtualMachine/template/{id}")
 	public void deleteVmTemplate(@PathParam("id") String templateId) {
 		try {
-			adminService.deleteVmTemplate( templateId);
+			adminService.deleteVmTemplate(templateId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -182,7 +190,7 @@ public class AdminResource {
 	@Path("virtue/template")
 	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
 		try {
-			VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate( template);
+			VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate(template);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -218,7 +226,7 @@ public class AdminResource {
 	@Path("virtue/template/{id}")
 	public VirtueTemplate getVirtueTemplate(@PathParam("id") String templateId) {
 		try {
-			VirtueTemplate virtueTemplate = adminService.getVirtueTemplate( templateId);
+			VirtueTemplate virtueTemplate = adminService.getVirtueTemplate(templateId);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -233,7 +241,7 @@ public class AdminResource {
 	@Path("virtue/template/{id}")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
 		try {
-			VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate( templateId, template);
+			VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -418,6 +426,62 @@ public class AdminResource {
 			@PathParam("templateId") String templateId) {
 		try {
 			adminService.revokeTemplateFromUser(templateId, username);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Path("user/active")
+	@Produces("application/json")
+	public Iterable<VirtueUser> getActiveUsers() {
+		try {
+			return adminService.getActiveUsers();
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Path("session")
+	@Produces("application/json")
+	public Map<String, List<String>> getAllSessions() {
+		try {
+			return adminService.getActiveSessions();
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Path("session/{sessionId}")
+	@Produces("application/json")
+	public VirtueSession getSession(@PathParam("sessionId") String sessionId) {
+		try {
+			return adminService.getActiveSession(sessionId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@DELETE
+	@Path("session/{sessionId}")
+	@Produces("application/json")
+	public void invalidateSession(@PathParam("sessionId") String sessionId) {
+		try {
+			adminService.invalidateSession(sessionId);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception

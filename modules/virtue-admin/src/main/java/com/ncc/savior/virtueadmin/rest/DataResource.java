@@ -286,7 +286,7 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("sessions")
+	@Path("session")
 	@Produces("application/json")
 	public Map<String, List<String>> getAllSessions() {
 		List<Object> principals = sessionRegistry.getAllPrincipals();

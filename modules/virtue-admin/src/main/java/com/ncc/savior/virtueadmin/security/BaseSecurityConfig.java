@@ -110,23 +110,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public ServletListenerRegistrationBean<HttpSessionListener> sessionListener() {
-		HttpSessionListener listener = new HttpSessionListener() {
-
-			@Override
-			public void sessionDestroyed(HttpSessionEvent se) {
-				// logger.debug("Session destroyed: " + se);
-			}
-
-			@Override
-			public void sessionCreated(HttpSessionEvent se) {
-				// logger.debug("Session created: " + se);
-			}
-		};
-		return new ServletListenerRegistrationBean<HttpSessionListener>(listener);
-	}
-
-	@Bean
 	public SessionRegistry sessionRegistry() {
 		return new SessionRegistryImpl();
 	}
