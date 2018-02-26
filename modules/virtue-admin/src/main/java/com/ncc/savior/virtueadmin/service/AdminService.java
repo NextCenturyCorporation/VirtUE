@@ -44,40 +44,60 @@ public class AdminService {
 	}
 
 	public AdminService(ITemplateManager templateManager) {
+		verifyAndReturnUser();
 		this.templateManager = templateManager;
 	}
 
 	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
+		verifyAndReturnUser();
 		return templateManager.getAllVirtueTemplates();
 	}
 
 	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
+		verifyAndReturnUser();
 		return templateManager.getAllVirtualMachineTemplates();
 	}
 
 	public Iterable<ApplicationDefinition> getAllApplicationTemplates() {
+		verifyAndReturnUser();
 		return templateManager.getAllApplications();
 	}
 
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
+		verifyAndReturnUser();
 		return virtueManager.getAllActiveVirtues();
 	}
 
+	public Iterable<VirtueTemplate> getVirtueTemplatesForUser(String username) {
+		verifyAndReturnUser();
+		VirtueUser user = userManager.getUser(username);
+		if (user != null) {
+			Map<String, VirtueTemplate> vts = templateManager.getVirtueTemplatesForUser(user);
+			return vts.values();
+		} else {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
+		}
+	}
+
 	public VirtueTemplate getVirtueTemplate(String templateId) {
+		verifyAndReturnUser();
 		Optional<VirtueTemplate> opt = templateManager.getVirtueTemplate(templateId);
 		return opt.isPresent() ? opt.get() : null;
 	}
 
 	public VirtualMachineTemplate getVmTemplate(String templateId) {
+		verifyAndReturnUser();
 		Optional<VirtualMachineTemplate> opt = templateManager.getVmTemplate(templateId);
 		return opt.isPresent() ? opt.get() : null;
 	}
 
 	public VirtueInstance getActiveVirtue(String virtueId) {
+		verifyAndReturnUser();
 		return virtueManager.getActiveVirtue(virtueId);
 	}
 
 	public ApplicationDefinition getApplicationDefinition(String templateId) {
+		verifyAndReturnUser();
 		Optional<ApplicationDefinition> opt = templateManager.getApplicationDefinition(templateId);
 		return opt.isPresent() ? opt.get() : null;
 	}
@@ -110,6 +130,7 @@ public class AdminService {
 	}
 
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
+		verifyAndReturnUser();
 		VirtueUser user = verifyAndReturnUser();
 		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
@@ -121,6 +142,7 @@ public class AdminService {
 	}
 
 	public VirtualMachineTemplate updateVmTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
+		verifyAndReturnUser();
 		VirtueUser user = verifyAndReturnUser();
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
@@ -192,15 +214,8 @@ public class AdminService {
 		}
 	}
 
-	private VirtueUser verifyAndReturnUser() {
-		VirtueUser user = UserService.getCurrentUser();
-		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
-		}
-		return user;
-	}
-
 	public List<VirtueUser> getActiveUsers() {
+		verifyAndReturnUser();
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		List<VirtueUser> users = new ArrayList<VirtueUser>(principals.size());
 		for (Object p : principals) {
@@ -217,6 +232,7 @@ public class AdminService {
 	}
 
 	public VirtueSession getActiveSession(String sessionId) {
+		verifyAndReturnUser();
 		if (sessionId != null) {
 			SessionInformation session = sessionRegistry.getSessionInformation(sessionId);
 			VirtueSession vs = VirtueSession.fromSessionInformation(session);
@@ -227,6 +243,7 @@ public class AdminService {
 	}
 
 	public void invalidateSession(String sessionId) {
+		verifyAndReturnUser();
 		if (sessionId != null) {
 			SessionInformation session = sessionRegistry.getSessionInformation(sessionId);
 			session.expireNow();
@@ -234,6 +251,7 @@ public class AdminService {
 	}
 
 	public Map<String, List<String>> getActiveSessions() {
+		verifyAndReturnUser();
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		Map<String, List<String>> sessionMap = new HashMap<String, List<String>>();
 		for (Object principal : principals) {
@@ -246,5 +264,13 @@ public class AdminService {
 			sessionMap.put(user.getUsername(), list);
 		}
 		return sessionMap;
+	}
+
+	private VirtueUser verifyAndReturnUser() {
+		VirtueUser user = UserService.getCurrentUser();
+		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
+		}
+		return user;
 	}
 }

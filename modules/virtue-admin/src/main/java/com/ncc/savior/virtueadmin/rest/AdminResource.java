@@ -1,7 +1,5 @@
 package com.ncc.savior.virtueadmin.rest;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,10 +10,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.userdetails.User;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -209,10 +206,15 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template")
-	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
+	public Iterable<VirtueTemplate> getAllVirtueTemplates(@QueryParam("user") String user) {
 		try {
-			Iterable<VirtueTemplate> virtueTemplates = adminService.getAllVirtueTemplates();
-			return virtueTemplates;
+			if (user == null || user.trim().equals("")) {
+				Iterable<VirtueTemplate> virtueTemplates = adminService.getAllVirtueTemplates();
+				return virtueTemplates;
+			} else {
+				Iterable<VirtueTemplate> virtueTemplates = adminService.getVirtueTemplatesForUser(user);
+				return virtueTemplates;
+			}
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception

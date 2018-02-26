@@ -13,12 +13,15 @@ public class VirtueSession {
 	private String username;
 	private ArrayList<GrantedAuthority> authorities;
 	private Date lastRequest;
+	private boolean expired;
 
-	public VirtueSession(String sessionId, String username, ArrayList<GrantedAuthority> auths, Date lastRequest) {
+	public VirtueSession(String sessionId, String username, ArrayList<GrantedAuthority> auths, Date lastRequest,
+			boolean expired) {
 		this.sessionId = sessionId;
 		this.username = username;
 		this.authorities = auths;
 		this.lastRequest = lastRequest;
+		this.expired = expired;
 	}
 
 	public static VirtueSession fromSessionInformation(SessionInformation session) {
@@ -27,7 +30,7 @@ public class VirtueSession {
 		String sessionId = session.getSessionId();
 		String username = principal.getUsername();
 		ArrayList<GrantedAuthority> auths = new ArrayList<GrantedAuthority>(principal.getAuthorities());
-		VirtueSession vs = new VirtueSession(sessionId, username, auths, lastRequest);
+		VirtueSession vs = new VirtueSession(sessionId, username, auths, lastRequest, session.isExpired());
 		return vs;
 	}
 
@@ -47,9 +50,13 @@ public class VirtueSession {
 		return lastRequest;
 	}
 
+	public boolean isExpired() {
+		return expired;
+	}
+
 	@Override
 	public String toString() {
 		return "VirtueSession [sessionId=" + sessionId + ", username=" + username + ", authorities=" + authorities
-				+ ", lastRequest=" + lastRequest + "]";
+				+ ", lastRequest=" + lastRequest + ", expired=" + expired + "]";
 	}
 }
