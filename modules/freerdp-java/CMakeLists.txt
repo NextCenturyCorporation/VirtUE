@@ -29,19 +29,7 @@ swig_add_module(
 	jfreerdp
 	java
 	src/main/swig/freerdp.i
-	src/main/cpp/FreeRDP.h
-	src/main/cpp/FreeRDP.cpp
+	src/main/cpp/FreeRDPWrapper.h
+	src/main/cpp/FreeRDPWrapper.cpp
 	)
-#set(SWIG_MODULE_jfreerdp_EXTRA_DEPS src/main/cpp/FreeRDP.cpp)
-
-# set(SWIG_JAVA_SOURCE_LIST "build/swig-java-files")
-# add_custom_command(
-# 	OUTPUT ${SWIG_JAVA_SOURCE_LIST}
-# 	COMMAND file(GLOB FREERDP_JAVA_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SWIG_OUTDIR}/*.java) 
-# 
-# 
-# add_jar(freerdp-java
-# 	SOURCES @${SWIG_JAVA_SOURCE_LIST}
-# 	OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/build
-# 	)
-# add_dependencies(freerdp-java jfreerdp)
+swig_link_libraries(jfreerdp freerdp2 winpr2)

@@ -1,21 +1,24 @@
-plugins {
-    id 'com.cisco.external-build' version '1.10'
+buildscript {
+    repositories {
+        mavenCentral()
+        // The following is only necessary if you want to use SNAPSHOT releases.
+        // maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.1.0'
+    }
 }
 
-apply plugin: 'com.cisco.external-build'
-import com.cisco.gradle.externalbuild.ExternalNativeLibrarySpec
-import com.cisco.gradle.externalbuild.tasks.CMake
+repositories {
+    mavenCentral()
+}
 
 apply plugin: 'base'
 apply plugin: 'eclipse'
 apply plugin: 'java'
 
-// In this section you declare where to find the dependencies of your project
-repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
-}
+
+apply plugin: 'org.junit.platform.gradle.plugin'
 
 task initCMake(type: Exec) {
     description 'Initialize cmake build'
@@ -26,7 +29,7 @@ task initCMake(type: Exec) {
     outputs.file(new File(workingDir, 'Makefile'))
     outputs.dir(new File(workingDir, 'CMakeFiles'))
     outputs.file(new File(workingDir, 'cmake_install.cmake'))
-    commandLine 'cmake', '-DCMAKE_CXX_FLAGS=-std=c++14', "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${workingDir}", '..'
+    commandLine 'cmake', '-G', 'Eclipse CDT4 - Unix Makefiles', '-DCMAKE_CXX_FLAGS=-std=c++14', "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${workingDir}", '..'
 }
 clean.dependsOn('cleanInitCMake')
 
@@ -37,8 +40,10 @@ task runMake(type: Exec) {
     commandLine 'make'
 }
 
-compileJava {
-    dependsOn 'runMake'
+compileJava.dependsOn('runMake')
+
+junitPlatformTest {
+    systemProperty "java.library.path", "build"
 }
 
 sourceSets {
@@ -49,3 +54,14 @@ sourceSets {
         }
     }
 }
+
+dependencies {
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.1.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0")
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "5.1.0"
+    testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version: "1.1.0"    
+
+    testCompile("junit:junit:4.12")
+    testRuntime("org.junit.vintage:junit-vintage-engine:5.1.0")
+}
+

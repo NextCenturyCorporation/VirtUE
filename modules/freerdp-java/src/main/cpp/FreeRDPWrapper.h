@@ -1,21 +1,21 @@
 /*
- * FreeRDP.h
+ * FreeRDPWrapper.h
  *
  *  Created on: Feb 22, 2018
  *      Author: clong
  */
 
-#ifndef SRC_MAIN_CPP_FREERDP_H_
-#define SRC_MAIN_CPP_FREERDP_H_
+#ifndef SRC_MAIN_CPP_FREERDPWRAPPER_H_
+#define SRC_MAIN_CPP_FREERDPWRAPPER_H_
 
 #include <freerdp/freerdp.h>
 #include <map>
 #include <mutex>
 
-class FreeRDP {
+class FreeRDPWrapper {
 public:
-	FreeRDP();
-	virtual ~FreeRDP();
+	FreeRDPWrapper();
+	virtual ~FreeRDPWrapper();
 
 	virtual bool preConnect() = 0;
 	virtual bool postConnect() = 0;
@@ -27,8 +27,8 @@ protected:
 	freerdp* instance;
 	// If we ever need high performance, we could use shared_mutex from boost
 	static std::mutex instanceMapLock;
-	static std::map<const freerdp*, FreeRDP*> instanceMap;
-	static FreeRDP& getInstance(const freerdp* rdp);
+	static std::map<const freerdp*, FreeRDPWrapper*> instanceMap;
+	static FreeRDPWrapper& getInstance(const freerdp* rdp);
 
 	virtual void registerCallbacks();
 	static int _preConnect(freerdp* instance);
@@ -36,4 +36,4 @@ protected:
 };
 
 
-#endif /* SRC_MAIN_CPP_FREERDP_H_ */
+#endif /* SRC_MAIN_CPP_FREERDPWRAPPER_H_ */

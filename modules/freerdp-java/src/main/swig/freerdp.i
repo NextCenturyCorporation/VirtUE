@@ -7,12 +7,12 @@
 
 %{
 #include <freerdp/freerdp.h>
-#include "FreeRDP.h"
+#include "FreeRDPWrapper.h"
     %}
 
-%feature("director") FreeRDP;
+%feature("director") FreeRDPWrapper;
 
 %import "freerdp/api.h"
 %include "freerdp/settings.h"
 %include "freerdp/freerdp.h"
-%include "FreeRDP.h"
+%include "FreeRDPWrapper.h"
