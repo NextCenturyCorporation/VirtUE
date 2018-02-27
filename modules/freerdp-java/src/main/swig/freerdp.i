@@ -12,6 +12,8 @@
 
 %feature("director") FreeRDPWrapper;
 
+%apply bool { BOOL };
+
 %import "freerdp/api.h"
 %include "freerdp/settings.h"
 %include "freerdp/freerdp.h"

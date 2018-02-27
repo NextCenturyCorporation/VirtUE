@@ -32,6 +32,10 @@ FreeRDPWrapper::~FreeRDPWrapper() {
 	}
 }
 
+freerdp* FreeRDPWrapper::getInstance() {
+	return instance;
+}
+
 bool FreeRDPWrapper::contextNew(rdpContext* context) {
 	return freerdp_context_new(instance);
 }

@@ -23,6 +23,8 @@ public:
 	virtual bool contextNew(rdpContext* context);
 	virtual void contextFree(rdpContext* context);
 
+	/** to call functions that haven't been exported yet */
+	virtual freerdp* getInstance();
 protected:
 	freerdp* instance;
 	// If we ever need high performance, we could use shared_mutex from boost
@@ -34,6 +36,5 @@ protected:
 	static int _preConnect(freerdp* instance);
 	static int _postConnect(freerdp* instance);
 };
-
 
 #endif /* SRC_MAIN_CPP_FREERDPWRAPPER_H_ */
