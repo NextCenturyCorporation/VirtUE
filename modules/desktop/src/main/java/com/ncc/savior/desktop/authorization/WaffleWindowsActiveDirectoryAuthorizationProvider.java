@@ -3,6 +3,8 @@ package com.ncc.savior.desktop.authorization;
 import java.io.InputStream;
 import java.util.Base64;
 
+import javax.ws.rs.client.Invocation.Builder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +20,8 @@ import waffle.windows.auth.impl.WindowsSecurityContextImpl;
 public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiveDirectoryAuthorizationProvider {
 	private static final Logger logger = LoggerFactory
 			.getLogger(WaffleWindowsActiveDirectoryAuthorizationProvider.class);
-
-	final String DEFAULT_SECURITY_PACKAGE = "Negotiate";
+	private static final String HEADER_AUTHORIZATION = "Authorization";
+	private static final String DEFAULT_SECURITY_PACKAGE = "Negotiate";
 	private WindowsAuthProviderImpl auth;
 
 	private IWindowsIdentity impersonatedUser;
@@ -103,18 +105,27 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 		}
 	}
 
-	@Override
-	public String getAuthorizationTicket(String targetHost) {
+	private String getAuthorizationTicket(String targetHost) {
 		if (null == targetHost || targetHost.trim().isEmpty()) {
 			return null;
 		}
 		String serverPrinc = "HTTP/" + targetHost;
-		byte[] token2 = WindowsSecurityContextImpl.getCurrent(DEFAULT_SECURITY_PACKAGE, "HTTP/" + targetHost)
-				.getToken();
+		// byte[] token2 =
+		// WindowsSecurityContextImpl.getCurrent(DEFAULT_SECURITY_PACKAGE, "HTTP/" +
+		// targetHost)
+		// .getToken();
 		byte[] token = getCurrentToken(serverPrinc);
 		byte[] encoded = Base64.getEncoder().encode(token);
 		String encodedStr = new String(encoded);
 		return DEFAULT_SECURITY_PACKAGE + " " + encodedStr;
+	}
+
+	@Override
+	public void addAuthorizationTicket(Builder builder, String targetHost) {
+		String ticket = getAuthorizationTicket(targetHost);
+		if (ticket != null) {
+			builder.header(HEADER_AUTHORIZATION, ticket);
+		}
 	}
 
 }

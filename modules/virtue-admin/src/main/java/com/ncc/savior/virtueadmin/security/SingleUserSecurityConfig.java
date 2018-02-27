@@ -14,20 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 /**
- * A property configurable Spring Security configuration. There are multiple
- * modes for authentication that can be set via the
- * 'savior.security.authentication' property.
- * <ul>
- * <li>HEADER - All connections will be granted the username and roles from
- * specific headers in the request. See {@link HeaderFilter} for details. The
- * client is fully trusted and thus this mode should not be used in production.
- * <li>SINGLEUSER - All connections will be granted the username and roles of a
- * user configured the security property file. This mode should not be used in
- * production. See {@link SingleUserFilter} for details.
- * <li>ACTIVEDIRECTORY - not fully implemented
- * <li>LDAP - not fully implemented
- * 
- *
+ * Security configuration where all connections will be granted the username and
+ * roles of a user configured the security property file. This mode should not
+ * be used in production. See {@link SingleUserFilter} for details.
  */
 @Profile({ "singleuser", "default" })
 @EnableWebSecurity

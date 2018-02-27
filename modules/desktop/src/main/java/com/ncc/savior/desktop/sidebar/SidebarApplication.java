@@ -29,17 +29,20 @@ public class SidebarApplication extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-
 		// Plumbing and depedency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
-		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
+		String baseUrl = props.getString(PropertyManager.PROPERTY_BASE_API_PATH);
+		String desktopUrl = baseUrl + props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
+		String loginUrl = baseUrl + props.getString(PropertyManager.PROPERTY_LOGIN_API_PATH);
+		String logoutUrl = baseUrl + props.getString(PropertyManager.PROPERTY_LOGOUT_API_PATH);
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
 		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		boolean swing = props.getBoolean(PropertyManager.PROPERTY_SWING, true);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
-		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization);
+		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization,
+				loginUrl, logoutUrl);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager;
 		if (swing) {

@@ -21,8 +21,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * The username is given ROLE_USER by default. If the X-admin header is present,
  * the user will be given ROLE_ADMIN. If the X-noroles header is present, the
  * user will get no roles.
- * 
- *
  */
 public class HeaderFilter extends OncePerRequestFilter {
 

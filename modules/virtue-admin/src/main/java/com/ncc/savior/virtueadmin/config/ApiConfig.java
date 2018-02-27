@@ -12,6 +12,7 @@ package com.ncc.savior.virtueadmin.config;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Component;
@@ -46,6 +47,8 @@ public class ApiConfig extends ResourceConfig {
 		register(HelloResource.class);
 		register(AdminResource.class);
 		register(WebServiceUtil.class);
+		
+		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 		
 
 	}
