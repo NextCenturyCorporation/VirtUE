@@ -4,18 +4,23 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.security.UserService;
+import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
 public class UserDataService {
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
+
+	@Autowired
+	private SecurityUserService securityService;
 
 	public UserDataService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager) {
 		this.activeVirtueManager = activeVirtueManager;
@@ -66,7 +71,7 @@ public class UserDataService {
 	// Stop running virtue application not yet supported
 
 	private VirtueUser verifyAndReturnUser() {
-		VirtueUser user = UserService.getCurrentUser();
+		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have USER role");
 		}

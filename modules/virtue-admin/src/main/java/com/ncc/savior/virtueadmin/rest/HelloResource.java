@@ -14,17 +14,21 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.security.UserService;
+import com.ncc.savior.virtueadmin.security.SecurityUserService;
 
 @Path("/")
 public class HelloResource {
+	@Autowired
+	private SecurityUserService securityService;
 
 	@GET
 	@Path("/")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getHello() throws URISyntaxException {
-		VirtueUser user = UserService.getCurrentUser();
+		VirtueUser user = securityService.getCurrentUser();
 
 		return Response.status(200).entity("Hello World " + user.getUsername()).build();
 	}
@@ -48,7 +52,7 @@ public class HelloResource {
 		String line;
 		try {
 			while ((line = buf.readLine()) != null) {
-//				line = line.replaceAll("csrf-token", csrf);
+				// line = line.replaceAll("csrf-token", csrf);
 				str.append(line + "\n");
 			}
 		} catch (IOException e) {
@@ -62,15 +66,15 @@ public class HelloResource {
 	@Path("/error")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getError() throws URISyntaxException {
-		VirtueUser user = UserService.getCurrentUser();
+		VirtueUser user = securityService.getCurrentUser();
 		return Response.status(400).entity("Error for " + user.getUsername()).build();
 	}
-	
+
 	@GET
 	@Path("/logout")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getLogout() throws URISyntaxException {
-		VirtueUser user = UserService.getCurrentUser();
+		VirtueUser user = securityService.getCurrentUser();
 		return Response.status(200).entity("logged out " + user.getUsername()).build();
 	}
 }

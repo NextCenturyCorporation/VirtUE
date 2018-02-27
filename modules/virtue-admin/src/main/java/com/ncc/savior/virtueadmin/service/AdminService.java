@@ -23,7 +23,7 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.security.UserService;
+import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
@@ -35,6 +35,9 @@ public class AdminService {
 
 	@Autowired
 	private SessionRegistry sessionRegistry;
+
+	@Autowired
+	private SecurityUserService securityService;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager,
 			IUserManager userManager) {
@@ -236,7 +239,7 @@ public class AdminService {
 			for (GrantedAuthority a : user.getAuthorities()) {
 				auths.add(a.getAuthority());
 			}
-			VirtueUser u = new VirtueUser(user.getUsername(), auths);
+			VirtueUser u = userManager.getUser(user.getUsername());
 			users.add(u);
 		}
 		return users;
@@ -296,7 +299,7 @@ public class AdminService {
 	}
 
 	private VirtueUser verifyAndReturnUser() {
-		VirtueUser user = UserService.getCurrentUser();
+		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
 		}

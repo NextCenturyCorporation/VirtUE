@@ -76,5 +76,7 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 	</bean>
+	
+	<bean name="securityService" class="com.ncc.savior.virtueadmin.security.SecurityUserService"></bean>
 
 </beans>  

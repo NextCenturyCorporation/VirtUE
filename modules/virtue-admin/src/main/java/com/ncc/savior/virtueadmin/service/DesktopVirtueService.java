@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -16,7 +18,7 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
-import com.ncc.savior.virtueadmin.security.UserService;
+import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
@@ -29,6 +31,9 @@ public class DesktopVirtueService {
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
 	private IApplicationManager applicationManager;
+
+	@Autowired
+	private SecurityUserService securityService;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
 			IApplicationManager applicationManager) {
@@ -129,7 +134,7 @@ public class DesktopVirtueService {
 
 
 	private VirtueUser verifyAndReturnUser() {
-		VirtueUser user = UserService.getCurrentUser();
+		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have USER role");
 		}

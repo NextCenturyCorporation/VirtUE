@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +23,20 @@ public class SpringJpaUserManager implements IUserManager {
 		Optional<VirtueUser> user = userRepo.findById(username);
 		return (user.orElse(null));
 	}
-	
+
 	@Override
-	public Iterable<VirtueUser> getAllUsers()
-	{
+	public Iterable<VirtueUser> getAllUsers() {
 		return userRepo.findAll();
 	}
 
 	@Override
 	public void clear() {
+		Iterator<VirtueUser> itr = userRepo.findAll().iterator();
+		while (itr.hasNext()) {
+			VirtueUser user = itr.next();
+			user.removeAllVirtueTemplates();
+			userRepo.save(user);
+		}
 		userRepo.deleteAll();
 	}
 

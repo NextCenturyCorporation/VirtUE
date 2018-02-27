@@ -279,7 +279,7 @@ public class DataResource {
 			for (GrantedAuthority a : user.getAuthorities()) {
 				auths.add(a.getAuthority());
 			}
-			VirtueUser u = new VirtueUser(user.getUsername(), auths);
+			VirtueUser u = userManager.getUser(user.getUsername());
 			users.add(u);
 		}
 		return users;
@@ -328,8 +328,9 @@ public class DataResource {
 	@Path("clear/")
 	public String clearAll() {
 		clearActiveDatabase();
-		clearTemplatesDatabase();
 		clearUsers();
+		clearTemplatesDatabase();
+
 		return "database cleared.";
 	}
 

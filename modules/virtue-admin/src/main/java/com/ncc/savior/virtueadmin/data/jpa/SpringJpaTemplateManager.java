@@ -17,6 +17,7 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 @Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
@@ -40,7 +41,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(VirtueUser user) {
-		Collection<VirtueTemplate> templates = vtRepository.findByUsers(user);
+		user = userRepo.findById(user.getUsername()).orElse(null);
+		if (user == null) {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
+		}
+		Collection<VirtueTemplate> templates = user.getVirtueTemplates();
 		Map<String, VirtueTemplate> ret = new HashMap<String, VirtueTemplate>();
 		for (VirtueTemplate t : templates) {
 			ret.put(t.getId(), t);
@@ -50,7 +55,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public Collection<String> getVirtueTemplateIdsForUser(VirtueUser user) {
-		Collection<VirtueTemplate> templates = vtRepository.findByUsers(user);
+		user = userRepo.findById(user.getUsername()).orElse(null);
+		if (user == null) {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
+		}
+		Collection<VirtueTemplate> templates = user.getVirtueTemplates();
 		Collection<String> ret = new HashSet<String>();
 		for (VirtueTemplate t : templates) {
 			ret.add(t.getId());
@@ -60,7 +69,17 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
-		return vtRepository.findByUsersAndId(user, templateId);
+		user = userRepo.findById(user.getUsername()).orElse(null);
+		if (user==null) {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
+		}
+		for (VirtueTemplate template : user.getVirtueTemplates()) {
+			if (template.getId().equals(templateId)) {
+				return template;
+			}
+		}
+		throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+				"Virtue Template id=" + templateId + " not found.");
 	}
 
 	@Override
@@ -138,17 +157,23 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId) {
 //		UserName username = new UserName(user.getUsername());
 		// TODO this seems inefficient, but it errors if the username does not exist.
+		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
+		if (existing != null) {
+			user = existing;
+		}
 		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-		Collection<VirtueUser> users = vt.getUsers();
-		users.add(user);
-		vtRepository.save(vt);
+		user.addVirtueTemplate(vt);
+		userRepo.save(user);
 	}
 
 	@Override
 	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
-		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-		vt.retrieveUsers().remove(user);
-		vtRepository.save(vt);
+		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
+		if (existing != null) {
+			VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
+			existing.removeVirtueTemplate(vt);
+			userRepo.save(existing);
+		}
 	}
 
 	@Override
@@ -172,13 +197,13 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public Collection<String> getUsersWithTemplate() {
+		Iterable<VirtueUser> allUsers = userRepo.findAll();
+		Iterator<VirtueUser> itr = allUsers.iterator();
 		Set<String> users = new HashSet<String>();
-		Iterable<VirtueTemplate> itr = vtRepository.findAll();
-		Iterator<VirtueTemplate> i = itr.iterator();
-		while (i.hasNext()) {
-			VirtueTemplate t = i.next();
-			for (VirtueUser u:t.getUsers()) {
-			users.add(u.getUsername());
+		while (itr.hasNext()) {
+			VirtueUser user = itr.next();
+			if (!user.getVirtueTemplates().isEmpty()) {
+				users.add(user.getUsername());
 			}
 		}
 		return users;
