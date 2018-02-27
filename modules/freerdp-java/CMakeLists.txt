@@ -34,11 +34,14 @@ swig_add_module(
 	)
 #set(SWIG_MODULE_jfreerdp_EXTRA_DEPS src/main/cpp/FreeRDP.cpp)
 
-message(STATUS "outdir: ${CMAKE_SWIG_OUTDIR}")
-file(GLOB FREERDP_JAVA_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SWIG_OUTDIR}/*.java) 
-message(STATUS "java sources: ${FREERDP_JAVA_SOURCES}")
-add_jar(freerdp-java
-	SOURCES ${FREERDP_JAVA_SOURCES}
-	OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/build
-	)
-add_dependencies(freerdp-java jfreerdp)
+# set(SWIG_JAVA_SOURCE_LIST "build/swig-java-files")
+# add_custom_command(
+# 	OUTPUT ${SWIG_JAVA_SOURCE_LIST}
+# 	COMMAND file(GLOB FREERDP_JAVA_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SWIG_OUTDIR}/*.java) 
+# 
+# 
+# add_jar(freerdp-java
+# 	SOURCES @${SWIG_JAVA_SOURCE_LIST}
+# 	OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/build
+# 	)
+# add_dependencies(freerdp-java jfreerdp)
