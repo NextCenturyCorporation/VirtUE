@@ -24,58 +24,80 @@ export class VmModalComponent implements OnInit {
   disabled = false;
   addVms = new EventEmitter();
   vmList = [];
-  selVmList = [];
+  selVmsList = [];
+  pageVmList = [];
 
   constructor(
     private route: ActivatedRoute,
     private vmService: VirtualMachineService,
     private dialogRef: MatDialogRef<VmModalComponent>,
     @Inject( MAT_DIALOG_DATA ) public data: any
-  ) {  }
+  ) {
+      this.pageVmList = data['selectedVms'];
+    }
 
   ngOnInit() {
     this.getVmList();
+    if (this.pageVmList.length > 0) {
+      this.selVmsList = this.pageVmList;
+    }
   }
 
   getVmList() {
     this.vmService.getVmList()
-      .subscribe(
-        data => {
-          this.vmList = data;
+    .subscribe( vms => {
+        this.vmList = vms;
+      }
+    );
+  }
+  selectVm(id:string) {
+    if (this.pageVmList.length > 0) {
+      for (let sel of this.pageVmList) {
+        if (sel === id) {
+          return true;
+          break;
         }
-      );
+      }
+    } else {
+      return false;
+    }
   }
   selectAll(event) {
     if (event) {
-      this.checked = true;
+      return true;
       let vms = this.vmList;
       for (let vm of vms) {
-        this.selVmList.push(vm.id);
+        this.selVmsList.push(vm.id);
       }
     } else {
-      this.checked = false;
+      return false;
       this.clearVmList();
     }
-    // console.log(this.selVmList);
   }
-  cbVmList(event, sel) {
-    if (event) {
-      this.selVmList.push(sel);
+
+  cbVmList(event, id: string, index: number) {
+    if (event === true) {
+      this.selVmsList.push(id);
     } else {
-      this.removeVm(sel);
+      this.removeVm(id, index);
     }
   }
-  removeVm(sel) {
-    this.selVmList.splice(sel, 1);
+
+  removeVm(id: string, index: number) {
+    this.selVmsList.splice(this.selVmsList.indexOf(id), 1);
   }
 
   clearVmList() {
-    this.selVmList = [];
-    // console.log(this.selVmList);
+    this.selVmsList = [];
+    this.pageVmList = [];
   }
 
   onAddVms(): void {
-    this.addVms.emit(this.selVmList);
+    // if (this.pageVmList.length > 0) {
+    //   this.selVmsList = this.pageVmList;
+    // }
+    this.addVms.emit(this.selVmsList);
+    this.clearVmList();
     this.dialogRef.close();
   }
 

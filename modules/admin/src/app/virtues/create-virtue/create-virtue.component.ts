@@ -19,12 +19,13 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 export class CreateVirtueComponent implements OnInit {
   users: Users[];
   virtues: Virtue[];
-  vms = VirtualMachine;
+  vms: VirtualMachine;
   hovering = false;
   activeClass: string;
   vmList = [];
   appList = [];
   selVmsList = [];
+  pageVmList = [];
 
   constructor(
     private virtuesService: VirtuesService,
@@ -33,16 +34,19 @@ export class CreateVirtueComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    if (this.selVmsList.length > 0) {
+    if (this.pageVmList.length > 0) {
       this.getVmList();
+      // console.log('page VM list @ ngOnInit(): ' + this.pageVmList);
     }
   }
 
   getVmList() {
     // loop through the selected VM list
-    const selectedVm = this.selVmsList;
+    const selectedVm = this.pageVmList;
+    // console.log('page VM list @ getVmList(): ' + this.pageVmList);
     this.vmService.getVmList()
-      .subscribe(data => {
+    .subscribe(data => {
+      if (this.vmList.length < 1) {
         for (let sel of selectedVm) {
           for (let vm of data) {
             if (sel === vm.id) {
@@ -51,17 +55,34 @@ export class CreateVirtueComponent implements OnInit {
             }
           }
         }
-      });
+      } else {
+        this.getUpdatedVmList();
+      }
+    });
+  }
+
+  getUpdatedVmList() {
+    this.vmList = [];
+    this.vmService.getVmList()
+    .subscribe(data => {
+      for (let sel of this.pageVmList) {
+        for (let vm of data) {
+          if (sel === vm.id) {
+            this.vmList.push(vm);
+            break;
+          }
+        }
+      }
+    });
   }
 
   createVirtue(virtueName: string) {
     this.getAppList();
-    const dt = new Date();
-    const vms = this.vmList;
-    for (let vm of vms) {
-      console.log('VMs: ');
-      console.log(vm);
-    }
+    // const vms = this.vmList;
+    // for (let vm of vms) {
+    //   console.log('VMs: ');
+    //   console.log(vm);
+    // }
     console.log(`Virtue Name: ${virtueName} | Create Date: ${dt.getTime()} `);
     let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
     let newVirtue = [{
@@ -75,9 +96,9 @@ export class CreateVirtueComponent implements OnInit {
       'lastEditor': 'skim',
       'applications': this.appList
     }];
-    // console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt } `);
-    console.log('New Virtue: ');
-    console.log(newVirtue);
+    // console.log('New Virtue: ');
+    // console.log(newVirtue);
+
     // this.virtuesService.createVirtue({newVirtue} as Virtue)
     // .subscribe(data => {
     //   this.virtues.push(data);
@@ -98,25 +119,36 @@ export class CreateVirtueComponent implements OnInit {
         });
       }
     }
-    console.log('getAppList():' + this.appList[0].name);
+    // console.log('getAppList():' + this.appList[0].name);
     // return this.appList;
   }
 
-  removeVm(id: string, vm: VirtualMachine): void {
-    this.vmList = this.vmList.filter(data => vm.id !== id);
-    // console.log(this.vmList);
+  removeVm(id: string, index:number): void {
+    this.vmList = this.vmList.filter(data => {
+      return data.id !== id;
+    });
+    this.pageVmList.splice(index, 1);
   }
 
   activateModal(id: string): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
-      width: '750px'
+      width: '750px',
+      data: {
+        selectedVms: this.pageVmList
+      },
     });
-
+    // console.log('VMs sent to dialog: ' + this.pageVmList);
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
     const vms = dialogRef.componentInstance.addVms.subscribe((data) => {
       this.selVmsList = data;
+      // console.log('VMs from dialog: ' + this.selVmsList);
+      if (this.pageVmList.length > 0) {
+        this.pageVmList = [];
+      }
+      this.pageVmList = this.selVmsList;
+
       this.getVmList();
     });
 
