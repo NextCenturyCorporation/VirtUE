@@ -34,8 +34,8 @@ export class VmModalComponent implements OnInit {
     private dialogRef: MatDialogRef<VmModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.pageVmList = data['selectedVms'];
-  }
+      this.pageVmList = data['selectedVms'];
+    }
 
   ngOnInit() {
     this.getVmList();
@@ -48,8 +48,8 @@ export class VmModalComponent implements OnInit {
     this.vmService.getVmList()
       .subscribe(vms => {
         this.vmList = vms;
-      }
-      );
+      });
+
   }
 
   selectVm(id: string) {

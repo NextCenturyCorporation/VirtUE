@@ -311,6 +311,20 @@ content {
     font-size: 0.88rem;
     font-weight: 600;
     margin: 0;
+
+    button {
+      background-color: transparent;
+      border: none;
+      color: #407097;
+      height: 24px;
+      margin: 0;
+      padding: 0;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }
 

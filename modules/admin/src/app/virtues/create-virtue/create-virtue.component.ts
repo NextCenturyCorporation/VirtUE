@@ -17,11 +17,11 @@ import { VirtualMachine } from '../../shared/models/vm.model';
   providers: [VirtuesService, VirtualMachineService]
 })
 export class CreateVirtueComponent implements OnInit {
+  vms: VirtualMachine;
+  activeClass: string;
   users: Users[];
   virtues: Virtue[];
-  vms: VirtualMachine;
-  hovering = false;
-  activeClass: string;
+
   vmList = [];
   appList = [];
   selVmsList = [];
@@ -61,6 +61,23 @@ export class CreateVirtueComponent implements OnInit {
       });
   }
 
+  getAppList() {
+    let vms = this.vmList;
+    let apps = [];
+    for (let vm of vms) {
+      apps = vm.applications;
+      for (let app of apps) {
+        this.appList.push({
+          'name': app.name,
+          'version': app.version,
+          'os': app.os,
+          'launchCommand': app.launchCommand
+        });
+      }
+    }
+    // console.log('getAppList():' + this.appList[0].name);
+    // return this.appList;
+  }
   getUpdatedVmList() {
     this.vmList = [];
     this.vmService.getVmList()
@@ -97,23 +114,7 @@ export class CreateVirtueComponent implements OnInit {
     //   this.virtues.push(data);
     // });
   }
-  getAppList() {
-    let vms = this.vmList;
-    let apps = [];
-    for (let vm of vms) {
-      apps = vm.applications;
-      for (let app of apps) {
-        this.appList.push({
-          'name': app.name,
-          'version': app.version,
-          'os': app.os,
-          'launchCommand': app.launchCommand
-        });
-      }
-    }
-    // console.log('getAppList():' + this.appList[0].name);
-    // return this.appList;
-  }
+
 
   removeVm(id: string, index: number): void {
     this.vmList = this.vmList.filter(data => {
