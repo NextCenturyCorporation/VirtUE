@@ -18,19 +18,21 @@ repositories {
 }
 
 task initCMake(type: Exec) {
+    description 'Initialize cmake build'
     workingDir 'build'
     inputs.file('CMakeLists.txt')
     outputs.dir(workingDir)
     outputs.file(new File(workingDir, 'CMakeCache.txt'))
     outputs.file(new File(workingDir, 'Makefile'))
+    outputs.dir(new File(workingDir, 'CMakeFiles'))
+    outputs.file(new File(workingDir, 'cmake_install.cmake'))
     commandLine 'cmake', '-DCMAKE_CXX_FLAGS=-std=c++14', "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${workingDir}", '..'
 }
+clean.dependsOn('cleanInitCMake')
 
 task runMake(type: Exec) {
-    println 'runMake: hi'
+    description 'Run make as configured by cmake, to build the swig wrapper library'
     dependsOn initCMake
-    //inputs.file('build/CMakeCache.txt')
-    //outputs.file('build/libjfreerdp.so')
     workingDir 'build'
     commandLine 'make'
 }
