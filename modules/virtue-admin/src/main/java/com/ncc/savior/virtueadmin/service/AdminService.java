@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +75,17 @@ public class AdminService {
 		if (user != null) {
 			Map<String, VirtueTemplate> vts = templateManager.getVirtueTemplatesForUser(user);
 			return vts.values();
+		} else {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
+		}
+	}
+
+	public Iterable<VirtueInstance> getAllActiveVirtuesForUser(String username) {
+		verifyAndReturnUser();
+		VirtueUser user = userManager.getUser(username);
+		if (user != null) {
+			Collection<VirtueInstance> vs = virtueManager.getVirtuesForUser(user);
+			return vs;
 		} else {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
 		}
@@ -248,6 +260,23 @@ public class AdminService {
 			SessionInformation session = sessionRegistry.getSessionInformation(sessionId);
 			session.expireNow();
 		}
+	}
+
+	public void logoutUser(String username) {
+		verifyAndReturnUser();
+		List<Object> principals = sessionRegistry.getAllPrincipals();
+		for (Object principal : principals) {
+			User user = (User) principal;
+			if (user.getUsername().equals(username)) {
+				List<SessionInformation> sessions = sessionRegistry.getAllSessions(user, false);
+				for (SessionInformation session : sessions) {
+					session.expireNow();
+				}
+			}
+		}
+		throw new SaviorException(SaviorException.REQUESTED_USER_NOT_LOGGED_IN,
+				"User=" + username + " was not logged in");
+
 	}
 
 	public Map<String, List<String>> getActiveSessions() {

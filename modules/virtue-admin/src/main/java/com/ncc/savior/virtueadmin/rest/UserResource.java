@@ -35,6 +35,7 @@ public class UserResource {
 	@Autowired
 	private UserDataService userVirtueService;
 
+	// JHU - User API - application get
 	@GET
 	@Produces("application/json")
 	@Path("application/{appId}")
@@ -50,6 +51,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - role get
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/{templateId}")
@@ -65,6 +67,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - user role list
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/")
@@ -80,6 +83,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - virtue get
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/")
@@ -95,6 +99,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - user virtue list
 	@GET
 	@Produces("application/json")
 	@Path("virtue/")
@@ -110,6 +115,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - virtue create
 	@POST
 	@Produces("application/json")
 	@Path("virtue/template/{templateId}/")
@@ -125,6 +131,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - virtue launch
 	// Launch virtue is currently unnecessary
 	@POST
 	@Produces("application/json")
@@ -141,6 +148,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - virtue stop
 	// Stop virtue not yet supported
 	@POST
 	@Produces("application/json")
@@ -157,6 +165,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - virtue destroy
 	@DELETE
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/")
@@ -171,6 +180,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - virtue application launch
 	@POST
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}")
@@ -186,6 +196,7 @@ public class UserResource {
 		}
 	}
 
+	// JHU - User API - virtue application stop
 	// Stop running virtue application not yet supported
 	@DELETE
 	@Produces("application/json")

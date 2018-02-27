@@ -43,6 +43,17 @@ public class AdminResource {
 
 	}
 
+	// JHU - Admin API unimplemented:
+	// resourse get
+	// resource list
+	// resource attach
+	// resource detach
+	// system export
+	// system import
+	// test import user
+	// test import application
+	// test import role
+
 	@POST
 	@Produces("application/json")
 	@Path("application")
@@ -57,6 +68,7 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - application list
 	@GET
 	@Produces("application/json")
 	@Path("application")
@@ -113,6 +125,7 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - role create
 	@POST
 	@Produces("application/json")
 	@Path("virtualMachine/template/")
@@ -141,6 +154,7 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - role list
 	@GET
 	@Produces("application/json")
 	@Path("virtualMachine/template")
@@ -290,12 +304,17 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - user virtue list
 	@GET
 	@Produces("application/json")
 	@Path("virtues")
-	public Iterable<VirtueInstance> getAllActiveVirtues() {
+	public Iterable<VirtueInstance> getAllActiveVirtues(@QueryParam("user") String username) {
 		try {
-			return adminService.getAllActiveVirtues();
+			if (username == null || username.trim().equals("")) {
+				return adminService.getAllActiveVirtues();
+			} else {
+				return adminService.getAllActiveVirtuesForUser(username);
+			}
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -378,6 +397,7 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - user list
 	@GET
 	@Produces("application/json")
 	@Path("user")
@@ -392,6 +412,7 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - user get
 	@DELETE
 	@Produces("application/json")
 	@Path("user/{username}")
@@ -406,6 +427,7 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - user role authorize
 	@POST
 	@Produces("application/json")
 	@Path("user/{username}/assign/{templateId}")
@@ -421,6 +443,7 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - user role unauthorize
 	@POST
 	@Produces("application/json")
 	@Path("user/{username}/revoke/{templateId}")
@@ -450,6 +473,22 @@ public class AdminResource {
 		}
 	}
 
+	// JHU - Admin API - user logout
+	@GET
+	@Path("user/{username}/logout")
+	@Produces("application/json")
+	public void logoutUser(@PathParam("username") String username) {
+		try {
+			adminService.logoutUser(username);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	// JHU - Admin API - usertoken list
 	@GET
 	@Path("session")
 	@Produces("application/json")
