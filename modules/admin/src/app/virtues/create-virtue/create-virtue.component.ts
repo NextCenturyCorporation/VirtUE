@@ -45,9 +45,27 @@ export class CreateVirtueComponent implements OnInit {
     const selectedVm = this.pageVmList;
     // console.log('page VM list @ getVmList(): ' + this.pageVmList);
     this.vmService.getVmList()
-    .subscribe(data => {
-      if (this.vmList.length < 1) {
-        for (let sel of selectedVm) {
+      .subscribe(data => {
+        if (this.vmList.length < 1) {
+          for (let sel of selectedVm) {
+            for (let vm of data) {
+              if (sel === vm.id) {
+                this.vmList.push(vm);
+                break;
+              }
+            }
+          }
+        } else {
+          this.getUpdatedVmList();
+        }
+      });
+  }
+
+  getUpdatedVmList() {
+    this.vmList = [];
+    this.vmService.getVmList()
+      .subscribe(data => {
+        for (let sel of this.pageVmList) {
           for (let vm of data) {
             if (sel === vm.id) {
               this.vmList.push(vm);
@@ -55,25 +73,7 @@ export class CreateVirtueComponent implements OnInit {
             }
           }
         }
-      } else {
-        this.getUpdatedVmList();
-      }
-    });
-  }
-
-  getUpdatedVmList() {
-    this.vmList = [];
-    this.vmService.getVmList()
-    .subscribe(data => {
-      for (let sel of this.pageVmList) {
-        for (let vm of data) {
-          if (sel === vm.id) {
-            this.vmList.push(vm);
-            break;
-          }
-        }
-      }
-    });
+      });
   }
 
   createVirtue(virtueName: string) {
@@ -115,7 +115,7 @@ export class CreateVirtueComponent implements OnInit {
     // return this.appList;
   }
 
-  removeVm(id: string, index:number): void {
+  removeVm(id: string, index: number): void {
     this.vmList = this.vmList.filter(data => {
       return data.id !== id;
     });
@@ -140,7 +140,7 @@ export class CreateVirtueComponent implements OnInit {
         this.pageVmList = [];
       }
       this.pageVmList = this.selVmsList;
-      
+
       this.getVmList();
     });
 

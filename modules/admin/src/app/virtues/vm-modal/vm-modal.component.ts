@@ -6,13 +6,13 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Application } from '../../shared/models/application.model';
 
-import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 @Component({
   selector: 'app-vm-modal',
   templateUrl: './vm-modal.component.html',
   styleUrls: ['./vm-modal.component.css'],
-  providers: [ VirtualMachineService ]
+  providers: [VirtualMachineService]
 })
 export class VmModalComponent implements OnInit {
   @Input() vmInput: VirtualMachine;
@@ -20,8 +20,9 @@ export class VmModalComponent implements OnInit {
 
   form: FormGroup;
   virtueId: string;
+
   checked = false;
-  disabled = false;
+
   addVms = new EventEmitter();
   vmList = [];
   selVmsList = [];
@@ -31,10 +32,10 @@ export class VmModalComponent implements OnInit {
     private route: ActivatedRoute,
     private vmService: VirtualMachineService,
     private dialogRef: MatDialogRef<VmModalComponent>,
-    @Inject( MAT_DIALOG_DATA ) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-      this.pageVmList = data['selectedVms'];
-    }
+    this.pageVmList = data['selectedVms'];
+  }
 
   ngOnInit() {
     this.getVmList();
@@ -45,18 +46,17 @@ export class VmModalComponent implements OnInit {
 
   getVmList() {
     this.vmService.getVmList()
-    .subscribe( vms => {
+      .subscribe(vms => {
         this.vmList = vms;
       }
-    );
+      );
   }
-  
-  selectVm(id:string) {
+
+  selectVm(id: string) {
     if (this.pageVmList.length > 0) {
       for (let sel of this.pageVmList) {
         if (sel === id) {
           return true;
-          break;
         }
       }
     } else {
@@ -66,13 +66,12 @@ export class VmModalComponent implements OnInit {
 
   selectAll(event) {
     if (event) {
-      return true;
-      let vms = this.vmList;
-      for (let vm of vms) {
+      this.checked = true;
+      for (let vm of this.vmList) {
         this.selVmsList.push(vm.id);
       }
     } else {
-      return false;
+      this.checked = false;
       this.clearVmList();
     }
   }
