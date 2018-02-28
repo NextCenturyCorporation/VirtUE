@@ -1,60 +1,109 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Application } from '../../shared/models/application.model';
 
-import { MatDialogRef } from '@angular/material';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 @Component({
   selector: 'app-vm-modal',
   templateUrl: './vm-modal.component.html',
   styleUrls: ['./vm-modal.component.css'],
-  providers: [ VirtualMachineService ]
+  providers: [VirtualMachineService]
 })
 export class VmModalComponent implements OnInit {
-  @Input() vmInput : VirtualMachine;
-  @Input() appInput : Application;
+  @Input() vmInput: VirtualMachine;
+  @Input() appInput: Application;
 
   form: FormGroup;
-  checked = false;
-  indeterminate = false;
+  virtueId: string;
 
-  selectedVms : string;
+  checked = false;
+
+  addVms = new EventEmitter();
   vmList = [];
-  appList = [];
+  selVmsList = [];
+  pageVmList = [];
 
   constructor(
+    private route: ActivatedRoute,
     private vmService: VirtualMachineService,
-    private dialogRef: MatDialogRef<VmModalComponent>
-  ) {}
+    private dialogRef: MatDialogRef<VmModalComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+      this.pageVmList = data['selectedVms'];
+    }
 
   ngOnInit() {
     this.getVmList();
+    if (this.pageVmList.length > 0) {
+      this.selVmsList = this.pageVmList;
+    }
   }
 
   getVmList() {
     this.vmService.getVmList()
-      .subscribe(
-        data => {
-          this.vmList = data;
-        }
-      );
+      .subscribe(vms => {
+        this.vmList = vms;
+      });
+
   }
 
-  addVms(id: string): void {
-    id = id.trim();
-    if (!id){
-      this.appList.push(VirtualMachine);
+  selectVm(id: string) {
+    if (this.pageVmList.length > 0) {
+      for (let sel of this.pageVmList) {
+        if (sel === id) {
+          return true;
+        }
+      }
+    } else {
+      return false;
     }
   }
 
-  cancelModal() {
+  selectAll(event) {
+    if (event) {
+      this.checked = true;
+      for (let vm of this.vmList) {
+        this.selVmsList.push(vm.id);
+      }
+    } else {
+      this.checked = false;
+      this.clearVmList();
+    }
+  }
+
+  cbVmList(event, id: string, index: number) {
+    if (event === true) {
+      this.selVmsList.push(id);
+    } else {
+      this.removeVm(id, index);
+    }
+  }
+
+  removeVm(id: string, index: number) {
+    this.selVmsList.splice(this.selVmsList.indexOf(id), 1);
+  }
+
+  clearVmList() {
+    this.selVmsList = [];
+    this.pageVmList = [];
+  }
+
+  onAddVms(): void {
+    // if (this.pageVmList.length > 0) {
+    //   this.selVmsList = this.pageVmList;
+    // }
+    this.addVms.emit(this.selVmsList);
+    this.clearVmList();
     this.dialogRef.close();
   }
-  saveVMList() {
+
+  cancelModal() {
+    this.clearVmList();
     this.dialogRef.close();
   }
 

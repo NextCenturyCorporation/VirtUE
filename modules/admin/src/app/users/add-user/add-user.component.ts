@@ -30,7 +30,7 @@ export class AddUserComponent implements OnInit {
 
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
-  activeDirUsers=[];
+  activeDirUsers = [];
 
   constructor(
     public dialog: MatDialog,
@@ -44,20 +44,20 @@ export class AddUserComponent implements OnInit {
         // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
     );
   }
-  activateModal(id,mode): void {
+  activateModal(id, mode): void {
 
   this.dialogWidth = 600;
 
   this.fullImagePath = './assets/images/app-icon-white.png';
 
-  if (mode=='add') {
+  if (mode === 'add') {
     this.submitBtn = 'Add Virtues';
   } else {
     this.submitBtn = 'Update List';
   }
 
-  let dialogRef = this.dialog.open( VirtueModalComponent, {
-    width: this.dialogWidth+'px',
+  const dialogRef = this.dialog.open( VirtueModalComponent, {
+    width: this.dialogWidth + 'px',
     data: {
       id: id,
       dialogMode: mode,
@@ -68,12 +68,12 @@ export class AddUserComponent implements OnInit {
   });
 
   this.screenWidth = (window.screen.width);
-  this.leftPosition = ((window.screen.width)-this.dialogWidth)/2;
+  this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
 
   // console.log(this.screenWidth);
   // console.log(this.leftPosition);
 
-  dialogRef.updatePosition({ top: '5%', left: this.leftPosition+'px' });
+  dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
 
   // dialogRef.afterClosed().subscribe();
 

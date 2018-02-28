@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
@@ -34,11 +35,11 @@ public class SidebarController {
 
 	public void init(Stage primaryStage) throws Exception {
 		List<DesktopVirtue> initialVirtues;
-		if (authService.getUser() != null) {
-			initialVirtues = virtueService.getVirtuesForUser();
-		} else {
+		// if (authService.getUser() != null) {
+		// initialVirtues = virtueService.getVirtuesForUser();
+		// } else {
 			initialVirtues = new ArrayList<DesktopVirtue>();
-		}
+		// }
 		currentVirtues = initialVirtues;
 		sidebar.start(primaryStage, initialVirtues);
 		startVirtuePoll();
@@ -49,9 +50,11 @@ public class SidebarController {
 
 			@Override
 			public void run() {
+				String previousUser = null;
 				while (!terminatePollThread) {
 					try {
-						if (authService.getUser() != null) {
+						DesktopUser currentUser = authService.getUser();
+						if (currentUser != null) {
 							List<DesktopVirtue> virtues;
 							try {
 
@@ -60,8 +63,13 @@ public class SidebarController {
 								// TODO do something with connection errors.
 								virtues = new ArrayList<DesktopVirtue>(0);
 							}
+							if (!currentUser.getUsername().equals(previousUser)) {
+								currentVirtues.clear();
+								previousUser = currentUser.getUsername();
+							}
 							detectChangesAndReport(currentVirtues, virtues);
 							currentVirtues = virtues;
+
 						}
 
 						Thread.sleep(pollPeriodMillis);

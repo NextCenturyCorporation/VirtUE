@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.authorization;
 
+import javax.ws.rs.client.Invocation.Builder;
+
 /**
  * Provides authorization services for the application. Implementations are
  * often platform specific.
@@ -13,8 +15,9 @@ public interface IActiveDirectoryAuthorizationProvider {
 	 * the OS to see if we can use the OS's logged in user.
 	 *
 	 * @return
+	 * @throws InvalidUserLoginException
 	 */
-	DesktopUser getCurrentUser();
+	DesktopUser getCurrentUser() throws InvalidUserLoginException;
 
 	/**
 	 * Attempt to login to a new user.
@@ -32,8 +35,9 @@ public interface IActiveDirectoryAuthorizationProvider {
 	 * Returns current token for single sign on.
 	 *
 	 * @return
+	 * @throws InvalidUserLoginException
 	 */
-	byte[] getCurrentToken(String serverPrinc);
+	byte[] getCurrentToken(String serverPrinc) throws InvalidUserLoginException;
 
 	/**
 	 * Attempt to logout of the current user. This is not guaranteed to log out
@@ -41,8 +45,5 @@ public interface IActiveDirectoryAuthorizationProvider {
 	 */
 	void logout();
 
-	String getAuthorizationTicket(String targetHost);
-
-
-
+	void addAuthorizationTicket(Builder builder, String targetHost) throws InvalidUserLoginException;
 }

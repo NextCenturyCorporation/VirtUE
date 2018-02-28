@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.authorization;
 
 import java.io.InputStream;
 
+import javax.ws.rs.client.Invocation.Builder;
+
 import javafx.scene.image.Image;
 
 public class DummyAuthentication implements IActiveDirectoryAuthorizationProvider {
@@ -40,9 +42,8 @@ public class DummyAuthentication implements IActiveDirectoryAuthorizationProvide
 	}
 
 	@Override
-	public String getAuthorizationTicket(String spn) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public void addAuthorizationTicket(Builder builder, String targetHost) throws InvalidUserLoginException {
+		// do nothing
 
+	}
 }

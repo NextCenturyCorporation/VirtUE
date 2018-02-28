@@ -291,6 +291,11 @@ content {
   margin-left: 10px;
   margin-right: 10px;
 }
+.table-row.active {
+  .menu-options {
+    display: block;
+  }
+}
 .table-data {
   @include raleway;
   background-color: #FFF;
@@ -306,8 +311,19 @@ content {
     font-size: 0.88rem;
     font-weight: 600;
     margin: 0;
-    &.active {
-      display: block;
+
+    button {
+      background-color: transparent;
+      border: none;
+      color: #407097;
+      height: 24px;
+      margin: 0;
+      padding: 0;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 }

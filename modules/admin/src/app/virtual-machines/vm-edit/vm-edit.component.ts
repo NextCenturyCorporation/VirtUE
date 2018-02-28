@@ -26,8 +26,8 @@ export class VmEditComponent implements OnInit {
   osValue: string;
   osInfo: string;
   osList = [
-    { "id":10, "os":"LINUX", "info": "https://packages.debian.org/stable/" },
-    { "id":11, "os":"Windows", "info":"https://www.microsoft.com/en-us/windows/" }
+    { 'id': 10, 'os': 'LINUX', 'info': 'https://packages.debian.org/stable/' },
+    { 'id': 11, 'os': 'Windows', 'info': 'https://www.microsoft.com/en-us/windows/' }
   ];
   os: string;
   selectedValue: string;
@@ -58,17 +58,17 @@ export class VmEditComponent implements OnInit {
     );
 
   }
-  getOsInfo(os){
+  getOsInfo(os) {
     const osList = this.osList;
-    for (var i in osList) {
+    for (let i in osList) {
       if (os === this.osList[i].os) {
         return this.osList[i].info;
       }
     }
   }
   getAppList(apps) {
-    for (var i in apps){
-      if (apps[i].name){
+    for (let i of apps) {
+      if (apps[i].name) {
         console.log(apps[i].name);
         this.appsInput += apps[i].name + '\n';
       }

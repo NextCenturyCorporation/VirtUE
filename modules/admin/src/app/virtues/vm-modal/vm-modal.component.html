@@ -6,9 +6,10 @@
     <div class="mui-row table-header-group">
       <div class="mui-col-md-5 table-header">
         <span class="float-left">
-          <input type="checkbox" name="selectAll"
-            [(ngModel)]="checked"
-            [(indeterminate)]="indeterminate" />
+          <mat-checkbox
+            name="selectAll"
+            (change)="selectAll($event.checked)"
+            [disabled]="disabled" ></mat-checkbox>
         </span>
         <span class="float-left text-align-left">Virtual Machine</span>
       </div>
@@ -20,15 +21,14 @@
       </div>
     </div>
     <div class="scrolling-list">
-      <div *ngFor="let vm of vmList" class="mui-row table-row">
+      <div *ngFor="let vm of vmList; let i = index " class="mui-row table-row">
         <div class="mui-col-md-5 table-data">
           <span class="float-left">
-            <input type="checkbox" name="vmItem"
-              [(ngModel)]="checked"
-              [(indeterminate)]="indeterminate"
-              [(value)]="vm.id"
-              [ngModelOptions]="{standalone: true}"
-            />
+            <mat-checkbox
+              name="cbVm"
+              [checked]="selectVm(vm.id)"
+              (change)="cbVmList($event.checked, vm.id, i)"
+              value="{{vm.id}}" ></mat-checkbox>
           </span>
           <span class="float-left">{{ vm.name }}</span>
         </div>
@@ -46,8 +46,8 @@
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button class="button" type="submit" (click)="saveVMList();">
-  Save
+  <button mat-button class="button" type="submit" (click)="onAddVms();">
+  Add VMs
   </button>
   <button mat-button type="button" (click)="cancelModal();" mat-dialog-close>
     Cancel
