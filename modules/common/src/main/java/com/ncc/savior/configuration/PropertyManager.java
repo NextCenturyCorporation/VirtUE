@@ -12,13 +12,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Property manager that aggregates multiple sources of properties with specific
- * Precedence to handle application configuration. </br>
- * </br>
+ * Precedence to handle application configuration. <br>
+ * <br>
  * Procedence order (first wins):
  * <ol>
  * <li>System properties
  * <li>Environmental properties
  * <li>Property files in order given in constructor (first wins)
+ * </ol>
  */
 
 public class PropertyManager {

@@ -50,8 +50,6 @@ public class VirtueInstance {
 
 	/**
 	 * Used for jackson deserialization
-	 * 
-	 * @param template
 	 */
 	protected VirtueInstance() {
 

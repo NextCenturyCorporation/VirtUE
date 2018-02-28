@@ -29,7 +29,6 @@ public class SidebarApplication extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-
 		// Plumbing and depedency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
 		String desktopUrl = props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
