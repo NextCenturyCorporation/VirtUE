@@ -45,14 +45,14 @@
                 <div class="table-header mui-col-md-3">Applications</div>
                 <div class="table-header mui-col-md-2">Enabled</div>
               </div>
-              <div class="mui-row table-row" *ngFor="let vm of virtueData.vmTemplates" appActiveClass>
+              <div class="mui-row table-row" *ngFor="let vm of vmList; let i = index" appActiveClass>
                 <div class="table-data mui-col-md-5">
                   <a mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
                   <span class="menu-options" *ngIf="vm.enabled">
-                    <a (click)="activateModal(vm.id)">Edit</a> | <a href="#">Disable</a>
+                    <button>Disable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
                   </span>
                   <span class="menu-options" *ngIf="vm.enabled===false">
-                    <a (click)="activateModal(vm.id)">Edit</a> | <a href="#">Remove</a>
+                    <button>Enable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
                   </span>
                 </div>
                 <div class="table-data mui-col-md-2">{{ vm.os }} </div>
