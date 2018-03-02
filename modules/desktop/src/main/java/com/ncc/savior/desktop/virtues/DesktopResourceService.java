@@ -32,7 +32,7 @@ import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
 
 public class DesktopResourceService {
 	@SuppressWarnings("unused")
@@ -108,19 +108,19 @@ public class DesktopResourceService {
 		return result.toString();
 	}
 
-	public DesktopVirtueApplication startApplication(String virtueId, ApplicationDefinition appDefn)
+	public LinuxApplicationInstance startApplication(String virtueId, ApplicationDefinition appDefn)
 			throws IOException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
-		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
+		LinuxApplicationInstance returnedApp = getClass(target, "GET", LinuxApplicationInstance.class);
 		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
+	public LinuxApplicationInstance startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
 			throws IOException {
 		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
-		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
+		LinuxApplicationInstance returnedApp = getClass(target, "GET", LinuxApplicationInstance.class);
 		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 	}
@@ -163,7 +163,7 @@ public class DesktopResourceService {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
-		if (response.getStatus() == 200) {
+		if (response.getStatus() == Response.Status.OK.getStatusCode()) {
 			InputStream in = (InputStream) response.getEntity();
 			T instance = jsonMapper.readValue(in, klass);
 			return instance;

@@ -164,6 +164,7 @@ public class VirtueMenuItem {
 										Alert alert = new Alert(AlertType.ERROR);
 										alert.setTitle("Error starting " + app.getName());
 										alert.setHeaderText("Error starting '" + app.getName() + "'");
+										alert.setResizable(true);
 
 										String text = stacktraceToString(e);
 										alert.setContentText(text);

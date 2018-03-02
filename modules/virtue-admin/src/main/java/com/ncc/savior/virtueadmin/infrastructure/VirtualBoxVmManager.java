@@ -11,7 +11,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -36,13 +36,13 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	private static final String ARGS_GETINFO = "showvminfo \"%s\" --machinereadable";
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
+	public AbstractVirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
 		// TODO
 		throw new RuntimeException("not yet implemented");
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public AbstractVirtualMachine startVirtualMachine(AbstractVirtualMachine vm) {
 		VmState state = getVirtialMachineState(vm);
 		if (state.equals(VmState.RUNNING)) {
 			vm.setState(VmState.RUNNING);
@@ -62,7 +62,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+	public AbstractVirtualMachine stopVirtualMachine(AbstractVirtualMachine vm) {
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_POWEROFF,
 				vm.getInfrastructureId());
 		try {
@@ -77,7 +77,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
+	public void deleteVirtualMachine(AbstractVirtualMachine vm) {
 		// this stops instead of destroying because we currently don't create or destory
 		// anything with this implementation.
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_POWEROFF,
@@ -91,7 +91,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 		}
 	}
 
-	public boolean pauseVm(VirtualMachine vm) {
+	public boolean pauseVm(AbstractVirtualMachine vm) {
 		String id = vm.getInfrastructureId();
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_PAUSE, id);
 		try {
@@ -104,7 +104,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 		}
 	}
 
-	public boolean resumeVm(VirtualMachine vm) {
+	public boolean resumeVm(AbstractVirtualMachine vm) {
 		String id = vm.getInfrastructureId();
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_RESUME, id);
 		try {
@@ -142,7 +142,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public VmState getVirtialMachineState(VirtualMachine vm) {
+	public VmState getVirtialMachineState(AbstractVirtualMachine vm) {
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_GETINFO,
 				vm.getInfrastructureId());
 		try {
@@ -166,7 +166,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<AbstractVirtualMachine> provisionVirtualMachineTemplates(
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		// TODO Auto-generated method stub
 		return null;

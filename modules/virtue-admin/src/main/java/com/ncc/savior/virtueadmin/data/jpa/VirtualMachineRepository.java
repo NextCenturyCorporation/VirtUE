@@ -2,8 +2,8 @@ package com.ncc.savior.virtueadmin.data.jpa;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 
-public interface VirtualMachineRepository extends CrudRepository<VirtualMachine, String> {
+public interface VirtualMachineRepository extends CrudRepository<AbstractVirtualMachine, String> {
 
 }

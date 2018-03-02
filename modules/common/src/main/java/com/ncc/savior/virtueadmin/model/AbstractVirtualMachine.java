@@ -1,33 +1,28 @@
 package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
+import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 
 @Entity
-public class VirtualMachine {
+public abstract class AbstractVirtualMachine {
 	@Id
 	private String id;
 	private String name;
 	private VmState state;
 	private OS os;
 	private String hostname;
-	private int sshPort;
 	private String infrastructureId;
-	private String userName;
-	@Column(length = 6000)
-	private String privateKey;
 	private String ipAddress;
 	// app ID to application
 	@ManyToMany
-	private Collection<ApplicationDefinition> applications;
-
-	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
-			String infrastructureId, String hostname, int sshPort, String userName, String privateKey,
-			String ipAddress) {
+	private Set<ApplicationDefinition> applications;
+	
+	protected AbstractVirtualMachine(String id, String name, Set<ApplicationDefinition> applications, VmState state, OS os,
+			String infrastructureId, String hostname, String ipAddress) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -36,17 +31,13 @@ public class VirtualMachine {
 		this.os = os;
 		this.infrastructureId = infrastructureId;
 		this.hostname = hostname;
-		this.sshPort = sshPort;
-		this.userName = userName;
-		this.privateKey = privateKey;
 		this.ipAddress = ipAddress;
-
 	}
-
+	
 	/**
 	 * Used for Jackson deserialization.
 	 */
-	protected VirtualMachine() {
+	protected AbstractVirtualMachine() {
 
 	}
 
@@ -74,10 +65,6 @@ public class VirtualMachine {
 		return os;
 	}
 
-	public int getSshPort() {
-		return sshPort;
-	}
-
 	public String getInfrastructureId() {
 		return infrastructureId;
 	}
@@ -86,32 +73,16 @@ public class VirtualMachine {
 		this.state = state;
 	}
 
-	public String getUserName() {
-		return userName;
-	}
-
-	public String getPrivateKey() {
-		return privateKey;
-	}
-
 	// Below setters are for jackson deserialization
 	protected void setId(String id) {
 		this.id = id;
-	}
-
-	public void setPrivateKey(String privateKey) {
-		this.privateKey = privateKey;
-	}
-
-	protected void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	protected void setName(String name) {
 		this.name = name;
 	}
 
-	protected void setApplications(Collection<ApplicationDefinition> applications) {
+	protected void setApplications(Set<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 
@@ -123,10 +94,6 @@ public class VirtualMachine {
 		this.hostname = hostname;
 	}
 
-	protected void setSshPort(int sshPort) {
-		this.sshPort = sshPort;
-	}
-
 	protected void setInfrastructureId(String infrastructureId) {
 		this.infrastructureId = infrastructureId;
 	}
@@ -134,8 +101,8 @@ public class VirtualMachine {
 	@Override
 	public String toString() {
 		return "VirtualMachine [id=" + id + ", name=" + name + ", state=" + state + ", os=" + os + ", hostname="
-				+ hostname + ", sshPort=" + sshPort + ", infrastructureId=" + infrastructureId + ", userName="
-				+ userName + ", ipAddress=" + ipAddress + ", applications=" + applications + "]";
+				+ hostname + ", infrastructureId=" + infrastructureId + ", ipAddress=" + ipAddress + ", applications="
+				+ applications + "]";
 	}
 
 	public String getIpAddress() {

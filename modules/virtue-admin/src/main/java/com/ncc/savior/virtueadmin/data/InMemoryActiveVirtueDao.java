@@ -9,7 +9,7 @@ import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -54,8 +54,8 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void updateVmState(String vmId, VmState state) {
 		for (VirtueInstance instance : virtues.values()) {
-			Collection<VirtualMachine> vms = instance.getVms();
-			for (VirtualMachine vm : vms) {
+			Collection<AbstractVirtualMachine> vms = instance.getVms();
+			for (AbstractVirtualMachine vm : vms) {
 				if (vm.getId().equals(vmId)) {
 					vm.setState(state);
 				break;
@@ -65,10 +65,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
+	public AbstractVirtualMachine getVmWithApplication(String virtueId, String applicationId) {
 		VirtueInstance virtue = virtues.get(virtueId);
 		if (virtue != null) {
-			for (VirtualMachine vm : virtue.getVms()) {
+			for (AbstractVirtualMachine vm : virtue.getVms()) {
 				ApplicationDefinition app = vm.findApplicationById(applicationId);
 				if (app != null) {
 					return vm;

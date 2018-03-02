@@ -25,7 +25,7 @@
 		<constructor-arg value="${savior.staticVm.pem}" />
 	</bean>
 	<bean name="appManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager">
+		class="com.ncc.savior.virtueadmin.infrastructure.LinuxApplicationManager">
 		<constructor-arg ref="defaultPem" />
 	</bean>
 

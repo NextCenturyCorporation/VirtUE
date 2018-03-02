@@ -43,6 +43,7 @@ public class AuthorizationService {
 	private void createAuthProviderChain() {
 		if (dummySecurity) {
 			authProvider = new DummyAuthentication();
+			return;
 		}
 
 		switch (os) {

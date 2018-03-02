@@ -11,7 +11,7 @@ import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.IStateUpdateListener;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
@@ -43,13 +43,13 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	}
 
 	@Override
-	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
-		VirtualMachine vm = virtueDao.getVmWithApplication(virtueId, applicationId);
+	public AbstractVirtualMachine getVmWithApplication(String virtueId, String applicationId) {
+		AbstractVirtualMachine vm = virtueDao.getVmWithApplication(virtueId, applicationId);
 		return vm;
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public AbstractVirtualMachine startVirtualMachine(AbstractVirtualMachine vm) {
 		// return vmManager.startVirtualMachine(vm);
 		// assume started
 		// cloudManager.startVirtualMachine(vm);

@@ -16,7 +16,7 @@ import com.ncc.savior.desktop.xpra.XpraConnectionManager;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
 
 /**
  * Interface for backend web service.
@@ -50,7 +50,7 @@ public class VirtueService {
 	// connectionManager.startApplication(params, app.getStartCommand());
 	// }
 
-	public void ensureConnection(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
+	public void ensureConnection(LinuxApplicationInstance app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
 		File file = null;
 		try {
@@ -58,7 +58,7 @@ public class VirtueService {
 
 			SshConnectionParameters params = null;
 			if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
-				File pem = File.createTempFile(app.getName(), ".pem");
+				File pem = File.createTempFile(app.getApplicationDefinition().getName(), ".pem");
 				FileWriter writer = new FileWriter(pem);
 				writer.write(key);
 				writer.close();
@@ -91,7 +91,7 @@ public class VirtueService {
 			throws IOException {
 		// TODO check to see if we have an XPRA connection
 		String virtueId = virtue.getId();
-		DesktopVirtueApplication app;
+		LinuxApplicationInstance app;
 		if (virtueId == null) {
 			app = desktopResourceService.startApplicationFromTemplate(virtue.getTemplateId(), appDefn);
 		} else {

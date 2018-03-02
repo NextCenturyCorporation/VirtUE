@@ -1,7 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 
 /**
  * Starts and manages applications running on VMs.
@@ -15,5 +15,5 @@ public interface IApplicationManager {
 	 * @param vm
 	 * @param application
 	 */
-	void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition application, int maxTries);
+	void startApplicationOnVm(AbstractVirtualMachine vm, ApplicationDefinition application, int maxTries);
 }

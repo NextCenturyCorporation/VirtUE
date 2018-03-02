@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
@@ -27,14 +27,14 @@ public interface IActiveVirtueManager {
 	Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> keySet);
 
 	/**
-	 * Returns {@link VirtualMachine} that contains the given application in the
+	 * Returns {@link AbstractVirtualMachine} that contains the given application in the
 	 * given virtue.
 	 * 
 	 * @param virtueId
 	 * @param applicationId
 	 * @return
 	 */
-	VirtualMachine getVmWithApplication(String virtueId, String applicationId);
+	AbstractVirtualMachine getVmWithApplication(String virtueId, String applicationId);
 
 	/**
 	 * Initiates starting a virtual machine.
@@ -42,7 +42,7 @@ public interface IActiveVirtueManager {
 	 * @param vm
 	 * @return
 	 */
-	VirtualMachine startVirtualMachine(VirtualMachine vm);
+	AbstractVirtualMachine startVirtualMachine(AbstractVirtualMachine vm);
 
 	/**
 	 * Handles the provisioning of all resources needed for a {@link VirtueTemplate}

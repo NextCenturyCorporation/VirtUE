@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.model.desktop.IApplicationInstance;
 import com.ncc.savior.virtueadmin.security.UserService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
@@ -63,7 +63,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}/start")
-	public DesktopVirtueApplication startApplication(@PathParam("virtueId") String virtueId,
+	public IApplicationInstance startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
 		try {
 			VirtueUser user = getUserFromSecurity();
@@ -87,7 +87,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("template/{templateId}/{applicationId}/start")
-	public DesktopVirtueApplication startApplicationFromTemplate(@PathParam("templateId") String templateId,
+	public IApplicationInstance startApplicationFromTemplate(@PathParam("templateId") String templateId,
 			@PathParam("applicationId") String applicationId) {
 		try {
 			VirtueUser user = getUserFromSecurity();

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -48,7 +48,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void updateVmState(String vmId, VmState state) {
-		Optional<VirtualMachine> vm = vmRepository.findById(vmId);
+		Optional<AbstractVirtualMachine> vm = vmRepository.findById(vmId);
 		if (!vm.isPresent()) {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Unable to find virtual machine with id=" + vmId);
 		} 
@@ -57,14 +57,14 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
+	public AbstractVirtualMachine getVmWithApplication(String virtueId, String applicationId) {
 		// TODO could be more efficient
 		Optional<VirtueInstance> virtue = virtueRepository.findById(virtueId);
 		if (!virtue.isPresent()) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue with id=" + virtueId);
 		}
-		Collection<VirtualMachine> vms = virtue.get().getVms();
-		for (VirtualMachine vm : vms) {
+		Collection<AbstractVirtualMachine> vms = virtue.get().getVms();
+		for (AbstractVirtualMachine vm : vms) {
 			Collection<ApplicationDefinition> apps = vm.getApplications();
 			for (ApplicationDefinition app : apps) {
 				if (app.getId().equals(applicationId)) {
@@ -78,7 +78,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void addVirtue(VirtueInstance vi) {
-		for (VirtualMachine vm : vi.getVms()) {
+		for (AbstractVirtualMachine vm : vi.getVms()) {
 			vmRepository.save(vm);
 		}
 		virtueRepository.save(vi);

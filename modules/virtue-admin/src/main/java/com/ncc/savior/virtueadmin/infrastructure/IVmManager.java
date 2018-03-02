@@ -2,7 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 
@@ -43,7 +43,7 @@ public interface IVmManager {
 	 * @param vmt
 	 * @return
 	 */
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt);
+	public AbstractVirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
@@ -54,7 +54,7 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VirtualMachine startVirtualMachine(VirtualMachine vm);
+	public AbstractVirtualMachine startVirtualMachine(AbstractVirtualMachine vm);
 
 	/**
 	 * Initiates a stop action on the provided VM. It is not guaranteed that the VM
@@ -65,7 +65,7 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm);
+	public AbstractVirtualMachine stopVirtualMachine(AbstractVirtualMachine vm);
 
 	/**
 	 * Calling this function notifies that the VM is no longer needed and the
@@ -77,7 +77,7 @@ public interface IVmManager {
 	 */
 	// TODO TBD if a VM is repurposed, who is responsible for reseting user access
 	// and user data?
-	public void deleteVirtualMachine(VirtualMachine vm);
+	public void deleteVirtualMachine(AbstractVirtualMachine vm);
 
 	/**
 	 * Returns the current state of the given Virtual Machine.
@@ -85,14 +85,14 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VmState getVirtialMachineState(VirtualMachine vm);
+	public VmState getVirtialMachineState(AbstractVirtualMachine vm);
 
 	/**
 	 * Convenience/Performance function to provision multiple VMs at one time. See
-	 * details from {@link IVmManager#startVirtualMachine(VirtualMachine)}.
+	 * details from {@link IVmManager#startVirtualMachine(AbstractVirtualMachine)}.
 	 * 
 	 * @param vmTemplates
 	 * @return
 	 */
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(Collection<VirtualMachineTemplate> vmTemplates);
+	public Collection<AbstractVirtualMachine> provisionVirtualMachineTemplates(Collection<VirtualMachineTemplate> vmTemplates);
 }

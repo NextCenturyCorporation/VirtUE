@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -69,40 +69,40 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
-		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
+	public AbstractVirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
+		AbstractVirtualMachine vm = new AbstractVirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
 				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
 		return vm;
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public AbstractVirtualMachine startVirtualMachine(AbstractVirtualMachine vm) {
 		vm.setState(VmState.RUNNING);
 		return vm;
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+	public AbstractVirtualMachine stopVirtualMachine(AbstractVirtualMachine vm) {
 		vm.setState(VmState.RUNNING);
 		return vm;
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
+	public void deleteVirtualMachine(AbstractVirtualMachine vm) {
 		// Do nothing. we don't want to delete in this implementation.
 	}
 
 	@Override
-	public VmState getVirtialMachineState(VirtualMachine vm) {
+	public VmState getVirtialMachineState(AbstractVirtualMachine vm) {
 		return VmState.RUNNING;
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<AbstractVirtualMachine> provisionVirtualMachineTemplates(
 			Collection<VirtualMachineTemplate> vmTemplates) {
-		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
+		Collection<AbstractVirtualMachine> vms = new HashSet<AbstractVirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
-			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
+			AbstractVirtualMachine vm = new AbstractVirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
 					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
 			vms.add(vm);
 

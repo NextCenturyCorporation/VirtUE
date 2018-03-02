@@ -12,11 +12,12 @@ import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.model.desktop.IApplicationInstance;
+import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
@@ -26,6 +27,7 @@ import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
  *
  */
 public class DesktopVirtueService {
+	private static final int APP_START_MAX_TRIES = 5;
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
 	private IApplicationManager applicationManager;
@@ -69,18 +71,18 @@ public class DesktopVirtueService {
 		return virtues;
 	}
 
-	public DesktopVirtueApplication startApplication(VirtueUser user, String virtueId, String applicationId)
+	public IApplicationInstance startApplication(VirtueUser user, String virtueId, String applicationId)
 			throws IOException {
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
-		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
+		AbstractVirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
-		applicationManager.startApplicationOnVm(vm, application, 5);
-		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
+		applicationManager.startApplicationOnVm(vm, application, APP_START_MAX_TRIES);
+		IApplicationInstance appInstance = new LinuxApplicationInstance(application, vm.getHostname(), vm.getSshPort(),
 				vm.getUserName(), vm.getPrivateKey());
-		return dva;
+		return appInstance;
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(VirtueUser user, String templateId, String applicationId)
+	public IApplicationInstance startApplicationFromTemplate(VirtueUser user, String templateId, String applicationId)
 			throws IOException {
 		VirtueInstance instance = createVirtue(user, templateId);
 		return startApplication(user, instance.getId(), applicationId);

@@ -12,7 +12,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
@@ -21,22 +21,22 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  *
  */
 // TODO credentials need to be added somewhere.
-public class SimpleApplicationManager implements IApplicationManager {
-	private static final Logger logger = LoggerFactory.getLogger(SimpleApplicationManager.class);
+public class LinuxApplicationManager implements IApplicationManager {
+	private static final Logger logger = LoggerFactory.getLogger(LinuxApplicationManager.class);
 	private static Random rand = new Random();
 	private String defaultPassword;
 	private File defaultCertificate;
 
-	public SimpleApplicationManager(String defaultPassword) {
+	public LinuxApplicationManager(String defaultPassword) {
 		this.defaultPassword = defaultPassword;
 	}
 
-	public SimpleApplicationManager(File defaultCertificate) {
+	public LinuxApplicationManager(File defaultCertificate) {
 		this.defaultCertificate = defaultCertificate;
 	}
 
 	@Override
-	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, int maxTries) {
+	public void startApplicationOnVm(AbstractVirtualMachine vm, ApplicationDefinition app, int maxTries) {
 		try {
 			SshConnectionParameters params = null;
 			if (defaultCertificate != null) {

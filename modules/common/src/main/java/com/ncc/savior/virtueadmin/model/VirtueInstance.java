@@ -31,14 +31,14 @@ public class VirtueInstance {
 	private String username;
 	private String templateId;
 	@OneToMany
-	private Collection<VirtualMachine> vms;
+	private Collection<AbstractVirtualMachine> vms;
 	// private Set<String> transducers;
 	private VirtueState state;
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
 
 	public VirtueInstance(String id, String name, String username, String templateId,
-			Collection<ApplicationDefinition> apps, Collection<VirtualMachine> vms) {
+			Collection<ApplicationDefinition> apps, Collection<AbstractVirtualMachine> vms) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -57,11 +57,11 @@ public class VirtueInstance {
 
 	public VirtueInstance(VirtueTemplate template, String username) {
 		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
-				getApplicationsFromTemplate(template), new HashSet<VirtualMachine>());
+				getApplicationsFromTemplate(template), new HashSet<AbstractVirtualMachine>());
 
 	}
 
-	public VirtueInstance(VirtueTemplate template, String username, Collection<VirtualMachine> vms) {
+	public VirtueInstance(VirtueTemplate template, String username, Collection<AbstractVirtualMachine> vms) {
 		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
 				getApplicationsFromTemplate(template), vms);
 
@@ -87,7 +87,7 @@ public class VirtueInstance {
 		return username;
 	}
 
-	public Collection<VirtualMachine> getVms() {
+	public Collection<AbstractVirtualMachine> getVms() {
 		return vms;
 	}
 
@@ -130,7 +130,7 @@ public class VirtueInstance {
 		this.templateId = templateid;
 	}
 
-	protected void setVms(Collection<VirtualMachine> vms) {
+	protected void setVms(Collection<AbstractVirtualMachine> vms) {
 		this.vms = vms;
 	}
 
@@ -141,14 +141,4 @@ public class VirtueInstance {
 	protected void setApplications(Collection<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
-
-	public VirtualMachine findVmByApplicationId(String applicationId) {
-		for (VirtualMachine vm : vms) {
-			if (vm.findApplicationById(applicationId) != null) {
-				return vm;
-			}
-		}
-		return null;
-	}
-
 }

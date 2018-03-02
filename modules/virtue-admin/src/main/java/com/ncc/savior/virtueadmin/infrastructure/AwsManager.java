@@ -57,22 +57,25 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
+import com.ncc.savior.virtueadmin.model.LinuxVirtualMachine;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.WindowsVirtualMachine;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 public class AwsManager implements ICloudManager {
 	private static final Logger logger = LoggerFactory.getLogger(AwsManager.class);
 	private static final int SSH_PORT = 22;
+	private static final int RDP_PORT = 3389;
 	AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
 	private String privateKey;
 
 	private AmazonEC2 ec2;
-	private AmazonS3 s3;
+	//private AmazonS3 s3;
 	// private AmazonSimpleDB sdb;
 	private AmazonCloudFormation stackbuilder;
 
@@ -125,7 +128,7 @@ public class AwsManager implements ICloudManager {
 			}
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
-		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
+		//s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
 		stackbuilder = AmazonCloudFormationClientBuilder.standard().withCredentials(credentialsProvider)
 				.withRegion(Regions.US_EAST_1).build();
 		/*
@@ -223,7 +226,7 @@ public class AwsManager implements ICloudManager {
 			Set<Instance> allInstances = getAllInstances();
 
 			printTraceRunningInstances();
-			Collection<VirtualMachine> vms = getNewInstances(template, sshLoginUsername, createdEc2Instances,
+			Collection<AbstractVirtualMachine> vms = getNewInstances(template, sshLoginUsername, createdEc2Instances,
 					allInstances);
 
 			// waitForReachability(createdEc2Instances);
@@ -272,8 +275,8 @@ public class AwsManager implements ICloudManager {
 		return vi;
 	}
 
-	private void renameAllVms(Collection<VirtualMachine> vms, String prefix) {
-		for (VirtualMachine vm : vms) {
+	private void renameAllVms(Collection<AbstractVirtualMachine> vms, String prefix) {
+		for (AbstractVirtualMachine vm : vms) {
 			CreateTagsRequest ctr = new CreateTagsRequest();
 			ctr.withResources(vm.getInfrastructureId());
 			Collection<Tag> tags = new ArrayList<Tag>();
@@ -284,9 +287,9 @@ public class AwsManager implements ICloudManager {
 
 	}
 
-	private void rebootAllVms(Collection<VirtualMachine> vms) {
-		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
-		for (VirtualMachine vm : vms) {
+	private void rebootAllVms(Collection<AbstractVirtualMachine> vms) {
+		Map<String, AbstractVirtualMachine> instanceIdsToVm = new HashMap<String, AbstractVirtualMachine>();
+		for (AbstractVirtualMachine vm : vms) {
 			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
 		}
 		RebootInstancesRequest reboot = new RebootInstancesRequest();
@@ -312,9 +315,9 @@ public class AwsManager implements ICloudManager {
 		}
 	}
 
-	public Collection<VirtualMachine> updateStatusOnVms(Collection<VirtualMachine> vms) {
-		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
-		for (VirtualMachine vm : vms) {
+	public Collection<AbstractVirtualMachine> updateStatusOnVms(Collection<AbstractVirtualMachine> vms) {
+		Map<String, AbstractVirtualMachine> instanceIdsToVm = new HashMap<String, AbstractVirtualMachine>();
+		for (AbstractVirtualMachine vm : vms) {
 			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
 		}
 		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
@@ -323,7 +326,7 @@ public class AwsManager implements ICloudManager {
 		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
 		while (itr.hasNext()) {
 			InstanceStatus status = itr.next();
-			VirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
+			AbstractVirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
 			vm.setState(awsStatusToSaviorState(status));
 		}
 		return vms;
@@ -374,7 +377,7 @@ public class AwsManager implements ICloudManager {
 		return VmState.ERROR;
 	}
 
-	private void waitForAllVmsRunning(Collection<VirtualMachine> vms) {
+	private void waitForAllVmsRunning(Collection<AbstractVirtualMachine> vms) {
 		boolean throwOnErrorState = true;
 
 		while (!areAllVmsRunning(vms, throwOnErrorState)) {
@@ -387,9 +390,9 @@ public class AwsManager implements ICloudManager {
 		}
 	}
 
-	private boolean areAllVmsRunning(Collection<VirtualMachine> vms, boolean throwOnErrorState) {
+	private boolean areAllVmsRunning(Collection<AbstractVirtualMachine> vms, boolean throwOnErrorState) {
 		logger.trace("Checking status of VMs:");
-		for (VirtualMachine vm : vms) {
+		for (AbstractVirtualMachine vm : vms) {
 			logger.trace("  " + vm.toString());
 			VmState state = vm.getState();
 			if (VmState.RUNNING.equals(state)) {
@@ -408,12 +411,13 @@ public class AwsManager implements ICloudManager {
 		return stackName;
 	}
 
-	private Collection<VirtualMachine> getNewInstances(VirtueTemplate template, String sshLoginUsername,
+	private Collection<AbstractVirtualMachine> getNewInstances(VirtueTemplate template, String sshLoginUsername,
 			List<StackResource> ec2InstancesResourcesCreated, Set<Instance> instances) {
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		Collection<AbstractVirtualMachine> vms = new ArrayList<AbstractVirtualMachine>();
 		// This only works for single VM virtues
 		for (Instance ec2Instance : instances) {
-			if (logger.isTraceEnabled() && ec2Instance.getState().getCode() < 33) {
+			// code < 33 indicates pending, running, or shutting down 
+			if (logger.isTraceEnabled() && (ec2Instance.getState().getCode() & 0xFF) < 33) {
 				logger.trace("After ID:" + ec2Instance.getInstanceId() + " - " + ec2Instance.getState().getName());
 			}
 			for (StackResource sr : ec2InstancesResourcesCreated) {
@@ -422,11 +426,19 @@ public class AwsManager implements ICloudManager {
 
 				if (ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId())) {
 					logger.trace("Found instance with id=" + ec2Instance);
-
-					VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
-							template.getApplications(), VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
-							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, this.privateKey,
-							ec2Instance.getPublicIpAddress());
+					AbstractVirtualMachine vm;
+					String vmId = UUID.randomUUID().toString();
+					if (ec2Instance.getPlatform().equals("Windows")) {
+						vm = new WindowsVirtualMachine(vmId, template.getName(), template.getApplications(),
+								VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
+								ec2Instance.getPublicDnsName(), ec2Instance.getPublicIpAddress(), RDP_PORT, hostCert);
+					}
+					else {
+						vm = new LinuxVirtualMachine(vmId, template.getName(),
+								template.getApplications(), VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
+								ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, this.privateKey,
+								ec2Instance.getPublicIpAddress());
+					}
 					vms.add(vm);
 				}
 			}

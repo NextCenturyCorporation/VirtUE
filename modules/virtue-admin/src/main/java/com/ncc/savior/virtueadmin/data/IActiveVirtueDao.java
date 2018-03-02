@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
 
@@ -43,7 +43,7 @@ public interface IActiveVirtueDao {
 	 * @param applicationId
 	 * @return
 	 */
-	VirtualMachine getVmWithApplication(String virtueId, String applicationId);
+	AbstractVirtualMachine getVmWithApplication(String virtueId, String applicationId);
 
 	/**
 	 * Adds a new virtue to the data store.

@@ -57,15 +57,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appsMath = new LinkedList<ApplicationDefinition>();
-		Collection<ApplicationDefinition> appChromeIsBetterThanFirefox = new LinkedList<ApplicationDefinition>();
 
 		appsAll.add(chrome);
 		appsAll.add(firefox);
 		appsAll.add(calculator);
 		appsBrowsers.add(chrome);
 		appsBrowsers.add(firefox);
-		appChromeIsBetterThanFirefox.add(chrome);
-		appChromeIsBetterThanFirefox.add(calculator);
 		appsMath.add(calculator);
 
 		Date now = new Date();
