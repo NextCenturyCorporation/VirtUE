@@ -39,12 +39,34 @@ public class AdminService {
 	@Autowired
 	private SecurityUserService securityService;
 
-	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager,
-			IUserManager userManager) {
+	private String initialAdmin;
+
+	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
+			String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
 		this.userManager = userManager;
+		this.initialAdmin = initialAdmin;
+		addInitialUser();
+	}
+
+	private void addInitialUser() {
+		Iterable<VirtueUser> users = userManager.getAllUsers();
+		if (initialAdmin != null && !initialAdmin.trim().equals("") && !users.iterator().hasNext()) {
+			String[] admins = initialAdmin.split(",");
+			for (String admin : admins) {
+				admin = admin.trim();
+				if (admin.equals("")) {
+					return;
+				}
+				Collection<String> authorities = new ArrayList<String>(2);
+				authorities.add("ROLE_ADMIN");
+				authorities.add("ROLE_USER");
+				VirtueUser user = new VirtueUser(admin, authorities);
+				userManager.addUser(user);
+			}
+		}
 	}
 
 	public AdminService(ITemplateManager templateManager) {
