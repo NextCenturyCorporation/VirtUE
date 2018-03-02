@@ -17,14 +17,15 @@ import { VirtualMachine } from '../../shared/models/vm.model';
   providers: [VirtuesService, VirtualMachineService]
 })
 export class CreateVirtueComponent implements OnInit {
+  vms: VirtualMachine;
+  activeClass: string;
   users: Users[];
   virtues: Virtue[];
-  vms : VirtualMachine[];
-  hovering = false;
-  activeClass: string;
+
   vmList = [];
   appList = [];
   selVmsList = [];
+  pageVmList = [];
 
   constructor(
     private virtuesService: VirtuesService,
@@ -33,57 +34,33 @@ export class CreateVirtueComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    if (this.selVmsList.length > 0) {
-      console.log('ngOnInit() selVmsList:' + this.selVmsList);
+    if (this.pageVmList.length > 0) {
       this.getVmList();
+      // console.log('page VM list @ ngOnInit(): ' + this.pageVmList);
     }
   }
 
   getVmList() {
     // loop through the selected VM list
-    const selectedVm = this.selVmsList;
+    const selectedVm = this.pageVmList;
+    // console.log('page VM list @ getVmList(): ' + this.pageVmList);
     this.vmService.getVmList()
-    .subscribe(data => {
-      for (let sel of selectedVm) {
-        for (let vm of data) {
-          if (sel === vm.id) {
-            this.vmList.push(vm);
-            console.log('VM List: ' + vm);
-            break;
+      .subscribe(data => {
+        if (this.vmList.length < 1) {
+          for (let sel of selectedVm) {
+            for (let vm of data) {
+              if (sel === vm.id) {
+                this.vmList.push(vm);
+                break;
+              }
+            }
           }
+        } else {
+          this.getUpdatedVmList();
         }
-      }
-    });
-    console.log('VM List: ' + this.vmList)
+      });
   }
 
-  createVirtue(virtueName: string) {
-    this.getAppList();
-    const vms = this.vmList;
-    for (let vm of vms) {
-      console.log('VMs: ');
-      console.log(vm);
-    }
-    console.log(`Virtue Name: ${virtueName} `);
-    let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
-    let newVirtue = [{
-      // 'id': 'TEST',
-      'name': virtueName,
-      'version': '1.0',
-      'vmTemplates': this.vmList,
-      'users': user,
-      'enabled': true,
-      'lastEditor': 'skim',
-      'applications': this.appList
-    }];
-    // console.log( `Virtue Name: ${virtueName} | Create Date: ${ dt } `);
-    console.log('New Virtue: ');
-    console.log(newVirtue);
-    // this.virtuesService.createVirtue({newVirtue} as Virtue)
-    // .subscribe(data => {
-    //   this.virtues.push(data);
-    // });
-  }
   getAppList() {
     let vms = this.vmList;
     let apps = [];
@@ -98,13 +75,52 @@ export class CreateVirtueComponent implements OnInit {
         });
       }
     }
-    console.log('getAppList():' + this.appList[0].name);
+    // console.log('getAppList():' + this.appList[0].name);
     // return this.appList;
   }
+  getUpdatedVmList() {
+    this.vmList = [];
+    this.vmService.getVmList()
+      .subscribe(data => {
+        for (let sel of this.pageVmList) {
+          for (let vm of data) {
+            if (sel === vm.id) {
+              this.vmList.push(vm);
+              break;
+            }
+          }
+        }
+      });
+  }
 
-  removeVm(id: string, vm: VirtualMachine): void {
-    this.vmList = this.vmList.filter(data => vm.id !== id);
-    // console.log(this.vmList);
+  createVirtue(virtueName: string) {
+    this.getAppList();
+    let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
+    let newVirtue = [{
+      // 'id': 'TEST',
+      'name': virtueName,
+      'version': '1.0',
+      'vmTemplates': this.vmList,
+      'users': user,
+      'enabled': true,
+      'lastEditor': 'skim',
+      'applications': this.appList
+    }];
+    // console.log('New Virtue: ');
+    // console.log(newVirtue);
+
+    // this.virtuesService.createVirtue({newVirtue} as Virtue)
+    // .subscribe(data => {
+    //   this.virtues.push(data);
+    // });
+  }
+
+
+  removeVm(id: string, index: number): void {
+    this.vmList = this.vmList.filter(data => {
+      return data.id !== id;
+    });
+    this.pageVmList.splice(index, 1);
   }
 
   activateModal(id: string): void {
@@ -112,14 +128,20 @@ export class CreateVirtueComponent implements OnInit {
     let dialogRef = this.dialog.open(VmModalComponent, {
       width: '750px',
       data: {
-        selectedList: this.selVmsList
+        selectedVms: this.pageVmList
       }
     });
-
+    // console.log('VMs sent to dialog: ' + this.pageVmList);
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
     const vms = dialogRef.componentInstance.addVms.subscribe((data) => {
-      this.selVmsList = this.selVmsList + data;
+      this.selVmsList = data;
+      // console.log('VMs from dialog: ' + this.selVmsList);
+      if (this.pageVmList.length > 0) {
+        this.pageVmList = [];
+      }
+      this.pageVmList = this.selVmsList;
+
       this.getVmList();
     });
 
