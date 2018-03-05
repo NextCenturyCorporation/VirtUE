@@ -11,6 +11,8 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -57,12 +59,18 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.RsaKeyGenerator;
+import com.ncc.savior.virtueadmin.util.RsaKeyGenerator.PublicPrivatePair;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 public class AwsManager implements ICloudManager {
@@ -79,6 +87,7 @@ public class AwsManager implements ICloudManager {
 	String baseStack_Name = "SaviorStack-";
 	private long vmStatePollPeriodMillis = 4000;
 	private long stackCreationStatePollPeriodMillis = 3000;
+	private RsaKeyGenerator keyGenerator;
 
 	AwsManager(File privatekeyfile) {
 		// credentialsProvider =new BasicCredentialsProvider();
@@ -89,7 +98,7 @@ public class AwsManager implements ICloudManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		this.keyGenerator = new RsaKeyGenerator();
 		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
 	}
 
@@ -230,6 +239,7 @@ public class AwsManager implements ICloudManager {
 			renameAllVms(vms, "VRTU-" + clientUser + "-" + serverUser);
 			waitForAllVmsRunning(vms);
 
+			addRsaKeyToVms(vms);
 			// rebootAllVms(vms);
 
 			vi = new VirtueInstance(template, clientUser, vms);
@@ -270,6 +280,56 @@ public class AwsManager implements ICloudManager {
 		 */
 
 		return vi;
+	}
+
+	private void addRsaKeyToVms(Collection<VirtualMachine> vms) {
+		JSch ssh = new JSch();
+
+		for (VirtualMachine vm : vms) {
+			if (OS.LINUX.equals(vm.getOs())) {
+				PublicPrivatePair keyPair = null;
+				String privKey = "";
+				File key = null;
+				try {
+					keyPair = keyGenerator.createRsaKeyPair();
+					privKey = keyPair.getPrivateKey();
+					String pubKey = keyPair.getPublicKey();
+					key = File.createTempFile("test", "");
+					FileWriter writer = new FileWriter(key);
+					writer.write(privateKey);
+					writer.close();
+					ssh.addIdentity(key.getAbsolutePath());
+					Session session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
+					session.setConfig("PreferredAuthentications", "publickey");
+					session.setConfig("StrictHostKeyChecking", "no");
+					session.connect();
+					ChannelExec channel = (ChannelExec) session.openChannel("exec");
+					channel.setCommand("echo '" + pubKey + "' >> ~/.ssh/authorized_keys");
+					channel.connect();
+
+					InputStreamReader stream = new InputStreamReader(channel.getInputStream());
+					BufferedReader reader = new BufferedReader(stream);
+					InputStreamReader estream = new InputStreamReader(channel.getErrStream());
+					BufferedReader ereader = new BufferedReader(estream);
+					String line;
+					while ((line = reader.readLine()) != null || (line = ereader.readLine()) != null) {
+						if (logger.isTraceEnabled()) {
+							logger.trace(line);
+						}
+					}
+					channel.disconnect();
+					session.disconnect();
+				} catch (JSchException | IOException e) {
+					logger.error("Key not created properly!  Clients won't be able to login", e);
+				} finally {
+					if (key != null) {
+						key.delete();
+					}
+					vm.setPrivateKey(privKey);
+				}
+			}
+		}
+
 	}
 
 	private void renameAllVms(Collection<VirtualMachine> vms, String prefix) {
@@ -425,7 +485,7 @@ public class AwsManager implements ICloudManager {
 
 					VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
 							template.getApplications(), VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
-							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, this.privateKey,
+							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, privateKey,
 							ec2Instance.getPublicIpAddress());
 					vms.add(vm);
 				}
@@ -535,6 +595,15 @@ public class AwsManager implements ICloudManager {
 		logger.trace("Stack creation completed.  Stack=" + stackName);
 
 		return stackStatus + (stackReason == null ? "" : " (" + stackReason + ")");
+	}
+
+	public static void main(String[] args) {
+		AwsManager am = new AwsManager(new File("./certs/vrtu.pem"));
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		VirtualMachine vm = new VirtualMachine("test", "test", null, null, OS.LINUX, "test",
+				"ec2-52-90-135-66.compute-1.amazonaws.com", 22, "admin", am.privateKey, "");
+		vms.add(vm);
+		am.addRsaKeyToVms(vms);
 	}
 
 }
