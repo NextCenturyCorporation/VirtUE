@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -36,7 +37,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	private static final String ARGS_GETINFO = "showvminfo \"%s\" --machinereadable";
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
+	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
 		// TODO
 		throw new RuntimeException("not yet implemented");
 	}
@@ -166,10 +167,16 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

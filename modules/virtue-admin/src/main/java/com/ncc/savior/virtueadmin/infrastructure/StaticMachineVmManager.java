@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -69,9 +70,10 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
+	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
+				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, user.getUsername(), privateKey,
+				ipAddress);
 		return vm;
 	}
 
@@ -98,16 +100,23 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
+					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, user.getUsername(),
+					privateKey, ipAddress);
 			vms.add(vm);
 
 		}
 		return vms;
+	}
+
+	@Override
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+		throw new RuntimeException("not implemented");
 	}
 
 }

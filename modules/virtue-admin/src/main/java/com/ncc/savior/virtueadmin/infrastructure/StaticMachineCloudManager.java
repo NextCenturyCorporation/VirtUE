@@ -3,11 +3,11 @@ package com.ncc.savior.virtueadmin.infrastructure;
 import java.util.Collection;
 import java.util.UUID;
 
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 public class StaticMachineCloudManager implements ICloudManager {
 
@@ -25,7 +25,7 @@ public class StaticMachineCloudManager implements ICloudManager {
 	@Override
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 		Collection<VirtualMachineTemplate> templates = template.getVmTemplates();
-		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(templates);
+		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, templates);
 		VirtueInstance virtue = new VirtueInstance(UUID.randomUUID().toString(), template.getName(), user.getUsername(),
 				template.getId(), template.getApplications(), vms);
 		return virtue;
