@@ -277,7 +277,6 @@ public class AwsManager implements ICloudManager {
 	}
 
 	private void addRsaKeyToVms(Collection<VirtualMachine> vms) {
-
 		for (VirtualMachine vm : vms) {
 			if (OS.LINUX.equals(vm.getOs())) {
 				String newPrivateKey = null;
