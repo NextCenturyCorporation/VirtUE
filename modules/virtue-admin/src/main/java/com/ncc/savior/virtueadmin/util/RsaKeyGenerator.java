@@ -73,7 +73,7 @@ public class RsaKeyGenerator {
 
 		JSch jsch = new JSch();
 
-		String passphrase = null;
+		// String passphrase = null;
 		// JTextField passphraseField = (JTextField) new JPasswordField(20);
 		// Object[] ob = { passphraseField };
 		// int result = JOptionPane.showConfirmDialog(null, ob, "Enter passphrase (empty
@@ -86,11 +86,11 @@ public class RsaKeyGenerator {
 		try {
 			KeyPair kpair = KeyPair.genKeyPair(jsch, type);
 			// kpair.setPassphrase(passphrase); deprecated
-			if (passphrase != null) {
-				kpair.writePrivateKey(filename, passphrase.getBytes());
-			} else {
-				kpair.writePrivateKey(filename);
-			}
+			// if (passphrase != null) {
+			// kpair.writePrivateKey(filename, passphrase.getBytes());
+			// } else {
+			kpair.writePrivateKey(filename);
+			// }
 			kpair.writePublicKey(filename + ".pub", comment);
 			System.out.println("Finger print: " + kpair.getFingerPrint());
 			kpair.dispose();

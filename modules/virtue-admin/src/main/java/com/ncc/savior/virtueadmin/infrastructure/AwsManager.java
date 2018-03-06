@@ -30,7 +30,10 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.PropertiesFileCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -44,7 +47,6 @@ import com.amazonaws.services.cloudformation.model.StackResource;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
@@ -56,8 +58,6 @@ import com.amazonaws.services.ec2.model.InstanceStatusSummary;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -68,13 +68,15 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 
 public class AwsManager implements ICloudManager {
+	private static final String VIRTUE_PROFILE = "virtue";
+	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
 	private static final Logger logger = LoggerFactory.getLogger(AwsManager.class);
 	private static final int SSH_PORT = 22;
-	AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+	private AWSCredentialsProvider credentialsProvider;
 	private String privateKey;
 
 	private AmazonEC2 ec2;
-	private AmazonS3 s3;
+	// private AmazonS3 s3;
 	// private AmazonSimpleDB sdb;
 	private AmazonCloudFormation stackbuilder;
 
@@ -84,8 +86,6 @@ public class AwsManager implements ICloudManager {
 	private SshKeyInjector sshKeyInjector;
 
 	AwsManager(File privatekeyfile) {
-		// credentialsProvider =new BasicCredentialsProvider();
-		// credentialsProvider.setCredentials(new Authscope, credentials);
 		try {
 			init();
 		} catch (Exception e) {
@@ -94,6 +94,7 @@ public class AwsManager implements ICloudManager {
 		}
 		this.sshKeyInjector = new SshKeyInjector();
 		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
+
 	}
 
 	/**
@@ -113,22 +114,27 @@ public class AwsManager implements ICloudManager {
 		 * The ProfileCredentialsProvider will return your [virtue] credential profile
 		 * by reading from the credentials file located at (~/.aws/credentials).
 		 */
-		AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+		// AWSCredentialsProvider credentialsProvider = new
+		// ProfileCredentialsProvider(VIRTUE);
+
+		// Set all AWS credential providers to use the virtue profile
+		System.setProperty(PROPERTY_AWS_PROFILE, VIRTUE_PROFILE);
+		// use the standard AWS credential provider chain so we can support a bunch of
+		// different methods to get credentials.
+		credentialsProvider = new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
+				new SystemPropertiesCredentialsProvider(), new ProfileCredentialsProvider(VIRTUE_PROFILE),
+				new PropertiesFileCredentialsProvider("./aws.properties"));
 
 		try {
 			credentialsProvider.getCredentials();
 
 		} catch (Exception e) {
-			logger.warn("Cannot load the credentials from the credential profiles file. ", e);
-			try {
-				credentialsProvider = new PropertiesFileCredentialsProvider("aws.properties");
-			} catch (Exception e2) {
-				logger.warn("Cannot load credentials from credentials file: aws.properties", e2);
-				throw new AmazonEC2Exception("Cannot load credentials.  Use cli or aws.properties");
-			}
+			logger.warn("Cannot load the credentials from the credential profiles file.  "
+					+ "Use CLI to create credentials or add to ./aws.properties file.", e);
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
-		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
+		// s3 =
+		// AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
 		stackbuilder = AmazonCloudFormationClientBuilder.standard().withCredentials(credentialsProvider)
 				.withRegion(Regions.US_EAST_1).build();
 		/*
@@ -146,8 +152,7 @@ public class AwsManager implements ICloudManager {
 	 */
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance) {
-		// TODO Auto-generated method stub
-
+		logger.debug("delete is being called, but not doing anything");
 	}
 
 	/*
@@ -304,7 +309,7 @@ public class AwsManager implements ICloudManager {
 
 	}
 
-	private void rebootAllVms(Collection<VirtualMachine> vms) {
+	protected void rebootAllVms(Collection<VirtualMachine> vms) {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
