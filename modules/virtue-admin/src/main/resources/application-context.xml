@@ -60,19 +60,29 @@
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
-<!-- 	<bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager"> -->
-<!-- 		<constructor-arg ref="defaultPem" /> -->
-<!-- 	</bean> -->
-	<bean name="awsVmManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsEc2VmManager">
+	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager"> -->
+	<!-- <constructor-arg ref="defaultPem" /> -->
+	<!-- </bean> -->
+	<bean name="awsVmManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.AwsEc2VmManager">
 		<constructor-arg ref="defaultPem" />
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
-<!-- 		<property name="defaultSecurityGroups"></property> -->
+		<!-- <property name="defaultSecurityGroups"></property> -->
 		<property name="awsProfile" value="${virtue.aws.server.profile}"></property>
 		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property>
 	</bean>
-	<bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.VmManagerDeferringCloudManager">
-		<constructor-arg ref="awsVmManager"></constructor-arg>
+	<bean name="cloudManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.OsBasedDeferredCloudManager">
+		<constructor-arg>
+			<map>
+				<entry key="WINDOWS" value-ref="awsVmManager"></entry>
+				<entry key="LINUX" value-ref="awsVmManager"></entry>
+			</map>
+		</constructor-arg>
 	</bean>
+	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.VmManagerDeferringCloudManager"> -->
+	<!-- <constructor-arg ref="awsVmManager"></constructor-arg> -->
+	<!-- </bean> -->
 	<!-- <bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineCloudManager"> -->
 	<!-- <constructor-arg ref="vmManager" /> -->
 	<!-- </bean> -->
@@ -87,7 +97,8 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 	</bean>
-	
-	<bean name="securityService" class="com.ncc.savior.virtueadmin.security.SecurityUserService"></bean>
+
+	<bean name="securityService"
+		class="com.ncc.savior.virtueadmin.security.SecurityUserService"></bean>
 
 </beans>  
