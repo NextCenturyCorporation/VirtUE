@@ -1,12 +1,13 @@
 package com.ncc.savior.virtueadmin.data;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
@@ -57,5 +58,9 @@ public interface IActiveVirtueDao {
 	Iterable<VirtueInstance> getAllActiveVirtues();
 
 	void clear();
+
+	Collection<VirtueInstance> getVirtuesForUser(VirtueUser user);
+
+	VirtueInstance getVirtueInstance(VirtueUser user, String instanceId);
 
 }

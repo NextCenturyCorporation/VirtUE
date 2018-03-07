@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
+import com.ncc.savior.virtueadmin.model.LinuxVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -70,7 +71,9 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 
 	@Override
 	public AbstractVirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
-		AbstractVirtualMachine vm = new AbstractVirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
+		AbstractVirtualMachine vm;
+		
+		vm = new LinuxVirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
 				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
 		return vm;
 	}
@@ -102,8 +105,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		Collection<AbstractVirtualMachine> vms = new HashSet<AbstractVirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
-			AbstractVirtualMachine vm = new AbstractVirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
+			AbstractVirtualMachine vm = provisionVirtualMachineTemplate(vmt);
 			vms.add(vm);
 
 		}

@@ -3,8 +3,9 @@ package com.ncc.savior.virtueadmin.rest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -19,15 +20,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.User;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
+
+/**
+ * Test and bootstrapping endpoint. This needs to be removed before production
+ * deployment.
+ *
+ */
 
 @Path("/data")
 public class DataResource {
@@ -38,10 +49,12 @@ public class DataResource {
 	@Autowired
 	private IUserManager userManager;
 
-	// TODO find where second version comes from so we can use @Autowired
 	@Qualifier("virtueDao")
 	@Autowired
 	private IActiveVirtueDao activeVirtueDao;
+
+	@Autowired
+	private SessionRegistry sessionRegistry;
 
 	public DataResource() {
 	}
@@ -68,16 +81,18 @@ public class DataResource {
 				"gimp");
 		ApplicationDefinition pinta = new ApplicationDefinition(UUID.randomUUID().toString(), "Pinta", "1.0", OS.LINUX,
 				"pinta");
-//		ApplicationDefinition gedit = new ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
-//				"gedit");
-//		ApplicationDefinition eclipse = new ApplicationDefinition(UUID.randomUUID().toString(), "Eclipse", "1.0",
-//				OS.LINUX, "eclipse");
+		// ApplicationDefinition gedit = new
+		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
+		// "gedit");
+		// ApplicationDefinition eclipse = new
+		// ApplicationDefinition(UUID.randomUUID().toString(), "Eclipse", "1.0",
+		// OS.LINUX, "eclipse");
 
-		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsMath = new LinkedList<ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsLibreOffice = new LinkedList<ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsDrawing = new LinkedList<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsAll = new HashSet<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsBrowsers = new HashSet<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsMath = new HashSet<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsLibreOffice = new HashSet<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsDrawing = new HashSet<ApplicationDefinition>();
 
 		appsBrowsers.add(chrome);
 		appsBrowsers.add(firefox);
@@ -212,9 +227,9 @@ public class DataResource {
 		VirtueUser newUser = userManager.getUser(newUserName);
 		if (newUser == null) {
 			Collection<String> auth = source.getAuthorities();
-			//need this verbose code to cause the authorities fetch
+			// need this verbose code to cause the authorities fetch
 			HashSet<String> newAuth = new HashSet<String>();
-			for (String a:auth) {
+			for (String a : auth) {
 				newAuth.add(a);
 			}
 			newUser = new VirtueUser(newUserName, source.getAuthorities());
@@ -252,6 +267,42 @@ public class DataResource {
 	}
 
 	@GET
+	@Path("user/current")
+	@Produces("application/json")
+	public Iterable<VirtueUser> getCurrentLoggedInUsers() {
+		List<Object> principals = sessionRegistry.getAllPrincipals();
+		List<VirtueUser> users = new ArrayList<VirtueUser>(principals.size());
+		for (Object p : principals) {
+			User user = (User) p;
+			ArrayList<String> auths = new ArrayList<String>();
+			for (GrantedAuthority a : user.getAuthorities()) {
+				auths.add(a.getAuthority());
+			}
+			VirtueUser u = userManager.getUser(user.getUsername());
+			users.add(u);
+		}
+		return users;
+	}
+
+	@GET
+	@Path("session")
+	@Produces("application/json")
+	public Map<String, List<String>> getAllSessions() {
+		List<Object> principals = sessionRegistry.getAllPrincipals();
+		Map<String, List<String>> sessionMap = new HashMap<String, List<String>>();
+		for (Object principal : principals) {
+			User user = (User) principal;
+			List<SessionInformation> sessions = sessionRegistry.getAllSessions(principal, false);
+			ArrayList<String> list = new ArrayList<String>();
+			for (SessionInformation s : sessions) {
+				list.add(s.getSessionId());
+			}
+			sessionMap.put(user.getUsername(), list);
+		}
+		return sessionMap;
+	}
+
+	@GET
 	@Path("templates/clear/")
 	public String clearTemplatesDatabase() {
 		templateManager.clear();
@@ -264,20 +315,21 @@ public class DataResource {
 		activeVirtueDao.clear();
 		return "database cleared.";
 	}
-	
+
 	@GET
 	@Path("user/clear/")
 	public String clearUsers() {
 		userManager.clear();
 		return "database cleared.";
 	}
-	
+
 	@GET
 	@Path("clear/")
 	public String clearAll() {
 		clearActiveDatabase();
-		clearTemplatesDatabase();
 		clearUsers();
+		clearTemplatesDatabase();
+
 		return "database cleared.";
 	}
 

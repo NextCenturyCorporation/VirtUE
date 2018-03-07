@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
 import java.security.cert.Certificate;
+import java.util.Set;
 
 import javax.persistence.Entity;
 
@@ -9,11 +10,17 @@ public class WindowsVirtualMachine extends AbstractVirtualMachine {
 
 	private int rdpPort;
 	private Certificate hostCert;
-	private String userName;
 
-	public WindowsVirtualMachine(int rdpPort, Certificate hostCert) {
+	public WindowsVirtualMachine(String id, String name, Set<ApplicationDefinition> apps, VmState state, OS os,
+			String infrastructureId, String hostname, String ipAddress, int rdpPort) {
+		super(id, name, apps, state, os, infrastructureId, hostname, ipAddress);
 		this.rdpPort = rdpPort;
-		this.hostCert = hostCert;
+		this.hostCert = fetchHostCert();
+	}
+
+	private Certificate fetchHostCert() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	protected WindowsVirtualMachine() {
@@ -33,13 +40,5 @@ public class WindowsVirtualMachine extends AbstractVirtualMachine {
 
 	protected void setHostCert(Certificate hostCert) {
 		this.hostCert = hostCert;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	protected void setUserName(String userName) {
-		this.userName = userName;
 	}
 }

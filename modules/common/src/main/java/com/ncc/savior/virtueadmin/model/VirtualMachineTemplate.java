@@ -1,7 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,14 +18,14 @@ public class VirtualMachineTemplate {
 	private OS os;
 	private String templatePath;
 	@ManyToMany()
-	private Collection<ApplicationDefinition> applications;
+	private Set<ApplicationDefinition> applications;
 	@ColumnDefault("true")
 	private boolean enabled;
 	private Date lastModification;
 	private String lastEditor;
 
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
-			Collection<ApplicationDefinition> applications, boolean enabled, Date lastModification, String lastEditor) {
+			Set<ApplicationDefinition> applications, boolean enabled, Date lastModification, String lastEditor) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -72,7 +72,7 @@ public class VirtualMachineTemplate {
 		return templatePath;
 	}
 
-	public Collection<ApplicationDefinition> getApplications() {
+	public Set<ApplicationDefinition> getApplications() {
 		return applications;
 	}
 
@@ -92,7 +92,7 @@ public class VirtualMachineTemplate {
 		this.templatePath = templatePath;
 	}
 
-	public void setApplications(Collection<ApplicationDefinition> applications) {
+	public void setApplications(Set<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 

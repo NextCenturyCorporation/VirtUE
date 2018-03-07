@@ -24,7 +24,6 @@ import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
  *
  */
 public class VirtueService {
-	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(VirtueService.class);
 	private XpraConnectionManager connectionManager;
 	private DesktopResourceService desktopResourceService;

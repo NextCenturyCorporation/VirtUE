@@ -5,11 +5,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,9 +17,9 @@ import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
@@ -54,9 +53,9 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
 				OS.LINUX, "gnome-calculator");
 
-		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
-		Collection<ApplicationDefinition> appsMath = new LinkedList<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsAll = new HashSet<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsBrowsers = new HashSet<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsMath = new HashSet<ApplicationDefinition>();
 
 		appsAll.add(chrome);
 		appsAll.add(firefox);

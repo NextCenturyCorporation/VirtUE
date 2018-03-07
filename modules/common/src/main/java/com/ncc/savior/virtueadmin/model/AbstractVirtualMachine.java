@@ -3,11 +3,15 @@ package com.ncc.savior.virtueadmin.model;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
 
 @Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 public abstract class AbstractVirtualMachine {
 	@Id
 	private String id;
@@ -20,6 +24,10 @@ public abstract class AbstractVirtualMachine {
 	// app ID to application
 	@ManyToMany
 	private Set<ApplicationDefinition> applications;
+	protected int sshPort;
+	protected String userName;
+	@Column(length = 6000)
+	protected String privateKey;
 	
 	protected AbstractVirtualMachine(String id, String name, Set<ApplicationDefinition> applications, VmState state, OS os,
 			String infrastructureId, String hostname, String ipAddress) {
@@ -120,5 +128,29 @@ public abstract class AbstractVirtualMachine {
 			}
 		}
 		return null;
+	}
+
+	public int getSshPort() {
+		return sshPort;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public String getPrivateKey() {
+		return privateKey;
+	}
+
+	public void setPrivateKey(String privateKey) {
+		this.privateKey = privateKey;
+	}
+
+	protected void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	protected void setSshPort(int sshPort) {
+		this.sshPort = sshPort;
 	}
 }

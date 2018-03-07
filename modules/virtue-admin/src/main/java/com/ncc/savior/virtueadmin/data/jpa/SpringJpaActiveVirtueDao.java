@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
-import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -44,6 +44,19 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 			set.add(vi);
 		}
 		return templateIdToVirtueInstances;
+	}
+
+	@Override
+	public Collection<VirtueInstance> getVirtuesForUser(VirtueUser user) {
+		Collection<VirtueInstance> virtueInstances = virtueRepository.findByUsername(user.getUsername());
+		return virtueInstances;
+	}
+
+	@Override
+	public VirtueInstance getVirtueInstance(VirtueUser user, String instanceId) {
+		String username = user.getUsername();
+		VirtueInstance vi = virtueRepository.findByUsernameAndId(username, instanceId);
+		return vi;
 	}
 
 	@Override

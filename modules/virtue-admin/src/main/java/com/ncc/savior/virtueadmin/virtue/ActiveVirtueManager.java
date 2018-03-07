@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.virtue;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -9,11 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
-import com.ncc.savior.virtueadmin.infrastructure.IStateUpdateListener;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -21,7 +21,6 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * Implementation of {@link IActiveVirtueManager}.
  * 
  * See interface for more descriptions.
- * 
  *
  */
 public class ActiveVirtueManager implements IActiveVirtueManager {
@@ -83,12 +82,12 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 		virtueDao.updateVmState(vmId, state);
 	}
 
-	private class VmUpdateListener implements IStateUpdateListener {
-		@Override
-		public void updateVmState(String vmId, VmState state) {
-			updateVmState(vmId, state);
-		}
-	}
+//	private class VmUpdateListener implements IStateUpdateListener {
+//		@Override
+//		public void updateVmState(String vmId, VmState state) {
+//			updateVmState(vmId, state);
+//		}
+//	}
 
 	@Override
 	public void deleteVirtue(VirtueUser user, String instanceId) {
@@ -98,11 +97,21 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 					"Virtue id=" + instanceId + " was not found");
 		}
 		if (vi.getUsername().equals(user.getUsername())) {
-			cloudManager.deleteVirtue(vi);
+
 		} else {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
 		}
+	}
+
+	@Override
+	public void adminDeleteVirtue(String instanceId) {
+		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
+		if (vi == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+					"Virtue id=" + instanceId + " was not found");
+		}
+		cloudManager.deleteVirtue(vi);
 	}
 
 	@Override
@@ -114,5 +123,16 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public VirtueInstance getActiveVirtue(String virtueId) {
 		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
 		return opt.isPresent() ? opt.get() : null;
+	}
+
+	@Override
+	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
+		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
+		return vi;
+	}
+
+	@Override
+	public Collection<VirtueInstance> getVirtuesForUser(VirtueUser user) {
+		return virtueDao.getVirtuesForUser(user);
 	}
 }

@@ -35,7 +35,6 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
 
 public class DesktopResourceService {
-	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(DesktopResourceService.class);
 	private Client client;
 	private ObjectMapper jsonMapper;

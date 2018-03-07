@@ -55,8 +55,6 @@ import com.amazonaws.services.ec2.model.InstanceStatusSummary;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.LinuxVirtualMachine;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -117,7 +115,6 @@ public class AwsManager implements ICloudManager {
 
 		try {
 			credentialsProvider.getCredentials();
-
 		} catch (Exception e) {
 			logger.warn("Cannot load the credentials from the credential profiles file. ", e);
 			try {
@@ -430,8 +427,8 @@ public class AwsManager implements ICloudManager {
 					String vmId = UUID.randomUUID().toString();
 					if (ec2Instance.getPlatform().equals("Windows")) {
 						vm = new WindowsVirtualMachine(vmId, template.getName(), template.getApplications(),
-								VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
-								ec2Instance.getPublicDnsName(), ec2Instance.getPublicIpAddress(), RDP_PORT, hostCert);
+								VmState.LAUNCHING, OS.WINDOWS, ec2Instance.getInstanceId(),
+								ec2Instance.getPublicDnsName(), ec2Instance.getPublicIpAddress(), RDP_PORT);
 					}
 					else {
 						vm = new LinuxVirtualMachine(vmId, template.getName(),

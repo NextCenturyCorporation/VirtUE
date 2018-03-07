@@ -1,8 +1,7 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -16,9 +15,9 @@ import org.springframework.context.annotation.Bean;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 //@SpringBootApplication
 @EntityScan("com.ncc.savior.virtueadmin.model")
@@ -40,7 +39,7 @@ public class JpaTest {
 
 			// save a couple of customers
 			Set<VirtualMachineTemplate> vmts1 = new HashSet<VirtualMachineTemplate>();
-			ArrayList<ApplicationDefinition> apps1 = new ArrayList<ApplicationDefinition>();
+			Set<ApplicationDefinition> apps1 = new HashSet<ApplicationDefinition>();
 			ApplicationDefinition a1 = new ApplicationDefinition(UUID.randomUUID().toString(), "testApp", "V1",
 					OS.LINUX);
 			apps1.add(a1);

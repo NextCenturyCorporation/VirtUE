@@ -40,7 +40,6 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
  *
  */
 public class SwingWindow extends XpraWindow {
-	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(SwingWindow.class);
 
 	private JCanvas canvas;

@@ -10,10 +10,8 @@ import javax.ws.rs.Produces;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.IApplicationInstance;
-import com.ncc.savior.virtueadmin.security.UserService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
@@ -42,8 +40,7 @@ public class DesktopRestService {
 	@Path("virtue")
 	public Set<DesktopVirtue> getAllVirtueByUser() {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser(user);
+			Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser();
 			return virtues;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -66,8 +63,7 @@ public class DesktopRestService {
 	public IApplicationInstance startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return desktopService.startApplication(user, virtueId, applicationId);
+			return desktopService.startApplication(virtueId, applicationId);
 		} catch (RuntimeException | IOException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
@@ -90,20 +86,12 @@ public class DesktopRestService {
 	public IApplicationInstance startApplicationFromTemplate(@PathParam("templateId") String templateId,
 			@PathParam("applicationId") String applicationId) {
 		try {
-			VirtueUser user = getUserFromSecurity();
-			return desktopService.startApplicationFromTemplate(user, templateId, applicationId);
+			return desktopService.startApplicationFromTemplate(templateId, applicationId);
 		} catch (RuntimeException | IOException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
 			// Needs to create ExceptionMapper for jersey.
 			throw WebServiceUtil.createWebserviceException(e);
 		}
-	}
-	
-	
-
-	private VirtueUser getUserFromSecurity() {
-		VirtueUser user = UserService.getCurrentUser();
-		return user;
 	}
 }
