@@ -9,10 +9,14 @@
 
 package com.ncc.savior.virtueadmin.infrastructure;
 
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Cloud Managers are classes that create, delete, and manage entire virtues.
+ *
+ */
 public interface ICloudManager {
 
 	void deleteVirtue(VirtueInstance virtueInstance);

@@ -40,6 +40,10 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
+/**
+ * {@link IVmManager} that uses AWS EC2 to create and manage VMs
+ *
+ */
 public class AwsEc2VmManager implements IVmManager {
 	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
 	private static final Logger logger = LoggerFactory.getLogger(AwsEc2VmManager.class);
@@ -189,6 +193,7 @@ public class AwsEc2VmManager implements IVmManager {
 			CreateTagsRequest ctr = new CreateTagsRequest();
 			ctr.withResources(vm.getInfrastructureId());
 			Collection<Tag> tags = new ArrayList<Tag>();
+			tags.add(new Tag("Autogen-Virtue-VM", serverUser));
 			tags.add(new Tag("Name", vm.getName()));
 			ctr.setTags(tags);
 			ec2.createTags(ctr);

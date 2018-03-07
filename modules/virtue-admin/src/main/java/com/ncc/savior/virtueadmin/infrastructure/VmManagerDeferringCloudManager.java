@@ -7,6 +7,11 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Cloud manager that simply defers its actions to a give {@link IVmManager}.
+ *
+ */
+
 public class VmManagerDeferringCloudManager implements ICloudManager {
 
 	private IVmManager vmManager;

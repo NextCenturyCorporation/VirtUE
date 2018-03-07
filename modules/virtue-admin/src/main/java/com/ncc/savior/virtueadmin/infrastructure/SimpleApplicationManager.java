@@ -66,7 +66,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 				int displayChecks = 3;
 				while (displays.isEmpty()) {
 					displays = initiator.getXpraServers();
-					logger.debug("display check: " + displays);
+					logger.trace("display check: " + displays);
 					displayChecks--;
 					if (!displays.isEmpty()) {
 						logger.debug("display found: " + displays);

@@ -9,6 +9,10 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Cloud manager that is backed by a single machine from
+ * {@link StaticMachineVmManager}.
+ */
 public class StaticMachineCloudManager implements ICloudManager {
 
 	private StaticMachineVmManager vmManager;

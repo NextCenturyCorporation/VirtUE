@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 
+/**
+ * Rest resource designed for testing and login.
+ */
 @Path("/")
 public class HelloResource {
 	@Autowired

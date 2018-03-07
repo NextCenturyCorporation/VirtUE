@@ -17,6 +17,9 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
+/**
+ * Utility functions related to SSH.
+ */
 public class SshUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SshUtil.class);
@@ -98,7 +101,7 @@ public class SshUtil {
 				logger.trace(line);
 			}
 		} catch (JSchException | IOException e) {
-			logger.debug("Vm is not reachable yet: " + e.getMessage());
+			logger.trace("Vm is not reachable yet: " + e.getMessage());
 			return false;
 		} finally {
 			if (key != null) {

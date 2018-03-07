@@ -61,6 +61,11 @@ import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 
+/**
+ * {@link ICloudManager} implementation that uses AWS EC2 and Cloud Formation to
+ * create and delete Virtues.
+ *
+ */
 public class AwsManager implements ICloudManager {
 	private static final String VIRTUE_PROFILE = "virtue";
 	private static final String PROPERTY_AWS_PROFILE = "aws.profile";

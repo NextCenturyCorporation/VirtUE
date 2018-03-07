@@ -16,6 +16,12 @@ import com.jcraft.jsch.Session;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.RsaKeyGenerator.PublicPrivatePair;
 
+/**
+ * Helper class that uses an {@link RsaKeyGenerator} to create a new RSA keypair
+ * and inject the public key into the 'authorized_keys" file of the SSH config
+ * on a given {@link VirtualMachine}. The {@link VirtualMachine} must already
+ * have existing credentials to login via SSH for the injection to work.
+ */
 public class SshKeyInjector {
 	private static final Logger logger = LoggerFactory.getLogger(SshKeyInjector.class);
 	private RsaKeyGenerator keyGenerator;

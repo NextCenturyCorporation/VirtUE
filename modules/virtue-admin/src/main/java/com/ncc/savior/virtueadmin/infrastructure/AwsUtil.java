@@ -23,6 +23,10 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * Utility functions for managing and updating AWS EC2 VMs.
+ *
+ */
 public class AwsUtil {
 	private static final Logger logger = LoggerFactory.getLogger(AwsUtil.class);
 
