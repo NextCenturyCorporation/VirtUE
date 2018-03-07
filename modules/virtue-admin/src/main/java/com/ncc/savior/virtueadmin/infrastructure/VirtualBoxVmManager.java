@@ -44,7 +44,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 
 	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
-		VmState state = getVirtialMachineState(vm);
+		VmState state = getVirtualMachineState(vm);
 		if (state.equals(VmState.RUNNING)) {
 			vm.setState(VmState.RUNNING);
 			return vm;
@@ -143,7 +143,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public VmState getVirtialMachineState(VirtualMachine vm) {
+	public VmState getVirtualMachineState(VirtualMachine vm) {
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_GETINFO,
 				vm.getInfrastructureId());
 		try {

@@ -37,7 +37,7 @@
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaActiveVirtueDao">
 	</bean>
 	<bean name="activeVirtueManager" class="com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager">
-		<constructor-arg ref="awsManager" />
+		<constructor-arg ref="cloudManager" />
 		<constructor-arg ref="virtueDao" />
 	</bean>
 	<!-- <bean name="templateManager" class="com.ncc.savior.virtueadmin.data.InMemoryTemplateManager"> -->
@@ -60,8 +60,18 @@
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
-	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">
+<!-- 	<bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager"> -->
+<!-- 		<constructor-arg ref="defaultPem" /> -->
+<!-- 	</bean> -->
+	<bean name="awsVmManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsEc2VmManager">
 		<constructor-arg ref="defaultPem" />
+		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
+<!-- 		<property name="defaultSecurityGroups"></property> -->
+		<property name="awsProfile" value="${virtue.aws.server.profile}"></property>
+		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property>
+	</bean>
+	<bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.VmManagerDeferringCloudManager">
+		<constructor-arg ref="awsVmManager"></constructor-arg>
 	</bean>
 	<!-- <bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineCloudManager"> -->
 	<!-- <constructor-arg ref="vmManager" /> -->

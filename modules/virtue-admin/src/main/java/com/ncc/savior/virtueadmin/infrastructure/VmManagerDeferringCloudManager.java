@@ -19,8 +19,7 @@ public class VmManagerDeferringCloudManager implements ICloudManager {
 
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance) {
-		// TODO Auto-generated method stub
-
+		vmManager.deleteVirtualMachines(virtueInstance.getVms());
 	}
 
 	@Override

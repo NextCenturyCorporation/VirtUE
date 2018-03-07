@@ -29,9 +29,11 @@ import org.springframework.security.core.userdetails.User;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
@@ -53,6 +55,9 @@ public class DataResource {
 	@Qualifier("virtueDao")
 	@Autowired
 	private IActiveVirtueDao activeVirtueDao;
+
+	@Autowired
+	private ICloudManager cloudManager;
 
 	@Autowired
 	private SessionRegistry sessionRegistry;
@@ -313,6 +318,11 @@ public class DataResource {
 	@GET
 	@Path("active/clear/")
 	public String clearActiveDatabase() {
+		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
+		for (VirtueInstance vi : all) {
+			cloudManager.deleteVirtue(vi);
+		}
+
 		activeVirtueDao.clear();
 		return "database cleared.";
 	}

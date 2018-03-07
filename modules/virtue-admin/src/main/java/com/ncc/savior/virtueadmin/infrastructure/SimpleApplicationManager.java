@@ -58,23 +58,32 @@ public class SimpleApplicationManager implements IApplicationManager {
 				} else {
 					display = displays.iterator().next();
 					logger.debug("using display " + display);
+					break;
 				}
 				set = initiator.getXpraServers();
 				maxTries--;
 				logger.debug("after start, has displays: " + set);
-				int displayChecks = 5;
+				int displayChecks = 3;
 				while (displays.isEmpty()) {
 					displays = initiator.getXpraServers();
+					logger.debug("display check: " + displays);
 					displayChecks--;
-					if (displayChecks < 1) {
+					if (!displays.isEmpty()) {
+						logger.debug("display found: " + displays);
 						break;
 					}
-					Thread.sleep(500);
+					if (displayChecks < 1) {
+						logger.debug("display check limit reached");
+						break;
+					}
+					Thread.sleep(250);
 				}
 				if (set.isEmpty() && maxTries > 0) {
+					logger.debug("Attempt to create display failed.  retries: " + maxTries);
 					Thread.sleep(500);
 				} else {
 					display = set.iterator().next();
+					logger.debug("Attempt to create display succeeded.  display: " + display);
 					break;
 				}
 			}

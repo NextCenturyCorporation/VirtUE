@@ -86,7 +86,7 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VmState getVirtialMachineState(VirtualMachine vm);
+	public VmState getVirtualMachineState(VirtualMachine vm);
 
 	/**
 	 * Convenience/Performance function to provision multiple VMs at one time. See

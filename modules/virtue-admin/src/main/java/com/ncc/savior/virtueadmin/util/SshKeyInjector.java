@@ -69,7 +69,7 @@ public class SshKeyInjector {
 			session.disconnect();
 
 		} catch (JSchException e) {
-			throw new IOException(e);
+			throw new IOException("Unable to add ssh key to " + vm.getHostname(), e);
 		} finally {
 			if (key != null) {
 				key.delete();

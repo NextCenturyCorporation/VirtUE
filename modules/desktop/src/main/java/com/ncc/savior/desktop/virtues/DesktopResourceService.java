@@ -162,13 +162,14 @@ public class DesktopResourceService {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
+		InputStream in = (InputStream) response.getEntity();
 		if (response.getStatus() == 200) {
-			InputStream in = (InputStream) response.getEntity();
 			T instance = jsonMapper.readValue(in, klass);
 			return instance;
 		} else {
-			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
-			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
+			String responseString = streamToString(in);
+			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + responseString);
+			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + responseString);
 		}
 	}
 
