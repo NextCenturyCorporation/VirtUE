@@ -278,4 +278,12 @@ public class AwsEc2VmManager implements IVmManager {
 	public void setDefaultAmi(String defaultAmi) {
 		this.defaultAmi = defaultAmi;
 	}
+
+	public String getDefaultLoginUsername() {
+		return defaultLoginUsername;
+	}
+
+	public void setDefaultLoginUsername(String defaultLoginUsername) {
+		this.defaultLoginUsername = defaultLoginUsername;
+	}
 }
