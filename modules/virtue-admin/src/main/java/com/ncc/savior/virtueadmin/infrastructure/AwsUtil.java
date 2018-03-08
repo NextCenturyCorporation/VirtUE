@@ -21,6 +21,7 @@ import com.amazonaws.services.ec2.model.InstanceStatusSummary;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
@@ -121,7 +122,7 @@ public class AwsUtil {
 		}
 	}
 
-	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
+	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<VirtualMachine> vms, long periodMillis) {
 		// create copy so we can alter
 		vms = new ArrayList<VirtualMachine>(vms);
 		while (true) {
@@ -137,6 +138,7 @@ public class AwsUtil {
 			if (vms.isEmpty()) {
 				break;
 			}
+			JavaUtil.sleepAndLogInterruption(periodMillis);
 		}
 	}
 

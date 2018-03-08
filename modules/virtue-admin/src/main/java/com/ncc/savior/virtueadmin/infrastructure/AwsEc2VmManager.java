@@ -187,7 +187,7 @@ public class AwsEc2VmManager implements IVmManager {
 
 	private void modifyVms(ArrayList<VirtualMachine> vms) {
 		long a = System.currentTimeMillis();
-		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms);
+		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500);
 		for (VirtualMachine vm : vms) {
 			CreateTagsRequest ctr = new CreateTagsRequest();
 			ctr.withResources(vm.getInfrastructureId());

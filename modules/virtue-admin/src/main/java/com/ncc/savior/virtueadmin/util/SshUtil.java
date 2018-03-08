@@ -27,15 +27,7 @@ public class SshUtil {
 
 	public static void waitUtilVmReachable(VirtualMachine vm, long periodMillis) {
 		while (!isVmReachable(vm)) {
-			sleepAndLogInterruption(periodMillis);
-		}
-	}
-
-	private static void sleepAndLogInterruption(long periodMillis) {
-		try {
-			Thread.sleep(periodMillis);
-		} catch (InterruptedException e) {
-			logger.error("Unexpected sleep interruption!", e);
+			JavaUtil.sleepAndLogInterruption(periodMillis);
 		}
 	}
 
@@ -67,7 +59,7 @@ public class SshUtil {
 				// if we never break, all vms must be reachable
 				allReachable = true;
 			}
-			sleepAndLogInterruption(periodMillis);
+			JavaUtil.sleepAndLogInterruption(periodMillis);
 		} while (!allReachable);
 	}
 
