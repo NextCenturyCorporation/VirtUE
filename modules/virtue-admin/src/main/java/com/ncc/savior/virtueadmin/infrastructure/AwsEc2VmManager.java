@@ -36,6 +36,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
@@ -180,7 +181,7 @@ public class AwsEc2VmManager implements IVmManager {
 					loginUsername, privateKey, instance.getPublicIpAddress());
 			vms.add(vm);
 		}
-
+		JavaUtil.sleepAndLogInterruption(2000);
 		modifyVms(vms);
 		return vms;
 	}
@@ -188,15 +189,7 @@ public class AwsEc2VmManager implements IVmManager {
 	private void modifyVms(ArrayList<VirtualMachine> vms) {
 		long a = System.currentTimeMillis();
 		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500);
-		for (VirtualMachine vm : vms) {
-			CreateTagsRequest ctr = new CreateTagsRequest();
-			ctr.withResources(vm.getInfrastructureId());
-			Collection<Tag> tags = new ArrayList<Tag>();
-			tags.add(new Tag("Autogen-Virtue-VM", serverUser));
-			tags.add(new Tag("Name", vm.getName()));
-			ctr.setTags(tags);
-			ec2.createTags(ctr);
-		}
+		nameVmsInAws(vms);
 		SshUtil.waitForAllVmsReachableParallel(vms, 2500);
 		long b = System.currentTimeMillis();
 		logger.debug("Vm's reachable after " + (b - a) / 1000.0 + " seconds");
@@ -206,6 +199,31 @@ public class AwsEc2VmManager implements IVmManager {
 		// "Vm's aws-ready after " + (c - a) / 1000.0 + " seconds. (additional " + (c -
 		// b) / 1000.0 + " seconds)");
 		addRsaKeyToVms(vms, 3);
+	}
+
+	private void nameVmsInAws(ArrayList<VirtualMachine> vms) {
+		vms = new ArrayList<VirtualMachine>(vms);
+		int tries = 3;
+		while (!vms.isEmpty() && tries > 0) {
+			Iterator<VirtualMachine> itr = vms.iterator();
+			while (itr.hasNext()) {
+				VirtualMachine vm = itr.next();
+				try {
+					CreateTagsRequest ctr = new CreateTagsRequest();
+					ctr.withResources(vm.getInfrastructureId());
+					Collection<Tag> tags = new ArrayList<Tag>();
+					tags.add(new Tag("Autogen-Virtue-VM", serverUser));
+					tags.add(new Tag("Name", vm.getName()));
+					ctr.setTags(tags);
+					ec2.createTags(ctr);
+					itr.remove();
+				} catch (Exception e) {
+					logger.warn("failed to rename AWS machine for VM='" + vm.getName() + "': " + e.getMessage());
+				}
+				JavaUtil.sleepAndLogInterruption(750);
+			}
+			tries--;
+		}
 	}
 
 	@Override

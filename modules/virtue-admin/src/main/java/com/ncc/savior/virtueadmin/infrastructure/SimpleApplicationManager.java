@@ -13,6 +13,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
@@ -81,16 +82,24 @@ public class SimpleApplicationManager implements IApplicationManager {
 				if (set.isEmpty() && maxTries > 0) {
 					logger.debug("Attempt to create display failed.  retries: " + maxTries);
 					Thread.sleep(500);
+				} else if (set.isEmpty()) {
+					// no tries left but no displays
+					String msg = "Unable to create Xpra server.";
+					logger.error(msg);
+					throw new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
 				} else {
 					display = set.iterator().next();
 					logger.debug("Attempt to create display succeeded.  display: " + display);
 					break;
 				}
+				logger.debug("going to top of loop");
 			}
+			logger.debug("starting app");
 			initiator.startXpraApp(display, app.getLaunchCommand());
 		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			String msg = "Error attempting to start application!";
+			logger.error(msg, e);
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
 		}
 	}
 
