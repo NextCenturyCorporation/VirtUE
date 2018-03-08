@@ -68,7 +68,6 @@ public class AwsEc2VmManager implements IVmManager {
 		}
 		this.defaultSecurityGroups = new ArrayList<String>();
 		// TODO much of this should be configurable instead of hard coded!
-		this.defaultSecurityGroups.add("ssh_default_vpc");
 		this.defaultSecurityGroups.add("default");
 		this.sshKeyInjector = new SshKeyInjector();
 		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);
@@ -265,6 +264,14 @@ public class AwsEc2VmManager implements IVmManager {
 
 	public String getAwsProfile() {
 		return awsProfile;
+	}
+
+	public void setDefaultSecurityGroupsCommaSeparated(String securityGroupsCommaSeparated) {
+		String[] sgs = securityGroupsCommaSeparated.split(",");
+		defaultSecurityGroups.clear();
+		for (String sg : sgs) {
+			defaultSecurityGroups.add(sg);
+		}
 	}
 
 	public void setAwsProfile(String awsProfile) {

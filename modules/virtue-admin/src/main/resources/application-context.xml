@@ -67,7 +67,7 @@
 		class="com.ncc.savior.virtueadmin.infrastructure.AwsEc2VmManager">
 		<constructor-arg ref="defaultPem" />
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
-		<!-- <property name="defaultSecurityGroups"></property> -->
+		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
 		<property name="awsProfile" value="${virtue.aws.server.profile}"></property>
 		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property>
 	</bean>

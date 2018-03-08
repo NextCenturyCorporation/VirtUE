@@ -146,17 +146,21 @@ public class AwsUtil {
 		for (VirtualMachine vm : vms) {
 			instanceIds.add(vm.getInfrastructureId());
 		}
-		describeInstancesRequest.setInstanceIds(instanceIds);
-		DescribeInstancesResult results = ec2.describeInstances(describeInstancesRequest);
-		for (Reservation r : results.getReservations()) {
-			for (Instance i : r.getInstances()) {
-				for (VirtualMachine vm : vms) {
-					if (vm.getInfrastructureId().equals(i.getInstanceId())) {
-						vm.setHostname(i.getPublicDnsName());
-						vm.setIpAddress(i.getPublicIpAddress());
+		try {
+			describeInstancesRequest.setInstanceIds(instanceIds);
+			DescribeInstancesResult results = ec2.describeInstances(describeInstancesRequest);
+			for (Reservation r : results.getReservations()) {
+				for (Instance i : r.getInstances()) {
+					for (VirtualMachine vm : vms) {
+						if (vm.getInfrastructureId().equals(i.getInstanceId())) {
+							vm.setHostname(i.getPublicDnsName());
+							vm.setIpAddress(i.getPublicIpAddress());
+						}
 					}
 				}
 			}
+		} catch (Exception e) {
+			logger.warn("Failed to updated networking for VMs=" + vms + ".  Will retry.", e);
 		}
 
 	}
