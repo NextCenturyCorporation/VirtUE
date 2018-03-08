@@ -11,13 +11,16 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.io.File;
 import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 public class XenVirtualMachineManager implements IVmManager {
 
@@ -39,10 +42,10 @@ public class XenVirtualMachineManager implements IVmManager {
 
 	public XenVirtualMachineManager(File privatekeyfile) {
 
-		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
+		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);
 		this.defaultLoginUsername = "admin";
 		this.sshKeyInjector = new SshKeyInjector();
-		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
+		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);
 		this.serverUser = System.getProperty("user.name");
 	}
 

@@ -60,6 +60,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * {@link ICloudManager} implementation that uses AWS EC2 and Cloud Formation to
@@ -92,7 +93,7 @@ public class AwsManager implements ICloudManager {
 			e.printStackTrace();
 		}
 		this.sshKeyInjector = new SshKeyInjector();
-		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
+		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);
 
 	}
 

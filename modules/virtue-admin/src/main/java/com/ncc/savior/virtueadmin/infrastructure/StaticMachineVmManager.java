@@ -1,8 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -15,7 +13,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.SaviorException;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Virtual machine manager that assumes it has a single VM which will fulfill
@@ -33,32 +31,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	private String ipAddress; 
 
 	public StaticMachineVmManager(String hostname, int sshPort, String userName, File privateKey, OS os) {
-		this(hostname, sshPort, userName, getKeyFromFile(privateKey), os);
-	}
-
-	static String getKeyFromFile(File privateKey) {
-		FileReader reader = null;
-		if (privateKey == null || !privateKey.isFile()) {
-			return "";
-		}
-		try {
-			reader = new FileReader(privateKey);
-			char[] cbuf = new char[4096];
-			int n = reader.read(cbuf);
-			String s = new String(cbuf, 0, n);
-			return s;
-		} catch (IOException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
-					"Error attempting to read file=" + privateKey.getAbsolutePath(), e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					logger.error("Error attempting to close file=" + privateKey.getAbsolutePath());
-				}
-			}
-		}
+		this(hostname, sshPort, userName, SshUtil.getKeyFromFile(privateKey), os);
 	}
 
 	public StaticMachineVmManager(String hostname, int sshPort, String userName, String privateKey, OS os) {

@@ -71,7 +71,7 @@ public class AwsEc2VmManager implements IVmManager {
 		this.defaultSecurityGroups.add("ssh_default_vpc");
 		this.defaultSecurityGroups.add("default");
 		this.sshKeyInjector = new SshKeyInjector();
-		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
+		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);
 		this.serverUser = System.getProperty("user.name");
 		this.defaultLoginUsername = "admin";
 	}

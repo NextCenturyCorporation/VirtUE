@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -115,6 +116,31 @@ public class SshUtil {
 			}
 		}
 		return true;
+	}
+
+	public static String getKeyFromFile(File privateKey) {
+		FileReader reader = null;
+		if (privateKey == null || !privateKey.isFile()) {
+			return "";
+		}
+		try {
+			reader = new FileReader(privateKey);
+			char[] cbuf = new char[4096];
+			int n = reader.read(cbuf);
+			String s = new String(cbuf, 0, n);
+			return s;
+		} catch (IOException e) {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+					"Error attempting to read file=" + privateKey.getAbsolutePath(), e);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					logger.error("Error attempting to close file=" + privateKey.getAbsolutePath());
+				}
+			}
+		}
 	}
 
 }
