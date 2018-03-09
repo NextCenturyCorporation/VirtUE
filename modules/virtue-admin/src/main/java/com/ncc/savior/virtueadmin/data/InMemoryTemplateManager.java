@@ -1,10 +1,12 @@
 package com.ncc.savior.virtueadmin.data;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -45,24 +48,25 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		initTestDatabase();
 	}
 
-	private void initTestDatabase() throws Exception {
-		ApplicationDefinition chrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome", "1.0",
+	private void initTestDatabase() throws Exception  {
+		ApplicationDefinition chrome = new ApplicationDefinition("Chrome", "1.0",
 				OS.LINUX, "google-chrome");
-		ApplicationDefinition firefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
+		ApplicationDefinition firefox = new ApplicationDefinition("Firefox", "1.0",
 				OS.LINUX, "firefox");
-		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
+		ApplicationDefinition calculator = new ApplicationDefinition("Calculator", "1.0",
 				OS.LINUX, "gnome-calculator");
+		ApplicationDefinition edge = new ApplicationDefinition("Edge", "1.0", OS.WINDOWS, "edge.exe");
 
 		Set<ApplicationDefinition> appsAll = new HashSet<ApplicationDefinition>();
 		Set<ApplicationDefinition> appsBrowsers = new HashSet<ApplicationDefinition>();
 		Set<ApplicationDefinition> appsMath = new HashSet<ApplicationDefinition>();
 
-		appsAll.add(chrome);
-		appsAll.add(firefox);
-		appsAll.add(calculator);
 		appsBrowsers.add(chrome);
 		appsBrowsers.add(firefox);
 		appsMath.add(calculator);
+
+		appsAll.addAll(appsBrowsers);
+		appsAll.addAll(appsMath);
 
 		Date now = new Date();
 		String systemName = "system";
@@ -75,33 +79,35 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
 				"Linux Math", appsMath, true, now, systemName);
+		
+		VirtualMachineTemplate vmWinBrowser = new VirtualMachineTemplate("Windows Browsers", OS.WINDOWS, "Windows Browsers", Collections.singleton(edge), true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 
-		// Let's load the cloudformation template file and store it in the virtue.
-		String awsCloudformationTemplate = convertStreamToString(
+		// Let's load the cloudformation template files and store them in the virtue.
+		String awsLinuxCloudformationTemplate = convertStreamToString(
 				InMemoryTemplateManager.class.getResourceAsStream("/aws-templates/BrowserVirtue.template"));
 
 		// Add a virtue with the initialized virtual machine.
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
-				"1.0", vmtsSingleAll, awsCloudformationTemplate, true, now, systemName);
+				"1.0", vmtsSingleAll, awsLinuxCloudformationTemplate, true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
-				"1.0", vmtsBrowsers, awsCloudformationTemplate, true, now, systemName);
+				"1.0", vmtsBrowsers, awsLinuxCloudformationTemplate, true, now, systemName);
 		List<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
 		vmts.add(vmBrowser);
 		vmts.add(vmAll);
 		vmts.add(vmMath);
 		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
-				vmts, awsCloudformationTemplate, true, now, systemName);
+				vmts, awsLinuxCloudformationTemplate, true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmsMath = new HashSet<VirtualMachineTemplate>();
 		vmsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
-				vmsMath, awsCloudformationTemplate, true, now, systemName);
+				vmsMath, awsLinuxCloudformationTemplate, true, now, systemName);
 
 		addApplicationDefinition(calculator);
 		addApplicationDefinition(firefox);
@@ -116,6 +122,13 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		addVirtueTemplate(virtueSingleAll);
 		addVirtueTemplate(virtueMath);
 
+		// Windows VM & Virtue
+		String awsWindowsCloudformationTemplate = convertStreamToString(
+				InMemoryTemplateManager.class.getResourceAsStream("/aws-templates/WindowsVM.template"));
+		VirtueTemplate virtueWinBrowser = new VirtueTemplate("Windows Browser", "1.0",
+				Collections.singleton(vmWinBrowser), awsWindowsCloudformationTemplate, true, now, systemName);
+		addVirtueTemplate(virtueWinBrowser);
+
 		VirtueUser user = new VirtueUser("user", new ArrayList<String>());
 		VirtueUser user2 = new VirtueUser("user2", new ArrayList<String>());
 		VirtueUser user3 = new VirtueUser("user3", new ArrayList<String>());
@@ -125,6 +138,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		assignVirtueTemplateToUser(user, virtueAllVms.getId());
 		assignVirtueTemplateToUser(user, virtueSingleBrowsers.getId());
+		assignVirtueTemplateToUser(user, awsWindowsCloudformationTemplate);
 
 		assignVirtueTemplateToUser(kdrumm, virtueAllVms.getId());
 		assignVirtueTemplateToUser(kdrumm, virtueSingleBrowsers.getId());
@@ -146,6 +160,8 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		System.out.println("virtueMath  - " + virtueMath.getId());
 		assignVirtueTemplateToUser(admin, virtueMath.getId());
+		
+		assignVirtueTemplateToUser(admin, virtueWinBrowser.getId());
 	}
 
 	@Override
@@ -264,17 +280,17 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	/* Aws Specific methods */
-	// Convert a stream into a single, newline separated string
-	public static String convertStreamToString(InputStream in) throws Exception {
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		StringBuilder stringbuilder = new StringBuilder();
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			stringbuilder.append(line + "\n");
+	// Convert a stream into a single string
+	public static String convertStreamToString(InputStream in) throws IOException {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(in));
+			return reader.lines().collect(Collectors.joining("\n"));
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
 		}
-		in.close();
-		return stringbuilder.toString();
 	}
 
 	@Override
