@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.UUID;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -17,22 +19,32 @@ public class ApplicationDefinition {
 	private OS os;
 	private String launchCommand;
 
-	public ApplicationDefinition(String id, String name, String version, OS os) {
-		super();
+	public ApplicationDefinition(String id, String displayName, String version, OS os, String launchCommand) {
 		this.id = id;
-		this.name = name;
+		this.name = displayName;
 		this.version = version;
 		this.os = os;
+		this.launchCommand = launchCommand;
 	}
 
-	public ApplicationDefinition(String id, String displayName, String version, OS os, String launchCommand) {
-		this.id=id;
-		this.name=displayName;
-		this.version=version;
-		this.os=os;
-		this.launchCommand=launchCommand;
+	/**
+	 * As {@link #ApplicationDefinition(String, String, String, OS, String)}, but
+	 * supplies a randomly-chosen ID.
+	 * 
+	 * @param displayName
+	 *            application name
+	 * @param version
+	 *            version
+	 * @param os
+	 *            OS
+	 * @param launchCommand
+	 *            command to run
+	 * @see UUID#randomUUID()
+	 */
+	public ApplicationDefinition(String displayName, String version, OS os, String launchCommand) {
+		this(UUID.randomUUID().toString(), displayName, version, os, launchCommand);
 	}
-
+	
 	/**
 	 * Used for jackson deserialization
 	 */
@@ -41,11 +53,7 @@ public class ApplicationDefinition {
 	}
 
 	public ApplicationDefinition(String templateId, ApplicationDefinition appDef) {
-		this.id = templateId;
-		this.name = appDef.getName();
-		this.version = appDef.getVersion();
-		this.os = appDef.getOs();
-		this.launchCommand = appDef.getLaunchCommand();
+		this(templateId, appDef.getName(), appDef.getVersion(), appDef.getOs(), appDef.getLaunchCommand());
 	}
 
 	public String getId() {

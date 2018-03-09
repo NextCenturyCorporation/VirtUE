@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.model;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
@@ -34,22 +35,10 @@ public class VirtueTemplate {
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
 
-	/**
-	 * Used for jackson deserialization
-	 * 
-	 * @param template
-	 * @param templateId
-	 */
 	public VirtueTemplate(String templateId, VirtueTemplate template) {
-		super();
-		this.id = templateId;
-		this.name = template.getName();
-		this.version = template.getVersion();
-		this.vmTemplates = template.getVmTemplates();
-		this.enabled = template.isEnabled();
-		this.lastModification = template.getLastModification();
-		this.lastEditor = template.getLastEditor();
-		this.awsTemplateName = template.getAwsTemplateName();
+		this(templateId, template.getName(), template.getVersion(), template.getVmTemplates(),
+				template.getAwsTemplateName(), template.isEnabled(), template.getLastModification(),
+				template.getLastEditor());
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -65,6 +54,18 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 	}
 
+	public VirtueTemplate(String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
+			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
+		this(UUID.randomUUID().toString(), name, version, vmTemplates, awsTemplateName, enabled, lastModification,
+				lastEditor);
+	}
+	
+	/**
+	 * Used for jackson deserialization
+	 * 
+	 * @param template
+	 * @param templateId
+	 */
 	protected VirtueTemplate() {
 		super();
 	}

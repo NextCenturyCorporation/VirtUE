@@ -41,7 +41,7 @@ public class JpaTest {
 			Set<VirtualMachineTemplate> vmts1 = new HashSet<VirtualMachineTemplate>();
 			Set<ApplicationDefinition> apps1 = new HashSet<ApplicationDefinition>();
 			ApplicationDefinition a1 = new ApplicationDefinition(UUID.randomUUID().toString(), "testApp", "V1",
-					OS.LINUX);
+					OS.LINUX, "testApp");
 			apps1.add(a1);
 			boolean enabled = true;
 			Date now = new Date();

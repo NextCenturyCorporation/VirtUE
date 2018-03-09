@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -37,6 +38,11 @@ public class VirtualMachineTemplate {
 		this.lastEditor = lastEditor;
 	}
 
+	public VirtualMachineTemplate(String name, OS os, String templatePath, Set<ApplicationDefinition> applications,
+			boolean enabled, Date lastModification, String lastEditor) {
+		this(UUID.randomUUID().toString(), name, os, templatePath, applications, enabled, lastModification, lastEditor);
+	}
+	
 	/**
 	 * Used for Jackson deserialization
 	 */
@@ -45,15 +51,9 @@ public class VirtualMachineTemplate {
 	}
 
 	public VirtualMachineTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
-		super();
-		this.id = templateId;
-		this.name = vmTemplate.getName();
-		this.os = vmTemplate.getOs();
-		this.templatePath = vmTemplate.getTemplatePath();
-		this.applications = vmTemplate.getApplications();
-		this.enabled = vmTemplate.isEnabled();
-		this.lastModification = vmTemplate.getLastModification();
-		this.lastEditor = vmTemplate.getLastEditor();
+		this(templateId, vmTemplate.getName(), vmTemplate.getOs(), vmTemplate.getTemplatePath(),
+				vmTemplate.getApplications(), vmTemplate.isEnabled(), vmTemplate.getLastModification(),
+				vmTemplate.getLastEditor());
 	}
 
 	public String getId() {

@@ -174,7 +174,7 @@ public class AwsManager implements ICloudManager {
 		String stackName = getStackName(clientUser, serverUser, uuid);
 		// String logicalResourceName = "SampleNotificationTopic";
 
-		String myCloudFormationFromFile = convertStreamToString(
+		String linuxCloudFormationTemplate = convertStreamToString(
 				AwsManager.class.getResourceAsStream("/aws-templates/BrowserVirtue.template"));
 
 		try {
@@ -182,7 +182,7 @@ public class AwsManager implements ICloudManager {
 			// Create a stack
 			CreateStackRequest createRequest = new CreateStackRequest();
 			createRequest.setStackName(stackName);
-			createRequest.setTemplateBody(myCloudFormationFromFile);
+			createRequest.setTemplateBody(linuxCloudFormationTemplate);
 
 			logger.trace("Creating a stack called " + createRequest.getStackName() + ".");
 			stackbuilder.createStack(createRequest);
@@ -299,11 +299,11 @@ public class AwsManager implements ICloudManager {
 
 	private void printTraceRunningInstances() {
 		if (logger.isTraceEnabled()) {
-			Set<Instance> is = getAllInstances();
-			logger.trace("You have " + is.size() + " Amazon EC2 instance(s) running.");
+			Set<Instance> instances = getAllInstances();
+			logger.trace("You have " + instances.size() + " Amazon EC2 instance(s) running.");
 			logger.trace("Current running instances: ");
 			int x = 0;
-			for (Instance i : is) {
+			for (Instance i : instances) {
 				x++;
 				if (i.getState().getCode() < 33) {
 					logger.trace("  " + x + ": " + i.getInstanceId() + " - " + i.getState().getName());
