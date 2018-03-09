@@ -59,8 +59,6 @@ public class XpraClient implements Closeable {
 	protected boolean stopReadThread;
 	private static int threadCount = 1;
 	private Status status;
-	private BaseConnectionFactory factory;
-	private IConnectionParameters params;
 
 	public XpraClient() {
 		connectListenerManager = new ConnectListenerManager();
@@ -110,8 +108,8 @@ public class XpraClient implements Closeable {
 	}
 
 	public void connect(BaseConnectionFactory factory, IConnectionParameters params) {
-		this.factory = factory;
-		this.params = params;
+		// this.factory = factory;
+		// this.params = params;
 		factory.connect(params, connectListenerManager);
 	}
 

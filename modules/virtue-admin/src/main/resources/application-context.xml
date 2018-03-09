@@ -12,21 +12,14 @@
     	http://www.springframework.org/schema/data/repository
         http://www.springframework.org/schema/data/repository/spring-repository-1.5.xsd">
 
-	<bean name="vmManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineVmManager">
-		<constructor-arg value="${savior.staticVm.hostname}" />
-		<constructor-arg value="${savior.staticVm.port}" />
-		<constructor-arg value="${savior.staticVm.userName}" />
-		<constructor-arg ref="defaultPem" />
-		<constructor-arg value="LINUX" />
+	<bean name="certificatesDirectory" class="java.io.File">
+		<constructor-arg value="${virtue.aws.server.keyDirectory}" />
 	</bean>
-
-	<bean name="defaultPem" class="java.io.File">
-		<constructor-arg value="${savior.staticVm.pem}" />
+	<bean name="keyManager" class="com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager">
+		<constructor-arg ref="certificatesDirectory" />
 	</bean>
 	<bean name="appManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager">
-		<constructor-arg ref="defaultPem" />
 	</bean>
 
 	<!-- <bean name="virtueDao" -->
@@ -65,11 +58,11 @@
 	<!-- </bean> -->
 	<bean name="awsVmManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.AwsEc2VmManager">
-		<constructor-arg ref="defaultPem" />
+		<constructor-arg ref="keyManager" />
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
 		<property name="awsProfile" value="${virtue.aws.server.profile}"></property>
-		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property>
+<!-- 		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property> -->
 	</bean>
 	<bean name="cloudManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.OsBasedDeferredCloudManager">

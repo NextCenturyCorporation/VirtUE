@@ -135,4 +135,24 @@ public class SshUtil {
 		}
 	}
 
+	public static void writeKeyToFile(File certificate, String privateKey) {
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(certificate);
+			writer.write(privateKey);
+			writer.flush();
+		} catch (IOException e) {
+			logger.warn("Failed to write key to file", e);
+		} finally {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					logger.warn("Failed to close file writer", e);
+				}
+			}
+		}
+
+	}
+
 }

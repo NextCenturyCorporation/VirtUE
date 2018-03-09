@@ -118,21 +118,24 @@ public class DataResource {
 
 		Date now = new Date();
 		String systemName = "system";
+		String allLinuxAmi = "ami-2b500951";
+		String linuxLoginUser = "admin";
 
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
-				OS.LINUX, "Browsers", appsBrowsers, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsBrowsers,linuxLoginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX, "All",
-				appsAll, true, now, systemName);
+		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
+				allLinuxAmi,
+				appsAll,linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
-				"Math", appsMath, true, now, systemName);
+				allLinuxAmi, appsMath,linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
-				"Drawing", appsDrawing, true, now, systemName);
+				allLinuxAmi, appsDrawing,linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
-				OS.LINUX, "LibreOffice", appsLibreOffice, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsLibreOffice,linuxLoginUser, true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);

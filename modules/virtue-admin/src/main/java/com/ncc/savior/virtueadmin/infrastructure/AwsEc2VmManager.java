@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -51,17 +50,15 @@ public class AwsEc2VmManager implements IVmManager {
 	private static final int SSH_PORT = 22;
 	private static final String VM_PREFIX = "VRTU-";
 	private AWSCredentialsProvider credentialsProvider;
-	private String privateKey;
 	private AmazonEC2 ec2;
 	private SshKeyInjector sshKeyInjector;
 	private String serverKeyName;
 	private ArrayList<String> defaultSecurityGroups;
 	private String serverUser;
 	private String awsProfile;
-	private String defaultAmi;
-	private String defaultLoginUsername;
+	private IKeyManager keyManager;
 
-	public AwsEc2VmManager(File privatekeyfile) {
+	public AwsEc2VmManager(IKeyManager keyManager) {
 		try {
 			init();
 		} catch (Exception e) {
@@ -71,9 +68,8 @@ public class AwsEc2VmManager implements IVmManager {
 		// TODO much of this should be configurable instead of hard coded!
 		this.defaultSecurityGroups.add("default");
 		this.sshKeyInjector = new SshKeyInjector();
-		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);
 		this.serverUser = System.getProperty("user.name");
-		this.defaultLoginUsername = "admin";
+		this.keyManager = keyManager;
 	}
 
 	private void init() throws AmazonClientException {
@@ -162,7 +158,6 @@ public class AwsEc2VmManager implements IVmManager {
 
 			// TODO template path should be the ami.
 			String templatePath = vmt.getTemplatePath();
-			templatePath = defaultAmi;
 			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(InstanceType.T2Small)
 					.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName)
 					.withSecurityGroups(defaultSecurityGroups);
@@ -175,7 +170,15 @@ public class AwsEc2VmManager implements IVmManager {
 			Instance instance = instances.get(0);
 			String clientUser = user.getUsername();
 			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
-			String loginUsername = defaultLoginUsername;
+			String loginUsername = vmt.getLoginUser();
+			String keyName = instance.getKeyName();
+			String privateKey = null;
+			if (keyName != null) {
+				String pk = keyManager.getKeyByName(keyName);
+				if (pk != null) {
+					privateKey = pk;
+				}
+			}
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
 					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
 					loginUsername, privateKey, instance.getPublicIpAddress());
@@ -294,21 +297,5 @@ public class AwsEc2VmManager implements IVmManager {
 
 	public void setAwsProfile(String awsProfile) {
 		this.awsProfile = awsProfile;
-	}
-
-	public String getDefaultAmi() {
-		return defaultAmi;
-	}
-
-	public void setDefaultAmi(String defaultAmi) {
-		this.defaultAmi = defaultAmi;
-	}
-
-	public String getDefaultLoginUsername() {
-		return defaultLoginUsername;
-	}
-
-	public void setDefaultLoginUsername(String defaultLoginUsername) {
-		this.defaultLoginUsername = defaultLoginUsername;
 	}
 }

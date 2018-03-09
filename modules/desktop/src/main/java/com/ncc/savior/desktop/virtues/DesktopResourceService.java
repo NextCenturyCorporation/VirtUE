@@ -83,7 +83,7 @@ public class DesktopResourceService {
 			}
 		} catch (IOException | ProcessingException e) {
 
-			logger.error("error attmepting to get virtues.", e);
+			logger.error("error attempting to get virtues.", e);
 			instances = new ArrayList<DesktopVirtue>();
 		}
 		return instances;

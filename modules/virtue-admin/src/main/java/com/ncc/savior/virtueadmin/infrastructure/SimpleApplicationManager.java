@@ -14,6 +14,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
@@ -26,23 +27,25 @@ public class SimpleApplicationManager implements IApplicationManager {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleApplicationManager.class);
 	private static Random rand = new Random();
 	private String defaultPassword;
-	private File defaultCertificate;
+	// private File defaultCertificate;
 
 	public SimpleApplicationManager(String defaultPassword) {
 		this.defaultPassword = defaultPassword;
 	}
 
-	public SimpleApplicationManager(File defaultCertificate) {
-		this.defaultCertificate = defaultCertificate;
+	public SimpleApplicationManager() {
 	}
 
 	@Override
 	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, int maxTries) {
+		File certificate = null;
 		try {
 			SshConnectionParameters params = null;
-			if (defaultCertificate != null) {
+			if (vm.getPrivateKey() != null) {
+				certificate = File.createTempFile("test", ".dat");
+				SshUtil.writeKeyToFile(certificate, vm.getPrivateKey());
 				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
-						vm.getUserName(), defaultCertificate);
+						vm.getUserName(), certificate);
 			} else {
 				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
 						vm.getUserName(), defaultPassword);
@@ -100,6 +103,10 @@ public class SimpleApplicationManager implements IApplicationManager {
 			String msg = "Error attempting to start application!";
 			logger.error(msg, e);
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
+		} finally {
+			if (certificate != null && certificate.exists()) {
+				certificate.delete();
+			}
 		}
 	}
 

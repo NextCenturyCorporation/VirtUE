@@ -83,6 +83,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 			vms.add(vm);
 
 		}
+		logger.debug("Pretending to provision " + vms.size() + " VMs from a single VM.");
 		return vms;
 	}
 
