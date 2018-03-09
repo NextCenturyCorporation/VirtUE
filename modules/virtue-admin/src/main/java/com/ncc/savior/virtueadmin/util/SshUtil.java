@@ -81,7 +81,7 @@ public class SshUtil {
 			session.setTimeout(500);
 			session.connect();
 			channel = (ChannelExec) session.openChannel("exec");
-			channel.setCommand("echo 'test'");
+			channel.setCommand("echo 'Testing reachability of VM'");
 			channel.connect();
 
 			InputStreamReader stream = new InputStreamReader(channel.getInputStream());

@@ -51,7 +51,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 			Set<Integer> set = null;
 			int display = -1;
 			while (true) {
-				Set<Integer> displays = initiator.getXpraServers();
+				Set<Integer> displays = initiator.getXpraServersWithRetries();
 				if (displays.isEmpty()) {
 					int attemptedDisplay = 100 + rand.nextInt(100);
 					logger.debug("attempting to start server on display " + attemptedDisplay);
@@ -61,12 +61,12 @@ public class SimpleApplicationManager implements IApplicationManager {
 					logger.debug("using display " + display);
 					break;
 				}
-				set = initiator.getXpraServers();
+				set = initiator.getXpraServersWithRetries();
 				maxTries--;
 				logger.debug("after start, has displays: " + set);
 				int displayChecks = 3;
 				while (displays.isEmpty()) {
-					displays = initiator.getXpraServers();
+					displays = initiator.getXpraServersWithRetries();
 					logger.trace("display check: " + displays);
 					displayChecks--;
 					if (!displays.isEmpty()) {
