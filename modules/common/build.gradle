@@ -10,6 +10,7 @@ buildscript {
 	
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
 sourceCompatibility = 1.8
 
@@ -34,4 +35,11 @@ dependencies {
 	
 	
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        //downloadSources = true
+    }
 }

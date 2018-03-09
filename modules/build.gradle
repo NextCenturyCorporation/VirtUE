@@ -1,0 +1,43 @@
+/*
+ * Build file for all SAVIOR modules
+ */
+
+apply plugin: 'eclipse'
+
+
+// test.maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
+
+subprojects {
+}
+
+task runDev(dependsOn: ['buildAll', 'runServer', 'runDesktop', 'cleanupServer']) {
+}
+
+task buildAll {
+    dependsOn getTasksByName('build', true)
+}
+
+task runServer {
+	doFirst {
+		ext.serverProcess = new ProcessBuilder()
+		.command("./gradlew", ":virtue-admin:run")
+		.start()
+// 		Thread.sleep(15 * 1000)
+	}
+	mustRunAfter buildAll
+}
+ 
+task runDesktop(dependsOn: ':desktop:run') {
+    mustRunAfter runServer
+}
+
+task cleanupServer {
+	doFirst {
+		if (tasks.runServer.serverProcess != null) {
+	 		tasks.runServer.serverProcess.destroy()
+	 	}
+	}
+    mustRunAfter runDesktop
+}
+
