@@ -22,7 +22,7 @@ public interface IXpraInitiator {
 	/**
 	 * Starts xpra server on a new display and returns that display.
 	 *
-	 * @param i
+	 * @param display
 	 *
 	 * @return
 	 * @throws IOException

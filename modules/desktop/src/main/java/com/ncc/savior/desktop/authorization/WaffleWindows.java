@@ -91,7 +91,7 @@ public class WaffleWindows {
 	// } while (clientContext.getContinue() || serverContext.getContinue());
 	// System.out.println(serverContext.getIdentity().getFqn());
 	// for (IWindowsAccount group : serverContext.getIdentity().getGroups()) {
-	// System.out.println(” ” + group.getFqn());
+	// System.out.println(" " + group.getFqn());
 	// }
 	// serverContext.dispose();
 	// clientContext.dispose();

@@ -16,6 +16,7 @@ import java.io.IOException;
  * <li>on byte for compression level hint
  * <li>on byte for chunk index (0 for main)
  * <li>on long (4 bytes) for size of the data that follows
+ * </ol>
  */
 public class Header {
 
