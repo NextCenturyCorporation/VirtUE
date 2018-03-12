@@ -5,6 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+/**
+ * Provides a warning to users if they are using the default profile is being
+ * used. The default profile should not be used in production but is ok in
+ * development. This warning can be enabled simply by using the 'default-alert'
+ * spring profile.
+ */
 @Profile("default-alert")
 @Component
 public class DefaultProfileWarner {

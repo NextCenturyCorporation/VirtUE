@@ -63,6 +63,7 @@ public class DataResource {
 	private SessionRegistry sessionRegistry;
 
 	public DataResource() {
+		logger.warn("***Data Resource is currently enabled.  Please disable for production systems.***");
 	}
 
 	@GET

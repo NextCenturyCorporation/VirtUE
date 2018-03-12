@@ -19,6 +19,9 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * Implementation of {@link IActiveVirtueDao} that uses Spring and JPA.
+ */
 @Repository
 public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	@Autowired
@@ -64,7 +67,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 		Optional<VirtualMachine> vm = vmRepository.findById(vmId);
 		if (!vm.isPresent()) {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Unable to find virtual machine with id=" + vmId);
-		} 
+		}
 		vm.get().setState(state);
 		vmRepository.save(vm.get());
 	}

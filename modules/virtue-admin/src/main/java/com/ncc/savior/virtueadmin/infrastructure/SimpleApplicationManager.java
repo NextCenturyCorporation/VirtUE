@@ -22,7 +22,6 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
  * 
  *
  */
-// TODO credentials need to be added somewhere.
 public class SimpleApplicationManager implements IApplicationManager {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleApplicationManager.class);
 	private static Random rand = new Random();

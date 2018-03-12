@@ -20,6 +20,9 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Test main
+ */
 //@SpringBootApplication
 @EntityScan("com.ncc.savior.virtueadmin.model")
 public class JpaTest {

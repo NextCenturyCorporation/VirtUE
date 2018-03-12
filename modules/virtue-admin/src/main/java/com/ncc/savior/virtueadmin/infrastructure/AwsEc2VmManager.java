@@ -44,7 +44,7 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
  * {@link IVmManager} that uses AWS EC2 to create and manage VMs
  *
  */
-public class AwsEc2VmManager implements IVmManager {
+public class AwsEc2VmManager extends BaseVmManager {
 	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
 	private static final Logger logger = LoggerFactory.getLogger(AwsEc2VmManager.class);
 	private static final int SSH_PORT = 22;
@@ -90,18 +90,6 @@ public class AwsEc2VmManager implements IVmManager {
 					+ "Use CLI to create credentials or add to ./aws.properties file.", e);
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
-	}
-
-	@Override
-	public void addStateUpdateListener(IStateUpdateListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void removeStateUpdateListener(IStateUpdateListener listener) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -189,6 +177,19 @@ public class AwsEc2VmManager implements IVmManager {
 		return vms;
 	}
 
+	/**
+	 * After VM's are created, there are still some functions that we need to do to
+	 * ensure we have all the information we need. This function handles those
+	 * methods. This includes:
+	 * <ul>
+	 * <li>Get IP address and hostname
+	 * <li>Name the VM in AWS
+	 * <li>Wait until the VM is actually reachable
+	 * <li>Add a new unique RSA key to the VM
+	 * </ul>
+	 * 
+	 * @param vms
+	 */
 	private void modifyVms(ArrayList<VirtualMachine> vms) {
 		long a = System.currentTimeMillis();
 		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500);
