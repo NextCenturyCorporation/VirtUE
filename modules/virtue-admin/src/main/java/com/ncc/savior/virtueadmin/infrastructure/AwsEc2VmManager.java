@@ -27,6 +27,8 @@ import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
@@ -41,7 +43,19 @@ import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
- * {@link IVmManager} that uses AWS EC2 to create and manage VMs
+ * {@link IVmManager} that uses AWS EC2 to create and manage VMs. The following
+ * parameters are important for configuration:
+ * <ul>
+ * <li>region - set in constructor for the AWS region to be used.
+ * <li>serverKeyName - the name of they key used for the VM's. They key will be
+ * retrieved from the {@link IKeyManager}
+ * <li>defaultSecurityGroups - a list of AWS security groups that will be
+ * applies to all VMs
+ * <li>serverUSer - The server user used for naming AWS VM's.
+ * <li>awsProfile - the profile used to get AWS login credentials.
+ * <li>instanceType - the AWS instance type that should be deployed I.E.
+ * t2.small
+ * </ul>
  *
  */
 public class AwsEc2VmManager extends BaseVmManager {
@@ -53,25 +67,33 @@ public class AwsEc2VmManager extends BaseVmManager {
 	private AmazonEC2 ec2;
 	private SshKeyInjector sshKeyInjector;
 	private String serverKeyName;
-	private ArrayList<String> defaultSecurityGroups;
+	private List<String> defaultSecurityGroups;
 	private String serverUser;
 	private String awsProfile;
 	private IKeyManager keyManager;
+	private String region;
+	private InstanceType instanceType;
 
-	public AwsEc2VmManager(IKeyManager keyManager) {
+	public AwsEc2VmManager(IKeyManager keyManager, String region) {
+		this.region = region;
 		try {
 			init();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		this.defaultSecurityGroups = new ArrayList<String>();
-		// TODO much of this should be configurable instead of hard coded!
 		this.defaultSecurityGroups.add("default");
 		this.sshKeyInjector = new SshKeyInjector();
 		this.serverUser = System.getProperty("user.name");
 		this.keyManager = keyManager;
+		this.instanceType = InstanceType.T2Small;
 	}
 
+	/**
+	 * initializes AWS/EC2 system mainly getting credentials.
+	 * 
+	 * @throws AmazonClientException
+	 */
 	private void init() throws AmazonClientException {
 		// Set all AWS credential providers to use the virtue profile
 		if (awsProfile != null && !awsProfile.trim().equals("")) {
@@ -89,7 +111,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			logger.warn("Cannot load the credentials from the credential profiles file.  "
 					+ "Use CLI to create credentials or add to ./aws.properties file.", e);
 		}
-		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
+		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
 	}
 
 	@Override
@@ -107,14 +129,46 @@ public class AwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instanceIds = new ArrayList<String>(1);
+		instanceIds.add(vm.getInfrastructureId());
+		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
+		ec2.startInstances(startInstancesRequest);
+		AwsUtil.updateStatusOnVm(ec2, vm);
+		notifyOnUpdateVmState(vm.getId(), vm.getState());
+		return vm;
 	}
 
 	@Override
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instanceIds = new ArrayList<String>(1);
+		instanceIds.add(vm.getInfrastructureId());
+		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
+		ec2.stopInstances(stopInstancesRequest);
+		AwsUtil.updateStatusOnVm(ec2, vm);
+		notifyOnUpdateVmState(vm.getId(), vm.getState());
+		return vm;
+	}
+
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
+		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
+		ec2.startInstances(startInstancesRequest);
+		AwsUtil.updateStatusOnVms(ec2, vms);
+		for (VirtualMachine vm : vms) {
+			notifyOnUpdateVmState(vm.getId(), vm.getState());
+		}
+		return vms;
+	}
+
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
+		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
+		ec2.stopInstances(stopInstancesRequest);
+		AwsUtil.updateStatusOnVms(ec2, vms);
+		for (VirtualMachine vm : vms) {
+			notifyOnUpdateVmState(vm.getId(), vm.getState());
+		}
+		return vms;
 	}
 
 	@Override
@@ -144,16 +198,15 @@ public class AwsEc2VmManager extends BaseVmManager {
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
-			// TODO template path should be the ami.
 			String templatePath = vmt.getTemplatePath();
-			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(InstanceType.T2Small)
+			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
 					.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName)
 					.withSecurityGroups(defaultSecurityGroups);
 			RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
 			List<Instance> instances = result.getReservation().getInstances();
 			if (instances.size() != 1) {
-				throw new RuntimeException("Created more than 1 instance!");
+				throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
 			}
 			Instance instance = instances.get(0);
 			String clientUser = user.getUsername();
@@ -276,7 +329,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		this.serverKeyName = serverKeyName;
 	}
 
-	public ArrayList<String> getDefaultSecurityGroups() {
+	public List<String> getDefaultSecurityGroups() {
 		return defaultSecurityGroups;
 	}
 
@@ -298,5 +351,37 @@ public class AwsEc2VmManager extends BaseVmManager {
 
 	public void setAwsProfile(String awsProfile) {
 		this.awsProfile = awsProfile;
+	}
+
+	public String getServerUser() {
+		return serverUser;
+	}
+
+	/**
+	 * Sets the server user used for naming AWS VM's. If it is null or an empty
+	 * string (after .trim()), the value will not be set. The default is set in the
+	 * constructor with the java property "user.name"
+	 * 
+	 * @param serverUser
+	 */
+	public void setServerUser(String serverUser) {
+		if (serverUser != null && !serverUser.trim().equals("")) {
+			this.serverUser = serverUser;
+		}
+	}
+
+	public InstanceType getInstanceType() {
+		return instanceType;
+	}
+
+	public void setInstanceType(String instanceTypeString) {
+		try {
+			InstanceType instanceType = InstanceType.fromValue(instanceTypeString);
+			if (instanceType != null) {
+				this.instanceType = instanceType;
+			}
+		} catch (Exception e) {
+			logger.error("Error attempting to sent instance type.", e);
+		}
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -46,6 +47,22 @@ public class AwsUtil {
 			vm.setState(awsStatusToSaviorState(status));
 		}
 		return vms;
+	}
+
+	public static VirtualMachine updateStatusOnVm(AmazonEC2 ec2, VirtualMachine vm) {
+		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
+		instanceIdsToVm.put(vm.getInfrastructureId(), vm);
+		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
+		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
+		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
+		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
+		if (itr.hasNext()) {
+			InstanceStatus status = itr.next();
+			vm.setState(awsStatusToSaviorState(status));
+		} else {
+			vm.setState(VmState.ERROR);
+		}
+		return vm;
 	}
 
 	public static VmState awsStatusToSaviorState(InstanceStatus status) {
@@ -144,10 +161,7 @@ public class AwsUtil {
 
 	private static void updateNetworking(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
-		Collection<String> instanceIds = new ArrayList<String>(vms.size());
-		for (VirtualMachine vm : vms) {
-			instanceIds.add(vm.getInfrastructureId());
-		}
+		Collection<String> instanceIds = vmsToInstanceIds(vms);
 		try {
 			describeInstancesRequest.setInstanceIds(instanceIds);
 			DescribeInstancesResult results = ec2.describeInstances(describeInstancesRequest);
@@ -165,6 +179,14 @@ public class AwsUtil {
 			logger.warn("Failed to updated networking for VMs=" + vms + ".  Will retry.", e);
 		}
 
+	}
+
+	public static List<String> vmsToInstanceIds(Collection<VirtualMachine> vms) {
+		List<String> instanceIds = new ArrayList<String>(vms.size());
+		for (VirtualMachine vm : vms) {
+			instanceIds.add(vm.getInfrastructureId());
+		}
+		return instanceIds;
 	}
 
 }
