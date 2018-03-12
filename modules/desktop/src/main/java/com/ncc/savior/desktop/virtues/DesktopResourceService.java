@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +33,8 @@ import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.desktop.BaseApplicationInstance;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
-import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
 
 public class DesktopResourceService {
 	private static final Logger logger = LoggerFactory.getLogger(DesktopResourceService.class);
@@ -42,30 +44,25 @@ public class DesktopResourceService {
 	private AuthorizationService authService;
 	private String targetHost;
 
-	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames) {
+	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames)
+			throws InvalidParameterException, KeyManagementException, NoSuchAlgorithmException {
 		try {
 			this.targetHost = new URI(baseApiUri).getHost();
-		} catch (URISyntaxException e1) {
+		} catch (URISyntaxException e) {
 			String error = "Unable to get Subject Principal Name from baseUrl=" + baseApiUri;
-			logger.error(error, e1);
-			throw new InvalidParameterException(error);
+			logger.error(error, e);
+			InvalidParameterException exception = new InvalidParameterException(error);
+			exception.initCause(e);
+			throw exception;
 		}
 		this.authService = authService;
 		if (allowAllHostnames) {
-			try {
-				client = getIgnoreSSLClient();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+			client = getIgnoreSSLClient();
 		} else {
 			client = ClientBuilder.newClient();
 		}
 		jsonMapper = new ObjectMapper();
 		baseApi = client.target(baseApiUri);
-	}
-
-	public DesktopResourceService(AuthorizationService authService, String baseApiUri) {
-		this(authService, baseApiUri, false);
 	}
 
 	public List<DesktopVirtue> getVirtues() throws IOException {
@@ -107,24 +104,24 @@ public class DesktopResourceService {
 		return result.toString();
 	}
 
-	public LinuxApplicationInstance startApplication(String virtueId, ApplicationDefinition appDefn)
+	public BaseApplicationInstance startApplication(String virtueId, ApplicationDefinition appDefn)
 			throws IOException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
-		LinuxApplicationInstance returnedApp = getClass(target, "GET", LinuxApplicationInstance.class);
+		BaseApplicationInstance returnedApp = getClass(target, "GET", BaseApplicationInstance.class);
 		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 
 	}
 
-	public LinuxApplicationInstance startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
+	public BaseApplicationInstance startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
 			throws IOException {
 		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
-		LinuxApplicationInstance returnedApp = getClass(target, "GET", LinuxApplicationInstance.class);
+		BaseApplicationInstance returnedApp = getClass(target, "GET", BaseApplicationInstance.class);
 		logger.debug("Started app=" + returnedApp);
 		return returnedApp;
 	}
 
-	public static Client getIgnoreSSLClient() throws Exception {
+	public static Client getIgnoreSSLClient() throws NoSuchAlgorithmException, KeyManagementException {
 		SSLContext sslcontext = SSLContext.getInstance("TLS");
 		sslcontext.init(null, new TrustManager[] { new X509TrustManager() {
 

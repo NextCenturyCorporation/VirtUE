@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
-import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.desktop.IApplicationInstance;
+import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
@@ -36,7 +38,8 @@ public class LinuxApplicationManager implements IApplicationManager {
 	}
 
 	@Override
-	public void startApplicationOnVm(AbstractVirtualMachine vm, ApplicationDefinition app, int maxTries) {
+	public IApplicationInstance startApplicationOnVm(AbstractVirtualMachine vm, ApplicationDefinition app, int maxTries) {
+		IApplicationInstance appInstance;
 		try {
 			SshConnectionParameters params = null;
 			if (defaultCertificate != null) {
@@ -79,10 +82,15 @@ public class LinuxApplicationManager implements IApplicationManager {
 				}
 			}
 			initiator.startXpraApp(display, app.getLaunchCommand());
+			appInstance = new LinuxApplicationInstance(app, vm.getHostname(), vm.getSshPort(),
+					vm.getUserName(), vm.getPrivateKey());
+
 		} catch (IOException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			appInstance = null;
 		}
+		return appInstance;
 	}
 
 }

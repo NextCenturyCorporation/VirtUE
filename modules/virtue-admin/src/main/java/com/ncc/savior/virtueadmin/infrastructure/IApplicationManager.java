@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.desktop.IApplicationInstance;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 
 /**
@@ -14,6 +15,7 @@ public interface IApplicationManager {
 	 * 
 	 * @param vm
 	 * @param application
+	 * @return 
 	 */
-	void startApplicationOnVm(AbstractVirtualMachine vm, ApplicationDefinition application, int maxTries);
+	IApplicationInstance startApplicationOnVm(AbstractVirtualMachine vm, ApplicationDefinition application, int maxTries);
 }

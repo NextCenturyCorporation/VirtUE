@@ -1,8 +1,6 @@
 package com.ncc.savior.virtueadmin.service;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +16,6 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.IApplicationInstance;
-import com.ncc.savior.virtueadmin.model.desktop.LinuxApplicationInstance;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
@@ -81,9 +78,8 @@ public class DesktopVirtueService {
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
 		AbstractVirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
-		applicationManager.startApplicationOnVm(vm, application, APP_START_MAX_TRIES);
-		IApplicationInstance appInstance = new LinuxApplicationInstance(application, vm.getHostname(), vm.getSshPort(),
-				vm.getUserName(), vm.getPrivateKey());
+		IApplicationInstance appInstance = applicationManager.startApplicationOnVm(vm, application,
+				APP_START_MAX_TRIES);
 		return appInstance;
 	}
 
@@ -116,29 +112,22 @@ public class DesktopVirtueService {
 
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
 		verifyAndReturnUser();
-		Collection<ApplicationDefinition> apps = template.getApplications();
-		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
-		for (ApplicationDefinition app : apps) {
-			appsMap.put(app.getId(), app);
-		}
-		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap);
+		Set<ApplicationDefinition> apps = template.getApplications();
+		return new DesktopVirtue(null, template.getName(), template.getId(), apps);
 	}
 
 	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
 		verifyAndReturnUser();
-		Collection<ApplicationDefinition> apps = instance.getApplications();
-		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
-		for (ApplicationDefinition app : apps) {
-			appsMap.put(app.getId(), app);
-		}
-		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap);
+		Set<ApplicationDefinition> apps = instance.getApplications();
+		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), apps);
 	}
 
 
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have USER role");
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+					"User '" + user.getUsername() + "' did not have USER role");
 		}
 		return user;
 	}
