@@ -2,12 +2,12 @@ package com.ncc.savior.virtueadmin.model.desktop;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 
-public class LinuxApplicationInstance extends BaseApplicationInstance {
-	protected LinuxApplicationInstance() {
+public class WindowsApplicationInstance extends BaseApplicationInstance {
+	protected WindowsApplicationInstance() {
 	}
 
-	public LinuxApplicationInstance(ApplicationDefinition application, String hostname, int sshPort, String userName,
-			String privateKey) {		
+	public WindowsApplicationInstance(ApplicationDefinition application, String hostname, int sshPort, String userName,
+			String privateKey) {
 		super(application, hostname, sshPort, userName, privateKey);
 	}
 
