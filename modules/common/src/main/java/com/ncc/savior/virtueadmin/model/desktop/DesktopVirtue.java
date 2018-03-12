@@ -1,8 +1,10 @@
 package com.ncc.savior.virtueadmin.model.desktop;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 
@@ -12,18 +14,10 @@ public class DesktopVirtue {
 	private String templateId;
 	private Map<String, ApplicationDefinition> apps;
 
-	public DesktopVirtue(String id, String name, String templateId, Map<String, ApplicationDefinition> apps) {
+	public DesktopVirtue(String id, String name, String templateId, Set<ApplicationDefinition> apps) {
 		super();
 		this.name = name;
-		this.apps = apps;
-		this.id = id;
-		this.templateId = templateId;
-	}
-
-	public DesktopVirtue(String id, String name, String templateId) {
-		super();
-		this.name = name;
-		this.apps = new HashMap<String, ApplicationDefinition>();
+		this.apps = apps.stream().collect(Collectors.toMap(ApplicationDefinition::getId, Function.identity()));
 		this.id = id;
 		this.templateId = templateId;
 	}

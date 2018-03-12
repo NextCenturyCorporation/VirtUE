@@ -57,7 +57,6 @@ public class SidebarController {
 						if (currentUser != null) {
 							List<DesktopVirtue> virtues;
 							try {
-
 								virtues = virtueService.getVirtuesForUser();
 							} catch (IOException e1) {
 								// TODO do something with connection errors.
@@ -69,7 +68,6 @@ public class SidebarController {
 							}
 							detectChangesAndReport(currentVirtues, virtues);
 							currentVirtues = virtues;
-
 						}
 
 						Thread.sleep(pollPeriodMillis);

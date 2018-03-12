@@ -1,9 +1,9 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class SidebarControllerTest {
 		};
 		SidebarController sc = new SidebarController(null, null, null);
 		sc.setVirtueChangeHandler(vch);
-		Map<String, ApplicationDefinition> apps = new HashMap<String, ApplicationDefinition>();
+		Set<ApplicationDefinition> apps = new HashSet<ApplicationDefinition>();
 		DesktopVirtue v1 = new DesktopVirtue("1", "1", "1", apps);
 		DesktopVirtue v2 = new DesktopVirtue("2", "2", "2", apps);
 		DesktopVirtue v3 = new DesktopVirtue("3", "3", "3", apps);

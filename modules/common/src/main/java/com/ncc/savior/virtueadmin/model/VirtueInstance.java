@@ -11,6 +11,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -35,10 +36,10 @@ public class VirtueInstance {
 	// private Set<String> transducers;
 	private VirtueState state;
 	@ManyToMany
-	private Collection<ApplicationDefinition> applications;
+	private Set<ApplicationDefinition> applications;
 
 	public VirtueInstance(String id, String name, String username, String templateId,
-			Collection<ApplicationDefinition> apps, Collection<AbstractVirtualMachine> vms) {
+			Set<ApplicationDefinition> apps, Collection<AbstractVirtualMachine> vms) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -67,8 +68,8 @@ public class VirtueInstance {
 
 	}
 
-	private static Collection<ApplicationDefinition> getApplicationsFromTemplate(VirtueTemplate template) {
-		Collection<ApplicationDefinition> list = new HashSet<ApplicationDefinition>();
+	private static Set<ApplicationDefinition> getApplicationsFromTemplate(VirtueTemplate template) {
+		Set<ApplicationDefinition> list = new HashSet<ApplicationDefinition>();
 		for (VirtualMachineTemplate vmTemp : template.getVmTemplates()) {
 			list.addAll(vmTemp.getApplications());
 		}
@@ -109,7 +110,7 @@ public class VirtueInstance {
 		return templateId;
 	}
 
-	public Collection<ApplicationDefinition> getApplications() {
+	public Set<ApplicationDefinition> getApplications() {
 		return applications;
 	}
 
@@ -138,7 +139,7 @@ public class VirtueInstance {
 		this.templateId = templateId;
 	}
 
-	protected void setApplications(Collection<ApplicationDefinition> applications) {
+	protected void setApplications(Set<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 }
