@@ -89,8 +89,8 @@ public class AwsManager implements ICloudManager {
 		try {
 			init();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SaviorException(SaviorException.CONFIGURATION_ERROR,
+					"Unable to start AwsManager due to configuration.", e);
 		}
 		this.sshKeyInjector = new SshKeyInjector();
 		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);

@@ -89,7 +89,6 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 
 	@Override
 	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
-		// TODO Auto-generated method stub
 		throw new RuntimeException("not implemented");
 	}
 
