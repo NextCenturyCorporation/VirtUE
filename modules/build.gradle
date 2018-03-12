@@ -4,9 +4,9 @@
 
 apply plugin: 'eclipse'
 
+import java.nio.file.Paths
 
 // test.maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-
 
 subprojects {
 }
@@ -20,9 +20,12 @@ task buildAll {
 
 task runServer {
 	doFirst {
+		// The Eclipse gradle launcher gives user.dir the wrong value, so we need to explicitly set the directory for the process
+		def currentDir = Paths.get(".").toAbsolutePath()
 		ext.serverProcess = new ProcessBuilder()
-		.command("./gradlew", ":virtue-admin:run")
-		.start()
+			.command("./gradlew", ":virtue-admin:run")
+			.directory(currentDir.toFile())
+			.start()
 // 		Thread.sleep(15 * 1000)
 	}
 	mustRunAfter buildAll
