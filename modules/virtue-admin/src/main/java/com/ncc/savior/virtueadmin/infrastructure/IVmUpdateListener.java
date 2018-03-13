@@ -20,5 +20,5 @@ public interface IVmUpdateListener {
 	 */
 	void updateVmState(String vmId, VmState state);
 
-	void updateVm(Collection<VirtualMachine> vms);
+	void updateVms(Collection<VirtualMachine> vms);
 }

@@ -31,7 +31,6 @@ public class HelloResource {
 	private SecurityUserService securityService;
 
 	@GET
-	@Path("/")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getHello() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();

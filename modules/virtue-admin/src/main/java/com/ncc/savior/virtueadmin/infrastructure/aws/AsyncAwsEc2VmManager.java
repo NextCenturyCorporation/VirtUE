@@ -109,7 +109,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			}
 
 			@Override
-			public void updateVm(Collection<VirtualMachine> vms) {
+			public void updateVms(Collection<VirtualMachine> vms) {
 				logger.debug("updated VMs");
 				for (VirtualMachine vm : vms) {
 					logger.debug("  " + vm);
@@ -357,5 +357,9 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		} catch (Exception e) {
 			logger.error("Error attempting to sent instance type.", e);
 		}
+	}
+
+	public void setUpdateListener(IVmUpdateListener listener) {
+		addVmUpdateListener(listener);
 	}
 }

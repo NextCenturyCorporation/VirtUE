@@ -39,7 +39,7 @@ public abstract class BaseVmManager implements IVmManager {
 
 	protected void notifyOnUpdateVms(Collection<VirtualMachine> vms) {
 		for (IVmUpdateListener listener : vmUpdateListeners) {
-			listener.updateVm(vms);
+			listener.updateVms(vms);
 		}
 	}
 }

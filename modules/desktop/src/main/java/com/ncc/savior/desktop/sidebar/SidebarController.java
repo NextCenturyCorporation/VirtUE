@@ -84,6 +84,7 @@ public class SidebarController {
 		virtuePollThread.start();
 	}
 
+	// TODO this still has bugs and should be completely rethought
 	protected void detectChangesAndReport(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues) {
 		DesktopVirtueComparator comparator = new DesktopVirtue.DesktopVirtueComparator();
 		currentVirtues.sort(comparator);
@@ -108,7 +109,8 @@ public class SidebarController {
 				}
 			}
 			if (0 == compare) {
-				if (!cv.getName().equals(nv.getName()) || updatedId) {
+				if (!cv.getName().equals(nv.getName()) || updatedId
+						|| !cv.getVirtueState().equals(nv.getVirtueState())) {
 					reportChangedVirtue(nv);
 				}
 				cindex++;

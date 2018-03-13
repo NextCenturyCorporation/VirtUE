@@ -110,7 +110,7 @@ public class VirtueMenuItem {
 	private String getLabel(DesktopVirtue virtue) {
 		String name = virtue.getName();
 		if (virtue.getId() != null) {
-			name = name + "*";
+			name = name + " (" + virtue.getVirtueState() + ")";
 		}
 		return name;
 	}

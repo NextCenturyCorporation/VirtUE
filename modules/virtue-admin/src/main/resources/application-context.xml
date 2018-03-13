@@ -15,7 +15,8 @@
 	<bean name="certificatesDirectory" class="java.io.File">
 		<constructor-arg value="${virtue.aws.server.keyDirectory}" />
 	</bean>
-	<bean name="keyManager" class="com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager">
+	<bean name="keyManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager">
 		<constructor-arg ref="certificatesDirectory" />
 	</bean>
 	<bean name="appManager"
@@ -63,10 +64,16 @@
 		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
-<!-- 		<property name="awsProfile" value="">${virtue.aws.profile}</property> -->
+		<!-- <property name="awsProfile" value="">${virtue.aws.profile}</property> -->
 		<property name="instanceType" value="${virtue.aws.instanceType}"></property>
 		<property name="serverUser" value="${virtue.aws.serverUser}"></property>
-<!-- 		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property> -->
+		<property name="updateListener" ref="activeVirtueUpdater"></property>
+		<!-- <property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property> -->
+	</bean>
+
+	<bean name="activeVirtueUpdater"
+		class="com.ncc.savior.virtueadmin.virtue.ActiveVirtueManagerUpdatingListener">
+		<constructor-arg ref="virtueDao"></constructor-arg>
 	</bean>
 	<bean name="cloudManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.OsBasedDeferredCloudManager">

@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,8 +22,10 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.Tag;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
+import com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
@@ -39,6 +42,9 @@ public class AwsVmUpdater {
 	@SuppressWarnings("rawtypes")
 	private Map<String, ScheduledFuture> namingFutureMap;
 	private IKeyManager keyManager;
+	private SimpleApplicationManager appManager;
+	@SuppressWarnings("rawtypes")
+	private Map<String, ScheduledFuture> startXpraFutureMap;
 
 	@SuppressWarnings("rawtypes")
 	public AwsVmUpdater(AmazonEC2 ec2, IUpdateNotifier notifier, IKeyManager keyManager) {
@@ -47,8 +53,10 @@ public class AwsVmUpdater {
 		this.keyManager = keyManager;
 		this.reachableFutureMap = Collections.synchronizedMap(new HashMap<String, ScheduledFuture>());
 		this.namingFutureMap = Collections.synchronizedMap(new HashMap<String, ScheduledFuture>());
+		this.startXpraFutureMap = Collections.synchronizedMap(new HashMap<String, ScheduledFuture>());
 		this.networkingQueue = Collections.synchronizedCollection(new ArrayList<VirtualMachine>());
 		this.sshKeyInjector = new SshKeyInjector();
+		this.appManager = new SimpleApplicationManager();
 		this.executor = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 
 			private int num = 1;
@@ -93,10 +101,17 @@ public class AwsVmUpdater {
 							.append("\n");
 					i++;
 				}
+				i = 1;
+				sb.append("Xpra:\n");
+				for (Entry<String, ScheduledFuture> entry : startXpraFutureMap.entrySet()) {
+					sb.append("  ").append(i).append(". ").append(entry.getKey()).append(" - ").append(entry.getValue())
+							.append("\n");
+					i++;
+				}
 				logger.debug(sb.toString());
 			}
 		};
-		// executor.scheduleAtFixedRate(command, 500, 5000, TimeUnit.MILLISECONDS);
+		executor.scheduleAtFixedRate(command, 500, 5000, TimeUnit.MILLISECONDS);
 
 	}
 
@@ -152,6 +167,7 @@ public class AwsVmUpdater {
 				networkingQueue.remove(vm);
 				File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKey());
 				addToReachabilityAndAddRsaQueue(vm, privateKeyFile);
+				vm.setState(VmState.LAUNCHING);
 				updated.add(vm);
 			}
 		}
@@ -205,9 +221,32 @@ public class AwsVmUpdater {
 				vm.setPrivateKey(newPrivateKey);
 				reachableFutureMap.get(vm.getId()).cancel(false);
 				reachableFutureMap.remove(vm.getId());
+				Runnable command = new Runnable() {
+					@Override
+					public void run() {
+						attemptStartXpra(vm, privateKeyFile);
+					}
+				};
+				ScheduledFuture<?> future = executor.scheduleWithFixedDelay(command, 100, 1500, TimeUnit.MILLISECONDS);
+				startXpraFutureMap.put(vm.getId(), future);
 				notifier.notifyUpdatedVm(vm);
 			}
 		}
+	}
+
+	protected void attemptStartXpra(VirtualMachine vm, File privateKeyFile) {
+		try {
+			int display = appManager.startOrGetXpraServer(vm, privateKeyFile);
+			if (display > 0) {
+				ScheduledFuture future = startXpraFutureMap.remove(vm.getId());
+				future.cancel(false);
+				vm.setState(VmState.RUNNING);
+				notifier.notifyUpdatedVm(vm);
+			}
+		} catch (IOException e) {
+			logger.debug("Failed to start XPRA", e);
+		}
+
 	}
 
 	private boolean isNotEmpty(String stringToTest) {

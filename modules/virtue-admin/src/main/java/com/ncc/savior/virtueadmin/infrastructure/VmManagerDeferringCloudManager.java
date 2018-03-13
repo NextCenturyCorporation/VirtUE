@@ -45,5 +45,4 @@ public class VmManagerDeferringCloudManager implements ICloudManager {
 		vmManager.stopVirtualMachines(virtueInstance.getVms());
 		return virtueInstance;
 	}
-
 }
