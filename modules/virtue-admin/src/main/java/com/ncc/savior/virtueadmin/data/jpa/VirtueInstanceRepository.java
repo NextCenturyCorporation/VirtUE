@@ -11,4 +11,8 @@ public interface VirtueInstanceRepository extends CrudRepository<VirtueInstance,
 
 	List<VirtueInstance> findByUsernameAndTemplateIdIn(String username, Collection<String> templateIds);
 
+	Collection<VirtueInstance> findByUsername(String username);
+
+	VirtueInstance findByUsernameAndId(String username, String instanceId);
+
 }

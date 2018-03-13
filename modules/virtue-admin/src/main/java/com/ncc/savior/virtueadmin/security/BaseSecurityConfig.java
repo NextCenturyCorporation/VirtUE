@@ -20,6 +20,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -61,6 +63,10 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
+		http.sessionManagement().maximumSessions(10)
+				// .invalidSessionUrl("/login")
+				// .maximumSessions(1)
+				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
 		doConfigure(http);
 
 		http.csrf().disable();
@@ -98,6 +104,11 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public DatabaseUserDetailsService userDetailsService() {
 		return new DatabaseUserDetailsService();
+	}
+
+	@Bean
+	public SessionRegistry sessionRegistry() {
+		return new SessionRegistryImpl();
 	}
 
 	class DatabaseUserDetailsService implements UserDetailsService {

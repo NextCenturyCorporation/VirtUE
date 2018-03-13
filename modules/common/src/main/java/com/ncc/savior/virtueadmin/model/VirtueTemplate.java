@@ -1,9 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,8 +24,6 @@ public class VirtueTemplate {
 	private String version;
 	@ManyToMany()
 	private Collection<VirtualMachineTemplate> vmTemplates;
-	@ManyToMany()
-	private Collection<VirtueUser> users;
 	@ColumnDefault("true")
 	private boolean enabled;
 	private Date lastModification;
@@ -77,10 +73,6 @@ public class VirtueTemplate {
 		return id;
 	}
 
-	public Collection<VirtueUser> getUsers() {
-		return users;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -118,8 +110,8 @@ public class VirtueTemplate {
 	@Override
 	public String toString() {
 		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
-				+ ", users=" + users + ", enabled=" + enabled + ", lastModification=" + lastModification
-				+ ", lastEditor=" + lastEditor + ", awsTemplateName=" + awsTemplateName + "]";
+				+ ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
+				+ ", awsTemplateName=" + awsTemplateName + "]";
 	}
 
 	public String getAwsTemplateName() {
@@ -152,9 +144,5 @@ public class VirtueTemplate {
 
 	public void setLastEditor(String lastEditor) {
 		this.lastEditor = lastEditor;
-	}
-
-	public List<VirtueUser> retrieveUsers() {
-		return new ArrayList<VirtueUser>(users);
 	}
 }

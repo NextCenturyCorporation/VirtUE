@@ -14,4 +14,6 @@ public interface IUserManager {
 
 	void removeUser(VirtueUser user);
 
+	void removeUser(String usernameToRemove);
+
 }
