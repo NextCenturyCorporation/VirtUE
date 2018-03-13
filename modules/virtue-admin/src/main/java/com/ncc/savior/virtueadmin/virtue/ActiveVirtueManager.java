@@ -83,7 +83,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 		// return vi;
 	}
 
-	protected void updateVmState(String vmId, VmState state) {
+	@Override
+	public void updateVmState(String vmId, VmState state) {
 		virtueDao.updateVmState(vmId, state);
 	}
 
@@ -134,5 +135,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
 		return vi;
+	}
+
+	@Override
+	public void updateVms(Collection<VirtualMachine> vms) {
+		virtueDao.updateVms(vms);
+
 	}
 }

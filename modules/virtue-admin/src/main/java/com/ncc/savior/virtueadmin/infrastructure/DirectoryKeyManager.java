@@ -24,9 +24,14 @@ public class DirectoryKeyManager implements IKeyManager {
 
 	@Override
 	public String getKeyByName(String keyName) {
-		File file = new File(directory, keyName + defaultExtension);
+		File file = getKeyFileByName(keyName);
 		String key = SshUtil.getKeyFromFile(file);
 		return key;
 	}
 
+	@Override
+	public File getKeyFileByName(String keyName) {
+		File file = new File(directory, keyName + defaultExtension);
+		return file;
+	}
 }

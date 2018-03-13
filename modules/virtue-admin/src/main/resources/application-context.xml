@@ -53,16 +53,17 @@
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
-	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager"> -->
+	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsManager"> -->
 	<!-- <constructor-arg ref="defaultPem" /> -->
 	<!-- </bean> -->
 	<bean name="awsVmManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.AwsEc2VmManager">
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
 		<constructor-arg ref="keyManager" />
 		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
-		<property name="awsProfile" value="${virtue.aws.profile}"></property>
+<!-- 		<property name="awsProfile" value="">${virtue.aws.profile}</property> -->
 		<property name="instanceType" value="${virtue.aws.instanceType}"></property>
 		<property name="serverUser" value="${virtue.aws.serverUser}"></property>
 <!-- 		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property> -->
@@ -79,7 +80,7 @@
 	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.VmManagerDeferringCloudManager"> -->
 	<!-- <constructor-arg ref="awsVmManager"></constructor-arg> -->
 	<!-- </bean> -->
-	<!-- <bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineCloudManager"> -->
+	<!-- <bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.staticvm.StaticMachineCloudManager"> -->
 	<!-- <constructor-arg ref="vmManager" /> -->
 	<!-- </bean> -->
 	<bean name="desktopService"

@@ -63,4 +63,6 @@ public interface IActiveVirtueDao {
 
 	VirtueInstance getVirtueInstance(VirtueUser user, String instanceId);
 
+	void updateVms(Collection<VirtualMachine> vms);
+
 }

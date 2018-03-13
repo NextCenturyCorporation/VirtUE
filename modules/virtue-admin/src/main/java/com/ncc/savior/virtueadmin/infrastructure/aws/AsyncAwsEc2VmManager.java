@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,31 +20,26 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.InstanceStateChange;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
-import com.amazonaws.services.ec2.model.StartInstancesRequest;
-import com.amazonaws.services.ec2.model.StopInstancesRequest;
-import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
-import com.ncc.savior.virtueadmin.model.OS;
+import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater.IUpdateNotifier;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-import com.ncc.savior.virtueadmin.util.SshKeyInjector;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * {@link IVmManager} that uses AWS EC2 to create and manage VMs. The following
@@ -61,23 +57,23 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
  * </ul>
  *
  */
-public class AwsEc2VmManager extends BaseVmManager {
+public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
-	private static final Logger logger = LoggerFactory.getLogger(AwsEc2VmManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(AsyncAwsEc2VmManager.class);
 	private static final int SSH_PORT = 22;
 	private static final String VM_PREFIX = "VRTU-";
 	private AWSCredentialsProvider credentialsProvider;
 	private AmazonEC2 ec2;
-	private SshKeyInjector sshKeyInjector;
 	private String serverKeyName;
 	private List<String> defaultSecurityGroups;
 	private String serverUser;
 	private String awsProfile;
-	private IKeyManager keyManager;
 	private String region;
 	private InstanceType instanceType;
+	private AwsVmUpdater vmUpdater;
 
-	public AwsEc2VmManager(IKeyManager keyManager, String region) {
+	public AsyncAwsEc2VmManager(IKeyManager keyManager, String region, String awsProfile) {
+		this.awsProfile = awsProfile;
 		this.region = region;
 		try {
 			init();
@@ -86,10 +82,40 @@ public class AwsEc2VmManager extends BaseVmManager {
 		}
 		this.defaultSecurityGroups = new ArrayList<String>();
 		this.defaultSecurityGroups.add("default");
-		this.sshKeyInjector = new SshKeyInjector();
+
 		this.serverUser = System.getProperty("user.name");
-		this.keyManager = keyManager;
 		this.instanceType = InstanceType.T2Small;
+
+		this.vmUpdater = new AwsVmUpdater(ec2, new IUpdateNotifier() {
+			@Override
+			public void notifyUpdatedVms(Collection<VirtualMachine> vms) {
+				notifyOnUpdateVms(vms);
+			}
+
+			@Override
+			public void notifyUpdatedVm(VirtualMachine vm) {
+				ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+				vms.add(vm);
+				notifyOnUpdateVms(vms);
+			}
+		}, keyManager);
+
+		this.addVmUpdateListener(new IVmUpdateListener() {
+
+			@Override
+			public void updateVmState(String vmId, VmState state) {
+				logger.debug("updated state: vmid=" + vmId + " state=" + state);
+
+			}
+
+			@Override
+			public void updateVm(Collection<VirtualMachine> vms) {
+				logger.debug("updated VMs");
+				for (VirtualMachine vm : vms) {
+					logger.debug("  " + vm);
+				}
+			}
+		});
 	}
 
 	/**
@@ -131,72 +157,6 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
-		List<String> instanceIds = new ArrayList<String>(1);
-		instanceIds.add(vm.getInfrastructureId());
-		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
-		ec2.startInstances(startInstancesRequest);
-		AwsUtil.updateStatusOnVm(ec2, vm);
-		notifyOnUpdateVmState(vm.getId(), vm.getState());
-		return vm;
-	}
-
-	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
-		List<String> instanceIds = new ArrayList<String>(1);
-		instanceIds.add(vm.getInfrastructureId());
-		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
-		ec2.stopInstances(stopInstancesRequest);
-		AwsUtil.updateStatusOnVm(ec2, vm);
-		notifyOnUpdateVmState(vm.getId(), vm.getState());
-		return vm;
-	}
-
-	@Override
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
-		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
-		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
-		ec2.startInstances(startInstancesRequest);
-		AwsUtil.updateStatusOnVms(ec2, vms);
-		for (VirtualMachine vm : vms) {
-			notifyOnUpdateVmState(vm.getId(), vm.getState());
-		}
-		return vms;
-	}
-
-	@Override
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
-		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
-		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
-		ec2.stopInstances(stopInstancesRequest);
-		AwsUtil.updateStatusOnVms(ec2, vms);
-		for (VirtualMachine vm : vms) {
-			notifyOnUpdateVmState(vm.getId(), vm.getState());
-		}
-		return vms;
-	}
-
-	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
-		List<String> instanceIds = new ArrayList<String>(1);
-		instanceIds.add(vm.getInfrastructureId());
-		TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(instanceIds);
-		ec2.terminateInstances(terminateInstancesRequest);
-	}
-
-	@Override
-	public VmState getVirtualMachineState(VirtualMachine vm) {
-		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
-		Collection<String> instanceIds = new ArrayList<String>(1);
-		instanceIds.add(vm.getInfrastructureId());
-		describeInstanceStatusRequest.setInstanceIds(instanceIds);
-		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
-		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
-		InstanceStatus awsStatus = itr.next();
-		return AwsUtil.awsStatusToSaviorState(awsStatus);
-	}
-
-	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
@@ -217,81 +177,80 @@ public class AwsEc2VmManager extends BaseVmManager {
 			String clientUser = user.getUsername();
 			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
 			String loginUsername = vmt.getLoginUser();
-			String keyName = instance.getKeyName();
-			String privateKey = null;
-			if (keyName != null) {
-				String pk = keyManager.getKeyByName(keyName);
-				if (pk != null) {
-					privateKey = pk;
-				}
-			}
+			String privateKey = serverKeyName;
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
 					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
 					loginUsername, privateKey, instance.getPublicIpAddress());
 			vms.add(vm);
 		}
-		JavaUtil.sleepAndLogInterruption(2000);
-		modifyVms(vms);
+		notifyOnUpdateVms(vms);
+		vmUpdater.addVmToProvisionPipeline(vms);
 		return vms;
 	}
 
-	/**
-	 * After VM's are created, there are still some functions that we need to do to
-	 * ensure we have all the information we need. This function handles those
-	 * methods. This includes:
-	 * <ul>
-	 * <li>Get IP address and hostname
-	 * <li>Name the VM in AWS
-	 * <li>Wait until the VM is actually reachable
-	 * <li>Add a new unique RSA key to the VM
-	 * </ul>
-	 * 
-	 * @param vms
-	 */
-	private void modifyVms(ArrayList<VirtualMachine> vms) {
-		long a = System.currentTimeMillis();
-		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500);
-		nameVmsInAws(vms);
-		SshUtil.waitForAllVmsReachableParallel(vms, 2500);
-		long b = System.currentTimeMillis();
-		logger.debug("Vm's reachable after " + (b - a) / 1000.0 + " seconds");
-		// AwsUtil.waitForAllVmsRunning(ec2, vms, 2500);
-		// long c = System.currentTimeMillis();
-		// logger.debug(
-		// "Vm's aws-ready after " + (c - a) / 1000.0 + " seconds. (additional " + (c -
-		// b) / 1000.0 + " seconds)");
-		addRsaKeyToVms(vms, 3);
+	@Override
+	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+		// TODO fix
+		throw new NotImplementedException();
+		// List<String> instanceIds = new ArrayList<String>(1);
+		// instanceIds.add(vm.getInfrastructureId());
+		// StartInstancesRequest startInstancesRequest = new
+		// StartInstancesRequest(instanceIds);
+		// ec2.startInstances(startInstancesRequest);
+		// AwsUtil.updateStatusOnVm(ec2, vm);
+		// notifyOnUpdateVmState(vm.getId(), vm.getState());
+		// return vm;
 	}
 
-	/**
-	 * Renames the VMs based on the {@link VirtualMachine#getName()} method. The
-	 * name is set earlier in the provision process.
-	 * 
-	 * @param vms
-	 */
-	private void nameVmsInAws(ArrayList<VirtualMachine> vms) {
-		vms = new ArrayList<VirtualMachine>(vms);
-		int tries = 3;
-		while (!vms.isEmpty() && tries > 0) {
-			Iterator<VirtualMachine> itr = vms.iterator();
-			while (itr.hasNext()) {
-				VirtualMachine vm = itr.next();
-				try {
-					CreateTagsRequest ctr = new CreateTagsRequest();
-					ctr.withResources(vm.getInfrastructureId());
-					Collection<Tag> tags = new ArrayList<Tag>();
-					tags.add(new Tag("Autogen-Virtue-VM", serverUser));
-					tags.add(new Tag("Name", vm.getName()));
-					ctr.setTags(tags);
-					ec2.createTags(ctr);
-					itr.remove();
-				} catch (Exception e) {
-					logger.warn("failed to rename AWS machine for VM='" + vm.getName() + "': " + e.getMessage());
-				}
-				JavaUtil.sleepAndLogInterruption(750);
-			}
-			tries--;
-		}
+	@Override
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+		// TODO fix
+		throw new NotImplementedException();
+		// List<String> instanceIds = new ArrayList<String>(1);
+		// instanceIds.add(vm.getInfrastructureId());
+		// StopInstancesRequest stopInstancesRequest = new
+		// StopInstancesRequest(instanceIds);
+		// ec2.stopInstances(stopInstancesRequest);
+		// AwsUtil.updateStatusOnVm(ec2, vm);
+		// notifyOnUpdateVmState(vm.getId(), vm.getState());
+		// return vm;
+	}
+
+	@Override
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO fix
+		throw new NotImplementedException();
+		// List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
+		// StartInstancesRequest startInstancesRequest = new
+		// StartInstancesRequest(instanceIds);
+		// ec2.startInstances(startInstancesRequest);
+		// AwsUtil.updateStatusOnVms(ec2, vms);
+		// for (VirtualMachine vm : vms) {
+		// notifyOnUpdateVmState(vm.getId(), vm.getState());
+		// }
+		// return vms;
+	}
+
+	@Override
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO fix
+		throw new NotImplementedException();
+		// List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
+		// StopInstancesRequest stopInstancesRequest = new
+		// StopInstancesRequest(instanceIds);
+		// ec2.stopInstances(stopInstancesRequest);
+		// AwsUtil.updateStatusOnVms(ec2, vms);
+		// for (VirtualMachine vm : vms) {
+		// notifyOnUpdateVmState(vm.getId(), vm.getState());
+		// }
+		// return vms;
+	}
+
+	@Override
+	public void deleteVirtualMachine(VirtualMachine vm) {
+		List<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+		vms.add(vm);
+		deleteVirtualMachines(vms);
 	}
 
 	@Override
@@ -306,39 +265,34 @@ public class AwsEc2VmManager extends BaseVmManager {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Terminating: " + result.getTerminatingInstances());
 			}
+			Collection<VirtualMachine> terminatedVms = new ArrayList<VirtualMachine>();
+			for (InstanceStateChange r : result.getTerminatingInstances()) {
+				String id = r.getInstanceId();
+				for (VirtualMachine vm : vms) {
+					if (vm.getInfrastructureId().equals(id)) {
+						terminatedVms.add(vm);
+						vm.setState(VmState.DELETING);
+					}
+				}
+			}
+			// TODO deleting to deleted?
+			notifyOnUpdateVms(terminatedVms);
+			// AwsVmUpdater.addVmsToDel
 		} catch (AmazonEC2Exception e) {
 			logger.warn("Error terminating instances", e);
 		}
 	}
 
-	/**
-	 * Adds unique RSA keys to VM's for SSH login. The public key is played in the
-	 * .ssh/authorized_keys file and the private key is stored in the database. This
-	 * allows anyone with access to hte private key the ability to login to this VM
-	 * and only this VM.
-	 * 
-	 * @param vms
-	 * @param numberOfAttempts
-	 */
-	private void addRsaKeyToVms(Collection<VirtualMachine> vms, int numberOfAttempts) {
-		for (VirtualMachine vm : vms) {
-			if (OS.LINUX.equals(vm.getOs())) {
-				String newPrivateKey = null;
-				// do while so we always attempt at least once
-				do {
-					try {
-						numberOfAttempts--;
-						newPrivateKey = sshKeyInjector.injectSshKey(vm, vm.getPrivateKey());
-						break;
-					} catch (Exception e) {
-						logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);
-					} finally {
-
-					}
-				} while (numberOfAttempts > 0);
-				vm.setPrivateKey(newPrivateKey);
-			}
-		}
+	@Override
+	public VmState getVirtualMachineState(VirtualMachine vm) {
+		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
+		Collection<String> instanceIds = new ArrayList<String>(1);
+		instanceIds.add(vm.getInfrastructureId());
+		describeInstanceStatusRequest.setInstanceIds(instanceIds);
+		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
+		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
+		InstanceStatus awsStatus = itr.next();
+		return AwsUtil.awsStatusToSaviorState(awsStatus);
 	}
 
 	public String getServerKeyName() {

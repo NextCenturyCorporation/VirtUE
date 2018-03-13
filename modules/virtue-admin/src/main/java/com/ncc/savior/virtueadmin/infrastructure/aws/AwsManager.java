@@ -7,7 +7,7 @@
 *  Copyright (c) 2017 Next Century Corporation. All rights reserved.
 */
 
-package com.ncc.savior.virtueadmin.infrastructure;
+package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -53,6 +53,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
+import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -287,7 +288,7 @@ public class AwsManager implements ICloudManager {
 			if (OS.LINUX.equals(vm.getOs())) {
 				String newPrivateKey = null;
 				try {
-					newPrivateKey = sshKeyInjector.injectSshKey(vm);
+					newPrivateKey = sshKeyInjector.injectSshKey(vm, vm.getPrivateKey());
 				} catch (IOException | RuntimeException e) {
 					logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);
 				} finally {

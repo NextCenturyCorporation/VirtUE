@@ -22,7 +22,7 @@ public interface IVmManager {
 	 * 
 	 * @param listener
 	 */
-	public void addStateUpdateListener(IStateUpdateListener listener);
+	public void addVmUpdateListener(IVmUpdateListener listener);
 
 	/**
 	 * Removes a listener which would have been notified when the state of a VM has
@@ -30,7 +30,7 @@ public interface IVmManager {
 	 * 
 	 * @param listener
 	 */
-	public void removeStateUpdateListener(IStateUpdateListener listener);
+	public void removeVmUpdateListener(IVmUpdateListener listener);
 
 	/**
 	 * Provide a provisioned VM that is currently not used by another Virtue that
@@ -85,6 +85,13 @@ public interface IVmManager {
 	public void deleteVirtualMachine(VirtualMachine vm);
 
 	/**
+	 * Deletes all vms
+	 * 
+	 * @param vms
+	 */
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
+
+	/**
 	 * Returns the current state of the given Virtual Machine.
 	 * 
 	 * @param vm
@@ -103,12 +110,5 @@ public interface IVmManager {
 	 */
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates);
-
-	/**
-	 * Deletes all vms
-	 * 
-	 * @param vms
-	 */
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
 
 }

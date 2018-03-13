@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang.NotImplementedException;
+
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -124,5 +126,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void clear() {
 		virtues.clear();
+	}
+
+	@Override
+	public void updateVms(Collection<VirtualMachine> vms) {
+		throw new NotImplementedException();
 	}
 }

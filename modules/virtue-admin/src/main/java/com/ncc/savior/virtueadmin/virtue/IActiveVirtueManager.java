@@ -8,6 +8,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * Manages and controls active {@link VirtueInstance}s for the system. This
@@ -66,5 +67,9 @@ public interface IActiveVirtueManager {
 	VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId);
 
 	void adminDeleteVirtue(String instanceId);
+
+	void updateVmState(String vmId, VmState state);
+
+	void updateVms(Collection<VirtualMachine> vms);
 
 }
