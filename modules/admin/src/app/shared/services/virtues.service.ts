@@ -15,8 +15,8 @@ const httpHeader = {
 
 export class VirtuesService {
 
-  private jsondata = 'http://localhost:8080/admin/virtue/template';
-  // private jsondata = './assets/json/virtue_list.json';
+  // private jsondata = 'http://localhost:8080/admin/virtue/template';
+  private jsondata = './assets/json/virtue_list.json';
 
   constructor(private httpClient: HttpClient) { }
 
