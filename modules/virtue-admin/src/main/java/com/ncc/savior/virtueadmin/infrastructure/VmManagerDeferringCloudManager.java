@@ -34,4 +34,16 @@ public class VmManagerDeferringCloudManager implements ICloudManager {
 		return vi;
 	}
 
+	@Override
+	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
+		vmManager.startVirtualMachines(virtueInstance.getVms());
+		return virtueInstance;
+	}
+
+	@Override
+	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
+		vmManager.stopVirtualMachines(virtueInstance.getVms());
+		return virtueInstance;
+	}
+
 }

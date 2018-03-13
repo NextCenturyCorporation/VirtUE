@@ -92,4 +92,20 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		throw new RuntimeException("not implemented");
 	}
 
+	@Override
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+		for (VirtualMachine vm : vms) {
+			startVirtualMachine(vm);
+		}
+		return vms;
+	}
+
+	@Override
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+		for (VirtualMachine vm : vms) {
+			stopVirtualMachine(vm);
+		}
+		return vms;
+	}
+
 }

@@ -105,4 +105,16 @@ public class XenVirtualMachineManager implements IVmManager {
 		
 	}
 
+	@Override
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

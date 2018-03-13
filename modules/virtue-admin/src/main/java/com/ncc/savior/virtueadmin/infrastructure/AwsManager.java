@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -468,5 +469,15 @@ public class AwsManager implements ICloudManager {
 		logger.trace("Stack creation completed.  Stack=" + stackName);
 
 		return stackStatus + (stackReason == null ? "" : " (" + stackReason + ")");
+	}
+
+	@Override
+	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
+		throw new NotImplementedException();
 	}
 }

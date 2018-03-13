@@ -149,6 +149,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		return vm;
 	}
 
+	@Override
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
@@ -160,6 +161,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		return vms;
 	}
 
+	@Override
 	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
@@ -258,6 +260,12 @@ public class AwsEc2VmManager extends BaseVmManager {
 		addRsaKeyToVms(vms, 3);
 	}
 
+	/**
+	 * Renames the VMs based on the {@link VirtualMachine#getName()} method. The
+	 * name is set earlier in the provision process.
+	 * 
+	 * @param vms
+	 */
 	private void nameVmsInAws(ArrayList<VirtualMachine> vms) {
 		vms = new ArrayList<VirtualMachine>(vms);
 		int tries = 3;
@@ -296,10 +304,19 @@ public class AwsEc2VmManager extends BaseVmManager {
 				logger.trace("Terminating: " + result.getTerminatingInstances());
 			}
 		} catch (AmazonEC2Exception e) {
-			logger.warn("Warning terminating instances", e);
+			logger.warn("Error terminating instances", e);
 		}
 	}
 
+	/**
+	 * Adds unique RSA keys to VM's for SSH login. The public key is played in the
+	 * .ssh/authorized_keys file and the private key is stored in the database. This
+	 * allows anyone with access to hte private key the ability to login to this VM
+	 * and only this VM.
+	 * 
+	 * @param vms
+	 * @param numberOfAttempts
+	 */
 	private void addRsaKeyToVms(Collection<VirtualMachine> vms, int numberOfAttempts) {
 		for (VirtualMachine vm : vms) {
 			if (OS.LINUX.equals(vm.getOs())) {

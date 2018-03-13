@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 /**
  * Base class for cloud managers where VM's in a virtue are split between
@@ -14,6 +18,53 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
  * {@link VirtualMachine} or {@link VirtualMachineTemplate}.
  */
 public abstract class BaseDeferredCloudManager implements ICloudManager {
+
+	@Override
+	public void deleteVirtue(VirtueInstance virtueInstance) {
+		Collection<VirtualMachine> vms = virtueInstance.getVms();
+		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
+		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
+			IVmManager manager = entry.getKey();
+			manager.deleteVirtualMachines(entry.getValue());
+		}
+	}
+
+	@Override
+	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
+		Collection<VirtualMachineTemplate> vmts = template.getVmTemplates();
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmts.size());
+		Map<IVmManager, Collection<VirtualMachineTemplate>> mapping = createVmManagerMappingFromVmTemplates(vmts);
+		for (Entry<IVmManager, Collection<VirtualMachineTemplate>> entry : mapping.entrySet()) {
+			IVmManager manager = entry.getKey();
+			Collection<VirtualMachine> myVms = manager.provisionVirtualMachineTemplates(user, vmts);
+			vms.addAll(myVms);
+		}
+		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
+		return vi;
+	}
+
+	@Override
+	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
+		Collection<VirtualMachine> vms = virtueInstance.getVms();
+		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
+		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
+			IVmManager manager = entry.getKey();
+			manager.startVirtualMachines(entry.getValue());
+		}
+		return virtueInstance;
+	}
+
+	@Override
+	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
+		Collection<VirtualMachine> vms = virtueInstance.getVms();
+		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
+		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
+			IVmManager manager = entry.getKey();
+			manager.stopVirtualMachines(entry.getValue());
+		}
+		return virtueInstance;
+	}
+
 	protected Map<IVmManager, Collection<VirtualMachine>> createVmManagerMappingFromVms(
 			Collection<VirtualMachine> vms) {
 		HashMap<IVmManager, Collection<VirtualMachine>> map = new HashMap<IVmManager, Collection<VirtualMachine>>();
