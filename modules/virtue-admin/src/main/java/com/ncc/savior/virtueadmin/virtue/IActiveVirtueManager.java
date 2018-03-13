@@ -1,12 +1,13 @@
 package com.ncc.savior.virtueadmin.virtue;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 /**
  * Manages and controls active {@link VirtueInstance}s for the system. This
@@ -59,5 +60,11 @@ public interface IActiveVirtueManager {
 	Iterable<VirtueInstance> getAllActiveVirtues();
 
 	VirtueInstance getActiveVirtue(String virtueId);
+
+	Collection<VirtueInstance> getVirtuesForUser(VirtueUser user);
+
+	VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId);
+
+	void adminDeleteVirtue(String instanceId);
 
 }

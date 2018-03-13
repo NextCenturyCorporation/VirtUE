@@ -2,10 +2,12 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 /**
  * Class to represent a user that has been authenticated by the security
@@ -23,6 +25,8 @@ public class VirtueUser {
 	private String username;
 	@ElementCollection(targetClass=String.class)
 	private Collection<String> authorities;
+	@ManyToMany()
+	private Collection<VirtueTemplate> virtueTemplates;
 
 	static {
 		testUser = new VirtueUser("testUser", new ArrayList<String>());
@@ -31,7 +35,6 @@ public class VirtueUser {
 		adminAuths.add("ROLE_ADMIN");
 		adminAuths.add("ROLE_USER");
 		adminUser = new VirtueUser("admin", adminAuths);
-		
 	}
 	
 	protected VirtueUser() {
@@ -41,6 +44,7 @@ public class VirtueUser {
 	public VirtueUser(String name, Collection<String> authorities) {
 		this.username = name;
 		this.authorities = authorities;
+		this.virtueTemplates = new HashSet<VirtueTemplate>();
 	}
 
 	public static VirtueUser testUser() {
@@ -55,6 +59,18 @@ public class VirtueUser {
 		return authorities;
 	}
 
+	public Collection<VirtueTemplate> getVirtueTemplates() {
+		return virtueTemplates;
+	}
+
+	public void addVirtueTemplate(VirtueTemplate virtueTemplate) {
+		virtueTemplates.add(virtueTemplate);
+	}
+
+	public void removeVirtueTemplate(VirtueTemplate virtueTemplate) {
+		virtueTemplates.remove(virtueTemplate);
+	}
+
 	public static VirtueUser anonymousUser() {
 		return anonymousUser;
 	}
@@ -65,7 +81,12 @@ public class VirtueUser {
 
 	@Override
 	public String toString() {
-		return "User [username=" + username + ", authorities=" + authorities + "]";
+		return "VirtueUser [username=" + username + ", authorities=" + authorities + ", virtueTemplates="
+				+ virtueTemplates + "]";
+	}
+
+	public void removeAllVirtueTemplates() {
+		virtueTemplates.clear();
 	}
 	
 	

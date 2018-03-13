@@ -11,6 +11,7 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -29,7 +30,10 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.PropertiesFileCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormation;
@@ -43,7 +47,6 @@ import com.amazonaws.services.cloudformation.model.StackResource;
 import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
@@ -55,42 +58,43 @@ import com.amazonaws.services.ec2.model.InstanceStatusSummary;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 
 public class AwsManager implements ICloudManager {
+	private static final String VIRTUE_PROFILE = "virtue";
+	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
 	private static final Logger logger = LoggerFactory.getLogger(AwsManager.class);
 	private static final int SSH_PORT = 22;
-	AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+	private AWSCredentialsProvider credentialsProvider;
 	private String privateKey;
 
 	private AmazonEC2 ec2;
-	private AmazonS3 s3;
+	// private AmazonS3 s3;
 	// private AmazonSimpleDB sdb;
 	private AmazonCloudFormation stackbuilder;
 
 	String baseStack_Name = "SaviorStack-";
 	private long vmStatePollPeriodMillis = 4000;
 	private long stackCreationStatePollPeriodMillis = 3000;
+	private SshKeyInjector sshKeyInjector;
 
 	AwsManager(File privatekeyfile) {
-		// credentialsProvider =new BasicCredentialsProvider();
-		// credentialsProvider.setCredentials(new Authscope, credentials);
 		try {
 			init();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		this.sshKeyInjector = new SshKeyInjector();
 		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
+
 	}
 
 	/**
@@ -110,22 +114,27 @@ public class AwsManager implements ICloudManager {
 		 * The ProfileCredentialsProvider will return your [virtue] credential profile
 		 * by reading from the credentials file located at (~/.aws/credentials).
 		 */
-		AWSCredentialsProvider credentialsProvider = new ProfileCredentialsProvider("virtue");
+		// AWSCredentialsProvider credentialsProvider = new
+		// ProfileCredentialsProvider(VIRTUE);
+
+		// Set all AWS credential providers to use the virtue profile
+		System.setProperty(PROPERTY_AWS_PROFILE, VIRTUE_PROFILE);
+		// use the standard AWS credential provider chain so we can support a bunch of
+		// different methods to get credentials.
+		credentialsProvider = new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
+				new SystemPropertiesCredentialsProvider(), new ProfileCredentialsProvider(VIRTUE_PROFILE),
+				new PropertiesFileCredentialsProvider("./aws.properties"));
 
 		try {
 			credentialsProvider.getCredentials();
 
 		} catch (Exception e) {
-			logger.warn("Cannot load the credentials from the credential profiles file. ", e);
-			try {
-				credentialsProvider = new PropertiesFileCredentialsProvider("aws.properties");
-			} catch (Exception e2) {
-				logger.warn("Cannot load credentials from credentials file: aws.properties", e2);
-				throw new AmazonEC2Exception("Cannot load credentials.  Use cli or aws.properties");
-			}
+			logger.warn("Cannot load the credentials from the credential profiles file.  "
+					+ "Use CLI to create credentials or add to ./aws.properties file.", e);
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
-		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
+		// s3 =
+		// AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion("us-east-1").build();
 		stackbuilder = AmazonCloudFormationClientBuilder.standard().withCredentials(credentialsProvider)
 				.withRegion(Regions.US_EAST_1).build();
 		/*
@@ -143,8 +152,7 @@ public class AwsManager implements ICloudManager {
 	 */
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance) {
-		// TODO Auto-generated method stub
-
+		logger.debug("delete is being called, but not doing anything");
 	}
 
 	/*
@@ -230,6 +238,7 @@ public class AwsManager implements ICloudManager {
 			renameAllVms(vms, "VRTU-" + clientUser + "-" + serverUser);
 			waitForAllVmsRunning(vms);
 
+			addRsaKeyToVms(vms);
 			// rebootAllVms(vms);
 
 			vi = new VirtueInstance(template, clientUser, vms);
@@ -272,6 +281,22 @@ public class AwsManager implements ICloudManager {
 		return vi;
 	}
 
+	private void addRsaKeyToVms(Collection<VirtualMachine> vms) {
+		for (VirtualMachine vm : vms) {
+			if (OS.LINUX.equals(vm.getOs())) {
+				String newPrivateKey = null;
+				try {
+					newPrivateKey = sshKeyInjector.injectSshKey(vm);
+				} catch (IOException | RuntimeException e) {
+					logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);
+				} finally {
+					vm.setPrivateKey(newPrivateKey);
+				}
+			}
+		}
+
+	}
+
 	private void renameAllVms(Collection<VirtualMachine> vms, String prefix) {
 		for (VirtualMachine vm : vms) {
 			CreateTagsRequest ctr = new CreateTagsRequest();
@@ -284,7 +309,7 @@ public class AwsManager implements ICloudManager {
 
 	}
 
-	private void rebootAllVms(Collection<VirtualMachine> vms) {
+	protected void rebootAllVms(Collection<VirtualMachine> vms) {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
@@ -425,7 +450,7 @@ public class AwsManager implements ICloudManager {
 
 					VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
 							template.getApplications(), VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
-							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, this.privateKey,
+							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, privateKey,
 							ec2Instance.getPublicIpAddress());
 					vms.add(vm);
 				}
@@ -535,6 +560,15 @@ public class AwsManager implements ICloudManager {
 		logger.trace("Stack creation completed.  Stack=" + stackName);
 
 		return stackStatus + (stackReason == null ? "" : " (" + stackReason + ")");
+	}
+
+	public static void main(String[] args) {
+		AwsManager am = new AwsManager(new File("./certs/vrtu.pem"));
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		VirtualMachine vm = new VirtualMachine("test", "test", null, null, OS.LINUX, "test",
+				"ec2-52-90-135-66.compute-1.amazonaws.com", 22, "admin", am.privateKey, "");
+		vms.add(vm);
+		am.addRsaKeyToVms(vms);
 	}
 
 }
