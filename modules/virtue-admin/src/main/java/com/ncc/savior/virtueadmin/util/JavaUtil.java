@@ -18,4 +18,8 @@ public class JavaUtil {
 		}
 	}
 
+	public static boolean isNotEmpty(String stringToTest) {
+		return stringToTest != null && !stringToTest.trim().equals("");
+	}
+
 }

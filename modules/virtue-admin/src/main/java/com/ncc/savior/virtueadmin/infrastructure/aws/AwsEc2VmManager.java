@@ -227,7 +227,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			}
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
 					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
-					loginUsername, privateKey, instance.getPublicIpAddress());
+					loginUsername, privateKey, keyName, instance.getPublicIpAddress());
 			vms.add(vm);
 		}
 		JavaUtil.sleepAndLogInterruption(2000);

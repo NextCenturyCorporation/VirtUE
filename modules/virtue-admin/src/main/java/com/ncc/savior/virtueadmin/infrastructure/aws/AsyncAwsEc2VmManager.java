@@ -177,10 +177,10 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			String clientUser = user.getUsername();
 			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
 			String loginUsername = vmt.getLoginUser();
-			String privateKey = serverKeyName;
+			String privateKeyName = serverKeyName;
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
 					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
-					loginUsername, privateKey, instance.getPublicIpAddress());
+					loginUsername, null, privateKeyName, instance.getPublicIpAddress());
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);

@@ -30,7 +30,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	private OS os;
 	private String userName;
 	private String privateKey;
-	private String ipAddress; 
+	private String ipAddress;
 
 	public StaticMachineVmManager(String hostname, int sshPort, String userName, File privateKey, OS os) {
 		this(hostname, sshPort, userName, SshUtil.getKeyFromFile(privateKey), os);
@@ -47,7 +47,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	@Override
 	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey,
+				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, null,
 				ipAddress);
 		return vm;
 	}
@@ -81,7 +81,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
 					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, user.getUsername(),
-					privateKey, ipAddress);
+					privateKey, null, ipAddress);
 			vms.add(vm);
 
 		}

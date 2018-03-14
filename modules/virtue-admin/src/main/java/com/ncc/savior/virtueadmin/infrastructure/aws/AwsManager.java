@@ -358,9 +358,10 @@ public class AwsManager implements ICloudManager {
 				if (ec2Instance.getInstanceId().equals(sr.getPhysicalResourceId())) {
 					logger.trace("Found instance with id=" + ec2Instance);
 
+					String privateKeyName = null;
 					VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
 							template.getApplications(), VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
-							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, privateKey,
+							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, privateKey, privateKeyName,
 							ec2Instance.getPublicIpAddress());
 					vms.add(vm);
 				}
