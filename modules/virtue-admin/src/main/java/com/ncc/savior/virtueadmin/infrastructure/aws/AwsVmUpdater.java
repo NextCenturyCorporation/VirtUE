@@ -16,13 +16,17 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.StartXpraComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
+import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.VmState;
 
 public class AwsVmUpdater {
 	private static final Logger logger = LoggerFactory.getLogger(AwsVmUpdater.class);
 	private ScheduledExecutorService executor;
 	private IUpdatePipeline provisionPipeline;
+	private IUpdatePipeline startingPipeline;
+	private IUpdatePipeline stoppingPipeline;
 
 	public AwsVmUpdater(AmazonEC2 ec2, IUpdateNotifier notifier, IKeyManager keyManager) {
 		this.provisionPipeline = new UpdatePipeline(notifier);
@@ -40,6 +44,16 @@ public class AwsVmUpdater {
 		provisionPipeline.addPipelineComponent(new TestReachabilityAndAddRsaComponent(executor, keyManager));
 		provisionPipeline.addPipelineComponent(new StartXpraComponent(executor, keyManager));
 		provisionPipeline.start();
+
+		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
+		startingPipeline.start();
+
+		stoppingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		stoppingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, false));
+		stoppingPipeline.addPipelineComponent(new SetStatusComponent(executor, VmState.STOPPED));
+		stoppingPipeline.start();
+
 		logger.debug("Provision pipeline started");
 		// startDebug();
 	}
@@ -112,6 +126,20 @@ public class AwsVmUpdater {
 		void notifyUpdatedVms(Collection<VirtualMachine> vm);
 
 		void notifyUpdatedVm(VirtualMachine vm);
+	}
+
+	public void addVmsToStartingPipeline(Collection<VirtualMachine> vms) {
+		startingPipeline.addToPipeline(vms);
+
+	}
+
+	public void addVmsToStoppingPipeline(Collection<VirtualMachine> vms) {
+		stoppingPipeline.addToPipeline(vms);
+
+	}
+
+	public void addVmsToDeletingPipeline(Collection<VirtualMachine> vms) {
+		stoppingPipeline.addToPipeline(vms);
 	}
 
 }

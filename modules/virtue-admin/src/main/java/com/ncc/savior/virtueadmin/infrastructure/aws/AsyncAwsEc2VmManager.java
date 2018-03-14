@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +27,10 @@ import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StartInstancesResult;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
@@ -190,60 +193,50 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
-		// TODO fix
-		throw new NotImplementedException();
-		// List<String> instanceIds = new ArrayList<String>(1);
-		// instanceIds.add(vm.getInfrastructureId());
-		// StartInstancesRequest startInstancesRequest = new
-		// StartInstancesRequest(instanceIds);
-		// ec2.startInstances(startInstancesRequest);
-		// AwsUtil.updateStatusOnVm(ec2, vm);
-		// notifyOnUpdateVmState(vm.getId(), vm.getState());
-		// return vm;
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms = startVirtualMachines(vms);
+		return vms.iterator().next();
 	}
 
 	@Override
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
-		// TODO fix
-		throw new NotImplementedException();
-		// List<String> instanceIds = new ArrayList<String>(1);
-		// instanceIds.add(vm.getInfrastructureId());
-		// StopInstancesRequest stopInstancesRequest = new
-		// StopInstancesRequest(instanceIds);
-		// ec2.stopInstances(stopInstancesRequest);
-		// AwsUtil.updateStatusOnVm(ec2, vm);
-		// notifyOnUpdateVmState(vm.getId(), vm.getState());
-		// return vm;
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms = stopVirtualMachines(vms);
+		return vms.iterator().next();
 	}
 
 	@Override
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
-		// TODO fix
-		throw new NotImplementedException();
-		// List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
-		// StartInstancesRequest startInstancesRequest = new
-		// StartInstancesRequest(instanceIds);
-		// ec2.startInstances(startInstancesRequest);
-		// AwsUtil.updateStatusOnVms(ec2, vms);
-		// for (VirtualMachine vm : vms) {
-		// notifyOnUpdateVmState(vm.getId(), vm.getState());
-		// }
-		// return vms;
+		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
+		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
+		StartInstancesResult result = ec2.startInstances(startInstancesRequest);
+		for (InstanceStateChange i : result.getStartingInstances()) {
+			for (VirtualMachine vm : vms) {
+				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
+					vm.setState(VmState.LAUNCHING);
+				}
+			}
+		}
+		notifyOnUpdateVms(vms);
+		vmUpdater.addVmsToStartingPipeline(vms);
+		return vms;
 	}
 
 	@Override
 	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
-		// TODO fix
-		throw new NotImplementedException();
-		// List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
-		// StopInstancesRequest stopInstancesRequest = new
-		// StopInstancesRequest(instanceIds);
-		// ec2.stopInstances(stopInstancesRequest);
-		// AwsUtil.updateStatusOnVms(ec2, vms);
-		// for (VirtualMachine vm : vms) {
-		// notifyOnUpdateVmState(vm.getId(), vm.getState());
-		// }
-		// return vms;
+		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
+		StopInstancesRequest startInstancesRequest = new StopInstancesRequest(instanceIds);
+		StopInstancesResult result = ec2.stopInstances(startInstancesRequest);
+		for (InstanceStateChange i : result.getStoppingInstances()) {
+			for (VirtualMachine vm : vms) {
+				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
+					vm.setState(VmState.STOPPING);
+				}
+			}
+		}
+		notifyOnUpdateVms(vms);
+		vmUpdater.addVmsToStoppingPipeline(vms);
+		return vms;
 	}
 
 	@Override
@@ -277,7 +270,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			}
 			// TODO deleting to deleted?
 			notifyOnUpdateVms(terminatedVms);
-			// AwsVmUpdater.addVmsToDel
+			vmUpdater.addVmsToDeletingPipeline(vms);
 		} catch (AmazonEC2Exception e) {
 			logger.warn("Error terminating instances", e);
 		}
