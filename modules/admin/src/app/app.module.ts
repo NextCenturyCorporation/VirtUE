@@ -91,6 +91,9 @@ import { JsonFilterPipe } from './shared/json-filter.pipe';
 import { CountFilterPipe } from './shared/count-filter.pipe';
 import { ActiveClassDirective } from './shared/directives/active-class.directive';
 import { VirtuesService } from './shared/services/virtues.service';
+import { VmAppsComponent } from './vm-apps/vm-apps.component';
+import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
+import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
 
 
 @NgModule({
@@ -127,7 +130,10 @@ import { VirtuesService } from './shared/services/virtues.service';
     VmListComponent,
     VmBuildComponent,
     VmEditComponent,
-    ActiveClassDirective
+    ActiveClassDirective,
+    VmAppsComponent,
+    VmAppsListComponent,
+    AddVmAppComponent
   ],
   imports: [
     AppRoutingModule,
