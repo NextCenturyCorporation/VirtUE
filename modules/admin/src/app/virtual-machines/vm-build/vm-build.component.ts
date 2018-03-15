@@ -59,10 +59,33 @@ export class VmBuildComponent implements OnInit {
             }
           }
         } else {
-          // this.getUpdatedVmList();
+          this.getUpdatedAppList();
         }
       });
   }
+
+  getUpdatedAppList() {
+    this.appList = [];
+    this.appsService.getAppsList()
+      .subscribe(apps => {
+        for (let sel of this.pageAppList) {
+          for (let app of apps) {
+            if (sel === app.id) {
+              this.appList.push(app);
+              break;
+            }
+          }
+        }
+      });
+  }
+
+  removeApp(id: string, index: number): void {
+    this.appList = this.appList.filter(data => {
+      return data.id !== id;
+    });
+    this.pageAppList.splice(index, 1);
+  }
+
 
   activateModal(): void {
 
