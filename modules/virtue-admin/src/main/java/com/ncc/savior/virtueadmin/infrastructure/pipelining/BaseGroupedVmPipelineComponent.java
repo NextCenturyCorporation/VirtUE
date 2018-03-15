@@ -7,6 +7,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
@@ -25,7 +28,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  *
  */
 public abstract class BaseGroupedVmPipelineComponent implements IPipelineComponent {
-
+	private static final Logger logger = LoggerFactory.getLogger(BaseGroupedVmPipelineComponent.class);
 	private ScheduledExecutorService executor;
 	private boolean isFixedRate;
 	private long initialDelayMillis;
@@ -70,8 +73,13 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 		Runnable command = new Runnable() {
 			@Override
 			public void run() {
-				ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmCollection);
-				onExecute(vms);
+				try {
+					ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmCollection);
+					onExecute(vms);
+				} catch (Throwable t) {
+					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
+							t);
+				}
 			}
 		};
 		if (isFixedRate) {

@@ -22,7 +22,7 @@ public class SidebarController {
 	private Thread virtuePollThread;
 	private boolean terminatePollThread = false;
 	private List<DesktopVirtue> currentVirtues;
-	private long pollPeriodMillis = 500;
+	private long pollPeriodMillis = 2500;
 	private VirtueChangeHandler changeHandler;
 	private AuthorizationService authService;
 

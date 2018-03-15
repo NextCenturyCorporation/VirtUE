@@ -38,6 +38,9 @@ public class StartXpraComponent extends BaseIndividualVmPipelineComponent {
 	protected void attemptStartXpra(VirtualMachine vm) {
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		try {
+			if (logger.isTraceEnabled()) {
+				logger.trace("starting xpra get " + vm);
+			}
 			int display = appManager.startOrGetXpraServer(vm, privateKeyFile);
 			if (display > 0) {
 				vm.setState(VmState.RUNNING);

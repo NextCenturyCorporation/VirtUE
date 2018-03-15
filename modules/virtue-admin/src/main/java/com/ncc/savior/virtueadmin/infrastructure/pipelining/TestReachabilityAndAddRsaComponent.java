@@ -42,7 +42,9 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 	 */
 	protected void testReachabilityAndAddRsaKey(VirtualMachine vm) {
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
+		logger.trace("Testing if VM is reachable - " + vm);
 		if (SshUtil.isVmReachable(vm, privateKeyFile)) {
+			logger.trace("VM is reachable - " + vm);
 			String newPrivateKey = null;
 			try {
 				newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);

@@ -1,9 +1,8 @@
-package com.ncc.savior.virtueadmin.infrastructure.aws;
+package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.ncc.savior.virtueadmin.infrastructure.pipelining.BaseGroupedVmPipelineComponent;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
@@ -22,9 +21,11 @@ public class SetStatusComponent extends BaseGroupedVmPipelineComponent {
 
 	@Override
 	protected void onExecute(ArrayList<VirtualMachine> vms) {
-		for (VirtualMachine vm : vms) {
-			vm.setState(state);
+		if (!vms.isEmpty()) {
+			for (VirtualMachine vm : vms) {
+				vm.setState(state);
+			}
+			doOnSuccess(vms);
 		}
-		doOnSuccess(vms);
 	}
 }

@@ -8,6 +8,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  * A component of an {@link IUpdatePipeline}. Each pipeline does an action on
  * VMs and retries until it succeeds.
  * 
+ * Component instances cannot be reused between different pipelines!
  *
  */
 public interface IPipelineComponent {

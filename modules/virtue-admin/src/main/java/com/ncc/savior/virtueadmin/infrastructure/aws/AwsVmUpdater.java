@@ -14,6 +14,8 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsNetworkingUpdateComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
+import com.ncc.savior.virtueadmin.infrastructure.pipelining.NetworkingClearingComponent;
+import com.ncc.savior.virtueadmin.infrastructure.pipelining.SetStatusComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.StartXpraComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComponent;
@@ -29,9 +31,9 @@ public class AwsVmUpdater {
 	private IUpdatePipeline stoppingPipeline;
 
 	public AwsVmUpdater(AmazonEC2 ec2, IUpdateNotifier notifier, IKeyManager keyManager) {
-		this.provisionPipeline = new UpdatePipeline(notifier);
-		this.startingPipeline = new UpdatePipeline(notifier);
-		this.stoppingPipeline = new UpdatePipeline(notifier);
+		this.provisionPipeline = new UpdatePipeline(notifier, "provisioning");
+		this.startingPipeline = new UpdatePipeline(notifier, "starting");
+		this.stoppingPipeline = new UpdatePipeline(notifier, "stopping");
 		this.executor = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 			private int num = 1;
 			@Override
@@ -51,12 +53,12 @@ public class AwsVmUpdater {
 		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
 		startingPipeline.start();
 
-		stoppingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		stoppingPipeline.addPipelineComponent(new NetworkingClearingComponent(executor));
 		stoppingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, false));
 		stoppingPipeline.addPipelineComponent(new SetStatusComponent(executor, VmState.STOPPED));
 		stoppingPipeline.start();
 
-		logger.debug("Provision pipeline started");
+		logger.debug("Aws update pipelines started");
 		// startDebug();
 	}
 

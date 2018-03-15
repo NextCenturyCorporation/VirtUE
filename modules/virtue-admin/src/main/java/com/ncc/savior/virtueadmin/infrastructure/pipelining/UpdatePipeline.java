@@ -4,18 +4,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater.IUpdateNotifier;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 public class UpdatePipeline implements IUpdatePipeline, IUpdatePipelineResultListener {
-
+	private static final Logger logger = LoggerFactory.getLogger(UpdatePipeline.class);
 	private List<IPipelineComponent> pipeline = new ArrayList<IPipelineComponent>();
 	private boolean isStarted;
 	private IUpdateNotifier notifier;
+	private String descriptor;
 
-	public UpdatePipeline(IUpdateNotifier notifier) {
+	public UpdatePipeline(IUpdateNotifier notifier, String descriptor) {
 		this.notifier = notifier;
+		this.descriptor = descriptor;
 	}
 
 	@Override
@@ -73,8 +78,15 @@ public class UpdatePipeline implements IUpdatePipeline, IUpdatePipelineResultLis
 			throw new RuntimeException("Error currentPipelineIndex is invalid=" + currentPipelineIndex);
 		}
 		currentPipelineIndex++;
+
 		if (currentPipelineIndex < pipeline.size()) {
-			pipeline.get(currentPipelineIndex).addVirtualMachines(vms);
+			IPipelineComponent component = pipeline.get(currentPipelineIndex);
+			logger.debug("Moving VMs to next pipeline component.  Pipeline=" + descriptor + " Component="
+					+ component.getClass().getSimpleName() + " index=" + currentPipelineIndex + " VMs(" + vms.size()
+					+ ")=" + vms);
+			component.addVirtualMachines(vms);
+		} else {
+			logger.debug("VMs exiting pipeline.  Pipeline=" + descriptor + " VMs=" + vms);
 		}
 	}
 

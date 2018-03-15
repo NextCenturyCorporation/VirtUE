@@ -15,6 +15,12 @@ public interface IKeyManager {
 	 */
 	String getKeyByName(String keyName);
 
+	/**
+	 * Retrieves a file that the key is already stored in.
+	 * 
+	 * @param privateKey
+	 * @return
+	 */
 	File getKeyFileByName(String privateKey);
 
 }

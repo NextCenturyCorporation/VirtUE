@@ -112,7 +112,12 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 		Runnable command = new Runnable() {
 			@Override
 			public void run() {
+				try {
 				onExecute(vm);
+				} catch (Throwable t) {
+					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
+							t);
+				}
 			}
 		};
 		return command;

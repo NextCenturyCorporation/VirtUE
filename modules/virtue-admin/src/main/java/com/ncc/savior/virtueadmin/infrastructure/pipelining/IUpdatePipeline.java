@@ -11,6 +11,8 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  * as it succeeds on whatever action the pipeline component is expected to
  * perform.
  * 
+ * Component instances cannot be reused between different pipelines!
+ * 
  *
  */
 public interface IUpdatePipeline {
@@ -20,6 +22,8 @@ public interface IUpdatePipeline {
 	 * numbers should be added at the beginning. High numbers should be added to the
 	 * end.
 	 * 
+	 * Component instances cannot be reused between different pipelines!
+	 * 
 	 * @param component
 	 * @param index
 	 */
@@ -27,6 +31,8 @@ public interface IUpdatePipeline {
 
 	/**
 	 * Add {@link IPipelineComponent} to the end of the {@link IUpdatePipeline}.
+	 * 
+	 * Component instances cannot be reused between different pipelines!
 	 * 
 	 * @param component
 	 */

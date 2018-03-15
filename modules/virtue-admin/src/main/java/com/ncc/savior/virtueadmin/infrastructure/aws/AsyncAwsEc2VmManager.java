@@ -38,6 +38,7 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater.IUpdateNotifier;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -75,6 +76,16 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private InstanceType instanceType;
 	private AwsVmUpdater vmUpdater;
 
+	/**
+	 * 
+	 * @param keyManager
+	 *            - Handles storing keys.
+	 * @param region
+	 *            - AWS region
+	 * @param awsProfile
+	 *            - Profile used by AWS Credential Providers. It is particularly
+	 *            passed to {@link ProfileCredentialsProvider}.
+	 */
 	public AsyncAwsEc2VmManager(IKeyManager keyManager, String region, String awsProfile) {
 		this.awsProfile = awsProfile;
 		this.region = region;
@@ -113,9 +124,13 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 			@Override
 			public void updateVms(Collection<VirtualMachine> vms) {
-				logger.debug("updated VMs");
-				for (VirtualMachine vm : vms) {
-					logger.debug("  " + vm);
+				if (logger.isTraceEnabled()) {
+					if (!vms.isEmpty()) {
+						logger.trace("updated VMs");
+						for (VirtualMachine vm : vms) {
+							logger.trace("  " + vm);
+						}
+					}
 				}
 			}
 		});
@@ -181,7 +196,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
 			String loginUsername = vmt.getLoginUser();
 			String privateKeyName = serverKeyName;
-			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
+			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
+					new ArrayList<ApplicationDefinition>(vmt.getApplications()),
 					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
 					loginUsername, null, privateKeyName, instance.getPublicIpAddress());
 			vms.add(vm);

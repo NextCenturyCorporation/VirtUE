@@ -1,11 +1,9 @@
 package com.ncc.savior.virtueadmin.util;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -86,6 +84,8 @@ public class SshUtil {
 		JSch ssh = new JSch();
 		ChannelExec channel = null;
 		Session session = null;
+//		BufferedReader reader = null;
+//		BufferedReader ereader = null;
 		try {
 			ssh.addIdentity(privateKeyFile.getAbsolutePath());
 			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
@@ -95,19 +95,20 @@ public class SshUtil {
 			session.connect();
 			channel = (ChannelExec) session.openChannel("exec");
 			channel.setCommand("echo 'Testing reachability of VM'");
-			channel.connect();
+			channel.connect(0);
 
-			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
-			BufferedReader reader = new BufferedReader(stream);
-			InputStreamReader estream = new InputStreamReader(channel.getErrStream());
-			BufferedReader ereader = new BufferedReader(estream);
-			String line;
+			// InputStreamReader stream = new InputStreamReader(channel.getInputStream());
+			// reader = new BufferedReader(stream);
+			// InputStreamReader estream = new InputStreamReader(channel.getErrStream());
+			// ereader = new BufferedReader(estream);
+			// String line;
 			// logger.debug("should read line soon");
-			while ((line = reader.readLine()) != null || (line = ereader.readLine()) != null) {
-				logger.trace(line);
-			}
+			// while ((line = reader.readLine()) != null || (line = ereader.readLine()) !=
+			// null) {
+			// logger.trace(line);
+			// }
 			return true;
-		} catch (JSchException | IOException e) {
+		} catch (JSchException e) {
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
 			return false;
 		} finally {
@@ -117,6 +118,7 @@ public class SshUtil {
 			if (session != null) {
 				session.disconnect();
 			}
+//			JavaUtil.closeIgnoreErrors(reader, ereader);
 		}
 	}
 
