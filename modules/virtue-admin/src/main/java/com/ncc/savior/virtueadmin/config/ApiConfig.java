@@ -24,9 +24,8 @@ import com.ncc.savior.virtueadmin.rest.HelloResource;
 import com.ncc.savior.virtueadmin.rest.UserResource;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
-/*
- * ApiConfig is responsible for registering all the webserivce 
- * apis. 
+/**
+ * ApiConfig is responsible for registering all the webserivce apis.
  * 
  * 
  */

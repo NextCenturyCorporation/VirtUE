@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * {@link IUserManager} that uses Spring and JPA.
+ */
 public class SpringJpaUserManager implements IUserManager {
 
 	@Autowired

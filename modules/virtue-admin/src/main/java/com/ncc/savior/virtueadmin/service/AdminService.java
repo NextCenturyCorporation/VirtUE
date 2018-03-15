@@ -27,6 +27,11 @@ import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
+/**
+ * Service that provides admin function like creating Virtue templates, Vm
+ * Templates, applications as well as user functions. All actions require
+ * ROLE_ADMIN.
+ */
 public class AdminService {
 
 	private IActiveVirtueManager virtueManager;

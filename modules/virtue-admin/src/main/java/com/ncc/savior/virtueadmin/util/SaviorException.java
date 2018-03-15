@@ -22,6 +22,8 @@ public class SaviorException extends RuntimeException {
 	public static final int USER_NOT_FOUND = 255;
 	public static final int REQUESTED_USER_NOT_LOGGED_IN = 255;
 
+	public static final int CONFIGURATION_ERROR = 255;
+
 	private int errorCode;
 
 	public SaviorException(int errorCode, String message) {

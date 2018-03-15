@@ -2,9 +2,12 @@ package com.ncc.savior.virtueadmin.data;
 
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Instance of this class will manage a set of users for the system.
+ */
 public interface IUserManager {
 
-	void addUser(VirtueUser admin);
+	void addUser(VirtueUser user);
 
 	VirtueUser getUser(String username);
 

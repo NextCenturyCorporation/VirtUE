@@ -29,7 +29,7 @@ public abstract class BaseVmManager implements IVmManager {
 		stateUpdateListeners.remove(listener);
 	}
 
-	protected void updateVmState(String vmId, VmState state) {
+	protected void notifyOnUpdateVmState(String vmId, VmState state) {
 		for (IStateUpdateListener listener : stateUpdateListeners) {
 			listener.updateVmState(vmId, state);
 		}

@@ -15,6 +15,10 @@ import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
+/**
+ * Service that provides functions for a user, mostly to retrieve that user's
+ * data. All functions require ROLE_USER.
+ */
 public class UserDataService {
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;

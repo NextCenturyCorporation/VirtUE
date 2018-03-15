@@ -29,9 +29,11 @@ import org.springframework.security.core.userdetails.User;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
@@ -55,9 +57,13 @@ public class DataResource {
 	private IActiveVirtueDao activeVirtueDao;
 
 	@Autowired
+	private ICloudManager cloudManager;
+
+	@Autowired
 	private SessionRegistry sessionRegistry;
 
 	public DataResource() {
+		logger.warn("***Data Resource is currently enabled.  Please disable for production systems.***");
 	}
 
 	@GET
@@ -113,21 +119,24 @@ public class DataResource {
 
 		Date now = new Date();
 		String systemName = "system";
+		String allLinuxAmi = "ami-2b500951";
+		String linuxLoginUser = "admin";
 
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
-				OS.LINUX, "Browsers", appsBrowsers, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsBrowsers,linuxLoginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX, "All",
-				appsAll, true, now, systemName);
+		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
+				allLinuxAmi,
+				appsAll,linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
-				"Math", appsMath, true, now, systemName);
+				allLinuxAmi, appsMath,linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
-				"Drawing", appsDrawing, true, now, systemName);
+				allLinuxAmi, appsDrawing,linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
-				OS.LINUX, "LibreOffice", appsLibreOffice, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsLibreOffice,linuxLoginUser, true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
@@ -313,6 +322,11 @@ public class DataResource {
 	@GET
 	@Path("active/clear/")
 	public String clearActiveDatabase() {
+		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
+		for (VirtueInstance vi : all) {
+			cloudManager.deleteVirtue(vi);
+		}
+
 		activeVirtueDao.clear();
 		return "database cleared.";
 	}
