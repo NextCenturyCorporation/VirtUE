@@ -30,6 +30,8 @@ public class AwsVmUpdater {
 
 	public AwsVmUpdater(AmazonEC2 ec2, IUpdateNotifier notifier, IKeyManager keyManager) {
 		this.provisionPipeline = new UpdatePipeline(notifier);
+		this.startingPipeline = new UpdatePipeline(notifier);
+		this.stoppingPipeline = new UpdatePipeline(notifier);
 		this.executor = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 			private int num = 1;
 			@Override
