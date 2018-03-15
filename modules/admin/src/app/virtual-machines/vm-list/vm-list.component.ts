@@ -31,7 +31,7 @@ export class VmListComponent implements OnInit {
   }
 
   listFilter(status: any) {
-    console.log('filterValue = ' + status);
+    // console.log('filterValue = ' + status);
     this.filterValue = status;
     this.totalVms = this.vms.length;
   }

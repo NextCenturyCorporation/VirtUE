@@ -3834,7 +3834,7 @@ content #content.content {
   font-size: 18px;
 }
 /* line 364, ../scss/_styles.scss */
-.titlebar .title {
+.titlebar .titlebar-title {
   float: left;
   margin: 0;
 }
