@@ -18,12 +18,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +48,8 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceState;
-import com.amazonaws.services.ec2.model.InstanceStatus;
-import com.amazonaws.services.ec2.model.InstanceStatusSummary;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
@@ -66,7 +61,13 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
+/**
+ * {@link ICloudManager} implementation that uses AWS EC2 and Cloud Formation to
+ * create and delete Virtues.
+ *
+ */
 public class AwsManager implements ICloudManager {
 	private static final String VIRTUE_PROFILE = "virtue";
 	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
@@ -89,11 +90,11 @@ public class AwsManager implements ICloudManager {
 		try {
 			init();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SaviorException(SaviorException.CONFIGURATION_ERROR,
+					"Unable to start AwsManager due to configuration.", e);
 		}
 		this.sshKeyInjector = new SshKeyInjector();
-		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
+		this.privateKey = SshUtil.getKeyFromFile(privatekeyfile);
 
 	}
 
@@ -236,7 +237,7 @@ public class AwsManager implements ICloudManager {
 
 			// waitForReachability(createdEc2Instances);
 			renameAllVms(vms, "VRTU-" + clientUser + "-" + serverUser);
-			waitForAllVmsRunning(vms);
+			AwsUtil.waitForAllVmsRunning(ec2, vms, vmStatePollPeriodMillis);
 
 			addRsaKeyToVms(vms);
 			// rebootAllVms(vms);
@@ -294,7 +295,6 @@ public class AwsManager implements ICloudManager {
 				}
 			}
 		}
-
 	}
 
 	private void renameAllVms(Collection<VirtualMachine> vms, String prefix) {
@@ -317,9 +317,9 @@ public class AwsManager implements ICloudManager {
 		RebootInstancesRequest reboot = new RebootInstancesRequest();
 		reboot.setInstanceIds(instanceIdsToVm.keySet());
 		ec2.rebootInstances(reboot);
-		updateStatusOnVms(vms);
+		AwsUtil.updateStatusOnVms(ec2, vms);
 
-		waitForAllVmsRunning(vms);
+		AwsUtil.waitForAllVmsRunning(ec2, vms, vmStatePollPeriodMillis);
 	}
 
 	private void printTraceRunningInstances() {
@@ -335,97 +335,6 @@ public class AwsManager implements ICloudManager {
 				}
 			}
 		}
-	}
-
-	public Collection<VirtualMachine> updateStatusOnVms(Collection<VirtualMachine> vms) {
-		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
-		for (VirtualMachine vm : vms) {
-			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
-		}
-		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
-		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
-		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
-		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
-		while (itr.hasNext()) {
-			InstanceStatus status = itr.next();
-			VirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
-			vm.setState(awsStatusToSaviorState(status));
-		}
-		return vms;
-
-	}
-
-	private VmState awsStatusToSaviorState(InstanceStatus status) {
-		InstanceState vmState = status.getInstanceState();
-		InstanceStatusSummary vmStatus = status.getInstanceStatus();
-		Integer stateCode = vmState.getCode();
-
-		// 0 : pending
-		// 16 : running
-		// 32 : shutting-down
-		// 48 : terminated
-		// 64 : stopping
-		// 80 : stopped
-
-		switch (stateCode) {
-		case 0: // pending
-			return VmState.CREATING;
-		case 16: // running
-			return getRunningStateFromStatus(vmStatus, status.getInstanceId());
-		case 32: // shutting-down
-			return VmState.STOPPING;
-		case 48: // terminated
-			return VmState.DELETING;
-		case 64: // stopping
-			return VmState.STOPPING;
-		case 80: // stopped
-			return VmState.STOPPED;
-		default:
-			logger.error("Unknown state code from AWS. Code=" + stateCode + " instanceId=" + status.getInstanceId());
-		}
-		return VmState.ERROR;
-	}
-
-	private VmState getRunningStateFromStatus(InstanceStatusSummary vmStatus, String instanceId) {
-		switch (vmStatus.getStatus()) {
-		case "ok":
-			return VmState.RUNNING;
-		case "initializing":
-			return VmState.LAUNCHING;
-		default:
-			logger.error("Unknown status from AWS. Code=" + vmStatus.getStatus() + " instanceId=" + instanceId);
-		}
-		// }
-		return VmState.ERROR;
-	}
-
-	private void waitForAllVmsRunning(Collection<VirtualMachine> vms) {
-		boolean throwOnErrorState = true;
-
-		while (!areAllVmsRunning(vms, throwOnErrorState)) {
-			try {
-				Thread.sleep(vmStatePollPeriodMillis);
-			} catch (InterruptedException e) {
-				logger.error("Poll sleep interrupted!");
-			}
-			vms = updateStatusOnVms(vms);
-		}
-	}
-
-	private boolean areAllVmsRunning(Collection<VirtualMachine> vms, boolean throwOnErrorState) {
-		logger.trace("Checking status of VMs:");
-		for (VirtualMachine vm : vms) {
-			logger.trace("  " + vm.toString());
-			VmState state = vm.getState();
-			if (VmState.RUNNING.equals(state)) {
-				continue;
-			} else if (throwOnErrorState && (state == null || VmState.ERROR.equals(state))) {
-				throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Vm state is in error.  VM=" + vm);
-			} else {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	private String getStackName(String clientUser, String serverUser, String uuid) {
@@ -562,13 +471,13 @@ public class AwsManager implements ICloudManager {
 		return stackStatus + (stackReason == null ? "" : " (" + stackReason + ")");
 	}
 
-	public static void main(String[] args) {
-		AwsManager am = new AwsManager(new File("./certs/vrtu.pem"));
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		VirtualMachine vm = new VirtualMachine("test", "test", null, null, OS.LINUX, "test",
-				"ec2-52-90-135-66.compute-1.amazonaws.com", 22, "admin", am.privateKey, "");
-		vms.add(vm);
-		am.addRsaKeyToVms(vms);
+	@Override
+	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
+		throw new NotImplementedException();
 	}
 
+	@Override
+	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
+		throw new NotImplementedException();
+	}
 }

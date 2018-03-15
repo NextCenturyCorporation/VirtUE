@@ -17,7 +17,7 @@ public interface IXpraInitiator {
 	 * @return
 	 * @throws IOException
 	 */
-	public Set<Integer> getXpraServers() throws IOException;
+	public Set<Integer> getXpraServersWithRetries() throws IOException;
 
 	/**
 	 * Starts xpra server on a new display and returns that display.

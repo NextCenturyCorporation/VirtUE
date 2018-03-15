@@ -7,6 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.userdetails.User;
 
+/**
+ * Model object that represents a session.
+ */
 public class VirtueSession {
 
 	private String sessionId;

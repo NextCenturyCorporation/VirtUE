@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
@@ -28,6 +30,7 @@ import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
  *
  */
 public class DesktopVirtueService {
+	private static final Logger logger = LoggerFactory.getLogger(DesktopVirtueService.class);
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
 	private IApplicationManager applicationManager;
@@ -73,23 +76,30 @@ public class DesktopVirtueService {
 		return virtues;
 	}
 
-	public DesktopVirtueApplication startApplication(String virtueId, String applicationId)
-			throws IOException {
+	public DesktopVirtueApplication startApplication(String virtueId, String applicationId) throws IOException {
 		verifyAndReturnUser();
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
-		applicationManager.startApplicationOnVm(vm, application, 5);
+		applicationManager.startApplicationOnVm(vm, application, 15);
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
 				vm.getUserName(), vm.getPrivateKey());
+		logger.debug("started app: " + dva);
 		return dva;
 	}
 
 	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, String applicationId)
 			throws IOException {
+		logger.debug("Attempting to start application from template.  TemplateId=" + templateId + " applicationId="
+				+ applicationId);
+		long a = System.currentTimeMillis();
 		verifyAndReturnUser();
 		VirtueInstance instance = createVirtue(templateId);
-		return startApplication(instance.getId(), applicationId);
+
+		DesktopVirtueApplication app = startApplication(instance.getId(), applicationId);
+		long b = System.currentTimeMillis();
+		logger.debug("Starting application from template took " + ((b - a) / 1000) / 60.0 + " minutes");
+		return app;
 	}
 
 	public void stopApplication(String virtueId, String applicationId) throws IOException {
@@ -132,11 +142,10 @@ public class DesktopVirtueService {
 		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap);
 	}
 
-
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,"User did not have USER role");
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have USER role");
 		}
 		return user;
 	}

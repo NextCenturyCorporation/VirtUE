@@ -1,8 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -13,8 +11,9 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.SaviorException;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Virtual machine manager that assumes it has a single VM which will fulfill
@@ -32,32 +31,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	private String ipAddress; 
 
 	public StaticMachineVmManager(String hostname, int sshPort, String userName, File privateKey, OS os) {
-		this(hostname, sshPort, userName, getKeyFromFile(privateKey), os);
-	}
-
-	static String getKeyFromFile(File privateKey) {
-		FileReader reader = null;
-		if (privateKey == null || !privateKey.isFile()) {
-			return "";
-		}
-		try {
-			reader = new FileReader(privateKey);
-			char[] cbuf = new char[4096];
-			int n = reader.read(cbuf);
-			String s = new String(cbuf, 0, n);
-			return s;
-		} catch (IOException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
-					"Error attempting to read file=" + privateKey.getAbsolutePath(), e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					logger.error("Error attempting to close file=" + privateKey.getAbsolutePath());
-				}
-			}
-		}
+		this(hostname, sshPort, userName, SshUtil.getKeyFromFile(privateKey), os);
 	}
 
 	public StaticMachineVmManager(String hostname, int sshPort, String userName, String privateKey, OS os) {
@@ -69,9 +43,10 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
+	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
+				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey,
+				ipAddress);
 		return vm;
 	}
 
@@ -93,19 +68,42 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public VmState getVirtialMachineState(VirtualMachine vm) {
+	public VmState getVirtualMachineState(VirtualMachine vm) {
 		return VmState.RUNNING;
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, ipAddress);
+					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, user.getUsername(),
+					privateKey, ipAddress);
 			vms.add(vm);
 
+		}
+		logger.debug("Pretending to provision " + vms.size() + " VMs from a single VM.");
+		return vms;
+	}
+
+	@Override
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+		for (VirtualMachine vm : vms) {
+			startVirtualMachine(vm);
+		}
+		return vms;
+	}
+
+	@Override
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+		for (VirtualMachine vm : vms) {
+			stopVirtualMachine(vm);
 		}
 		return vms;
 	}

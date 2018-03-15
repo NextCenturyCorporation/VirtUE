@@ -18,8 +18,6 @@ public class SecurityUserService {
 	private IUserManager userManager;
 
 	public VirtueUser getCurrentUser() {
-		// TODO hook up to Spring Security at some point.
-		// return User.testUser();
 		return getUserFromSpringContext();
 	}
 

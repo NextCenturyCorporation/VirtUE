@@ -119,7 +119,7 @@ public class VirtualMachine {
 		this.os = os;
 	}
 
-	protected void setHostname(String hostname) {
+	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
 
@@ -142,7 +142,7 @@ public class VirtualMachine {
 		return ipAddress;
 	}
 
-	protected void setIpAddress(String ipAddress) {
+	public void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
 

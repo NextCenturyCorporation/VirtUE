@@ -17,6 +17,7 @@ public class VirtualMachineTemplate {
 	private String name;
 	private OS os;
 	private String templatePath;
+	private String loginUser;
 	@ManyToMany()
 	private Collection<ApplicationDefinition> applications;
 	@ColumnDefault("true")
@@ -25,7 +26,8 @@ public class VirtualMachineTemplate {
 	private String lastEditor;
 
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
-			Collection<ApplicationDefinition> applications, boolean enabled, Date lastModification, String lastEditor) {
+			Collection<ApplicationDefinition> applications, String loginUser, boolean enabled, Date lastModification,
+			String lastEditor) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -35,6 +37,7 @@ public class VirtualMachineTemplate {
 		this.enabled = enabled;
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
+		this.loginUser = loginUser;
 	}
 
 	/**
@@ -54,6 +57,7 @@ public class VirtualMachineTemplate {
 		this.enabled = vmTemplate.isEnabled();
 		this.lastModification = vmTemplate.getLastModification();
 		this.lastEditor = vmTemplate.getLastEditor();
+		this.loginUser = vmTemplate.getLoginUser();
 	}
 
 	public String getId() {
@@ -120,10 +124,18 @@ public class VirtualMachineTemplate {
 		this.lastEditor = lastEditor;
 	}
 
+	public String getLoginUser() {
+		return loginUser;
+	}
+
+	public void setLoginUser(String loginUser) {
+		this.loginUser = loginUser;
+	}
+
 	@Override
 	public String toString() {
 		return "VirtualMachineTemplate [id=" + id + ", name=" + name + ", os=" + os + ", templatePath=" + templatePath
-				+ ", applications=" + applications + ", enabled=" + enabled + ", lastModification=" + lastModification
-				+ ", lastEditor=" + lastEditor + "]";
+				+ ", loginUser=" + loginUser + ", applications=" + applications + ", enabled=" + enabled
+				+ ", lastModification=" + lastModification + ", lastEditor=" + lastEditor + "]";
 	}
 }

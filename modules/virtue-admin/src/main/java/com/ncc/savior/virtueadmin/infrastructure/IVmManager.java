@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
@@ -43,7 +44,7 @@ public interface IVmManager {
 	 * @param vmt
 	 * @return
 	 */
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt);
+	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
@@ -56,6 +57,8 @@ public interface IVmManager {
 	 */
 	public VirtualMachine startVirtualMachine(VirtualMachine vm);
 
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms);
+
 	/**
 	 * Initiates a stop action on the provided VM. It is not guaranteed that the VM
 	 * will be stopped when this function returns. However, if the VM is not stopped
@@ -66,6 +69,8 @@ public interface IVmManager {
 	 * @return
 	 */
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm);
+
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms);
 
 	/**
 	 * Calling this function notifies that the VM is no longer needed and the
@@ -85,14 +90,25 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VmState getVirtialMachineState(VirtualMachine vm);
+	public VmState getVirtualMachineState(VirtualMachine vm);
 
 	/**
 	 * Convenience/Performance function to provision multiple VMs at one time. See
 	 * details from {@link IVmManager#startVirtualMachine(VirtualMachine)}.
 	 * 
+	 * @param user
+	 * 
 	 * @param vmTemplates
 	 * @return
 	 */
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(Collection<VirtualMachineTemplate> vmTemplates);
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
+			Collection<VirtualMachineTemplate> vmTemplates);
+
+	/**
+	 * Deletes all vms
+	 * 
+	 * @param vms
+	 */
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
+
 }
