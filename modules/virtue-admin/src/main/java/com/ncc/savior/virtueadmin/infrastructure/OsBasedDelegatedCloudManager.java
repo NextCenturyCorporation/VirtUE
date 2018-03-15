@@ -8,15 +8,15 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
- * {@link ICloudManager} implementation which defers individual VM actions to
+ * {@link ICloudManager} implementation which delegates individual VM actions to
  * multiple {@link IVmManager}s based on the OS of the VM.
  *
  */
-public class OsBasedDeferredCloudManager extends BaseDeferredCloudManager {
+public class OsBasedDelegatedCloudManager extends BaseDelegatedCloudManager {
 
 	private Map<OS, IVmManager> managerMap;
 
-	public OsBasedDeferredCloudManager(Map<OS, IVmManager> managerMap) {
+	public OsBasedDelegatedCloudManager(Map<OS, IVmManager> managerMap) {
 		this.managerMap = managerMap;
 	}
 

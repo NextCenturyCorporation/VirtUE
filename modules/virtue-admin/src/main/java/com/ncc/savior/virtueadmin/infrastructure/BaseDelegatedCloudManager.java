@@ -13,11 +13,11 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 /**
- * Base class for cloud managers where VM's in a virtue are split between
- * multiple {@link IVmManager}s based on some aspect of the
+ * Base class for cloud managers where actions on VM's in a virtue are split
+ * between multiple {@link IVmManager}s based on some aspect of the
  * {@link VirtualMachine} or {@link VirtualMachineTemplate}.
  */
-public abstract class BaseDeferredCloudManager implements ICloudManager {
+public abstract class BaseDelegatedCloudManager implements ICloudManager {
 
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance) {
