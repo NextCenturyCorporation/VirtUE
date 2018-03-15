@@ -3657,26 +3657,31 @@ content #content.content {
   padding-top: 1.1rem;
 }
 
-/* line 230, ../scss/_styles.scss */
+/* line 231, ../scss/_styles.scss */
+.filters span {
+  font-family: 'Raleway500', Arial, sans-serif;
+}
+
+/* line 236, ../scss/_styles.scss */
 .paging {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
   margin-top: 0.75rem;
 }
-/* line 235, ../scss/_styles.scss */
+/* line 241, ../scss/_styles.scss */
 .paging .page-number {
   text-align: left;
 }
-/* line 238, ../scss/_styles.scss */
+/* line 244, ../scss/_styles.scss */
 .paging .page-controls {
   text-align: center;
 }
-/* line 241, ../scss/_styles.scss */
+/* line 247, ../scss/_styles.scss */
 .paging .page-item-total {
   text-align: right;
 }
 
-/* line 247, ../scss/_styles.scss */
+/* line 253, ../scss/_styles.scss */
 .table-container, .data-list {
   font-family: 'Raleway500', Arial, sans-serif;
   margin: 10px 0;
@@ -3685,24 +3690,24 @@ content #content.content {
   overflow-x: hidden;
 }
 
-/* line 255, ../scss/_styles.scss */
+/* line 261, ../scss/_styles.scss */
 .table-container {
   border: 1px solid #B2B2B2;
 }
 
-/* line 259, ../scss/_styles.scss */
+/* line 265, ../scss/_styles.scss */
 .data-list {
   border-top: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 262, ../scss/_styles.scss */
+/* line 268, ../scss/_styles.scss */
 .data-list .table-header-group {
   border-right: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
   border-left: 1px solid #B2B2B2;
 }
 
-/* line 268, ../scss/_styles.scss */
+/* line 274, ../scss/_styles.scss */
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;
   display: flex;
@@ -3710,22 +3715,22 @@ content #content.content {
   align-items: stretch;
 }
 
-/* line 274, ../scss/_styles.scss */
+/* line 280, ../scss/_styles.scss */
 .table-row {
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 276, ../scss/_styles.scss */
+/* line 282, ../scss/_styles.scss */
 .table-row:last-child {
   border-bottom: none;
 }
 
-/* line 280, ../scss/_styles.scss */
+/* line 286, ../scss/_styles.scss */
 .table-header, .table-data {
   padding-top: 0.65rem;
   padding-bottom: 0.65rem;
 }
 
-/* line 284, ../scss/_styles.scss */
+/* line 290, ../scss/_styles.scss */
 .table-header {
   font-family: 'Raleway600', Arial, sans-serif;
   background-color: #E9E3E6;
@@ -3733,30 +3738,30 @@ content #content.content {
   align-items: flex-end;
 }
 
-/* line 290, ../scss/_styles.scss */
+/* line 296, ../scss/_styles.scss */
 .table-header span {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-/* line 295, ../scss/_styles.scss */
+/* line 301, ../scss/_styles.scss */
 .table-row.active .menu-options {
   display: block;
 }
 
-/* line 299, ../scss/_styles.scss */
+/* line 305, ../scss/_styles.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
-/* line 303, ../scss/_styles.scss */
+/* line 309, ../scss/_styles.scss */
 .table-data span {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
 }
-/* line 308, ../scss/_styles.scss */
+/* line 314, ../scss/_styles.scss */
 .table-data .menu-options {
   clear: both;
   display: none;
@@ -3764,7 +3769,7 @@ content #content.content {
   font-weight: 600;
   margin: 0;
 }
-/* line 315, ../scss/_styles.scss */
+/* line 321, ../scss/_styles.scss */
 .table-data .menu-options button {
   background-color: transparent;
   border: none;
@@ -3774,26 +3779,26 @@ content #content.content {
   padding: 0;
   text-decoration: none;
 }
-/* line 324, ../scss/_styles.scss */
+/* line 330, ../scss/_styles.scss */
 .table-data .menu-options button:hover {
   text-decoration: underline;
 }
 
-/* line 331, ../scss/_styles.scss */
+/* line 337, ../scss/_styles.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 336, ../scss/_styles.scss */
+/* line 342, ../scss/_styles.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 339, ../scss/_styles.scss */
+/* line 345, ../scss/_styles.scss */
 .titlebar {
   clear: both;
   display: block;
@@ -3801,39 +3806,39 @@ content #content.content {
   margin-bottom: 1.2rem;
   min-height: 1rem;
 }
-/* line 346, ../scss/_styles.scss */
+/* line 352, ../scss/_styles.scss */
 .titlebar:after {
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 352, ../scss/_styles.scss */
+/* line 358, ../scss/_styles.scss */
 .titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
   margin-top: 0;
 }
-/* line 353, ../scss/_styles.scss */
+/* line 359, ../scss/_styles.scss */
 .titlebar h2 {
   font-size: 28px;
 }
-/* line 354, ../scss/_styles.scss */
+/* line 360, ../scss/_styles.scss */
 .titlebar h3 {
   font-size: 24px;
 }
-/* line 355, ../scss/_styles.scss */
+/* line 361, ../scss/_styles.scss */
 .titlebar h4 {
   font-size: 20px;
 }
-/* line 356, ../scss/_styles.scss */
+/* line 362, ../scss/_styles.scss */
 .titlebar h5 {
   font-size: 18px;
 }
-/* line 358, ../scss/_styles.scss */
+/* line 364, ../scss/_styles.scss */
 .titlebar .title {
   float: left;
   margin: 0;
 }
-/* line 362, ../scss/_styles.scss */
+/* line 368, ../scss/_styles.scss */
 .titlebar .titlebar-button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
@@ -3844,14 +3849,14 @@ content #content.content {
   padding: 0.5rem 0.7rem;
 }
 
-/* line 373, ../scss/_styles.scss */
+/* line 379, ../scss/_styles.scss */
 .no-data-message {
   display: block;
   border-top: 1px solid #b2b2b2;
   border-bottom: 1px solid #b2b2b2;
 }
 
-/* line 378, ../scss/_styles.scss */
+/* line 384, ../scss/_styles.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3859,19 +3864,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 385, ../scss/_styles.scss */
+/* line 391, ../scss/_styles.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 388, ../scss/_styles.scss */
+/* line 394, ../scss/_styles.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 392, ../scss/_styles.scss */
+/* line 398, ../scss/_styles.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3880,7 +3885,7 @@ footer {
   position: relative;
 }
 
-/* line 399, ../scss/_styles.scss */
+/* line 405, ../scss/_styles.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;

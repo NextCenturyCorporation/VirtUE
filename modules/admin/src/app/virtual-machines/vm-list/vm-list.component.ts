@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { VirtualMachineService } from '../../shared/services/vm.service';
-import { JsonFilterPipe } from '../../shared/json-filter.pipe';
-import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 @Component({
   selector: 'app-vm-list',
@@ -11,10 +9,12 @@ import { CountFilterPipe } from '../../shared/count-filter.pipe';
 })
 export class VmListComponent implements OnInit {
 
-  noListData = false;
-  vmlist: string;
   vms = [];
-  vmLength: number;
+  filterValue = '*';
+  noListData = false;
+
+  vmlist: string;
+  totalVms: number;
 
   constructor( private vmService: VirtualMachineService ) { }
 
@@ -24,7 +24,16 @@ export class VmListComponent implements OnInit {
 
   getVmList() {
     this.vmService.getVmList()
-      .subscribe(vmlist => this.vms = vmlist);
+      .subscribe(vmlist => {
+        this.vms = vmlist;
+        this.totalVms = vmlist.length;
+      });
+  }
+
+  listFilter(status: any) {
+    console.log('filterValue = ' + status);
+    this.filterValue = status;
+    this.totalVms = this.vms.length;
   }
 
   // addVM(name: string, status: string) {

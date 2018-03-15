@@ -8,7 +8,7 @@
     <div id="content">
       <div class="mui-container-fluid">
         <!-- if there are no virtues, show this message -->
-        <div class="mui-row margin-top-10">
+        <div class="mui-row margin-top-10" *ngIf="apps.length < 1">
           <div class="mui-col-md-12 padding-left-0">
             <p class="no-data-message">
               No applications can be found at this time. To add an application, click on the button "Add New App" above.
@@ -19,44 +19,46 @@
 
       <!-- if there are virtues, show this list -->
       <div class="mui-container-fluid">
-        <div class="mui-row virtues-filters">
-          <div class="virtues-filter mui-col-md-12 padding-left-0">All Apps | <a href="#">Disabled Apps</a></div>
+        <div class="mui-row">
+          <div class="mui-col-md-12 padding-left-0 filters">
+            <span *ngIf="filterValue === '*'">All Apps</span>
+            <a mat-button *ngIf="filterValue !== '*'"  (click)="listFilter('*')">All Apps</a> |
+            <span *ngIf="filterValue === true">Enabled Apps</span>
+            <a mat-button *ngIf="filterValue !== true" (click)="listFilter(true)">Enabled Apps</a> |
+            <span *ngIf="filterValue === false">Disabled Apps</span>
+            <a mat-button *ngIf="filterValue !== false" (click)="listFilter(false)">Disabled Apps</a>
+          </div>
         </div>
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-3">Application Name</div>
+          <div class="table-header mui-col-md-6">Application Name</div>
+          <div class="table-header mui-col-md-2">Version</div>
           <div class="table-header mui-col-md-2">OS</div>
-          <div class="table-header mui-col-md-3">Virtual Machines</div>
-          <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
-        <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
-          <div class="table-data mui-col-md-3">
-            <a class="edit">Application Name</a>
+        <div *ngFor="let app of apps | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
+          <div class="table-data mui-col-md-6">
+            <a class="edit">{{ app.name }}</a>
             <!-- if this virtue is enabled show this menu -->
-            <span class="menu-options">Duplicate | <a mat-button>Disable</a> | Export</span>
+            <span *ngIf="app.enabled" class="menu-options"><a mat-button>Disable</a> | <a mat-button>Check for Updates</a></span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span class="menu-options"><a mat-button>Enable</a> | <a mat-button>Delete</a></span>
+            <span *ngIf="app.enabled===false" class="menu-options"><a mat-button>Enable</a> | <a mat-button>Uninstall</a></span>
           </div>
 
-          <div class="table-data mui-col-md-2">&nbsp;</div>
-          <div class="table-data mui-col-md-3">
-             <span [ngStyle]="{'margin-left':0}">&nbsp;</span>
-          </div>
-          <div class="table-data mui-col-md-2">&nbsp;</div>
+          <div class="table-data mui-col-md-2">{{ app.version }}</div>
+          <div class="table-data mui-col-md-2">{{ app.os }}</div>
           <div class="table-data mui-col-md-2">
-            <!-- virtue.enabled ? 'Enabled' : 'Disabled'<br />
-            virtue.lastModification | date:'short' -->
+            <!-- app.enabled ? 'Enabled' : 'Disabled' -->
           </div>
           <div class="clearfix"></div>
         </div>
       </div>
       <div class="paging">
-        <div class="page-number mui-col-md-4">Page # of #</div>
+        <div class="page-number mui-col-md-4">&nbsp;</div>
         <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
-        <div class="page-item-total mui-col-md-4"># Virtues</div>
+        <div class="page-item-total mui-col-md-4">{{ totalApps }} Installed Applications</div>
         <div class="clearfix"></div>
       </div>
     </div>

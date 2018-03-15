@@ -227,6 +227,12 @@ content {
   }
 }
 
+.filters {
+  span {
+    font-family: 'Raleway500', Arial, sans-serif;
+  }
+}
+
 .paging {
   @include raleway;
   font-size: 0.88rem;

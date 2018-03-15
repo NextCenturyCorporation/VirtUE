@@ -13,7 +13,7 @@ export class CountFilterPipe implements PipeTransform {
     const resultArray = [];
 
     for (const item of value) {
-      if (item[propName].toLowerCase().match(filterString)) {
+      if (item[propName].match(filterString)) {
         resultArray.push(item);
       }
     }

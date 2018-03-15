@@ -84,16 +84,19 @@ import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
 import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
 import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
 
-import { DialogsComponent } from './dialogs/dialogs.component';
-import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-
-import { JsonFilterPipe } from './shared/json-filter.pipe';
-import { CountFilterPipe } from './shared/count-filter.pipe';
-import { ActiveClassDirective } from './shared/directives/active-class.directive';
-import { VirtuesService } from './shared/services/virtues.service';
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
 import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
+
+import { DialogsComponent } from './dialogs/dialogs.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+
+import { ActiveClassDirective } from './shared/directives/active-class.directive';
+import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
+import { JsonFilterPipe } from './shared/pipes/json-filter.pipe';
+import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
+import { VirtuesService } from './shared/services/virtues.service';
+import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-modal.component';
 
 
 @NgModule({
@@ -123,6 +126,7 @@ import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
     FileShareComponent,
     PrintersComponent,
     ConfigSensorsComponent,
+    ListFilterPipe,
     JsonFilterPipe,
     CountFilterPipe,
     PageNotFoundComponent,
@@ -133,7 +137,8 @@ import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
     ActiveClassDirective,
     VmAppsComponent,
     VmAppsListComponent,
-    AddVmAppComponent
+    AddVmAppComponent,
+    VmAppsModalComponent
   ],
   imports: [
     AppRoutingModule,
@@ -163,6 +168,7 @@ import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
   ],
   bootstrap: [AppComponent],
   entryComponents: [
+    VmAppsModalComponent,
     VmModalComponent,
     DialogsComponent,
     VirtueModalComponent,

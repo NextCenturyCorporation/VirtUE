@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs/Rx';
 
 @Component({
   selector: 'app-vm-apps',
@@ -6,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class VmAppsComponent implements OnInit {
 
-  constructor() { }
+  constructor( private router: ActivatedRoute ) { }
 
   ngOnInit() {
   }
