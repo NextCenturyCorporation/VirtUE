@@ -27,7 +27,8 @@ export class VmAppsListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private appsService: VmAppsService,
-    public dialog: MatDialog,) { }
+    public dialog: MatDialog
+  ) { }
 
   ngOnInit() {
     this.appsService.getAppsList()

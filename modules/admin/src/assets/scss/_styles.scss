@@ -270,6 +270,9 @@ content {
     border-bottom: 1px solid #B2B2B2;
     border-left: 1px solid #B2B2B2;
   }
+  .table-data {
+    min-height: 56px;
+  }
 }
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;

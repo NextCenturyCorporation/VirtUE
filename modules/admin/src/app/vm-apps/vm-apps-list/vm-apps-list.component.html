@@ -1,6 +1,6 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h1 class="title">Applications</h1>
+    <h1 class="titlebar-title">Applications</h1>
     <button class="titlebar-button" [routerLink]="['add-app']">Add New App</button>
   </div>
 
@@ -35,11 +35,11 @@
           <div class="table-header mui-col-md-6">Application Name</div>
           <div class="table-header mui-col-md-2">Version</div>
           <div class="table-header mui-col-md-2">OS</div>
-          <div class="table-header mui-col-md-2">Date</div>
+          <div class="table-header mui-col-md-2">Status</div>
         </div>
         <div *ngFor="let app of apps | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-6">
-            <a class="edit">{{ app.name }}</a>
+            {{ app.name }}
             <!-- if this virtue is enabled show this menu -->
             <span *ngIf="app.enabled" class="menu-options"><a mat-button>Disable</a> | <a mat-button>Check for Updates</a></span>
 
@@ -50,14 +50,14 @@
           <div class="table-data mui-col-md-2">{{ app.version }}</div>
           <div class="table-data mui-col-md-2">{{ app.os }}</div>
           <div class="table-data mui-col-md-2">
-            <!-- app.enabled ? 'Enabled' : 'Disabled' -->
+            {{ app.enabled ? 'Enabled' : 'Disabled' }}
           </div>
           <div class="clearfix"></div>
         </div>
       </div>
       <div class="paging">
         <div class="page-number mui-col-md-4">&nbsp;</div>
-        <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
+        <div class="page-controls mui-col-md-4"><!-- < First | < Previous | Next > | Last > --></div>
         <div class="page-item-total mui-col-md-4">{{ totalApps }} Installed Applications</div>
         <div class="clearfix"></div>
       </div>
