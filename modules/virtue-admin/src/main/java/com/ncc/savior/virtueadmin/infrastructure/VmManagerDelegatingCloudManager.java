@@ -8,17 +8,17 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 /**
- * Cloud manager that simply defers its actions to a give {@link IVmManager}.
+ * Cloud manager that simply delegates its actions to a given
+ * {@link IVmManager}. All actions are performed in the {@link IVmManager} given
+ * in the constructor.
  *
  */
 
-public class VmManagerDeferringCloudManager implements ICloudManager {
+public class VmManagerDelegatingCloudManager implements ICloudManager {
 
 	private IVmManager vmManager;
 
-	public VmManagerDeferringCloudManager(IVmManager vmManager) {
-		// TODO make multiple vm managers a valid option with methods to give a set of
-		// the VMs to each.
+	public VmManagerDelegatingCloudManager(IVmManager vmManager) {
 		this.vmManager = vmManager;
 	}
 

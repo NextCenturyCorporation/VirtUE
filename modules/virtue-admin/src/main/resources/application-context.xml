@@ -76,7 +76,7 @@
 		<constructor-arg ref="virtueDao"></constructor-arg>
 	</bean>
 	<bean name="cloudManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.OsBasedDeferredCloudManager">
+		class="com.ncc.savior.virtueadmin.infrastructure.OsBasedDelegatedCloudManager">
 		<constructor-arg>
 			<map>
 				<entry key="WINDOWS" value-ref="awsVmManager"></entry>
@@ -84,7 +84,7 @@
 			</map>
 		</constructor-arg>
 	</bean>
-	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.VmManagerDeferringCloudManager"> -->
+	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.VmManagerDelegatingCloudManager"> -->
 	<!-- <constructor-arg ref="awsVmManager"></constructor-arg> -->
 	<!-- </bean> -->
 	<!-- <bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.staticvm.StaticMachineCloudManager"> -->
