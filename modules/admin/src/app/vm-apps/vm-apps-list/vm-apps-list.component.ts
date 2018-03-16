@@ -48,6 +48,22 @@ export class VmAppsListComponent implements OnInit {
     this.totalApps = this.apps.length;
   }
 
+  openDialogPrompt(id, type, text): void {
+    let dialogRef = this.dialog.open(DialogsComponent, {
+      width: '450px',
+      data:  {
+          dialogText: text,
+          dialogType: type
+        }
+    });
+
+    dialogRef.updatePosition({ top: '15%', left: '36%' });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
+  }
+  
   openAppsDialog(): void {
     let dialogRef = this.dialog.open(AddVmAppComponent, {
       width: '480px',
