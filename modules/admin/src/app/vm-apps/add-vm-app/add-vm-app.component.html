@@ -1,11 +1,31 @@
-<h3>Upload or Paste URL the Application Package</h3>
+<h3>Install Application Package</h3>
 <form>
-  <p>
+  <mat-form-field *ngIf="selectedOs == null">
+    <mat-select placeholder="Select OS" [(ngModel)]="selectedOs" name="os">
+      <mat-option *ngFor="let os of osList" [value]="os">
+        {{ os }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <p [ngClass]="{
+    'hide':selectedOs == null,
+    'selected-value':selectedOs != null
+  }">{{ selectedOs }}</p>
+
+  <mat-form-field *ngIf="selectedOs === 'LINUX'">
+    <mat-select placeholder="Select Distribution" [(ngModel)]="selectedDist" name="os">
+      <mat-option *ngFor="let d of distroList" [value]="d">
+        {{ d }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <p *ngIf="selectedOs === 'Windows'">
     <label for="file">Upload Package:</label><br />
     <input type="file" id="file" (change)="handleFIleInput($event.target.files)" />
   </p>
-  <p>
-    <label for="url">Paste URL to Package:</label>
+  <p *ngIf="selectedOs === 'LINUX' && selectedDist != null">
+    <label for="url">Package Name:</label>
     <input type="text" id="url" (change)="handleFIleInput($event.target.files)" />
   </p>
   <hr />
@@ -16,7 +36,7 @@
     <div class="mui-col-md-4 form-item text-align-center">
       <!-- <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Install Another Application</span> -->
       <button class="button-submit" type="submit">Install</button>
-      <button (click)="onNoClick()" class="button-cancel" type="cancel">Cancel</button>
+      <button (click)="onCancel()" class="button-cancel" type="cancel">Cancel</button>
     </div>
     <div class="mui-col-md-4"></div>
   </div>

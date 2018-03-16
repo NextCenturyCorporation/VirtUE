@@ -7,6 +7,11 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 })
 export class AddVmAppComponent implements OnInit {
 
+  osList = ['LINUX','Windows'];
+  distroList = ['Debian'];
+  selectedOs: string;
+  selectedDist: string;
+
   constructor(
     public dialogRef: MatDialogRef<AddVmAppComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -15,8 +20,10 @@ export class AddVmAppComponent implements OnInit {
   ngOnInit() {
   }
 
-  onNoClick(): void {
+  onCancel(): void {
     this.dialogRef.close();
+    this.selectedOs = null;
+    this.selectedDist = null;
   }
 
 }
