@@ -124,4 +124,10 @@ public interface ITemplateManager {
 	void deleteVmTemplate(String templateId);
 
 	void deleteVirtueTemplate(String templateId);
+
+	Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts);
+
+	Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds);
+
+	Iterable<ApplicationDefinition> getApplications(Collection<String> appIds);
 }

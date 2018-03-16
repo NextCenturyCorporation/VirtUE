@@ -156,7 +156,7 @@ public class VirtueTemplate {
 	}
 
 	@JsonGetter
-	protected Collection<String> getVirtualMachineTemplateIds() {
+	public Collection<String> getVirtualMachineTemplateIds() {
 		if (vmTemplates != null) {
 			virtualMachineTemplateIds = new ArrayList<String>();
 			for (VirtualMachineTemplate vmt : vmTemplates) {

@@ -71,6 +71,9 @@ public class VirtueUser {
 	}
 
 	public void addVirtueTemplate(VirtueTemplate virtueTemplate) {
+		if (virtueTemplates == null) {
+			virtueTemplates = new ArrayList<VirtueTemplate>();
+		}
 		virtueTemplates.add(virtueTemplate);
 	}
 
@@ -97,7 +100,7 @@ public class VirtueUser {
 	}
 
 	@JsonGetter
-	protected Collection<String> getVirtueTemplateIds() {
+	public Collection<String> getVirtueTemplateIds() {
 		if (virtueTemplates != null) {
 			virtueTemplateIds = new ArrayList<String>();
 			for (VirtueTemplate vt : virtueTemplates) {
