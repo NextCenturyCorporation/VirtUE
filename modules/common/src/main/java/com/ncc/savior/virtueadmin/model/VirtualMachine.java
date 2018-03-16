@@ -1,11 +1,16 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class VirtualMachine {
@@ -25,6 +30,9 @@ public class VirtualMachine {
 	// app ID to application
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
+
+	@Transient
+	private Collection<String> applicationIds;
 
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
 			String infrastructureId, String hostname, int sshPort, String userName, String privateKey,
@@ -60,6 +68,7 @@ public class VirtualMachine {
 		return name;
 	}
 
+	@JsonIgnore
 	public Collection<ApplicationDefinition> getApplications() {
 		return applications;
 	}
@@ -137,8 +146,8 @@ public class VirtualMachine {
 	public String toString() {
 		return "VirtualMachine [id=" + id + ", name=" + name + ", state=" + state + ", os=" + os + ", hostname="
 				+ hostname + ", sshPort=" + sshPort + ", infrastructureId=" + infrastructureId + ", userName="
-				+ userName + ", privateKey=[protected], privateKeyName=" + privateKeyName + ", ipAddress="
-				+ ipAddress + ", applications=" + applications + "]";
+				+ userName + ", privateKey=[protected], privateKeyName=" + privateKeyName + ", ipAddress=" + ipAddress
+				+ ", applications=" + applications + "]";
 	}
 
 	public String getIpAddress() {
@@ -164,5 +173,20 @@ public class VirtualMachine {
 
 	public void setPrivateKeyName(String privateKeyName) {
 		this.privateKeyName = privateKeyName;
+	}
+
+	@JsonGetter
+	public Collection<String> getApplicationIds() {
+		if (applications != null) {
+			applicationIds = new ArrayList<String>();
+			for (ApplicationDefinition app : applications) {
+				applicationIds.add(app.getId());
+			}
+		}
+		return applicationIds;
+	}
+
+	protected void setApplicationIds(Collection<String> applicationIds) {
+		this.applicationIds = applicationIds;
 	}
 }

@@ -8,6 +8,10 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Class to represent a user that has been authenticated by the security
@@ -18,15 +22,17 @@ import javax.persistence.ManyToMany;
 @Entity
 public class VirtueUser {
 	private static final VirtueUser testUser;
-	private static final VirtueUser anonymousUser;	
+	private static final VirtueUser anonymousUser;
 	private static VirtueUser adminUser;
 
 	@Id
 	private String username;
-	@ElementCollection(targetClass=String.class)
+	@ElementCollection(targetClass = String.class)
 	private Collection<String> authorities;
 	@ManyToMany()
 	private Collection<VirtueTemplate> virtueTemplates;
+	@Transient
+	private Collection<String> virtueTemplateIds;
 
 	static {
 		testUser = new VirtueUser("testUser", new ArrayList<String>());
@@ -36,9 +42,9 @@ public class VirtueUser {
 		adminAuths.add("ROLE_USER");
 		adminUser = new VirtueUser("admin", adminAuths);
 	}
-	
+
 	protected VirtueUser() {
-		
+
 	}
 
 	public VirtueUser(String name, Collection<String> authorities) {
@@ -59,6 +65,7 @@ public class VirtueUser {
 		return authorities;
 	}
 
+	@JsonIgnore
 	public Collection<VirtueTemplate> getVirtueTemplates() {
 		return virtueTemplates;
 	}
@@ -88,6 +95,20 @@ public class VirtueUser {
 	public void removeAllVirtueTemplates() {
 		virtueTemplates.clear();
 	}
-	
-	
+
+	@JsonGetter
+	protected Collection<String> getVirtueTemplateIds() {
+		if (virtueTemplates != null) {
+			virtueTemplateIds = new ArrayList<String>();
+			for (VirtueTemplate vt : virtueTemplates) {
+				virtueTemplateIds.add(vt.getId());
+			}
+		}
+		return virtueTemplateIds;
+	}
+
+	protected void setVirtueTemplateIds(Collection<String> virtueTemplateIds) {
+		this.virtueTemplateIds = virtueTemplateIds;
+	}
+
 }
