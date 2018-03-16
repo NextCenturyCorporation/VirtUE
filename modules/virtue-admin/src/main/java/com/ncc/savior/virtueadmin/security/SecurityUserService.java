@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * User Service provides the {@link VirtueUser} object from the Spring Security
@@ -32,6 +33,10 @@ public class SecurityUserService {
 			// }
 			String name = auth.getName();
 			VirtueUser user = userManager.getUser(name);
+			if (user == null) {
+				throw new SaviorException(SaviorException.USER_NOT_FOUND,
+						"User=" + name + " not found in user database!");
+			}
 			return user;
 		}
 		return VirtueUser.anonymousUser();

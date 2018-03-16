@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.infrastructure;
+package com.ncc.savior.virtueadmin.infrastructure.staticvm;
 
 import java.io.File;
 import java.util.Collection;
@@ -8,6 +8,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
+import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -28,7 +30,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	private OS os;
 	private String userName;
 	private String privateKey;
-	private String ipAddress; 
+	private String ipAddress;
 
 	public StaticMachineVmManager(String hostname, int sshPort, String userName, File privateKey, OS os) {
 		this(hostname, sshPort, userName, SshUtil.getKeyFromFile(privateKey), os);
@@ -45,7 +47,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	@Override
 	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
-				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey,
+				VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, userName, privateKey, null,
 				ipAddress);
 		return vm;
 	}
@@ -79,7 +81,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
 					VmState.RUNNING, os, UUID.randomUUID().toString(), hostname, sshPort, user.getUsername(),
-					privateKey, ipAddress);
+					privateKey, null, ipAddress);
 			vms.add(vm);
 
 		}
