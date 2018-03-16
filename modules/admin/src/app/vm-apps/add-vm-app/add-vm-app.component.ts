@@ -7,7 +7,7 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 })
 export class AddVmAppComponent implements OnInit {
 
-  osList = ['LINUX','Windows'];
+  osList = ['LINUX', 'Windows'];
   distroList = ['Debian'];
   selectedOs: string;
   selectedDist: string;
