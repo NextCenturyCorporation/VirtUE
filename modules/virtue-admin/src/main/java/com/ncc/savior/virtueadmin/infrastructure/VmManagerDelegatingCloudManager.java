@@ -2,10 +2,10 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
 
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 
 /**

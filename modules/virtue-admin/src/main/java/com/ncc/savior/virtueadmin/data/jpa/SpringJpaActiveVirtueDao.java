@@ -14,11 +14,10 @@ import org.springframework.stereotype.Repository;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueUser;
 
 /**
  * Implementation of {@link IActiveVirtueDao} that uses Spring and JPA.

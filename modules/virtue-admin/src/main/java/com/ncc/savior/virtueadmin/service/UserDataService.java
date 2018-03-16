@@ -10,14 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.dto.VirtueTemplateDto;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
-
-import dto.VirtueTemplateDto;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * Service that provides functions for a user, mostly to retrieve that user's

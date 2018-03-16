@@ -11,8 +11,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * Base class for {@link IPipelineComponent} that handles much of the hard work.

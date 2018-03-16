@@ -12,11 +12,10 @@ import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.SshUtil;
-
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * Virtual machine manager that assumes it has a single VM which will fulfill

@@ -14,11 +14,10 @@ import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * {@link ITemplateManager} that uses Spring and JPA.

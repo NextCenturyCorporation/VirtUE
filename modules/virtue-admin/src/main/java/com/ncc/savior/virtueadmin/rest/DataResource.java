@@ -32,11 +32,10 @@ import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production

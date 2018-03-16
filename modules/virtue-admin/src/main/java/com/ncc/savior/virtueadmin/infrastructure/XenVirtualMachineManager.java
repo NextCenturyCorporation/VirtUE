@@ -17,12 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2VmManager;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
-
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueUser;
 
 public class XenVirtualMachineManager extends BaseVmManager {
 

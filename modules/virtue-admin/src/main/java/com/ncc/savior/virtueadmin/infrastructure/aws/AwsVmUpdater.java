@@ -21,8 +21,7 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndA
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VmState;
-
-import persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 public class AwsVmUpdater {
 	private static final Logger logger = LoggerFactory.getLogger(AwsVmUpdater.class);

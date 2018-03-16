@@ -18,11 +18,10 @@ import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * Implementation of {@link ITemplateManager} that stores all the template data

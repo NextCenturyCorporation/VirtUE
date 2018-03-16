@@ -21,18 +21,17 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
+import com.ncc.savior.virtueadmin.model.dto.VirtualMachineTemplateDto;
+import com.ncc.savior.virtueadmin.model.dto.VirtueInstanceDto;
+import com.ncc.savior.virtueadmin.model.dto.VirtueTemplateDto;
+import com.ncc.savior.virtueadmin.model.dto.VirtueUserDto;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
-
-import dto.VirtualMachineTemplateDto;
-import dto.VirtueInstanceDto;
-import dto.VirtueTemplateDto;
-import dto.VirtueUserDto;
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * Service that provides admin function like creating Virtue templates, Vm

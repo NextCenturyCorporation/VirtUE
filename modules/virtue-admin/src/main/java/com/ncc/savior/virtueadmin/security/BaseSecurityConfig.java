@@ -29,8 +29,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
-
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 /**
  * Base security configuration for Savior Server. All other security

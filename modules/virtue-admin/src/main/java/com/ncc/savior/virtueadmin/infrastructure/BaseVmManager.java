@@ -5,8 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VmState;
-
-import persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 /**
  * 

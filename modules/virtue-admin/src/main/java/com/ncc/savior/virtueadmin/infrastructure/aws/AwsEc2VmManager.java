@@ -37,15 +37,15 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * {@link IVmManager} that uses AWS EC2 to create and manage VMs. The following

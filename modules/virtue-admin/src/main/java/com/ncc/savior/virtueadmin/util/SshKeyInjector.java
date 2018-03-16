@@ -13,10 +13,10 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 import com.ncc.savior.virtueadmin.util.RsaKeyGenerator.PublicPrivatePair;
 
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * Helper class that uses an {@link RsaKeyGenerator} to create a new RSA keypair

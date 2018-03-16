@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.ncc.savior.virtueadmin.model.VmState;
-
-import persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 /**
  * Automatically sets the state of the vms and returns success.

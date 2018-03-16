@@ -18,16 +18,15 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.model.dto.VirtueInstanceDto;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
-
-import dto.VirtueInstanceDto;
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * Virtue service to handle functions specifically for the desktop application.

@@ -3,9 +3,9 @@ package com.ncc.savior.virtueadmin.infrastructure;
 import java.util.Collection;
 
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * Listener class to handle when a {@link VirtualMachine}'s {@link VmState} has

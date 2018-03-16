@@ -5,10 +5,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueTemplate;
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 /**
  * Manages and stores all template information and definitions.

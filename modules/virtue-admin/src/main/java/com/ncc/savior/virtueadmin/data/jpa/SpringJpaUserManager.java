@@ -6,8 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
-
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 /**
  * {@link IUserManager} that uses Spring and JPA.

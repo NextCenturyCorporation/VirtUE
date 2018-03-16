@@ -8,9 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater.IUpdateNotifier;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtualMachine;
 
 public class UpdatePipeline implements IUpdatePipeline, IUpdatePipelineResultListener {
 	private static final Logger logger = LoggerFactory.getLogger(UpdatePipeline.class);

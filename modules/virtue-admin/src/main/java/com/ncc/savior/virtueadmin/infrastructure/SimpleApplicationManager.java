@@ -12,10 +12,9 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshUtil;
-
-import persistance.JpaVirtualMachine;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the

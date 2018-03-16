@@ -18,9 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
-
-import persistance.JpaVirtueUser;
 
 /**
  * Rest resource designed for testing and login.

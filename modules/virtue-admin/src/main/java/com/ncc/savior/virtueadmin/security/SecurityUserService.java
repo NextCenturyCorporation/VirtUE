@@ -5,9 +5,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtueUser;
 
 /**
  * User Service provides the {@link VirtueUser} object from the Spring Security

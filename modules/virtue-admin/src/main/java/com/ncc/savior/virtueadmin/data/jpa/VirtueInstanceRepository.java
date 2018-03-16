@@ -6,8 +6,7 @@ import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 
 import com.ncc.savior.virtueadmin.model.BaseVirtueInstance;
-
-import persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
 
 /**
  * JPA respository that stores {@link BaseVirtueInstance}s. This respository

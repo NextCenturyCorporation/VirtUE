@@ -2,8 +2,9 @@ package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 
 import java.util.Collection;
 
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * A component of an {@link IUpdatePipeline}. Each pipeline does an action on

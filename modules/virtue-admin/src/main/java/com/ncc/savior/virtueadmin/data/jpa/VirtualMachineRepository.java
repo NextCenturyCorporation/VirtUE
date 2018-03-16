@@ -2,8 +2,9 @@ package com.ncc.savior.virtueadmin.data.jpa;
 
 import org.springframework.data.repository.CrudRepository;
 
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * JPA repository that stores {@link VirtualMachine}s.

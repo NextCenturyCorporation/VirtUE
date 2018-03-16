@@ -13,11 +13,10 @@ import org.apache.commons.lang.NotImplementedException;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueUser;
 
 /**
  * Implementation of {@link IActiveVirtueDao} that stores all the Active Virtue

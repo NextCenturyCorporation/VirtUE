@@ -21,10 +21,9 @@ import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceStatusSummary;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtualMachine;
 
 /**
  * Utility functions for managing and updating AWS EC2 VMs.

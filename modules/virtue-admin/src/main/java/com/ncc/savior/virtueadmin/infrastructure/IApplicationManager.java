@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-
-import persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 /**
  * Starts and manages applications running on VMs.

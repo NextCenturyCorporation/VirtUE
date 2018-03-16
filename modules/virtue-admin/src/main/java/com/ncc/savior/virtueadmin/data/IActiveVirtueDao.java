@@ -6,10 +6,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VmState;
-
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtueInstance;
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 /**
  * Data access object for Active Virtues. This class manages the storage and

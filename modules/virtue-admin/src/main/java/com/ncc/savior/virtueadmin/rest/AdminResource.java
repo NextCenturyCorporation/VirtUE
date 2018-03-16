@@ -16,15 +16,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
+import com.ncc.savior.virtueadmin.model.dto.VirtualMachineTemplateDto;
+import com.ncc.savior.virtueadmin.model.dto.VirtueInstanceDto;
+import com.ncc.savior.virtueadmin.model.dto.VirtueTemplateDto;
+import com.ncc.savior.virtueadmin.model.dto.VirtueUserDto;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
-
-import dto.VirtualMachineTemplateDto;
-import dto.VirtueInstanceDto;
-import dto.VirtueTemplateDto;
-import dto.VirtueUserDto;
 
 /**
  * Rest resource that handles endpoints specifically for an administrator

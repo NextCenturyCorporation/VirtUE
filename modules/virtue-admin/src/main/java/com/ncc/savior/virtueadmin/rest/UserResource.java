@@ -14,13 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.BaseVirtueInstance;
+import com.ncc.savior.virtueadmin.model.dto.VirtueTemplateDto;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueInstance;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.UserDataService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
-
-import dto.VirtueTemplateDto;
-import persistance.JpaVirtueInstance;
 
 /**
  * Rest resource that handles endpoints specifically to satisfy API for a given

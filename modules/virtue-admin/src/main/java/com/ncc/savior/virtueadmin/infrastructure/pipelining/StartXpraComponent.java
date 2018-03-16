@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * Component of an {@link IUpdatePipeline} that will start Xpra on the

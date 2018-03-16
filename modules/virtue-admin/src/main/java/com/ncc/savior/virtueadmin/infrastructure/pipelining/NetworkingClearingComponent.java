@@ -3,7 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
-import persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 public class NetworkingClearingComponent extends BaseGroupedVmPipelineComponent {
 

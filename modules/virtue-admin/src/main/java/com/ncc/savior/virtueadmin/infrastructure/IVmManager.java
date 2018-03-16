@@ -3,11 +3,11 @@ package com.ncc.savior.virtueadmin.infrastructure;
 import java.util.Collection;
 
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtualMachineTemplate;
-import persistance.JpaVirtueUser;
 
 /**
  * Manages the low level instantiations of Virtual Machines, their control and

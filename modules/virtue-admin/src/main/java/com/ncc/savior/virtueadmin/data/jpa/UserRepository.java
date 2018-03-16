@@ -2,7 +2,7 @@ package com.ncc.savior.virtueadmin.data.jpa;
 
 import org.springframework.data.repository.CrudRepository;
 
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 /**
  * JPA repository class that stores {@link VirtueUser}s.

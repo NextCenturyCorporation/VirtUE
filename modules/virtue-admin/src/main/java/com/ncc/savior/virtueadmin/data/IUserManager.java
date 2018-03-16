@@ -1,6 +1,6 @@
 package com.ncc.savior.virtueadmin.data;
 
-import persistance.JpaVirtueUser;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtueUser;
 
 /**
  * Instance of this class will manage a set of users for the system.

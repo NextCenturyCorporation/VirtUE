@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * Component of an {@link IUpdatePipeline} that will test for reachability via

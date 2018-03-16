@@ -3,10 +3,9 @@ package com.ncc.savior.virtueadmin.infrastructure;
 import java.util.Map;
 
 import com.ncc.savior.virtueadmin.model.OS;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.util.SaviorException;
-
-import persistance.JpaVirtualMachine;
-import persistance.JpaVirtualMachineTemplate;
 
 /**
  * {@link ICloudManager} implementation which delegates individual VM actions to

@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.Tag;
+import com.ncc.savior.virtueadmin.model.persistance.JpaVirtualMachine;
 
 import net.bytebuddy.agent.VirtualMachine;
-import persistance.JpaVirtualMachine;
 
 /**
  * Component of an {@link IUpdatePipeline} that will rename a VM instance in
