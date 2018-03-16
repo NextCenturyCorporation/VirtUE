@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,17 +16,23 @@ import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 
+import com.ncc.savior.util.ConversionUtil;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
+
+import dto.VirtualMachineTemplateDto;
+import dto.VirtueInstanceDto;
+import dto.VirtueTemplateDto;
+import dto.VirtueUserDto;
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Service that provides admin function like creating Virtue templates, Vm
@@ -57,7 +64,7 @@ public class AdminService {
 	}
 
 	private void addInitialUser() {
-		Iterable<VirtueUser> users = userManager.getAllUsers();
+		Iterable<JpaVirtueUser> users = userManager.getAllUsers();
 		if (initialAdmin != null && !initialAdmin.trim().equals("") && !users.iterator().hasNext()) {
 			String[] admins = initialAdmin.split(",");
 			for (String admin : admins) {
@@ -68,7 +75,7 @@ public class AdminService {
 				Collection<String> authorities = new ArrayList<String>(2);
 				authorities.add("ROLE_ADMIN");
 				authorities.add("ROLE_USER");
-				VirtueUser user = new VirtueUser(admin, authorities);
+				JpaVirtueUser user = new JpaVirtueUser(admin, authorities);
 				userManager.addUser(user);
 			}
 		}
@@ -79,14 +86,16 @@ public class AdminService {
 		this.templateManager = templateManager;
 	}
 
-	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
+	public Iterable<VirtueTemplateDto> getAllVirtueTemplates() {
 		verifyAndReturnUser();
-		return templateManager.getAllVirtueTemplates();
+		Iterable<JpaVirtueTemplate> itr = templateManager.getAllVirtueTemplates();
+		return ConversionUtil.virtueTemplateIterable(itr);
 	}
 
-	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
+	public Iterable<VirtualMachineTemplateDto> getAllVmTemplates() {
 		verifyAndReturnUser();
-		return templateManager.getAllVirtualMachineTemplates();
+		Iterable<JpaVirtualMachineTemplate> itr = templateManager.getAllVirtualMachineTemplates();
+		return ConversionUtil.vmTemplateIterable(itr);
 	}
 
 	public Iterable<ApplicationDefinition> getAllApplicationTemplates() {
@@ -94,48 +103,51 @@ public class AdminService {
 		return templateManager.getAllApplications();
 	}
 
-	public Iterable<VirtueInstance> getAllActiveVirtues() {
+	public Iterable<VirtueInstanceDto> getAllActiveVirtues() {
 		verifyAndReturnUser();
-		return virtueManager.getAllActiveVirtues();
+		Iterable<JpaVirtueInstance> itr = virtueManager.getAllActiveVirtues();
+		return ConversionUtil.virtueInstanceIterable(itr);
 	}
 
-	public Iterable<VirtueTemplate> getVirtueTemplatesForUser(String username) {
+	public Iterable<VirtueTemplateDto> getVirtueTemplatesForUser(String username) {
 		verifyAndReturnUser();
-		VirtueUser user = userManager.getUser(username);
+		JpaVirtueUser user = userManager.getUser(username);
 		if (user != null) {
-			Map<String, VirtueTemplate> vts = templateManager.getVirtueTemplatesForUser(user);
-			return vts.values();
+			Map<String, JpaVirtueTemplate> vts = templateManager.getVirtueTemplatesForUser(user);
+			return ConversionUtil.virtueTemplateIterable(vts.values());
 		} else {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
 		}
 	}
 
-	public Iterable<VirtueInstance> getAllActiveVirtuesForUser(String username) {
+	public Iterable<VirtueInstanceDto> getAllActiveVirtuesForUser(String username) {
 		verifyAndReturnUser();
-		VirtueUser user = userManager.getUser(username);
+		JpaVirtueUser user = userManager.getUser(username);
 		if (user != null) {
-			Collection<VirtueInstance> vs = virtueManager.getVirtuesForUser(user);
-			return vs;
+			Collection<JpaVirtueInstance> jpaVms = virtueManager.getVirtuesForUser(user);
+			return ConversionUtil.virtueInstanceIterable(jpaVms);
 		} else {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
 		}
 	}
 
-	public VirtueTemplate getVirtueTemplate(String templateId) {
+	public VirtueTemplateDto getVirtueTemplate(String templateId) {
 		verifyAndReturnUser();
-		Optional<VirtueTemplate> opt = templateManager.getVirtueTemplate(templateId);
-		return opt.isPresent() ? opt.get() : null;
+		Optional<JpaVirtueTemplate> opt = templateManager.getVirtueTemplate(templateId);
+		return opt.isPresent() ? new VirtueTemplateDto(opt.get()) : null;
 	}
 
-	public VirtualMachineTemplate getVmTemplate(String templateId) {
+	public VirtualMachineTemplateDto getVmTemplate(String templateId) {
 		verifyAndReturnUser();
-		Optional<VirtualMachineTemplate> opt = templateManager.getVmTemplate(templateId);
-		return opt.isPresent() ? opt.get() : null;
+		Optional<JpaVirtualMachineTemplate> opt = templateManager.getVmTemplate(templateId);
+		return opt.isPresent() ? new VirtualMachineTemplateDto(opt.get()) : null;
 	}
 
-	public VirtueInstance getActiveVirtue(String virtueId) {
+	public VirtueInstanceDto getActiveVirtue(String virtueId) {
 		verifyAndReturnUser();
-		return virtueManager.getActiveVirtue(virtueId);
+		JpaVirtueInstance persistVirtue = virtueManager.getActiveVirtue(virtueId);
+		return new VirtueInstanceDto(persistVirtue, persistVirtue.getUsername(),
+				ConversionUtil.hasIdIterable(persistVirtue.getVms()));
 	}
 
 	public ApplicationDefinition getApplicationDefinition(String templateId) {
@@ -144,7 +156,7 @@ public class AdminService {
 		return opt.isPresent() ? opt.get() : null;
 	}
 
-	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
+	public VirtueTemplateDto createNewVirtueTemplate(VirtueTemplateDto template) {
 		verifyAndReturnUser();
 		String id = UUID.randomUUID().toString();
 		return updateVirtueTemplate(id, template);
@@ -156,7 +168,7 @@ public class AdminService {
 		return updateApplicationDefinitions(id, appDef);
 	}
 
-	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate vmTemplate) {
+	public VirtualMachineTemplateDto createVmTemplate(VirtualMachineTemplateDto vmTemplate) {
 		verifyAndReturnUser();
 		String id = UUID.randomUUID().toString();
 		return updateVmTemplate(id, vmTemplate);
@@ -171,27 +183,42 @@ public class AdminService {
 		return appDef;
 	}
 
-	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
+	public VirtueTemplateDto updateVirtueTemplate(String templateId, VirtueTemplateDto template) {
 		verifyAndReturnUser();
-		VirtueUser user = verifyAndReturnUser();
+		JpaVirtueUser user = verifyAndReturnUser();
 		if (!templateId.equals(template.getId())) {
-			template = new VirtueTemplate(templateId, template);
+			template = new VirtueTemplateDto(templateId, template, template.getVmTemplateIds());
 		}
 		template.setLastEditor(user.getUsername());
 		template.setLastModification(new Date());
-		templateManager.addVirtueTemplate(template);
+
+		Iterable<JpaVirtualMachineTemplate> jvmt = templateManager.getVmTemplatesById(template.getVmTemplateIds());
+		Collection<JpaVirtualMachineTemplate> vmTemplates = new ArrayList<JpaVirtualMachineTemplate>();
+		Iterator<JpaVirtualMachineTemplate> itr = jvmt.iterator();
+		while (itr.hasNext()) {
+			vmTemplates.add(itr.next());
+		}
+		JpaVirtueTemplate t = new JpaVirtueTemplate(templateId, template.getName(), template.getVersion(), vmTemplates,
+				template.getAwsTemplateName(), template.isEnabled(), template.getLastModification(),
+				template.getLastEditor());
+		templateManager.addVirtueTemplate(t);
 		return template;
 	}
 
-	public VirtualMachineTemplate updateVmTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
+	public VirtualMachineTemplateDto updateVmTemplate(String templateId, VirtualMachineTemplateDto vmTemplate) {
 		verifyAndReturnUser();
-		VirtueUser user = verifyAndReturnUser();
+		JpaVirtueUser user = verifyAndReturnUser();
 		if (!templateId.equals(vmTemplate.getId())) {
-			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
+			vmTemplate = new VirtualMachineTemplateDto(templateId, vmTemplate, vmTemplate.getApplicationIds());
 		}
 		vmTemplate.setLastEditor(user.getUsername());
 		vmTemplate.setLastModification(new Date());
-		templateManager.addVmTemplate(vmTemplate);
+
+		Iterable<ApplicationDefinition> japps = templateManager
+				.getApplicationDefinitions(vmTemplate.getApplicationIds());
+		JpaVirtualMachineTemplate jvmt = new JpaVirtualMachineTemplate(vmTemplate, japps);
+
+		templateManager.addVmTemplate(jvmt);
 		return vmTemplate;
 	}
 
@@ -215,15 +242,17 @@ public class AdminService {
 		virtueManager.adminDeleteVirtue(instanceId);
 	}
 
-	public VirtueUser createUpdateUser(VirtueUser newUser) {
+	public VirtueUserDto createUpdateUser(VirtueUserDto newUser) {
 		verifyAndReturnUser();
-		userManager.addUser(newUser);
+		JpaVirtueUser juser = new JpaVirtueUser(newUser.getUsername(), newUser.getAuthorities());
+		userManager.addUser(juser);
 		return newUser;
 	}
 
-	public VirtueUser getUser(String usernameToRetrieve) {
+	public VirtueUserDto getUser(String usernameToRetrieve) {
 		verifyAndReturnUser();
-		return userManager.getUser(usernameToRetrieve);
+		JpaVirtueUser juser = userManager.getUser(usernameToRetrieve);
+		return new VirtueUserDto(juser, ConversionUtil.hasIdIterable(juser.getVirtueTemplates()));
 	}
 
 	public void removeUser(String usernameToRemove) {
@@ -231,14 +260,14 @@ public class AdminService {
 		userManager.removeUser(usernameToRemove);
 	}
 
-	public Iterable<VirtueUser> getAllUsers() {
+	public Iterable<VirtueUserDto> getAllUsers() {
 		verifyAndReturnUser();
-		return userManager.getAllUsers();
+		return ConversionUtil.userIterable(userManager.getAllUsers());
 	}
 
 	public void assignTemplateToUser(String templateId, String username) {
 		verifyAndReturnUser();
-		VirtueUser user = userManager.getUser(username);
+		JpaVirtueUser user = userManager.getUser(username);
 		if (user != null) {
 			templateManager.assignVirtueTemplateToUser(user, templateId);
 		} else {
@@ -248,7 +277,7 @@ public class AdminService {
 
 	public void revokeTemplateFromUser(String templateId, String username) {
 		verifyAndReturnUser();
-		VirtueUser user = userManager.getUser(username);
+		JpaVirtueUser user = userManager.getUser(username);
 		if (user != null) {
 			templateManager.revokeVirtueTemplateFromUser(user, templateId);
 		} else {
@@ -256,18 +285,20 @@ public class AdminService {
 		}
 	}
 
-	public List<VirtueUser> getActiveUsers() {
+	public List<VirtueUserDto> getActiveUsers() {
 		verifyAndReturnUser();
 		List<Object> principals = sessionRegistry.getAllPrincipals();
-		List<VirtueUser> users = new ArrayList<VirtueUser>(principals.size());
+		List<VirtueUserDto> users = new ArrayList<VirtueUserDto>(principals.size());
 		for (Object p : principals) {
 			User user = (User) p;
 			ArrayList<String> auths = new ArrayList<String>();
 			for (GrantedAuthority a : user.getAuthorities()) {
 				auths.add(a.getAuthority());
 			}
-			VirtueUser u = userManager.getUser(user.getUsername());
-			users.add(u);
+			JpaVirtueUser u = userManager.getUser(user.getUsername());
+			VirtueUserDto restUser = new VirtueUserDto(u,
+					ConversionUtil.virtueTemplateCollection(u.getVirtueTemplates()));
+			users.add(restUser);
 		}
 		return users;
 
@@ -325,8 +356,8 @@ public class AdminService {
 		return sessionMap;
 	}
 
-	private VirtueUser verifyAndReturnUser() {
-		VirtueUser user = securityService.getCurrentUser();
+	private JpaVirtueUser verifyAndReturnUser() {
+		JpaVirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
 		}

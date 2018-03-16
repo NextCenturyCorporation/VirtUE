@@ -1,21 +1,21 @@
 package com.ncc.savior.virtueadmin.data;
 
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+import persistance.JpaVirtueUser;
 
 /**
  * Instance of this class will manage a set of users for the system.
  */
 public interface IUserManager {
 
-	void addUser(VirtueUser user);
+	void addUser(JpaVirtueUser user);
 
-	VirtueUser getUser(String username);
+	JpaVirtueUser getUser(String username);
 
-	Iterable<VirtueUser> getAllUsers();
+	Iterable<JpaVirtueUser> getAllUsers();
 
 	void clear();
 
-	void removeUser(VirtueUser user);
+	void removeUser(JpaVirtueUser user);
 
 	void removeUser(String usernameToRemove);
 

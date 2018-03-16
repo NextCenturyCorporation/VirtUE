@@ -5,10 +5,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueUser;
 
 /**
  * Data access object for Active Virtues. This class manages the storage and
@@ -27,7 +28,7 @@ public interface IActiveVirtueDao {
 	 * @param templateIds
 	 * @return
 	 */
-	Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds);
+	Map<String, Set<JpaVirtueInstance>> getVirtuesFromTemplateIds(JpaVirtueUser user, Set<String> templateIds);
 
 	/**
 	 * Updates the state of a given VM.
@@ -44,25 +45,25 @@ public interface IActiveVirtueDao {
 	 * @param applicationId
 	 * @return
 	 */
-	VirtualMachine getVmWithApplication(String virtueId, String applicationId);
+	JpaVirtualMachine getVmWithApplication(String virtueId, String applicationId);
 
 	/**
 	 * Adds a new virtue to the data store.
 	 * 
 	 * @param vi
 	 */
-	void addVirtue(VirtueInstance vi);
+	void addVirtue(JpaVirtueInstance vi);
 
-	Optional<VirtueInstance> getVirtueInstance(String virtueId);
+	Optional<JpaVirtueInstance> getVirtueInstance(String virtueId);
 
-	Iterable<VirtueInstance> getAllActiveVirtues();
+	Iterable<JpaVirtueInstance> getAllActiveVirtues();
 
 	void clear();
 
-	Collection<VirtueInstance> getVirtuesForUser(VirtueUser user);
+	Collection<JpaVirtueInstance> getVirtuesForUser(JpaVirtueUser user);
 
-	VirtueInstance getVirtueInstance(VirtueUser user, String instanceId);
+	JpaVirtueInstance getVirtueInstance(JpaVirtueUser user, String instanceId);
 
-	void updateVms(Collection<VirtualMachine> vms);
+	void updateVms(Collection<JpaVirtualMachine> vms);
 
 }

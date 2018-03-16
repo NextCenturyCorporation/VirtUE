@@ -6,11 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Base class for cloud managers where actions on VM's in a virtue are split
@@ -20,34 +21,34 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 public abstract class BaseDelegatedCloudManager implements ICloudManager {
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
-		Collection<VirtualMachine> vms = virtueInstance.getVms();
-		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
-		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
+	public void deleteVirtue(JpaVirtueInstance virtueInstance) {
+		Collection<JpaVirtualMachine> vms = virtueInstance.getVms();
+		Map<IVmManager, Collection<JpaVirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
+		for (Entry<IVmManager, Collection<JpaVirtualMachine>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
 			manager.deleteVirtualMachines(entry.getValue());
 		}
 	}
 
 	@Override
-	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
-		Collection<VirtualMachineTemplate> vmts = template.getVmTemplates();
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmts.size());
-		Map<IVmManager, Collection<VirtualMachineTemplate>> mapping = createVmManagerMappingFromVmTemplates(vmts);
-		for (Entry<IVmManager, Collection<VirtualMachineTemplate>> entry : mapping.entrySet()) {
+	public JpaVirtueInstance createVirtue(JpaVirtueUser user, JpaVirtueTemplate template) throws Exception {
+		Collection<JpaVirtualMachineTemplate> vmts = template.getVmTemplates();
+		Collection<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>(vmts.size());
+		Map<IVmManager, Collection<JpaVirtualMachineTemplate>> mapping = createVmManagerMappingFromVmTemplates(vmts);
+		for (Entry<IVmManager, Collection<JpaVirtualMachineTemplate>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
-			Collection<VirtualMachine> myVms = manager.provisionVirtualMachineTemplates(user, vmts);
+			Collection<JpaVirtualMachine> myVms = manager.provisionVirtualMachineTemplates(user, vmts);
 			vms.addAll(myVms);
 		}
-		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
+		JpaVirtueInstance vi = new JpaVirtueInstance(template, user.getUsername(), vms);
 		return vi;
 	}
 
 	@Override
-	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
-		Collection<VirtualMachine> vms = virtueInstance.getVms();
-		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
-		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
+	public JpaVirtueInstance startVirtue(JpaVirtueInstance virtueInstance) {
+		Collection<JpaVirtualMachine> vms = virtueInstance.getVms();
+		Map<IVmManager, Collection<JpaVirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
+		for (Entry<IVmManager, Collection<JpaVirtualMachine>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
 			manager.startVirtualMachines(entry.getValue());
 		}
@@ -55,24 +56,24 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 	}
 
 	@Override
-	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
-		Collection<VirtualMachine> vms = virtueInstance.getVms();
-		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
-		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
+	public JpaVirtueInstance stopVirtue(JpaVirtueInstance virtueInstance) {
+		Collection<JpaVirtualMachine> vms = virtueInstance.getVms();
+		Map<IVmManager, Collection<JpaVirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
+		for (Entry<IVmManager, Collection<JpaVirtualMachine>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
 			manager.stopVirtualMachines(entry.getValue());
 		}
 		return virtueInstance;
 	}
 
-	protected Map<IVmManager, Collection<VirtualMachine>> createVmManagerMappingFromVms(
-			Collection<VirtualMachine> vms) {
-		HashMap<IVmManager, Collection<VirtualMachine>> map = new HashMap<IVmManager, Collection<VirtualMachine>>();
-		for (VirtualMachine vm : vms) {
+	protected Map<IVmManager, Collection<JpaVirtualMachine>> createVmManagerMappingFromVms(
+			Collection<JpaVirtualMachine> vms) {
+		HashMap<IVmManager, Collection<JpaVirtualMachine>> map = new HashMap<IVmManager, Collection<JpaVirtualMachine>>();
+		for (JpaVirtualMachine vm : vms) {
 			IVmManager manager = getVmManagerForVm(vm);
-			Collection<VirtualMachine> col = map.get(manager);
+			Collection<JpaVirtualMachine> col = map.get(manager);
 			if (col == null) {
-				col = new ArrayList<VirtualMachine>();
+				col = new ArrayList<JpaVirtualMachine>();
 				map.put(manager, col);
 			}
 			col.add(vm);
@@ -80,14 +81,14 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 		return map;
 	}
 
-	protected Map<IVmManager, Collection<VirtualMachineTemplate>> createVmManagerMappingFromVmTemplates(
-			Collection<VirtualMachineTemplate> vmts) {
-		HashMap<IVmManager, Collection<VirtualMachineTemplate>> map = new HashMap<IVmManager, Collection<VirtualMachineTemplate>>();
-		for (VirtualMachineTemplate vmt : vmts) {
+	protected Map<IVmManager, Collection<JpaVirtualMachineTemplate>> createVmManagerMappingFromVmTemplates(
+			Collection<JpaVirtualMachineTemplate> vmts) {
+		HashMap<IVmManager, Collection<JpaVirtualMachineTemplate>> map = new HashMap<IVmManager, Collection<JpaVirtualMachineTemplate>>();
+		for (JpaVirtualMachineTemplate vmt : vmts) {
 			IVmManager manager = getVmManagerForVmTemplate(vmt);
-			Collection<VirtualMachineTemplate> col = map.get(manager);
+			Collection<JpaVirtualMachineTemplate> col = map.get(manager);
 			if (col == null) {
-				col = new ArrayList<VirtualMachineTemplate>();
+				col = new ArrayList<JpaVirtualMachineTemplate>();
 				map.put(manager, col);
 			}
 			col.add(vmt);
@@ -95,7 +96,7 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 		return map;
 	}
 
-	protected abstract IVmManager getVmManagerForVm(VirtualMachine vm);
+	protected abstract IVmManager getVmManagerForVm(JpaVirtualMachine vm);
 
-	protected abstract IVmManager getVmManagerForVmTemplate(VirtualMachineTemplate vm);
+	protected abstract IVmManager getVmManagerForVmTemplate(JpaVirtualMachineTemplate vm);
 }

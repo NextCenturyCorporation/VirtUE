@@ -14,10 +14,11 @@ import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * {@link ITemplateManager} that uses Spring and JPA.
@@ -43,40 +44,40 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(VirtueUser user) {
+	public Map<String, JpaVirtueTemplate> getVirtueTemplatesForUser(JpaVirtueUser user) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
 		if (user == null) {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
-		Collection<VirtueTemplate> templates = user.getVirtueTemplates();
-		Map<String, VirtueTemplate> ret = new HashMap<String, VirtueTemplate>();
-		for (VirtueTemplate t : templates) {
+		Collection<JpaVirtueTemplate> templates = user.getVirtueTemplates();
+		Map<String, JpaVirtueTemplate> ret = new HashMap<String, JpaVirtueTemplate>();
+		for (JpaVirtueTemplate t : templates) {
 			ret.put(t.getId(), t);
 		}
 		return ret;
 	}
 
 	@Override
-	public Collection<String> getVirtueTemplateIdsForUser(VirtueUser user) {
+	public Collection<String> getVirtueTemplateIdsForUser(JpaVirtueUser user) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
 		if (user == null) {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
-		Collection<VirtueTemplate> templates = user.getVirtueTemplates();
+		Collection<JpaVirtueTemplate> templates = user.getVirtueTemplates();
 		Collection<String> ret = new HashSet<String>();
-		for (VirtueTemplate t : templates) {
+		for (JpaVirtueTemplate t : templates) {
 			ret.add(t.getId());
 		}
 		return ret;
 	}
 
 	@Override
-	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
+	public JpaVirtueTemplate getVirtueTemplateForUser(JpaVirtueUser user, String templateId) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
 		if (user == null) {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
-		for (VirtueTemplate template : user.getVirtueTemplates()) {
+		for (JpaVirtueTemplate template : user.getVirtueTemplates()) {
 			if (template.getId().equals(templateId)) {
 				return template;
 			}
@@ -86,13 +87,13 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
+	public Iterable<JpaVirtueTemplate> getAllVirtueTemplates() {
 		return vtRepository.findAll();
 
 	}
 
 	@Override
-	public Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates() {
+	public Iterable<JpaVirtualMachineTemplate> getAllVirtualMachineTemplates() {
 		return vmtRepository.findAll();
 	}
 
@@ -112,12 +113,12 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	// }
 
 	@Override
-	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
+	public Optional<JpaVirtualMachineTemplate> getVmTemplate(String templateId) {
 		return vmtRepository.findById(templateId);
 	}
 
 	@Override
-	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
+	public Optional<JpaVirtueTemplate> getVirtueTemplate(String templateId) {
 		return vtRepository.findById(templateId);
 	}
 
@@ -127,7 +128,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void addVmTemplate(VirtualMachineTemplate vmTemplate) {
+	public void addVmTemplate(JpaVirtualMachineTemplate vmTemplate) {
 		Collection<ApplicationDefinition> apps = vmTemplate.getApplications();
 		vmTemplate.setApplications(new HashSet<ApplicationDefinition>());
 		// Adding empty template and then adding applications (that are already in db)
@@ -142,13 +143,13 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void addVirtueTemplate(VirtueTemplate template) {
-		Collection<VirtualMachineTemplate> vms = template.getVmTemplates();
-		template.setVmTemplates(new HashSet<VirtualMachineTemplate>());
+	public void addVirtueTemplate(JpaVirtueTemplate template) {
+		Collection<JpaVirtualMachineTemplate> vms = template.getVmTemplates();
+		template.setVmTemplates(new HashSet<JpaVirtualMachineTemplate>());
 		vtRepository.save(template);
 		// adding empty template and then adding vmtempaltes (that are already in db)
 		// seem to work better for jpa
-		for (VirtualMachineTemplate vmt : vms) {
+		for (JpaVirtualMachineTemplate vmt : vms) {
 			assingVmTemplateToVirtueTemplate(template.getId(), vmt.getId());
 			// VirtualMachineTemplate managedVmt = vmtRepository.findOne(vmt.getId());
 			// template.getVmTemplates().add(managedVmt);
@@ -157,23 +158,23 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId) {
+	public void assignVirtueTemplateToUser(JpaVirtueUser user, String virtueTemplateId) {
 		// UserName username = new UserName(user.getUsername());
 		// TODO this seems inefficient, but it errors if the username does not exist.
-		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
+		JpaVirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		if (existing != null) {
 			user = existing;
 		}
-		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
+		JpaVirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
 		user.addVirtueTemplate(vt);
 		userRepo.save(user);
 	}
 
 	@Override
-	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
-		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
+	public void revokeVirtueTemplateFromUser(JpaVirtueUser user, String virtueTemplateId) {
+		JpaVirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		if (existing != null) {
-			VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
+			JpaVirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
 			existing.removeVirtueTemplate(vt);
 			userRepo.save(existing);
 		}
@@ -181,7 +182,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) throws NoSuchElementException {
-		VirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
+		JpaVirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
 		ApplicationDefinition app = appRepository.findById(applicationId).get();
 		if (vmt != null && app != null) {
 			vmt.getApplications().add(app);
@@ -192,19 +193,19 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public void assingVmTemplateToVirtueTemplate(String virtueTemplateId, String vmTemplateId)
 			throws NoSuchElementException {
-		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-		VirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
+		JpaVirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
+		JpaVirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
 		vt.getVmTemplates().add(vmt);
 		vtRepository.save(vt);
 	}
 
 	@Override
 	public Collection<String> getUsersWithTemplate() {
-		Iterable<VirtueUser> allUsers = userRepo.findAll();
-		Iterator<VirtueUser> itr = allUsers.iterator();
+		Iterable<JpaVirtueUser> allUsers = userRepo.findAll();
+		Iterator<JpaVirtueUser> itr = allUsers.iterator();
 		Set<String> users = new HashSet<String>();
 		while (itr.hasNext()) {
-			VirtueUser user = itr.next();
+			JpaVirtueUser user = itr.next();
 			if (!user.getVirtueTemplates().isEmpty()) {
 				users.add(user.getUsername());
 			}
@@ -233,6 +234,29 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public void deleteVirtueTemplate(String templateId) {
 		vtRepository.deleteById(templateId);
+	}
+
+	@Override
+	public void test() {
+		Iterable<JpaVirtualMachineTemplate> t = vmtRepository.findAll();
+		Iterator<JpaVirtualMachineTemplate> itr = t.iterator();
+		itr.next();
+
+		JpaVirtualMachineTemplate vmt = itr.next();
+
+		Collection<ApplicationDefinition> app = vmt.getApplications();
+		String s = app.toString();
+		System.out.println(s);
+	}
+
+	@Override
+	public Iterable<JpaVirtualMachineTemplate> getVmTemplatesById(Collection<String> vmTemplateIds) {
+		return vmtRepository.findAllById(vmTemplateIds);
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getApplicationDefinitions(Collection<String> applicationIds) {
+		return appRepository.findAllById(applicationIds);
 	}
 
 }

@@ -9,7 +9,7 @@ import javax.persistence.Id;
  *
  */
 @Entity
-public class ApplicationDefinition {
+public class ApplicationDefinition implements HasId {
 	@Id
 	private String id;
 	private String name;
@@ -48,6 +48,7 @@ public class ApplicationDefinition {
 		this.launchCommand = appDef.getLaunchCommand();
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}

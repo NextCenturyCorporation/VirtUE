@@ -18,10 +18,11 @@ import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Implementation of {@link ITemplateManager} that stores all the template data
@@ -33,14 +34,14 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  */
 public class InMemoryTemplateManager implements ITemplateManager {
 
-	private Map<String, VirtueTemplate> templates;
-	private Map<String, VirtualMachineTemplate> vmTemplates;
+	private Map<String, JpaVirtueTemplate> templates;
+	private Map<String, JpaVirtualMachineTemplate> vmTemplates;
 	private Map<String, Collection<String>> userToTemplateId;
 	private Map<String, ApplicationDefinition> applications;
 
 	public InMemoryTemplateManager() throws Exception {
-		templates = new LinkedHashMap<String, VirtueTemplate>();
-		vmTemplates = new LinkedHashMap<String, VirtualMachineTemplate>();
+		templates = new LinkedHashMap<String, JpaVirtueTemplate>();
+		vmTemplates = new LinkedHashMap<String, JpaVirtualMachineTemplate>();
 		userToTemplateId = new LinkedHashMap<String, Collection<String>>();
 		applications = new LinkedHashMap<String, ApplicationDefinition>();
 		initTestDatabase();
@@ -72,16 +73,19 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		String systemName = "system";
 //		String allTemplate = "default-template";
 		String loginUser = "loginUser";
-		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
+		JpaVirtualMachineTemplate vmBrowser = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(),
+				"Linux Browsers",
 				OS.LINUX, "Linux Browsers", appsBrowsers, loginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux All", OS.LINUX,
+		JpaVirtualMachineTemplate vmAll = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(), "Linux All",
+				OS.LINUX,
 				"Linux All", appsAll, loginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
+		JpaVirtualMachineTemplate vmMath = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math",
+				OS.LINUX,
 				"Linux Math", appsMath, loginUser, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmtsSingleAll = new HashSet<JpaVirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 
 		// Let's load the cloudformation template file and store it in the virtue.
@@ -89,23 +93,26 @@ public class InMemoryTemplateManager implements ITemplateManager {
 				InMemoryTemplateManager.class.getResourceAsStream("/aws-templates/BrowserVirtue.template"));
 
 		// Add a virtue with the initialized virtual machine.
-		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
+		JpaVirtueTemplate virtueSingleAll = new JpaVirtueTemplate(UUID.randomUUID().toString(),
+				"Linux Single VM Virtue",
 				"1.0", vmtsSingleAll, awsCloudformationTemplate, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmtsBrowsers = new HashSet<JpaVirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
-		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
+		JpaVirtueTemplate virtueSingleBrowsers = new JpaVirtueTemplate(UUID.randomUUID().toString(),
+				"Linux Browser Virtue",
 				"1.0", vmtsBrowsers, awsCloudformationTemplate, true, now, systemName);
-		List<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
+		List<JpaVirtualMachineTemplate> vmts = new ArrayList<JpaVirtualMachineTemplate>();
 		vmts.add(vmBrowser);
 		vmts.add(vmAll);
 		vmts.add(vmMath);
-		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
+		JpaVirtueTemplate virtueAllVms = new JpaVirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue",
+				"1.0",
 				vmts, awsCloudformationTemplate, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmsMath = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmsMath = new HashSet<JpaVirtualMachineTemplate>();
 		vmsMath.add(vmMath);
-		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
+		JpaVirtueTemplate virtueMath = new JpaVirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
 				vmsMath, awsCloudformationTemplate, true, now, systemName);
 
 		addApplicationDefinition(calculator);
@@ -121,12 +128,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		addVirtueTemplate(virtueSingleAll);
 		addVirtueTemplate(virtueMath);
 
-		VirtueUser user = new VirtueUser("user", new ArrayList<String>());
-		VirtueUser user2 = new VirtueUser("user2", new ArrayList<String>());
-		VirtueUser user3 = new VirtueUser("user3", new ArrayList<String>());
-		VirtueUser admin = new VirtueUser("admin", new ArrayList<String>());
-		VirtueUser kdrumm = new VirtueUser("kdrumm", new ArrayList<String>());
-		VirtueUser kdrummTest = new VirtueUser("kdrumm_test", new ArrayList<String>());
+		JpaVirtueUser user = new JpaVirtueUser("user", new ArrayList<String>());
+		JpaVirtueUser user2 = new JpaVirtueUser("user2", new ArrayList<String>());
+		JpaVirtueUser user3 = new JpaVirtueUser("user3", new ArrayList<String>());
+		JpaVirtueUser admin = new JpaVirtueUser("admin", new ArrayList<String>());
+		JpaVirtueUser kdrumm = new JpaVirtueUser("kdrumm", new ArrayList<String>());
+		JpaVirtueUser kdrummTest = new JpaVirtueUser("kdrumm_test", new ArrayList<String>());
 
 		assignVirtueTemplateToUser(user, virtueAllVms.getId());
 		assignVirtueTemplateToUser(user, virtueSingleBrowsers.getId());
@@ -154,22 +161,22 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Collection<VirtueTemplate> getAllVirtueTemplates() {
+	public Collection<JpaVirtueTemplate> getAllVirtueTemplates() {
 		return templates.values();
 	}
 
 	@Override
-	public Collection<VirtualMachineTemplate> getAllVirtualMachineTemplates() {
+	public Collection<JpaVirtualMachineTemplate> getAllVirtualMachineTemplates() {
 		return vmTemplates.values();
 	}
 
 	@Override
-	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(VirtueUser user) {
-		Map<String, VirtueTemplate> map = new LinkedHashMap<String, VirtueTemplate>();
+	public Map<String, JpaVirtueTemplate> getVirtueTemplatesForUser(JpaVirtueUser user) {
+		Map<String, JpaVirtueTemplate> map = new LinkedHashMap<String, JpaVirtueTemplate>();
 		Collection<String> templateIds = userToTemplateId.get(user.getUsername());
 		if (templateIds != null) {
 			for (String templateId : templateIds) {
-				VirtueTemplate template = templates.get(templateId);
+				JpaVirtueTemplate template = templates.get(templateId);
 				map.put(template.getId(), template);
 			}
 		}
@@ -177,7 +184,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Collection<String> getVirtueTemplateIdsForUser(VirtueUser user) {
+	public Collection<String> getVirtueTemplateIdsForUser(JpaVirtueUser user) {
 		return userToTemplateId.get(user.getUsername());
 	}
 
@@ -187,7 +194,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
+	public JpaVirtueTemplate getVirtueTemplateForUser(JpaVirtueUser user, String templateId) {
 		Collection<String> userTemplates = userToTemplateId.get(user.getUsername());
 		if (userTemplates != null && userTemplates.contains(templateId)) {
 			return getTemplate(templateId);
@@ -196,16 +203,16 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void addVirtueTemplate(VirtueTemplate template) {
+	public void addVirtueTemplate(JpaVirtueTemplate template) {
 		Collection<ApplicationDefinition> apps = template.getApplications();
 		verifyAppsExist(apps);
-		Collection<VirtualMachineTemplate> vmts = template.getVmTemplates();
+		Collection<JpaVirtualMachineTemplate> vmts = template.getVmTemplates();
 		verifyVmTemplatesExist(vmts);
 		templates.put(template.getId(), template);
 	}
 
 	@Override
-	public void addVmTemplate(VirtualMachineTemplate vmTemplate) {
+	public void addVmTemplate(JpaVirtualMachineTemplate vmTemplate) {
 		Collection<ApplicationDefinition> apps = vmTemplate.getApplications();
 		verifyAppsExist(apps);
 		vmTemplates.put(vmTemplate.getId(), vmTemplate);
@@ -217,7 +224,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId) {
+	public void assignVirtueTemplateToUser(JpaVirtueUser user, String virtueTemplateId) {
 		if (templates.containsKey(virtueTemplateId)) {
 			Collection<String> list = userToTemplateId.get(user.getUsername());
 			if (list == null) {
@@ -232,7 +239,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
+	public void revokeVirtueTemplateFromUser(JpaVirtueUser user, String virtueTemplateId) {
 		if (templates.containsKey(virtueTemplateId)) {
 			Collection<String> list = userToTemplateId.get(user.getUsername());
 			if (list != null) {
@@ -244,12 +251,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		}
 	}
 
-	private VirtueTemplate getTemplate(String templateId) {
+	private JpaVirtueTemplate getTemplate(String templateId) {
 		return templates.get(templateId);
 	}
 
-	private void verifyVmTemplatesExist(Collection<VirtualMachineTemplate> vmts) {
-		for (VirtualMachineTemplate vmt : vmts) {
+	private void verifyVmTemplatesExist(Collection<JpaVirtualMachineTemplate> vmts) {
+		for (JpaVirtualMachineTemplate vmt : vmts) {
 			if (!vmTemplates.containsKey(vmt.getId())) {
 				throw new SaviorException(SaviorException.VM_TEMPLATE_NOT_FOUND,
 						"VM Template ID=" + vmt.getId() + " not found.");
@@ -289,7 +296,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	@Override
 	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) {
-		VirtualMachineTemplate vm = this.vmTemplates.get(vmTemplateId);
+		JpaVirtualMachineTemplate vm = this.vmTemplates.get(vmTemplateId);
 		ApplicationDefinition app = this.applications.get(applicationId);
 		if (vm != null && app != null) {
 			vm.getApplications().add(app);
@@ -298,8 +305,8 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	@Override
 	public void assingVmTemplateToVirtueTemplate(String virtueTemplateId, String vmTemplateId) {
-		VirtualMachineTemplate vm = this.vmTemplates.get(vmTemplateId);
-		VirtueTemplate virtue = this.templates.get(virtueTemplateId);
+		JpaVirtualMachineTemplate vm = this.vmTemplates.get(vmTemplateId);
+		JpaVirtueTemplate virtue = this.templates.get(virtueTemplateId);
 		if (virtue != null && vm != null) {
 			virtue.getVmTemplates().add(vm);
 		}
@@ -334,13 +341,31 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
+	public Optional<JpaVirtueTemplate> getVirtueTemplate(String templateId) {
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
+	public Optional<JpaVirtualMachineTemplate> getVmTemplate(String templateId) {
 		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public void test() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Iterable<JpaVirtualMachineTemplate> getVmTemplatesById(Collection<String> vmTemplateIds) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getApplicationDefinitions(Collection<String> applicationIds) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

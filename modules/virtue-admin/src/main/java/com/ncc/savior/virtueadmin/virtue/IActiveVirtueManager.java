@@ -4,14 +4,16 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
- * Manages and controls active {@link VirtueInstance}s for the system. This
- * class is what converts {@link VirtueTemplate}s into {@link VirtueInstance}.
+ * Manages and controls active {@link JpaVirtueInstance}s for the system. This
+ * class is what converts {@link VirtueTemplate}s into
+ * {@link JpaVirtueInstance}.
  * 
  *
  */
@@ -25,7 +27,7 @@ public interface IActiveVirtueManager {
 	 * @param keySet
 	 * @return
 	 */
-	Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> keySet);
+	Map<String, Set<JpaVirtueInstance>> getVirtuesFromTemplateIds(JpaVirtueUser user, Set<String> keySet);
 
 	/**
 	 * Returns {@link VirtualMachine} that contains the given application in the
@@ -35,7 +37,7 @@ public interface IActiveVirtueManager {
 	 * @param applicationId
 	 * @return
 	 */
-	VirtualMachine getVmWithApplication(String virtueId, String applicationId);
+	JpaVirtualMachine getVmWithApplication(String virtueId, String applicationId);
 
 	/**
 	 * Initiates starting a virtual machine.
@@ -43,27 +45,27 @@ public interface IActiveVirtueManager {
 	 * @param vm
 	 * @return
 	 */
-	VirtualMachine startVirtualMachine(VirtualMachine vm);
+	JpaVirtualMachine startVirtualMachine(JpaVirtualMachine vm);
 
 	/**
 	 * Handles the provisioning of all resources needed for a {@link VirtueTemplate}
-	 * to create a usable {@link VirtueInstance}.
+	 * to create a usable {@link JpaVirtueInstance}.
 	 * 
 	 * @param user
 	 * @param template
 	 * @return
 	 */
-	VirtueInstance provisionTemplate(VirtueUser user, VirtueTemplate template);
+	JpaVirtueInstance provisionTemplate(JpaVirtueUser user, JpaVirtueTemplate template);
 
-	void deleteVirtue(VirtueUser user, String instanceId);
+	void deleteVirtue(JpaVirtueUser user, String instanceId);
 
-	Iterable<VirtueInstance> getAllActiveVirtues();
+	Iterable<JpaVirtueInstance> getAllActiveVirtues();
 
-	VirtueInstance getActiveVirtue(String virtueId);
+	JpaVirtueInstance getActiveVirtue(String virtueId);
 
-	Collection<VirtueInstance> getVirtuesForUser(VirtueUser user);
+	Collection<JpaVirtueInstance> getVirtuesForUser(JpaVirtueUser user);
 
-	VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId);
+	JpaVirtueInstance getVirtueForUserFromTemplateId(JpaVirtueUser user, String instanceId);
 
 	void adminDeleteVirtue(String instanceId);
 }

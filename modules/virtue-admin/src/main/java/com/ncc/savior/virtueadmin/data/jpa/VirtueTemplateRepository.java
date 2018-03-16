@@ -2,11 +2,11 @@ package com.ncc.savior.virtueadmin.data.jpa;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import persistance.JpaVirtueTemplate;
 
 /**
  * JPA respository that stores {@link VirtueTemplate}s.
  */
-public interface VirtueTemplateRepository extends CrudRepository<VirtueTemplate, String> {
+public interface VirtueTemplateRepository extends CrudRepository<JpaVirtueTemplate, String> {
 
 }

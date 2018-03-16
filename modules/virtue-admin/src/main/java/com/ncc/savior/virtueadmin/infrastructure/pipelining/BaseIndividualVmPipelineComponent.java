@@ -11,7 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * Base class for {@link IPipelineComponent} that handles much of the hard work.
@@ -67,9 +68,9 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	}
 
 	@Override
-	public void addVirtualMachines(Collection<VirtualMachine> vms) {
+	public void addVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		logger.trace("Scheduling " + vms.size() + " vms to be renamed.");
-		for (VirtualMachine vm : vms) {
+		for (JpaVirtualMachine vm : vms) {
 			Runnable command = getRunnable(vm);
 			ScheduledFuture<?> future = schedule(command);
 			futureMap.put(vm.getId(), future);
@@ -82,7 +83,7 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	 * 
 	 * @param vm
 	 */
-	protected void doOnFailure(VirtualMachine vm) {
+	protected void doOnFailure(JpaVirtualMachine vm) {
 		ScheduledFuture<?> future = futureMap.remove(vm.getId());
 		if (future != null) {
 			future.cancel(false);
@@ -100,7 +101,7 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	 *            {@link IPipelineComponent}. These VM's will be saved and moved to
 	 *            the next component in the pipeline.
 	 */
-	protected void doOnSuccess(VirtualMachine vm) {
+	protected void doOnSuccess(JpaVirtualMachine vm) {
 		ScheduledFuture<?> future = futureMap.remove(vm.getId());
 		if (future != null) {
 			future.cancel(false);
@@ -108,7 +109,7 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 		resultListener.onSuccess(vm, myIndexInPipeline);
 	}
 
-	protected Runnable getRunnable(VirtualMachine vm) {
+	protected Runnable getRunnable(JpaVirtualMachine vm) {
 		Runnable command = new Runnable() {
 			@Override
 			public void run() {
@@ -123,7 +124,7 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 		return command;
 	}
 
-	protected abstract void onExecute(VirtualMachine vm);
+	protected abstract void onExecute(JpaVirtualMachine vm);
 
 	private ScheduledFuture<?> schedule(Runnable command) {
 		ScheduledFuture<?> future = null;

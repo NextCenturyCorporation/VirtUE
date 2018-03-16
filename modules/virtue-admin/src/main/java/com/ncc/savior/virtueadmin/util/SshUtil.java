@@ -14,7 +14,8 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+
+import persistance.JpaVirtualMachine;
 
 /**
  * Utility functions related to SSH.
@@ -23,7 +24,7 @@ public class SshUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SshUtil.class);
 
-	public static void waitUtilVmReachable(VirtualMachine vm, String privateKeyFile, long periodMillis) {
+	public static void waitUtilVmReachable(JpaVirtualMachine vm, String privateKeyFile, long periodMillis) {
 		while (!isVmReachable(vm, privateKeyFile)) {
 			JavaUtil.sleepAndLogInterruption(periodMillis);
 		}
@@ -37,16 +38,16 @@ public class SshUtil {
 	// }
 	// }
 
-	public static void waitForAllVmsReachableParallel(ArrayList<VirtualMachine> vms, int periodMillis) {
+	public static void waitForAllVmsReachableParallel(ArrayList<JpaVirtualMachine> vms, int periodMillis) {
 		// create copy so we can modify the list
-		vms = new ArrayList<VirtualMachine>(vms);
+		vms = new ArrayList<JpaVirtualMachine>(vms);
 		boolean allReachable = false;
 		do {
 			allReachable = true;
 			// use iterator so we can remove without modification exceptions
-			Iterator<VirtualMachine> itr = vms.iterator();
+			Iterator<JpaVirtualMachine> itr = vms.iterator();
 			while (itr.hasNext()) {
-				VirtualMachine vm = itr.next();
+				JpaVirtualMachine vm = itr.next();
 				boolean thisVmReachable = isVmReachable(vm, vm.getPrivateKey());
 				allReachable &= thisVmReachable;
 				if (thisVmReachable) {
@@ -61,7 +62,7 @@ public class SshUtil {
 		} while (!allReachable);
 	}
 
-	public static boolean isVmReachable(VirtualMachine vm, String privateKey) {
+	public static boolean isVmReachable(JpaVirtualMachine vm, String privateKey) {
 		File key = null;
 		try {
 			key = File.createTempFile("test", "");
@@ -79,13 +80,13 @@ public class SshUtil {
 		}
 	}
 
-	public static boolean isVmReachable(VirtualMachine vm, File privateKeyFile) {
+	public static boolean isVmReachable(JpaVirtualMachine vm, File privateKeyFile) {
 		// Jsch is not thread safe
 		JSch ssh = new JSch();
 		ChannelExec channel = null;
 		Session session = null;
-//		BufferedReader reader = null;
-//		BufferedReader ereader = null;
+		// BufferedReader reader = null;
+		// BufferedReader ereader = null;
 		try {
 			ssh.addIdentity(privateKeyFile.getAbsolutePath());
 			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
@@ -118,7 +119,7 @@ public class SshUtil {
 			if (session != null) {
 				session.disconnect();
 			}
-//			JavaUtil.closeIgnoreErrors(reader, ereader);
+			// JavaUtil.closeIgnoreErrors(reader, ereader);
 		}
 	}
 

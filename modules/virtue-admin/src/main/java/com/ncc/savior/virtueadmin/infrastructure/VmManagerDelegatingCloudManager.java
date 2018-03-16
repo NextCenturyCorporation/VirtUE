@@ -2,10 +2,11 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
+
 
 /**
  * Cloud manager that simply delegates its actions to a given
@@ -23,25 +24,25 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 	}
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(JpaVirtueInstance virtueInstance) {
 		vmManager.deleteVirtualMachines(virtueInstance.getVms());
 	}
 
 	@Override
-	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
-		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, template.getVmTemplates());
-		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
+	public JpaVirtueInstance createVirtue(JpaVirtueUser user, JpaVirtueTemplate template) throws Exception {
+		Collection<JpaVirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, template.getVmTemplates());
+		JpaVirtueInstance vi = new JpaVirtueInstance(template, user.getUsername(), vms);
 		return vi;
 	}
 
 	@Override
-	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
+	public JpaVirtueInstance startVirtue(JpaVirtueInstance virtueInstance) {
 		vmManager.startVirtualMachines(virtueInstance.getVms());
 		return virtueInstance;
 	}
 
 	@Override
-	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
+	public JpaVirtueInstance stopVirtue(JpaVirtueInstance virtueInstance) {
 		vmManager.stopVirtualMachines(virtueInstance.getVms());
 		return virtueInstance;
 	}

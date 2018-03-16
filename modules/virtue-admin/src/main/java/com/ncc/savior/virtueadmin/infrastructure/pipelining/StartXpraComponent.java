@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * Component of an {@link IUpdatePipeline} that will start Xpra on the
@@ -30,12 +32,12 @@ public class StartXpraComponent extends BaseIndividualVmPipelineComponent {
 	}
 
 	@Override
-	protected void onExecute(VirtualMachine vm) {
+	protected void onExecute(JpaVirtualMachine vm) {
 		attemptStartXpra(vm);
 
 	}
 
-	protected void attemptStartXpra(VirtualMachine vm) {
+	protected void attemptStartXpra(JpaVirtualMachine vm) {
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		try {
 			if (logger.isTraceEnabled()) {

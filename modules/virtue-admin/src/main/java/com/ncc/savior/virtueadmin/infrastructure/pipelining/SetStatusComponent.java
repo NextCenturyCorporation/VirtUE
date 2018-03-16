@@ -3,8 +3,9 @@ package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+
+import persistance.JpaVirtualMachine;
 
 /**
  * Automatically sets the state of the vms and returns success.
@@ -20,9 +21,9 @@ public class SetStatusComponent extends BaseGroupedVmPipelineComponent {
 	}
 
 	@Override
-	protected void onExecute(ArrayList<VirtualMachine> vms) {
+	protected void onExecute(ArrayList<JpaVirtualMachine> vms) {
 		if (!vms.isEmpty()) {
-			for (VirtualMachine vm : vms) {
+			for (JpaVirtualMachine vm : vms) {
 				vm.setState(state);
 			}
 			doOnSuccess(vms);

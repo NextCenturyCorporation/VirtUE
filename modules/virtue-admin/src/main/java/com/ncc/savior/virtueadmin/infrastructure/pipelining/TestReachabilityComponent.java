@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SshUtil;
+
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * Component of an {@link IUpdatePipeline} that will test for reachability via
@@ -26,7 +28,7 @@ public class TestReachabilityComponent extends BaseIndividualVmPipelineComponent
 	}
 
 	@Override
-	protected void onExecute(VirtualMachine vm) {
+	protected void onExecute(JpaVirtualMachine vm) {
 		testReachability(vm);
 	}
 
@@ -36,7 +38,7 @@ public class TestReachabilityComponent extends BaseIndividualVmPipelineComponent
 	 * 
 	 * @param vm
 	 */
-	protected void testReachability(VirtualMachine vm) {
+	protected void testReachability(JpaVirtualMachine vm) {
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		boolean reachable = SshUtil.isVmReachable(vm, privateKeyFile);
 		if (reachable && successOnReachable) {

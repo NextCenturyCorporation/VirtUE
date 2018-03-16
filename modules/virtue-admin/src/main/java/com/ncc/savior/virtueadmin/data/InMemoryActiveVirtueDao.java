@@ -12,11 +12,12 @@ import java.util.Set;
 import org.apache.commons.lang.NotImplementedException;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueUser;
 
 /**
  * Implementation of {@link IActiveVirtueDao} that stores all the Active Virtue
@@ -28,24 +29,24 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  */
 public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 
-	private Map<String, VirtueInstance> virtues;
+	private Map<String, JpaVirtueInstance> virtues;
 
 	public InMemoryActiveVirtueDao() {
-		virtues = new LinkedHashMap<String, VirtueInstance>();
+		virtues = new LinkedHashMap<String, JpaVirtueInstance>();
 	}
 
 	@Override
-	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds) {
-		Map<String, Set<VirtueInstance>> map = new LinkedHashMap<String, Set<VirtueInstance>>();
+	public Map<String, Set<JpaVirtueInstance>> getVirtuesFromTemplateIds(JpaVirtueUser user, Set<String> templateIds) {
+		Map<String, Set<JpaVirtueInstance>> map = new LinkedHashMap<String, Set<JpaVirtueInstance>>();
 		if (templateIds == null || templateIds.isEmpty()) {
 			return map;
 		}
-		for (VirtueInstance instance : virtues.values()) {
+		for (JpaVirtueInstance instance : virtues.values()) {
 			if (templateIds.contains(instance.getTemplateId())) {
 				if (instance.getUsername() != null && instance.getUsername().equals(user.getUsername())) {
-					Set<VirtueInstance> virtuesFromTemplateId = map.get(instance.getTemplateId());
+					Set<JpaVirtueInstance> virtuesFromTemplateId = map.get(instance.getTemplateId());
 					if (virtuesFromTemplateId == null) {
-						virtuesFromTemplateId = new LinkedHashSet<VirtueInstance>();
+						virtuesFromTemplateId = new LinkedHashSet<JpaVirtueInstance>();
 						map.put(instance.getTemplateId(), virtuesFromTemplateId);
 					}
 					virtuesFromTemplateId.add(instance);
@@ -56,10 +57,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public Collection<VirtueInstance> getVirtuesForUser(VirtueUser user) {
-		List<VirtueInstance> result = new ArrayList<VirtueInstance>();
-		Collection<VirtueInstance> vs = virtues.values();
-		for (VirtueInstance v : vs) {
+	public Collection<JpaVirtueInstance> getVirtuesForUser(JpaVirtueUser user) {
+		List<JpaVirtueInstance> result = new ArrayList<JpaVirtueInstance>();
+		Collection<JpaVirtueInstance> vs = virtues.values();
+		for (JpaVirtueInstance v : vs) {
 			if (v.getUsername().equals(user.getUsername())) {
 				result.add(v);
 			}
@@ -68,8 +69,8 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public VirtueInstance getVirtueInstance(VirtueUser user, String instanceId) {
-		VirtueInstance vi = virtues.get(instanceId);
+	public JpaVirtueInstance getVirtueInstance(JpaVirtueUser user, String instanceId) {
+		JpaVirtueInstance vi = virtues.get(instanceId);
 		if (vi != null && vi.getUsername().equals(user.getUsername())) {
 			return vi;
 		}
@@ -78,9 +79,9 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void updateVmState(String vmId, VmState state) {
-		for (VirtueInstance instance : virtues.values()) {
-			Collection<VirtualMachine> vms = instance.getVms();
-			for (VirtualMachine vm : vms) {
+		for (JpaVirtueInstance instance : virtues.values()) {
+			Collection<JpaVirtualMachine> vms = instance.getVms();
+			for (JpaVirtualMachine vm : vms) {
 				if (vm.getId().equals(vmId)) {
 					vm.setState(state);
 				break;
@@ -90,10 +91,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
-		VirtueInstance virtue = virtues.get(virtueId);
+	public JpaVirtualMachine getVmWithApplication(String virtueId, String applicationId) {
+		JpaVirtueInstance virtue = virtues.get(virtueId);
 		if (virtue != null) {
-			for (VirtualMachine vm : virtue.getVms()) {
+			for (JpaVirtualMachine vm : virtue.getVms()) {
 				ApplicationDefinition app = vm.findApplicationById(applicationId);
 				if (app != null) {
 					return vm;
@@ -109,17 +110,17 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public void addVirtue(VirtueInstance vi) {
+	public void addVirtue(JpaVirtueInstance vi) {
 		virtues.put(vi.getId(), vi);
 	}
 
 	@Override
-	public Optional<VirtueInstance> getVirtueInstance(String virtueId) {
+	public Optional<JpaVirtueInstance> getVirtueInstance(String virtueId) {
 		return Optional.of(virtues.get(virtueId));
 	}
 
 	@Override
-	public Iterable<VirtueInstance> getAllActiveVirtues() {
+	public Iterable<JpaVirtueInstance> getAllActiveVirtues() {
 		return virtues.values();
 	}
 
@@ -129,7 +130,7 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public void updateVms(Collection<VirtualMachine> vms) {
+	public void updateVms(Collection<JpaVirtualMachine> vms) {
 		throw new NotImplementedException();
 	}
 }

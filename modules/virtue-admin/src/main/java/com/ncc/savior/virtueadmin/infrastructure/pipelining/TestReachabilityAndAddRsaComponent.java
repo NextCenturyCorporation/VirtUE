@@ -7,9 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
+
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * Component of an {@link IUpdatePipeline} that will test for reachability via
@@ -30,7 +32,7 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 	}
 
 	@Override
-	protected void onExecute(VirtualMachine vm) {
+	protected void onExecute(JpaVirtualMachine vm) {
 		testReachabilityAndAddRsaKey(vm);
 	}
 
@@ -40,7 +42,7 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 	 * 
 	 * @param vm
 	 */
-	protected void testReachabilityAndAddRsaKey(VirtualMachine vm) {
+	protected void testReachabilityAndAddRsaKey(JpaVirtualMachine vm) {
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		logger.trace("Testing if VM is reachable - " + vm);
 		if (SshUtil.isVmReachable(vm, privateKeyFile)) {

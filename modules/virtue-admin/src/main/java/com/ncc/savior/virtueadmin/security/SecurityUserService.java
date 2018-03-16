@@ -5,8 +5,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtueUser;
 
 /**
  * User Service provides the {@link VirtueUser} object from the Spring Security
@@ -18,11 +19,11 @@ public class SecurityUserService {
 	@Autowired
 	private IUserManager userManager;
 
-	public VirtueUser getCurrentUser() {
+	public JpaVirtueUser getCurrentUser() {
 		return getUserFromSpringContext();
 	}
 
-	private VirtueUser getUserFromSpringContext() {
+	private JpaVirtueUser getUserFromSpringContext() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null) {
 			// Collection<? extends GrantedAuthority> groups = auth.getAuthorities();
@@ -32,14 +33,14 @@ public class SecurityUserService {
 			// myGroups.add(groupStr);
 			// }
 			String name = auth.getName();
-			VirtueUser user = userManager.getUser(name);
+			JpaVirtueUser user = userManager.getUser(name);
 			if (user == null) {
 				throw new SaviorException(SaviorException.USER_NOT_FOUND,
 						"User=" + name + " not found in user database!");
 			}
 			return user;
 		}
-		return VirtueUser.anonymousUser();
+		return JpaVirtueUser.anonymousUser();
 	}
 
 }

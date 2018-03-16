@@ -11,12 +11,13 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Implementation of {@link IActiveVirtueManager}.
@@ -36,24 +37,24 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 	}
 
 	@Override
-	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds) {
-		Map<String, Set<VirtueInstance>> virtues = virtueDao.getVirtuesFromTemplateIds(user, templateIds);
+	public Map<String, Set<JpaVirtueInstance>> getVirtuesFromTemplateIds(JpaVirtueUser user, Set<String> templateIds) {
+		Map<String, Set<JpaVirtueInstance>> virtues = virtueDao.getVirtuesFromTemplateIds(user, templateIds);
 		return virtues;
 	}
 
 	@Override
-	public Collection<VirtueInstance> getVirtuesForUser(VirtueUser user) {
+	public Collection<JpaVirtueInstance> getVirtuesForUser(JpaVirtueUser user) {
 		return virtueDao.getVirtuesForUser(user);
 	}
 
 	@Override
-	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
-		VirtualMachine vm = virtueDao.getVmWithApplication(virtueId, applicationId);
+	public JpaVirtualMachine getVmWithApplication(String virtueId, String applicationId) {
+		JpaVirtualMachine vm = virtueDao.getVmWithApplication(virtueId, applicationId);
 		return vm;
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public JpaVirtualMachine startVirtualMachine(JpaVirtualMachine vm) {
 		// return vmManager.startVirtualMachine(vm);
 		// assume started
 		// cloudManager.startVirtualMachine(vm);
@@ -63,9 +64,9 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 	}
 
 	@Override
-	public VirtueInstance provisionTemplate(VirtueUser user, VirtueTemplate template) {
+	public JpaVirtueInstance provisionTemplate(JpaVirtueUser user, JpaVirtueTemplate template) {
 		try {
-			VirtueInstance vi = cloudManager.createVirtue(user, template);
+			JpaVirtueInstance vi = cloudManager.createVirtue(user, template);
 			logger.debug("From template=" + template);
 			logger.debug("  created instance=" + vi);
 			virtueDao.addVirtue(vi);
@@ -96,8 +97,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 //	}
 
 	@Override
-	public void deleteVirtue(VirtueUser user, String instanceId) {
-		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
+	public void deleteVirtue(JpaVirtueUser user, String instanceId) {
+		JpaVirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
@@ -112,7 +113,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 
 	@Override
 	public void adminDeleteVirtue(String instanceId) {
-		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
+		JpaVirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
@@ -121,24 +122,24 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 	}
 
 	@Override
-	public Iterable<VirtueInstance> getAllActiveVirtues() {
+	public Iterable<JpaVirtueInstance> getAllActiveVirtues() {
 		return virtueDao.getAllActiveVirtues();
 	}
 
 	@Override
-	public VirtueInstance getActiveVirtue(String virtueId) {
-		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
+	public JpaVirtueInstance getActiveVirtue(String virtueId) {
+		Optional<JpaVirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
 		return opt.isPresent() ? opt.get() : null;
 	}
 
 	@Override
-	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
-		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
+	public JpaVirtueInstance getVirtueForUserFromTemplateId(JpaVirtueUser user, String instanceId) {
+		JpaVirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
 		return vi;
 	}
 
 	@Override
-	public void updateVms(Collection<VirtualMachine> vms) {
+	public void updateVms(Collection<JpaVirtualMachine> vms) {
 		virtueDao.updateVms(vms);
 
 	}

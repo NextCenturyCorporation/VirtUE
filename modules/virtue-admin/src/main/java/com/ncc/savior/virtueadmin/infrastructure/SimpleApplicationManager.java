@@ -12,9 +12,10 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshUtil;
+
+import persistance.JpaVirtualMachine;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
@@ -37,7 +38,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 
 
 	@Override
-	public int startOrGetXpraServer(VirtualMachine vm, File privateKeyFile) throws IOException {
+	public int startOrGetXpraServer(JpaVirtualMachine vm, File privateKeyFile) throws IOException {
 		SshConnectionParameters params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(),
 				vm.getSshPort(), vm.getUserName(), privateKeyFile);
 		SshXpraInitiater initiator = new SshXpraInitiater(params);
@@ -55,7 +56,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 	}
 
 	@Override
-	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, int maxTries) {
+	public void startApplicationOnVm(JpaVirtualMachine vm, ApplicationDefinition app, int maxTries) {
 		File certificate = null;
 		try {
 			SshConnectionParameters params = null;

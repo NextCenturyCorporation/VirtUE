@@ -30,6 +30,8 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
 
+import persistance.JpaVirtueUser;
+
 /**
  * Base security configuration for Savior Server. All other security
  * configurations should extend this one.
@@ -124,7 +126,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				username = fqdn.substring(0, fqdn.indexOf("@"));
 			}
 
-			com.ncc.savior.virtueadmin.model.VirtueUser user = userManager.getUser(username);
+			JpaVirtueUser user = userManager.getUser(username);
 			if (user == null) {
 				return cannotFindUser(username, "Unable to find user=" + username + " in user database.");
 			}

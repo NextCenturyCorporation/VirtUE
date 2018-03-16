@@ -5,18 +5,20 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.BaseVirtueInstance;
+
+import persistance.JpaVirtueInstance;
 
 /**
- * JPA respository that stores {@link VirtueInstance}s. This respository
+ * JPA respository that stores {@link BaseVirtueInstance}s. This respository
  * contains extra methods in addition to the default Spring JPA methods.
  */
-public interface VirtueInstanceRepository extends CrudRepository<VirtueInstance, String> {
+public interface VirtueInstanceRepository extends CrudRepository<JpaVirtueInstance, String> {
 
-	List<VirtueInstance> findByUsernameAndTemplateIdIn(String username, Collection<String> templateIds);
+	List<JpaVirtueInstance> findByUsernameAndTemplateIdIn(String username, Collection<String> templateIds);
 
-	Collection<VirtueInstance> findByUsername(String username);
+	Collection<JpaVirtueInstance> findByUsername(String username);
 
-	VirtueInstance findByUsernameAndId(String username, String instanceId);
+	JpaVirtueInstance findByUsernameAndId(String username, String instanceId);
 
 }

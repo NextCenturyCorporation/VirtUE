@@ -2,7 +2,8 @@ package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 
 import java.util.Collection;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * A component of an {@link IUpdatePipeline}. Each pipeline does an action on
@@ -18,7 +19,7 @@ public interface IPipelineComponent {
 	 * 
 	 * @param vms
 	 */
-	void addVirtualMachines(Collection<VirtualMachine> vms);
+	void addVirtualMachines(Collection<JpaVirtualMachine> vms);
 
 	/**
 	 * Called when an {@link IUpdatePipeline} is started so

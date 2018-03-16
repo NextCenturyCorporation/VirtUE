@@ -55,14 +55,15 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * {@link ICloudManager} implementation that uses AWS EC2 and Cloud Formation to
@@ -153,7 +154,7 @@ public class AwsManager implements ICloudManager {
 	 * savior.virtueadmin.model.VirtueInstance)
 	 */
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(JpaVirtueInstance virtueInstance) {
 		logger.debug("delete is being called, but not doing anything");
 	}
 
@@ -166,7 +167,7 @@ public class AwsManager implements ICloudManager {
 	 * com.ncc.savior.virtueadmin.model.VirtueTemplate)
 	 */
 	@Override
-	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
+	public JpaVirtueInstance createVirtue(JpaVirtueUser user, JpaVirtueTemplate template) throws Exception {
 
 		try {
 			credentialsProvider.getCredentials();
@@ -176,7 +177,7 @@ public class AwsManager implements ICloudManager {
 					+ "location (/Users/<user>/.aws/credentials), and is in valid format.", e);
 		}
 
-		VirtueInstance vi = null;
+		JpaVirtueInstance vi = null;
 		String clientUser = user.getUsername();
 		String serverUser = System.getProperty("user.name");
 		String sshLoginUsername = "admin";
@@ -233,7 +234,7 @@ public class AwsManager implements ICloudManager {
 			Set<Instance> allInstances = getAllInstances();
 
 			printTraceRunningInstances();
-			Collection<VirtualMachine> vms = getNewInstances(template, sshLoginUsername, createdEc2Instances,
+			Collection<JpaVirtualMachine> vms = getNewInstances(template, sshLoginUsername, createdEc2Instances,
 					allInstances);
 
 			// waitForReachability(createdEc2Instances);
@@ -243,7 +244,7 @@ public class AwsManager implements ICloudManager {
 			addRsaKeyToVms(vms);
 			// rebootAllVms(vms);
 
-			vi = new VirtueInstance(template, clientUser, vms);
+			vi = new JpaVirtueInstance(template, clientUser, vms);
 			vi.setId(uuid);
 
 		} catch (AmazonServiceException ase) {
@@ -283,8 +284,8 @@ public class AwsManager implements ICloudManager {
 		return vi;
 	}
 
-	private void addRsaKeyToVms(Collection<VirtualMachine> vms) {
-		for (VirtualMachine vm : vms) {
+	private void addRsaKeyToVms(Collection<JpaVirtualMachine> vms) {
+		for (JpaVirtualMachine vm : vms) {
 			if (OS.LINUX.equals(vm.getOs())) {
 				String newPrivateKey = null;
 				try {
@@ -298,8 +299,8 @@ public class AwsManager implements ICloudManager {
 		}
 	}
 
-	private void renameAllVms(Collection<VirtualMachine> vms, String prefix) {
-		for (VirtualMachine vm : vms) {
+	private void renameAllVms(Collection<JpaVirtualMachine> vms, String prefix) {
+		for (JpaVirtualMachine vm : vms) {
 			CreateTagsRequest ctr = new CreateTagsRequest();
 			ctr.withResources(vm.getInfrastructureId());
 			Collection<Tag> tags = new ArrayList<Tag>();
@@ -310,9 +311,9 @@ public class AwsManager implements ICloudManager {
 
 	}
 
-	protected void rebootAllVms(Collection<VirtualMachine> vms) {
-		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
-		for (VirtualMachine vm : vms) {
+	protected void rebootAllVms(Collection<JpaVirtualMachine> vms) {
+		Map<String, JpaVirtualMachine> instanceIdsToVm = new HashMap<String, JpaVirtualMachine>();
+		for (JpaVirtualMachine vm : vms) {
 			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
 		}
 		RebootInstancesRequest reboot = new RebootInstancesRequest();
@@ -343,9 +344,9 @@ public class AwsManager implements ICloudManager {
 		return stackName;
 	}
 
-	private Collection<VirtualMachine> getNewInstances(VirtueTemplate template, String sshLoginUsername,
+	private Collection<JpaVirtualMachine> getNewInstances(JpaVirtueTemplate template, String sshLoginUsername,
 			List<StackResource> ec2InstancesResourcesCreated, Set<Instance> instances) {
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		Collection<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>();
 		// This only works for single VM virtues
 		for (Instance ec2Instance : instances) {
 			if (logger.isTraceEnabled() && ec2Instance.getState().getCode() < 33) {
@@ -359,7 +360,7 @@ public class AwsManager implements ICloudManager {
 					logger.trace("Found instance with id=" + ec2Instance);
 
 					String privateKeyName = null;
-					VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), template.getName(),
+					JpaVirtualMachine vm = new JpaVirtualMachine(UUID.randomUUID().toString(), template.getName(),
 							template.getApplications(), VmState.LAUNCHING, OS.LINUX, ec2Instance.getInstanceId(),
 							ec2Instance.getPublicDnsName(), SSH_PORT, sshLoginUsername, privateKey, privateKeyName,
 							ec2Instance.getPublicIpAddress());
@@ -381,7 +382,7 @@ public class AwsManager implements ICloudManager {
 		return instances;
 	}
 
-	public String deleteVirtue(VirtueUser user, String instanceId) throws Exception {
+	public String deleteVirtue(JpaVirtueUser user, String instanceId) throws Exception {
 
 		// Delete the stack
 
@@ -474,12 +475,12 @@ public class AwsManager implements ICloudManager {
 	}
 
 	@Override
-	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
+	public JpaVirtueInstance startVirtue(JpaVirtueInstance virtueInstance) {
 		throw new NotImplementedException();
 	}
 
 	@Override
-	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
+	public JpaVirtueInstance stopVirtue(JpaVirtueInstance virtueInstance) {
 		throw new NotImplementedException();
 	}
 }

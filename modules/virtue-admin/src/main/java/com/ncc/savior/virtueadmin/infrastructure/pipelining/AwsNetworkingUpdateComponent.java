@@ -5,9 +5,11 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
+
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * Component of an {@link IUpdatePipeline} that will retrieve the networking (IP
@@ -24,10 +26,10 @@ public class AwsNetworkingUpdateComponent extends BaseGroupedVmPipelineComponent
 	}
 
 	@Override
-	protected void onExecute(ArrayList<VirtualMachine> vms) {
-		ArrayList<VirtualMachine> updated = new ArrayList<VirtualMachine>();
+	protected void onExecute(ArrayList<JpaVirtualMachine> vms) {
+		ArrayList<JpaVirtualMachine> updated = new ArrayList<JpaVirtualMachine>();
 		AwsUtil.updateNetworking(ec2, vms);
-		for (VirtualMachine vm : vms) {
+		for (JpaVirtualMachine vm : vms) {
 			if (JavaUtil.isNotEmpty(vm.getHostname())) {
 				vm.setState(VmState.LAUNCHING);
 				updated.add(vm);

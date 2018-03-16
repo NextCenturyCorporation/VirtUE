@@ -13,11 +13,12 @@ import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueUser;
 
 /**
  * Implementation of {@link IActiveVirtueDao} that uses Spring and JPA.
@@ -34,14 +35,14 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	private VirtueInstanceRepository virtueRepository;
 
 	@Override
-	public Map<String, Set<VirtueInstance>> getVirtuesFromTemplateIds(VirtueUser user, Set<String> templateIds) {
-		List<VirtueInstance> virtueInstances = virtueRepository.findByUsernameAndTemplateIdIn(user.getUsername(),
+	public Map<String, Set<JpaVirtueInstance>> getVirtuesFromTemplateIds(JpaVirtueUser user, Set<String> templateIds) {
+		List<JpaVirtueInstance> virtueInstances = virtueRepository.findByUsernameAndTemplateIdIn(user.getUsername(),
 				templateIds);
-		Map<String, Set<VirtueInstance>> templateIdToVirtueInstances = new HashMap<String, Set<VirtueInstance>>();
-		for (VirtueInstance vi : virtueInstances) {
-			Set<VirtueInstance> set = templateIdToVirtueInstances.get(vi.getTemplateId());
+		Map<String, Set<JpaVirtueInstance>> templateIdToVirtueInstances = new HashMap<String, Set<JpaVirtueInstance>>();
+		for (JpaVirtueInstance vi : virtueInstances) {
+			Set<JpaVirtueInstance> set = templateIdToVirtueInstances.get(vi.getTemplateId());
 			if (set == null) {
-				set = new HashSet<VirtueInstance>();
+				set = new HashSet<JpaVirtueInstance>();
 				templateIdToVirtueInstances.put(vi.getTemplateId(), set);
 			}
 			set.add(vi);
@@ -50,21 +51,21 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public Collection<VirtueInstance> getVirtuesForUser(VirtueUser user) {
-		Collection<VirtueInstance> virtueInstances = virtueRepository.findByUsername(user.getUsername());
+	public Collection<JpaVirtueInstance> getVirtuesForUser(JpaVirtueUser user) {
+		Collection<JpaVirtueInstance> virtueInstances = virtueRepository.findByUsername(user.getUsername());
 		return virtueInstances;
 	}
 
 	@Override
-	public VirtueInstance getVirtueInstance(VirtueUser user, String instanceId) {
+	public JpaVirtueInstance getVirtueInstance(JpaVirtueUser user, String instanceId) {
 		String username = user.getUsername();
-		VirtueInstance vi = virtueRepository.findByUsernameAndId(username, instanceId);
+		JpaVirtueInstance vi = virtueRepository.findByUsernameAndId(username, instanceId);
 		return vi;
 	}
 
 	@Override
 	public void updateVmState(String vmId, VmState state) {
-		Optional<VirtualMachine> vm = vmRepository.findById(vmId);
+		Optional<JpaVirtualMachine> vm = vmRepository.findById(vmId);
 		if (!vm.isPresent()) {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Unable to find virtual machine with id=" + vmId);
 		}
@@ -73,14 +74,14 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public VirtualMachine getVmWithApplication(String virtueId, String applicationId) {
+	public JpaVirtualMachine getVmWithApplication(String virtueId, String applicationId) {
 		// TODO could be more efficient
-		Optional<VirtueInstance> virtue = virtueRepository.findById(virtueId);
+		Optional<JpaVirtueInstance> virtue = virtueRepository.findById(virtueId);
 		if (!virtue.isPresent()) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue with id=" + virtueId);
 		}
-		Collection<VirtualMachine> vms = virtue.get().getVms();
-		for (VirtualMachine vm : vms) {
+		Collection<JpaVirtualMachine> vms = virtue.get().getVms();
+		for (JpaVirtualMachine vm : vms) {
 			Collection<ApplicationDefinition> apps = vm.getApplications();
 			for (ApplicationDefinition app : apps) {
 				if (app.getId().equals(applicationId)) {
@@ -93,20 +94,20 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public void addVirtue(VirtueInstance vi) {
-		for (VirtualMachine vm : vi.getVms()) {
+	public void addVirtue(JpaVirtueInstance vi) {
+		for (JpaVirtualMachine vm : vi.getVms()) {
 			vmRepository.save(vm);
 		}
 		virtueRepository.save(vi);
 	}
 
 	@Override
-	public Optional<VirtueInstance> getVirtueInstance(String virtueId) {
+	public Optional<JpaVirtueInstance> getVirtueInstance(String virtueId) {
 		return virtueRepository.findById(virtueId);
 	}
 
 	@Override
-	public Iterable<VirtueInstance> getAllActiveVirtues() {
+	public Iterable<JpaVirtueInstance> getAllActiveVirtues() {
 		return virtueRepository.findAll();
 	}
 
@@ -116,7 +117,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
-	public void updateVms(Collection<VirtualMachine> vms) {
+	public void updateVms(Collection<JpaVirtualMachine> vms) {
 		vmRepository.saveAll(vms);
 	}
 

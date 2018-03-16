@@ -4,8 +4,9 @@ import java.util.Collection;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+
+import persistance.JpaVirtualMachine;
 
 public class ActiveVirtueManagerUpdatingListener implements IVmUpdateListener {
 	private IActiveVirtueDao virtueManager;
@@ -20,7 +21,7 @@ public class ActiveVirtueManagerUpdatingListener implements IVmUpdateListener {
 	}
 
 	@Override
-	public void updateVms(Collection<VirtualMachine> vms) {
+	public void updateVms(Collection<JpaVirtualMachine> vms) {
 		virtueManager.updateVms(vms);
 	}
 

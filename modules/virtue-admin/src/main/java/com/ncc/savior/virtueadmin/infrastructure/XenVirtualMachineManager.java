@@ -16,12 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2VmManager;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 import com.ncc.savior.virtueadmin.util.SshUtil;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueUser;
 
 public class XenVirtualMachineManager extends BaseVmManager {
 
@@ -49,56 +50,56 @@ public class XenVirtualMachineManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
+	public JpaVirtualMachine provisionVirtualMachineTemplate(JpaVirtueUser user, JpaVirtualMachineTemplate vmt) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public JpaVirtualMachine startVirtualMachine(JpaVirtualMachine vm) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+	public JpaVirtualMachine stopVirtualMachine(JpaVirtualMachine vm) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
+	public void deleteVirtualMachine(JpaVirtualMachine vm) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public VmState getVirtualMachineState(VirtualMachine vm) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates) {
+	public VmState getVirtualMachineState(JpaVirtualMachine vm) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<JpaVirtualMachine> provisionVirtualMachineTemplates(JpaVirtueUser user,
+			Collection<JpaVirtualMachineTemplate> vmTemplates) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+	public void deleteVirtualMachines(Collection<JpaVirtualMachine> vms) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Collection<JpaVirtualMachine> startVirtualMachines(Collection<JpaVirtualMachine> vms) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<JpaVirtualMachine> stopVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		// TODO Auto-generated method stub
 		return null;
 	}

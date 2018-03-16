@@ -11,11 +11,12 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Virtual Box based implementation of {@link IVmManager}.
@@ -37,12 +38,12 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	private static final String ARGS_GETINFO = "showvminfo \"%s\" --machinereadable";
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
+	public JpaVirtualMachine provisionVirtualMachineTemplate(JpaVirtueUser user, JpaVirtualMachineTemplate vmt) {
 		throw new RuntimeException("not yet implemented");
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public JpaVirtualMachine startVirtualMachine(JpaVirtualMachine vm) {
 		VmState state = getVirtualMachineState(vm);
 		if (state.equals(VmState.RUNNING)) {
 			vm.setState(VmState.RUNNING);
@@ -62,7 +63,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+	public JpaVirtualMachine stopVirtualMachine(JpaVirtualMachine vm) {
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_POWEROFF,
 				vm.getInfrastructureId());
 		try {
@@ -77,7 +78,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
+	public void deleteVirtualMachine(JpaVirtualMachine vm) {
 		// this stops instead of destroying because we currently don't create or destory
 		// anything with this implementation.
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_POWEROFF,
@@ -91,7 +92,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 		}
 	}
 
-	public boolean pauseVm(VirtualMachine vm) {
+	public boolean pauseVm(JpaVirtualMachine vm) {
 		String id = vm.getInfrastructureId();
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_PAUSE, id);
 		try {
@@ -104,7 +105,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 		}
 	}
 
-	public boolean resumeVm(VirtualMachine vm) {
+	public boolean resumeVm(JpaVirtualMachine vm) {
 		String id = vm.getInfrastructureId();
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_RESUME, id);
 		try {
@@ -142,7 +143,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public VmState getVirtualMachineState(VirtualMachine vm) {
+	public VmState getVirtualMachineState(JpaVirtualMachine vm) {
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_GETINFO,
 				vm.getInfrastructureId());
 		try {
@@ -166,26 +167,26 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates) {
+	public Collection<JpaVirtualMachine> provisionVirtualMachineTemplates(JpaVirtueUser user,
+			Collection<JpaVirtualMachineTemplate> vmTemplates) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+	public void deleteVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<JpaVirtualMachine> startVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<JpaVirtualMachine> stopVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		// TODO Auto-generated method stub
 		return null;
 	}

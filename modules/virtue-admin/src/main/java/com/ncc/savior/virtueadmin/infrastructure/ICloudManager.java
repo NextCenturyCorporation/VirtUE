@@ -9,9 +9,9 @@
 
 package com.ncc.savior.virtueadmin.infrastructure;
 
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Cloud Managers are classes that create, delete, and manage entire virtues.
@@ -19,12 +19,12 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
  */
 public interface ICloudManager {
 
-	void deleteVirtue(VirtueInstance virtueInstance);
+	void deleteVirtue(JpaVirtueInstance virtueInstance);
 
-	VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception;
+	JpaVirtueInstance createVirtue(JpaVirtueUser user, JpaVirtueTemplate template) throws Exception;
 
-	VirtueInstance startVirtue(VirtueInstance virtueInstance);
+	JpaVirtueInstance startVirtue(JpaVirtueInstance virtueInstance);
 
-	VirtueInstance stopVirtue(VirtueInstance virtueInstance);
+	JpaVirtueInstance stopVirtue(JpaVirtueInstance virtueInstance);
 
 }

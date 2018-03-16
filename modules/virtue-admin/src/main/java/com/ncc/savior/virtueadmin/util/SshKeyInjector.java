@@ -13,8 +13,10 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.RsaKeyGenerator.PublicPrivatePair;
+
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * Helper class that uses an {@link RsaKeyGenerator} to create a new RSA keypair
@@ -38,7 +40,7 @@ public class SshKeyInjector {
 	 * @return
 	 * @throws IOException
 	 */
-	public String injectSshKey(VirtualMachine vm, String privateKey) throws IOException {
+	public String injectSshKey(JpaVirtualMachine vm, String privateKey) throws IOException {
 		File privateKeyFile = null;
 		try {
 			privateKeyFile = File.createTempFile("test", "");
@@ -60,7 +62,7 @@ public class SshKeyInjector {
 	 * @return
 	 * @throws IOException
 	 */
-	public String injectSshKey(VirtualMachine vm, File privateKeyFile) throws IOException {
+	public String injectSshKey(JpaVirtualMachine vm, File privateKeyFile) throws IOException {
 		PublicPrivatePair keyPair = null;
 		String privKey = "";
 		// Jsch is not thread safe

@@ -2,10 +2,12 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Manages the low level instantiations of Virtual Machines, their control and
@@ -44,7 +46,7 @@ public interface IVmManager {
 	 * @param vmt
 	 * @return
 	 */
-	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt);
+	JpaVirtualMachine provisionVirtualMachineTemplate(JpaVirtueUser user, JpaVirtualMachineTemplate vmt);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
@@ -55,9 +57,9 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VirtualMachine startVirtualMachine(VirtualMachine vm);
+	public JpaVirtualMachine startVirtualMachine(JpaVirtualMachine vm);
 
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms);
+	public Collection<JpaVirtualMachine> startVirtualMachines(Collection<JpaVirtualMachine> vms);
 
 	/**
 	 * Initiates a stop action on the provided VM. It is not guaranteed that the VM
@@ -68,9 +70,9 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm);
+	public JpaVirtualMachine stopVirtualMachine(JpaVirtualMachine vm);
 
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms);
+	public Collection<JpaVirtualMachine> stopVirtualMachines(Collection<JpaVirtualMachine> vms);
 
 	/**
 	 * Calling this function notifies that the VM is no longer needed and the
@@ -82,14 +84,14 @@ public interface IVmManager {
 	 */
 	// TODO TBD if a VM is repurposed, who is responsible for reseting user access
 	// and user data?
-	public void deleteVirtualMachine(VirtualMachine vm);
+	public void deleteVirtualMachine(JpaVirtualMachine vm);
 
 	/**
 	 * Deletes all vms
 	 * 
 	 * @param vms
 	 */
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
+	public void deleteVirtualMachines(Collection<JpaVirtualMachine> vms);
 
 	/**
 	 * Returns the current state of the given Virtual Machine.
@@ -97,7 +99,7 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VmState getVirtualMachineState(VirtualMachine vm);
+	public VmState getVirtualMachineState(JpaVirtualMachine vm);
 
 	/**
 	 * Convenience/Performance function to provision multiple VMs at one time. See
@@ -108,7 +110,7 @@ public interface IVmManager {
 	 * @param vmTemplates
 	 * @return
 	 */
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates);
+	public Collection<JpaVirtualMachine> provisionVirtualMachineTemplates(JpaVirtueUser user,
+			Collection<JpaVirtualMachineTemplate> vmTemplates);
 
 }

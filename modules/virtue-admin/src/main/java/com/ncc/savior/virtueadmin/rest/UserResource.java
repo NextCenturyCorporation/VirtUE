@@ -13,12 +13,14 @@ import javax.ws.rs.Produces;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.BaseVirtueInstance;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.UserDataService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
+
+import dto.VirtueTemplateDto;
+import persistance.JpaVirtueInstance;
 
 /**
  * Rest resource that handles endpoints specifically to satisfy API for a given
@@ -55,9 +57,9 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/{templateId}")
-	public VirtueTemplate getVirtueTemplateByUser(@PathParam("templateId") String templateId) {
+	public VirtueTemplateDto getVirtueTemplateByUser(@PathParam("templateId") String templateId) {
 		try {
-			VirtueTemplate vt = userVirtueService.getVirtueTemplate(templateId);
+			VirtueTemplateDto vt = userVirtueService.getVirtueTemplate(templateId);
 			return vt;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -71,9 +73,9 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/")
-	public Collection<VirtueTemplate> getAllVirtueTemplatesByUser() {
+	public Collection<VirtueTemplateDto> getAllVirtueTemplatesByUser() {
 		try {
-			Collection<VirtueTemplate> vts = userVirtueService.getVirtueTemplatesForUser();
+			Collection<VirtueTemplateDto> vts = userVirtueService.getVirtueTemplatesForUser();
 			return vts;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -87,9 +89,9 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/")
-	public VirtueInstance getVirtueInstance(@PathParam("virtueId") String virtueId) {
+	public BaseVirtueInstance getVirtueInstance(@PathParam("virtueId") String virtueId) {
 		try {
-			VirtueInstance vi = userVirtueService.getVirtueInstanceForUserById(virtueId);
+			BaseVirtueInstance vi = userVirtueService.getVirtueInstanceForUserById(virtueId);
 			return vi;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -103,9 +105,9 @@ public class UserResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/")
-	public Collection<VirtueInstance> getVirtueInstances() {
+	public Collection<JpaVirtueInstance> getVirtueInstances() {
 		try {
-			Collection<VirtueInstance> vis = userVirtueService.getVirtueInstancesForUser();
+			Collection<JpaVirtueInstance> vis = userVirtueService.getVirtueInstancesForUser();
 			return vis;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -119,9 +121,9 @@ public class UserResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtue/template/{templateId}/")
-	public VirtueInstance createVirtue(@PathParam("templateId") String templateId) {
+	public BaseVirtueInstance createVirtue(@PathParam("templateId") String templateId) {
 		try {
-			VirtueInstance vi = desktopService.createVirtue(templateId);
+			BaseVirtueInstance vi = desktopService.createVirtue(templateId);
 			return vi;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException

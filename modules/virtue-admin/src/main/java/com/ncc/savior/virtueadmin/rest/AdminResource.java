@@ -15,15 +15,16 @@ import javax.ws.rs.QueryParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
+
+import dto.VirtualMachineTemplateDto;
+import dto.VirtueInstanceDto;
+import dto.VirtueTemplateDto;
+import dto.VirtueUserDto;
 
 /**
  * Rest resource that handles endpoints specifically for an administrator
@@ -129,7 +130,7 @@ public class AdminResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtualMachine/template/")
-	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate templateId) {
+	public VirtualMachineTemplateDto createVmTemplate(VirtualMachineTemplateDto templateId) {
 		try {
 			return adminService.createVmTemplate(templateId);
 		} catch (RuntimeException e) {
@@ -143,7 +144,7 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtualMachine/template/{id}")
-	public VirtualMachineTemplate getVmTemplate(@PathParam("id") String templateId) {
+	public VirtualMachineTemplateDto getVmTemplate(@PathParam("id") String templateId) {
 		try {
 			return adminService.getVmTemplate(templateId);
 		} catch (RuntimeException e) {
@@ -158,7 +159,7 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtualMachine/template")
-	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
+	public Iterable<VirtualMachineTemplateDto> getAllVmTemplates() {
 		try {
 			return adminService.getAllVmTemplates();
 		} catch (RuntimeException e) {
@@ -172,7 +173,8 @@ public class AdminResource {
 	@PUT
 	@Produces("application/json")
 	@Path("virtualMachine/template/{id}")
-	public VirtualMachineTemplate updateVmTemplate(@PathParam("id") String templateId, VirtualMachineTemplate vmt) {
+	public VirtualMachineTemplateDto updateVmTemplate(@PathParam("id") String templateId,
+			VirtualMachineTemplateDto vmt) {
 		try {
 			return adminService.updateVmTemplate(templateId, vmt);
 		} catch (RuntimeException e) {
@@ -199,9 +201,9 @@ public class AdminResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtue/template")
-	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
+	public VirtueTemplateDto createNewVirtueTemplate(VirtueTemplateDto template) {
 		try {
-			VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate(template);
+			VirtueTemplateDto virtueTemplate = adminService.createNewVirtueTemplate(template);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -220,13 +222,13 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template")
-	public Iterable<VirtueTemplate> getAllVirtueTemplates(@QueryParam("user") String user) {
+	public Iterable<VirtueTemplateDto> getAllVirtueTemplates(@QueryParam("user") String user) {
 		try {
 			if (user == null || user.trim().equals("")) {
-				Iterable<VirtueTemplate> virtueTemplates = adminService.getAllVirtueTemplates();
+				Iterable<VirtueTemplateDto> virtueTemplates = adminService.getAllVirtueTemplates();
 				return virtueTemplates;
 			} else {
-				Iterable<VirtueTemplate> virtueTemplates = adminService.getVirtueTemplatesForUser(user);
+				Iterable<VirtueTemplateDto> virtueTemplates = adminService.getVirtueTemplatesForUser(user);
 				return virtueTemplates;
 			}
 		} catch (RuntimeException e) {
@@ -240,9 +242,9 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
-	public VirtueTemplate getVirtueTemplate(@PathParam("id") String templateId) {
+	public VirtueTemplateDto getVirtueTemplate(@PathParam("id") String templateId) {
 		try {
-			VirtueTemplate virtueTemplate = adminService.getVirtueTemplate(templateId);
+			VirtueTemplateDto virtueTemplate = adminService.getVirtueTemplate(templateId);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -255,9 +257,9 @@ public class AdminResource {
 	@POST
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
-	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
+	public VirtueTemplateDto updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplateDto template) {
 		try {
-			VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
+			VirtueTemplateDto virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
 			return virtueTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -293,7 +295,7 @@ public class AdminResource {
 	@Produces("application/json")
 
 	@Path("createvirtue/type/{templateId}")
-	public VirtueInstance createVirtueFromTemplate(@PathParam("templateId") String templateId) {
+	public VirtueInstanceDto createVirtueFromTemplate(@PathParam("templateId") String templateId) {
 		try {
 			return desktopService.createVirtue(templateId);
 		} catch (Exception e) {
@@ -308,7 +310,7 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtues")
-	public Iterable<VirtueInstance> getAllActiveVirtues(@QueryParam("user") String username) {
+	public Iterable<VirtueInstanceDto> getAllActiveVirtues(@QueryParam("user") String username) {
 		try {
 			if (username == null || username.trim().equals("")) {
 				return adminService.getAllActiveVirtues();
@@ -326,7 +328,7 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("virtues/{id}")
-	public VirtueInstance getActiveVirtue(@PathParam("id") String virtueId) {
+	public VirtueInstanceDto getActiveVirtue(@PathParam("id") String virtueId) {
 		try {
 			return adminService.getActiveVirtue(virtueId);
 		} catch (RuntimeException e) {
@@ -353,7 +355,7 @@ public class AdminResource {
 	@POST
 	@Produces("application/json")
 	@Path("user/")
-	public VirtueUser createUpdateUser(VirtueUser newUser) {
+	public VirtueUserDto createUpdateUser(VirtueUserDto newUser) {
 		try {
 			return adminService.createUpdateUser(newUser);
 		} catch (RuntimeException e) {
@@ -367,7 +369,7 @@ public class AdminResource {
 	@PUT
 	@Produces("application/json")
 	@Path("user/{username}")
-	public VirtueUser updateUser(@PathParam("username") String username, VirtueUser newUser) {
+	public VirtueUserDto updateUser(@PathParam("username") String username, VirtueUserDto newUser) {
 		try {
 			if (!newUser.getUsername().equals(username)) {
 				throw new SaviorException(SaviorException.UNKNOWN_ERROR,
@@ -385,9 +387,9 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("user/{username}")
-	public VirtueUser getUser(@PathParam("username") String usernameToRetrieve) {
+	public VirtueUserDto getUser(@PathParam("username") String usernameToRetrieve) {
 		try {
-			VirtueUser returnedUser = adminService.getUser(usernameToRetrieve);
+			VirtueUserDto returnedUser = adminService.getUser(usernameToRetrieve);
 			return returnedUser;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -401,7 +403,7 @@ public class AdminResource {
 	@GET
 	@Produces("application/json")
 	@Path("user")
-	public Iterable<VirtueUser> getAllUsers() {
+	public Iterable<VirtueUserDto> getAllUsers() {
 		try {
 			return adminService.getAllUsers();
 		} catch (RuntimeException e) {
@@ -462,7 +464,7 @@ public class AdminResource {
 	@GET
 	@Path("user/active")
 	@Produces("application/json")
-	public Iterable<VirtueUser> getActiveUsers() {
+	public Iterable<VirtueUserDto> getActiveUsers() {
 		try {
 			return adminService.getActiveUsers();
 		} catch (RuntimeException e) {

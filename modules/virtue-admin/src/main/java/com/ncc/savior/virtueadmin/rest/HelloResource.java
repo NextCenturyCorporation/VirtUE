@@ -18,8 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
+
+import persistance.JpaVirtueUser;
 
 /**
  * Rest resource designed for testing and login.
@@ -33,7 +34,7 @@ public class HelloResource {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getHello() throws URISyntaxException {
-		VirtueUser user = securityService.getCurrentUser();
+		JpaVirtueUser user = securityService.getCurrentUser();
 
 		return Response.status(200).entity("Hello World " + user.getUsername()).build();
 	}
@@ -74,7 +75,7 @@ public class HelloResource {
 	@Path("/error")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getError() throws URISyntaxException {
-		VirtueUser user = securityService.getCurrentUser();
+		JpaVirtueUser user = securityService.getCurrentUser();
 		return Response.status(400).entity("Error for " + user.getUsername()).build();
 	}
 
@@ -82,7 +83,7 @@ public class HelloResource {
 	@Path("/logout")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getLogout() throws URISyntaxException {
-		VirtueUser user = securityService.getCurrentUser();
+		JpaVirtueUser user = securityService.getCurrentUser();
 		return Response.status(200).entity("logged out " + user.getUsername()).build();
 	}
 }

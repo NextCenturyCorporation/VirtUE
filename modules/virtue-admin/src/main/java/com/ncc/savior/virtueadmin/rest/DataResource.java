@@ -32,10 +32,11 @@ import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -64,6 +65,12 @@ public class DataResource {
 
 	public DataResource() {
 		logger.warn("***Data Resource is currently enabled.  Please disable for production systems.***");
+	}
+
+	@GET
+	@Path("test")
+	public void test() {
+		templateManager.test();
 	}
 
 	@GET
@@ -122,46 +129,50 @@ public class DataResource {
 		String allLinuxAmi = "ami-2b500951";
 		String linuxLoginUser = "admin";
 
-		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
+		JpaVirtualMachineTemplate vmBrowser = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
 				OS.LINUX, allLinuxAmi, appsBrowsers,linuxLoginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
+		JpaVirtualMachineTemplate vmAll = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
 				allLinuxAmi,
 				appsAll,linuxLoginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
+		JpaVirtualMachineTemplate vmMath = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
 				allLinuxAmi, appsMath,linuxLoginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
+		JpaVirtualMachineTemplate vmDrawing = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing",
+				OS.LINUX,
 				allLinuxAmi, appsDrawing,linuxLoginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
+		JpaVirtualMachineTemplate vmLibreOffice = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(),
+				"LibreOffice",
 				OS.LINUX, allLinuxAmi, appsLibreOffice,linuxLoginUser, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmtsSingleAll = new HashSet<JpaVirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		String allTemplate = "default-template";
-		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue", "1.0",
+		JpaVirtueTemplate virtueSingleAll = new JpaVirtueTemplate(UUID.randomUUID().toString(), "Test Virtue", "1.0",
 				vmtsSingleAll, allTemplate, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmtsBrowsers = new HashSet<JpaVirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
-		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue", "1.0",
+		JpaVirtueTemplate virtueBrowsers = new JpaVirtueTemplate(UUID.randomUUID().toString(), "Web Virtue", "1.0",
 				vmtsBrowsers, allTemplate, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmtsLibre = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmtsLibre = new HashSet<JpaVirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
-		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0", vmtsLibre,
+		JpaVirtueTemplate virtueLibre = new JpaVirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0",
+				vmtsLibre,
 				allTemplate, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmtsDrawing = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmtsDrawing = new HashSet<JpaVirtualMachineTemplate>();
 		vmtsDrawing.add(vmDrawing);
-		VirtueTemplate virtueDrawing = new VirtueTemplate(UUID.randomUUID().toString(), "Artist Virtue", "1.0",
+		JpaVirtueTemplate virtueDrawing = new JpaVirtueTemplate(UUID.randomUUID().toString(), "Artist Virtue", "1.0",
 				vmtsDrawing, allTemplate, true, now, systemName);
 
-		Set<VirtualMachineTemplate> vmtsMath = new HashSet<VirtualMachineTemplate>();
+		Set<JpaVirtualMachineTemplate> vmtsMath = new HashSet<JpaVirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
-		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0", vmtsMath,
+		JpaVirtueTemplate virtueMath = new JpaVirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0",
+				vmtsMath,
 				allTemplate, true, now, systemName);
 
 		for (ApplicationDefinition app : appsAll) {
@@ -186,15 +197,15 @@ public class DataResource {
 		adminRoles.add("ROLE_USER");
 		adminRoles.add("ROLE_ADMIN");
 
-		VirtueUser admin = new VirtueUser("admin", adminRoles);
-		VirtueUser presenter = new VirtueUser("presenter", userRoles);
-		VirtueUser office = new VirtueUser("office", userRoles);
-		VirtueUser math = new VirtueUser("math", userRoles);
-		VirtueUser drawing = new VirtueUser("drawing", userRoles);
-		VirtueUser browser = new VirtueUser("browser", userRoles);
-		VirtueUser nerd = new VirtueUser("nerd", userRoles);
-		VirtueUser artist = new VirtueUser("artist", userRoles);
-		VirtueUser developer = new VirtueUser("developer", userRoles);
+		JpaVirtueUser admin = new JpaVirtueUser("admin", adminRoles);
+		JpaVirtueUser presenter = new JpaVirtueUser("presenter", userRoles);
+		JpaVirtueUser office = new JpaVirtueUser("office", userRoles);
+		JpaVirtueUser math = new JpaVirtueUser("math", userRoles);
+		JpaVirtueUser drawing = new JpaVirtueUser("drawing", userRoles);
+		JpaVirtueUser browser = new JpaVirtueUser("browser", userRoles);
+		JpaVirtueUser nerd = new JpaVirtueUser("nerd", userRoles);
+		JpaVirtueUser artist = new JpaVirtueUser("artist", userRoles);
+		JpaVirtueUser developer = new JpaVirtueUser("developer", userRoles);
 
 		userManager.addUser(admin);
 		userManager.addUser(presenter);
@@ -233,8 +244,8 @@ public class DataResource {
 	@Path("user/{sourceUser}/{newUser}")
 	public Response assignUser(@PathParam("sourceUser") String sourceUserName,
 			@PathParam("newUser") String newUserName) {
-		VirtueUser source = userManager.getUser(sourceUserName);
-		VirtueUser newUser = userManager.getUser(newUserName);
+		JpaVirtueUser source = userManager.getUser(sourceUserName);
+		JpaVirtueUser newUser = userManager.getUser(newUserName);
 		if (newUser == null) {
 			Collection<String> auth = source.getAuthorities();
 			// need this verbose code to cause the authorities fetch
@@ -242,7 +253,7 @@ public class DataResource {
 			for (String a : auth) {
 				newAuth.add(a);
 			}
-			newUser = new VirtueUser(newUserName, source.getAuthorities());
+			newUser = new JpaVirtueUser(newUserName, source.getAuthorities());
 			userManager.addUser(newUser);
 		}
 		Collection<String> ids = templateManager.getVirtueTemplateIdsForUser(source);
@@ -256,9 +267,9 @@ public class DataResource {
 	@GET
 	@Path("user/{sourceUser}")
 	@Produces("application/json")
-	public Map<String, VirtueTemplate> assignUser(@PathParam("sourceUser") String sourceUserName) {
-		VirtueUser source = new VirtueUser(sourceUserName, new ArrayList<String>());
-		Map<String, VirtueTemplate> ids = templateManager.getVirtueTemplatesForUser(source);
+	public Map<String, JpaVirtueTemplate> assignUser(@PathParam("sourceUser") String sourceUserName) {
+		JpaVirtueUser source = new JpaVirtueUser(sourceUserName, new ArrayList<String>());
+		Map<String, JpaVirtueTemplate> ids = templateManager.getVirtueTemplatesForUser(source);
 		return ids;
 	}
 
@@ -272,23 +283,23 @@ public class DataResource {
 	@GET
 	@Path("user/")
 	@Produces("application/json")
-	public Iterable<VirtueUser> getUsers() {
+	public Iterable<JpaVirtueUser> getUsers() {
 		return userManager.getAllUsers();
 	}
 
 	@GET
 	@Path("user/current")
 	@Produces("application/json")
-	public Iterable<VirtueUser> getCurrentLoggedInUsers() {
+	public Iterable<JpaVirtueUser> getCurrentLoggedInUsers() {
 		List<Object> principals = sessionRegistry.getAllPrincipals();
-		List<VirtueUser> users = new ArrayList<VirtueUser>(principals.size());
+		List<JpaVirtueUser> users = new ArrayList<JpaVirtueUser>(principals.size());
 		for (Object p : principals) {
 			User user = (User) p;
 			ArrayList<String> auths = new ArrayList<String>();
 			for (GrantedAuthority a : user.getAuthorities()) {
 				auths.add(a.getAuthority());
 			}
-			VirtueUser u = userManager.getUser(user.getUsername());
+			JpaVirtueUser u = userManager.getUser(user.getUsername());
 			users.add(u);
 		}
 		return users;
@@ -322,8 +333,8 @@ public class DataResource {
 	@GET
 	@Path("active/clear/")
 	public String clearActiveDatabase() {
-		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
-		for (VirtueInstance vi : all) {
+		Iterable<JpaVirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
+		for (JpaVirtueInstance vi : all) {
 			cloudManager.deleteVirtue(vi);
 		}
 

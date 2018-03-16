@@ -39,11 +39,12 @@ import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater.IUpdateNotifier;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * {@link IVmManager} that uses AWS EC2 to create and manage VMs. The following
@@ -102,13 +103,13 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 		this.vmUpdater = new AwsVmUpdater(ec2, new IUpdateNotifier() {
 			@Override
-			public void notifyUpdatedVms(Collection<VirtualMachine> vms) {
+			public void notifyUpdatedVms(Collection<JpaVirtualMachine> vms) {
 				notifyOnUpdateVms(vms);
 			}
 
 			@Override
-			public void notifyUpdatedVm(VirtualMachine vm) {
-				ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+			public void notifyUpdatedVm(JpaVirtualMachine vm) {
+				ArrayList<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>(1);
 				vms.add(vm);
 				notifyOnUpdateVms(vms);
 			}
@@ -123,11 +124,11 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			}
 
 			@Override
-			public void updateVms(Collection<VirtualMachine> vms) {
+			public void updateVms(Collection<JpaVirtualMachine> vms) {
 				if (logger.isTraceEnabled()) {
 					if (!vms.isEmpty()) {
 						logger.trace("updated VMs");
-						for (VirtualMachine vm : vms) {
+						for (JpaVirtualMachine vm : vms) {
 							logger.trace("  " + vm);
 						}
 					}
@@ -162,9 +163,9 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
-		Collection<VirtualMachineTemplate> vmTemplates = new ArrayList<VirtualMachineTemplate>(1);
-		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates);
+	public JpaVirtualMachine provisionVirtualMachineTemplate(JpaVirtueUser user, JpaVirtualMachineTemplate vmt) {
+		Collection<JpaVirtualMachineTemplate> vmTemplates = new ArrayList<JpaVirtualMachineTemplate>(1);
+		Collection<JpaVirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates);
 		if (vms.size() != 1) {
 			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
 			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
@@ -175,10 +176,10 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates) {
-		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
-		for (VirtualMachineTemplate vmt : vmTemplates) {
+	public Collection<JpaVirtualMachine> provisionVirtualMachineTemplates(JpaVirtueUser user,
+			Collection<JpaVirtualMachineTemplate> vmTemplates) {
+		ArrayList<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>(vmTemplates.size());
+		for (JpaVirtualMachineTemplate vmt : vmTemplates) {
 			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
 			String templatePath = vmt.getTemplatePath();
@@ -196,7 +197,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
 			String loginUsername = vmt.getLoginUser();
 			String privateKeyName = serverKeyName;
-			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
+			JpaVirtualMachine vm = new JpaVirtualMachine(UUID.randomUUID().toString(), name,
 					new ArrayList<ApplicationDefinition>(vmt.getApplications()),
 					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
 					loginUsername, null, privateKeyName, instance.getPublicIpAddress());
@@ -208,26 +209,26 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+	public JpaVirtualMachine startVirtualMachine(JpaVirtualMachine vm) {
+		Collection<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>();
 		vms = startVirtualMachines(vms);
 		return vms.iterator().next();
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+	public JpaVirtualMachine stopVirtualMachine(JpaVirtualMachine vm) {
+		Collection<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>();
 		vms = stopVirtualMachines(vms);
 		return vms.iterator().next();
 	}
 
 	@Override
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<JpaVirtualMachine> startVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
 		StartInstancesResult result = ec2.startInstances(startInstancesRequest);
 		for (InstanceStateChange i : result.getStartingInstances()) {
-			for (VirtualMachine vm : vms) {
+			for (JpaVirtualMachine vm : vms) {
 				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
 					vm.setState(VmState.LAUNCHING);
 				}
@@ -239,12 +240,12 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<JpaVirtualMachine> stopVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StopInstancesRequest startInstancesRequest = new StopInstancesRequest(instanceIds);
 		StopInstancesResult result = ec2.stopInstances(startInstancesRequest);
 		for (InstanceStateChange i : result.getStoppingInstances()) {
-			for (VirtualMachine vm : vms) {
+			for (JpaVirtualMachine vm : vms) {
 				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
 					vm.setState(VmState.STOPPING);
 				}
@@ -256,17 +257,17 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
-		List<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+	public void deleteVirtualMachine(JpaVirtualMachine vm) {
+		List<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>(1);
 		vms.add(vm);
 		deleteVirtualMachines(vms);
 	}
 
 	@Override
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+	public void deleteVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		try {
 			List<String> instanceIds = new ArrayList<String>(vms.size());
-			for (VirtualMachine vm : vms) {
+			for (JpaVirtualMachine vm : vms) {
 				instanceIds.add(vm.getInfrastructureId());
 			}
 			TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(instanceIds);
@@ -274,10 +275,10 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Terminating: " + result.getTerminatingInstances());
 			}
-			Collection<VirtualMachine> terminatedVms = new ArrayList<VirtualMachine>();
+			Collection<JpaVirtualMachine> terminatedVms = new ArrayList<JpaVirtualMachine>();
 			for (InstanceStateChange r : result.getTerminatingInstances()) {
 				String id = r.getInstanceId();
-				for (VirtualMachine vm : vms) {
+				for (JpaVirtualMachine vm : vms) {
 					if (vm.getInfrastructureId().equals(id)) {
 						terminatedVms.add(vm);
 						vm.setState(VmState.DELETING);
@@ -293,7 +294,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VmState getVirtualMachineState(VirtualMachine vm) {
+	public VmState getVirtualMachineState(JpaVirtualMachine vm) {
 		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
 		Collection<String> instanceIds = new ArrayList<String>(1);
 		instanceIds.add(vm.getInfrastructureId());

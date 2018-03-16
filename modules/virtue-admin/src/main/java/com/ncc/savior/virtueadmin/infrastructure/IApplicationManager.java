@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+
+import persistance.JpaVirtualMachine;
 
 /**
  * Starts and manages applications running on VMs.
@@ -18,7 +19,7 @@ public interface IApplicationManager {
 	 * @param vm
 	 * @param application
 	 */
-	void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition application, int maxTries);
+	void startApplicationOnVm(JpaVirtualMachine vm, ApplicationDefinition application, int maxTries);
 
 	/**
 	 * Tries to get a started Xpra server. If none is found, it will attempt to
@@ -29,5 +30,5 @@ public interface IApplicationManager {
 	 * throwing means failure.
 	 * 
 	 */
-	int startOrGetXpraServer(VirtualMachine vm, File privateKeyFile) throws IOException;
+	int startOrGetXpraServer(JpaVirtualMachine vm, File privateKeyFile) throws IOException;
 }

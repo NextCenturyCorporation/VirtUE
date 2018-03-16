@@ -20,10 +20,11 @@ import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceStatusSummary;
 import com.amazonaws.services.ec2.model.Reservation;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
 
 /**
  * Utility functions for managing and updating AWS EC2 VMs.
@@ -32,9 +33,9 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
 public class AwsUtil {
 	private static final Logger logger = LoggerFactory.getLogger(AwsUtil.class);
 
-	public static Collection<VirtualMachine> updateStatusOnVms(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
-		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
-		for (VirtualMachine vm : vms) {
+	public static Collection<JpaVirtualMachine> updateStatusOnVms(AmazonEC2 ec2, Collection<JpaVirtualMachine> vms) {
+		Map<String, JpaVirtualMachine> instanceIdsToVm = new HashMap<String, JpaVirtualMachine>();
+		for (JpaVirtualMachine vm : vms) {
 			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
 		}
 		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
@@ -43,14 +44,14 @@ public class AwsUtil {
 		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
 		while (itr.hasNext()) {
 			InstanceStatus status = itr.next();
-			VirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
+			JpaVirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
 			vm.setState(awsStatusToSaviorState(status));
 		}
 		return vms;
 	}
 
-	public static VirtualMachine updateStatusOnVm(AmazonEC2 ec2, VirtualMachine vm) {
-		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
+	public static JpaVirtualMachine updateStatusOnVm(AmazonEC2 ec2, JpaVirtualMachine vm) {
+		Map<String, JpaVirtualMachine> instanceIdsToVm = new HashMap<String, JpaVirtualMachine>();
 		instanceIdsToVm.put(vm.getInfrastructureId(), vm);
 		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
 		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
@@ -109,9 +110,9 @@ public class AwsUtil {
 		return VmState.ERROR;
 	}
 
-	public static boolean areAllVmsRunning(Collection<VirtualMachine> vms, boolean throwOnErrorState) {
+	public static boolean areAllVmsRunning(Collection<JpaVirtualMachine> vms, boolean throwOnErrorState) {
 		logger.trace("Checking status of VMs:");
-		for (VirtualMachine vm : vms) {
+		for (JpaVirtualMachine vm : vms) {
 			logger.trace("  " + vm.toString());
 			VmState state = vm.getState();
 			if (VmState.RUNNING.equals(state)) {
@@ -125,7 +126,7 @@ public class AwsUtil {
 		return true;
 	}
 
-	public static void waitForAllVmsRunning(AmazonEC2 ec2, Collection<VirtualMachine> vms,
+	public static void waitForAllVmsRunning(AmazonEC2 ec2, Collection<JpaVirtualMachine> vms,
 			long vmStatePollPeriodMillis) {
 		boolean throwOnErrorState = true;
 
@@ -139,14 +140,15 @@ public class AwsUtil {
 		}
 	}
 
-	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<VirtualMachine> vms, long periodMillis) {
+	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<JpaVirtualMachine> vms,
+			long periodMillis) {
 		// create copy so we can alter
-		vms = new ArrayList<VirtualMachine>(vms);
+		vms = new ArrayList<JpaVirtualMachine>(vms);
 		while (true) {
-			Iterator<VirtualMachine> itr = vms.iterator();
+			Iterator<JpaVirtualMachine> itr = vms.iterator();
 			updateNetworking(ec2, vms);
 			while (itr.hasNext()) {
-				VirtualMachine vm = itr.next();
+				JpaVirtualMachine vm = itr.next();
 				String hn = vm.getHostname();
 				if (hn != null && !hn.trim().equals("")) {
 					itr.remove();
@@ -159,7 +161,7 @@ public class AwsUtil {
 		}
 	}
 
-	public static void updateNetworking(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
+	public static void updateNetworking(AmazonEC2 ec2, Collection<JpaVirtualMachine> vms) {
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 		Collection<String> instanceIds = vmsToInstanceIds(vms);
 		try {
@@ -167,7 +169,7 @@ public class AwsUtil {
 			DescribeInstancesResult results = ec2.describeInstances(describeInstancesRequest);
 			for (Reservation r : results.getReservations()) {
 				for (Instance i : r.getInstances()) {
-					for (VirtualMachine vm : vms) {
+					for (JpaVirtualMachine vm : vms) {
 						if (vm.getInfrastructureId().equals(i.getInstanceId())) {
 							vm.setHostname(i.getPublicDnsName());
 							vm.setIpAddress(i.getPublicIpAddress());
@@ -181,9 +183,9 @@ public class AwsUtil {
 
 	}
 
-	public static List<String> vmsToInstanceIds(Collection<VirtualMachine> vms) {
+	public static List<String> vmsToInstanceIds(Collection<JpaVirtualMachine> vms) {
 		List<String> instanceIds = new ArrayList<String>(vms.size());
-		for (VirtualMachine vm : vms) {
+		for (JpaVirtualMachine vm : vms) {
 			instanceIds.add(vm.getInfrastructureId());
 		}
 		return instanceIds;

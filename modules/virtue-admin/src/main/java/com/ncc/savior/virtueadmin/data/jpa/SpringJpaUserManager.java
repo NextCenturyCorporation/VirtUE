@@ -6,7 +6,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+
+import persistance.JpaVirtueUser;
 
 /**
  * {@link IUserManager} that uses Spring and JPA.
@@ -17,26 +18,26 @@ public class SpringJpaUserManager implements IUserManager {
 	private UserRepository userRepo;
 
 	@Override
-	public void addUser(VirtueUser user) {
+	public void addUser(JpaVirtueUser user) {
 		userRepo.save(user);
 	}
 
 	@Override
-	public VirtueUser getUser(String username) {
-		Optional<VirtueUser> user = userRepo.findById(username);
+	public JpaVirtueUser getUser(String username) {
+		Optional<JpaVirtueUser> user = userRepo.findById(username);
 		return (user.orElse(null));
 	}
 
 	@Override
-	public Iterable<VirtueUser> getAllUsers() {
+	public Iterable<JpaVirtueUser> getAllUsers() {
 		return userRepo.findAll();
 	}
 
 	@Override
 	public void clear() {
-		Iterator<VirtueUser> itr = userRepo.findAll().iterator();
+		Iterator<JpaVirtueUser> itr = userRepo.findAll().iterator();
 		while (itr.hasNext()) {
-			VirtueUser user = itr.next();
+			JpaVirtueUser user = itr.next();
 			user.removeAllVirtueTemplates();
 			userRepo.save(user);
 		}
@@ -44,7 +45,7 @@ public class SpringJpaUserManager implements IUserManager {
 	}
 
 	@Override
-	public void removeUser(VirtueUser user) {
+	public void removeUser(JpaVirtueUser user) {
 		userRepo.delete(user);
 	}
 

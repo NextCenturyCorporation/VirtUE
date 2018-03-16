@@ -20,8 +20,9 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.StartXpraComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+
+import persistance.JpaVirtualMachine;
 
 public class AwsVmUpdater {
 	private static final Logger logger = LoggerFactory.getLogger(AwsVmUpdater.class);
@@ -122,27 +123,27 @@ public class AwsVmUpdater {
 	 * 
 	 * @param vms
 	 */
-	public void addVmToProvisionPipeline(ArrayList<VirtualMachine> vms) {
+	public void addVmToProvisionPipeline(ArrayList<JpaVirtualMachine> vms) {
 		provisionPipeline.addToPipeline(vms);
 	}
 
 	public static interface IUpdateNotifier {
-		void notifyUpdatedVms(Collection<VirtualMachine> vm);
+		void notifyUpdatedVms(Collection<JpaVirtualMachine> vm);
 
-		void notifyUpdatedVm(VirtualMachine vm);
+		void notifyUpdatedVm(JpaVirtualMachine vm);
 	}
 
-	public void addVmsToStartingPipeline(Collection<VirtualMachine> vms) {
+	public void addVmsToStartingPipeline(Collection<JpaVirtualMachine> vms) {
 		startingPipeline.addToPipeline(vms);
 
 	}
 
-	public void addVmsToStoppingPipeline(Collection<VirtualMachine> vms) {
+	public void addVmsToStoppingPipeline(Collection<JpaVirtualMachine> vms) {
 		stoppingPipeline.addToPipeline(vms);
 
 	}
 
-	public void addVmsToDeletingPipeline(Collection<VirtualMachine> vms) {
+	public void addVmsToDeletingPipeline(Collection<JpaVirtualMachine> vms) {
 		stoppingPipeline.addToPipeline(vms);
 	}
 

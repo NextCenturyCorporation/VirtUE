@@ -3,9 +3,10 @@ package com.ncc.savior.virtueadmin.infrastructure;
 import java.util.Map;
 
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtualMachineTemplate;
 
 /**
  * {@link ICloudManager} implementation which delegates individual VM actions to
@@ -21,7 +22,7 @@ public class OsBasedDelegatedCloudManager extends BaseDelegatedCloudManager {
 	}
 
 	@Override
-	protected IVmManager getVmManagerForVm(VirtualMachine vm) {
+	protected IVmManager getVmManagerForVm(JpaVirtualMachine vm) {
 		IVmManager manager = managerMap.get(vm.getOs());
 		if (manager == null) {
 			throw new SaviorException(SaviorException.CONFIGURATION_ERROR,
@@ -31,7 +32,7 @@ public class OsBasedDelegatedCloudManager extends BaseDelegatedCloudManager {
 	}
 
 	@Override
-	protected IVmManager getVmManagerForVmTemplate(VirtualMachineTemplate vmt) {
+	protected IVmManager getVmManagerForVmTemplate(JpaVirtualMachineTemplate vmt) {
 		IVmManager manager = managerMap.get(vmt.getOs());
 		if (manager == null) {
 			throw new SaviorException(SaviorException.CONFIGURATION_ERROR,

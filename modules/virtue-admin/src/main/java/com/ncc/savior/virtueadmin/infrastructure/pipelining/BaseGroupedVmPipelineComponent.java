@@ -10,7 +10,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import net.bytebuddy.agent.VirtualMachine;
+import persistance.JpaVirtualMachine;
 
 /**
  * Base class for {@link IPipelineComponent} that handles much of the hard work.
@@ -34,7 +35,7 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 	private long initialDelayMillis;
 	private long periodOrDelayMillis;
 	ScheduledFuture<?> future = null;
-	protected Collection<VirtualMachine> vmCollection;
+	protected Collection<JpaVirtualMachine> vmCollection;
 	private IUpdatePipelineResultListener resultListener;
 	private int myIndexInPipeline;
 
@@ -59,11 +60,11 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 		this.isFixedRate = isFixedRate;
 		this.initialDelayMillis = initialDelayMillis;
 		this.periodOrDelayMillis = periodOrDelayMillis;
-		this.vmCollection = Collections.synchronizedCollection(new ArrayList<VirtualMachine>());
+		this.vmCollection = Collections.synchronizedCollection(new ArrayList<JpaVirtualMachine>());
 	}
 
 	@Override
-	public void addVirtualMachines(Collection<VirtualMachine> vms) {
+	public void addVirtualMachines(Collection<JpaVirtualMachine> vms) {
 		vmCollection.addAll(vms);
 	}
 
@@ -74,7 +75,7 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 			@Override
 			public void run() {
 				try {
-					ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmCollection);
+					ArrayList<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>(vmCollection);
 					onExecute(vms);
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
@@ -101,7 +102,7 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 	 *            {@link IPipelineComponent}. These VM's will be saved and moved to
 	 *            the next component in the pipeline.
 	 */
-	protected void doOnSuccess(Collection<VirtualMachine> vms) {
+	protected void doOnSuccess(Collection<JpaVirtualMachine> vms) {
 		vmCollection.removeAll(vms);
 		resultListener.onSuccess(vms, myIndexInPipeline);
 	}
@@ -112,7 +113,7 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 	 * 
 	 * @param vms
 	 */
-	protected void doOnFailure(Collection<VirtualMachine> vms) {
+	protected void doOnFailure(Collection<JpaVirtualMachine> vms) {
 		vmCollection.removeAll(vms);
 		resultListener.onFatalError(vms);
 	}
@@ -130,7 +131,7 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 	 * 
 	 * @param vms
 	 */
-	protected abstract void onExecute(ArrayList<VirtualMachine> vms);
+	protected abstract void onExecute(ArrayList<JpaVirtualMachine> vms);
 
 	@Override
 	public void setResultListener(IUpdatePipelineResultListener resultListener) {

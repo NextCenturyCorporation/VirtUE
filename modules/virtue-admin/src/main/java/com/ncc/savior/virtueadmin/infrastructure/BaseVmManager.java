@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
+
+import persistance.JpaVirtualMachine;
 
 /**
  * 
@@ -37,7 +38,7 @@ public abstract class BaseVmManager implements IVmManager {
 		}
 	}
 
-	protected void notifyOnUpdateVms(Collection<VirtualMachine> vms) {
+	protected void notifyOnUpdateVms(Collection<JpaVirtualMachine> vms) {
 		for (IVmUpdateListener listener : vmUpdateListeners) {
 			listener.updateVms(vms);
 		}

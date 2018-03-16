@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,9 +17,10 @@ import org.springframework.context.annotation.Bean;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
+
+import persistance.JpaVirtualMachineTemplate;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Test main
@@ -42,7 +44,7 @@ public class JpaTest {
 					userRep);
 
 			// save a couple of customers
-			Set<VirtualMachineTemplate> vmts1 = new HashSet<VirtualMachineTemplate>();
+			Set<JpaVirtualMachineTemplate> vmts1 = new HashSet<JpaVirtualMachineTemplate>();
 			ArrayList<ApplicationDefinition> apps1 = new ArrayList<ApplicationDefinition>();
 			ApplicationDefinition a1 = new ApplicationDefinition(UUID.randomUUID().toString(), "testApp", "V1",
 					OS.LINUX);
@@ -51,20 +53,24 @@ public class JpaTest {
 			Date now = new Date();
 			String systemUser = "system";
 			String loginUser = "admin";
-			VirtualMachineTemplate vmt1 = new VirtualMachineTemplate(UUID.randomUUID().toString(), "test", OS.LINUX,
+			JpaVirtualMachineTemplate vmt1 = new JpaVirtualMachineTemplate(UUID.randomUUID().toString(), "test",
+					OS.LINUX,
 					"myTemplatePath", apps1, loginUser, enabled, now, systemUser);
 			vmts1.add(vmt1);
-			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1,
+			JpaVirtueTemplate vt1 = new JpaVirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1,
 					"default-template", enabled, now, systemUser);
 
 			tm.addApplicationDefinition(a1);
 			tm.addVmTemplate(vmt1);
 			tm.addVirtueTemplate(vt1);
 
-			VirtueUser user = VirtueUser.testUser();
+			Collection<String> authorities = new ArrayList<String>();
+			authorities.add("ROLE_USER");
+			authorities.add("ROLE_ADMIN");
+			JpaVirtueUser user = new JpaVirtueUser("Test", authorities);
 			// userRep.save(new UserName(user.getUsername()));
 
-			Map<String, VirtueTemplate> testVts = tm.getVirtueTemplatesForUser(user);
+			Map<String, JpaVirtueTemplate> testVts = tm.getVirtueTemplatesForUser(user);
 			log.info(testVts.toString());
 
 			tm.assignVirtueTemplateToUser(user, vt1.getId());
@@ -79,13 +85,13 @@ public class JpaTest {
 			// fetch all customers
 			log.info("Customers found with findAll():");
 			log.info("-------------------------------");
-			for (VirtueTemplate template : vtRepository.findAll()) {
+			for (JpaVirtueTemplate template : vtRepository.findAll()) {
 				log.info(template.toString());
 			}
 			log.info("");
 
 			// fetch an individual customer by ID
-			VirtueTemplate virtueTemplate = vtRepository.findById("id").get();
+			JpaVirtueTemplate virtueTemplate = vtRepository.findById("id").get();
 			log.info("Customer found with findOne(1L):");
 			log.info("--------------------------------");
 			log.info(virtueTemplate == null ? "null" : virtueTemplate.toString());

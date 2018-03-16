@@ -8,8 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater.IUpdateNotifier;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+import persistance.JpaVirtualMachine;
 
 public class UpdatePipeline implements IUpdatePipeline, IUpdatePipelineResultListener {
 	private static final Logger logger = LoggerFactory.getLogger(UpdatePipeline.class);
@@ -49,7 +50,7 @@ public class UpdatePipeline implements IUpdatePipeline, IUpdatePipelineResultLis
 	}
 
 	@Override
-	public void addToPipeline(Collection<VirtualMachine> vms) {
+	public void addToPipeline(Collection<JpaVirtualMachine> vms) {
 		pipeline.get(0).addVirtualMachines(vms);
 
 	}
@@ -65,14 +66,14 @@ public class UpdatePipeline implements IUpdatePipeline, IUpdatePipelineResultLis
 	}
 
 	@Override
-	public void onSuccess(VirtualMachine vm, int currentPipelineIndex) {
-		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+	public void onSuccess(JpaVirtualMachine vm, int currentPipelineIndex) {
+		ArrayList<JpaVirtualMachine> vms = new ArrayList<JpaVirtualMachine>(1);
 		vms.add(vm);
 		onSuccess(vms, currentPipelineIndex);
 	}
 
 	@Override
-	public void onSuccess(Collection<VirtualMachine> vms, int currentPipelineIndex) {
+	public void onSuccess(Collection<JpaVirtualMachine> vms, int currentPipelineIndex) {
 		notifier.notifyUpdatedVms(vms);
 		if (currentPipelineIndex < 0) {
 			throw new RuntimeException("Error currentPipelineIndex is invalid=" + currentPipelineIndex);
@@ -91,13 +92,13 @@ public class UpdatePipeline implements IUpdatePipeline, IUpdatePipelineResultLis
 	}
 
 	@Override
-	public void onFatalError(VirtualMachine vm) {
+	public void onFatalError(JpaVirtualMachine vm) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void onFatalError(Collection<VirtualMachine> vms) {
+	public void onFatalError(Collection<JpaVirtualMachine> vms) {
 		// TODO Auto-generated method stub
 
 	}

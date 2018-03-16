@@ -11,20 +11,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.util.ConversionUtil;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueState;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
+
+import dto.VirtueInstanceDto;
+import persistance.JpaVirtualMachine;
+import persistance.JpaVirtueInstance;
+import persistance.JpaVirtueTemplate;
+import persistance.JpaVirtueUser;
 
 /**
  * Virtue service to handle functions specifically for the desktop application.
@@ -56,21 +59,22 @@ public class DesktopVirtueService {
 	 * 
 	 */
 	public Set<DesktopVirtue> getDesktopVirtuesForUser() {
-		VirtueUser user = verifyAndReturnUser();
-		Map<String, VirtueTemplate> templates = templateManager.getVirtueTemplatesForUser(user);
-		Map<String, Set<VirtueInstance>> templateIdToActiveVirtues = activeVirtueManager.getVirtuesFromTemplateIds(user,
+		JpaVirtueUser user = verifyAndReturnUser();
+		Map<String, JpaVirtueTemplate> templates = templateManager.getVirtueTemplatesForUser(user);
+		Map<String, Set<JpaVirtueInstance>> templateIdToActiveVirtues = activeVirtueManager
+				.getVirtuesFromTemplateIds(user,
 				templates.keySet());
 		Set<DesktopVirtue> virtues = new LinkedHashSet<DesktopVirtue>();
 		for (String templateId : templates.keySet()) {
 			if (templateIdToActiveVirtues.containsKey(templateId)) {
 				// Template has active virtues
-				for (VirtueInstance instance : templateIdToActiveVirtues.get(templateId)) {
+				for (JpaVirtueInstance instance : templateIdToActiveVirtues.get(templateId)) {
 					// convert VirtueInstance to DesktopVirtue and add
 					DesktopVirtue dv = convertVirtueInstanceToDesktopVirtue(instance);
 					virtues.add(dv);
 				}
 			} else {
-				VirtueTemplate template = templates.get(templateId);
+				JpaVirtueTemplate template = templates.get(templateId);
 				DesktopVirtue dv = convertVirtueTemplateToDesktopVirtue(template);
 				virtues.add(dv);
 			}
@@ -81,7 +85,7 @@ public class DesktopVirtueService {
 	public DesktopVirtueApplication startApplication(String virtueId, String applicationId) throws IOException {
 		verifyAndReturnUser();
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
-		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
+		JpaVirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
 		applicationManager.startApplicationOnVm(vm, application, 15);
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
@@ -96,7 +100,7 @@ public class DesktopVirtueService {
 				+ applicationId);
 		long a = System.currentTimeMillis();
 		verifyAndReturnUser();
-		VirtueInstance instance = createVirtue(templateId);
+		JpaVirtueInstance instance = createVirtueAndReturnInternal(templateId);
 		while (!VirtueState.RUNNING.equals(instance.getState())) {
 			JavaUtil.sleepAndLogInterruption(2000);
 			instance = activeVirtueManager.getActiveVirtue(instance.getId());
@@ -122,21 +126,27 @@ public class DesktopVirtueService {
 	}
 
 	public void deleteVirtue(String instanceId) {
-		VirtueUser user = verifyAndReturnUser();
+		JpaVirtueUser user = verifyAndReturnUser();
 		activeVirtueManager.deleteVirtue(user, instanceId);
 	}
 
-	public VirtueInstance createVirtue(String templateId) {
-		VirtueUser user = verifyAndReturnUser();
-		VirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
+	public VirtueInstanceDto createVirtue(String templateId) {
+		JpaVirtueInstance jpa = createVirtueAndReturnInternal(templateId);
+		Collection<String> vmIds = ConversionUtil.hasIdIterable(jpa.getVms());
+		return new VirtueInstanceDto(jpa, jpa.getUsername(), vmIds);
+	}
+
+	private JpaVirtueInstance createVirtueAndReturnInternal(String templateId) {
+		JpaVirtueUser user = verifyAndReturnUser();
+		JpaVirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
 		if (template == null) {
 			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
 		}
-		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
+		JpaVirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
 		return instance;
 	}
 
-	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
+	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(JpaVirtueTemplate template) {
 		verifyAndReturnUser();
 		Collection<ApplicationDefinition> apps = template.getApplications();
 		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
@@ -146,7 +156,7 @@ public class DesktopVirtueService {
 		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED);
 	}
 
-	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
+	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(JpaVirtueInstance instance) {
 		verifyAndReturnUser();
 		Collection<ApplicationDefinition> apps = instance.getApplications();
 		Map<String, ApplicationDefinition> appsMap = new HashMap<String, ApplicationDefinition>();
@@ -157,8 +167,8 @@ public class DesktopVirtueService {
 				instance.getState());
 	}
 
-	private VirtueUser verifyAndReturnUser() {
-		VirtueUser user = securityService.getCurrentUser();
+	private JpaVirtueUser verifyAndReturnUser() {
+		JpaVirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have USER role");
 		}
@@ -166,7 +176,7 @@ public class DesktopVirtueService {
 	}
 
 	public DesktopVirtue createVirtueAsDesktopVirtue(String templateId) {
-		VirtueInstance instance = createVirtue(templateId);
+		JpaVirtueInstance instance = createVirtueAndReturnInternal(templateId);
 		DesktopVirtue dv = convertVirtueInstanceToDesktopVirtue(instance);
 		return dv;
 	}
