@@ -1,11 +1,12 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Applications</h1>
-    <button class="titlebar-button" [routerLink]="['add-app']">Add New App</button>
+    <button class="titlebar-button" (click)="openAppsDialog()">Install New App</button>
   </div>
 
   <div id="content-main">
     <div id="content">
+
       <div class="mui-container-fluid">
         <!-- if there are no virtues, show this message -->
         <div class="mui-row margin-top-10" *ngIf="apps.length < 1">

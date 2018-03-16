@@ -1,3 +1,23 @@
-<p>
-  add-vm-app works!
-</p>
+<h3>Upload or Paste URL the Application Package</h3>
+<form>
+  <p>
+    <label for="file">Upload Package:</label><br />
+    <input type="file" id="file" (change)="handleFIleInput($event.target.files)" />
+  </p>
+  <p>
+    <label for="url">Paste URL to Package:</label>
+    <input type="text" id="url" (change)="handleFIleInput($event.target.files)" />
+  </p>
+  <hr />
+  <div class="mui-row border-top">
+    <div class="mui-col-md-4">
+      <input #editor type="hidden" value="system" />
+    </div>
+    <div class="mui-col-md-4 form-item text-align-center">
+      <!-- <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Install Another Application</span> -->
+      <button class="button-submit" type="submit">Install</button>
+      <button (click)="onNoClick()" class="button-cancel" type="cancel">Cancel</button>
+    </div>
+    <div class="mui-col-md-4"></div>
+  </div>
+</form>
