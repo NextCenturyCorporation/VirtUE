@@ -120,4 +120,9 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 		vmRepository.saveAll(vms);
 	}
 
+	@Override
+	public void deleteVirtue(VirtueInstance vi) {
+		virtueRepository.delete(vi);
+	}
+
 }

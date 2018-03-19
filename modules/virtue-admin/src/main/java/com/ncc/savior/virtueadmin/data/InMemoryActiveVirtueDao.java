@@ -132,4 +132,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public void updateVms(Collection<VirtualMachine> vms) {
 		throw new NotImplementedException();
 	}
+
+	@Override
+	public void deleteVirtue(VirtueInstance vi) {
+		// TODO Auto-generated method stub
+
+	}
 }
