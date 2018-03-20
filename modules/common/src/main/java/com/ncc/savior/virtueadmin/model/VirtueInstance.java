@@ -46,6 +46,7 @@ public class VirtueInstance {
 		this.templateId = templateId;
 		this.applications = apps;
 		this.vms = vms;
+		state = getVirtueStateFrom(vms);
 	}
 
 	/**
@@ -58,7 +59,6 @@ public class VirtueInstance {
 	public VirtueInstance(VirtueTemplate template, String username) {
 		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
 				getApplicationsFromTemplate(template), new HashSet<VirtualMachine>());
-
 	}
 
 	public VirtueInstance(VirtueTemplate template, String username, Collection<VirtualMachine> vms) {
@@ -92,7 +92,7 @@ public class VirtueInstance {
 	}
 
 	public VirtueState getState() {
-		return state;
+		return getVirtueStateFrom(vms);
 	}
 
 	@Override
@@ -132,6 +132,7 @@ public class VirtueInstance {
 
 	protected void setVms(Collection<VirtualMachine> vms) {
 		this.vms = vms;
+		state = getVirtueStateFrom(vms);
 	}
 
 	protected void setTemplateId(String templateId) {
@@ -149,6 +150,57 @@ public class VirtueInstance {
 			}
 		}
 		return null;
+	}
+
+	private VirtueState getVirtueStateFrom(Collection<VirtualMachine> vms) {
+		// TODO this should probably be handled elsewhere
+		state = VirtueState.RUNNING;
+		boolean creating = false;
+		boolean launching = false;
+		boolean deleting = false;
+		for (VirtualMachine vm : vms) {
+			VmState s = vm.getState();
+			switch (s) {
+			case RUNNING:
+				// do nothing
+				break;
+			case CREATING:
+				creating = true;
+				break;
+			case LAUNCHING:
+				creating = true;
+				break;
+			case DELETING:
+				deleting = true;
+				break;
+			case ERROR:
+				setState(null);
+				return null;
+			case PAUSED:
+				break;
+			case PAUSING:
+				break;
+			case RESUMING:
+				break;
+			case STOPPED:
+				break;
+			case STOPPING:
+				break;
+			default:
+				break;
+			}
+		}
+		if ((creating || launching) && deleting) {
+			return (null);
+		}
+
+		if ((creating || launching)) {
+			return (VirtueState.LAUNCHING);
+		}
+		if (deleting) {
+			return (VirtueState.DELETING);
+		}
+		return VirtueState.RUNNING;
 	}
 
 }

@@ -1,8 +1,9 @@
-package com.ncc.savior.virtueadmin.infrastructure;
+package com.ncc.savior.virtueadmin.infrastructure.staticvm;
 
 import java.util.Collection;
 import java.util.UUID;
 
+import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;

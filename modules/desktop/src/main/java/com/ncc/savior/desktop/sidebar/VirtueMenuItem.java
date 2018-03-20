@@ -127,7 +127,7 @@ public class VirtueMenuItem {
 	private String getLabel(DesktopVirtue virtue) {
 		String name = virtue.getName();
 		if (virtue.getId() != null) {
-			name = name + "*";
+			name = name + " (" + virtue.getVirtueState() + ")";
 		}
 		return name;
 	}
@@ -169,9 +169,9 @@ public class VirtueMenuItem {
 						public void run() {
 							try {
 								statusSpinner.setImage(statusImage);
-								statusSpinner.setVisible(true);
+								// statusSpinner.setVisible(true);
 								virtueService.startApplication(virtue, app, color);
-								statusSpinner.setVisible(false);
+								// statusSpinner.setVisible(false);
 							} catch (IOException e) {
 								logger.error("Error starting " + app.getName(), e);
 								Platform.runLater(new Runnable() {

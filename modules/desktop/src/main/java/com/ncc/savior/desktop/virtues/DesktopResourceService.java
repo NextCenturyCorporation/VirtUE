@@ -116,13 +116,25 @@ public class DesktopResourceService {
 
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
-			throws IOException {
-		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
-		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
-		logger.debug("Started app=" + returnedApp);
-		return returnedApp;
+	public DesktopVirtue startVirtue(String virtueTemplateId) throws IOException {
+		// template/{templateId}/start
+		WebTarget target = baseApi.path("template").path(virtueTemplateId).path("start");
+		DesktopVirtue startingVirtue = getClass(target, "GET", DesktopVirtue.class);
+		// logger.debug("Started app=" + returnedApp);
+		return startingVirtue;
+
 	}
+
+	// public DesktopVirtueApplication startApplicationFromTemplate(String
+	// templateId, ApplicationDefinition appDefn)
+	// throws IOException {
+	// WebTarget target =
+	// baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
+	// DesktopVirtueApplication returnedApp = getClass(target, "GET",
+	// DesktopVirtueApplication.class);
+	// logger.debug("Started app=" + returnedApp);
+	// return returnedApp;
+	// }
 
 	public static Client getIgnoreSSLClient() throws Exception {
 		SSLContext sslcontext = SSLContext.getInstance("TLS");
@@ -168,8 +180,10 @@ public class DesktopResourceService {
 			return instance;
 		} else {
 			String responseString = streamToString(in);
-			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + responseString);
-			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + responseString);
+			String error = "Error in request to " + target.toString() + " Status:" + response.getStatus()
+					+ " response: " + responseString;
+			logger.error(error);
+			throw new RuntimeException(error);
 		}
 	}
 
