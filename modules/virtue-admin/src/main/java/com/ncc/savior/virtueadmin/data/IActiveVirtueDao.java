@@ -65,4 +65,6 @@ public interface IActiveVirtueDao {
 
 	void updateVms(Collection<VirtualMachine> vms);
 
+	void deleteVirtue(VirtueInstance vi);
+
 }

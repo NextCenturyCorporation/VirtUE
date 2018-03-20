@@ -118,6 +118,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 					"Virtue id=" + instanceId + " was not found");
 		}
 		cloudManager.deleteVirtue(vi);
+		virtueDao.deleteVirtue(vi);
 	}
 
 	@Override

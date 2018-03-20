@@ -1,0 +1,67 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        // The following is only necessary if you want to use SNAPSHOT releases.
+        // maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.1.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'base'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+
+
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+task initCMake(type: Exec) {
+    description 'Initialize cmake build'
+    workingDir 'build'
+    inputs.file('CMakeLists.txt')
+    outputs.dir(workingDir)
+    outputs.file(new File(workingDir, 'CMakeCache.txt'))
+    outputs.file(new File(workingDir, 'Makefile'))
+    outputs.dir(new File(workingDir, 'CMakeFiles'))
+    outputs.file(new File(workingDir, 'cmake_install.cmake'))
+    commandLine 'cmake', '-G', 'Eclipse CDT4 - Unix Makefiles', '-DCMAKE_CXX_FLAGS=-std=c++14', "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${workingDir}", '..'
+}
+clean.dependsOn('cleanInitCMake')
+
+task runMake(type: Exec) {
+    description 'Run make as configured by cmake, to build the swig wrapper library'
+    dependsOn initCMake
+    workingDir 'build'
+    commandLine 'make'
+}
+
+compileJava.dependsOn('runMake')
+
+junitPlatformTest {
+    systemProperty "java.library.path", "build"
+}
+
+sourceSets {
+    buildDir 'build/build'
+    main {
+        java {
+            srcDirs = [ 'build/build/java' ]
+        }
+    }
+}
+
+dependencies {
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.1.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0")
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "5.1.0"
+    testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version: "1.1.0"    
+
+    testCompile("junit:junit:4.12")
+    testRuntime("org.junit.vintage:junit-vintage-engine:5.1.0")
+}
+
