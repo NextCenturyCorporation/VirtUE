@@ -125,4 +125,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public void clear() {
 		virtues.clear();
 	}
+
+	@Override
+	public void deleteVirtue(VirtueInstance vi) {
+		// TODO Auto-generated method stub
+
+	}
 }
