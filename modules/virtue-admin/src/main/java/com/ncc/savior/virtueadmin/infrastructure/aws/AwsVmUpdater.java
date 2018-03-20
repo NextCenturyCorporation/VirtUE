@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
+import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsGetStatusComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsNetworkingUpdateComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.NetworkingClearingComponent;
-import com.ncc.savior.virtueadmin.infrastructure.pipelining.SetStatusComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.StartXpraComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComponent;
@@ -43,20 +43,26 @@ public class AwsVmUpdater {
 				return new Thread(r, name);
 			}
 		});
+		ArrayList<VmState> awsStartedStates = new ArrayList<VmState>();
+		awsStartedStates.add(VmState.RUNNING);
+		awsStartedStates.add(VmState.LAUNCHING);
+
 		provisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
 		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		provisionPipeline.addPipelineComponent(new AwsGetStatusComponent(executor, ec2, awsStartedStates));
 		provisionPipeline.addPipelineComponent(new TestReachabilityAndAddRsaComponent(executor, keyManager));
 		provisionPipeline.addPipelineComponent(new StartXpraComponent(executor, keyManager));
 		provisionPipeline.start();
 
 		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		startingPipeline.addPipelineComponent(new AwsGetStatusComponent(executor, ec2, awsStartedStates));
 		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
 		startingPipeline.addPipelineComponent(new StartXpraComponent(executor, keyManager));
 		startingPipeline.start();
 
 		stoppingPipeline.addPipelineComponent(new NetworkingClearingComponent(executor));
 		stoppingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, false));
-		stoppingPipeline.addPipelineComponent(new SetStatusComponent(executor, VmState.STOPPED));
+		stoppingPipeline.addPipelineComponent(new AwsGetStatusComponent(executor, ec2, VmState.STOPPED));
 		stoppingPipeline.start();
 
 		logger.debug("Aws update pipelines started");

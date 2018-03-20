@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.amazonaws.services.ec2.AmazonEC2;
@@ -24,7 +25,7 @@ public class AwsNetworkingUpdateComponent extends BaseGroupedVmPipelineComponent
 	}
 
 	@Override
-	protected void onExecute(ArrayList<VirtualMachine> vms) {
+	protected void onExecute(Collection<VirtualMachine> vms) {
 		ArrayList<VirtualMachine> updated = new ArrayList<VirtualMachine>();
 		AwsUtil.updateNetworking(ec2, vms);
 		for (VirtualMachine vm : vms) {

@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -74,7 +75,7 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 			@Override
 			public void run() {
 				try {
-					ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmCollection);
+					HashSet<VirtualMachine> vms = new HashSet<VirtualMachine>(vmCollection);
 					onExecute(vms);
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
@@ -130,7 +131,7 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 	 * 
 	 * @param vms
 	 */
-	protected abstract void onExecute(ArrayList<VirtualMachine> vms);
+	protected abstract void onExecute(Collection<VirtualMachine> vms);
 
 	@Override
 	public void setResultListener(IUpdatePipelineResultListener resultListener) {

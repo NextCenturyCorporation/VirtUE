@@ -328,7 +328,8 @@ public class AdminResource {
 	@Path("virtues/{id}")
 	public VirtueInstance getActiveVirtue(@PathParam("id") String virtueId) {
 		try {
-			return adminService.getActiveVirtue(virtueId);
+			VirtueInstance v = adminService.getActiveVirtue(virtueId);
+			return v;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
