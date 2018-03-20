@@ -8,8 +8,6 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { Virtue } from '../../shared/models/virtue.model';
 import { VirtuesService } from '../../shared/services/virtues.service';
-import { JsonFilterPipe } from '../../shared/json-filter.pipe';
-import { CountFilterPipe } from '../../shared/count-filter.pipe';
 
 @Component({
   selector: 'app-virtue-list',
@@ -38,7 +36,7 @@ export class VirtueListComponent implements OnInit {
     });
   }
 
-  openDialog(id, type, text): void {
+  openDialog(id, type, action, text): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {

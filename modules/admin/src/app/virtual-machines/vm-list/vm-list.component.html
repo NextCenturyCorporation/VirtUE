@@ -1,8 +1,8 @@
 <div id="content-container">
-  <div id="content-header" class="mui-container-fluid titlebar">
-    <h1 class="title">Virtual Machines</h1>
-    <button [routerLink]="['vm-build']">Build VM</button>
-    <button [disabled]="true">Import VM</button>
+  <div id="content-header" class="titlebar">
+    <h1 class="titlebar-title">Virtual Machines</h1>
+    <button class="titlebar-button" [routerLink]="['vm-build']">Build VM</button>
+    <button class="titlebar-button" [disabled]="true">Import VM</button>
   </div>
 
   <div id="content-main">
@@ -21,7 +21,14 @@
       <!-- if there are virtues, show this list -->
       <div *ngIf="vms.length > 0" class="mui-container-fluid">
         <div class="mui-row virtues-filters">
-          <div class="virtues-filter mui-col-md-12 padding-left-0">All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a></div>
+          <div class="mui-col-md-12 padding-left-0 filters">
+            <span *ngIf="filterValue === '*'">All VMs</span>
+            <a mat-button *ngIf="filterValue !== '*'"  (click)="listFilter('*')">All VMs</a> |
+            <span *ngIf="filterValue === true">Enabled VMs</span>
+            <a mat-button *ngIf="filterValue !== true" (click)="listFilter(true)">Enabled VMs</a> |
+            <span *ngIf="filterValue === false">Disabled VMs</span>
+            <a mat-button *ngIf="filterValue !== false" (click)="listFilter(false)">Disabled VMs</a>
+          </div>
         </div>
       </div>
       <div class="mui-container-fluid data-list">
@@ -32,7 +39,7 @@
           <div class="table-header mui-col-md-2">Last Modified By</div>
           <div class="table-header mui-col-md-2">Modified Date</div>
         </div>
-        <div *ngFor="let vm of vms" class="mui-row table-row">
+        <div *ngFor="let vm of vms | listFilter:filterValue:'enabled'" class="mui-row table-row">
           <div class="table-data mui-col-md-4">
             <div class="mini-menu">
               <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.name }}</a>
@@ -59,7 +66,7 @@
       <div class="paging">
         <div class="page-number mui-col-md-4">Page # of #</div>
         <div class="page-controls mui-col-md-4"><span *ngIf="vmLength > 10"><< First | < Previous | Next > | Last >></span></div>
-        <div class="page-item-total mui-col-md-4">{{ vmLength }} Virtual Machines</div>
+        <div class="page-item-total mui-col-md-4">{{ totalVms }} Virtual Machines</div>
         <div class="clearfix"></div>
       </div>
     </div>
