@@ -184,4 +184,18 @@ public class DesktopResourceService {
 			builder.header("X-Authorization", username);
 		}
 	}
+
+	public void startVirtue(String virtueId) throws InvalidUserLoginException, IOException {
+		WebTarget target = baseApi.path("virtue").path(virtueId).path("start");
+		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
+		logger.debug("Started virtue=" + virtue);
+
+	}
+
+	public void stopVirtue(String virtueId) throws InvalidUserLoginException, IOException {
+		WebTarget target = baseApi.path("virtue").path(virtueId).path("stop");
+		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
+		logger.debug("Stopped virtue=" + virtue);
+
+	}
 }

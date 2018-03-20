@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class SidebarControllerTest {
@@ -39,16 +40,16 @@ public class SidebarControllerTest {
 		SidebarController sc = new SidebarController(null, null, null);
 		sc.setVirtueChangeHandler(vch);
 		Map<String, ApplicationDefinition> apps = new HashMap<String, ApplicationDefinition>();
-		DesktopVirtue v1 = new DesktopVirtue("1", "1", "1", apps);
-		DesktopVirtue v2 = new DesktopVirtue("2", "2", "2", apps);
-		DesktopVirtue v3 = new DesktopVirtue("3", "3", "3", apps);
-		DesktopVirtue v3_2 = new DesktopVirtue("3", "3-2", "3", apps);
-		DesktopVirtue v4 = new DesktopVirtue("4", "4", "4", apps);
-		DesktopVirtue v5 = new DesktopVirtue("5", "5", "5", apps);
-		DesktopVirtue v7 = new DesktopVirtue("7", "7", "7", apps);
-		DesktopVirtue v7_2 = new DesktopVirtue("7", "7-2", "7", apps);
-		DesktopVirtue v9 = new DesktopVirtue("9", "9", "9", apps);
-		DesktopVirtue v10 = new DesktopVirtue("10", "10", "10", apps);
+		DesktopVirtue v1 = new DesktopVirtue("1", "1", "1", apps, VirtueState.RUNNING);
+		DesktopVirtue v2 = new DesktopVirtue("2", "2", "2", apps, VirtueState.RUNNING);
+		DesktopVirtue v3 = new DesktopVirtue("3", "3", "3", apps, VirtueState.RUNNING);
+		DesktopVirtue v3_2 = new DesktopVirtue("3", "3-2", "3", apps, VirtueState.RUNNING);
+		DesktopVirtue v4 = new DesktopVirtue("4", "4", "4", apps, VirtueState.RUNNING);
+		DesktopVirtue v5 = new DesktopVirtue("5", "5", "5", apps, VirtueState.RUNNING);
+		DesktopVirtue v7 = new DesktopVirtue("7", "7", "7", apps, VirtueState.RUNNING);
+		DesktopVirtue v7_2 = new DesktopVirtue("7", "7-2", "7", apps, VirtueState.RUNNING);
+		DesktopVirtue v9 = new DesktopVirtue("9", "9", "9", apps, VirtueState.RUNNING);
+		DesktopVirtue v10 = new DesktopVirtue("10", "10", "10", apps, VirtueState.RUNNING);
 		List<DesktopVirtue> cv = new ArrayList<DesktopVirtue>();
 		List<DesktopVirtue> nv = new ArrayList<DesktopVirtue>();
 		nv.add(v3_2);

@@ -67,4 +67,8 @@ public interface IActiveVirtueManager {
 
 	void adminDeleteVirtue(String instanceId);
 
+	VirtueInstance startVirtue(VirtueUser user, String virtueId);
+
+	VirtueInstance stopVirtue(VirtueUser user, String virtueId);
+
 }

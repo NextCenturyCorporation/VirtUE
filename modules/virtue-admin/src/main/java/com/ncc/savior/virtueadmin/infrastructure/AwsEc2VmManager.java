@@ -69,7 +69,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	private String serverKeyName;
 	private List<String> defaultSecurityGroups;
 	private String serverUser;
-	private String awsProfile;
+	private String awsProfile = "virtue";
 	private IKeyManager keyManager;
 	private String region;
 	private InstanceType instanceType;

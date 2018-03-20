@@ -5,27 +5,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 
 public class DesktopVirtue {
 	private String id;
 	private String name;
 	private String templateId;
 	private Map<String, ApplicationDefinition> apps;
+	private VirtueState virtueState;
 
-	public DesktopVirtue(String id, String name, String templateId, Map<String, ApplicationDefinition> apps) {
+	public DesktopVirtue(String id, String name, String templateId, Map<String, ApplicationDefinition> apps,
+			VirtueState virtueState) {
 		super();
 		this.name = name;
 		this.apps = apps;
 		this.id = id;
 		this.templateId = templateId;
+		this.virtueState = virtueState;
 	}
 
-	public DesktopVirtue(String id, String name, String templateId) {
+	public DesktopVirtue(String id, String name, String templateId, VirtueState virtueState) {
 		super();
 		this.name = name;
 		this.apps = new HashMap<String, ApplicationDefinition>();
 		this.id = id;
 		this.templateId = templateId;
+		this.virtueState = virtueState;
 	}
 
 	protected DesktopVirtue() {
@@ -66,7 +71,16 @@ public class DesktopVirtue {
 
 	@Override
 	public String toString() {
-		return "DesktopVirtue [id=" + id + ", name=" + name + ", templateId=" + templateId + ", apps=" + apps + "]";
+		return "DesktopVirtue [id=" + id + ", name=" + name + ", templateId=" + templateId + ", apps=" + apps
+				+ ", virtueState=" + virtueState + "]";
+	}
+
+	public VirtueState getVirtueState() {
+		return virtueState;
+	}
+
+	public void setVirtueState(VirtueState virtueState) {
+		this.virtueState = virtueState;
 	}
 
 	public static class DesktopVirtueComparator implements Comparator<DesktopVirtue> {

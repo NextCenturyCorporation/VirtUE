@@ -16,6 +16,7 @@ import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -122,6 +123,24 @@ public class DesktopVirtueService {
 		return instance;
 	}
 
+	public VirtueInstance startVirtue(String virtueId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueInstance instance = activeVirtueManager.startVirtue(user, virtueId);
+		if (instance == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+		}
+		return instance;
+	}
+
+	public VirtueInstance stopVirtue(String virtueId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueInstance instance = activeVirtueManager.stopVirtue(user, virtueId);
+		if (instance == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+		}
+		return instance;
+	}
+
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
 		verifyAndReturnUser();
 		Collection<ApplicationDefinition> apps = template.getApplications();
@@ -129,7 +148,7 @@ public class DesktopVirtueService {
 		for (ApplicationDefinition app : apps) {
 			appsMap.put(app.getId(), app);
 		}
-		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap);
+		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED);
 	}
 
 	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
@@ -139,7 +158,8 @@ public class DesktopVirtueService {
 		for (ApplicationDefinition app : apps) {
 			appsMap.put(app.getId(), app);
 		}
-		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap);
+		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap,
+				instance.getState());
 	}
 
 	private VirtueUser verifyAndReturnUser() {

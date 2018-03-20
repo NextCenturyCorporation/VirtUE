@@ -3,11 +3,13 @@ package com.ncc.savior.desktop.virtues;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
@@ -15,6 +17,7 @@ import com.ncc.savior.desktop.xpra.XpraClient.Status;
 import com.ncc.savior.desktop.xpra.XpraConnectionManager;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
@@ -27,10 +30,18 @@ public class VirtueService {
 	private static final Logger logger = LoggerFactory.getLogger(VirtueService.class);
 	private XpraConnectionManager connectionManager;
 	private DesktopResourceService desktopResourceService;
+	private ArrayList<VirtueState> startableVirtueStates;
+	private ArrayList<VirtueState> stopableVirtueStates;
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
+		this.startableVirtueStates = new ArrayList<VirtueState>();
+		this.stopableVirtueStates = new ArrayList<VirtueState>();
+		startableVirtueStates.add(VirtueState.STOPPED);
+		startableVirtueStates.add(VirtueState.STOPPING);
+		stopableVirtueStates.add(VirtueState.LAUNCHING);
+		stopableVirtueStates.add(VirtueState.RUNNING);
 
 	}
 
@@ -63,8 +74,7 @@ public class VirtueService {
 				writer.close();
 				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
 			} else {
-				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(),
-						key);
+				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
 			}
 			String colorDesc = (color == null ? "" : " with color " + color.toString());
 			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
@@ -97,5 +107,17 @@ public class VirtueService {
 			app = desktopResourceService.startApplication(virtueId, appDefn);
 		}
 		ensureConnection(app, virtue, color);
+	}
+
+	public void startVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
+		if (startableVirtueStates.contains(virtue.getVirtueState())) {
+			desktopResourceService.startVirtue(virtue.getId());
+		}
+	}
+
+	public void stopVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
+		if (stopableVirtueStates.contains(virtue.getVirtueState())) {
+			desktopResourceService.stopVirtue(virtue.getId());
+		}
 	}
 }
