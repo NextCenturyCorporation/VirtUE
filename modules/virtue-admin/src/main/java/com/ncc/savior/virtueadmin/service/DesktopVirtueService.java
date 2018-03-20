@@ -22,6 +22,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
+import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
@@ -96,7 +97,19 @@ public class DesktopVirtueService {
 		long a = System.currentTimeMillis();
 		verifyAndReturnUser();
 		VirtueInstance instance = createVirtue(templateId);
-
+		while (!VirtueState.RUNNING.equals(instance.getState())) {
+			JavaUtil.sleepAndLogInterruption(2000);
+			instance = activeVirtueManager.getActiveVirtue(instance.getId());
+			VirtueState s = instance.getState();
+			if (VirtueState.RUNNING.equals(s)) {
+				break;
+			}
+			if (VirtueState.CREATING.equals(s) || VirtueState.LAUNCHING.equals(s)) {
+				continue;
+			} else {
+				throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error with virtue state! " + s);
+			}
+		}
 		DesktopVirtueApplication app = startApplication(instance.getId(), applicationId);
 		long b = System.currentTimeMillis();
 		logger.debug("Starting application from template took " + ((b - a) / 1000) / 60.0 + " minutes");
@@ -123,22 +136,22 @@ public class DesktopVirtueService {
 		return instance;
 	}
 
-	public VirtueInstance startVirtue(String virtueId) {
+	public DesktopVirtue startVirtue(String virtueId) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance instance = activeVirtueManager.startVirtue(user, virtueId);
 		if (instance == null) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
 		}
-		return instance;
+		return convertVirtueInstanceToDesktopVirtue(instance);
 	}
 
-	public VirtueInstance stopVirtue(String virtueId) {
+	public DesktopVirtue stopVirtue(String virtueId) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance instance = activeVirtueManager.stopVirtue(user, virtueId);
 		if (instance == null) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
 		}
-		return instance;
+		return convertVirtueInstanceToDesktopVirtue(instance);
 	}
 
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
@@ -168,5 +181,11 @@ public class DesktopVirtueService {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have USER role");
 		}
 		return user;
+	}
+
+	public DesktopVirtue createVirtueAsDesktopVirtue(String templateId) {
+		VirtueInstance instance = createVirtue(templateId);
+		DesktopVirtue dv = convertVirtueInstanceToDesktopVirtue(instance);
+		return dv;
 	}
 }

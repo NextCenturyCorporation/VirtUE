@@ -9,6 +9,7 @@
 
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -17,6 +18,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Virtue class models a virtual unit with the user, applications etc.
@@ -37,6 +42,11 @@ public class VirtueInstance {
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
 
+	@Transient
+	private Collection<String> virtualMachineIds;
+	@Transient
+	private Collection<String> applicationIds;
+
 	public VirtueInstance(String id, String name, String username, String templateId,
 			Collection<ApplicationDefinition> apps, Collection<VirtualMachine> vms) {
 		super();
@@ -46,6 +56,7 @@ public class VirtueInstance {
 		this.templateId = templateId;
 		this.applications = apps;
 		this.vms = vms;
+		state = getVirtueStateFrom(vms);
 	}
 
 	/**
@@ -58,7 +69,6 @@ public class VirtueInstance {
 	public VirtueInstance(VirtueTemplate template, String username) {
 		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
 				getApplicationsFromTemplate(template), new HashSet<VirtualMachine>());
-
 	}
 
 	public VirtueInstance(VirtueTemplate template, String username, Collection<VirtualMachine> vms) {
@@ -87,12 +97,13 @@ public class VirtueInstance {
 		return username;
 	}
 
+	@JsonIgnore
 	public Collection<VirtualMachine> getVms() {
 		return vms;
 	}
 
 	public VirtueState getState() {
-		return state;
+		return getVirtueStateFrom(vms);
 	}
 
 	@Override
@@ -109,6 +120,7 @@ public class VirtueInstance {
 		return templateId;
 	}
 
+	@JsonIgnore
 	public Collection<ApplicationDefinition> getApplications() {
 		return applications;
 	}
@@ -132,6 +144,7 @@ public class VirtueInstance {
 
 	protected void setVms(Collection<VirtualMachine> vms) {
 		this.vms = vms;
+		state = getVirtueStateFrom(vms);
 	}
 
 	protected void setTemplateId(String templateId) {
@@ -149,6 +162,82 @@ public class VirtueInstance {
 			}
 		}
 		return null;
+	}
+
+	@JsonGetter
+	protected Collection<String> getVirtualMachineIds() {
+		if (vms != null) {
+			virtualMachineIds = new ArrayList<String>();
+			for (VirtualMachine vm : vms) {
+				virtualMachineIds.add(vm.getId());
+			}
+		}
+		return virtualMachineIds;
+	}
+
+	@JsonGetter
+	public Collection<String> getApplicationIds() {
+		if (applications != null) {
+			applicationIds = new ArrayList<String>();
+			for (ApplicationDefinition app : applications) {
+				applicationIds.add(app.getId());
+			}
+		}
+		return applicationIds;
+	}
+
+	protected void setVirtualMachineIds(Collection<String> virtualMachineIds) {
+		this.virtualMachineIds = virtualMachineIds;
+	}
+
+	protected void setApplicationIds(Collection<String> applicationIds) {
+		this.applicationIds = applicationIds;
+	}
+
+	private VirtueState getVirtueStateFrom(Collection<VirtualMachine> vms) {
+		// TODO this should probably be handled elsewhere
+		state = null;
+		for (VirtualMachine vm : vms) {
+			VirtueState temp = null;
+			temp = vmStateToVirtueState(vm);
+			if (state == null || state.equals(temp)) {
+				state = temp;
+			} else {
+				return null;
+			}
+		}
+		return state;
+	}
+
+	private VirtueState vmStateToVirtueState(VirtualMachine vm) {
+		VmState s = vm.getState();
+		switch (s) {
+		case RUNNING:
+			return VirtueState.RUNNING;
+		case CREATING:
+			return VirtueState.CREATING;
+		case LAUNCHING:
+			return VirtueState.LAUNCHING;
+		case DELETING:
+			return VirtueState.DELETING;
+		case ERROR:
+			return null;
+		case PAUSED:
+			return VirtueState.PAUSED;
+		case PAUSING:
+			return VirtueState.PAUSING;
+		case RESUMING:
+			return VirtueState.RESUMING;
+		case STOPPED:
+			return VirtueState.STOPPED;
+		case STOPPING:
+			return VirtueState.STOPPING;
+		case DELETED:
+			return VirtueState.UNPROVISIONED;
+		default:
+			break;
+		}
+		return state;
 	}
 
 }

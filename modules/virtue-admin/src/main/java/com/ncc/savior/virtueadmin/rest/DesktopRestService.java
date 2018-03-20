@@ -94,4 +94,46 @@ public class DesktopRestService {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
+
+	@GET
+	@Produces("application/json")
+	@Path("template/{templateId}/start")
+	public DesktopVirtue createVirtue(@PathParam("templateId") String templateId) {
+		try {
+			return desktopService.createVirtueAsDesktopVirtue(templateId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("virtue/{virtueId}/start")
+	public DesktopVirtue startVirtue(@PathParam("virtueId") String virtueId) {
+		try {
+			return desktopService.startVirtue(virtueId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("virtue/{virtueId}/stop")
+	public DesktopVirtue stopVirtue(@PathParam("virtueId") String virtueId) {
+		try {
+			return desktopService.stopVirtue(virtueId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
 }

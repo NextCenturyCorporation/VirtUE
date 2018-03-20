@@ -69,18 +69,18 @@ public class DesktopVirtue {
 		this.templateId = templateId;
 	}
 
-	@Override
-	public String toString() {
-		return "DesktopVirtue [id=" + id + ", name=" + name + ", templateId=" + templateId + ", apps=" + apps
-				+ ", virtueState=" + virtueState + "]";
-	}
-
 	public VirtueState getVirtueState() {
 		return virtueState;
 	}
 
 	public void setVirtueState(VirtueState virtueState) {
 		this.virtueState = virtueState;
+	}
+
+	@Override
+	public String toString() {
+		return "DesktopVirtue [id=" + id + ", name=" + name + ", templateId=" + templateId + ", apps=" + apps
+				+ ", virtueState=" + virtueState + "]";
 	}
 
 	public static class DesktopVirtueComparator implements Comparator<DesktopVirtue> {

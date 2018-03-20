@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.util;
 
+import java.io.Closeable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,20 @@ public class JavaUtil {
 			Thread.sleep(periodMillis);
 		} catch (InterruptedException e) {
 			logger.error("Unexpected sleep interruption!", e);
+		}
+	}
+
+	public static boolean isNotEmpty(String stringToTest) {
+		return stringToTest != null && !stringToTest.trim().equals("");
+	}
+
+	public static void closeIgnoreErrors(Closeable... closeables) {
+		for (Closeable closeable : closeables) {
+			try {
+				closeable.close();
+			} catch (Throwable t) {
+				// do nothing
+			}
 		}
 	}
 

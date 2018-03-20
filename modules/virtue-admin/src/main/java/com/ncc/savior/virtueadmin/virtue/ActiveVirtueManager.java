@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
+import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -23,7 +24,7 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * See interface for more descriptions.
  *
  */
-public class ActiveVirtueManager implements IActiveVirtueManager {
+public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListener {
 	private final static Logger logger = LoggerFactory.getLogger(ActiveVirtueManager.class);
 
 	private IActiveVirtueDao virtueDao;
@@ -31,7 +32,6 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 
 	public ActiveVirtueManager(ICloudManager cloudManager, IActiveVirtueDao virtueDao) {
 		this.cloudManager = cloudManager;
-		// cloudManager.addStateUpdateListener(new VmUpdateListener());
 		this.virtueDao = virtueDao;
 	}
 
@@ -83,7 +83,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 		// return vi;
 	}
 
-	protected void updateVmState(String vmId, VmState state) {
+	@Override
+	public void updateVmState(String vmId, VmState state) {
 		virtueDao.updateVmState(vmId, state);
 	}
 
@@ -169,5 +170,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 		} else {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
 		}
+	}
+
+	@Override
+	public void updateVms(Collection<VirtualMachine> vms) {
+		virtueDao.updateVms(vms);
+
 	}
 }

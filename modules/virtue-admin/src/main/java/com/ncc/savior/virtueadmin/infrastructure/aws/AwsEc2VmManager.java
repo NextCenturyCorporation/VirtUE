@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.infrastructure;
+package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +32,9 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
+import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
+import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
+import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -224,7 +227,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			}
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
 					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
-					loginUsername, privateKey, instance.getPublicIpAddress());
+					loginUsername, privateKey, keyName, instance.getPublicIpAddress());
 			vms.add(vm);
 		}
 		JavaUtil.sleepAndLogInterruption(2000);
@@ -325,7 +328,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 				do {
 					try {
 						numberOfAttempts--;
-						newPrivateKey = sshKeyInjector.injectSshKey(vm);
+						newPrivateKey = sshKeyInjector.injectSshKey(vm, vm.getPrivateKey());
 						break;
 					} catch (Exception e) {
 						logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);

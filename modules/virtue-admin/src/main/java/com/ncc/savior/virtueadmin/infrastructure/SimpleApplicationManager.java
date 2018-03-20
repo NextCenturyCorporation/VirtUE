@@ -35,6 +35,25 @@ public class SimpleApplicationManager implements IApplicationManager {
 	public SimpleApplicationManager() {
 	}
 
+
+	@Override
+	public int startOrGetXpraServer(VirtualMachine vm, File privateKeyFile) throws IOException {
+		SshConnectionParameters params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(),
+				vm.getSshPort(), vm.getUserName(), privateKeyFile);
+		SshXpraInitiater initiator = new SshXpraInitiater(params);
+		Set<Integer> servers = initiator.getXpraServers();
+		if (servers.isEmpty()) {
+			int attemptedDisplay = 100 + rand.nextInt(100);
+			initiator.startXpraServer(attemptedDisplay);
+			servers = initiator.getXpraServers();
+		}
+		if (servers.isEmpty()) {
+			return -1;
+		} else {
+			return servers.iterator().next();
+		}
+	}
+
 	@Override
 	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, int maxTries) {
 		File certificate = null;
