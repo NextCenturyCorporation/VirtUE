@@ -83,8 +83,8 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 			for (VirtualMachine vm : vms) {
 				if (vm.getId().equals(vmId)) {
 					vm.setState(state);
-				break;
-			}
+					break;
+				}
 			}
 		}
 	}
@@ -135,7 +135,6 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void deleteVirtue(VirtueInstance vi) {
-		// TODO Auto-generated method stub
-
+		throw new NotImplementedException();
 	}
 }
