@@ -100,9 +100,9 @@ public class VirtueMenuItem {
 			style = new BorderStroke(c, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2, 2, 2, 2));
 		}
 		pane.setBorder(new Border(style));
-		VBox vpane = getStartStopVirtue();
+		// VBox vpane = getStartStopVirtue();
 		// HBox hbox = new HBox();
-		pane.getChildren().add(vpane);
+		// pane.getChildren().add(vpane);
 		pane.getChildren().add(view);
 		pane.getChildren().add(label);
 		// pane.getChildren().add(hbox);
