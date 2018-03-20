@@ -36,7 +36,7 @@ export class VirtueListComponent implements OnInit {
     });
   }
 
-  openDialog(id, type, text): void {
+  openDialog(id, type, action, text): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {

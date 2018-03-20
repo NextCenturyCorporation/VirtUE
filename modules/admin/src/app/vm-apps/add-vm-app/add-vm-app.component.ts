@@ -1,15 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 
 @Component({
   selector: 'app-add-vm-app',
-  templateUrl: './add-vm-app.component.html',
-  styleUrls: ['./add-vm-app.component.css']
+  templateUrl: './add-vm-app.component.html'
 })
 export class AddVmAppComponent implements OnInit {
 
-  constructor() { }
+  osList = ['LINUX', 'Windows'];
+  distroList = ['Debian'];
+  selectedOs: string;
+  selectedDist: string;
+
+  constructor(
+    public dialogRef: MatDialogRef<AddVmAppComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) { }
 
   ngOnInit() {
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
+    this.selectedOs = null;
+    this.selectedDist = null;
   }
 
 }

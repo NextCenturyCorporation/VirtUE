@@ -3423,8 +3423,15 @@ p {
   margin: 10px 0;
   padding: 10px 0;
 }
+/* line 45, ../scss/_styles.scss */
+p.selected-value {
+  display: block;
+  background-color: #e9e3e6;
+  border: 1px solid #B2B2B2;
+  padding: 3px 5px;
+}
 
-/* line 46, ../scss/_styles.scss */
+/* line 52, ../scss/_styles.scss */
 hr {
   clear: both;
   display: block;
@@ -3433,12 +3440,12 @@ hr {
   padding: 0;
 }
 
-/* line 55, ../scss/_styles.scss */
+/* line 60, ../scss/_styles.scss */
 .app-icon-white {
   background-image: url(/assets/images/app-icon-white.png) no-repeat;
 }
 
-/* line 58, ../scss/_styles.scss */
+/* line 63, ../scss/_styles.scss */
 #wrapper {
   display: block;
   margin: 0;
@@ -3446,14 +3453,14 @@ hr {
   position: relative;
 }
 
-/* line 64, ../scss/_styles.scss */
+/* line 69, ../scss/_styles.scss */
 #content-container {
   position: relative;
   padding: 0 25px;
 }
 
 /* Header Global CSS */
-/* line 69, ../scss/_styles.scss */
+/* line 74, ../scss/_styles.scss */
 header {
   background-color: #2E294E;
   display: block;
@@ -3461,39 +3468,39 @@ header {
   margin-bottom: 50px;
 }
 
-/* line 75, ../scss/_styles.scss */
+/* line 80, ../scss/_styles.scss */
 breadcrumb {
   display: block;
   font-size: 0.9rem;
   margin-top: 1.2rem;
   margin-left: 20px;
 }
-/* line 80, ../scss/_styles.scss */
+/* line 85, ../scss/_styles.scss */
 breadcrumb ol {
   list-style-type: none;
   padding: 0;
 }
-/* line 84, ../scss/_styles.scss */
+/* line 89, ../scss/_styles.scss */
 breadcrumb li {
   display: inline-block;
   margin-right: 6px;
 }
-/* line 87, ../scss/_styles.scss */
+/* line 92, ../scss/_styles.scss */
 breadcrumb li:before {
   content: '>';
 }
-/* line 92, ../scss/_styles.scss */
+/* line 97, ../scss/_styles.scss */
 breadcrumb li:first-child:before {
   content: '';
 }
 
-/* line 97, ../scss/_styles.scss */
+/* line 102, ../scss/_styles.scss */
 form {
   clear: both;
   display: block;
 }
 
-/* line 101, ../scss/_styles.scss */
+/* line 106, ../scss/_styles.scss */
 form:after {
   clear: both;
   content: ' ';
@@ -3501,31 +3508,31 @@ form:after {
   height: 1px;
 }
 
-/* line 107, ../scss/_styles.scss */
+/* line 112, ../scss/_styles.scss */
 .form-item {
   clear: both;
   display: block;
   padding: 0.5rem 0;
   width: 100%;
 }
-/* line 112, ../scss/_styles.scss */
+/* line 117, ../scss/_styles.scss */
 .form-item span {
   padding: 0;
 }
 
-/* line 116, ../scss/_styles.scss */
+/* line 121, ../scss/_styles.scss */
 label {
   font-family: 'Raleway600';
   margin: 0;
   padding: 0;
 }
 
-/* line 121, ../scss/_styles.scss */
+/* line 126, ../scss/_styles.scss */
 input, select {
   border: 1px solid #B2B2B2;
 }
 
-/* line 124, ../scss/_styles.scss */
+/* line 129, ../scss/_styles.scss */
 input[type="color"] {
   -webkit-appearance: none;
   border: 1px solid #B2B2B2;
@@ -3534,17 +3541,17 @@ input[type="color"] {
   padding: 2px;
 }
 
-/* line 131, ../scss/_styles.scss */
+/* line 136, ../scss/_styles.scss */
 input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 
-/* line 134, ../scss/_styles.scss */
+/* line 139, ../scss/_styles.scss */
 input[type="color"]::-webkit-color-swatch {
   border: none;
 }
 
-/* line 137, ../scss/_styles.scss */
+/* line 142, ../scss/_styles.scss */
 input[type='text'], input[type='password'] {
   box-sizing: border-box;
   height: 30px;
@@ -3552,7 +3559,7 @@ input[type='text'], input[type='password'] {
   width: 100%;
 }
 
-/* line 143, ../scss/_styles.scss */
+/* line 148, ../scss/_styles.scss */
 button, input[type='button'] {
   border: none;
   cursor: pointer;
@@ -3561,33 +3568,33 @@ button, input[type='button'] {
   padding: 0.55rem 1rem 0.6rem;
 }
 
-/* line 151, ../scss/_styles.scss */
+/* line 156, ../scss/_styles.scss */
 button.button-submit {
   background-color: #407097;
   border-radius: 0;
   color: white;
   text-shadow: 1px 1px #3E3F4E;
 }
-/* line 157, ../scss/_styles.scss */
+/* line 162, ../scss/_styles.scss */
 button.button-delete, button.button-cancel {
   background-color: none;
   border: none;
   border-radius: 0;
   color: #407097;
 }
-/* line 163, ../scss/_styles.scss */
+/* line 168, ../scss/_styles.scss */
 button.button-trash {
   height: 20px;
   margin: 0;
   padding: 0;
   width: 18px;
 }
-/* line 169, ../scss/_styles.scss */
+/* line 174, ../scss/_styles.scss */
 button .fa {
   color: #407097;
 }
 
-/* line 173, ../scss/_styles.scss */
+/* line 178, ../scss/_styles.scss */
 select {
   background-color: white;
   -webkit-appearance: none;
@@ -3604,13 +3611,13 @@ select {
   width: 100%;
 }
 
-/* line 186, ../scss/_styles.scss */
+/* line 191, ../scss/_styles.scss */
 .select-container {
   height: 35px;
   position: relative;
   width: 100%;
 }
-/* line 191, ../scss/_styles.scss */
+/* line 196, ../scss/_styles.scss */
 .select-container .fa {
   font-size: 1.4rem;
   font-weight: 700;
@@ -3620,68 +3627,68 @@ select {
   top: 7px;
 }
 
-/* line 201, ../scss/_styles.scss */
+/* line 206, ../scss/_styles.scss */
 [disabled] {
   color: #b2b2b2;
 }
 
-/* line 204, ../scss/_styles.scss */
+/* line 209, ../scss/_styles.scss */
 app-root {
   height: inherit;
 }
 
 /* Content Global CSS */
-/* line 208, ../scss/_styles.scss */
+/* line 213, ../scss/_styles.scss */
 content {
   display: block;
   min-height: 560px;
   margin: 4rem 0 1rem;
   position: relative;
 }
-/* line 213, ../scss/_styles.scss */
+/* line 218, ../scss/_styles.scss */
 content:after {
   clear: both;
   content: ' ';
   display: block;
 }
-/* line 218, ../scss/_styles.scss */
+/* line 223, ../scss/_styles.scss */
 content #content-main {
   padding: 0;
 }
-/* line 221, ../scss/_styles.scss */
+/* line 226, ../scss/_styles.scss */
 content #content {
   display: block;
 }
-/* line 223, ../scss/_styles.scss */
+/* line 228, ../scss/_styles.scss */
 content #content.content {
   padding-top: 1.1rem;
 }
 
-/* line 231, ../scss/_styles.scss */
+/* line 236, ../scss/_styles.scss */
 .filters span {
   font-family: 'Raleway500', Arial, sans-serif;
 }
 
-/* line 236, ../scss/_styles.scss */
+/* line 241, ../scss/_styles.scss */
 .paging {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
   margin-top: 0.75rem;
 }
-/* line 241, ../scss/_styles.scss */
+/* line 246, ../scss/_styles.scss */
 .paging .page-number {
   text-align: left;
 }
-/* line 244, ../scss/_styles.scss */
+/* line 249, ../scss/_styles.scss */
 .paging .page-controls {
   text-align: center;
 }
-/* line 247, ../scss/_styles.scss */
+/* line 252, ../scss/_styles.scss */
 .paging .page-item-total {
   text-align: right;
 }
 
-/* line 253, ../scss/_styles.scss */
+/* line 258, ../scss/_styles.scss */
 .table-container, .data-list {
   font-family: 'Raleway500', Arial, sans-serif;
   margin: 10px 0;
@@ -3690,28 +3697,28 @@ content #content.content {
   overflow-x: hidden;
 }
 
-/* line 261, ../scss/_styles.scss */
+/* line 266, ../scss/_styles.scss */
 .table-container {
   border: 1px solid #B2B2B2;
 }
 
-/* line 265, ../scss/_styles.scss */
+/* line 270, ../scss/_styles.scss */
 .data-list {
   border-top: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 268, ../scss/_styles.scss */
+/* line 273, ../scss/_styles.scss */
 .data-list .table-header-group {
   border-right: 1px solid #B2B2B2;
   border-bottom: 1px solid #B2B2B2;
   border-left: 1px solid #B2B2B2;
 }
-/* line 273, ../scss/_styles.scss */
+/* line 278, ../scss/_styles.scss */
 .data-list .table-data {
   min-height: 56px;
 }
 
-/* line 277, ../scss/_styles.scss */
+/* line 282, ../scss/_styles.scss */
 .table-header-row, .table-header-group {
   border-bottom: 1px solid #B2B2B2;
   display: flex;
@@ -3719,22 +3726,22 @@ content #content.content {
   align-items: stretch;
 }
 
-/* line 283, ../scss/_styles.scss */
+/* line 288, ../scss/_styles.scss */
 .table-row {
   border-bottom: 1px solid #B2B2B2;
 }
-/* line 285, ../scss/_styles.scss */
+/* line 290, ../scss/_styles.scss */
 .table-row:last-child {
   border-bottom: none;
 }
 
-/* line 289, ../scss/_styles.scss */
+/* line 294, ../scss/_styles.scss */
 .table-header, .table-data {
   padding-top: 0.65rem;
   padding-bottom: 0.65rem;
 }
 
-/* line 293, ../scss/_styles.scss */
+/* line 298, ../scss/_styles.scss */
 .table-header {
   font-family: 'Raleway600', Arial, sans-serif;
   background-color: #E9E3E6;
@@ -3742,30 +3749,30 @@ content #content.content {
   align-items: flex-end;
 }
 
-/* line 299, ../scss/_styles.scss */
+/* line 304, ../scss/_styles.scss */
 .table-header span {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-/* line 304, ../scss/_styles.scss */
+/* line 309, ../scss/_styles.scss */
 .table-row.active .menu-options {
   display: block;
 }
 
-/* line 308, ../scss/_styles.scss */
+/* line 313, ../scss/_styles.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
-/* line 312, ../scss/_styles.scss */
+/* line 317, ../scss/_styles.scss */
 .table-data span {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
 }
-/* line 317, ../scss/_styles.scss */
+/* line 322, ../scss/_styles.scss */
 .table-data .menu-options {
   clear: both;
   display: none;
@@ -3773,7 +3780,7 @@ content #content.content {
   font-weight: 600;
   margin: 0;
 }
-/* line 324, ../scss/_styles.scss */
+/* line 329, ../scss/_styles.scss */
 .table-data .menu-options button {
   background-color: transparent;
   border: none;
@@ -3783,26 +3790,26 @@ content #content.content {
   padding: 0;
   text-decoration: none;
 }
-/* line 333, ../scss/_styles.scss */
+/* line 338, ../scss/_styles.scss */
 .table-data .menu-options button:hover {
   text-decoration: underline;
 }
 
-/* line 340, ../scss/_styles.scss */
+/* line 345, ../scss/_styles.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 345, ../scss/_styles.scss */
+/* line 350, ../scss/_styles.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 348, ../scss/_styles.scss */
+/* line 353, ../scss/_styles.scss */
 .titlebar {
   clear: both;
   display: block;
@@ -3810,39 +3817,39 @@ content #content.content {
   margin-bottom: 1.2rem;
   min-height: 1rem;
 }
-/* line 355, ../scss/_styles.scss */
+/* line 360, ../scss/_styles.scss */
 .titlebar:after {
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 361, ../scss/_styles.scss */
+/* line 366, ../scss/_styles.scss */
 .titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
   margin-top: 0;
 }
-/* line 362, ../scss/_styles.scss */
+/* line 367, ../scss/_styles.scss */
 .titlebar h2 {
   font-size: 28px;
 }
-/* line 363, ../scss/_styles.scss */
+/* line 368, ../scss/_styles.scss */
 .titlebar h3 {
   font-size: 24px;
 }
-/* line 364, ../scss/_styles.scss */
+/* line 369, ../scss/_styles.scss */
 .titlebar h4 {
   font-size: 20px;
 }
-/* line 365, ../scss/_styles.scss */
+/* line 370, ../scss/_styles.scss */
 .titlebar h5 {
   font-size: 18px;
 }
-/* line 367, ../scss/_styles.scss */
+/* line 372, ../scss/_styles.scss */
 .titlebar .titlebar-title {
   float: left;
   margin: 0;
 }
-/* line 371, ../scss/_styles.scss */
+/* line 376, ../scss/_styles.scss */
 .titlebar .titlebar-button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
@@ -3853,14 +3860,14 @@ content #content.content {
   padding: 0.5rem 0.7rem;
 }
 
-/* line 382, ../scss/_styles.scss */
+/* line 387, ../scss/_styles.scss */
 .no-data-message {
   display: block;
   border-top: 1px solid #b2b2b2;
   border-bottom: 1px solid #b2b2b2;
 }
 
-/* line 387, ../scss/_styles.scss */
+/* line 392, ../scss/_styles.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3868,19 +3875,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 394, ../scss/_styles.scss */
+/* line 399, ../scss/_styles.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 397, ../scss/_styles.scss */
+/* line 402, ../scss/_styles.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 401, ../scss/_styles.scss */
+/* line 406, ../scss/_styles.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3889,7 +3896,7 @@ footer {
   position: relative;
 }
 
-/* line 408, ../scss/_styles.scss */
+/* line 413, ../scss/_styles.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;
@@ -4160,17 +4167,27 @@ footer {
   color: #736f72;
 }
 
-/* line 86, ../scss/_helpers.scss */
+/* line 87, ../scss/_helpers.scss */
+.hidden {
+  display: none;
+}
+
+/* line 88, ../scss/_helpers.scss */
+.show {
+  display: block;
+}
+
+/* line 90, ../scss/_helpers.scss */
 .text-align-left {
   text-align: left;
 }
 
-/* line 89, ../scss/_helpers.scss */
+/* line 93, ../scss/_helpers.scss */
 .text-align-center {
   text-align: center;
 }
 
-/* line 92, ../scss/_helpers.scss */
+/* line 96, ../scss/_helpers.scss */
 .text-align-right {
   text-align: right;
 }
