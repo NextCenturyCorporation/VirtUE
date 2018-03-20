@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,11 +175,18 @@ public class AdminService {
 	}
 
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
-		verifyAndReturnUser();
 		VirtueUser user = verifyAndReturnUser();
+		Collection<String> vmtIds = template.getVirtualMachineTemplateIds();
+		Iterator<VirtualMachineTemplate> itr = templateManager.getVmTemplates(vmtIds).iterator();
 		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
 		}
+		
+		Set<VirtualMachineTemplate> vmTemplates=new HashSet<VirtualMachineTemplate>();
+		while(itr.hasNext()) {
+			vmTemplates.add(itr.next());
+		}
+		template.setVmTemplates(vmTemplates);
 		template.setLastEditor(user.getUsername());
 		template.setLastModification(new Date());
 		templateManager.addVirtueTemplate(template);
@@ -184,11 +194,18 @@ public class AdminService {
 	}
 
 	public VirtualMachineTemplate updateVmTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
-		verifyAndReturnUser();
 		VirtueUser user = verifyAndReturnUser();
+		Collection<String> appIds = vmTemplate.getApplicationIds();
+		Iterator<ApplicationDefinition> itr = templateManager.getApplications(appIds).iterator();
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
 		}
+		
+		Collection<ApplicationDefinition> applications=new HashSet<ApplicationDefinition>();
+		while(itr.hasNext()) {
+			applications.add(itr.next());
+		}
+		vmTemplate.setApplications(applications);
 		vmTemplate.setLastEditor(user.getUsername());
 		vmTemplate.setLastModification(new Date());
 		templateManager.addVmTemplate(vmTemplate);
@@ -217,6 +234,15 @@ public class AdminService {
 
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
 		verifyAndReturnUser();
+		Collection<String> vts = newUser.getVirtueTemplateIds();
+		if (vts != null && !vts.isEmpty()) {
+			Collection<VirtueTemplate> usersVirtueTemplates = new ArrayList<VirtueTemplate>();
+			Iterable<VirtueTemplate> iterable = templateManager.getVirtueTemplates(vts);
+			Iterator<VirtueTemplate> itr = iterable.iterator();
+			while (itr.hasNext()) {
+				usersVirtueTemplates.add(itr.next());
+			}
+		}
 		userManager.addUser(newUser);
 		return newUser;
 	}

@@ -235,4 +235,19 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		vtRepository.deleteById(templateId);
 	}
 
+	@Override
+	public Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts) {
+		return vtRepository.findAllById(vts);
+	}
+
+	@Override
+	public Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds) {
+		return vmtRepository.findAllById(vmtIds);
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getApplications(Collection<String> appIds) {
+		return appRepository.findAllById(appIds);
+	}
+
 }

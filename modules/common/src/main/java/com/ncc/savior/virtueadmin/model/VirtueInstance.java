@@ -9,6 +9,7 @@
 
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -17,6 +18,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Virtue class models a virtual unit with the user, applications etc.
@@ -36,6 +41,11 @@ public class VirtueInstance {
 	private VirtueState state;
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
+
+	@Transient
+	private Collection<String> virtualMachineIds;
+	@Transient
+	private Collection<String> applicationIds;
 
 	public VirtueInstance(String id, String name, String username, String templateId,
 			Collection<ApplicationDefinition> apps, Collection<VirtualMachine> vms) {
@@ -87,6 +97,7 @@ public class VirtueInstance {
 		return username;
 	}
 
+	@JsonIgnore
 	public Collection<VirtualMachine> getVms() {
 		return vms;
 	}
@@ -109,6 +120,7 @@ public class VirtueInstance {
 		return templateId;
 	}
 
+	@JsonIgnore
 	public Collection<ApplicationDefinition> getApplications() {
 		return applications;
 	}
@@ -150,6 +162,36 @@ public class VirtueInstance {
 			}
 		}
 		return null;
+	}
+
+	@JsonGetter
+	protected Collection<String> getVirtualMachineIds() {
+		if (vms != null) {
+			virtualMachineIds = new ArrayList<String>();
+			for (VirtualMachine vm : vms) {
+				virtualMachineIds.add(vm.getId());
+			}
+		}
+		return virtualMachineIds;
+	}
+
+	@JsonGetter
+	public Collection<String> getApplicationIds() {
+		if (applications != null) {
+			applicationIds = new ArrayList<String>();
+			for (ApplicationDefinition app : applications) {
+				applicationIds.add(app.getId());
+			}
+		}
+		return applicationIds;
+	}
+
+	protected void setVirtualMachineIds(Collection<String> virtualMachineIds) {
+		this.virtualMachineIds = virtualMachineIds;
+	}
+
+	protected void setApplicationIds(Collection<String> applicationIds) {
+		this.applicationIds = applicationIds;
 	}
 
 	private VirtueState getVirtueStateFrom(Collection<VirtualMachine> vms) {
