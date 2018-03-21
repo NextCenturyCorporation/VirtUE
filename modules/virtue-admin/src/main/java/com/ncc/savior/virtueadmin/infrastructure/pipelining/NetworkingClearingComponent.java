@@ -13,12 +13,10 @@ public class NetworkingClearingComponent extends BaseGroupedVmPipelineComponent 
 
 	@Override
 	protected void onExecute(Collection<VirtualMachine> vms) {
-		if (!vms.isEmpty()) {
-			for (VirtualMachine vm : vms) {
-				vm.setHostname(null);
-				vm.setIpAddress(null);
-			}
-			doOnSuccess(vms);
+		for (VirtualMachine vm : vms) {
+			vm.setHostname(null);
+			vm.setIpAddress(null);
 		}
+		doOnSuccess(vms);
 	}
 }

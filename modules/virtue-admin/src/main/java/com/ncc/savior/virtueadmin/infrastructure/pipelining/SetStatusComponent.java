@@ -21,11 +21,9 @@ public class SetStatusComponent extends BaseGroupedVmPipelineComponent {
 
 	@Override
 	protected void onExecute(Collection<VirtualMachine> vms) {
-		if (!vms.isEmpty()) {
-			for (VirtualMachine vm : vms) {
-				vm.setState(state);
-			}
-			doOnSuccess(vms);
+		for (VirtualMachine vm : vms) {
+			vm.setState(state);
 		}
+		doOnSuccess(vms);
 	}
 }

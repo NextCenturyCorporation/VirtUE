@@ -75,8 +75,10 @@ public abstract class BaseGroupedVmPipelineComponent implements IPipelineCompone
 			@Override
 			public void run() {
 				try {
-					HashSet<VirtualMachine> vms = new HashSet<VirtualMachine>(vmCollection);
-					onExecute(vms);
+					if (!vmCollection.isEmpty()) {
+						HashSet<VirtualMachine> vms = new HashSet<VirtualMachine>(vmCollection);
+						onExecute(vms);
+					}
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
 							t);

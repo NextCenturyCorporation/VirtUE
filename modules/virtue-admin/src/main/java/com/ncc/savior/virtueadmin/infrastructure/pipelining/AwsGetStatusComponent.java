@@ -29,23 +29,21 @@ public class AwsGetStatusComponent extends BaseGroupedVmPipelineComponent {
 
 	@Override
 	protected void onExecute(Collection<VirtualMachine> vms) {
-		if (!vms.isEmpty()) {
-			Collection<VirtualMachine> successfulVms = new ArrayList<VirtualMachine>();
-			Collection<VirtualMachine> errorVms = new ArrayList<VirtualMachine>();
-			vms = AwsUtil.updateStatusOnVms(ec2, vms);
-			for (VirtualMachine vm : vms) {
-				if (exitStates.contains(vm.getState())) {
-					successfulVms.add(vm);
-				} else if (VmState.ERROR.equals(vm.getState())) {
-					errorVms.add(vm);
-				}
+		Collection<VirtualMachine> successfulVms = new ArrayList<VirtualMachine>();
+		Collection<VirtualMachine> errorVms = new ArrayList<VirtualMachine>();
+		vms = AwsUtil.updateStatusOnVms(ec2, vms);
+		for (VirtualMachine vm : vms) {
+			if (exitStates.contains(vm.getState())) {
+				successfulVms.add(vm);
+			} else if (VmState.ERROR.equals(vm.getState())) {
+				errorVms.add(vm);
 			}
-			if (!successfulVms.isEmpty()) {
-				doOnSuccess(successfulVms);
-			}
-			if (!errorVms.isEmpty()) {
-				doOnFailure(errorVms);
-			}
+		}
+		if (!successfulVms.isEmpty()) {
+			doOnSuccess(successfulVms);
+		}
+		if (!errorVms.isEmpty()) {
+			doOnFailure(errorVms);
 		}
 	}
 }
