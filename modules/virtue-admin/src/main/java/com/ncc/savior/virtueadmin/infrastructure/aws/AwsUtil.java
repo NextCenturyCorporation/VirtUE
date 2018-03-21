@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.infrastructure;
+package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -159,7 +159,7 @@ public class AwsUtil {
 		}
 	}
 
-	private static void updateNetworking(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
+	public static void updateNetworking(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 		Collection<String> instanceIds = vmsToInstanceIds(vms);
 		try {

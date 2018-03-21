@@ -109,18 +109,18 @@
     -->
 
 	<logger name="org.springframework.security" additivity="false">
-        <level value="ERROR"/>
+        <level value="WARN"/>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="INFO"/>
     </logger>
 
-<!-- 	<logger name="org.springframework" additivity="false"> -->
-<!--         <level value="INFO"/> -->
-<!--         <appender-ref ref="CONSOLE"/> -->
-<!--         <appender-ref ref="DEBUG"/> -->
-<!--         <appender-ref ref="INFO"/> -->
-<!--     </logger> -->
+	<logger name="org.glassfish.jersey" additivity="false">
+        <level value="WARN"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DEBUG"/>
+        <appender-ref ref="INFO"/>
+    </logger>
 
     <logger name="com" additivity="false">
         <level value="ERROR"/>

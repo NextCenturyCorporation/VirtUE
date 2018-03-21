@@ -94,4 +94,18 @@ public class DesktopRestService {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
+
+	@GET
+	@Produces("application/json")
+	@Path("template/{templateId}/start")
+	public DesktopVirtue createVirtue(@PathParam("templateId") String templateId) {
+		try {
+			return desktopService.createVirtueAsDesktopVirtue(templateId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
 }
