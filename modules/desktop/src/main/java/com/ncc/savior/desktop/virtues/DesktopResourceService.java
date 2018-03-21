@@ -20,6 +20,7 @@ import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.ResponseProcessingException;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -105,7 +106,7 @@ public class DesktopResourceService {
 	}
 
 	public BaseApplicationInstance startApplication(String virtueId, ApplicationDefinition appDefn)
-			throws IOException {
+			throws IOException, ResponseProcessingException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
 		BaseApplicationInstance returnedApp = getClass(target, "GET", BaseApplicationInstance.class);
 		logger.debug("Started app=" + returnedApp);
@@ -114,7 +115,7 @@ public class DesktopResourceService {
 	}
 
 	public BaseApplicationInstance startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
-			throws IOException {
+			throws IOException, ResponseProcessingException {
 		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
 		BaseApplicationInstance returnedApp = getClass(target, "GET", BaseApplicationInstance.class);
 		logger.debug("Started app=" + returnedApp);
@@ -155,7 +156,7 @@ public class DesktopResourceService {
 	}
 
 	private <T> T getClass(WebTarget target, String method, Class<T> klass)
-			throws IOException, InvalidUserLoginException {
+			throws IOException, InvalidUserLoginException, ResponseProcessingException {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
@@ -164,8 +165,7 @@ public class DesktopResourceService {
 			T instance = jsonMapper.readValue(in, klass);
 			return instance;
 		} else {
-			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
-			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
+			throw new ResponseProcessingException(response, "could not process response from WebTarget: " + target);
 		}
 	}
 

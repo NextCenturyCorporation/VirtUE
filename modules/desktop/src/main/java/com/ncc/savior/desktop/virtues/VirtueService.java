@@ -3,10 +3,13 @@ package com.ncc.savior.desktop.virtues;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import javax.ws.rs.client.ResponseProcessingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,22 +57,20 @@ public class VirtueService {
 	// connectionManager.startApplication(params, app.getStartCommand());
 	// }
 
-	public void ensureConnection(BaseApplicationInstance app, DesktopVirtue virtue, RgbColor color)
-			throws IOException {
+	public void ensureConnection(BaseApplicationInstance app, DesktopVirtue virtue, RgbColor color) throws IOException {
 		File file = null;
 		try {
 			String key = app.getPrivateKey();
 
 			SshConnectionParameters params = null;
 			if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
-				File pem = File.createTempFile(app.getApplicationDefinition().getName(), ".pem");
+				File pem = Files.createTempFile(app.getApplicationDefinition().getName(), ".pem").toFile();
 				FileWriter writer = new FileWriter(pem);
 				writer.write(key);
 				writer.close();
 				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
 			} else {
-				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(),
-						key);
+				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
 			}
 			String colorDesc = (color == null ? "" : " with color " + color.toString());
 			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
@@ -117,7 +118,7 @@ public class VirtueService {
 	}
 
 	public void startApplication(DesktopVirtue virtue, ApplicationDefinition appDefn, RgbColor color)
-			throws IOException {
+			throws IOException, ResponseProcessingException {
 		// TODO check to see if we have an XPRA connection
 		String virtueId = virtue.getId();
 		BaseApplicationInstance app;

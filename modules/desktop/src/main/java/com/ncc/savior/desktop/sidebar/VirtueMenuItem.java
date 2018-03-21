@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import javax.ws.rs.client.ResponseProcessingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +157,7 @@ public class VirtueMenuItem {
 								statusSpinner.setVisible(true);
 								virtueService.startApplication(virtue, app, color);
 								statusSpinner.setVisible(false);
-							} catch (IOException e) {
+							} catch (IOException | ResponseProcessingException e) {
 								logger.error("Error starting " + app.getName(), e);
 								Platform.runLater(new Runnable() {
 									@Override
@@ -201,7 +203,7 @@ public class VirtueMenuItem {
 		return menu;
 	}
 
-	private String stacktraceToString(IOException e) {
+	private String stacktraceToString(Exception e) {
 		String text;
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
