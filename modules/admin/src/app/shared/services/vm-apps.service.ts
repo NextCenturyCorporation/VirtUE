@@ -42,7 +42,7 @@ export class VmAppsService {
     // /?id=${id}
     return this.httpClient.get<Application[]>(src);
 
-    //return this.httpClient.put<Application[]>(src, JSON.stringify(app));
+    // return this.httpClient.put<Application[]>(src, JSON.stringify(app));
   }
   /**
   public updateStatus(id: string, app: Application): Observable<any> {
