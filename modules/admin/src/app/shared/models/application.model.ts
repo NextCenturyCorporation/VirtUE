@@ -1,5 +1,5 @@
 export class Application {
-  id: string;
+  id: any;
   name: string;
   version: string;
   os: string;

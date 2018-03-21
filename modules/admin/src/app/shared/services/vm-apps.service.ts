@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { ActivatedRoute, Params } from '@angular/router';
 
+import { Location } from '@angular/common';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -20,27 +22,38 @@ export class VmAppsService {
 
   constructor( private httpClient: HttpClient ) {  }
 
-  public getAppsList(): Observable<Array<Application>> {
-    return this.httpClient.get<Array<Application>>(this.jsondata);
+  public getAppsList(): Observable<Application[]> {
+    return this.httpClient.get<Application[]>(this.jsondata);
   }
 
-  public getApp(id: string): Observable<any> {
-    const src = `${this.jsondata}/${id}`;
-    return this.httpClient.get<Application>(src);
+  public getApp(id: string): Observable<Application[]> {
+    const src = `${this.jsondata}/?id=${id}`;
+
+    console.log('getApp ID: ' + id + ' @ ' + src);
+
+    return this.httpClient.get<Application[]>(src);
   }
 
-  public createVirtue(vm: Application) {
+  public addApp(vm: Application) {
     return this.httpClient.post( this.jsondata, vm );
   }
-/**
+  public updateStatus(id: string): Observable<any> {
+    const src = `${this.jsondata}`;
+    // /?id=${id}
+    return this.httpClient.get<Application[]>(src);
+
+    //return this.httpClient.put<Application[]>(src, JSON.stringify(app));
+  }
+  /**
+  public updateStatus(id: string, app: Application): Observable<any> {
+    return this.httpClient.put(`${this.jsondata}?id=${id}`,app);
+  }
+
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
     return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
   }
+  */
 
-  public update(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
-  }
-*/
   /**
    * Handle Http operation that failed.
    * Let the app continue.
