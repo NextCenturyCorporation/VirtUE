@@ -197,9 +197,9 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			String loginUsername = vmt.getLoginUser();
 			String privateKeyName = serverKeyName;
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
-					new ArrayList<ApplicationDefinition>(vmt.getApplications()),
-					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
-					loginUsername, null, privateKeyName, instance.getPublicIpAddress());
+					new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
+					instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null,
+					privateKeyName, instance.getPublicIpAddress());
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
@@ -225,12 +225,19 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
-		StartInstancesResult result = ec2.startInstances(startInstancesRequest);
-		for (InstanceStateChange i : result.getStartingInstances()) {
-			for (VirtualMachine vm : vms) {
-				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
-					vm.setState(VmState.LAUNCHING);
+		try {
+			StartInstancesResult result = ec2.startInstances(startInstancesRequest);
+			for (InstanceStateChange i : result.getStartingInstances()) {
+				for (VirtualMachine vm : vms) {
+					if (vm.getInfrastructureId().equals(i.getInstanceId())) {
+						vm.setState(VmState.LAUNCHING);
+					}
 				}
+			}
+		} catch (AmazonEC2Exception e) {
+			logger.error("Error starting virtual machines", e);
+			for (VirtualMachine vm : vms) {
+				vm.setState(VmState.ERROR);
 			}
 		}
 		notifyOnUpdateVms(vms);

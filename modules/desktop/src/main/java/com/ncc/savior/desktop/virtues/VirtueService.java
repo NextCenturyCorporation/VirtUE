@@ -39,20 +39,23 @@ public class VirtueService {
 	private static final Logger logger = LoggerFactory.getLogger(VirtueService.class);
 	private XpraConnectionManager connectionManager;
 	private DesktopResourceService desktopResourceService;
-	private ArrayList<VirtueState> startableVirtueStates;
-	private ArrayList<VirtueState> stopableVirtueStates;
+	public static ArrayList<VirtueState> startableVirtueStates;
+	public static ArrayList<VirtueState> stopableVirtueStates;
 	private Map<String, List<ApplicationDefinition>> pendingApps;
 	private Map<String, RgbColor> colors;
+
+	static {
+		startableVirtueStates = new ArrayList<VirtueState>();
+		stopableVirtueStates = new ArrayList<VirtueState>();
+		startableVirtueStates.add(VirtueState.STOPPED);
+		// startableVirtueStates.add(VirtueState.STOPPING);
+		stopableVirtueStates.add(VirtueState.LAUNCHING);
+		stopableVirtueStates.add(VirtueState.RUNNING);
+	}
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
-		this.startableVirtueStates = new ArrayList<VirtueState>();
-		this.stopableVirtueStates = new ArrayList<VirtueState>();
-		startableVirtueStates.add(VirtueState.STOPPED);
-		startableVirtueStates.add(VirtueState.STOPPING);
-		stopableVirtueStates.add(VirtueState.LAUNCHING);
-		stopableVirtueStates.add(VirtueState.RUNNING);
 
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());

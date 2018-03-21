@@ -58,6 +58,8 @@ public class VirtueMenuItem {
 	private ImageView statusSpinner;
 	private Image statusImage;
 	private RgbColor color;
+	private Button startButton;
+	private Button stopButton;
 
 	public VirtueMenuItem(DesktopVirtue virtue, VirtueService virtueService, Image statusImage, int width,
 			RgbColor color) {
@@ -125,12 +127,13 @@ public class VirtueMenuItem {
 		startView.setFitHeight(12);
 		stopView.setFitWidth(12);
 		stopView.setFitHeight(12);
-		Button startButton = new Button("", startView);
-		Button stopButton = new Button("", stopView);
+		this.startButton = new Button("", startView);
+		this.stopButton = new Button("", stopView);
 		startButton.setMaxWidth(12);
 		startButton.setMaxHeight(12);
 		stopButton.setMaxWidth(12);
 		stopButton.setMaxHeight(12);
+		setStartStopButtonStatus(virtue);
 		startButton.setOnAction(new EventHandler<ActionEvent>() {
 
 			@Override
@@ -286,6 +289,13 @@ public class VirtueMenuItem {
 		return node;
 	}
 
+	private void setStartStopButtonStatus(DesktopVirtue virtue) {
+		boolean startable = VirtueService.startableVirtueStates.contains(virtue.getVirtueState());
+		boolean stoppable = VirtueService.stopableVirtueStates.contains(virtue.getVirtueState());
+		startButton.setDisable(!startable);
+		stopButton.setDisable(!stoppable);
+	}
+
 	public void updateVirtue(DesktopVirtue virtue) {
 		this.virtue = virtue;
 		String text = getLabel(virtue);
@@ -293,6 +303,7 @@ public class VirtueMenuItem {
 			@Override
 			public void run() {
 				label.setText(text);
+				setStartStopButtonStatus(virtue);
 			}
 		});
 	}
