@@ -116,8 +116,6 @@ public class DesktopResourceService {
 
 	}
 
-
-
 	// public DesktopVirtueApplication startApplicationFromTemplate(String
 	// templateId, ApplicationDefinition appDefn)
 	// throws IOException {
@@ -204,14 +202,18 @@ public class DesktopResourceService {
 	public void startVirtue(String virtueId) throws InvalidUserLoginException, IOException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path("start");
 		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
-		logger.debug("Started virtue=" + virtue);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Started virtue=" + virtue);
+		}
 
 	}
 
 	public void stopVirtue(String virtueId) throws InvalidUserLoginException, IOException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path("stop");
 		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
-		logger.debug("Stopped virtue=" + virtue);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Stopping virtue=" + virtue);
+		}
 
 	}
 }

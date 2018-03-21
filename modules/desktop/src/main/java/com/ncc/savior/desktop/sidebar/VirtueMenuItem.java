@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 import javafx.application.Platform;
@@ -140,6 +141,8 @@ public class VirtueMenuItem {
 			public void handle(ActionEvent event) {
 				try {
 					virtueService.startVirtue(virtue);
+					virtue.setVirtueState(VirtueState.LAUNCHING);
+					updateVirtue(virtue);
 				} catch (IOException e) {
 					String msg = "Error attempting to start virtue=" + virtue;
 					logger.error(msg, e);
@@ -152,6 +155,8 @@ public class VirtueMenuItem {
 			public void handle(ActionEvent event) {
 				try {
 					virtueService.stopVirtue(virtue);
+					virtue.setVirtueState(VirtueState.STOPPING);
+					updateVirtue(virtue);
 				} catch (IOException e) {
 					String msg = "Error attempting to stop virtue=" + virtue;
 					logger.error(msg, e);
