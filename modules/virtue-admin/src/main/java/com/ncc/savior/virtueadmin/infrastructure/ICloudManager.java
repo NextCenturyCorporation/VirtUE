@@ -23,4 +23,8 @@ public interface ICloudManager {
 
 	VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception;
 
+	VirtueInstance startVirtue(VirtueInstance virtueInstance);
+
+	VirtueInstance stopVirtue(VirtueInstance virtueInstance);
+
 }

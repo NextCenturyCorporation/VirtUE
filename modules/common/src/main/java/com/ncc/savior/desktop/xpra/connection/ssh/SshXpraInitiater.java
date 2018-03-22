@@ -36,12 +36,28 @@ public class SshXpraInitiater implements IXpraInitiator {
 	}
 
 	@Override
+	public Set<Integer> getXpraServersWithRetries() throws IOException {
+		int triesLeft = 3;
+		IOException lastException = null;
+		while (triesLeft > 0) {
+			try {
+				triesLeft--;
+				Set<Integer> servers = getXpraServers();
+				return servers;
+			} catch (IOException e) {
+				lastException = e;
+				logger.warn("Failed to get Xpra Servers.  Tries left=" + (triesLeft) + " Error=" + e.getMessage());
+			}
+		}
+		throw lastException;
+	}
+
 	public Set<Integer> getXpraServers() throws IOException {
 		Session session = null;
 		ChannelExec channel = null;
 		Set<Integer> set = new TreeSet<Integer>();
 		try {
-			session = getConnectedSession();
+			session = getConnectedSessionWithRetries();
 			channel = getConnectedChannel(XPRA_LIST, session, null);
 			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			BufferedReader reader = new BufferedReader(stream);
@@ -74,7 +90,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		Session session = null;
 		ChannelExec channel = null;
 		try {
-			session = getConnectedSession();
+			session = getConnectedSessionWithRetries();
 			session.setTimeout(10000);
 			String command = (display > 0 ? XPRA_START + " :" + display : XPRA_START);
 			// command = "sudo systemctl enable xpra.socket;" + command;
@@ -107,7 +123,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		ChannelExec channel = null;
 		boolean success = false;
 		try {
-			session = getConnectedSession();
+			session = getConnectedSessionWithRetries();
 			channel = getConnectedChannel(XPRA_STOP + " :" + display, session, null);
 			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
 			BufferedReader reader = new BufferedReader(stream);
@@ -134,7 +150,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 			return;
 		}
 		try {
-			session = getConnectedSession();
+			session = getConnectedSessionWithRetries();
 			String fullCommand = "export DISPLAY=:" + display + ";" + SUDO_OR_NOTHING + command;
 			logger.debug("cmd: " + fullCommand);
 			channel = getConnectedChannel(fullCommand, session, null);
@@ -153,7 +169,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 
 	@Override
 	public void stopAllXpraServers() throws IOException {
-		Set<Integer> displays = getXpraServers();
+		Set<Integer> displays = getXpraServersWithRetries();
 		for (Integer display : displays) {
 			stopXpraServer(display);
 		}
@@ -168,10 +184,21 @@ public class SshXpraInitiater implements IXpraInitiator {
 		return channel;
 	}
 
-	private Session getConnectedSession() throws JSchException {
-		Session session = JschUtils.getSession(params);
-		session.connect();
-		return session;
+	private Session getConnectedSessionWithRetries() throws JSchException {
+		int triesLeft = 3;
+		JSchException lastException = null;
+		while (triesLeft > 0) {
+			triesLeft--;
+			try {
+				Session session = JschUtils.getSession(params);
+				session.connect();
+				return session;
+			} catch (JSchException e) {
+				lastException = e;
+				logger.warn("Failed to get Xpra Servers.  Tries left=" + (triesLeft) + " Error=" + e.getMessage());
+			}
+		}
+		throw lastException;
 	}
 
 	private void closeAll(Session session, ChannelExec channel) {
@@ -187,7 +214,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		SshConnectionParameters p = new SshConnectionParameters("localhost", 22, "user", "password");
 		SshXpraInitiater init = new SshXpraInitiater(p);
 
-		Set<Integer> displays = init.getXpraServers();
+		Set<Integer> displays = init.getXpraServersWithRetries();
 		System.out.println(displays);
 		//
 		init.stopAllXpraServers();
@@ -198,7 +225,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		int display = init.startXpraServer(8);
 		System.out.println("started on " + display);
 
-		displays = init.getXpraServers();
+		displays = init.getXpraServersWithRetries();
 		System.out.println(displays);
 
 		init.startXpraApp(display, "gedit");

@@ -63,6 +63,7 @@ public class DataResource {
 	private SessionRegistry sessionRegistry;
 
 	public DataResource() {
+		logger.warn("***Data Resource is currently enabled.  Please disable for production systems.***");
 	}
 
 	@GET
@@ -118,24 +119,32 @@ public class DataResource {
 
 		Date now = new Date();
 		String systemName = "system";
-
+		String allLinuxAmi = "ami-2b500951";
+		String windowsAmi = "ami-36a65f4b";
+		String linuxLoginUser = "admin";
+		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
-				OS.LINUX, "Browsers", appsBrowsers, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsBrowsers, linuxLoginUser, true, now, systemName);
 
-		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX, "All",
-				appsAll, true, now, systemName);
+		VirtualMachineTemplate windowsVm = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Windows",
+				OS.WINDOWS, windowsAmi, new ArrayList<ApplicationDefinition>(), windowsLoginUser, true, now,
+				systemName);
+
+		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
+				allLinuxAmi, appsAll, linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
-				"Math", appsMath, true, now, systemName);
+				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmDrawing = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
-				"Drawing", appsDrawing, true, now, systemName);
+				allLinuxAmi, appsDrawing, linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
-				OS.LINUX, "LibreOffice", appsLibreOffice, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsLibreOffice, linuxLoginUser, true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
+		// vmtsSingleAll.add(windowsVm);
 		String allTemplate = "default-template";
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue", "1.0",
 				vmtsSingleAll, allTemplate, true, now, systemName);
@@ -169,6 +178,7 @@ public class DataResource {
 		templateManager.addVmTemplate(vmLibreOffice);
 		templateManager.addVmTemplate(vmDrawing);
 		templateManager.addVmTemplate(vmAll);
+		templateManager.addVmTemplate(windowsVm);
 
 		templateManager.addVirtueTemplate(virtueBrowsers);
 		templateManager.addVirtueTemplate(virtueSingleAll);

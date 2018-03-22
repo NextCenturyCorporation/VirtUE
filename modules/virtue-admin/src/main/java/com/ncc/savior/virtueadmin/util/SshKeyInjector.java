@@ -38,26 +38,45 @@ public class SshKeyInjector {
 	 * @return
 	 * @throws IOException
 	 */
-	public String injectSshKey(VirtualMachine vm) throws IOException {
-		// Jsch is not thread safe
-		JSch ssh = new JSch();
+	public String injectSshKey(VirtualMachine vm, String privateKey) throws IOException {
+		File privateKeyFile = null;
+		try {
+			privateKeyFile = File.createTempFile("test", "");
+			FileWriter writer = new FileWriter(privateKeyFile);
+			writer.write(privateKey);
+			writer.close();
+			return injectSshKey(vm, privateKeyFile);
+		} finally {
+			if (privateKeyFile != null) {
+				privateKeyFile.delete();
+			}
+		}
+	}
+
+	/**
+	 * returns new private key used to login to machine
+	 * 
+	 * @param vm
+	 * @return
+	 * @throws IOException
+	 */
+	public String injectSshKey(VirtualMachine vm, File privateKeyFile) throws IOException {
 		PublicPrivatePair keyPair = null;
 		String privKey = "";
-		File key = null;
+		// Jsch is not thread safe
+		Session session = null;
+		ChannelExec channel = null;
 		try {
+			JSch ssh = new JSch();
 			keyPair = keyGenerator.createRsaKeyPair();
 			privKey = keyPair.getPrivateKey();
 			String pubKey = keyPair.getPublicKey();
-			key = File.createTempFile("test", "");
-			FileWriter writer = new FileWriter(key);
-			writer.write(vm.getPrivateKey());
-			writer.close();
-			ssh.addIdentity(key.getAbsolutePath());
-			Session session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
+			ssh.addIdentity(privateKeyFile.getAbsolutePath());
+			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
 			session.setConfig("PreferredAuthentications", "publickey");
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.connect();
-			ChannelExec channel = (ChannelExec) session.openChannel("exec");
+			channel = (ChannelExec) session.openChannel("exec");
 			channel.setCommand("echo '" + pubKey + "' >> ~/.ssh/authorized_keys");
 			channel.connect();
 
@@ -71,16 +90,16 @@ public class SshKeyInjector {
 					logger.trace(line);
 				}
 			}
-			channel.disconnect();
-			session.disconnect();
-
+			return privKey;
 		} catch (JSchException e) {
 			throw new IOException("Unable to add ssh key to " + vm.getHostname(), e);
 		} finally {
-			if (key != null) {
-				key.delete();
+			if (channel != null) {
+				channel.disconnect();
+			}
+			if (session != null) {
+				session.disconnect();
 			}
 		}
-		return privKey;
 	}
 }

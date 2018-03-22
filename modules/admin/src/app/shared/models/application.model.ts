@@ -4,4 +4,5 @@ export class Application {
   version: string;
   os: string;
   launchCommand: string;
+  enabled: boolean;
 }

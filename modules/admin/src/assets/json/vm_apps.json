@@ -1,0 +1,78 @@
+[{
+  "id": "18c13ab7-4325-4d16-9b88-174a267d1bea",
+  "name": "Chrome",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "google-chrome",
+  "enabled": true
+}, {
+  "id": "tptwp3x5-doqx-l3y6-ih2w-znhagh571mbd",
+  "name": "Chromium",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "google-chromium",
+  "enabled": false
+},{
+  "id": "4f036e79-9ff3-4499-ac80-175395d23f5a",
+  "name": "Firefox",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "firefox",
+  "enabled": true
+}, {
+  "id": "b94652f1-c7f7-4150-a273-384da423faae",
+  "name": "LibreOffice Calc",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "localc",
+  "enabled": true
+}, {
+  "id": "f1cbb5ca-9f6e-428a-9038-5bc058a6c2bd",
+  "name": "LibreOffice Draw",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "lodraw",
+  "enabled": true
+}, {
+  "id": "3f95ec4c-c346-4a09-bd9c-6da0a2447981",
+  "name": "LibreOffice Impress",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "loimpress",
+  "enabled": true
+}, {
+  "id": "2ae273de-d36e-4d8c-9f2a-8129d24b3841",
+  "name": "LibreOffice Writer",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "lowriter",
+  "enabled": true
+}, {
+  "id": "654d7896-f1e5-4d6d-896f-7ad78dd448f8",
+  "name": "Calculator",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "gnome-calculator",
+  "enabled": true
+}, {
+  "id": "acc5ebbf-1041-404f-b42d-575eb3f6d765",
+  "name": "GIMP",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "gimp",
+  "enabled": true
+}, {
+  "id": "5818b15c-889e-4c26-bde3-22715365f4d6",
+  "name": "Pinta",
+  "version": "1.0",
+  "os": "LINUX",
+  "launchCommand": "pinta",
+  "enabled": true
+}, {
+  "id": "g40nye00-v9dh-dq7p-ashl-72xbf4opylff",
+  "name": "Calculator",
+  "version": "1.0",
+  "os": "Windows",
+  "launchCommand": "Calculator",
+  "enabled": false
+}]

@@ -19,6 +19,9 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * {@link ITemplateManager} that uses Spring and JPA.
+ */
 @Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
 	@Autowired
@@ -70,7 +73,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
-		if (user==null) {
+		if (user == null) {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
 		for (VirtueTemplate template : user.getVirtueTemplates()) {
@@ -155,7 +158,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId) {
-//		UserName username = new UserName(user.getUsername());
+		// UserName username = new UserName(user.getUsername());
 		// TODO this seems inefficient, but it errors if the username does not exist.
 		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		if (existing != null) {
@@ -230,6 +233,21 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public void deleteVirtueTemplate(String templateId) {
 		vtRepository.deleteById(templateId);
+	}
+
+	@Override
+	public Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts) {
+		return vtRepository.findAllById(vts);
+	}
+
+	@Override
+	public Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds) {
+		return vmtRepository.findAllById(vmtIds);
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getApplications(Collection<String> appIds) {
+		return appRepository.findAllById(appIds);
 	}
 
 }

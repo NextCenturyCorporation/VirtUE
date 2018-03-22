@@ -1,13 +1,18 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnDefault;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class VirtualMachineTemplate {
@@ -17,6 +22,7 @@ public class VirtualMachineTemplate {
 	private String name;
 	private OS os;
 	private String templatePath;
+	private String loginUser;
 	@ManyToMany()
 	private Collection<ApplicationDefinition> applications;
 	@ColumnDefault("true")
@@ -24,8 +30,12 @@ public class VirtualMachineTemplate {
 	private Date lastModification;
 	private String lastEditor;
 
+	@Transient
+	private Collection<String> applicationIds;
+
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
-			Collection<ApplicationDefinition> applications, boolean enabled, Date lastModification, String lastEditor) {
+			Collection<ApplicationDefinition> applications, String loginUser, boolean enabled, Date lastModification,
+			String lastEditor) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -35,6 +45,7 @@ public class VirtualMachineTemplate {
 		this.enabled = enabled;
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
+		this.loginUser = loginUser;
 	}
 
 	/**
@@ -54,6 +65,7 @@ public class VirtualMachineTemplate {
 		this.enabled = vmTemplate.isEnabled();
 		this.lastModification = vmTemplate.getLastModification();
 		this.lastEditor = vmTemplate.getLastEditor();
+		this.loginUser = vmTemplate.getLoginUser();
 	}
 
 	public String getId() {
@@ -72,6 +84,7 @@ public class VirtualMachineTemplate {
 		return templatePath;
 	}
 
+	@JsonIgnore
 	public Collection<ApplicationDefinition> getApplications() {
 		return applications;
 	}
@@ -120,10 +133,29 @@ public class VirtualMachineTemplate {
 		this.lastEditor = lastEditor;
 	}
 
+	public String getLoginUser() {
+		return loginUser;
+	}
+
+	public void setLoginUser(String loginUser) {
+		this.loginUser = loginUser;
+	}
+
+	@JsonGetter
+	public Collection<String> getApplicationIds() {
+		if (applications != null) {
+			applicationIds = new ArrayList<String>();
+			for (ApplicationDefinition app : applications) {
+				applicationIds.add(app.getId());
+			}
+		}
+		return applicationIds;
+	}
+
 	@Override
 	public String toString() {
 		return "VirtualMachineTemplate [id=" + id + ", name=" + name + ", os=" + os + ", templatePath=" + templatePath
-				+ ", applications=" + applications + ", enabled=" + enabled + ", lastModification=" + lastModification
-				+ ", lastEditor=" + lastEditor + "]";
+				+ ", loginUser=" + loginUser + ", applications=" + applications + ", enabled=" + enabled
+				+ ", lastModification=" + lastModification + ", lastEditor=" + lastEditor + "]";
 	}
 }

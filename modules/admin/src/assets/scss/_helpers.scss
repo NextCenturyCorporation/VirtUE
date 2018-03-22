@@ -83,6 +83,10 @@
 .font-color-gray {
     color: $darkGray;
 }
+
+.hidden { display: none; }
+.show { display: block; }
+
 .text-align-left {
   text-align: left;
 }

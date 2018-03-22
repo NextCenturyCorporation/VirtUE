@@ -2,9 +2,6 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { DashboardService } from '../shared/services/dashboard.service';
 
-import { JsonFilterPipe } from '../shared/json-filter.pipe';
-import { CountFilterPipe } from '../shared/count-filter.pipe';
-
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',

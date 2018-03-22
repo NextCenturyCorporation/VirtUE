@@ -38,7 +38,6 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 
 	@Override
 	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
-		// TODO
 		throw new RuntimeException("not yet implemented");
 	}
 
@@ -177,6 +176,18 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

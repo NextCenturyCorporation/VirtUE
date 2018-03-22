@@ -11,7 +11,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 @Component({
   selector: 'app-vm-modal',
   templateUrl: './vm-modal.component.html',
-  styleUrls: ['./vm-modal.component.css'],
   providers: [VirtualMachineService]
 })
 export class VmModalComponent implements OnInit {

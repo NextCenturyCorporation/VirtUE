@@ -1,10 +1,9 @@
 package com.ncc.savior.virtueadmin.util;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -24,17 +23,9 @@ public class SshUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(SshUtil.class);
 
-	public static void waitUtilVmReachable(VirtualMachine vm, long periodMillis) {
-		while (!isVmReachable(vm)) {
-			sleepAndLogInterruption(periodMillis);
-		}
-	}
-
-	private static void sleepAndLogInterruption(long periodMillis) {
-		try {
-			Thread.sleep(periodMillis);
-		} catch (InterruptedException e) {
-			logger.error("Unexpected sleep interruption!", e);
+	public static void waitUtilVmReachable(VirtualMachine vm, String privateKeyFile, long periodMillis) {
+		while (!isVmReachable(vm, privateKeyFile)) {
+			JavaUtil.sleepAndLogInterruption(periodMillis);
 		}
 	}
 
@@ -56,7 +47,7 @@ public class SshUtil {
 			Iterator<VirtualMachine> itr = vms.iterator();
 			while (itr.hasNext()) {
 				VirtualMachine vm = itr.next();
-				boolean thisVmReachable = isVmReachable(vm);
+				boolean thisVmReachable = isVmReachable(vm, vm.getPrivateKey());
 				allReachable &= thisVmReachable;
 				if (thisVmReachable) {
 					itr.remove();
@@ -66,55 +57,114 @@ public class SshUtil {
 				// if we never break, all vms must be reachable
 				allReachable = true;
 			}
-			sleepAndLogInterruption(periodMillis);
+			JavaUtil.sleepAndLogInterruption(periodMillis);
 		} while (!allReachable);
 	}
 
-	public static boolean isVmReachable(VirtualMachine vm) {
-		// Jsch is not thread safe
-		JSch ssh = new JSch();
+	public static boolean isVmReachable(VirtualMachine vm, String privateKey) {
 		File key = null;
-		ChannelExec channel = null;
-		Session session = null;
 		try {
 			key = File.createTempFile("test", "");
 			FileWriter writer = new FileWriter(key);
 			writer.write(vm.getPrivateKey());
 			writer.close();
-			ssh.addIdentity(key.getAbsolutePath());
+			return isVmReachable(vm, key);
+		} catch (IOException e) {
+			logger.trace("Error writing key to test VM reachability: " + e.getMessage());
+			return false;
+		} finally {
+			if (key != null) {
+				key.delete();
+			}
+		}
+	}
+
+	public static boolean isVmReachable(VirtualMachine vm, File privateKeyFile) {
+		// Jsch is not thread safe
+		JSch ssh = new JSch();
+		ChannelExec channel = null;
+		Session session = null;
+//		BufferedReader reader = null;
+//		BufferedReader ereader = null;
+		try {
+			ssh.addIdentity(privateKeyFile.getAbsolutePath());
 			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
 			session.setConfig("PreferredAuthentications", "publickey");
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.setTimeout(500);
 			session.connect();
 			channel = (ChannelExec) session.openChannel("exec");
-			channel.setCommand("echo 'test'");
-			channel.connect();
+			channel.setCommand("echo 'Testing reachability of VM'");
+			channel.connect(0);
 
-			InputStreamReader stream = new InputStreamReader(channel.getInputStream());
-			BufferedReader reader = new BufferedReader(stream);
-			InputStreamReader estream = new InputStreamReader(channel.getErrStream());
-			BufferedReader ereader = new BufferedReader(estream);
-			String line;
+			// InputStreamReader stream = new InputStreamReader(channel.getInputStream());
+			// reader = new BufferedReader(stream);
+			// InputStreamReader estream = new InputStreamReader(channel.getErrStream());
+			// ereader = new BufferedReader(estream);
+			// String line;
 			// logger.debug("should read line soon");
-			while ((line = reader.readLine()) != null || (line = ereader.readLine()) != null) {
-				logger.trace(line);
-			}
-		} catch (JSchException | IOException e) {
+			// while ((line = reader.readLine()) != null || (line = ereader.readLine()) !=
+			// null) {
+			// logger.trace(line);
+			// }
+			return true;
+		} catch (JSchException e) {
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
 			return false;
 		} finally {
-			if (key != null) {
-				key.delete();
-			}
 			if (channel != null) {
 				channel.disconnect();
 			}
 			if (session != null) {
 				session.disconnect();
 			}
+//			JavaUtil.closeIgnoreErrors(reader, ereader);
 		}
-		return true;
+	}
+
+	public static String getKeyFromFile(File privateKey) {
+		FileReader reader = null;
+		if (privateKey == null || !privateKey.isFile()) {
+			return "";
+		}
+		try {
+			reader = new FileReader(privateKey);
+			char[] cbuf = new char[4096];
+			int n = reader.read(cbuf);
+			String s = new String(cbuf, 0, n);
+			return s;
+		} catch (IOException e) {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+					"Error attempting to read file=" + privateKey.getAbsolutePath(), e);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					logger.error("Error attempting to close file=" + privateKey.getAbsolutePath());
+				}
+			}
+		}
+	}
+
+	public static void writeKeyToFile(File certificate, String privateKey) {
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(certificate);
+			writer.write(privateKey);
+			writer.flush();
+		} catch (IOException e) {
+			logger.warn("Failed to write key to file", e);
+		} finally {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					logger.warn("Failed to close file writer", e);
+				}
+			}
+		}
+
 	}
 
 }

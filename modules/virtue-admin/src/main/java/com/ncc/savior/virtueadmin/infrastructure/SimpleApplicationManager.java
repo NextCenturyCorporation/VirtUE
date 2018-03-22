@@ -13,6 +13,8 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.util.SaviorException;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
@@ -20,28 +22,48 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  * 
  *
  */
-// TODO credentials need to be added somewhere.
 public class SimpleApplicationManager implements IApplicationManager {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleApplicationManager.class);
 	private static Random rand = new Random();
 	private String defaultPassword;
-	private File defaultCertificate;
+	// private File defaultCertificate;
 
 	public SimpleApplicationManager(String defaultPassword) {
 		this.defaultPassword = defaultPassword;
 	}
 
-	public SimpleApplicationManager(File defaultCertificate) {
-		this.defaultCertificate = defaultCertificate;
+	public SimpleApplicationManager() {
+	}
+
+
+	@Override
+	public int startOrGetXpraServer(VirtualMachine vm, File privateKeyFile) throws IOException {
+		SshConnectionParameters params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(),
+				vm.getSshPort(), vm.getUserName(), privateKeyFile);
+		SshXpraInitiater initiator = new SshXpraInitiater(params);
+		Set<Integer> servers = initiator.getXpraServers();
+		if (servers.isEmpty()) {
+			int attemptedDisplay = 100 + rand.nextInt(100);
+			initiator.startXpraServer(attemptedDisplay);
+			servers = initiator.getXpraServers();
+		}
+		if (servers.isEmpty()) {
+			return -1;
+		} else {
+			return servers.iterator().next();
+		}
 	}
 
 	@Override
 	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, int maxTries) {
+		File certificate = null;
 		try {
 			SshConnectionParameters params = null;
-			if (defaultCertificate != null) {
+			if (vm.getPrivateKey() != null) {
+				certificate = File.createTempFile("test", ".dat");
+				SshUtil.writeKeyToFile(certificate, vm.getPrivateKey());
 				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
-						vm.getUserName(), defaultCertificate);
+						vm.getUserName(), certificate);
 			} else {
 				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
 						vm.getUserName(), defaultPassword);
@@ -50,7 +72,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 			Set<Integer> set = null;
 			int display = -1;
 			while (true) {
-				Set<Integer> displays = initiator.getXpraServers();
+				Set<Integer> displays = initiator.getXpraServersWithRetries();
 				if (displays.isEmpty()) {
 					int attemptedDisplay = 100 + rand.nextInt(100);
 					logger.debug("attempting to start server on display " + attemptedDisplay);
@@ -60,12 +82,12 @@ public class SimpleApplicationManager implements IApplicationManager {
 					logger.debug("using display " + display);
 					break;
 				}
-				set = initiator.getXpraServers();
+				set = initiator.getXpraServersWithRetries();
 				maxTries--;
 				logger.debug("after start, has displays: " + set);
 				int displayChecks = 3;
 				while (displays.isEmpty()) {
-					displays = initiator.getXpraServers();
+					displays = initiator.getXpraServersWithRetries();
 					logger.trace("display check: " + displays);
 					displayChecks--;
 					if (!displays.isEmpty()) {
@@ -81,16 +103,28 @@ public class SimpleApplicationManager implements IApplicationManager {
 				if (set.isEmpty() && maxTries > 0) {
 					logger.debug("Attempt to create display failed.  retries: " + maxTries);
 					Thread.sleep(500);
+				} else if (set.isEmpty()) {
+					// no tries left but no displays
+					String msg = "Unable to create Xpra server.";
+					logger.error(msg);
+					throw new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
 				} else {
 					display = set.iterator().next();
 					logger.debug("Attempt to create display succeeded.  display: " + display);
 					break;
 				}
+				logger.debug("going to top of loop");
 			}
+			logger.debug("starting app");
 			initiator.startXpraApp(display, app.getLaunchCommand());
 		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			String msg = "Error attempting to start application!";
+			logger.error(msg, e);
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
+		} finally {
+			if (certificate != null && certificate.exists()) {
+				certificate.delete();
+			}
 		}
 	}
 

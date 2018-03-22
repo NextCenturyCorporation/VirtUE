@@ -22,7 +22,7 @@ public interface IVmManager {
 	 * 
 	 * @param listener
 	 */
-	public void addStateUpdateListener(IStateUpdateListener listener);
+	public void addVmUpdateListener(IVmUpdateListener listener);
 
 	/**
 	 * Removes a listener which would have been notified when the state of a VM has
@@ -30,7 +30,7 @@ public interface IVmManager {
 	 * 
 	 * @param listener
 	 */
-	public void removeStateUpdateListener(IStateUpdateListener listener);
+	public void removeVmUpdateListener(IVmUpdateListener listener);
 
 	/**
 	 * Provide a provisioned VM that is currently not used by another Virtue that
@@ -57,6 +57,8 @@ public interface IVmManager {
 	 */
 	public VirtualMachine startVirtualMachine(VirtualMachine vm);
 
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms);
+
 	/**
 	 * Initiates a stop action on the provided VM. It is not guaranteed that the VM
 	 * will be stopped when this function returns. However, if the VM is not stopped
@@ -67,6 +69,8 @@ public interface IVmManager {
 	 * @return
 	 */
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm);
+
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms);
 
 	/**
 	 * Calling this function notifies that the VM is no longer needed and the
@@ -79,6 +83,13 @@ public interface IVmManager {
 	// TODO TBD if a VM is repurposed, who is responsible for reseting user access
 	// and user data?
 	public void deleteVirtualMachine(VirtualMachine vm);
+
+	/**
+	 * Deletes all vms
+	 * 
+	 * @param vms
+	 */
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
 
 	/**
 	 * Returns the current state of the given Virtual Machine.
@@ -99,12 +110,5 @@ public interface IVmManager {
 	 */
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates);
-
-	/**
-	 * Deletes all vms
-	 * 
-	 * @param vms
-	 */
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
 
 }

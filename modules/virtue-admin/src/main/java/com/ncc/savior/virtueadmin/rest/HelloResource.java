@@ -14,6 +14,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -24,11 +26,11 @@ import com.ncc.savior.virtueadmin.security.SecurityUserService;
  */
 @Path("/")
 public class HelloResource {
+	private static final Logger logger = LoggerFactory.getLogger(HelloResource.class);
 	@Autowired
 	private SecurityUserService securityService;
 
 	@GET
-	@Path("/")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getHello() throws URISyntaxException {
 		VirtueUser user = securityService.getCurrentUser();
@@ -49,7 +51,8 @@ public class HelloResource {
 		// }
 		// }
 		// }
-		InputStream stream = this.getClass().getResourceAsStream("/templates/login.html");
+		String filePath = "/templates/login.html";
+		InputStream stream = this.getClass().getResourceAsStream(filePath);
 		BufferedReader buf = new BufferedReader(new InputStreamReader(stream));
 		StringBuffer str = new StringBuffer();
 		String line;
@@ -59,8 +62,10 @@ public class HelloResource {
 				str.append(line + "\n");
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			String msg = "Unable to read html file=" + filePath + ". ";
+			logger.error(msg, e);
+			return Response.status(400).entity(msg + e.getMessage()).build();
+
 		}
 		return Response.status(200).entity(str.toString()).build();
 	}
