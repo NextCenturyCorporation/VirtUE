@@ -71,12 +71,20 @@
 		<property name="awsProfile" value="${virtue.aws.server.profile}"></property>
 		<property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property>
 	</bean>
+
+<bean name="xenVmManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.XenVmDomainManager">
+		<constructor-arg ref="defaultPem" />
+		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
+</bean>
+
+
 	<bean name="cloudManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.OsBasedDeferredCloudManager">
 		<constructor-arg>
 			<map>
 				<entry key="WINDOWS" value-ref="awsVmManager"></entry>
-				<entry key="LINUX" value-ref="awsVmManager"></entry>
+				<entry key="LINUX" value-ref="xenVmManager"></entry>
 			</map>
 		</constructor-arg>
 	</bean>
