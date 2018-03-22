@@ -73,9 +73,9 @@
 	</bean>
 
 <bean name="xenVmManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.XenVmDomainManager">
+		class="com.ncc.savior.virtueadmin.infrastructure.XenVirtualMachineManager">
 		<constructor-arg ref="defaultPem" />
-		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
+		<!--  <property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property> -->
 </bean>
 
 
