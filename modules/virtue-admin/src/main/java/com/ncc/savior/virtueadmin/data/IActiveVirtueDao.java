@@ -67,4 +67,6 @@ public interface IActiveVirtueDao {
 
 	void deleteVirtue(VirtueInstance vi);
 
+	void updateVirtue(VirtueInstance virtue);
+
 }

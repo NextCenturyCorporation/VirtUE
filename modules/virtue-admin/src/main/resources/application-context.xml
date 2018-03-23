@@ -54,14 +54,15 @@
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
-	<!-- <bean name="cloudManager" class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsManager"> -->
-	<!-- <constructor-arg ref="defaultPem" /> -->
-	<!-- </bean> -->
+	<bean name="awsEc2Provider"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider">
+		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
+	</bean>
 	<bean name="awsVmManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
 		<constructor-arg ref="keyManager" />
-		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
+		<constructor-arg ref="awsEc2Provider" />
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
 		<!-- <property name="awsProfile" value="">${virtue.aws.profile}</property> -->
@@ -76,13 +77,13 @@
 		<constructor-arg ref="virtueDao"></constructor-arg>
 	</bean>
 
-<bean name="xenVmManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.XenVirtualMachineManager">
-		<constructor-arg ref="keyManager" />
-		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
-		<!--  <property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property> -->
-</bean>
+<!-- 	<bean name="xenVmManager" -->
+<!-- 		class="com.ncc.savior.virtueadmin.infrastructure.XenVirtualMachineManager"> -->
+<!-- 		<constructor-arg ref="keyManager" /> -->
+<!-- 		<constructor-arg value="${virtue.aws.region}"></constructor-arg> -->
+<!-- 		<constructor-arg value="${virtue.aws.profile}"></constructor-arg> -->
+<!-- 		 <property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>  -->
+<!-- 	</bean> -->
 
 
 	<bean name="cloudManager"
@@ -90,7 +91,7 @@
 		<constructor-arg>
 			<map>
 				<entry key="WINDOWS" value-ref="awsVmManager"></entry>
-				<entry key="LINUX" value-ref="xenVmManager"></entry>
+				<entry key="LINUX" value-ref="awsVmManager"></entry>
 			</map>
 		</constructor-arg>
 	</bean>

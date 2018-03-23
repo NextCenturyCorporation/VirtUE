@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.infrastructure.aws;
+package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,31 +18,36 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.NetworkingClearingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.SetStatusComponent;
-import com.ncc.savior.virtueadmin.infrastructure.pipelining.StartXpraComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
-public class AwsVmUpdater implements IVmUpdater {
-	private static final Logger logger = LoggerFactory.getLogger(AwsVmUpdater.class);
+public class XenHostCreationVmUpdater implements IVmUpdater {
+	private static final Logger logger = LoggerFactory.getLogger(XenHostCreationVmUpdater.class);
 	private ScheduledExecutorService executor;
 	private IUpdatePipeline<VirtualMachine> provisionPipeline;
 	private IUpdatePipeline<VirtualMachine> startingPipeline;
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
+	private AmazonEC2 ec2;
+	private IUpdateListener<VirtualMachine> notifier;
+	private IKeyManager keyManager;
 
-	public AwsVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> notifier, IKeyManager keyManager,
-			boolean includeXpra) {
+	public XenHostCreationVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> notifier, IKeyManager keyManager) {
+		this.ec2 = ec2;
+		this.notifier = notifier;
+		this.keyManager = keyManager;
 		this.provisionPipeline = new UpdatePipeline<VirtualMachine>(notifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "starting");
 		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "stopping");
-		this.executor = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+
+		this.executor = Executors.newScheduledThreadPool(2, new ThreadFactory() {
 			private int num = 1;
 
 			@Override
 			public synchronized Thread newThread(Runnable r) {
-				String name = "aws-updated-" + num;
+				String name = "xen-updated-" + num;
 				num++;
 				return new Thread(r, name);
 			}
@@ -51,12 +56,7 @@ public class AwsVmUpdater implements IVmUpdater {
 		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
 		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
 		provisionPipeline.addPipelineComponent(reachableRsa);
-		if (includeXpra) {
-			reachableRsa.setSuccessState(VmState.LAUNCHING);
-			provisionPipeline.addPipelineComponent(new StartXpraComponent(executor, keyManager));
-		}else {
-			reachableRsa.setSuccessState(VmState.RUNNING);
-		}
+		reachableRsa.setSuccessState(VmState.RUNNING);
 		provisionPipeline.start();
 
 		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
@@ -69,50 +69,25 @@ public class AwsVmUpdater implements IVmUpdater {
 		stoppingPipeline.start();
 
 		logger.debug("Aws update pipelines started");
-		// startDebug();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.IVmUpdater#
-	 * addVmToProvisionPipeline(java.util.ArrayList)
-	 */
 	@Override
 	public void addVmToProvisionPipeline(ArrayList<VirtualMachine> vms) {
 		provisionPipeline.addToPipeline(vms);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.IVmUpdater#
-	 * addVmsToStartingPipeline(java.util.Collection)
-	 */
 	@Override
 	public void addVmsToStartingPipeline(Collection<VirtualMachine> vms) {
 		startingPipeline.addToPipeline(vms);
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.IVmUpdater#
-	 * addVmsToStoppingPipeline(java.util.Collection)
-	 */
 	@Override
 	public void addVmsToStoppingPipeline(Collection<VirtualMachine> vms) {
 		stoppingPipeline.addToPipeline(vms);
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.IVmUpdater#
-	 * addVmsToDeletingPipeline(java.util.Collection)
-	 */
 	@Override
 	public void addVmsToDeletingPipeline(Collection<VirtualMachine> vms) {
 		stoppingPipeline.addToPipeline(vms);

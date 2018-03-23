@@ -9,15 +9,8 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSCredentialsProviderChain;
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-import com.amazonaws.auth.PropertiesFileCredentialsProvider;
-import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
@@ -35,9 +28,9 @@ import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
+import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
-import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
-import com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater.IUpdateNotifier;
+import com.ncc.savior.virtueadmin.infrastructure.IVmUpdater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -62,19 +55,35 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  *
  */
 public class AsyncAwsEc2VmManager extends BaseVmManager {
-	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
 	private static final Logger logger = LoggerFactory.getLogger(AsyncAwsEc2VmManager.class);
 	private static final int SSH_PORT = 22;
 	private static final String VM_PREFIX = "VRTU-";
-	private AWSCredentialsProvider credentialsProvider;
 	private AmazonEC2 ec2;
 	private String serverKeyName;
 	private List<String> defaultSecurityGroups;
 	private String serverUser;
 	private String awsProfile;
-	private String region;
 	private InstanceType instanceType;
-	private AwsVmUpdater vmUpdater;
+	private IVmUpdater vmUpdater;
+	/**
+	 * 
+	 * @param keyManager
+	 *            - Handles storing keys.
+	 * @param region
+	 *            - AWS region
+	 * @param awsProfile
+	 *            - Profile used by AWS Credential Providers. It is particularly
+	 *            passed to {@link ProfileCredentialsProvider}.
+	 */
+	public AsyncAwsEc2VmManager(IVmUpdater updater, IKeyManager keyManager, VirtueAwsEc2Provider ec2Provider) {
+		this.ec2 = ec2Provider.getEc2();
+		this.defaultSecurityGroups = new ArrayList<String>();
+		this.defaultSecurityGroups.add("default");
+
+		this.serverUser = System.getProperty("user.name");
+		this.instanceType = InstanceType.T2Small;
+		this.vmUpdater = updater;
+	}
 
 	/**
 	 * 
@@ -86,79 +95,15 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	 *            - Profile used by AWS Credential Providers. It is particularly
 	 *            passed to {@link ProfileCredentialsProvider}.
 	 */
-	public AsyncAwsEc2VmManager(IKeyManager keyManager, String region, String awsProfile) {
-		this.awsProfile = awsProfile;
-		this.region = region;
-		try {
-			init();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		this.defaultSecurityGroups = new ArrayList<String>();
-		this.defaultSecurityGroups.add("default");
+	public AsyncAwsEc2VmManager(IKeyManager keyManager, VirtueAwsEc2Provider credProvider) {
+		this(null, keyManager, credProvider);
+		this.vmUpdater = new AwsVmUpdater(ec2, new IUpdateListener<VirtualMachine>() {
 
-		this.serverUser = System.getProperty("user.name");
-		this.instanceType = InstanceType.T2Small;
-
-		this.vmUpdater = new AwsVmUpdater(ec2, new IUpdateNotifier() {
 			@Override
-			public void notifyUpdatedVms(Collection<VirtualMachine> vms) {
+			public void updateElements(Collection<VirtualMachine> vms) {
 				notifyOnUpdateVms(vms);
 			}
-
-			@Override
-			public void notifyUpdatedVm(VirtualMachine vm) {
-				ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
-				vms.add(vm);
-				notifyOnUpdateVms(vms);
-			}
-		}, keyManager);
-
-		this.addVmUpdateListener(new IVmUpdateListener() {
-
-			@Override
-			public void updateVmState(String vmId, VmState state) {
-				logger.debug("updated state: vmid=" + vmId + " state=" + state);
-
-			}
-
-			@Override
-			public void updateVms(Collection<VirtualMachine> vms) {
-				if (logger.isTraceEnabled()) {
-					if (!vms.isEmpty()) {
-						logger.trace("updated VMs");
-						for (VirtualMachine vm : vms) {
-							logger.trace("  " + vm);
-						}
-					}
-				}
-			}
-		});
-	}
-
-	/**
-	 * initializes AWS/EC2 system mainly getting credentials.
-	 * 
-	 * @throws AmazonClientException
-	 */
-	private void init() throws AmazonClientException {
-		// Set all AWS credential providers to use the virtue profile
-		if (awsProfile != null && !awsProfile.trim().equals("")) {
-			System.setProperty(PROPERTY_AWS_PROFILE, awsProfile);
-		}
-		// use the standard AWS credential provider chain so we can support a bunch of
-		// different methods to get credentials.
-		credentialsProvider = new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
-				new SystemPropertiesCredentialsProvider(), new ProfileCredentialsProvider(awsProfile),
-				new PropertiesFileCredentialsProvider("./aws.properties"));
-		try {
-			credentialsProvider.getCredentials();
-
-		} catch (Exception e) {
-			logger.warn("Cannot load the credentials from the credential profiles file.  "
-					+ "Use CLI to create credentials or add to ./aws.properties file.", e);
-		}
-		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
+		}, keyManager, true);
 	}
 
 	@Override
@@ -179,32 +124,37 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
-			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
-
-			String templatePath = vmt.getTemplatePath();
-			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
-					.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName)
-					.withSecurityGroups(defaultSecurityGroups);
-			RunInstancesResult result = ec2.runInstances(runInstancesRequest);
-
-			List<Instance> instances = result.getReservation().getInstances();
-			if (instances.size() != 1) {
-				throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
-			}
-			Instance instance = instances.get(0);
-			String clientUser = user.getUsername();
-			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
-			String loginUsername = vmt.getLoginUser();
-			String privateKeyName = serverKeyName;
-			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
-					new ArrayList<ApplicationDefinition>(vmt.getApplications()),
-					VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
-					loginUsername, null, privateKeyName, instance.getPublicIpAddress());
+			VirtualMachine vm = provisionVm(user, vmt);
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
 		vmUpdater.addVmToProvisionPipeline(vms);
 		return vms;
+	}
+
+	private VirtualMachine provisionVm(VirtueUser user, VirtualMachineTemplate vmt) {
+		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
+
+		String templatePath = vmt.getTemplatePath();
+		runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
+				.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName)
+				.withSecurityGroups(defaultSecurityGroups);
+		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
+
+		List<Instance> instances = result.getReservation().getInstances();
+		if (instances.size() != 1) {
+			throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
+		}
+		Instance instance = instances.get(0);
+		String clientUser = user.getUsername();
+		String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
+		String loginUsername = vmt.getLoginUser();
+		String privateKeyName = serverKeyName;
+		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
+				new ArrayList<ApplicationDefinition>(vmt.getApplications()),
+				VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
+				loginUsername, null, privateKeyName, instance.getPublicIpAddress());
+		return vm;
 	}
 
 	@Override
@@ -368,7 +318,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		}
 	}
 
-	public void setUpdateListener(IVmUpdateListener listener) {
+	public void setUpdateListener(IUpdateListener<VirtualMachine> listener) {
 		addVmUpdateListener(listener);
 	}
 }

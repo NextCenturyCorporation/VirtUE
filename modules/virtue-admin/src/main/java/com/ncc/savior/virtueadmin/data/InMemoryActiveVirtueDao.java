@@ -137,4 +137,9 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public void deleteVirtue(VirtueInstance vi) {
 		throw new NotImplementedException();
 	}
+
+	@Override
+	public void updateVirtue(VirtueInstance virtue) {
+		throw new NotImplementedException();
+	}
 }

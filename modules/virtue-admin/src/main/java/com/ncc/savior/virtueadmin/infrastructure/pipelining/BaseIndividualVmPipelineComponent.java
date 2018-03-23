@@ -29,7 +29,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  * 
  *
  */
-public abstract class BaseIndividualVmPipelineComponent implements IPipelineComponent {
+public abstract class BaseIndividualVmPipelineComponent<T> implements IPipelineComponent<T> {
 	private static final Logger logger = LoggerFactory.getLogger(BaseIndividualVmPipelineComponent.class);
 	@SuppressWarnings("rawtypes")
 	private Map<String, ScheduledFuture> futureMap;
@@ -38,7 +38,7 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	private boolean isFixedRate = true;
 	private long initialDelayMillis;
 	private long periodOrDelayMillis;
-	private IUpdatePipelineResultListener resultListener;
+	private IUpdatePipelineResultListener<T> resultListener;
 	private int myIndexInPipeline;
 
 	/**
@@ -67,12 +67,12 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	}
 
 	@Override
-	public void addVirtualMachines(Collection<VirtualMachine> vms) {
-		logger.trace("Scheduling " + vms.size() + " vms to be renamed.");
-		for (VirtualMachine vm : vms) {
-			Runnable command = getRunnable(vm);
+	public void addPipelineElements(Collection<PipelineWrapper<T>> wrappers) {
+		logger.trace("Scheduling " + wrappers.size() + " vms to be renamed.");
+		for (PipelineWrapper<T> wrapper : wrappers) {
+			Runnable command = getRunnable(wrapper);
 			ScheduledFuture<?> future = schedule(command);
-			futureMap.put(vm.getId(), future);
+			futureMap.put(getId(wrapper.get()), future);
 		}
 	}
 
@@ -80,14 +80,14 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	 * handles when a VM failed in a way that they should not be retried and should
 	 * be removed from the entire pipeline.
 	 * 
-	 * @param vm
+	 * @param element
 	 */
-	protected void doOnFailure(VirtualMachine vm) {
-		ScheduledFuture<?> future = futureMap.remove(vm.getId());
+	protected void doOnFailure(PipelineWrapper<T> wrapper) {
+		ScheduledFuture<?> future = futureMap.remove(getId(wrapper.get()));
 		if (future != null) {
 			future.cancel(false);
 		}
-		resultListener.onFatalError(vm);
+		resultListener.onFatalError(wrapper);
 	}
 
 	/**
@@ -100,20 +100,21 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	 *            {@link IPipelineComponent}. These VM's will be saved and moved to
 	 *            the next component in the pipeline.
 	 */
-	protected void doOnSuccess(VirtualMachine vm) {
-		ScheduledFuture<?> future = futureMap.remove(vm.getId());
+	protected void doOnSuccess(PipelineWrapper<T> wrapper) {
+		T element = wrapper.get();
+		ScheduledFuture<?> future = futureMap.remove(getId(element));
 		if (future != null) {
 			future.cancel(false);
 		}
-		resultListener.onSuccess(vm, myIndexInPipeline);
+		resultListener.onSuccess(wrapper, myIndexInPipeline);
 	}
 
-	protected Runnable getRunnable(VirtualMachine vm) {
+	protected Runnable getRunnable(PipelineWrapper<T> pipelineWrapper) {
 		Runnable command = new Runnable() {
 			@Override
 			public void run() {
 				try {
-				onExecute(vm);
+					onExecute(pipelineWrapper);
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
 							t);
@@ -123,7 +124,9 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 		return command;
 	}
 
-	protected abstract void onExecute(VirtualMachine vm);
+	protected abstract void onExecute(PipelineWrapper<T> pipelineWrapper);
+
+	protected abstract String getId(T element);
 
 	private ScheduledFuture<?> schedule(Runnable command) {
 		ScheduledFuture<?> future = null;
@@ -143,7 +146,7 @@ public abstract class BaseIndividualVmPipelineComponent implements IPipelineComp
 	}
 
 	@Override
-	public void setResultListener(IUpdatePipelineResultListener resultListener) {
+	public void setResultListener(IUpdatePipelineResultListener<T> resultListener) {
 		this.resultListener = resultListener;
 	}
 
