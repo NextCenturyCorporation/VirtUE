@@ -14,10 +14,10 @@ import com.ncc.savior.desktop.xpra.connection.IConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.IXpraInitiator;
 import com.ncc.savior.desktop.xpra.connection.IXpraInitiator.IXpraInitatorFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory.TcpConnectionParameters;
+import com.ncc.savior.network.SshConnectionParameters;
 
 public class XpraConnectionManager {
 	@SuppressWarnings("unused")

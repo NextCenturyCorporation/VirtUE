@@ -13,7 +13,7 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.BaseConnection;
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
+import com.ncc.savior.network.SshConnectionParameters;
 
 /**
  * Xpra connection implemented via SSH

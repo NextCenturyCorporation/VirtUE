@@ -43,7 +43,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public Map<String, VirtueTemplate> getVirtueTemplatesForUser(VirtueUser user) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
 		if (user == null) {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
+			throw new SaviorException(SaviorException.ErrorCode.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
 		Collection<VirtueTemplate> templates = user.getVirtueTemplates();
 		Map<String, VirtueTemplate> ret = new HashMap<String, VirtueTemplate>();
@@ -57,7 +57,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public Collection<String> getVirtueTemplateIdsForUser(VirtueUser user) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
 		if (user == null) {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
+			throw new SaviorException(SaviorException.ErrorCode.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
 		Collection<VirtueTemplate> templates = user.getVirtueTemplates();
 		Collection<String> ret = new HashSet<String>();
@@ -70,15 +70,15 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
-		if (user==null) {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
+		if (user == null) {
+			throw new SaviorException(SaviorException.ErrorCode.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
 		for (VirtueTemplate template : user.getVirtueTemplates()) {
 			if (template.getId().equals(templateId)) {
 				return template;
 			}
 		}
-		throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+		throw new SaviorException(SaviorException.ErrorCode.VIRTUE_TEMPLATE_ID_NOT_FOUND,
 				"Virtue Template id=" + templateId + " not found.");
 	}
 

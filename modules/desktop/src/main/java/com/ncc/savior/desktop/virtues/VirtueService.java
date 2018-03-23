@@ -18,8 +18,8 @@ import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.XpraClient.Status;
+import com.ncc.savior.network.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.XpraConnectionManager;
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -89,7 +89,7 @@ public class VirtueService {
 	public List<DesktopVirtue> getVirtuesForUser() throws IOException {
 		List<DesktopVirtue> list = null;
 		list = desktopResourceService.getVirtues();
-		addDevelopmentVirtues(list);
+		// addDevelopmentVirtues(list);
 		return list;
 	}
 

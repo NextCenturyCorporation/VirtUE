@@ -86,9 +86,8 @@ public class AwsManager implements ICloudManager {
 		// credentialsProvider.setCredentials(new Authscope, credentials);
 		try {
 			init();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (AmazonClientException e) {
+			throw new SaviorException(SaviorException.ErrorCode.CLOUD_ERROR, "unknown error", e);
 		}
 
 		this.privateKey = StaticMachineVmManager.getKeyFromFile(privatekeyfile);
@@ -176,13 +175,28 @@ public class AwsManager implements ICloudManager {
 
 		String linuxCloudFormationTemplate = convertStreamToString(
 				AwsManager.class.getResourceAsStream("/aws-templates/BrowserVirtue.template"));
+		String windowsCloudFormationTemplate = convertStreamToString(
+				AwsManager.class.getResourceAsStream("/aws-templates/WindowsVM.template"));
 
 		try {
 			printTraceRunningInstances();
 			// Create a stack
 			CreateStackRequest createRequest = new CreateStackRequest();
 			createRequest.setStackName(stackName);
-			createRequest.setTemplateBody(linuxCloudFormationTemplate);
+			// TODO make this work for Virtues with > 1 VM
+			OS os = template.getVmTemplates().iterator().next().getOs();
+			String templateBody;
+			switch (os) {
+			case LINUX:
+				templateBody = linuxCloudFormationTemplate;
+				break;
+			case WINDOWS:
+				templateBody = windowsCloudFormationTemplate;
+				break;
+			default:
+				throw new InternalError("unsupported OS type: " + os);
+			}
+			createRequest.setTemplateBody(templateBody);
 
 			logger.trace("Creating a stack called " + createRequest.getStackName() + ".");
 			stackbuilder.createStack(createRequest);
@@ -249,7 +263,7 @@ public class AwsManager implements ICloudManager {
 				logger.error("  Error Type:       " + ase.getErrorType());
 				logger.error("  Request ID:       " + ase.getRequestId());
 			}
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error Creating stack", ase);
+			throw new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR, "Error Creating stack", ase);
 
 		} catch (AmazonClientException ace) {
 			logger.error("Caught an AmazonClientException, which means the client encountered "
@@ -395,7 +409,8 @@ public class AwsManager implements ICloudManager {
 			if (VmState.RUNNING.equals(state)) {
 				continue;
 			} else if (throwOnErrorState && (state == null || VmState.ERROR.equals(state))) {
-				throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Vm state is in error.  VM=" + vm);
+				throw new SaviorException(SaviorException.ErrorCode.VM_ERROR,
+						"VM is not running. VM=" + vm + " state=" + state);
 			} else {
 				return false;
 			}
@@ -425,7 +440,7 @@ public class AwsManager implements ICloudManager {
 					logger.trace("Found instance with id=" + ec2Instance);
 					AbstractVirtualMachine vm;
 					String vmId = UUID.randomUUID().toString();
-					if (ec2Instance.getPlatform().equals("Windows")) {
+					if ("windows".equalsIgnoreCase(ec2Instance.getPlatform())) {
 						vm = new WindowsVirtualMachine(vmId, template.getName(), template.getApplications(),
 								VmState.LAUNCHING, OS.WINDOWS, ec2Instance.getInstanceId(),
 								ec2Instance.getPublicDnsName(), ec2Instance.getPublicIpAddress(), RDP_PORT);
@@ -524,13 +539,20 @@ public class AwsManager implements ICloudManager {
 				stackReason = "Stack has been deleted";
 			} else {
 				for (Stack stack : stacks) {
-					if (stack.getStackStatus().equals(StackStatus.CREATE_COMPLETE.toString())
-							|| stack.getStackStatus().equals(StackStatus.CREATE_FAILED.toString())
-							|| stack.getStackStatus().equals(StackStatus.ROLLBACK_FAILED.toString())
-							|| stack.getStackStatus().equals(StackStatus.DELETE_FAILED.toString())) {
+					String status = stack.getStackStatus();
+					switch (StackStatus.fromValue(status)) {
+					case CREATE_COMPLETE:
+					case CREATE_FAILED:
+					case ROLLBACK_COMPLETE:
+					case ROLLBACK_FAILED:
+					case DELETE_COMPLETE:
+					case DELETE_FAILED:
 						completed = true;
-						stackStatus = stack.getStackStatus();
+						stackStatus = status;
 						stackReason = stack.getStackStatusReason();
+						break;
+					default:
+						break;
 					}
 				}
 			}

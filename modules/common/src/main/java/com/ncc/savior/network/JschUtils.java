@@ -1,4 +1,4 @@
-package com.ncc.savior.desktop.xpra.connection.ssh;
+package com.ncc.savior.network;
 
 import java.io.File;
 
@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 
 /**
  * Used for a single place where default connection options are set for SSH.

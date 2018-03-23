@@ -28,9 +28,9 @@ public class WebServiceUtil implements ExceptionMapper<SaviorException> {
 		}
 		SaviorException exception;
 		if (message == null) {
-			exception = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error", e);
+			exception = new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR, "Unknown error", e);
 		} else {
-			exception = new SaviorException(SaviorException.UNKNOWN_ERROR, message, e);
+			exception = new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR, message, e);
 		}
 		return exception;
 	}

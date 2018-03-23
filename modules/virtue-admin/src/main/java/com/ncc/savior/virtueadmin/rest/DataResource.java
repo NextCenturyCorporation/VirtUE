@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.rest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -81,6 +82,8 @@ public class DataResource {
 				"gimp");
 		ApplicationDefinition pinta = new ApplicationDefinition(UUID.randomUUID().toString(), "Pinta", "1.0", OS.LINUX,
 				"pinta");
+		ApplicationDefinition edge = new ApplicationDefinition("Edge", "1.0", OS.WINDOWS, "edge.exe");
+		
 		// ApplicationDefinition gedit = new
 		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
 		// "gedit");
@@ -93,6 +96,7 @@ public class DataResource {
 		Set<ApplicationDefinition> appsMath = new HashSet<ApplicationDefinition>();
 		Set<ApplicationDefinition> appsLibreOffice = new HashSet<ApplicationDefinition>();
 		Set<ApplicationDefinition> appsDrawing = new HashSet<ApplicationDefinition>();
+		Set<ApplicationDefinition> appsWindows = Collections.singleton(edge);
 
 		appsBrowsers.add(chrome);
 		appsBrowsers.add(firefox);
@@ -109,6 +113,7 @@ public class DataResource {
 		appsAll.addAll(appsMath);
 		appsAll.addAll(appsDrawing);
 		appsAll.addAll(appsMath);
+		appsAll.addAll(appsWindows);
 
 		Date now = new Date();
 		String systemName = "system";
@@ -128,6 +133,9 @@ public class DataResource {
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
 				OS.LINUX, "LibreOffice", appsLibreOffice, true, now, systemName);
 
+		VirtualMachineTemplate vmWinBrowser = new VirtualMachineTemplate("Windows Browsers", OS.WINDOWS,
+				"Windows Browsers", appsWindows, true, now, systemName);
+		
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		String allTemplate = "default-template";
@@ -154,6 +162,11 @@ public class DataResource {
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0", vmtsMath,
 				allTemplate, true, now, systemName);
 
+		Set<VirtualMachineTemplate> vmtsWindows = new HashSet<VirtualMachineTemplate>();
+		vmtsWindows.add(vmWinBrowser);
+		VirtueTemplate virtueWindows = new VirtueTemplate(UUID.randomUUID().toString(), "Windows Virtue", "1.0",
+				vmtsWindows, allTemplate, true, now, systemName);				
+		
 		for (ApplicationDefinition app : appsAll) {
 			templateManager.addApplicationDefinition(app);
 		}
@@ -162,6 +175,7 @@ public class DataResource {
 		templateManager.addVmTemplate(vmBrowser);
 		templateManager.addVmTemplate(vmLibreOffice);
 		templateManager.addVmTemplate(vmDrawing);
+		templateManager.addVmTemplate(vmWinBrowser);
 		templateManager.addVmTemplate(vmAll);
 
 		templateManager.addVirtueTemplate(virtueBrowsers);
@@ -169,6 +183,7 @@ public class DataResource {
 		templateManager.addVirtueTemplate(virtueDrawing);
 		templateManager.addVirtueTemplate(virtueLibre);
 		templateManager.addVirtueTemplate(virtueMath);
+		templateManager.addVirtueTemplate(virtueWindows);
 
 		ArrayList<String> userRoles = new ArrayList<String>();
 		userRoles.add("ROLE_USER");
@@ -201,6 +216,7 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(admin, virtueDrawing.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueMath.getId());
+		templateManager.assignVirtueTemplateToUser(admin, virtueWindows.getId());
 		templateManager.assignVirtueTemplateToUser(presenter, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(presenter, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(office, virtueLibre.getId());
@@ -209,11 +225,13 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(artist, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(drawing, virtueDrawing.getId());
 		templateManager.assignVirtueTemplateToUser(browser, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(browser, virtueWindows.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueMath.getId());
 		templateManager.assignVirtueTemplateToUser(nerd, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(developer, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(developer, virtueMath.getId());
+		templateManager.assignVirtueTemplateToUser(developer, virtueWindows.getId());
 
 		logger.info("Data preloaded");
 		return Response.ok().entity("success").build();

@@ -14,7 +14,8 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.desktop.xpra.connection.IXpraInitiator;
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
+import com.ncc.savior.network.JschUtils;
+import com.ncc.savior.network.SshConnectionParameters;
 
 /**
  * Helper class that starts applications and controls Xpra over SSH.
@@ -170,7 +171,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 
 	private Session getConnectedSession() throws JSchException {
 		Session session = JschUtils.getSession(params);
-		session.connect();
+		session.connect(5000);
 		return session;
 	}
 

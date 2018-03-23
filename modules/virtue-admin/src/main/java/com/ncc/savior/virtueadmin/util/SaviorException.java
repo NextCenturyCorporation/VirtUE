@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.util;
 
+import com.ncc.savior.virtueadmin.util.SaviorException.ErrorCode;
+
 /**
  * Generic exception for savior that could be passed to user or APIs
  * 
@@ -8,33 +10,32 @@ package com.ncc.savior.virtueadmin.util;
 public class SaviorException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	// List of errors and assigned codes.
-	// TODO codes need to be assigned (255 means unassigned/unknown) and probably
-	// should be turned in to enums.
-	public static final int UNKNOWN_ERROR = 255;
-	public static final int INVALID_TEMPATE_ID = 255;
-	public static final int VIRTUE_ID_NOT_FOUND = 255;
-	public static final int APPLICATION_ID_NOT_FOUND = 255;
-	public static final int VIRTUE_TEMPLATE_ID_NOT_FOUND = 255;
-	public static final int VM_TEMPLATE_NOT_FOUND = 255;
-	public static final int VM_NOT_FOUND = 255;
-	public static final int NOT_YET_IMPLEMENTED = 255;
-	public static final int USER_NOT_FOUND = 255;
-	public static final int REQUESTED_USER_NOT_LOGGED_IN = 255;
+	public static enum ErrorCode {
+		UNKNOWN_ERROR, INVALID_TEMPATE_ID, VIRTUE_ID_NOT_FOUND, APPLICATION_ID_NOT_FOUND, VIRTUE_TEMPLATE_ID_NOT_FOUND,
+		VM_TEMPLATE_NOT_FOUND, VM_NOT_FOUND, NOT_YET_IMPLEMENTED, USER_NOT_FOUND, REQUESTED_USER_NOT_LOGGED_IN,
+		VM_ERROR, CLOUD_ERROR;
+		
+		public SaviorException createException(String message) {
+			return new SaviorException(this, message);
+		}
 
-	private int errorCode;
-
-	public SaviorException(int errorCode, String message) {
-		super(message);
-		this.errorCode = errorCode;
+		public SaviorException createException(String message, Throwable t) {
+			return new SaviorException(this, message, t);
+		}
 	}
 
-	public SaviorException(int errorCode, String message, Throwable t) {
+	private ErrorCode errorCode;
+
+	public SaviorException(ErrorCode errorCode, String message) {
+		this(errorCode, message, null);
+	}
+
+	public SaviorException(ErrorCode errorCode, String message, Throwable t) {
 		super(message, t);
 		this.errorCode = errorCode;
 	}
 
-	public int getErrorCode() {
+	public ErrorCode getErrorCode() {
 		return errorCode;
 	}
 }

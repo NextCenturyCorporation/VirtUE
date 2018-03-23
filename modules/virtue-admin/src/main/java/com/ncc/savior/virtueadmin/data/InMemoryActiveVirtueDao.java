@@ -99,10 +99,11 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 			}
 			// if we drop out of the list of vms, we couldn't find the vm with that
 			// application id.
-			throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+			throw new SaviorException(SaviorException.ErrorCode.APPLICATION_ID_NOT_FOUND,
 					"Cannot find application with ID=" + applicationId + " in virtue id=" + virtueId);
 		} else {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorException.ErrorCode.VIRTUE_ID_NOT_FOUND,
+					"Cannot find virtue with ID=" + virtueId);
 		}
 	}
 

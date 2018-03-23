@@ -73,7 +73,7 @@ public class UserDataService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have USER role");
+			throw new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR, "User did not have USER role");
 		}
 		return user;
 	}

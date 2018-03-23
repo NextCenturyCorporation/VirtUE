@@ -101,7 +101,7 @@ public class AdminService {
 			Map<String, VirtueTemplate> vts = templateManager.getVirtueTemplatesForUser(user);
 			return vts.values();
 		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
+			throw new SaviorException(SaviorException.ErrorCode.USER_NOT_FOUND, "User=" + username + " not found");
 		}
 	}
 
@@ -112,7 +112,7 @@ public class AdminService {
 			Collection<VirtueInstance> vs = virtueManager.getVirtuesForUser(user);
 			return vs;
 		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
+			throw new SaviorException(SaviorException.ErrorCode.USER_NOT_FOUND, "User=" + username + " not found");
 		}
 	}
 
@@ -237,7 +237,7 @@ public class AdminService {
 		if (user != null) {
 			templateManager.assignVirtueTemplateToUser(user, templateId);
 		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
+			throw new SaviorException(SaviorException.ErrorCode.USER_NOT_FOUND, "User=" + username + " was not found");
 		}
 	}
 
@@ -247,7 +247,7 @@ public class AdminService {
 		if (user != null) {
 			templateManager.revokeVirtueTemplateFromUser(user, templateId);
 		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
+			throw new SaviorException(SaviorException.ErrorCode.USER_NOT_FOUND, "User=" + username + " was not found");
 		}
 	}
 
@@ -299,7 +299,7 @@ public class AdminService {
 				}
 			}
 		}
-		throw new SaviorException(SaviorException.REQUESTED_USER_NOT_LOGGED_IN,
+		throw new SaviorException(SaviorException.ErrorCode.REQUESTED_USER_NOT_LOGGED_IN,
 				"User=" + username + " was not logged in");
 
 	}
@@ -323,7 +323,7 @@ public class AdminService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
+			throw new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR, "User did not have ADMIN role");
 		}
 		return user;
 	}

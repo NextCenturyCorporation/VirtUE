@@ -14,6 +14,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.debug.DebugPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
+import com.ncc.savior.network.SshConnectionParameters;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -71,7 +72,7 @@ public class JavaFxTestRunner extends Application {
 		// "password"));
 
 		client.connect(new SshConnectionFactory(),
-				new SshConnectionFactory.SshConnectionParameters("ec2-52-23-199-83.compute-1.amazonaws.com", 22,
+				new SshConnectionParameters("ec2-52-23-199-83.compute-1.amazonaws.com", 22,
 						"admin", new File("./certs/vrtu.pem")));
 
 	}

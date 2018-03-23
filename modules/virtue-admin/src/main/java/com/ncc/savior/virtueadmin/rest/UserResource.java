@@ -138,7 +138,7 @@ public class UserResource {
 	@Path("virtue/{virtueId}/")
 	public void launchVirtue(@PathParam("virtueId") String virtueId) {
 		try {
-			throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED,
+			throw new SaviorException(SaviorException.ErrorCode.NOT_YET_IMPLEMENTED,
 					"Launch virtue not yet implemented.  Virtues are lauched when created.");
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -155,7 +155,7 @@ public class UserResource {
 	@Path("virtue/{virtueId}/stop")
 	public void stopVirtue(@PathParam("virtueId") String virtueId) {
 		try {
-			throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED,
+			throw new SaviorException(SaviorException.ErrorCode.NOT_YET_IMPLEMENTED,
 					"Stop virtue not yet implemented.  Virtues must be stopped and destroyed manually");
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException

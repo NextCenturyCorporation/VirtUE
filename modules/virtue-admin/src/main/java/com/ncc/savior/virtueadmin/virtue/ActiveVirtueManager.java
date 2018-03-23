@@ -68,7 +68,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 		} catch (Exception e) {
 			// TODO fix cloud manager to not throw exception. Throw something more specific.
 			logger.error("error creating virtue!", e);
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "unknown error creating virtue.", e);
+			throw new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR, "unknown error creating virtue.", e);
 		}
 		// List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
 		// Map<String, VirtualMachine> vms =
@@ -93,13 +93,13 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public void deleteVirtue(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorException.ErrorCode.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
 		if (vi.getUsername().equals(user.getUsername())) {
 
 		} else {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
+			throw new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
 		}
 	}
@@ -108,7 +108,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager {
 	public void adminDeleteVirtue(String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorException.ErrorCode.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
 		cloudManager.deleteVirtue(vi);

@@ -1,0 +1,40 @@
+{   
+   
+   "Description": "Create an EC2 instance running Windows Server 2016 with ssh installed.",
+    "Parameters": 
+    {},
+        
+    "Resources": {
+        "Ec2Instance": 
+        {
+            "Properties": 
+            {
+                "ImageId": "ami-36a65f4b",
+                "InstanceType" : "t2.small",
+                "SecurityGroups" : ["ssh_default_vpc", "default" ],
+                "Tags" : 
+                [
+                    {"Key" : "Name", "Value" : "Virtue creation in process"}
+                ]
+            },
+
+            "Type": "AWS::EC2::Instance"
+        }
+    },
+
+    "Outputs": 
+    {
+        "InstanceId": 
+        {
+            "Description": "The InstanceId of the newly created EC2 instance",
+            "Value": 
+            {
+                "Ref": "Ec2Instance"
+            }
+        }
+    },
+
+
+   "AWSTemplateFormatVersion": "2010-09-09"
+
+}

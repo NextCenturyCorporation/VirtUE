@@ -22,8 +22,8 @@ public class DelegatingApplicationManager implements IApplicationManager {
 	
 	@Override
 	public IApplicationInstance startApplicationOnVm(AbstractVirtualMachine vm, ApplicationDefinition application, int maxTries) {
-		// TODO Auto-generated method stub
-		return null;
+		IApplicationManager osAppManager = delegates.get(vm.getOs());
+		return osAppManager.startApplicationOnVm(vm, application, maxTries);
 	}
 
 }

@@ -92,7 +92,8 @@ public class DesktopVirtueService {
 
 	public void stopApplication(String virtueId, String applicationId) throws IOException {
 		verifyAndReturnUser();
-		throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED, "Stop application is not yet implemented.");
+		throw new SaviorException(SaviorException.ErrorCode.NOT_YET_IMPLEMENTED,
+				"Stop application is not yet implemented.");
 	}
 
 	public void deleteVirtue(String instanceId) {
@@ -104,7 +105,7 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
 		if (template == null) {
-			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
+			throw new SaviorException(SaviorException.ErrorCode.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
 		}
 		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
 		return instance;
@@ -126,7 +127,7 @@ public class DesktopVirtueService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+			throw new SaviorException(SaviorException.ErrorCode.UNKNOWN_ERROR,
 					"User '" + user.getUsername() + "' did not have USER role");
 		}
 		return user;

@@ -8,9 +8,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
+import com.ncc.savior.network.SshConnectionParameters;
 import com.ncc.savior.virtueadmin.model.AbstractVirtualMachine;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.IApplicationInstance;
@@ -43,11 +42,11 @@ public class LinuxApplicationManager implements IApplicationManager {
 		try {
 			SshConnectionParameters params = null;
 			if (defaultCertificate != null) {
-				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
-						vm.getUserName(), defaultCertificate);
+				params = new SshConnectionParameters(vm.getHostname(), vm.getSshPort(), vm.getUserName(),
+						defaultCertificate);
 			} else {
-				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
-						vm.getUserName(), defaultPassword);
+				params = new SshConnectionParameters(vm.getHostname(), vm.getSshPort(), vm.getUserName(),
+						defaultPassword);
 			}
 			SshXpraInitiater initiator = new SshXpraInitiater(params);
 			Set<Integer> set = null;
