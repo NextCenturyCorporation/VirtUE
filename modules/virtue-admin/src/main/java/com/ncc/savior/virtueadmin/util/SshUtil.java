@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class SshUtil {
 	// }
 	// }
 
-	public static void waitForAllVmsReachableParallel(ArrayList<VirtualMachine> vms, int periodMillis) {
+	public static void waitForAllVmsReachableParallel(Collection<VirtualMachine> vms, int periodMillis) {
 		// create copy so we can modify the list
 		vms = new ArrayList<VirtualMachine>(vms);
 		boolean allReachable = false;

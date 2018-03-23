@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,14 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceStatusSummary;
+import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
@@ -187,6 +194,31 @@ public class AwsUtil {
 			instanceIds.add(vm.getInfrastructureId());
 		}
 		return instanceIds;
+	}
+
+	public static VirtualMachine provisionVm(AmazonEC2 ec2, VirtueUser user, VirtualMachineTemplate vmt,
+			String namePrefix, InstanceType instanceType, Collection<String> securityGroups, String serverKeyName) {
+		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
+
+		String templatePath = vmt.getTemplatePath();
+		runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
+				.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName).withSecurityGroups(securityGroups);
+		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
+
+		List<Instance> instances = result.getReservation().getInstances();
+		if (instances.size() != 1) {
+			throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
+		}
+		Instance instance = instances.get(0);
+
+		String name = namePrefix + instance.getInstanceId();
+		String loginUsername = vmt.getLoginUser();
+		String privateKeyName = serverKeyName;
+		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
+				new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
+				instance.getInstanceId(), instance.getPublicDnsName(), 22, loginUsername, null, privateKeyName,
+				instance.getPublicIpAddress());
+		return vm;
 	}
 
 }

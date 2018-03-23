@@ -124,7 +124,9 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			Collection<VirtualMachineTemplate> vmTemplates) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
-			VirtualMachine vm = provisionVm(user, vmt);
+			String clientUser = user.getUsername();
+			String namePrefix = VM_PREFIX + clientUser + "-" + serverUser + "-";
+			VirtualMachine vm = provisionVm(user, vmt, namePrefix);
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
@@ -132,7 +134,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		return vms;
 	}
 
-	private VirtualMachine provisionVm(VirtueUser user, VirtualMachineTemplate vmt) {
+	private VirtualMachine provisionVm(VirtueUser user, VirtualMachineTemplate vmt, String namePrefix) {
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
 		String templatePath = vmt.getTemplatePath();
@@ -146,8 +148,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
 		}
 		Instance instance = instances.get(0);
-		String clientUser = user.getUsername();
-		String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
+
+		String name = namePrefix + instance.getInstanceId();
 		String loginUsername = vmt.getLoginUser();
 		String privateKeyName = serverKeyName;
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
