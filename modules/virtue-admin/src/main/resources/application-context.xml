@@ -77,13 +77,12 @@
 		<constructor-arg ref="virtueDao"></constructor-arg>
 	</bean>
 
-<!-- 	<bean name="xenVmManager" -->
-<!-- 		class="com.ncc.savior.virtueadmin.infrastructure.XenVirtualMachineManager"> -->
-<!-- 		<constructor-arg ref="keyManager" /> -->
-<!-- 		<constructor-arg value="${virtue.aws.region}"></constructor-arg> -->
-<!-- 		<constructor-arg value="${virtue.aws.profile}"></constructor-arg> -->
-<!-- 		 <property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>  -->
-<!-- 	</bean> -->
+	<bean name="xenVmManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.XenVirtualMachineManager">
+		<constructor-arg ref="keyManager" />
+		<constructor-arg ref="awsEc2Provider" />
+		 <!--  <property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property> -->
+	</bean>
 
 
 	<bean name="cloudManager"
@@ -91,7 +90,7 @@
 		<constructor-arg>
 			<map>
 				<entry key="WINDOWS" value-ref="awsVmManager"></entry>
-				<entry key="LINUX" value-ref="awsVmManager"></entry>
+				<entry key="LINUX" value-ref="xenVmManager"></entry>
 			</map>
 		</constructor-arg>
 	</bean>
