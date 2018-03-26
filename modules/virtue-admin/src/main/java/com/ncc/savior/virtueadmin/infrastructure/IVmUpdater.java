@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -18,12 +17,13 @@ public interface IVmUpdater {
 	 * 
 	 * @param vms
 	 */
-	void addVmToProvisionPipeline(ArrayList<VirtualMachine> vms);
+	void addVmToProvisionPipeline(Collection<VirtualMachine> vms);
 
 	void addVmsToStartingPipeline(Collection<VirtualMachine> vms);
 
 	void addVmsToStoppingPipeline(Collection<VirtualMachine> vms);
 
 	void addVmsToDeletingPipeline(Collection<VirtualMachine> vms);
+
 
 }

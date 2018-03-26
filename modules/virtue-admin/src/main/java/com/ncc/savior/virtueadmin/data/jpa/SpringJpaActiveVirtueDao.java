@@ -129,4 +129,9 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	public void updateVirtue(VirtueInstance virtue) {
 		virtueRepository.save(virtue);
 	}
+
+	@Override
+	public Optional<VirtualMachine> getXenVm(String id) {
+		return vmRepository.findById(id);
+	}
 }

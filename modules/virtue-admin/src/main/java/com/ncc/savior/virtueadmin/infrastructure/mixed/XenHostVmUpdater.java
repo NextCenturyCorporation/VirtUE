@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,21 +23,29 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
-public class XenHostCreationVmUpdater implements IVmUpdater {
-	private static final Logger logger = LoggerFactory.getLogger(XenHostCreationVmUpdater.class);
+public class XenHostVmUpdater implements IVmUpdater {
+	private static final Logger logger = LoggerFactory.getLogger(XenHostVmUpdater.class);
 	private ScheduledExecutorService executor;
-	private IUpdatePipeline<VirtualMachine> provisionPipeline;
+	private IUpdatePipeline<VirtualMachine> zenVmProvisionPipeline;
 	private IUpdatePipeline<VirtualMachine> startingPipeline;
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 	private AmazonEC2 ec2;
 	private IUpdateListener<VirtualMachine> notifier;
 	private IKeyManager keyManager;
 
-	public XenHostCreationVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> notifier, IKeyManager keyManager) {
+	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> notifier,
+			IKeyManager keyManager) {
 		this.ec2 = ec2;
 		this.notifier = notifier;
 		this.keyManager = keyManager;
-		this.provisionPipeline = new UpdatePipeline<VirtualMachine>(notifier, "provisioning");
+		IUpdateListener<VirtualMachine> zenProvisionNotifier = new IUpdateListener<VirtualMachine>() {
+			@Override
+			public void updateElements(Collection<VirtualMachine> elements) {
+				// TODO Auto-generated method stub
+
+			}
+		};
+		this.zenVmProvisionPipeline = new UpdatePipeline<VirtualMachine>(zenProvisionNotifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "starting");
 		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "stopping");
 
@@ -52,28 +59,34 @@ public class XenHostCreationVmUpdater implements IVmUpdater {
 				return new Thread(r, name);
 			}
 		});
-		provisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
-		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
-		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
-		provisionPipeline.addPipelineComponent(reachableRsa);
-		reachableRsa.setSuccessState(VmState.RUNNING);
-		provisionPipeline.start();
 
-		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
-		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
+		zenVmProvisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
+		zenVmProvisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
+		zenVmProvisionPipeline.addPipelineComponent(reachableRsa);
+		reachableRsa.setSuccessState(VmState.RUNNING);
+		zenVmProvisionPipeline.start();
+
+		startingPipeline.addPipelineComponent(
+				new AwsNetworkingUpdateComponent(executor, ec2));
+		startingPipeline.addPipelineComponent(
+				new TestReachabilityComponent(executor, keyManager, true));
 		startingPipeline.start();
 
-		stoppingPipeline.addPipelineComponent(new NetworkingClearingComponent(executor));
-		stoppingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, false));
-		stoppingPipeline.addPipelineComponent(new SetStatusComponent(executor, VmState.STOPPED));
+		stoppingPipeline
+				.addPipelineComponent(new NetworkingClearingComponent(executor));
+		stoppingPipeline.addPipelineComponent(
+				new TestReachabilityComponent(executor, keyManager, false));
+		stoppingPipeline.addPipelineComponent(
+				new SetStatusComponent(executor, VmState.STOPPED));
 		stoppingPipeline.start();
 
 		logger.debug("Aws update pipelines started");
 	}
 
 	@Override
-	public void addVmToProvisionPipeline(ArrayList<VirtualMachine> vms) {
-		provisionPipeline.addToPipeline(vms);
+	public void addVmToProvisionPipeline(Collection<VirtualMachine> vms) {
+		zenVmProvisionPipeline.addToPipeline(vms);
 	}
 
 	@Override

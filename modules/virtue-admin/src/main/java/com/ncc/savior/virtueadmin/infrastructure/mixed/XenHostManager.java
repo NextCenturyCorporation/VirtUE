@@ -2,71 +2,123 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.amazonaws.services.ec2.model.InstanceType;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
-import com.ncc.savior.virtueadmin.infrastructure.IVmUpdater;
-import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
-import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.JavaUtil;
 
 public class XenHostManager {
-	private IXenVmCreationScheduleManager vmCreationScheduleManager;
-	private AsyncAwsEc2VmManager xenVmManager;
-	private VirtueUser XenManagementUser;
+	private static final Logger logger = LoggerFactory.getLogger(XenAwsMixCloudManager.class);
 	private VirtualMachineTemplate xenVmTemplate;
 	private IUpdateListener<VirtualMachine> notifier;
-	private IActiveVirtueDao activeVirtueDao;
+	private AwsEc2Wrapper ec2Wrapper;
+	private Collection<String> securityGroups;
+	private String xenKeyName;
+	private InstanceType xenInstanceType;
+	private XenHostVmUpdater updater;
+	protected IActiveVirtueDao vmDao;
 
-	public XenHostManager(IKeyManager keyManager, VirtueAwsEc2Provider ec2Provider, IActiveVirtueDao activeVirtueDao) {
-		this.activeVirtueDao = activeVirtueDao;
-		this.notifier = new IUpdateListener<VirtualMachine>() {
+	protected Map<String, XenVirtueCreationPackage> packs = new HashMap<String, XenVirtueCreationPackage>();
 
+	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
+			IUpdateListener<VirtualMachine> notifier, Collection<String> securityGroups, String xenKeyName,
+			InstanceType xenInstanceType) {
+		this.notifier = notifier;
+		this.ec2Wrapper = ec2Wrapper;
+		this.securityGroups = securityGroups;
+		this.xenKeyName = xenKeyName;
+		this.xenInstanceType = xenInstanceType;
+		this.vmDao = xenVmDao;
+		IUpdateListener<VirtualMachine> xenListener = new IUpdateListener<VirtualMachine>() {
 			@Override
-			public void updateElements(Collection<VirtualMachine> vms) {
-				for (VirtualMachine vm : vms) {
-					if (VmState.RUNNING.equals(vm.getState())) {
-						initiateVmCreationOnXen(vm);
-					}
-				}
+			public void updateElements(Collection<VirtualMachine> elements) {
+				xenVmDao.updateVms(elements);
 			}
 		};
-		IVmUpdater updater = new XenHostCreationVmUpdater(ec2Provider.getEc2(), notifier, keyManager);
-		this.xenVmManager = new AsyncAwsEc2VmManager(updater, keyManager, ec2Provider);
-		XenManagementUser = new VirtueUser("XenManager", new ArrayList<String>());
+		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager);
 	}
 
-	protected void initiateVmCreationOnXen(VirtualMachine vm) {
-		Collection<VirtualMachineTemplate> linuxVmts = vmCreationScheduleManager.getTemplates(vm.getName());
-		// TODO create XenVmManager
-		// TOOD provision XenVms
-		// TODO save XenVmManager
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		VirtueInstance virtue = activeVirtueDao.getVirtueInstance(vm.getName()).get();
-		virtue.getVms().addAll(vms);
-		activeVirtueDao.updateVirtue(virtue);
+	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
+			IUpdateListener<VirtualMachine> notifier, String securityGroupsCommaSeparated, String xenKeyName,
+			String xenInstanceType) {
+		this(keyManager, ec2Wrapper, xenVmDao, notifier, splitOnComma(securityGroupsCommaSeparated), xenKeyName,
+				InstanceType.fromValue(xenInstanceType));
 	}
 
-	public VirtualMachine provisionXenHost(String xenHostName, Collection<VirtualMachineTemplate> linuxVmts,
-			VirtueUser user) {
-		VirtualMachine vm = xenVmManager.provisionVirtualMachineTemplate(XenManagementUser, xenVmTemplate);
-		vm.setName(xenHostName);
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
-		notifier.updateElements(vms);
+	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
+		Collection<String> groups = new ArrayList<String>();
+		if (securityGroupsCommaSeparated != null) {
+			for (String group : securityGroupsCommaSeparated.split(",")) {
+				groups.add(group.trim());
+			}
+		}
+		return groups;
+	}
 
-		vmCreationScheduleManager.addTemplates(xenHostName, linuxVmts);
-		return vm;
+	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
+		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate, "Xen-" + virtue.getUsername(), securityGroups,
+				xenKeyName, xenInstanceType);
+		xenVm.setId(virtue.getId());
+		ArrayList<VirtualMachine> xenVms = new ArrayList<VirtualMachine>();
+		xenVms.add(xenVm);
+		vmDao.updateVms(xenVms);
+		updater.addVmToProvisionPipeline(xenVms);
+		final String id = virtue.getId();
+		for (VirtualMachineTemplate vmt : linuxVmts) {
+			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), "",
+					new ArrayList<ApplicationDefinition>(), VmState.CREATING, vmt.getOs(), "", "", 22, "", "", "", "");
+			virtue.getVms().add(vm);
+		}
+		Runnable r = new Runnable() {
+
+			@Override
+			public void run() {
+				Optional<VirtualMachine> vm = vmDao.getXenVm(id);
+				while (!vm.isPresent() || VmState.RUNNING.equals(vm.get().getState())) {
+					JavaUtil.sleepAndLogInterruption(2000);
+					vm = vmDao.getXenVm(id);
+				}
+				// TODO Create vms from templates but use the VM instances already stored in the
+				// virtue.
+
+				// TODO make sure VM status is updated via notifier
+
+				logger.info("Create vms here " + linuxVmts);
+			}
+		};
+		Thread t = new Thread(r, "XenProvisioner-" + id);
+		t.start();
 	}
 
 	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms) {
 		// TODO get XenVmManager for id
 		// TODO tell XenManager to delete itself
 		// TODO schedule once Vm's are deleted, XenManager will delete itself.
+
+	}
+
+	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {
+		// TODO Auto-generated method stub
 
 	}
 

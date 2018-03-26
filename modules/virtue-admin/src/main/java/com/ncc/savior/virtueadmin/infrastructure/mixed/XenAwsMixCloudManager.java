@@ -3,6 +3,9 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2VmManager;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -13,11 +16,15 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 public class XenAwsMixCloudManager implements ICloudManager {
+	private static final Logger logger = LoggerFactory.getLogger(XenAwsMixCloudManager.class);
 
 	private XenHostManager xenHostManager;
 	private AwsEc2VmManager awsVmManager;
 
-	public XenAwsMixCloudManager() {
+	public XenAwsMixCloudManager(XenHostManager xenHostManager, AwsEc2VmManager awsVmManager) {
+		super();
+		this.xenHostManager = xenHostManager;
+		this.awsVmManager = awsVmManager;
 	}
 
 	@Override
@@ -50,19 +57,41 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts);
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
-		xenHostManager.provisionXenHost(vi.getId(), linuxVmts, user);
+		xenHostManager.provisionXenHost(vi, linuxVmts);
 		return vi;
 	}
 
 	@Override
 	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<VirtualMachine> vms = virtueInstance.getVms();
+		Collection<VirtualMachine> linuxVms = new ArrayList<VirtualMachine>();
+		Collection<VirtualMachine> windowsVms = new ArrayList<VirtualMachine>();
+		for (VirtualMachine vm : vms) {
+			if (OS.LINUX.equals(vm.getOs())) {
+				linuxVms.add(vm);
+			} else if (OS.WINDOWS.equals(vm.getOs())) {
+				windowsVms.add(vm);
+			}
+		}
+		xenHostManager.startVirtue(virtueInstance, linuxVms);
+		awsVmManager.startVirtualMachines(windowsVms);
+		return virtueInstance;
 	}
 
 	@Override
 	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<VirtualMachine> vms = virtueInstance.getVms();
+		Collection<VirtualMachine> linuxVms = new ArrayList<VirtualMachine>();
+		Collection<VirtualMachine> windowsVms = new ArrayList<VirtualMachine>();
+		for (VirtualMachine vm : vms) {
+			if (OS.LINUX.equals(vm.getOs())) {
+				linuxVms.add(vm);
+			} else if (OS.WINDOWS.equals(vm.getOs())) {
+				windowsVms.add(vm);
+			}
+		}
+		xenHostManager.stopVirtue(virtueInstance, linuxVms);
+		awsVmManager.stopVirtualMachines(windowsVms);
+		return virtueInstance;
 	}
 }

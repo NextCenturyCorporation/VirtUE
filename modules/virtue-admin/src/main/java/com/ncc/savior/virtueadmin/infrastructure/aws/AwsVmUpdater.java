@@ -17,7 +17,6 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsNetworkingUpdateC
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.NetworkingClearingComponent;
-import com.ncc.savior.virtueadmin.infrastructure.pipelining.SetStatusComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.StartXpraComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityComponent;
@@ -32,8 +31,10 @@ public class AwsVmUpdater implements IVmUpdater {
 	private IUpdatePipeline<VirtualMachine> startingPipeline;
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 
-	public AwsVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> notifier, IKeyManager keyManager,
+	public AwsVmUpdater(VirtueAwsEc2Provider ec2Provider, IUpdateListener<VirtualMachine> notifier,
+			IKeyManager keyManager,
 			boolean includeXpra) {
+		AmazonEC2 ec2 = ec2Provider.getEc2();
 		this.provisionPipeline = new UpdatePipeline<VirtualMachine>(notifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "starting");
 		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "stopping");
@@ -64,8 +65,10 @@ public class AwsVmUpdater implements IVmUpdater {
 		startingPipeline.start();
 
 		stoppingPipeline.addPipelineComponent(new NetworkingClearingComponent(executor));
-		stoppingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, false));
-		stoppingPipeline.addPipelineComponent(new SetStatusComponent(executor, VmState.STOPPED));
+		Collection<VmState> successStatus = new ArrayList<VmState>();
+		successStatus.add(VmState.DELETED);
+		successStatus.add(VmState.STOPPED);
+		stoppingPipeline.addPipelineComponent(new AwsUpdateStatus(executor, ec2, successStatus));
 		stoppingPipeline.start();
 
 		logger.debug("Aws update pipelines started");
@@ -79,7 +82,7 @@ public class AwsVmUpdater implements IVmUpdater {
 	 * addVmToProvisionPipeline(java.util.ArrayList)
 	 */
 	@Override
-	public void addVmToProvisionPipeline(ArrayList<VirtualMachine> vms) {
+	public void addVmToProvisionPipeline(Collection<VirtualMachine> vms) {
 		provisionPipeline.addToPipeline(vms);
 	}
 

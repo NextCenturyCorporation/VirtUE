@@ -52,7 +52,8 @@ public class UpdatePipeline<T> implements IUpdatePipeline<T>, IUpdatePipelineRes
 	public void addToPipeline(Collection<T> elements) {
 		Collection<PipelineWrapper<T>> wrappers = new ArrayList<PipelineWrapper<T>>();
 		for (T element : elements) {
-			wrappers.add(new PipelineWrapper<T>(element));
+			PipelineWrapper<T> wrapper = new PipelineWrapper<T>(element);
+			wrappers.add(wrapper);
 		}
 		pipeline.get(0).addPipelineElements(wrappers);
 

@@ -106,7 +106,7 @@ public class VirtualMachine {
 	}
 
 	// Below setters are for jackson deserialization
-	protected void setId(String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

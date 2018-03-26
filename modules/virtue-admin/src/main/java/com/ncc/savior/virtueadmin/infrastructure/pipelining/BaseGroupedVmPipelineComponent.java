@@ -74,8 +74,10 @@ public abstract class BaseGroupedVmPipelineComponent<T> implements IPipelineComp
 			@Override
 			public void run() {
 				try {
-					ArrayList<PipelineWrapper<T>> elements = new ArrayList<PipelineWrapper<T>>(collection);
-					onExecute(elements);
+					if (!collection.isEmpty()) {
+						ArrayList<PipelineWrapper<T>> elements = new ArrayList<PipelineWrapper<T>>(collection);
+						onExecute(elements);
+					}
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
 							t);

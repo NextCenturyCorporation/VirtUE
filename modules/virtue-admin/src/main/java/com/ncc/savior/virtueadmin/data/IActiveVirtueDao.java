@@ -69,4 +69,6 @@ public interface IActiveVirtueDao {
 
 	void updateVirtue(VirtueInstance virtue);
 
+	Optional<VirtualMachine> getXenVm(String id);
+
 }

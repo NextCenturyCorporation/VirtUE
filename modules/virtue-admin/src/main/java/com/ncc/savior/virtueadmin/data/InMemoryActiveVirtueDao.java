@@ -142,4 +142,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public void updateVirtue(VirtueInstance virtue) {
 		throw new NotImplementedException();
 	}
+
+	@Override
+	public Optional<VirtualMachine> getXenVm(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
