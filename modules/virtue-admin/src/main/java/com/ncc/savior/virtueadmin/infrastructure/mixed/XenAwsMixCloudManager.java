@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
-import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2VmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -19,9 +19,9 @@ public class XenAwsMixCloudManager implements ICloudManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenAwsMixCloudManager.class);
 
 	private XenHostManager xenHostManager;
-	private AwsEc2VmManager awsVmManager;
+	private AsyncAwsEc2VmManager awsVmManager;
 
-	public XenAwsMixCloudManager(XenHostManager xenHostManager, AwsEc2VmManager awsVmManager) {
+	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;

@@ -64,8 +64,9 @@
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 	</bean>
-	
-	<bean name="awsVmUpdater" class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater">
+
+	<bean name="awsVmUpdater"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater" />
 		<constructor-arg ref="keyManager" />
@@ -100,11 +101,12 @@
 	<!-- </bean> -->
 
 	<bean name="cloudManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.statemachine.StateMachineCloudManager">
-
+		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenAwsMixCloudManager">
+		<constructor-arg ref="xenManager"></constructor-arg>
+		<constructor-arg ref="awsVmManager"></constructor-arg>
 	</bean>
 
-	<bean name=""
+	<bean name="xenManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager">
 		<constructor-arg ref="keyManager"></constructor-arg>
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
