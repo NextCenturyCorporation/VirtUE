@@ -1,12 +1,16 @@
 package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -47,7 +51,6 @@ public class XenHostManager {
 	private IKeyManager keyManager;
 	private static final String VM_PREFIX = "VRTU-";
 
-
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
 			IUpdateListener<VirtualMachine> actualVmNotifier, Collection<String> securityGroups, String xenKeyName,
 			InstanceType xenInstanceType) {
@@ -58,7 +61,7 @@ public class XenHostManager {
 		this.xenInstanceType = xenInstanceType;
 		this.vmDao = xenVmDao;
 		this.serverUser = System.getProperty("user.name");
-		this.keyManager = keyManager; 
+		this.keyManager = keyManager;
 		IUpdateListener<VirtualMachine> xenListener = new IUpdateListener<VirtualMachine>() {
 			@Override
 			public void updateElements(Collection<VirtualMachine> elements) {
@@ -89,12 +92,19 @@ public class XenHostManager {
 		return groups;
 	}
 
+	// move provision code
+	// when xen starts run
+	// sudo setupXen.sh
+	// sudo nfsd.sh
+	// start vms with code below
+
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
-		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroups,
-				xenKeyName, xenInstanceType);
+//		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
+//				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroups, xenKeyName, xenInstanceType);
 		
-		
+		VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX, null,
+				"ec2-34-229-112-147.compute-1.amazonaws.com", 22, "", "", "virginiatech_ec2", "");
+
 		xenVm.setId(virtue.getId());
 		ArrayList<VirtualMachine> xenVms = new ArrayList<VirtualMachine>();
 		xenVms.add(xenVm);
@@ -102,108 +112,149 @@ public class XenHostManager {
 		updater.addVmToProvisionPipeline(xenVms);
 		final String id = virtue.getId();
 		for (VirtualMachineTemplate vmt : linuxVmts) {
-			
-			String keyName = xenVm.getPrivateKeyName(); 
-			// String myKey = keyManager.getKeyByName(keyName);
-			File privateKeyFile = keyManager.getKeyFileByName(keyName);
-			String ipAddress = "0.0.0.0"; 
-			
-			JSch ssh = new JSch();
-			ChannelExec channel = null;
-			Session session = null;
-			// final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-			String domainUUID = UUID.randomUUID().toString(); 
-			String clientUser = virtue.getUsername();
-			String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
-			String loginUsername = vmt.getLoginUser();			
-			
-			try {
-				ssh.addIdentity(privateKeyFile.getAbsolutePath());
-
-				session = ssh.getSession("ec2-user","ec2-35-172-226-43.compute-1.amazonaws.com", 22);
-				session.setConfig("PreferredAuthentications", "publickey");
-				session.setConfig("StrictHostKeyChecking", "no");
-				session.setTimeout(500);
-				session.connect();
-
-
-				Channel myChannel = session.openChannel("shell");
-				OutputStream ops = myChannel.getOutputStream();
-				PrintStream ps = new PrintStream(ops, true);
-
-				myChannel.connect();
-				InputStream input = myChannel.getInputStream();
-
-				//commands
-				ps.println("cd ./app-domains");
-				ps.println("./create.sh " + name);
-				ps.println("sudo xl console " + name);
-
-				//ps.println("exit");
-				ps.close();
-				ipAddress = getIpAddress(input, myChannel);
-
-				myChannel.disconnect();
-				session.disconnect();				
-
-			} catch (JSchException e) {
-				logger.trace("Vm is not reachable yet: " + e.getMessage());
-				//return false;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-				if (channel != null) {
-					channel.disconnect();
-				}
-				if (session != null) {
-					session.disconnect();
-				}
-				//			JavaUtil.closeIgnoreErrors(reader, ereader);
-			}	
-			
-			
-			String dnsAddress = ""; //we don't have dns name yet. 
-
-			/*
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), "",
 					new ArrayList<ApplicationDefinition>(), VmState.CREATING, vmt.getOs(), "", "", 22, "", "", "", "");
-		    */
-			
-			
-			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
-					VmState.CREATING, vmt.getOs(), domainUUID, dnsAddress, 22,
-					loginUsername, "", keyName, ipAddress );
-			
+
 			virtue.getVms().add(vm);
-			
+
 		}
-		
+
 		Runnable r = new Runnable() {
 
 			@Override
 			public void run() {
+				// wait until xen VM is ready
 				Optional<VirtualMachine> vmo = vmDao.getXenVm(id);
 				while (!vmo.isPresent() || !VmState.RUNNING.equals(vmo.get().getState())) {
 					JavaUtil.sleepAndLogInterruption(2000);
 					vmo = vmDao.getXenVm(id);
 				}
-				// TODO Create vms from templates but use the VM instances already stored in the
-				// virtue.
 
-				// TODO make sure VM status is updated via notifier
+				VirtualMachine xen = vmo.get();
+				JSch ssh = new JSch();
+				ChannelExec channel = null;
+				Session session = null;
+				String keyName = xenVm.getPrivateKeyName();
+				File privateKeyFile = keyManager.getKeyFileByName(keyName);
+				try {
+					// setup Xen VM
+					ssh.addIdentity(privateKeyFile.getAbsolutePath());
+					session = ssh.getSession(xen.getUserName(), xen.getHostname(), 22);
+					session.setConfig("PreferredAuthentications", "publickey");
+					session.setConfig("StrictHostKeyChecking", "no");
+					session.setTimeout(500);
+					session.connect();
 
-				// TEST CODE TO BE REMOVED ONCE XEN VM's ARE CREATED AND UPDATED
-				for (VirtualMachine vm : virtue.getVms()) {
-					vm.setState(VmState.RUNNING);
+					Channel myChannel = session.openChannel("shell");
+					OutputStream ops = myChannel.getOutputStream();
+					PrintStream ps = new PrintStream(ops, true);
+
+					myChannel.connect();
+					InputStream input = myChannel.getInputStream();
+					InputStreamReader reader = new InputStreamReader(input);
+					BufferedReader br = new BufferedReader(reader);
+					Runnable readerRunnable = new Runnable() {
+
+						@Override
+						public void run() {
+
+							boolean stopReaderThread = false;
+
+							String line;
+							long start = System.currentTimeMillis();
+							try {
+								while (!stopReaderThread && (line = br.readLine()) != null) {
+									System.out.println(line);
+									if (System.currentTimeMillis() - start > 15000) {
+										break;
+									}
+								}
+							} catch (IOException e) {
+
+							}
+						}
+					};
+					Thread t = new Thread(readerRunnable);
+					t.start();
+					// commands
+					ps.println("sudo ./setupXen.sh");
+					ps.println("sudo ./nfsd.sh &");
+					JavaUtil.sleepAndLogInterruption(3000);
+					ps.println("sudo xl list");
+					t.join(15000);
+					// ps.print("\035");
+
+					// provision Xen Guest VMs
+
+					Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>(virtue.getVms());
+					Iterator<VirtualMachine> vmsItr = vms.iterator();
+
+					for (VirtualMachineTemplate vmt : linuxVmts) {
+						VirtualMachine vm = vmsItr.next();
+						String ipAddress = "0.0.0.0";
+						String clientUser = virtue.getUsername();
+						String domainUUID = UUID.randomUUID().toString();
+						String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
+						String loginUsername = vmt.getLoginUser();
+
+						// try {
+						// session = ssh.getSession(xen.getUserName(), xen.getHostname(), 22);
+						// session.setConfig("PreferredAuthentications", "publickey");
+						// session.setConfig("StrictHostKeyChecking", "no");
+						// session.setTimeout(500);
+						// session.connect();
+
+						// myChannel = session.openChannel("shell");
+						// ops = myChannel.getOutputStream();
+						// ps = new PrintStream(ops, true);
+						//
+						// myChannel.connect();
+						// input = myChannel.getInputStream();
+
+						// commands
+						ps.println("sudo xl console");
+						ps.println("cd ./app-domains");
+						ps.println("./create.sh " + name);
+						ps.println("sudo xl console " + name);
+
+						// ps.println("exit");
+						ipAddress = getIpAddress(br, myChannel);
+						new Thread(readerRunnable).start();
+						int bracket = 29;
+						String c = "\\u" + bracket;
+						ps.print(c);
+						ps.print("\029");
+						ps.print("\035");
+						ps.println("sudo xl list ");
+						String dnsAddress = ""; // we don't have dns name yet.
+						vm.setName(name);
+						vm.setInfrastructureId(name);
+						vm.setUserName(loginUsername);
+						vm.setHostname(dnsAddress);
+						vm.setIpAddress(ipAddress);
+						vm.setState(VmState.RUNNING);
+						JavaUtil.sleepAndLogInterruption(5000);
+					}
+				} catch (JSchException e) {
+					logger.trace("Vm is not reachable yet: " + e.getMessage());
+				} catch (Exception e) {
+					logger.error("error in SSH", e);
+				} finally {
+					if (channel != null) {
+						channel.disconnect();
+					}
+					if (session != null) {
+						session.disconnect();
+					}
+					// JavaUtil.closeIgnoreErrors(reader, ereader);
 				}
-				notifier.updateElements(virtue.getVms());
-				// END TEST CODE
 
-				logger.info("Create vms here " + linuxVmts);
+				notifier.updateElements(virtue.getVms());
+
+				logger.info("Created vms " + virtue.getVms());
 			}
 		};
+
 		Thread t = new Thread(r, "XenProvisioner-" + id);
 		t.start();
 	}
@@ -230,69 +281,37 @@ public class XenHostManager {
 		// TODO Auto-generated method stub
 
 	}
-	
-	
-	   /**
-	    * @param input
-	    * @param channel
-	    */
-	   private static String getIpAddress(InputStream input,
-	                                   Channel channel) throws Exception
-	   {
-		  String virtue_ip = "0.0.0.0";
-	      int SIZE = 1024;
-	      byte[] tmp = new byte[SIZE];
-	      while (true)
-	      {
-	         while (input.available() > 0)
-	         {
-	            int i = input.read(tmp, 0, SIZE);
-	            if(i < 0)
-	               break;
-	            
-	             String myIP = new String(tmp, 0, i); 
-	             //System.out.print(myIP);
 
-	             if(myIP.contains("virtue-ip"))
-	             {
-
-	            	 System.out.print(findIP(myIP));
-		             virtue_ip = findIP(myIP); 
-		             return virtue_ip; 
-	             }
-	         }
-	         if(channel.isClosed())
-	         {
-	            System.out.println("exit-status: " + channel.getExitStatus());
-	            break;
-	         }
-	         try
-	         {
-	            Thread.sleep(300);
-	         }
-	         catch (Exception ee)
-	         {
-	         }
-	      }
-	      
-	      return virtue_ip;
-	   }
-	   
-	   
-	   private static String findIP(String substring)
-	   {
-		   String IPADDRESS_PATTERN = 
-			        "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-
-			Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
-			Matcher matcher = pattern.matcher(substring);
-			if (matcher.find()) {
-			    return matcher.group();
-			} else{
-			    return "0.0.0.0";
+	/**
+	 * @param input
+	 * @param channel
+	 */
+	private static String getIpAddress(BufferedReader reader, Channel channel) throws Exception {
+		String virtue_ip = "0.0.0.0";
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			System.out.println((line));
+			if (line.contains("virtue-ip")) {
+				virtue_ip = findIP(line);
+				return virtue_ip;
 			}
+		}
 
-     }
+		return virtue_ip;
+	}
+
+	private static String findIP(String substring) {
+		String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+
+		Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
+		Matcher matcher = pattern.matcher(substring);
+		if (matcher.find()) {
+			return matcher.group();
+		} else {
+			return "0.0.0.0";
+		}
+
+	}
 
 	protected void setServerUser(String serverUser) {
 		if (serverUser != null && !serverUser.trim().equals("")) {

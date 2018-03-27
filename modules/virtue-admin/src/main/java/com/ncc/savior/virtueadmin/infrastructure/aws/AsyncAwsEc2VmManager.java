@@ -135,10 +135,12 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
-		Collection<VirtualMachine> terminatedVms = ec2Wrapper.deleteVirtualMachines(vms);
-		// TODO deleting to deleted?
-		notifyOnUpdateVms(terminatedVms);
-		vmUpdater.addVmsToDeletingPipeline(vms);
+		if (!vms.isEmpty()) {
+			Collection<VirtualMachine> terminatedVms = ec2Wrapper.deleteVirtualMachines(vms);
+			// TODO deleting to deleted?
+			notifyOnUpdateVms(terminatedVms);
+			vmUpdater.addVmsToDeletingPipeline(vms);
+		}
 
 	}
 

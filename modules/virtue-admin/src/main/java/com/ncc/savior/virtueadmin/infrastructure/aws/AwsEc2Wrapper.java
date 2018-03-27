@@ -26,7 +26,6 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
@@ -49,10 +48,7 @@ public class AwsEc2Wrapper {
 			String serverKeyName, InstanceType instanceType) {
 		
 		VirtualMachine vm = null; 
-		
-		if (false) {
-
-			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
+		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
 			String templatePath = vmt.getTemplatePath();
 			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
@@ -66,40 +62,14 @@ public class AwsEc2Wrapper {
 			
 			Instance instance = instances.get(0);
 
-			
 			String name = namePrefix + instance.getInstanceId();
 			String loginUsername = vmt.getLoginUser();
 			String privateKeyName = serverKeyName;
-			
 			
 			vm = new VirtualMachine(UUID.randomUUID().toString(), name,
 					new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
 					instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
 					instance.getPublicIpAddress());
-		}
-		else	
-		{
-			
-			Instance instance = new Instance(); 
-			
-			instance.setInstanceId("038bd7b2b36652bf1");
-			instance.setPublicDnsName("ec2-35-172-226-43.compute-1.amazonaws.com" );
-			instance.setPublicIpAddress("35.172.226.43");
-
-			String name = namePrefix + instance.getInstanceId();
-			String loginUsername = "admin"; //vmt.getLoginUser();
-			String privateKeyName = "virginiatech_ec2";	
-			
-			
-			vm = new VirtualMachine(UUID.randomUUID().toString(), name,
-					null, VmState.CREATING, OS.LINUX,
-					instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
-					instance.getPublicIpAddress());
-			
-		}
-
-
-
 		return vm;
 	}
 

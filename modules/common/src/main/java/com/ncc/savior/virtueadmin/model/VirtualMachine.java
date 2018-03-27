@@ -114,7 +114,7 @@ public class VirtualMachine {
 		this.privateKey = privateKey;
 	}
 
-	protected void setUserName(String userName) {
+	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
@@ -138,7 +138,7 @@ public class VirtualMachine {
 		this.sshPort = sshPort;
 	}
 
-	protected void setInfrastructureId(String infrastructureId) {
+	public void setInfrastructureId(String infrastructureId) {
 		this.infrastructureId = infrastructureId;
 	}
 
