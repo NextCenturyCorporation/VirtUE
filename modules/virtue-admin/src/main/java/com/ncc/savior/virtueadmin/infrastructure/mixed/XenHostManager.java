@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -9,11 +10,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +43,10 @@ public class XenHostManager {
 	private String xenKeyName;
 	private InstanceType xenInstanceType;
 	private XenHostVmUpdater updater;
-	protected IActiveVirtueDao vmDao;
+	protected IActiveVirtueDao xenVmDao;
 	private String serverUser;
 	private IKeyManager keyManager;
+	private XenGuestManagerFactory xenGuestManagerFactory;
 	private static final String VM_PREFIX = "VRTU-";
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
@@ -58,9 +57,10 @@ public class XenHostManager {
 		this.securityGroups = securityGroups;
 		this.xenKeyName = xenKeyName;
 		this.xenInstanceType = xenInstanceType;
-		this.vmDao = xenVmDao;
+		this.xenVmDao = xenVmDao;
 		this.serverUser = System.getProperty("user.name");
 		this.keyManager = keyManager;
+		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, notifier);
 		IUpdateListener<VirtualMachine> xenListener = new IUpdateListener<VirtualMachine>() {
 			@Override
 			public void updateElements(Collection<VirtualMachine> elements) {
@@ -111,15 +111,13 @@ public class XenHostManager {
 		ArrayList<VirtualMachine> xenVms = new ArrayList<VirtualMachine>();
 		xenVms.add(xenVm);
 
-		vmDao.updateVms(xenVms);
+		xenVmDao.updateVms(xenVms);
 		updater.addVmToProvisionPipeline(xenVms);
 		final String id = virtue.getId();
 		for (VirtualMachineTemplate vmt : linuxVmts) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), "",
 					new ArrayList<ApplicationDefinition>(), VmState.CREATING, vmt.getOs(), "", "", 22, "", "", "", "");
-
 			virtue.getVms().add(vm);
-
 		}
 
 		Runnable r = new Runnable() {
@@ -127,10 +125,10 @@ public class XenHostManager {
 			@Override
 			public void run() {
 				// wait until xen VM is ready
-				Optional<VirtualMachine> vmo = vmDao.getXenVm(id);
+				Optional<VirtualMachine> vmo = xenVmDao.getXenVm(id);
 				while (!vmo.isPresent() || !VmState.RUNNING.equals(vmo.get().getState())) {
 					JavaUtil.sleepAndLogInterruption(2000);
-					vmo = vmDao.getXenVm(id);
+					vmo = xenVmDao.getXenVm(id);
 				}
 
 				VirtualMachine xen = vmo.get();
@@ -156,22 +154,33 @@ public class XenHostManager {
 					InputStream input = myChannel.getInputStream();
 					InputStreamReader reader = new InputStreamReader(input);
 					BufferedReader br = new BufferedReader(reader);
+					Thread t = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							String line;
+							try {
+								while ((line = br.readLine()) != null) {
+									System.out.println(line);
+									if (line.contains("finished " + id) && !line.contains("echo")) {
+										break;
+									}
+								}
+							} catch (IOException e) {
+								logger.error("Error reading SSH output", e);
+							}
+						}
+					});
+					t.start();
 					// commands
 					ps.println("sudo ./setupXen.sh");
 					ps.println("sudo ./nfsd.sh &");
 					JavaUtil.sleepAndLogInterruption(3000);
 					ps.println("sudo xl list");
-					// ps.print("\035");
-
-					// provision Xen Guest VMs
-
-					Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>(virtue.getVms());
-					Iterator<VirtualMachine> vmsItr = vms.iterator();
-
-					for (VirtualMachineTemplate vmt : linuxVmts) {
-						VirtualMachine vm = vmsItr.next();
-						provisionXenVm(virtue, ps, br, vmt, vm);
-					}
+					ps.println("echo finished " + id);
+					t.join(60000);
+					JavaUtil.sleepAndLogInterruption(1000);
+					ps.println("exit");
+					JavaUtil.sleepAndLogInterruption(1000);
 				} catch (JSchException e) {
 					logger.trace("Vm is not reachable yet: " + e.getMessage());
 				} catch (Exception e) {
@@ -183,12 +192,10 @@ public class XenHostManager {
 					if (session != null) {
 						session.disconnect();
 					}
-					// JavaUtil.closeIgnoreErrors(reader, ereader);
 				}
-
-				notifier.updateElements(virtue.getVms());
-
-				logger.info("Created vms " + virtue.getVms());
+				// provision Xen Guest VMs
+				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
+				guestManager.provisionGuests(virtue, linuxVmts);
 			}
 
 			private void provisionXenVm(VirtueInstance virtue, PrintStream ps, BufferedReader br,
@@ -204,7 +211,7 @@ public class XenHostManager {
 				ps.println("sudo ./create.sh " + name);
 				ps.println("sudo xl console " + name);
 				JavaUtil.sleepAndLogInterruption(200);
-				ipAddress = getIpAddress(br);
+				ipAddress = XenGuestManager.getIpAddress(br);
 				ps.println("\035");
 				ps.println("sudo xl list");
 				String dnsAddress = ""; // we don't have dns name yet.
@@ -223,56 +230,43 @@ public class XenHostManager {
 	}
 
 	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms) {
-		// TODO get XenVmManager for id
-		// TODO tell XenManager to delete its vms
+		// get XenVmManager for id
+		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(id);
+		VirtualMachine xenVm = vmo.get();
+		XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
+		// tell XenManager to delete its vms
+		guestManager.deleteGuests(linuxVms);
 		// TODO schedule once Vm's are deleted, XenManager will delete itself.
-		Optional<VirtualMachine> vm = vmDao.getXenVm(id);
-		if (vm.isPresent()) {
-			ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-			vms.add(vm.get());
-			ec2Wrapper.deleteVirtualMachines(vms);
-		}
 
+		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(xenVm);
+		ec2Wrapper.deleteVirtualMachines(vms);
 	}
 
 	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {
-		// TODO Auto-generated method stub
-
+		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueInstance.getId());
+		VirtualMachine xenVm = vmo.get();
+		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+		vms.add(xenVm);
+		ec2Wrapper.startVirtualMachines(vms);
+		updater.addVmsToStartingPipeline(vms);
+		// TODO do the following once the xenVm is started
+		// XenGuestManager guestManager =
+		// xenGuestManagerFactory.getXenGuestManager(xenVm);
+		// guestManager.stopGuests(linuxVms);
 	}
 
 	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {
-		// TODO Auto-generated method stub
+		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueInstance.getId());
+		VirtualMachine xenVm = vmo.get();
+		XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
+		guestManager.stopGuests(linuxVms);
+		// TODO wait until stop is done
 
-	}
-
-	/**
-	 * @param input
-	 * @param channel
-	 */
-	private static String getIpAddress(BufferedReader reader) throws Exception {
-		String virtue_ip = "0.0.0.0";
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			System.out.println((line));
-			if (line.contains("virtue-ip")) {
-				virtue_ip = findIP(line);
-				return virtue_ip;
-			}
-		}
-
-		return virtue_ip;
-	}
-
-	private static String findIP(String substring) {
-		String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-
-		Pattern pattern = Pattern.compile(IPADDRESS_PATTERN);
-		Matcher matcher = pattern.matcher(substring);
-		if (matcher.find()) {
-			return matcher.group();
-		} else {
-			return "0.0.0.0";
-		}
+		// ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+		// vms.add(xenVm);
+		// ec2Wrapper.stopVirtualMachines(vms);
+		// updater.addVmsToStoppingPipeline(vms);
 
 	}
 
