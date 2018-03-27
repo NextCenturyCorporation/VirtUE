@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * Base class for {@link IPipelineComponent} that handles much of the hard work.
@@ -115,6 +116,8 @@ public abstract class BaseIndividualVmPipelineComponent<T> implements IPipelineC
 			public void run() {
 				try {
 					onExecute(pipelineWrapper);
+				} catch (SaviorException e) {
+					doOnFailure(pipelineWrapper);
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
 							t);

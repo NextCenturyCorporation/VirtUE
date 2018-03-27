@@ -110,6 +110,9 @@ public class SshUtil {
 			// }
 			return true;
 		} catch (JSchException e) {
+			if (e.getMessage().contains("Auth fail")) {
+				throw new SaviorException(SaviorException.CONFIGURATION_ERROR, "Auth fail trying to login to vm=" + vm);
+			}
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
 			return false;
 		} finally {

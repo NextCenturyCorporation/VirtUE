@@ -86,7 +86,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			String clientUser = user.getUsername();
-			String namePrefix = VM_PREFIX + clientUser + "-" + serverUser + "-";
+			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + "-";
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, defaultSecurityGroups, serverKeyName,
 					instanceType);
 			vms.add(vm);

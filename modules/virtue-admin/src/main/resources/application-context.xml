@@ -112,9 +112,9 @@
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater"></constructor-arg>
-		<constructor-arg value="${virtue.aws.server.securityGroups}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.server.vmKey}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.instanceType}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 	</bean>
 
 	<bean name="desktopService"

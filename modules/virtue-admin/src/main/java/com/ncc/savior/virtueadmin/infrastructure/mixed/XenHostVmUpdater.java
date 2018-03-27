@@ -29,25 +29,12 @@ public class XenHostVmUpdater implements IVmUpdater {
 	private IUpdatePipeline<VirtualMachine> zenVmProvisionPipeline;
 	private IUpdatePipeline<VirtualMachine> startingPipeline;
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
-	private AmazonEC2 ec2;
-	private IUpdateListener<VirtualMachine> notifier;
-	private IKeyManager keyManager;
 
-	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> notifier,
+	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> xenVmHostNotifier,
 			IKeyManager keyManager) {
-		this.ec2 = ec2;
-		this.notifier = notifier;
-		this.keyManager = keyManager;
-		IUpdateListener<VirtualMachine> zenProvisionNotifier = new IUpdateListener<VirtualMachine>() {
-			@Override
-			public void updateElements(Collection<VirtualMachine> elements) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-		this.zenVmProvisionPipeline = new UpdatePipeline<VirtualMachine>(zenProvisionNotifier, "provisioning");
-		this.startingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "starting");
-		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "stopping");
+		this.zenVmProvisionPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "provisioning");
+		this.startingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "starting");
+		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "stopping");
 
 		this.executor = Executors.newScheduledThreadPool(2, new ThreadFactory() {
 			private int num = 1;
