@@ -2,7 +2,6 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -101,10 +100,10 @@ public class XenHostManager {
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroups, xenKeyName, xenInstanceType);
-		
+
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,
-		// "ec2-34-229-112-147.compute-1.amazonaws.com", 22, "ec2_user", "",
+		// "ec2-34-207-74-33.compute-1.amazonaws.com", 22, "ec2-user", "",
 		// "virginiatech_ec2", "");
 		// xenVm.setState(VmState.RUNNING);
 		//
@@ -157,35 +156,11 @@ public class XenHostManager {
 					InputStream input = myChannel.getInputStream();
 					InputStreamReader reader = new InputStreamReader(input);
 					BufferedReader br = new BufferedReader(reader);
-					Runnable readerRunnable = new Runnable() {
-
-						@Override
-						public void run() {
-
-							boolean stopReaderThread = false;
-
-							String line;
-							long start = System.currentTimeMillis();
-							try {
-								while (!stopReaderThread && (line = br.readLine()) != null) {
-									System.out.println(line);
-									if (System.currentTimeMillis() - start > 15000) {
-										break;
-									}
-								}
-							} catch (IOException e) {
-
-							}
-						}
-					};
-					Thread t = new Thread(readerRunnable);
-					t.start();
 					// commands
 					ps.println("sudo ./setupXen.sh");
 					ps.println("sudo ./nfsd.sh &");
 					JavaUtil.sleepAndLogInterruption(3000);
 					ps.println("sudo xl list");
-					t.join(15000);
 					// ps.print("\035");
 
 					// provision Xen Guest VMs
@@ -195,49 +170,7 @@ public class XenHostManager {
 
 					for (VirtualMachineTemplate vmt : linuxVmts) {
 						VirtualMachine vm = vmsItr.next();
-						String ipAddress = "0.0.0.0";
-						String clientUser = virtue.getUsername();
-						String domainUUID = UUID.randomUUID().toString();
-						String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
-						String loginUsername = vmt.getLoginUser();
-
-						// try {
-						// session = ssh.getSession(xen.getUserName(), xen.getHostname(), 22);
-						// session.setConfig("PreferredAuthentications", "publickey");
-						// session.setConfig("StrictHostKeyChecking", "no");
-						// session.setTimeout(500);
-						// session.connect();
-
-						// myChannel = session.openChannel("shell");
-						// ops = myChannel.getOutputStream();
-						// ps = new PrintStream(ops, true);
-						//
-						// myChannel.connect();
-						// input = myChannel.getInputStream();
-
-						// commands
-						ps.println("sudo xl console");
-						ps.println("cd ./app-domains");
-						ps.println("./create.sh " + name);
-						ps.println("sudo xl console " + name);
-
-						// ps.println("exit");
-						ipAddress = getIpAddress(br, myChannel);
-						new Thread(readerRunnable).start();
-						int bracket = 29;
-						String c = "\\u" + bracket;
-						ps.print(c);
-						ps.print("\029");
-						ps.print("\035");
-						ps.println("sudo xl list ");
-						String dnsAddress = ""; // we don't have dns name yet.
-						vm.setName(name);
-						vm.setInfrastructureId(name);
-						vm.setUserName(loginUsername);
-						vm.setHostname(dnsAddress);
-						vm.setIpAddress(ipAddress);
-						vm.setState(VmState.RUNNING);
-						JavaUtil.sleepAndLogInterruption(5000);
+						provisionXenVm(virtue, ps, br, vmt, vm);
 					}
 				} catch (JSchException e) {
 					logger.trace("Vm is not reachable yet: " + e.getMessage());
@@ -256,6 +189,32 @@ public class XenHostManager {
 				notifier.updateElements(virtue.getVms());
 
 				logger.info("Created vms " + virtue.getVms());
+			}
+
+			private void provisionXenVm(VirtueInstance virtue, PrintStream ps, BufferedReader br,
+					VirtualMachineTemplate vmt, VirtualMachine vm) throws Exception {
+				String ipAddress = "0.0.0.0";
+				String clientUser = virtue.getUsername();
+				String domainUUID = UUID.randomUUID().toString();
+				String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
+				String loginUsername = vmt.getLoginUser();
+
+				ps.println("sudo xl list");
+				ps.println("cd ./app-domains");
+				ps.println("sudo ./create.sh " + name);
+				ps.println("sudo xl console " + name);
+				JavaUtil.sleepAndLogInterruption(200);
+				ipAddress = getIpAddress(br);
+				ps.println("\035");
+				ps.println("sudo xl list");
+				String dnsAddress = ""; // we don't have dns name yet.
+				vm.setName(name);
+				vm.setInfrastructureId(name);
+				vm.setUserName(loginUsername);
+				vm.setHostname(dnsAddress);
+				vm.setIpAddress(ipAddress);
+				vm.setState(VmState.RUNNING);
+				JavaUtil.sleepAndLogInterruption(5000);
 			}
 		};
 
@@ -290,7 +249,7 @@ public class XenHostManager {
 	 * @param input
 	 * @param channel
 	 */
-	private static String getIpAddress(BufferedReader reader, Channel channel) throws Exception {
+	private static String getIpAddress(BufferedReader reader) throws Exception {
 		String virtue_ip = "0.0.0.0";
 		String line = null;
 		while ((line = reader.readLine()) != null) {
