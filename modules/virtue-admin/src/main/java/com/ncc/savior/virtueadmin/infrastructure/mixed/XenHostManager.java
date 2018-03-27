@@ -99,15 +99,19 @@ public class XenHostManager {
 	// start vms with code below
 
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
-//		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-//				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroups, xenKeyName, xenInstanceType);
+		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
+				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroups, xenKeyName, xenInstanceType);
 		
-		VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX, null,
-				"ec2-34-229-112-147.compute-1.amazonaws.com", 22, "", "", "virginiatech_ec2", "");
-
+		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
+		// null,
+		// "ec2-34-229-112-147.compute-1.amazonaws.com", 22, "ec2_user", "",
+		// "virginiatech_ec2", "");
+		// xenVm.setState(VmState.RUNNING);
+		//
 		xenVm.setId(virtue.getId());
 		ArrayList<VirtualMachine> xenVms = new ArrayList<VirtualMachine>();
 		xenVms.add(xenVm);
+
 		vmDao.updateVms(xenVms);
 		updater.addVmToProvisionPipeline(xenVms);
 		final String id = virtue.getId();
