@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -132,97 +133,78 @@ public class XenVirtualMachineManager extends BaseVmManager {
 
 		}
 	*/
-				int i = 0; 
-		String myKey = keyManager.getKeyByName("virginiatech_ec2"); 
-		File privateKeyFile = keyManager.getKeyFileByName("virginiatech_ec2");
-
-		//cert =/Users/womitowoju/workspace/VirtUE/modules/virtue-admin/certs
-		
-		
-		JSch ssh = new JSch();
-		ChannelExec channel = null;
-		Session session = null;
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		
-		try {
-			//ssh.addIdentity(myKey);
-			ssh.addIdentity(privateKeyFile.getAbsolutePath());
-
-			session = ssh.getSession("ec2-user","ec2-35-172-226-43.compute-1.amazonaws.com", 22);
-			session.setConfig("PreferredAuthentications", "publickey");
-			session.setConfig("StrictHostKeyChecking", "no");
-			session.setTimeout(500);
-			session.connect();
+		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
+		for (VirtualMachineTemplate vmt : vmTemplates) {
 			
-			if(false)
-			{
-				channel = (ChannelExec) session.openChannel("exec");
-				//channel.setCommand("echo 'Testing reachability of VM'");
-				
-				channel.setCommand("cd ./app-domains; ./create.sh dom2;  sudo xl console dom2"); 
-				//channel.setCommand("sudo xl console dom2"); 
-	
-				channel.connect(10000);
-				
-	  		    //channel.setOutputStream(baos);//This prints on console. Need 2 capture in String somehow?
-	
-				channel.setOutputStream(System.out); 
-				// InputStreamReader stream = new InputStreamReader(channel.getInputStream());
-				// reader = new BufferedReader(stream);
-				// InputStreamReader estream = new InputStreamReader(channel.getErrStream());
-				// ereader = new BufferedReader(estream);
-				// String line;
-				// logger.debug("should read line soon");
-				// while ((line = reader.readLine()) != null || (line = ereader.readLine()) !=
-				// null) {
-				// logger.trace(line);
-				// }
-				//return true;
-	  		   String myOutput = new String(baos.toByteArray());
-	  		   channel.sendSignal("2"); // CTRL + C - interrupt
-			}
-			else
-			{
-			      Channel myChannel = session.openChannel("shell");
-			      OutputStream ops = myChannel.getOutputStream();
-			      PrintStream ps = new PrintStream(ops, true);
+			String keyName = "virginiatech_ec2"; 
+			String myKey = keyManager.getKeyByName(keyName); 
+			File privateKeyFile = keyManager.getKeyFileByName("virginiatech_ec2");
+			String ipAddress = "0.0.0.0"; 
 
-			      myChannel.connect();
-			      InputStream input = myChannel.getInputStream();
+			JSch ssh = new JSch();
+			ChannelExec channel = null;
+			Session session = null;
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-			      //commands
-			      ps.println("cd ./app-domains");
-			      ps.println("./create.sh dom2");
-			      ps.println("sudo xl console dom2");
-
-
-			      //ps.println("exit");
-			      ps.close();
-			      printResult(input, myChannel);
-
-			      myChannel.disconnect();
-			      session.disconnect();				
-			}
-				
-
+			String domainUUID = UUID.randomUUID().toString(); 
+			String clientUser = user.getUsername();
+			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + domainUUID;
+			String loginUsername = vmt.getLoginUser();
 			
-		} catch (JSchException e) {
-			logger.trace("Vm is not reachable yet: " + e.getMessage());
-			//return false;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			if (channel != null) {
-				channel.disconnect();
-			}
-			if (session != null) {
-				session.disconnect();
-			}
-//			JavaUtil.closeIgnoreErrors(reader, ereader);
-		}		
-		
+			try {
+				ssh.addIdentity(privateKeyFile.getAbsolutePath());
+
+				session = ssh.getSession("ec2-user","ec2-35-172-226-43.compute-1.amazonaws.com", 22);
+				session.setConfig("PreferredAuthentications", "publickey");
+				session.setConfig("StrictHostKeyChecking", "no");
+				session.setTimeout(500);
+				session.connect();
+
+
+				Channel myChannel = session.openChannel("shell");
+				OutputStream ops = myChannel.getOutputStream();
+				PrintStream ps = new PrintStream(ops, true);
+
+				myChannel.connect();
+				InputStream input = myChannel.getInputStream();
+
+				//commands
+				ps.println("cd ./app-domains");
+				ps.println("./create.sh dom2");
+				ps.println("sudo xl console " + name);
+
+				//ps.println("exit");
+				ps.close();
+				ipAddress = getIpAddress(input, myChannel);
+
+				myChannel.disconnect();
+				session.disconnect();				
+
+			} catch (JSchException e) {
+				logger.trace("Vm is not reachable yet: " + e.getMessage());
+				//return false;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				if (channel != null) {
+					channel.disconnect();
+				}
+				if (session != null) {
+					session.disconnect();
+				}
+				//			JavaUtil.closeIgnoreErrors(reader, ereader);
+			}		
+
+			String dnsAddress = ""; //we don't have dns name yet. 
+ 
+			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name, vmt.getApplications(),
+					VmState.CREATING, vmt.getOs(), domainUUID, dnsAddress, SSH_PORT,
+					loginUsername, privateKey, keyName, ipAddress );
+			
+			vms.add(vm);
+
+		}
 		return null;
 	}
 
@@ -249,7 +231,7 @@ public class XenVirtualMachineManager extends BaseVmManager {
 	    * @param input
 	    * @param channel
 	    */
-	   private static String printResult(InputStream input,
+	   private static String getIpAddress(InputStream input,
 	                                   Channel channel) throws Exception
 	   {
 		  String virtue_ip = "";
@@ -269,6 +251,7 @@ public class XenVirtualMachineManager extends BaseVmManager {
 	             if(myIP.contains("virtue-ip"))
 	             {
 		             System.out.print(findIP(myIP));
+		             virtue_ip = findIP(myIP); 
 	             }
 	         }
 	         if(channel.isClosed())

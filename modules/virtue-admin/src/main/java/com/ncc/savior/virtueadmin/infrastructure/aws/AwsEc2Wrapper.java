@@ -26,6 +26,7 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
@@ -46,26 +47,59 @@ public class AwsEc2Wrapper {
 
 	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String namePrefix, Collection<String> securityGroups,
 			String serverKeyName, InstanceType instanceType) {
-		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
+		
+		VirtualMachine vm = null; 
+		
+		if (false) {
 
-		String templatePath = vmt.getTemplatePath();
-		runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
-				.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName).withSecurityGroups(securityGroups);
-		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
+			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
-		List<Instance> instances = result.getReservation().getInstances();
-		if (instances.size() != 1) {
-			throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
+			String templatePath = vmt.getTemplatePath();
+			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
+					.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName).withSecurityGroups(securityGroups);
+			RunInstancesResult result = ec2.runInstances(runInstancesRequest);
+
+			List<Instance> instances = result.getReservation().getInstances();
+			if (instances.size() != 1) {
+				throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
+			}
+			
+			Instance instance = instances.get(0);
+
+			
+			String name = namePrefix + instance.getInstanceId();
+			String loginUsername = vmt.getLoginUser();
+			String privateKeyName = serverKeyName;
+			
+			
+			vm = new VirtualMachine(UUID.randomUUID().toString(), name,
+					new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
+					instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
+					instance.getPublicIpAddress());
 		}
-		Instance instance = instances.get(0);
+		else	
+		{
+			
+			Instance instance = new Instance(); 
+			
+			instance.setInstanceId("038bd7b2b36652bf1");
+			instance.setPublicDnsName("ec2-35-172-226-43.compute-1.amazonaws.com" );
+			instance.setPublicIpAddress("35.172.226.43");
 
-		String name = namePrefix + instance.getInstanceId();
-		String loginUsername = vmt.getLoginUser();
-		String privateKeyName = serverKeyName;
-		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
-				new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
-				instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
-				instance.getPublicIpAddress());
+			String name = namePrefix + instance.getInstanceId();
+			String loginUsername = "admin"; //vmt.getLoginUser();
+			String privateKeyName = "virginiatech_ec2";	
+			
+			
+			vm = new VirtualMachine(UUID.randomUUID().toString(), name,
+					null, VmState.CREATING, OS.LINUX,
+					instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
+					instance.getPublicIpAddress());
+			
+		}
+
+
+
 		return vm;
 	}
 
