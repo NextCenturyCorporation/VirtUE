@@ -122,7 +122,7 @@ public class VirtualMachine {
 		this.name = name;
 	}
 
-	protected void setApplications(Collection<ApplicationDefinition> applications) {
+	public void setApplications(Collection<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 
@@ -134,7 +134,7 @@ public class VirtualMachine {
 		this.hostname = hostname;
 	}
 
-	protected void setSshPort(int sshPort) {
+	public void setSshPort(int sshPort) {
 		this.sshPort = sshPort;
 	}
 

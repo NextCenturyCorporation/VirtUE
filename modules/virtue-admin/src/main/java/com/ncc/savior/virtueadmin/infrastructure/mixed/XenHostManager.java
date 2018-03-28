@@ -68,7 +68,7 @@ public class XenHostManager {
 			}
 		};
 		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager);
-		String templatePath = "ami-e156839c";
+		String templatePath = "ami-e700d89a";
 		String xenLoginUser = "ec2-user";
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX,
 				templatePath, new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
@@ -175,9 +175,10 @@ public class XenHostManager {
 					ps.println("sudo ./setupXen.sh");
 					ps.println("sudo ./nfsd.sh &");
 					JavaUtil.sleepAndLogInterruption(3000);
+					// ps.println("\035");
 					ps.println("sudo xl list");
 					ps.println("echo finished " + id);
-					t.join(60000);
+					t.join(20000);
 					JavaUtil.sleepAndLogInterruption(1000);
 					ps.println("exit");
 					JavaUtil.sleepAndLogInterruption(1000);
@@ -196,32 +197,6 @@ public class XenHostManager {
 				// provision Xen Guest VMs
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				guestManager.provisionGuests(virtue, linuxVmts);
-			}
-
-			private void provisionXenVm(VirtueInstance virtue, PrintStream ps, BufferedReader br,
-					VirtualMachineTemplate vmt, VirtualMachine vm) throws Exception {
-				String ipAddress = "0.0.0.0";
-				String clientUser = virtue.getUsername();
-				String domainUUID = UUID.randomUUID().toString();
-				String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
-				String loginUsername = vmt.getLoginUser();
-
-				ps.println("sudo xl list");
-				ps.println("cd ./app-domains");
-				ps.println("sudo ./create.sh " + name);
-				ps.println("sudo xl console " + name);
-				JavaUtil.sleepAndLogInterruption(200);
-				ipAddress = XenGuestManager.getIpAddress(br);
-				ps.println("\035");
-				ps.println("sudo xl list");
-				String dnsAddress = ""; // we don't have dns name yet.
-				vm.setName(name);
-				vm.setInfrastructureId(name);
-				vm.setUserName(loginUsername);
-				vm.setHostname(dnsAddress);
-				vm.setIpAddress(ipAddress);
-				vm.setState(VmState.RUNNING);
-				JavaUtil.sleepAndLogInterruption(5000);
 			}
 		};
 
@@ -253,7 +228,7 @@ public class XenHostManager {
 		// TODO do the following once the xenVm is started
 		// XenGuestManager guestManager =
 		// xenGuestManagerFactory.getXenGuestManager(xenVm);
-		// guestManager.stopGuests(linuxVms);
+		// guestManager.startGuests(linuxVms);
 	}
 
 	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {

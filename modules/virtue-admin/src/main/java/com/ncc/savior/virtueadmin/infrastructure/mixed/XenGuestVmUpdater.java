@@ -9,13 +9,9 @@ import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.ec2.AmazonEC2;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmUpdater;
-import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUpdateStatus;
-import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsNetworkingUpdateComponent;
-import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.NetworkingClearingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
@@ -24,16 +20,15 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
-public class XenHostVmUpdater implements IVmUpdater {
+public class XenGuestVmUpdater implements IVmUpdater {
 	private static final Logger logger = LoggerFactory.getLogger(XenHostVmUpdater.class);
 	private ScheduledExecutorService executor;
-	private IUpdatePipeline<VirtualMachine> zenVmProvisionPipeline;
+	private IUpdatePipeline<VirtualMachine> provisionPipeline;
 	private IUpdatePipeline<VirtualMachine> startingPipeline;
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 
-	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> xenVmHostNotifier,
-			IKeyManager keyManager) {
-		this.zenVmProvisionPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "provisioning");
+	public XenGuestVmUpdater(IUpdateListener<VirtualMachine> xenVmHostNotifier, IKeyManager keyManager) {
+		this.provisionPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "starting");
 		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "stopping");
 
@@ -42,39 +37,34 @@ public class XenHostVmUpdater implements IVmUpdater {
 
 			@Override
 			public synchronized Thread newThread(Runnable r) {
-				String name = "xen-updated-" + num;
+				String name = "xen-guest-updated-" + num;
 				num++;
 				return new Thread(r, name);
 			}
 		});
 
-		zenVmProvisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
-		zenVmProvisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
 		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
-		zenVmProvisionPipeline.addPipelineComponent(reachableRsa);
+		provisionPipeline.addPipelineComponent(reachableRsa);
 		reachableRsa.setSuccessState(VmState.RUNNING);
-		zenVmProvisionPipeline.start();
+		provisionPipeline.start();
 
-		startingPipeline.addPipelineComponent(
-				new AwsNetworkingUpdateComponent(executor, ec2));
-		startingPipeline.addPipelineComponent(
-				new TestReachabilityComponent(executor, keyManager, true));
+		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
 		startingPipeline.start();
 
-		stoppingPipeline
-				.addPipelineComponent(new NetworkingClearingComponent(executor));
+		stoppingPipeline.addPipelineComponent(new NetworkingClearingComponent(executor));
 		Collection<VmState> successStatus = new ArrayList<VmState>();
 		successStatus.add(VmState.DELETED);
 		successStatus.add(VmState.STOPPED);
-		stoppingPipeline.addPipelineComponent(new AwsUpdateStatus(executor, ec2, successStatus));
+		// TODO setup some type of update
 		stoppingPipeline.start();
 
-		logger.debug("Aws update pipelines started");
+		logger.debug("Xen guest update pipelines started");
 	}
 
 	@Override
 	public void addVmToProvisionPipeline(Collection<VirtualMachine> vms) {
-		zenVmProvisionPipeline.addToPipeline(vms);
+		logger.debug("added vms " + vms);
+		provisionPipeline.addToPipeline(vms);
 	}
 
 	@Override
@@ -93,5 +83,4 @@ public class XenHostVmUpdater implements IVmUpdater {
 	public void addVmsToDeletingPipeline(Collection<VirtualMachine> vms) {
 		stoppingPipeline.addToPipeline(vms);
 	}
-
 }

@@ -85,8 +85,8 @@ public class SshUtil {
 		JSch ssh = new JSch();
 		ChannelExec channel = null;
 		Session session = null;
-//		BufferedReader reader = null;
-//		BufferedReader ereader = null;
+		// BufferedReader reader = null;
+		// BufferedReader ereader = null;
 		try {
 			ssh.addIdentity(privateKeyFile.getAbsolutePath());
 			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
@@ -122,7 +122,7 @@ public class SshUtil {
 			if (session != null) {
 				session.disconnect();
 			}
-//			JavaUtil.closeIgnoreErrors(reader, ereader);
+			// JavaUtil.closeIgnoreErrors(reader, ereader);
 		}
 	}
 
