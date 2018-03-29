@@ -43,19 +43,20 @@ public class XenGuestVmUpdater implements IVmUpdater {
 			}
 		});
 
-		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
+		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager,
+				200);
 		provisionPipeline.addPipelineComponent(reachableRsa);
 		reachableRsa.setSuccessState(VmState.RUNNING);
 		provisionPipeline.start();
 
-		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
+		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true, 5000));
 		startingPipeline.start();
 
 		stoppingPipeline.addPipelineComponent(new NetworkingClearingComponent(executor));
 		Collection<VmState> successStatus = new ArrayList<VmState>();
 		successStatus.add(VmState.DELETED);
 		successStatus.add(VmState.STOPPED);
-		// TODO setup some type of update
+		stoppingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, false, 3000));
 		stoppingPipeline.start();
 
 		logger.debug("Xen guest update pipelines started");

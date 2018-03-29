@@ -136,7 +136,12 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		for (ApplicationDefinition app : apps) {
 			// assignApplicationToVmTemplate(vmTemplate.getId(), app.getId());
 			Optional<ApplicationDefinition> manageredApp = appRepository.findById(app.getId());
-			vmTemplate.getApplications().add(manageredApp.get());
+			if (manageredApp.isPresent()) {
+				vmTemplate.getApplications().add(manageredApp.get());
+			} else {
+				new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+						"Unable to find application with id=" + app.getId());
+			}
 		}
 		vmtRepository.save(vmTemplate);
 	}

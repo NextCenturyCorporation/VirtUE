@@ -25,6 +25,13 @@ public class TestReachabilityComponent extends BaseIndividualVmPipelineComponent
 		this.successOnReachable = successOnReachable;
 	}
 
+	public TestReachabilityComponent(ScheduledExecutorService executor, IKeyManager keyManager,
+			boolean successOnReachable, long initialDelay) {
+		super(executor, true, initialDelay, 3000);
+		this.keyManager = keyManager;
+		this.successOnReachable = successOnReachable;
+	}
+
 	@Override
 	protected void onExecute(PipelineWrapper<VirtualMachine> wrapper) {
 		testReachability(wrapper);

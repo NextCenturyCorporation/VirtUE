@@ -3,14 +3,11 @@ package com.ncc.savior.virtueadmin.infrastructure.statemachine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.statemachine.StateMachine;
 
@@ -49,11 +46,12 @@ public class StateMachineManager {
 		});
 	}
 
-	public void add(StateMachine<ProvisionStates, ProvisionEvents> stateMachine) {
-		Map<Object, Object> vars = stateMachine.getExtendedState().getVariables();
-		vars.put(StateMachineCloudManager.KEY_STATE_MACHINE_MANAGER, this);
-		ScheduledFuture<?> future = executor.schedule(getProvisionXen(), 0, TimeUnit.SECONDS);
-		vars.put(StateMachineCloudManager.KEY_FUTURE, future);
+	public void add(StateMachine<ProvisionStates, StateEvents> stateMachine) {
+		// Map<Object, Object> vars = stateMachine.getExtendedState().getVariables();
+		// vars.put(StateMachineCloudManager.KEY_STATE_MACHINE_MANAGER, this);
+		// ScheduledFuture<?> future = executor.schedule(getProvisionXen(), 0,
+		// TimeUnit.SECONDS);
+		// vars.put(StateMachineCloudManager.KEY_FUTURE, future);
 
 	}
 

@@ -15,7 +15,7 @@ import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
-public class XenProvisionerAction implements Action<ProvisionStates, ProvisionEvents> {
+public class XenProvisionerAction implements Action<ProvisionStates, StateEvents> {
 
 	@Autowired
 	private AwsEc2Wrapper awsWrapper;
@@ -34,7 +34,7 @@ public class XenProvisionerAction implements Action<ProvisionStates, ProvisionEv
 	}
 
 	@Override
-	public void execute(StateContext<ProvisionStates, ProvisionEvents> context) {
+	public void execute(StateContext<ProvisionStates, StateEvents> context) {
 		Map<Object, Object> vars = context.getExtendedState().getVariables();
 		VirtueUser user = (VirtueUser) vars.get(StateMachineKeys.KEY_USER);
 

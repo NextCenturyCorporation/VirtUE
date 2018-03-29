@@ -32,6 +32,14 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 		this.successState = VmState.RUNNING;
 	}
 
+	public TestReachabilityAndAddRsaComponent(ScheduledExecutorService executor, IKeyManager keyManager,
+			long initialDelayMillis) {
+		super(executor, true, initialDelayMillis, 3000);
+		this.keyManager = keyManager;
+		this.sshKeyInjector = new SshKeyInjector();
+		this.successState = VmState.RUNNING;
+	}
+
 	@Override
 	protected void onExecute(PipelineWrapper<VirtualMachine> wrapper) {
 		testReachabilityAndAddRsaKey(wrapper);

@@ -57,7 +57,9 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts);
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
-		xenHostManager.provisionXenHost(vi, linuxVmts);
+		if (!linuxVmts.isEmpty()) {
+			xenHostManager.provisionXenHost(vi, linuxVmts);
+		}
 		return vi;
 	}
 
