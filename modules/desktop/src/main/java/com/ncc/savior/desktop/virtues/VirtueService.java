@@ -20,6 +20,7 @@ import com.ncc.savior.desktop.xpra.XpraClient.Status;
 import com.ncc.savior.desktop.xpra.XpraConnectionManager;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -73,6 +74,20 @@ public class VirtueService {
 	 * @throws IOException
 	 */
 	public void ensureConnection(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
+			throws IOException {
+		if (OS.LINUX.equals(app.getOs())) {
+			ensureConnectionLinux(app, virtue, color);
+		} else {
+			ensureConnectionWindows(app, virtue, color);
+		}
+	}
+
+	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
+			throws IOException {
+		WindowsRdp.startRdp(app, virtue, color);
+	}
+
+	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
 		File file = null;
 		try {

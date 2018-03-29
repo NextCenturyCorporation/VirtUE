@@ -78,6 +78,9 @@ public class UpdatePipeline<T> implements IUpdatePipeline<T>, IUpdatePipelineRes
 
 	@Override
 	public void onSuccess(Collection<PipelineWrapper<T>> wrappers, int currentPipelineIndex) {
+		if (wrappers.isEmpty()) {
+			return;
+		}
 		Collection<T> vms = unwrap(wrappers);
 		notifier.updateElements(vms);
 		if (currentPipelineIndex < 0) {
