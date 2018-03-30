@@ -65,6 +65,10 @@ public class VirtueUser {
 		return authorities;
 	}
 
+	public void setVirtueTemplates(Collection<VirtueTemplate> myVts) {
+		this.virtueTemplates = myVts;
+	}
+
 	@JsonIgnore
 	public Collection<VirtueTemplate> getVirtueTemplates() {
 		return virtueTemplates;

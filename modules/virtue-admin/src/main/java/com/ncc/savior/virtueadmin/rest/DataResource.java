@@ -119,12 +119,14 @@ public class DataResource {
 		appsBrowsersWindows.add(windowsChrome);
 		appsBrowsersWindows.add(windowsFirefox);
 
-		appsAll.addAll(appsBrowsersLinux);
-		appsAll.addAll(appsLibreOffice);
-		appsAll.addAll(appsMath);
+		appsAllLinux.addAll(appsBrowsersLinux);
+		appsAllLinux.addAll(appsLibreOffice);
+		appsAllLinux.addAll(appsMath);
+		appsAllLinux.add(linuxTerminal);
+		appsAllLinux.add(thunderBird);
+		appsAll.addAll(appsAllLinux);
 		appsAll.addAll(appsBrowsersWindows);
-		appsAll.add(linuxTerminal);
-		appsAll.add(thunderBird);
+
 
 		Date now = new Date();
 		String systemName = "system";

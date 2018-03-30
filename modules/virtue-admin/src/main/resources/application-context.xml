@@ -129,6 +129,12 @@
 		<constructor-arg ref="templateManager" />
 	</bean>
 
+	<bean name="importExportService"
+		class="com.ncc.savior.virtueadmin.service.ImportExportService">
+		<constructor-arg ref="templateManager" />
+		<constructor-arg ref="userManager" />
+	</bean>
+
 	<bean name="securityService"
 		class="com.ncc.savior.virtueadmin.security.SecurityUserService"></bean>
 

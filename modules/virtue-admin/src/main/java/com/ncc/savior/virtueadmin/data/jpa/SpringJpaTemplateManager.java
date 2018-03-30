@@ -219,10 +219,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void clear() {
+		userRepo.deleteAll();
 		vtRepository.deleteAll();
 		vmtRepository.deleteAll();
 		appRepository.deleteAll();
-		userRepo.deleteAll();
+
 	}
 
 	@Override

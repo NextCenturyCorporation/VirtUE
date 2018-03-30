@@ -100,7 +100,7 @@ public class VirtueTemplate {
 	}
 
 	// below setters are used for jackson deserialization.
-	protected void setId(String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
