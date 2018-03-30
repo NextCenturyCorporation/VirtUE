@@ -166,6 +166,17 @@ public class VirtueTemplate {
 		return virtualMachineTemplateIds;
 	}
 
+	@JsonGetter
+	public Collection<String> getApplicationIds() {
+		Collection<String> applicationIds = new ArrayList<String>();
+		if (vmTemplates != null) {
+			for (VirtualMachineTemplate vmt : vmTemplates) {
+				applicationIds.addAll(vmt.getApplicationIds());
+			}
+		}
+		return applicationIds;
+	}
+
 	protected void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
 		this.virtualMachineTemplateIds = virtualMachineTemplateIds;
 	}
