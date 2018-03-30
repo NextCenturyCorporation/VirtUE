@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
+import java.util.Collection;
+
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
@@ -9,7 +11,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * 
  *
  */
-public interface IStateUpdateListener {
+public interface IVmUpdateListener {
 	/**
 	 * Called when a {@link VirtualMachine}'s {@link VmState} has been updated.
 	 * 
@@ -17,4 +19,6 @@ public interface IStateUpdateListener {
 	 * @param state
 	 */
 	void updateVmState(String vmId, VmState state);
+
+	void updateVms(Collection<VirtualMachine> vms);
 }

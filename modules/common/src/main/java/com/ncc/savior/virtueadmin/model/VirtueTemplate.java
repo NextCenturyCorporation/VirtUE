@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -8,8 +9,12 @@ import java.util.stream.Collectors;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnDefault;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Data Transfer Object (DTO) for templates.
@@ -31,6 +36,8 @@ public class VirtueTemplate {
 
 	private String awsTemplateName;
 
+	@Transient
+	private Collection<String> virtualMachineTemplateIds;
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
 
@@ -81,11 +88,13 @@ public class VirtueTemplate {
 		return version;
 	}
 
+	@JsonIgnore
 	public Set<ApplicationDefinition> getApplications() {
 		return getVmTemplates().stream().flatMap(vmTemplate -> vmTemplate.getApplications().parallelStream())
 				.collect(Collectors.toSet());
 	}
 
+	@JsonIgnore
 	public Collection<VirtualMachineTemplate> getVmTemplates() {
 		return vmTemplates;
 	}
@@ -144,5 +153,20 @@ public class VirtueTemplate {
 
 	public void setLastEditor(String lastEditor) {
 		this.lastEditor = lastEditor;
+	}
+
+	@JsonGetter
+	public Collection<String> getVirtualMachineTemplateIds() {
+		if (vmTemplates != null) {
+			virtualMachineTemplateIds = new ArrayList<String>();
+			for (VirtualMachineTemplate vmt : vmTemplates) {
+				virtualMachineTemplateIds.add(vmt.getId());
+			}
+		}
+		return virtualMachineTemplateIds;
+	}
+
+	protected void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
+		this.virtualMachineTemplateIds = virtualMachineTemplateIds;
 	}
 }

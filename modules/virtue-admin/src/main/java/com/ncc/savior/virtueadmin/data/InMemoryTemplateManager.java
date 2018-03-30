@@ -343,4 +343,22 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		throw new RuntimeException("not implemented");
 	}
 
+	@Override
+	public Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getApplications(Collection<String> appIds) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
