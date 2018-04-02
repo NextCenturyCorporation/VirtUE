@@ -5,7 +5,7 @@ export class VirtualMachine {
   name: string;
   os: string;
   templatePath: string;
-  applications: Application[];
+  applicationIds: any[];
   enabled: boolean;
   lastModification: string;
   lastEditor: string;
@@ -15,7 +15,7 @@ export class VirtualMachine {
     name: string,
     os: string,
     templatePath: string,
-    applications: Application[],
+    applicationIds: any[],
     enabled: boolean,
     lastModification: string,
     lastEditor: string
@@ -24,7 +24,7 @@ export class VirtualMachine {
     this.name = name;
     this.os = os;
     this.templatePath = templatePath;
-    this.applications = applications;
+    this.applicationIds = applicationIds;
     this.enabled = enabled;
     this.lastModification = lastModification;
     this.lastEditor = lastEditor;

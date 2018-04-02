@@ -33,6 +33,18 @@
               <button mat-button class="titlebar-button" (click)="activateModal()">Add Application Packages</button>
             </div>
           </div>
+          <!-- if there are no apps, show this message -->
+          <div class="mui-row">
+            <div class="mui-col-md-6">
+              <div *ngIf="appList.length < 1" class="mui-row margin-top-10">
+                <div class="mui-col-md-12">
+                  <p class="no-data-message">
+                    No applications are attached to this VM. To add application(s), click on the button "Add Application Packages".
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="mui-row">
             <div class="mui-col-md-6">
               <div *ngIf="appList.length > 0" class="mui-container-fluid data-list">
@@ -44,13 +56,8 @@
               <div *ngFor="let app of appList; let i = index" class="mui-row table-row" appActiveClass>
                 <div class="table-data mui-col-md-6">
                   <a class="edit" (click)="activateModal(app.id)">{{ app.name }}</a>
-                  <!-- if this virtue is enabled show this menu -->
-                  <span class="menu-options" *ngIf="app.enabled">
-                    <button>Disable</button> | <button mat-button (click)="removeApp(app.id, i)">Remove</button>
-                  </span>
-                  <!-- if this virtue is disabled show this menu -->
-                  <span class="menu-options" *ngIf="app.enabled===false">
-                    <a href="#">Enable</a> | <a (click)="removeApp(app.id)">Remove</a>
+                  <span class="menu-options">
+                    <button mat-button (click)="removeApp(app.id, i)">Remove</button>
                   </span>
                 </div>
                 <div class="table-data mui-col-md-3">{{ app.version }}</div>
@@ -61,7 +68,8 @@
             </div>
           </div>
         </div>
-        <div class="mui-row border-top">
+        <hr />
+        <div class="mui-row">
           <div class="mui-col-md-4">&nbsp;</div>
           <div class="mui-col-md-4 form-item text-align-center">
             <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Build Another VM</span>

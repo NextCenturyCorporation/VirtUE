@@ -6,7 +6,7 @@ export class Virtue {
   id: any;
   name: string;
   version: string;
-  vmTemplates: VirtualMachine[];
+  virtualMachineTemplateIds: any[];
   users: Users[];
   enabled: boolean;
   lastEditor: string;
@@ -17,7 +17,7 @@ export class Virtue {
     id: any,
     name: string,
     version: string,
-    vmTemplates: VirtualMachine[],
+    virtualMachineTemplateIds: any[],
     users: Users[],
     enabled: boolean,
     lastEditor: string,
@@ -27,7 +27,7 @@ export class Virtue {
     this.id = id;
     this.name = name;
     this.version = version;
-    this.vmTemplates = vmTemplates;
+    this.virtualMachineTemplateIds = virtualMachineTemplateIds;
     this.users = users;
     this.enabled = enabled;
     this.lastEditor = lastEditor;

@@ -58,8 +58,8 @@
           <div class="table-data mui-col-md-2">{{ vm.os }}</div>
           <div class="table-data mui-col-md-2">
             <ul>
-              <ng-container *ngFor="let app of vm.applications; let i=index">
-              <li>{{ app.name }}</li>
+              <ng-container *ngFor="let app of vm.applicationIds">
+              <li>{{ getAppName(app) }}</li>
               </ng-container>
             </ul>
           </div>

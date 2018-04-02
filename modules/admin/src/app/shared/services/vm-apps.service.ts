@@ -17,8 +17,8 @@ const httpHeader = {
 
 export class VmAppsService {
 
-  // private jsondata = 'http://localhost:8080/admin/virtualMachine/template';
-  private jsondata = './assets/json/vm_apps.json';
+  private jsondata = 'http://localhost:8080/admin/application';
+  // private jsondata = './assets/json/vm_apps.json';
 
   constructor( private httpClient: HttpClient ) {  }
 
