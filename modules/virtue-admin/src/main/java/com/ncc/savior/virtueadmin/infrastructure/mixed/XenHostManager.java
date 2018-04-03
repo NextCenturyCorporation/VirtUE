@@ -68,7 +68,7 @@ public class XenHostManager {
 			}
 		};
 		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager);
-		String templatePath = "ami-e700d89a";
+		String templatePath = "ami-d29434af";
 		String xenLoginUser = "ec2-user";
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX,
 				templatePath, new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
@@ -160,8 +160,8 @@ public class XenHostManager {
 							String line;
 							try {
 								while ((line = br.readLine()) != null) {
-									System.out.println(line);
-									if (line.contains("finished " + id) && !line.contains("echo")) {
+									logger.debug(line);
+									if (line.contains("finished setting up Xen " + id) && !line.contains("echo")) {
 										break;
 									}
 								}
@@ -177,7 +177,7 @@ public class XenHostManager {
 					JavaUtil.sleepAndLogInterruption(3000);
 					// ps.println("\035");
 					ps.println("sudo xl list");
-					ps.println("echo finished " + id);
+					ps.println("echo finished setting up Xen " + id);
 					t.join(20000);
 					JavaUtil.sleepAndLogInterruption(1000);
 					ps.println("exit");
@@ -196,6 +196,7 @@ public class XenHostManager {
 				}
 				// provision Xen Guest VMs
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
+				logger.debug("starting to provision guests");
 				guestManager.provisionGuests(virtue, linuxVmts);
 			}
 		};
@@ -207,15 +208,16 @@ public class XenHostManager {
 	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms) {
 		// get XenVmManager for id
 		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(id);
-		VirtualMachine xenVm = vmo.get();
-		XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
-		// tell XenManager to delete its vms
-		guestManager.deleteGuests(linuxVms);
-		// TODO schedule once Vm's are deleted, XenManager will delete itself.
-
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		vms.add(xenVm);
-		ec2Wrapper.deleteVirtualMachines(vms);
+		if (vmo.isPresent()) {
+			VirtualMachine xenVm = vmo.get();
+			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
+			// tell XenManager to delete its vms
+			guestManager.deleteGuests(linuxVms);
+			// TODO schedule once Vm's are deleted, XenManager will delete itself.
+			vms.add(xenVm);
+			ec2Wrapper.deleteVirtualMachines(vms);
+		}
 	}
 
 	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {

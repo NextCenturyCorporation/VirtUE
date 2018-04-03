@@ -115,6 +115,9 @@ public class SshUtil {
 			}
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
 			return false;
+		} catch (Throwable t) {
+			logger.error("Found unexpected error.  Handle me better", t);
+			return false;
 		} finally {
 			if (channel != null) {
 				channel.disconnect();
