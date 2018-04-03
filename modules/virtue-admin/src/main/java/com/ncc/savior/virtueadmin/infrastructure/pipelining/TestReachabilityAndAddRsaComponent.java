@@ -55,21 +55,25 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 		VirtualMachine vm = wrapper.get();
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		logger.debug("Testing if VM is reachable - " + vm);
-		if (SshUtil.isVmReachable(vm, privateKeyFile)) {
-			logger.debug("VM is reachable - " + vm);
-			String newPrivateKey = null;
-			try {
-				newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);
-				vm.setPrivateKey(newPrivateKey);
-				vm.setState(successState);
-				doOnSuccess(wrapper);
-			} catch (Exception e) {
-				logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);
-			} finally {
+		try {
+			if (SshUtil.isVmReachable(vm, privateKeyFile)) {
+				logger.debug("VM is reachable - " + vm);
+				String newPrivateKey = null;
+				try {
+					newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);
+					vm.setPrivateKey(newPrivateKey);
+					vm.setState(successState);
+					doOnSuccess(wrapper);
+				} catch (Exception e) {
+					logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);
+				} finally {
 
+				}
+			} else {
+				logger.debug("Test failed - " + vm);
 			}
-		} else {
-			logger.debug("Test failed - " + vm);
+		} catch (Throwable t) {
+			logger.error("Test Failed - " + vm, t);
 		}
 	}
 

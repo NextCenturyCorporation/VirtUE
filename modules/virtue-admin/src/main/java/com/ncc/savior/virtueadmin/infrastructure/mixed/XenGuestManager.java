@@ -21,9 +21,11 @@ import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -239,11 +241,23 @@ public class XenGuestManager {
 	}
 
 	private void setupPortForwarding(Session session, int externalSensingPort, int startingInternalPort,
-			int numSensingPorts, String ipAddress) throws JSchException, IOException {
+			int numSensingPorts, String ipAddress) throws JSchException, IOException, SftpException {
+		String script = "./pf.sh";
+		ChannelSftp ch = (ChannelSftp) session.openChannel("sftp");
+		ch.connect();
+		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("portForwarding.sh");
+		ch.put(stream, script + "win");
+
+		ch.disconnect();
+		JavaUtil.sleepAndLogInterruption(100);
+
+		JavaUtil.sleepAndLogInterruption(100);
+		sendCommandFromSession(session, "tr -d '\\15\\32' < " + script + "win > " + script);
+		sendCommandFromSession(session, "chmod 755 " + script);
+		JavaUtil.sleepAndLogInterruption(100);
 		for (int i = 0; i < numSensingPorts; i++) {
 
-			String cmd = "./portForwarding2.sh " + (i + externalSensingPort) + " " + ipAddress + " "
-					+ (startingInternalPort + i);
+			String cmd = script + " " + (i + externalSensingPort) + " " + ipAddress + " " + (startingInternalPort + i);
 			sendCommandFromSession(session, cmd);
 			JavaUtil.sleepAndLogInterruption(100);
 		}
@@ -333,7 +347,7 @@ public class XenGuestManager {
 				logger.debug("Updated " + elements);
 			}
 		};
-		String hostname = "ec2-34-229-246-30.compute-1.amazonaws.com";
+		String hostname = "ec2-52-90-206-205.compute-1.amazonaws.com";
 		String ipAddress = "34.229.246.30";
 		VirtualMachine xenVm = new VirtualMachine(UUID.randomUUID().toString(), "Test VM",
 				new ArrayList<ApplicationDefinition>(), VmState.RUNNING, OS.LINUX, "", hostname, 22, "ec2-user", null,
