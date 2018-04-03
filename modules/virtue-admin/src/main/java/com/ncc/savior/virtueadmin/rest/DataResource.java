@@ -85,13 +85,15 @@ public class DataResource {
 		ApplicationDefinition loimpress = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Impress",
 				"1.0", OS.LINUX, "loimpress");
 		ApplicationDefinition linuxTerminal = new ApplicationDefinition(UUID.randomUUID().toString(), "Terminal", "1.0",
-				OS.LINUX, "gnome-terminal");
+				OS.LINUX, "xterm");
 		ApplicationDefinition thunderBird = new ApplicationDefinition(UUID.randomUUID().toString(), "Thunderbird",
 				"1.0", OS.LINUX, "thunderbird");
 
-		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome", "1.0",
+		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Win)",
+				"1.0",
 				OS.WINDOWS, "google-chrome");
-		ApplicationDefinition windowsFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
+		ApplicationDefinition windowsFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox (Win)",
+				"1.0",
 				OS.WINDOWS, "firefox");
 		// ApplicationDefinition gedit = new
 		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
