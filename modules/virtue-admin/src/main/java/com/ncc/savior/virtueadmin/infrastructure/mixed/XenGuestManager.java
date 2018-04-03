@@ -83,7 +83,7 @@ public class XenGuestManager {
 				String domainUUID = UUID.randomUUID().toString();
 				String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
 
-				name = "VRTU-test";
+				// name = "VRTU-test";
 				// ipAddress = "192.168.0.54";
 				String loginUsername = "user";
 				// String loginUsername = vmt.getLoginUser();
