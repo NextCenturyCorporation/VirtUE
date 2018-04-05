@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.5.1)
 
+if(${CMAKE_VERSION} VERSION_LESS "3.8")
+  message(WARNING "With cmake versions before 3.8, swig-generated files will not always be updated when they should be. Use the clean target and then rebuild to work around this.")
+endif()
+
 project(freerdp-java Java CXX)
 set(CMAKE_CXX_FLAGS "-std=c++14")
 
