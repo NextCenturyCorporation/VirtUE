@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueState;
@@ -83,7 +84,10 @@ public class DesktopVirtueService {
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
-		applicationManager.startApplicationOnVm(vm, application, 15);
+		if (OS.LINUX.equals(vm.getOs())) {
+			applicationManager.startApplicationOnVm(vm, application, 15);
+		} else {
+		}
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
 				vm.getUserName(), vm.getPrivateKey());
 		logger.debug("started app: " + dva);

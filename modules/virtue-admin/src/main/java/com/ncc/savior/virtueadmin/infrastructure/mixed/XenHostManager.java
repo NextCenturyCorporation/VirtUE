@@ -50,8 +50,8 @@ public class XenHostManager {
 	private static final String VM_PREFIX = "VRTU-";
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> actualVmNotifier, Collection<String> securityGroups, String xenKeyName,
-			InstanceType xenInstanceType) {
+			IUpdateListener<VirtualMachine> actualVmNotifier, Collection<String> securityGroups, String xenAmi,
+			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType) {
 		this.notifier = actualVmNotifier;
 		this.ec2Wrapper = ec2Wrapper;
 		this.securityGroups = securityGroups;
@@ -68,17 +68,15 @@ public class XenHostManager {
 			}
 		};
 		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager);
-		String templatePath = "ami-d29434af";
-		String xenLoginUser = "ec2-user";
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX,
-				templatePath, new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
+				xenAmi, new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
 	}
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> notifier, String securityGroupsCommaSeparated, String xenKeyName,
-			String xenInstanceType) {
-		this(keyManager, ec2Wrapper, xenVmDao, notifier, splitOnComma(securityGroupsCommaSeparated), xenKeyName,
-				InstanceType.fromValue(xenInstanceType));
+			IUpdateListener<VirtualMachine> notifier, String securityGroupsCommaSeparated, String xenAmi,
+			String xenUser, String xenKeyName, String xenInstanceType) {
+		this(keyManager, ec2Wrapper, xenVmDao, notifier, splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser,
+				xenKeyName, InstanceType.fromValue(xenInstanceType));
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {

@@ -1,4 +1,4 @@
-package com.ncc.savior.desktop.virtues;
+package com.ncc.savior.desktop.rdp;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,12 +24,12 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
  *
  */
 
-public class WindowsRdp {
+public class WindowsRdp implements IRdpClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(WindowsRdp.class);
 
-	public static Process startRdp(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
-			throws IOException {
+	@Override
+	public Process startRdp(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color) throws IOException {
 		return startRdp(app, virtue, color, false);
 	}
 
@@ -48,7 +48,7 @@ public class WindowsRdp {
 			writer = new BufferedWriter(new FileWriter(tempFile));
 			writer.write("full address:s:" + app.getHostname());
 			writer.write(nl);
-			writer.write("alternate shell:s:" + "calc.exe");
+			writer.write("alternate shell:s:" + app.getWindowsApplicationPath());
 			writer.write(nl);
 			writer.write("remoteapplicationmode:i:0");
 			writer.write(nl);
@@ -136,9 +136,9 @@ public class WindowsRdp {
 		String version = "1";
 		String hostname = args[1];
 		DesktopVirtueApplication dva = new DesktopVirtueApplication("", "calc.exe", version, OS.WINDOWS, hostname, 3389,
-				"Administrator", args[0]);
+				"Administrator", args[0], "calc.exe");
 		DesktopVirtue virtue = new DesktopVirtue(UUID.randomUUID().toString(), "name", "tempId");
-		Process p = startRdp(dva, virtue, null);
+		Process p = new WindowsRdp().startRdp(dva, virtue, null);
 
 		if (p != null && p.isAlive()) {
 			log(p.getInputStream());

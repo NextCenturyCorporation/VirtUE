@@ -32,7 +32,7 @@ public class AwsVmUpdater implements IVmUpdater {
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 
 	public AwsVmUpdater(VirtueAwsEc2Provider ec2Provider, IUpdateListener<VirtualMachine> notifier,
-			IKeyManager keyManager, boolean includeXpra) {
+			IKeyManager keyManager, boolean includeXpra, boolean changePrivateKey) {
 		AmazonEC2 ec2 = ec2Provider.getEc2();
 		this.provisionPipeline = new UpdatePipeline<VirtualMachine>(notifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "starting");
@@ -42,14 +42,15 @@ public class AwsVmUpdater implements IVmUpdater {
 
 			@Override
 			public synchronized Thread newThread(Runnable r) {
-				String name = "aws-updated-" + num;
+				String name = "aws-updater-" + num;
 				num++;
 				return new Thread(r, name);
 			}
 		});
 		provisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
 		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
-		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
+		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager,
+				false);
 		provisionPipeline.addPipelineComponent(reachableRsa);
 		if (includeXpra) {
 			reachableRsa.setSuccessState(VmState.LAUNCHING);

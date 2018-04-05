@@ -91,10 +91,10 @@ public class DataResource {
 
 		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Win)",
 				"1.0",
-				OS.WINDOWS, "google-chrome");
+				OS.WINDOWS, "c:\\windows\\notepad.exe");
 		ApplicationDefinition windowsFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox (Win)",
 				"1.0",
-				OS.WINDOWS, "firefox");
+				OS.WINDOWS, "c:\\windows\\notepad.exe");
 		// ApplicationDefinition gedit = new
 		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
 		// "gedit");
@@ -134,6 +134,7 @@ public class DataResource {
 		String systemName = "system";
 		String allLinuxAmi = "ami-2b500951";
 		String windowsAmi = "ami-36a65f4b";
+		windowsAmi = "ami-ca00afb7";
 		String linuxLoginUser = "admin";
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",

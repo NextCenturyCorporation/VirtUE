@@ -71,6 +71,7 @@
 		<constructor-arg ref="activeVirtueUpdater" />
 		<constructor-arg ref="keyManager" />
 		<constructor-arg value="false"></constructor-arg>
+		<constructor-arg value="false"></constructor-arg>
 	</bean>
 	<bean name="awsVmManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
@@ -113,6 +114,8 @@
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 	</bean>

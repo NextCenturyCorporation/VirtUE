@@ -42,7 +42,7 @@ public class XenHostVmUpdater implements IVmUpdater {
 
 			@Override
 			public synchronized Thread newThread(Runnable r) {
-				String name = "xen-updated-" + num;
+				String name = "xen-updater-" + num;
 				num++;
 				return new Thread(r, name);
 			}

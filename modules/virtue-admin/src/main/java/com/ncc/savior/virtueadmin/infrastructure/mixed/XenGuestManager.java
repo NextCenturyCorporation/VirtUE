@@ -79,7 +79,11 @@ public class XenGuestManager {
 
 			for (VirtualMachineTemplate vmt : linuxVmts) {
 
+				// TODO this iterator filtering os seems weird.
 				VirtualMachine vm = vmsItr.next();
+				while (vm.getOs().equals(OS.WINDOWS)) {
+					vm = vmsItr.next();
+				}
 				String ipAddress = "0.0.0.0";
 				String clientUser = virtue.getUsername();
 				String domainUUID = UUID.randomUUID().toString();

@@ -24,12 +24,14 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 	private IKeyManager keyManager;
 	private SshKeyInjector sshKeyInjector;
 	private VmState successState;
+	private boolean updateVmPrivateKey;
 
 	public TestReachabilityAndAddRsaComponent(ScheduledExecutorService executor, IKeyManager keyManager) {
 		super(executor, true, 25000, 3000);
 		this.keyManager = keyManager;
 		this.sshKeyInjector = new SshKeyInjector();
 		this.successState = VmState.RUNNING;
+		this.updateVmPrivateKey = true;
 	}
 
 	public TestReachabilityAndAddRsaComponent(ScheduledExecutorService executor, IKeyManager keyManager,
@@ -38,6 +40,16 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 		this.keyManager = keyManager;
 		this.sshKeyInjector = new SshKeyInjector();
 		this.successState = VmState.RUNNING;
+		this.updateVmPrivateKey = true;
+	}
+
+	public TestReachabilityAndAddRsaComponent(ScheduledExecutorService executor, IKeyManager keyManager,
+			boolean updateVmPrivateKey) {
+		super(executor, true, 25000, 3000);
+		this.keyManager = keyManager;
+		this.sshKeyInjector = new SshKeyInjector();
+		this.successState = VmState.RUNNING;
+		this.updateVmPrivateKey = updateVmPrivateKey;
 	}
 
 	@Override
@@ -54,14 +66,16 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 	protected void testReachabilityAndAddRsaKey(PipelineWrapper<VirtualMachine> wrapper) {
 		VirtualMachine vm = wrapper.get();
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
-		logger.debug("Testing if VM is reachable - " + vm);
+		// logger.debug("Testing if VM is reachable - " + vm);
 		try {
 			if (SshUtil.isVmReachable(vm, privateKeyFile)) {
 				logger.debug("VM is reachable - " + vm);
 				String newPrivateKey = null;
 				try {
 					newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);
-					vm.setPrivateKey(newPrivateKey);
+					if (updateVmPrivateKey) {
+						vm.setPrivateKey(newPrivateKey);
+					}
 					vm.setState(successState);
 					doOnSuccess(wrapper);
 				} catch (Exception e) {
@@ -70,7 +84,7 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 
 				}
 			} else {
-				logger.debug("Test failed - " + vm);
+				// logger.debug("Test failed - " + vm);
 			}
 		} catch (Throwable t) {
 			logger.error("Test Failed - " + vm, t);
