@@ -7,6 +7,7 @@
 
 
 #include "FreeRDPWrapper.h"
+#include <iostream>
 
 std::mutex FreeRDPWrapper::instanceMapLock;
 std::map<const freerdp*, FreeRDPWrapper*> FreeRDPWrapper::instanceMap;
@@ -16,8 +17,8 @@ FreeRDPWrapper& FreeRDPWrapper::getInstance(const freerdp* rdp) {
 	return *instanceMap[rdp];
 }
 
-FreeRDPWrapper::FreeRDPWrapper() {
-	instance = freerdp_new();
+FreeRDPWrapper::FreeRDPWrapper()
+    : instance(freerdp_new()) {
 	std::lock_guard<std::mutex> lock(instanceMapLock);
 	instanceMap[instance] = this;
 	registerCallbacks();
@@ -28,7 +29,6 @@ FreeRDPWrapper::~FreeRDPWrapper() {
 		std::lock_guard<std::mutex> lock(instanceMapLock);
 		instanceMap.erase(instance);
 		freerdp_free(instance);
-		instance = 0;
 	}
 }
 
@@ -49,10 +49,27 @@ void FreeRDPWrapper::registerCallbacks() {
 	instance->PostConnect = FreeRDPWrapper::_postConnect;
 }
 
+static std::mutex preConnectCallbacksLock;
+static std::map<const freerdp*, BoolCallback* > preConnectCallbacks;
+
+void FreeRDPWrapper::registerPreConnect(BoolCallback* cb) {
+	std::lock_guard<std::mutex> lock(preConnectCallbacksLock);
+	preConnectCallbacks[instance] = cb;
+}
 int FreeRDPWrapper::_preConnect(freerdp* instance) {
-	return FreeRDPWrapper::getInstance(instance).preConnect();
+	std::lock_guard<std::mutex> lock(preConnectCallbacksLock);
+	BoolCallback* cb = preConnectCallbacks[instance];
+	if (cb) {
+		return cb->apply();
+	}
+	else {
+		return 0;
+	}
 }
 
 int FreeRDPWrapper::_postConnect(freerdp* instance) {
-	return FreeRDPWrapper::getInstance(instance).postConnect();
+	std::cerr << "postConnect not yet implemented" << std::endl;
+	return 0;
 }
+
+

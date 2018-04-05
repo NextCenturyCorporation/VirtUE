@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.xpra;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -22,10 +23,10 @@ import com.ncc.savior.network.SshConnectionParameters;
 public class XpraConnectionManager {
 	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(XpraConnectionManager.class);
-	private HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory> connectionFactoryMap;
-	private HashMap<String, XpraClient> activeClientsMap;
-	private HashMap<Class<? extends IConnectionParameters>, IXpraInitiator.IXpraInitatorFactory> initiaterMap;
-	private HashMap<String, XpraApplicationManager> activeAppManagers;
+	private Map<Class<? extends IConnectionParameters>, BaseConnectionFactory> connectionFactoryMap;
+	private Map<String, XpraClient> activeClientsMap;
+	private Map<Class<? extends IConnectionParameters>, IXpraInitiator.IXpraInitatorFactory> initiaterMap;
+	private Map<String, XpraApplicationManager> activeAppManagers;
 	private IApplicationManagerFactory applicationManagerFactory;
 
 	public XpraConnectionManager(IApplicationManagerFactory appManagerFactory) {

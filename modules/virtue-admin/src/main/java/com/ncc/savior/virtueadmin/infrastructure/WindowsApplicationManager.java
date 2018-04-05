@@ -18,7 +18,6 @@ import com.ncc.savior.virtueadmin.util.SaviorException.ErrorCode;
 
 public class WindowsApplicationManager implements IApplicationManager {
 
-	private static final int RDP_PORT = 3389;
 	private File sshCertificate;
 
 	public WindowsApplicationManager(File sshCertificate) {
@@ -33,29 +32,6 @@ public class WindowsApplicationManager implements IApplicationManager {
 			int maxTries) throws IllegalArgumentException {
 		if (vm.getOs() != OS.WINDOWS) {
 			throw new IllegalArgumentException("vm OS must be Windows, but was: " + vm.getOs());
-		}
-		
-		SshConnectionParameters sshParams = new SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
-				vm.getUserName(), sshCertificate);
-		int randomPort = SocketUtils.findAvailableTcpPort();
-		Session session;
-		try {
-			session = JschUtils.getSession(sshParams);
-		} catch (JSchException e) {
-			throw new IllegalArgumentException("bad user or hostname for VM '" + vm.getName() + "'", e);
-		}
-		
-		try {
-			session.connect();
-		} catch (JSchException e) {
-			throw new SaviorException(ErrorCode.UNKNOWN_ERROR, "could not connect to VM '" + vm.getName() + "'", e);
-		}
-		
-		try {
-			session.setPortForwardingR(RDP_PORT, "localhost", randomPort);
-		} catch (JSchException e) {
-			throw new SaviorException(ErrorCode.UNKNOWN_ERROR,
-					"failed to forward RDP port for VM '" + vm.getName() + "'", e);
 		}
 		
 		IApplicationInstance appInstance;

@@ -28,27 +28,25 @@ public class FreeRDPWrapperTest {
 
 	@Test
 	void testPreConnect() {
-		Callback cb = makeCallback();
-		rdp_freerdp internal = cb.getInstance();
+		FreeRDPWrapper rdp = new FreeRDPWrapper();
+		rdp_context context = new rdp_context();
+		rdp.contextNew(context);
+		
+		Callback cb = new Callback();
+		rdp.registerPreConnect(cb);
+		rdp_freerdp internal = rdp.getInstance();
+		
 		freerdp.freerdp_connect(internal);
 		Assert.assertTrue(cb.preConnectCalled);
 	}
 
-	private Callback makeCallback() {
-		Callback cb = new Callback();
-		rdp_context context = new rdp_context();
-		cb.contextNew(context);
-		return cb;
-	}
-	
-	public static class Callback extends FreeRDPWrapper {
+	public static class Callback extends BoolCallback {
 		boolean preConnectCalled = false;
 
 		@Override
-		public boolean preConnect() {
+		public boolean apply() {
 			preConnectCalled = true;
 			return true;
 		}
-
 	}
 }
