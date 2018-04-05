@@ -19,16 +19,21 @@ include_directories(SYSTEM
 
 set(CMAKE_SWIG_OUTDIR build/java/com/nextcentury/savior/freerdp)
 
-set_source_files_properties(src/main/swig/freerdp.i PROPERTIES
-													CPLUSPLUS ON
-													)
+set(FREERDP_SWIG_SOURCES
+	src/main/swig/freerdp.i
+	)
+	
+set_source_files_properties( ${FREERDP_SWIG_SOURCES}
+							 PROPERTIES
+							 CPLUSPLUS ON
+							 )
 set(CMAKE_SWIG_FLAGS -package com.nextcentury.savior.freerdp)
 include_directories(src/main/cpp)
 
 swig_add_module(
 	jfreerdp
 	java
-	src/main/swig/freerdp.i
+	${FREERDP_SWIG_SOURCES}
 	src/main/cpp/FreeRDPWrapper.h
 	src/main/cpp/FreeRDPWrapper.cpp
 	)
