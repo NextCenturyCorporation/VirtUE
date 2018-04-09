@@ -70,7 +70,8 @@ public class DataResource {
 	@Path("templates/preload")
 	public Response preloadTemplates() {
 		logger.info("attempting to preload data");
-		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome", "1.0",
+		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Linux)",
+				"1.0",
 				OS.LINUX, "google-chrome");
 		ApplicationDefinition linuxFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
 				OS.LINUX, "firefox");

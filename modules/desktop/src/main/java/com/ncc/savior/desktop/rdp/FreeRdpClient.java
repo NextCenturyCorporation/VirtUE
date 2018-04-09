@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -30,8 +31,16 @@ public class FreeRdpClient implements IRdpClient {
 		String appPath = app.getWindowsApplicationPath();
 		String password = app.getPrivateKey();
 		String params = String.format("/f /u:%s /v:%s /app:\"%s\" /p:\"%s\"", user, host, appPath, password);
+		String[] params2 = new String[] { exe.getAbsolutePath(), "/f", "/u:" + user, "/v:" + host,
+				"/app:\"" + appPath + "\"", "/p:\"" + password + "\"" };
 		logger.debug("Exe=" + exe.getAbsolutePath() + " Params=" + params);
-		Process p = Runtime.getRuntime().exec(exe.getAbsolutePath() + " " + params);
+
+		// Process p = Runtime.getRuntime().exec(exe.getAbsolutePath() + " " + params);
+		Process p = new ProcessBuilder(params2)
+				.redirectErrorStream(true)
+				.redirectOutput(Redirect.INHERIT)
+				// .redirectOutput(new File("logs/rdp.out"))
+				.start();
 		final Process process = p;
 		Thread t = new Thread(new Runnable() {
 
@@ -48,7 +57,6 @@ public class FreeRdpClient implements IRdpClient {
 		});
 		t.start();
 		sleep(1000);
-
 		return p;
 	}
 
@@ -56,8 +64,7 @@ public class FreeRdpClient implements IRdpClient {
 		String version = "1";
 		String hostname = args[1];
 		DesktopVirtueApplication dva = new DesktopVirtueApplication("", "c:\\windows\\notepad.exe", version, OS.WINDOWS,
-				hostname, 3389,
-				"Administrator", args[0], "c:\\windows\\notepad.exe");
+				hostname, 3389, "Administrator", args[0], "c:\\windows\\notepad.exe");
 		DesktopVirtue virtue = new DesktopVirtue(UUID.randomUUID().toString(), "name", "tempId");
 
 		Process p = new FreeRdpClient(new File("c:\\wfreerdp.exe")).startRdp(dva, virtue, null);
