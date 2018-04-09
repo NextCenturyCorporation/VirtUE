@@ -40,6 +40,7 @@ public class XenGuestManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenGuestManager.class);
 	private static final String VM_PREFIX = "VRTU-";
 	private static final String PORTS_FILE = "ports.properties";
+	private static final String SENSOR_SCRIPT = "run_sensors.sh";
 	private File keyFile;
 	private VirtualMachine xenVm;
 	private IUpdateListener<VirtualMachine> notifier;
@@ -115,6 +116,7 @@ public class XenGuestManager {
 				setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
 				externalSensingPort += numSensingPorts;
 				catFile(session, ipAddress, loginUsername, PORTS_FILE);
+				startSensors(session, SENSOR_SCRIPT);
 
 				String dnsAddress = ""; // we don't have dns name yet.
 				vm.setName(name);
@@ -155,6 +157,10 @@ public class XenGuestManager {
 				session.disconnect();
 			}
 		}
+	}
+
+	private void startSensors(Session session, String sensorScript) throws JSchException, IOException {
+		sendCommandFromSession(session, "./" + sensorScript);
 	}
 
 	private String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {

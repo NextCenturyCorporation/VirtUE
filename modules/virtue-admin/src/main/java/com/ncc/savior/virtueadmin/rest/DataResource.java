@@ -90,11 +90,23 @@ public class DataResource {
 				"1.0", OS.LINUX, "thunderbird");
 
 		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Win)",
-				"1.0",
+				"1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+		ApplicationDefinition windowsEdge = new ApplicationDefinition(UUID.randomUUID().toString(), "Microsoft Edge",
+				"1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+		ApplicationDefinition windowsWord = new ApplicationDefinition(UUID.randomUUID().toString(),
+				"Microsoft Word 2013", "1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+		ApplicationDefinition windowsExcel = new ApplicationDefinition(UUID.randomUUID().toString(),
+				"Microsoft Excel 2013", "1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+		ApplicationDefinition windowsOutlook = new ApplicationDefinition(UUID.randomUUID().toString(),
+				"Microsoft Outlook 2013", "1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+		ApplicationDefinition windowsPowershell = new ApplicationDefinition(UUID.randomUUID().toString(),
+				"Windows Powershell", "1.0", OS.WINDOWS,
+				"c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe");
+		ApplicationDefinition windowsSkype = new ApplicationDefinition(UUID.randomUUID().toString(), "Skype", "1.0",
 				OS.WINDOWS, "c:\\windows\\notepad.exe");
-		ApplicationDefinition windowsFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox (Win)",
-				"1.0",
-				OS.WINDOWS, "c:\\windows\\notepad.exe");
+		ApplicationDefinition windowsCommandTerminal = new ApplicationDefinition(UUID.randomUUID().toString(),
+				"Windows Command Terminal", "1.0", OS.WINDOWS, "c:\\windows\\system32\\cmd.exe");
+
 		// ApplicationDefinition gedit = new
 		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
 		// "gedit");
@@ -119,7 +131,7 @@ public class DataResource {
 		appsLibreOffice.add(lowriter);
 		appsMath.add(calculator);
 		appsBrowsersWindows.add(windowsChrome);
-		appsBrowsersWindows.add(windowsFirefox);
+		appsBrowsersWindows.add(windowsEdge);
 
 		appsAllLinux.addAll(appsBrowsersLinux);
 		appsAllLinux.addAll(appsLibreOffice);
@@ -127,8 +139,14 @@ public class DataResource {
 		appsAllLinux.add(linuxTerminal);
 		appsAllLinux.add(thunderBird);
 		appsAll.addAll(appsAllLinux);
-		appsAll.addAll(appsBrowsersWindows);
-
+		appsAll.add(windowsChrome);
+		appsAll.add(windowsEdge);
+		appsAll.add(windowsWord);
+		appsAll.add(windowsExcel);
+		appsAll.add(windowsOutlook);
+		appsAll.add(windowsPowershell);
+		appsAll.add(windowsSkype);
+		appsAll.add(windowsCommandTerminal);
 
 		Date now = new Date();
 		String systemName = "system";
@@ -148,6 +166,48 @@ public class DataResource {
 
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
 				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName);
+
+		Collection<ApplicationDefinition> appsDocEditor = new LinkedList<ApplicationDefinition>();
+		appsDocEditor.add(windowsWord);
+		appsDocEditor.add(windowsExcel);
+		appsDocEditor.add(windowsEdge);
+		Collection<ApplicationDefinition> appsWinCorpEmail = new LinkedList<ApplicationDefinition>();
+		appsWinCorpEmail.add(windowsOutlook);
+		appsWinCorpEmail.add(windowsEdge);
+		Collection<ApplicationDefinition> appsExternalInternet = new LinkedList<ApplicationDefinition>();
+		appsExternalInternet.add(windowsChrome);
+		appsExternalInternet.add(windowsSkype);
+		Collection<ApplicationDefinition> appsPowerUserWin = new LinkedList<ApplicationDefinition>();
+		appsPowerUserWin.add(windowsCommandTerminal);
+		appsPowerUserWin.add(windowsPowershell);
+		Collection<ApplicationDefinition> appsPowerUserLinux = new LinkedList<ApplicationDefinition>();
+		appsPowerUserLinux.add(linuxChrome);
+		appsPowerUserLinux.add(linuxTerminal);
+		Collection<ApplicationDefinition> appsRouter = new LinkedList<ApplicationDefinition>();
+		appsRouter.add(linuxTerminal);
+		appsRouter.add(linuxFirefox);
+		Collection<ApplicationDefinition> appsLinuxCorpEmail = new LinkedList<ApplicationDefinition>();
+		appsLinuxCorpEmail.add(thunderBird);
+		appsLinuxCorpEmail.add(linuxFirefox);
+		VirtualMachineTemplate vmDocEditor = new VirtualMachineTemplate(UUID.randomUUID().toString(),
+				"Document Editor VM", OS.WINDOWS, windowsAmi, appsDocEditor, windowsLoginUser, true, now, systemName);
+		VirtualMachineTemplate vmWinCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
+				"Windows Corperate Email User VM", OS.WINDOWS, windowsAmi, appsWinCorpEmail, windowsLoginUser, true,
+				now, systemName);
+		VirtualMachineTemplate vmExternalInternet = new VirtualMachineTemplate(UUID.randomUUID().toString(),
+				"External Internet Consumer VM", OS.WINDOWS, windowsAmi, appsExternalInternet, windowsLoginUser, true,
+				now, systemName);
+		VirtualMachineTemplate vmPowerUserWin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
+				"Power User VM Windows", OS.WINDOWS, windowsAmi, appsPowerUserWin, windowsLoginUser, true, now,
+				systemName);
+		VirtualMachineTemplate vmPowerUserLinux = new VirtualMachineTemplate(UUID.randomUUID().toString(),
+				"Power User Vm Linux", OS.LINUX, allLinuxAmi, appsPowerUserLinux, linuxLoginUser, true, now,
+				systemName);
+		VirtualMachineTemplate vmRouterAdmin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
+				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName);
+		VirtualMachineTemplate vmLinuxCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
+				"Linux Corperate Email User VM", OS.LINUX, allLinuxAmi, appsLinuxCorpEmail, linuxLoginUser, true, now,
+				systemName);
 
 		// VirtualMachineTemplate vmDrawing = new
 		// VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
@@ -184,6 +244,20 @@ public class DataResource {
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0", vmtsMath,
 				allTemplate, true, now, systemName);
 
+		VirtueTemplate virtueDocumentEditor = new VirtueTemplate(UUID.randomUUID().toString(), "Document Editor", "1.0",
+				allTemplate, true, now, systemName, vmDocEditor);
+		VirtueTemplate virtueWinCorpEmail = new VirtueTemplate(UUID.randomUUID().toString(),
+				"Windows Corporate Email User", "1.0", allTemplate, true, now, systemName, vmWinCorpEmail);
+		VirtueTemplate virtueRouterAdmin = new VirtueTemplate(UUID.randomUUID().toString(), "Router Admin", "1.0",
+				allTemplate, true, now, systemName, vmRouterAdmin);
+		VirtueTemplate virtueLinuxCorporateEmailUser = new VirtueTemplate(UUID.randomUUID().toString(),
+				"Linux Corporate Email User", "1.0", allTemplate, true, now, systemName, vmLinuxCorpEmail);
+		VirtueTemplate virtueExternalInternet = new VirtueTemplate(UUID.randomUUID().toString(),
+				"Enternal Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
+		VirtueTemplate virtuePowerUser = new VirtueTemplate(UUID.randomUUID().toString(),
+				"Windows and Linux Power User", "1.0", allTemplate, true, now, systemName, vmPowerUserWin,
+				vmPowerUserLinux);
+
 		for (ApplicationDefinition app : appsAll) {
 			templateManager.addApplicationDefinition(app);
 		}
@@ -195,11 +269,26 @@ public class DataResource {
 		templateManager.addVmTemplate(vmAll);
 		templateManager.addVmTemplate(windowsBrowserVm);
 
+		templateManager.addVmTemplate(vmDocEditor);
+		templateManager.addVmTemplate(vmWinCorpEmail);
+		templateManager.addVmTemplate(vmRouterAdmin);
+		templateManager.addVmTemplate(vmLinuxCorpEmail);
+		templateManager.addVmTemplate(vmExternalInternet);
+		templateManager.addVmTemplate(vmPowerUserWin);
+		templateManager.addVmTemplate(vmPowerUserLinux);
+
 		templateManager.addVirtueTemplate(virtueBrowsers);
 		templateManager.addVirtueTemplate(virtueSingleAll);
 		templateManager.addVirtueTemplate(virtueWindows);
 		templateManager.addVirtueTemplate(virtueLibre);
 		templateManager.addVirtueTemplate(virtueMath);
+
+		templateManager.addVirtueTemplate(virtueDocumentEditor);
+		templateManager.addVirtueTemplate(virtueWinCorpEmail);
+		templateManager.addVirtueTemplate(virtueRouterAdmin);
+		templateManager.addVirtueTemplate(virtueLinuxCorporateEmailUser);
+		templateManager.addVirtueTemplate(virtueExternalInternet);
+		templateManager.addVirtueTemplate(virtuePowerUser);
 
 		ArrayList<String> userRoles = new ArrayList<String>();
 		userRoles.add("ROLE_USER");
@@ -229,6 +318,12 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(admin, virtueWindows.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueMath.getId());
+		templateManager.assignVirtueTemplateToUser(admin, virtueDocumentEditor.getId());
+		templateManager.assignVirtueTemplateToUser(admin, virtueWinCorpEmail.getId());
+		templateManager.assignVirtueTemplateToUser(admin, virtueRouterAdmin.getId());
+		templateManager.assignVirtueTemplateToUser(admin, virtueLinuxCorporateEmailUser.getId());
+		templateManager.assignVirtueTemplateToUser(admin, virtueExternalInternet.getId());
+		templateManager.assignVirtueTemplateToUser(admin, virtuePowerUser.getId());
 		templateManager.assignVirtueTemplateToUser(presenter, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(presenter, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(office, virtueLibre.getId());
