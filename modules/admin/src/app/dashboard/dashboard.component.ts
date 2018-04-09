@@ -1,12 +1,12 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { DashboardService } from '../shared/services/dashboard.service';
+import { SensingService } from '../shared/services/sensing.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  providers: [ DashboardService ]
+  providers: [ SensingService ]
 })
 
 export class DashboardComponent implements OnInit {
@@ -17,7 +17,8 @@ export class DashboardComponent implements OnInit {
   columns = [
     {value: '', viewValue: 'Select Column'},
     {value: 'timestamp', viewValue: 'Timestamp'},
-    {value: 'sensor', viewValue: 'Sensor'},
+    {value: 'sensor_id', viewValue: 'ID'},
+    {value: 'sensor_name', viewValue: 'Sensor Name'},
     {value: 'message', viewValue: 'Message'},
     {value: 'level', viewValue: 'level'}
   ];
@@ -39,11 +40,13 @@ export class DashboardComponent implements OnInit {
 
   // constructor(){}
   constructor(
-    private dashboardService: DashboardService
+    private sensingService: SensingService
   ) {}
 
   ngOnInit() {
-    this.dashboardService.getList()
-    .subscribe(data => this.jsonData = data);
+    this.sensingService.getList()
+    .subscribe(data => {
+      this.jsonData = data;
+    });
   }
 }
