@@ -1,7 +1,5 @@
 %module(directors="1") freerdp
 
-%include <swiginterface.i>
-
 %begin %{
     /* prevents conflicting definitions of __int64 between swig and winpr */
 #define __INTEL_COMPILER
@@ -20,3 +18,4 @@
 
 %feature("director") BoolCallback;
 %include "FreeRDPWrapper.h"
+

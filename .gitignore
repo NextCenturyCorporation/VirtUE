@@ -16,3 +16,4 @@ samba-config-*
 /modules/ecosystem/directory-service/docker/savior-firefox/id_rsa.pub
 /modules/ecosystem/directory-service/docker/savior-firefox/.image.date
 **/src/assets/.sass-cache/*
+/modules/freerdp-java/core

@@ -12,17 +12,14 @@
 #include <map>
 #include <mutex>
 
-template <typename R, typename ...Args> class Callback {
-public:
-	virtual R apply(Args&... params) = 0;
-	virtual ~Callback() {}
-};
+#define CALLBACK_CLASS(CLASS, RETURN, ARGS)                             \
+    class CLASS {                                                       \
+    public:                                                             \
+        virtual RETURN apply ARGS = 0;                                  \
+        virtual ~CLASS() {}                                             \
+    }
 
-class BoolCallback : public Callback<bool> {
-public:
-	virtual bool apply() = 0;
-    virtual ~BoolCallback() {}
-};
+CALLBACK_CLASS(BoolCallback, bool, (freerdp* instance));
 
 class FreeRDPWrapper {
 public:
@@ -35,7 +32,7 @@ public:
 	virtual void contextFree(rdpContext* context);
 
 	/** to call functions that haven't been exported yet */
-	virtual freerdp* getInstance();
+	virtual freerdp* getInstance() const;
 protected:
 	freerdp *const instance;
 	// If we ever need high performance, we could use shared_mutex from boost

@@ -44,7 +44,7 @@ public class FreeRDPWrapperTest {
 		boolean preConnectCalled = false;
 
 		@Override
-		public boolean apply() {
+		public boolean apply(rdp_freerdp instance) {
 			preConnectCalled = true;
 			return true;
 		}
