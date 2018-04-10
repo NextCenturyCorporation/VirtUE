@@ -12,14 +12,16 @@
 #include <map>
 #include <mutex>
 
-#define CALLBACK_CLASS(CLASS, RETURN, ARGS)                             \
+#define CALLBACK_CLASS_DECL(CLASS, RETURN, ARGS)                             \
     class CLASS {                                                       \
     public:                                                             \
         virtual RETURN apply ARGS = 0;                                  \
         virtual ~CLASS() {}                                             \
     }
 
-CALLBACK_CLASS(BoolCallback, bool, (freerdp* instance));
+CALLBACK_CLASS_DECL(BoolCallback, bool, (freerdp* instance));
+
+#undef CALLBACK_CLASS_DECL
 
 class FreeRDPWrapper {
 public:

@@ -1,4 +1,4 @@
-%module(directors="1") freerdp
+%module(directors="1") freerdpmodule
 
 %begin %{
     /* prevents conflicting definitions of __int64 between swig and winpr */
@@ -8,6 +8,7 @@
 %{
 #include <freerdp/freerdp.h>
 #include "FreeRDPWrapper.h"
+#include "FreeRDP.h"
     %}
 
 %apply bool { BOOL };
@@ -18,4 +19,4 @@
 
 %feature("director") BoolCallback;
 %include "FreeRDPWrapper.h"
-
+%include "FreeRDP.h"

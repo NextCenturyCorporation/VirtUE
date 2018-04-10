@@ -1,30 +1,5 @@
 #include "ClientContext.h"
-#include <map>
-#include <mutex>
-
-/**
- * A partial implementation of the std::map interface that is thread safe.
- */
-template <typename KEY, typename VAL>
-class ConcurrentMap {
-public:
-    VAL& operator[]( const KEY& key) {
-        std::lock_guard<std::mutex> lock(mapLock);
-        return map[key];
-    }
-    typename std::map< KEY, VAL >::size_type erase( const KEY& key ) {
-        std::lock_guard<std::mutex> lock(mapLock);
-        return map.erase(key);
-    }
-    std::map< KEY, VAL > clone() const {
-        std::lock_guard<std::mutex> lock(mapLock);
-        std::map< KEY, VAL > copy(map);
-        return copy;
-    }
-private:
-    std::mutex mapLock;
-    std::map< KEY, VAL > map;
-};
+#include "ConcurrentMap.h"
 
 // callback lookups
 static ConcurrentMap< rdpContext*, ClientContext* > contextMap;

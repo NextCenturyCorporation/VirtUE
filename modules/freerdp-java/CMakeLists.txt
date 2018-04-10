@@ -36,6 +36,8 @@ set(FREERDP_CPP_SOURCES
 	src/main/cpp/ClientContext.cpp
 	src/main/cpp/FreeRDPWrapper.h
 	src/main/cpp/FreeRDPWrapper.cpp
+	src/main/cpp/FreeRDP.h
+	src/main/cpp/FreeRDP.cpp
 	)
   
 set_source_files_properties( ${FREERDP_SWIG_SOURCES}
@@ -71,7 +73,6 @@ ExternalProject_Add(
   INSTALL_COMMAND ""
   )
 
-add_library(Catch INTERFACE)
 include_directories(build/catch)
 
 # Build a lib w/o any SWIG or Java stuff to test the base C++ code
@@ -79,5 +80,6 @@ add_library(jfreerdp-cpp ${FREERDP_CPP_SOURCES})
 link_libraries(jfreerdp-cpp freerdp-client2 freerdp2 winpr2)
 
 add_executable(ClientContextTest src/test/cpp/ClientContextTest.cpp)
-target_link_libraries(ClientContextTest Catch jfreerdp-cpp)
+target_link_libraries(ClientContextTest jfreerdp-cpp)
+add_dependencies(ClientContextTest catch)
 add_test(NAME ClientContextTest COMMAND ClientContextTest)

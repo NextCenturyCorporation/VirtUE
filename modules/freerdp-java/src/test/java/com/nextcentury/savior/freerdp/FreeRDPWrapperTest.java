@@ -36,7 +36,7 @@ public class FreeRDPWrapperTest {
 		rdp.registerPreConnect(cb);
 		rdp_freerdp internal = rdp.getInstance();
 		
-		freerdp.freerdp_connect(internal);
+		freerdpmodule.freerdp_connect(internal);
 		Assert.assertTrue(cb.preConnectCalled);
 	}
 
