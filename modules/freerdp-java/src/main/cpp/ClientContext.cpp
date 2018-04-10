@@ -1,5 +1,8 @@
 #include "ClientContext.h"
 #include "ConcurrentMap.h"
+#include <winpr/thread.h>
+
+CALLBACK_CLASS_IMPL(ClientThreadRunner, bool, (freerdp* instance), rdpContext*);
 
 // callback lookups
 static ConcurrentMap< rdpContext*, ClientContext* > contextMap;
@@ -108,3 +111,24 @@ int ClientContext::clientStop(rdpContext* context) {
     }
 }
 
+bool ClientContext::createThread(ClientThreadRunner* runner) {
+	ClientThreadRunner::setCallback(context, runner);
+	HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)
+			&createThreadCallback, context->instance, 0, NULL);
+}
+
+void* ClientContext::createThreadCallback(void* arg) {
+	rdpContext* context = static_cast<rdpContext*>(arg);
+	ClientThreadRunner* runner = ClientThreadRunner::getCallback(context);
+	runner->apply(context->instance);
+	ClientThreadRunner::removeCallback(context);
+}
+
+int ClientContext::waitForThread() {
+	HANDLE thread = freerdp_client_get_thread(context);
+	WaitForSingleObject(thread, INFINITE);
+	DWORD dwExitCode;
+	GetExitCodeThread(thread, &dwExitCode);
+
+	return dwExitCode;
+}

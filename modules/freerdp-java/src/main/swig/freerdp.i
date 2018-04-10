@@ -19,4 +19,5 @@
 
 %feature("director") BoolCallback;
 %include "FreeRDPWrapper.h"
+%import "swighelper.h"
 %include "FreeRDP.h"

@@ -37,7 +37,14 @@ task runMake(type: Exec) {
     description 'Run make as configured by cmake, to build the swig wrapper library'
     dependsOn initCMake
     workingDir 'build'
-    commandLine 'make'
+
+    // note: a simple attempt to parallelize this make invocation
+    // failed, I think due to swig running simultaneously with the
+    // same output. Switching to one swig file that includes others
+    // might enable this to work.
+    
+    //int cpuCount = Runtime.getRuntime().availableProcessors()
+    commandLine 'make'//, '-j' + cpuCount, '-l' + (cpuCount/2)
 }
 
 compileJava.dependsOn('runMake')
@@ -60,8 +67,14 @@ dependencies {
     testRuntime("org.junit.jupiter:junit-jupiter-engine:5.1.0")
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: "5.1.0"
     testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version: "1.1.0"    
-
+	//testCompile group: 'org.mockito', name: 'mockito-core', version: "2.17.0"
+	
     testCompile("junit:junit:4.12")
     testRuntime("org.junit.vintage:junit-vintage-engine:5.1.0")
 }
 
+compileJava {
+    doFirst {
+        logger.lifecycle('')
+    }
+}

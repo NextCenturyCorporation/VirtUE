@@ -33,12 +33,12 @@ class ClientContextTest {
 		}
 
 		@Override
-		public boolean clientNew(SWIGTYPE_p_freerdp instance, ClientContext context) {
+		public boolean clientNew(rdp_freerdp instance, ClientContext context) {
 			return true;
 		}
 
 		@Override
-		public void clientFree(SWIGTYPE_p_freerdp instance, ClientContext context) {
+		public void clientFree(rdp_freerdp instance, ClientContext context) {
 		}
 
 		@Override
