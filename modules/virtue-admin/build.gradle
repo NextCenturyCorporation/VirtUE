@@ -30,6 +30,10 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
+//Springboot creates executable jars, but breaks the rest of the distribution mechanism.  This fixes distributions.
+bootJar { enabled = false }
+jar {enabled = true}
+
 eclipse {
 	classpath {
 		defaultOutputDir = file('ecbuild')

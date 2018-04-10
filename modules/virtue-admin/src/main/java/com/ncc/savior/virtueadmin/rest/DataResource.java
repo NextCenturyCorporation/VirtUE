@@ -92,6 +92,7 @@ public class DataResource {
 
 		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Win)",
 				"1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+		// "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 		ApplicationDefinition windowsEdge = new ApplicationDefinition(UUID.randomUUID().toString(), "Microsoft Edge",
 				"1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
 		ApplicationDefinition windowsWord = new ApplicationDefinition(UUID.randomUUID().toString(),
