@@ -181,7 +181,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			subnetId = newSubnetId;
 			this.vpcId = vpc;
 		} else {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Failed to find subnet with name=" + subnetName);
+			logger.error("Failed to find subnet with name=" + subnetName);
 		}
 	}
 
