@@ -98,6 +98,7 @@ import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
 import { VirtuesService } from './shared/services/virtues.service';
 import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-modal.component';
 
+import { Globals } from './shared/globals';
 
 @NgModule({
   declarations: [
@@ -164,6 +165,7 @@ import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-m
   ],
   providers: [
     { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
+    Globals,
     VirtuesService
   ],
   bootstrap: [AppComponent],

@@ -6,6 +6,7 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Virtue } from '../models/virtue.model';
+import { Globals } from '../globals';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -15,28 +16,31 @@ const httpHeader = {
 
 export class VirtuesService {
 
-  private jsondata = 'http://localhost:8080/admin/virtue/template';
+  constructor(
+    private httpClient: HttpClient,
+    private globals: Globals
+  ) {}
+
+  private restApi = this.globals.serverUrl + '/admin/virtue/template';
   // private jsondata = './assets/json/virtue_list.json';
 
-  constructor(private httpClient: HttpClient) { }
-
   public getVirtues(): Observable<Array<Virtue>> {
-    return this.httpClient.get<Array<Virtue>>(this.jsondata);
+    return this.httpClient.get<Array<Virtue>>(this.restApi);
   }
 
   public getVirtue(id: string): Observable<any> {
     // const src = `${this.jsondata}/${id}`;
-    const src = `${this.jsondata}/?id=${id}`;
+    const src = `${this.restApi}/?id=${id}`;
     return this.httpClient.get<Virtue>(src);
   }
 
   public createVirtue(virtue: Virtue): Observable<any> {
-    return this.httpClient.post(this.jsondata, virtue);
+    return this.httpClient.post(this.restApi, virtue);
     // return this.httpClient.post<Virtue>(this.jsondata, virtue);
   }
 
   public updateVirtue(id: string, virtue: Virtue): Observable<any> {
-    const src = `${this.jsondata}/?id=${id}`;
+    const src = `${this.restApi}/?id=${id}`;
     return this.httpClient.put(src, virtue);
     // return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
   }

@@ -26,14 +26,15 @@
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-3">Virtue Name</div>
-          <div class="table-header mui-col-md-2">OS</div>
+          <div class="table-header mui-col-md-2">Virtue Name</div>
           <div class="table-header mui-col-md-3">Virtual Machines</div>
+          <div class="table-header mui-col-md-3">Apps</div>
           <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
+        <p>{{ getAppName('d4000085-1700-484d-9e61-dc3b82a585e2') }}</p>
         <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
-          <div class="table-data mui-col-md-3">
+          <div class="table-data mui-col-md-2">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
             <!-- if this virtue is enabled show this menu -->
             <span *ngIf="virtue.enabled" class="menu-options">Duplicate | <a mat-button (click)="virtueStatus(virtue.id)">Disable</a> | Export</span>
@@ -41,10 +42,15 @@
             <!-- if this virtue is disabled show this menu -->
             <span *ngIf="virtue.enabled==false" class="menu-options"><a mat-button (click)="virtueStatus(virtue.id)">Enable</a> | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
           </div>
-
-          <div class="table-data mui-col-md-2">{{ virtue.vmTemplates[0].os }} </div>
+          <div class="table-data mui-col-md-3"><!-- virtue.vmTemplates[0].os -->
+            <ul>
+              <li *ngFor="let vm of virtue.virtualMachineTemplateIds">{{ vm }}</li>
+            </ul>
+          </div>
           <div class="table-data mui-col-md-3">
-             <span [ngStyle]="{'margin-left':0}" *ngFor="let app of virtue.applications">{{ app.name }}</span>
+            <ul>
+              <li *ngFor="let app of virtue.applicationIds">{{ app }}</li>
+            </ul>
           </div>
           <div class="table-data mui-col-md-2">{{virtue.lastEditor}}</div>
           <div class="table-data mui-col-md-2">

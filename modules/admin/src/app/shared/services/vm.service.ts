@@ -6,6 +6,7 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { VirtualMachine } from '../models/vm.model';
+import { Globals } from '../globals';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -15,10 +16,13 @@ const httpHeader = {
 
 export class VirtualMachineService {
 
-  private jsondata = 'http://localhost:8080/admin/virtualMachine/template';
-  // private jsondata = './assets/json/vm_list.json';
+  constructor(
+    private httpClient: HttpClient,
+    private hostname: Globals
+   ) {  }
 
-  constructor( private httpClient: HttpClient ) {  }
+ private jsondata = this.hostname + '/admin/virtualMachine/template';
+ // private jsondata = './assets/json/vm_list.json';
 
   public getVmList(): Observable<Array<VirtualMachine>> {
     return this.httpClient.get<Array<VirtualMachine>>(this.jsondata);

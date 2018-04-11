@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { User } from '../models/user.model';
 import { Virtue } from '../models/virtue.model';
 import { VirtuesService } from '../services/virtues.service';
+import { Globals } from '../globals';
 
 const httpOption = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -15,15 +16,15 @@ export class UsersService {
 
   constructor(
     private http: HttpClient,
-    private virtue: VirtuesService
+    private virtue: VirtuesService,
+    private hostname: Globals
   ) { }
 
   // private jsondata = 'http://localhost:8080/admin/user/template';
   private adUsers = './assets/json/ad_users.json';
-  private jsondata = './assets/json/app_users.json';
+  private jsondata = this.hostname.serverUrl + './admin/user';
 
   private userVirtues = [];
-  // virtueListChanged = new EventEmitter<UserVirtue[]>();
 
   // use this when running locally only
   private userData = [];
@@ -40,42 +41,18 @@ export class UsersService {
     const src = `${this.jsondata}/?id=${id}`;
     return this.http.get<User>(src);
   }
+/*
+  public addUser(user: User): Observable<User> {
+    return this.http.post<User>(this.jsondata, user);
+  }
 
-  // public addUser(user: User): Observable<User> {
-  //   return this.http.post<User>(this.jsondata, user);
-  // }
-  //
-  // public deleteUser(user: User): Observable<User> {
-  //   return this.http.delete<User>(`${this.jsondata}/${user.id}`);
-  // }
-  //
-  // public update(user: User): Observable<any> {
-  //   return this.http.put<User>(`${this.jsondata}/${user.id}`,user);
-  // }
+  public deleteUser(user: User): Observable<User> {
+    return this.http.delete<User>(`${this.jsondata}/${user.id}`);
+  }
 
-
-  // Virtue dialog service
-  // public getLocalObj(objId: string): Observable<any> {
-  // const data = this.userData;
-  // this.virtue
-  // for (var i in data) {
-  //     if (data[i].id === objId) {
-  //       console.log(i);
-  //       return data[i];
-  //       // console.log(data[i].slice());
-  //       break;
-  //     }
-  // }
-  // }
-  // public addUserVirtues(userVirtue: virtue): Observable<Array<Virtue>> {
-  //   // return this.http.post<User>(this.jsondata, user);
-  //   this.userVirtues.push[userVirtue];
-  //   console.log(userVirtue);
-  // }
-  //
-  // public getSelectedVirtues(){
-  //   return this.virtues.slice();
-  // }
+  public update(user: User): Observable<any> {
+    return this.http.put<User>(`${this.jsondata}/${user.id}`,user);
+  }*/
 
 
 }

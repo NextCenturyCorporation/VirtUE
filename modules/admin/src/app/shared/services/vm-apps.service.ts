@@ -8,6 +8,7 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Application } from '../models/application.model';
+import { Globals } from '../globals';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -17,10 +18,13 @@ const httpHeader = {
 
 export class VmAppsService {
 
-  private jsondata = 'http://localhost:8080/admin/application';
-  // private jsondata = './assets/json/vm_apps.json';
+  constructor(
+    private httpClient: HttpClient,
+    private hostname: Globals
+   ) {  }
 
-  constructor( private httpClient: HttpClient ) {  }
+  private jsondata = this.hostname.serverUrl + '/admin/application';
+  // private jsondata = './assets/json/vm_apps.json';
 
   public getAppsList(): Observable<Application[]> {
     return this.httpClient.get<Application[]>(this.jsondata);
@@ -29,7 +33,7 @@ export class VmAppsService {
   public getApp(id: string): Observable<Application[]> {
     const src = `${this.jsondata}/?id=${id}`;
 
-    console.log('getApp ID: ' + id + ' @ ' + src);
+    // console.log('getApp ID: ' + id + ' @ ' + src);
 
     return this.httpClient.get<Application[]>(src);
   }
