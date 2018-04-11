@@ -27,8 +27,8 @@ include_directories(SYSTEM
 set(CMAKE_SWIG_OUTDIR build/java/com/nextcentury/savior/freerdp)
 
 set(FREERDP_SWIG_SOURCES
-	src/main/swig/client.i
 	src/main/swig/freerdp.i
+	src/main/swig/winpr.i
 	)
 
 set(FREERDP_CPP_SOURCES
@@ -44,7 +44,7 @@ set_source_files_properties( ${FREERDP_SWIG_SOURCES}
 							 PROPERTIES
 							 CPLUSPLUS ON
 							 )
-set(CMAKE_SWIG_FLAGS -package com.nextcentury.savior.freerdp)
+set(CMAKE_SWIG_FLAGS -package com.nextcentury.savior.freerdp -Wall)
 include_directories(src/main/cpp)
 
 swig_add_module(
@@ -62,16 +62,19 @@ enable_testing()
 include(ExternalProject)
 ExternalProject_Add(
   catch
-  PREFIX ${CMAKE_BINARY_DIR}/catch
+  PREFIX catch
   URL https://github.com/catchorg/Catch2/releases/download/v2.2.2/catch.hpp
+  URL_HASH MD5=40b58ea3607594234e53e1748240876f
   DOWNLOAD_NAME catch.hpp
   DOWNLOAD_NO_EXTRACT TRUE
   DOWNLOAD_NO_PROGRESS TRUE
-  DOWNLOAD_DIR catch
+  DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/.cache/catch
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
-  INSTALL_COMMAND ""
+  INSTALL_DIR ${CMAKE_BINARY_DIR}/catch
+  INSTALL_COMMAND cmake -E copy ${CMAKE_SOURCE_DIR}/.cache/catch/catch.hpp ${CMAKE_BINARY_DIR}/catch
   )
+#  INSTALL_COMMAND cmake -E make_directory ${CMAKE_BINARY_DIR}/catch -E copy ${CMAKE_SOURCE_DIR}/.cache/catch/catch.hpp ${CMAKE_BINARY_DIR}/catch
 
 include_directories(build/catch)
 

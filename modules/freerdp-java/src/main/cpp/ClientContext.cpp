@@ -115,13 +115,15 @@ bool ClientContext::createThread(ClientThreadRunner* runner) {
 	ClientThreadRunner::setCallback(context, runner);
 	HANDLE thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)
 			&createThreadCallback, context->instance, 0, NULL);
+	rdp_client_context* clientContext = dynamic_cast<rdp_client_context*>(context);
+	clientContext->thread = thread;
 }
 
 void* ClientContext::createThreadCallback(void* arg) {
-	rdpContext* context = static_cast<rdpContext*>(arg);
-	ClientThreadRunner* runner = ClientThreadRunner::getCallback(context);
-	runner->apply(context->instance);
-	ClientThreadRunner::removeCallback(context);
+	freerdp* instance = static_cast<freerdp*>(arg);
+	ClientThreadRunner* runner = ClientThreadRunner::getCallback(instance->context);
+	runner->apply(instance);
+	ClientThreadRunner::removeCallback(instance->context);
 }
 
 int ClientContext::waitForThread() {

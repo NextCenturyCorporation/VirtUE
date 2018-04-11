@@ -38,13 +38,9 @@ task runMake(type: Exec) {
     dependsOn initCMake
     workingDir 'build'
 
-    // note: a simple attempt to parallelize this make invocation
-    // failed, I think due to swig running simultaneously with the
-    // same output. Switching to one swig file that includes others
-    // might enable this to work.
-    
-    //int cpuCount = Runtime.getRuntime().availableProcessors()
-    commandLine 'make'//, '-j' + cpuCount, '-l' + (cpuCount/2)
+    // parallelize the build
+    int cpuCount = Runtime.getRuntime().availableProcessors()
+    commandLine 'make', '-j', cpuCount, '-l', cpuCount/2
 }
 
 compileJava.dependsOn('runMake')

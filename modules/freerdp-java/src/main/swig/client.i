@@ -1,35 +1,11 @@
-%module(directors="1") client
-
-%begin %{
-    /* prevents conflicting definitions of __int64 between swig and winpr */
-#define __INTEL_COMPILER
-%}
+// Intended to be included by freerdp.i
 
 %{
 #include <freerdp/client.h>
 #include "ClientContext.h"
     %}
 
-%apply bool { BOOL };
-
-/* When using directors, multiple Java objects can refer to the same C++ object. */
-
-%typemap(javacode) SWIGTYPE %{
-  public boolean equals(Object obj) {
-    boolean equal = false;
-    if (obj instanceof $javaclassname)
-      equal = ((($javaclassname)obj).swigCPtr == this.swigCPtr);
-    return equal;
-  }
-  public int hashCode() {
-    return (int)swigCPtr;
-  }
-%}
-
-%import "freerdp/api.h"
 %include "freerdp/client.h"
-%include "freerdp/settings.h"
-%import "freerdp/freerdp.h"
 %feature("director") ClientEntryPoints;
 %import "swighelper.h"
 %include "ClientContext.h"
