@@ -16,6 +16,10 @@ import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
+import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStatus;
@@ -24,6 +28,9 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.SecurityGroup;
+import com.amazonaws.services.ec2.model.Subnet;
+import com.amazonaws.services.ec2.model.Tag;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -219,6 +226,62 @@ public class AwsUtil {
 				instance.getInstanceId(), instance.getPublicDnsName(), 22, loginUsername, null, privateKeyName,
 				instance.getPublicIpAddress());
 		return vm;
+	}
+
+	public static String getVpcIdFromSubnetId(String subnetId, AwsEc2Wrapper ec2Wrapper) {
+		DescribeSubnetsRequest req = new DescribeSubnetsRequest();
+		req.withSubnetIds(subnetId);
+		DescribeSubnetsResult sub = ec2Wrapper.getEc2().describeSubnets(req);
+		List<Subnet> subnets = sub.getSubnets();
+		if (subnets.isEmpty()) {
+			throw new IllegalArgumentException("Could not find subnet with id=" + subnetId);
+		}
+		return subnets.get(0).getVpcId();
+	}
+
+	public static String getSubnetIdFromName(String subnetName, AwsEc2Wrapper ec2Wrapper) {
+		DescribeSubnetsRequest req = new DescribeSubnetsRequest();
+		DescribeSubnetsResult sub = ec2Wrapper.getEc2().describeSubnets(req);
+		String newSubnetId = null;
+		for (Subnet subnet : sub.getSubnets()) {
+			List<Tag> tags = subnet.getTags();
+			for (Tag tag : tags) {
+				if (tag.getKey().equalsIgnoreCase("name")) {
+					if (tag.getValue().equalsIgnoreCase(subnetName)) {
+						// match!
+						if (newSubnetId == null) {
+							newSubnetId = subnet.getSubnetId();
+						} else {
+							throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+									"Found multiple subnets with the name=" + subnetName);
+						}
+					}
+				}
+			}
+		}
+		return newSubnetId;
+	}
+
+	public static Collection<String> getSecurityGroupIdsByNameAndVpcId(Collection<String> defaultSecurityGroups,
+			String vpcId, AwsEc2Wrapper ec2Wrapper) {
+		ArrayList<String> securityGroupIds = new ArrayList<String>();
+		DescribeSecurityGroupsRequest req = new DescribeSecurityGroupsRequest();
+		DescribeSecurityGroupsResult sgs = ec2Wrapper.getEc2().describeSecurityGroups(req);
+		for (SecurityGroup sg : sgs.getSecurityGroups()) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("examining SG: id=" + sg.getGroupId() + " name=" + sg.getGroupName() + " vpcId="
+						+ sg.getVpcId());
+			}
+			if (defaultSecurityGroups.contains(sg.getGroupName()) && sg.getVpcId().equals(vpcId)) {
+				logger.trace("match!");
+				securityGroupIds.add(sg.getGroupId());
+			}
+		}
+		if (defaultSecurityGroups.size() != securityGroupIds.size()) {
+			logger.warn("Found mismatch of security group name to ids.  #Names=" + defaultSecurityGroups.size()
+					+ " #Ids=" + securityGroupIds.size() + " Names=" + defaultSecurityGroups);
+		}
+		return securityGroupIds;
 	}
 
 }

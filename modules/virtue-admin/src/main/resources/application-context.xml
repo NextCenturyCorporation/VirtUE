@@ -78,7 +78,7 @@
 		<constructor-arg ref="awsVmUpdater" />
 		<constructor-arg ref="keyManager" />
 		<constructor-arg ref="ec2Wrapper" />
-
+		<property name="defaultSubnetName" value="${virtue.aws.server.subnet.name}"></property>
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
 		<!-- <property name="awsProfile" value="">${virtue.aws.profile}</property> -->
@@ -114,6 +114,7 @@
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>

@@ -44,15 +44,18 @@ public class AwsEc2Wrapper {
 		return ec2;
 	}
 
-	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String namePrefix, Collection<String> securityGroups,
-			String serverKeyName, InstanceType instanceType) {
+	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String namePrefix,
+			Collection<String> securityGroupIds, String serverKeyName, InstanceType instanceType, String subnetIds) {
 		
 		VirtualMachine vm = null; 
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
 			String templatePath = vmt.getTemplatePath();
 			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
-					.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName).withSecurityGroups(securityGroups);
+				.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName).withSecurityGroupIds(securityGroupIds)
+				.withSubnetId(subnetIds);
+
+		// .withSecurityGroups(securityGroups);
 			RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
 			List<Instance> instances = result.getReservation().getInstances();

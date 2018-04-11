@@ -46,6 +46,9 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private InstanceType instanceType;
 	private IVmUpdater vmUpdater;
 	private AwsEc2Wrapper ec2Wrapper;
+	private Collection<String> securityGroupIds;
+	private String subnetId;
+	private String vpcId;
 
 	/**
 	 * 
@@ -87,8 +90,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			String clientUser = user.getUsername();
 			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + "-";
-			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, defaultSecurityGroups, serverKeyName,
-					instanceType);
+			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, securityGroupIds, serverKeyName, instanceType,
+					subnetId);
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
@@ -161,20 +164,38 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		return defaultSecurityGroups;
 	}
 
-	public void setDefaultSecurityGroups(ArrayList<String> defaultSecurityGroups) {
+	/**
+	 * must be called after set {@link #setDefaultSubnetName(String)}
+	 * 
+	 * @param defaultSecurityGroups
+	 */
+	public void setDefaultSecurityGroups(List<String> defaultSecurityGroups) {
 		this.defaultSecurityGroups = defaultSecurityGroups;
+		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(defaultSecurityGroups, vpcId, ec2Wrapper);
 	}
 
-	public String getAwsProfile() {
-		return awsProfile;
+	public void setDefaultSubnetName(String subnetName) {
+		String newSubnetId = AwsUtil.getSubnetIdFromName(subnetName, ec2Wrapper);
+		String vpc = AwsUtil.getVpcIdFromSubnetId(newSubnetId, ec2Wrapper);
+		if (newSubnetId != null) {
+			subnetId = newSubnetId;
+			this.vpcId = vpc;
+		} else {
+			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Failed to find subnet with name=" + subnetName);
+		}
 	}
 
 	public void setDefaultSecurityGroupsCommaSeparated(String securityGroupsCommaSeparated) {
 		String[] sgs = securityGroupsCommaSeparated.split(",");
-		defaultSecurityGroups.clear();
+		List<String> secGroups = new ArrayList<String>();
 		for (String sg : sgs) {
-			defaultSecurityGroups.add(sg);
+			secGroups.add(sg);
 		}
+		setDefaultSecurityGroups(secGroups);
+	}
+
+	public String getAwsProfile() {
+		return awsProfile;
 	}
 
 	public void setAwsProfile(String awsProfile) {

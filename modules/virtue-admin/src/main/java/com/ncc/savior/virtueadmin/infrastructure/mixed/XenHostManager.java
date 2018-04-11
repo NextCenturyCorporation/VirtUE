@@ -26,6 +26,7 @@ import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -39,7 +40,6 @@ public class XenHostManager {
 	private VirtualMachineTemplate xenVmTemplate;
 	private IUpdateListener<VirtualMachine> notifier;
 	private AwsEc2Wrapper ec2Wrapper;
-	private Collection<String> securityGroups;
 	private String xenKeyName;
 	private InstanceType xenInstanceType;
 	private XenHostVmUpdater updater;
@@ -47,14 +47,19 @@ public class XenHostManager {
 	private String serverUser;
 	private IKeyManager keyManager;
 	private XenGuestManagerFactory xenGuestManagerFactory;
+	private String subnetId;
+	private Collection<String> securityGroupIds;
 	private static final String VM_PREFIX = "VRTU-";
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> actualVmNotifier, Collection<String> securityGroups, String xenAmi,
-			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType) {
+			IUpdateListener<VirtualMachine> actualVmNotifier, Collection<String> securityGroupsNames, String subnetName,
+			String xenAmi, String xenLoginUser, String xenKeyName, InstanceType xenInstanceType) {
 		this.notifier = actualVmNotifier;
 		this.ec2Wrapper = ec2Wrapper;
-		this.securityGroups = securityGroups;
+
+		this.subnetId = AwsUtil.getSubnetIdFromName(subnetName, ec2Wrapper);
+		String vpcId = AwsUtil.getVpcIdFromSubnetId(subnetId, ec2Wrapper);
+		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
 		this.xenInstanceType = xenInstanceType;
 		this.xenVmDao = xenVmDao;
@@ -68,14 +73,16 @@ public class XenHostManager {
 			}
 		};
 		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager);
-		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX,
-				xenAmi, new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
+		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
+				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
 	}
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> notifier, String securityGroupsCommaSeparated, String xenAmi,
+			IUpdateListener<VirtualMachine> notifier, String securityGroupsCommaSeparated, String subnetId,
+			String xenAmi,
 			String xenUser, String xenKeyName, String xenInstanceType) {
-		this(keyManager, ec2Wrapper, xenVmDao, notifier, splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser,
+		this(keyManager, ec2Wrapper, xenVmDao, notifier, splitOnComma(securityGroupsCommaSeparated), subnetId, xenAmi,
+				xenUser,
 				xenKeyName, InstanceType.fromValue(xenInstanceType));
 	}
 
@@ -97,7 +104,8 @@ public class XenHostManager {
 
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroups, xenKeyName, xenInstanceType);
+				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName, xenInstanceType,
+				subnetId);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,

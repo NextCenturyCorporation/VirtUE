@@ -577,4 +577,17 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
+
+	@GET
+	@Path("sensing")
+	@Produces("application/json")
+	public Response getSensing() throws IOException {
+		try {
+			String response = adminService.getSensingReponse();
+			return Response.ok(response).build();
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+
+	}
 }

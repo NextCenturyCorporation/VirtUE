@@ -1,5 +1,9 @@
 package com.ncc.savior.virtueadmin.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -12,7 +16,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
@@ -27,6 +37,7 @@ import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
+import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
@@ -48,6 +59,9 @@ public class AdminService {
 	private SecurityUserService securityService;
 
 	private String initialAdmin;
+
+	@Value("${virtue.sensing.redirectUrl}")
+	private String sensingUri;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
 			String initialAdmin) {
@@ -357,5 +371,22 @@ public class AdminService {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
 		}
 		return user;
+	}
+
+	public String getSensingReponse() throws IOException {
+		if (JavaUtil.isNotEmpty(sensingUri)) {
+			Client client = ClientBuilder.newClient();
+			Response response = client.target(sensingUri).request(MediaType.APPLICATION_JSON_TYPE).get();
+			InputStream in = (InputStream) response.getEntity();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			String line;
+			StringBuilder sb = new StringBuilder();
+			while ((line = reader.readLine()) != null) {
+				sb.append(line).append("\n");
+			}
+			return sb.toString();
+		} else {
+			throw new IllegalArgumentException("No sensing URI was set");
+		}
 	}
 }
