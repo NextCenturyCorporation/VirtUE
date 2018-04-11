@@ -16,11 +16,12 @@ const httpHeader = {
 export class SensingService {
 
   private jsonfile = './assets/json/sample_data.json';
+  private restApi = 'http://sensing-api.savior.internal:17141/api/v1/sensors/all/inspect';
 
   constructor( private httpClient: HttpClient ) { }
 
   getList(): Observable<any> {
-    return this.httpClient.get<any>(this.jsonfile);
+    return this.httpClient.get<any>(this.restApi);
   }
 
 }
