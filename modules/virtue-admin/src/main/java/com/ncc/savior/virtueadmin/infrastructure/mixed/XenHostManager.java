@@ -79,11 +79,9 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
 			IUpdateListener<VirtualMachine> notifier, String securityGroupsCommaSeparated, String subnetId,
-			String xenAmi,
-			String xenUser, String xenKeyName, String xenInstanceType) {
+			String xenAmi, String xenUser, String xenKeyName, String xenInstanceType) {
 		this(keyManager, ec2Wrapper, xenVmDao, notifier, splitOnComma(securityGroupsCommaSeparated), subnetId, xenAmi,
-				xenUser,
-				xenKeyName, InstanceType.fromValue(xenInstanceType));
+				xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType));
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
