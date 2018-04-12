@@ -120,7 +120,7 @@ public class XenGuestManager {
 
 				externalSensingPort += numSensingPorts;
 				catFile(session, ipAddress, loginUsername, PORTS_FILE);
-				startSensors(session, SENSOR_SCRIPT);
+				startSensors(session, SENSOR_SCRIPT, ipAddress, loginUsername);
 
 				String dnsAddress = ""; // we don't have dns name yet.
 				vm.setName(name);
@@ -166,8 +166,10 @@ public class XenGuestManager {
 		}
 	}
 
-	private void startSensors(Session session, String sensorScript) throws JSchException, IOException {
-		sendCommandFromSession(session, "./" + sensorScript);
+	private void startSensors(Session session, String sensorScript, String ipAddress, String username)
+			throws JSchException, IOException {
+		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \" sudo ./" + sensorScript + "\"";
+		sendCommandFromSession(session, cmd);
 	}
 
 	private String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {
