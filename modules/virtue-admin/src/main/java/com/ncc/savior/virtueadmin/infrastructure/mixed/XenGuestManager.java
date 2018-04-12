@@ -28,6 +28,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
+import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -45,13 +46,15 @@ public class XenGuestManager {
 	private VirtualMachine xenVm;
 	private IUpdateListener<VirtualMachine> notifier;
 	private XenGuestVmUpdater guestUpdater;
+	private Route53Manager route53;
 
 	public XenGuestManager(VirtualMachine xenVm, File keyFile, IUpdateListener<VirtualMachine> notifier,
-			XenGuestVmUpdater guestUpdater) {
+			XenGuestVmUpdater guestUpdater, Route53Manager route53) {
 		this.keyFile = keyFile;
 		this.xenVm = xenVm;
 		this.notifier = notifier;
 		this.guestUpdater = guestUpdater;
+		this.route53 = route53;
 	}
 
 	public void provisionGuests(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
@@ -109,11 +112,12 @@ public class XenGuestManager {
 					sendCommandFromSession(session, hostCmd);
 				}
 
-				logger.debug("Attempting to setup port forwarding.");
+				logger.debug("Attempting to setup port forwarding. ");
 				String hostname = sendCommandFromSession(session, "hostname").get(0);
-				hostname += ".ec2.internal";
-				setupHostname(session, loginUsername, hostname, ipAddress);
+				String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
+				setupHostname(session, loginUsername, hostname, dns, ipAddress);
 				setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
+
 				externalSensingPort += numSensingPorts;
 				catFile(session, ipAddress, loginUsername, PORTS_FILE);
 				startSensors(session, SENSOR_SCRIPT);
@@ -122,6 +126,7 @@ public class XenGuestManager {
 				vm.setName(name);
 				vm.setInfrastructureId(name);
 				vm.setUserName(loginUsername);
+				vm.setInternalHostname(hostname);
 				vm.setHostname(dnsAddress);
 				vm.setIpAddress(ipAddress);
 				int internalPort = 22;
@@ -138,6 +143,8 @@ public class XenGuestManager {
 				vm.setState(VmState.LAUNCHING);
 				vm.setHostname(xenVm.getHostname());
 				vm.setIpAddress(xenVm.getIpAddress());
+				vm.setInternalHostname(dns);
+				vm.setInternalIpAddress(ipAddress);
 				vm.setPrivateKeyName(xenVm.getPrivateKeyName());
 				vm.setSshPort(externalSshPort);
 				vm.setApplications(new ArrayList<ApplicationDefinition>(vmt.getApplications()));
@@ -242,12 +249,15 @@ public class XenGuestManager {
 		return session;
 	}
 
-	private void setupHostname(Session session, String username, String hostname, String ipAddress)
+	private void setupHostname(Session session, String username, String hostname, String dns, String ipAddress)
 			throws JSchException, IOException {
 		// hostname = hostname`";
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"echo hostname=" + hostname
 				+ " > " + PORTS_FILE + "\"";
+		String cmd2 = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"echo dns=" + dns + " >> "
+				+ PORTS_FILE + "\"";
 		sendCommandFromSession(session, cmd);
+		sendCommandFromSession(session, cmd2);
 	}
 
 	private void setupPortForwarding(Session session, int externalSensingPort, int startingInternalPort,
@@ -346,8 +356,19 @@ public class XenGuestManager {
 	}
 
 	public void deleteGuests(Collection<VirtualMachine> linuxVms) {
-		// TODO Auto-generated method stub
-
+		Collection<String> hostnames = new ArrayList<String>();
+		try {
+			for (VirtualMachine vm : linuxVms) {
+				if (JavaUtil.isNotEmpty(vm.getInternalHostname())) {
+					hostnames.add(vm.getInternalHostname());
+				}
+			}
+			if (!hostnames.isEmpty()) {
+				route53.deleteARecords(hostnames);
+			}
+		} catch (Exception e) {
+			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames);
+		}
 	}
 
 	public static void main(String[] args) {
@@ -372,7 +393,7 @@ public class XenGuestManager {
 				new ArrayList<ApplicationDefinition>(), "user", true, new Date(), "System"));
 
 		XenGuestManager mgr = new XenGuestManager(xenVm, new File("certs/virginiatech_ec2.pem"), updateListener,
-				new XenGuestVmUpdater(updateListener, new DirectoryKeyManager(new File("./certs/"))));
+				new XenGuestVmUpdater(updateListener, new DirectoryKeyManager(new File("./certs/"))), null);
 
 		mgr.provisionGuests(virtue, linuxVmts);
 	}

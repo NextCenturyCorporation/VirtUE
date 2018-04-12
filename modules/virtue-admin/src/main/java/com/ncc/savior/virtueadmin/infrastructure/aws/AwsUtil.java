@@ -186,6 +186,8 @@ public class AwsUtil {
 						if (vm.getInfrastructureId().equals(i.getInstanceId())) {
 							vm.setHostname(i.getPublicDnsName());
 							vm.setIpAddress(i.getPublicIpAddress());
+							vm.setInternalIpAddress(i.getPrivateIpAddress());
+							vm.setInternalHostname(i.getPrivateDnsName());
 						}
 					}
 				}

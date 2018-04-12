@@ -59,6 +59,11 @@
 		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
 	</bean>
+	
+	<bean name="awsRoute53" class="com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager">
+		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.domain}"></constructor-arg>
+	</bean>
 
 	<bean name="ec2Wrapper"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper">
@@ -113,6 +118,7 @@
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater"></constructor-arg>
+		<constructor-arg ref="awsRoute53"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>

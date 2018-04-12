@@ -33,6 +33,8 @@ public class VirtualMachine {
 
 	@Transient
 	private Collection<String> applicationIds;
+	private String internalHostname;
+	private String privateIpAddress;
 
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
 			String infrastructureId, String hostname, int sshPort, String userName, String privateKey,
@@ -147,7 +149,8 @@ public class VirtualMachine {
 		return "VirtualMachine [id=" + id + ", name=" + name + ", state=" + state + ", os=" + os + ", hostname="
 				+ hostname + ", sshPort=" + sshPort + ", infrastructureId=" + infrastructureId + ", userName="
 				+ userName + ", privateKey=[protected], privateKeyName=" + privateKeyName + ", ipAddress=" + ipAddress
-				+ ", applications=" + applications + "]";
+				+ ", applications=" + applications + ", applicationIds=" + applicationIds + ", internalHostname="
+				+ internalHostname + "]";
 	}
 
 	public String getIpAddress() {
@@ -188,5 +191,21 @@ public class VirtualMachine {
 
 	protected void setApplicationIds(Collection<String> applicationIds) {
 		this.applicationIds = applicationIds;
+	}
+
+	public void setInternalHostname(String hostname) {
+		this.internalHostname = hostname;
+	}
+
+	public String getInternalHostname() {
+		return this.internalHostname;
+	}
+
+	public void setInternalIpAddress(String privateIpAddress) {
+		this.privateIpAddress = privateIpAddress;
+	}
+
+	public String getInternalIpAddress() {
+		return this.privateIpAddress;
 	}
 }

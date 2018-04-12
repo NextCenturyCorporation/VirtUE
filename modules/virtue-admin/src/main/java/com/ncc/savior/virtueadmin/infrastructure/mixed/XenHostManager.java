@@ -27,6 +27,7 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
+import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -52,8 +53,9 @@ public class XenHostManager {
 	private static final String VM_PREFIX = "VRTU-";
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> actualVmNotifier, Collection<String> securityGroupsNames, String subnetName,
-			String xenAmi, String xenLoginUser, String xenKeyName, InstanceType xenInstanceType) {
+			IUpdateListener<VirtualMachine> actualVmNotifier, Route53Manager route53,
+			Collection<String> securityGroupsNames, String subnetName, String xenAmi, String xenLoginUser,
+			String xenKeyName, InstanceType xenInstanceType) {
 		this.notifier = actualVmNotifier;
 		this.ec2Wrapper = ec2Wrapper;
 
@@ -65,7 +67,7 @@ public class XenHostManager {
 		this.xenVmDao = xenVmDao;
 		this.serverUser = System.getProperty("user.name");
 		this.keyManager = keyManager;
-		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, notifier);
+		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, notifier, route53);
 		IUpdateListener<VirtualMachine> xenListener = new IUpdateListener<VirtualMachine>() {
 			@Override
 			public void updateElements(Collection<VirtualMachine> elements) {
@@ -78,10 +80,10 @@ public class XenHostManager {
 	}
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> notifier, String securityGroupsCommaSeparated, String subnetId,
-			String xenAmi, String xenUser, String xenKeyName, String xenInstanceType) {
-		this(keyManager, ec2Wrapper, xenVmDao, notifier, splitOnComma(securityGroupsCommaSeparated), subnetId, xenAmi,
-				xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType));
+			IUpdateListener<VirtualMachine> notifier, Route53Manager route53, String securityGroupsCommaSeparated,
+			String subnetId, String xenAmi, String xenUser, String xenKeyName, String xenInstanceType) {
+		this(keyManager, ec2Wrapper, xenVmDao, notifier, route53, splitOnComma(securityGroupsCommaSeparated), subnetId,
+				xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType));
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
