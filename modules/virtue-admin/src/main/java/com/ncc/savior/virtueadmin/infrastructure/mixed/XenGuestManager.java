@@ -367,7 +367,7 @@ public class XenGuestManager {
 				route53.deleteARecords(hostnames);
 			}
 		} catch (Exception e) {
-			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames);
+			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames, e);
 		}
 	}
 

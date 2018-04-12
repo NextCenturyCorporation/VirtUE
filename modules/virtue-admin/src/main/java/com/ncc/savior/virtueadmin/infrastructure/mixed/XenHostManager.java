@@ -2,6 +2,8 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
@@ -152,6 +156,8 @@ public class XenHostManager {
 					session.setTimeout(500);
 					session.connect();
 
+					copySshKey(session, privateKeyFile);
+
 					Channel myChannel = session.openChannel("shell");
 					OutputStream ops = myChannel.getOutputStream();
 					PrintStream ps = new PrintStream(ops, true);
@@ -209,6 +215,28 @@ public class XenHostManager {
 
 		Thread t = new Thread(r, "XenProvisioner-" + id);
 		t.start();
+	}
+
+	protected void copySshKey(Session session, File privateKeyFile) {
+		ChannelSftp ch = null;
+		try {
+			ch = (ChannelSftp) session.openChannel("sftp");
+			ch.connect();
+			InputStream stream = new FileInputStream(privateKeyFile);
+			ch.put(stream, privateKeyFile.getName());
+			// 400 from octal to decimal
+			ch.chmod(256, privateKeyFile.getName());
+		} catch (JSchException e) {
+			logger.error("Error attempting to copy private key", e);
+		} catch (FileNotFoundException e) {
+			logger.error("Error attempting to copy private key", e);
+		} catch (SftpException e) {
+			logger.error("Error attempting to copy private key", e);
+		} finally {
+
+			ch.disconnect();
+		}
+
 	}
 
 	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms) {

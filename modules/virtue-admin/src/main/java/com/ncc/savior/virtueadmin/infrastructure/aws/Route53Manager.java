@@ -113,8 +113,11 @@ public class Route53Manager {
 	}
 
 	private String getFqdnFromHostname(String hostname) {
-		String dns = hostname + "." + domain;
-		return dns;
+		if (!hostname.endsWith(domain)) {
+			String dns = hostname + "." + domain;
+			return dns;
+		}
+		return hostname;
 	}
 
 	public void deleteARecords(Map<String, String> records) {
@@ -196,14 +199,14 @@ public class Route53Manager {
 		client.changeResourceRecordSets(request);
 	}
 
-	private Change getDeleteChange(String dns, String ip) {
-		dns += "." + domain;
+	private Change getDeleteChange(String hostname, String ip) {
+		String dns = getFqdnFromHostname(hostname);
 		return new Change().withAction(ChangeAction.DELETE).withResourceRecordSet(new ResourceRecordSet().withName(dns)
 				.withType(RRType.A).withTTL(60L).withResourceRecords(new ResourceRecord().withValue(ip)));
 	}
 
-	private Change getAddARecordChange(String dns, String ip) {
-		dns += "." + domain;
+	private Change getAddARecordChange(String hostname, String ip) {
+		String dns = getFqdnFromHostname(hostname);
 		return new Change().withAction(ChangeAction.UPSERT).withResourceRecordSet(new ResourceRecordSet().withName(dns)
 				.withType(RRType.A).withTTL(60L).withResourceRecords(new ResourceRecord().withValue(ip)));
 	}
