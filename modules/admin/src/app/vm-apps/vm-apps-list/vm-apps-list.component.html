@@ -40,12 +40,12 @@
         </div>
         <div *ngFor="let app of apps | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-6">
-            {{ app.name }}
+            <a mat-button (click)="updateStatus(app.id, app.enabled)">{{ app.name }}</a>
             <!-- if this virtue is enabled show this menu -->
-            <span *ngIf="app.enabled" class="menu-options"><a mat-button>Disable</a> | <a mat-button>Check for Updates</a></span>
+            <span *ngIf="app.enabled" class="menu-options"><a mat-button (click)="updateStatus(app.id)">Disable</a> | <a mat-button>Check for Updates</a></span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span *ngIf="app.enabled===false" class="menu-options"><a mat-button>Enable</a> | <a mat-button (click)="openDialogPrompt(app.id, 'uninstall', app.name)">Uninstall</a></span>
+            <span *ngIf="app.enabled===false" class="menu-options"><a mat-button (click)="updateStatus(app.id)">Enable</a> | <a mat-button (click)="openDialogPrompt(app.id, 'uninstall', app.name)">Uninstall</a></span>
           </div>
 
           <div class="table-data mui-col-md-2">{{ app.version }}</div>

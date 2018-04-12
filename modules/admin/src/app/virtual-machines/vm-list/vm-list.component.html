@@ -39,27 +39,35 @@
           <div class="table-header mui-col-md-2">Last Modified By</div>
           <div class="table-header mui-col-md-2">Modified Date</div>
         </div>
-        <div *ngFor="let vm of vms | listFilter:filterValue:'enabled'" class="mui-row table-row">
+        <div *ngFor="let vm of vms | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-4">
             <div class="mini-menu">
               <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.name }}</a>
               <!-- if this virtue is enabled show this menu -->
-              <span class="menu-options"><a mat-button (click)="openDialog(vm.id,'disable','Virtual Machine')">Disable</a> | Duplicate | Export</span>
+              <span *ngIf="vm.enabled === true" class="menu-options">
+                <a mat-button (click)="updateStatus(vm.id)">Disable</a> | Duplicate | Export
+              </span>
 
               <!-- if this virtue is disabled show this menu -->
-              <span class="menu-options">Enable | <a mat-button (click)="openDialog('vm.id','delete','Virtual Machine')">Delete</a></span>
+              <span *ngIf="vm.enabled !== true"class="menu-options">
+                <a mat-button (click)="updateStatus(vm.id)">Enable</a> |
+                <a mat-button (click)="openDialog(vm.id, 'delete', 'delete', vm.name)">Delete</a>
+              </span>
           </div>
           </div>
           <div class="table-data mui-col-md-2">{{ vm.os }}</div>
           <div class="table-data mui-col-md-2">
             <ul>
-              <ng-container *ngFor="let app of vm.applications; let i=index">
-              <li>{{ app.name }}</li>
+              <ng-container *ngFor="let app of vm.applicationIds">
+              <li>{{ getAppName(app) }}</li>
               </ng-container>
             </ul>
           </div>
           <div class="table-data mui-col-md-2">{{ vm.lastEditor }}</div>
-          <div class="table-data mui-col-md-2">{{ vm.enabled }}<br />{{ vm.modifiedDate }}</div>
+          <div class="table-data mui-col-md-2">
+            {{vm.enabled ? 'Enabled' : 'Disabled'}}<br />
+            {{vm.lastModification | date:'short' }}
+          </div>
           <div class="clearfix"></div>
         </div>
       </div>

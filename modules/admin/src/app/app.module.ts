@@ -143,9 +143,9 @@ import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-m
   imports: [
     AppRoutingModule,
     BreadcrumbsModule,
+    BrowserAnimationsModule,
     BrowserModule,
     FormsModule,
-    ReactiveFormsModule,
     HttpClientModule,
     HttpModule,
     MatAutocompleteModule,
@@ -156,7 +156,7 @@ import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-m
     MatRadioModule,
     MatSelectModule,
     MatToolbarModule,
-    BrowserAnimationsModule,
+    ReactiveFormsModule,
     SplitPaneModule
   ],
   exports: [
