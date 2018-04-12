@@ -41,7 +41,9 @@ public class Route53Manager {
 	public Route53Manager(VirtueAwsEc2Provider ec2Provider, String domain) {
 		client = ec2Provider.getRoute53Client();
 		this.hostedZone = getHostedZoneForDomain(domain);
-		this.hostedZoneId = hostedZone.getId();
+		if (hostedZone != null) {
+			this.hostedZoneId = hostedZone.getId();
+		}
 		this.domain = domain;
 	}
 
