@@ -18,6 +18,8 @@ public class NetworkingClearingComponent extends BaseGroupedVmPipelineComponent<
 				VirtualMachine vm = wrapper.get();
 				vm.setHostname(null);
 				vm.setIpAddress(null);
+				vm.setInternalIpAddress(null);
+				vm.setInternalHostname(null);
 			}
 			doOnSuccess(wrappers);
 		}

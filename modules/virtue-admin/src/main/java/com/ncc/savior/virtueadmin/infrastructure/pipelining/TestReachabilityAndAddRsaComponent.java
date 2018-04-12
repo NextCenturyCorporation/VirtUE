@@ -24,12 +24,14 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 	private IKeyManager keyManager;
 	private SshKeyInjector sshKeyInjector;
 	private VmState successState;
+	private boolean updateVmPrivateKey;
 
 	public TestReachabilityAndAddRsaComponent(ScheduledExecutorService executor, IKeyManager keyManager) {
 		super(executor, true, 25000, 3000);
 		this.keyManager = keyManager;
 		this.sshKeyInjector = new SshKeyInjector();
 		this.successState = VmState.RUNNING;
+		this.updateVmPrivateKey = true;
 	}
 
 	public TestReachabilityAndAddRsaComponent(ScheduledExecutorService executor, IKeyManager keyManager,
@@ -38,6 +40,16 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 		this.keyManager = keyManager;
 		this.sshKeyInjector = new SshKeyInjector();
 		this.successState = VmState.RUNNING;
+		this.updateVmPrivateKey = true;
+	}
+
+	public TestReachabilityAndAddRsaComponent(ScheduledExecutorService executor, IKeyManager keyManager,
+			boolean updateVmPrivateKey) {
+		super(executor, true, 25000, 3000);
+		this.keyManager = keyManager;
+		this.sshKeyInjector = new SshKeyInjector();
+		this.successState = VmState.RUNNING;
+		this.updateVmPrivateKey = updateVmPrivateKey;
 	}
 
 	@Override
@@ -54,20 +66,28 @@ public class TestReachabilityAndAddRsaComponent extends BaseIndividualVmPipeline
 	protected void testReachabilityAndAddRsaKey(PipelineWrapper<VirtualMachine> wrapper) {
 		VirtualMachine vm = wrapper.get();
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
-		logger.trace("Testing if VM is reachable - " + vm);
-		if (SshUtil.isVmReachable(vm, privateKeyFile)) {
-			logger.trace("VM is reachable - " + vm);
-			String newPrivateKey = null;
-			try {
-				newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);
-				vm.setPrivateKey(newPrivateKey);
-				vm.setState(successState);
-				doOnSuccess(wrapper);
-			} catch (Exception e) {
-				logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);
-			} finally {
+		// logger.debug("Testing if VM is reachable - " + vm);
+		try {
+			if (SshUtil.isVmReachable(vm, privateKeyFile)) {
+				logger.debug("VM is reachable - " + vm);
+				String newPrivateKey = null;
+				try {
+					newPrivateKey = sshKeyInjector.injectSshKey(vm, privateKeyFile);
+					if (updateVmPrivateKey) {
+						vm.setPrivateKey(newPrivateKey);
+					}
+					vm.setState(successState);
+					doOnSuccess(wrapper);
+				} catch (Exception e) {
+					logger.error("Injecting new SSH key failed.  Clients will not be able to login.", e);
+				} finally {
 
+				}
+			} else {
+				// logger.debug("Test failed - " + vm);
 			}
+		} catch (Throwable t) {
+			logger.error("Test Failed - " + vm, t);
 		}
 	}
 

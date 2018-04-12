@@ -33,6 +33,10 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
+//Springboot creates executable jars, but breaks the rest of the distribution mechanism.  This fixes distributions.
+bootJar { enabled = false }
+jar {enabled = true}
+
 group = 'com.ncc.savior'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
@@ -63,6 +67,7 @@ dependencies {
     compile 'com.amazonaws:aws-java-sdk-ec2'    
     compile 'com.amazonaws:aws-java-sdk-cloudformation'
     compile 'com.amazonaws:aws-java-sdk-simpledb'
+    compile 'com.amazonaws:aws-java-sdk-route53' 
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion

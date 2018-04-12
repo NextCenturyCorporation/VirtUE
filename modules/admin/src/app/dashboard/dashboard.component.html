@@ -19,17 +19,19 @@
             </form>
             <div class="mui-container-fluid">
               <div class="mui-row">
-                <div class="mui-col-md-2 table-header">Timestamp</div>
-                <div class="mui-col-md-3 table-header">Sensor</div>
-                <div class="mui-col-md-6 table-header">Message</div>
+                <div class="mui-col-md-3 table-header">ID</div>
+                <div class="mui-col-md-1 table-header">Sensor</div>
+                <div class="mui-col-md-5 table-header">Message</div>
                 <div class="mui-col-md-1 table-header">Level</div>
+                  <div class="mui-col-md-2 table-header">Timestamp</div>
               </div>
               <div class="table-container">
                 <div class="mui-row" *ngFor="let d of jsonData | filter:selected:'message'">
-                  <div class="mui-col-md-2 table-data">{{d.timestamp|date:"MM/dd/yyyy, h:mm a"}}</div>
-                  <div class="mui-col-md-3 table-data">{{d.sensor}}</div>
-                  <div class="mui-col-md-6 table-data">{{d.message}}</div>
+                  <div class="mui-col-md-3 table-data">{{d.sensor_id}}</div>
+                  <div class="mui-col-md-1 table-data">{{d.sensor_name}}</div>
+                  <div class="mui-col-md-5 table-data">{{d.message}}</div>
                   <div class="mui-col-md-1 table-data border-bottom">{{d.level}}</div>
+                    <div class="mui-col-md-2 table-data">{{d.timestamp|date:"MM/dd/yyyy, h:mm a"}}</div>
                 </div>
               </div>
 

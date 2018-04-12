@@ -11,6 +11,8 @@ import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.amazonaws.services.route53.AmazonRoute53Async;
+import com.amazonaws.services.route53.AmazonRoute53AsyncClientBuilder;
 
 public class VirtueAwsEc2Provider {
 	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
@@ -19,6 +21,7 @@ public class VirtueAwsEc2Provider {
 	private String region;
 	private AWSCredentialsProviderChain credentialsProvider;
 	private AmazonEC2 ec2;
+	private AmazonRoute53Async route53Client;
 
 	public VirtueAwsEc2Provider(String region, String awsProfile) {
 		this.region = region;
@@ -49,6 +52,8 @@ public class VirtueAwsEc2Provider {
 					+ "Use CLI to create credentials or add to ./aws.properties file.", e);
 		}
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
+		route53Client = AmazonRoute53AsyncClientBuilder.standard().withCredentials(credentialsProvider)
+				.withRegion(region).build();
 	}
 
 	public String getAwsProfile() {
@@ -65,6 +70,10 @@ public class VirtueAwsEc2Provider {
 
 	public AmazonEC2 getEc2() {
 		return ec2;
+	}
+
+	public AmazonRoute53Async getRoute53Client() {
+		return route53Client;
 	}
 
 }

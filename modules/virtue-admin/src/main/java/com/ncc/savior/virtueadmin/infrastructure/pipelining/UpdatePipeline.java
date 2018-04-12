@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,13 +100,13 @@ public class UpdatePipeline<T> implements IUpdatePipeline<T>, IUpdatePipelineRes
 
 	@Override
 	public void onFatalError(PipelineWrapper<T> wrapper) {
-		throw new NotImplementedException();
+		logger.debug("VM exiting pipeline due to failure. Pipeline=" + descriptor + " VM=" + wrapper.get());
 
 	}
 
 	@Override
 	public void onFatalError(Collection<PipelineWrapper<T>> wrappers) {
-		throw new NotImplementedException();
+		logger.debug("VMs exiting pipeline due to failure. Pipeline=" + descriptor + " VMs=" + unwrap(wrappers));
 
 	}
 
