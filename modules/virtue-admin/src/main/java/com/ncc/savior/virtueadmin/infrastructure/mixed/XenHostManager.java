@@ -184,9 +184,10 @@ public class XenHostManager {
 					});
 					t.start();
 					// commands
-					ps.println("sudo ./setupXen.sh");
-					ps.println("sudo ./nfsd.sh &");
-					JavaUtil.sleepAndLogInterruption(3000);
+					// ps.println("sudo ./setupXen.sh");
+					// ps.println("sudo ./nfsd.sh &");
+					// TODO this sleep is here
+					JavaUtil.sleepAndLogInterruption(10000);
 					// ps.println("\035");
 					ps.println("sudo xl list");
 					ps.println("echo finished setting up Xen " + id);

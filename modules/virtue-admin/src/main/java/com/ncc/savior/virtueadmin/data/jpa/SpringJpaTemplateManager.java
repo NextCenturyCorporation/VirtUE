@@ -178,8 +178,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
 		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		if (existing != null) {
-			VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-			existing.removeVirtueTemplate(vt);
+			Iterator<VirtueTemplate> itr = existing.getVirtueTemplates().iterator();
+			while (itr.hasNext()) {
+				VirtueTemplate template = itr.next();
+				if (template.getId().equals(virtueTemplateId)) {
+					itr.remove();
+					break;
+				}
+			}
 			userRepo.save(existing);
 		}
 	}

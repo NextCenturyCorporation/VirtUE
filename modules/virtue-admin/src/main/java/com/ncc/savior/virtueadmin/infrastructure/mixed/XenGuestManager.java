@@ -168,8 +168,10 @@ public class XenGuestManager {
 
 	private void startSensors(Session session, String sensorScript, String ipAddress, String username)
 			throws JSchException, IOException {
-		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \" sudo ./" + sensorScript + "\"";
-		sendCommandFromSession(session, cmd);
+		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \" nohup sudo ./" + sensorScript
+				+ " > sensing.log 2>&1 \"";
+		List<String> output = sendCommandFromSession(session, cmd);
+		logger.debug(output.toString());
 	}
 
 	private String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {
