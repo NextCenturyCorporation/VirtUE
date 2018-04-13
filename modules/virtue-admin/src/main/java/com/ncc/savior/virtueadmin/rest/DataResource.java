@@ -71,8 +71,7 @@ public class DataResource {
 	public Response preloadTemplates() {
 		logger.info("attempting to preload data");
 		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Linux)",
-				"1.0",
-				OS.LINUX, "google-chrome");
+				"1.0", OS.LINUX, "google-chrome");
 		ApplicationDefinition linuxFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
 				OS.LINUX, "firefox");
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
@@ -153,10 +152,11 @@ public class DataResource {
 		Date now = new Date();
 		String systemName = "system";
 		String allLinuxAmi = "ami-2b500951";
-		//String windowsAmi = "ami-36a65f4b";
-		//ssh, but prior to sensing or additional apps
-		//String windowsAmi = "ami-ca00afb7"; 
-		String windowsAmi = "ami-6f69b310";
+		// String windowsAmi = "ami-36a65f4b";
+		// ssh, but prior to sensing or additional apps
+		// String windowsAmi = "ami-ca00afb7";
+		// String windowsAmi = "ami-6f69b310";
+		String windowsAmi = "ami-cfcd68b0";
 		String linuxLoginUser = "admin";
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
