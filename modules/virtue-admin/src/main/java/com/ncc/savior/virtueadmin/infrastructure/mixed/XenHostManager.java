@@ -41,7 +41,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 
 public class XenHostManager {
-	private static final Logger logger = LoggerFactory.getLogger(XenAwsMixCloudManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private VirtualMachineTemplate xenVmTemplate;
 	private IUpdateListener<VirtualMachine> notifier;
 	private AwsEc2Wrapper ec2Wrapper;
