@@ -6,7 +6,7 @@ import { ActiveClassDirective } from '../../shared/directives/active-class.direc
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
-import { Users } from '../../shared/models/users.model';
+import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 
@@ -19,7 +19,7 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 export class CreateVirtueComponent implements OnInit {
   vms: VirtualMachine;
   activeClass: string;
-  users: Users[];
+  users: User[];
   virtues: Virtue[];
 
   vmList = [];

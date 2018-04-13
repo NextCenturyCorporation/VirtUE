@@ -17,21 +17,29 @@ const httpHeader = {
 @Injectable()
 
 export class VmAppsService {
-
+  restApi: string;
   constructor(
     private httpClient: HttpClient,
     private hostname: Globals
    ) {  }
 
-  private jsondata = this.hostname.serverUrl + '/admin/application';
-  // private jsondata = './assets/json/vm_apps.json';
+  private getBaseUrl() {
+   let baseUrl = './assets/json/baseUrl.json';
+   // let jsondata = './assets/json/vm_apps.json';
+   return this.httpClient.get(baseUrl);
+  }
 
   public getAppsList(): Observable<Application[]> {
-    return this.httpClient.get<Application[]>(this.jsondata);
+    this.getBaseUrl().subscribe( resp => {
+      let info = resp[0].url;
+      this.restApi = `${info}admin/application`;
+      console.log(this.restApi);
+    });
+    return this.httpClient.get<Application[]>(this.restApi);
   }
 
   public getApp(id: string): Observable<Application[]> {
-    const src = `${this.jsondata}/?id=${id}`;
+    const src = `${this.restApi}/?id=${id}`;
 
     // console.log('getApp ID: ' + id + ' @ ' + src);
 
@@ -39,10 +47,10 @@ export class VmAppsService {
   }
 
   public addApp(vm: Application) {
-    return this.httpClient.post( this.jsondata, vm );
+    return this.httpClient.post( this.restApi, vm );
   }
   public updateStatus(id: string): Observable<any> {
-    const src = `${this.jsondata}`;
+    const src = `${this.restApi}`;
     // /?id=${id}
     return this.httpClient.get<Application[]>(src);
 
@@ -50,11 +58,11 @@ export class VmAppsService {
   }
   /**
   public updateStatus(id: string, app: Application): Observable<any> {
-    return this.httpClient.put(`${this.jsondata}?id=${id}`,app);
+    return this.httpClient.put(`${this.restApi}?id=${id}`,app);
   }
 
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
+    return this.httpClient.delete<Virtue>(`${this.restApi}/${virtue.id}`);
   }
   */
 

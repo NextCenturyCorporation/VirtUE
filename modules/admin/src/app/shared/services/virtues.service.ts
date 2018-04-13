@@ -1,12 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injector, Injectable } from '@angular/core';
+import { AsyncPipe, JsonPipe } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
+import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Virtue } from '../models/virtue.model';
-import { Globals } from '../globals';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -16,40 +17,40 @@ const httpHeader = {
 
 export class VirtuesService {
 
-  constructor(
-    private httpClient: HttpClient,
-    private globals: Globals
-  ) {}
+  baseUrl: string;
+  configUrl: 'admin/virtue/template';
+  restApi: './assets/json/virtue_list.json';
 
-  private restApi = this.globals.serverUrl + '/admin/virtue/template';
-  // private jsondata = './assets/json/virtue_list.json';
+  constructor( private httpClient: HttpClient ) {}
 
-  public getVirtues(): Observable<Array<Virtue>> {
+  // getBaseUrl() {
+  //   return this.httpClient.get(this.configUrl);
+  // }
+
+  getVirtues(): Observable<Array<Virtue>> {
     return this.httpClient.get<Array<Virtue>>(this.restApi);
   }
 
   public getVirtue(id: string): Observable<any> {
     // const src = `${this.jsondata}/${id}`;
-    const src = `${this.restApi}/?id=${id}`;
+    let src = `${this.restApi}/?id=${id}`;
     return this.httpClient.get<Virtue>(src);
   }
 
+/**
   public createVirtue(virtue: Virtue): Observable<any> {
-    return this.httpClient.post(this.restApi, virtue);
-    // return this.httpClient.post<Virtue>(this.jsondata, virtue);
+    return this.http.post(this.restApi, virtue);
   }
 
   public updateVirtue(id: string, virtue: Virtue): Observable<any> {
     const src = `${this.restApi}/?id=${id}`;
-    return this.httpClient.put(src, virtue);
-    // return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
+    return this.http.put(src, virtue);
   }
 
-  /**
-    public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-      return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
-    }
-  */
+  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
+    return this.http.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
+  }
+*/
   /**
    * Handle Http operation that failed.
    * Let the app continue.

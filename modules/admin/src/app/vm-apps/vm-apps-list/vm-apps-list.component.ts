@@ -48,18 +48,8 @@ export class VmAppsListComponent implements OnInit {
       app[i].enabled ? app[i].enabled = false : app[i].enabled = true;
       console.log(app);
     });
-    // this.appsService.update(id, app);
-  }
 
-  // updateStatus(id: string, status: boolean): void {
-  //   // console.log(`App ${id} status is ${status}`);
-  //   let app = this.apps.find(item => item.id == id);
-  //   app.enabled = status;
-  //   console.log(app.enabled);
-  //   this.appsService.updateStatus(id, {enabled: status})
-  //     .subscribe(res => console.log(res.json())
-  //   );
-  // }
+  }
 
   listFilter(status: any) {
     console.log('filterValue = ' + status);
@@ -91,7 +81,6 @@ export class VmAppsListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      // this.animal = result;
     });
   }
 

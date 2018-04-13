@@ -7,21 +7,12 @@
 
   <div id="content-main">
     <div id="content">
-      <div class="mui-container-fluid">
-        <!-- if there are no virtues, show this message -->
-        <div class="mui-row margin-top-10" *ngIf="virtues.length < 1">
-          <div class="mui-col-md-12 padding-left-0">
-            <p class="no-data-message">
-              No virtues have been created at this time. To create a virtue, click on the button "Create New" above.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <!-- if there are virtues, show this list -->
       <div class="mui-container-fluid" *ngIf="virtues.length > 0">
         <div class="mui-row virtues-filters">
-          <div class="virtues-filter mui-col-md-12 padding-left-0">All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a></div>
+          <div class="virtues-filter mui-col-md-12 padding-left-0">
+            All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a>
+          </div>
         </div>
       </div>
       <div class="mui-container-fluid data-list">
@@ -32,7 +23,14 @@
           <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">Date</div>
         </div>
-        <p>{{ getAppName('d4000085-1700-484d-9e61-dc3b82a585e2') }}</p>
+        <!-- if there are no virtues, show this message -->
+        <div class="mui-row margin-top-10" *ngIf="virtues.length < 1">
+          <div class="mui-col-md-12 padding-left-0">
+            <p class="no-data-message">
+              No virtues have been created at this time. To create a virtue, click on the button "Create New" above.
+            </p>
+          </div>
+        </div>
         <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>

@@ -9,7 +9,7 @@ import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
 import { Application } from '../../shared/models/application.model';
-import { Users } from '../../shared/models/users.model';
+import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 
@@ -28,7 +28,7 @@ export class EditVirtueComponent implements OnInit {
   virtueId: { id: string };
   vms: VirtualMachine;
   activeClass: string;
-  users: Users[];
+  users: User[];
   virtues: Virtue[];
 
   virtueData = [];

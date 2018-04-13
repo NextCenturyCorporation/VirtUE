@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Injector, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -43,20 +43,9 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     .subscribe( virtueList => {
       this.virtues = virtueList;
     });
-    // this.vmService.getVmList()
-    // .subscribe( data  => {
-    //   this.vmList = data;
-    // });
-    this.appService.getAppsList()
-    .subscribe( data  => {
-      this.appsList = data;
-    });
   }
 
   ngOnDestroy() {
-    // this.virtuesService.unsubscribe();
-    // this.vmService.unsubscribe();
-    // this.appService.unsubscribe();
   }
 
   getAppName(id: string): void {
@@ -88,8 +77,6 @@ export class VirtueListComponent implements OnInit, OnDestroy {
       virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;
       console.log(virtueObj);
     });
-    // this.virtuesService.updateVirtue(id, virtueObj);
-
   }
 
 }

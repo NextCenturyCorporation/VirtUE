@@ -1,21 +1,22 @@
 export class SensingModel {
-  sensor_id: string;
-  sensor_name: string;
-  message: string;
-  level: string;
   timestamp: string;
-
-  public VirtualMachine(
-    sensor_id: string,
-    sensor_name: string,
-    message: string,
-    level: string,
-    timestamp: string
-  ) {
-    this.sensor_id = sensor_id;
-    this.sensor_name = sensor_name;
-    this.message = message;
-    this.level = level;
-    this.timestamp = timestamp;
-  }
+  sensors: [
+    {
+      virtue_id: string,
+      username: string,
+      updated_at: string,
+      sensor_id: string,
+      public_key: string,
+      port: number,
+      last_sync_at: string,
+      kafka_topic: string,
+      inserted_at: string,
+      has_registered: boolean,
+      has_certificates: boolean,
+      configuration_id: number,
+      component_id: number,
+      address: string
+    }
+  ];
+  error: boolean;
 }
