@@ -36,6 +36,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 public class XenGuestManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenGuestManager.class);
@@ -99,7 +100,7 @@ public class XenGuestManager {
 				// String loginUsername = vmt.getLoginUser();
 				createGuestVm(session, name);
 				ipAddress = getGuestVmIpAddress(session, name);
-				List<String> sshConfig = sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
+				List<String> sshConfig = SshUtil.sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
 				boolean hostIsKnown = false;
 				for (String line : sshConfig) {
 					if (line.contains(ipAddress)) {
@@ -109,11 +110,11 @@ public class XenGuestManager {
 				}
 				if (!hostIsKnown) {
 					String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
-					sendCommandFromSession(session, hostCmd);
+					SshUtil.sendCommandFromSession(session, hostCmd);
 				}
 
 				logger.debug("Attempting to setup port forwarding. ");
-				String hostname = sendCommandFromSession(session, "hostname").get(0);
+				String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
 				String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
 				setupHostname(session, loginUsername, hostname, dns, ipAddress);
 				setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
@@ -137,8 +138,8 @@ public class XenGuestManager {
 						"sudo iptables -A FORWARD -p tcp -d %s --dport %d  -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
 						ipAddress, internalPort);
 				// cmd += ";sudo ip route";
-				sendCommandFromSession(session, cmd);
-				sendCommandFromSession(session, "sudo iptables -vnL -t nat\n");
+				SshUtil.sendCommandFromSession(session, cmd);
+				SshUtil.sendCommandFromSession(session, "sudo iptables -vnL -t nat\n");
 				JavaUtil.sleepAndLogInterruption(1000);
 				vm.setState(VmState.LAUNCHING);
 				vm.setHostname(xenVm.getHostname());
@@ -170,7 +171,7 @@ public class XenGuestManager {
 			throws JSchException, IOException {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \" nohup sudo ./" + sensorScript
 				+ " > sensing.log 2>&1 \"";
-		List<String> output = sendCommandFromSession(session, cmd);
+		List<String> output = SshUtil.sendCommandFromSession(session, cmd);
 		logger.debug(output.toString());
 	}
 
@@ -213,34 +214,6 @@ public class XenGuestManager {
 		return ch;
 	}
 
-	private List<String> sendCommandFromSession(Session session, String command) throws JSchException, IOException {
-		logger.debug("sending command: " + command);
-		ChannelExec myChannel = (ChannelExec) session.openChannel("exec");
-		BufferedReader br = null;
-		BufferedReader er = null;
-		ArrayList<String> lines = new ArrayList<String>();
-		try {
-			myChannel.setCommand(command);
-			// OutputStream ops = myChannel.getOutputStream();
-			// PrintStream ps = new PrintStream(ops, true);
-			myChannel.connect();
-			InputStream input = myChannel.getInputStream();
-			InputStreamReader reader = new InputStreamReader(input);
-			br = new BufferedReader(reader);
-			er = new BufferedReader(new InputStreamReader(myChannel.getErrStream()));
-			String line;
-			JavaUtil.sleepAndLogInterruption(500);
-			while ((line = br.readLine()) != null || (line = er.readLine()) != null) {
-				logger.debug(line);
-				lines.add(line);
-			}
-			return lines;
-		} finally {
-			JavaUtil.closeIgnoreErrors(br, er);
-			myChannel.disconnect();
-		}
-	}
-
 	private Session getConnectedSession() throws JSchException {
 		JSch ssh = new JSch();
 		Session session;
@@ -260,8 +233,8 @@ public class XenGuestManager {
 				+ " > " + PORTS_FILE + "\"";
 		String cmd2 = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"echo dns=" + dns + " >> "
 				+ PORTS_FILE + "\"";
-		sendCommandFromSession(session, cmd);
-		sendCommandFromSession(session, cmd2);
+		SshUtil.sendCommandFromSession(session, cmd);
+		SshUtil.sendCommandFromSession(session, cmd2);
 	}
 
 	private void setupPortForwarding(Session session, int externalSensingPort, int startingInternalPort,
@@ -276,13 +249,13 @@ public class XenGuestManager {
 		JavaUtil.sleepAndLogInterruption(100);
 
 		JavaUtil.sleepAndLogInterruption(100);
-		sendCommandFromSession(session, "tr -d '\\15\\32' < " + script + "win > " + script);
-		sendCommandFromSession(session, "chmod 755 " + script);
+		SshUtil.sendCommandFromSession(session, "tr -d '\\15\\32' < " + script + "win > " + script);
+		SshUtil.sendCommandFromSession(session, "chmod 755 " + script);
 		JavaUtil.sleepAndLogInterruption(100);
 		for (int i = 0; i < numSensingPorts; i++) {
 
 			String cmd = script + " " + (i + externalSensingPort) + " " + ipAddress + " " + (startingInternalPort + i);
-			sendCommandFromSession(session, cmd);
+			SshUtil.sendCommandFromSession(session, cmd);
 			JavaUtil.sleepAndLogInterruption(100);
 		}
 		JavaUtil.sleepAndLogInterruption(100);
@@ -310,7 +283,7 @@ public class XenGuestManager {
 	private void catFile(Session session, String ipAddress, String username, String file)
 			throws JSchException, IOException {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \"cat " + file + "\"";
-		sendCommandFromSession(session, cmd);
+		SshUtil.sendCommandFromSession(session, cmd);
 	}
 
 	private String getIpFromConsole(CommandHandler ch, String name) {

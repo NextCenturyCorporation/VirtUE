@@ -71,4 +71,6 @@ public interface IActiveVirtueDao {
 
 	Optional<VirtualMachine> getXenVm(String id);
 
+	Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList);
+
 }

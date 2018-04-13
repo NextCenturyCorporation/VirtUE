@@ -148,4 +148,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

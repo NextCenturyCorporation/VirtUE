@@ -106,6 +106,11 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
+	public Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList) {
+		return virtueRepository.findAllById(virtueList);
+	}
+
+	@Override
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtueRepository.findAll();
 	}

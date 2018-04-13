@@ -21,10 +21,15 @@ public class XenAwsMixCloudManager implements ICloudManager {
 	private XenHostManager xenHostManager;
 	private AsyncAwsEc2VmManager awsVmManager;
 
-	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager) {
+	private WindowsNfsMountingService windowsNfsMountingService;
+
+	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
+			WindowsNfsMountingService windowsNfsMountingService) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
+		// TODO this is a little out of place, but will work here for now.
+		this.windowsNfsMountingService = windowsNfsMountingService;
 	}
 
 	@Override
@@ -60,6 +65,11 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		if (!linuxVmts.isEmpty()) {
 			xenHostManager.provisionXenHost(vi, linuxVmts);
 		}
+
+		windowsNfsMountingService.mountNfsOnWindowsBoxes(vi);
+		// need to add NFS, can use this: echo mount -o mtype=hard 10.0.4.178:/disk/nfs
+		// t: > "AppData\Roaming\Microsoft\Windows\Start
+		// Menu\Programs\Startup\start.bat"
 		return vi;
 	}
 
