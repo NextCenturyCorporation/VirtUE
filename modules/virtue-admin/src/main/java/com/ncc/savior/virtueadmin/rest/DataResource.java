@@ -153,8 +153,10 @@ public class DataResource {
 		Date now = new Date();
 		String systemName = "system";
 		String allLinuxAmi = "ami-2b500951";
-		String windowsAmi = "ami-36a65f4b";
-		windowsAmi = "ami-ca00afb7";
+		//String windowsAmi = "ami-36a65f4b";
+		//ssh, but prior to sensing or additional apps
+		//String windowsAmi = "ami-ca00afb7"; 
+		String windowsAmi = "ami-8b78a2f4";
 		String linuxLoginUser = "admin";
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
