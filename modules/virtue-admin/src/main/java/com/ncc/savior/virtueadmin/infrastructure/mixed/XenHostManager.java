@@ -132,6 +132,8 @@ public class XenHostManager {
 
 		Runnable r = new Runnable() {
 
+			private String Dom0NfsSensorCmd = "/home/ec2-user/twosix/matt/nfs-sensor-target/run_docker.sh";
+
 			@Override
 			public void run() {
 				// wait until xen VM is ready
@@ -189,6 +191,7 @@ public class XenHostManager {
 					// TODO this sleep is here
 					JavaUtil.sleepAndLogInterruption(10000);
 					// ps.println("\035");
+					ps.println("nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1");
 					ps.println("sudo xl list");
 					ps.println("echo finished setting up Xen " + id);
 					t.join(20000);
