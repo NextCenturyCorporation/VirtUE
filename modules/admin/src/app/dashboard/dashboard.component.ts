@@ -63,8 +63,12 @@ export class DashboardComponent implements OnInit {
 
   getSensingData(baseUrl: string) {
     this.sensingService.getList(baseUrl).subscribe(data => {
-      this.sensorData = data;
+      this.sensorlog(data);
     });
+  }
+
+  sensorlog(log){
+    this.sensorData = log;
   }
 
   getVirtueInfo(baseUrl: string) {

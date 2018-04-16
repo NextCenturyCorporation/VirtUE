@@ -9,7 +9,6 @@
         <!-- if there are no virtues, show this message -->
         <div class="mui-row margin-top-10">
           <div class="mui-col-md-12 padding-left-0">
-
             <div class="mui-container-fluid">
               <div class="mui-row">
                 <div class="mui-col-md-3 table-header">Sensor</div>
@@ -18,16 +17,22 @@
                 <div class="mui-col-md-1 table-header">Certificate</div>
                 <div class="mui-col-md-2 table-header">Timestamp</div>
               </div>
-              <div class="table-container">
+              <div *ngIf="sensorData.length < 1" class="table-container">
+                <div class="mui-row">
+                  <div class="mui-col-md-12 table-data">
+                    <p>No sensor information is available at this time.</p>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="sensorData.length > 0" class="table-container">
                 <div class="mui-row" *ngFor="let d of sensorData">
                   <div class="mui-col-md-3 table-data">{{ getSensorInfo(d.sensors, 'sensor_id') }}</div>
                   <div class="mui-col-md-3 table-data">{{ getSensorInfo(d.sensors, 'virtue_id') }}</div>
                   <div class="mui-col-md-3 table-data">{{ getSensorInfo(d.sensors, 'kafka_topic') }}</div>
                   <div class="mui-col-md-1 table-data border-bottom">{{ getSensorInfo(d.sensors, 'has_certificates') }}</div>
-                    <div class="mui-col-md-2 table-data">{{d.timestamp|date:"MM/dd/yyyy, h:mm a"}}</div>
+                  <div class="mui-col-md-2 table-data">{{d.timestamp|date:"MM/dd/yyyy, h:mm a"}}</div>
                 </div>
               </div>
-
             </div>
 
           </div>

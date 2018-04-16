@@ -57,30 +57,30 @@ export class EditVirtueComponent implements OnInit {
 
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-        this.getThisVirtue(awsServer);
-        if (this.vmList.length > 0) {
-          this.getVmList(awsServer);
-        }
+      this.getThisVirtue(awsServer);
+      if (this.vmList.length > 0) {
+        this.getVmList(awsServer);
+      }
     });
   }
 
   getThisVirtue(baseUrl: string) {
     this.baseUrl = baseUrl;
     const id = this.virtueId.id;
-    this.virtuesService.getVirtue(baseUrl, id).subscribe(
-      data => {
-        for (let vObj of data) {
-          if (vObj.id === id) {
-            this.virtueData = vObj;
-            // this.vmList = vObj.virtualMachineTemplateIds;
-            for (let vm of vObj.virtualMachineTemplateIds) {
-              this.pageVmList.push(vm);
-              this.vmList.push(vm);
-            }
-            break;
+    this.virtuesService.getVirtue(baseUrl, id).subscribe(data => {
+      for (let vObj of data) {
+        if (vObj.id === id) {
+          this.virtueData = vObj;
+          // this.vmList = vObj.virtualMachineTemplateIds;
+          for (let vm of vObj.virtualMachineTemplateIds) {
+            this.pageVmList.push(vm);
+            this.vmList.push(vm);
           }
+          break;
         }
-      });
+        return this.virtueData;
+      }
+    });
   }
 
   getAllVms(baseUrl: string) {

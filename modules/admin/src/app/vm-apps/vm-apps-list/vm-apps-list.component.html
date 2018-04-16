@@ -22,12 +22,12 @@
       <div class="mui-container-fluid">
         <div class="mui-row">
           <div class="mui-col-md-12 padding-left-0 filters">
-            <span *ngIf="filterValue === '*'">All Apps</span>
-            <a mat-button *ngIf="filterValue !== '*'"  (click)="listFilter('*')">All Apps</a> |
-            <span *ngIf="filterValue === true">Enabled Apps</span>
-            <a mat-button *ngIf="filterValue !== true" (click)="listFilter(true)">Enabled Apps</a> |
-            <span *ngIf="filterValue === false">Disabled Apps</span>
-            <a mat-button *ngIf="filterValue !== false" (click)="listFilter(false)">Disabled Apps</a>
+            <span>All Apps</span>
+            <a mat-button (click)="listFilter('*')">All Apps</a> |
+            <span>Enabled Apps</span>
+            <a mat-button (click)="listFilter(true)">Enabled Apps</a> |
+            <span>Disabled Apps</span>
+            <a mat-button (click)="listFilter(false)">Disabled Apps</a>
           </div>
         </div>
       </div>
@@ -48,7 +48,10 @@
             </span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span *ngIf="app.enabled===false" class="menu-options"><a mat-button (click)="updateStatus(app.id)">Enable</a> | <a mat-button (click)="openDialogPrompt(app.id, 'uninstall', app.name)">Uninstall</a></span>
+            <span class="menu-options">
+              <a mat-button (click)="updateStatus(app.id)">Enable</a> |
+              <a mat-button (click)="openDialogPrompt(app.id, 'uninstall', app.name)">Uninstall</a>
+            </span>
           </div>
 
           <div class="table-data mui-col-md-2">{{ app.version }}</div>
@@ -61,7 +64,7 @@
       </div>
       <div class="paging">
         <div class="page-number mui-col-md-4">&nbsp;</div>
-        <div class="page-controls mui-col-md-4"><!-- < First | < Previous | Next > | Last > --></div>
+        <div class="page-controls mui-col-md-4">&nbsp;</div>
         <div class="page-item-total mui-col-md-4">{{ totalApps }} Installed Applications</div>
         <div class="clearfix"></div>
       </div>
