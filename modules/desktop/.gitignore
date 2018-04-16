@@ -3,7 +3,6 @@
 /debug/
 /logs/
 /out/
-/gradle/
 .gradle/
 /bin1/
 /certs/*
