@@ -6,7 +6,6 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { SensingModel } from '../models/sensing.model';
-import { Globals } from '../globals';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -17,15 +16,15 @@ const httpHeader = {
 export class SensingService {
 
   constructor(
-    private httpClient: HttpClient,
-    private hostname: Globals
+    private httpClient: HttpClient
   ) { }
 
-  private jsonfile = './assets/json/sample_data.json';
-  private restApi = this.hostname.serverUrl + '/admin/sensing';
+  // private jsonfile = './assets/json/sensing.json';
+  private configUrl = 'admin/sensing';
 
-  public getList(): Observable<any> {
-    return this.httpClient.get<any>(this.restApi);
+  public getList(baseUrl: string): Observable<any> {
+    let src = baseUrl + this.configUrl;
+    return this.httpClient.get<any>(src);
   }
 
 }

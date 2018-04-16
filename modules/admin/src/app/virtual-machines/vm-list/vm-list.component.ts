@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { VmAppsService } from '../../shared/services/vm-apps.service';
+
+import { ApplicationsService } from '../../shared/services/applications.service';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
+
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 
 @Component({
   selector: 'app-vm-list',
-  providers: [ VirtualMachineService, VmAppsService ],
+  providers: [ BaseUrlService, VirtualMachineService, ApplicationsService ],
   templateUrl: './vm-list.component.html',
   styleUrls: ['./vm-list.component.css']
 })
@@ -23,33 +26,40 @@ export class VmListComponent implements OnInit {
 
   constructor(
     private vmService: VirtualMachineService,
-    private appsService: VmAppsService,
+    private appsService: ApplicationsService,
+    private baseUrlService: BaseUrlService,
     public dialog: MatDialog
   ) {}
 
   ngOnInit() {
-    this.getVmList();
-    this.getAppsList();
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+        this.getVmList(awsServer);
+        this.getAppsList(awsServer);
+    });
   }
 
-  getVmList() {
-    this.vmService.getVmList()
+  getVmList(baseUrl: string) {
+    this.vmService.getVmList(baseUrl)
       .subscribe(vmlist => {
         this.vms = vmlist;
         this.totalVms = vmlist.length;
       });
   }
 
-  getAppsList() {
-    this.appsService.getAppsList()
+  getAppsList(baseUrl: string) {
+    this.appsService.getAppsList(baseUrl)
     .subscribe(appList => {
       this.apps = appList;
     });
   }
 
-  getAppName(id: string) {
-    let app = this.apps.filter(data => data['id'] === id);
-    return app[0].name;
+  getAppName(id: string): void {
+    for (let app of this.apps) {
+      if (id === app.id) {
+        return app.name;
+      }
+    }
   }
 
   listFilter(status: any) {

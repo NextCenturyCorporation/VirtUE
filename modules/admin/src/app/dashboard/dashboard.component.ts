@@ -1,12 +1,18 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
+
+import { SensingModel } from '../shared/models/sensing.model';
+
+import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { SensingService } from '../shared/services/sensing.service';
+import { VirtuesService } from '../shared/services/virtues.service';
+
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  providers: [ SensingService ]
+  providers: [ BaseUrlService, SensingService, VirtuesService ]
 })
 
 export class DashboardComponent implements OnInit {
@@ -18,7 +24,7 @@ export class DashboardComponent implements OnInit {
     {value: '', viewValue: 'Select Column'},
     {value: 'timestamp', viewValue: 'Timestamp'},
     {value: 'sensor_id', viewValue: 'ID'},
-    {value: 'sensor_name', viewValue: 'Sensor Name'},
+    {value: 'sensor', viewValue: 'Sensor Name'},
     {value: 'message', viewValue: 'Message'},
     {value: 'level', viewValue: 'level'}
   ];
@@ -36,17 +42,66 @@ export class DashboardComponent implements OnInit {
   ];
 
   jsonResult: string;
-  jsonData = [];
+  sensorData = [];
+  virtues = [];
+  virtueName: string;
 
   // constructor(){}
   constructor(
-    private sensingService: SensingService
+    private baseUrlService: BaseUrlService,
+    private sensingService: SensingService,
+    private virtuesService: VirtuesService
   ) {}
 
   ngOnInit() {
-    this.sensingService.getList()
-    .subscribe(data => {
-      this.jsonData = data;
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getVirtueInfo(awsServer);
+      this.getSensingData(awsServer);
     });
   }
+
+  getSensingData(baseUrl: string) {
+    this.sensingService.getList(baseUrl).subscribe(data => {
+      this.sensorData = data;
+    });
+  }
+
+  getVirtueInfo(baseUrl: string) {
+    this.virtuesService.getVirtues(baseUrl).subscribe(virtues => {
+      this.virtues = virtues;
+    });
+  }
+
+  getSensorInfo(sensor: any[], prop: string) {
+    if (prop === 'sensor_id') {
+      return sensor[0].sensor_id;
+
+    } else if (prop === 'virtue_id') {
+      // console.log(sensor[0].virtue_id);
+      this.getVirtueName(sensor[0].virtue_id);
+      // this.virtueName = `${this.virtueName} (${sensor[0].virtue_id})`;
+      return this.virtueName;
+
+    } else if (prop === 'kafka_topic') {
+      return sensor[0].kafka_topic;
+
+    } else if (prop === 'has_certificates') {
+      if (sensor[0].has_certificates === true) {
+        return 'Yes';
+      } else {
+        return 'No';
+      }
+    }
+  }
+
+  getVirtueName(id: string) {
+    for (let virtue of this.virtues) {
+      if (id === virtue.id) {
+        // console.log(virtue.name);
+        this.virtueName = virtue.name;
+      }
+    }
+  }
+
 }

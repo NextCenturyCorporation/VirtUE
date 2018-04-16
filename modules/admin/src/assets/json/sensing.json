@@ -1,0 +1,22 @@
+[{
+  "timestamp": "2018-04-09T15:33:49.984395",
+  "sensors": [{
+      "virtue_id": "9e86f384-cd66-428c-9c52-65c5f185e47b",
+      "username": "admin",
+      "updated_at": "2018-04-09T15:33:49.984395",
+      "sensor_id": "bb408dd8-fc2c-428b-8e50-bdadca54c116",
+      "public_key": "PUBLIC KEY *********************** 9e86f384-cd66-428c-9c52-65c5f185e47b",
+      "port": 1024,
+      "last_sync_at": "2018-04-09T15:33:49.984395",
+      "kafka_topic": "python      9  65 root  mem    REG              202,1      168  1288588 /usr/lib/locale/C.UTF-8/LC_IDENTIFICATION\n",
+      "inserted_at": "2018-04-09T15:33:49.984395",
+      "has_registered": true,
+      "has_certificates": true,
+      "configuration_id": "lsof-1.20171117",
+      "component_id": "lsof-1.20171117",
+      "address": "/usr/lib/locale/C.UTF-8/LC_IDENTIFICATION\n"
+    }
+  ],
+  "error": false
+  }
+]

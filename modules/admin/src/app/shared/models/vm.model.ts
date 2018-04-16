@@ -7,7 +7,7 @@ export class VirtualMachine {
   enabled: boolean;
   lastModification: string;
   lastEditor: string;
-  applicationIds: any[]
+  applicationIds: any[];
 
   public VirtualMachine(
     id: string,

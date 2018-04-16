@@ -6,6 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
@@ -17,7 +18,7 @@ export class AdUsers {
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
   styleUrls: ['./add-user.component.css'],
-  providers: [ UsersService ]
+  providers: [BaseUrlService, UsersService]
 })
 
 export class AddUserComponent implements OnInit {
@@ -27,6 +28,7 @@ export class AddUserComponent implements OnInit {
   submitBtn: any;
   dialogWidth: any;
   fullImagePath: string;
+  awsServer: any;
 
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
@@ -34,53 +36,63 @@ export class AddUserComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
+    private baseUrlService: BaseUrlService,
     private usersService: UsersService
   ) {
     this.adUserCtrl = new FormControl();
     this.filteredUsers = this.adUserCtrl.valueChanges
       .pipe(
         startWith(''),
-        map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
+        map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice())
         // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
-    );
+      );
   }
+
+  ngOnInit() {
+    this.baseUrlService.getBaseUrl().subscribe(_url => {
+      this.awsServer = _url;
+    });
+
+    console.log(this.awsServer);
+  }
+
   activateModal(id, mode): void {
 
-  this.dialogWidth = 600;
+    this.dialogWidth = 600;
 
-  this.fullImagePath = './assets/images/app-icon-white.png';
+    this.fullImagePath = './assets/images/app-icon-white.png';
 
-  if (mode === 'add') {
-    this.submitBtn = 'Add Virtues';
-  } else {
-    this.submitBtn = 'Update List';
-  }
+    if (mode === 'add') {
+      this.submitBtn = 'Add Virtues';
+    } else {
+      this.submitBtn = 'Update List';
+    }
 
-  const dialogRef = this.dialog.open( VirtueModalComponent, {
-    width: this.dialogWidth + 'px',
-    data: {
-      id: id,
-      dialogMode: mode,
-      dialogButton: this.submitBtn,
-      appIcon: this.fullImagePath
-    },
-    panelClass: 'virtue-modal-overlay'
-  });
+    const dialogRef = this.dialog.open(VirtueModalComponent, {
+      width: this.dialogWidth + 'px',
+      data: {
+        id: id,
+        dialogMode: mode,
+        dialogButton: this.submitBtn,
+        appIcon: this.fullImagePath
+      },
+      panelClass: 'virtue-modal-overlay'
+    });
 
-  this.screenWidth = (window.screen.width);
-  this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
+    this.screenWidth = (window.screen.width);
+    this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
 
-  // console.log(this.screenWidth);
-  // console.log(this.leftPosition);
+    // console.log(this.screenWidth);
+    // console.log(this.leftPosition);
 
-  dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
+    dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
 
-  // dialogRef.afterClosed().subscribe();
+    // dialogRef.afterClosed().subscribe();
 
   }
   // Gets AD user for autocomplete field
-  getUsers() {
-    this.usersService.getUsers().subscribe(
+  getUsers(baseUrl: string) {
+    this.usersService.getUsers(baseUrl).subscribe(
       adUsers => {
         this.activeDirUsers = adUsers;
       }
@@ -90,9 +102,6 @@ export class AddUserComponent implements OnInit {
   filterUsers(username: string) {
     return this.activeDirUsers.filter(adUser =>
       adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
-  }
-
-  ngOnInit() {
   }
 
 }

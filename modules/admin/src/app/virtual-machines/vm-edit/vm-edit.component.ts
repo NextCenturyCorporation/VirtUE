@@ -5,7 +5,9 @@ import { MatDialog, MatDialogRef } from '@angular/material';
 
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Application } from '../../shared/models/application.model';
-import { VmAppsService } from '../../shared/services/vm-apps.service';
+
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
@@ -15,7 +17,7 @@ import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
   selector: 'app-vm-edit',
   templateUrl: './vm-edit.component.html',
   styleUrls: ['./vm-edit.component.css'],
-  providers: [ VirtualMachineService, VmAppsService ]
+  providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
 export class VmEditComponent implements OnInit {
 
@@ -31,6 +33,7 @@ export class VmEditComponent implements OnInit {
   pageAppList = [];
 
   appsInput = '';
+  baseUrl: string;
   osValue: string;
   osInfo: string;
   osList = [
@@ -42,8 +45,9 @@ export class VmEditComponent implements OnInit {
 
   constructor(
     private router: ActivatedRoute,
+    private appsService: ApplicationsService,
+    private baseUrlService: BaseUrlService,
     private vmService: VirtualMachineService,
-    private appsService: VmAppsService,
     private location: Location,
     public dialog: MatDialog
   ) { }
@@ -52,11 +56,15 @@ export class VmEditComponent implements OnInit {
     this.vmId = {
       id: this.router.snapshot.params['id']
     };
-    this.getThisVm(this.vmId.id);
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getThisVm(awsServer, this.vmId.id);
+    });
   }
 
-  getThisVm(id: string) {
-    this.vmService.getVM(id).subscribe(
+  getThisVm(baseUrl: string, id: string) {
+    this.baseUrl = baseUrl;
+    this.vmService.getVM(baseUrl, id).subscribe(
       data => {
         this.vmData = data;
         this.selected = data.os;
@@ -71,7 +79,7 @@ export class VmEditComponent implements OnInit {
     // loop through the selected VM list
     const selectedApps = this.pageAppList;
     console.log('getAppList: ' + this.pageAppList);
-    this.appsService.getAppsList()
+    this.appsService.getAppsList(this.baseUrl)
       .subscribe(apps => {
         if (selectedApps.length < 1) {
           for (let sel of selectedApps) {
@@ -83,14 +91,14 @@ export class VmEditComponent implements OnInit {
             }
           }
         } else {
-          this.getUpdatedAppList();
+          this.getUpdatedAppList(this.baseUrl);
         }
       });
   }
 
-  getUpdatedAppList() {
+  getUpdatedAppList(baseUrl: string) {
     this.appList = [];
-    this.appsService.getAppsList()
+    this.appsService.getAppsList(baseUrl)
       .subscribe(apps => {
         for (let sel of this.pageAppList) {
           for (let app of apps) {

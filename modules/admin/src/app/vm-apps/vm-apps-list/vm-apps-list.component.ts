@@ -8,11 +8,13 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { Application } from '../../shared/models/application.model';
-import { VmAppsService } from '../../shared/services/vm-apps.service';
+
+import { ApplicationsService } from '../../shared/services/applications.service';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 
 @Component({
   selector: 'app-vm-apps-list',
-  providers: [ VmAppsService ],
+  providers: [ ApplicationsService, BaseUrlService ],
   templateUrl: './vm-apps-list.component.html',
   styleUrls: ['./vm-apps-list.component.css']
 })
@@ -30,12 +32,20 @@ export class VmAppsListComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private appsService: VmAppsService,
+    private appsService: ApplicationsService,
+    private baseUrlService: BaseUrlService,
     public dialog: MatDialog
   ) { }
 
   ngOnInit() {
-    this.appsService.getAppsList()
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+        this.getApplications(awsServer);
+    });
+  }
+
+  getApplications(baseUrl: string) {
+    this.appsService.getAppsList(baseUrl)
     .subscribe( appsList => {
       this.apps = appsList;
       this.totalApps = appsList.length;

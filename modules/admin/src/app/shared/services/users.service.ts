@@ -1,9 +1,8 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
 import { User } from '../models/user.model';
-import { Virtue } from '../models/virtue.model';
-import { VirtuesService } from '../services/virtues.service';
 import { Globals } from '../globals';
 
 const httpOption = {
@@ -14,31 +13,25 @@ const httpOption = {
 
 export class UsersService {
 
+  private subscription: Subscription;
+  private configUrl = 'admin/user';
+  private restApi = './assets/json/users.json';
+
+
   constructor(
     private http: HttpClient,
-    private virtue: VirtuesService,
     private hostname: Globals
-  ) { }
-
-  // private jsondata = 'http://localhost:8080/admin/user/template';
-  private adUsers = './assets/json/ad_users.json';
-  private jsondata = this.hostname.serverUrl + './admin/user';
-
-  private userVirtues = [];
-
-  // use this when running locally only
-  private userData = [];
-  // User services
-  public getAdUsers(): Observable<Array<User>> {
-    return this.http.get<Array<User>>(this.adUsers);
+  ) {
   }
 
-  public getUsers(): Observable<Array<User>> {
-    return this.http.get<Array<User>>(this.jsondata);
+  // User services
+  public getUsers( baseUrl: string ): Observable<Array<User>> {
+    let awsServer = baseUrl + this.configUrl;
+    return this.http.get<Array<User>>(awsServer);
   }
 
   public getUser(id: string): Observable<User> {
-    const src = `${this.jsondata}/?id=${id}`;
+    const src = `${this.restApi}/?id=${id}`;
     return this.http.get<User>(src);
   }
 /*

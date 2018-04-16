@@ -8,7 +8,6 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Application } from '../models/application.model';
-import { Globals } from '../globals';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -16,47 +15,44 @@ const httpHeader = {
 
 @Injectable()
 
-export class VmAppsService {
-  restApi: string;
+export class ApplicationsService {
+
+  configUrl = 'admin/application';
+  // restApi = './assets/json/applications.json';
+
   constructor(
-    private httpClient: HttpClient,
-    private hostname: Globals
+    private httpClient: HttpClient
    ) {  }
 
-  private getBaseUrl() {
-   let baseUrl = './assets/json/baseUrl.json';
-   // let jsondata = './assets/json/vm_apps.json';
-   return this.httpClient.get(baseUrl);
-  }
+  // private getBaseUrl() {
+  //  let baseUrl = './assets/json/baseUrl.json';
+  //  // let jsondata = './assets/json/vm_apps.json';
+  //  return this.httpClient.get(baseUrl);
+  // }
 
-  public getAppsList(): Observable<Application[]> {
-    this.getBaseUrl().subscribe( resp => {
-      let info = resp[0].url;
-      this.restApi = `${info}admin/application`;
-      console.log(this.restApi);
-    });
-    return this.httpClient.get<Application[]>(this.restApi);
-  }
-
-  public getApp(id: string): Observable<Application[]> {
-    const src = `${this.restApi}/?id=${id}`;
-
-    // console.log('getApp ID: ' + id + ' @ ' + src);
-
+  public getAppsList(baseUrl: string): Observable<Application[]> {
+    const src = `${baseUrl + this.configUrl}`;
     return this.httpClient.get<Application[]>(src);
   }
 
+  public getApp(baseUrl: string, id: string): Observable<Application[]> {
+    const src = `${baseUrl + this.configUrl}/?id=${id}`;
+    // console.log('getApp ID: ' + id + ' @ ' + src);
+    return this.httpClient.get<Application[]>(src);
+  }
+
+/**
   public addApp(vm: Application) {
     return this.httpClient.post( this.restApi, vm );
   }
+
   public updateStatus(id: string): Observable<any> {
     const src = `${this.restApi}`;
-    // /?id=${id}
     return this.httpClient.get<Application[]>(src);
-
     // return this.httpClient.put<Application[]>(src, JSON.stringify(app));
   }
-  /**
+
+
   public updateStatus(id: string, app: Application): Observable<any> {
     return this.httpClient.put(`${this.restApi}?id=${id}`,app);
   }

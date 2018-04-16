@@ -1,6 +1,6 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h1 class="title">Edit Virtue</h1>
+    <h1 class="titlebar-title">Edit Virtue</h1>
     <button (click)="virtueStatus(virtueData.id)" class="titlebar-button">{{ virtueData.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button>
   </div>
   <div id="content-main">
@@ -25,40 +25,41 @@
             </div>
             <div class="mui-row titlebar">
               <div class="mui-col-md-12">
-                <h2 class="title">Virtual Machines</h2>
+                <h2 class="titlebar-title">Virtual Machines</h2>
                 <button mat-button class="titlebar-button" (click)="activateModal(virtueData.id)">Add VM</button>
               </div>
             </div>
-            <!-- if there are no virtue, show this message -->
-            <div *ngIf="" class="mui-row margin-top-10">
-              <div class="mui-col-md-12">
-                <p class="no-data-message">
-                  No virtual machines are attached this virtue. To add VM(s), click on the button "Add VM".
-                </p>
-              </div>
-            </div>
             <!-- if there are virtual machines, show this list -->
-            <div *ngIf="(virtueData.vmTemplates)" class="mui-container-fluid data-list">
+            <div *ngIf="(virtueData.virtualMachineTemplateIds)" class="mui-container-fluid data-list">
               <div class="mui-row table-header-group">
-                <div class="table-header mui-col-md-5">Application VM</div>
-                <div class="table-header mui-col-md-2">OS</div>
-                <div class="table-header mui-col-md-3">Applications</div>
+                <div class="table-header mui-col-md-3">VM</div>
+                <div class="table-header mui-col-md-3">OS</div>
+                <div class="table-header mui-col-md-4">Applications</div>
                 <div class="table-header mui-col-md-2">Enabled</div>
               </div>
-              <div class="mui-row table-row" *ngFor="let vm of vmList; let i = index" appActiveClass>
-                <div class="table-data mui-col-md-5">
-                  <a mat-button (click)="activateModal(vm.id)">{{ vm.name }}</a>
+              <!-- if there are no virtue, show this message -->
+              <div *ngIf="virtueData.virtualMachineTemplateIds.length < 1" class="mui-row margin-top-10">
+                <div class="mui-col-md-12">
+                  <p class="no-data-message">
+                    No virtual machines are attached this virtue. To add VM(s), click on the button "Add VM".
+                  </p>
+                </div>
+              </div>
+              <div class="mui-row table-row" *ngFor="let vm of virtueData.virtualMachineTemplateIds" appActiveClass>
+                <div class="table-data mui-col-md-3">
+                  <!-- <a mat-button (click)="activateModal(vm)"></a> -->
+                  {{ getVmInfo(vm, 'name') }}
                   <span class="menu-options" *ngIf="vm.enabled">
-                    <button>Disable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
+                    <button>Disable</button> | <button mat-button (click)="removeVm(vm, i)">Remove</button>
                   </span>
                   <span class="menu-options" *ngIf="vm.enabled===false">
-                    <button>Enable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
+                    <button>Enable</button> | <button mat-button (click)="removeVm(vm, i)">Remove</button>
                   </span>
                 </div>
-                <div class="table-data mui-col-md-2">{{ vm.os }} </div>
+                <div class="table-data mui-col-md-3">{{ getVmInfo(vm, 'os') }} </div>
                 <div class="table-data mui-col-md-3">
                   <ul class="padding-left-5">
-                    <li *ngFor="let app of vm.applications">{{ app.name }}</li>
+                    <li *ngFor="let app of vm.applicationIds">{{ app }}</li>
                   </ul>
                 </div>
                 <div class="table-data mui-col-md-2">{{ vm.enabled ? 'Enabled':'Disabled' }} </div>

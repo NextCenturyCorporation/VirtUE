@@ -3,6 +3,8 @@ import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
+
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
@@ -14,11 +16,12 @@ import { VirtualMachine } from '../../shared/models/vm.model';
   selector: 'app-create-virtue',
   templateUrl: './create-virtue.component.html',
   styleUrls: ['./create-virtue.component.css'],
-  providers: [VirtuesService, VirtualMachineService]
+  providers: [ BaseUrlService, VirtuesService, VirtualMachineService ]
 })
 export class CreateVirtueComponent implements OnInit {
   vms: VirtualMachine;
   activeClass: string;
+  baseUrl: string;
   users: User[];
   virtues: Virtue[];
 
@@ -28,6 +31,7 @@ export class CreateVirtueComponent implements OnInit {
   pageVmList = [];
 
   constructor(
+    private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog
@@ -35,16 +39,19 @@ export class CreateVirtueComponent implements OnInit {
 
   ngOnInit() {
     if (this.pageVmList.length > 0) {
-      this.getVmList();
-      // console.log('page VM list @ ngOnInit(): ' + this.pageVmList);
+      this.baseUrlService.getBaseUrl().subscribe(res => {
+        let awsServer = res[0].aws_server;
+          this.getVmList(awsServer);
+      });
     }
   }
 
-  getVmList() {
+  getVmList(baseUrl: string) {
+    this.baseUrl = baseUrl;
     // loop through the selected VM list
     const selectedVm = this.pageVmList;
     // console.log('page VM list @ getVmList(): ' + this.pageVmList);
-    this.vmService.getVmList()
+    this.vmService.getVmList(baseUrl)
       .subscribe(data => {
         if (this.vmList.length < 1) {
           for (let sel of selectedVm) {
@@ -56,7 +63,7 @@ export class CreateVirtueComponent implements OnInit {
             }
           }
         } else {
-          this.getUpdatedVmList();
+          this.getUpdatedVmList(baseUrl);
         }
       });
   }
@@ -78,9 +85,9 @@ export class CreateVirtueComponent implements OnInit {
     // console.log('getAppList():' + this.appList[0].name);
     // return this.appList;
   }
-  getUpdatedVmList() {
+  getUpdatedVmList(baseUrl: string) {
     this.vmList = [];
-    this.vmService.getVmList()
+    this.vmService.getVmList(baseUrl)
       .subscribe(data => {
         for (let sel of this.pageVmList) {
           for (let vm of data) {
@@ -142,7 +149,7 @@ export class CreateVirtueComponent implements OnInit {
       }
       this.pageVmList = this.selVmsList;
 
-      this.getVmList();
+      this.getVmList(this.baseUrl);
     });
 
     dialogRef.afterClosed().subscribe(() => {

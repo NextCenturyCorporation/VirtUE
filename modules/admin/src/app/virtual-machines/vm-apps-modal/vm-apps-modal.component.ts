@@ -2,7 +2,8 @@ import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { VmAppsService } from '../../shared/services/vm-apps.service';
+import { ApplicationsService } from '../../shared/services/applications.service';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { Application } from '../../shared/models/application.model';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -11,7 +12,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   selector: 'app-vm-modal',
   templateUrl: './vm-apps-modal.component.html',
   styleUrls: ['./vm-apps-modal.component.css'],
-  providers: [VmAppsService]
+  providers: [ ApplicationsService, BaseUrlService ]
 })
 export class VmAppsModalComponent implements OnInit {
   @Input() appInput: Application;
@@ -28,7 +29,8 @@ export class VmAppsModalComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private appsService: VmAppsService,
+    private appsService: ApplicationsService,
+    private baseUrlService: BaseUrlService,
     private dialogRef: MatDialogRef<VmAppsModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
@@ -36,14 +38,18 @@ export class VmAppsModalComponent implements OnInit {
     }
 
   ngOnInit() {
-    this.getAppsList();
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getAppsList(awsServer);
+    });
+
     if (this.pageAppList.length > 0) {
       this.selAppList = this.pageAppList;
     }
   }
 
-  getAppsList() {
-    this.appsService.getAppsList()
+  getAppsList(baseUrl: string) {
+    this.appsService.getAppsList(baseUrl)
       .subscribe(apps => {
         this.appList = apps;
       });

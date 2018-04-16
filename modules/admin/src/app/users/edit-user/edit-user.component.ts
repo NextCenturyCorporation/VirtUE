@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 
 import { User } from '../../shared/models/user.model';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 
@@ -18,12 +19,13 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
   styleUrls: ['./edit-user.component.css'],
-  providers: [ UsersService, VirtuesService ]
+  providers: [ BaseUrlService, UsersService, VirtuesService ]
 })
 
 export class EditUserComponent implements OnInit {
   @Input() user: User;
 
+  awsServer: any;
   saviorUserId: {id: string};
   selectedUser: string;
   screenWidth: any;
@@ -40,15 +42,11 @@ export class EditUserComponent implements OnInit {
 
   constructor(
     private router: ActivatedRoute,
+    private baseUrlService: BaseUrlService,
     private usersService: UsersService,
     private virtuesService: VirtuesService,
     public dialog: MatDialog
   ) {
-    this.usersService.getAdUsers().subscribe(
-      adUsers => {
-        this.activeDirUsers = adUsers;
-      }
-    );
     this.adUserCtrl = new FormControl();
     this.filteredUsers = this.adUserCtrl.valueChanges
       .pipe(
@@ -58,14 +56,24 @@ export class EditUserComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.baseUrlService.getBaseUrl().subscribe(_url => {
+      this.awsServer = _url[0].aws_server;
+    });
+
+    console.log(this.awsServer);
+
     this.saviorUserId = {
       id: this.router.snapshot.params['id']
     };
-    this.getAdUsers();
-    this.getThisUser();
+    this.getThisUser(this.awsServer);
   }
 
-  getThisUser() {
+  getThisUser(baseUrl: string) {
+
+    this.usersService.getUsers(baseUrl).subscribe(
+    adUsers => {
+      this.activeDirUsers = adUsers;
+    });
     // const id = this.saviorUserId.id;
     // this.usersService.getUser(id)
     // .subscribe( data => {
@@ -78,12 +86,6 @@ export class EditUserComponent implements OnInit {
     //     }
     //   }
     // });
-  }
-
-  getAdUsers(): void {
-    // Gets AD user for autocomplete field
-    this.usersService.getAdUsers()
-      .subscribe(adUsers => this.activeDirUsers = adUsers);
   }
 
   filterUsers(name: string) {

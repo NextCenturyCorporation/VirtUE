@@ -7,14 +7,15 @@ import { Observable } from 'rxjs/Observable';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
 
+import { ApplicationsService } from '../../shared/services/applications.service';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
-import { VmAppsService } from '../../shared/services/vm-apps.service';
 
 @Component({
   selector: 'app-vm-build',
   templateUrl: './vm-build.component.html',
   styleUrls: ['./vm-build.component.css'],
-  providers: [VirtualMachineService, VmAppsService]
+  providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
 export class VmBuildComponent implements OnInit {
   osValue: string;
@@ -32,22 +33,28 @@ export class VmBuildComponent implements OnInit {
   appList = [];
   selAppList = [];
   pageAppList = [];
+  baseUrl: string;
 
   constructor(
     private vmService: VirtualMachineService,
-    private appsService: VmAppsService,
+    private appsService: ApplicationsService,
+    private baseUrlService: BaseUrlService,
     public dialog: MatDialog,
   ) { }
 
   ngOnInit() {
-    this.getAppList();
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+        this.getAppList(awsServer);
+    });
   }
 
-  getAppList() {
+  getAppList(baseUrl: string) {
+    this.baseUrl = baseUrl;
     // loop through the selected VM list
     const selectedApps = this.pageAppList;
     console.log('page Apps list @ getAppList(): ' + this.pageAppList);
-    this.appsService.getAppsList()
+    this.appsService.getAppsList(baseUrl)
       .subscribe(apps => {
         if (this.appList.length < 1) {
           for (let sel of selectedApps) {
@@ -59,14 +66,14 @@ export class VmBuildComponent implements OnInit {
             }
           }
         } else {
-          this.getUpdatedAppList();
+          this.getUpdatedAppList(baseUrl);
         }
       });
   }
 
-  getUpdatedAppList() {
+  getUpdatedAppList(baseUrl: string) {
     this.appList = [];
-    this.appsService.getAppsList()
+    this.appsService.getAppsList(baseUrl)
       .subscribe(apps => {
         for (let sel of this.pageAppList) {
           for (let app of apps) {
@@ -106,7 +113,7 @@ export class VmBuildComponent implements OnInit {
       }
       this.pageAppList = this.selAppList;
 
-      this.getAppList();
+      this.getAppList(this.baseUrl);
     });
 
     dialogRef.afterClosed().subscribe(() => {

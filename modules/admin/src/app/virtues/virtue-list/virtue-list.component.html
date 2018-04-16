@@ -33,21 +33,24 @@
         </div>
         <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
-            <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
+            <!--<a class="edit" [routerLink]="['edit',virtue.id]"></a> -->
+            {{ virtue.name }}
             <!-- if this virtue is enabled show this menu -->
-            <span *ngIf="virtue.enabled" class="menu-options">Duplicate | <a mat-button (click)="virtueStatus(virtue.id)">Disable</a> | Export</span>
+            <span *ngIf="virtue.enabled" class="menu-options">
+              <a mat-button (click)="virtueStatus(virtue.id)">Disable</a>
+            </span>
 
             <!-- if this virtue is disabled show this menu -->
             <span *ngIf="virtue.enabled==false" class="menu-options"><a mat-button (click)="virtueStatus(virtue.id)">Enable</a> | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
           </div>
           <div class="table-data mui-col-md-3"><!-- virtue.vmTemplates[0].os -->
             <ul>
-              <li *ngFor="let vm of virtue.virtualMachineTemplateIds">{{ vm }}</li>
+              <li *ngFor="let vm of virtue.virtualMachineTemplateIds">{{ getVmName(vm) }}</li>
             </ul>
           </div>
           <div class="table-data mui-col-md-3">
             <ul>
-              <li *ngFor="let app of virtue.applicationIds">{{ app }}</li>
+              <li *ngFor="let app of virtue.applicationIds">{{ getAppName(app) }}</li>
             </ul>
           </div>
           <div class="table-data mui-col-md-2">{{virtue.lastEditor}}</div>
@@ -58,12 +61,12 @@
           <div class="clearfix"></div>
         </div>
       </div>
-      <div class="paging">
+      <!-- <div class="paging">
         <div class="page-number mui-col-md-4">Page # of #</div>
         <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
         <div class="page-item-total mui-col-md-4"># Virtues</div>
         <div class="clearfix"></div>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>
