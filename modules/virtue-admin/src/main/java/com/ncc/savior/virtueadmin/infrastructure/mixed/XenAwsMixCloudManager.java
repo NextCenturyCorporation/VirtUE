@@ -62,9 +62,9 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts);
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
-		if (!linuxVmts.isEmpty()) {
-			xenHostManager.provisionXenHost(vi, linuxVmts);
-		}
+		// if (!linuxVmts.isEmpty()) {
+		xenHostManager.provisionXenHost(vi, linuxVmts);
+		// }
 
 		windowsNfsMountingService.mountNfsOnWindowsBoxes(vi);
 		// need to add NFS, can use this: echo mount -o mtype=hard 10.0.4.178:/disk/nfs

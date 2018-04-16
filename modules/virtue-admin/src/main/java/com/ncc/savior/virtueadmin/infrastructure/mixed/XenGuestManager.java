@@ -99,8 +99,10 @@ public class XenGuestManager {
 				// name = "VRTU-test";
 				// ipAddress = "192.168.0.54";
 				String loginUsername = "user";
+				// roles: default, email, power, god
+				String role = vmt.getSecurityTag();
 				// String loginUsername = vmt.getLoginUser();
-				createGuestVm(session, name);
+				createGuestVm(session, name, role);
 				ipAddress = getGuestVmIpAddress(session, name);
 				List<String> sshConfig = SshUtil.sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
 				boolean hostIsKnown = false;
@@ -186,13 +188,18 @@ public class XenGuestManager {
 		return ipAddress;
 	}
 
-	private String createGuestVm(Session session, String name) throws JSchException, IOException {
+	private String createGuestVm(Session session, String name, String role) throws JSchException, IOException {
 		CommandHandler ch = getCommandHandlerFromSession(session);
 		String finishString = "finished with " + name;
 		logger.debug("Sending commands to create VM.");
+		String createCmd = "sudo ./create.sh " + name;
+		if (JavaUtil.isNotEmpty(role)) {
+			createCmd += " " + role;
+		}
+		logger.debug("CreateCmd=" + createCmd);
 		ch.sendln("sudo xl list");
 		ch.sendln("cd ./app-domains");
-		ch.sendln("sudo ./create.sh " + name);
+		ch.sendln(createCmd);
 		ch.sendln("cd ..");
 		ch.sendln("echo " + finishString);
 		ch.readUtil(finishString, "echo");

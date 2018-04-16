@@ -26,7 +26,10 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
 
 public class WindowsNfsMountingService {
 	private static final Logger logger = LoggerFactory.getLogger(WindowsNfsMountingService.class);
-	private String command = "echo mount -o mtype=hard %s:/disk/nfs t: > \"AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\mountNfs.bat\"";
+	private String command1File = "\"AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\mountNfs.bat\"";
+	private String command = "echo mount -o mtype=hard %s:/disk/nfs t: > " + command1File;
+	private String command2File = "\"AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\startSensors.bat\"";
+	private String command2 = "echo C:\\Users\\Administrator\\savior\\bin\\run-all.bat > " + command2File;
 	private IActiveVirtueDao activeVirtueDao;
 	private Thread pollingThread;
 	private IKeyManager keyManager;
@@ -111,7 +114,11 @@ public class WindowsNfsMountingService {
 			session.setTimeout(500);
 			session.connect();
 			String cmd = String.format(command, nfs.getInternalIpAddress());
-			SshUtil.sendCommandFromSession(session, cmd);
+			String cmd2 = String.format(command2, nfs.getInternalIpAddress());
+			List<String> output = SshUtil.sendCommandFromSession(session, cmd);
+			logger.debug(output.toString());
+			output = SshUtil.sendCommandFromSession(session, cmd2);
+			logger.debug(output.toString());
 			return true;
 		} catch (JSchException e) {
 			logger.debug("mount failed", e);

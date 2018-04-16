@@ -195,23 +195,30 @@ public class DataResource {
 		appsLinuxCorpEmail.add(linuxFirefox);
 		VirtualMachineTemplate vmDocEditor = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Document Editor VM", OS.WINDOWS, windowsAmi, appsDocEditor, windowsLoginUser, true, now, systemName);
+		vmDocEditor.setSecurityTag("default");
 		VirtualMachineTemplate vmWinCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Windows Corperate Email User VM", OS.WINDOWS, windowsAmi, appsWinCorpEmail, windowsLoginUser, true,
 				now, systemName);
+		vmWinCorpEmail.setSecurityTag("email");
 		VirtualMachineTemplate vmExternalInternet = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"External Internet Consumer VM", OS.WINDOWS, windowsAmi, appsExternalInternet, windowsLoginUser, true,
 				now, systemName);
+		vmExternalInternet.setSecurityTag("power");
 		VirtualMachineTemplate vmPowerUserWin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Power User VM Windows", OS.WINDOWS, windowsAmi, appsPowerUserWin, windowsLoginUser, true, now,
 				systemName);
+		vmPowerUserWin.setSecurityTag("power");
 		VirtualMachineTemplate vmPowerUserLinux = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Power User Vm Linux", OS.LINUX, allLinuxAmi, appsPowerUserLinux, linuxLoginUser, true, now,
 				systemName);
+		vmPowerUserLinux.setSecurityTag("power");
 		VirtualMachineTemplate vmRouterAdmin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName);
+		vmRouterAdmin.setSecurityTag("power");
 		VirtualMachineTemplate vmLinuxCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Linux Corperate Email User VM", OS.LINUX, allLinuxAmi, appsLinuxCorpEmail, linuxLoginUser, true, now,
 				systemName);
+		vmLinuxCorpEmail.setSecurityTag("email");
 
 		// VirtualMachineTemplate vmDrawing = new
 		// VirtualMachineTemplate(UUID.randomUUID().toString(), "Drawing", OS.LINUX,
