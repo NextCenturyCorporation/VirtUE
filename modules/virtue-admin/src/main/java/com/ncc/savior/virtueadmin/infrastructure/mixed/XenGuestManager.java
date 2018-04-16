@@ -62,7 +62,7 @@ public class XenGuestManager {
 
 		ChannelExec channel = null;
 		Session session = null;
-
+		logger.debug("Provisioning linux guests=" + linuxVmts);
 		try {
 			session = getConnectedSession();
 
@@ -87,8 +87,10 @@ public class XenGuestManager {
 				// TODO this iterator filtering os seems weird.
 				VirtualMachine vm = vmsItr.next();
 				while (vm.getOs().equals(OS.WINDOWS)) {
+					logger.debug("Skipping provision of windows vm=" + vm);
 					vm = vmsItr.next();
 				}
+				logger.debug("Starting provision of guest=" + vm);
 				String ipAddress = "0.0.0.0";
 				String clientUser = virtue.getUsername();
 				String domainUUID = UUID.randomUUID().toString();
@@ -151,6 +153,7 @@ public class XenGuestManager {
 				vm.setApplications(new ArrayList<ApplicationDefinition>(vmt.getApplications()));
 				externalSshPort++;
 			}
+			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
 			notifier.updateElements(vms);
 			guestUpdater.addVmToProvisionPipeline(vms);
 		} catch (JSchException e) {
