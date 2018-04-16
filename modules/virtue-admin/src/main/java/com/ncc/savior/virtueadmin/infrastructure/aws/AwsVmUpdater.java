@@ -47,6 +47,10 @@ public class AwsVmUpdater implements IVmUpdater {
 				return new Thread(r, name);
 			}
 		});
+		ArrayList<VmState> awsStartedStates = new ArrayList<VmState>();
+		awsStartedStates.add(VmState.RUNNING);
+		awsStartedStates.add(VmState.LAUNCHING);
+
 		provisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
 		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
 		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager,

@@ -196,53 +196,48 @@ public class VirtueInstance {
 
 	private VirtueState getVirtueStateFrom(Collection<VirtualMachine> vms) {
 		// TODO this should probably be handled elsewhere
-		state = VirtueState.RUNNING;
-		boolean creating = false;
-		boolean launching = false;
-		boolean deleting = false;
+		state = null;
 		for (VirtualMachine vm : vms) {
-			VmState s = vm.getState();
-			switch (s) {
-			case RUNNING:
-				// do nothing
-				break;
-			case CREATING:
-				creating = true;
-				break;
-			case LAUNCHING:
-				creating = true;
-				break;
-			case DELETING:
-				deleting = true;
-				break;
-			case ERROR:
-				setState(null);
+			VirtueState temp = null;
+			temp = vmStateToVirtueState(vm);
+			if (state == null || state.equals(temp)) {
+				state = temp;
+			} else {
 				return null;
-			case PAUSED:
-				break;
-			case PAUSING:
-				break;
-			case RESUMING:
-				break;
-			case STOPPED:
-				break;
-			case STOPPING:
-				break;
-			default:
-				break;
 			}
 		}
-		if ((creating || launching) && deleting) {
-			return (null);
-		}
+		return state;
+	}
 
-		if ((creating || launching)) {
-			return (VirtueState.LAUNCHING);
+	private VirtueState vmStateToVirtueState(VirtualMachine vm) {
+		VmState s = vm.getState();
+		switch (s) {
+		case RUNNING:
+			return VirtueState.RUNNING;
+		case CREATING:
+			return VirtueState.CREATING;
+		case LAUNCHING:
+			return VirtueState.LAUNCHING;
+		case DELETING:
+			return VirtueState.DELETING;
+		case ERROR:
+			return null;
+		case PAUSED:
+			return VirtueState.PAUSED;
+		case PAUSING:
+			return VirtueState.PAUSING;
+		case RESUMING:
+			return VirtueState.RESUMING;
+		case STOPPED:
+			return VirtueState.STOPPED;
+		case STOPPING:
+			return VirtueState.STOPPING;
+		case DELETED:
+			return VirtueState.UNPROVISIONED;
+		default:
+			break;
 		}
-		if (deleting) {
-			return (VirtueState.DELETING);
-		}
-		return VirtueState.RUNNING;
+		return state;
 	}
 
 }

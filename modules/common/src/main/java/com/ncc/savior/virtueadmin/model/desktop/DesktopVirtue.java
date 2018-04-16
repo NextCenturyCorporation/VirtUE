@@ -24,13 +24,13 @@ public class DesktopVirtue {
 		this.virtueState = virtueState;
 	}
 
-	public DesktopVirtue(String id, String name, String templateId) {
+	public DesktopVirtue(String id, String name, String templateId, VirtueState virtueState) {
 		super();
 		this.name = name;
 		this.apps = new HashMap<String, ApplicationDefinition>();
 		this.id = id;
 		this.templateId = templateId;
-		this.virtueState = VirtueState.UNPROVISIONED;
+		this.virtueState = virtueState;
 	}
 
 	protected DesktopVirtue() {

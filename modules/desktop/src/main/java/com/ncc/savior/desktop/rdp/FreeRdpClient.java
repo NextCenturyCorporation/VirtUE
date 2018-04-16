@@ -65,7 +65,7 @@ public class FreeRdpClient implements IRdpClient {
 		String hostname = args[1];
 		DesktopVirtueApplication dva = new DesktopVirtueApplication("", "c:\\windows\\notepad.exe", version, OS.WINDOWS,
 				hostname, 3389, "Administrator", args[0], "c:\\windows\\notepad.exe");
-		DesktopVirtue virtue = new DesktopVirtue(UUID.randomUUID().toString(), "name", "tempId");
+		DesktopVirtue virtue = new DesktopVirtue(UUID.randomUUID().toString(), "name", "tempId", null);
 
 		Process p = new FreeRdpClient(new File("c:\\wfreerdp.exe")).startRdp(dva, virtue, null);
 

@@ -51,9 +51,11 @@ public class AwsUtil {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			instanceIdsToVm.put(vm.getInfrastructureId(), vm);
+			vm.setState(VmState.ERROR);
 		}
 		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
 		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
+		describeInstanceStatusRequest.setIncludeAllInstances(true);
 		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
 		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
 		while (itr.hasNext()) {
@@ -69,6 +71,7 @@ public class AwsUtil {
 		instanceIdsToVm.put(vm.getInfrastructureId(), vm);
 		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
 		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
+		describeInstanceStatusRequest.setIncludeAllInstances(true);
 		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
 		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
 		if (itr.hasNext()) {

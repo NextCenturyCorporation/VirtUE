@@ -83,12 +83,10 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		// return vi;
 	}
 
-//	private class VmUpdateListener implements IStateUpdateListener {
-//		@Override
-//		public void updateVmState(String vmId, VmState state) {
-//			updateVmState(vmId, state);
-//		}
-//	}
+	// @Override
+	// public void updateVmState(String vmId, VmState state) {
+	// virtueDao.updateVmState(vmId, state);
+	// }
 
 	@Override
 	public void deleteVirtue(VirtueUser user, String instanceId) {
@@ -131,6 +129,40 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
 		return vi;
+	}
+
+	@Override
+	public VirtueInstance startVirtue(VirtueUser user, String virtueId) {
+		Optional<VirtueInstance> v = virtueDao.getVirtueInstance(virtueId);
+		if (v.isPresent()) {
+			VirtueInstance virtue = v.get();
+			if (virtue.getUsername().equals(user.getUsername())) {
+				virtue = cloudManager.startVirtue(virtue);
+				return virtue;
+			} else {
+				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+						"User=" + user.getUsername() + " is not authorized to start virtueId=" + virtueId);
+			}
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+		}
+	}
+
+	@Override
+	public VirtueInstance stopVirtue(VirtueUser user, String virtueId) {
+		Optional<VirtueInstance> v = virtueDao.getVirtueInstance(virtueId);
+		if (v.isPresent()) {
+			VirtueInstance virtue = v.get();
+			if (virtue.getUsername().equals(user.getUsername())) {
+				virtue = cloudManager.stopVirtue(virtue);
+				return virtue;
+			} else {
+				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+						"User=" + user.getUsername() + " is not authorized to stop virtueId=" + virtueId);
+			}
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+		}
 	}
 
 	@Override

@@ -116,15 +116,6 @@ public class DesktopResourceService {
 
 	}
 
-	public DesktopVirtue startVirtue(String virtueTemplateId) throws IOException {
-		// template/{templateId}/start
-		WebTarget target = baseApi.path("template").path(virtueTemplateId).path("start");
-		DesktopVirtue startingVirtue = getClass(target, "GET", DesktopVirtue.class);
-		// logger.debug("Started app=" + returnedApp);
-		return startingVirtue;
-
-	}
-
 	// public DesktopVirtueApplication startApplicationFromTemplate(String
 	// templateId, ApplicationDefinition appDefn)
 	// throws IOException {
@@ -197,5 +188,32 @@ public class DesktopResourceService {
 			String username = user.getUsername();
 			builder.header("X-Authorization", username);
 		}
+	}
+
+	public DesktopVirtue createVirtue(String virtueTemplateId) throws IOException {
+		// template/{templateId}/start
+		WebTarget target = baseApi.path("template").path(virtueTemplateId).path("start");
+		DesktopVirtue startingVirtue = getClass(target, "GET", DesktopVirtue.class);
+		// logger.debug("Started app=" + returnedApp);
+		return startingVirtue;
+
+	}
+
+	public void startVirtue(String virtueId) throws InvalidUserLoginException, IOException {
+		WebTarget target = baseApi.path("virtue").path(virtueId).path("start");
+		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Started virtue=" + virtue);
+		}
+
+	}
+
+	public void stopVirtue(String virtueId) throws InvalidUserLoginException, IOException {
+		WebTarget target = baseApi.path("virtue").path(virtueId).path("stop");
+		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Stopping virtue=" + virtue);
+		}
+
 	}
 }

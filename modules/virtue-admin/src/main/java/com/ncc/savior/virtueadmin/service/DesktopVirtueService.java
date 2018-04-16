@@ -147,6 +147,24 @@ public class DesktopVirtueService {
 		return instance;
 	}
 
+	public DesktopVirtue startVirtue(String virtueId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueInstance instance = activeVirtueManager.startVirtue(user, virtueId);
+		if (instance == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+		}
+		return convertVirtueInstanceToDesktopVirtue(instance);
+	}
+
+	public DesktopVirtue stopVirtue(String virtueId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueInstance instance = activeVirtueManager.stopVirtue(user, virtueId);
+		if (instance == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+		}
+		return convertVirtueInstanceToDesktopVirtue(instance);
+	}
+
 	private DesktopVirtue convertVirtueTemplateToDesktopVirtue(VirtueTemplate template) {
 		verifyAndReturnUser();
 		Collection<ApplicationDefinition> apps = template.getApplications();
