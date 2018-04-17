@@ -24,7 +24,6 @@ export class SensingService {
 
   public getList(baseUrl: string): Observable<any> {
     let src = baseUrl + this.configUrl;
-    console.log(src);
     return this.httpClient.get<any>(src);
   }
 

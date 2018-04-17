@@ -63,9 +63,10 @@ export class DashboardComponent implements OnInit {
 
   getSensingData(baseUrl: string) {
     this.sensingService.getList(baseUrl).subscribe(data => {
+      // console.log('Has sensing data? ' + data.timestamp);
       if (data.length > 0) {
         this.sensorData = data;
-        // this.sensorlog(data);
+        this.sensorlog(data);
       } else {
         this.getStaticData();
       }
@@ -74,12 +75,13 @@ export class DashboardComponent implements OnInit {
 
   getStaticData() {
     this.sensingService.getStaticList().subscribe(data => {
-      console.log('sensing data not found...');
+      // console.log('sensing data not found...');
       this.sensorData = data;
     });
   }
 
   sensorlog(log) {
+    // console.log('sensorlog ... ' + this.sensorData.error);
     this.sensorData = log;
   }
 
