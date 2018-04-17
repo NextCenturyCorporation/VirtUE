@@ -169,7 +169,7 @@ import { Globals } from './shared/globals';
     OverlayModule
   ],
   providers: [
-    { provide: OverlayContainer, useFactory: () => new AppOverlayContainer() },
+    OverlayContainer,
     Globals,
     BaseUrlService,
     MessageService,
