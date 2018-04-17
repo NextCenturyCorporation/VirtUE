@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,11 @@ public class VmTemplateIT {
 		given().port(randomServerPort).when().get("/data/templates/preload").then().statusCode(HttpStatus.SC_OK);
 	}
 
+	@After
+	public void tearDown() {
+		given().port(randomServerPort).when().get("/data/clear").then().statusCode(HttpStatus.SC_OK);
+	}
+
 	@Test
 	public void listVmTemplateTest() {
 		List<VirtualMachineTemplate> list = given().port(randomServerPort).when().get("/admin/virtualMachine/template")
@@ -58,7 +64,7 @@ public class VmTemplateIT {
 		assertThat(vmt.getId()).isEqualTo(id);
 	}
 
-	// @Test
+	@Test
 	// TODO need to fix database integrity constraint violation
 	public void deleteVmTemplatesByIdTest() {
 		List<Application> appList = given().port(randomServerPort).when().get("/admin/application").then().extract()
@@ -76,6 +82,7 @@ public class VmTemplateIT {
 		ContentType contentType = ContentType.JSON;
 		VirtualMachineTemplate newVmt = given().port(randomServerPort).when().body(vmt1).contentType(contentType)
 				.post("/admin/virtualMachine/template/").then().extract().as(VirtualMachineTemplate.class);
+		assertThat(newVmt).isNotNull();
 		// above is really just to get an ID of a vm template that does belong to any
 		// virtues and thus avoid any database constraints
 
@@ -83,7 +90,7 @@ public class VmTemplateIT {
 				.then().extract().jsonPath().getList("", VirtualMachineTemplate.class);
 		assertThat(list).isNotEmpty();
 
-		String id = vmt1.getId();
+		String id = newVmt.getId();
 		given().port(randomServerPort).when().delete("/admin/virtualMachine/template/" + id).then().assertThat()
 				.statusCode(204);
 
@@ -129,6 +136,12 @@ public class VmTemplateIT {
 		assertThat(newVmt.getLastEditor()).isNotEqualTo(initialUser);
 		// verify id was given
 		assertThat(newVmt.getId()).isNotNull();
+
+		Collection<String> newAppIds = newVmt.getApplicationIds();
+		for (String id : newAppIds) {
+			assertThat(appIds).contains(id);
+		}
+		assertThat(appIds.size()).isEqualTo(newAppIds.size());
 	}
 
 }

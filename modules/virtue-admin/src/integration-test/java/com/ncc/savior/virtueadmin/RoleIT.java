@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +40,11 @@ public class RoleIT {
 	@Before
 	public void setup() {
 		given().port(randomServerPort).when().get("/data/templates/preload").then().statusCode(HttpStatus.SC_OK);
+	}
+
+	@After
+	public void tearDown() {
+		given().port(randomServerPort).when().get("/data/clear").then().statusCode(HttpStatus.SC_OK);
 	}
 
 	@Test
