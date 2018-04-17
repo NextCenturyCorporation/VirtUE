@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * {@link IUserManager} that uses Spring and JPA.
@@ -24,7 +25,11 @@ public class SpringJpaUserManager implements IUserManager {
 	@Override
 	public VirtueUser getUser(String username) {
 		Optional<VirtueUser> user = userRepo.findById(username);
-		return (user.orElse(null));
+		if (user.isPresent()) {
+			return user.get();
+		} else {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
+		}
 	}
 
 	@Override
@@ -33,14 +38,17 @@ public class SpringJpaUserManager implements IUserManager {
 	}
 
 	@Override
-	public void clear() {
+	public void clear(boolean removeUsers) {
 		Iterator<VirtueUser> itr = userRepo.findAll().iterator();
 		while (itr.hasNext()) {
 			VirtueUser user = itr.next();
 			user.removeAllVirtueTemplates();
 			userRepo.save(user);
 		}
-		userRepo.deleteAll();
+		itr = userRepo.findAll().iterator();
+		if (removeUsers) {
+			userRepo.deleteAll();
+		}
 	}
 
 	@Override

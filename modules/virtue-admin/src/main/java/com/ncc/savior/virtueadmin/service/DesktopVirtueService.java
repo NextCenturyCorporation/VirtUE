@@ -85,7 +85,7 @@ public class DesktopVirtueService {
 
 	public DesktopVirtueApplication startApplication(String virtueId, String applicationId) throws IOException {
 		verifyAndReturnUser();
-		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
+		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId);
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
 		if (OS.LINUX.equals(vm.getOs())) {

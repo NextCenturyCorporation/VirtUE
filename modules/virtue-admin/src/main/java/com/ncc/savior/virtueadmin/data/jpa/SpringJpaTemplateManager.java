@@ -102,8 +102,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
-		return appRepository.findById(applicationId);
+	public ApplicationDefinition getApplicationDefinition(String applicationId) {
+		Optional<ApplicationDefinition> oa = appRepository.findById(applicationId);
+		if (oa.isPresent()) {
+			return oa.get();
+		} else {
+			throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+					"Cannot find application with id=" + applicationId);
+		}
 	}
 
 	// @Override
@@ -112,13 +118,25 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	// }
 
 	@Override
-	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
-		return vmtRepository.findById(templateId);
+	public VirtualMachineTemplate getVmTemplate(String templateId) {
+		Optional<VirtualMachineTemplate> ovmt = vmtRepository.findById(templateId);
+		if (ovmt.isPresent()) {
+			return ovmt.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_TEMPLATE_NOT_FOUND,
+					"Cannot find VM template with id=" + templateId);
+		}
 	}
 
 	@Override
-	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
-		return vtRepository.findById(templateId);
+	public VirtueTemplate getVirtueTemplate(String templateId) {
+		Optional<VirtueTemplate> ovt = vtRepository.findById(templateId);
+		if (ovt.isPresent()) {
+			return ovt.get();
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+					"Cannot find virtue template with id=" + templateId);
+		}
 	}
 
 	@Override
@@ -225,7 +243,6 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void clear() {
-		userRepo.deleteAll();
 		vtRepository.deleteAll();
 		vmtRepository.deleteAll();
 		appRepository.deleteAll();
@@ -260,6 +277,16 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public Iterable<ApplicationDefinition> getApplications(Collection<String> appIds) {
 		return appRepository.findAllById(appIds);
+	}
+
+	@Override
+	public boolean containsApplication(String id) {
+		return appRepository.existsById(id);
+	}
+
+	@Override
+	public boolean containsVirtueTemplate(String id) {
+		return vtRepository.existsById(id);
 	}
 
 }

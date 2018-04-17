@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -157,8 +156,8 @@ public class ImportExportService {
 		ApplicationDefinition app = read(TYPE_APPLICATION, testApplication, ApplicationDefinition.class);
 		String id = IMPORT_ID_PREFIX + testApplication;
 		app.setId(id);
-		Optional<ApplicationDefinition> existingApp = templateManager.getApplicationDefinition(id);
-		if (!existingApp.isPresent()) {
+		boolean exists = templateManager.containsApplication(id);
+		if (!exists) {
 			templateManager.addApplicationDefinition(app);
 		}
 		return id;
@@ -168,8 +167,8 @@ public class ImportExportService {
 		VirtueTemplate vt = read(TYPE_VIRTUE, testVirtue, VirtueTemplate.class);
 		String id = IMPORT_ID_PREFIX + testVirtue;
 		vt.setId(id);
-		Optional<VirtueTemplate> existingVirtueTemplate = templateManager.getVirtueTemplate(id);
-		if (!existingVirtueTemplate.isPresent()) {
+		boolean exists = templateManager.containsVirtueTemplate(id);
+		if (!exists) {
 			templateManager.addVirtueTemplate(vt);
 		}
 		return id;
