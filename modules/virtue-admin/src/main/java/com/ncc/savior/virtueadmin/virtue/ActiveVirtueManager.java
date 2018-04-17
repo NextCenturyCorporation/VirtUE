@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
-import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
+import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -24,7 +24,7 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * See interface for more descriptions.
  *
  */
-public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListener {
+public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListener<VirtualMachine> {
 	private final static Logger logger = LoggerFactory.getLogger(ActiveVirtueManager.class);
 
 	private IActiveVirtueDao virtueDao;
@@ -83,11 +83,6 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 		// return vi;
 	}
 
-	@Override
-	public void updateVmState(String vmId, VmState state) {
-		virtueDao.updateVmState(vmId, state);
-	}
-
 //	private class VmUpdateListener implements IStateUpdateListener {
 //		@Override
 //		public void updateVmState(String vmId, VmState state) {
@@ -139,7 +134,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 	}
 
 	@Override
-	public void updateVms(Collection<VirtualMachine> vms) {
+	public void updateElements(Collection<VirtualMachine> vms) {
 		virtueDao.updateVms(vms);
 
 	}

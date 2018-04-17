@@ -183,7 +183,11 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void handle(MouseEvent event) {
 				// do cleanup stuff.
-				authService.logout();
+				try {
+					authService.logout();
+				} catch (Throwable t) {
+					// do nothing
+				}
 				Platform.exit();
 				System.exit(0);
 			}
@@ -235,17 +239,17 @@ public class Sidebar implements VirtueChangeHandler {
 					@Override
 					public void onLoginSuccess(DesktopUser user) {
 						try {
-						Platform.runLater(new Runnable() {
-							@Override
-							public void run() {
-								virtuePane.getChildren().clear();
-								virtueIdToVmi.clear();
-								userLabel.setText(user.getUsername());
-								if (user.getImage() != null) {
-									userImageView.setImage(user.getImage());
+							Platform.runLater(new Runnable() {
+								@Override
+								public void run() {
+									virtuePane.getChildren().clear();
+									virtueIdToVmi.clear();
+									userLabel.setText(user.getUsername());
+									if (user.getImage() != null) {
+										userImageView.setImage(user.getImage());
+									}
 								}
-							}
-						});
+							});
 						} catch (Throwable t) {
 							logger.debug("Error applying changes to login success.", t);
 						}

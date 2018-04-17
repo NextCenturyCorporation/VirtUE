@@ -22,7 +22,7 @@ public interface IVmManager {
 	 * 
 	 * @param listener
 	 */
-	public void addVmUpdateListener(IVmUpdateListener listener);
+	public void addVmUpdateListener(IUpdateListener<VirtualMachine> listener);
 
 	/**
 	 * Removes a listener which would have been notified when the state of a VM has
@@ -30,7 +30,7 @@ public interface IVmManager {
 	 * 
 	 * @param listener
 	 */
-	public void removeVmUpdateListener(IVmUpdateListener listener);
+	public void removeVmUpdateListener(IUpdateListener<VirtualMachine> listener);
 
 	/**
 	 * Provide a provisioned VM that is currently not used by another Virtue that

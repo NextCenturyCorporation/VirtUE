@@ -137,7 +137,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
 		ec2.startInstances(startInstancesRequest);
 		AwsUtil.updateStatusOnVm(ec2, vm);
-		notifyOnUpdateVmState(vm.getId(), vm.getState());
+		notifyOnUpdateVm(vm);
 		return vm;
 	}
 
@@ -148,7 +148,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
 		ec2.stopInstances(stopInstancesRequest);
 		AwsUtil.updateStatusOnVm(ec2, vm);
-		notifyOnUpdateVmState(vm.getId(), vm.getState());
+		notifyOnUpdateVm(vm);
 		return vm;
 	}
 
@@ -159,7 +159,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		ec2.startInstances(startInstancesRequest);
 		AwsUtil.updateStatusOnVms(ec2, vms);
 		for (VirtualMachine vm : vms) {
-			notifyOnUpdateVmState(vm.getId(), vm.getState());
+			notifyOnUpdateVm(vm);
 		}
 		return vms;
 	}
@@ -171,7 +171,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		ec2.stopInstances(stopInstancesRequest);
 		AwsUtil.updateStatusOnVms(ec2, vms);
 		for (VirtualMachine vm : vms) {
-			notifyOnUpdateVmState(vm.getId(), vm.getState());
+			notifyOnUpdateVm(vm);
 		}
 		return vms;
 	}

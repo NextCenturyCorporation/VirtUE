@@ -11,14 +11,14 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  * Component instances cannot be reused between different pipelines!
  *
  */
-public interface IPipelineComponent {
+public interface IPipelineComponent<T> {
 
 	/**
 	 * Adds {@link VirtualMachine}s to this particular {@link IPipelineComponent}.
 	 * 
 	 * @param vms
 	 */
-	void addVirtualMachines(Collection<VirtualMachine> vms);
+	void addPipelineElements(Collection<PipelineWrapper<T>> vms);
 
 	/**
 	 * Called when an {@link IUpdatePipeline} is started so
@@ -35,6 +35,6 @@ public interface IPipelineComponent {
 	 * 
 	 * @param updatePipeline
 	 */
-	void setResultListener(IUpdatePipelineResultListener updatePipeline);
+	void setResultListener(IUpdatePipelineResultListener<T> updatePipeline);
 
 }

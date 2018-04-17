@@ -15,7 +15,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  * 
  *
  */
-public interface IUpdatePipeline {
+public interface IUpdatePipeline<T> {
 	/**
 	 * Add {@link IPipelineComponent} to a specific index. If index is out of
 	 * bounds, the component should be added to the specific end. I.E. negative
@@ -27,7 +27,7 @@ public interface IUpdatePipeline {
 	 * @param component
 	 * @param index
 	 */
-	void addPipelineComponent(IPipelineComponent component, int index);
+	void addPipelineComponent(IPipelineComponent<T> component, int index);
 
 	/**
 	 * Add {@link IPipelineComponent} to the end of the {@link IUpdatePipeline}.
@@ -36,7 +36,7 @@ public interface IUpdatePipeline {
 	 * 
 	 * @param component
 	 */
-	void addPipelineComponent(IPipelineComponent component);
+	void addPipelineComponent(IPipelineComponent<T> component);
 
 	/**
 	 * Add {@link VirtualMachine}s to the {@link IUpdatePipeline} to be processed.
@@ -45,7 +45,7 @@ public interface IUpdatePipeline {
 	 * 
 	 * @param vms
 	 */
-	void addToPipeline(Collection<VirtualMachine> vms);
+	void addToPipeline(Collection<T> vms);
 
 	/**
 	 * Starts the {@link IUpdatePipeline}. Typically, this just tells each component

@@ -136,7 +136,12 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		for (ApplicationDefinition app : apps) {
 			// assignApplicationToVmTemplate(vmTemplate.getId(), app.getId());
 			Optional<ApplicationDefinition> manageredApp = appRepository.findById(app.getId());
-			vmTemplate.getApplications().add(manageredApp.get());
+			if (manageredApp.isPresent()) {
+				vmTemplate.getApplications().add(manageredApp.get());
+			} else {
+				new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+						"Unable to find application with id=" + app.getId());
+			}
 		}
 		vmtRepository.save(vmTemplate);
 	}
@@ -173,8 +178,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
 		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		if (existing != null) {
-			VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-			existing.removeVirtueTemplate(vt);
+			Iterator<VirtueTemplate> itr = existing.getVirtueTemplates().iterator();
+			while (itr.hasNext()) {
+				VirtueTemplate template = itr.next();
+				if (template.getId().equals(virtueTemplateId)) {
+					itr.remove();
+					break;
+				}
+			}
 			userRepo.save(existing);
 		}
 	}
@@ -214,10 +225,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void clear() {
+		userRepo.deleteAll();
 		vtRepository.deleteAll();
 		vmtRepository.deleteAll();
 		appRepository.deleteAll();
-		userRepo.deleteAll();
+
 	}
 
 	@Override

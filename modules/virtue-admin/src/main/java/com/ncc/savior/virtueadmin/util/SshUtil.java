@@ -1,11 +1,16 @@
 package com.ncc.savior.virtueadmin.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +42,36 @@ public class SshUtil {
 	// }
 	// }
 
-	public static void waitForAllVmsReachableParallel(ArrayList<VirtualMachine> vms, int periodMillis) {
+	public static List<String> sendCommandFromSession(Session session, String command)
+			throws JSchException, IOException {
+		logger.debug("sending command: " + command);
+		ChannelExec myChannel = (ChannelExec) session.openChannel("exec");
+		BufferedReader br = null;
+		BufferedReader er = null;
+		ArrayList<String> lines = new ArrayList<String>();
+		try {
+			myChannel.setCommand(command);
+			// OutputStream ops = myChannel.getOutputStream();
+			// PrintStream ps = new PrintStream(ops, true);
+			myChannel.connect();
+			InputStream input = myChannel.getInputStream();
+			InputStreamReader reader = new InputStreamReader(input);
+			br = new BufferedReader(reader);
+			er = new BufferedReader(new InputStreamReader(myChannel.getErrStream()));
+			String line;
+			JavaUtil.sleepAndLogInterruption(500);
+			while ((line = br.readLine()) != null || (line = er.readLine()) != null) {
+				logger.debug(line);
+				lines.add(line);
+			}
+			return lines;
+		} finally {
+			JavaUtil.closeIgnoreErrors(br, er);
+			myChannel.disconnect();
+		}
+	}
+
+	public static void waitForAllVmsReachableParallel(Collection<VirtualMachine> vms, int periodMillis) {
 		// create copy so we can modify the list
 		vms = new ArrayList<VirtualMachine>(vms);
 		boolean allReachable = false;
@@ -84,8 +118,8 @@ public class SshUtil {
 		JSch ssh = new JSch();
 		ChannelExec channel = null;
 		Session session = null;
-//		BufferedReader reader = null;
-//		BufferedReader ereader = null;
+		// BufferedReader reader = null;
+		// BufferedReader ereader = null;
 		try {
 			ssh.addIdentity(privateKeyFile.getAbsolutePath());
 			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
@@ -109,7 +143,13 @@ public class SshUtil {
 			// }
 			return true;
 		} catch (JSchException e) {
+			if (e.getMessage().contains("Auth fail")) {
+				throw new SaviorException(SaviorException.CONFIGURATION_ERROR, "Auth fail trying to login to vm=" + vm);
+			}
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
+			return false;
+		} catch (Throwable t) {
+			logger.error("Found unexpected error.  Handle me better", t);
 			return false;
 		} finally {
 			if (channel != null) {
@@ -118,7 +158,7 @@ public class SshUtil {
 			if (session != null) {
 				session.disconnect();
 			}
-//			JavaUtil.closeIgnoreErrors(reader, ereader);
+			// JavaUtil.closeIgnoreErrors(reader, ereader);
 		}
 	}
 

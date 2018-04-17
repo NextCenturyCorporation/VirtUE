@@ -69,7 +69,7 @@ public class ApplicationDefinition {
 	}
 
 	// below setters used for jackson deserialization
-	protected void setId(String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

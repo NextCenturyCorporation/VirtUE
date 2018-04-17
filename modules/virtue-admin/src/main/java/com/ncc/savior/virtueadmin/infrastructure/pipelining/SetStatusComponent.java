@@ -1,6 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -10,7 +10,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * Automatically sets the state of the vms and returns success.
  *
  */
-public class SetStatusComponent extends BaseGroupedVmPipelineComponent {
+public class SetStatusComponent extends BaseGroupedVmPipelineComponent<VirtualMachine> {
 
 	private VmState state;
 
@@ -20,12 +20,12 @@ public class SetStatusComponent extends BaseGroupedVmPipelineComponent {
 	}
 
 	@Override
-	protected void onExecute(ArrayList<VirtualMachine> vms) {
-		if (!vms.isEmpty()) {
-			for (VirtualMachine vm : vms) {
-				vm.setState(state);
+	protected void onExecute(Collection<PipelineWrapper<VirtualMachine>> wrappers) {
+		if (!wrappers.isEmpty()) {
+			for (PipelineWrapper<VirtualMachine> wrapper : wrappers) {
+				wrapper.get().setState(state);
 			}
-			doOnSuccess(vms);
+			doOnSuccess(wrappers);
 		}
 	}
 }

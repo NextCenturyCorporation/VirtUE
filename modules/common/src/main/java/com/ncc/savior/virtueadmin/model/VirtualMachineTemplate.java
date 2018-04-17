@@ -32,6 +32,7 @@ public class VirtualMachineTemplate {
 
 	@Transient
 	private Collection<String> applicationIds;
+	private String securityTag;
 
 	public VirtualMachineTemplate(String id, String name, OS os, String templatePath,
 			Collection<ApplicationDefinition> applications, String loginUser, boolean enabled, Date lastModification,
@@ -93,7 +94,7 @@ public class VirtualMachineTemplate {
 		this.id = id;
 	}
 
-	protected void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
@@ -157,5 +158,13 @@ public class VirtualMachineTemplate {
 		return "VirtualMachineTemplate [id=" + id + ", name=" + name + ", os=" + os + ", templatePath=" + templatePath
 				+ ", loginUser=" + loginUser + ", applications=" + applications + ", enabled=" + enabled
 				+ ", lastModification=" + lastModification + ", lastEditor=" + lastEditor + "]";
+	}
+
+	public String getSecurityTag() {
+		return this.securityTag;
+	}
+
+	public void setSecurityTag(String securityTag) {
+		this.securityTag = securityTag;
 	}
 }
