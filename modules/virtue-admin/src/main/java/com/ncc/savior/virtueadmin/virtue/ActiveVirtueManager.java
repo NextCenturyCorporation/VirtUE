@@ -83,12 +83,12 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		// return vi;
 	}
 
-//	private class VmUpdateListener implements IStateUpdateListener {
-//		@Override
-//		public void updateVmState(String vmId, VmState state) {
-//			updateVmState(vmId, state);
-//		}
-//	}
+	// private class VmUpdateListener implements IStateUpdateListener {
+	// @Override
+	// public void updateVmState(String vmId, VmState state) {
+	// updateVmState(vmId, state);
+	// }
+	// }
 
 	@Override
 	public void deleteVirtue(VirtueUser user, String instanceId) {
@@ -97,6 +97,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
+		cloudManager.deleteVirtue(vi);
 		if (vi.getUsername().equals(user.getUsername())) {
 
 		} else {
@@ -130,6 +131,10 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	@Override
 	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
+		if (vi == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+					"Cannot find virtue with id=" + instanceId + " for user=" + user.getUsername());
+		}
 		return vi;
 	}
 

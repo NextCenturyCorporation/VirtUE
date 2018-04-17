@@ -456,8 +456,8 @@ public class DataResource {
 	@GET
 	@Path("user/clear/")
 	public String clearUsers() {
-		userManager.clear();
-		return "database cleared.";
+		userManager.clear(false);
+		return "Users cleared.";
 	}
 
 	@GET
@@ -466,7 +466,7 @@ public class DataResource {
 		clearActiveDatabase();
 		clearUsers();
 		clearTemplatesDatabase();
-
+		userManager.clear(true);
 		return "database cleared.";
 	}
 

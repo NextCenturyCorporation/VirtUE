@@ -15,6 +15,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  * Data Transfer Object (DTO) for templates.
@@ -142,7 +143,7 @@ public class VirtueTemplate {
 		this.version = version;
 	}
 
-	public void setVmTemplates(Set<VirtualMachineTemplate> vmTemplates) {
+	public void setVmTemplates(Collection<VirtualMachineTemplate> vmTemplates) {
 		this.vmTemplates = vmTemplates;
 	}
 
@@ -207,7 +208,9 @@ public class VirtueTemplate {
 		return applicationIds;
 	}
 
-	protected void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
+	@JsonSetter
+	public void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
+		this.vmTemplates = null;
 		this.virtualMachineTemplateIds = virtualMachineTemplateIds;
 	}
 }

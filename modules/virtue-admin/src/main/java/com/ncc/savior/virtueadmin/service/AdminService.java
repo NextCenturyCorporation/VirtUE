@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -119,35 +118,27 @@ public class AdminService {
 	public Iterable<VirtueTemplate> getVirtueTemplatesForUser(String username) {
 		verifyAndReturnUser();
 		VirtueUser user = userManager.getUser(username);
-		if (user != null) {
-			Map<String, VirtueTemplate> vts = templateManager.getVirtueTemplatesForUser(user);
-			return vts.values();
-		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
-		}
+		Map<String, VirtueTemplate> vts = templateManager.getVirtueTemplatesForUser(user);
+		return vts.values();
 	}
 
 	public Iterable<VirtueInstance> getAllActiveVirtuesForUser(String username) {
 		verifyAndReturnUser();
 		VirtueUser user = userManager.getUser(username);
-		if (user != null) {
-			Collection<VirtueInstance> vs = virtueManager.getVirtuesForUser(user);
-			return vs;
-		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
-		}
+		Collection<VirtueInstance> vs = virtueManager.getVirtuesForUser(user);
+		return vs;
 	}
 
 	public VirtueTemplate getVirtueTemplate(String templateId) {
 		verifyAndReturnUser();
-		Optional<VirtueTemplate> opt = templateManager.getVirtueTemplate(templateId);
-		return opt.isPresent() ? opt.get() : null;
+		VirtueTemplate viTemplate = templateManager.getVirtueTemplate(templateId);
+		return viTemplate;
 	}
 
 	public VirtualMachineTemplate getVmTemplate(String templateId) {
 		verifyAndReturnUser();
-		Optional<VirtualMachineTemplate> opt = templateManager.getVmTemplate(templateId);
-		return opt.isPresent() ? opt.get() : null;
+		VirtualMachineTemplate vmTemplate = templateManager.getVmTemplate(templateId);
+		return vmTemplate;
 	}
 
 	public VirtueInstance getActiveVirtue(String virtueId) {
@@ -157,8 +148,8 @@ public class AdminService {
 
 	public ApplicationDefinition getApplicationDefinition(String templateId) {
 		verifyAndReturnUser();
-		Optional<ApplicationDefinition> opt = templateManager.getApplicationDefinition(templateId);
-		return opt.isPresent() ? opt.get() : null;
+		ApplicationDefinition app = templateManager.getApplicationDefinition(templateId);
+		return app;
 	}
 
 	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
@@ -191,13 +182,14 @@ public class AdminService {
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
 		VirtueUser user = verifyAndReturnUser();
 		Collection<String> vmtIds = template.getVirtualMachineTemplateIds();
-		Iterator<VirtualMachineTemplate> itr = templateManager.getVmTemplates(vmtIds).iterator();
+		Iterable<VirtualMachineTemplate> vmts = templateManager.getVmTemplates(vmtIds);
+		Iterator<VirtualMachineTemplate> itr = vmts.iterator();
 		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
 		}
-		
-		Set<VirtualMachineTemplate> vmTemplates=new HashSet<VirtualMachineTemplate>();
-		while(itr.hasNext()) {
+
+		Set<VirtualMachineTemplate> vmTemplates = new HashSet<VirtualMachineTemplate>();
+		while (itr.hasNext()) {
 			vmTemplates.add(itr.next());
 		}
 		template.setVmTemplates(vmTemplates);
@@ -214,9 +206,9 @@ public class AdminService {
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
 		}
-		
-		Collection<ApplicationDefinition> applications=new HashSet<ApplicationDefinition>();
-		while(itr.hasNext()) {
+
+		Collection<ApplicationDefinition> applications = new HashSet<ApplicationDefinition>();
+		while (itr.hasNext()) {
 			applications.add(itr.next());
 		}
 		vmTemplate.setApplications(applications);
@@ -263,7 +255,8 @@ public class AdminService {
 
 	public VirtueUser getUser(String usernameToRetrieve) {
 		verifyAndReturnUser();
-		return userManager.getUser(usernameToRetrieve);
+		VirtueUser user = userManager.getUser(usernameToRetrieve);
+		return user;
 	}
 
 	public void removeUser(String usernameToRemove) {
@@ -279,21 +272,13 @@ public class AdminService {
 	public void assignTemplateToUser(String templateId, String username) {
 		verifyAndReturnUser();
 		VirtueUser user = userManager.getUser(username);
-		if (user != null) {
-			templateManager.assignVirtueTemplateToUser(user, templateId);
-		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
-		}
+		templateManager.assignVirtueTemplateToUser(user, templateId);
 	}
 
 	public void revokeTemplateFromUser(String templateId, String username) {
 		verifyAndReturnUser();
 		VirtueUser user = userManager.getUser(username);
-		if (user != null) {
-			templateManager.revokeVirtueTemplateFromUser(user, templateId);
-		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
-		}
+		templateManager.revokeVirtueTemplateFromUser(user, templateId);
 	}
 
 	public List<VirtueUser> getActiveUsers() {
@@ -354,13 +339,16 @@ public class AdminService {
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		Map<String, List<String>> sessionMap = new HashMap<String, List<String>>();
 		for (Object principal : principals) {
-			User user = (User) principal;
+			if (principal == null) {
+				continue;
+			}
+			String username = (principal instanceof User ? ((User) principal).getUsername() : principal.toString());
 			List<SessionInformation> sessions = sessionRegistry.getAllSessions(principal, false);
 			ArrayList<String> list = new ArrayList<String>();
 			for (SessionInformation s : sessions) {
 				list.add(s.getSessionId());
 			}
-			sessionMap.put(user.getUsername(), list);
+			sessionMap.put(username, list);
 		}
 		return sessionMap;
 	}

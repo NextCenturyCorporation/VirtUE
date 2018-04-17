@@ -4,8 +4,10 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +16,11 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.OS;
+
+import io.restassured.http.ContentType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -36,10 +43,76 @@ public class ApplicationIT {
 		given().port(randomServerPort).when().get("/data/templates/preload").then().statusCode(HttpStatus.SC_OK);
 	}
 
+	@After
+	public void tearDown() {
+		given().port(randomServerPort).when().get("/data/clear").then().statusCode(HttpStatus.SC_OK);
+	}
+
 	@Test
 	public void listApplicationsTest() {
 		List<Application> list = given().port(randomServerPort).when().get("/admin/application").then().extract()
 				.jsonPath().getList("", Application.class);
 		assertThat(list).isNotEmpty();
 	}
+
+	@Test
+	public void getValidApplicationsByIdTest() {
+		List<Application> list = given().port(randomServerPort).when().get("/admin/application").then().extract()
+				.jsonPath().getList("", Application.class);
+		assertThat(list).isNotEmpty();
+
+		String id = list.get(0).id;
+		ApplicationDefinition app = given().port(randomServerPort).when().get("/admin/application/" + id).then()
+				.extract().as(ApplicationDefinition.class);
+		assertThat(app).isNotNull();
+		assertThat(app.getId()).isEqualTo(id);
+	}
+
+	@Test
+	public void getInvalidApplicationsByIdTest() {
+		String id = UUID.randomUUID().toString() + "-bad";
+		given().port(randomServerPort).when().get("/admin/application/" + id).then().assertThat().statusCode(400);
+	}
+
+	@Test
+	public void deleteValidApplicationsByIdTest() {
+		ApplicationDefinition app1 = new ApplicationDefinition(null, "Test Template", "", OS.LINUX);
+		ContentType contentType = ContentType.JSON;
+		Application application = given().port(randomServerPort).when().body(app1).contentType(contentType)
+				.post("/admin/application").then().extract().as(Application.class);
+
+		assertThat(application).isNotNull();
+		// verify id was given
+		assertThat(application.id).isNotNull();
+
+		List<Application> list = given().port(randomServerPort).when().get("/admin/application").then().extract()
+				.jsonPath().getList("", Application.class);
+		assertThat(list).isNotEmpty();
+
+		String id = application.id;
+		given().port(randomServerPort).when().delete("/admin/application/" + id).then().assertThat().statusCode(204);
+
+		List<Application> list2 = given().port(randomServerPort).when().get("/admin/application").then().extract()
+				.jsonPath().getList("", Application.class);
+		assertThat(list).isNotEmpty();
+
+		assertThat(list2.size() + 1).isEqualTo(list.size());
+		for (Application app2 : list2) {
+			assertThat(app2.id).isNotEqualTo(id);
+		}
+	}
+
+	@Test
+	public void createApplicationTest() {
+
+		ApplicationDefinition app = new ApplicationDefinition(null, "Test Template", "", OS.LINUX);
+		ContentType contentType = ContentType.JSON;
+		Application application = given().port(randomServerPort).when().body(app).contentType(contentType)
+				.post("/admin/application").then().extract().as(Application.class);
+
+		assertThat(application).isNotNull();
+		// verify id was given
+		assertThat(application.id).isNotNull();
+	}
+
 }

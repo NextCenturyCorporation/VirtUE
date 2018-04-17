@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +19,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.ncc.savior.virtueadmin.RoleIT.Role;
-import com.ncc.savior.virtueadmin.UserIT.User;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -38,6 +39,11 @@ public class UserIT {
 		given().port(randomServerPort).when().get("/data/templates/preload").then().statusCode(HttpStatus.SC_OK);
 	}
 
+	@After
+	public void tearDown() {
+		given().port(randomServerPort).when().get("/data/clear").then().statusCode(HttpStatus.SC_OK);
+	}
+
 	@Test
 	public void listUsersTest() {
 		List<User> list = given().port(randomServerPort).when().get("/admin/user").then().extract().jsonPath()
@@ -55,6 +61,12 @@ public class UserIT {
 					.as(User.class);
 			assertThat(retrievedUser).isEqualToComparingFieldByFieldRecursively(retrievedUser);
 		}
+	}
+
+	@Test
+	public void getBadUserTest() {
+		given().port(randomServerPort).when().get("/admin/user/{username}", UUID.randomUUID().toString() + "-bad")
+				.then().assertThat().statusCode(400);
 	}
 
 	@Test
@@ -90,8 +102,8 @@ public class UserIT {
 		User originalUser = given().port(randomServerPort).when().get("/admin/user").then().extract().jsonPath()
 				.getList("", User.class).iterator().next();
 		String role = originalUser.virtueTemplateIds.iterator().next();
-		given().port(randomServerPort).when().post("/admin/user/{username}/revoke/{role}", originalUser.username, role).then()
-				.statusCode(HttpStatus.SC_NO_CONTENT);
+		given().port(randomServerPort).when().post("/admin/user/{username}/revoke/{role}", originalUser.username, role)
+				.then().statusCode(HttpStatus.SC_NO_CONTENT);
 		User revokedUser = given().port(randomServerPort).when().get("/admin/user/{username}", originalUser.username)
 				.as(User.class);
 		assertThat(revokedUser.virtueTemplateIds).doesNotContain(role);

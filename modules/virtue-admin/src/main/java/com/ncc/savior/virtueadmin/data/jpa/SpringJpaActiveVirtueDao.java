@@ -118,6 +118,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void clear() {
 		virtueRepository.deleteAll();
+		vmRepository.deleteAll();
 	}
 
 	@Override
