@@ -354,13 +354,16 @@ public class AdminService {
 		List<Object> principals = sessionRegistry.getAllPrincipals();
 		Map<String, List<String>> sessionMap = new HashMap<String, List<String>>();
 		for (Object principal : principals) {
-			User user = (User) principal;
+			if (principal == null) {
+				continue;
+			}
+			String username = (principal instanceof User ? ((User) principal).getUsername() : principal.toString());
 			List<SessionInformation> sessions = sessionRegistry.getAllSessions(principal, false);
 			ArrayList<String> list = new ArrayList<String>();
 			for (SessionInformation s : sessions) {
 				list.add(s.getSessionId());
 			}
-			sessionMap.put(user.getUsername(), list);
+			sessionMap.put(username, list);
 		}
 		return sessionMap;
 	}
