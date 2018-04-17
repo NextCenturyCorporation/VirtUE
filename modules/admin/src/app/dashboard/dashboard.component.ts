@@ -62,11 +62,10 @@ export class DashboardComponent implements OnInit {
   }
 
   getSensingData(baseUrl: string) {
-    this.sensingService.getList(baseUrl).subscribe(data => {
-      // console.log('Has sensing data? ' + data.timestamp);
+    this.sensingService.getSensingLog(baseUrl).subscribe(data => {
       if (data.length > 0) {
-        this.sensorData = data;
-        this.sensorlog(data);
+        this.sensorData = data[0].sensors;
+        console.log(this.sensorData);
       } else {
         this.getStaticData();
       }
@@ -75,8 +74,9 @@ export class DashboardComponent implements OnInit {
 
   getStaticData() {
     this.sensingService.getStaticList().subscribe(data => {
+      // console.log(data[0].sensors);
+      this.sensorData = data[0].sensors;
       // console.log('sensing data not found...');
-      this.sensorData = data;
     });
   }
 
@@ -91,20 +91,14 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  getSensorInfo(sensor: any[], prop: string) {
-    if (prop === 'sensor_id') {
-      return sensor[0].sensor_id;
-
-    } else if (prop === 'virtue_id') {
-      this.getVirtueName(sensor[0].virtue_id);
+  getSensorInfo(value: string, prop: string) {
+    if (prop === 'virtue_id') {
+      let sensorValue = this.getVirtueName(value);
       // return this.virtueName;
-      return sensor[0].virtue_id;
+      return sensorValue;
 
-    } else if (prop === 'kafka_topic') {
-      return sensor[0].kafka_topic;
-
-    } else if (prop === 'has_certificates') {
-      if (sensor[0].has_certificates === true) {
+    }  else if (prop === 'certs') {
+      if (value) {
         return 'Yes';
       } else {
         return 'No';
@@ -116,8 +110,9 @@ export class DashboardComponent implements OnInit {
     for (let virtue of this.virtues) {
       if (id === virtue.id) {
         // console.log(virtue.name);
-        this.virtueName = virtue.name;
-        break;
+        return virtue.name;
+      } else {
+        return id;
       }
     }
   }
