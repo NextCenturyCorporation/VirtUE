@@ -63,11 +63,23 @@ export class DashboardComponent implements OnInit {
 
   getSensingData(baseUrl: string) {
     this.sensingService.getList(baseUrl).subscribe(data => {
-      this.sensorlog(data);
+      if (data.length > 0) {
+        this.sensorData = data;
+        // this.sensorlog(data);
+      } else {
+        this.getStaticData();
+      }
     });
   }
 
-  sensorlog(log){
+  getStaticData() {
+    this.sensingService.getStaticList().subscribe(data => {
+      console.log('sensing data not found...');
+      this.sensorData = data;
+    });
+  }
+
+  sensorlog(log) {
     this.sensorData = log;
   }
 
@@ -82,10 +94,9 @@ export class DashboardComponent implements OnInit {
       return sensor[0].sensor_id;
 
     } else if (prop === 'virtue_id') {
-      // console.log(sensor[0].virtue_id);
       this.getVirtueName(sensor[0].virtue_id);
-      // this.virtueName = `${this.virtueName} (${sensor[0].virtue_id})`;
-      return this.virtueName;
+      // return this.virtueName;
+      return sensor[0].virtue_id;
 
     } else if (prop === 'kafka_topic') {
       return sensor[0].kafka_topic;
@@ -104,6 +115,7 @@ export class DashboardComponent implements OnInit {
       if (id === virtue.id) {
         // console.log(virtue.name);
         this.virtueName = virtue.name;
+        break;
       }
     }
   }
