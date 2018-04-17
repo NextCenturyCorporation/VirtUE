@@ -47,12 +47,12 @@ public class CreateDestroyVirtueIT {
 
 		// create a virtue template.
 		VirtueInstance instance = given().port(randomServerPort).when().post("/user/virtue/template/" + templateId)
-				.then().extract().jsonPath().getObject("", VirtueInstance.class);
+				.then().extract().as(VirtueInstance.class);
 		assertThat(instance).isNotNull();
 
 		// check on instance
 		instance = given().port(randomServerPort).when().get("/user/virtue/" + instance.getId()).then().extract()
-				.jsonPath().getObject("", VirtueInstance.class);
+				.as(VirtueInstance.class);
 		assertThat(instance).isNotNull();
 		
 		// delete instance
@@ -60,7 +60,7 @@ public class CreateDestroyVirtueIT {
 				.statusCode(204);
 
 		instance = given().port(randomServerPort).when().get("/user/virtue/" + instance.getId()).then().extract()
-				.jsonPath().getObject("", VirtueInstance.class);
+				.as(VirtueInstance.class);
 		assertThat(instance).isNotNull();
 	}
 }

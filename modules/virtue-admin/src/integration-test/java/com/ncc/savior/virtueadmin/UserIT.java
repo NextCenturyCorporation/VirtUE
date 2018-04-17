@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.http.HttpStatus;
 import org.junit.Before;
@@ -57,6 +58,12 @@ public class UserIT {
 	}
 
 	@Test
+	public void getBadUserTest() {
+		given().port(randomServerPort).when().get("/admin/user/{username}", UUID.randomUUID().toString() + "-bad")
+				.then().assertThat().statusCode(400);
+	}
+
+	@Test
 	public void assignRoleTest() {
 		// get users and virtues
 		List<User> users = given().port(randomServerPort).when().get("/admin/user").then().extract().jsonPath()
@@ -89,8 +96,8 @@ public class UserIT {
 		User originalUser = given().port(randomServerPort).when().get("/admin/user").then().extract().jsonPath()
 				.getList("", User.class).iterator().next();
 		String role = originalUser.virtueTemplateIds.iterator().next();
-		given().port(randomServerPort).when().post("/admin/user/{username}/revoke/{role}", originalUser.username, role).then()
-				.statusCode(HttpStatus.SC_NO_CONTENT);
+		given().port(randomServerPort).when().post("/admin/user/{username}/revoke/{role}", originalUser.username, role)
+				.then().statusCode(HttpStatus.SC_NO_CONTENT);
 		User revokedUser = given().port(randomServerPort).when().get("/admin/user/{username}", originalUser.username)
 				.as(User.class);
 		assertThat(revokedUser.virtueTemplateIds).doesNotContain(role);

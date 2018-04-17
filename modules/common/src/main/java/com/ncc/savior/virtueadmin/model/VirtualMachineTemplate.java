@@ -13,6 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 @Entity
 public class VirtualMachineTemplate {
@@ -140,6 +141,12 @@ public class VirtualMachineTemplate {
 
 	public void setLoginUser(String loginUser) {
 		this.loginUser = loginUser;
+	}
+
+	@JsonSetter
+	public void setApplicationIds(Collection<String> appIds) {
+		applications = null;
+		applicationIds = appIds;
 	}
 
 	@JsonGetter
