@@ -19,12 +19,17 @@ export class SensingService {
     private httpClient: HttpClient
   ) { }
 
-  // private jsonfile = './assets/json/sensing.json';
+  private jsonfile = './assets/json/sensing.json';
   private configUrl = 'admin/sensing';
 
-  public getList(baseUrl: string): Observable<any> {
+  public getSensingLog(baseUrl: string): Observable<any> {
     let src = baseUrl + this.configUrl;
     return this.httpClient.get<any>(src);
+  }
+
+  public getStaticList(): Observable<any> {
+    // console.log('using static data');
+    return this.httpClient.get<any>(this.jsonfile);
   }
 
 }
