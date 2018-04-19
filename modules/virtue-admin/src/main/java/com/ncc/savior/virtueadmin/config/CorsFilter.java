@@ -7,11 +7,14 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 @Provider
 public class CorsFilter implements ContainerResponseFilter {
+	private static final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
 	private Boolean enabled;
 	private String allowOrigin;
@@ -26,6 +29,13 @@ public class CorsFilter implements ContainerResponseFilter {
 		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization");
 		this.allowCredentials = env.getProperty("savior.cors.allow-credentials", "true");
 		this.allowMethods = env.getProperty("savior.cors.allow-methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+		if (enabled) {
+			logger.debug("CORS Filter has been enabled");
+			logger.debug("  CORS-allow-origin=" + allowOrigin);
+			logger.debug("  CORS-allow-headers=" + allowHeaders);
+			logger.debug("  CORS-allow-credentials=" + allowCredentials);
+			logger.debug("  CORS-allow-methods=" + allowMethods);
+		}
 	}
 
 	@Override
