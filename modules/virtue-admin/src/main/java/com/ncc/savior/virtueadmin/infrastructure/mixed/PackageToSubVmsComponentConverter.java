@@ -9,7 +9,8 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 public class PackageToSubVmsComponentConverter implements IPipelineComponent<XenVirtueCreationPackage> {
 	private IPipelineComponent<VirtualMachine> subPipeline;
-	private IUpdatePipelineResultListener<XenVirtueCreationPackage> myResultListener;
+	// private IUpdatePipelineResultListener<XenVirtueCreationPackage>
+	// myResultListener;
 
 	public PackageToSubVmsComponentConverter(IPipelineComponent<VirtualMachine> subPipeline) {
 		this.subPipeline = subPipeline;

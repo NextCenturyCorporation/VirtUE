@@ -23,7 +23,6 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
 
 public class BruteForceAwsZenCloudManager implements ICloudManager {
 
-	private static final int SSH_PORT = 22;
 	private AmazonEC2 ec2;
 	private InstanceType instanceType;
 	private List<String> defaultSecurityGroups;

@@ -50,6 +50,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	@Override
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
+		logger.debug("creating virtue from template=" + template.getId());
 		Collection<VirtualMachineTemplate> linuxVmts = new ArrayList<VirtualMachineTemplate>();
 		Collection<VirtualMachineTemplate> windowsVmts = new ArrayList<VirtualMachineTemplate>();
 		Collection<VirtualMachineTemplate> vmts = template.getVmTemplates();
@@ -66,10 +67,9 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		xenHostManager.provisionXenHost(vi, linuxVmts);
 		// }
 
+
 		windowsNfsMountingService.mountNfsOnWindowsBoxes(vi);
-		// need to add NFS, can use this: echo mount -o mtype=hard 10.0.4.178:/disk/nfs
-		// t: > "AppData\Roaming\Microsoft\Windows\Start
-		// Menu\Programs\Startup\start.bat"
+
 		return vi;
 	}
 

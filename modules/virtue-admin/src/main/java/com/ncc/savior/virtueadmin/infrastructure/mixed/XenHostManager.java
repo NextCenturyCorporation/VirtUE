@@ -54,7 +54,6 @@ public class XenHostManager {
 	private XenGuestManagerFactory xenGuestManagerFactory;
 	private String subnetId;
 	private Collection<String> securityGroupIds;
-	private static final String VM_PREFIX = "VRTU-";
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
 			IUpdateListener<VirtualMachine> actualVmNotifier, Route53Manager route53,
