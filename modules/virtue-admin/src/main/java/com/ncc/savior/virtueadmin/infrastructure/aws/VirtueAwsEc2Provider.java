@@ -14,6 +14,13 @@ import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.route53.AmazonRoute53Async;
 import com.amazonaws.services.route53.AmazonRoute53AsyncClientBuilder;
 
+/**
+ * Provides AWS support classes such as {@link AmazonEC2} or
+ * {@link AmazonRoute53Async} using the given region and credentials from the
+ * system.
+ * 
+ *
+ */
 public class VirtueAwsEc2Provider {
 	private static final String PROPERTY_AWS_PROFILE = "aws.profile";
 	private static final Logger logger = LoggerFactory.getLogger(VirtueAwsEc2Provider.class);

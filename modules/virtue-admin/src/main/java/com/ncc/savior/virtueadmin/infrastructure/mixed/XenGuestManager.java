@@ -38,6 +38,13 @@ import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
+/**
+ * Handles creation, starting, stopping, deleting and some other management of
+ * XenGuest (DomU) Virtual Machines. One instance of this class maps directly to
+ * only one instance of Xen.
+ * 
+ *
+ */
 public class XenGuestManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenGuestManager.class);
 	private static final String VM_PREFIX = "VRTU-";

@@ -10,6 +10,13 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * Implementation of {@link IUpdatePipeline}. See {@link IUpdatePipeline}
+ * documentation for more details.
+ * 
+ *
+ * @param <T>
+ */
 public class UpdatePipeline<T> implements IUpdatePipeline<T>, IUpdatePipelineResultListener<T> {
 	private static final Logger logger = LoggerFactory.getLogger(UpdatePipeline.class);
 	private List<IPipelineComponent<T>> pipeline = new ArrayList<IPipelineComponent<T>>();

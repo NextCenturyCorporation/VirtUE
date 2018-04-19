@@ -11,6 +11,11 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.Channel;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 
+/**
+ * Helper class to handle streaming commands over SSH using JSCH.
+ * 
+ *
+ */
 public class CommandHandler implements Closeable {
 	private static Logger logger = LoggerFactory.getLogger(CommandHandler.class);
 

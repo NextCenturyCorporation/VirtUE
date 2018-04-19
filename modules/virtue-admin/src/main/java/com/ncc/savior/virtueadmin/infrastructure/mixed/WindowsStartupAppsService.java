@@ -24,8 +24,21 @@ import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
-public class WindowsNfsMountingService {
-	private static final Logger logger = LoggerFactory.getLogger(WindowsNfsMountingService.class);
+/**
+ * Used to add scripts, shortcuts or programs into the startup folder on a
+ * windows VM such that those programs will start when logged in.
+ * 
+ * Typically, users of this class will call
+ * {@link #addVirtueToQueue(VirtueInstance)} and this service will handle
+ * waiting until the VM's in that virtue are ready. Once they are ready, the
+ * scripts,etc will be added to the startup folder.
+ * 
+ * This class is a temporary patch until we use services.
+ * 
+ *
+ */
+public class WindowsStartupAppsService {
+	private static final Logger logger = LoggerFactory.getLogger(WindowsStartupAppsService.class);
 	private String command1File = "\"AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\mountNfs.bat\"";
 	private String command = "echo mount -o mtype=hard %s:/disk/nfs t: > " + command1File;
 	private String command2File = "\"AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\startSensors.bat\"";
@@ -35,7 +48,7 @@ public class WindowsNfsMountingService {
 	private IKeyManager keyManager;
 	private List<String> virtueList;
 
-	public WindowsNfsMountingService(IActiveVirtueDao activeVirtueDao, IKeyManager keyManager) {
+	public WindowsStartupAppsService(IActiveVirtueDao activeVirtueDao, IKeyManager keyManager) {
 		this.activeVirtueDao = activeVirtueDao;
 		this.keyManager = keyManager;
 		this.virtueList = Collections.synchronizedList(new ArrayList<String>());
@@ -88,7 +101,7 @@ public class WindowsNfsMountingService {
 					for (VirtualMachine vm : v.getVms()) {
 						// go through each VM for windwos boxes
 						if (OS.WINDOWS.equals(vm.getOs())) {
-							boolean mySuccess = addNfsMountToStartup(xenVm.get(), vm);
+							boolean mySuccess = addWindowsStartupServices(xenVm.get(), vm);
 							success &= mySuccess;
 						}
 					}
@@ -101,7 +114,7 @@ public class WindowsNfsMountingService {
 		return false;
 	}
 
-	public boolean addNfsMountToStartup(VirtualMachine nfs, VirtualMachine windows) {
+	public boolean addWindowsStartupServices(VirtualMachine nfs, VirtualMachine windows) {
 		JSch ssh = new JSch();
 		Session session = null;
 		logger.debug("Attempting to mount NFS on windows box for virtue " + nfs.getId());
@@ -132,7 +145,13 @@ public class WindowsNfsMountingService {
 		return false;
 	}
 
-	public void mountNfsOnWindowsBoxes(VirtueInstance vi) {
+	/**
+	 * Adds the given virtue to the list of Virtues. This service will apply the
+	 * startup commands when the appropriate VM's are ready.
+	 * 
+	 * @param vi
+	 */
+	public void addVirtueToQueue(VirtueInstance vi) {
 		virtueList.add(vi.getId());
 	}
 

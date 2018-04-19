@@ -40,6 +40,14 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 
+/**
+ * This class handles creation, deletion, start, and stop among other management
+ * task of Xen Host Virtual Machines (Dom0). It uses {@link AwsEc2Wrapper} to
+ * create the Xen host on AWS and then uses {@link XenGuestManagerFactory} to
+ * get {@link XenGuestManager}s to provision the Guest (DomU) Virtual Machines.
+ * 
+ *
+ */
 public class XenHostManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private VirtualMachineTemplate xenVmTemplate;

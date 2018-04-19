@@ -15,16 +15,23 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Cloud manager that mixes AWS instances for Windows VMs via an
+ * {@link AsyncAwsEc2VmManager}, but defers any linux boxes to a
+ * {@link XenHostManager}.
+ * 
+ *
+ */
 public class XenAwsMixCloudManager implements ICloudManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenAwsMixCloudManager.class);
 
 	private XenHostManager xenHostManager;
 	private AsyncAwsEc2VmManager awsVmManager;
 
-	private WindowsNfsMountingService windowsNfsMountingService;
+	private WindowsStartupAppsService windowsNfsMountingService;
 
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
-			WindowsNfsMountingService windowsNfsMountingService) {
+			WindowsStartupAppsService windowsNfsMountingService) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
@@ -68,7 +75,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		// }
 
 
-		windowsNfsMountingService.mountNfsOnWindowsBoxes(vi);
+		windowsNfsMountingService.addVirtueToQueue(vi);
 
 		return vi;
 	}

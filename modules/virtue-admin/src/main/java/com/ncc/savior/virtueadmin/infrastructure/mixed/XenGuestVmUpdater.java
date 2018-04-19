@@ -20,6 +20,12 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * {@link IVmUpdater} specifically for Guest Virtual Machines (DomU) created in
+ * Xen.
+ * 
+ *
+ */
 public class XenGuestVmUpdater implements IVmUpdater {
 	private static final Logger logger = LoggerFactory.getLogger(XenHostVmUpdater.class);
 	private ScheduledExecutorService executor;

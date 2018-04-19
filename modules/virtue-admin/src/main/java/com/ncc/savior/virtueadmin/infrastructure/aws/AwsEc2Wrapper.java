@@ -30,14 +30,20 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * Class that essentially wraps the AWS EC2 interface to provide a simplier
+ * interface for what the project needs.
+ * 
+ *
+ */
 public class AwsEc2Wrapper {
 	private static final Logger logger = LoggerFactory.getLogger(AwsEc2Wrapper.class);
 	private static final int SSH_PORT = 22;
 
 	private AmazonEC2 ec2;
-	
+
 	public AwsEc2Wrapper(VirtueAwsEc2Provider ec2Provider) {
-		this.ec2=ec2Provider.getEc2();
+		this.ec2 = ec2Provider.getEc2();
 	}
 
 	public AmazonEC2 getEc2() {
@@ -46,33 +52,33 @@ public class AwsEc2Wrapper {
 
 	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String namePrefix,
 			Collection<String> securityGroupIds, String serverKeyName, InstanceType instanceType, String subnetIds) {
-		
-		VirtualMachine vm = null; 
+
+		VirtualMachine vm = null;
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
-			String templatePath = vmt.getTemplatePath();
-			runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
+		String templatePath = vmt.getTemplatePath();
+		runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
 				.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName).withSecurityGroupIds(securityGroupIds)
 				.withSubnetId(subnetIds);
 
 		// .withSecurityGroups(securityGroups);
-			RunInstancesResult result = ec2.runInstances(runInstancesRequest);
+		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
-			List<Instance> instances = result.getReservation().getInstances();
-			if (instances.size() != 1) {
-				throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
-			}
-			
-			Instance instance = instances.get(0);
+		List<Instance> instances = result.getReservation().getInstances();
+		if (instances.size() != 1) {
+			throw new RuntimeException("Created more than 1 instance when only 1 was expected!");
+		}
 
-			String name = namePrefix + instance.getInstanceId();
-			String loginUsername = vmt.getLoginUser();
-			String privateKeyName = serverKeyName;
-			
-			vm = new VirtualMachine(UUID.randomUUID().toString(), name,
-					new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
-					instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
-					instance.getPublicIpAddress());
+		Instance instance = instances.get(0);
+
+		String name = namePrefix + instance.getInstanceId();
+		String loginUsername = vmt.getLoginUser();
+		String privateKeyName = serverKeyName;
+
+		vm = new VirtualMachine(UUID.randomUUID().toString(), name,
+				new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
+				instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
+				instance.getPublicIpAddress());
 		return vm;
 	}
 

@@ -24,6 +24,12 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * {@link IVmUpdater} implemented designed specifically for AWS EC2 VM's that
+ * are intended to be VM's in the Savior system (as opposed to Xen Hosts).
+ * 
+ *
+ */
 public class AwsVmUpdater implements IVmUpdater {
 	private static final Logger logger = LoggerFactory.getLogger(AwsVmUpdater.class);
 	private ScheduledExecutorService executor;

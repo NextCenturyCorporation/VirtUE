@@ -110,10 +110,10 @@
 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenAwsMixCloudManager">
 		<constructor-arg ref="xenManager"></constructor-arg>
 		<constructor-arg ref="awsVmManager"></constructor-arg>
-		<constructor-arg ref="nfsMountingService"></constructor-arg>
+		<constructor-arg ref="windowStartupService"></constructor-arg>
 	</bean>
 	
-	<bean name="nfsMountingService" class="com.ncc.savior.virtueadmin.infrastructure.mixed.WindowsNfsMountingService">
+	<bean name="windowStartupService" class="com.ncc.savior.virtueadmin.infrastructure.mixed.WindowsStartupAppsService">
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="keyManager"></constructor-arg>
 	</bean>

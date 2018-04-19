@@ -24,6 +24,11 @@ import com.ncc.savior.virtueadmin.infrastructure.pipelining.UpdatePipeline;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * {@link IVmUpdater} created specifically to handle Xen Hosts (Dom0).
+ * 
+ *
+ */
 public class XenHostVmUpdater implements IVmUpdater {
 	private static final Logger logger = LoggerFactory.getLogger(XenHostVmUpdater.class);
 	private ScheduledExecutorService executor;
@@ -31,8 +36,7 @@ public class XenHostVmUpdater implements IVmUpdater {
 	private IUpdatePipeline<VirtualMachine> startingPipeline;
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 
-	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> xenVmHostNotifier,
-			IKeyManager keyManager) {
+	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> xenVmHostNotifier, IKeyManager keyManager) {
 		this.zenVmProvisionPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "starting");
 		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "stopping");
@@ -55,14 +59,11 @@ public class XenHostVmUpdater implements IVmUpdater {
 		reachableRsa.setSuccessState(VmState.RUNNING);
 		zenVmProvisionPipeline.start();
 
-		startingPipeline.addPipelineComponent(
-				new AwsNetworkingUpdateComponent(executor, ec2));
-		startingPipeline.addPipelineComponent(
-				new TestReachabilityComponent(executor, keyManager, true));
+		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
 		startingPipeline.start();
 
-		stoppingPipeline
-				.addPipelineComponent(new NetworkingClearingComponent(executor));
+		stoppingPipeline.addPipelineComponent(new NetworkingClearingComponent(executor));
 		Collection<VmState> successStatus = new ArrayList<VmState>();
 		successStatus.add(VmState.DELETED);
 		successStatus.add(VmState.STOPPED);
