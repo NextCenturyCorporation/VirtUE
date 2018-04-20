@@ -92,7 +92,8 @@ public class DesktopVirtueService {
 			applicationManager.startApplicationOnVm(vm, application, 15);
 		} else {
 		}
-		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
+		String hostname = vm.getHostname();
+		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, hostname, vm.getSshPort(),
 				vm.getUserName(), vm.getPrivateKey());
 		if (OS.WINDOWS.equals(dva.getOs()) && windowsPassword != null) {
 			dva.setPrivateKey(windowsPassword);

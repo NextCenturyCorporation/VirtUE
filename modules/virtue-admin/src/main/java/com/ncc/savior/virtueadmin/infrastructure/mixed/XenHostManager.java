@@ -66,10 +66,9 @@ public class XenHostManager {
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
 			IUpdateListener<VirtualMachine> actualVmNotifier, Route53Manager route53,
 			Collection<String> securityGroupsNames, String subnetName, String xenAmi, String xenLoginUser,
-			String xenKeyName, InstanceType xenInstanceType) {
+			String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns) {
 		this.notifier = actualVmNotifier;
 		this.ec2Wrapper = ec2Wrapper;
-
 		this.subnetId = AwsUtil.getSubnetIdFromName(subnetName, ec2Wrapper);
 		String vpcId = AwsUtil.getVpcIdFromSubnetId(subnetId, ec2Wrapper);
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
@@ -85,16 +84,17 @@ public class XenHostManager {
 				xenVmDao.updateVms(elements);
 			}
 		};
-		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager);
+		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager, usePublicDns);
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
 	}
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
 			IUpdateListener<VirtualMachine> notifier, Route53Manager route53, String securityGroupsCommaSeparated,
-			String subnetId, String xenAmi, String xenUser, String xenKeyName, String xenInstanceType) {
+			String subnetId, String xenAmi, String xenUser, String xenKeyName, String xenInstanceType,
+			boolean usePublicDns) {
 		this(keyManager, ec2Wrapper, xenVmDao, notifier, route53, splitOnComma(securityGroupsCommaSeparated), subnetId,
-				xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType));
+				xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType), usePublicDns);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {

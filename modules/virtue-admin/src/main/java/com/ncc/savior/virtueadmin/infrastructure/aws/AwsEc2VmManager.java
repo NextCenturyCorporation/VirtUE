@@ -76,9 +76,11 @@ public class AwsEc2VmManager extends BaseVmManager {
 	private IKeyManager keyManager;
 	private String region;
 	private InstanceType instanceType;
+	private boolean usePublicDns;
 
-	public AwsEc2VmManager(IKeyManager keyManager, String region) {
+	public AwsEc2VmManager(IKeyManager keyManager, String region, boolean usePublicDns) {
 		this.region = region;
+		this.usePublicDns=usePublicDns;
 		try {
 			init();
 		} catch (Exception e) {
@@ -231,7 +233,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			vms.add(vm);
 		}
 		JavaUtil.sleepAndLogInterruption(2000);
-		modifyVms(vms);
+		modifyVms(vms, usePublicDns);
 		return vms;
 	}
 
@@ -247,10 +249,11 @@ public class AwsEc2VmManager extends BaseVmManager {
 	 * </ul>
 	 * 
 	 * @param vms
+	 * @param usePublicDns 
 	 */
-	private void modifyVms(ArrayList<VirtualMachine> vms) {
+	private void modifyVms(ArrayList<VirtualMachine> vms, boolean usePublicDns) {
 		long a = System.currentTimeMillis();
-		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500);
+		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500, usePublicDns);
 		nameVmsInAws(vms);
 		SshUtil.waitForAllVmsReachableParallel(vms, 2500);
 		long b = System.currentTimeMillis();
