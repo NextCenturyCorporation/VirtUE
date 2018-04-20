@@ -1,11 +1,11 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * 
@@ -15,31 +15,33 @@ import com.ncc.savior.virtueadmin.model.VmState;
  */
 public abstract class BaseVmManager implements IVmManager {
 
-	private Set<IVmUpdateListener> vmUpdateListeners;
+	private Set<IUpdateListener<VirtualMachine>> vmUpdateListeners;
 
 	protected BaseVmManager() {
-		this.vmUpdateListeners = new LinkedHashSet<IVmUpdateListener>();
+		this.vmUpdateListeners = new LinkedHashSet<IUpdateListener<VirtualMachine>>();
 	}
 
 	@Override
-	public void addVmUpdateListener(IVmUpdateListener listener) {
+	public void addVmUpdateListener(IUpdateListener<VirtualMachine> listener) {
 		vmUpdateListeners.add(listener);
 	}
 
 	@Override
-	public void removeVmUpdateListener(IVmUpdateListener listener) {
+	public void removeVmUpdateListener(IUpdateListener<VirtualMachine> listener) {
 		vmUpdateListeners.remove(listener);
 	}
 
-	protected void notifyOnUpdateVmState(String vmId, VmState state) {
-		for (IVmUpdateListener listener : vmUpdateListeners) {
-			listener.updateVmState(vmId, state);
+	protected void notifyOnUpdateVm(VirtualMachine vm) {
+		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+		vms.add(vm);
+		for (IUpdateListener<VirtualMachine> listener : vmUpdateListeners) {
+			listener.updateElements(vms);
 		}
 	}
 
 	protected void notifyOnUpdateVms(Collection<VirtualMachine> vms) {
-		for (IVmUpdateListener listener : vmUpdateListeners) {
-			listener.updateVms(vms);
+		for (IUpdateListener<VirtualMachine> listener : vmUpdateListeners) {
+			listener.updateElements(vms);
 		}
 	}
 }

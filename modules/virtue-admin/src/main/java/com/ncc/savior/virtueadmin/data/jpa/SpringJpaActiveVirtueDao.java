@@ -106,6 +106,11 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
+	public Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList) {
+		return virtueRepository.findAllById(virtueList);
+	}
+
+	@Override
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtueRepository.findAll();
 	}
@@ -113,6 +118,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void clear() {
 		virtueRepository.deleteAll();
+		vmRepository.deleteAll();
 	}
 
 	@Override
@@ -123,5 +129,15 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void deleteVirtue(VirtueInstance vi) {
 		virtueRepository.delete(vi);
+	}
+
+	@Override
+	public void updateVirtue(VirtueInstance virtue) {
+		virtueRepository.save(virtue);
+	}
+
+	@Override
+	public Optional<VirtualMachine> getXenVm(String id) {
+		return vmRepository.findById(id);
 	}
 }

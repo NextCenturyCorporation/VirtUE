@@ -20,7 +20,6 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -34,7 +33,6 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.WindowEvent;
 
@@ -111,18 +109,18 @@ public class VirtueMenuItem {
 		return pane;
 	}
 
-	private VBox getStartStopVirtue() {
-		VBox vbox = new VBox();
-		Image startImage = new Image("images/play.png");
-		ImageView startView = new ImageView(startImage);
-		Image stopImage = new Image("images/stop.png");
-		ImageView stopView = new ImageView(stopImage);
-		Button startButton = new Button("", startView);
-		Button stopButton = new Button("", stopView);
-		vbox.getChildren().add(startButton);
-		vbox.getChildren().add(stopButton);
-		return vbox;
-	}
+	// private VBox getStartStopVirtue() {
+	// VBox vbox = new VBox();
+	// Image startImage = new Image("images/play.png");
+	// ImageView startView = new ImageView(startImage);
+	// Image stopImage = new Image("images/stop.png");
+	// ImageView stopView = new ImageView(stopImage);
+	// Button startButton = new Button("", startView);
+	// Button stopButton = new Button("", stopView);
+	// vbox.getChildren().add(startButton);
+	// vbox.getChildren().add(stopButton);
+	// return vbox;
+	// }
 
 	private String getLabel(DesktopVirtue virtue) {
 		String name = virtue.getName();

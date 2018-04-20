@@ -10,10 +10,12 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueState;
@@ -39,6 +41,9 @@ public class DesktopVirtueService {
 
 	@Autowired
 	private SecurityUserService securityService;
+
+	@Value("${virtue.aws.windows.password}")
+	private String windowsPassword;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
 			IApplicationManager applicationManager) {
@@ -80,12 +85,18 @@ public class DesktopVirtueService {
 
 	public DesktopVirtueApplication startApplication(String virtueId, String applicationId) throws IOException {
 		verifyAndReturnUser();
-		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId).get();
+		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId);
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
-		applicationManager.startApplicationOnVm(vm, application, 15);
+		if (OS.LINUX.equals(vm.getOs())) {
+			applicationManager.startApplicationOnVm(vm, application, 15);
+		} else {
+		}
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, vm.getHostname(), vm.getSshPort(),
 				vm.getUserName(), vm.getPrivateKey());
+		if (OS.WINDOWS.equals(dva.getOs()) && windowsPassword != null) {
+			dva.setPrivateKey(windowsPassword);
+		}
 		logger.debug("started app: " + dva);
 		return dva;
 	}

@@ -13,7 +13,7 @@ public interface IUserManager {
 
 	Iterable<VirtueUser> getAllUsers();
 
-	void clear();
+	void clear(boolean removeAllUsers);
 
 	void removeUser(VirtueUser user);
 

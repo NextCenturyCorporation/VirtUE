@@ -3,11 +3,11 @@ package com.ncc.savior.virtueadmin.virtue;
 import java.util.Collection;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
-import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
+import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
 
-public class ActiveVirtueManagerUpdatingListener implements IVmUpdateListener {
+public class ActiveVirtueManagerUpdatingListener implements IUpdateListener<VirtualMachine> {
 	private IActiveVirtueDao virtueManager;
 
 	public ActiveVirtueManagerUpdatingListener(IActiveVirtueDao virtueManager) {
@@ -15,13 +15,12 @@ public class ActiveVirtueManagerUpdatingListener implements IVmUpdateListener {
 	}
 
 	@Override
-	public void updateVmState(String vmId, VmState state) {
-		virtueManager.updateVmState(vmId, state);
+	public void updateElements(Collection<VirtualMachine> vms) {
+		virtueManager.updateVms(vms);
 	}
 
-	@Override
-	public void updateVms(Collection<VirtualMachine> vms) {
-		virtueManager.updateVms(vms);
+	public void updateVirtue(VirtueInstance virtue) {
+		virtueManager.updateVirtue(virtue);
 	}
 
 }

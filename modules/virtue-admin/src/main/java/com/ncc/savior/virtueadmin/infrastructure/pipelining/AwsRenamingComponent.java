@@ -16,7 +16,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  * Component of an {@link IUpdatePipeline} that will rename a VM instance in
  * AWS. The name is based on {@link VirtualMachine#getName()}.
  */
-public class AwsRenamingComponent extends BaseIndividualVmPipelineComponent {
+public class AwsRenamingComponent extends BaseIndividualVmPipelineComponent<VirtualMachine> {
 	private static final Logger logger = LoggerFactory.getLogger(AwsRenamingComponent.class);
 	private AmazonEC2 ec2;
 
@@ -26,10 +26,11 @@ public class AwsRenamingComponent extends BaseIndividualVmPipelineComponent {
 	}
 
 	@Override
-	protected void onExecute(VirtualMachine vm) {
+	protected void onExecute(PipelineWrapper<VirtualMachine> wrapper) {
+		VirtualMachine vm = wrapper.get();
 		try {
 			nameVmInAws(vm);
-			doOnSuccess(vm);
+			doOnSuccess(wrapper);
 		} catch (Exception e) {
 			logger.trace("Naming in AWS failed for vm=" + vm.getId());
 			return;
@@ -52,4 +53,8 @@ public class AwsRenamingComponent extends BaseIndividualVmPipelineComponent {
 		ec2.createTags(ctr);
 	}
 
+	@Override
+	protected String getId(VirtualMachine element) {
+		return element.getId();
+	}
 }

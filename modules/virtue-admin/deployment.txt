@@ -1,0 +1,44 @@
+To build from source:
+ * Requires java 8
+ * navigate to modules/virtue-admin
+ * execute 'gradlew build' on linux or 'gradlew.bat build' on windows
+ * deployment bundle will be at 'build/distributaions/' as either 'virtue-admin-0.0.1-SNAPSHOT.tar' or 'virtue-admin-0.0.1-SNAPSHOT.zip'
+
+Setup Server:
+ * copy (usually with scp) onto server
+ * move deployment bundle into desired location.
+ * unzip/untar bundle with 'tar -xvf virtue-admin-0.0.1-SNAPSHOT.tar' or 'unzip virtue-admin-0.0.1-SNAPSHOT.zip' depending on which file you chose
+ 
+Configure Server:
+ * In base 'virtue-admin-0.0.1-SNAPSHOT' folder, create 'certs' directory and copy necessary private keys into that directory
+ * Note: it is desired to make sure the certs have a minimal set of permissions to be read by the server application.
+ * In base 'virtue-admin-0.0.1-SNAPSHOT' folder, create 'aws.properties' and add the following lines with your AWS account access keys:
+   accessKey=<access key>
+   secretKey=<secret key>
+ * In base 'virtue-admin-0.0.1-SNAPSHOT' folder, create 'application.properties'
+   * If Active Directory is desired, add 'spring.profiles.active=h2, ad'
+   * Add a property for windows password as ' virtue.aws.windows.password=<password>'
+   * Add a property for initial admin users as 'savior.initialAdmin=<comma separated list of admin usernames>'
+ * In base 'virtue-admin-0.0.1-SNAPSHOT' folder, create 'savior-server.properties' and add the following line
+   * virtue.sensing.redirectUrl=http://sensing-api.savior.internal:17141/api/v1/sensors/all/inspect
+   * There are more properties that can be added in the 'savior-server.properties' file.  Check the source code default properties at 'modules/virtue-admin/src/main/resources/savior-server.properties' for properties that can be put in this file to alter the system.
+ * If Active Directory is desired, you need to create a keytab file:
+   * Log onto a windows machine that can manage Active Directory users
+   * Create a new domain user which will be the user for the machine.  
+     * You may want to make sure the password does not expire
+   * In powershell, run: 'setspn -A HTTP/<hostname> <user>' where <hostname> is the DNS name of the machine that will run the server and <user> is the user created in the step before
+   * In powershell, run: 'ktpass /out <keytabFile> /mapuser <user>@<domain> /princ HTTP/<hostname>@<domain> /pass <password> /ptype KRB5_NT_PRINCIPAL /crypto All' where <hostname> is the DNS name of the machine that will run the server, <user> is the username created earlier, <keytabFile> is the file name you want the keytab file to be created as, <domain> is the domain, <password> is the password for the <user>
+ * If Active Directory is desired in base 'virtue-admin-0.0.1-SNAPSHOT' folder, create 'savior-server-security.properties' and add the following with correct values:  
+	savior.security.ad.domain=<domain>
+	savior.security.ad.url=ldap://<hostname to AD>
+	savior.security.ldap=ldap://<hostname to AD>
+	savior.virtueadmin.principal=HTTP/<hostname used to make keytab>@<domain>
+	savior.virtueadmin.keytab=<path to keytab file>
+ 
+Start the Server:
+ * Change directory to the directory 'virtue-admin-0.0.1-SNAPSHOT'
+ * Execute 'bin/virtue-admin' on Linux or 'bin/virtue-admin.bat' on Windows
+   * On Linux, it may be desirable to have the server run without maintain an SSH session.  To allow this, start the server with 'nohup bin/virtue-admin &'
+ * The server should generate logs in the 'logs' directory
+
+ 

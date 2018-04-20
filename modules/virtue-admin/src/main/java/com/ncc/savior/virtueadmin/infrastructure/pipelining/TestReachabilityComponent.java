@@ -14,7 +14,7 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
  * {@link VirtualMachine#getPrivateKeyName()} and a passin {@link IKeyManager}
  * to login.
  */
-public class TestReachabilityComponent extends BaseIndividualVmPipelineComponent {
+public class TestReachabilityComponent extends BaseIndividualVmPipelineComponent<VirtualMachine> {
 	private IKeyManager keyManager;
 	private boolean successOnReachable;
 
@@ -25,9 +25,16 @@ public class TestReachabilityComponent extends BaseIndividualVmPipelineComponent
 		this.successOnReachable = successOnReachable;
 	}
 
+	public TestReachabilityComponent(ScheduledExecutorService executor, IKeyManager keyManager,
+			boolean successOnReachable, long initialDelay) {
+		super(executor, true, initialDelay, 3000);
+		this.keyManager = keyManager;
+		this.successOnReachable = successOnReachable;
+	}
+
 	@Override
-	protected void onExecute(VirtualMachine vm) {
-		testReachability(vm);
+	protected void onExecute(PipelineWrapper<VirtualMachine> wrapper) {
+		testReachability(wrapper);
 	}
 
 	/**
@@ -36,13 +43,19 @@ public class TestReachabilityComponent extends BaseIndividualVmPipelineComponent
 	 * 
 	 * @param vm
 	 */
-	protected void testReachability(VirtualMachine vm) {
+	protected void testReachability(PipelineWrapper<VirtualMachine> wrapper) {
+		VirtualMachine vm = wrapper.get();
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		boolean reachable = SshUtil.isVmReachable(vm, privateKeyFile);
 		if (reachable && successOnReachable) {
-			doOnSuccess(vm);
+			doOnSuccess(wrapper);
 		} else if (!reachable && !successOnReachable) {
-			doOnSuccess(vm);
+			doOnSuccess(wrapper);
 		}
+	}
+
+	@Override
+	protected String getId(VirtualMachine element) {
+		return element.getId();
 	}
 }

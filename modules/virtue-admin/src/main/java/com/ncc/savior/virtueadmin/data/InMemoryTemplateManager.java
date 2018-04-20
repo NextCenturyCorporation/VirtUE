@@ -12,7 +12,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -182,8 +181,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
-		return Optional.of(applications.get(applicationId));
+	public ApplicationDefinition getApplicationDefinition(String applicationId) {
+		ApplicationDefinition app = applications.get(applicationId);
+		if (app == null) {
+			throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND, "not found");
+		}
+		return app;
 	}
 
 	@Override
@@ -334,31 +337,38 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
+	public VirtueTemplate getVirtueTemplate(String templateId) {
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
+	public VirtualMachineTemplate getVmTemplate(String templateId) {
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
 	public Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not implemented");
 	}
 
 	@Override
 	public Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not implemented");
 	}
 
 	@Override
 	public Iterable<ApplicationDefinition> getApplications(Collection<String> appIds) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public boolean containsApplication(String id) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public boolean containsVirtueTemplate(String id) {
+		throw new RuntimeException("not implemented");
 	}
 
 }

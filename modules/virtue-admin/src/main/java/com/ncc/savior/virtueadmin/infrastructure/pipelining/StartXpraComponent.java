@@ -18,7 +18,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * {@link VirtualMachine#getPrivateKeyName()} and a passin {@link IKeyManager}
  * to login.
  */
-public class StartXpraComponent extends BaseIndividualVmPipelineComponent {
+public class StartXpraComponent extends BaseIndividualVmPipelineComponent<VirtualMachine> {
 	private static final Logger logger = LoggerFactory.getLogger(StartXpraComponent.class);
 	private IKeyManager keyManager;
 	private SimpleApplicationManager appManager;
@@ -30,12 +30,13 @@ public class StartXpraComponent extends BaseIndividualVmPipelineComponent {
 	}
 
 	@Override
-	protected void onExecute(VirtualMachine vm) {
-		attemptStartXpra(vm);
+	protected void onExecute(PipelineWrapper<VirtualMachine> wrapper) {
+		attemptStartXpra(wrapper);
 
 	}
 
-	protected void attemptStartXpra(VirtualMachine vm) {
+	protected void attemptStartXpra(PipelineWrapper<VirtualMachine> wrapper) {
+		VirtualMachine vm = wrapper.get();
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		try {
 			if (logger.isTraceEnabled()) {
@@ -44,10 +45,15 @@ public class StartXpraComponent extends BaseIndividualVmPipelineComponent {
 			int display = appManager.startOrGetXpraServer(vm, privateKeyFile);
 			if (display > 0) {
 				vm.setState(VmState.RUNNING);
-				doOnSuccess(vm);
+				doOnSuccess(wrapper);
 			}
 		} catch (IOException e) {
 			logger.debug("Failed to start XPRA", e);
 		}
+	}
+
+	@Override
+	protected String getId(VirtualMachine element) {
+		return element.getId();
 	}
 }
