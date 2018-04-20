@@ -36,6 +36,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -356,8 +357,10 @@ public class DataResource {
 	public Response assignUser(@PathParam("sourceUser") String sourceUserName,
 			@PathParam("newUser") String newUserName) {
 		VirtueUser source = userManager.getUser(sourceUserName);
-		VirtueUser newUser = userManager.getUser(newUserName);
-		if (newUser == null) {
+		VirtueUser newUser;
+		try {
+			newUser = userManager.getUser(newUserName);
+		} catch (SaviorException e) {
 			Collection<String> auth = source.getAuthorities();
 			// need this verbose code to cause the authorities fetch
 			HashSet<String> newAuth = new HashSet<String>();
