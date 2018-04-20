@@ -32,7 +32,7 @@ public class AwsVmUpdater implements IVmUpdater {
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 
 	public AwsVmUpdater(VirtueAwsEc2Provider ec2Provider, IUpdateListener<VirtualMachine> notifier,
-			IKeyManager keyManager, boolean includeXpra, boolean changePrivateKey) {
+			IKeyManager keyManager, boolean includeXpra, boolean changePrivateKey, boolean usePublicDns) {
 		AmazonEC2 ec2 = ec2Provider.getEc2();
 		this.provisionPipeline = new UpdatePipeline<VirtualMachine>(notifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(notifier, "starting");
@@ -48,7 +48,7 @@ public class AwsVmUpdater implements IVmUpdater {
 			}
 		});
 		provisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
-		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2, usePublicDns));
 		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager,
 				false);
 		provisionPipeline.addPipelineComponent(reachableRsa);
@@ -60,7 +60,7 @@ public class AwsVmUpdater implements IVmUpdater {
 		}
 		provisionPipeline.start();
 
-		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2, usePublicDns));
 		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true, 5000));
 		startingPipeline.start();
 

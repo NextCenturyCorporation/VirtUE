@@ -31,8 +31,7 @@ public class XenHostVmUpdater implements IVmUpdater {
 	private IUpdatePipeline<VirtualMachine> startingPipeline;
 	private IUpdatePipeline<VirtualMachine> stoppingPipeline;
 
-	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> xenVmHostNotifier,
-			IKeyManager keyManager) {
+	public XenHostVmUpdater(AmazonEC2 ec2, IUpdateListener<VirtualMachine> xenVmHostNotifier, IKeyManager keyManager, boolean usePublicDns) {
 		this.zenVmProvisionPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "provisioning");
 		this.startingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "starting");
 		this.stoppingPipeline = new UpdatePipeline<VirtualMachine>(xenVmHostNotifier, "stopping");
@@ -49,16 +48,14 @@ public class XenHostVmUpdater implements IVmUpdater {
 		});
 
 		zenVmProvisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
-		zenVmProvisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2));
+		zenVmProvisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2, usePublicDns));
 		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
 		zenVmProvisionPipeline.addPipelineComponent(reachableRsa);
 		reachableRsa.setSuccessState(VmState.RUNNING);
 		zenVmProvisionPipeline.start();
 
-		startingPipeline.addPipelineComponent(
-				new AwsNetworkingUpdateComponent(executor, ec2));
-		startingPipeline.addPipelineComponent(
-				new TestReachabilityComponent(executor, keyManager, true));
+		startingPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2, usePublicDns));
+		startingPipeline.addPipelineComponent(new TestReachabilityComponent(executor, keyManager, true));
 		startingPipeline.start();
 
 		stoppingPipeline

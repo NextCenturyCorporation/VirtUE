@@ -154,12 +154,12 @@ public class AwsUtil {
 		}
 	}
 
-	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<VirtualMachine> vms, long periodMillis) {
+	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<VirtualMachine> vms, long periodMillis, boolean usePublicDns) {
 		// create copy so we can alter
 		vms = new ArrayList<VirtualMachine>(vms);
 		while (true) {
 			Iterator<VirtualMachine> itr = vms.iterator();
-			updateNetworking(ec2, vms);
+			updateNetworking(ec2, vms, usePublicDns);
 			while (itr.hasNext()) {
 				VirtualMachine vm = itr.next();
 				String hn = vm.getHostname();
@@ -174,7 +174,7 @@ public class AwsUtil {
 		}
 	}
 
-	public static void updateNetworking(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
+	public static void updateNetworking(AmazonEC2 ec2, Collection<VirtualMachine> vms, boolean usePublicDns) {
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 		Collection<String> instanceIds = vmsToInstanceIds(vms);
 		try {
@@ -184,8 +184,13 @@ public class AwsUtil {
 				for (Instance i : r.getInstances()) {
 					for (VirtualMachine vm : vms) {
 						if (vm.getInfrastructureId().equals(i.getInstanceId())) {
-							vm.setHostname(i.getPublicDnsName());
-							vm.setIpAddress(i.getPublicIpAddress());
+							if (usePublicDns) {
+								vm.setHostname(i.getPublicDnsName());
+								vm.setIpAddress(i.getPublicIpAddress());
+							} else {
+								vm.setIpAddress(i.getPrivateIpAddress());
+								vm.setHostname(i.getPrivateDnsName());
+							}
 							vm.setInternalIpAddress(i.getPrivateIpAddress());
 							vm.setInternalHostname(i.getPrivateDnsName());
 						}

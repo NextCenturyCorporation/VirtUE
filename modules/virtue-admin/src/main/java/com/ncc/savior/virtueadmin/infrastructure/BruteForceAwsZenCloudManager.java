@@ -35,6 +35,7 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 	private String xenServerKeyName;
 	private IKeyManager keyManager;
 	private SshKeyInjector sshKeyInjector;
+	private boolean usePublicDns=true;
 
 	public BruteForceAwsZenCloudManager(VirtueAwsEc2Provider ec2Provider, IKeyManager keyManager,String xenAmi, String vmKeyName,
 			List<String> vmSecurityGroups, String xenKeyName) {
@@ -88,7 +89,7 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 		allVms.addAll(vms);
 		allVms.add(zenVm);
 
-		AwsUtil.waitUntilAllNetworkingUpdated(ec2, allVms, 2000);
+		AwsUtil.waitUntilAllNetworkingUpdated(ec2, allVms, 2000, usePublicDns);
 		SshUtil.waitForAllVmsReachableParallel(vms, 5000);
 
 		for (VirtualMachine vm : allVms) {
