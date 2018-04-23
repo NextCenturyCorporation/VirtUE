@@ -22,7 +22,6 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
@@ -39,6 +38,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
+import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * This class handles creation, deletion, start, and stop among other management
@@ -151,19 +151,13 @@ public class XenHostManager {
 				}
 
 				VirtualMachine xen = vmo.get();
-				JSch ssh = new JSch();
 				ChannelExec channel = null;
 				Session session = null;
 				String keyName = xenVm.getPrivateKeyName();
 				File privateKeyFile = keyManager.getKeyFileByName(keyName);
 				try {
 					// setup Xen VM
-					ssh.addIdentity(privateKeyFile.getAbsolutePath());
-					session = ssh.getSession(xen.getUserName(), xen.getHostname(), 22);
-					session.setConfig("PreferredAuthentications", "publickey");
-					session.setConfig("StrictHostKeyChecking", "no");
-					session.setTimeout(500);
-					session.connect();
+					session = SshUtil.getConnectedSession(xen, privateKeyFile);
 
 					copySshKey(session, privateKeyFile);
 

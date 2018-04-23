@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
@@ -71,7 +70,7 @@ public class XenGuestManager {
 		Session session = null;
 		logger.debug("Provisioning linux guests=" + linuxVmts);
 		try {
-			session = getConnectedSession();
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
 
 			Collection<VirtualMachine> vms = virtue.getVms();
 			Iterator<VirtualMachine> vmsItr = vms.iterator();
@@ -229,18 +228,6 @@ public class XenGuestManager {
 
 		CommandHandler ch = new CommandHandler(ps, br, myChannel);
 		return ch;
-	}
-
-	private Session getConnectedSession() throws JSchException {
-		JSch ssh = new JSch();
-		Session session;
-		ssh.addIdentity(keyFile.getAbsolutePath());
-		session = ssh.getSession(xenVm.getUserName(), xenVm.getHostname(), xenVm.getSshPort());
-		session.setConfig("PreferredAuthentications", "publickey");
-		session.setConfig("StrictHostKeyChecking", "no");
-		session.setTimeout(500);
-		session.connect();
-		return session;
 	}
 
 	private void setupHostname(Session session, String username, String hostname, String dns, String ipAddress)

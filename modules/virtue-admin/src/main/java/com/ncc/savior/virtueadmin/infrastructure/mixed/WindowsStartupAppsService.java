@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
@@ -115,17 +114,11 @@ public class WindowsStartupAppsService {
 	}
 
 	public boolean addWindowsStartupServices(VirtualMachine nfs, VirtualMachine windows) {
-		JSch ssh = new JSch();
 		Session session = null;
 		logger.debug("Attempting to mount NFS on windows box for virtue " + nfs.getId());
 		try {
 			File keyFile = keyManager.getKeyFileByName(windows.getPrivateKeyName());
-			ssh.addIdentity(keyFile.getAbsolutePath());
-			session = ssh.getSession(windows.getUserName(), windows.getHostname(), 22);
-			session.setConfig("PreferredAuthentications", "publickey");
-			session.setConfig("StrictHostKeyChecking", "no");
-			session.setTimeout(500);
-			session.connect();
+			session=SshUtil.getConnectedSession(windows, keyFile);
 			String cmd = String.format(command, nfs.getInternalIpAddress());
 			String cmd2 = String.format(command2, nfs.getInternalIpAddress());
 			List<String> output = SshUtil.sendCommandFromSession(session, cmd);

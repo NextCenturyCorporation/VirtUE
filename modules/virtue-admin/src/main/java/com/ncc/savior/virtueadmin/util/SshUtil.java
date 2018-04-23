@@ -121,12 +121,7 @@ public class SshUtil {
 		// BufferedReader reader = null;
 		// BufferedReader ereader = null;
 		try {
-			ssh.addIdentity(privateKeyFile.getAbsolutePath());
-			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
-			session.setConfig("PreferredAuthentications", "publickey");
-			session.setConfig("StrictHostKeyChecking", "no");
-			session.setTimeout(500);
-			session.connect();
+			session = SshUtil.getConnectedSession(vm, privateKeyFile, ssh);
 			channel = (ChannelExec) session.openChannel("exec");
 			channel.setCommand("echo 'Testing reachability of VM'");
 			channel.connect(0);
@@ -160,6 +155,22 @@ public class SshUtil {
 			}
 			// JavaUtil.closeIgnoreErrors(reader, ereader);
 		}
+	}
+
+	public static Session getConnectedSession(VirtualMachine vm, File privateKeyFile) throws JSchException {
+		JSch ssh = new JSch();
+		return getConnectedSession(vm, privateKeyFile, ssh);
+	}
+
+	public static Session getConnectedSession(VirtualMachine vm, File privateKeyFile, JSch ssh) throws JSchException {
+		Session session;
+		ssh.addIdentity(privateKeyFile.getAbsolutePath());
+		session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
+		session.setConfig("PreferredAuthentications", "publickey");
+		session.setConfig("StrictHostKeyChecking", "no");
+		session.setTimeout(500);
+		session.connect();
+		return session;
 	}
 
 	public static String getKeyFromFile(File privateKey) {
