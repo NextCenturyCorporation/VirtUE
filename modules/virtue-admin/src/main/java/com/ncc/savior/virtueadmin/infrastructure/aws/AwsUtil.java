@@ -54,6 +54,7 @@ public class AwsUtil {
 		}
 		DescribeInstanceStatusRequest describeInstanceStatusRequest = new DescribeInstanceStatusRequest();
 		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
+		describeInstanceStatusRequest.setIncludeAllInstances(true);
 		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
 		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
 		while (itr.hasNext()) {
@@ -100,7 +101,7 @@ public class AwsUtil {
 		case 32: // shutting-down
 			return VmState.STOPPING;
 		case 48: // terminated
-			return VmState.DELETING;
+			return VmState.DELETED;
 		case 64: // stopping
 			return VmState.STOPPING;
 		case 80: // stopped

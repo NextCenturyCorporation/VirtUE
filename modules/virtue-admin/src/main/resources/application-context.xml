@@ -70,8 +70,18 @@
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 	</bean>
 
+<!-- 	<bean name="awsVmUpdater" -->
+<!-- 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater"> -->
+<!-- 		<constructor-arg ref="awsEc2Provider"></constructor-arg> -->
+<!-- 		<constructor-arg ref="activeVirtueUpdater" /> -->
+<!-- 		<constructor-arg ref="keyManager" /> -->
+<!-- 		<constructor-arg value="false"></constructor-arg> -->
+<!-- 		<constructor-arg value="false"></constructor-arg> -->
+<!-- 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg> -->
+<!-- 	</bean> -->
+	
 	<bean name="awsVmUpdater"
-		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater">
+		class="com.ncc.savior.virtueadmin.infrastructure.future.FutureVmUpdater">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater" />
 		<constructor-arg ref="keyManager" />
