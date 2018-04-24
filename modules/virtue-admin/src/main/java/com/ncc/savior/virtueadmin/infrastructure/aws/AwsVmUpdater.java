@@ -15,6 +15,7 @@ import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmUpdater;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsNetworkingUpdateComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent;
+import com.ncc.savior.virtueadmin.infrastructure.pipelining.EnsureDeleteVolumeOnTerminationUpdateComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.NetworkingClearingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.StartXpraComponent;
@@ -55,6 +56,7 @@ public class AwsVmUpdater implements IVmUpdater {
 		});
 		provisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
 		provisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2, usePublicDns));
+		provisionPipeline.addPipelineComponent(new EnsureDeleteVolumeOnTerminationUpdateComponent(executor, ec2));
 		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager,
 				false);
 		provisionPipeline.addPipelineComponent(reachableRsa);
