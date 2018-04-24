@@ -16,6 +16,7 @@ import com.ncc.savior.virtueadmin.infrastructure.IVmUpdater;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUpdateStatus;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsNetworkingUpdateComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.AwsRenamingComponent;
+import com.ncc.savior.virtueadmin.infrastructure.pipelining.EnsureDeleteVolumeOnTerminationUpdateComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.IUpdatePipeline;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.NetworkingClearingComponent;
 import com.ncc.savior.virtueadmin.infrastructure.pipelining.TestReachabilityAndAddRsaComponent;
@@ -54,6 +55,7 @@ public class XenHostVmUpdater implements IVmUpdater {
 
 		zenVmProvisionPipeline.addPipelineComponent(new AwsRenamingComponent(executor, ec2));
 		zenVmProvisionPipeline.addPipelineComponent(new AwsNetworkingUpdateComponent(executor, ec2, usePublicDns));
+		zenVmProvisionPipeline.addPipelineComponent(new EnsureDeleteVolumeOnTerminationUpdateComponent(executor, ec2));
 		TestReachabilityAndAddRsaComponent reachableRsa = new TestReachabilityAndAddRsaComponent(executor, keyManager);
 		zenVmProvisionPipeline.addPipelineComponent(reachableRsa);
 		reachableRsa.setSuccessState(VmState.RUNNING);
