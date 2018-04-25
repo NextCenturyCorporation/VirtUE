@@ -140,6 +140,7 @@
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
+		<property name="serverUser" value="${virtue.aws.serverUser}"></property>
 	</bean>
 
 	<bean name="desktopService"

@@ -312,7 +312,7 @@ public class XenHostManager {
 
 	}
 
-	protected void setServerUser(String serverUser) {
+	public void setServerUser(String serverUser) {
 		if (serverUser != null && !serverUser.trim().equals("")) {
 			this.serverUser = serverUser;
 		}

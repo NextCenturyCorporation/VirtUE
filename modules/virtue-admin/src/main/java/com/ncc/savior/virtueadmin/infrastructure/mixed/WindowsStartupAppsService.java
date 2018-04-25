@@ -122,7 +122,7 @@ public class WindowsStartupAppsService {
 			String cmd = String.format(command, nfsOrXen.getInternalIpAddress());
 			String cmd2 = String.format(command2, nfsOrXen.getInternalIpAddress());
 			List<String> output = SshUtil.sendCommandFromSession(session, cmd);
-			logger.debug(output.toString());
+			logger.debug("Cmd=" + cmd + " output=" + output.toString());
 			output = SshUtil.sendCommandFromSession(session, cmd2);
 			logger.debug(output.toString());
 			return true;
