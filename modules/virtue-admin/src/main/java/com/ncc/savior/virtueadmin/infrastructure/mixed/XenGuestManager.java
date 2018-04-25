@@ -25,6 +25,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -61,11 +62,13 @@ public class XenGuestManager {
 		this.route53 = route53;
 	}
 
-	public void provisionGuests(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
+	public void provisionGuests(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
+			CompletableFuture<Collection<VirtualMachine>> xenGuestFuture) {
 
 		ChannelExec channel = null;
 		Session session = null;
 		logger.debug("Provisioning linux guests=" + linuxVmts);
+		Collection<VirtualMachine> linuxVms = new ArrayList<VirtualMachine>();
 		try {
 			session = SshUtil.getConnectedSession(xenVm, keyFile);
 
@@ -93,6 +96,7 @@ public class XenGuestManager {
 					logger.debug("Skipping provision of windows vm=" + vm);
 					vm = vmsItr.next();
 				}
+				linuxVms.add(vm);
 				logger.debug("Starting provision of guest=" + vm);
 				String ipAddress = "0.0.0.0";
 				String clientUser = virtue.getUsername();
@@ -159,11 +163,13 @@ public class XenGuestManager {
 				externalSshPort++;
 			}
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
-			addVmToProvisionPipeline(vms);
+			addVmToProvisionPipeline(vms, xenGuestFuture);
 		} catch (JSchException e) {
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
+			xenGuestFuture.completeExceptionally(e);
 		} catch (Exception e) {
 			logger.error("error in SSH", e);
+			xenGuestFuture.completeExceptionally(e);
 		} finally {
 			if (channel != null) {
 				channel.disconnect();
@@ -174,17 +180,18 @@ public class XenGuestManager {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void addVmToProvisionPipeline(Collection<VirtualMachine> vms) {
+	private void addVmToProvisionPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
 		Void v = null;
-		List<CompletableFuture<VirtualMachine>> cfs = new ArrayList<CompletableFuture<VirtualMachine>>(vms.size());
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, true);
 			cf = serviceProvider.getAddRsa().chainFutures(cf, v);
 			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
 		}
-		// TODO create and return future
+		fc.combineFutures(linuxFuture);
 	}
 
 	private void startSensors(Session session, String sensorScript, String ipAddress, String username)

@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * Cloud manager that mixes AWS instances for Windows VMs via an
@@ -31,11 +33,14 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private WindowsStartupAppsService windowsNfsMountingService;
 
+	private CompletableFutureServiceProvider serviceProvider;
+
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
-			WindowsStartupAppsService windowsNfsMountingService) {
+			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
+		this.serviceProvider = serviceProvider;
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
 	}
@@ -76,11 +81,24 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		// if (!linuxVmts.isEmpty()) {
 
+		CompletableFuture<Collection<VirtualMachine>> linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
-		xenHostManager.provisionXenHost(vi, linuxVmts);
+		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture);
 		// }
-
-		windowsNfsMountingService.addVirtueToQueue(vi);
+		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
+			// windowsNfsMountingService.addVirtueToQueue(vi);
+			for (VirtualMachine windows : winVms) {
+				windowsNfsMountingService.addWindowsStartupServices(xen, windows);
+			}
+			return winVms;
+		}).thenAccept((Collection<VirtualMachine> finishedWindowsBoxes) -> {
+			for (VirtualMachine winBox : finishedWindowsBoxes) {
+				CompletableFuture<VirtualMachine> myCf = serviceProvider.getUpdateStatus().startFutures(winBox,
+						VmState.RUNNING);
+				serviceProvider.getVmNotifierService().chainFutures(myCf, null);
+			}
+		});
 
 		return vi;
 	}

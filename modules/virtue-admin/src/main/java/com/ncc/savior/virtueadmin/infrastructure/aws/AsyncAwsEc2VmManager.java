@@ -100,12 +100,14 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
-		addVmToProvisionPipeline(vms);
+		addVmToProvisionPipeline(vms, vmFutures);
 		return vms;
 	}
 
-	private void addVmToProvisionPipeline(ArrayList<VirtualMachine> vms) {
+	private void addVmToProvisionPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFutures) {
 		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(vm, v);
 			cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
@@ -114,9 +116,12 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 			cf = serviceProvider.getAddRsa().chainFutures(cf, v);
-			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
 		}
+		fc.combineFutures(vmFutures);
+
 	}
 
 	@Override

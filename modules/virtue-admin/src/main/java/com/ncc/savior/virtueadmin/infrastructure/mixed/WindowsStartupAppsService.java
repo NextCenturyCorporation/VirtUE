@@ -51,10 +51,10 @@ public class WindowsStartupAppsService {
 		this.activeVirtueDao = activeVirtueDao;
 		this.keyManager = keyManager;
 		this.virtueList = Collections.synchronizedList(new ArrayList<String>());
-		startPollingThread();
+		// startPollingThread();
 	}
 
-	private void startPollingThread() {
+	public void startPollingThread() {
 		this.pollingThread = new Thread(new Runnable() {
 
 			@Override
@@ -113,14 +113,14 @@ public class WindowsStartupAppsService {
 		return false;
 	}
 
-	public boolean addWindowsStartupServices(VirtualMachine nfs, VirtualMachine windows) {
+	public boolean addWindowsStartupServices(VirtualMachine nfsOrXen, VirtualMachine windows) {
 		Session session = null;
-		logger.debug("Attempting to mount NFS on windows box for virtue " + nfs.getId());
+		logger.debug("Attempting to mount NFS on windows box for virtue " + nfsOrXen.getId());
 		try {
 			File keyFile = keyManager.getKeyFileByName(windows.getPrivateKeyName());
 			session=SshUtil.getConnectedSession(windows, keyFile);
-			String cmd = String.format(command, nfs.getInternalIpAddress());
-			String cmd2 = String.format(command2, nfs.getInternalIpAddress());
+			String cmd = String.format(command, nfsOrXen.getInternalIpAddress());
+			String cmd2 = String.format(command2, nfsOrXen.getInternalIpAddress());
 			List<String> output = SshUtil.sendCommandFromSession(session, cmd);
 			logger.debug(output.toString());
 			output = SshUtil.sendCommandFromSession(session, cmd2);

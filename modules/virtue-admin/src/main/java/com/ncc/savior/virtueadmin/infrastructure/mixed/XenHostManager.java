@@ -106,7 +106,8 @@ public class XenHostManager {
 	// sudo nfsd.sh
 	// start vms with code below
 
-	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
+	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName, xenInstanceType,
 				subnetId);
@@ -122,7 +123,8 @@ public class XenHostManager {
 		xenVms.add(xenVm);
 
 		xenVmDao.updateVms(xenVms);
-		CompletableFuture<VirtualMachine> xenHostFuture = addVmToProvisionPipeline(xenVm);
+		CompletableFuture<VirtualMachine> xenProvisionFuture = new CompletableFuture<VirtualMachine>();
+		addVmToProvisionPipeline(xenVm, xenProvisionFuture);
 		// TODO use future here instead of while loop below
 		final String id = virtue.getId();
 		for (VirtualMachineTemplate vmt : linuxVmts) {
@@ -137,6 +139,7 @@ public class XenHostManager {
 
 			@Override
 			public void run() {
+				logger.debug("Starting Guest configuration");
 				// wait until xen VM is ready
 				Optional<VirtualMachine> vmo = xenVmDao.getXenVm(id);
 				while (!vmo.isPresent() || !VmState.RUNNING.equals(vmo.get().getState())) {
@@ -193,6 +196,7 @@ public class XenHostManager {
 					JavaUtil.sleepAndLogInterruption(1000);
 					ps.println("exit");
 					JavaUtil.sleepAndLogInterruption(1000);
+					xenFuture.complete(xen);
 				} catch (JSchException e) {
 					logger.trace("Vm is not reachable yet: " + e.getMessage());
 				} catch (Exception e) {
@@ -208,15 +212,16 @@ public class XenHostManager {
 				// provision Xen Guest VMs
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				logger.debug("starting to provision guests");
-				guestManager.provisionGuests(virtue, linuxVmts);
+				guestManager.provisionGuests(virtue, linuxVmts, linuxFuture);
 			}
 		};
 
-		Thread t = new Thread(r, "XenProvisioner-" + id);
-		t.start();
+		xenProvisionFuture.thenRun(r);
+		// Thread t = new Thread(r, "XenProvisioner-" + id);
+		// t.start();
 	}
 
-	private CompletableFuture<VirtualMachine> addVmToProvisionPipeline(VirtualMachine xenVm) {
+	private void addVmToProvisionPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
 		Void v = null;
 		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(xenVm, v);
 		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
@@ -227,7 +232,10 @@ public class XenHostManager {
 		cf = serviceProvider.getAddRsa().chainFutures(cf, v);
 		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		return cf;
+		cf.thenAccept((VirtualMachine vm) -> {
+			logger.debug("xen host future complete");
+			xenFuture.complete(vm);
+		});
 	}
 
 	protected void copySshKey(Session session, File privateKeyFile) {
