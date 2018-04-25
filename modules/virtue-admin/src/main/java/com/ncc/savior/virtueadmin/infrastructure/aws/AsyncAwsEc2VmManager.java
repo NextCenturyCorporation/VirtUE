@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure.aws;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
-import com.ncc.savior.virtueadmin.infrastructure.IVmUpdater;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -44,11 +45,11 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private String serverUser;
 	private String awsProfile;
 	private InstanceType instanceType;
-	private IVmUpdater vmUpdater;
 	private AwsEc2Wrapper ec2Wrapper;
 	private Collection<String> securityGroupIds;
 	private String subnetId;
 	private String vpcId;
+	private CompletableFutureServiceProvider serviceProvider;
 
 	/**
 	 * 
@@ -60,20 +61,24 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	 *            - Profile used by AWS Credential Providers. It is particularly
 	 *            passed to {@link ProfileCredentialsProvider}.
 	 */
-	public AsyncAwsEc2VmManager(IVmUpdater updater, IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper) {
+	public AsyncAwsEc2VmManager(CompletableFutureServiceProvider serviceProvider, IKeyManager keyManager,
+			AwsEc2Wrapper ec2Wrapper) {
 		this.ec2Wrapper = ec2Wrapper;
 		this.defaultSecurityGroups = new ArrayList<String>();
 		this.defaultSecurityGroups.add("default");
 
 		this.serverUser = System.getProperty("user.name");
 		this.instanceType = InstanceType.T2Small;
-		this.vmUpdater = updater;
+		this.serviceProvider = serviceProvider;
 	}
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
+	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		Collection<VirtualMachineTemplate> vmTemplates = new ArrayList<VirtualMachineTemplate>(1);
-		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates);
+		vmTemplates.add(vmt);
+
+		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future);
 		if (vms.size() != 1) {
 			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
 			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
@@ -85,7 +90,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates) {
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			String clientUser = user.getUsername();
@@ -95,8 +100,23 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
-		vmUpdater.addVmToProvisionPipeline(vms);
+		addVmToProvisionPipeline(vms);
 		return vms;
+	}
+
+	private void addVmToProvisionPipeline(ArrayList<VirtualMachine> vms) {
+		Void v = null;
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(vm, v);
+			cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+			cf = serviceProvider.getEnsureDeleteVolumeOnTermination().chainFutures(cf, v);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+			cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		}
 	}
 
 	@Override
@@ -117,16 +137,38 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
 		ec2Wrapper.startVirtualMachines(vms);
 		notifyOnUpdateVms(vms);
-		vmUpdater.addVmsToStartingPipeline(vms);
+		addVmsToStartingPipeline(vms);
 		return vms;
+	}
+
+	private void addVmsToStartingPipeline(Collection<VirtualMachine> vms) {
+		Void v = null;
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsNetworkingUpdateService().startFutures(vm, v);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		}
 	}
 
 	@Override
 	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
 		ec2Wrapper.stopVirtualMachines(vms);
 		notifyOnUpdateVms(vms);
-		vmUpdater.addVmsToStoppingPipeline(vms);
+		addVmsToStoppingPipeline(vms);
 		return vms;
+	}
+
+	private void addVmsToStoppingPipeline(Collection<VirtualMachine> vms) {
+		Void v = null;
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPED);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		}
 	}
 
 	@Override
@@ -142,9 +184,20 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			Collection<VirtualMachine> terminatedVms = ec2Wrapper.deleteVirtualMachines(vms);
 			// TODO deleting to deleted?
 			notifyOnUpdateVms(terminatedVms);
-			vmUpdater.addVmsToDeletingPipeline(vms);
+			addVmsToDeletingPipeline(vms);
 		}
 
+	}
+
+	private void addVmsToDeletingPipeline(Collection<VirtualMachine> vms) {
+		Void v = null;
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		}
 	}
 
 	@Override

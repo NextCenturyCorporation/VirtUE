@@ -9,10 +9,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,9 +25,8 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-import com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager;
-import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -51,16 +50,14 @@ public class XenGuestManager {
 	private static final String SENSOR_SCRIPT = "run_sensors.sh";
 	private File keyFile;
 	private VirtualMachine xenVm;
-	private IUpdateListener<VirtualMachine> notifier;
-	private XenGuestVmUpdater guestUpdater;
 	private Route53Manager route53;
+	private CompletableFutureServiceProvider serviceProvider;
 
-	public XenGuestManager(VirtualMachine xenVm, File keyFile, IUpdateListener<VirtualMachine> notifier,
-			XenGuestVmUpdater guestUpdater, Route53Manager route53) {
+	public XenGuestManager(VirtualMachine xenVm, File keyFile, CompletableFutureServiceProvider serviceProvider,
+			Route53Manager route53) {
 		this.keyFile = keyFile;
 		this.xenVm = xenVm;
-		this.notifier = notifier;
-		this.guestUpdater = guestUpdater;
+		this.serviceProvider = serviceProvider;
 		this.route53 = route53;
 	}
 
@@ -162,8 +159,7 @@ public class XenGuestManager {
 				externalSshPort++;
 			}
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
-			notifier.updateElements(vms);
-			guestUpdater.addVmToProvisionPipeline(vms);
+			addVmToProvisionPipeline(vms);
 		} catch (JSchException e) {
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
 		} catch (Exception e) {
@@ -176,6 +172,19 @@ public class XenGuestManager {
 				session.disconnect();
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addVmToProvisionPipeline(Collection<VirtualMachine> vms) {
+		Void v = null;
+		List<CompletableFuture<VirtualMachine>> cfs = new ArrayList<CompletableFuture<VirtualMachine>>(vms.size());
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, true);
+			cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		}
+		// TODO create and return future
 	}
 
 	private void startSensors(Session session, String sensorScript, String ipAddress, String username)
@@ -351,32 +360,4 @@ public class XenGuestManager {
 			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames, e);
 		}
 	}
-
-	public static void main(String[] args) {
-		IUpdateListener<VirtualMachine> updateListener = new IUpdateListener<VirtualMachine>() {
-			@Override
-			public void updateElements(Collection<VirtualMachine> elements) {
-				logger.debug("Updated " + elements);
-			}
-		};
-		String hostname = "ec2-52-90-206-205.compute-1.amazonaws.com";
-		String ipAddress = "34.229.246.30";
-		VirtualMachine xenVm = new VirtualMachine(UUID.randomUUID().toString(), "Test VM",
-				new ArrayList<ApplicationDefinition>(), VmState.RUNNING, OS.LINUX, "", hostname, 22, "ec2-user", null,
-				"virginiatech_ec2", ipAddress);
-		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		vms.add(new VirtualMachine(UUID.randomUUID().toString(), "Test VM", new ArrayList<ApplicationDefinition>(),
-				VmState.CREATING, OS.LINUX, "test id", "", 22, "user", "", "", ""));
-		VirtueInstance virtue = new VirtueInstance(UUID.randomUUID().toString(), "test-virtue", "test-user",
-				"test_template id", new ArrayList<ApplicationDefinition>(), vms);
-		Collection<VirtualMachineTemplate> linuxVmts = new ArrayList<VirtualMachineTemplate>();
-		linuxVmts.add(new VirtualMachineTemplate(UUID.randomUUID().toString(), "test template", OS.LINUX, "test",
-				new ArrayList<ApplicationDefinition>(), "user", true, new Date(), "System"));
-
-		XenGuestManager mgr = new XenGuestManager(xenVm, new File("certs/virginiatech_ec2.pem"), updateListener,
-				new XenGuestVmUpdater(updateListener, new DirectoryKeyManager(new File("./certs/"))), null);
-
-		mgr.provisionGuests(virtue, linuxVmts);
-	}
-
 }

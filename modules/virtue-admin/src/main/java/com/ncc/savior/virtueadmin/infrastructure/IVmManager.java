@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -44,7 +45,20 @@ public interface IVmManager {
 	 * @param vmt
 	 * @return
 	 */
-	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt);
+	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
+			CompletableFuture<Collection<VirtualMachine>> vmFutures);
+
+	/**
+	 * Convenience/Performance function to provision multiple VMs at one time. See
+	 * details from {@link IVmManager#startVirtualMachine(VirtualMachine)}.
+	 * 
+	 * @param user
+	 * 
+	 * @param vmTemplates
+	 * @return
+	 */
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
@@ -98,17 +112,5 @@ public interface IVmManager {
 	 * @return
 	 */
 	public VmState getVirtualMachineState(VirtualMachine vm);
-
-	/**
-	 * Convenience/Performance function to provision multiple VMs at one time. See
-	 * details from {@link IVmManager#startVirtualMachine(VirtualMachine)}.
-	 * 
-	 * @param user
-	 * 
-	 * @param vmTemplates
-	 * @return
-	 */
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates);
 
 }

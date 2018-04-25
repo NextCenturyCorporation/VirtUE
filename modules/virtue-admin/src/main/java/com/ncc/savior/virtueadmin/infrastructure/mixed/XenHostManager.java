@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,10 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
-import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -51,50 +52,42 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
 public class XenHostManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private VirtualMachineTemplate xenVmTemplate;
-	private IUpdateListener<VirtualMachine> notifier;
 	private AwsEc2Wrapper ec2Wrapper;
 	private String xenKeyName;
 	private InstanceType xenInstanceType;
-	private XenHostVmUpdater updater;
 	protected IActiveVirtueDao xenVmDao;
 	private String serverUser;
 	private IKeyManager keyManager;
 	private XenGuestManagerFactory xenGuestManagerFactory;
 	private String subnetId;
 	private Collection<String> securityGroupIds;
+	private CompletableFutureServiceProvider serviceProvider;
 
-	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> actualVmNotifier, Route53Manager route53,
+	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
+			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
 			Collection<String> securityGroupsNames, String subnetName, String xenAmi, String xenLoginUser,
 			String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns) {
-		this.notifier = actualVmNotifier;
+		this.xenVmDao = vmDao;
+		this.serviceProvider = serviceProvider;
 		this.ec2Wrapper = ec2Wrapper;
 		this.subnetId = AwsUtil.getSubnetIdFromName(subnetName, ec2Wrapper);
 		String vpcId = AwsUtil.getVpcIdFromSubnetId(subnetId, ec2Wrapper);
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
 		this.xenInstanceType = xenInstanceType;
-		this.xenVmDao = xenVmDao;
 		this.serverUser = System.getProperty("user.name");
 		this.keyManager = keyManager;
-		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, notifier, route53);
-		IUpdateListener<VirtualMachine> xenListener = new IUpdateListener<VirtualMachine>() {
-			@Override
-			public void updateElements(Collection<VirtualMachine> elements) {
-				xenVmDao.updateVms(elements);
-			}
-		};
-		this.updater = new XenHostVmUpdater(ec2Wrapper.getEc2(), xenListener, keyManager, usePublicDns);
+		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53);
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
 	}
 
-	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper, IActiveVirtueDao xenVmDao,
-			IUpdateListener<VirtualMachine> notifier, Route53Manager route53, String securityGroupsCommaSeparated,
-			String subnetId, String xenAmi, String xenUser, String xenKeyName, String xenInstanceType,
-			boolean usePublicDns) {
-		this(keyManager, ec2Wrapper, xenVmDao, notifier, route53, splitOnComma(securityGroupsCommaSeparated), subnetId,
-				xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType), usePublicDns);
+	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
+			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
+			String securityGroupsCommaSeparated, String subnetId, String xenAmi, String xenUser, String xenKeyName,
+			String xenInstanceType, boolean usePublicDns) {
+		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, splitOnComma(securityGroupsCommaSeparated),
+				subnetId, xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType), usePublicDns);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -129,7 +122,8 @@ public class XenHostManager {
 		xenVms.add(xenVm);
 
 		xenVmDao.updateVms(xenVms);
-		updater.addVmToProvisionPipeline(xenVms);
+		CompletableFuture<VirtualMachine> xenHostFuture = addVmToProvisionPipeline(xenVm);
+		// TODO use future here instead of while loop below
 		final String id = virtue.getId();
 		for (VirtualMachineTemplate vmt : linuxVmts) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), "",
@@ -222,6 +216,20 @@ public class XenHostManager {
 		t.start();
 	}
 
+	private CompletableFuture<VirtualMachine> addVmToProvisionPipeline(VirtualMachine xenVm) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(xenVm, v);
+		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+		cf = serviceProvider.getEnsureDeleteVolumeOnTermination().chainFutures(cf, v);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+		cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		return cf;
+	}
+
 	protected void copySshKey(Session session, File privateKeyFile) {
 		ChannelSftp ch = null;
 		try {
@@ -256,7 +264,18 @@ public class XenHostManager {
 			// TODO schedule once Vm's are deleted, XenManager will delete itself.
 			vms.add(xenVm);
 			ec2Wrapper.deleteVirtualMachines(vms);
+			addToDeletePipeline(xenVm);
 		}
+	}
+
+	private CompletableFuture<VirtualMachine> addToDeletePipeline(VirtualMachine xenVm) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(xenVm, false);
+		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		return cf;
 	}
 
 	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {
@@ -265,7 +284,6 @@ public class XenHostManager {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
 		vms.add(xenVm);
 		ec2Wrapper.startVirtualMachines(vms);
-		updater.addVmsToStartingPipeline(vms);
 		// TODO do the following once the xenVm is started
 		// XenGuestManager guestManager =
 		// xenGuestManagerFactory.getXenGuestManager(xenVm);

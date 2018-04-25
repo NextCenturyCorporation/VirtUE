@@ -79,19 +79,16 @@
 <!-- 		<constructor-arg value="false"></constructor-arg> -->
 <!-- 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg> -->
 <!-- 	</bean> -->
-	
-	<bean name="awsVmUpdater"
-		class="com.ncc.savior.virtueadmin.infrastructure.future.FutureVmUpdater">
+	<bean name="futureServiceProvider"
+		class="com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater" />
 		<constructor-arg ref="keyManager" />
-		<constructor-arg value="false"></constructor-arg>
-		<constructor-arg value="false"></constructor-arg>
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 	</bean>
 	<bean name="awsVmManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
-		<constructor-arg ref="awsVmUpdater" />
+		<constructor-arg ref="futureServiceProvider" />
 		<constructor-arg ref="keyManager" />
 		<constructor-arg ref="ec2Wrapper" />
 		<property name="defaultSubnetName" value="${virtue.aws.server.subnet.name}"></property>
@@ -133,9 +130,9 @@
 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager">
 		<constructor-arg ref="keyManager"></constructor-arg>
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
-		<constructor-arg ref="virtueDao"></constructor-arg>
-		<constructor-arg ref="activeVirtueUpdater"></constructor-arg>
+		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 		<constructor-arg ref="awsRoute53"></constructor-arg>
+		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>

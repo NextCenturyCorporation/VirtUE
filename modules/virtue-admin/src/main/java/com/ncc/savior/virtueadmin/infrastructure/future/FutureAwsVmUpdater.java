@@ -1,29 +1,22 @@
 package com.ncc.savior.virtueadmin.infrastructure.future;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
-import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmUpdater;
-import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 
-public class FutureVmUpdater implements IVmUpdater {
-	private static final Logger logger = LoggerFactory.getLogger(FutureVmUpdater.class);
+public class FutureAwsVmUpdater implements IVmUpdater {
+	private static final Logger logger = LoggerFactory.getLogger(FutureAwsVmUpdater.class);
 	private ScheduledExecutorService executor;
 	private AwsRenamingCompletableFutureService awsRenamingService;
 	private AwsNetworkingUpdateService awsNetworkingUpdateService;
@@ -35,55 +28,8 @@ public class FutureVmUpdater implements IVmUpdater {
 	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> networkClearingService;
 	private AwsUpdateStatusCompletableFutureService awsUpdateStatus;
 
-	public FutureVmUpdater(VirtueAwsEc2Provider ec2Provider, IUpdateListener<VirtualMachine> notifier,
-			IKeyManager keyManager, boolean includeXpra, boolean changePrivateKey, boolean usePublicDns) {
-		this.executor = Executors.newScheduledThreadPool(3, new ThreadFactory() {
-			private int num = 1;
+	public FutureAwsVmUpdater() {
 
-			@Override
-			public synchronized Thread newThread(Runnable r) {
-				String name = "aws-updater-" + num;
-				num++;
-				return new Thread(r, name);
-			}
-		});
-		AmazonEC2 ec2 = ec2Provider.getEc2();
-		awsRenamingService = new AwsRenamingCompletableFutureService(executor, ec2);
-		awsNetworkingUpdateService = new AwsNetworkingUpdateService(executor, ec2, usePublicDns);
-		ensureDeleteVolumeOnTermination = new EnsureDeleteVolumeOnTerminationCompletableFutureService(executor, ec2);
-		testUpDown = new TestReachabilityCompletableFuture(executor, keyManager);
-		addRsa = new AddRsaKeyCompletableFutureService(executor, keyManager);
-		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2);
-		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(executor,
-				"alterStatus") {
-			@Override
-			protected VirtualMachine onExecute(VirtualMachine param, VmState state) {
-				param.setState(state);
-				return param;
-			}
-		};
-		notifierService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(executor,
-				"notifierService") {
-			@Override
-			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {
-				ArrayList<VirtualMachine> collection = new ArrayList<VirtualMachine>();
-				collection.add(param);
-				notifier.updateElements(collection);
-				return param;
-			}
-		};
-		this.networkClearingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
-				executor, "NetworkClearingService") {
-
-			@Override
-			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {
-				param.setHostname(null);
-				param.setIpAddress(null);
-				param.setInternalIpAddress(null);
-				param.setInternalHostname(null);
-				return param;
-			}
-		};
 	}
 
 	@Override

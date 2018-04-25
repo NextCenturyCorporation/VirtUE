@@ -29,7 +29,8 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 
 	@Override
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
-		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, template.getVmTemplates());
+		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, template.getVmTemplates(),
+				null);
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		return vi;
 	}

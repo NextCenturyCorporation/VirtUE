@@ -36,7 +36,7 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 		Map<IVmManager, Collection<VirtualMachineTemplate>> mapping = createVmManagerMappingFromVmTemplates(vmts);
 		for (Entry<IVmManager, Collection<VirtualMachineTemplate>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
-			Collection<VirtualMachine> myVms = manager.provisionVirtualMachineTemplates(user, vmts);
+			Collection<VirtualMachine> myVms = manager.provisionVirtualMachineTemplates(user, vmts, null);
 			vms.addAll(myVms);
 		}
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);

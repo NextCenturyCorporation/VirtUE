@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,12 +69,16 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVmts.add(vmt);
 			}
 		}
-		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts);
+
+		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
+				windowsFuture);
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		// if (!linuxVmts.isEmpty()) {
+
+		// actually provisions xen host and then xen guests.
 		xenHostManager.provisionXenHost(vi, linuxVmts);
 		// }
-
 
 		windowsNfsMountingService.addVirtueToQueue(vi);
 
