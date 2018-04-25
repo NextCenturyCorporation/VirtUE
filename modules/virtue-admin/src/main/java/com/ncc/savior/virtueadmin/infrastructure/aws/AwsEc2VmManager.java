@@ -76,9 +76,11 @@ public class AwsEc2VmManager extends BaseVmManager {
 	private IKeyManager keyManager;
 	private String region;
 	private InstanceType instanceType;
+	private boolean usePublicDns;
 
-	public AwsEc2VmManager(IKeyManager keyManager, String region) {
+	public AwsEc2VmManager(IKeyManager keyManager, String region, boolean usePublicDns) {
 		this.region = region;
+		this.usePublicDns=usePublicDns;
 		try {
 			init();
 		} catch (Exception e) {
@@ -137,7 +139,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
 		ec2.startInstances(startInstancesRequest);
 		AwsUtil.updateStatusOnVm(ec2, vm);
-		notifyOnUpdateVmState(vm.getId(), vm.getState());
+		notifyOnUpdateVm(vm);
 		return vm;
 	}
 
@@ -148,7 +150,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
 		ec2.stopInstances(stopInstancesRequest);
 		AwsUtil.updateStatusOnVm(ec2, vm);
-		notifyOnUpdateVmState(vm.getId(), vm.getState());
+		notifyOnUpdateVm(vm);
 		return vm;
 	}
 
@@ -159,7 +161,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		ec2.startInstances(startInstancesRequest);
 		AwsUtil.updateStatusOnVms(ec2, vms);
 		for (VirtualMachine vm : vms) {
-			notifyOnUpdateVmState(vm.getId(), vm.getState());
+			notifyOnUpdateVm(vm);
 		}
 		return vms;
 	}
@@ -171,7 +173,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		ec2.stopInstances(stopInstancesRequest);
 		AwsUtil.updateStatusOnVms(ec2, vms);
 		for (VirtualMachine vm : vms) {
-			notifyOnUpdateVmState(vm.getId(), vm.getState());
+			notifyOnUpdateVm(vm);
 		}
 		return vms;
 	}
@@ -231,7 +233,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			vms.add(vm);
 		}
 		JavaUtil.sleepAndLogInterruption(2000);
-		modifyVms(vms);
+		modifyVms(vms, usePublicDns);
 		return vms;
 	}
 
@@ -247,10 +249,11 @@ public class AwsEc2VmManager extends BaseVmManager {
 	 * </ul>
 	 * 
 	 * @param vms
+	 * @param usePublicDns 
 	 */
-	private void modifyVms(ArrayList<VirtualMachine> vms) {
+	private void modifyVms(ArrayList<VirtualMachine> vms, boolean usePublicDns) {
 		long a = System.currentTimeMillis();
-		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500);
+		AwsUtil.waitUntilAllNetworkingUpdated(ec2, vms, 500, usePublicDns);
 		nameVmsInAws(vms);
 		SshUtil.waitForAllVmsReachableParallel(vms, 2500);
 		long b = System.currentTimeMillis();

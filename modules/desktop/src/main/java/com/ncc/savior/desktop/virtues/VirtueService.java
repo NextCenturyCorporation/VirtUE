@@ -13,6 +13,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
@@ -20,6 +21,7 @@ import com.ncc.savior.desktop.xpra.XpraClient.Status;
 import com.ncc.savior.desktop.xpra.XpraConnectionManager;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -40,12 +42,15 @@ public class VirtueService {
 	private DesktopResourceService desktopResourceService;
 	private Map<String, List<ApplicationDefinition>> pendingApps;
 	private Map<String, RgbColor> colors;
+	private IRdpClient rdpClient;
 
-	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger) {
+	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
+			IRdpClient rdpClient) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());
+		this.rdpClient = rdpClient;
 	}
 
 	// public void connectAndStartApp(DesktopVirtue app) throws IOException {
@@ -73,6 +78,20 @@ public class VirtueService {
 	 * @throws IOException
 	 */
 	public void ensureConnection(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
+			throws IOException {
+		if (OS.LINUX.equals(app.getOs())) {
+			ensureConnectionLinux(app, virtue, color);
+		} else {
+			ensureConnectionWindows(app, virtue, color);
+		}
+	}
+
+	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
+			throws IOException {
+		rdpClient.startRdp(app, virtue, color);
+	}
+
+	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
 		File file = null;
 		try {

@@ -67,4 +67,10 @@ public interface IActiveVirtueDao {
 
 	void deleteVirtue(VirtueInstance vi);
 
+	void updateVirtue(VirtueInstance virtue);
+
+	Optional<VirtualMachine> getXenVm(String id);
+
+	Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList);
+
 }

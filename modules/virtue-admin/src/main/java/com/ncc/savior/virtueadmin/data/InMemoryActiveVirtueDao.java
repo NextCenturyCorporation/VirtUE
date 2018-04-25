@@ -137,4 +137,21 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	public void deleteVirtue(VirtueInstance vi) {
 		throw new NotImplementedException();
 	}
+
+	@Override
+	public void updateVirtue(VirtueInstance virtue) {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public Optional<VirtualMachine> getXenVm(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

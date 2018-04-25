@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
-import com.ncc.savior.virtueadmin.infrastructure.IVmUpdateListener;
+import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -24,7 +24,7 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  * See interface for more descriptions.
  *
  */
-public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListener {
+public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListener<VirtualMachine> {
 	private final static Logger logger = LoggerFactory.getLogger(ActiveVirtueManager.class);
 
 	private IActiveVirtueDao virtueDao;
@@ -83,17 +83,12 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 		// return vi;
 	}
 
-	@Override
-	public void updateVmState(String vmId, VmState state) {
-		virtueDao.updateVmState(vmId, state);
-	}
-
-//	private class VmUpdateListener implements IStateUpdateListener {
-//		@Override
-//		public void updateVmState(String vmId, VmState state) {
-//			updateVmState(vmId, state);
-//		}
-//	}
+	// private class VmUpdateListener implements IStateUpdateListener {
+	// @Override
+	// public void updateVmState(String vmId, VmState state) {
+	// updateVmState(vmId, state);
+	// }
+	// }
 
 	@Override
 	public void deleteVirtue(VirtueUser user, String instanceId) {
@@ -102,6 +97,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
+		cloudManager.deleteVirtue(vi);
 		if (vi.getUsername().equals(user.getUsername())) {
 
 		} else {
@@ -135,11 +131,15 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IVmUpdateListe
 	@Override
 	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
+		if (vi == null) {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+					"Cannot find virtue with id=" + instanceId + " for user=" + user.getUsername());
+		}
 		return vi;
 	}
 
 	@Override
-	public void updateVms(Collection<VirtualMachine> vms) {
+	public void updateElements(Collection<VirtualMachine> vms) {
 		virtueDao.updateVms(vms);
 
 	}

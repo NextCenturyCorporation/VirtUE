@@ -15,6 +15,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  * Data Transfer Object (DTO) for templates.
@@ -72,6 +73,36 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 	}
 
+	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
+			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.version = version;
+		this.vmTemplates = new ArrayList<VirtualMachineTemplate>();
+		vmTemplates.add(vmTemplate);
+		this.enabled = enabled;
+		this.lastModification = lastModification;
+		this.lastEditor = lastEditor;
+		this.awsTemplateName = awsTemplateName;
+	}
+
+	public VirtueTemplate(String id, String name, String version, String awsTemplateName, boolean enabled,
+			Date lastModification, String lastEditor, VirtualMachineTemplate... vmTemplates) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.version = version;
+		this.vmTemplates = new ArrayList<VirtualMachineTemplate>();
+		for (VirtualMachineTemplate vmTemplate : vmTemplates) {
+			this.vmTemplates.add(vmTemplate);
+		}
+		this.enabled = enabled;
+		this.lastModification = lastModification;
+		this.lastEditor = lastEditor;
+		this.awsTemplateName = awsTemplateName;
+	}
+
 	protected VirtueTemplate() {
 		super();
 	}
@@ -100,7 +131,7 @@ public class VirtueTemplate {
 	}
 
 	// below setters are used for jackson deserialization.
-	protected void setId(String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -112,7 +143,7 @@ public class VirtueTemplate {
 		this.version = version;
 	}
 
-	public void setVmTemplates(Set<VirtualMachineTemplate> vmTemplates) {
+	public void setVmTemplates(Collection<VirtualMachineTemplate> vmTemplates) {
 		this.vmTemplates = vmTemplates;
 	}
 
@@ -166,7 +197,20 @@ public class VirtueTemplate {
 		return virtualMachineTemplateIds;
 	}
 
-	protected void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
+	@JsonGetter
+	public Collection<String> getApplicationIds() {
+		Collection<String> applicationIds = new ArrayList<String>();
+		if (vmTemplates != null) {
+			for (VirtualMachineTemplate vmt : vmTemplates) {
+				applicationIds.addAll(vmt.getApplicationIds());
+			}
+		}
+		return applicationIds;
+	}
+
+	@JsonSetter
+	public void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
+		this.vmTemplates = null;
 		this.virtualMachineTemplateIds = virtualMachineTemplateIds;
 	}
 }

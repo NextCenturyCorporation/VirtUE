@@ -2,7 +2,6 @@ package com.ncc.savior.virtueadmin.service;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,8 +33,8 @@ public class UserDataService {
 	public ApplicationDefinition getApplication(String appId) {
 		// TODO should users be restricted to which applications they can see?
 		verifyAndReturnUser();
-		Optional<ApplicationDefinition> app = this.templateManager.getApplicationDefinition(appId);
-		return app.orElse(null);
+		ApplicationDefinition app = this.templateManager.getApplicationDefinition(appId);
+		return app;
 	}
 
 	public VirtueTemplate getVirtueTemplate(String templateId) {
