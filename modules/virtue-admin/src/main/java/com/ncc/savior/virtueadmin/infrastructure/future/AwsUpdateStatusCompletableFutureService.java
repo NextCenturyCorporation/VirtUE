@@ -35,7 +35,9 @@ public class AwsUpdateStatusCompletableFutureService
 		while (itr.hasNext()) {
 			Wrapper wrapper = itr.next();
 			VmState successState = wrapper.extra;
-			if (!successState.equals(wrapper.param.getState())) {
+			if (successState.equals(wrapper.param.getState())) {
+				wrapper.result = wrapper.param;
+			} else {
 				// remove all of the unsuccessful statuses
 				itr.remove();
 			}
