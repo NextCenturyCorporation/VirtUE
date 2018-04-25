@@ -1,3 +1,4 @@
+import { HashLocationStrategy, Location, LocationStrategy } from '@angular/common';
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
@@ -12,12 +13,16 @@ import { VirtuesService } from '../shared/services/virtues.service';
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  providers: [ BaseUrlService, SensingService, VirtuesService ]
+  providers: [
+    Location,
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
+    BaseUrlService, SensingService, VirtuesService ]
 })
 
 export class DashboardComponent implements OnInit {
 
   form: FormGroup;
+  location: Location;
 
   columnSearch: string;
   columns = [
@@ -45,13 +50,17 @@ export class DashboardComponent implements OnInit {
   sensorData = [];
   virtues = [];
   virtueName: string;
+;
 
   // constructor(){}
   constructor(
+    location: Location,
     private baseUrlService: BaseUrlService,
     private sensingService: SensingService,
     private virtuesService: VirtuesService
-  ) {}
+  ) {
+    this.location = location;
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
