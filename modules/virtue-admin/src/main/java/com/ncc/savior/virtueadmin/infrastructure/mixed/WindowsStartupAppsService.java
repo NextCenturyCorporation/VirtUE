@@ -65,7 +65,7 @@ public class WindowsStartupAppsService {
 					logger.error("Windows NFS Mounting Service polling thread stopped!", t);
 				}
 			}
-		}, "WindowsNfsMountingService");
+		}, "WindowsStartupServiceThread");
 		this.pollingThread.setDaemon(true);
 		this.pollingThread.start();
 	}
