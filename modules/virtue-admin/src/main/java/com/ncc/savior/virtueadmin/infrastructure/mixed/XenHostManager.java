@@ -108,6 +108,15 @@ public class XenHostManager {
 
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
 			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		// if caller doesn't provide a future, we may still want one.
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (xenFuture == null) {
+			xenFuture = new CompletableFuture<VirtualMachine>();
+		}
+		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
+		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName, xenInstanceType,
 				subnetId);
@@ -196,7 +205,7 @@ public class XenHostManager {
 					JavaUtil.sleepAndLogInterruption(1000);
 					ps.println("exit");
 					JavaUtil.sleepAndLogInterruption(1000);
-					xenFuture.complete(xen);
+					finalXenFuture.complete(xen);
 				} catch (JSchException e) {
 					logger.trace("Vm is not reachable yet: " + e.getMessage());
 				} catch (Exception e) {
@@ -212,7 +221,7 @@ public class XenHostManager {
 				// provision Xen Guest VMs
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				logger.debug("starting to provision guests");
-				guestManager.provisionGuests(virtue, linuxVmts, linuxFuture);
+				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture);
 			}
 		};
 
@@ -286,30 +295,84 @@ public class XenHostManager {
 		return cf;
 	}
 
-	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {
+	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms,
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		// if caller doesn't provide a future, we may still want one.
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (xenFuture == null) {
+			xenFuture = new CompletableFuture<VirtualMachine>();
+		}
+		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
 		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueInstance.getId());
 		VirtualMachine xenVm = vmo.get();
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
 		vms.add(xenVm);
 		ec2Wrapper.startVirtualMachines(vms);
+		addVmToStartingPipeline(xenVm, xenFuture);
 		// TODO do the following once the xenVm is started
 		// XenGuestManager guestManager =
 		// xenGuestManagerFactory.getXenGuestManager(xenVm);
 		// guestManager.startGuests(linuxVms);
+
+		Runnable startGuestsRunnable = () -> {
+			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
+			guestManager.startGuests(linuxVms, finalLinuxFuture);
+		};
+		xenFuture.thenRun(startGuestsRunnable);
 	}
 
-	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms) {
+	private void addVmToStartingPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(xenVm, v);
+		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf.thenAccept((VirtualMachine vm) -> {
+			logger.debug("xen host starting future complete");
+			xenFuture.complete(vm);
+		});
+	}
+
+	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms,
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		// if caller doesn't provide a future, we may still want one.
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (xenFuture == null) {
+			xenFuture = new CompletableFuture<VirtualMachine>();
+		}
+		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
 		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueInstance.getId());
 		VirtualMachine xenVm = vmo.get();
 		XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
-		guestManager.stopGuests(linuxVms);
-		// TODO wait until stop is done
+		guestManager.stopGuests(linuxVms, linuxFuture);
 
-		// ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
-		// vms.add(xenVm);
-		// ec2Wrapper.stopVirtualMachines(vms);
-		// updater.addVmsToStoppingPipeline(vms);
+		Runnable stopHostRunnable = () -> {
+			ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+			vms.add(xenVm);
+			ec2Wrapper.stopVirtualMachines(vms);
+			addVmsToStoppingPipeline(xenVm, finalXenFuture);
+		};
+		linuxFuture.thenRun(stopHostRunnable);
+	}
 
+	private void addVmsToStoppingPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(xenVm, false);
+		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPED);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf.thenAccept((VirtualMachine vm) -> {
+			logger.debug("xen host stopping future complete");
+			xenFuture.complete(vm);
+		});
 	}
 
 	public void setServerUser(String serverUser) {

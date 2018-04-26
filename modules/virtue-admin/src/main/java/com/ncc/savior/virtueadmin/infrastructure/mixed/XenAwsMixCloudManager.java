@@ -57,7 +57,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		awsVmManager.deleteVirtualMachines(windowsVms);
+		awsVmManager.deleteVirtualMachines(windowsVms, null);
 		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms);
 	}
 
@@ -115,8 +115,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		xenHostManager.startVirtue(virtueInstance, linuxVms);
-		awsVmManager.startVirtualMachines(windowsVms);
+		xenHostManager.startVirtue(virtueInstance, linuxVms, null, null);
+		awsVmManager.startVirtualMachines(windowsVms, null);
 		return virtueInstance;
 	}
 
@@ -132,8 +132,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		xenHostManager.stopVirtue(virtueInstance, linuxVms);
-		awsVmManager.stopVirtualMachines(windowsVms);
+		xenHostManager.stopVirtue(virtueInstance, linuxVms, null, null);
+		awsVmManager.stopVirtualMachines(windowsVms, null);
 		return virtueInstance;
 	}
 }

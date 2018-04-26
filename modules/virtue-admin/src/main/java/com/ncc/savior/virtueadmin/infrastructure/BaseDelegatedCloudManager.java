@@ -25,7 +25,7 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
 		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
-			manager.deleteVirtualMachines(entry.getValue());
+			manager.deleteVirtualMachines(entry.getValue(), null);
 		}
 	}
 
@@ -49,7 +49,7 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
 		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
-			manager.startVirtualMachines(entry.getValue());
+			manager.startVirtualMachines(entry.getValue(), null);
 		}
 		return virtueInstance;
 	}
@@ -60,7 +60,7 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
 		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
-			manager.stopVirtualMachines(entry.getValue());
+			manager.stopVirtualMachines(entry.getValue(), null);
 		}
 		return virtueInstance;
 	}

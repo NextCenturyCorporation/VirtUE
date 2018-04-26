@@ -91,6 +91,9 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures) {
+		if (vmFutures == null) {
+			vmFutures = new CompletableFuture<Collection<VirtualMachine>>();
+		}
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			String clientUser = user.getUsername();
@@ -125,84 +128,110 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public VirtualMachine startVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		vms = startVirtualMachines(vms);
+		vms = startVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		vms = stopVirtualMachines(vms);
+		vms = stopVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
 
 	@Override
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
 		ec2Wrapper.startVirtualMachines(vms);
 		notifyOnUpdateVms(vms);
-		addVmsToStartingPipeline(vms);
+		addVmsToStartingPipeline(vms, vmFuture);
 		return vms;
 	}
 
-	private void addVmsToStartingPipeline(Collection<VirtualMachine> vms) {
+	private void addVmsToStartingPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsNetworkingUpdateService().startFutures(vm, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
 		}
+		fc.combineFutures(future);
 	}
 
 	@Override
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
 		ec2Wrapper.stopVirtualMachines(vms);
 		notifyOnUpdateVms(vms);
-		addVmsToStoppingPipeline(vms);
+		addVmsToStoppingPipeline(vms, vmFuture);
 		return vms;
 	}
 
-	private void addVmsToStoppingPipeline(Collection<VirtualMachine> vms) {
+	private void addVmsToStoppingPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPED);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
 		}
+		fc.combineFutures(future);
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
+	public void deleteVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		List<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
 		vms.add(vm);
-		deleteVirtualMachines(vms);
+		deleteVirtualMachines(vms, future);
 	}
 
 	@Override
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
+		if (future == null) {
+			future = new CompletableFuture<Collection<VirtualMachine>>();
+		}
 		if (!vms.isEmpty()) {
 			Collection<VirtualMachine> terminatedVms = ec2Wrapper.deleteVirtualMachines(vms);
 			// TODO deleting to deleted?
 			notifyOnUpdateVms(terminatedVms);
-			addVmsToDeletingPipeline(vms);
+			addVmsToDeletingPipeline(vms, future);
 		}
 
 	}
 
-	private void addVmsToDeletingPipeline(Collection<VirtualMachine> vms) {
+	private void addVmsToDeletingPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
 		}
+		fc.combineFutures(future);
 	}
 
 	@Override

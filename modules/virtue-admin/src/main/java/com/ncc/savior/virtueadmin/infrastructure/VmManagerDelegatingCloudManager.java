@@ -24,7 +24,7 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance) {
-		vmManager.deleteVirtualMachines(virtueInstance.getVms());
+		vmManager.deleteVirtualMachines(virtueInstance.getVms(), null);
 	}
 
 	@Override
@@ -37,13 +37,13 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 
 	@Override
 	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
-		vmManager.startVirtualMachines(virtueInstance.getVms());
+		vmManager.startVirtualMachines(virtueInstance.getVms(), null);
 		return virtueInstance;
 	}
 
 	@Override
 	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
-		vmManager.stopVirtualMachines(virtueInstance.getVms());
+		vmManager.stopVirtualMachines(virtueInstance.getVms(), null);
 		return virtueInstance;
 	}
 }

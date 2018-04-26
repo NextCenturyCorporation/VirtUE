@@ -16,7 +16,6 @@ import com.amazonaws.services.ec2.model.InstanceAttributeName;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMappingSpecification;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
-import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
@@ -63,7 +62,8 @@ public class EnsureDeleteVolumeOnTerminationUpdateComponent extends BaseIndividu
 			mod.setInstanceId(instanceId);
 			mod.setAttribute(InstanceAttributeName.BlockDeviceMapping);
 			mod.setBlockDeviceMappings(mapspecs);
-			ModifyInstanceAttributeResult modResult = ec2.modifyInstanceAttribute(mod);
+			// ModifyInstanceAttributeResult modResult =
+			ec2.modifyInstanceAttribute(mod);
 		} else {
 			logger.trace("All EBS is set to delete on termination");
 		}

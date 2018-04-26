@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.ws.rs.GET;
@@ -32,10 +33,12 @@ import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
@@ -417,6 +420,24 @@ public class DataResource {
 			users.add(u);
 		}
 		return users;
+	}
+
+	@GET
+	@Path("vm/status")
+	@Produces("application/json")
+	public Map<String, VmState> getAllVmStatus() {
+		Map<String, VmState> result = new TreeMap<String, VmState>();
+		activeVirtueDao.getAllVirtualMachines().forEach((VirtualMachine vm) -> {
+			result.put(vm.getName(), vm.getState());
+		});
+		return result;
+	}
+
+	@GET
+	@Path("vm")
+	@Produces("application/json")
+	public Iterable<VirtualMachine> getAllVms() {
+		return activeVirtueDao.getAllVirtualMachines();
 	}
 
 	@GET

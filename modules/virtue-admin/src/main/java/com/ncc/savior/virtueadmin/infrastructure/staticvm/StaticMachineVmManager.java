@@ -55,19 +55,19 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		vm.setState(VmState.RUNNING);
 		return vm;
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		vm.setState(VmState.RUNNING);
 		return vm;
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
+	public void deleteVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		// Do nothing. we don't want to delete in this implementation.
 	}
 
@@ -92,22 +92,25 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 	}
 
 	@Override
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		for (VirtualMachine vm : vms) {
-			startVirtualMachine(vm);
+			startVirtualMachine(vm, future);
 		}
 		return vms;
 	}
 
 	@Override
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		for (VirtualMachine vm : vms) {
-			stopVirtualMachine(vm);
+			stopVirtualMachine(vm, future);
 		}
 		return vms;
 	}

@@ -97,9 +97,10 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
-		cloudManager.deleteVirtue(vi);
-		if (vi.getUsername().equals(user.getUsername())) {
 
+		if (vi.getUsername().equals(user.getUsername())) {
+			cloudManager.deleteVirtue(vi);
+			virtueDao.deleteVirtue(vi);
 		} else {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");

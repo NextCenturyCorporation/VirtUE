@@ -42,6 +42,10 @@ public class TestReachabilityCompletableFuture
 		Boolean successOnReachable = wrapper.extra;
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 		boolean reachable = SshUtil.isVmReachable(vm, privateKeyFile);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Tested VM=" + vm.getId() + " reachability=" + reachable + " successOnReachable="
+					+ successOnReachable);
+		}
 		if (reachable && successOnReachable) {
 			onSuccess(vm.getId(), wrapper.param, wrapper.future);
 		} else if (!reachable && !successOnReachable) {

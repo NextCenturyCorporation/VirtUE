@@ -69,9 +69,11 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VirtualMachine startVirtualMachine(VirtualMachine vm);
+	public VirtualMachine startVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture);
 
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms);
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture);
 
 	/**
 	 * Initiates a stop action on the provided VM. It is not guaranteed that the VM
@@ -82,9 +84,10 @@ public interface IVmManager {
 	 * @param vm
 	 * @return
 	 */
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm);
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture);
 
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms);
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture);
 
 	/**
 	 * Calling this function notifies that the VM is no longer needed and the
@@ -96,14 +99,15 @@ public interface IVmManager {
 	 */
 	// TODO TBD if a VM is repurposed, who is responsible for reseting user access
 	// and user data?
-	public void deleteVirtualMachine(VirtualMachine vm);
+	public void deleteVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future);
 
 	/**
 	 * Deletes all vms
 	 * 
 	 * @param vms
 	 */
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future);
 
 	/**
 	 * Returns the current state of the given Virtual Machine.

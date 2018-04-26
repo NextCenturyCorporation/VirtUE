@@ -161,6 +161,7 @@ public class XenGuestManager {
 				vm.setSshPort(externalSshPort);
 				vm.setApplications(new ArrayList<ApplicationDefinition>(vmt.getApplications()));
 				externalSshPort++;
+				logger.debug("finished provisioning linux guest Vm=" + vm.getName());
 			}
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
 			addVmToProvisionPipeline(vms, xenGuestFuture);
@@ -347,7 +348,14 @@ public class XenGuestManager {
 		}
 	}
 
-	public void stopGuests(Collection<VirtualMachine> linuxVms) {
+	public void startGuests(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void stopGuests(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
 		// TODO Auto-generated method stub
 
 	}
