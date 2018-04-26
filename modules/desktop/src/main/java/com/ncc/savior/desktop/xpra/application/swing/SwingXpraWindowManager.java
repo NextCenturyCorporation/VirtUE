@@ -180,7 +180,6 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 			}
 		};
 		this.baseFrame.addKeyListener(keyAdapter);
-
 	}
 
 	@Override
