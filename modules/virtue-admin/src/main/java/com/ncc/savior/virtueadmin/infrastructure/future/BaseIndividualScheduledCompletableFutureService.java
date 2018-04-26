@@ -55,8 +55,13 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 	}
 
 	protected void onSuccess(String id, R result, CompletableFuture<R> cf) {
-		futureMap.remove(id).cancel(true);
-		super.onSuccess(result, cf);
+		ScheduledFuture<?> future = futureMap.remove(id);
+		if (future == null) {
+			onFailure(id, null, cf);
+		} else {
+			future.cancel(true);
+			super.onSuccess(result, cf);
+		}
 	}
 
 	protected void onFailure(String id, P initial, Exception e, CompletableFuture<R> cf) {
@@ -76,7 +81,7 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 				try {
 					onExecute(wrapper);
 				} catch (SaviorException e) {
-					onFailure(wrapper.param, e, wrapper.future);
+					onFailure(getId(wrapper), wrapper.param, e, wrapper.future);
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
 							t);

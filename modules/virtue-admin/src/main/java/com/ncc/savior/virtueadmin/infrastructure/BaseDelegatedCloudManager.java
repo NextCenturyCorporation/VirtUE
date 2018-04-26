@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -20,7 +21,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 public abstract class BaseDelegatedCloudManager implements ICloudManager {
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		Collection<VirtualMachine> vms = virtueInstance.getVms();
 		Map<IVmManager, Collection<VirtualMachine>> mapping = createVmManagerMappingFromVms(vms);
 		for (Entry<IVmManager, Collection<VirtualMachine>> entry : mapping.entrySet()) {

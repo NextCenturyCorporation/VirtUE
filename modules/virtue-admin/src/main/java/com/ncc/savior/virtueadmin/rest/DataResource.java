@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -470,7 +471,11 @@ public class DataResource {
 	public String clearActiveDatabase() {
 		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
 		for (VirtueInstance vi : all) {
-			cloudManager.deleteVirtue(vi);
+			CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();
+			cloudManager.deleteVirtue(vi, future);
+			future.thenAccept((virtue) -> {
+				activeVirtueDao.deleteVirtue(virtue);
+			});
 		}
 
 		activeVirtueDao.clear();

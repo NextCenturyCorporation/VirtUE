@@ -72,6 +72,7 @@ public abstract class BaseGroupedScheduledCompletableFutureService<P, R, X>
 		return list;
 	}
 
+
 	protected void onSuccess(Collection<Wrapper> completedWrappers) {
 		for (BaseCompletableFutureService<P, R, X>.Wrapper wrapper : completedWrappers) {
 			if (wrapper.result != null) {

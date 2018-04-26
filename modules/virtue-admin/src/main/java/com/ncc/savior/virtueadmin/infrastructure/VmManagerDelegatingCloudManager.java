@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -23,7 +24,7 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 	}
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		vmManager.deleteVirtualMachines(virtueInstance.getVms(), null);
 	}
 

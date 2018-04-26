@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure.staticvm;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -24,7 +25,7 @@ public class StaticMachineCloudManager implements ICloudManager {
 	}
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		// do nothing
 	}
 

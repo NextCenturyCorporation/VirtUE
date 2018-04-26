@@ -166,7 +166,7 @@ public class XenGuestManager {
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
 			addVmToProvisionPipeline(vms, xenGuestFuture);
 		} catch (JSchException e) {
-			logger.trace("Vm is not reachable yet: " + e.getMessage());
+			logger.error("Vm is not reachable yet: " + e.getMessage());
 			xenGuestFuture.completeExceptionally(e);
 		} catch (Exception e) {
 			logger.error("error in SSH", e);
@@ -200,7 +200,6 @@ public class XenGuestManager {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \" nohup sudo ./" + sensorScript
 				+ " > sensing.log 2>&1 \"";
 		List<String> output = SshUtil.sendCommandFromSession(session, cmd);
-		logger.debug(output.toString());
 	}
 
 	private String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {
@@ -360,7 +359,11 @@ public class XenGuestManager {
 
 	}
 
-	public void deleteGuests(Collection<VirtualMachine> linuxVms) {
+	public void deleteGuests(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
 		Collection<String> hostnames = new ArrayList<String>();
 		try {
 			for (VirtualMachine vm : linuxVms) {
@@ -373,6 +376,8 @@ public class XenGuestManager {
 			}
 		} catch (Exception e) {
 			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames, e);
+		} finally {
+			linuxFuture.complete(linuxVms);
 		}
 	}
 }

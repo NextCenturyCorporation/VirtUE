@@ -41,7 +41,7 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 			logger.trace("Adding future to " + getServiceName() + " with extra=" + extra);
 		}
 		CompletableFuture<R> cf = new CompletableFuture<R>();
-		priorCf.thenAcceptAsync(new Consumer<P>() {
+		priorCf.thenAccept(new Consumer<P>() {
 
 			@Override
 			public void accept(P t) {
@@ -50,7 +50,7 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 				}
 				offer(t, extra, cf);
 			}
-		}, executor);
+		});
 		return cf;
 	}
 
@@ -64,8 +64,8 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 	}
 
 	protected void onFailure(P initial, Exception e, CompletableFuture<R> cf) {
-		if (logger.isTraceEnabled()) {
-			logger.trace(getServiceName() + " failed with initial data=" + initial + " and error:" + e);
+		if (logger.isDebugEnabled()) {
+			logger.debug(getServiceName() + " failed with initial data=" + initial + " and error:", e);
 		}
 		cf.completeExceptionally(e);
 	}
@@ -74,8 +74,8 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 
 	protected void onFailure(P initial, CompletableFuture<R> cf) {
 		SaviorException se = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error with value" + initial);
-		if (logger.isTraceEnabled()) {
-			logger.trace(getServiceName() + " failed with initial data=" + initial + " and error:" + se);
+		if (logger.isDebugEnabled()) {
+			logger.debug(getServiceName() + " failed with initial data=" + initial + " and error:", se);
 		}
 		cf.completeExceptionally(se);
 	}

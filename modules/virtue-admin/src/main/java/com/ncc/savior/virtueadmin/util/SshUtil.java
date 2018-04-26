@@ -61,11 +61,16 @@ public class SshUtil {
 			String line;
 			JavaUtil.sleepAndLogInterruption(500);
 			while ((line = br.readLine()) != null || (line = er.readLine()) != null) {
-				logger.debug(line);
+				logger.debug("  : " + line);
 				lines.add(line);
 			}
+			logger.debug("finished command successfully");
 			return lines;
+		} catch (Exception e) {
+			logger.debug("finished command exceptionally", e);
+			throw e;
 		} finally {
+			logger.debug("finished command finally");
 			JavaUtil.closeIgnoreErrors(br, er);
 			myChannel.disconnect();
 		}
@@ -168,7 +173,7 @@ public class SshUtil {
 		session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
 		session.setConfig("PreferredAuthentications", "publickey");
 		session.setConfig("StrictHostKeyChecking", "no");
-		session.setTimeout(500);
+		session.setTimeout(1000);
 		session.connect();
 		return session;
 	}

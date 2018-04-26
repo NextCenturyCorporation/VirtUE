@@ -39,6 +39,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
+import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
@@ -269,7 +270,15 @@ public class XenHostManager {
 
 	}
 
-	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms) {
+	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms,
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (xenFuture == null) {
+			xenFuture = new CompletableFuture<VirtualMachine>();
+		}
+		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
 		// get XenVmManager for id
 		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(id);
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>();
@@ -277,22 +286,35 @@ public class XenHostManager {
 			VirtualMachine xenVm = vmo.get();
 			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 			// tell XenManager to delete its vms
-			guestManager.deleteGuests(linuxVms);
-			// TODO schedule once Vm's are deleted, XenManager will delete itself.
-			vms.add(xenVm);
-			ec2Wrapper.deleteVirtualMachines(vms);
-			addToDeletePipeline(xenVm);
+			guestManager.deleteGuests(linuxVms, linuxFuture);
+			linuxFuture.thenRun(() -> {
+				vms.add(xenVm);
+				ec2Wrapper.deleteVirtualMachines(vms);
+				CompletableFuture<VirtualMachine> xenFuture2 = new CompletableFuture<>();
+				addToDeletePipeline(xenVm, xenFuture2);
+				xenFuture2.thenAccept((vm) -> {
+					xenVmDao.deleteVm(vm);
+					finalXenFuture.complete(vm);
+				});
+			});
+		} else {
+			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR,
+					"Unable to find Xen VM with id=" + id);
+			linuxFuture.completeExceptionally(e);
+			xenFuture.completeExceptionally(e);
 		}
 	}
 
-	private CompletableFuture<VirtualMachine> addToDeletePipeline(VirtualMachine xenVm) {
+	private void addToDeletePipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
 		Void v = null;
 		CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(xenVm, false);
 		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
 		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		return cf;
+		cf.thenAccept((vm) -> {
+			xenFuture.complete(vm);
+		});
 	}
 
 	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms,

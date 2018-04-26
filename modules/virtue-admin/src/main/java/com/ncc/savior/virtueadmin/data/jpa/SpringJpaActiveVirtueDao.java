@@ -145,4 +145,9 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	public Iterable<VirtualMachine> getAllVirtualMachines() {
 		return vmRepository.findAll();
 	}
+
+	@Override
+	public void deleteVm(VirtualMachine vm) {
+		vmRepository.deleteById(vm.getId());
+	}
 }

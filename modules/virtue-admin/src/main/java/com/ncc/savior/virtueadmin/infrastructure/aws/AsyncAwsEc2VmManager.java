@@ -215,6 +215,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			// TODO deleting to deleted?
 			notifyOnUpdateVms(terminatedVms);
 			addVmsToDeletingPipeline(vms, future);
+		} else {
+			future.complete(vms);
 		}
 
 	}

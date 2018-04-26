@@ -46,7 +46,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 	}
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		Collection<VirtualMachine> vms = virtueInstance.getVms();
 		Collection<VirtualMachine> linuxVms = new ArrayList<VirtualMachine>();
 		Collection<VirtualMachine> windowsVms = new ArrayList<VirtualMachine>();
@@ -57,8 +57,13 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		awsVmManager.deleteVirtualMachines(windowsVms, null);
-		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms);
+		CompletableFuture<Collection<VirtualMachine>> windowsFuture=new CompletableFuture<Collection<VirtualMachine>>();
+		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
+		awsVmManager.deleteVirtualMachines(windowsVms, windowsFuture);
+		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms, xenFuture,null);
+		CompletableFuture.allOf(windowsFuture, xenFuture).thenRun(() -> {
+			future.complete(virtueInstance);
+		});
 	}
 
 	@Override
