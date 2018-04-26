@@ -12,6 +12,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -164,7 +165,17 @@ public class XenHostManager {
 				File privateKeyFile = keyManager.getKeyFileByName(keyName);
 				try {
 					// setup Xen VM
-					session = SshUtil.getConnectedSession(xen, privateKeyFile);
+					int attempts = 0;
+					while (attempts < 5) {
+						try {
+							session = SshUtil.getConnectedSession(xen, privateKeyFile);
+							break;
+						} catch (JSchException e) {
+							logger.warn("Connection failed", e);
+						}
+						JavaUtil.sleepAndLogInterruption(500);
+						attempts++;
+					}
 
 					copySshKey(session, privateKeyFile);
 
@@ -192,12 +203,13 @@ public class XenHostManager {
 							}
 						}
 					});
-					t.start();
 					// commands
 					// ps.println("sudo ./setupXen.sh");
 					// ps.println("sudo ./nfsd.sh &");
 					// TODO this sleep is here
-					JavaUtil.sleepAndLogInterruption(10000);
+					waitUntilXlListIsReady(session);
+					t.start();
+					JavaUtil.sleepAndLogInterruption(20000);
 					// ps.println("\035");
 					ps.println("nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1");
 					ps.println("sudo xl list");
@@ -229,6 +241,31 @@ public class XenHostManager {
 		xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
+	}
+
+	protected void waitUntilXlListIsReady(Session session) {
+		boolean success = false;
+		while (!success) {
+			try {
+				List<String> resp = SshUtil.sendCommandFromSession(session, "sudo xl list");
+				for (String line : resp) {
+					if (line.contains("Domain-0")) {
+						success = true;
+					}
+				}
+			} catch (IOException | JSchException e) {
+				logger.error("error waiting for xl list", e);
+			}
+			JavaUtil.sleepAndLogInterruption(2000);
+		}
+	}
+
+	protected void waitUntilXlListIsReady(PrintStream ps, BufferedReader br) {
+		while (true) {
+			ps.println("sudo xl list");
+
+		}
+
 	}
 
 	private void addVmToProvisionPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
