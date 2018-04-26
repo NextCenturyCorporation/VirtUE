@@ -17,7 +17,7 @@ public class AddRsaKeyCompletableFutureService
 	private SshKeyInjector sshKeyInjector;
 
 	public AddRsaKeyCompletableFutureService(ScheduledExecutorService executor, IKeyManager keyManager) {
-		super(executor, true, 25000, 3000);
+		super(executor, true, 10, 1000);
 		this.keyManager = keyManager;
 		this.sshKeyInjector = new SshKeyInjector();
 	}

@@ -29,7 +29,7 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 	private AmazonEC2 ec2;
 
 	public EnsureDeleteVolumeOnTerminationCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2) {
-		super(executor, true, 1000, 3000);
+		super(executor, true, 10, 1000);
 		this.ec2 = ec2;
 	}
 

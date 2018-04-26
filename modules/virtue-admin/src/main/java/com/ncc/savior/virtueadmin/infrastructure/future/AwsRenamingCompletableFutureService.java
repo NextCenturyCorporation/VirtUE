@@ -22,7 +22,7 @@ public class AwsRenamingCompletableFutureService
 	private AmazonEC2 ec2;
 
 	public AwsRenamingCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2) {
-		super(executor, true, 1000, 3000);
+		super(executor, true, 10, 3000);
 		this.ec2 = ec2;
 	}
 
