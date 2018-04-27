@@ -2,6 +2,7 @@ import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core'
 import { FormGroup, FormBuilder } from '@angular/forms';
 
 import { Virtue } from '../../shared/models/virtue.model';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 
@@ -11,7 +12,7 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
   selector: 'app-virtue-modal',
   templateUrl: './virtue-modal.component.html',
   styleUrls: ['./virtue-modal.component.css'],
-  providers: [ UsersService, VirtuesService ]
+  providers: [ BaseUrlService, UsersService, VirtuesService ]
 })
 export class VirtueModalComponent implements OnInit {
 
@@ -22,6 +23,7 @@ export class VirtueModalComponent implements OnInit {
   userVirtues = [];
 
   constructor(
+    private baseUrlService: BaseUrlService,
     private usersService: UsersService,
     private virtuesService: VirtuesService,
     public dialogRef: MatDialogRef<VirtueModalComponent>,
@@ -31,11 +33,14 @@ export class VirtueModalComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getVirtues();
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getVirtues(awsServer);
+    });
   }
 
-  getVirtues() {
-    this.virtuesService.getVirtues()
+  getVirtues(baseUrl: string) {
+    this.virtuesService.getVirtues(baseUrl)
       .subscribe(virtues => this.virtues = virtues);
   }
 

@@ -1,38 +1,34 @@
-import { Application } from './application.model';
-import { Users } from './users.model';
-import { VirtualMachine } from './vm.model';
-
 export class Virtue {
   id: any;
   name: string;
   version: string;
-  vmTemplates: VirtualMachine[];
-  users: Users[];
+  virtualMachineTemplateIds: any[];
   enabled: boolean;
   lastEditor: string;
+  lastModification: any;
   awsTemplateName: string;
-  applications: Application[];
+  applicationIds: any[];
 
   public Virtue(
     id: any,
     name: string,
     version: string,
-    vmTemplates: VirtualMachine[],
-    users: Users[],
+    virtualMachineTemplateIds: any[],
     enabled: boolean,
     lastEditor: string,
+    lastModification: any,
     awsTemplateName: string,
-    applications: Application[]
+    applicationIds: any[]
   ) {
     this.id = id;
     this.name = name;
     this.version = version;
-    this.vmTemplates = vmTemplates;
-    this.users = users;
+    this.virtualMachineTemplateIds = virtualMachineTemplateIds;
     this.enabled = enabled;
     this.lastEditor = lastEditor;
+    this.lastModification = lastModification;
     this.awsTemplateName = awsTemplateName;
-    this.applications = applications;
+    this.applicationIds = applicationIds;
   }
   constructor() { }
 }

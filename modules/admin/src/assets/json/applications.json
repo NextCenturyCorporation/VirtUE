@@ -1,0 +1,120 @@
+[{
+    "id": "d4000085-1700-484d-9e61-dc3b82a585e2",
+    "name": "Chrome (Linux)",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "google-chrome"
+  },
+  {
+    "id": "f470b10c-057b-46e7-8a53-bba0d9588916",
+    "name": "Firefox",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "firefox"
+  },
+  {
+    "id": "584e4773-af4b-4af7-b2f4-2a2494fcf78c",
+    "name": "LibreOffice Calc",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "localc"
+  },
+  {
+    "id": "2f54e4cd-a055-44d6-a47a-8966068da04e",
+    "name": "LibreOffice Draw",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "lodraw"
+  },
+  {
+    "id": "441cc0ed-503f-4f4b-b408-df9e10a625ba",
+    "name": "LibreOffice Impress",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "loimpress"
+  },
+  {
+    "id": "4ae7e9fa-50bd-4fff-879b-c3aa2d8e04e8",
+    "name": "LibreOffice Writer",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "lowriter"
+  },
+  {
+    "id": "4bf5572b-38b4-422d-9cb0-e5cfedae2f84",
+    "name": "Calculator",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "gnome-calculator"
+  },
+  {
+    "id": "f66fde16-50ea-4900-acee-5e597998b61e",
+    "name": "Terminal",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "xterm"
+  },
+  {
+    "id": "d2566fb0-132c-4c8d-8694-056ab8207bfa",
+    "name": "Thunderbird",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "thunderbird"
+  },
+  {
+    "id": "dc40575e-2fe8-4ccc-a98e-b0a437b490da",
+    "name": "Chrome (Win)",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe"
+  },
+  {
+    "id": "eac12c5f-9d69-477e-a047-9e6504468d77",
+    "name": "Microsoft Edge",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe"
+  },
+  {
+    "id": "01b57f32-0f35-47e9-ad5d-1890d5813d08",
+    "name": "Microsoft Word 2013",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe"
+  },
+  {
+    "id": "e7d02266-cdba-4845-a41b-9ba13c393a99",
+    "name": "Microsoft Excel 2013",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe"
+  },
+  {
+    "id": "c9049592-e94a-4579-b698-10d032e8e5cb",
+    "name": "Microsoft Outlook 2013",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe"
+  },
+  {
+    "id": "467e0dd4-85b3-47be-9a3c-700c58918da8",
+    "name": "Windows Powershell",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe"
+  },
+  {
+    "id": "be19a242-4684-4569-aa30-9a99acd44a0f",
+    "name": "Skype",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe"
+  },
+  {
+    "id": "4add0e3c-19da-429b-ad73-4e4821a861f8",
+    "name": "Windows Command Terminal",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\system32\\cmd.exe"
+  }
+]

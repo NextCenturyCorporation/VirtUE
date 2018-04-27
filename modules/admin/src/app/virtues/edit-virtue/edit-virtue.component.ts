@@ -5,11 +5,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
+
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
 import { Application } from '../../shared/models/application.model';
-import { Users } from '../../shared/models/users.model';
+import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 
@@ -21,17 +23,19 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
   selector: 'app-edit-virtue',
   templateUrl: './edit-virtue.component.html',
   styleUrls: ['./edit-virtue.component.css'],
-  providers: [VirtuesService, VirtualMachineService]
+  providers: [ BaseUrlService, VirtuesService, VirtualMachineService ]
 })
 
 export class EditVirtueComponent implements OnInit {
   virtueId: { id: string };
-  vms: VirtualMachine;
+  virtualMachine: VirtualMachine;
   activeClass: string;
-  users: Users[];
+  baseUrl: string;
+  users: User[];
   virtues: Virtue[];
 
   virtueData = [];
+  vmInfo = [];
   vmList = [];
   appList = [];
   selVmsList = [];
@@ -39,6 +43,7 @@ export class EditVirtueComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     private location: Location,
@@ -49,47 +54,70 @@ export class EditVirtueComponent implements OnInit {
     this.virtueId = {
       id: this.route.snapshot.params['id']
     };
-    this.getThisVirtue();
-    if (this.vmList.length > 0) {
-      this.getVmList();
-    }
+
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getThisVirtue(awsServer);
+      if (this.vmList.length > 0) {
+        this.getVmList(awsServer);
+      }
+    });
   }
 
-  getThisVirtue() {
+  getThisVirtue(baseUrl: string) {
+    this.baseUrl = baseUrl;
     const id = this.virtueId.id;
-    this.virtuesService.getVirtue(id).subscribe(
-      data => {
-        for (let vObj of data) {
-          if (vObj.id === id) {
-            this.virtueData = vObj;
-            this.vmList = vObj.vmTemplates;
-            for (let vm of vObj.vmTemplates) {
-              this.pageVmList.push(vm.id);
-            }
-            break;
+    this.virtuesService.getVirtue(baseUrl, id).subscribe(data => {
+      for (let vObj of data) {
+        if (vObj.id === id) {
+          this.virtueData = vObj;
+          // this.vmList = vObj.virtualMachineTemplateIds;
+          for (let vm of vObj.virtualMachineTemplateIds) {
+            this.pageVmList.push(vm);
+            this.vmList.push(vm);
           }
+          break;
         }
-      });
+        return this.virtueData;
+      }
+    });
   }
 
-  getVmList() {
+  getAllVms(baseUrl: string) {
+    this.vmService.getVmList(baseUrl).subscribe(vms => {
+      this.vmList = vms;
+    });
+  }
+
+  getVmList(baseUrl: string) {
     // loop through the selected VM list
-    const selectedVm = this.pageVmList;
-    this.vmService.getVmList()
-      .subscribe(data => {
-        if (this.vmList.length < 1) {
-          for (let vm of data) {
-            for (let sel of selectedVm) {
-              if (sel === vm.id) {
-                this.vmList.push(vm);
-                break;
-              }
+    let selectedVm = this.pageVmList;
+    this.vmService.getVmList(baseUrl)
+    .subscribe(data => {
+      if (this.vmList.length < 1) {
+        for (let vm of data) {
+          for (let sel of selectedVm) {
+            if (sel === vm.id) {
+              this.vmList.push(vm);
+              break;
             }
           }
-        } else {
-          this.getUpdatedVmList();
         }
-      });
+      } else {
+        this.getUpdatedVmList(baseUrl);
+      }
+    });
+  }
+
+  getVmInfo(id: string, prop: string) {
+    let vm = this.vmList.filter(data => id === data.id);
+    if (id !== null) {
+      if (prop === 'name') {
+        return vm[0].name;
+      } else if (prop === 'os') {
+        return vm[0].os;
+      }
+    }
   }
 
   getAppList() {
@@ -97,20 +125,17 @@ export class EditVirtueComponent implements OnInit {
     let apps = [];
     for (let vm of vms) {
       apps = vm.applications;
-      for (let app of apps) {
-        this.appList.push({
-          'name': app.name,
-          'version': app.version,
-          'os': app.os,
-          'launchCommand': app.launchCommand
-        });
-      }
+      // for (let app of apps) {
+        // this.appList.push({
+        //
+        // });
+      // }
     }
   }
 
-  getUpdatedVmList() {
+  getUpdatedVmList(baseUrl: string) {
     this.vmList = [];
-    this.vmService.getVmList()
+    this.vmService.getVmList(baseUrl)
       .subscribe(data => {
         for (let sel of this.pageVmList) {
           for (let vm of data) {
@@ -160,7 +185,7 @@ export class EditVirtueComponent implements OnInit {
       this.pageVmList = this.selVmsList;
 
 
-      this.getVmList();
+      this.getVmList(this.baseUrl);
     });
 
     dialogRef.afterClosed().subscribe(() => {

@@ -12,21 +12,15 @@
     	http://www.springframework.org/schema/data/repository
         http://www.springframework.org/schema/data/repository/spring-repository-1.5.xsd">
 
-	<bean name="vmManager"
-		class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineVmManager">
-		<constructor-arg value="${savior.staticVm.hostname}" />
-		<constructor-arg value="${savior.staticVm.port}" />
-		<constructor-arg value="${savior.staticVm.userName}" />
-		<constructor-arg ref="defaultPem" />
-		<constructor-arg value="LINUX" />
+	<bean name="certificatesDirectory" class="java.io.File">
+		<constructor-arg value="${virtue.aws.server.keyDirectory}" />
 	</bean>
-
-	<bean name="defaultPem" class="java.io.File">
-		<constructor-arg value="${savior.staticVm.pem}" />
+	<bean name="keyManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager">
+		<constructor-arg ref="certificatesDirectory" />
 	</bean>
 	<bean name="appManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.SimpleApplicationManager">
-		<constructor-arg ref="defaultPem" />
 	</bean>
 
 	<!-- <bean name="virtueDao" -->
@@ -37,7 +31,7 @@
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaActiveVirtueDao">
 	</bean>
 	<bean name="activeVirtueManager" class="com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager">
-		<constructor-arg ref="awsManager" />
+		<constructor-arg ref="cloudManager" />
 		<constructor-arg ref="virtueDao" />
 	</bean>
 	<!-- <bean name="templateManager" class="com.ncc.savior.virtueadmin.data.InMemoryTemplateManager"> -->
@@ -60,12 +54,87 @@
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
-	<bean name="awsManager" class="com.ncc.savior.virtueadmin.infrastructure.AwsManager">
-		<constructor-arg ref="defaultPem" />
+	<bean name="awsEc2Provider"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider">
+		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
 	</bean>
-	<!-- <bean name="staticManager" class="com.ncc.savior.virtueadmin.infrastructure.StaticMachineCloudManager"> -->
-	<!-- <constructor-arg ref="vmManager" /> -->
+	
+	<bean name="awsRoute53" class="com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager">
+		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.domain}"></constructor-arg>
+	</bean>
+
+	<bean name="ec2Wrapper"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper">
+		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+	</bean>
+
+	<bean name="awsVmUpdater"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater">
+		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+		<constructor-arg ref="activeVirtueUpdater" />
+		<constructor-arg ref="keyManager" />
+		<constructor-arg value="false"></constructor-arg>
+		<constructor-arg value="false"></constructor-arg>
+		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
+	</bean>
+	<bean name="awsVmManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
+		<constructor-arg ref="awsVmUpdater" />
+		<constructor-arg ref="keyManager" />
+		<constructor-arg ref="ec2Wrapper" />
+		<property name="defaultSubnetName" value="${virtue.aws.server.subnet.name}"></property>
+		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
+		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
+		<!-- <property name="awsProfile" value="">${virtue.aws.profile}</property> -->
+		<property name="instanceType" value="${virtue.aws.instanceType}"></property>
+		<property name="serverUser" value="${virtue.aws.serverUser}"></property>
+		<property name="updateListener" ref="activeVirtueUpdater"></property>
+		<!-- <property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property> -->
+	</bean>
+
+	<bean name="activeVirtueUpdater"
+		class="com.ncc.savior.virtueadmin.virtue.ActiveVirtueManagerUpdatingListener">
+		<constructor-arg ref="virtueDao"></constructor-arg>
+	</bean>
+
+	<!-- <bean name="xenVmManager" -->
+	<!-- class="com.ncc.savior.virtueadmin.infrastructure.XenVirtualMachineManager"> -->
+	<!-- <constructor-arg ref="keyManager" /> -->
+	<!-- <constructor-arg value="${virtue.aws.region}"></constructor-arg> -->
+	<!-- <constructor-arg value="${virtue.aws.profile}"></constructor-arg> -->
+	<!-- <property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property> -->
 	<!-- </bean> -->
+
+	<bean name="cloudManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenAwsMixCloudManager">
+		<constructor-arg ref="xenManager"></constructor-arg>
+		<constructor-arg ref="awsVmManager"></constructor-arg>
+		<constructor-arg ref="windowStartupService"></constructor-arg>
+	</bean>
+	
+	<bean name="windowStartupService" class="com.ncc.savior.virtueadmin.infrastructure.mixed.WindowsStartupAppsService">
+		<constructor-arg ref="virtueDao"></constructor-arg>
+		<constructor-arg ref="keyManager"></constructor-arg>
+	</bean>
+
+	<bean name="xenManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager">
+		<constructor-arg ref="keyManager"></constructor-arg>
+		<constructor-arg ref="ec2Wrapper"></constructor-arg>
+		<constructor-arg ref="virtueDao"></constructor-arg>
+		<constructor-arg ref="activeVirtueUpdater"></constructor-arg>
+		<constructor-arg ref="awsRoute53"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
+	</bean>
+
 	<bean name="desktopService"
 		class="com.ncc.savior.virtueadmin.service.DesktopVirtueService">
 		<constructor-arg ref="activeVirtueManager" />
@@ -77,7 +146,14 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 	</bean>
-	
-	<bean name="securityService" class="com.ncc.savior.virtueadmin.security.SecurityUserService"></bean>
+
+	<bean name="importExportService"
+		class="com.ncc.savior.virtueadmin.service.ImportExportService">
+		<constructor-arg ref="templateManager" />
+		<constructor-arg ref="userManager" />
+	</bean>
+
+	<bean name="securityService"
+		class="com.ncc.savior.virtueadmin.security.SecurityUserService"></bean>
 
 </beans>  

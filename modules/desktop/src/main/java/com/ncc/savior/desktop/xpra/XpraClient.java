@@ -108,6 +108,8 @@ public class XpraClient implements Closeable {
 	}
 
 	public void connect(BaseConnectionFactory factory, IConnectionParameters params) {
+		// this.factory = factory;
+		// this.params = params;
 		factory.connect(params, connectListenerManager);
 	}
 
@@ -164,6 +166,8 @@ public class XpraClient implements Closeable {
 	private void onIoException(IOException e) {
 		logger.error("Error with Xpra connection", e);
 		close();
+		// TODO consider some type of retry
+		// connect(factory, params);
 	}
 
 	public void addConnectListener(IConnectListener listener) {

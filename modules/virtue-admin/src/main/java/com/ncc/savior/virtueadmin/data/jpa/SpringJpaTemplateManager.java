@@ -19,6 +19,9 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * {@link ITemplateManager} that uses Spring and JPA.
+ */
 @Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
 	@Autowired
@@ -70,7 +73,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
 		user = userRepo.findById(user.getUsername()).orElse(null);
-		if (user==null) {
+		if (user == null) {
 			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + user + " not found.");
 		}
 		for (VirtueTemplate template : user.getVirtueTemplates()) {
@@ -99,8 +102,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
-		return appRepository.findById(applicationId);
+	public ApplicationDefinition getApplicationDefinition(String applicationId) {
+		Optional<ApplicationDefinition> oa = appRepository.findById(applicationId);
+		if (oa.isPresent()) {
+			return oa.get();
+		} else {
+			throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+					"Cannot find application with id=" + applicationId);
+		}
 	}
 
 	// @Override
@@ -109,13 +118,25 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	// }
 
 	@Override
-	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
-		return vmtRepository.findById(templateId);
+	public VirtualMachineTemplate getVmTemplate(String templateId) {
+		Optional<VirtualMachineTemplate> ovmt = vmtRepository.findById(templateId);
+		if (ovmt.isPresent()) {
+			return ovmt.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_TEMPLATE_NOT_FOUND,
+					"Cannot find VM template with id=" + templateId);
+		}
 	}
 
 	@Override
-	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
-		return vtRepository.findById(templateId);
+	public VirtueTemplate getVirtueTemplate(String templateId) {
+		Optional<VirtueTemplate> ovt = vtRepository.findById(templateId);
+		if (ovt.isPresent()) {
+			return ovt.get();
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+					"Cannot find virtue template with id=" + templateId);
+		}
 	}
 
 	@Override
@@ -129,13 +150,21 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		vmTemplate.setApplications(new HashSet<ApplicationDefinition>());
 		// Adding empty template and then adding applications (that are already in db)
 		// seems to work better for jpa
-		vmTemplate = vmtRepository.save(vmTemplate);
-		for (ApplicationDefinition app : apps) {
-			// assignApplicationToVmTemplate(vmTemplate.getId(), app.getId());
-			Optional<ApplicationDefinition> manageredApp = appRepository.findById(app.getId());
-			vmTemplate.getApplications().add(manageredApp.get());
-		}
 		vmtRepository.save(vmTemplate);
+		for (ApplicationDefinition app : apps) {
+			assignApplicationToVmTemplate(vmTemplate.getId(), app.getId());
+			// Optional<ApplicationDefinition> manageredApp =
+			// appRepository.findById(app.getId());
+			// if (manageredApp.isPresent()) {
+			// vmTemplate.getApplications().add(manageredApp.get());
+			// newApps.add(manageredApp.get());
+			// } else {
+			// new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+			// "Unable to find application with id=" + app.getId());
+			// }
+		}
+		// vmtRepository.save(vmTemplate);
+		vmTemplate.setApplications(apps);
 	}
 
 	@Override
@@ -150,12 +179,13 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 			// VirtualMachineTemplate managedVmt = vmtRepository.findOne(vmt.getId());
 			// template.getVmTemplates().add(managedVmt);
 		}
+		template.setVmTemplates(vms);
 		// vtRepository.save(template);
 	}
 
 	@Override
 	public void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId) {
-//		UserName username = new UserName(user.getUsername());
+		// UserName username = new UserName(user.getUsername());
 		// TODO this seems inefficient, but it errors if the username does not exist.
 		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		if (existing != null) {
@@ -170,8 +200,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
 		VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		if (existing != null) {
-			VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
-			existing.removeVirtueTemplate(vt);
+			Iterator<VirtueTemplate> itr = existing.getVirtueTemplates().iterator();
+			while (itr.hasNext()) {
+				VirtueTemplate template = itr.next();
+				if (template.getId().equals(virtueTemplateId)) {
+					itr.remove();
+					break;
+				}
+			}
 			userRepo.save(existing);
 		}
 	}
@@ -180,10 +216,16 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) throws NoSuchElementException {
 		VirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
 		ApplicationDefinition app = appRepository.findById(applicationId).get();
-		if (vmt != null && app != null) {
-			vmt.getApplications().add(app);
-			vmtRepository.save(vmt);
+		if (app == null) {
+			new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+					"Unable to find application with id=" + applicationId);
 		}
+		if (vmt == null) {
+			new SaviorException(SaviorException.VM_TEMPLATE_NOT_FOUND,
+					"Unable to find VM template with id=" + vmTemplateId);
+		}
+		vmt.getApplications().add(app);
+		vmtRepository.save(vmt);
 	}
 
 	@Override
@@ -191,6 +233,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 			throws NoSuchElementException {
 		VirtueTemplate vt = vtRepository.findById(virtueTemplateId).get();
 		VirtualMachineTemplate vmt = vmtRepository.findById(vmTemplateId).get();
+		if (vt == null) {
+			new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+					"Unable to find application with id=" + virtueTemplateId);
+		}
+		if (vmt == null) {
+			new SaviorException(SaviorException.VM_TEMPLATE_NOT_FOUND,
+					"Unable to find VM template with id=" + vmTemplateId);
+		}
 		vt.getVmTemplates().add(vmt);
 		vtRepository.save(vt);
 	}
@@ -214,7 +264,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		vtRepository.deleteAll();
 		vmtRepository.deleteAll();
 		appRepository.deleteAll();
-		userRepo.deleteAll();
+
 	}
 
 	@Override
@@ -230,6 +280,31 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	@Override
 	public void deleteVirtueTemplate(String templateId) {
 		vtRepository.deleteById(templateId);
+	}
+
+	@Override
+	public Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts) {
+		return vtRepository.findAllById(vts);
+	}
+
+	@Override
+	public Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds) {
+		return vmtRepository.findAllById(vmtIds);
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getApplications(Collection<String> appIds) {
+		return appRepository.findAllById(appIds);
+	}
+
+	@Override
+	public boolean containsApplication(String id) {
+		return appRepository.existsById(id);
+	}
+
+	@Override
+	public boolean containsVirtueTemplate(String id) {
+		return vtRepository.existsById(id);
 	}
 
 }

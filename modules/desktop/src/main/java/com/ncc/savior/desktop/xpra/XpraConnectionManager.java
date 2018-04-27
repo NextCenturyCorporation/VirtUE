@@ -71,7 +71,7 @@ public class XpraConnectionManager {
 		if (initiatorFactory != null) {
 			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
 			// logger.debug("getting servers");
-			Set<Integer> servers = init.getXpraServers();
+			Set<Integer> servers = init.getXpraServersWithRetries();
 			// logger.debug("displays: " + servers);
 			if (servers.size() >= 1) {
 				params.setDisplay(servers.iterator().next());
@@ -101,7 +101,7 @@ public class XpraConnectionManager {
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
 			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
-			Set<Integer> servers = init.getXpraServers();
+			Set<Integer> servers = init.getXpraServersWithRetries();
 			// logger.debug("displays: " + servers);
 			int display;
 			if (!servers.isEmpty()) {

@@ -2,7 +2,10 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +24,8 @@ public class SidebarController {
 	private Sidebar sidebar;
 	private Thread virtuePollThread;
 	private boolean terminatePollThread = false;
-	private List<DesktopVirtue> currentVirtues;
-	private long pollPeriodMillis = 500;
+	protected Map<String, DesktopVirtue> currentVirtues;
+	private long pollPeriodMillis = 2500;
 	private VirtueChangeHandler changeHandler;
 	private AuthorizationService authService;
 
@@ -31,6 +34,7 @@ public class SidebarController {
 		this.changeHandler = sidebar;
 		this.virtueService = virtueService;
 		this.authService = authService;
+		this.currentVirtues = new TreeMap<String, DesktopVirtue>();
 	}
 
 	public void init(Stage primaryStage) throws Exception {
@@ -38,11 +42,27 @@ public class SidebarController {
 		// if (authService.getUser() != null) {
 		// initialVirtues = virtueService.getVirtuesForUser();
 		// } else {
-			initialVirtues = new ArrayList<DesktopVirtue>();
+		initialVirtues = new ArrayList<DesktopVirtue>();
 		// }
-		currentVirtues = initialVirtues;
+		currentVirtues = getCurrentVirtueMap(initialVirtues);
 		sidebar.start(primaryStage, initialVirtues);
 		startVirtuePoll();
+	}
+
+	private Map<String, DesktopVirtue> getCurrentVirtueMap(List<DesktopVirtue> initialVirtues) {
+		Map<String, DesktopVirtue> map = new TreeMap<String, DesktopVirtue>();
+		for (DesktopVirtue v : initialVirtues) {
+			String key = getMapKey(v);
+			map.put(key, v);
+		}
+		return map;
+	}
+
+	private String getMapKey(DesktopVirtue v) {
+		if (v.getId() == null || v.getId().trim().equals("")) {
+			return v.getTemplateId();
+		}
+		return v.getTemplateId() + "-" + v.getId();
 	}
 
 	private void startVirtuePoll() {
@@ -67,8 +87,7 @@ public class SidebarController {
 								currentVirtues.clear();
 								previousUser = currentUser.getUsername();
 							}
-							detectChangesAndReport(currentVirtues, virtues);
-							currentVirtues = virtues;
+							updateVirtues(virtues);
 
 						}
 
@@ -84,7 +103,38 @@ public class SidebarController {
 		virtuePollThread.start();
 	}
 
-	protected void detectChangesAndReport(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues) {
+	protected void updateVirtues(List<DesktopVirtue> virtues) {
+		Iterator<DesktopVirtue> itr = virtues.iterator();
+		Map<String, DesktopVirtue> newCurrentVirtues = new TreeMap<String, DesktopVirtue>();
+		while (itr.hasNext()) {
+			DesktopVirtue v = itr.next();
+			String key = getMapKey(v);
+			if (currentVirtues.containsKey(key)) {
+				currentVirtues.remove(key);
+				newCurrentVirtues.put(getMapKey(v), v);
+				reportChangedVirtue(v);
+			} else if (currentVirtues.containsKey(v.getTemplateId())) {
+				currentVirtues.remove(v.getTemplateId());
+				newCurrentVirtues.put(getMapKey(v), v);
+				reportChangedVirtue(v);
+			} else {
+				reportAddedVirtue(v);
+				newCurrentVirtues.put(getMapKey(v), v);
+			}
+		}
+
+		Iterator<DesktopVirtue> removeItr = currentVirtues.values().iterator();
+		while (removeItr.hasNext()) {
+			DesktopVirtue v = removeItr.next();
+			reportRemovedVirtue(v);
+			removeItr.remove();
+		}
+
+		currentVirtues = newCurrentVirtues;
+	}
+
+	// TODO this still has bugs and should be completely rethought
+	protected void detectChangesAndReport2(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues) {
 		DesktopVirtueComparator comparator = new DesktopVirtue.DesktopVirtueComparator();
 		currentVirtues.sort(comparator);
 		virtues.sort(comparator);
@@ -108,7 +158,8 @@ public class SidebarController {
 				}
 			}
 			if (0 == compare) {
-				if (!cv.getName().equals(nv.getName()) || updatedId) {
+				if (!cv.getName().equals(nv.getName()) || updatedId
+						|| !cv.getVirtueState().equals(nv.getVirtueState())) {
 					reportChangedVirtue(nv);
 				}
 				cindex++;

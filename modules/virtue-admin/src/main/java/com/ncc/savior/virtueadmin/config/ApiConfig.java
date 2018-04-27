@@ -24,9 +24,8 @@ import com.ncc.savior.virtueadmin.rest.HelloResource;
 import com.ncc.savior.virtueadmin.rest.UserResource;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
-/*
- * ApiConfig is responsible for registering all the webserivce 
- * apis. 
+/**
+ * ApiConfig is responsible for registering all the webserivce apis.
  * 
  * 
  */
@@ -47,6 +46,8 @@ public class ApiConfig extends ResourceConfig {
 		register(AdminResource.class);
 		register(UserResource.class);
 		register(WebServiceUtil.class);
+		
+		register(CorsFilter.class);
 		
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 		

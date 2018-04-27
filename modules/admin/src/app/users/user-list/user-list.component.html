@@ -1,6 +1,6 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h1 class="title">Users</h1>
+    <h1 class="titlebar-title">Users</h1>
     <button class="titlebar-button" [routerLink]="['add']">Add User</button>
   </div>
 
@@ -8,7 +8,7 @@
     <div id="content">
       <div class="mui-container-fluid">
         <!-- if there are no virtues, show this message -->
-        <div *ngIf="appUserList.length < 1" class="mui-row margin-top-10">
+        <div *ngIf="users.length < 1" class="mui-row margin-top-10">
           <div class="mui-col-md-12 padding-left-0">
             <p class="no-data-message">
               No users have been added at this time. To add a user, click on the button "Add User" above.
@@ -24,30 +24,32 @@
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-3">Name</div>
+          <div class="table-header mui-col-md-2">Userame</div>
+          <div class="table-header mui-col-md-3">Authorities</div>
           <div class="table-header mui-col-md-7">Virtues</div>
-          <div class="table-header mui-col-md-2">Date</div>
         </div>
 
-        <div class="mui-row table-row" *ngFor="let su of appUserList ">
-          <div class="table-data mui-col-md-3">
-            <a class="edit" (click)="onSelected(su.id)" [routerLink]="['edit',su.id]">{{ su.name }}</a>
-            <!-- if this user is enabled show this menu -->
+        <div class="mui-row table-row" *ngFor="let su of users ">
+          <div class="table-data mui-col-md-2">
+            <!-- <a class="edit" (click)="onSelected(su.id)" [routerLink]="['edit',su.id]"></a> -->
+            {{ su.username }}
+            <!-- if this user is enabled show this menu
             <span class="active account-options">
               <a href="#">Duplicate</a> | <a [routerLink]="['edit',su.id]">Disable</a>
-            </span>
+            </span> -->
 
-            <!-- if this user is disabled show this menu -->
+            <!-- if this user is disabled show this menu
             <span class="active account-options">
               <a href="#">Enable</a> | <a class="edit" (click)="openDialog(su.id,'delete','user account')">Delete</a>
-            </span>
+            </span>-->
+          </div>
+          <div class="table-data mui-col-md-3">{{ su.authorities }}
           </div>
           <div class="table-data mui-col-md-7">
             <ul>
-              <li *ngFor="let virtue of su.virtues">{{ virtue.name }}</li>
+              <li *ngFor="let virtue of su.virtueTemplateIds">{{ getVirtueName(virtue) }}</li>
             </ul>
           </div>
-          <div class="table-data mui-col-md-2">{{ su.status}}<br />{{ su.modifiedDate}}</div>
           <div class="clearfix"></div>
         </div>
       </div>

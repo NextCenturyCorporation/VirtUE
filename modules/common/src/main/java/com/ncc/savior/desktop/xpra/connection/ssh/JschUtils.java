@@ -48,6 +48,7 @@ public class JschUtils {
 		Session session = jsch.getSession(params.getUser(), params.getHost(), params.getPort());
 		session.setServerAliveInterval(1000);
 		session.setServerAliveCountMax(15);
+		session.setTimeout(1000);
 		session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
 		session.setPassword(params.getPassword());
 		session.setConfig("StrictHostKeyChecking", "no");

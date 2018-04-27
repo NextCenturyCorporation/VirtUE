@@ -19,6 +19,9 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
+/**
+ * Implementation of {@link IActiveVirtueDao} that uses Spring and JPA.
+ */
 @Repository
 public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	@Autowired
@@ -64,7 +67,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 		Optional<VirtualMachine> vm = vmRepository.findById(vmId);
 		if (!vm.isPresent()) {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Unable to find virtual machine with id=" + vmId);
-		} 
+		}
 		vm.get().setState(state);
 		vmRepository.save(vm.get());
 	}
@@ -103,6 +106,11 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	}
 
 	@Override
+	public Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList) {
+		return virtueRepository.findAllById(virtueList);
+	}
+
+	@Override
 	public Iterable<VirtueInstance> getAllActiveVirtues() {
 		return virtueRepository.findAll();
 	}
@@ -110,6 +118,26 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void clear() {
 		virtueRepository.deleteAll();
+		vmRepository.deleteAll();
 	}
 
+	@Override
+	public void updateVms(Collection<VirtualMachine> vms) {
+		vmRepository.saveAll(vms);
+	}
+
+	@Override
+	public void deleteVirtue(VirtueInstance vi) {
+		virtueRepository.delete(vi);
+	}
+
+	@Override
+	public void updateVirtue(VirtueInstance virtue) {
+		virtueRepository.save(virtue);
+	}
+
+	@Override
+	public Optional<VirtualMachine> getXenVm(String id) {
+		return vmRepository.findById(id);
+	}
 }

@@ -1,5 +1,8 @@
 package com.ncc.savior.virtueadmin.rest;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +14,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +28,7 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
+import com.ncc.savior.virtueadmin.service.ImportExportService;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
@@ -38,6 +45,9 @@ public class AdminResource {
 
 	@Autowired
 	private AdminService adminService;
+
+	@Autowired
+	private ImportExportService importExportService;
 
 	public AdminResource() {
 
@@ -529,5 +539,55 @@ public class AdminResource {
 			// Needs to create ExceptionMapper for jersey.
 			throw WebServiceUtil.createWebserviceException(e);
 		}
+	}
+
+	@GET
+	@Path("export")
+	@Produces("application/json")
+	public Response exportSystem() {
+		try {
+			StreamingOutput stream = new StreamingOutput() {
+				@Override
+				public void write(OutputStream os) throws IOException, WebApplicationException {
+					importExportService.exportSystem(os);
+					os.flush();
+				}
+			};
+			return Response.ok(stream).build();
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@POST
+	@Path("import")
+	@Produces("application/json")
+	public void importSystem(InputStream stream) {
+		try {
+			importExportService.importSystem(stream);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		} catch (IOException e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Path("sensing")
+	@Produces("application/json")
+	public Response getSensing() throws IOException {
+		try {
+			String response = adminService.getSensingReponse();
+			return Response.ok(response).build();
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+
 	}
 }

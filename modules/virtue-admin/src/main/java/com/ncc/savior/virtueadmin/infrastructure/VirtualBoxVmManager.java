@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
@@ -36,14 +37,13 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	private static final String ARGS_GETINFO = "showvminfo \"%s\" --machinereadable";
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtualMachineTemplate vmt) {
-		// TODO
+	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
 		throw new RuntimeException("not yet implemented");
 	}
 
 	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
-		VmState state = getVirtialMachineState(vm);
+		VmState state = getVirtualMachineState(vm);
 		if (state.equals(VmState.RUNNING)) {
 			vm.setState(VmState.RUNNING);
 			return vm;
@@ -142,7 +142,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public VmState getVirtialMachineState(VirtualMachine vm) {
+	public VmState getVirtualMachineState(VirtualMachine vm) {
 		String command = String.format(WINDOWS_PATH_TO_VIRTUAL_BOX + COMMAND + " " + ARGS_GETINFO,
 				vm.getInfrastructureId());
 		try {
@@ -166,8 +166,26 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
 		// TODO Auto-generated method stub
 		return null;
 	}

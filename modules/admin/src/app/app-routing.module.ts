@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule, Routes, ExtraOptions } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
@@ -17,6 +17,9 @@ import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
 import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
 import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { VmAppsComponent } from './vm-apps/vm-apps.component';
+import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
+import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -26,6 +29,10 @@ const routes: Routes = [
     { path: '', component:  UserListComponent },
     { path: 'add', component: AddUserComponent, data: {breadcrumb: 'Add User Account'} },
     { path: 'edit/:id', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} }
+  ] },
+  { path: 'vm-apps', component: VmAppsComponent, data: {breadcrumb: 'Applications'}, children: [
+    { path: '', component: VmAppsListComponent },
+    { path: 'add-app', component: AddVmAppComponent, data: {breadcrumb: 'Install New App'} },
   ] },
   { path: 'virtues', component: VirtuesComponent, data: {breadcrumb: 'Virtues'}, children: [
     { path: '', component: VirtueListComponent },
@@ -42,7 +49,9 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [ RouterModule.forRoot(routes) ],
+  imports: [ RouterModule.forRoot(routes, {
+    useHash: true
+  })],
   exports: [ RouterModule ],
   declarations: []
 })

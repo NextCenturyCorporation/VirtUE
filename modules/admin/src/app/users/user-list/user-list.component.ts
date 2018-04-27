@@ -3,7 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
 import { User } from '../../shared/models/user.model';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
 
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
@@ -12,32 +14,51 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.css'],
-  providers: [ UsersService ]
+  providers: [ BaseUrlService, UsersService ]
 })
 export class UserListComponent implements OnInit {
   @Input() user: User;
 
   saviorUsers: string;
-  appUserList = [];
+  users = [];
+  virtues = [];
 
   constructor(
     private route: ActivatedRoute,
-    private usersService: UsersService,
     private location: Location,
+    private baseUrlService: BaseUrlService,
+    private usersService: UsersService,
+    private virtuesService: VirtuesService,
     public dialog: MatDialog
   ) {}
 
   ngOnInit() {
-    this.getUsers();
+    this.baseUrlService.getBaseUrl().subscribe( _url => {
+      let awsServer = _url[0].aws_server;
+      this.getUsers(awsServer);
+      this.getVirtues(awsServer);
+    });
+
   }
 
-  getUsers(): void {
-    this.usersService.getUsers()
-      .subscribe(appUsers => this.appUserList = appUsers);
+  getUsers( baseUrl: string ): void {
+    this.usersService.getUsers(baseUrl).subscribe(data => {
+      this.users = data;
+    });
   }
 
-  onSelected(id) {
+  getVirtues(baseUrl: string) {
+    this.virtuesService.getVirtues(baseUrl).subscribe( virtues => {
+      this.virtues = virtues;
+    });
+  }
 
+  getVirtueName(id: string) {
+    for (let virtue of this.virtues) {
+      if (id === virtue.id) {
+        return virtue.name;
+      }
+    }
   }
 
   openDialog(id, type, text): void {

@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Injector, Injectable } from '@angular/core';
+import { AsyncPipe, JsonPipe } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
+import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Virtue } from '../models/virtue.model';
+import { MessageService } from './message.service';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -15,37 +18,42 @@ const httpHeader = {
 
 export class VirtuesService {
 
-  // private jsondata = 'http://localhost:8080/admin/virtue/template';
-  private jsondata = './assets/json/virtue_list.json';
+  private configUrl = 'admin/virtue/template';
+  // private restApi = './assets/json/virtue_list.json';
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(
+    private httpClient: HttpClient,
+    private messageService: MessageService
+  ) {}
 
-  public getVirtues(): Observable<Array<Virtue>> {
-    return this.httpClient.get<Array<Virtue>>(this.jsondata);
+  getVirtues(baseUrl: string): Observable<Virtue[]> {
+    let src = `${baseUrl + this.configUrl}`;
+    return this.httpClient.get<Virtue[]>(src);
+      // .pipe(
+      //   tap(virtues => this.log(`fetched virtues`)),
+      //   catchError(this.handleError('getVirtues', []))
+      // );
   }
 
-  public getVirtue(id: string): Observable<any> {
-    // const src = `${this.jsondata}/${id}`;
-    const src = `${this.jsondata}/?id=${id}`;
+  public getVirtue(baseUrl: string, id: string): Observable<any> {
+    let src = `${baseUrl + this.configUrl}/?id=${id}`;
     return this.httpClient.get<Virtue>(src);
   }
 
+/**
   public createVirtue(virtue: Virtue): Observable<any> {
-    return this.httpClient.post(this.jsondata, virtue);
-    // return this.httpClient.post<Virtue>(this.jsondata, virtue);
+    return this.http.post(this.restApi, virtue);
   }
 
   public updateVirtue(id: string, virtue: Virtue): Observable<any> {
-    const src = `${this.jsondata}/?id=${id}`;
-    return this.httpClient.put(src, virtue);
-    // return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
+    const src = `${this.restApi}/?id=${id}`;
+    return this.http.put(src, virtue);
   }
 
-  /**
-    public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-      return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
-    }
-  */
+  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
+    return this.http.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
+  }
+*/
   /**
    * Handle Http operation that failed.
    * Let the app continue.
@@ -55,14 +63,18 @@ export class VirtuesService {
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
 
-      // TODO: send the error to remote logging infrastructure
+      // send the error to remote logging infrastructure
       console.error(error); // log to console instead
 
-      // TODO: better job of transforming error for user consumption
-      // this.log(`${operation} failed: ${error.message}`);
+      // better job of transforming error for user consumption
+      this.log(`${operation} failed: ${error.message}`);
 
       // Let the app keep running by returning an empty result.
       return of(result as T);
     };
+  }
+  /** Log a HeroService message with the MessageService */
+  private log (message: string) {
+    this.messageService.add('VirtueService: ' + message);
   }
 }

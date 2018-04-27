@@ -1,0 +1,88 @@
+[{
+    "username": "admin",
+    "authorities": [
+      "ROLE_USER",
+      "ROLE_ADMIN"
+    ],
+    "virtueTemplateIds": [
+      "9e86f384-cd66-428c-9c52-65c5f185e47b",
+      "1d443030-a72e-44d9-8ea0-987e9d2aa484",
+      "c4953af8-39cc-4254-92d0-3e9ed4248061",
+      "62d3ed51-a74e-4705-8dcc-507278b0d41d",
+      "1894ac7e-d001-470d-910b-2aac3374a8ef",
+      "9dd5816c-0f2d-43bb-bea1-2059240d3654",
+      "635396aa-2e08-49c3-9d4b-78c79f5a7d84",
+      "2d91909a-cffc-4410-9c50-4c89e11a82e8",
+      "38ab6e31-e9e8-4832-a031-547a78a5c5d0",
+      "c75f7e8a-c981-45a8-a111-0bf6e5c9dd1e",
+      "a646d67a-09eb-4854-940e-c348cb9c09cb"
+    ]
+  },
+  {
+    "username": "browser",
+    "authorities": [
+      "ROLE_USER"
+    ],
+    "virtueTemplateIds": [
+      "c4953af8-39cc-4254-92d0-3e9ed4248061",
+      "9e86f384-cd66-428c-9c52-65c5f185e47b"
+    ]
+  },
+  {
+    "username": "developer",
+    "authorities": [
+      "ROLE_USER"
+    ],
+    "virtueTemplateIds": [
+      "9e86f384-cd66-428c-9c52-65c5f185e47b",
+      "1894ac7e-d001-470d-910b-2aac3374a8ef"
+    ]
+  },
+  {
+    "username": "kdrumm",
+    "authorities": [
+      "ROLE_ADMIN",
+      "ROLE_USER"
+    ],
+    "virtueTemplateIds": []
+  },
+  {
+    "username": "math",
+    "authorities": [
+      "ROLE_USER"
+    ],
+    "virtueTemplateIds": [
+      "1894ac7e-d001-470d-910b-2aac3374a8ef"
+    ]
+  },
+  {
+    "username": "nerd",
+    "authorities": [
+      "ROLE_USER"
+    ],
+    "virtueTemplateIds": [
+      "62d3ed51-a74e-4705-8dcc-507278b0d41d",
+      "1894ac7e-d001-470d-910b-2aac3374a8ef",
+      "9e86f384-cd66-428c-9c52-65c5f185e47b"
+    ]
+  },
+  {
+    "username": "office",
+    "authorities": [
+      "ROLE_USER"
+    ],
+    "virtueTemplateIds": [
+      "62d3ed51-a74e-4705-8dcc-507278b0d41d"
+    ]
+  },
+  {
+    "username": "presenter",
+    "authorities": [
+      "ROLE_USER"
+    ],
+    "virtueTemplateIds": [
+      "62d3ed51-a74e-4705-8dcc-507278b0d41d",
+      "9e86f384-cd66-428c-9c52-65c5f185e47b"
+    ]
+  }
+]

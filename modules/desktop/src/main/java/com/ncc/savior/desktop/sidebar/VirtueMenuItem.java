@@ -98,7 +98,9 @@ public class VirtueMenuItem {
 			style = new BorderStroke(c, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2, 2, 2, 2));
 		}
 		pane.setBorder(new Border(style));
+		// VBox vpane = getStartStopVirtue();
 		// HBox hbox = new HBox();
+		// pane.getChildren().add(vpane);
 		pane.getChildren().add(view);
 		pane.getChildren().add(label);
 		// pane.getChildren().add(hbox);
@@ -107,10 +109,23 @@ public class VirtueMenuItem {
 		return pane;
 	}
 
+	// private VBox getStartStopVirtue() {
+	// VBox vbox = new VBox();
+	// Image startImage = new Image("images/play.png");
+	// ImageView startView = new ImageView(startImage);
+	// Image stopImage = new Image("images/stop.png");
+	// ImageView stopView = new ImageView(stopImage);
+	// Button startButton = new Button("", startView);
+	// Button stopButton = new Button("", stopView);
+	// vbox.getChildren().add(startButton);
+	// vbox.getChildren().add(stopButton);
+	// return vbox;
+	// }
+
 	private String getLabel(DesktopVirtue virtue) {
 		String name = virtue.getName();
 		if (virtue.getId() != null) {
-			name = name + "*";
+			name = name + " (" + virtue.getVirtueState() + ")";
 		}
 		return name;
 	}
@@ -152,9 +167,9 @@ public class VirtueMenuItem {
 						public void run() {
 							try {
 								statusSpinner.setImage(statusImage);
-								statusSpinner.setVisible(true);
+								// statusSpinner.setVisible(true);
 								virtueService.startApplication(virtue, app, color);
-								statusSpinner.setVisible(false);
+								// statusSpinner.setVisible(false);
 							} catch (IOException e) {
 								logger.error("Error starting " + app.getName(), e);
 								Platform.runLater(new Runnable() {

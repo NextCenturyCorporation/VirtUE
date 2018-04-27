@@ -1,6 +1,6 @@
 <div id="content-container">
-  <div id="content-header" class="mui-container-fluid titlebar">
-    <h1 class="title">Virtual Machines</h1>
+  <div id="content-header" class="titlebar">
+    <h1 class="titlebar-title">Virtual Machines</h1>
     <button class="titlebar-button" [routerLink]="['vm-build']">Build VM</button>
     <button class="titlebar-button" [disabled]="true">Import VM</button>
   </div>
@@ -21,7 +21,14 @@
       <!-- if there are virtues, show this list -->
       <div *ngIf="vms.length > 0" class="mui-container-fluid">
         <div class="mui-row virtues-filters">
-          <div class="virtues-filter mui-col-md-12 padding-left-0">All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a></div>
+          <div class="mui-col-md-12 padding-left-0 filters">
+            <span *ngIf="filterValue === '*'">All VMs</span>
+            <a mat-button *ngIf="filterValue !== '*'"  (click)="listFilter('*')">All VMs</a> |
+            <span *ngIf="filterValue === true">Enabled VMs</span>
+            <a mat-button *ngIf="filterValue !== true" (click)="listFilter(true)">Enabled VMs</a> |
+            <span *ngIf="filterValue === false">Disabled VMs</span>
+            <a mat-button *ngIf="filterValue !== false" (click)="listFilter(false)">Disabled VMs</a>
+          </div>
         </div>
       </div>
       <div class="mui-container-fluid data-list">
@@ -32,34 +39,43 @@
           <div class="table-header mui-col-md-2">Last Modified By</div>
           <div class="table-header mui-col-md-2">Modified Date</div>
         </div>
-        <div *ngFor="let vm of vms" class="mui-row table-row">
+        <div *ngFor="let vm of vms | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-4">
             <div class="mini-menu">
-              <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.name }}</a>
+              <!-- <a class="edit" [routerLink]="['edit',vm.id]"></a> -->
+              {{ vm.name }}
               <!-- if this virtue is enabled show this menu -->
-              <span class="menu-options"><a mat-button (click)="openDialog(vm.id,'disable','Virtual Machine')">Disable</a> | Duplicate | Export</span>
+              <span *ngIf="vm.enabled === true" class="menu-options">
+                <a mat-button (click)="updateStatus(vm.id)">Disable</a>
+              </span>
 
               <!-- if this virtue is disabled show this menu -->
-              <span class="menu-options">Enable | <a mat-button (click)="openDialog('vm.id','delete','Virtual Machine')">Delete</a></span>
+              <span *ngIf="vm.enabled !== true"class="menu-options">
+                <a mat-button (click)="updateStatus(vm.id)">Enable</a> |
+                <a mat-button (click)="openDialog(vm.id, 'delete', 'delete', vm.name)">Delete</a>
+              </span>
           </div>
           </div>
           <div class="table-data mui-col-md-2">{{ vm.os }}</div>
           <div class="table-data mui-col-md-2">
             <ul>
-              <ng-container *ngFor="let app of vm.applications; let i=index">
-              <li>{{ app.name }}</li>
+              <ng-container *ngFor="let app of vm.applicationIds">
+              <li>{{ getAppName(app)}}</li>
               </ng-container>
             </ul>
           </div>
           <div class="table-data mui-col-md-2">{{ vm.lastEditor }}</div>
-          <div class="table-data mui-col-md-2">{{ vm.enabled }}<br />{{ vm.modifiedDate }}</div>
+          <div class="table-data mui-col-md-2">
+            {{vm.enabled ? 'Enabled' : 'Disabled'}}<br />
+            {{vm.lastModification | date:'short' }}
+          </div>
           <div class="clearfix"></div>
         </div>
       </div>
       <div class="paging">
         <div class="page-number mui-col-md-4">Page # of #</div>
         <div class="page-controls mui-col-md-4"><span *ngIf="vmLength > 10"><< First | < Previous | Next > | Last >></span></div>
-        <div class="page-item-total mui-col-md-4">{{ vmLength }} Virtual Machines</div>
+        <div class="page-item-total mui-col-md-4">{{ totalVms }} Virtual Machines</div>
         <div class="clearfix"></div>
       </div>
     </div>

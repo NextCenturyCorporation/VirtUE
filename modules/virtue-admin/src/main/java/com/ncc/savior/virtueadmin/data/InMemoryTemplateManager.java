@@ -5,22 +5,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
@@ -71,14 +70,15 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		Date now = new Date();
 		String systemName = "system";
 //		String allTemplate = "default-template";
+		String loginUser = "loginUser";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
-				OS.LINUX, "Linux Browsers", appsBrowsers, true, now, systemName);
+				OS.LINUX, "Linux Browsers", appsBrowsers, loginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux All", OS.LINUX,
-				"Linux All", appsAll, true, now, systemName);
+				"Linux All", appsAll, loginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Math", OS.LINUX,
-				"Linux Math", appsMath, true, now, systemName);
+				"Linux Math", appsMath, loginUser, true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
@@ -181,8 +181,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Optional<ApplicationDefinition> getApplicationDefinition(String applicationId) {
-		return Optional.of(applications.get(applicationId));
+	public ApplicationDefinition getApplicationDefinition(String applicationId) {
+		ApplicationDefinition app = applications.get(applicationId);
+		if (app == null) {
+			throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND, "not found");
+		}
+		return app;
 	}
 
 	@Override
@@ -333,12 +337,37 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public Optional<VirtueTemplate> getVirtueTemplate(String templateId) {
+	public VirtueTemplate getVirtueTemplate(String templateId) {
 		throw new RuntimeException("not implemented");
 	}
 
 	@Override
-	public Optional<VirtualMachineTemplate> getVmTemplate(String templateId) {
+	public VirtualMachineTemplate getVmTemplate(String templateId) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Iterable<ApplicationDefinition> getApplications(Collection<String> appIds) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public boolean containsApplication(String id) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public boolean containsVirtueTemplate(String id) {
 		throw new RuntimeException("not implemented");
 	}
 

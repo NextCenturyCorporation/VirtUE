@@ -2,17 +2,18 @@ import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
-import { VirtualMachine } from '../../shared/models/vm.model';
+
 import { Application } from '../../shared/models/application.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 @Component({
   selector: 'app-vm-modal',
   templateUrl: './vm-modal.component.html',
-  styleUrls: ['./vm-modal.component.css'],
-  providers: [VirtualMachineService]
+  providers: [BaseUrlService, VirtualMachineService]
 })
 export class VmModalComponent implements OnInit {
   @Input() vmInput: VirtualMachine;
@@ -30,6 +31,7 @@ export class VmModalComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private baseUrlService: BaseUrlService,
     private vmService: VirtualMachineService,
     private dialogRef: MatDialogRef<VmModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
@@ -38,14 +40,18 @@ export class VmModalComponent implements OnInit {
     }
 
   ngOnInit() {
-    this.getVmList();
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getVmList(awsServer);
+    });
+
     if (this.pageVmList.length > 0) {
       this.selVmsList = this.pageVmList;
     }
   }
 
-  getVmList() {
-    this.vmService.getVmList()
+  getVmList(baseUrl: string) {
+    this.vmService.getVmList(baseUrl)
       .subscribe(vms => {
         this.vmList = vms;
       });

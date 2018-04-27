@@ -2,7 +2,6 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -76,10 +75,8 @@ public interface ITemplateManager {
 	 * 
 	 * @return
 	 */
-	
-	Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates();
 
-	Iterable<ApplicationDefinition> getAllApplications();
+	Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates();
 
 	/**
 	 * Returns all the {@link ApplicationDefinition}s in the data store.
@@ -87,12 +84,34 @@ public interface ITemplateManager {
 	 * @param applicationId
 	 * @return
 	 */
-	Optional<ApplicationDefinition> getApplicationDefinition(String applicationId);
-//	ApplicationDefinition getApplicationDefinition(String applicationId);
+	Iterable<ApplicationDefinition> getAllApplications();
 
-	Optional<VirtueTemplate> getVirtueTemplate(String templateId);
+	/**
+	 * Returns {@link ApplicationDefinition} matching the given ID or throws a
+	 * SaviorException if not found.
+	 * 
+	 * @param applicationId
+	 * @return
+	 */
+	ApplicationDefinition getApplicationDefinition(String applicationId);
 
-	Optional<VirtualMachineTemplate> getVmTemplate(String templateId);
+	/**
+	 * Returns {@link VirtueTemplate} matching the given ID or throws a
+	 * SaviorException if not found.
+	 * 
+	 * @param applicationId
+	 * @return
+	 */
+	VirtueTemplate getVirtueTemplate(String templateId);
+
+	/**
+	 * Returns {@link VirtualMachineTemplate} matching the given ID or throws a
+	 * SaviorException if not found.
+	 * 
+	 * @param applicationId
+	 * @return
+	 */
+	VirtualMachineTemplate getVmTemplate(String templateId);
 
 	/**
 	 * Adds a new {@link ApplicationDefinition} to the data store.
@@ -124,4 +143,14 @@ public interface ITemplateManager {
 	void deleteVmTemplate(String templateId);
 
 	void deleteVirtueTemplate(String templateId);
+
+	Iterable<VirtueTemplate> getVirtueTemplates(Collection<String> vts);
+
+	Iterable<VirtualMachineTemplate> getVmTemplates(Collection<String> vmtIds);
+
+	Iterable<ApplicationDefinition> getApplications(Collection<String> appIds);
+
+	boolean containsApplication(String id);
+
+	boolean containsVirtueTemplate(String id);
 }

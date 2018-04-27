@@ -6,6 +6,9 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 
+/**
+ * Helper class that creates RSA keypairs mainly for SSH login.
+ */
 public class RsaKeyGenerator {
 	private JSch jsch;
 

@@ -70,7 +70,7 @@ public class UserResource {
 	// JHU - User API - user role list
 	@GET
 	@Produces("application/json")
-	@Path("virtue/template/")
+	@Path("virtue/template")
 	public Collection<VirtueTemplate> getAllVirtueTemplatesByUser() {
 		try {
 			Collection<VirtueTemplate> vts = userVirtueService.getVirtueTemplatesForUser();
@@ -86,7 +86,7 @@ public class UserResource {
 	// JHU - User API - virtue get
 	@GET
 	@Produces("application/json")
-	@Path("virtue/{virtueId}/")
+	@Path("virtue/{virtueId}")
 	public VirtueInstance getVirtueInstance(@PathParam("virtueId") String virtueId) {
 		try {
 			VirtueInstance vi = userVirtueService.getVirtueInstanceForUserById(virtueId);
@@ -102,7 +102,7 @@ public class UserResource {
 	// JHU - User API - user virtue list
 	@GET
 	@Produces("application/json")
-	@Path("virtue/")
+	@Path("virtue")
 	public Collection<VirtueInstance> getVirtueInstances() {
 		try {
 			Collection<VirtueInstance> vis = userVirtueService.getVirtueInstancesForUser();
@@ -118,7 +118,7 @@ public class UserResource {
 	// JHU - User API - virtue create
 	@POST
 	@Produces("application/json")
-	@Path("virtue/template/{templateId}/")
+	@Path("virtue/template/{templateId}")
 	public VirtueInstance createVirtue(@PathParam("templateId") String templateId) {
 		try {
 			VirtueInstance vi = desktopService.createVirtue(templateId);
@@ -135,7 +135,7 @@ public class UserResource {
 	// Launch virtue is currently unnecessary
 	@POST
 	@Produces("application/json")
-	@Path("virtue/{virtueId}/")
+	@Path("virtue/{virtueId}")
 	public void launchVirtue(@PathParam("virtueId") String virtueId) {
 		try {
 			throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED,
@@ -168,7 +168,7 @@ public class UserResource {
 	// JHU - User API - virtue destroy
 	@DELETE
 	@Produces("application/json")
-	@Path("virtue/{virtueId}/")
+	@Path("virtue/{virtueId}")
 	public void deleteVirtue(@PathParam("virtueId") String virtueId) {
 		try {
 			desktopService.deleteVirtue(virtueId);

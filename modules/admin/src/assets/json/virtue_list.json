@@ -1,1 +1,192 @@
-[{"id":"9a2fb9b1-69be-4c90-975b-3a2e11eb7805","name":"Web Virtue","version":"1.0","vmTemplates":[{"id":"e03e68a8-e436-4b13-b309-63ab52aa8e08","name":"Browsers","os":"LINUX","templatePath":"Browsers","applications":[{"id":"18c13ab7-4325-4d16-9b88-174a267d1bea","name":"Chrome","version":"1.0","os":"LINUX","launchCommand":"google-chrome"},{"id":"4f036e79-9ff3-4499-ac80-175395d23f5a","name":"Firefox","version":"1.0","os":"LINUX","launchCommand":"firefox"}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system"}],"users":[{"username":"admin","authorities":["ROLE_USER","ROLE_ADMIN"]},{"username":"presenter","authorities":["ROLE_USER"]},{"username":"browser","authorities":["ROLE_USER"]},{"username":"nerd","authorities":["ROLE_USER"]},{"username":"artist","authorities":["ROLE_USER"]},{"username":"developer","authorities":["ROLE_USER"]}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system","awsTemplateName":"default-template","applications":[{"id":"4f036e79-9ff3-4499-ac80-175395d23f5a","name":"Firefox","version":"1.0","os":"LINUX","launchCommand":"firefox"},{"id":"18c13ab7-4325-4d16-9b88-174a267d1bea","name":"Chrome","version":"1.0","os":"LINUX","launchCommand":"google-chrome"}]},{"id":"1dbb650a-68c4-47b3-b0a0-0cdbdcd40965","name":"Test Virtue","version":"1.0","vmTemplates":[{"id":"bc01b075-b074-4f68-a7dc-85611d55cd33","name":"All","os":"LINUX","templatePath":"All","applications":[{"id":"18c13ab7-4325-4d16-9b88-174a267d1bea","name":"Chrome","version":"1.0","os":"LINUX","launchCommand":"google-chrome"},{"id":"4f036e79-9ff3-4499-ac80-175395d23f5a","name":"Firefox","version":"1.0","os":"LINUX","launchCommand":"firefox"},{"id":"b94652f1-c7f7-4150-a273-384da423faae","name":"LibreOffice Calc","version":"1.0","os":"LINUX","launchCommand":"localc"},{"id":"f1cbb5ca-9f6e-428a-9038-5bc058a6c2bd","name":"LibreOffice Draw","version":"1.0","os":"LINUX","launchCommand":"lodraw"},{"id":"3f95ec4c-c346-4a09-bd9c-6da0a2447981","name":"LibreOffice Impress","version":"1.0","os":"LINUX","launchCommand":"loimpress"},{"id":"2ae273de-d36e-4d8c-9f2a-8129d24b3841","name":"LibreOffice Writer","version":"1.0","os":"LINUX","launchCommand":"lowriter"},{"id":"654d7896-f1e5-4d6d-896f-7ad78dd448f8","name":"Calculator","version":"1.0","os":"LINUX","launchCommand":"gnome-calculator"},{"id":"acc5ebbf-1041-404f-b42d-575eb3f6d765","name":"GIMP","version":"1.0","os":"LINUX","launchCommand":"gimp"},{"id":"5818b15c-889e-4c26-bde3-22715365f4d6","name":"Pinta","version":"1.0","os":"LINUX","launchCommand":"pinta"},{"id":"654d7896-f1e5-4d6d-896f-7ad78dd448f8","name":"Calculator","version":"1.0","os":"LINUX","launchCommand":"gnome-calculator"}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system"}],"users":[{"username":"admin","authorities":["ROLE_USER","ROLE_ADMIN"]}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system","awsTemplateName":"default-template","applications":[{"id":"18c13ab7-4325-4d16-9b88-174a267d1bea","name":"Chrome","version":"1.0","os":"LINUX","launchCommand":"google-chrome"},{"id":"b94652f1-c7f7-4150-a273-384da423faae","name":"LibreOffice Calc","version":"1.0","os":"LINUX","launchCommand":"localc"},{"id":"acc5ebbf-1041-404f-b42d-575eb3f6d765","name":"GIMP","version":"1.0","os":"LINUX","launchCommand":"gimp"},{"id":"f1cbb5ca-9f6e-428a-9038-5bc058a6c2bd","name":"LibreOffice Draw","version":"1.0","os":"LINUX","launchCommand":"lodraw"},{"id":"2ae273de-d36e-4d8c-9f2a-8129d24b3841","name":"LibreOffice Writer","version":"1.0","os":"LINUX","launchCommand":"lowriter"},{"id":"654d7896-f1e5-4d6d-896f-7ad78dd448f8","name":"Calculator","version":"1.0","os":"LINUX","launchCommand":"gnome-calculator"},{"id":"4f036e79-9ff3-4499-ac80-175395d23f5a","name":"Firefox","version":"1.0","os":"LINUX","launchCommand":"firefox"},{"id":"3f95ec4c-c346-4a09-bd9c-6da0a2447981","name":"LibreOffice Impress","version":"1.0","os":"LINUX","launchCommand":"loimpress"},{"id":"5818b15c-889e-4c26-bde3-22715365f4d6","name":"Pinta","version":"1.0","os":"LINUX","launchCommand":"pinta"}]},{"id":"635c3fe8-48b1-4553-b5e5-1ce43227e5a2","name":"Artist Virtue","version":"1.0","vmTemplates":[{"id":"a3ab065d-c9a6-4abd-9a58-26d80f9e4962","name":"Drawing","os":"LINUX","templatePath":"Drawing","applications":[{"id":"acc5ebbf-1041-404f-b42d-575eb3f6d765","name":"GIMP","version":"1.0","os":"LINUX","launchCommand":"gimp"},{"id":"5818b15c-889e-4c26-bde3-22715365f4d6","name":"Pinta","version":"1.0","os":"LINUX","launchCommand":"pinta"}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system"}],"users":[{"username":"admin","authorities":["ROLE_USER","ROLE_ADMIN"]},{"username":"drawing","authorities":["ROLE_USER"]},{"username":"artist","authorities":["ROLE_USER"]}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system","awsTemplateName":"default-template","applications":[{"id":"5818b15c-889e-4c26-bde3-22715365f4d6","name":"Pinta","version":"1.0","os":"LINUX","launchCommand":"pinta"},{"id":"acc5ebbf-1041-404f-b42d-575eb3f6d765","name":"GIMP","version":"1.0","os":"LINUX","launchCommand":"gimp"}]},{"id":"714a52c1-8e07-4db0-8612-6ea22686e3ab","name":"Office Virtue","version":"1.0","vmTemplates":[{"id":"70c1e2df-d8d2-4021-a485-ff741bf1d41a","name":"LibreOffice","os":"LINUX","templatePath":"LibreOffice","applications":[{"id":"b94652f1-c7f7-4150-a273-384da423faae","name":"LibreOffice Calc","version":"1.0","os":"LINUX","launchCommand":"localc"},{"id":"f1cbb5ca-9f6e-428a-9038-5bc058a6c2bd","name":"LibreOffice Draw","version":"1.0","os":"LINUX","launchCommand":"lodraw"},{"id":"3f95ec4c-c346-4a09-bd9c-6da0a2447981","name":"LibreOffice Impress","version":"1.0","os":"LINUX","launchCommand":"loimpress"},{"id":"2ae273de-d36e-4d8c-9f2a-8129d24b3841","name":"LibreOffice Writer","version":"1.0","os":"LINUX","launchCommand":"lowriter"}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system"}],"users":[{"username":"admin","authorities":["ROLE_USER","ROLE_ADMIN"]},{"username":"presenter","authorities":["ROLE_USER"]},{"username":"office","authorities":["ROLE_USER"]},{"username":"nerd","authorities":["ROLE_USER"]}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system","awsTemplateName":"default-template","applications":[{"id":"2ae273de-d36e-4d8c-9f2a-8129d24b3841","name":"LibreOffice Writer","version":"1.0","os":"LINUX","launchCommand":"lowriter"},{"id":"b94652f1-c7f7-4150-a273-384da423faae","name":"LibreOffice Calc","version":"1.0","os":"LINUX","launchCommand":"localc"},{"id":"3f95ec4c-c346-4a09-bd9c-6da0a2447981","name":"LibreOffice Impress","version":"1.0","os":"LINUX","launchCommand":"loimpress"},{"id":"f1cbb5ca-9f6e-428a-9038-5bc058a6c2bd","name":"LibreOffice Draw","version":"1.0","os":"LINUX","launchCommand":"lodraw"}]},{"id":"ea29e90c-69bc-4131-9928-69ec4e0f3562","name":"Math Virtue","version":"1.0","vmTemplates":[{"id":"daec64bb-c5ae-4f6b-905f-046077bf7a96","name":"Math","os":"LINUX","templatePath":"Math","applications":[{"id":"654d7896-f1e5-4d6d-896f-7ad78dd448f8","name":"Calculator","version":"1.0","os":"LINUX","launchCommand":"gnome-calculator"}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system"}],"users":[{"username":"admin","authorities":["ROLE_USER","ROLE_ADMIN"]},{"username":"math","authorities":["ROLE_USER"]},{"username":"nerd","authorities":["ROLE_USER"]},{"username":"developer","authorities":["ROLE_USER"]}],"enabled":true,"lastModification":"2018-02-15T18:01:36.270+0000","lastEditor":"system","awsTemplateName":"default-template","applications":[{"id":"654d7896-f1e5-4d6d-896f-7ad78dd448f8","name":"Calculator","version":"1.0","os":"LINUX","launchCommand":"gnome-calculator"}]}]
+[{
+    "id": "9e86f384-cd66-428c-9c52-65c5f185e47b",
+    "name": "Web Virtue (Both OS)",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "db4f1e3f-dfa7-4873-b10e-5d0b43947f4d",
+      "c2b6c15a-08cd-418f-80b8-c647b89192cf"
+    ],
+    "applicationIds": [
+      "d4000085-1700-484d-9e61-dc3b82a585e2",
+      "f470b10c-057b-46e7-8a53-bba0d9588916",
+      "dc40575e-2fe8-4ccc-a98e-b0a437b490da",
+      "eac12c5f-9d69-477e-a047-9e6504468d77"
+    ]
+  },
+  {
+    "id": "1d443030-a72e-44d9-8ea0-987e9d2aa484",
+    "name": "Test Virtue",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "33aabf7b-b480-40df-99ee-cd8b7c61e931"
+    ],
+    "applicationIds": [
+      "d4000085-1700-484d-9e61-dc3b82a585e2",
+      "f470b10c-057b-46e7-8a53-bba0d9588916",
+      "584e4773-af4b-4af7-b2f4-2a2494fcf78c",
+      "2f54e4cd-a055-44d6-a47a-8966068da04e",
+      "441cc0ed-503f-4f4b-b408-df9e10a625ba",
+      "4ae7e9fa-50bd-4fff-879b-c3aa2d8e04e8",
+      "4bf5572b-38b4-422d-9cb0-e5cfedae2f84",
+      "f66fde16-50ea-4900-acee-5e597998b61e",
+      "d2566fb0-132c-4c8d-8694-056ab8207bfa"
+    ]
+  },
+  {
+    "id": "c4953af8-39cc-4254-92d0-3e9ed4248061",
+    "name": "Windows Virtue",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "c2b6c15a-08cd-418f-80b8-c647b89192cf"
+    ],
+    "applicationIds": [
+      "dc40575e-2fe8-4ccc-a98e-b0a437b490da",
+      "eac12c5f-9d69-477e-a047-9e6504468d77"
+    ]
+  },
+  {
+    "id": "62d3ed51-a74e-4705-8dcc-507278b0d41d",
+    "name": "Office Virtue",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "5c94c566-214a-4eec-9626-9dc2a48d167c"
+    ],
+    "applicationIds": [
+      "584e4773-af4b-4af7-b2f4-2a2494fcf78c",
+      "2f54e4cd-a055-44d6-a47a-8966068da04e",
+      "441cc0ed-503f-4f4b-b408-df9e10a625ba",
+      "4ae7e9fa-50bd-4fff-879b-c3aa2d8e04e8"
+    ]
+  },
+  {
+    "id": "1894ac7e-d001-470d-910b-2aac3374a8ef",
+    "name": "Math Virtue",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "2b469e51-890c-4f2a-81ed-9ad67721eabd"
+    ],
+    "applicationIds": [
+      "4bf5572b-38b4-422d-9cb0-e5cfedae2f84"
+    ]
+  },
+  {
+    "id": "9dd5816c-0f2d-43bb-bea1-2059240d3654",
+    "name": "Document Editor",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "675a0bda-1755-41b4-af51-231f3819f822"
+    ],
+    "applicationIds": [
+      "01b57f32-0f35-47e9-ad5d-1890d5813d08",
+      "e7d02266-cdba-4845-a41b-9ba13c393a99",
+      "eac12c5f-9d69-477e-a047-9e6504468d77"
+    ]
+  },
+  {
+    "id": "635396aa-2e08-49c3-9d4b-78c79f5a7d84",
+    "name": "Windows Corporate Email User",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "765d6ad4-2278-4e5e-bc06-4ac00d42fced"
+    ],
+    "applicationIds": [
+      "c9049592-e94a-4579-b698-10d032e8e5cb",
+      "eac12c5f-9d69-477e-a047-9e6504468d77"
+    ]
+  },
+  {
+    "id": "2d91909a-cffc-4410-9c50-4c89e11a82e8",
+    "name": "Router Admin",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "612a1342-358b-414a-b277-ff9d6ee54689"
+    ],
+    "applicationIds": [
+      "f66fde16-50ea-4900-acee-5e597998b61e",
+      "f470b10c-057b-46e7-8a53-bba0d9588916"
+    ]
+  },
+  {
+    "id": "38ab6e31-e9e8-4832-a031-547a78a5c5d0",
+    "name": "Linux Corporate Email User",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "86cbc238-9d5b-4957-94ba-1bdcdd083763"
+    ],
+    "applicationIds": [
+      "d2566fb0-132c-4c8d-8694-056ab8207bfa",
+      "f470b10c-057b-46e7-8a53-bba0d9588916"
+    ]
+  },
+  {
+    "id": "c75f7e8a-c981-45a8-a111-0bf6e5c9dd1e",
+    "name": "Enternal Internet Consumer",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "450b44b7-757f-4d0d-90f1-5935fa5c783a"
+    ],
+    "applicationIds": [
+      "dc40575e-2fe8-4ccc-a98e-b0a437b490da",
+      "be19a242-4684-4569-aa30-9a99acd44a0f"
+    ]
+  },
+  {
+    "id": "a646d67a-09eb-4854-940e-c348cb9c09cb",
+    "name": "Windows and Linux Power User",
+    "version": "1.0",
+    "enabled": true,
+    "lastModification": "2018-04-11T18:21:03.701+0000",
+    "lastEditor": "system",
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "71be5756-866e-48ee-be88-08557a92abe2",
+      "12f827f4-e05d-4ae3-9c41-2444ad2ca46f"
+    ],
+    "applicationIds": [
+      "4add0e3c-19da-429b-ad73-4e4821a861f8",
+      "467e0dd4-85b3-47be-9a3c-700c58918da8",
+      "d4000085-1700-484d-9e61-dc3b82a585e2",
+      "f66fde16-50ea-4900-acee-5e597998b61e"
+    ]
+  }
+]

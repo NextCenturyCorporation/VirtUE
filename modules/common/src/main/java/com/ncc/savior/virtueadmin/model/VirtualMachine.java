@@ -1,11 +1,16 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class VirtualMachine {
@@ -20,14 +25,20 @@ public class VirtualMachine {
 	private String userName;
 	@Column(length = 6000)
 	private String privateKey;
+	private String privateKeyName;
 	private String ipAddress;
 	// app ID to application
 	@ManyToMany
 	private Collection<ApplicationDefinition> applications;
 
+	@Transient
+	private Collection<String> applicationIds;
+	private String internalHostname;
+	private String privateIpAddress;
+
 	public VirtualMachine(String id, String name, Collection<ApplicationDefinition> applications, VmState state, OS os,
 			String infrastructureId, String hostname, int sshPort, String userName, String privateKey,
-			String ipAddress) {
+			String privateKeyName, String ipAddress) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -40,6 +51,7 @@ public class VirtualMachine {
 		this.userName = userName;
 		this.privateKey = privateKey;
 		this.ipAddress = ipAddress;
+		this.privateKeyName = privateKeyName;
 
 	}
 
@@ -58,6 +70,7 @@ public class VirtualMachine {
 		return name;
 	}
 
+	@JsonIgnore
 	public Collection<ApplicationDefinition> getApplications() {
 		return applications;
 	}
@@ -95,7 +108,7 @@ public class VirtualMachine {
 	}
 
 	// Below setters are for jackson deserialization
-	protected void setId(String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -103,15 +116,15 @@ public class VirtualMachine {
 		this.privateKey = privateKey;
 	}
 
-	protected void setUserName(String userName) {
+	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
-	protected void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
-	protected void setApplications(Collection<ApplicationDefinition> applications) {
+	public void setApplications(Collection<ApplicationDefinition> applications) {
 		this.applications = applications;
 	}
 
@@ -119,15 +132,15 @@ public class VirtualMachine {
 		this.os = os;
 	}
 
-	protected void setHostname(String hostname) {
+	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
 
-	protected void setSshPort(int sshPort) {
+	public void setSshPort(int sshPort) {
 		this.sshPort = sshPort;
 	}
 
-	protected void setInfrastructureId(String infrastructureId) {
+	public void setInfrastructureId(String infrastructureId) {
 		this.infrastructureId = infrastructureId;
 	}
 
@@ -135,14 +148,16 @@ public class VirtualMachine {
 	public String toString() {
 		return "VirtualMachine [id=" + id + ", name=" + name + ", state=" + state + ", os=" + os + ", hostname="
 				+ hostname + ", sshPort=" + sshPort + ", infrastructureId=" + infrastructureId + ", userName="
-				+ userName + ", ipAddress=" + ipAddress + ", applications=" + applications + "]";
+				+ userName + ", privateKey=[protected], privateKeyName=" + privateKeyName + ", ipAddress=" + ipAddress
+				+ ", applications=" + applications + ", applicationIds=" + applicationIds + ", internalHostname="
+				+ internalHostname + "]";
 	}
 
 	public String getIpAddress() {
 		return ipAddress;
 	}
 
-	protected void setIpAddress(String ipAddress) {
+	public void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
 
@@ -153,5 +168,44 @@ public class VirtualMachine {
 			}
 		}
 		return null;
+	}
+
+	public String getPrivateKeyName() {
+		return privateKeyName;
+	}
+
+	public void setPrivateKeyName(String privateKeyName) {
+		this.privateKeyName = privateKeyName;
+	}
+
+	@JsonGetter
+	public Collection<String> getApplicationIds() {
+		if (applications != null) {
+			applicationIds = new ArrayList<String>();
+			for (ApplicationDefinition app : applications) {
+				applicationIds.add(app.getId());
+			}
+		}
+		return applicationIds;
+	}
+
+	protected void setApplicationIds(Collection<String> applicationIds) {
+		this.applicationIds = applicationIds;
+	}
+
+	public void setInternalHostname(String hostname) {
+		this.internalHostname = hostname;
+	}
+
+	public String getInternalHostname() {
+		return this.internalHostname;
+	}
+
+	public void setInternalIpAddress(String privateIpAddress) {
+		this.privateIpAddress = privateIpAddress;
+	}
+
+	public String getInternalIpAddress() {
+		return this.privateIpAddress;
 	}
 }

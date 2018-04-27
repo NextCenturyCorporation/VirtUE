@@ -12,9 +12,10 @@ public class DesktopVirtueApplication {
 	private int port;
 	private String userName;
 	private String privateKey;
+	private String windowsApplicationPath;
 
 	public DesktopVirtueApplication(String id, String name, String version, OS os, String hostname, int port,
-			String userName, String privateKey) {
+			String userName, String privateKey, String windowsApplicationPath) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -24,6 +25,7 @@ public class DesktopVirtueApplication {
 		this.port = port;
 		this.userName = userName;
 		this.privateKey = privateKey;
+		this.windowsApplicationPath = windowsApplicationPath;
 	}
 
 	protected DesktopVirtueApplication() {
@@ -33,7 +35,7 @@ public class DesktopVirtueApplication {
 	public DesktopVirtueApplication(ApplicationDefinition application, String hostname, int sshPort, String userName,
 			String privateKey) {
 		this(application.getId(), application.getName(), application.getVersion(), application.getOs(), hostname,
-				sshPort, userName, privateKey);
+				sshPort, userName, privateKey, application.getLaunchCommand());
 	}
 
 	public String getId() {
@@ -100,9 +102,18 @@ public class DesktopVirtueApplication {
 		this.privateKey = privateKey;
 	}
 
+	public String getWindowsApplicationPath() {
+		return windowsApplicationPath;
+	}
+
+	protected void setWindowsApplicationPath(String windowsApplicationPath) {
+		this.windowsApplicationPath = windowsApplicationPath;
+	}
+
 	@Override
 	public String toString() {
 		return "DesktopVirtueApplication [id=" + id + ", name=" + name + ", version=" + version + ", os=" + os
-				+ ", hostname=" + hostname + ", port=" + port + ", userName=" + userName + "]";
+				+ ", hostname=" + hostname + ", port=" + port + ", userName=" + userName + ", privateKey="
+				+ "[protected]" + ", windowsApplicationPath=" + windowsApplicationPath + "]";
 	}
 }

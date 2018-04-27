@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
+import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
+
+import { SensingModel } from '../models/sensing.model';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -13,7 +16,7 @@ const httpHeader = {
 
 export class DashboardService {
 
-  private jsonfile = './assets/json/sample_data.json';
+  private jsonfile = './assets/json/sensing.json';
 
   constructor( private httpClient: HttpClient ) { }
 

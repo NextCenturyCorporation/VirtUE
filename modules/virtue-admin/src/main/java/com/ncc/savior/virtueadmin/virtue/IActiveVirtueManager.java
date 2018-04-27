@@ -66,5 +66,4 @@ public interface IActiveVirtueManager {
 	VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId);
 
 	void adminDeleteVirtue(String instanceId);
-
 }

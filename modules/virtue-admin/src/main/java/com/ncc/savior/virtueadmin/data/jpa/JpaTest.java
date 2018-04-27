@@ -1,8 +1,8 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -16,10 +16,13 @@ import org.springframework.context.annotation.Bean;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Test main
+ */
 //@SpringBootApplication
 @EntityScan("com.ncc.savior.virtueadmin.model")
 public class JpaTest {
@@ -47,8 +50,9 @@ public class JpaTest {
 			boolean enabled = true;
 			Date now = new Date();
 			String systemUser = "system";
+			String loginUser = "admin";
 			VirtualMachineTemplate vmt1 = new VirtualMachineTemplate(UUID.randomUUID().toString(), "test", OS.LINUX,
-					"myTemplatePath", apps1, enabled, now, systemUser);
+					"myTemplatePath", apps1, loginUser, enabled, now, systemUser);
 			vmts1.add(vmt1);
 			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1,
 					"default-template", enabled, now, systemUser);

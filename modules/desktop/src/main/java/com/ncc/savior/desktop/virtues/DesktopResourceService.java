@@ -83,7 +83,7 @@ public class DesktopResourceService {
 			}
 		} catch (IOException | ProcessingException e) {
 
-			logger.error("error attmepting to get virtues.", e);
+			logger.error("error attempting to get virtues.", e);
 			instances = new ArrayList<DesktopVirtue>();
 		}
 		return instances;
@@ -116,13 +116,25 @@ public class DesktopResourceService {
 
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, ApplicationDefinition appDefn)
-			throws IOException {
-		WebTarget target = baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
-		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
-		logger.debug("Started app=" + returnedApp);
-		return returnedApp;
+	public DesktopVirtue startVirtue(String virtueTemplateId) throws IOException {
+		// template/{templateId}/start
+		WebTarget target = baseApi.path("template").path(virtueTemplateId).path("start");
+		DesktopVirtue startingVirtue = getClass(target, "GET", DesktopVirtue.class);
+		// logger.debug("Started app=" + returnedApp);
+		return startingVirtue;
+
 	}
+
+	// public DesktopVirtueApplication startApplicationFromTemplate(String
+	// templateId, ApplicationDefinition appDefn)
+	// throws IOException {
+	// WebTarget target =
+	// baseApi.path("template").path(templateId).path(appDefn.getId()).path("start");
+	// DesktopVirtueApplication returnedApp = getClass(target, "GET",
+	// DesktopVirtueApplication.class);
+	// logger.debug("Started app=" + returnedApp);
+	// return returnedApp;
+	// }
 
 	public static Client getIgnoreSSLClient() throws Exception {
 		SSLContext sslcontext = SSLContext.getInstance("TLS");
@@ -162,13 +174,16 @@ public class DesktopResourceService {
 		Builder builder = target.request(MediaType.APPLICATION_JSON_TYPE);
 		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
+		InputStream in = (InputStream) response.getEntity();
 		if (response.getStatus() == 200) {
-			InputStream in = (InputStream) response.getEntity();
 			T instance = jsonMapper.readValue(in, klass);
 			return instance;
 		} else {
-			logger.error("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
-			throw new RuntimeException("FIX ME!!!!!" + response.getStatus() + " : " + response.getEntity().toString());
+			String responseString = streamToString(in);
+			String error = "Error in request to " + target.toString() + " Status:" + response.getStatus()
+					+ " response: " + responseString;
+			logger.error(error);
+			throw new RuntimeException(error);
 		}
 	}
 

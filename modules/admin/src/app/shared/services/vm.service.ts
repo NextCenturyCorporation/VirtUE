@@ -6,6 +6,7 @@ import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { VirtualMachine } from '../models/vm.model';
+import { Globals } from '../globals';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -15,28 +16,30 @@ const httpHeader = {
 
 export class VirtualMachineService {
 
-  // private jsondata = 'http://localhost:8080/admin/virtualMachine/template';
-  private jsondata = './assets/json/vm_list.json';
+  private configUrl = 'admin/virtualMachine/template';
+  // private restApi = './assets/json/vm_list.json';
 
-  constructor( private httpClient: HttpClient ) {  }
+  constructor(
+    private httpClient: HttpClient,
+    private hostname: Globals
+   ) {  }
 
-  public getVmList(): Observable<Array<VirtualMachine>> {
-    return this.httpClient.get<Array<VirtualMachine>>(this.jsondata);
+  public getVmList(baseUrl: string): Observable<VirtualMachine[]> {
+    let src = baseUrl + this.configUrl;
+    return this.httpClient.get<VirtualMachine[]>(src);
   }
 
-  public getVM(id: string): Observable<any> {
-    const src = `${this.jsondata}/${id}`;
+  public getVM(baseUrl: string, id: string): Observable<any> {
+    let src = `${baseUrl + this.configUrl}/${id}`;
     return this.httpClient.get<VirtualMachine>(src);
   }
 
-  // public createVirtue(virtue: any[]): Observable<Virtue> {
-  //   return this.httpClient.post<Virtue>(this.jsondata, virtue);
-  // }
-
-  public createVirtue(vm: VirtualMachine) {
-    return this.httpClient.post( this.jsondata, vm );
-  }
 /**
+  public createVirtue(vm: VirtualMachine) {
+    let src = baseUrl + this.configUrl;
+    return this.httpClient.post(src, vm );
+  }
+
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
     return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
   }

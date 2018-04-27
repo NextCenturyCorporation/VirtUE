@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang.NotImplementedException;
+
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -81,8 +83,8 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 			for (VirtualMachine vm : vms) {
 				if (vm.getId().equals(vmId)) {
 					vm.setState(state);
-				break;
-			}
+					break;
+				}
 			}
 		}
 	}
@@ -124,5 +126,32 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void clear() {
 		virtues.clear();
+	}
+
+	@Override
+	public void updateVms(Collection<VirtualMachine> vms) {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public void deleteVirtue(VirtueInstance vi) {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public void updateVirtue(VirtueInstance virtue) {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public Optional<VirtualMachine> getXenVm(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
