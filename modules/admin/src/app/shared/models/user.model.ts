@@ -3,7 +3,7 @@ export class User {
   authorities: any[];
   virtueTemplateIds: any[];
 
-  public UserTemplate(
+  public User(
     username: string,
     authorities: any[],
     virtueTemplateIds: any[]

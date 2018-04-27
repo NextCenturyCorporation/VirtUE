@@ -33,8 +33,8 @@
         </div>
         <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
-            <!--<a class="edit" [routerLink]="['edit',virtue.id]"></a> -->
-            {{ virtue.name }}
+            <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
+
             <!-- if this virtue is enabled show this menu -->
             <span *ngIf="virtue.enabled" class="menu-options">
               <a mat-button (click)="virtueStatus(virtue.id)">Disable</a>

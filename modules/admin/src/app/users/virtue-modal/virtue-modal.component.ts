@@ -1,7 +1,8 @@
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
 import { Virtue } from '../../shared/models/virtue.model';
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
@@ -11,26 +12,28 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 @Component({
   selector: 'app-virtue-modal',
   templateUrl: './virtue-modal.component.html',
-  styleUrls: ['./virtue-modal.component.css'],
-  providers: [ BaseUrlService, UsersService, VirtuesService ]
+  providers: [ ApplicationsService, BaseUrlService, UsersService, VirtuesService ]
 })
 export class VirtueModalComponent implements OnInit {
+  @Input() virtueInput: Virtue;
 
   @ViewChild('userVirtue') userVirtueRef: ElementRef;
 
   form: FormGroup;
+
+  addVirtues = new EventEmitter();
   virtues = [];
-  userVirtues = [];
+  selVirtues = [];
+  storedVirtues = [];
 
   constructor(
+    private appService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     private usersService: UsersService,
     private virtuesService: VirtuesService,
     public dialogRef: MatDialogRef<VirtueModalComponent>,
     @Inject( MAT_DIALOG_DATA ) public data: any
-   ) {
-    console.log('data', this.data);
-  }
+   ) {  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
@@ -41,15 +44,53 @@ export class VirtueModalComponent implements OnInit {
 
   getVirtues(baseUrl: string) {
     this.virtuesService.getVirtues(baseUrl)
-      .subscribe(virtues => this.virtues = virtues);
+      .subscribe(virtues => {
+        this.virtues = virtues;
+      });
   }
 
-  // onAddVirtues() {
-  //   const selVirtue = this.userVirtueRef.nativeElement.value;
-  //   // const newVirtue = new UserVirtue(selVirtue);
-  //   this.virtuesService.addUserVirtues(selVirtue);
-  //   console.log(selVirtue);
-  // }
+  selectedVirtues(id: string) {
+    if (this.storedVirtues.length > 0) {
+      for (let sel of this.storedVirtues) {
+        if (sel === id) {
+          return true;
+        }
+      }
+    } else {
+      return false;
+    }
+  }
+
+  cbVirtueList(event, id: string, index: number) {
+    if (event === true) {
+      this.selVirtues.push(id);
+    } else {
+      this.removeVm(id, index);
+    }
+  }
+
+  removeVm(id: string, index: number) {
+    this.selVirtues.splice(this.selVirtues.indexOf(id), 1);
+  }
+
+  clearList() {
+    this.selVirtues = [];
+    this.storedVirtues = [];
+  }
+
+  onAddVirtues(): void {
+    // if (this.storedVirtues.length > 0) {
+    //   this.selVmsList = this.storedVirtues;
+    // }
+    this.addVirtues.emit(this.selVirtues);
+    this.clearList();
+    this.dialogRef.close();
+  }
+
+  cancelModal() {
+    this.clearList();
+    this.dialogRef.close();
+  }
 
   save() {
     this.dialogRef.close();

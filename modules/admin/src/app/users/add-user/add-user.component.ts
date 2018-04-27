@@ -1,3 +1,5 @@
+import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material';
@@ -6,27 +8,24 @@ import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 
+import { User } from '../../shared/models/user.model';
+
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
-export class AdUsers {
-  constructor(public name: string, public username: string) { }
-}
 
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
   styleUrls: ['./add-user.component.css'],
-  providers: [BaseUrlService, UsersService]
+  providers: [BaseUrlService, UsersService, VirtuesService]
 })
 
 export class AddUserComponent implements OnInit {
 
-  screenWidth: any;
-  leftPosition: any;
   submitBtn: any;
-  dialogWidth: any;
   fullImagePath: string;
   awsServer: any;
 
@@ -34,32 +33,124 @@ export class AddUserComponent implements OnInit {
   filteredUsers: Observable<any[]>;
   activeDirUsers = [];
 
+  storedVirtues = [];
+  selVirtues = [];
+  virtues = [];
+
   constructor(
     public dialog: MatDialog,
     private baseUrlService: BaseUrlService,
-    private usersService: UsersService
+    private location: Location,
+    private usersService: UsersService,
+    private virtuesService: VirtuesService
   ) {
     this.adUserCtrl = new FormControl();
-    this.filteredUsers = this.adUserCtrl.valueChanges
-      .pipe(
-        startWith(''),
-        map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice())
-        // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
-      );
+    // this.filteredUsers = this.adUserCtrl.valueChanges
+    //   .pipe(
+    //     startWith(''),
+    //     map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice())
+    //     // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
+    //   );
+  }
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log(req);
+    return next.handle(req);
   }
 
   ngOnInit() {
-    this.baseUrlService.getBaseUrl().subscribe(_url => {
-      this.awsServer = _url;
+    this.baseUrlService.getBaseUrl().subscribe(data => {
+      let url = data[0].aws_server;
+      this.getBaseUrl(url);
+      this.virtuesService.getVirtues(url);
     });
+  }
 
-    console.log(this.awsServer);
+  getBaseUrl( url: string ) {
+    this.awsServer = url;
+  }
+
+  addUser( username: string, roleUser: boolean, roleAdmin: boolean ) {
+    username = username.trim().replace(' ', '').toLowerCase();
+    let authorities = [];
+    let virtueTemplateIds = [];
+
+    if (roleUser) {
+      authorities.push('ROLE_USER');
+    }
+    if (roleAdmin) {
+      authorities.push('ROLE_ADMIN');
+    }
+    for (let item of this.selVirtues) {
+      virtueTemplateIds.push(item);
+    }
+
+    let body = {
+      "username": username,
+      "authorities": authorities,
+      "virtueTemplateIds": virtueTemplateIds
+    };
+
+    if (!body.username) { return; }
+
+    let baseUrl = this.awsServer;
+    this.usersService.createUser(baseUrl, JSON.stringify(body)).subscribe(
+      data => {
+        console.log('success!');
+        // console.log(data.virtueTemplateIds);
+      },
+      error => {
+        console.error("Error!");
+      }
+    );
+
+  }
+
+  getVirtues(baseUrl: string) {
+    let selectedVirtue = this.storedVirtues;
+    this.virtuesService.getVirtues(baseUrl)
+    .subscribe(data => {
+      if (this.selVirtues.length < 1) {
+        for (let virtue of data) {
+          for (let sel of selectedVirtue) {
+            if (sel === virtue.id) {
+              this.selVirtues = data;
+              break;
+            }
+          }
+        }
+      } else {
+        this.getUpdatedVirtueList(baseUrl);
+      }
+    });
+  }
+
+  getUpdatedVirtueList(baseUrl: string) {
+    this.virtues = [];
+    this.virtuesService.getVirtues(baseUrl)
+    .subscribe(data => {
+      for (let sel of this.selVirtues) {
+        for (let virtue of data) {
+          if (sel === virtue.id) {
+            this.virtues.push(virtue);
+            break;
+          }
+        }
+      }
+    });
+  }
+
+  removeVirtue(id: string, index: number): void {
+    this.virtues = this.virtues.filter(data => {
+      return data.id !== id;
+    });
+    this.storedVirtues.splice(index, 1);
   }
 
   activateModal(id, mode): void {
 
-    this.dialogWidth = 600;
-
+    let dialogWidth = 800;
+    let dialogHeight = 600;
     this.fullImagePath = './assets/images/app-icon-white.png';
 
     if (mode === 'add') {
@@ -69,7 +160,8 @@ export class AddUserComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open(VirtueModalComponent, {
-      width: this.dialogWidth + 'px',
+      height: dialogHeight + 'px',
+      width: dialogWidth + 'px',
       data: {
         id: id,
         dialogMode: mode,
@@ -79,29 +171,21 @@ export class AddUserComponent implements OnInit {
       panelClass: 'virtue-modal-overlay'
     });
 
-    this.screenWidth = (window.screen.width);
-    this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
+    let screenWidth = (window.screen.width);
+    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
-    // console.log(this.screenWidth);
-    // console.log(this.leftPosition);
-
-    dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
-
+    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
+    const virtueList = dialogRef.componentInstance.addVirtues.subscribe((data) => {
+      this.selVirtues = data);
 
-  }
-  // Gets AD user for autocomplete field
-  getUsers(baseUrl: string) {
-    this.usersService.getUsers(baseUrl).subscribe(
-      adUsers => {
-        this.activeDirUsers = adUsers;
+      if (this.storedVirtues.length > 0) {
+        this.storedVirtues = [];
       }
-    );
-  }
-  // filters the AD list as you type
-  filterUsers(username: string) {
-    return this.activeDirUsers.filter(adUser =>
-      adUser.username.toLowerCase().indexOf(username.toLowerCase()) === 0);
+      this.storedVirtues = this.selVirtues;
+
+      this.getVirtues(this.awsServer);
+    });
   }
 
 }

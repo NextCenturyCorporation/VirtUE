@@ -25,20 +25,14 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 export class EditUserComponent implements OnInit {
   @Input() user: User;
 
-  awsServer: any;
-  saviorUserId: {id: string};
-  selectedUser: string;
-  screenWidth: any;
-  leftPosition: any;
+  baseUrl: string;
+  userToEdit: {id: string};
   submitBtn: any;
-  dialogWidth: any;
   fullImagePath: string;
 
   adUserCtrl: FormControl;
-  filteredUsers: Observable<any[]>;
-  activeDirUsers = [];
-  appUser = [];
-  selectedApps = [];
+  userData = [];
+  selectedVirtues = [];
 
   constructor(
     private router: ActivatedRoute,
@@ -46,57 +40,39 @@ export class EditUserComponent implements OnInit {
     private usersService: UsersService,
     private virtuesService: VirtuesService,
     public dialog: MatDialog
-  ) {
-    this.adUserCtrl = new FormControl();
-    this.filteredUsers = this.adUserCtrl.valueChanges
-      .pipe(
-        startWith(''),
-        map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice() )
-    );
-  }
+  ) {}
 
   ngOnInit() {
-    this.baseUrlService.getBaseUrl().subscribe(_url => {
-      this.awsServer = _url[0].aws_server;
-    });
-
-    console.log(this.awsServer);
-
-    this.saviorUserId = {
+    this.userToEdit = {
       id: this.router.snapshot.params['id']
     };
-    this.getThisUser(this.awsServer);
-  }
 
-  getThisUser(baseUrl: string) {
-
-    this.usersService.getUsers(baseUrl).subscribe(
-    adUsers => {
-      this.activeDirUsers = adUsers;
+    this.baseUrlService.getBaseUrl().subscribe(data => {
+      let url = data[0].aws_server;
+      this.getBaseUrl(url);
+      this.getUserToEdit(url, this.userToEdit.id);
     });
-    // const id = this.saviorUserId.id;
-    // this.usersService.getUser(id)
-    // .subscribe( data => {
-    //   for (let user of data) {
-    //     if (user.id === id) {
-    //       this.appUser = user;
-    //       this.selectedUser = user.name;
-    //       this.selectedApps = user.virtues;
-    //       break;
-    //     }
-    //   }
-    // });
+
   }
 
-  filterUsers(name: string) {
-    return this.activeDirUsers.filter(adUser =>
-      adUser.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
+  getBaseUrl( url: string ) {
+    this.baseUrl = url;
+  }
+
+  getUserToEdit(baseUrl: string, username: string) {
+    this.usersService.getUser(baseUrl, username).subscribe(data => {
+      this.userData = data;
+    });
+  }
+
+  displayUser(userData: any) {
+    this.userData = userData[0];
   }
 
   activateModal(id, mode): void {
-
-    this.dialogWidth = 600;
-    this.fullImagePath = './assets/images/app-icon-white.png';
+    let dialogHeight = 600;
+    let dialogWidth = 800;
+    let fullImagePath = './assets/images/app-icon-white.png';
 
     if (mode === 'add') {
       this.submitBtn = 'Add Virtues';
@@ -105,7 +81,8 @@ export class EditUserComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open( VirtueModalComponent, {
-      width: this.dialogWidth + 'px',
+      height: dialogHeight + 'px',
+      width: dialogWidth + 'px',
       data: {
         id: id,
         dialogMode: mode,
@@ -115,10 +92,10 @@ export class EditUserComponent implements OnInit {
       panelClass: 'virtue-modal-overlay'
     });
 
-    this.screenWidth = (window.screen.width);
-    this.leftPosition = ((window.screen.width) - this.dialogWidth) / 2;
+    let screenWidth = (window.screen.width);
+    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
-    dialogRef.updatePosition({ top: '5%', left: this.leftPosition + 'px' });
+    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
   }
 }

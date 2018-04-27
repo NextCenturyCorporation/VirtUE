@@ -6,70 +6,82 @@
     <div id="content" class="content">
       <div class="mui-container-fluid">
         <div class="mui-row">
-
           <div class="mui-col-md-9">
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input type="text" placeholder="" aria-label="Number" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" >
-                  <mat-autocomplete #auto="matAutocomplete" id="ad-autocomplete" panel="">
-                    <mat-option *ngFor="let adUser of filteredUsers | async" [value]="adUser.name">
-                      {{ adUser.name }}
-                    </mat-option>
-                  </mat-autocomplete>
+                  <input type="text" #userName placeholder="User Name" aria-label="Number" matInput>
                 </mat-form-field>
               </div>
+              <div class="mui-col-md-12 form-item">
+                <div class="mui-col-md-6 table-data">
+                  <label>Select Role(s)</label><br />
+                  <mat-checkbox #roleUser value="ROLE_USER"> User</mat-checkbox> <br />
+                  <mat-checkbox #roleAdmin value="ROLE_ADMIN"> Administrator</mat-checkbox>
+                </div>
               </div>
-              <div class="mui-row">
-                <div class="titlebar margin-top-20">
-                  <br />
-                  <h3 class="title">Virtues</h3>
-                  <button mat-button (click)="activateModal(0,'add')">Add Virtue</button>
+            </div>
+            <hr />
+            <div class="mui-row">
+              <div class="titlebar margin-top-20">
+                <br />
+                <h3 class="titlebar-title">Virtues</h3>
+                <button class="titlebar-button" mat-button (click)="activateModal(0,'add')">Add Virtue</button>
+              </div>
+            </div>
+
+            <div class="mui-row">
+              <div class="table-container">
+                <div class="mui-row table-header-group">
+                  <div class="table-header mui-col-md-4">
+                    <div class="text-align-left margin-left-20 margin-right-0">
+                      <span>Virtue Name</span>
+                    </div>
+                  </div>
+                  <div class="table-header mui-col-md-8">
+                    Applications
+                  </div>
                 </div>
               </div>
 
               <!-- if there are no virtues, show this message -->
               <div class="mui-row">
-                <div class="mui-col-md-12 padding-left-0">
-                  <p class="virtue-message">
+                <div class="mui-col-md-12">
+                  <p class="virtue-message" *ngIf="selVirtues.length < 1">
                     No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
                   </p>
                 </div>
               </div>
-              <div class="mui-row">
-                <div class="table-container">
-                  <div class="mui-row table-header-group">
-                    <div class="table-header mui-col-md-4">
-                      <div class="text-align-left margin-left-20 margin-right-0 padding-left-10">Virtue Name</div>
+            </div>
+
+            <div class="mui-row" *ngIf="selVirtues.length > 0">
+              <div class="table-container">
+                <div class="mui-row table-row" *ngFor="let virtue of selVirtues">
+                  <div class="table-data mui-col-md-4">
+                    <div class="virtue-name">
+                      <span class="virtue-color margin-right-10"></span>
+                      <a class="edit" (click)="activateModal(1,'edit')">{{ virtue }}</a>
+                      <!-- This should show if hovered over -->
+                      <span class="active virtue-options"><a href="#">Remove</a></span>
                     </div>
-                    <div class="table-header mui-col-md-8">Applications</div>
                   </div>
-                  <div class="mui-row table-row">
-                    <div class="table-data mui-col-md-4">
-                      <div class="virtue-color margin-right-10"></div>
-                      <div class="virtue-name">
-                        <a class="edit" (click)="activateModal(1,'edit')">[ Virtue Name ]</a>
-                        <!-- This should show if hovered over -->
-                        <span class="active virtue-options"><a href="#">Remove</a></span>
-                      </div>
-                    </div>
-                    <div class="table-data mui-col-md-8">[App 1, App 2, App 3, Apps N...]</div>
-                    <div class="clearfix"></div>
-                  </div>
-                </div>
-                <div class="paging">
-                  <div class="page-number mui-col-md-4">Page # of #</div>
-                  <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
-                  <div class="page-item-total mui-col-md-4"># User Accounts</div>
+                  <div class="table-data mui-col-md-8">[App 1, App 2, App 3, Apps N...]</div>
                   <div class="clearfix"></div>
                 </div>
               </div>
+              <div class="paging">
+                <div class="page-number mui-col-md-4">Page # of #</div>
+                <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
+                <div class="page-item-total mui-col-md-4"># User Accounts</div>
+                <div class="clearfix"></div>
+              </div>
+            </div>
               <div class="mui-row">
                 <hr />
                 <div class="mui-col-md-4">&nbsp;</div>
                 <div class="mui-col-md-4 form-item text-align-center">
                   <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Add Another User</span>
-                  <button class="button-submit" type="submit" (click)="addNewUser()" >Add User</button>
+                  <button class="button-submit" type="submit" (click)="addUser(userName.value, roleUser.checked, roleAdmin.checked); userName.value=''" >Add User</button>
                   <button class="button-cancel" type="cancel">Cancel</button>
                 </div>
                 <div class="mui-col-md-4"></div>

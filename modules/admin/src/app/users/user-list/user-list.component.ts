@@ -19,6 +19,7 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 export class UserListComponent implements OnInit {
   @Input() user: User;
 
+  awsServer: string;
   saviorUsers: string;
   users = [];
   virtues = [];
@@ -35,16 +36,27 @@ export class UserListComponent implements OnInit {
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe( _url => {
       let awsServer = _url[0].aws_server;
+      this.getBaseUrl(awsServer);
       this.getUsers(awsServer);
       this.getVirtues(awsServer);
     });
 
   }
 
+  getBaseUrl( url: string ) {
+    this.awsServer = url;
+  }
+
   getUsers( baseUrl: string ): void {
     this.usersService.getUsers(baseUrl).subscribe(data => {
       this.users = data;
     });
+  }
+
+  deleteUser(username: string) {
+    // console.log(username);
+    this.usersService.deleteUser(this.awsServer, username);
+    this.getUsers(this.awsServer);
   }
 
   getVirtues(baseUrl: string) {

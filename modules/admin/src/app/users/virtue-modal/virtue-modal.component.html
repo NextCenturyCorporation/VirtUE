@@ -2,34 +2,36 @@
 <h2 mat-dialog-title>{{data.dialogMode}} Virtues</h2>
 <div mat-dialog-content>
   <div class="mui-container-fluid mui-col-md-12">
-    <div class="mui-row">
-      <div class="mui-col-md-4 padding-left-0"><label>Select a Virtue</label></div>
-      <div class="mui-col-md-6 padding-right-0">
-        <mat-form-field>
-          <mat-select #userVirtue name="virtues" panelClass="select-virtue-class">
-            <mat-option *ngFor="let option of virtues" [value]="option">{{ option.name }}</mat-option>
-          </mat-select>
-        </mat-form-field>
+    <div class="mui-row table-header-group">
+      <div class="table-header mui-col-md-2 text-align-left">
+        <mat-checkbox
+        name="selectAll"
+        (change)="selectAll($event.checked)"
+        [disabled]="disabled"></mat-checkbox>
       </div>
-      <div class="mui-col-md-2">
-      <button class="button" (click)="onAddVirtues()">Add</button></div>
+      <div class="table-header mui-col-md-3">Virtue</div>
+      <div class="table-header mui-col-md-7">Applications</div>
     </div>
-    <div class="mui-row">
-      <p><label>Virtues:</label></p>
-      <ul *ngIf="userVirtues.length > 0">
-        <li *ngFor="let uv of userVirtues">{{ uv }}</li>
-      </ul>
-      <!-- <div id="virtue-1" class="mui-col-md-6" style="background-color: #F6511D">
-        <span class="icon"><img [src]="data.appIcon" /></span>
-        <span class="virtue-name">Virtue 1</span>
-        <button class="fa fa-times fa-lg remove-virtue"></button>
-      </div> -->
+    <div class="mui-row" *ngFor="let virtue of virtues">
+      <div class="mui-col-md-2">
+        <mat-checkbox
+          name="cbVirtue"
+          [checked]="selectedVirtues(virtue.id)"
+          (change)="cbVirtueList($event.checked, virtue.id, i)"
+          value="{{virtue.id}}" ></mat-checkbox>
+      </div>
+      <div class="table-data mui-col-md-3">{{ virtue.name }}</div>
+      <div class="table-data mui-col-md-7">
+        <ul>
+          <li *ngFor="let app of virtue.applicationIds">{{ app }}</li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button type="submit" (click)="save();">
+  <button mat-button type="submit" (click)="onAddVirtues();">
   {{data.dialogButton}}
   </button>
   <button mat-button type="button" mat-dialog-close>

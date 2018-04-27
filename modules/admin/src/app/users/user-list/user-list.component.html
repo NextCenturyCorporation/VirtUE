@@ -29,19 +29,14 @@
           <div class="table-header mui-col-md-7">Virtues</div>
         </div>
 
-        <div class="mui-row table-row" *ngFor="let su of users ">
+        <div class="mui-row table-row" *ngFor="let su of users" appActiveClass>
           <div class="table-data mui-col-md-2">
-            <!-- <a class="edit" (click)="onSelected(su.id)" [routerLink]="['edit',su.id]"></a> -->
-            {{ su.username }}
-            <!-- if this user is enabled show this menu
-            <span class="active account-options">
-              <a href="#">Duplicate</a> | <a [routerLink]="['edit',su.id]">Disable</a>
-            </span> -->
+            <a class="edit" [routerLink]="['edit',su.username]">{{ su.username }}</a>
 
-            <!-- if this user is disabled show this menu
-            <span class="active account-options">
-              <a href="#">Enable</a> | <a class="edit" (click)="openDialog(su.id,'delete','user account')">Delete</a>
-            </span>-->
+            <!-- if this user is enabled show this menu -->
+            <span class="account-options">
+              <a href="#">Duplicate</a> | <a class="edit" (click)="deleteUser(su.username)">Delete</a>
+            </span>
           </div>
           <div class="table-data mui-col-md-3">{{ su.authorities }}
           </div>

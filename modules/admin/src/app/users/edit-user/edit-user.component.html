@@ -8,16 +8,11 @@
         <div class="mui-row">
           <div class="mui-col-md-9">
             <div class="mui-row">
-              <div class="mui-col-md-12 form-item">{{ appUser.name }}
+              <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input type="text" placeholder="" matInput [formControl]="adUserCtrl" [matAutocomplete]="auto" />
-                  <mat-autocomplete mat-selected-item="appUser.name" #auto="matAutocomplete" id="ad-autocomplete" panel="">
-                    <mat-option *ngFor="let adUser of activeDirUsers" [value]="adUser.name">
-                      {{ adUser.name }}
-                    </mat-option>
-                  </mat-autocomplete>
+                  <input matInput type="text" placeholder="" [(value)]="userData.username" />
                 </mat-form-field>
-                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ saviorUserId.id }}</span>
+                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ userToEdit.id }}</span>
                 </div>
               </div>
 
