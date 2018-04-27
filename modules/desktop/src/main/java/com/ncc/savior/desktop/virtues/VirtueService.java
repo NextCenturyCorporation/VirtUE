@@ -13,6 +13,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
@@ -40,9 +41,20 @@ public class VirtueService {
 	private static final Logger logger = LoggerFactory.getLogger(VirtueService.class);
 	private XpraConnectionManager connectionManager;
 	private DesktopResourceService desktopResourceService;
+	public static ArrayList<VirtueState> startableVirtueStates;
+	public static ArrayList<VirtueState> stopableVirtueStates;
 	private Map<String, List<ApplicationDefinition>> pendingApps;
 	private Map<String, RgbColor> colors;
 	private IRdpClient rdpClient;
+
+	static {
+		startableVirtueStates = new ArrayList<VirtueState>();
+		stopableVirtueStates = new ArrayList<VirtueState>();
+		startableVirtueStates.add(VirtueState.STOPPED);
+		// startableVirtueStates.add(VirtueState.STOPPING);
+		stopableVirtueStates.add(VirtueState.LAUNCHING);
+		stopableVirtueStates.add(VirtueState.RUNNING);
+	}
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
 			IRdpClient rdpClient) {
@@ -163,7 +175,7 @@ public class VirtueService {
 		String virtueId = virtue.getId();
 		DesktopVirtueApplication app;
 		if (virtueId == null) {
-			virtue = desktopResourceService.startVirtue(virtue.getTemplateId());
+			virtue = desktopResourceService.createVirtue(virtue.getTemplateId());
 			addPendingAppStart(virtue.getId(), appDefn, color);
 		} else {
 			if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
@@ -185,5 +197,17 @@ public class VirtueService {
 			colors.put(virtueId, color);
 		}
 		apps.add(appDefn);
+	}
+
+	public void startVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
+		if (startableVirtueStates.contains(virtue.getVirtueState())) {
+			desktopResourceService.startVirtue(virtue.getId());
+		}
+	}
+
+	public void stopVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
+		if (stopableVirtueStates.contains(virtue.getVirtueState())) {
+			desktopResourceService.stopVirtue(virtue.getId());
+		}
 	}
 }

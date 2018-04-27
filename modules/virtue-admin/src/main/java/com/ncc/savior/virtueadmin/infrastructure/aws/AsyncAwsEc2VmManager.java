@@ -149,9 +149,13 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		if (vmFuture == null) {
 			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
-		ec2Wrapper.startVirtualMachines(vms);
-		notifyOnUpdateVms(vms);
-		addVmsToStartingPipeline(vms, vmFuture);
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			ec2Wrapper.startVirtualMachines(vms);
+			notifyOnUpdateVms(vms);
+			addVmsToStartingPipeline(vms, vmFuture);
+		}
 		return vms;
 	}
 
@@ -176,9 +180,13 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		if (vmFuture == null) {
 			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
-		ec2Wrapper.stopVirtualMachines(vms);
-		notifyOnUpdateVms(vms);
-		addVmsToStoppingPipeline(vms, vmFuture);
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			ec2Wrapper.stopVirtualMachines(vms);
+			notifyOnUpdateVms(vms);
+			addVmsToStoppingPipeline(vms, vmFuture);
+		}
 		return vms;
 	}
 

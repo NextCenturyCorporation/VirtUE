@@ -210,7 +210,15 @@ public class XenGuestManager {
 		return ipAddress;
 	}
 
-	private String createGuestVm(Session session, String name, String role) throws JSchException, IOException {
+	private void createGuestVm(Session session, String name, String role) throws JSchException, IOException {
+		String command = "cd ./app-domains; sudo ./create.sh " + name;
+		if (JavaUtil.isNotEmpty(role)) {
+			command += " " + role;
+		}
+		SshUtil.sendCommandFromSession(session, command);
+	}
+
+	private String createGuestVm2(Session session, String name, String role) throws JSchException, IOException {
 		CommandHandler ch = getCommandHandlerFromSession(session);
 		String finishString = "finished with " + name;
 		logger.debug("Sending commands to create VM.");
@@ -349,14 +357,72 @@ public class XenGuestManager {
 
 	public void startGuests(Collection<VirtualMachine> linuxVms,
 			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
-		// TODO Auto-generated method stub
+		Session session = null;
+		try {
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
+			for (VirtualMachine vm : linuxVms) {
+				createGuestVm(session, vm.getName(), null);
+			}
+			addToStartPipeline(linuxVms, linuxFuture);
+		} catch (JSchException | IOException e) {
+			linuxFuture.completeExceptionally(e);
+		} finally {
+			SshUtil.disconnectLogErrors(session);
+		}
+	}
 
+	private void addToStartPipeline(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : linuxVms) {
+			CompletableFuture<VirtualMachine> cf = null;
+			// = serviceProvider.getAwsRenamingService().startFutures(vm, v);
+			//
+			logger.error("NEED TO FIGURE OUT STARTING PIPELINE");
+			// cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+			cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.LAUNCHING);
+			cf = serviceProvider.getNetworkSettingService().chainFutures(cf, xenVm);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
+		}
+		fc.combineFutures(linuxFuture);
 	}
 
 	public void stopGuests(Collection<VirtualMachine> linuxVms,
 			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
-		// TODO Auto-generated method stub
+		Session session = null;
+		try {
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
+			for (VirtualMachine vm : linuxVms) {
+				SshUtil.sendCommandFromSession(session, "sudo xl shutdown " + vm.getName());
+			}
+			addToStopPipeline(linuxVms, linuxFuture);
+		} catch (JSchException | IOException e) {
+			linuxFuture.completeExceptionally(e);
+		} finally {
+			SshUtil.disconnectLogErrors(session);
+		}
+	}
 
+	private void addToStopPipeline(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : linuxVms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+			// cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPING);
+			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			logger.error("NEED TO FIGURE OUT STOP SERVICES");
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.STOPPED);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
+		}
+		fc.combineFutures(linuxFuture);
 	}
 
 	public void deleteGuests(Collection<VirtualMachine> linuxVms,

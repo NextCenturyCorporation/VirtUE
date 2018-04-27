@@ -147,6 +147,40 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	}
 
 	@Override
+	public VirtueInstance startVirtue(VirtueUser user, String virtueId) {
+		Optional<VirtueInstance> v = virtueDao.getVirtueInstance(virtueId);
+		if (v.isPresent()) {
+			VirtueInstance virtue = v.get();
+			if (virtue.getUsername().equals(user.getUsername())) {
+				virtue = cloudManager.startVirtue(virtue);
+				return virtue;
+			} else {
+				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+						"User=" + user.getUsername() + " is not authorized to start virtueId=" + virtueId);
+			}
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+		}
+	}
+
+	@Override
+	public VirtueInstance stopVirtue(VirtueUser user, String virtueId) {
+		Optional<VirtueInstance> v = virtueDao.getVirtueInstance(virtueId);
+		if (v.isPresent()) {
+			VirtueInstance virtue = v.get();
+			if (virtue.getUsername().equals(user.getUsername())) {
+				virtue = cloudManager.stopVirtue(virtue);
+				return virtue;
+			} else {
+				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+						"User=" + user.getUsername() + " is not authorized to stop virtueId=" + virtueId);
+			}
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+		}
+	}
+
+	@Override
 	public void updateElements(Collection<VirtualMachine> vms) {
 		virtueDao.updateVms(vms);
 

@@ -26,18 +26,21 @@ public class TestReachabilityCompletableFuture
 	}
 
 	@Override
-	protected void onExecute(BaseCompletableFutureService<VirtualMachine, VirtualMachine, Boolean>.Wrapper wrapper) {
-		testReachability(wrapper);
+	protected void onExecute(String id,
+			BaseCompletableFutureService<VirtualMachine, VirtualMachine, Boolean>.Wrapper wrapper) {
+		testReachability(id, wrapper);
 	}
 
 	/**
 	 * Tests the reachability of a VM and calls success if reachable is desired
 	 * value.
 	 * 
+	 * @param id
+	 * 
 	 * @param wrapper
 	 */
 	protected void testReachability(
-			BaseCompletableFutureService<VirtualMachine, VirtualMachine, Boolean>.Wrapper wrapper) {
+			String id, BaseCompletableFutureService<VirtualMachine, VirtualMachine, Boolean>.Wrapper wrapper) {
 		VirtualMachine vm = wrapper.param;
 		Boolean successOnReachable = wrapper.extra;
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
@@ -47,9 +50,9 @@ public class TestReachabilityCompletableFuture
 					+ successOnReachable);
 		}
 		if (reachable && successOnReachable) {
-			onSuccess(vm.getId(), wrapper.param, wrapper.future);
+			onSuccess(id, wrapper.param, wrapper.future);
 		} else if (!reachable && !successOnReachable) {
-			onSuccess(vm.getId(), wrapper.param, wrapper.future);
+			onSuccess(id, wrapper.param, wrapper.future);
 		}
 	}
 

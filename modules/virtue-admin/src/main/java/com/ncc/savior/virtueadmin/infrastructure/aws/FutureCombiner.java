@@ -50,7 +50,9 @@ public class FutureCombiner<T> {
 			});
 		}
 
-		current.thenAccept((Void) -> future.complete(results));
+		current.thenAccept((Void) -> {
+			future.complete(results);
+		});
 		return future;
 	}
 

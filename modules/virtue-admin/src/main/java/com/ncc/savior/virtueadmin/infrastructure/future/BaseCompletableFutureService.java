@@ -51,6 +51,12 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 				offer(t, extra, cf);
 			}
 		});
+
+		// TODO handle errors better
+		priorCf.exceptionally((ex) -> {
+			cf.completeExceptionally(ex);
+			return null;
+		});
 		return cf;
 	}
 

@@ -15,6 +15,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -142,9 +143,10 @@ public class SshUtil {
 			// }
 			return true;
 		} catch (JSchException e) {
-			if (e.getMessage().contains("Auth fail")) {
-				throw new SaviorException(SaviorException.CONFIGURATION_ERROR, "Auth fail trying to login to vm=" + vm);
-			}
+			// if (e.getMessage().contains("Auth fail")) {
+			// throw new SaviorException(SaviorException.CONFIGURATION_ERROR, "Auth fail
+			// trying to login to vm=" + vm);
+			// }
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
 			return false;
 		} catch (Throwable t) {
@@ -220,6 +222,27 @@ public class SshUtil {
 			}
 		}
 
+	}
+
+	public static void disconnectLogErrors(Session session, Channel channel) {
+		try {
+			if (channel != null && channel.isConnected()) {
+				channel.disconnect();
+			}
+		} catch (Throwable t) {
+			logger.warn("Error attempting to disconnect SSH channel.", t);
+		}
+		disconnectLogErrors(session);
+	}
+
+	public static void disconnectLogErrors(Session session) {
+		try {
+			if (session != null && session.isConnected()) {
+				session.disconnect();
+			}
+		} catch (Throwable t) {
+			logger.warn("Error attempting to disconnect SSH session.", t);
+		}
 	}
 
 }

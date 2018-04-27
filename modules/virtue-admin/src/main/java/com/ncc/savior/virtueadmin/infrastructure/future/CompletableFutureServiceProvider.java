@@ -23,10 +23,10 @@ public class CompletableFutureServiceProvider {
 	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void> networkClearingService;
 	private AwsUpdateStatusCompletableFutureService awsUpdateStatus;
 	private ScheduledExecutorService executor;
+	private BaseCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine> networkCopyingService;
 
 	public CompletableFutureServiceProvider(VirtueAwsEc2Provider ec2Provider,
-			IUpdateListener<VirtualMachine> vmNotifier,
-			IKeyManager keyManager, boolean usePublicDns) {
+			IUpdateListener<VirtualMachine> vmNotifier, IKeyManager keyManager, boolean usePublicDns) {
 		this.executor = Executors.newScheduledThreadPool(3, new ThreadFactory() {
 			private int num = 1;
 
@@ -74,6 +74,18 @@ public class CompletableFutureServiceProvider {
 				return param;
 			}
 		};
+		this.networkCopyingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine>(
+				executor, "NetworkCopyingService") {
+
+			@Override
+			protected VirtualMachine onExecute(VirtualMachine param, VirtualMachine extra) {
+				param.setHostname(extra.getHostname());
+				param.setIpAddress(extra.getIpAddress());
+				param.setInternalIpAddress(extra.getInternalIpAddress());
+				param.setInternalHostname(extra.getInternalHostname());
+				return param;
+			}
+		};
 	}
 
 	public AwsRenamingCompletableFutureService getAwsRenamingService() {
@@ -114,5 +126,9 @@ public class CompletableFutureServiceProvider {
 
 	public ScheduledExecutorService getExecutor() {
 		return executor;
+	}
+
+	public BaseCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine> getNetworkSettingService() {
+		return networkCopyingService;
 	}
 }

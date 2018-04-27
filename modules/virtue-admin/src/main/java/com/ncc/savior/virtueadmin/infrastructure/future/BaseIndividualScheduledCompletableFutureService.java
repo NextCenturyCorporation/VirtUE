@@ -35,9 +35,10 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 	@Override
 	protected void offer(P p, X extra, CompletableFuture<R> cf) {
 		BaseGroupedScheduledCompletableFutureService<P, R, X>.Wrapper wrapper = new Wrapper(p, extra, cf);
-		Runnable command = getRunnable(wrapper);
+		String id = getId(wrapper);
+		Runnable command = getRunnable(wrapper, id);
 		ScheduledFuture<?> future = schedule(command);
-		futureMap.put(getId(wrapper), future);
+		futureMap.put(id, future);
 	}
 
 	protected abstract String getId(BaseCompletableFutureService<P, R, X>.Wrapper wrapper);
@@ -57,31 +58,37 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 	protected void onSuccess(String id, R result, CompletableFuture<R> cf) {
 		ScheduledFuture<?> future = futureMap.remove(id);
 		if (future == null) {
-			onFailure(id, null, cf);
+			super.onFailure(null, cf);
 		} else {
-			future.cancel(true);
+			future.cancel(false);
 			super.onSuccess(result, cf);
 		}
 	}
 
 	protected void onFailure(String id, P initial, Exception e, CompletableFuture<R> cf) {
-		futureMap.remove(id).cancel(true);
+		ScheduledFuture<?> future = futureMap.remove(id);
+		if (future != null) {
+			future.cancel(false);
+		}
 		super.onFailure(initial, e, cf);
 	}
 
 	protected void onFailure(String id, P initial, CompletableFuture<R> cf) {
-		futureMap.remove(id).cancel(true);
+		ScheduledFuture<?> future = futureMap.remove(id);
+		if (future != null) {
+			future.cancel(false);
+		}
 		super.onFailure(initial, cf);
 	}
 
-	protected Runnable getRunnable(BaseCompletableFutureService<P, R, X>.Wrapper wrapper) {
+	protected Runnable getRunnable(BaseCompletableFutureService<P, R, X>.Wrapper wrapper, String id) {
 		Runnable command = new Runnable() {
 			@Override
 			public void run() {
 				try {
-					onExecute(wrapper);
+					onExecute(id, wrapper);
 				} catch (SaviorException e) {
-					onFailure(getId(wrapper), wrapper.param, e, wrapper.future);
+					onFailure(id, wrapper.param, e, wrapper.future);
 				} catch (Throwable t) {
 					logger.debug("Error in pipeline component runnable.  Component=" + this.getClass().getSimpleName(),
 							t);
@@ -91,7 +98,7 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		return command;
 	}
 
-	protected abstract void onExecute(BaseCompletableFutureService<P, R, X>.Wrapper wrapper);
+	protected abstract void onExecute(String id, BaseCompletableFutureService<P, R, X>.Wrapper wrapper);
 
 	@Override
 	public void onServiceStart() {

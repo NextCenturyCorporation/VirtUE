@@ -268,23 +268,6 @@ public class XenHostManager {
 
 	}
 
-	private void addVmToProvisionPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
-		Void v = null;
-		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(xenVm, v);
-		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
-		cf = serviceProvider.getEnsureDeleteVolumeOnTermination().chainFutures(cf, v);
-		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
-		cf = serviceProvider.getAddRsa().chainFutures(cf, v);
-		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf.thenAccept((VirtualMachine vm) -> {
-			logger.debug("xen host future complete");
-			xenFuture.complete(vm);
-		});
-	}
-
 	protected void copySshKey(Session session, File privateKeyFile) {
 		ChannelSftp ch = null;
 		try {
@@ -342,18 +325,6 @@ public class XenHostManager {
 		}
 	}
 
-	private void addToDeletePipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
-		Void v = null;
-		CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(xenVm, false);
-		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf.thenAccept((vm) -> {
-			xenFuture.complete(vm);
-		});
-	}
-
 	public void startVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms,
 			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
 		// if caller doesn't provide a future, we may still want one.
@@ -382,21 +353,6 @@ public class XenHostManager {
 		xenFuture.thenRun(startGuestsRunnable);
 	}
 
-	private void addVmToStartingPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
-		Void v = null;
-		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(xenVm, v);
-		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
-		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
-		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
-		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-		cf.thenAccept((VirtualMachine vm) -> {
-			logger.debug("xen host starting future complete");
-			xenFuture.complete(vm);
-		});
-	}
-
 	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms,
 			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
 		// if caller doesn't provide a future, we may still want one.
@@ -419,6 +375,53 @@ public class XenHostManager {
 			addVmsToStoppingPipeline(xenVm, finalXenFuture);
 		};
 		linuxFuture.thenRun(stopHostRunnable);
+	}
+
+	private void addVmToProvisionPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(xenVm, v);
+		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+		cf = serviceProvider.getEnsureDeleteVolumeOnTermination().chainFutures(cf, v);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+		cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf.thenAccept((VirtualMachine vm) -> {
+			logger.debug("xen host future complete");
+			xenFuture.complete(vm);
+		}).exceptionally((ex) -> {
+			logger.error("EXCEPTIOPN", ex);
+			return null;
+		});
+	}
+
+	private void addToDeletePipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(xenVm, false);
+		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf.thenAccept((vm) -> {
+			xenFuture.complete(vm);
+		});
+	}
+
+	private void addVmToStartingPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(xenVm, v);
+		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf.thenAccept((VirtualMachine vm) -> {
+			logger.debug("xen host starting future complete");
+			xenFuture.complete(vm);
+		});
 	}
 
 	private void addVmsToStoppingPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {

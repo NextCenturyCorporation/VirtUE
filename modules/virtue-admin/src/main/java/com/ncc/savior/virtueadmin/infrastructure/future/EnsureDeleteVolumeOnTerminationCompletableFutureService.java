@@ -34,12 +34,12 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 	}
 
 	@Override
-	protected void onExecute(Wrapper wrapper) {
+	protected void onExecute(String id, Wrapper wrapper) {
 		VirtualMachine vm = wrapper.param;
 		try {
 			boolean success = ensureBlockDevisesDeletedOnTermination(vm.getInfrastructureId());
 			if (success) {
-				onSuccess(vm.getId(), vm, wrapper.future);
+				onSuccess(id, vm, wrapper.future);
 			}
 		} catch (Exception e) {
 			logger.trace("Naming in AWS failed for vm=" + vm.getId());
