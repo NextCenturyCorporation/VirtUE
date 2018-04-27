@@ -70,7 +70,6 @@ public class SshUtil {
 			logger.debug("finished command exceptionally", e);
 			throw e;
 		} finally {
-			logger.debug("finished command finally");
 			JavaUtil.closeIgnoreErrors(br, er);
 			myChannel.disconnect();
 		}
