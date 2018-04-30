@@ -39,7 +39,7 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  */
 public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private static final Logger logger = LoggerFactory.getLogger(AsyncAwsEc2VmManager.class);
-	private static final String VM_PREFIX = "VRTU-";
+	private static final String VM_PREFIX = "VRTU-W-";
 	private String serverKeyName;
 	private List<String> defaultSecurityGroups;
 	private String serverUser;

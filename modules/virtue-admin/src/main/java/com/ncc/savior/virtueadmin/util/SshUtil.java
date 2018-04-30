@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -74,6 +75,54 @@ public class SshUtil {
 			JavaUtil.closeIgnoreErrors(br, er);
 			myChannel.disconnect();
 		}
+	}
+
+	public static List<String> sendCommandFromSessionWithTimeout(Session session, String command, long waitTimeMillis)
+			throws JSchException, IOException {
+		logger.debug("sending command: " + command);
+		ChannelExec myChannel = (ChannelExec) session.openChannel("exec");
+		InputStreamReader er = null;
+		InputStreamReader reader = null;
+		ArrayList<String> lines = new ArrayList<String>();
+		try {
+			myChannel.setCommand(command);
+			// OutputStream ops = myChannel.getOutputStream();
+			// PrintStream ps = new PrintStream(ops, true);
+			myChannel.connect();
+			InputStream input = myChannel.getInputStream();
+			reader = new InputStreamReader(input);
+
+			er = new InputStreamReader(myChannel.getErrStream());
+			JavaUtil.sleepAndLogInterruption(waitTimeMillis);
+			String error = readAvailable(er);
+			String output = readAvailable(reader);
+			lines.add(output);
+			lines.add(error);
+			logger.debug("finished command successfully");
+			return lines;
+		} catch (Exception e) {
+			logger.debug("finished command exceptionally", e);
+			throw e;
+		} finally {
+			JavaUtil.closeIgnoreErrors(reader, er);
+			myChannel.disconnect();
+		}
+	}
+
+	private static String readAvailable(InputStreamReader reader) throws IOException {
+		if (reader.ready()) {
+			int size = 4096;
+			char[] cbuf = new char[size];
+			int offset = 0;
+			StringBuilder sb = new StringBuilder();
+			while (reader.ready()) {
+				int numRead = reader.read(cbuf, offset, size);
+				char[] buffer = Arrays.copyOf(cbuf, numRead);
+				sb.append(new String(buffer));
+			}
+			return sb.toString();
+		}
+		return "";
 	}
 
 	public static void waitForAllVmsReachableParallel(Collection<VirtualMachine> vms, int periodMillis) {

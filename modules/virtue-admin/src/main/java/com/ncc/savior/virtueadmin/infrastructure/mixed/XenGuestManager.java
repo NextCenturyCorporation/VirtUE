@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,7 +45,6 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
  */
 public class XenGuestManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenGuestManager.class);
-	private static final String VM_PREFIX = "VRTU-";
 	private static final String PORTS_FILE = "ports.properties";
 	private static final String SENSOR_SCRIPT = "run_sensors.sh";
 	private File keyFile;
@@ -98,67 +96,14 @@ public class XenGuestManager {
 				}
 				linuxVms.add(vm);
 				logger.debug("Starting provision of guest=" + vm);
-				String ipAddress = "0.0.0.0";
-				String domainUUID = UUID.randomUUID().toString();
-				String name = VM_PREFIX + serverUser + "-" + virtue.getUsername() + "-" + domainUUID;
-
-				// name = "VRTU-test";
-				// ipAddress = "192.168.0.54";
-				String loginUsername = "user";
-				// roles: default, email, power, god
-				String role = vmt.getSecurityTag();
-				// String loginUsername = vmt.getLoginUser();
-				createGuestVm(session, name, role);
-				ipAddress = getGuestVmIpAddress(session, name);
-				List<String> sshConfig = SshUtil.sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
-				boolean hostIsKnown = false;
-				for (String line : sshConfig) {
-					if (line.contains(ipAddress)) {
-						hostIsKnown = true;
-						break;
-					}
-				}
-				if (!hostIsKnown) {
-					String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
-					SshUtil.sendCommandFromSession(session, hostCmd);
-				}
-
-				logger.debug("Attempting to setup port forwarding. ");
-				String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
-				String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
-				setupHostname(session, loginUsername, hostname, dns, ipAddress);
-				setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
-
-				externalSensingPort += numSensingPorts;
-				catFile(session, ipAddress, loginUsername, PORTS_FILE);
-				startSensors(session, SENSOR_SCRIPT, ipAddress, loginUsername);
-
-				String dnsAddress = ""; // we don't have dns name yet.
-				vm.setName(name);
-				vm.setInfrastructureId(name);
-				vm.setUserName(loginUsername);
-				vm.setInternalHostname(hostname);
-				vm.setHostname(dnsAddress);
-				vm.setIpAddress(ipAddress);
-				int internalPort = 22;
-				String cmd = String.format(
-						"sudo iptables -t nat -A PREROUTING -p tcp -i eth0  --dport %d -j DNAT --to-destination %s:%d ;",
-						externalSshPort, ipAddress, internalPort);
-				cmd += String.format(
-						"sudo iptables -A FORWARD -p tcp -d %s --dport %d  -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
-						ipAddress, internalPort);
-				// cmd += ";sudo ip route";
-				SshUtil.sendCommandFromSession(session, cmd);
-				SshUtil.sendCommandFromSession(session, "sudo iptables -vnL -t nat\n");
-				JavaUtil.sleepAndLogInterruption(1000);
+				vm.setUserName(vmt.getLoginUser());
 				vm.setState(VmState.LAUNCHING);
-				vm.setHostname(xenVm.getHostname());
-				vm.setIpAddress(xenVm.getIpAddress());
-				vm.setInternalHostname(dns);
-				vm.setInternalIpAddress(ipAddress);
-				vm.setPrivateKeyName(xenVm.getPrivateKeyName());
-				vm.setSshPort(externalSshPort);
+				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
+						vmt.getSecurityTag(), vm, true);
+				externalSensingPort += numSensingPorts;
 				vm.setApplications(new ArrayList<ApplicationDefinition>(vmt.getApplications()));
+				vm.setPrivateKeyName(xenVm.getPrivateKeyName());
+				JavaUtil.sleepAndLogInterruption(100);
 				externalSshPort++;
 				logger.debug("finished provisioning linux guest Vm=" + vm.getName());
 			}
@@ -180,6 +125,71 @@ public class XenGuestManager {
 		}
 	}
 
+	private void createStartGuestVm(Session session, int externalSshPort, int externalSensingPort,
+			int startingInternalPort, int numSensingPorts, String role, VirtualMachine vm, boolean create)
+			throws JSchException, IOException, SftpException {
+		String ipAddress = "0.0.0.0";
+		String name = vm.getName();
+		String loginUsername = vm.getUserName();
+		if (create) {
+		createGuestVm(session, name, role);
+		}else {
+			SshUtil.sendCommandFromSession(session, "sudo xl create app-domains/" + name + "/" + name + ".cfg");
+		}
+		ipAddress = getGuestVmIpAddress(session, name);
+		updateSshKnownHosts(session, ipAddress);
+		logger.debug("Attempting to setup port forwarding. ");
+		String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
+		String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
+		setupHostname(session, loginUsername, hostname, dns, ipAddress);
+		setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
+
+		externalSensingPort += numSensingPorts;
+		catFile(session, ipAddress, loginUsername, PORTS_FILE);
+		startSensors(session, SENSOR_SCRIPT, ipAddress, loginUsername);
+		int internalPort = 22;
+		setupPortForward(session, externalSshPort, ipAddress, internalPort);
+		printIpTables(session);
+
+		vm.setInfrastructureId(name);
+		vm.setHostname(xenVm.getHostname());
+		vm.setIpAddress(xenVm.getIpAddress());
+		vm.setInternalHostname(dns);
+		vm.setInternalIpAddress(ipAddress);
+		vm.setSshPort(externalSshPort);
+	}
+
+	private void printIpTables(Session session) throws JSchException, IOException {
+		SshUtil.sendCommandFromSession(session, "sudo iptables -vnL -t nat\n");
+	}
+
+	private void setupPortForward(Session session, int externalSshPort, String ipAddress, int internalPort)
+			throws JSchException, IOException {
+		String cmd = String.format(
+				"sudo iptables -t nat -A PREROUTING -p tcp -i eth0  --dport %d -j DNAT --to-destination %s:%d ;",
+				externalSshPort, ipAddress, internalPort);
+		cmd += String.format(
+				"sudo iptables -A FORWARD -p tcp -d %s --dport %d  -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
+				ipAddress, internalPort);
+		// cmd += ";sudo ip route";
+		SshUtil.sendCommandFromSession(session, cmd);
+	}
+
+	private void updateSshKnownHosts(Session session, String ipAddress) throws JSchException, IOException {
+		List<String> sshConfig = SshUtil.sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
+		boolean hostIsKnown = false;
+		for (String line : sshConfig) {
+			if (line.contains(ipAddress)) {
+				hostIsKnown = true;
+				break;
+			}
+		}
+		if (!hostIsKnown) {
+			String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
+			SshUtil.sendCommandFromSession(session, hostCmd);
+		}
+	}
+
 	private void addVmToProvisionPipeline(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
 		Void v = null;
@@ -198,7 +208,7 @@ public class XenGuestManager {
 			throws JSchException, IOException {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \" nohup sudo ./" + sensorScript
 				+ " > sensing.log 2>&1 \"";
-		List<String> output = SshUtil.sendCommandFromSession(session, cmd);
+		SshUtil.sendCommandFromSessionWithTimeout(session, cmd, 500);
 	}
 
 	private String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {
@@ -360,10 +370,16 @@ public class XenGuestManager {
 		try {
 			session = SshUtil.getConnectedSession(xenVm, keyFile);
 			for (VirtualMachine vm : linuxVms) {
-				createGuestVm(session, vm.getName(), null);
+				int externalSshPort = 8001;
+				int externalSensingPort = 12001;
+				int startingInternalPort = 11001;
+				int numSensingPorts = 3;
+				vm.setState(VmState.LAUNCHING);
+				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
+						null, vm, false);
 			}
 			addToStartPipeline(linuxVms, linuxFuture);
-		} catch (JSchException | IOException e) {
+		} catch (JSchException | IOException | SftpException e) {
 			linuxFuture.completeExceptionally(e);
 		} finally {
 			SshUtil.disconnectLogErrors(session);

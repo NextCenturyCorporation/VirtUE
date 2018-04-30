@@ -28,7 +28,7 @@ public class CompletableFutureServiceProvider {
 
 	public CompletableFutureServiceProvider(VirtueAwsEc2Provider ec2Provider,
 			IUpdateListener<VirtualMachine> vmNotifier, IKeyManager keyManager, boolean usePublicDns) {
-		this.executor = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+		this.executor = Executors.newScheduledThreadPool(6, new ThreadFactory() {
 			private int num = 1;
 
 			@Override

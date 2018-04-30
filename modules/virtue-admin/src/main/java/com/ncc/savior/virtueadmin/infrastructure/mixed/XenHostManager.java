@@ -6,8 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.ec2.model.InstanceType;
-import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
@@ -53,6 +50,7 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
  *
  */
 public class XenHostManager {
+	private static final String VM_PREFIX = "VRTU-XG-";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private VirtualMachineTemplate xenVmTemplate;
 	private AwsEc2Wrapper ec2Wrapper;
@@ -121,7 +119,8 @@ public class XenHostManager {
 		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
 		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName, xenInstanceType,
+				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName,
+				xenInstanceType,
 				subnetId);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
@@ -140,7 +139,9 @@ public class XenHostManager {
 		// TODO use future here instead of while loop below
 		final String id = virtue.getId();
 		for (VirtualMachineTemplate vmt : linuxVmts) {
-			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), "",
+			String domainUUID = UUID.randomUUID().toString();
+			String name = VM_PREFIX + serverUser + "-" + virtue.getUsername() + "-" + domainUUID;
+			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
 					new ArrayList<ApplicationDefinition>(), VmState.CREATING, vmt.getOs(), "", "", 22, "", "", "", "");
 			virtue.getVms().add(vm);
 		}
@@ -151,7 +152,7 @@ public class XenHostManager {
 
 			@Override
 			public void run() {
-				logger.debug("Starting Guest configuration");
+				logger.debug("Starting Host configuration");
 				// wait until xen VM is ready
 				Optional<VirtualMachine> vmo = xenVmDao.getXenVm(id);
 				while (!vmo.isPresent() || !VmState.RUNNING.equals(vmo.get().getState())) {
@@ -166,59 +167,15 @@ public class XenHostManager {
 				File privateKeyFile = keyManager.getKeyFileByName(keyName);
 				try {
 					// setup Xen VM
-					int attempts = 0;
-					while (attempts < 5) {
-						try {
-							session = SshUtil.getConnectedSession(xen, privateKeyFile);
-							break;
-						} catch (JSchException e) {
-							logger.warn("Connection failed", e);
-						}
-						JavaUtil.sleepAndLogInterruption(500);
-						attempts++;
-					}
+					session = getSession(xen, session, privateKeyFile, 5);
 
 					copySshKey(session, privateKeyFile);
-
-					Channel myChannel = session.openChannel("shell");
-					OutputStream ops = myChannel.getOutputStream();
-					PrintStream ps = new PrintStream(ops, true);
-
-					myChannel.connect();
-					InputStream input = myChannel.getInputStream();
-					InputStreamReader reader = new InputStreamReader(input);
-					BufferedReader br = new BufferedReader(reader);
-					Thread t = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							String line;
-							try {
-								while ((line = br.readLine()) != null) {
-									logger.debug(line);
-									if (line.contains("finished setting up Xen " + id) && !line.contains("echo")) {
-										break;
-									}
-								}
-							} catch (IOException e) {
-								logger.error("Error reading SSH output", e);
-							}
-						}
-					});
-					// commands
-					// ps.println("sudo ./setupXen.sh");
-					// ps.println("sudo ./nfsd.sh &");
-					// TODO this sleep is here
 					waitUntilXlListIsReady(session);
-					t.start();
-					JavaUtil.sleepAndLogInterruption(20000);
-					// ps.println("\035");
-					ps.println("nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1");
-					ps.println("sudo xl list");
-					ps.println("echo finished setting up Xen " + id);
-					t.join(20000);
-					JavaUtil.sleepAndLogInterruption(1000);
-					ps.println("exit");
-					JavaUtil.sleepAndLogInterruption(1000);
+					// JavaUtil.sleepAndLogInterruption(20000);
+					SshUtil.sendCommandFromSessionWithTimeout(session,
+							"nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1", 300);
+					SshUtil.sendCommandFromSession(session, "sudo xl list");
+					logger.trace("Xen Host configure complete");
 					finalXenFuture.complete(xen);
 				} catch (JSchException e) {
 					logger.trace("Vm is not reachable yet: " + e.getMessage());
@@ -236,6 +193,21 @@ public class XenHostManager {
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				logger.debug("starting to provision guests");
 				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverUser);
+			}
+
+			private Session getSession(VirtualMachine xen, Session session, File privateKeyFile, int maxAttempts) {
+				int attempts = 0;
+				while (attempts < maxAttempts) {
+					try {
+						session = SshUtil.getConnectedSession(xen, privateKeyFile);
+						break;
+					} catch (JSchException e) {
+						logger.warn("Connection failed", e);
+					}
+					JavaUtil.sleepAndLogInterruption(500);
+					attempts++;
+				}
+				return session;
 			}
 		};
 
