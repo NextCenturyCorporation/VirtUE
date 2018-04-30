@@ -14,7 +14,11 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
+ * Service which will try to rename an AWS machine based on the name in the
+ * {@link VirtualMachine}. This service will retry until successful and then
+ * complete the future.
  * 
+ *
  */
 public class AwsRenamingCompletableFutureService
 		extends BaseIndividualScheduledCompletableFutureService<VirtualMachine, VirtualMachine, Void> {

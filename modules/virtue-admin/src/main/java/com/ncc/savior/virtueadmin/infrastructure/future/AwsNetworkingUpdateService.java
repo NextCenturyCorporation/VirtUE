@@ -9,6 +9,16 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.JavaUtil;
 
+/**
+ * Service which will try get the networking information for an AWS instance. If
+ * usePublicDns is true, it will get the public DNS and IP, otherwise, it will
+ * only get the internal hostname and IP. AWS internal DNS and IP are always
+ * retrieved and stored in the {@link VirtualMachine}s internal DNS and IP
+ * variables. This service will retry until successful and then complete the
+ * future.
+ * 
+ *
+ */
 public class AwsNetworkingUpdateService
 		extends BaseGroupedScheduledCompletableFutureService<VirtualMachine, VirtualMachine, Void> {
 

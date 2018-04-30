@@ -10,6 +10,13 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
 
+/**
+ * Service which will try to add a new, unique RSA key to the SSH authorized
+ * keys file on the given machine. This service will retry until successful and
+ * then complete the future.
+ * 
+ *
+ */
 public class AddRsaKeyCompletableFutureService
 		extends BaseIndividualScheduledCompletableFutureService<VirtualMachine, VirtualMachine, Void> {
 	private static final Logger logger = LoggerFactory.getLogger(AddRsaKeyCompletableFutureService.class);

@@ -10,6 +10,13 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * Service will get the status of the AWS VM and update the state in
+ * {@link VirtualMachine}. This service will retry until the VM has the given
+ * success state and then complete the future.
+ * 
+ *
+ */
 public class AwsUpdateStatusCompletableFutureService
 		extends BaseGroupedScheduledCompletableFutureService<VirtualMachine, VirtualMachine, VmState> {
 

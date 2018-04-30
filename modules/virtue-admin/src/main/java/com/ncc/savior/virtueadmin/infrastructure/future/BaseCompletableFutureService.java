@@ -10,7 +10,13 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
- * 
+ * Base class for services services that may be asynchoronous and use
+ * {@link CompletableFuture}s to indicate completion and pass parameters.
+ * Implementers are expected to implement
+ * {@link #offer(Object, Object, CompletableFuture)} calls and need to call
+ * {@link #onSuccess(Object, CompletableFuture)} or
+ * {@link #onFailure(Object, CompletableFuture)} or
+ * {@link #onFailure(Object, Exception, CompletableFuture)}.
  * 
  *
  * @param <P>
@@ -36,6 +42,17 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 		return chainFutures(future, extra);
 	}
 
+	/**
+	 * Adds this service on a future chain. When priorCf completes, this service
+	 * will execute on the parameter from the prior {@link CompletableFuture} with
+	 * whatever data is in the extra parameter in the function call. It will return
+	 * a {@link CompletableFuture} which can be used to chain another service or
+	 * execute another action on completion.
+	 * 
+	 * @param priorCf
+	 * @param extra
+	 * @return
+	 */
 	public CompletableFuture<R> chainFutures(CompletableFuture<P> priorCf, X extra) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Adding future to " + getServiceName() + " with extra=" + extra);
@@ -63,6 +80,13 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 		return cf;
 	}
 
+	/**
+	 * Function call to indicate that
+	 * 
+	 * @param t
+	 * @param extra
+	 * @param cf
+	 */
 	protected abstract void offer(P t, X extra, CompletableFuture<R> cf);
 
 	protected void onSuccess(R result, CompletableFuture<R> cf) {
