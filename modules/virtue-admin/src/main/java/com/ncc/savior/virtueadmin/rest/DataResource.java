@@ -269,7 +269,7 @@ public class DataResource {
 		VirtueTemplate virtueLinuxCorporateEmailUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Linux Corporate Email User", "1.0", allTemplate, true, now, systemName, vmLinuxCorpEmail);
 		VirtueTemplate virtueExternalInternet = new VirtueTemplate(UUID.randomUUID().toString(),
-				"Enternal Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
+				"External Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
 		VirtueTemplate virtuePowerUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows and Linux Power User", "1.0", allTemplate, true, now, systemName, vmPowerUserWin,
 				vmPowerUserLinux);
