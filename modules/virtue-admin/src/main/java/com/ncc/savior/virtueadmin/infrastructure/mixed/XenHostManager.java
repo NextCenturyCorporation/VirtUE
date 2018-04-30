@@ -31,6 +31,7 @@ import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
+import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -234,11 +235,31 @@ public class XenHostManager {
 				// provision Xen Guest VMs
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				logger.debug("starting to provision guests");
-				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture);
+				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverUser);
 			}
 		};
 
-		xenProvisionFuture.thenRun(r);
+		xenProvisionFuture.handle((xenVm2, ex) -> {
+			if (ex == null) {
+				r.run();
+			} else {
+				Collection<VirtualMachine> vms = virtue.getVms();
+				FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+				for (VirtualMachine vm : vms) {
+					vm.setState(VmState.ERROR);
+					CompletableFuture<VirtualMachine> f = serviceProvider.getVmNotifierService().startFutures(vm, null);
+					fc.addFuture(f);
+				}
+				xenVm2.setState(VmState.ERROR);
+				CompletableFuture<VirtualMachine> f = serviceProvider.getVmNotifierService().startFutures(xenVm2, null);
+				fc.addFuture(f);
+				// fc.combineFutures(future)
+				finalXenFuture.completeExceptionally(ex);
+
+			}
+			return xenVm2;
+		});
+		// xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
 	}
@@ -384,6 +405,7 @@ public class XenHostManager {
 		cf = serviceProvider.getEnsureDeleteVolumeOnTermination().chainFutures(cf, v);
 		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
 		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		// cf = serviceProvider.getErrorCausingService().chainFutures(cf, v);
 		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 		cf = serviceProvider.getAddRsa().chainFutures(cf, v);
 		cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
@@ -391,9 +413,12 @@ public class XenHostManager {
 		cf.thenAccept((VirtualMachine vm) -> {
 			logger.debug("xen host future complete");
 			xenFuture.complete(vm);
-		}).exceptionally((ex) -> {
-			logger.error("EXCEPTIOPN", ex);
-			return null;
+		});
+		cf.exceptionally((ex) -> {
+			logger.error("EXCEPTION", ex);
+			xenFuture.completeExceptionally(ex);
+			xenVm.setState(VmState.ERROR);
+			return xenVm;
 		});
 	}
 

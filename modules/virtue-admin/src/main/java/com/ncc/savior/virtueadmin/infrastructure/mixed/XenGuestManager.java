@@ -63,7 +63,7 @@ public class XenGuestManager {
 	}
 
 	public void provisionGuests(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
-			CompletableFuture<Collection<VirtualMachine>> xenGuestFuture) {
+			CompletableFuture<Collection<VirtualMachine>> xenGuestFuture, String serverUser) {
 
 		ChannelExec channel = null;
 		Session session = null;
@@ -99,9 +99,8 @@ public class XenGuestManager {
 				linuxVms.add(vm);
 				logger.debug("Starting provision of guest=" + vm);
 				String ipAddress = "0.0.0.0";
-				String clientUser = virtue.getUsername();
 				String domainUUID = UUID.randomUUID().toString();
-				String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
+				String name = VM_PREFIX + serverUser + "-" + virtue.getUsername() + "-" + domainUUID;
 
 				// name = "VRTU-test";
 				// ipAddress = "192.168.0.54";

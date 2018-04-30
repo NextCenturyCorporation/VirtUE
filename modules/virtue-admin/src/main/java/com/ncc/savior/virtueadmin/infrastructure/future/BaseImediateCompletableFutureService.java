@@ -14,8 +14,12 @@ public abstract class BaseImediateCompletableFutureService<P, R, X> extends Base
 
 	@Override
 	protected void offer(P p, X extra, CompletableFuture<R> cf) {
-		R result = onExecute(p, extra);
-		onSuccess(result, cf);
+		try {
+			R result = onExecute(p, extra);
+			onSuccess(result, cf);
+		} catch (Exception e) {
+			onFailure(p, e, cf);
+		}
 	}
 
 	protected abstract R onExecute(P param, X extra);

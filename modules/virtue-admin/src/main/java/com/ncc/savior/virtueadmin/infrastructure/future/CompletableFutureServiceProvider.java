@@ -24,6 +24,7 @@ public class CompletableFutureServiceProvider {
 	private AwsUpdateStatusCompletableFutureService awsUpdateStatus;
 	private ScheduledExecutorService executor;
 	private BaseCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine> networkCopyingService;
+	private BaseCompletableFutureService<VirtualMachine, VirtualMachine, Void> errorCausingService;
 
 	public CompletableFutureServiceProvider(VirtueAwsEc2Provider ec2Provider,
 			IUpdateListener<VirtualMachine> vmNotifier, IKeyManager keyManager, boolean usePublicDns) {
@@ -86,6 +87,14 @@ public class CompletableFutureServiceProvider {
 				return param;
 			}
 		};
+		this.errorCausingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
+				executor, "errorCausingService") {
+
+			@Override
+			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {
+				throw new RuntimeException("Forced Exception");
+			}
+		};
 	}
 
 	public AwsRenamingCompletableFutureService getAwsRenamingService() {
@@ -130,5 +139,9 @@ public class CompletableFutureServiceProvider {
 
 	public BaseCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine> getNetworkSettingService() {
 		return networkCopyingService;
+	}
+
+	public BaseCompletableFutureService<VirtualMachine, VirtualMachine, Void> getErrorCausingService() {
+		return errorCausingService;
 	}
 }

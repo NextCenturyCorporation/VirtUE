@@ -54,6 +54,9 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 
 		// TODO handle errors better
 		priorCf.exceptionally((ex) -> {
+			if (logger.isTraceEnabled()) {
+				logger.trace(getServiceName() + " Handling excption " + ex.getMessage());
+			}
 			cf.completeExceptionally(ex);
 			return null;
 		});
