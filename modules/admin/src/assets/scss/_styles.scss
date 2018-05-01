@@ -387,9 +387,10 @@ content {
 .no-data-message {
   display: block;
   border: none;
-  // border-top: 1px solid #b2b2b2;
-  // border-bottom: 1px solid #b2b2b2;
+  margin-left: 25px;
+  margin-right: 25px;
 }
+
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;

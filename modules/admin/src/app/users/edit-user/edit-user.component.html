@@ -10,29 +10,20 @@
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input matInput type="text" placeholder="" [(value)]="userData.username" />
+                  <input matInput type="text" placeholder="" value="{{ userToEdit.id }}" />
                 </mat-form-field>
-                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ userToEdit.id }}</span>
                 </div>
               </div>
 
               <div class="mui-row">
                 <div class="titlebar margin-top-20">
-                  <h3 class="title">Virtues</h3>
+                  <h3 class="titlebar-title">Virtues</h3>
                   <button class="titlebar-button" mat-button (click)="activateModal(0,'add')">Add Virtue</button>
                 </div>
               </div>
 
-              <!-- if there are no virtues, show this message   *ngIf="appUser.virtues.length < 1"  -->
-              <div *ngIf="selectedApps.length < 1" class="mui-row">
-                <div class="mui-col-md-12 padding-left-0">
-                  <p class="virtue-message">
-                    No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
-                  </p>
-                </div>
-              </div>
-               <!-- *ngIf="appUser.virtues"  -->
-              <div *ngIf="selectedApps.length > 0" class="mui-row">
+              <!-- *ngIf="appUser.virtues"  -->
+              <div  class="mui-row">
                 <div class="table-container">
                   <div class="mui-row table-header-group">
                     <div class="table-header mui-col-md-4">
@@ -40,19 +31,28 @@
                     </div>
                     <div class="table-header mui-col-md-8">Applications</div>
                   </div>
-                  <div *ngFor="let virtue of appUser.virtues" class="mui-row table-row">
+                  <!-- if there are no virtues, show this message   *ngIf="appUser.virtues.length < 1"  -->
+                  <div class="mui-row table-row">
+                    <div class="mui-col-md-12 padding-left-0">
+                      <p class="no-data-message">
+                        No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="mui-row table-row">
                     <div class="table-data mui-col-md-4">
                       <div class="virtue-color margin-right-10"></div>
                       <div class="virtue-name">
-                        <a class="edit" (click)="activateModal(1,'edit')">{{ virtue.name }}</a>
+                        <a class="edit" (click)="activateModal(1,'edit')">virtue.name</a>
                         <!-- This should show if hovered over -->
-                        <span [ngClass]="virtue.enabled ? 'menu-options':'menu-options'"><a href="#">Remove</a></span>
+                        <span><a href="#">Remove</a></span>
+                         [ngClass]="virtue.enabled ? 'menu-options':'menu-options'"
                       </div>
                     </div>
                     <div class="table-data mui-col-md-8">
-                      <div class="mui-col-md-4" *ngFor="let apps of virtue.vmTemplates">
+                      <div class="mui-col-md-4">
                         <ul>
-                          <li *ngFor="let app of apps.applications">{{ app.name }}</li>
+                          <li>app.name</li>
                         </ul>
                       </div>
                     </div>

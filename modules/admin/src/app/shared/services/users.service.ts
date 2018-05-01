@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
@@ -25,6 +25,7 @@ export class UsersService {
 
   getUser(baseUrl: string, id: string): Observable<any> {
     let src = baseUrl + this.configUrl + id;
+    console.log(src);
     return this.httpClient.get<any>(src);
   }
 
@@ -40,19 +41,36 @@ export class UsersService {
     }
   }
 
-  deleteUser(baseUrl: string, username: string) {
-    let awsServer = baseUrl + this.configUrl;
-    console.log('Delete: ' + awsServer + username);
-    return this.httpClient.delete(awsServer + username).subscribe(
-      data => console.log(data),
-      error => console.error('Error')
-    );
-  }
-
-/*
+  /*
   public update(user: User): Observable<any> {
     return this.http.put<User>(`${this.jsondata}/${user.id}`,user);
   }*/
 
+  assignVirtues(baseUrl: string, username: string, virtue: string) {
+    console.log('assignVirtues => ');
+    console.log(username);
+    console.log(virtue);
+
+    let userRecord = baseUrl + this.configUrl + username + '/assign/' + virtue;
+
+    return this.httpClient.post(userRecord, virtue, httpOptions).toPromise().then(data => {
+            return data;
+          },
+          error => {
+            console.log('users.service.ts (assignVirtues): looks like there\'s a problem posting virtue ' + virtue);
+          });
+  }
+
+  deleteUser(baseUrl: string, username: string) {
+    let awsServer = baseUrl + this.configUrl;
+    return this.httpClient.delete(awsServer + username).subscribe(
+      data => {
+        return true;
+      },
+      error => {
+        console.error('Error');
+      });
+
+  }
 
 }

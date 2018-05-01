@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, EventEmitter, Input, OnInit, OnDestroy } from '@angular/core';
+import { Routes, RouterModule, Router } from '@angular/router';
 import { Location } from '@angular/common';
 
 import { User } from '../../shared/models/user.model';
@@ -23,15 +23,21 @@ export class UserListComponent implements OnInit {
   saviorUsers: string;
   users = [];
   virtues = [];
+  isInitialized = false;
 
   constructor(
-    private route: ActivatedRoute,
+    private router: Router,
     private location: Location,
     private baseUrlService: BaseUrlService,
     private usersService: UsersService,
     private virtuesService: VirtuesService,
     public dialog: MatDialog
-  ) {}
+  ) {
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe( _url => {
@@ -40,11 +46,17 @@ export class UserListComponent implements OnInit {
       this.getUsers(awsServer);
       this.getVirtues(awsServer);
     });
-
   }
 
   getBaseUrl( url: string ) {
     this.awsServer = url;
+  }
+
+  reloadPage() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.router.navigate([this.router.url]);
+    }, 500);
   }
 
   getUsers( baseUrl: string ): void {
@@ -56,7 +68,7 @@ export class UserListComponent implements OnInit {
   deleteUser(username: string) {
     // console.log(username);
     this.usersService.deleteUser(this.awsServer, username);
-    this.getUsers(this.awsServer);
+    this.reloadPage();
   }
 
   getVirtues(baseUrl: string) {

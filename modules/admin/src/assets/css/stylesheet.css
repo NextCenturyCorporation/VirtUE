@@ -3864,9 +3864,11 @@ content #content.content {
 .no-data-message {
   display: block;
   border: none;
+  margin-left: 25px;
+  margin-right: 25px;
 }
 
-/* line 393, ../scss/_styles.scss */
+/* line 394, ../scss/_styles.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3874,19 +3876,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 400, ../scss/_styles.scss */
+/* line 401, ../scss/_styles.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 403, ../scss/_styles.scss */
+/* line 404, ../scss/_styles.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 407, ../scss/_styles.scss */
+/* line 408, ../scss/_styles.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3895,7 +3897,7 @@ footer {
   position: relative;
 }
 
-/* line 414, ../scss/_styles.scss */
+/* line 415, ../scss/_styles.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;

@@ -1,5 +1,5 @@
 import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
+import { Routes, RouterModule, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material';
@@ -40,17 +40,15 @@ export class AddUserComponent implements OnInit {
   constructor(
     public dialog: MatDialog,
     private baseUrlService: BaseUrlService,
-    private location: Location,
+    private router: Router,
     private usersService: UsersService,
     private virtuesService: VirtuesService
   ) {
     this.adUserCtrl = new FormControl();
-    // this.filteredUsers = this.adUserCtrl.valueChanges
-    //   .pipe(
-    //     startWith(''),
-    //     map(adUser => adUser ? this.filterUsers(adUser) : this.activeDirUsers.slice())
-    //     // map(adUser => adUser ? this.filterStates(adUser) : this.AdUsers.slice())
-    //   );
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -64,6 +62,13 @@ export class AddUserComponent implements OnInit {
       this.getBaseUrl(url);
       this.virtuesService.getVirtues(url);
     });
+  }
+
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.router.navigate(['/users']);
+    }, 500);
   }
 
   getBaseUrl( url: string ) {
@@ -87,8 +92,7 @@ export class AddUserComponent implements OnInit {
 
     let body = {
       "username": username,
-      "authorities": authorities,
-      "virtueTemplateIds": virtueTemplateIds
+      "authorities": authorities
     };
 
     if (!body.username) { return; }
@@ -96,13 +100,22 @@ export class AddUserComponent implements OnInit {
     let baseUrl = this.awsServer;
     this.usersService.createUser(baseUrl, JSON.stringify(body)).subscribe(
       data => {
-        console.log('success!');
+        return true;
         // console.log(data.virtueTemplateIds);
       },
       error => {
-        console.error("Error!");
+        console.error("Error");
       }
     );
+    this.assignUserVirtues(baseUrl, username, virtueTemplateIds)
+    this.resetRouter();
+    this.router.navigate(['/users']);
+  }
+
+  assignUserVirtues(baseUrl: string, username: string, virtues: any[]) {
+    for ( let item of virtues ) {
+      this.usersService.assignVirtues(baseUrl, username, item);
+    }
 
   }
 
@@ -177,7 +190,7 @@ export class AddUserComponent implements OnInit {
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
     const virtueList = dialogRef.componentInstance.addVirtues.subscribe((data) => {
-      this.selVirtues = data);
+      this.selVirtues = data;
 
       if (this.storedVirtues.length > 0) {
         this.storedVirtues = [];
