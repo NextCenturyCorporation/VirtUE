@@ -46,7 +46,6 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 
 	public BaseIndividualScheduledCompletableFutureService(ScheduledExecutorService executor, boolean isFixedRate,
 			long initialDelayMillis, long periodOrDelayMillis) {
-		super(executor);
 		this.executor = executor;
 		this.isFixedRate = isFixedRate;
 		this.initialDelayMillis = initialDelayMillis;

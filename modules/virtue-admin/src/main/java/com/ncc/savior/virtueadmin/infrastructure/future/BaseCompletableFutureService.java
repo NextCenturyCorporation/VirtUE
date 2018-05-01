@@ -1,7 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.future;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -31,10 +30,8 @@ import com.ncc.savior.virtueadmin.util.SaviorException;
  */
 public abstract class BaseCompletableFutureService<P, R, X> {
 	private static final Logger logger = LoggerFactory.getLogger(BaseCompletableFutureService.class);
-	private Executor executor;
 
-	public BaseCompletableFutureService(Executor executor) {
-		this.executor = executor;
+	public BaseCompletableFutureService() {
 	}
 
 	public CompletableFuture<R> startFutures(P param, X extra) {

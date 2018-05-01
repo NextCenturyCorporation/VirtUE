@@ -215,25 +215,28 @@ public class XenHostManager {
 			if (ex == null) {
 				r.run();
 			} else {
-				Collection<VirtualMachine> vms = virtue.getVms();
-				FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
-				for (VirtualMachine vm : vms) {
-					vm.setState(VmState.ERROR);
-					CompletableFuture<VirtualMachine> f = serviceProvider.getVmNotifierService().startFutures(vm, null);
-					fc.addFuture(f);
-				}
-				xenVm2.setState(VmState.ERROR);
-				CompletableFuture<VirtualMachine> f = serviceProvider.getVmNotifierService().startFutures(xenVm2, null);
-				fc.addFuture(f);
-				// fc.combineFutures(future)
-				finalXenFuture.completeExceptionally(ex);
-
+				handleError(virtue, finalXenFuture, xenVm2, ex);
 			}
 			return xenVm2;
 		});
 		// xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
+	}
+
+	private void handleError(VirtueInstance virtue, CompletableFuture<?> future, VirtualMachine xenVm, Throwable ex) {
+		Collection<VirtualMachine> vms = virtue.getVms();
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : vms) {
+			vm.setState(VmState.ERROR);
+			CompletableFuture<VirtualMachine> f = serviceProvider.getVmNotifierService().startFutures(vm, null);
+			fc.addFuture(f);
+		}
+		xenVm.setState(VmState.ERROR);
+		CompletableFuture<VirtualMachine> f = serviceProvider.getVmNotifierService().startFutures(xenVm, null);
+		fc.addFuture(f);
+		// fc.combineFutures(future)
+		future.completeExceptionally(ex);
 	}
 
 	protected void waitUntilXlListIsReady(Session session) {

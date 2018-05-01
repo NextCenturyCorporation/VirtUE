@@ -1,7 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.future;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 /**
  * Simple Untity implementation of {@link BaseCompletableFutureService} for
@@ -18,8 +17,7 @@ public abstract class BaseImediateCompletableFutureService<P, R, X> extends Base
 
 	private String serviceName = null;
 
-	public BaseImediateCompletableFutureService(Executor executor, String serviceName) {
-		super(executor);
+	public BaseImediateCompletableFutureService(String serviceName) {
 		this.serviceName = serviceName;
 	}
 

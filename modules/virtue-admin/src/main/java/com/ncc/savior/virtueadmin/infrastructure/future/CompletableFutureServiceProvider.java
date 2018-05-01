@@ -55,7 +55,7 @@ public class CompletableFutureServiceProvider {
 		testUpDown = new TestReachabilityCompletableFuture(executor, keyManager);
 		addRsa = new AddRsaKeyCompletableFutureService(executor, keyManager);
 		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2);
-		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(executor,
+		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(
 				"alterStatus") {
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, VmState state) {
@@ -63,7 +63,7 @@ public class CompletableFutureServiceProvider {
 				return param;
 			}
 		};
-		vmNnotifierService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(executor,
+		vmNnotifierService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
 				"notifierService") {
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {
@@ -75,7 +75,7 @@ public class CompletableFutureServiceProvider {
 			}
 		};
 		this.networkClearingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
-				executor, "NetworkClearingService") {
+				"NetworkClearingService") {
 
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {
@@ -87,7 +87,7 @@ public class CompletableFutureServiceProvider {
 			}
 		};
 		this.networkCopyingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine>(
-				executor, "NetworkCopyingService") {
+				"NetworkCopyingService") {
 
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, VirtualMachine extra) {
@@ -99,7 +99,7 @@ public class CompletableFutureServiceProvider {
 			}
 		};
 		this.errorCausingService = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, Void>(
-				executor, "errorCausingService") {
+				"errorCausingService") {
 
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {

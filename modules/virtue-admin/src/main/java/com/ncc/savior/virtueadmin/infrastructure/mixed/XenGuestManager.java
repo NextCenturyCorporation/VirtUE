@@ -249,29 +249,6 @@ public class XenGuestManager {
 		SshUtil.sendCommandFromSession(session, command);
 	}
 
-	private String createGuestVm2(Session session, String name, String role) throws JSchException, IOException {
-		CommandHandler ch = getCommandHandlerFromSession(session);
-		String finishString = "finished with " + name;
-		logger.debug("Sending commands to create VM.");
-		String createCmd = "sudo ./create.sh " + name;
-		if (JavaUtil.isNotEmpty(role)) {
-			createCmd += " " + role;
-		}
-		logger.debug("CreateCmd=" + createCmd);
-		ch.sendln("sudo xl list");
-		ch.sendln("cd ./app-domains");
-		ch.sendln(createCmd);
-		ch.sendln("cd ..");
-		ch.sendln("echo " + finishString);
-		ch.readUtil(finishString, "echo");
-		try {
-			ch.close();
-		} catch (IOException e) {
-			logger.error("error closing connection when creating guest VM", e);
-		}
-		return finishString;
-	}
-
 	private CommandHandler getCommandHandlerFromSession(Session session) throws JSchException, IOException {
 		Channel myChannel = session.openChannel("shell");
 		OutputStream ops = myChannel.getOutputStream();
@@ -401,7 +378,8 @@ public class XenGuestManager {
 						null, vm, false);
 			}
 			addToStartPipeline(linuxVms, linuxFuture);
-		} catch (JSchException | IOException | SftpException e) {
+		} catch (Exception e) {
+			logger.error("Error attempting to start guests " + linuxVms);
 			linuxFuture.completeExceptionally(e);
 		} finally {
 			SshUtil.disconnectLogErrors(session);
@@ -416,7 +394,6 @@ public class XenGuestManager {
 			CompletableFuture<VirtualMachine> cf = null;
 			// = serviceProvider.getAwsRenamingService().startFutures(vm, v);
 			//
-			logger.error("NEED TO FIGURE OUT STARTING PIPELINE");
 			// cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
 			cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.LAUNCHING);
 			cf = serviceProvider.getNetworkSettingService().chainFutures(cf, xenVm);
@@ -455,7 +432,6 @@ public class XenGuestManager {
 			cf = serviceProvider.getTestUpDown().startFutures(vm, false);
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-			logger.error("NEED TO FIGURE OUT STOP SERVICES");
 			fc.addFuture(cf);
 		}
 		fc.combineFutures(linuxFuture);
