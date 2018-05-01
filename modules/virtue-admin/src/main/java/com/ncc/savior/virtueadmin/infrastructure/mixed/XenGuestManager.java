@@ -134,7 +134,29 @@ public class XenGuestManager {
 		if (create) {
 			createGuestVm(session, name, role);
 		} else {
-			SshUtil.sendCommandFromSession(session, "sudo xl create app-domains/" + name + "/" + name + ".cfg");
+			// error:
+			// xencall: error: Could not obtain handle on privileged command interface: No
+			// such file or directory
+			// libxl: error: libxl.c:102:libxl_ctx_alloc: cannot open libxc handle: No such
+			// file or directory
+			// cannot init xl context
+			boolean success = false;
+			while (true) {
+				success = true;
+				List<String> response = SshUtil.sendCommandFromSession(session,
+						"sudo xl create app-domains/" + name + "/" + name + ".cfg");
+				for (String line : response) {
+					if (line.contains("xencall: error:") || line.contains("invalid domain identifier")) {
+						success = false;
+						break;
+					}
+				}
+				if (success) {
+					break;
+				} else {
+					JavaUtil.sleepAndLogInterruption(200);
+				}
+			}
 		}
 		ipAddress = getGuestVmIpAddress(session, name);
 		updateSshKnownHosts(session, ipAddress);
@@ -429,6 +451,7 @@ public class XenGuestManager {
 		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : linuxVms) {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.STOPPING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getTestUpDown().startFutures(vm, false);
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
