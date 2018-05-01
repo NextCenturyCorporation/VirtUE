@@ -81,7 +81,9 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 	}
 
 	/**
-	 * Function call to indicate that
+	 * Function call to indicate that a parameter is ready and should be acted upon
+	 * or setup to be acted upon later. Once complete, the future should be
+	 * completed.
 	 * 
 	 * @param t
 	 * @param extra

@@ -15,6 +15,12 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
+/**
+ * Class that creates and stores all the Completable Future Services
+ * ({@link BaseCompletableFutureService}).
+ * 
+ *
+ */
 public class CompletableFutureServiceProvider {
 	private static final Logger logger = LoggerFactory.getLogger(CompletableFutureServiceProvider.class);
 	private AwsRenamingCompletableFutureService awsRenamingService;

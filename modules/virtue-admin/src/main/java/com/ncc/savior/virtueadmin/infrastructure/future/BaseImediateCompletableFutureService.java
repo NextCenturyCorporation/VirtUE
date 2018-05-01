@@ -3,6 +3,17 @@ package com.ncc.savior.virtueadmin.infrastructure.future;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+/**
+ * Simple Untity implementation of {@link BaseCompletableFutureService} for
+ * fast, immediate tasks. Concrete implementations should implement
+ * {@link #onExecute(Object, Object)} returning the resulting value. Throwing an
+ * exception will cause a failure.
+ * 
+ *
+ * @param <P>
+ * @param <R>
+ * @param <X>
+ */
 public abstract class BaseImediateCompletableFutureService<P, R, X> extends BaseCompletableFutureService<P, R, X> {
 
 	private String serviceName = null;

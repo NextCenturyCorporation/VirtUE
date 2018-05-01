@@ -20,7 +20,9 @@ import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
- * 
+ * This service ensures that AWS Virtual Machines have their volumnes set to
+ * delete when the VM terminates. If this is not set, the volumes will stay
+ * around and cost money for storage.
  */
 public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 		extends BaseIndividualScheduledCompletableFutureService<VirtualMachine, VirtualMachine, Void> {

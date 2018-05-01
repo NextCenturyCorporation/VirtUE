@@ -5,10 +5,34 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.amazonaws.services.elasticmapreduce.util.ResizeJobFlowStep.OnFailure;
+
+/**
+ * Implementation of {@link BaseCompletableFutureService} where multiple
+ * parameters P can be executed at the same time to save on efficiency. In this
+ * variant, this class manages a single {@link ScheduledFuture} which will call
+ * {@link #onExecute(Collection)} of the concrete implementation and pass all of
+ * the P's along with their future and extra value in a {@link Wrapper} class.
+ * The collection passed is a copy and can be manipulated.
+ * 
+ * The concrete implementation is expected to implement
+ * {@link #onExecute(Collection)} and call either {@link #onSuccess(Collection)}
+ * or one of the
+ * {@link #onFailure(com.ncc.savior.virtueadmin.infrastructure.future.BaseCompletableFutureService.Wrapper)},
+ * {@link OnFailure} methods provided here. They should not call any onFailure
+ * methods provided by the super class {@link BaseCompletableFutureService}
+ * 
+ *
+ * @param <P>
+ * @param <R>
+ * @param <X>
+ */
 
 public abstract class BaseGroupedScheduledCompletableFutureService<P, R, X>
 		extends BaseCompletableFutureService<P, R, X> {

@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.future;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.util.SaviorException;
+
+/**
+ * Implementation of {@link BaseCompletableFutureService} where multiple
+ * parameters P can NOT be executed at the same time and must be executed
+ * individually. In this variant, this there will be a {@link ScheduledFuture}
+ * for each passed instance which will call {@link #onExecute(Collection)} of
+ * the concrete implementation.
+ * 
+ * The concrete implementation is expected to implement
+ * {@link #onExecute(Collection)} and call either
+ * {@link #onSuccess(String, Object, CompletableFuture)} or one of the
+ * {@link #onFailure(String, Object, CompletableFuture)}
+ * {@link #onFailure(String, Object, Exception, CompletableFuture)} methods
+ * provided here. They should not call any onFailure methods provided by the
+ * super class {@link BaseCompletableFutureService}
+ * 
+ *
+ * @param <P>
+ * @param <R>
+ * @param <X>
+ */
 
 public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		extends BaseCompletableFutureService<P, R, X> {

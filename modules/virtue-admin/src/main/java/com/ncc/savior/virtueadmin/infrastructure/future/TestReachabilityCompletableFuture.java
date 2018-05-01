@@ -10,6 +10,14 @@ import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.SshUtil;
 
+/**
+ * This service tests a VM to see if the server can reach it via SSH login. When
+ * adding a VM to this service, the extra parameter is set to whether success
+ * should be reachable or not reachable. This is useful to determine when a
+ * Virtual Machine is finished booting or is shutting down.
+ * 
+ *
+ */
 public class TestReachabilityCompletableFuture
 		extends BaseIndividualScheduledCompletableFutureService<VirtualMachine, VirtualMachine, Boolean> {
 	private static final Logger logger = LoggerFactory.getLogger(TestReachabilityCompletableFuture.class);
@@ -39,8 +47,8 @@ public class TestReachabilityCompletableFuture
 	 * 
 	 * @param wrapper
 	 */
-	protected void testReachability(
-			String id, BaseCompletableFutureService<VirtualMachine, VirtualMachine, Boolean>.Wrapper wrapper) {
+	protected void testReachability(String id,
+			BaseCompletableFutureService<VirtualMachine, VirtualMachine, Boolean>.Wrapper wrapper) {
 		VirtualMachine vm = wrapper.param;
 		Boolean successOnReachable = wrapper.extra;
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
