@@ -196,6 +196,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : vms) {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPED);

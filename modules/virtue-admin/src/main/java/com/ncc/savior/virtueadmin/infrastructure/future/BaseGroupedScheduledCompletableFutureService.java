@@ -72,7 +72,6 @@ public abstract class BaseGroupedScheduledCompletableFutureService<P, R, X>
 		return list;
 	}
 
-
 	protected void onSuccess(Collection<Wrapper> completedWrappers) {
 		for (BaseCompletableFutureService<P, R, X>.Wrapper wrapper : completedWrappers) {
 			if (wrapper.result != null) {
@@ -80,6 +79,15 @@ public abstract class BaseGroupedScheduledCompletableFutureService<P, R, X>
 				collection.remove(wrapper);
 			}
 		}
+	}
+
+	protected void onFailure(Wrapper wrapper, Exception e) {
+		collection.remove(wrapper);
+		super.onFailure(wrapper.param, e, wrapper.future);
+	}
+
+	protected void onFailure(Wrapper wrapper) {
+		super.onFailure(wrapper.param, wrapper.future);
 	}
 
 }

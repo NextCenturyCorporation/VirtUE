@@ -33,9 +33,11 @@ public class AwsUpdateStatusCompletableFutureService
 		try {
 			AwsUtil.updateStatusOnVms(ec2, vms);
 		} catch (AmazonEC2Exception e) {
-			if (e.getErrorCode().equals("InvalidInstanceID.NotFound")) {
-				// TODO
-				return;
+			for (BaseCompletableFutureService<VirtualMachine, VirtualMachine, VmState>.Wrapper wrapper : wrappers) {
+				VirtualMachine vm = wrapper.param;
+				if (e.getErrorMessage().contains(vm.getName())) {
+					onFailure(wrapper, e);
+				}
 			}
 		}
 		Iterator<Wrapper> itr = wrappers.iterator();

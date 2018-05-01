@@ -132,8 +132,8 @@ public class XenGuestManager {
 		String name = vm.getName();
 		String loginUsername = vm.getUserName();
 		if (create) {
-		createGuestVm(session, name, role);
-		}else {
+			createGuestVm(session, name, role);
+		} else {
 			SshUtil.sendCommandFromSession(session, "sudo xl create app-domains/" + name + "/" + name + ".cfg");
 		}
 		ipAddress = getGuestVmIpAddress(session, name);
@@ -428,13 +428,11 @@ public class XenGuestManager {
 		Void v = null;
 		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
 		for (VirtualMachine vm : linuxVms) {
-			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
-			// cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPING);
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.STOPPING);
+			cf = serviceProvider.getTestUpDown().startFutures(vm, false);
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			logger.error("NEED TO FIGURE OUT STOP SERVICES");
-			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.STOPPED);
-			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			fc.addFuture(cf);
 		}
 		fc.combineFutures(linuxFuture);

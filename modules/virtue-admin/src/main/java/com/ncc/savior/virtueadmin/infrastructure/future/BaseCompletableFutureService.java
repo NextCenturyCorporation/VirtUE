@@ -96,14 +96,14 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 		cf.complete(result);
 	}
 
+	protected abstract String getServiceName();
+
 	protected void onFailure(P initial, Exception e, CompletableFuture<R> cf) {
 		if (logger.isDebugEnabled()) {
 			logger.debug(getServiceName() + " failed with initial data=" + initial + " and error:", e);
 		}
 		cf.completeExceptionally(e);
 	}
-
-	protected abstract String getServiceName();
 
 	protected void onFailure(P initial, CompletableFuture<R> cf) {
 		SaviorException se = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error with value" + initial);

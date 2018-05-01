@@ -332,6 +332,10 @@ public class XenHostManager {
 		VirtualMachine xenVm = vmo.get();
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
 		vms.add(xenVm);
+		for (VirtualMachine vm : linuxVms) {
+			CompletableFuture<VirtualMachine> f = serviceProvider.getUpdateStatus().startFutures(vm, VmState.LAUNCHING);
+			serviceProvider.getVmNotifierService().chainFutures(f, null);
+		}
 		ec2Wrapper.startVirtualMachines(vms);
 		addVmToStartingPipeline(xenVm, xenFuture);
 		// TODO do the following once the xenVm is started
@@ -367,7 +371,15 @@ public class XenHostManager {
 			ec2Wrapper.stopVirtualMachines(vms);
 			addVmsToStoppingPipeline(xenVm, finalXenFuture);
 		};
+
 		linuxFuture.thenRun(stopHostRunnable);
+		finalXenFuture.thenRun(() -> {
+			for (VirtualMachine vm : linuxVms) {
+				CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm,
+						VmState.STOPPED);
+				serviceProvider.getVmNotifierService().chainFutures(cf, null);
+			}
+		});
 	}
 
 	private void addVmToProvisionPipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {

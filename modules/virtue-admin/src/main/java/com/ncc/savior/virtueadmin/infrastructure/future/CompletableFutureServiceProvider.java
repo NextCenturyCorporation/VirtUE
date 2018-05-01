@@ -5,6 +5,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
@@ -13,6 +16,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 public class CompletableFutureServiceProvider {
+	private static final Logger logger = LoggerFactory.getLogger(CompletableFutureServiceProvider.class);
 	private AwsRenamingCompletableFutureService awsRenamingService;
 	private AwsNetworkingUpdateService awsNetworkingUpdateService;
 	private EnsureDeleteVolumeOnTerminationCompletableFutureService ensureDeleteVolumeOnTermination;
@@ -57,6 +61,7 @@ public class CompletableFutureServiceProvider {
 				"notifierService") {
 			@Override
 			protected VirtualMachine onExecute(VirtualMachine param, Void extra) {
+				logger.trace("SAVING: " + param.getState());
 				ArrayList<VirtualMachine> collection = new ArrayList<VirtualMachine>();
 				collection.add(param);
 				vmNotifier.updateElements(collection);
