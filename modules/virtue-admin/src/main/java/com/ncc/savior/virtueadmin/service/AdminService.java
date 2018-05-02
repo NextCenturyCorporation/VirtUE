@@ -248,6 +248,7 @@ public class AdminService {
 			while (itr.hasNext()) {
 				usersVirtueTemplates.add(itr.next());
 			}
+			newUser.setVirtueTemplates(usersVirtueTemplates);
 		}
 		userManager.addUser(newUser);
 		return newUser;
