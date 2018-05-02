@@ -31,31 +31,22 @@
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
           <div class="table-header mui-col-md-6">Application Name</div>
-          <div class="table-header mui-col-md-2">Version</div>
-          <div class="table-header mui-col-md-2">OS</div>
-          <div class="table-header mui-col-md-2">Status</div>
+          <div class="table-header mui-col-md-3">Version</div>
+          <div class="table-header mui-col-md-3">OS</div>
         </div>
         <div *ngFor="let app of apps | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-6">
             <!-- <a mat-button (click)="updateStatus(app.id, app.enabled)"></a> -->
             {{ app.name }}
-            <!-- if this virtue is enabled show this menu -->
-            <span *ngIf="app.enabled" class="menu-options">
-              <a mat-button (click)="updateStatus(app.id)">Disable</a>
-            </span>
 
             <!-- if this virtue is disabled show this menu -->
             <span class="menu-options">
-              <a mat-button (click)="updateStatus(app.id)">Enable</a> |
               <a mat-button (click)="openDialogPrompt(app.id, 'uninstall', app.name)">Uninstall</a>
             </span>
           </div>
 
-          <div class="table-data mui-col-md-2">{{ app.version }}</div>
-          <div class="table-data mui-col-md-2">{{ app.os }}</div>
-          <div class="table-data mui-col-md-2">
-            {{ app.enabled ? 'Enabled' : 'Disabled' }}
-          </div>
+          <div class="table-data mui-col-md-3">{{ app.version }}</div>
+          <div class="table-data mui-col-md-3">{{ app.os }}</div>
           <div class="clearfix"></div>
         </div>
       </div>
