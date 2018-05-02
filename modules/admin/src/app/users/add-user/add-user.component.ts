@@ -67,7 +67,6 @@ export class AddUserComponent implements OnInit {
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-      this.router.navigate(['/users']);
     }, 500);
   }
 

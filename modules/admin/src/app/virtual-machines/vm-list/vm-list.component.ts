@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
+import { Routes, RouterModule, Router } from '@angular/router';
 
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -21,30 +22,43 @@ export class VmListComponent implements OnInit {
   filterValue = '*';
   noListData = false;
 
+  baseUrl: string;
   vmlist: string;
   totalVms: number;
+  vmStatus: boolean;
 
   constructor(
     private vmService: VirtualMachineService,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    public router: Router
   ) {}
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
-      let awsServer = res[0].aws_server;
-        this.getVmList(awsServer);
-        this.getAppsList(awsServer);
+      let url = res[0].aws_server;
+      this.getBaseUrl(url);
+      this.getVmList(url);
+      this.getAppsList(url);
     });
   }
 
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 500);
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+  }
+
   getVmList(baseUrl: string) {
-    this.vmService.getVmList(baseUrl)
-      .subscribe(vmlist => {
-        this.vms = vmlist;
-        this.totalVms = vmlist.length;
-      });
+    this.vmService.getVmList(baseUrl).subscribe(vmlist => {
+      this.vms = vmlist;
+      this.totalVms = vmlist.length;
+    });
   }
 
   getAppsList(baseUrl: string) {
@@ -62,19 +76,27 @@ export class VmListComponent implements OnInit {
     }
   }
 
-  listFilter(status: any) {
+  listFilter(isEnabled: any) {
     // console.log('filterValue = ' + status);
-    this.filterValue = status;
+    this.filterValue = isEnabled;
     this.totalVms = this.vms.length;
   }
 
-  updateStatus(id: string): void {
-    const vm = this.vms.filter(data => data['id'] === id);
-    // vm.map((_, i) => {
-    //   vm[i].enabled ? vm[i].enabled = false : vm[i].enabled = true;
-    //   console.log(vm);
-    // });
-    // this.appsService.update(id, app);
+  updateVmStatus(id: string, isEnabled: boolean): void {
+    if (isEnabled) {
+      this.vmStatus = false;
+    } else {
+      this.vmStatus = true;
+    }
+    console.log('updating status for vm #' + id);
+    this.vmService.updateStatus(this.baseUrl, id, this.vmStatus).subscribe( data => {
+      return true;
+      },
+      error => {
+        console.log("error: " + error.message);
+      });
+    this.resetRouter();
+    this.router.navigate(['/vm']);
   }
 
   openDialog(id, type, action, text): void {
