@@ -115,4 +115,36 @@ public class ApplicationIT {
 		assertThat(application.id).isNotNull();
 	}
 
+	@Test
+	public void updateApplicationTest() {
+		List<Application> list = given().port(randomServerPort).when().get("/admin/application").then().extract()
+				.jsonPath().getList("", Application.class);
+
+		Application myApp = list.get(0);
+
+		Application updatedApp = new Application();
+		updatedApp.launchCommand = myApp.launchCommand + "-newCmd";
+		updatedApp.name = myApp.name + "-newName";
+		updatedApp.version = myApp.version + ".1";
+		Application updateReturned = given().port(randomServerPort).when().body(updatedApp)
+				.contentType(ContentType.JSON).put("/admin/application/" + myApp.id).then().extract()
+				.as(Application.class);
+
+		ApplicationDefinition app = given().port(randomServerPort).when().get("/admin/application/" + myApp.id).then()
+				.extract().as(ApplicationDefinition.class);
+		assertThat(app).isNotNull();
+		assertThat(app.getId()).isEqualTo(myApp.id);
+		assertThat(app.getLaunchCommand()).isEqualTo(updatedApp.launchCommand);
+		assertThat(app.getName()).isEqualTo(updatedApp.name);
+		assertThat(app.getOs()).isEqualTo(updatedApp.os);
+		assertThat(app.getVersion()).isEqualTo(updatedApp.version);
+
+		assertThat(updateReturned).isNotNull();
+		assertThat(updateReturned.id).isEqualTo(myApp.id);
+		assertThat(updateReturned.launchCommand).isEqualTo(updatedApp.launchCommand);
+		assertThat(updateReturned.name).isEqualTo(updatedApp.name);
+		assertThat(updateReturned.os).isEqualTo(updatedApp.os);
+		assertThat(updateReturned.version).isEqualTo(updatedApp.version);
+	}
+
 }

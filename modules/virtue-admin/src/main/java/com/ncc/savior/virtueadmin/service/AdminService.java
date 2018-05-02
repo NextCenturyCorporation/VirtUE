@@ -172,6 +172,9 @@ public class AdminService {
 
 	public ApplicationDefinition updateApplicationDefinitions(String templateId, ApplicationDefinition appDef) {
 		verifyAndReturnUser();
+		if (appDef.getId() == null) {
+			appDef.setId(templateId);
+		}
 		if (!templateId.equals(appDef.getId())) {
 			appDef = new ApplicationDefinition(templateId, appDef);
 		}
@@ -202,7 +205,13 @@ public class AdminService {
 	public VirtualMachineTemplate updateVmTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
 		VirtueUser user = verifyAndReturnUser();
 		Collection<String> appIds = vmTemplate.getApplicationIds();
+		if (appIds == null) {
+			appIds = new ArrayList<String>();
+		}
 		Iterator<ApplicationDefinition> itr = templateManager.getApplications(appIds).iterator();
+		if (vmTemplate.getId() == null) {
+			vmTemplate.setId(templateId);
+		}
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
 		}

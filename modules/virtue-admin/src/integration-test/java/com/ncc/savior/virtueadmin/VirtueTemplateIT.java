@@ -148,4 +148,49 @@ public class VirtueTemplateIT {
 		}
 	}
 
+	@Test
+	public void updateVmTemplateTest() {
+		List<VirtueTemplate> list = given().port(randomServerPort).when().get("/admin/virtue/template/").then()
+				.extract().jsonPath().getList("", VirtueTemplate.class);
+
+		VirtueTemplate myVirtue = list.get(0);
+
+		// String id, String name, String version, Collection<VirtualMachineTemplate>
+		// vmTemplates,
+		// String awsTemplateName, boolean enabled, Date lastModification, String
+		// lastEditor
+		VirtueTemplate updatedVm = new VirtueTemplate(null, "new name", "new version",
+				(List<VirtualMachineTemplate>) null, "new template", !myVirtue.isEnabled(), null, null);
+		Collection<String> virtualMachineTemplateIds = new ArrayList<String>();
+		if (!myVirtue.getVirtualMachineTemplateIds().isEmpty()) {
+			virtualMachineTemplateIds.add(myVirtue.getVirtualMachineTemplateIds().iterator().next());
+		}
+		updatedVm.setVirtualMachineTemplateIds(virtualMachineTemplateIds);
+
+		VirtueTemplate updateReturned = given().port(randomServerPort).when().body(updatedVm)
+				.contentType(ContentType.JSON).put("/admin/virtue/template/" + myVirtue.getId()).then().extract()
+				.as(VirtueTemplate.class);
+
+		VirtueTemplate virtue = given().port(randomServerPort).when().get("/admin/virtue/template/" + myVirtue.getId())
+				.then().extract().as(VirtueTemplate.class);
+
+		assertThat(virtue).isNotNull();
+		assertThat(virtue.getVirtualMachineTemplateIds()).isEqualTo(updatedVm.getVirtualMachineTemplateIds());
+		assertThat(virtue.getId()).isEqualTo(myVirtue.getId());
+		assertThat(virtue.getVersion()).isEqualTo(updatedVm.getVersion());
+		assertThat(virtue.getName()).isEqualTo(updatedVm.getName());
+		assertThat(virtue.getAwsTemplateName()).isEqualTo(updatedVm.getAwsTemplateName());
+		assertThat(virtue.isEnabled()).isEqualTo(updatedVm.isEnabled());
+
+
+		assertThat(updateReturned).isNotNull();
+		assertThat(updateReturned.getVirtualMachineTemplateIds()).isEqualTo(updatedVm.getVirtualMachineTemplateIds());
+		assertThat(updateReturned.getId()).isEqualTo(myVirtue.getId());
+		assertThat(updateReturned.getVersion()).isEqualTo(updatedVm.getVersion());
+		assertThat(updateReturned.getName()).isEqualTo(updatedVm.getName());
+		assertThat(updateReturned.getAwsTemplateName()).isEqualTo(updatedVm.getAwsTemplateName());
+		assertThat(updateReturned.isEnabled()).isEqualTo(updatedVm.isEnabled());
+
+	}
+
 }

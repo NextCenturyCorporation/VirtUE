@@ -109,8 +109,8 @@ public class AdminResource {
 
 	@PUT
 	@Produces("application/json")
-	@Path("application")
-	public ApplicationDefinition updateApplicationDefinitions(@PathParam("id") String templateId,
+	@Path("application/{templateId}")
+	public ApplicationDefinition updateApplicationDefinitions(@PathParam("templateId") String templateId,
 			ApplicationDefinition appDef) {
 		try {
 			return adminService.updateApplicationDefinitions(templateId, appDef);
@@ -262,7 +262,7 @@ public class AdminResource {
 		}
 	}
 
-	@POST
+	@PUT
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
