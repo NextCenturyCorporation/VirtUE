@@ -36,7 +36,7 @@ export class VirtuesService {
   }
 
   public getVirtue(baseUrl: string, id: string): Observable<any> {
-    let src = `${baseUrl + this.configUrl}/?id=${id}`;
+    let src = `${baseUrl + this.configUrl}/${id}`;
     return this.httpClient.get<Virtue>(src);
   }
 

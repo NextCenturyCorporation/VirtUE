@@ -41,23 +41,36 @@ export class UsersService {
     }
   }
 
-  /*
-  public update(user: User): Observable<any> {
-    return this.http.put<User>(`${this.jsondata}/${user.id}`,user);
-  }*/
+  updateUser(baseUrl: string, username: string, userData: any): Observable<any> {
+    let awsServer = baseUrl + this.configUrl + username;
+    console.log('updateUser => ');
+    console.log(username);
+    if (userData.length > 0) {
+      console.log(`Success, ${username} was updated`);
+      return this.httpClient.put(awsServer, userData, httpOptions);
+    } else {
+      console.log('Sadness, there was a problem updating this user:');
+      console.log(userData.username);
+    }
+  }
 
   assignVirtues(baseUrl: string, username: string, virtue: string) {
-    console.log('assignVirtues => ');
-    console.log(username);
-    console.log(virtue);
-
     let userRecord = baseUrl + this.configUrl + username + '/assign/' + virtue;
-
     return this.httpClient.post(userRecord, virtue, httpOptions).toPromise().then(data => {
             return data;
           },
           error => {
             console.log('users.service.ts (assignVirtues): looks like there\'s a problem posting virtue ' + virtue);
+          });
+  }
+
+  revokeVirtues(baseUrl: string, username: string, virtue: string) {
+    let userRecord = baseUrl + this.configUrl + username + '/revoke/' + virtue;
+    return this.httpClient.post(userRecord, virtue, httpOptions).toPromise().then(data => {
+            console.log('revoked ' + virtue);
+          },
+          error => {
+            console.log('users.service.ts (revokeVirtues()): looks like there\'s a problem revoking this virtue ' + virtue);
           });
   }
 

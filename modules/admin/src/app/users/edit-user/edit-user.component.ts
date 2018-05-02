@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 
 import { User } from '../../shared/models/user.model';
@@ -26,16 +26,21 @@ export class EditUserComponent implements OnInit {
   @Input() user: User;
 
   baseUrl: string;
-  userToEdit: {id: string};
-  submitBtn: any;
   fullImagePath: string;
-
+  submitBtn: string;
+  userToEdit: {id: string};
   adUserCtrl: FormControl;
+
+  userRoleUser = false;
+  userRoleAdmin = false;
   userData = [];
-  selectedVirtues = [];
+  userVirtues = [];
+  selUserVirtues = [];
+  storedVirtues = [];
 
   constructor(
-    private router: ActivatedRoute,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
     private baseUrlService: BaseUrlService,
     private usersService: UsersService,
     private virtuesService: VirtuesService,
@@ -44,7 +49,7 @@ export class EditUserComponent implements OnInit {
 
   ngOnInit() {
     this.userToEdit = {
-      id: this.router.snapshot.params['id']
+      id: this.activatedRoute.snapshot.params['id']
     };
 
     this.baseUrlService.getBaseUrl().subscribe(data => {
@@ -52,7 +57,13 @@ export class EditUserComponent implements OnInit {
       this.getBaseUrl(url);
       this.getUserToEdit(url, this.userToEdit.id);
     });
+  }
 
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.router.navigate(['/users']);
+    }, 500);
   }
 
   getBaseUrl( url: string ) {
@@ -62,40 +73,121 @@ export class EditUserComponent implements OnInit {
   getUserToEdit(baseUrl: string, username: string) {
     this.usersService.getUser(baseUrl, username).subscribe(data => {
       this.userData = data;
+      this.getUserAuth(data.authorities);
+      this.getUserVirtues(baseUrl, data.virtueTemplateIds);
+      this.displayUser(data);
     });
+  }
+
+  getUserAuth( auth: any[] ) {
+    for (let role of auth) {
+      if (role === 'ROLE_USER') {
+        this.userRoleUser = true;
+      }
+      if (role === 'ROLE_ADMIN') {
+        this.userRoleAdmin = true;
+      }
+    }
+  }
+
+  getUserVirtues(baseUrl: string, virtues: any[]) {
+    if (this.storedVirtues.length > 0) {
+      this.userVirtues = [];
+    }
+
+    for (let virtue of virtues) {
+      this.virtuesService.getVirtue(baseUrl, virtue).subscribe(data => {
+        let _virtue = {
+          'id': data.id,
+          'name': data.name,
+          'enabled': data.enabled,
+          'virtualMachineTemplateIds': data.virtualMachineTemplateIds,
+          'applicationIds': data.applicationIds
+        };
+        this.userVirtues.push(_virtue);
+
+      });
+    }
+    return this.userVirtues;
   }
 
   displayUser(userData: any) {
-    this.userData = userData[0];
+    this.userData = userData;
+    this.storedVirtues = userData.virtueTemplateIds;
+    console.log(this.storedVirtues);
   }
 
-  activateModal(id, mode): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
-    let fullImagePath = './assets/images/app-icon-white.png';
+  updateUser(username: string, roleUser: string, roleAdmin: string) {
+    username = username.trim().replace(' ', '').toLowerCase();
+    let authorities = [];
+    let virtueTemplateIds = [];
 
-    if (mode === 'add') {
-      this.submitBtn = 'Add Virtues';
-    } else {
-      this.submitBtn = 'Update List';
+    if (roleUser) {
+      authorities.push('ROLE_USER');
     }
+    if (roleAdmin) {
+      authorities.push('ROLE_ADMIN');
+    }
+    for (let item of this.storedVirtues) {
+      virtueTemplateIds.push(item);
+    }
+    console.log('virtueTemplateIds: ' + this.storedVirtues)
 
-    const dialogRef = this.dialog.open( VirtueModalComponent, {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        id: id,
-        dialogMode: mode,
-        dialogButton: this.submitBtn,
-        appIcon: this.fullImagePath
+    let body = {
+      "username": username,
+      "authorities": authorities,
+      "virtueTemplateIds": this.storedVirtues
+    };
+
+    if (!body.username) { return; }
+
+    this.usersService.updateUser(this.baseUrl, this.userToEdit.id, JSON.stringify(body)).subscribe(
+      data => {
+        return true;
       },
-      panelClass: 'virtue-modal-overlay'
+      error => {
+        console.log('Error');
+      });
+    // this.assignUserVirtues(baseUrl, username, virtueTemplateIds)
+    this.resetRouter();
+    this.router.navigate(['/users']);
+  }
+
+  assignUserVirtues(baseUrl: string, username: string, virtues: any[]) {
+    for ( let item of virtues ) {
+      this.usersService.assignVirtues(baseUrl, username, item);
+    }
+  }
+
+  removeVirtue(username: string, virtue: string) {
+    console.log('revoking virtue: ' + virtue + ' for user ' + username);
+    this.usersService.revokeVirtues(this.baseUrl, username, virtue);
+  }
+
+  activateModal(): void {
+    this.submitBtn = 'Update List';
+
+    let dialogRef = this.dialog.open(VirtueModalComponent, {
+      width: '750px',
+      data: {
+        dialogButton: this.submitBtn,
+        selUserVirtues: this.storedVirtues
+      }
     });
 
-    let screenWidth = (window.screen.width);
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
+    dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-    // dialogRef.afterClosed().subscribe();
+    const userVirtues = dialogRef.componentInstance.userVirtues.subscribe((data) => {
+      this.selUserVirtues = data;
+      if (this.selUserVirtues.length > 0) {
+        this.storedVirtues = [];
+      }
+      this.storedVirtues = this.selUserVirtues;
+      this.getUserVirtues(this.baseUrl, this.storedVirtues);
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      userVirtues.unsubscribe();
+    });
   }
 }

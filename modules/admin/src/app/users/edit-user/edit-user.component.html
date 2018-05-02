@@ -10,63 +10,79 @@
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input matInput type="text" placeholder="" value="{{ userToEdit.id }}" />
+                  <input matInput #userName type="text" placeholder="" value="{{ userToEdit.id }}" readonly />
                 </mat-form-field>
+              </div>
+              <div class="mui-col-md-12 form-item">
+                <div class="mui-col-md-6 table-data">
+                  <label>Select Role(s)</label><br />
+                  <mat-checkbox #roleUser value="ROLE_USER" [ngModel]="userRoleUser"> User</mat-checkbox><br />
+                  <mat-checkbox #roleAdmin value="ROLE_ADMIN" [ngModel]="userRoleAdmin"> Administrator</mat-checkbox>
                 </div>
               </div>
+            </div>
+            <hr />
 
               <div class="mui-row">
                 <div class="titlebar margin-top-20">
                   <h3 class="titlebar-title">Virtues</h3>
-                  <button class="titlebar-button" mat-button (click)="activateModal(0,'add')">Add Virtue</button>
+                  <button class="titlebar-button" mat-button (click)="activateModal(0,'add')">Manage Virtues</button>
                 </div>
               </div>
 
-              <!-- *ngIf="appUser.virtues"  -->
-              <div  class="mui-row">
+              <div class="mui-row">
                 <div class="table-container">
                   <div class="mui-row table-header-group">
-                    <div class="table-header mui-col-md-4">
+                    <div class="table-header mui-col-md-3">
                       <div class="text-align-left"><span>Virtue Name</span></div>
                     </div>
                     <div class="table-header mui-col-md-8">Applications</div>
+                    <div class="table-header mui-col-md-1">Status</div>
                   </div>
                   <!-- if there are no virtues, show this message   *ngIf="appUser.virtues.length < 1"  -->
-                  <div class="mui-row table-row">
+                  <div class="mui-row table-row" *ngIf="userVirtues.length < 1">
                     <div class="mui-col-md-12 padding-left-0">
                       <p class="no-data-message">
                         No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
                       </p>
                     </div>
                   </div>
-                  <div class="mui-row table-row">
-                    <div class="table-data mui-col-md-4">
-                      <div class="virtue-color margin-right-10"></div>
+                  <div class="mui-row table-row" *ngFor="let virtue of userVirtues" appActiveClass>
+                    <div class="table-data mui-col-md-3">
+                      <!-- <div class="virtue-color margin-right-10"></div> -->
                       <div class="virtue-name">
-                        <a class="edit" (click)="activateModal(1,'edit')">virtue.name</a>
+                        <a class="edit" (click)="activateModal(1,'edit')">{{ virtue.name }}</a>
                         <!-- This should show if hovered over -->
-                        <span><a href="#">Remove</a></span>
-                         [ngClass]="virtue.enabled ? 'menu-options':'menu-options'"
+                        <span [ngClass]="virtue.enabled ? 'menu-options':'menu-options'">
+                          <a (click)="removeVirtue(userData.username, virtue.id)">Remove</a>
+                        </span>
                       </div>
                     </div>
                     <div class="table-data mui-col-md-8">
-                      <div class="mui-col-md-4">
+                      <div class="mui-col-md-6">
                         <ul>
-                          <li>app.name</li>
+                          <li *ngFor="let app of virtue.applicationIds">{{ app }}</li>
                         </ul>
                       </div>
+                    </div>
+                    <div class="table-data mui-col-md-1">
+                        {{ virtue.enabled ? 'Enabled' : 'Disabled' }}
                     </div>
                     <div class="clearfix"></div>
                   </div>
                 </div>
-                <div class="paging">
-                  <div class="page-number mui-col-md-4">Page # of #</div>
-                  <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
-                  <div class="page-item-total mui-col-md-4"># User Accounts</div>
-                  <div class="clearfix"></div>
-                </div>
               </div>
           </div>
+        </div>
+        <div class="mui-row">
+          <hr />
+          <div class="mui-col-md-4">&nbsp;</div>
+          <div class="mui-col-md-4 form-item text-align-center">
+            <button class="button-cancel" type="cancel">Delete User</button>
+            <button class="button-submit" type="submit" (click)="updateUser(userName.value, userRoleUser.checked, userRoleAdmin.checked); userName.value=''" >Update User</button>
+            <button class="button-cancel" type="cancel">Cancel</button>
+          </div>
+          <div class="mui-col-md-4"></div>
         </div>
 
         <div class="mui-col-md-3">&nbsp;</div>

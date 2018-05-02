@@ -21,9 +21,9 @@ export class VirtueModalComponent implements OnInit {
 
   form: FormGroup;
 
-  addVirtues = new EventEmitter();
+  userVirtues = new EventEmitter();
   virtues = [];
-  selVirtues = [];
+  selUserVirtues = [];
   storedVirtues = [];
 
   constructor(
@@ -32,14 +32,19 @@ export class VirtueModalComponent implements OnInit {
     private usersService: UsersService,
     private virtuesService: VirtuesService,
     public dialogRef: MatDialogRef<VirtueModalComponent>,
-    @Inject( MAT_DIALOG_DATA ) public data: any
-   ) {  }
+    @Inject(MAT_DIALOG_DATA) public data: any) {
+        this.storedVirtues = data['selUserVirtues'];
+      }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getVirtues(awsServer);
     });
+
+    if (this.storedVirtues.length > 0) {
+      this.selUserVirtues = this.storedVirtues;
+    }
   }
 
   getVirtues(baseUrl: string) {
@@ -63,18 +68,19 @@ export class VirtueModalComponent implements OnInit {
 
   cbVirtueList(event, id: string, index: number) {
     if (event === true) {
-      this.selVirtues.push(id);
+      this.selUserVirtues.push(id);
+      console.log(this.selUserVirtues);
     } else {
       this.removeVm(id, index);
     }
   }
 
   removeVm(id: string, index: number) {
-    this.selVirtues.splice(this.selVirtues.indexOf(id), 1);
+    this.selUserVirtues.splice(this.selUserVirtues.indexOf(id), 1);
   }
 
   clearList() {
-    this.selVirtues = [];
+    this.selUserVirtues = [];
     this.storedVirtues = [];
   }
 
@@ -82,7 +88,7 @@ export class VirtueModalComponent implements OnInit {
     // if (this.storedVirtues.length > 0) {
     //   this.selVmsList = this.storedVirtues;
     // }
-    this.addVirtues.emit(this.selVirtues);
+    this.userVirtues.emit(this.selUserVirtues);
     this.clearList();
     this.dialogRef.close();
   }

@@ -116,7 +116,6 @@ export class AddUserComponent implements OnInit {
     for ( let item of virtues ) {
       this.usersService.assignVirtues(baseUrl, username, item);
     }
-
   }
 
   getVirtues(baseUrl: string) {
@@ -189,7 +188,7 @@ export class AddUserComponent implements OnInit {
 
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
-    const virtueList = dialogRef.componentInstance.addVirtues.subscribe((data) => {
+    const virtueList = dialogRef.componentInstance.userVirtues.subscribe((data) => {
       this.selVirtues = data;
 
       if (this.storedVirtues.length > 0) {
