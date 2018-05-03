@@ -61,6 +61,8 @@ public class AdminService {
 
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
+	@Value("${virtue.sensing.stream.url}")
+	private String sensingStreamUri;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
 			String initialAdmin) {
@@ -399,4 +401,10 @@ public class AdminService {
 		}
 	}
 
+	public InputStream getSensingStream() {
+		Client client = ClientBuilder.newClient();
+		Response response = client.target(sensingStreamUri).request(MediaType.APPLICATION_JSON_TYPE).get();
+		InputStream in = (InputStream) response.getEntity();
+		return in;
+	}
 }

@@ -3,8 +3,10 @@ package com.ncc.savior.virtueadmin.rest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -21,6 +23,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
@@ -374,6 +377,32 @@ public class AdminResource {
 		}
 	}
 
+	@GET
+	@Produces("application/json")
+	@Path("virtualMachine")
+	public Iterable<VirtualMachine> getAllActiveVirtualMachines(@QueryParam("user") String username) {
+		try {
+			Iterable<VirtueInstance> virtues;
+			if (username == null || username.trim().equals("")) {
+				virtues = adminService.getAllActiveVirtues();
+			} else {
+				virtues = adminService.getAllActiveVirtuesForUser(username);
+			}
+			Set<VirtualMachine> vms = new HashSet<VirtualMachine>();
+			for (VirtueInstance virtue : virtues) {
+				for (VirtualMachine vm : virtue.getVms()) {
+					vms.add(vm);
+				}
+			}
+			return vms;
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
 	@POST
 	@Produces("application/json")
 	@Path("user/")
@@ -598,6 +627,19 @@ public class AdminResource {
 	public Response getSensing() throws IOException {
 		try {
 			String response = adminService.getSensingReponse();
+			return Response.ok(response).build();
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+
+	}
+
+	@GET
+	@Path("sensing/stream")
+	@Produces("application/json")
+	public Response getSensingStream() throws IOException {
+		try {
+			InputStream response = adminService.getSensingStream();
 			return Response.ok(response).build();
 		} catch (Exception e) {
 			throw WebServiceUtil.createWebserviceException(e);

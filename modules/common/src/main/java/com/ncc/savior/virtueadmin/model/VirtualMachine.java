@@ -103,6 +103,7 @@ public class VirtualMachine {
 		return userName;
 	}
 
+	@JsonIgnore
 	public String getPrivateKey() {
 		return privateKey;
 	}
@@ -170,6 +171,7 @@ public class VirtualMachine {
 		return null;
 	}
 
+	@JsonIgnore
 	public String getPrivateKeyName() {
 		return privateKeyName;
 	}
