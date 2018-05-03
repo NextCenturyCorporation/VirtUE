@@ -91,7 +91,7 @@ public class VirtualMachineTemplate {
 		return applications;
 	}
 
-	protected void setId(String id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

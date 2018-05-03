@@ -76,7 +76,7 @@ public class VirtueUser {
 
 	public void addVirtueTemplate(VirtueTemplate virtueTemplate) {
 		if (virtueTemplates == null) {
-			virtueTemplates = new ArrayList<VirtueTemplate>();
+			virtueTemplates = new HashSet<VirtueTemplate>();
 		}
 		virtueTemplates.add(virtueTemplate);
 	}
