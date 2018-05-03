@@ -135,6 +135,17 @@ public class AdminService {
 		return viTemplate;
 	}
 
+	public VirtueTemplate toggleVirtueTemplateEnabled(String templateId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueTemplate viTemplate = templateManager.getVirtueTemplate(templateId);
+		boolean enabled = viTemplate.isEnabled();
+		viTemplate.setEnabled(!enabled);
+		viTemplate.setLastModification(new Date());
+		viTemplate.setLastEditor(user.getUsername());
+		templateManager.addVirtueTemplate(viTemplate);
+		return viTemplate;
+	}
+
 	public VirtualMachineTemplate getVmTemplate(String templateId) {
 		verifyAndReturnUser();
 		VirtualMachineTemplate vmTemplate = templateManager.getVmTemplate(templateId);
@@ -387,4 +398,5 @@ public class AdminService {
 			throw new IllegalArgumentException("No sensing URI was set");
 		}
 	}
+
 }

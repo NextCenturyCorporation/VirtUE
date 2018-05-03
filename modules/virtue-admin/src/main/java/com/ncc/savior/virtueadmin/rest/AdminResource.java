@@ -262,6 +262,21 @@ public class AdminResource {
 		}
 	}
 
+	@GET
+	@Produces("application/json")
+	@Path("virtue/template/{id}/toggle")
+	public VirtueTemplate toggleVirtueTemplateEnabled(@PathParam("id") String templateId) {
+		try {
+			VirtueTemplate virtueTemplate = adminService.toggleVirtueTemplateEnabled(templateId);
+			return virtueTemplate;
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
 	@PUT
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
@@ -301,7 +316,6 @@ public class AdminResource {
 	 */
 	@GET
 	@Produces("application/json")
-
 	@Path("createvirtue/type/{templateId}")
 	public VirtueInstance createVirtueFromTemplate(@PathParam("templateId") String templateId) {
 		try {
