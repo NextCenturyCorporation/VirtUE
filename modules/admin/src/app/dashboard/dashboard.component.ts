@@ -50,7 +50,6 @@ export class DashboardComponent implements OnInit {
   sensorData = [];
   virtues = [];
   virtueName: string;
-;
 
   // constructor(){}
   constructor(
