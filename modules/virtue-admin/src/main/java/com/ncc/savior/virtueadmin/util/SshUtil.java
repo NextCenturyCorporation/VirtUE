@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -61,14 +63,74 @@ public class SshUtil {
 			String line;
 			JavaUtil.sleepAndLogInterruption(500);
 			while ((line = br.readLine()) != null || (line = er.readLine()) != null) {
-				logger.debug(line);
+				logger.debug("  : " + line);
 				lines.add(line);
 			}
+			logger.debug("finished command successfully");
 			return lines;
+		} catch (Exception e) {
+			logger.debug("finished command exceptionally", e);
+			throw e;
 		} finally {
 			JavaUtil.closeIgnoreErrors(br, er);
 			myChannel.disconnect();
 		}
+	}
+
+	public static List<String> sendCommandFromSessionWithTimeout(Session session, String command, long waitTimeMillis)
+			throws JSchException, IOException {
+		logger.debug("sending command: " + command);
+		ChannelExec myChannel = (ChannelExec) session.openChannel("exec");
+		InputStreamReader er = null;
+		InputStreamReader reader = null;
+		ArrayList<String> lines = new ArrayList<String>();
+		try {
+			myChannel.setCommand(command);
+			// OutputStream ops = myChannel.getOutputStream();
+			// PrintStream ps = new PrintStream(ops, true);
+			myChannel.connect();
+			InputStream input = myChannel.getInputStream();
+			reader = new InputStreamReader(input);
+
+			er = new InputStreamReader(myChannel.getErrStream());
+			JavaUtil.sleepAndLogInterruption(waitTimeMillis);
+			String error = readAvailable(er);
+			String output = readAvailable(reader);
+			lines.add(output);
+			lines.add(error);
+			logger.debug("finished command successfully");
+			return lines;
+		} catch (Exception e) {
+			logger.debug("finished command exceptionally", e);
+			throw e;
+		} finally {
+			JavaUtil.closeIgnoreErrors(reader, er);
+			myChannel.disconnect();
+		}
+	}
+
+	/**
+	 * This function explicitly reads only what is available and does not wait until
+	 * the stream is finished. Therefore, some of the stream may be lost.
+	 * 
+	 * @param reader
+	 * @return
+	 * @throws IOException
+	 */
+	private static String readAvailable(InputStreamReader reader) throws IOException {
+		if (reader.ready()) {
+			int size = 4096;
+			char[] cbuf = new char[size];
+			int offset = 0;
+			StringBuilder sb = new StringBuilder();
+			while (reader.ready()) {
+				int numRead = reader.read(cbuf, offset, size);
+				char[] buffer = Arrays.copyOf(cbuf, numRead);
+				sb.append(new String(buffer));
+			}
+			return sb.toString();
+		}
+		return "";
 	}
 
 	public static void waitForAllVmsReachableParallel(Collection<VirtualMachine> vms, int periodMillis) {
@@ -121,12 +183,7 @@ public class SshUtil {
 		// BufferedReader reader = null;
 		// BufferedReader ereader = null;
 		try {
-			ssh.addIdentity(privateKeyFile.getAbsolutePath());
-			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
-			session.setConfig("PreferredAuthentications", "publickey");
-			session.setConfig("StrictHostKeyChecking", "no");
-			session.setTimeout(500);
-			session.connect();
+			session = SshUtil.getConnectedSession(vm, privateKeyFile, ssh);
 			channel = (ChannelExec) session.openChannel("exec");
 			channel.setCommand("echo 'Testing reachability of VM'");
 			channel.connect(0);
@@ -143,9 +200,10 @@ public class SshUtil {
 			// }
 			return true;
 		} catch (JSchException e) {
-			if (e.getMessage().contains("Auth fail")) {
-				throw new SaviorException(SaviorException.CONFIGURATION_ERROR, "Auth fail trying to login to vm=" + vm);
-			}
+			// if (e.getMessage().contains("Auth fail")) {
+			// throw new SaviorException(SaviorException.CONFIGURATION_ERROR, "Auth fail
+			// trying to login to vm=" + vm);
+			// }
 			logger.trace("Vm is not reachable yet: " + e.getMessage());
 			return false;
 		} catch (Throwable t) {
@@ -160,6 +218,22 @@ public class SshUtil {
 			}
 			// JavaUtil.closeIgnoreErrors(reader, ereader);
 		}
+	}
+
+	public static Session getConnectedSession(VirtualMachine vm, File privateKeyFile) throws JSchException {
+		JSch ssh = new JSch();
+		return getConnectedSession(vm, privateKeyFile, ssh);
+	}
+
+	public static Session getConnectedSession(VirtualMachine vm, File privateKeyFile, JSch ssh) throws JSchException {
+		Session session;
+		ssh.addIdentity(privateKeyFile.getAbsolutePath());
+		session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
+		session.setConfig("PreferredAuthentications", "publickey");
+		session.setConfig("StrictHostKeyChecking", "no");
+		session.setTimeout(1000);
+		session.connect();
+		return session;
 	}
 
 	public static String getKeyFromFile(File privateKey) {
@@ -207,4 +281,24 @@ public class SshUtil {
 
 	}
 
+	public static void disconnectLogErrors(Session session, Channel channel) {
+		try {
+			if (channel != null && channel.isConnected()) {
+				channel.disconnect();
+			}
+		} catch (Throwable t) {
+			logger.warn("Error attempting to disconnect SSH channel.", t);
+		}
+		disconnectLogErrors(session);
+	}
+
+	public static void disconnectLogErrors(Session session) {
+		try {
+			if (session != null && session.isConnected()) {
+				session.disconnect();
+			}
+		} catch (Throwable t) {
+			logger.warn("Error attempting to disconnect SSH session.", t);
+		}
+	}
 }

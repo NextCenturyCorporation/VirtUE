@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 import javafx.application.Platform;
@@ -20,6 +21,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -32,6 +34,7 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.stage.WindowEvent;
@@ -56,6 +59,8 @@ public class VirtueMenuItem {
 	private ImageView statusSpinner;
 	private Image statusImage;
 	private RgbColor color;
+	private Button startButton;
+	private Button stopButton;
 
 	public VirtueMenuItem(DesktopVirtue virtue, VirtueService virtueService, Image statusImage, int width,
 			RgbColor color) {
@@ -98,6 +103,9 @@ public class VirtueMenuItem {
 			style = new BorderStroke(c, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(2, 2, 2, 2));
 		}
 		pane.setBorder(new Border(style));
+		Pane startStopPane = getStartStopVirtue();
+		// HBox hbox = new HBox();
+		pane.getChildren().add(startStopPane);
 		// VBox vpane = getStartStopVirtue();
 		// HBox hbox = new HBox();
 		// pane.getChildren().add(vpane);
@@ -106,6 +114,7 @@ public class VirtueMenuItem {
 		// pane.getChildren().add(hbox);
 		pane.getChildren().add(statusSpinner);
 		HBox.setMargin(label, new Insets(0, 0, 0, 5));
+		HBox.setMargin(startStopPane, new Insets(0, 0, 0, 2));
 		return pane;
 	}
 
@@ -121,6 +130,57 @@ public class VirtueMenuItem {
 	// vbox.getChildren().add(stopButton);
 	// return vbox;
 	// }
+	private Pane getStartStopVirtue() {
+		HBox pane = new HBox();
+		Image startImage = new Image("images/play.png");
+		ImageView startView = new ImageView(startImage);
+		Image stopImage = new Image("images/stop.png");
+		ImageView stopView = new ImageView(stopImage);
+		startView.setFitWidth(12);
+		startView.setFitHeight(12);
+		stopView.setFitWidth(12);
+		stopView.setFitHeight(12);
+		this.startButton = new Button("", startView);
+		this.stopButton = new Button("", stopView);
+		startButton.setMaxWidth(12);
+		startButton.setMaxHeight(12);
+		stopButton.setMaxWidth(12);
+		stopButton.setMaxHeight(12);
+		setStartStopButtonStatus(virtue);
+		startButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					virtueService.startVirtue(virtue);
+					virtue.setVirtueState(VirtueState.LAUNCHING);
+					updateVirtue(virtue);
+				} catch (IOException e) {
+					String msg = "Error attempting to start virtue=" + virtue;
+					logger.error(msg, e);
+				}
+			}
+		});
+		stopButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					virtueService.stopVirtue(virtue);
+					virtue.setVirtueState(VirtueState.STOPPING);
+					updateVirtue(virtue);
+				} catch (IOException e) {
+					String msg = "Error attempting to stop virtue=" + virtue;
+					logger.error(msg, e);
+				}
+			}
+		});
+
+		pane.getChildren().add(startButton);
+		pane.getChildren().add(stopButton);
+
+		return pane;
+	}
 
 	private String getLabel(DesktopVirtue virtue) {
 		String name = virtue.getName();
@@ -246,6 +306,13 @@ public class VirtueMenuItem {
 		return node;
 	}
 
+	private void setStartStopButtonStatus(DesktopVirtue virtue) {
+		boolean startable = VirtueService.startableVirtueStates.contains(virtue.getVirtueState());
+		boolean stoppable = VirtueService.stopableVirtueStates.contains(virtue.getVirtueState());
+		startButton.setDisable(!startable);
+		stopButton.setDisable(!stoppable);
+	}
+
 	public void updateVirtue(DesktopVirtue virtue) {
 		this.virtue = virtue;
 		String text = getLabel(virtue);
@@ -253,6 +320,7 @@ public class VirtueMenuItem {
 			@Override
 			public void run() {
 				label.setText(text);
+				setStartStopButtonStatus(virtue);
 			}
 		});
 	}

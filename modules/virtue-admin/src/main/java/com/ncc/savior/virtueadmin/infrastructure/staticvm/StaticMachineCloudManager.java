@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure.staticvm;
 
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -24,14 +25,14 @@ public class StaticMachineCloudManager implements ICloudManager {
 	}
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		// do nothing
 	}
 
 	@Override
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 		Collection<VirtualMachineTemplate> templates = template.getVmTemplates();
-		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, templates);
+		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, templates, null);
 		VirtueInstance virtue = new VirtueInstance(UUID.randomUUID().toString(), template.getName(), user.getUsername(),
 				template.getId(), template.getApplications(), vms);
 		return virtue;

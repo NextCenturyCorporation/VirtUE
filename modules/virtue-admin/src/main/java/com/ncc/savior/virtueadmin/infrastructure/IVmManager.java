@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -44,60 +45,8 @@ public interface IVmManager {
 	 * @param vmt
 	 * @return
 	 */
-	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt);
-
-	/**
-	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
-	 * will be started when this function returns. However, if the VM is not started
-	 * upon return, the implementation should notify the
-	 * {@link IStateUpdateListener}s when it has finished starting.
-	 * 
-	 * @param vm
-	 * @return
-	 */
-	public VirtualMachine startVirtualMachine(VirtualMachine vm);
-
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms);
-
-	/**
-	 * Initiates a stop action on the provided VM. It is not guaranteed that the VM
-	 * will be stopped when this function returns. However, if the VM is not stopped
-	 * upon return, the implementation should notify the
-	 * {@link IStateUpdateListener}s when it has finished stopping.
-	 * 
-	 * @param vm
-	 * @return
-	 */
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm);
-
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms);
-
-	/**
-	 * Calling this function notifies that the VM is no longer needed and the
-	 * manager is free to reclaim its resources. The obvious implementation should
-	 * just delete the VM, however, the manager could save it and repurpose it if
-	 * necessary.
-	 * 
-	 * @param vm
-	 */
-	// TODO TBD if a VM is repurposed, who is responsible for reseting user access
-	// and user data?
-	public void deleteVirtualMachine(VirtualMachine vm);
-
-	/**
-	 * Deletes all vms
-	 * 
-	 * @param vms
-	 */
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms);
-
-	/**
-	 * Returns the current state of the given Virtual Machine.
-	 * 
-	 * @param vm
-	 * @return
-	 */
-	public VmState getVirtualMachineState(VirtualMachine vm);
+	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
+			CompletableFuture<Collection<VirtualMachine>> vmFutures);
 
 	/**
 	 * Convenience/Performance function to provision multiple VMs at one time. See
@@ -109,6 +58,63 @@ public interface IVmManager {
 	 * @return
 	 */
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates);
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures);
+
+	/**
+	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
+	 * will be started when this function returns. However, if the VM is not started
+	 * upon return, the implementation should notify the
+	 * {@link IStateUpdateListener}s when it has finished starting.
+	 * 
+	 * @param vm
+	 * @return
+	 */
+	public VirtualMachine startVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture);
+
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture);
+
+	/**
+	 * Initiates a stop action on the provided VM. It is not guaranteed that the VM
+	 * will be stopped when this function returns. However, if the VM is not stopped
+	 * upon return, the implementation should notify the
+	 * {@link IStateUpdateListener}s when it has finished stopping.
+	 * 
+	 * @param vm
+	 * @return
+	 */
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture);
+
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture);
+
+	/**
+	 * Calling this function notifies that the VM is no longer needed and the
+	 * manager is free to reclaim its resources. The obvious implementation should
+	 * just delete the VM, however, the manager could save it and repurpose it if
+	 * necessary.
+	 * 
+	 * @param vm
+	 */
+	// TODO TBD if a VM is repurposed, who is responsible for reseting user access
+	// and user data?
+	public void deleteVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future);
+
+	/**
+	 * Deletes all vms
+	 * 
+	 * @param vms
+	 */
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future);
+
+	/**
+	 * Returns the current state of the given Virtual Machine.
+	 * 
+	 * @param vm
+	 * @return
+	 */
+	public VmState getVirtualMachineState(VirtualMachine vm);
 
 }

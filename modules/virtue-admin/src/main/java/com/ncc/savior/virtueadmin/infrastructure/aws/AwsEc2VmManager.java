@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 
 	public AwsEc2VmManager(IKeyManager keyManager, String region, boolean usePublicDns) {
 		this.region = region;
-		this.usePublicDns=usePublicDns;
+		this.usePublicDns = usePublicDns;
 		try {
 			init();
 		} catch (Exception e) {
@@ -120,9 +121,11 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt) {
+	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		Collection<VirtualMachineTemplate> vmTemplates = new ArrayList<VirtualMachineTemplate>(1);
-		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates);
+		vmTemplates.add(vmt);
+		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future);
 		if (vms.size() != 1) {
 			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
 			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
@@ -133,7 +136,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine startVirtualMachine(VirtualMachine vm) {
+	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		List<String> instanceIds = new ArrayList<String>(1);
 		instanceIds.add(vm.getInfrastructureId());
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
@@ -144,7 +147,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm) {
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		List<String> instanceIds = new ArrayList<String>(1);
 		instanceIds.add(vm.getInfrastructureId());
 		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
@@ -155,7 +158,8 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
 		ec2.startInstances(startInstancesRequest);
@@ -167,7 +171,8 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms) {
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
 		ec2.stopInstances(stopInstancesRequest);
@@ -179,7 +184,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public void deleteVirtualMachine(VirtualMachine vm) {
+	public void deleteVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		List<String> instanceIds = new ArrayList<String>(1);
 		instanceIds.add(vm.getInfrastructureId());
 		TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(instanceIds);
@@ -200,7 +205,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates) {
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -249,7 +254,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	 * </ul>
 	 * 
 	 * @param vms
-	 * @param usePublicDns 
+	 * @param usePublicDns
 	 */
 	private void modifyVms(ArrayList<VirtualMachine> vms, boolean usePublicDns) {
 		long a = System.currentTimeMillis();
@@ -298,7 +303,8 @@ public class AwsEc2VmManager extends BaseVmManager {
 	}
 
 	@Override
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms) {
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
 		try {
 			List<String> instanceIds = new ArrayList<String>(vms.size());
 			for (VirtualMachine vm : vms) {
