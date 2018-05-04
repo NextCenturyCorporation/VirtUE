@@ -16,7 +16,7 @@ const httpHeader = {
 
 export class VirtualMachineService {
 
-  private configUrl = 'admin/virtualMachine/template';
+  private configUrl = 'admin/virtualMachine/template/';
   // private restApi = './assets/json/vm_list.json';
 
   constructor(
@@ -24,9 +24,9 @@ export class VirtualMachineService {
     private hostname: Globals
    ) {  }
 
-  public getVmList(baseUrl: string): Observable<VirtualMachine[]> {
+  public getVmList(baseUrl: string): Observable<any> {
     let src = baseUrl + this.configUrl;
-    return this.httpClient.get<VirtualMachine[]>(src);
+    return this.httpClient.get<any>(src);
   }
 
   public getVM(baseUrl: string, id: string): Observable<any> {

@@ -10,7 +10,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Virtue } from '../models/virtue.model';
 import { MessageService } from './message.service';
 
-const httpHeader = {
+const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
@@ -36,14 +36,22 @@ export class VirtuesService {
   }
 
   public getVirtue(baseUrl: string, id: string): Observable<any> {
-    let src = `${baseUrl + this.configUrl}/?id=${id}`;
-    return this.httpClient.get<Virtue>(src);
+    let url = `${baseUrl + this.configUrl}/${id}`;
+    return this.httpClient.get<Virtue>(url);
   }
 
-/**
-  public createVirtue(virtue: Virtue): Observable<any> {
-    return this.http.post(this.restApi, virtue);
+  public createVirtue(baseUrl: string, virtueData: any): Observable<any> {
+    let url = `${baseUrl + this.configUrl}`;
+    if (virtueData) {
+      console.log(virtueData);
+      return this.httpClient.post(url, virtueData, httpOptions);
+    } else {
+      console.log('Sadness, there was a problem creating this virtue:');
+      console.log(virtueData);
+    }
+    // return this.http.post(url, virtueData);
   }
+/**
 
   public updateVirtue(id: string, virtue: Virtue): Observable<any> {
     const src = `${this.restApi}/?id=${id}`;

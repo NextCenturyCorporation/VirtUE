@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Routes, RouterModule, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material';
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 
@@ -32,28 +33,41 @@ export class CreateVirtueComponent implements OnInit {
 
   constructor(
     private baseUrlService: BaseUrlService,
+    private router: Router,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog
   ) { }
 
   ngOnInit() {
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getBaseUrl(awsServer);
+    });
+
     if (this.pageVmList.length > 0) {
-      this.baseUrlService.getBaseUrl().subscribe(res => {
-        let awsServer = res[0].aws_server;
-          this.getVmList(awsServer);
-      });
+      this.getVmList();
     }
   }
 
-  getVmList(baseUrl: string) {
-    this.baseUrl = baseUrl;
-    // loop through the selected VM list
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+    console.log('URL: ' + url);
+  }
+
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.router.navigate(['/users']);
+    }, 500);
+  }
+
+  getVmList() {
     const selectedVm = this.pageVmList;
-    // console.log('page VM list @ getVmList(): ' + this.pageVmList);
-    this.vmService.getVmList(baseUrl)
+    this.vmService.getVmList(this.baseUrl)
       .subscribe(data => {
         if (this.vmList.length < 1) {
+          console.log(this.pageVmList);
           for (let sel of selectedVm) {
             for (let vm of data) {
               if (sel === vm.id) {
@@ -63,7 +77,7 @@ export class CreateVirtueComponent implements OnInit {
             }
           }
         } else {
-          this.getUpdatedVmList(baseUrl);
+          this.getUpdatedVmList(this.baseUrl);
         }
       });
   }
@@ -92,7 +106,7 @@ export class CreateVirtueComponent implements OnInit {
         for (let sel of this.pageVmList) {
           for (let vm of data) {
             if (sel === vm.id) {
-              this.vmList.push(vm);
+              this.vmList.push(vm.id);
               break;
             }
           }
@@ -101,25 +115,31 @@ export class CreateVirtueComponent implements OnInit {
   }
 
   createVirtue(virtueName: string) {
-    this.getAppList();
-    let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
-    let newVirtue = [{
-      // 'id': 'TEST',
+    let _virtues = [];
+    for (let vm of this.vmList) {
+      _virtues.push(vm.id);
+    }
+    console.log(_virtues);
+    let body = [{
       'name': virtueName,
       'version': '1.0',
-      'vmTemplates': this.vmList,
-      'users': user,
       'enabled': true,
       'lastEditor': 'skim',
-      'applications': this.appList
+      'virtualMachineTemplateIds': _virtues
     }];
     // console.log('New Virtue: ');
     // console.log(newVirtue);
 
-    // this.virtuesService.createVirtue({newVirtue} as Virtue)
-    // .subscribe(data => {
-    //   this.virtues.push(data);
-    // });
+    this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
+      data => {
+        return true;
+      },
+      error => {
+        console.log(error.message);
+      });
+    
+    this.resetRouter();
+    this.router.navigate(['/virtues']);
   }
 
 
@@ -133,7 +153,7 @@ export class CreateVirtueComponent implements OnInit {
   activateModal(id: string): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
-      width: '750px',
+      width: '800px',
       data: {
         selectedVms: this.pageVmList
       }
@@ -149,7 +169,7 @@ export class CreateVirtueComponent implements OnInit {
       }
       this.pageVmList = this.selVmsList;
 
-      this.getVmList(this.baseUrl);
+      this.getVmList();
     });
 
     dialogRef.afterClosed().subscribe(() => {
