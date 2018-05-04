@@ -109,6 +109,14 @@ public class SshUtil {
 		}
 	}
 
+	/**
+	 * This function explicitly reads only what is available and does not wait until
+	 * the stream is finished. Therefore, some of the stream may be lost.
+	 * 
+	 * @param reader
+	 * @return
+	 * @throws IOException
+	 */
 	private static String readAvailable(InputStreamReader reader) throws IOException {
 		if (reader.ready()) {
 			int size = 4096;
@@ -293,5 +301,4 @@ public class SshUtil {
 			logger.warn("Error attempting to disconnect SSH session.", t);
 		}
 	}
-
 }

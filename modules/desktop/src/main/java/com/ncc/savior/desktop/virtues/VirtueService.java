@@ -199,12 +199,18 @@ public class VirtueService {
 		apps.add(appDefn);
 	}
 
+	// TODO Arguable, this could be handled differently.
+	// * Ignore non-startable states
+	// * Throw an Exception for non-startable states
+	// * Allow non-startable states to follow through (maybe the user knows
+	// something) and allow the server to return errors
 	public void startVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (startableVirtueStates.contains(virtue.getVirtueState())) {
 			desktopResourceService.startVirtue(virtue.getId());
 		}
 	}
 
+	// TODO see notes above and apply to this
 	public void stopVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (stopableVirtueStates.contains(virtue.getVirtueState())) {
 			desktopResourceService.stopVirtue(virtue.getId());

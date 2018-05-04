@@ -201,12 +201,17 @@ public class VirtueInstance {
 		for (VirtualMachine vm : vms) {
 			states.add(getVirtueStateFromVmState(vm.getState()));
 		}
+		// Since states is a set, if there is only one state, it will be returned
+		// properly
 		if (states.size() == 1) {
 			return states.iterator().next();
 		}
 		if (states.isEmpty() || states.contains(VirtueState.ERROR)) {
 			return VirtueState.ERROR;
 		}
+		// At this point, picking a virtue state gets very tricky unless it falls in one
+		// of the "good-path", expected situations where some VM's are in progress
+		// towards a state and some are in that state.
 		if (states.contains(VirtueState.LAUNCHING) && states.contains(VirtueState.RUNNING)) {
 			return VirtueState.LAUNCHING;
 		}

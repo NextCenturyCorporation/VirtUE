@@ -21,6 +21,11 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
  */
 public interface ICloudManager {
 
+	// It is somewhat odd that there is a future here, but no where else at this
+	// level. This is due to the notifiers that update the vms and virtues not
+	// having a delete function. We may want to add a delete function to the
+	// notifiers and remove the future here. This would contain all futures inside
+	// the ICloudManager level.
 	void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future);
 
 	VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception;
