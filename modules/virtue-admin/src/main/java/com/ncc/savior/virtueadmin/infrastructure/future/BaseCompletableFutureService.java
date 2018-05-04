@@ -9,8 +9,12 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
- * Base class for services services that may be asynchoronous and use
+ * Base class for services services that may be asynchronous and use
  * {@link CompletableFuture}s to indicate completion and pass parameters.
+ * 
+ * These services help to chain futures together as well as schedule tasks that
+ * should occur intermittently until successful.
+ * 
  * Implementers are expected to implement
  * {@link #offer(Object, Object, CompletableFuture)} calls and need to call
  * {@link #onSuccess(Object, CompletableFuture)} or

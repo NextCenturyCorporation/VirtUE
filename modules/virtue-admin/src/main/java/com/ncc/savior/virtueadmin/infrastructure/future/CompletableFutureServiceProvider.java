@@ -17,7 +17,9 @@ import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * Class that creates and stores all the Completable Future Services
- * ({@link BaseCompletableFutureService}).
+ * ({@link BaseCompletableFutureService}). This is just a shortcut class to
+ * store all the services. They could in the future be injected individually in
+ * class that need them.
  * 
  *
  */

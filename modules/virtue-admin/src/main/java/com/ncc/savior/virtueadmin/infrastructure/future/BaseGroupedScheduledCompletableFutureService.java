@@ -30,8 +30,14 @@ import com.amazonaws.services.elasticmapreduce.util.ResizeJobFlowStep.OnFailure;
  * 
  *
  * @param <P>
+ *            - input parameter to service that will be given from
+ *            {@link CompletableFuture} (usually from previous service)
  * @param <R>
+ *            - Return type parameter that is returned via return
+ *            {@link CompletableFuture} (often goes to the next service)
  * @param <X>
+ *            - extra information class. Can be any class and is just passed
+ *            along with the data. This could be a virtue id, for example.
  */
 
 public abstract class BaseGroupedScheduledCompletableFutureService<P, R, X>

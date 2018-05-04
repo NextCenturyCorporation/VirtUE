@@ -10,8 +10,14 @@ import java.util.concurrent.CompletableFuture;
  * 
  *
  * @param <P>
+ *            - input parameter to service that will be given from
+ *            {@link CompletableFuture} (usually from previous service)
  * @param <R>
+ *            - Return type parameter that is returned via return
+ *            {@link CompletableFuture} (often goes to the next service)
  * @param <X>
+ *            - extra information class. Can be any class and is just passed
+ *            along with the data. This could be a virtue id, for example.
  */
 public abstract class BaseImediateCompletableFutureService<P, R, X> extends BaseCompletableFutureService<P, R, X> {
 

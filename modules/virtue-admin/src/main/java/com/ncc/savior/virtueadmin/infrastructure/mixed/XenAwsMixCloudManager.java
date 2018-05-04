@@ -23,6 +23,25 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * {@link AsyncAwsEc2VmManager}, but defers any linux boxes to a
  * {@link XenHostManager}.
  * 
+ * This implementation is based on {@link CompletableFuture}s.
+ * {@link CompletableFuture}s allow for asynchronous tasks to be chained
+ * together to occur in order when the previous completes. With access to the
+ * future, code has the ability to complete it successfully or exceptionally at
+ * any time.
+ * 
+ * <ul>
+ * <li>TODO Errors usually get passed through the chain, but are often not
+ * handled here. Need to handle errors better
+ * <li>TODO Need to interact with futures from outside events. (I.E. VM could be
+ * deleted on AWS while the system thinks it is still provisioning)
+ * <li>TODO There are no timeouts for services where they may never complete
+ * (reachability for a VM that has been deleted)
+ * <li>Nothing prevents a Virtue that is in one process from being acted upon.
+ * I.E. if a virtue is provisioning, it can be requested to be deleted. Doing
+ * this would cause issues where futures would get lost and status may not be
+ * accurate. We should allow for the current future of a VM to be retrieved and
+ * interrupted (completeExceptionally).
+ * 
  *
  */
 public class XenAwsMixCloudManager implements ICloudManager {
@@ -57,10 +76,16 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		CompletableFuture<Collection<VirtualMachine>> windowsFuture=new CompletableFuture<Collection<VirtualMachine>>();
+		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		awsVmManager.deleteVirtualMachines(windowsVms, windowsFuture);
-		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms, xenFuture,null);
+		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms, xenFuture, null);
+		// Database needs to be updated when we delete, but we don't have access here.
+		// This is one of a couple ways to handle this and could be reviewed. Most
+		// likely, the notifiers (that usually update the database in the
+		// CompletableFuture services) should have delete/remove methods.
+		//
+		// Currently, we use this future to pass it out so we can delete it elsewhere.
 		CompletableFuture.allOf(windowsFuture, xenFuture).thenRun(() -> {
 			future.complete(virtueInstance);
 		});
@@ -92,12 +117,17 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture);
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
+			// When xen (really NFS) and all windows VM's are up
+			// Add them to the windows startup services service
+
 			// windowsNfsMountingService.addVirtueToQueue(vi);
 			for (VirtualMachine windows : winVms) {
 				windowsNfsMountingService.addWindowsStartupServices(xen, windows);
 			}
 			return winVms;
 		}).thenAccept((Collection<VirtualMachine> finishedWindowsBoxes) -> {
+			// Once startup services are done on windows machines, set VM state to running
+			// and notify (notify saves to DB typically)
 			for (VirtualMachine winBox : finishedWindowsBoxes) {
 				CompletableFuture<VirtualMachine> myCf = serviceProvider.getUpdateStatus().startFutures(winBox,
 						VmState.RUNNING);
