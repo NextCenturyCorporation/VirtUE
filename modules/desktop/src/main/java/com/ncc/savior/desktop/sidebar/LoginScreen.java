@@ -147,9 +147,6 @@ public class LoginScreen extends Stage {
 		} catch (Exception t) {
 			logger.error("login failed", t);
 			warningLbl.setText("Login Failed: " + t.getMessage());
-		} catch (Exception t) {
-			logger.error("login failed", t);
-			warningLbl.setText("Login Failed: " + t.getMessage());
 		}
 	}
 
