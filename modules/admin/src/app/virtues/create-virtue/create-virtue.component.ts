@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Routes, RouterModule, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material';
+import { Observable } from 'rxjs/Observable';
+
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
@@ -19,8 +23,10 @@ import { VirtualMachine } from '../../shared/models/vm.model';
   styleUrls: ['./create-virtue.component.css'],
   providers: [ BaseUrlService, VirtuesService, VirtualMachineService ]
 })
+
 export class CreateVirtueComponent implements OnInit {
   vms: VirtualMachine;
+  virtueForm: FormControl;
   activeClass: string;
   baseUrl: string;
   users: User[];
@@ -37,7 +43,18 @@ export class CreateVirtueComponent implements OnInit {
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog
-  ) { }
+  ) {
+    this.virtueForm = new FormControl();
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+  }
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log(req);
+    return next.handle(req);
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
@@ -58,7 +75,6 @@ export class CreateVirtueComponent implements OnInit {
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-      this.router.navigate(['/users']);
     }, 500);
   }
 
@@ -67,7 +83,6 @@ export class CreateVirtueComponent implements OnInit {
     this.vmService.getVmList(this.baseUrl)
       .subscribe(data => {
         if (this.vmList.length < 1) {
-          console.log(this.pageVmList);
           for (let sel of selectedVm) {
             for (let vm of data) {
               if (sel === vm.id) {
@@ -115,20 +130,20 @@ export class CreateVirtueComponent implements OnInit {
   }
 
   createVirtue(virtueName: string) {
-    let _virtues = [];
-    for (let vm of this.vmList) {
-      _virtues.push(vm.id);
+    console.log(virtueName);
+    let virtueVms = [];
+    for (let vm of this.pageVmList) {
+      virtueVms.push(vm);
     }
-    console.log(_virtues);
-    let body = [{
+    console.log(virtueVms);
+    let body = {
       'name': virtueName,
       'version': '1.0',
       'enabled': true,
-      'lastEditor': 'skim',
-      'virtualMachineTemplateIds': _virtues
-    }];
+      'virtualMachineTemplateIds': virtueVms
+    };
     // console.log('New Virtue: ');
-    // console.log(newVirtue);
+    console.log(body);
 
     this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
       data => {
@@ -137,7 +152,7 @@ export class CreateVirtueComponent implements OnInit {
       error => {
         console.log(error.message);
       });
-    
+
     this.resetRouter();
     this.router.navigate(['/virtues']);
   }

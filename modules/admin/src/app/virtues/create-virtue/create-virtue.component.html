@@ -4,7 +4,6 @@
   </div>
 
   <div id="content-main" class="border-top">
-    <form id="create-virtue" method="post">
       <div id="content" class="virtue-content">
         <vertical-split-pane
           primary-component-minsize="60"
@@ -17,7 +16,7 @@
 
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
-                <input type="text" #virtueName value="" placeholder="Virtue Name" />
+                <input type="text" #virtueName placeholder="Virtue Name" matInput />
               </div>
             </div>
             <div class="mui-row titlebar">
@@ -85,14 +84,14 @@
             <input #editor type="hidden" value="system" />
           </div>
           <div class="mui-col-md-4 form-item text-align-center">
-            <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Create Another Virtue</span>
-            <button (click)="createVirtue(virtueName.value); virtueName.value=''" class="button-submit" type="submit">Create Virtue</button>
+            <span class="margin-right-10">
+              <input name="create-another" type="checkbox" value="1" /> Create Another Virtue
+            </span>
+            <button class="button-submit" type="submit" (click)="createVirtue(virtueName.value); virtueName.value=''">Create Virtue</button>
             <button class="button-cancel" type="cancel">Cancel</button>
           </div>
           <div class="mui-col-md-4"></div>
         </div>
       </div>
-
-    </form>
   </div>
 </div>

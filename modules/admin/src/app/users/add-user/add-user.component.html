@@ -10,7 +10,7 @@
             <div class="mui-row">
               <div class="mui-col-md-12 form-item">
                 <mat-form-field>
-                  <input type="text" #userName placeholder="User Name" aria-label="Number" matInput>
+                  <input type="text" #userName placeholder="User Name" aria-label="Username" matInput>
                 </mat-form-field>
               </div>
               <div class="mui-col-md-12 form-item">
@@ -81,7 +81,7 @@
                 <div class="mui-col-md-4">&nbsp;</div>
                 <div class="mui-col-md-4 form-item text-align-center">
                   <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Add Another User</span>
-                  <button class="button-submit" type="submit" (click)="addUser(userName.value, roleUser.checked, roleAdmin.checked); userName.value=''" >Add User</button>
+                  <button class="button-submit" type="submit" (click)="addUser(userName.value, roleUser.checked, roleAdmin.checked); userName.value=''; roleUser.checked = false; roleAdmin.checked = false;" >Add User</button>
                   <button class="button-cancel" type="cancel">Cancel</button>
                 </div>
                 <div class="mui-col-md-4"></div>
