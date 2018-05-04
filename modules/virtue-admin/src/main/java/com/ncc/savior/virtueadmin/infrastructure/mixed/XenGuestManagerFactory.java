@@ -3,8 +3,8 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 import java.io.File;
 
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
-import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
@@ -15,22 +15,20 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 public class XenGuestManagerFactory {
 
 	private IKeyManager keyManager;
-	private IUpdateListener<VirtualMachine> notifier;
-	private XenGuestVmUpdater guestVmUpdater;
 	private Route53Manager route53;
+	private CompletableFutureServiceProvider serviceProvider;
 
-	public XenGuestManagerFactory(IKeyManager keyManager, IUpdateListener<VirtualMachine> notifier,
+	public XenGuestManagerFactory(IKeyManager keyManager, CompletableFutureServiceProvider serviceProvider,
 			Route53Manager route53) {
 		this.keyManager = keyManager;
-		this.notifier = notifier;
 		this.route53 = route53;
-		guestVmUpdater = new XenGuestVmUpdater(notifier, keyManager);
+		this.serviceProvider = serviceProvider;
 	}
 
 	public XenGuestManager getXenGuestManager(VirtualMachine xenVm) {
 		String keyName = xenVm.getPrivateKeyName();
 		File keyFile = keyManager.getKeyFileByName(keyName);
-		XenGuestManager xgm = new XenGuestManager(xenVm, keyFile, notifier, guestVmUpdater, route53);
+		XenGuestManager xgm = new XenGuestManager(xenVm, keyFile, serviceProvider, route53);
 		return xgm;
 	}
 

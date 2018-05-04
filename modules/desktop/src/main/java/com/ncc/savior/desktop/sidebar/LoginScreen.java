@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
-import com.sun.jna.platform.win32.Win32Exception;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -145,7 +144,7 @@ public class LoginScreen extends Stage {
 			logger.debug("Login to domain=" + domain + " user=" + username + " was successful!");
 			triggerLoginSuccessListener(user);
 			close();
-		} catch (Win32Exception t) {
+		} catch (Exception t) {
 			logger.error("login failed", t);
 			warningLbl.setText("Login Failed: " + t.getMessage());
 		}

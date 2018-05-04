@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
@@ -52,10 +51,10 @@ public class WindowsStartupAppsService {
 		this.activeVirtueDao = activeVirtueDao;
 		this.keyManager = keyManager;
 		this.virtueList = Collections.synchronizedList(new ArrayList<String>());
-		startPollingThread();
+		// startPollingThread();
 	}
 
-	private void startPollingThread() {
+	public void startPollingThread() {
 		this.pollingThread = new Thread(new Runnable() {
 
 			@Override
@@ -66,7 +65,7 @@ public class WindowsStartupAppsService {
 					logger.error("Windows NFS Mounting Service polling thread stopped!", t);
 				}
 			}
-		}, "WindowsNfsMountingService");
+		}, "WindowsStartupServiceThread");
 		this.pollingThread.setDaemon(true);
 		this.pollingThread.start();
 	}
@@ -114,22 +113,16 @@ public class WindowsStartupAppsService {
 		return false;
 	}
 
-	public boolean addWindowsStartupServices(VirtualMachine nfs, VirtualMachine windows) {
-		JSch ssh = new JSch();
+	public boolean addWindowsStartupServices(VirtualMachine nfsOrXen, VirtualMachine windows) {
 		Session session = null;
-		logger.debug("Attempting to mount NFS on windows box for virtue " + nfs.getId());
+		logger.debug("Attempting to mount NFS on windows box for virtue " + nfsOrXen.getId());
 		try {
 			File keyFile = keyManager.getKeyFileByName(windows.getPrivateKeyName());
-			ssh.addIdentity(keyFile.getAbsolutePath());
-			session = ssh.getSession(windows.getUserName(), windows.getHostname(), 22);
-			session.setConfig("PreferredAuthentications", "publickey");
-			session.setConfig("StrictHostKeyChecking", "no");
-			session.setTimeout(500);
-			session.connect();
-			String cmd = String.format(command, nfs.getInternalIpAddress());
-			String cmd2 = String.format(command2, nfs.getInternalIpAddress());
+			session=SshUtil.getConnectedSession(windows, keyFile);
+			String cmd = String.format(command, nfsOrXen.getInternalIpAddress());
+			String cmd2 = String.format(command2, nfsOrXen.getInternalIpAddress());
 			List<String> output = SshUtil.sendCommandFromSession(session, cmd);
-			logger.debug(output.toString());
+			logger.debug("Cmd=" + cmd + " output=" + output.toString());
 			output = SshUtil.sendCommandFromSession(session, cmd2);
 			logger.debug(output.toString());
 			return true;

@@ -73,4 +73,8 @@ public interface IActiveVirtueDao {
 
 	Iterable<VirtueInstance> getVirtueInstances(Collection<String> virtueList);
 
+	Iterable<VirtualMachine> getAllVirtualMachines();
+
+	void deleteVm(VirtualMachine vm);
+
 }

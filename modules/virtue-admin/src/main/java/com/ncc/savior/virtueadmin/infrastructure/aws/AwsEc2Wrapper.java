@@ -97,14 +97,19 @@ public class AwsEc2Wrapper {
 
 	public void stopVirtualMachines(Collection<VirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
-		StopInstancesRequest startInstancesRequest = new StopInstancesRequest(instanceIds);
-		StopInstancesResult result = ec2.stopInstances(startInstancesRequest);
-		for (InstanceStateChange i : result.getStoppingInstances()) {
-			for (VirtualMachine vm : vms) {
-				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
-					vm.setState(VmState.STOPPING);
+		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest(instanceIds);
+		stopInstancesRequest.withForce(true);
+		try {
+			StopInstancesResult result = ec2.stopInstances(stopInstancesRequest);
+			for (InstanceStateChange i : result.getStoppingInstances()) {
+				for (VirtualMachine vm : vms) {
+					if (vm.getInfrastructureId().equals(i.getInstanceId())) {
+						vm.setState(VmState.STOPPING);
+					}
 				}
 			}
+		} catch (Exception e) {
+			logger.error("error", e);
 		}
 	}
 
