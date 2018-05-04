@@ -144,4 +144,43 @@ public class VmTemplateIT {
 		assertThat(appIds.size()).isEqualTo(newAppIds.size());
 	}
 
+	@Test
+	public void updateVmTemplateTest() {
+		List<VirtualMachineTemplate> list = given().port(randomServerPort).when().get("/admin/virtualMachine/template/")
+				.then().extract().jsonPath().getList("", VirtualMachineTemplate.class);
+
+		VirtualMachineTemplate myVm = list.get(0);
+
+		VirtualMachineTemplate updatedVm = new VirtualMachineTemplate(null, "new name", OS.MAC, "new path",
+				null, "loginner", !myVm.isEnabled(), null, null);
+		updatedVm.setApplicationIds(myVm.getApplicationIds());
+
+		VirtualMachineTemplate updateReturned = given().port(randomServerPort).when().body(updatedVm)
+				.contentType(ContentType.JSON).put("/admin/virtualMachine/template/" + myVm.getId()).then().extract()
+				.as(VirtualMachineTemplate.class);
+
+		VirtualMachineTemplate vm = given().port(randomServerPort).when()
+				.get("/admin/virtualMachine/template/" + myVm.getId()).then().extract()
+				.as(VirtualMachineTemplate.class);
+		assertThat(vm).isNotNull();
+		assertThat(vm.getApplicationIds()).isEqualTo(updatedVm.getApplicationIds());
+		assertThat(vm.getId()).isEqualTo(myVm.getId());
+		assertThat(vm.getLoginUser()).isEqualTo(updatedVm.getLoginUser());
+		assertThat(vm.getName()).isEqualTo(updatedVm.getName());
+		assertThat(vm.getOs()).isEqualTo(updatedVm.getOs());
+		assertThat(vm.getSecurityTag()).isEqualTo(updatedVm.getSecurityTag());
+		assertThat(vm.getTemplatePath()).isEqualTo(updatedVm.getTemplatePath());
+		assertThat(vm.isEnabled()).isEqualTo(updatedVm.isEnabled());
+
+		assertThat(updateReturned).isNotNull();
+		assertThat(updateReturned.getApplicationIds()).isEqualTo(updatedVm.getApplicationIds());
+		assertThat(updateReturned.getId()).isEqualTo(myVm.getId());
+		assertThat(updateReturned.getLoginUser()).isEqualTo(updatedVm.getLoginUser());
+		assertThat(updateReturned.getName()).isEqualTo(updatedVm.getName());
+		assertThat(updateReturned.getOs()).isEqualTo(updatedVm.getOs());
+		assertThat(updateReturned.getSecurityTag()).isEqualTo(updatedVm.getSecurityTag());
+		assertThat(updateReturned.getTemplatePath()).isEqualTo(updatedVm.getTemplatePath());
+		assertThat(updateReturned.isEnabled()).isEqualTo(updatedVm.isEnabled());
+	}
+
 }

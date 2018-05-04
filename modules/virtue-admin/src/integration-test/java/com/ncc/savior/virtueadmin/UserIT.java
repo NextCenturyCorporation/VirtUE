@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,6 +20,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.ncc.savior.virtueadmin.RoleIT.Role;
+import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+
+import io.restassured.http.ContentType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -45,6 +49,29 @@ public class UserIT {
 	}
 
 	@Test
+	public void createUsersTest() {
+		List<VirtueTemplate> listOfTemplates = given().port(randomServerPort).when().get("/admin/virtue/template")
+				.then().extract().jsonPath().getList("", VirtueTemplate.class);
+
+		User userToPost = new User();
+		userToPost.username = "ItTestUser1";
+		userToPost.authorities = new ArrayList<String>();
+		userToPost.authorities.add("ROLE_USER");
+		userToPost.virtueTemplateIds = new ArrayList<String>();
+		userToPost.virtueTemplateIds.add(listOfTemplates.get(0).getId());
+
+		ContentType contentType = ContentType.JSON;
+		User userReturned = given().port(randomServerPort).when().body(userToPost).contentType(contentType)
+				.post("/admin/user").then().extract().as(User.class);
+
+		User user = given().port(randomServerPort).when().get("/admin/user/" + userToPost.username).then().extract()
+				.as(User.class);
+
+		assertThat(user).isEqualToComparingFieldByFieldRecursively(userReturned);
+		assertThat(user).isEqualToComparingFieldByFieldRecursively(userToPost);
+	}
+
+	@Test
 	public void listUsersTest() {
 		List<User> list = given().port(randomServerPort).when().get("/admin/user").then().extract().jsonPath()
 				.getList("", User.class);
@@ -59,7 +86,7 @@ public class UserIT {
 		for (User user : list) {
 			User retrievedUser = given().port(randomServerPort).when().get("/admin/user/{username}", user.username)
 					.as(User.class);
-			assertThat(retrievedUser).isEqualToComparingFieldByFieldRecursively(retrievedUser);
+			assertThat(user).isEqualToComparingFieldByFieldRecursively(retrievedUser);
 		}
 	}
 
