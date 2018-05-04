@@ -12,6 +12,7 @@ package com.ncc.savior.virtueadmin.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -130,7 +131,7 @@ public class VirtueInstance {
 		this.id = id;
 	}
 
-	protected void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
@@ -195,54 +196,66 @@ public class VirtueInstance {
 	}
 
 	private VirtueState getVirtueStateFrom(Collection<VirtualMachine> vms) {
-		// TODO this should probably be handled elsewhere
-		state = VirtueState.RUNNING;
-		boolean creating = false;
-		boolean launching = false;
-		boolean deleting = false;
+		// TODO this should probably be handled elsewhere or rethought
+		Set<VirtueState> states = new HashSet<VirtueState>();
 		for (VirtualMachine vm : vms) {
-			VmState s = vm.getState();
-			switch (s) {
-			case RUNNING:
-				// do nothing
-				break;
-			case CREATING:
-				creating = true;
-				break;
-			case LAUNCHING:
-				creating = true;
-				break;
-			case DELETING:
-				deleting = true;
-				break;
-			case ERROR:
-				setState(null);
-				return null;
-			case PAUSED:
-				break;
-			case PAUSING:
-				break;
-			case RESUMING:
-				break;
-			case STOPPED:
-				break;
-			case STOPPING:
-				break;
-			default:
-				break;
-			}
+			states.add(getVirtueStateFromVmState(vm.getState()));
 		}
-		if ((creating || launching) && deleting) {
-			return (null);
+		// Since states is a set, if there is only one state, it will be returned
+		// properly
+		if (states.size() == 1) {
+			return states.iterator().next();
 		}
+		if (states.isEmpty() || states.contains(VirtueState.ERROR)) {
+			return VirtueState.ERROR;
+		}
+		// At this point, picking a virtue state gets very tricky unless it falls in one
+		// of the "good-path", expected situations where some VM's are in progress
+		// towards a state and some are in that state.
+		if (states.contains(VirtueState.LAUNCHING) && states.contains(VirtueState.RUNNING)) {
+			return VirtueState.LAUNCHING;
+		}
+		if (states.contains(VirtueState.CREATING)
+				&& (states.contains(VirtueState.RUNNING) || states.contains(VirtueState.LAUNCHING))) {
+			return VirtueState.CREATING;
+		}
+		if (states.contains(VirtueState.STOPPING) && states.contains(VirtueState.STOPPED)) {
+			return VirtueState.STOPPING;
+		}
+		if (states.contains(VirtueState.DELETING) && states.contains(VirtueState.DELETED)) {
+			return VirtueState.STOPPING;
+		}
+		return VirtueState.ERROR;
+	}
 
-		if ((creating || launching)) {
-			return (VirtueState.LAUNCHING);
+	public static VirtueState getVirtueStateFromVmState(VmState s) {
+		switch (s) {
+		case RUNNING:
+			return VirtueState.RUNNING;
+		case CREATING:
+			return VirtueState.CREATING;
+		case LAUNCHING:
+			return VirtueState.LAUNCHING;
+		case DELETING:
+			return VirtueState.DELETING;
+		case DELETED:
+			return VirtueState.DELETED;
+		case ERROR:
+			return VirtueState.ERROR;
+		case PAUSED:
+			return VirtueState.PAUSED;
+		case PAUSING:
+			return VirtueState.PAUSING;
+		case RESUMING:
+			return VirtueState.RESUMING;
+		case STOPPED:
+			return VirtueState.STOPPED;
+		case STOPPING:
+			return VirtueState.STOPPING;
+		default:
+			break;
 		}
-		if (deleting) {
-			return (VirtueState.DELETING);
-		}
-		return VirtueState.RUNNING;
+		return null;
 	}
 
 }

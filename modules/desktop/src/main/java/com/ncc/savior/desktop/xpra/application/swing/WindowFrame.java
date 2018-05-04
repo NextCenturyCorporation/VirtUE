@@ -95,18 +95,23 @@ public abstract class WindowFrame {
 
 	public static WindowFrame createWindow(NewWindowPacket packet, Window owner) {
 		boolean modal = packet.getMetadata().getModal();
+		WindowFrame frame;
 		if (owner != null) {
 			JDialog dialog = new JDialog(owner);
+			dialog.setFocusTraversalKeysEnabled(false);
 			if (modal) {
 				dialog.setModalityType(ModalityType.DOCUMENT_MODAL);
 			} else {
 				dialog.setModalityType(ModalityType.MODELESS);
 			}
 			// dialog.setLocation(packet.getX(), packet.getY());
-			return new DialogWindowFrame(dialog);
+			frame = new DialogWindowFrame(dialog);
 		} else {
-			return new NormalWindowFrame(new JFrame());
+			JFrame jframe = new JFrame();
+			jframe.setFocusTraversalKeysEnabled(false);
+			frame = new NormalWindowFrame(jframe);
 		}
+		return frame;
 	}
 
 	public Window getWindow() {

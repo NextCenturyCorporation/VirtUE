@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,9 +98,13 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
-		cloudManager.deleteVirtue(vi);
-		if (vi.getUsername().equals(user.getUsername())) {
 
+		if (vi.getUsername().equals(user.getUsername())) {
+			CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();
+			cloudManager.deleteVirtue(vi, future);
+			future.thenAccept((virtue) -> {
+				virtueDao.deleteVirtue(virtue);
+			});
 		} else {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
@@ -113,8 +118,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
-		cloudManager.deleteVirtue(vi);
-		virtueDao.deleteVirtue(vi);
+		CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();
+		cloudManager.deleteVirtue(vi, future);
+		future.thenAccept((virtue) -> {
+			virtueDao.deleteVirtue(virtue);
+		});
 	}
 
 	@Override
@@ -136,6 +144,40 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 					"Cannot find virtue with id=" + instanceId + " for user=" + user.getUsername());
 		}
 		return vi;
+	}
+
+	@Override
+	public VirtueInstance startVirtue(VirtueUser user, String virtueId) {
+		Optional<VirtueInstance> v = virtueDao.getVirtueInstance(virtueId);
+		if (v.isPresent()) {
+			VirtueInstance virtue = v.get();
+			if (virtue.getUsername().equals(user.getUsername())) {
+				virtue = cloudManager.startVirtue(virtue);
+				return virtue;
+			} else {
+				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+						"User=" + user.getUsername() + " is not authorized to start virtueId=" + virtueId);
+			}
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+		}
+	}
+
+	@Override
+	public VirtueInstance stopVirtue(VirtueUser user, String virtueId) {
+		Optional<VirtueInstance> v = virtueDao.getVirtueInstance(virtueId);
+		if (v.isPresent()) {
+			VirtueInstance virtue = v.get();
+			if (virtue.getUsername().equals(user.getUsername())) {
+				virtue = cloudManager.stopVirtue(virtue);
+				return virtue;
+			} else {
+				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+						"User=" + user.getUsername() + " is not authorized to stop virtueId=" + virtueId);
+			}
+		} else {
+			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+		}
 	}
 
 	@Override
