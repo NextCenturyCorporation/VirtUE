@@ -1,7 +1,9 @@
 import { Injector, Injectable } from '@angular/core';
 import { AsyncPipe, JsonPipe } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 
+import 'rxjs/add/observable/throw';
+import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
@@ -47,6 +49,8 @@ export class VirtuesService {
 
   public deleteVirtue(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id;
+    console.log('Deleting... ' + url);
+
     return this.httpClient.delete(url).toPromise().then(
       data => {
         return true;
@@ -59,21 +63,23 @@ export class VirtuesService {
   public updateVirtue(baseUrl: string, id: string, virtueData: any) {
     let url = baseUrl + this.configUrl + id;
     console.log(url);
-    return this.httpClient.put(url, virtueData, httpOptions).toPromise().then(
-      data => {
-        return true;
-      },
-      error => {
-      console.log(error.message);
-    });
+    return this.httpClient.put(url, virtueData, httpOptions)
+            .catch(this.errorHandler);
+    // .toPromise().then(
+    //   data => {
+    //     return true;
+    //   },
+    //   error => {
+    //   console.log(error.message);
+    // });
   }
 
-  toggleVirtueStatus(baseUrl: string, id: string) {
+  toggleVirtueStatus(baseUrl: string, id: string, virtueStatus: boolean) {
     let url = baseUrl + this.configUrl + id + '/toggle';
     console.log(url);
     return this.httpClient.get(url).toPromise().then(
       data => {
-        return true;
+        console.log(data[0].enabled);
       },
       error => {
       console.log(error.message);
@@ -94,6 +100,10 @@ export class VirtuesService {
    * @ param operation - name of the operation that failed
    * @ param result - optional value to return as the observable result
    */
+   errorHandler(error: HttpErrorResponse) {
+     return Observable.throw(error.message || "Server Error");
+   }
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
 

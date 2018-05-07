@@ -8,6 +8,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
@@ -25,7 +26,7 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
   selector: 'app-edit-virtue',
   templateUrl: './edit-virtue.component.html',
   styleUrls: ['./edit-virtue.component.css'],
-  providers: [ BaseUrlService, VirtuesService, VirtualMachineService ]
+  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
 })
 
 export class EditVirtueComponent implements OnInit {
@@ -35,19 +36,21 @@ export class EditVirtueComponent implements OnInit {
   virtualMachine: VirtualMachine;
   activeClass: string;
   baseUrl: string;
+  errorMsg: any;
   users: User[];
   virtues: Virtue[];
 
   virtueData = [];
   vmInfo = [];
   vmList = [];
-  appList = [];
+  appsList = [];
   selVmsList = [];
   pageVmList = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
+    private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
@@ -64,8 +67,9 @@ export class EditVirtueComponent implements OnInit {
 
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-      this.getThisVirtue(awsServer, this.virtueId.id);
       this.getBaseUrl(awsServer);
+      this.getThisVirtue(awsServer, this.virtueId.id);
+      this.getAppsList(awsServer);
       if (this.pageVmList.length > 0) {
         this.getVirtueVmList(this.pageVmList);
       }
@@ -73,12 +77,12 @@ export class EditVirtueComponent implements OnInit {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    console.log(req);
     return next.handle(req);
   }
 
   getBaseUrl(url: string) {
     this.baseUrl = url;
+    console.log('getBaseUrl() => ' + this.baseUrl);
   }
 
   resetRouter() {
@@ -115,21 +119,6 @@ export class EditVirtueComponent implements OnInit {
         }
       );
     }
-    // this.vmService.getVmList(this.baseUrl)
-    // .subscribe(data => {
-    //   if (this.vmList.length < 1) {
-    //     for (let vm of data) {
-    //       for (let sel of selectedVm) {
-    //         if (sel === vm.id) {
-    //           this.vmList.push(vm);
-    //           break;
-    //         }
-    //       }
-    //     }
-    //   } else {
-    //     this.getUpdatedVmList(this.baseUrl);
-    //   }
-    // });
   }
 
   getVmInfo(id: string, prop: string) {
@@ -143,16 +132,16 @@ export class EditVirtueComponent implements OnInit {
     }
   }
 
-  getAppList() {
-    let vms = this.vmList;
-    let apps = [];
-    for (let vm of vms) {
-      apps = vm.applications;
-      // for (let app of apps) {
-        // this.appList.push({
-        //
-        // });
-      // }
+  getAppsList(baseUrl: string) {
+    this.appsService.getAppsList(baseUrl).subscribe(data => {
+      this.appsList = data;
+    });
+  }
+
+  getAppName(id: string) {
+    const app = this.appsList.filter(data =>  id === data.id);
+    if (id !== null) {
+      return app[0].name;
     }
   }
 
@@ -172,9 +161,12 @@ export class EditVirtueComponent implements OnInit {
   }
 
   removeVm(id: string, index: number): void {
+    console.log(id);
     this.vmList = this.vmList.filter(data => {
       return data.id !== id;
     });
+    console.log(this.vmList);
+    // console.log('new vm list: ' + this.vmList);
     this.pageVmList.splice(index, 1);
   }
 
@@ -225,18 +217,26 @@ export class EditVirtueComponent implements OnInit {
     };
     console.log('updating virtue #' + id);
     console.log(body);
-    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
+    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body)).subscribe(
+      data => {
+        console.log('Updating ' + data.name + '(' + data.id + ')');
+      },
+      error => {
+        console.log(error);
+      });
     this.resetRouter();
     // this.router.navigate(['/virtues']);
   }
 
-  virtueStatus(isEnabled: boolean): void {
+  virtueStatus(id: string, isEnabled: boolean): void {
     if (isEnabled) {
       this.virtueEnabled = false;
     } else {
       this.virtueEnabled = true;
     }
-    console.log(this.virtueEnabled);
+    console.log('Virtue is enabled: ' + this.virtueEnabled);
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id, isEnabled);
+    this.resetRouter();
   }
 
   deleteVirtue(id): void {

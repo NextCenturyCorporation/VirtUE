@@ -29,6 +29,7 @@ export class VirtueListComponent implements OnInit, OnDestroy {
   virtues = [];
   vmList = [];
   appsList = [];
+  virtueEnabled: boolean;
   baseUrl: string;
   virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
@@ -126,13 +127,15 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     this.resetRouter();
   }
 
-  virtueStatus(id: string, virtue: Virtue): void {
-    // console.log(id);
-    // const virtueObj = this.virtues.filter(data => id === virtue.id);
-    console.log(id);
-    // virtueObj.map((_, i) => {
-    //   virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;
-    // });
+  virtueStatus(id: string, isEnabled: boolean) {
+    if (isEnabled) {
+      this.virtueEnabled = false;
+    } else {
+      this.virtueEnabled = true;
+    }
+    console.log('Virtue is enabled: ' + this.virtueEnabled);
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id, isEnabled);
+    this.resetRouter();
   }
 
 }

@@ -54,7 +54,7 @@
                 <div class="table-data mui-col-md-2">{{ vm.os }}</div>
                 <div class="table-data mui-col-md-5">
                   <ul>
-                    <li *ngFor="let app of vm.applications">{{ app.name }}</li>
+                    <li *ngFor="let app of vm.applicationIds">{{ getAppName(app) }}</li>
                   </ul>
                 </div>
                 <div class="clearfix"></div>

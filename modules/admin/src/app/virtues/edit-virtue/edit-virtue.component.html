@@ -56,16 +56,16 @@
                   <a mat-button (click)="activateModal(vm)">{{ vm.name }}</a>
                   <!-- getVmInfo(vm, 'name') -->
                   <span class="menu-options" *ngIf="vm.enabled">
-                    <button>Disable</button> | <button mat-button (click)="removeVm(vm, i)">Remove</button>
+                    <button>Disable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
                   </span>
                   <span class="menu-options" *ngIf="vm.enabled===false">
-                    <button>Enable</button> | <button mat-button (click)="removeVm(vm, i)">Remove</button>
+                    <button>Enable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
                   </span>
                 </div>
                 <div class="table-data mui-col-md-2">{{ vm.os }}</div>
                 <div class="table-data mui-col-md-5">
                   <ul class="padding-left-5">
-                    <li *ngFor="let app of vm.applicationIds">{{ app }}</li>
+                    <li *ngFor="let id of vm.applicationIds">{{ getAppName(id) }}</li>
                   </ul>
                 </div>
                 <div class="table-data mui-col-md-1">{{ vm.enabled ? 'Enabled':'Disabled' }} </div>

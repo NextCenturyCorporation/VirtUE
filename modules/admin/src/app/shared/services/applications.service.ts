@@ -17,7 +17,7 @@ const httpHeader = {
 
 export class ApplicationsService {
 
-  configUrl = 'admin/application';
+  configUrl = 'admin/application/';
   // restApi = './assets/json/applications.json';
 
   constructor(
@@ -31,13 +31,13 @@ export class ApplicationsService {
   // }
 
   public getAppsList(baseUrl: string): Observable<Application[]> {
-    const src = `${baseUrl + this.configUrl}`;
+    const src = baseUrl + this.configUrl;
     return this.httpClient.get<Application[]>(src);
   }
 
   public getApp(baseUrl: string, id: string): Observable<Application[]> {
-    const src = `${baseUrl + this.configUrl}/?id=${id}`;
-    // console.log('getApp ID: ' + id + ' @ ' + src);
+    const src = baseUrl + this.configUrl + id;
+    console.log(src);
     return this.httpClient.get<Application[]>(src);
   }
 
