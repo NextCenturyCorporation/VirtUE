@@ -18,7 +18,7 @@ const httpOptions = {
 
 export class VirtuesService {
 
-  private configUrl = 'admin/virtue/template';
+  private configUrl = 'admin/virtue/template/';
   // private restApi = './assets/json/virtue_list.json';
 
   constructor(
@@ -36,20 +36,48 @@ export class VirtuesService {
   }
 
   public getVirtue(baseUrl: string, id: string): Observable<any> {
-    let url = `${baseUrl + this.configUrl}/${id}`;
+    let url = baseUrl + this.configUrl + id;
     return this.httpClient.get<Virtue>(url);
   }
 
   public createVirtue(baseUrl: string, virtueData: any): Observable<any> {
     let url = `${baseUrl + this.configUrl}`;
-    if (virtueData) {
-      console.log(virtueData);
-      return this.httpClient.post(url, virtueData, httpOptions);
-    } else {
-      console.log('Sadness, there was a problem creating this virtue:');
-      console.log(virtueData);
-    }
-    // return this.http.post(url, virtueData);
+    return this.httpClient.post(url, virtueData, httpOptions);
+  }
+
+  public deleteVirtue(baseUrl: string, id: string) {
+    let url = baseUrl + this.configUrl + id;
+    return this.httpClient.delete(url).toPromise().then(
+      data => {
+        return true;
+      },
+      error => {
+      console.log(error.message);
+    });
+  }
+
+  public updateVirtue(baseUrl: string, id: string, virtueData: any) {
+    let url = baseUrl + this.configUrl + id;
+    console.log(url);
+    return this.httpClient.put(url, virtueData, httpOptions).toPromise().then(
+      data => {
+        return true;
+      },
+      error => {
+      console.log(error.message);
+    });
+  }
+
+  toggleVirtueStatus(baseUrl: string, id: string) {
+    let url = baseUrl + this.configUrl + id + '/toggle';
+    console.log(url);
+    return this.httpClient.get(url).toPromise().then(
+      data => {
+        return true;
+      },
+      error => {
+      console.log(error.message);
+    });
   }
 /**
 
@@ -58,9 +86,7 @@ export class VirtuesService {
     return this.http.put(src, virtue);
   }
 
-  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-    return this.http.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
-  }
+
 */
   /**
    * Handle Http operation that failed.

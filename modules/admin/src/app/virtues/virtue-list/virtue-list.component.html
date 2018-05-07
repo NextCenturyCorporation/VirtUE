@@ -37,7 +37,8 @@
 
             <!-- if this virtue is enabled show this menu -->
             <span *ngIf="virtue.enabled" class="menu-options">
-              <a mat-button (click)="virtueStatus(virtue.id)">Disable</a>
+              <a mat-button (click)="virtueStatus(virtue.id)">Disable</a> |
+              <a mat-button (click)="deleteVirtue(virtue.id)">Delete</a>
             </span>
 
             <!-- if this virtue is disabled show this menu -->

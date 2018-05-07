@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
+import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
@@ -28,6 +30,8 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 
 export class EditVirtueComponent implements OnInit {
   virtueId: { id: string };
+  virtueForm: FormControl;
+  virtueEnabled: boolean;
   virtualMachine: VirtualMachine;
   activeClass: string;
   baseUrl: string;
@@ -42,71 +46,90 @@ export class EditVirtueComponent implements OnInit {
   pageVmList = [];
 
   constructor(
-    private route: ActivatedRoute,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     private location: Location,
     public dialog: MatDialog
-  ) { }
+  ) {
+      this.virtueForm = new FormControl();
+    }
 
   ngOnInit() {
     this.virtueId = {
-      id: this.route.snapshot.params['id']
+      id: this.activatedRoute.snapshot.params['id']
     };
 
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-      this.getThisVirtue(awsServer);
-      if (this.vmList.length > 0) {
-        this.getVmList(awsServer);
+      this.getThisVirtue(awsServer, this.virtueId.id);
+      this.getBaseUrl(awsServer);
+      if (this.pageVmList.length > 0) {
+        this.getVirtueVmList(this.pageVmList);
       }
     });
   }
 
-  getThisVirtue(baseUrl: string) {
-    this.baseUrl = baseUrl;
-    const id = this.virtueId.id;
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log(req);
+    return next.handle(req);
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+  }
+
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 500);
+  }
+
+  getThisVirtue(baseUrl: string, id: string) {
     this.virtuesService.getVirtue(baseUrl, id).subscribe(data => {
-      for (let vObj of data) {
-        if (vObj.id === id) {
-          this.virtueData = vObj;
-          // this.vmList = vObj.virtualMachineTemplateIds;
-          for (let vm of vObj.virtualMachineTemplateIds) {
-            this.pageVmList.push(vm);
-            this.vmList.push(vm);
-          }
-          break;
-        }
-        return this.virtueData;
-      }
+      this.virtueData = data;
+      this.pageVmList = data.virtualMachineTemplateIds;
+      this.virtueEnabled = data.enabled;
+      this.getVirtueVmList(data.virtualMachineTemplateIds);
     });
   }
 
-  getAllVms(baseUrl: string) {
-    this.vmService.getVmList(baseUrl).subscribe(vms => {
+  getAllVms() {
+    this.vmService.getVmList(this.baseUrl).subscribe(vms => {
       this.vmList = vms;
     });
   }
 
-  getVmList(baseUrl: string) {
+  getVirtueVmList(virtueVms: any[]) {
     // loop through the selected VM list
     let selectedVm = this.pageVmList;
-    this.vmService.getVmList(baseUrl)
-    .subscribe(data => {
-      if (this.vmList.length < 1) {
-        for (let vm of data) {
-          for (let sel of selectedVm) {
-            if (sel === vm.id) {
-              this.vmList.push(vm);
-              break;
-            }
-          }
+    for (let id of selectedVm) {
+      this.vmService.getVM(this.baseUrl, id).subscribe(
+        data => {
+          this.vmList.push(data);
+        },
+        error => {
+          console.log(error.message);
         }
-      } else {
-        this.getUpdatedVmList(baseUrl);
-      }
-    });
+      );
+    }
+    // this.vmService.getVmList(this.baseUrl)
+    // .subscribe(data => {
+    //   if (this.vmList.length < 1) {
+    //     for (let vm of data) {
+    //       for (let sel of selectedVm) {
+    //         if (sel === vm.id) {
+    //           this.vmList.push(vm);
+    //           break;
+    //         }
+    //       }
+    //     }
+    //   } else {
+    //     this.getUpdatedVmList(this.baseUrl);
+    //   }
+    // });
   }
 
   getVmInfo(id: string, prop: string) {
@@ -185,18 +208,35 @@ export class EditVirtueComponent implements OnInit {
       this.pageVmList = this.selVmsList;
 
 
-      this.getVmList(this.baseUrl);
+      this.getVirtueVmList(this.pageVmList);
     });
 
-    dialogRef.afterClosed().subscribe(() => {
-      vms.unsubscribe();
-    });
+    // dialogRef.afterClosed().subscribe(() => {
+    //   vms.unsubscribe();
+    // });
   }
 
-  virtueStatus(virtue: Virtue): void {
-    // console.log(this.virtueData['enabled']);
-    this.virtueData['enabled'] ? this.virtueData['enabled'] = false : this.virtueData['enabled'] = true;
-    // this.virtuesService.updateVirtue(this.virtueId.id, this.virtueData);
+  updateThisVirtue(id: string, virtueName: string, virtueVersion: string) {
+    let body = {
+      'name': virtueName,
+      'version': virtueVersion,
+      'enabled': this.virtueEnabled,
+      'virtualMachineTemplateIds': this.pageVmList
+    };
+    console.log('updating virtue #' + id);
+    console.log(body);
+    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
+    this.resetRouter();
+    // this.router.navigate(['/virtues']);
+  }
+
+  virtueStatus(isEnabled: boolean): void {
+    if (isEnabled) {
+      this.virtueEnabled = false;
+    } else {
+      this.virtueEnabled = true;
+    }
+    console.log(this.virtueEnabled);
   }
 
   deleteVirtue(id): void {

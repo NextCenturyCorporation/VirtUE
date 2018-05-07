@@ -1,6 +1,6 @@
 import { Component, Injector, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { filter } from 'rxjs/operators';
 
@@ -34,7 +34,7 @@ export class VirtueListComponent implements OnInit, OnDestroy {
   os: Observable<Array<VirtuesService>>;
 
   constructor(
-    private route: ActivatedRoute,
+    private router: Router,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
@@ -45,6 +45,7 @@ export class VirtueListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
+      this.getBaseUrl(awsServer)
       this.getVirtues(awsServer);
       this.getApplications(awsServer);
       this.getVmList(awsServer);
@@ -54,8 +55,17 @@ export class VirtueListComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
   }
 
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 500);
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+  }
+
   getVirtues(baseUrl: string) {
-    this.baseUrl = baseUrl;
     this.virtuesService.getVirtues(baseUrl).subscribe( virtues => {
       this.virtues = virtues;
     });
@@ -108,6 +118,12 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
     });
+  }
+
+  deleteVirtue(id: string) {
+    console.log('deleting ' + id);
+    this.virtuesService.deleteVirtue(this.baseUrl, id);
+    this.resetRouter();
   }
 
   virtueStatus(id: string, virtue: Virtue): void {
