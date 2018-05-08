@@ -65,6 +65,10 @@ export class EditVirtueComponent implements OnInit {
       id: this.activatedRoute.snapshot.params['id']
     };
 
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getBaseUrl(awsServer);
@@ -82,13 +86,12 @@ export class EditVirtueComponent implements OnInit {
 
   getBaseUrl(url: string) {
     this.baseUrl = url;
-    console.log('getBaseUrl() => ' + this.baseUrl);
   }
 
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-    }, 500);
+    }, 1000);
   }
 
   getThisVirtue(baseUrl: string, id: string) {
@@ -161,27 +164,14 @@ export class EditVirtueComponent implements OnInit {
   }
 
   removeVm(id: string, index: number): void {
-    console.log(id);
     this.vmList = this.vmList.filter(data => {
       return data.id !== id;
     });
-    console.log(this.vmList);
-    // console.log('new vm list: ' + this.vmList);
+    // console.log(this.vmList);
+
     this.pageVmList.splice(index, 1);
   }
 
-  // activateModal(id): void {
-  //   let virtueId = id;
-  //   let dialogRef = this.dialog.open(VmModalComponent, {
-  //     width: '960px'
-  //   });
-  //
-  //   dialogRef.updatePosition({ top: '5%', left: '20%' });
-  //
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     // console.log('This modal was closed');
-  //   });
-  // }
   activateModal(): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
@@ -215,17 +205,17 @@ export class EditVirtueComponent implements OnInit {
       'enabled': this.virtueEnabled,
       'virtualMachineTemplateIds': this.pageVmList
     };
-    console.log('updating virtue #' + id);
-    console.log(body);
+
     this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body)).subscribe(
       data => {
-        console.log('Updating ' + data.name + '(' + data.id + ')');
+        // console.log('Updating ' + data.name + '(' + data.id + ')');
+        return true;
       },
       error => {
         console.log(error);
       });
     this.resetRouter();
-    // this.router.navigate(['/virtues']);
+    this.router.navigate(['/virtues']);
   }
 
   virtueStatus(id: string, isEnabled: boolean): void {
@@ -234,8 +224,11 @@ export class EditVirtueComponent implements OnInit {
     } else {
       this.virtueEnabled = true;
     }
-    console.log('Virtue is enabled: ' + this.virtueEnabled);
-    this.virtuesService.toggleVirtueStatus(this.baseUrl, id, isEnabled);
+    let body = {
+      'enabled': this.virtueEnabled,
+    };
+    // console.log('Virtue is enabled: ' + this.virtueEnabled);
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
     this.resetRouter();
   }
 

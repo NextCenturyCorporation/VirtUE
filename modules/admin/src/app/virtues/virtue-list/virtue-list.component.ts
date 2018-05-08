@@ -150,8 +150,12 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     } else {
       this.virtueEnabled = true;
     }
+    let body = {
+      'enabled': this.virtueEnabled
+    };
     console.log('Virtue is enabled: ' + this.virtueEnabled);
-    this.virtuesService.toggleVirtueStatus(this.baseUrl, id, isEnabled);
+    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
+    // this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
     this.resetRouter();
   }
 }

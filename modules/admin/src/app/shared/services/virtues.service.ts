@@ -74,18 +74,12 @@ export class VirtuesService {
     // });
   }
 
-  toggleVirtueStatus(baseUrl: string, id: string, virtueStatus: boolean) {
+  toggleVirtueStatus(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id + '/toggle';
     console.log(url);
-    return this.httpClient.get(url).toPromise().then(
-      data => {
-        console.log(data[0].enabled);
-      },
-      error => {
-      console.log(error.message);
-    });
+    return this.httpClient.get(url).catch(this.errorHandler);
   }
-  
+
   /**
    * Handle Http operation that failed.
    * Let the app continue.
