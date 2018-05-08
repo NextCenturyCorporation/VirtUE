@@ -18,7 +18,7 @@ const httpOptions = {
 
 export class VirtuesService {
 
-  private configUrl = 'admin/virtue/template';
+  private configUrl = 'admin/virtue/template/';
   // private restApi = './assets/json/virtue_list.json';
 
   constructor(
@@ -49,17 +49,25 @@ export class VirtuesService {
       console.log('Sadness, there was a problem creating this virtue:');
       console.log(virtueData);
     }
-    // return this.http.post(url, virtueData);
+  }
+
+  public deleteVirtue(baseUrl: string, id: string) {
+    let url = baseUrl + this.configUrl + id;
+    console.log('Deleting... ' + url);
+
+    return this.httpClient.delete(url).toPromise().then(
+      data => {
+        return true;
+      },
+      error => {
+      console.log(error.message);
+    });
   }
 /**
 
   public updateVirtue(id: string, virtue: Virtue): Observable<any> {
     const src = `${this.restApi}/?id=${id}`;
     return this.http.put(src, virtue);
-  }
-
-  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-    return this.http.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
   }
 */
   /**

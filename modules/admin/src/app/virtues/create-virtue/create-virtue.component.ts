@@ -75,7 +75,7 @@ export class CreateVirtueComponent implements OnInit {
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-    }, 500);
+    }, 1000);
   }
 
   getVmList() {

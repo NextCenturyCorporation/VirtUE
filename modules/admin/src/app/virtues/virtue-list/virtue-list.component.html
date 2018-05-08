@@ -38,10 +38,16 @@
             <!-- if this virtue is enabled show this menu -->
             <span *ngIf="virtue.enabled" class="menu-options">
               <a mat-button (click)="virtueStatus(virtue.id)">Disable</a>
+              | <a mat-button (click)="openDialog(virtue.id,'delete','virtue',virtue.name)">Delete</a>
+              <!-- <a mat-button (click)="deleteVirtue(virtue.id)">Delete</a> -->
             </span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span *ngIf="virtue.enabled==false" class="menu-options"><a mat-button (click)="virtueStatus(virtue.id)">Enable</a> | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
+            <span *ngIf="virtue.enabled==false" class="menu-options">
+              <a mat-button (click)="virtueStatus(virtue.id)">Enable</a> |
+              <a mat-button (click)="deleteVirtue(virtue.id)">Delete</a>
+              <!-- <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a> -->
+            </span>
           </div>
           <div class="table-data mui-col-md-3"><!-- virtue.vmTemplates[0].os -->
             <ul>
