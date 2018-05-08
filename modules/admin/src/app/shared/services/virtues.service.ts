@@ -85,15 +85,7 @@ export class VirtuesService {
       console.log(error.message);
     });
   }
-/**
-
-  public updateVirtue(id: string, virtue: Virtue): Observable<any> {
-    const src = `${this.restApi}/?id=${id}`;
-    return this.http.put(src, virtue);
-  }
-
-
-*/
+  
   /**
    * Handle Http operation that failed.
    * Let the app continue.
