@@ -29,7 +29,7 @@ export class VirtuesService {
   ) {}
 
   getVirtues(baseUrl: string): Observable<Virtue[]> {
-    let src = 'baseUrl + this.configUrl';
+    let src = baseUrl + this.configUrl;
     return this.httpClient.get<Virtue[]>(src);
       // .pipe(
       //   tap(virtues => this.log(`fetched virtues`)),
@@ -43,13 +43,13 @@ export class VirtuesService {
   }
 
   public createVirtue(baseUrl: string, virtueData: any): Observable<any> {
-    let url = 'baseUrl + this.configUrl';
+    let url = baseUrl + this.configUrl;
     return this.httpClient.post(url, virtueData, httpOptions);
   }
 
   public deleteVirtue(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id;
-    console.log('Deleting... ' + url);
+    // console.log('Deleting... ' + url);
 
     return this.httpClient.delete(url).toPromise().then(
       data => {
@@ -76,7 +76,7 @@ export class VirtuesService {
 
   toggleVirtueStatus(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id + '/toggle';
-    console.log(url);
+    // console.log(url);
     return this.httpClient.get(url).catch(this.errorHandler);
   }
 
