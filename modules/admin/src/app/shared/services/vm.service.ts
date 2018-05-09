@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
+<<<<<<< HEAD
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+=======
 import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+>>>>>>> VRTU-349
 
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
@@ -44,6 +48,15 @@ export class VirtualMachineService {
            }, error => {
              console.log(error);
            });
+
+  updateStatus(baseUrl: string, id: string, isEnabled: boolean): Observable<VirtualMachine> {
+    let url = baseUrl + this.configUrl + id;
+    console.log(url);
+    let body = {
+      "enabled": isEnabled
+    };
+    console.log(body);
+    return this.httpClient.put<VirtualMachine>(url, JSON.stringify(body), httpOptions);
   }
 
   public updateVM(baseUrl: string, id: string, vmData: any) {
@@ -57,9 +70,29 @@ export class VirtualMachineService {
   }
 
 /**
-
+  
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
     return this.httpClient.delete<Virtue>('this.jsondata}/${virtue.id');
   }
+
 */
+  /**
+   * Handle Http operation that failed.
+   * Let the app continue.
+   * @ param operation - name of the operation that failed
+   * @ param result - optional value to return as the observable result
+   */
+  private handleError<T> (operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+
+      // TODO: send the error to remote logging infrastructure
+      console.error(error.message); // log to console instead
+
+      // TODO: better job of transforming error for user consumption
+      // this.log(`${operation} failed: ${error.message}`);
+
+      // Let the app keep running by returning an empty result.
+      return of(result as T);
+    };
+  }
 }

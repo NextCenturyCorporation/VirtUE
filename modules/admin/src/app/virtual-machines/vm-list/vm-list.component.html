@@ -42,16 +42,16 @@
         <div *ngFor="let vm of vms | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-4">
             <div class="mini-menu">
-              <!-- <a class="edit" [routerLink]="['edit',vm.id]"></a> -->
-              {{ vm.name }}
+              <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.name }}</a>
+
               <!-- if this virtue is enabled show this menu -->
               <span *ngIf="vm.enabled === true" class="menu-options">
-                <a mat-button (click)="updateStatus(vm.id)">Disable</a>
+                <a mat-button (click)="updateVmStatus(vm.id, vm.enabled)">Disable</a>
               </span>
 
               <!-- if this virtue is disabled show this menu -->
               <span *ngIf="vm.enabled !== true"class="menu-options">
-                <a mat-button (click)="updateStatus(vm.id)">Enable</a> |
+                <a mat-button (click)="updateVmStatus(vm.id, vm.enabled)">Enable</a> |
                 <a mat-button (click)="openDialog(vm.id, 'delete', 'delete', vm.name)">Delete</a>
               </span>
           </div>
