@@ -51,7 +51,7 @@ export class VirtueListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
-      this.getBaseUrl(awsServer)
+      this.getBaseUrl(awsServer);
       this.getVirtues(awsServer);
       this.getApplications(awsServer);
       this.getVmList(awsServer);
