@@ -46,14 +46,20 @@ export class VirtualMachineService {
            });
   }
 
+  public updateVM(baseUrl: string, id: string, vmData: any) {
+    let url = baseUrl + this.configUrl + id;
+    return this.httpClient.put(url, vmData, httpOptions)
+           .toPromise().then(data => {
+             return data;
+           }, error => {
+             console.log(error);
+           });
+  }
+
 /**
 
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
     return this.httpClient.delete<Virtue>('this.jsondata}/${virtue.id');
-  }
-
-  public update(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.put<Virtue>('this.jsondata}/${virtue.id',virtue);
   }
 */
 }
