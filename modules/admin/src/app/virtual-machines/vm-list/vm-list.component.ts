@@ -107,22 +107,29 @@ export class VmListComponent implements OnInit {
     this.router.navigate(['/vm']);
   }
 
-  openDialog(id, type, action, text): void {
+  deleteVM(id: string) {
+    this.vmService.deleteVM(this.baseUrl, id);
+    this.refreshData();
+  }
+
+  openDialog(id: string, type: string, category: string, description: string): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {
-          dialogText: text,
-          dialogType: type
+          dialogType: type,
+          dialogCategory: category,
+          dialogId: id,
+          dialogDescription: description
         }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((data) => {
+      // console.log('Dialog Emitter: ' + data);
+      if (type === 'delete') {
+        this.deleteVM(data);
+      }
     });
   }
-  // addVM(name: string, status: string) {
-  //   this.vms.push({name: name, status: status});
-  // }
 }

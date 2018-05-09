@@ -65,13 +65,15 @@ export class VirtualMachineService {
     return this.httpClient.put<VirtualMachine>(url, JSON.stringify(body), httpOptions);
   }
 
-/**
-
-  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.delete<Virtue>('this.jsondata}/${virtue.id');
+  public deleteVM(baseUrl: string, id: string) {
+    let url = baseUrl + this.configUrl + id;
+    return this.httpClient.delete(url)
+    .toPromise().then(data => {
+       return data;
+     }, error => {
+       console.log(error);
+     });
   }
-
-*/
   /**
    * Handle Http operation that failed.
    * Let the app continue.

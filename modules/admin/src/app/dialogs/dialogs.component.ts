@@ -25,9 +25,9 @@ export class DialogsComponent implements OnInit {
   }
 
   confirmSelection() {
-    if (this.dialogCategory === 'virtue' && this.dialogType === 'delete') {
+    if (this.dialogType === 'delete') {
       this.dialogEmitter.emit(this.dialogId);
-    }
+    } 
     this.dialogRef.close();
   }
 
