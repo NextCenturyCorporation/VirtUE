@@ -47,16 +47,6 @@ export class VirtualMachineService {
            });
  }
 
-  public updateStatus(baseUrl: string, id: string, isEnabled: boolean): Observable<any> {
-    let url = baseUrl + this.configUrl + id;
-    console.log(url);
-    let body = {
-      "enabled": isEnabled
-    };
-    console.log(body);
-    return this.httpClient.put<VirtualMachine>(url, JSON.stringify(body), httpOptions);
-  }
-
   public updateVM(baseUrl: string, id: string, vmData: any) {
     let url = baseUrl + this.configUrl + id;
     return this.httpClient.put(url, vmData, httpOptions)
@@ -65,6 +55,14 @@ export class VirtualMachineService {
            }, error => {
              console.log(error);
            });
+  }
+
+  public updateStatus(baseUrl: string, id: string, isEnabled: boolean): Observable<any> {
+    let url = baseUrl + this.configUrl + id;
+    let body = {
+      'enabled': isEnabled
+    };
+    return this.httpClient.put<VirtualMachine>(url, JSON.stringify(body), httpOptions);
   }
 
 /**

@@ -20,19 +20,28 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
   providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
 export class VmBuildComponent implements OnInit, OnDestroy {
-  osValue: string;
-  osInfo: string;
-  osList = [
-    { 'id': 1, 'os_name': 'Debian', 'osSystem': 'LINUX' },
-    { 'id': 2, 'os_name': 'Windows', 'osSystem': 'WINDOWS' }
-  ];
   vmForm: FormControl;
-
   activeClass: string;
+  baseUrl: string;
+  osValue: string;
+  selectedOS: string;
+  securityTag: string;
+  securityLevel: string;
+
   appList = [];
   selAppList = [];
   pageAppList = [];
-  baseUrl: string;
+  osList = [
+    { 'name': 'Debian', 'os': 'LINUX' },
+    { 'name': 'Windows', 'os': 'WINDOWS' }
+  ];
+
+  securityOptions = [
+    { 'level': 'default', 'name': 'Default'} ,
+    { 'level': 'email', 'name': 'Email' },
+    { 'level': 'power',  'name': 'Power User' },
+    { 'level': 'admin', 'name': 'Administrator' }
+  ];
 
   constructor(
     private vmService: VirtualMachineService,
@@ -137,16 +146,18 @@ export class VmBuildComponent implements OnInit, OnDestroy {
     });
   }
 
-  buildVirtualMachine(vmName: string, vmOs: string) {
+  buildVirtualMachine(vmName: string, vmOs: string, vmSecurityTag: string) {
+
     let body = {
       'name': vmName,
       'os': vmOs,
+      'loginUser': 'system',
       'enabled': true,
-      'applicationIds': this.pageAppList
+      'applicationIds': this.pageAppList,
+      'securityTag': vmSecurityTag
     };
     console.log(body);
     this.vmService.createVM(this.baseUrl, JSON.stringify(body));
     this.router.navigate(['/vm']);
   }
-
 }

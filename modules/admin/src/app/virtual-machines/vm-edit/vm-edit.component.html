@@ -5,81 +5,89 @@
 
   <div id="content-main" class="border-top">
     <div id="content">
-
-      <form id="build-vm-form" method="post">
-        <div class="mui-container-fluid">
-          <div class="mui-row">
-            <div class="mui-col-md-6">
-              <mat-form-field>
-                <input matInput #vm_name placeholder="Virtual Machine Template Name" value="{{ vmData.name }}"  />
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="mui-row">
-            <div class="mui-col-md-2">
-              <label for="operatingSystem">Select Operating System:</label>
-            </div>
-            <div class="mui-col-md-4">
-              <mat-form-field class="form-field">
-                <mat-select [(ngModel)]="osValue" #vm_os [ngModelOptions]="{standalone: true}" placeholder="Select One" [(value)]="selected" disableRipple>
-                  <mat-option *ngFor="let os of osList" [value]="os.os_name">{{ os.os_name }} </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="mui-row titlebar">
-            <div class="mui-col-md-6">
-              <h3 class="titlebar-title">Application Packages</h3>
-              <button mat-button class="titlebar-button" (click)="activateModal()">Add Application Packages</button>
-            </div>
-          </div>
-          <!-- if there are no apps, show this message -->
-          <div class="mui-row">
-            <div class="mui-col-md-6">
-              <div *ngIf="appList.length < 1" class="mui-row margin-top-10">
-                <div class="mui-col-md-12">
-                  <p class="no-data-message">
-                    No applications are attached to this VM. To add application(s), click on the button "Add Application Packages".
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mui-row">
-            <div class="mui-col-md-6">
-              <div *ngIf="appList.length > 0" class="mui-container-fluid data-list">
-              <div class="mui-row table-header-group">
-                <div class="table-header mui-col-md-6">Application</div>
-                <div class="table-header mui-col-md-3">Version</div>
-                <div class="table-header mui-col-md-3">OS</div>
-              </div>
-              <div *ngFor="let app of appList; let i = index" class="mui-row table-row" appActiveClass>
-                <div class="table-data mui-col-md-6">
-                  <a class="edit" (click)="activateModal(app.id)">{{ app.name }}</a>
-                  <span class="menu-options">
-                    <button mat-button (click)="removeApp(app.id, i)">Remove</button>
-                  </span>
-                </div>
-                <div class="table-data mui-col-md-3">{{ app.version }}</div>
-                <div class="table-data mui-col-md-3">{{ app.os }}</div>
-                <div class="clearfix"></div>
-              </div>
-            </div>
-            </div>
-          </div>
-        </div>
-        <hr />
+      <div class="mui-container-fluid">
         <div class="mui-row">
-          <div class="mui-col-md-4">&nbsp;</div>
-          <div class="mui-col-md-4 form-item text-align-center">
-            <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Build Another VM</span>
-            <button class="button-submit" type="submit" (click)="onBuildVM(vm_name.value,selected,vm_packages.value)">Build VM</button>
-            <button class="button-cancel" type="cancel">Cancel</button>
+          <div class="mui-col-md-6">
+            <mat-form-field>
+              <input matInput #vmName placeholder="Virtual Machine Template Name" value="{{ vmData.name }}"  />
+            </mat-form-field>
           </div>
-          <div class="mui-col-md-4"></div>
         </div>
-
-      </form>
+        <div class="mui-row">
+          <div class="mui-col-md-2">
+            <label for="operatingSystem">Select Operating System:</label>
+          </div>
+          <div class="mui-col-md-4">
+            <mat-form-field class="form-field">
+              <mat-select [(ngModel)]="osValue" #vmOs [ngModelOptions]="{standalone: true}" placeholder="Select One" [(value)]="selectedOS" disableRipple>
+                <mat-option *ngFor="let item of osList" [value]="item.os">{{ item.name }} </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="mui-row">
+          <div class="mui-col-md-2">
+            <label for="templatePath">Permissions:</label>
+          </div>
+          <div class="mui-col-md-4">
+            <mat-form-field class="form-field">
+              <mat-select [(ngModel)]="securityTag" #vmSecurityTag [ngModelOptions]="{standalone: true}" placeholder="Select One" [(value)]="securityLevel" disableRipple>
+                <mat-option *ngFor="let item of securityOptions" [value]="item.level">{{ item.name }} </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="mui-row titlebar">
+          <div class="mui-col-md-6">
+            <h3 class="titlebar-title">Application Packages</h3>
+            <button mat-button class="titlebar-button" (click)="activateModal()">Add Application Packages</button>
+          </div>
+        </div>
+        <!-- if there are no apps, show this message -->
+        <div class="mui-row">
+          <div class="mui-col-md-6">
+            <div *ngIf="appList.length < 1" class="mui-row margin-top-10">
+              <div class="mui-col-md-12">
+                <p class="no-data-message">
+                  No applications are attached to this VM. To add application(s), click on the button "Add Application Packages".
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mui-row">
+          <div class="mui-col-md-6">
+            <div *ngIf="appList.length > 0" class="mui-container-fluid data-list">
+            <div class="mui-row table-header-group">
+              <div class="table-header mui-col-md-6">Application</div>
+              <div class="table-header mui-col-md-3">Version</div>
+              <div class="table-header mui-col-md-3">OS</div>
+            </div>
+            <div *ngFor="let app of appList; let i = index" class="mui-row table-row" appActiveClass>
+              <div class="table-data mui-col-md-6">
+                <a class="edit" (click)="activateModal(app.id)">{{ app.name }}</a>
+                <span class="menu-options">
+                  <button mat-button (click)="removeApp(app.id, i)">Remove</button>
+                </span>
+              </div>
+              <div class="table-data mui-col-md-3">{{ app.version }}</div>
+              <div class="table-data mui-col-md-3">{{ app.os }}</div>
+              <div class="clearfix"></div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div class="mui-row">
+        <div class="mui-col-md-4">&nbsp;</div>
+        <div class="mui-col-md-4 form-item text-align-center">
+          <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Build Another VM</span>
+          <button class="button-submit" type="submit" (click)="buildVirtualMachine(vmData.id,vmName.value,selectedOS,securityLevel)">Update Template</button>
+          <button class="button-cancel" type="cancel" (click)="cancel()">Cancel</button>
+        </div>
+        <div class="mui-col-md-4"></div>
+      </div>
     </div>
   </div>
 </div>

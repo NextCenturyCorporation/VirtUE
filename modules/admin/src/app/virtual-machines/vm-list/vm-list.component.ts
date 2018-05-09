@@ -59,7 +59,7 @@ export class VmListComponent implements OnInit {
     setTimeout(() => {
       this.router.navigated = false;
       this.getVmList(this.baseUrl);
-    }, 2000);
+    }, 1000);
   }
 
   getVmList(baseUrl: string) {
@@ -101,7 +101,7 @@ export class VmListComponent implements OnInit {
       return true;
       },
       error => {
-        console.log("error: " + error.message);
+        console.log('error: ' + error.message);
       });
     this.refreshData();
     this.router.navigate(['/vm']);
