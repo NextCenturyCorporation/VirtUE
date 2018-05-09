@@ -24,13 +24,13 @@ export class DialogsComponent implements OnInit {
     this.dialogId = this.data['dialogId'];
   }
 
+  ngOnInit() {
+  }
+
   confirmSelection() {
     if (this.dialogType === 'delete') {
       this.dialogEmitter.emit(this.dialogId);
-    } 
+    }
     this.dialogRef.close();
-  }
-
-  ngOnInit() {
   }
 }
