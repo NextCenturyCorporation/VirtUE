@@ -140,4 +140,14 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	public Optional<VirtualMachine> getXenVm(String id) {
 		return vmRepository.findById(id);
 	}
+
+	@Override
+	public Iterable<VirtualMachine> getAllVirtualMachines() {
+		return vmRepository.findAll();
+	}
+
+	@Override
+	public void deleteVm(VirtualMachine vm) {
+		vmRepository.deleteById(vm.getId());
+	}
 }

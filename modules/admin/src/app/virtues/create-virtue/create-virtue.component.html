@@ -4,12 +4,11 @@
   </div>
 
   <div id="content-main" class="border-top">
-    <form id="create-virtue" method="post">
       <div id="content" class="virtue-content">
         <vertical-split-pane
           primary-component-minsize="60"
           secondary-component-minsize="40"
-          [primary-component-toggled-off]="false" 
+          [primary-component-toggled-off]="false"
           local-storage-key="split-pane"
           primary-component-initialratio="0.8">
 
@@ -17,29 +16,28 @@
 
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
-                <input type="text" #virtueName value="" placeholder="Virtue Name" />
+                <input type="text" #virtueName placeholder="Virtue Name" matInput />
               </div>
             </div>
             <div class="mui-row titlebar">
               <div class="mui-col-md-12">
-                <h3 class="title">Virtual Machines</h3>
+                <h3 class="titlebar-title">Virtual Machines</h3>
                 <button mat-button class="titlebar-button" (click)="activateModal('test')">Add VM</button>
               </div>
             </div>
-            <!-- if there are no virtue, show this message -->
-            <div *ngIf="vmList.length < 1" class="mui-row margin-top-10">
-              <div class="mui-col-md-12">
-                <p class="no-data-message">
-                  No virtual machines are attached to this virtue. To add VM(s), click on the button "Add VM".
-                </p>
-              </div>
-            </div>
-            <!-- if there are virtue machines, show this list -->
-            <div *ngIf="vmList.length > 0" class="mui-container-fluid data-list">
+            <div class="mui-container-fluid data-list">
               <div class="mui-row table-header-group">
                 <div class="table-header mui-col-md-5">Virtual Machine</div>
                 <div class="table-header mui-col-md-2">OS</div>
                 <div class="table-header mui-col-md-5">Applications</div>
+              </div>
+              <!-- if there are no virtue, show this message -->
+              <div *ngIf="vmList.length < 1" class="mui-row margin-top-10">
+                <div class="mui-col-md-12 padding-left-0">
+                  <p class="no-data-message">
+                    No virtual machines are attached to this virtue. To add VM(s), click on the button "Add VM".
+                  </p>
+                </div>
               </div>
               <div *ngFor="let vm of vmList; let i = index" class="mui-row table-row" appActiveClass>
                 <div class="table-data mui-col-md-5">
@@ -56,7 +54,7 @@
                 <div class="table-data mui-col-md-2">{{ vm.os }}</div>
                 <div class="table-data mui-col-md-5">
                   <ul>
-                    <li *ngFor="let app of vm.applications">{{ app.name }}</li>
+                    <li *ngFor="let app of vm.applicationIds">{{ getAppName(app) }}</li>
                   </ul>
                 </div>
                 <div class="clearfix"></div>
@@ -86,14 +84,14 @@
             <input #editor type="hidden" value="system" />
           </div>
           <div class="mui-col-md-4 form-item text-align-center">
-            <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Create Another Virtue</span>
-            <button (click)="createVirtue(virtueName.value,editor.value)" class="button-submit" type="submit">Create Virtue</button>
+            <span class="margin-right-10">
+              <input name="create-another" type="checkbox" value="1" /> Create Another Virtue
+            </span>
+            <button class="button-submit" type="submit" (click)="createVirtue(virtueName.value); virtueName.value=''">Create Virtue</button>
             <button class="button-cancel" type="cancel">Cancel</button>
           </div>
           <div class="mui-col-md-4"></div>
         </div>
       </div>
-
-    </form>
   </div>
 </div>

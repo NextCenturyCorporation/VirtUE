@@ -1,6 +1,7 @@
 import { Component, Injector, Input, OnDestroy, OnInit } from '@angular/core';
+import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
 import { MatDialog, MatDialogRef } from '@angular/material';
-import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { filter } from 'rxjs/operators';
 
@@ -29,22 +30,28 @@ export class VirtueListComponent implements OnInit, OnDestroy {
   virtues = [];
   vmList = [];
   appsList = [];
+  virtueEnabled: boolean;
   baseUrl: string;
   virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
 
   constructor(
-    private route: ActivatedRoute,
+    private router: Router,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog,
-  ) {}
+  ) {
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
+      this.getBaseUrl(awsServer);
       this.getVirtues(awsServer);
       this.getApplications(awsServer);
       this.getVmList(awsServer);
@@ -54,8 +61,24 @@ export class VirtueListComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
   }
 
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log(req);
+    return next.handle(req);
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+  }
+
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 1000);
+    this.router.navigate(['/virtues']);
+  }
+
   getVirtues(baseUrl: string) {
-    this.baseUrl = baseUrl;
     this.virtuesService.getVirtues(baseUrl).subscribe( virtues => {
       this.virtues = virtues;
     });
@@ -94,29 +117,45 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     }
   }
 
-  openDialog(id, type, action, text): void {
+  openDialog(id: string, type: string, category: string, description: string): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {
-          dialogText: text,
-          dialogType: type
+          dialogType: type,
+          dialogCategory: category,
+          dialogId: id,
+          dialogDescription: description
         }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((data) => {
+      console.log('Dialog Emitter: ' + data);
+      if (type === 'delete') {
+        this.deleteVirtue(data);
+      }
     });
   }
 
-  virtueStatus(id: string, virtue: Virtue): void {
-    // console.log(id);
-    // const virtueObj = this.virtues.filter(data => id === virtue.id);
-    console.log(id);
-    // virtueObj.map((_, i) => {
-    //   virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;
-    // });
+  deleteVirtue(id: string) {
+    console.log('deleting ' + id);
+    this.virtuesService.deleteVirtue(this.baseUrl, id);
+    this.resetRouter();
   }
 
+  virtueStatus(id: string, isEnabled: boolean) {
+    if (isEnabled) {
+      this.virtueEnabled = false;
+    } else {
+      this.virtueEnabled = true;
+    }
+    let body = {
+      'enabled': this.virtueEnabled
+    };
+    console.log('Virtue is enabled: ' + this.virtueEnabled);
+    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
+    // this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
+    this.resetRouter();
+  }
 }

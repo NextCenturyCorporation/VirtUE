@@ -1,12 +1,18 @@
 import { Injectable } from '@angular/core';
+<<<<<<< HEAD
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+=======
+import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+>>>>>>> VRTU-349
 
+import 'rxjs/add/observable/throw';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
-import { catchError, map, tap } from 'rxjs/operators';
+import { ISubscription } from 'rxjs/Subscription';
 
 import { VirtualMachine } from '../models/vm.model';
-import { Globals } from '../globals';
+import { MessageService } from './message.service';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -17,30 +23,31 @@ const httpOptions = {
 export class VirtualMachineService {
 
   private configUrl = 'admin/virtualMachine/template/';
-  // private restApi = './assets/json/vm_list.json';
 
   constructor(
-    private httpClient: HttpClient,
-    private hostname: Globals
+    private httpClient: HttpClient
    ) {  }
 
-  public getVmList(baseUrl: string): Observable<VirtualMachine[]> {
+  public getVmList(baseUrl: string): Observable<any> {
     let src = baseUrl + this.configUrl;
-    return this.httpClient.get<VirtualMachine[]>(src);
+    return this.httpClient.get<any>(src);
   }
 
   public getVM(baseUrl: string, id: string): Observable<any> {
-    let src = `${baseUrl + this.configUrl}/${id}`;
+    let src = baseUrl + this.configUrl + id;
     return this.httpClient.get<VirtualMachine>(src);
   }
 
-   createVirtue(baseUrl: string, id: string, vmData: any[]): Observable<any> {
+  public createVM(baseUrl: string, vmData: any) {
     let url = baseUrl + this.configUrl;
-    let body = {
-
-    };
-    return this.httpClient.post(url, body, httpOptions);
-  }
+    console.log('createVM() => ');
+    console.log(vmData);
+    return this.httpClient.post(url, vmData, httpOptions)
+           .toPromise().then(data => {
+             return data;
+           }, error => {
+             console.log(error);
+           });
 
   updateStatus(baseUrl: string, id: string, isEnabled: boolean): Observable<VirtualMachine> {
     let url = baseUrl + this.configUrl + id;
@@ -51,19 +58,14 @@ export class VirtualMachineService {
     console.log(body);
     return this.httpClient.put<VirtualMachine>(url, JSON.stringify(body), httpOptions);
   }
+
 /**
-  public createVirtue(vm: VirtualMachine) {
-    let src = baseUrl + this.configUrl;
-    return this.httpClient.post(src, vm );
+  public update(virtue: Virtue): Observable<Virtue> {
+    return this.httpClient.put<Virtue>('this.jsondata}/${virtue.id',virtue);
   }
-
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-    return this.httpClient.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
+    return this.httpClient.delete<Virtue>('this.jsondata}/${virtue.id');
   }
-
-    public update(virtue: Virtue): Observable<Virtue> {
-      return this.httpClient.put<Virtue>(`${this.jsondata}/${virtue.id}`,virtue);
-    }
 
 */
   /**

@@ -90,8 +90,8 @@ export class AddUserComponent implements OnInit {
     }
 
     let body = {
-      "username": username,
-      "authorities": authorities
+      'username': username,
+      'authorities': authorities
     };
 
     if (!body.username) { return; }
@@ -103,10 +103,10 @@ export class AddUserComponent implements OnInit {
         // console.log(data.virtueTemplateIds);
       },
       error => {
-        console.error("Error");
+        console.error('Error');
       }
     );
-    this.assignUserVirtues(baseUrl, username, virtueTemplateIds)
+    this.assignUserVirtues(baseUrl, username, virtueTemplateIds);
     this.resetRouter();
     this.router.navigate(['/users']);
   }

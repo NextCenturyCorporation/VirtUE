@@ -31,17 +31,35 @@ export class VmListComponent implements OnInit {
     private vmService: VirtualMachineService,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
-    public dialog: MatDialog,
-    public router: Router
-  ) {}
+    private router: Router,
+    public dialog: MatDialog
+  ) {
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
-      let url = res[0].aws_server;
-      this.getBaseUrl(url);
-      this.getVmList(url);
-      this.getAppsList(url);
+      let awsServer = res[0].aws_server;
+      this.getBaseUrl(awsServer);
+      this.getVmList(awsServer);
+      this.getAppsList(awsServer);
     });
+    this.refreshData();
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+    console.log('URL: ' + url);
+  }
+
+  refreshData() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.getVmList(this.baseUrl);
+    }, 2000);
   }
 
   resetRouter() {

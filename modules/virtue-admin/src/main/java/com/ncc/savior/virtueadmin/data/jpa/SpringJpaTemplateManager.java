@@ -169,7 +169,10 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void addVirtueTemplate(VirtueTemplate template) {
-		Collection<VirtualMachineTemplate> vms = template.getVmTemplates();
+		Collection<VirtualMachineTemplate> vms = new HashSet<VirtualMachineTemplate>();
+		for (VirtualMachineTemplate vm : template.getVmTemplates()) {
+			vms.add(vm);
+		}
 		template.setVmTemplates(new HashSet<VirtualMachineTemplate>());
 		vtRepository.save(template);
 		// adding empty template and then adding vmtempaltes (that are already in db)

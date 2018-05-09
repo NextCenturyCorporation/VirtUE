@@ -135,6 +135,17 @@ public class AdminService {
 		return viTemplate;
 	}
 
+	public VirtueTemplate toggleVirtueTemplateEnabled(String templateId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueTemplate viTemplate = templateManager.getVirtueTemplate(templateId);
+		boolean enabled = viTemplate.isEnabled();
+		viTemplate.setEnabled(!enabled);
+		viTemplate.setLastModification(new Date());
+		viTemplate.setLastEditor(user.getUsername());
+		templateManager.addVirtueTemplate(viTemplate);
+		return viTemplate;
+	}
+
 	public VirtualMachineTemplate getVmTemplate(String templateId) {
 		verifyAndReturnUser();
 		VirtualMachineTemplate vmTemplate = templateManager.getVmTemplate(templateId);
@@ -172,6 +183,9 @@ public class AdminService {
 
 	public ApplicationDefinition updateApplicationDefinitions(String templateId, ApplicationDefinition appDef) {
 		verifyAndReturnUser();
+		if (appDef.getId() == null) {
+			appDef.setId(templateId);
+		}
 		if (!templateId.equals(appDef.getId())) {
 			appDef = new ApplicationDefinition(templateId, appDef);
 		}
@@ -202,7 +216,13 @@ public class AdminService {
 	public VirtualMachineTemplate updateVmTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
 		VirtueUser user = verifyAndReturnUser();
 		Collection<String> appIds = vmTemplate.getApplicationIds();
+		if (appIds == null) {
+			appIds = new ArrayList<String>();
+		}
 		Iterator<ApplicationDefinition> itr = templateManager.getApplications(appIds).iterator();
+		if (vmTemplate.getId() == null) {
+			vmTemplate.setId(templateId);
+		}
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
 		}
@@ -248,6 +268,7 @@ public class AdminService {
 			while (itr.hasNext()) {
 				usersVirtueTemplates.add(itr.next());
 			}
+			newUser.setVirtueTemplates(usersVirtueTemplates);
 		}
 		userManager.addUser(newUser);
 		return newUser;
@@ -377,4 +398,5 @@ public class AdminService {
 			throw new IllegalArgumentException("No sensing URI was set");
 		}
 	}
+
 }

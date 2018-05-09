@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -67,15 +66,10 @@ public class SshKeyInjector {
 		Session session = null;
 		ChannelExec channel = null;
 		try {
-			JSch ssh = new JSch();
 			keyPair = keyGenerator.createRsaKeyPair();
 			privKey = keyPair.getPrivateKey();
 			String pubKey = keyPair.getPublicKey();
-			ssh.addIdentity(privateKeyFile.getAbsolutePath());
-			session = ssh.getSession(vm.getUserName(), vm.getHostname(), vm.getSshPort());
-			session.setConfig("PreferredAuthentications", "publickey");
-			session.setConfig("StrictHostKeyChecking", "no");
-			session.connect();
+			session = SshUtil.getConnectedSession(vm, privateKeyFile);
 			channel = (ChannelExec) session.openChannel("exec");
 			channel.setCommand("echo '" + pubKey + "' >> ~/.ssh/authorized_keys");
 			channel.connect();

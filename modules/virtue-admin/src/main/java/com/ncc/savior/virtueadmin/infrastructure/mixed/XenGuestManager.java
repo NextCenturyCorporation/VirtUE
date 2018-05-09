@@ -9,10 +9,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,13 +21,12 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-import com.ncc.savior.virtueadmin.infrastructure.DirectoryKeyManager;
-import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
+import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -47,31 +45,30 @@ import com.ncc.savior.virtueadmin.util.SshUtil;
  */
 public class XenGuestManager {
 	private static final Logger logger = LoggerFactory.getLogger(XenGuestManager.class);
-	private static final String VM_PREFIX = "VRTU-";
 	private static final String PORTS_FILE = "ports.properties";
 	private static final String SENSOR_SCRIPT = "run_sensors.sh";
 	private File keyFile;
 	private VirtualMachine xenVm;
-	private IUpdateListener<VirtualMachine> notifier;
-	private XenGuestVmUpdater guestUpdater;
 	private Route53Manager route53;
+	private CompletableFutureServiceProvider serviceProvider;
 
-	public XenGuestManager(VirtualMachine xenVm, File keyFile, IUpdateListener<VirtualMachine> notifier,
-			XenGuestVmUpdater guestUpdater, Route53Manager route53) {
+	public XenGuestManager(VirtualMachine xenVm, File keyFile, CompletableFutureServiceProvider serviceProvider,
+			Route53Manager route53) {
 		this.keyFile = keyFile;
 		this.xenVm = xenVm;
-		this.notifier = notifier;
-		this.guestUpdater = guestUpdater;
+		this.serviceProvider = serviceProvider;
 		this.route53 = route53;
 	}
 
-	public void provisionGuests(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts) {
+	public void provisionGuests(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
+			CompletableFuture<Collection<VirtualMachine>> xenGuestFuture, String serverUser) {
 
 		ChannelExec channel = null;
 		Session session = null;
 		logger.debug("Provisioning linux guests=" + linuxVmts);
+		Collection<VirtualMachine> linuxVms = new ArrayList<VirtualMachine>();
 		try {
-			session = getConnectedSession();
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
 
 			Collection<VirtualMachine> vms = virtue.getVms();
 			Iterator<VirtualMachine> vmsItr = vms.iterator();
@@ -97,78 +94,27 @@ public class XenGuestManager {
 					logger.debug("Skipping provision of windows vm=" + vm);
 					vm = vmsItr.next();
 				}
+				linuxVms.add(vm);
 				logger.debug("Starting provision of guest=" + vm);
-				String ipAddress = "0.0.0.0";
-				String clientUser = virtue.getUsername();
-				String domainUUID = UUID.randomUUID().toString();
-				String name = VM_PREFIX + clientUser + "-" + virtue.getUsername() + "-" + domainUUID;
-
-				// name = "VRTU-test";
-				// ipAddress = "192.168.0.54";
-				String loginUsername = "user";
-				// roles: default, email, power, god
-				String role = vmt.getSecurityTag();
-				// String loginUsername = vmt.getLoginUser();
-				createGuestVm(session, name, role);
-				ipAddress = getGuestVmIpAddress(session, name);
-				List<String> sshConfig = SshUtil.sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
-				boolean hostIsKnown = false;
-				for (String line : sshConfig) {
-					if (line.contains(ipAddress)) {
-						hostIsKnown = true;
-						break;
-					}
-				}
-				if (!hostIsKnown) {
-					String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
-					SshUtil.sendCommandFromSession(session, hostCmd);
-				}
-
-				logger.debug("Attempting to setup port forwarding. ");
-				String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
-				String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
-				setupHostname(session, loginUsername, hostname, dns, ipAddress);
-				setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
-
-				externalSensingPort += numSensingPorts;
-				catFile(session, ipAddress, loginUsername, PORTS_FILE);
-				startSensors(session, SENSOR_SCRIPT, ipAddress, loginUsername);
-
-				String dnsAddress = ""; // we don't have dns name yet.
-				vm.setName(name);
-				vm.setInfrastructureId(name);
-				vm.setUserName(loginUsername);
-				vm.setInternalHostname(hostname);
-				vm.setHostname(dnsAddress);
-				vm.setIpAddress(ipAddress);
-				int internalPort = 22;
-				String cmd = String.format(
-						"sudo iptables -t nat -A PREROUTING -p tcp -i eth0  --dport %d -j DNAT --to-destination %s:%d ;",
-						externalSshPort, ipAddress, internalPort);
-				cmd += String.format(
-						"sudo iptables -A FORWARD -p tcp -d %s --dport %d  -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
-						ipAddress, internalPort);
-				// cmd += ";sudo ip route";
-				SshUtil.sendCommandFromSession(session, cmd);
-				SshUtil.sendCommandFromSession(session, "sudo iptables -vnL -t nat\n");
-				JavaUtil.sleepAndLogInterruption(1000);
+				vm.setUserName(vmt.getLoginUser());
 				vm.setState(VmState.LAUNCHING);
-				vm.setHostname(xenVm.getHostname());
-				vm.setIpAddress(xenVm.getIpAddress());
-				vm.setInternalHostname(dns);
-				vm.setInternalIpAddress(ipAddress);
-				vm.setPrivateKeyName(xenVm.getPrivateKeyName());
-				vm.setSshPort(externalSshPort);
+				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
+						vmt.getSecurityTag(), vm, true);
+				externalSensingPort += numSensingPorts;
 				vm.setApplications(new ArrayList<ApplicationDefinition>(vmt.getApplications()));
+				vm.setPrivateKeyName(xenVm.getPrivateKeyName());
+				JavaUtil.sleepAndLogInterruption(100);
 				externalSshPort++;
+				logger.debug("finished provisioning linux guest Vm=" + vm.getName());
 			}
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
-			notifier.updateElements(vms);
-			guestUpdater.addVmToProvisionPipeline(vms);
+			addVmToProvisionPipeline(vms, xenGuestFuture);
 		} catch (JSchException e) {
-			logger.trace("Vm is not reachable yet: " + e.getMessage());
+			logger.error("Vm is not reachable yet: " + e.getMessage());
+			xenGuestFuture.completeExceptionally(e);
 		} catch (Exception e) {
 			logger.error("error in SSH", e);
+			xenGuestFuture.completeExceptionally(e);
 		} finally {
 			if (channel != null) {
 				channel.disconnect();
@@ -179,12 +125,112 @@ public class XenGuestManager {
 		}
 	}
 
+	private void createStartGuestVm(Session session, int externalSshPort, int externalSensingPort,
+			int startingInternalPort, int numSensingPorts, String role, VirtualMachine vm, boolean create)
+			throws JSchException, IOException, SftpException {
+		String ipAddress = "0.0.0.0";
+		String name = vm.getName();
+		String loginUsername = vm.getUserName();
+		if (create) {
+			createGuestVm(session, name, role);
+		} else {
+			// error:
+			// xencall: error: Could not obtain handle on privileged command interface: No
+			// such file or directory
+			// libxl: error: libxl.c:102:libxl_ctx_alloc: cannot open libxc handle: No such
+			// file or directory
+			// cannot init xl context
+			boolean success = false;
+			while (true) {
+				success = true;
+				List<String> response = SshUtil.sendCommandFromSession(session,
+						"sudo xl create app-domains/" + name + "/" + name + ".cfg");
+				for (String line : response) {
+					if (line.contains("xencall: error:") || line.contains("invalid domain identifier")) {
+						success = false;
+						break;
+					}
+				}
+				if (success) {
+					break;
+				} else {
+					JavaUtil.sleepAndLogInterruption(200);
+				}
+			}
+		}
+		ipAddress = getGuestVmIpAddress(session, name);
+		updateSshKnownHosts(session, ipAddress);
+		logger.debug("Attempting to setup port forwarding. ");
+		String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
+		String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
+		setupHostname(session, loginUsername, hostname, dns, ipAddress);
+		setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
+
+		externalSensingPort += numSensingPorts;
+		catFile(session, ipAddress, loginUsername, PORTS_FILE);
+		startSensors(session, SENSOR_SCRIPT, ipAddress, loginUsername);
+		int internalPort = 22;
+		setupPortForward(session, externalSshPort, ipAddress, internalPort);
+		printIpTables(session);
+
+		vm.setInfrastructureId(name);
+		vm.setHostname(xenVm.getHostname());
+		vm.setIpAddress(xenVm.getIpAddress());
+		vm.setInternalHostname(dns);
+		vm.setInternalIpAddress(ipAddress);
+		vm.setSshPort(externalSshPort);
+	}
+
+	private void printIpTables(Session session) throws JSchException, IOException {
+		SshUtil.sendCommandFromSession(session, "sudo iptables -vnL -t nat\n");
+	}
+
+	private void setupPortForward(Session session, int externalSshPort, String ipAddress, int internalPort)
+			throws JSchException, IOException {
+		String cmd = String.format(
+				"sudo iptables -t nat -A PREROUTING -p tcp -i eth0  --dport %d -j DNAT --to-destination %s:%d ;",
+				externalSshPort, ipAddress, internalPort);
+		cmd += String.format(
+				"sudo iptables -A FORWARD -p tcp -d %s --dport %d  -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT",
+				ipAddress, internalPort);
+		// cmd += ";sudo ip route";
+		SshUtil.sendCommandFromSession(session, cmd);
+	}
+
+	private void updateSshKnownHosts(Session session, String ipAddress) throws JSchException, IOException {
+		List<String> sshConfig = SshUtil.sendCommandFromSession(session, "cat ~/.ssh/known_hosts");
+		boolean hostIsKnown = false;
+		for (String line : sshConfig) {
+			if (line.contains(ipAddress)) {
+				hostIsKnown = true;
+				break;
+			}
+		}
+		if (!hostIsKnown) {
+			String hostCmd = "ssh-keyscan " + ipAddress + " >> ~/.ssh/known_hosts";
+			SshUtil.sendCommandFromSession(session, hostCmd);
+		}
+	}
+
+	private void addVmToProvisionPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, true);
+			cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
+		}
+		fc.combineFutures(linuxFuture);
+	}
+
 	private void startSensors(Session session, String sensorScript, String ipAddress, String username)
 			throws JSchException, IOException {
 		String cmd = "ssh -i virginiatech_ec2.pem " + username + "@" + ipAddress + " \" nohup sudo ./" + sensorScript
 				+ " > sensing.log 2>&1 \"";
-		List<String> output = SshUtil.sendCommandFromSession(session, cmd);
-		logger.debug(output.toString());
+		SshUtil.sendCommandFromSessionWithTimeout(session, cmd, 500);
 	}
 
 	private String getGuestVmIpAddress(Session session, String name) throws JSchException, IOException {
@@ -195,27 +241,12 @@ public class XenGuestManager {
 		return ipAddress;
 	}
 
-	private String createGuestVm(Session session, String name, String role) throws JSchException, IOException {
-		CommandHandler ch = getCommandHandlerFromSession(session);
-		String finishString = "finished with " + name;
-		logger.debug("Sending commands to create VM.");
-		String createCmd = "sudo ./create.sh " + name;
+	private void createGuestVm(Session session, String name, String role) throws JSchException, IOException {
+		String command = "cd ./app-domains; sudo ./create.sh " + name;
 		if (JavaUtil.isNotEmpty(role)) {
-			createCmd += " " + role;
+			command += " " + role;
 		}
-		logger.debug("CreateCmd=" + createCmd);
-		ch.sendln("sudo xl list");
-		ch.sendln("cd ./app-domains");
-		ch.sendln(createCmd);
-		ch.sendln("cd ..");
-		ch.sendln("echo " + finishString);
-		ch.readUtil(finishString, "echo");
-		try {
-			ch.close();
-		} catch (IOException e) {
-			logger.error("error closing connection when creating guest VM", e);
-		}
-		return finishString;
+		SshUtil.sendCommandFromSession(session, command);
 	}
 
 	private CommandHandler getCommandHandlerFromSession(Session session) throws JSchException, IOException {
@@ -229,18 +260,6 @@ public class XenGuestManager {
 
 		CommandHandler ch = new CommandHandler(ps, br, myChannel);
 		return ch;
-	}
-
-	private Session getConnectedSession() throws JSchException {
-		JSch ssh = new JSch();
-		Session session;
-		ssh.addIdentity(keyFile.getAbsolutePath());
-		session = ssh.getSession(xenVm.getUserName(), xenVm.getHostname(), xenVm.getSshPort());
-		session.setConfig("PreferredAuthentications", "publickey");
-		session.setConfig("StrictHostKeyChecking", "no");
-		session.setTimeout(500);
-		session.connect();
-		return session;
 	}
 
 	private void setupHostname(Session session, String username, String hostname, String dns, String ipAddress)
@@ -344,12 +363,85 @@ public class XenGuestManager {
 		}
 	}
 
-	public void stopGuests(Collection<VirtualMachine> linuxVms) {
-		// TODO Auto-generated method stub
-
+	public void startGuests(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Session session = null;
+		try {
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
+			for (VirtualMachine vm : linuxVms) {
+				int externalSshPort = 8001;
+				int externalSensingPort = 12001;
+				int startingInternalPort = 11001;
+				int numSensingPorts = 3;
+				vm.setState(VmState.LAUNCHING);
+				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
+						null, vm, false);
+			}
+			addToStartPipeline(linuxVms, linuxFuture);
+		} catch (Exception e) {
+			logger.error("Error attempting to start guests " + linuxVms);
+			linuxFuture.completeExceptionally(e);
+		} finally {
+			SshUtil.disconnectLogErrors(session);
+		}
 	}
 
-	public void deleteGuests(Collection<VirtualMachine> linuxVms) {
+	private void addToStartPipeline(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : linuxVms) {
+			CompletableFuture<VirtualMachine> cf = null;
+			// = serviceProvider.getAwsRenamingService().startFutures(vm, v);
+			//
+			// cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+			cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.LAUNCHING);
+			cf = serviceProvider.getNetworkSettingService().chainFutures(cf, xenVm);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
+		}
+		fc.combineFutures(linuxFuture);
+	}
+
+	public void stopGuests(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Session session = null;
+		try {
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
+			for (VirtualMachine vm : linuxVms) {
+				SshUtil.sendCommandFromSession(session, "sudo xl shutdown " + vm.getName());
+			}
+			addToStopPipeline(linuxVms, linuxFuture);
+		} catch (JSchException | IOException e) {
+			linuxFuture.completeExceptionally(e);
+		} finally {
+			SshUtil.disconnectLogErrors(session);
+		}
+	}
+
+	private void addToStopPipeline(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : linuxVms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.STOPPING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
+		}
+		fc.combineFutures(linuxFuture);
+	}
+
+	public void deleteGuests(Collection<VirtualMachine> linuxVms,
+			CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
 		Collection<String> hostnames = new ArrayList<String>();
 		try {
 			for (VirtualMachine vm : linuxVms) {
@@ -362,34 +454,8 @@ public class XenGuestManager {
 			}
 		} catch (Exception e) {
 			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames, e);
+		} finally {
+			linuxFuture.complete(linuxVms);
 		}
 	}
-
-	public static void main(String[] args) {
-		IUpdateListener<VirtualMachine> updateListener = new IUpdateListener<VirtualMachine>() {
-			@Override
-			public void updateElements(Collection<VirtualMachine> elements) {
-				logger.debug("Updated " + elements);
-			}
-		};
-		String hostname = "ec2-52-90-206-205.compute-1.amazonaws.com";
-		String ipAddress = "34.229.246.30";
-		VirtualMachine xenVm = new VirtualMachine(UUID.randomUUID().toString(), "Test VM",
-				new ArrayList<ApplicationDefinition>(), VmState.RUNNING, OS.LINUX, "", hostname, 22, "ec2-user", null,
-				"virginiatech_ec2", ipAddress);
-		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		vms.add(new VirtualMachine(UUID.randomUUID().toString(), "Test VM", new ArrayList<ApplicationDefinition>(),
-				VmState.CREATING, OS.LINUX, "test id", "", 22, "user", "", "", ""));
-		VirtueInstance virtue = new VirtueInstance(UUID.randomUUID().toString(), "test-virtue", "test-user",
-				"test_template id", new ArrayList<ApplicationDefinition>(), vms);
-		Collection<VirtualMachineTemplate> linuxVmts = new ArrayList<VirtualMachineTemplate>();
-		linuxVmts.add(new VirtualMachineTemplate(UUID.randomUUID().toString(), "test template", OS.LINUX, "test",
-				new ArrayList<ApplicationDefinition>(), "user", true, new Date(), "System"));
-
-		XenGuestManager mgr = new XenGuestManager(xenVm, new File("certs/virginiatech_ec2.pem"), updateListener,
-				new XenGuestVmUpdater(updateListener, new DirectoryKeyManager(new File("./certs/"))), null);
-
-		mgr.provisionGuests(virtue, linuxVmts);
-	}
-
 }

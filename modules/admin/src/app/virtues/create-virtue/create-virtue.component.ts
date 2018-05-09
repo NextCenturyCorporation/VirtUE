@@ -1,9 +1,15 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import { FormControl, FormGroup } from '@angular/forms';
+import { Routes, RouterModule, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material';
+import { Observable } from 'rxjs/Observable';
+
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
@@ -16,42 +22,68 @@ import { VirtualMachine } from '../../shared/models/vm.model';
   selector: 'app-create-virtue',
   templateUrl: './create-virtue.component.html',
   styleUrls: ['./create-virtue.component.css'],
-  providers: [ BaseUrlService, VirtuesService, VirtualMachineService ]
+  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
 })
+
 export class CreateVirtueComponent implements OnInit {
   vms: VirtualMachine;
+  virtueForm: FormControl;
   activeClass: string;
   baseUrl: string;
   users: User[];
   virtues: Virtue[];
 
   vmList = [];
-  appList = [];
+  appsList = [];
   selVmsList = [];
   pageVmList = [];
 
   constructor(
     private baseUrlService: BaseUrlService,
+    private router: Router,
+    private appsService: ApplicationsService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog
-  ) { }
+  ) {
+    this.virtueForm = new FormControl();
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+  }
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log(req);
+    return next.handle(req);
+  }
 
   ngOnInit() {
+    this.baseUrlService.getBaseUrl().subscribe(res => {
+      let awsServer = res[0].aws_server;
+      this.getBaseUrl(awsServer);
+      this.getAppsList(awsServer);
+    });
+
     if (this.pageVmList.length > 0) {
-      this.baseUrlService.getBaseUrl().subscribe(res => {
-        let awsServer = res[0].aws_server;
-          this.getVmList(awsServer);
-      });
+      this.getVmList();
     }
   }
 
-  getVmList(baseUrl: string) {
-    this.baseUrl = baseUrl;
-    // loop through the selected VM list
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+    console.log('URL: ' + url);
+  }
+
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 1000);
+  }
+
+  getVmList() {
     const selectedVm = this.pageVmList;
-    // console.log('page VM list @ getVmList(): ' + this.pageVmList);
-    this.vmService.getVmList(baseUrl)
+    this.vmService.getVmList(this.baseUrl)
       .subscribe(data => {
         if (this.vmList.length < 1) {
           for (let sel of selectedVm) {
@@ -63,28 +95,24 @@ export class CreateVirtueComponent implements OnInit {
             }
           }
         } else {
-          this.getUpdatedVmList(baseUrl);
+          this.getUpdatedVmList(this.baseUrl);
         }
       });
   }
 
-  getAppList() {
-    let vms = this.vmList;
-    let apps = [];
-    for (let vm of vms) {
-      apps = vm.applications;
-      for (let app of apps) {
-        this.appList.push({
-          'name': app.name,
-          'version': app.version,
-          'os': app.os,
-          'launchCommand': app.launchCommand
-        });
-      }
-    }
-    // console.log('getAppList():' + this.appList[0].name);
-    // return this.appList;
+  getAppsList(baseUrl: string) {
+    this.appsService.getAppsList(baseUrl).subscribe(data => {
+      this.appsList = data;
+    });
   }
+
+  getAppName(id: string) {
+    const app = this.appsList.filter(data =>  id === data.id);
+    if (id !== null) {
+      return app[0].name;
+    }
+  }
+
   getUpdatedVmList(baseUrl: string) {
     this.vmList = [];
     this.vmService.getVmList(baseUrl)
@@ -92,7 +120,7 @@ export class CreateVirtueComponent implements OnInit {
         for (let sel of this.pageVmList) {
           for (let vm of data) {
             if (sel === vm.id) {
-              this.vmList.push(vm);
+              this.vmList.push(vm.id);
               break;
             }
           }
@@ -101,25 +129,31 @@ export class CreateVirtueComponent implements OnInit {
   }
 
   createVirtue(virtueName: string) {
-    this.getAppList();
-    let user = [{ 'username': 'admin', 'authorities': ['ROLE_USER', 'ROLE_ADMIN'] }];
-    let newVirtue = [{
-      // 'id': 'TEST',
+    console.log(virtueName);
+    let virtueVms = [];
+    for (let vm of this.pageVmList) {
+      virtueVms.push(vm);
+    }
+    console.log(virtueVms);
+    let body = {
       'name': virtueName,
       'version': '1.0',
-      'vmTemplates': this.vmList,
-      'users': user,
       'enabled': true,
-      'lastEditor': 'skim',
-      'applications': this.appList
-    }];
+      'virtualMachineTemplateIds': virtueVms
+    };
     // console.log('New Virtue: ');
-    // console.log(newVirtue);
+    console.log(body);
 
-    // this.virtuesService.createVirtue({newVirtue} as Virtue)
-    // .subscribe(data => {
-    //   this.virtues.push(data);
-    // });
+    this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
+      data => {
+        return true;
+      },
+      error => {
+        console.log(error.message);
+      });
+
+    this.resetRouter();
+    this.router.navigate(['/virtues']);
   }
 
 
@@ -133,7 +167,7 @@ export class CreateVirtueComponent implements OnInit {
   activateModal(id: string): void {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
-      width: '750px',
+      width: '800px',
       data: {
         selectedVms: this.pageVmList
       }
@@ -149,7 +183,7 @@ export class CreateVirtueComponent implements OnInit {
       }
       this.pageVmList = this.selVmsList;
 
-      this.getVmList(this.baseUrl);
+      this.getVmList();
     });
 
     dialogRef.afterClosed().subscribe(() => {

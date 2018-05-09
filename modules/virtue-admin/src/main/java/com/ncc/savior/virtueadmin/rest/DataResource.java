@@ -9,7 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,10 +34,12 @@ import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
@@ -158,7 +162,7 @@ public class DataResource {
 		// String windowsAmi = "ami-ca00afb7";
 		// String windowsAmi = "ami-6f69b310";
 		String windowsAmi = "ami-cfcd68b0";
-		String linuxLoginUser = "admin";
+		String linuxLoginUser = "user";
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
 				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName);
@@ -265,7 +269,7 @@ public class DataResource {
 		VirtueTemplate virtueLinuxCorporateEmailUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Linux Corporate Email User", "1.0", allTemplate, true, now, systemName, vmLinuxCorpEmail);
 		VirtueTemplate virtueExternalInternet = new VirtueTemplate(UUID.randomUUID().toString(),
-				"Enternal Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
+				"External Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
 		VirtueTemplate virtuePowerUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows and Linux Power User", "1.0", allTemplate, true, now, systemName, vmPowerUserWin,
 				vmPowerUserLinux);
@@ -420,6 +424,24 @@ public class DataResource {
 	}
 
 	@GET
+	@Path("vm/status")
+	@Produces("application/json")
+	public Map<String, VmState> getAllVmStatus() {
+		Map<String, VmState> result = new TreeMap<String, VmState>();
+		activeVirtueDao.getAllVirtualMachines().forEach((VirtualMachine vm) -> {
+			result.put(vm.getName(), vm.getState());
+		});
+		return result;
+	}
+
+	@GET
+	@Path("vm")
+	@Produces("application/json")
+	public Iterable<VirtualMachine> getAllVms() {
+		return activeVirtueDao.getAllVirtualMachines();
+	}
+
+	@GET
 	@Path("session")
 	@Produces("application/json")
 	public Map<String, List<String>> getAllSessions() {
@@ -449,7 +471,11 @@ public class DataResource {
 	public String clearActiveDatabase() {
 		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
 		for (VirtueInstance vi : all) {
-			cloudManager.deleteVirtue(vi);
+			CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();
+			cloudManager.deleteVirtue(vi, future);
+			future.thenAccept((virtue) -> {
+				activeVirtueDao.deleteVirtue(virtue);
+			});
 		}
 
 		activeVirtueDao.clear();

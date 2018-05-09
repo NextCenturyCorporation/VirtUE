@@ -2,23 +2,45 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
+import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * Cloud manager that mixes AWS instances for Windows VMs via an
  * {@link AsyncAwsEc2VmManager}, but defers any linux boxes to a
  * {@link XenHostManager}.
+ * 
+ * This implementation is based on {@link CompletableFuture}s.
+ * {@link CompletableFuture}s allow for asynchronous tasks to be chained
+ * together to occur in order when the previous completes. With access to the
+ * future, code has the ability to complete it successfully or exceptionally at
+ * any time.
+ * 
+ * <ul>
+ * <li>TODO Errors usually get passed through the chain, but are often not
+ * handled here. Need to handle errors better
+ * <li>TODO Need to interact with futures from outside events. (I.E. VM could be
+ * deleted on AWS while the system thinks it is still provisioning)
+ * <li>TODO There are no timeouts for services where they may never complete
+ * (reachability for a VM that has been deleted)
+ * <li>Nothing prevents a Virtue that is in one process from being acted upon.
+ * I.E. if a virtue is provisioning, it can be requested to be deleted. Doing
+ * this would cause issues where futures would get lost and status may not be
+ * accurate. We should allow for the current future of a VM to be retrieved and
+ * interrupted (completeExceptionally).
  * 
  *
  */
@@ -30,17 +52,20 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private WindowsStartupAppsService windowsNfsMountingService;
 
+	private CompletableFutureServiceProvider serviceProvider;
+
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
-			WindowsStartupAppsService windowsNfsMountingService) {
+			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
+		this.serviceProvider = serviceProvider;
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
 	}
 
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		Collection<VirtualMachine> vms = virtueInstance.getVms();
 		Collection<VirtualMachine> linuxVms = new ArrayList<VirtualMachine>();
 		Collection<VirtualMachine> windowsVms = new ArrayList<VirtualMachine>();
@@ -51,8 +76,19 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		awsVmManager.deleteVirtualMachines(windowsVms);
-		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms);
+		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
+		awsVmManager.deleteVirtualMachines(windowsVms, windowsFuture);
+		xenHostManager.deleteVirtue(virtueInstance.getId(), linuxVms, xenFuture, null);
+		// Database needs to be updated when we delete, but we don't have access here.
+		// This is one of a couple ways to handle this and could be reviewed. Most
+		// likely, the notifiers (that usually update the database in the
+		// CompletableFuture services) should have delete/remove methods.
+		//
+		// Currently, we use this future to pass it out so we can delete it elsewhere.
+		CompletableFuture.allOf(windowsFuture, xenFuture).thenRun(() -> {
+			future.complete(virtueInstance);
+		});
 	}
 
 	@Override
@@ -68,14 +104,36 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVmts.add(vmt);
 			}
 		}
-		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts);
+
+		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
+				windowsFuture);
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		// if (!linuxVmts.isEmpty()) {
-		xenHostManager.provisionXenHost(vi, linuxVmts);
+
+		CompletableFuture<Collection<VirtualMachine>> linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
+		// actually provisions xen host and then xen guests.
+		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture);
 		// }
+		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
+			// When xen (really NFS) and all windows VM's are up
+			// Add them to the windows startup services service
 
-
-		windowsNfsMountingService.addVirtueToQueue(vi);
+			// windowsNfsMountingService.addVirtueToQueue(vi);
+			for (VirtualMachine windows : winVms) {
+				windowsNfsMountingService.addWindowsStartupServices(xen, windows);
+			}
+			return winVms;
+		}).thenAccept((Collection<VirtualMachine> finishedWindowsBoxes) -> {
+			// Once startup services are done on windows machines, set VM state to running
+			// and notify (notify saves to DB typically)
+			for (VirtualMachine winBox : finishedWindowsBoxes) {
+				CompletableFuture<VirtualMachine> myCf = serviceProvider.getUpdateStatus().startFutures(winBox,
+						VmState.RUNNING);
+				serviceProvider.getVmNotifierService().chainFutures(myCf, null);
+			}
+		});
 
 		return vi;
 	}
@@ -92,8 +150,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		xenHostManager.startVirtue(virtueInstance, linuxVms);
-		awsVmManager.startVirtualMachines(windowsVms);
+		xenHostManager.startVirtue(virtueInstance, linuxVms, null, null);
+		awsVmManager.startVirtualMachines(windowsVms, null);
 		return virtueInstance;
 	}
 
@@ -109,8 +167,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 				windowsVms.add(vm);
 			}
 		}
-		xenHostManager.stopVirtue(virtueInstance, linuxVms);
-		awsVmManager.stopVirtualMachines(windowsVms);
+		xenHostManager.stopVirtue(virtueInstance, linuxVms, null, null);
+		awsVmManager.stopVirtualMachines(windowsVms, null);
 		return virtueInstance;
 	}
 }

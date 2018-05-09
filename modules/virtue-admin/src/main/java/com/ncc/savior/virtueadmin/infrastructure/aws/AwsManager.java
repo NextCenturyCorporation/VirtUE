@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
@@ -153,7 +154,7 @@ public class AwsManager implements ICloudManager {
 	 * savior.virtueadmin.model.VirtueInstance)
 	 */
 	@Override
-	public void deleteVirtue(VirtueInstance virtueInstance) {
+	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		logger.debug("delete is being called, but not doing anything");
 	}
 

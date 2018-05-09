@@ -154,4 +154,16 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public Iterable<VirtualMachine> getAllVirtualMachines() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteVm(VirtualMachine vm) {
+		// TODO Auto-generated method stub
+
+	}
 }

@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.util.JavaUtil;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -55,12 +56,13 @@ public class CreateDestroyVirtueIT {
 		VirtueInstance instance = given().port(randomServerPort).when().post("/user/virtue/template/" + templateId)
 				.then().extract().as(VirtueInstance.class);
 		assertThat(instance).isNotNull();
+		JavaUtil.sleepAndLogInterruption(10000);
 
 		// check on instance
 		instance = given().port(randomServerPort).when().get("/user/virtue/" + instance.getId()).then().extract()
 				.as(VirtueInstance.class);
 		assertThat(instance).isNotNull();
-		
+
 		// delete instance
 		given().port(randomServerPort).when().delete("/user/virtue/" + instance.getId()).then().assertThat()
 				.statusCode(204);
