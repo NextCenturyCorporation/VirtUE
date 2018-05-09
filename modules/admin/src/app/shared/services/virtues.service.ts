@@ -29,7 +29,7 @@ export class VirtuesService {
   ) {}
 
   getVirtues(baseUrl: string): Observable<Virtue[]> {
-    let src = `${baseUrl + this.configUrl}`;
+    let src = 'baseUrl + this.configUrl';
     return this.httpClient.get<Virtue[]>(src);
       // .pipe(
       //   tap(virtues => this.log(`fetched virtues`)),
@@ -43,7 +43,7 @@ export class VirtuesService {
   }
 
   public createVirtue(baseUrl: string, virtueData: any): Observable<any> {
-    let url = `${baseUrl + this.configUrl}`;
+    let url = 'baseUrl + this.configUrl';
     return this.httpClient.post(url, virtueData, httpOptions);
   }
 
@@ -87,7 +87,7 @@ export class VirtuesService {
    * @ param result - optional value to return as the observable result
    */
    errorHandler(error: HttpErrorResponse) {
-     return Observable.throw(error.message || "Server Error");
+     return Observable.throw(error.message || 'Server Error');
    }
 
   private handleError<T>(operation = 'operation', result?: T) {
@@ -97,7 +97,7 @@ export class VirtuesService {
       console.error(error); // log to console instead
 
       // better job of transforming error for user consumption
-      this.log(`${operation} failed: ${error.message}`);
+      this.log('operation} failed: ${error.message');
 
       // Let the app keep running by returning an empty result.
       return of(result as T);
