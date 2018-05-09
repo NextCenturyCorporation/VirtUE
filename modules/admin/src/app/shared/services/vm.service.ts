@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-<<<<<<< HEAD
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-=======
 import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
->>>>>>> VRTU-349
 
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
@@ -70,7 +66,7 @@ export class VirtualMachineService {
   }
 
 /**
-  
+
   public deleteVirtue(virtue: Virtue): Observable<Virtue> {
     return this.httpClient.delete<Virtue>('this.jsondata}/${virtue.id');
   }
