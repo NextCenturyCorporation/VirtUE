@@ -62,16 +62,6 @@ export class VmListComponent implements OnInit {
     }, 2000);
   }
 
-  resetRouter() {
-    setTimeout(() => {
-      this.router.navigated = false;
-    }, 500);
-  }
-
-  getBaseUrl(url: string) {
-    this.baseUrl = url;
-  }
-
   getVmList(baseUrl: string) {
     this.vmService.getVmList(baseUrl).subscribe(vmlist => {
       this.vms = vmlist;
@@ -113,7 +103,7 @@ export class VmListComponent implements OnInit {
       error => {
         console.log("error: " + error.message);
       });
-    this.resetRouter();
+    this.refreshData();
     this.router.navigate(['/vm']);
   }
 

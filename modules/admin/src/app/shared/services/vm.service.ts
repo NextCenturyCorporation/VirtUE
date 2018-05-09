@@ -5,6 +5,7 @@ import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of';
 import { ISubscription } from 'rxjs/Subscription';
 
 import { VirtualMachine } from '../models/vm.model';
@@ -44,8 +45,9 @@ export class VirtualMachineService {
            }, error => {
              console.log(error);
            });
+ }
 
-  updateStatus(baseUrl: string, id: string, isEnabled: boolean): Observable<VirtualMachine> {
+  public updateStatus(baseUrl: string, id: string, isEnabled: boolean): Observable<any> {
     let url = baseUrl + this.configUrl + id;
     console.log(url);
     let body = {
