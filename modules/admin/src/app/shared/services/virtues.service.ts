@@ -43,6 +43,7 @@ export class VirtuesService {
   }
 
   public createVirtue(baseUrl: string, virtueData: any): Observable<any> {
+    console.log('createVirtue() => ' + baseUrl);
     let url = baseUrl + this.configUrl;
     return this.httpClient.post(url, virtueData, httpOptions);
   }

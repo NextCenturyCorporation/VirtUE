@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes, ExtraOptions } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
@@ -11,6 +11,7 @@ import { VirtuesComponent } from './virtues/virtues.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
+import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
@@ -38,6 +39,7 @@ const routes: Routes = [
     { path: '', component: VirtueListComponent },
     { path: 'create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
     { path: 'edit/:id', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
+    { path: 'duplicate/:id', component: DuplicateVirtueComponent, data: {breadcrumb: 'Duplicate Virtue'} },
     { path: 'virtue-settings', component: VirtueSettingsComponent }
   ] },
   { path: 'vm', component: VirtualMachinesComponent, data: {breadcrumb: 'Virtual Machines'}, children: [

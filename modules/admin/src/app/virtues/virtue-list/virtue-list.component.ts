@@ -1,17 +1,13 @@
-import { Component, Injector, Input, OnDestroy, OnInit } from '@angular/core';
-import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { Component, OnInit } from '@angular/core';
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { filter } from 'rxjs/operators';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { Virtue } from '../../shared/models/virtue.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
-import { Application } from '../../shared/models/application.model';
-
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
@@ -24,7 +20,7 @@ import { ApplicationsService } from '../../shared/services/applications.service'
   styleUrls: ['./virtue-list.component.css']
 })
 
-export class VirtueListComponent implements OnInit, OnDestroy {
+export class VirtueListComponent implements OnInit {
   virtue: Virtue[];
   title = 'Virtues';
   virtues = [];
@@ -56,14 +52,10 @@ export class VirtueListComponent implements OnInit, OnDestroy {
       this.getApplications(awsServer);
       this.getVmList(awsServer);
     });
+    this.refreshData();
   }
-
-  ngOnDestroy() {
-  }
-
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    console.log(req);
     return next.handle(req);
   }
 
@@ -71,16 +63,16 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     this.baseUrl = url;
   }
 
-  resetRouter() {
+  refreshData() {
     setTimeout(() => {
       this.router.navigated = false;
+      this.getVirtues(this.baseUrl);
     }, 1000);
-    this.router.navigate(['/virtues']);
   }
 
   getVirtues(baseUrl: string) {
-    this.virtuesService.getVirtues(baseUrl).subscribe( virtues => {
-      this.virtues = virtues;
+    this.virtuesService.getVirtues(baseUrl).subscribe( data => {
+      this.virtues = data;
     });
   }
 
@@ -97,10 +89,6 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     });
   }
 
-  getAppsList(list: any[]) {
-    this.appsList = list;
-  }
-
   getAppName(id: string) {
     for (let app of this.appsList) {
       if (id === app.id) {
@@ -115,6 +103,27 @@ export class VirtueListComponent implements OnInit, OnDestroy {
         return vm.name;
       }
     }
+  }
+
+  virtueStatus(id: string, isEnabled: boolean) {
+    if (isEnabled) {
+      this.virtueEnabled = false;
+    } else {
+      this.virtueEnabled = true;
+    }
+    let body = {
+      'enabled': this.virtueEnabled
+    };
+    console.log('Virtue is enabled: ' + this.virtueEnabled);
+    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
+    // this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
+    this.refreshData();
+  }
+
+  deleteVirtue(id: string) {
+    console.log('deleting ' + id);
+    this.virtuesService.deleteVirtue(this.baseUrl, id);
+    this.refreshData();
   }
 
   openDialog(id: string, type: string, category: string, description: string): void {
@@ -136,26 +145,5 @@ export class VirtueListComponent implements OnInit, OnDestroy {
         this.deleteVirtue(data);
       }
     });
-  }
-
-  deleteVirtue(id: string) {
-    console.log('deleting ' + id);
-    this.virtuesService.deleteVirtue(this.baseUrl, id);
-    this.resetRouter();
-  }
-
-  virtueStatus(id: string, isEnabled: boolean) {
-    if (isEnabled) {
-      this.virtueEnabled = false;
-    } else {
-      this.virtueEnabled = true;
-    }
-    let body = {
-      'enabled': this.virtueEnabled
-    };
-    console.log('Virtue is enabled: ' + this.virtueEnabled);
-    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
-    // this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
-    this.resetRouter();
   }
 }

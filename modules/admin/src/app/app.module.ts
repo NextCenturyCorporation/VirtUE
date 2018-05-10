@@ -12,40 +12,17 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { AppOverlayContainer } from './appOverlayContainer';
 import { OverlayModule } from '@angular/cdk/overlay';
 
 import {
   MatAutocompleteModule,
-  MatButtonModule,
-  MatButtonToggleModule,
-  MatCardModule,
   MatCheckboxModule,
-  MatChipsModule,
-  MatDatepickerModule,
   MatDialogModule,
-  MatExpansionModule,
   MatFormFieldModule,
-  MatGridListModule,
-  MatIconModule,
   MatInputModule,
-  MatListModule,
-  MatMenuModule,
-  MatNativeDateModule,
-  MatProgressBarModule,
-  MatProgressSpinnerModule,
   MatRadioModule,
-  MatRippleModule,
   MatSelectModule,
-  MatSidenavModule,
-  MatSliderModule,
-  MatSlideToggleModule,
-  MatSnackBarModule,
-  MatStepperModule,
-  MatTableModule,
-  MatTabsModule,
   MatToolbarModule,
-  MatTooltipModule,
 } from '@angular/material';
 
 import { BreadcrumbsModule } from 'ng2-breadcrumbs';
@@ -76,6 +53,7 @@ import { VirtuesComponent } from './virtues/virtues.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
+import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
@@ -103,8 +81,6 @@ import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
 import { VirtuesService } from './shared/services/virtues.service';
 
-import { Globals } from './shared/globals';
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -125,6 +101,7 @@ import { Globals } from './shared/globals';
     VirtueSettingsComponent,
     CreateVirtueComponent,
     EditVirtueComponent,
+    DuplicateVirtueComponent,
     DialogsComponent,
     VirtueModalComponent,
     VmModalComponent,
@@ -144,7 +121,7 @@ import { Globals } from './shared/globals';
     VmAppsComponent,
     VmAppsListComponent,
     AddVmAppComponent,
-    VmAppsModalComponent
+    VmAppsModalComponent,
   ],
   imports: [
     AppRoutingModule,
@@ -170,7 +147,6 @@ import { Globals } from './shared/globals';
   ],
   providers: [
     OverlayContainer,
-    Globals,
     BaseUrlService,
     MessageService,
     VirtuesService
