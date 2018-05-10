@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Virtual Machines</h1>
-    <button class="titlebar-button" [routerLink]="['vm-build']">Build VM</button>
+    <button class="titlebar-button" [routerLink]="['vm-build']">Build VM Template</button>
     <button class="titlebar-button" [disabled]="true">Import VM</button>
   </div>
 
@@ -48,8 +48,7 @@
               <!-- if this virtue is enabled show this menu -->
               <span *ngIf="vm.enabled === true" class="menu-options">
                 <a mat-button (click)="updateVmStatus(vm.id, vm.enabled)">Disable</a> |
-
-                <a mat-button (click)="openDialog(vm.id, 'delete', 'vm', vm.name)">Delete</a>
+                <a class="edit" [routerLink]="['duplicate',vm.id]">Duplicate</a>
               </span>
 
               <!-- if this virtue is disabled show this menu -->

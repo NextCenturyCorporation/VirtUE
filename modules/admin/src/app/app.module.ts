@@ -63,6 +63,7 @@ import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.co
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
 import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
 import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
+import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
 
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
@@ -117,6 +118,7 @@ import { VirtuesService } from './shared/services/virtues.service';
     VmListComponent,
     VmBuildComponent,
     VmEditComponent,
+    VmDuplicateComponent,
     ActiveClassDirective,
     VmAppsComponent,
     VmAppsListComponent,

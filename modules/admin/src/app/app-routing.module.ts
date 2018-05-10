@@ -17,6 +17,7 @@ import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.co
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
 import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
 import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
+import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
@@ -46,6 +47,7 @@ const routes: Routes = [
     { path: '', component: VmListComponent },
     { path: 'vm-build', component: VmBuildComponent, data: {breadcrumb: 'Build Virtual Machine'} },
     { path: 'edit/:id', component: VmEditComponent, data: {breadcrumb: 'Edit Virtual Machine'} },
+      { path: 'duplicate/:id', component: VmDuplicateComponent, data: {breadcrumb: 'Duplicate Virtual Machine'} },
   ] },
   { path: '**', component: PageNotFoundComponent }
 ];

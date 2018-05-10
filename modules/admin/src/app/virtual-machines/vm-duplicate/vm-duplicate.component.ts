@@ -1,25 +1,23 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { Component, Input, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
+
+import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
 
 import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { VirtualMachine } from '../../shared/models/vm.model';
-import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ApplicationsService } from '../../shared/services/applications.service';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
-import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
-
 @Component({
-  selector: 'app-vm-edit',
-  templateUrl: './vm-edit.component.html',
-  styleUrls: ['./vm-edit.component.css'],
+  selector: 'app-vm-duplicate',
+  templateUrl: './vm-duplicate.component.html',
+  styleUrls: ['./vm-duplicate.component.css'],
   providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
-export class VmEditComponent implements OnInit {
-
+export class VmDuplicateComponent implements OnInit {
   @Input() vm: VirtualMachine;
 
   vmForm: FormControl;
@@ -76,6 +74,7 @@ export class VmEditComponent implements OnInit {
     this.vmService.getVM(baseUrl, id).subscribe(
       data => {
         this.vmData = data;
+        this.vmData['name'] = 'Copy of ' + this.vmData['name'];
         this.selectedOS = data.os;
         this.pageAppList = data.applicationIds;
         this.getAppList(data.applicationIds);
@@ -125,7 +124,6 @@ export class VmEditComponent implements OnInit {
     this.pageAppList.splice(index, 1);
   }
 
-
   activateModal(): void {
 
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
@@ -151,7 +149,7 @@ export class VmEditComponent implements OnInit {
     });
   }
 
-  buildVirtualMachine(id: string, vmName: string, vmOs: string, vmSecurityTag: string) {
+  duplicateVirtualMachine(vmName: string, vmOs: string, vmSecurityTag: string) {
     let body = {
       'name': vmName,
       'os': vmOs,
@@ -160,7 +158,9 @@ export class VmEditComponent implements OnInit {
       'applicationIds': this.pageAppList,
       'securityTag': vmSecurityTag
     };
-    this.vmService.updateVM(this.baseUrl, id, JSON.stringify(body));
+    // console.log('duplicateVirtualMachine() => ');
+    // console.log(body);
+    this.vmService.createVM(this.baseUrl, JSON.stringify(body));
     this.router.navigate(['/vm']);
   }
 

@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
-import { ISubscription } from 'rxjs/Subscription';
 
 import { VirtualMachine } from '../models/vm.model';
 import { MessageService } from './message.service';
@@ -37,8 +36,8 @@ export class VirtualMachineService {
 
   public createVM(baseUrl: string, vmData: any) {
     let url = baseUrl + this.configUrl;
-    console.log('createVM() => ');
-    console.log(vmData);
+    // console.log('createVM() => ');
+    //     // console.log(vmData);
     return this.httpClient.post(url, vmData, httpOptions)
            .toPromise().then(data => {
              return data;

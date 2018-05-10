@@ -147,7 +147,6 @@ export class VmBuildComponent implements OnInit, OnDestroy {
   }
 
   buildVirtualMachine(vmName: string, vmOs: string, vmSecurityTag: string) {
-
     let body = {
       'name': vmName,
       'os': vmOs,
