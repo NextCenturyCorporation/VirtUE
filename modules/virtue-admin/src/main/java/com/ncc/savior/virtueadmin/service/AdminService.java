@@ -196,7 +196,12 @@ public class AdminService {
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
 		VirtueUser user = verifyAndReturnUser();
 		Collection<String> vmtIds = template.getVirtualMachineTemplateIds();
-		Iterable<VirtualMachineTemplate> vmts = templateManager.getVmTemplates(vmtIds);
+		Iterable<VirtualMachineTemplate> vmts;
+		if (vmtIds == null) {
+			vmts = new ArrayList<VirtualMachineTemplate>();
+		} else {
+			vmts = templateManager.getVmTemplates(vmtIds);
+		}
 		Iterator<VirtualMachineTemplate> itr = vmts.iterator();
 		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
