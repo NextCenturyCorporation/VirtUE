@@ -1,0 +1,301 @@
+package com.ncc.savior.desktop.clipboard.windows;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.data.ClipboardData;
+import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
+import com.sun.jna.WString;
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.platform.win32.WinDef.HWND;
+import com.sun.jna.platform.win32.WinDef.LPARAM;
+import com.sun.jna.platform.win32.WinDef.LRESULT;
+import com.sun.jna.platform.win32.WinDef.WPARAM;
+import com.sun.jna.platform.win32.WinUser;
+import com.sun.jna.platform.win32.WinUser.MSG;
+import com.sun.jna.platform.win32.WinUser.WNDCLASSEX;
+import com.sun.jna.platform.win32.WinUser.WindowProc;
+import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.PointerByReference;
+
+public class WindowsClipboardWrapper implements IClipboardWrapper {
+	private static final Logger logger = LoggerFactory.getLogger(WindowsClipboardWrapper.class);
+	// message for window creation. window is needed for the windows callback.
+	protected static final int WM_NCCREATE = 0x0081;
+	// Sent to clipboard owner when empty clipboard is called
+	protected static final int WM_DESTROYCLIPBOARD = 0x0307;
+	// Sent to clipboard viewers when clipboard changes
+	protected static final int WM_DRAWCLIPBOARD = 0x0308;
+	// Sent to clipboard owner who set clipboard to delayed render mode and someone
+	// has tried to paste. Need to put data on clipboard.
+	protected static final int WM_RENDERFORMAT = 0x0305;
+	// Sent to clipboard owner before owner is destroyed so it can render all
+	// formats. We probably want to ignore this. TODO figure out if ignore is
+	// appropriate.
+	protected static final int WM_RENDERALLFORMATS = 0x0306;
+
+	static IWindowsClipboardUser32 user32 = IWindowsClipboardUser32.INSTANCE;
+	static Kernel32 kernel32 = Kernel32.INSTANCE;
+
+	WindowProc callback = new WindowProc() {
+		@Override
+		public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
+			// logger.debug("got message(callback)=" + uMsg);
+			switch (uMsg) {
+			case WM_NCCREATE:
+				return new LRESULT(1);
+			case WM_DESTROYCLIPBOARD:
+				onClipboardEmptied();
+				return new LRESULT(1);
+			case WM_DRAWCLIPBOARD:
+				onClipboardChanged();
+				return new LRESULT(1);
+			case WM_RENDERFORMAT:
+				onPaste(wParam);
+				return new LRESULT(1);
+			case WM_RENDERALLFORMATS:
+				return new LRESULT(1);
+			case User32.WM_DEVICECHANGE:
+				return new LRESULT(1);
+
+			default:
+				return new LRESULT(0);
+			}
+		}
+	};
+	private HWND windowHandle;
+	private ScheduledExecutorService executor;
+	private IClipboardListener clipboardListener;
+
+	public WindowsClipboardWrapper() {
+
+		ThreadFactory threadFactory = new ThreadFactory() {
+			private int i = 1;
+
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(r, getName());
+			}
+
+			private synchronized String getName() {
+				// increments after returning value;
+				return "clipboard-" + i++;
+			}
+		};
+		this.executor = Executors.newScheduledThreadPool(3, threadFactory);
+
+		executor.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				WString className = new WString("delayedRenderClipboardManager");
+				String title = "title";
+				WNDCLASSEX wx = new WNDCLASSEX();
+				wx.clear();
+				wx.lpszClassName = className;
+				wx.lpfnWndProc = callback;
+
+				if (User32.INSTANCE.RegisterClassEx(wx).intValue() != 0) {
+					windowHandle = user32.CreateWindowEx(0, className, title, 0, 0, 0, 0, 0, null, null, null, null);
+					user32.SetClipboardViewer(windowHandle);
+				}
+				while (true) {
+					getMessage(windowHandle);
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+	}
+
+	@Override
+	public void setDelayedRenderFormats(Collection<Integer> formats) {
+		executor.schedule(new Runnable() {
+
+			@Override
+			public void run() {
+				logger.debug("writing null to clipboard formats=" + formats);
+				writeNullToClipboard(windowHandle, formats);
+			}
+
+		}, 1, TimeUnit.MICROSECONDS);
+
+	}
+
+	private static void getMessage(HWND windowHandle) {
+		MSG msg = new WinUser.MSG();
+		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 0);
+		if (hasMessage) {
+			user32.GetMessage(msg, windowHandle, 0, 0);
+			// logger.debug("got message=" + msg.message);
+			if (msg.message != 0xC228) {
+			}
+			user32.TranslateMessage(msg);
+			user32.DispatchMessage(msg);
+		}
+	}
+
+	protected void onPaste(WPARAM wParam) {
+		if (clipboardListener != null) {
+			clipboardListener.onPasteAttempt(wParam.intValue());
+		} else {
+			Pointer p = new Memory(1);
+			p.setByte(0, (byte) 0);
+			user32.SetClipboardData(wParam.intValue(), p);
+		}
+	}
+
+	protected void onClipboardChanged() {
+		HWND owner = user32.GetClipboardOwner();
+		if (!windowHandle.equals(owner)) {
+			executor.schedule(new Runnable() {
+				@Override
+				public void run() {
+					Set<Integer> formats = getClipboardFormatsAvailable();
+					clipboardListener.onClipboardChanged(formats);
+				}
+			}, 1, TimeUnit.MICROSECONDS);
+		}
+	}
+
+	/**
+	 * Called when someone (including yourself) calls to empty your clipboard. This
+	 * is likely to occur just before they write the clipboard. We don't use this at
+	 * the moment because we are watching for the clipboard changed call.
+	 */
+	protected void onClipboardEmptied() {
+
+	}
+
+	protected void writeNullToClipboard(HWND windowHandle2, Collection<Integer> formats) {
+		openClipboardWhenFree(windowHandle);
+		try {
+			boolean success = user32.EmptyClipboard();
+			if (!success) {
+				throw windowsErrorToException("Error emptying clipboard");
+			}
+			for (Integer format : formats) {
+				user32.SetClipboardData(format, Pointer.NULL);
+				WindowsError error = getLastError();
+				if (error.error != 0) {
+					throw windowsErrorToException("Error writing NULL to clipboard with format=" + format, error);
+				}
+			}
+		} catch (Throwable t) {
+			throw windowsErrorToException("Error attempting to write null to clipboard for formats=" + formats, null,
+					t);
+		} finally {
+			HWND owner = user32.GetClipboardOwner();
+			if (windowHandle.equals(owner)) {
+				user32.CloseClipboard();
+			}
+		}
+	}
+
+	private Set<Integer> getClipboardFormatsAvailable() {
+		IntByReference returnedSizeOfFormats = new IntByReference();
+		int sizeOfFormats = 20;
+		int[] formats = new int[sizeOfFormats];
+		boolean success = user32.GetUpdatedClipboardFormats(formats, sizeOfFormats, returnedSizeOfFormats);
+		if (success) {
+			Set<Integer> set = new HashSet<Integer>();
+			int[] arr = Arrays.copyOf(formats, returnedSizeOfFormats.getValue());
+			for (int a : arr) {
+				set.add(a);
+			}
+			return set;
+		} else {
+			throw windowsErrorToException("Error getting clipboard formats.");
+		}
+
+	}
+
+	private RuntimeException windowsErrorToException(String string, WindowsError error, Throwable t) {
+		if (error == null) {
+			error = getLastError();
+		}
+		String message = string + " Error=" + error + " WindowsMessage=" + error.errorMessage;
+		if (t != null) {
+			return new RuntimeException(message, t);
+		} else {
+			return new RuntimeException(message);
+		}
+	}
+
+	private RuntimeException windowsErrorToException(String string) {
+		return windowsErrorToException(string, null, null);
+	}
+
+	private RuntimeException windowsErrorToException(String string, WindowsError error) {
+		return windowsErrorToException(string, error, null);
+	}
+
+	private static WindowsError getLastError() {
+		int error = kernel32.GetLastError();
+		int langId = 0;
+		PointerByReference lpBuffer = new PointerByReference();
+		int ret = kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
+				| WinBase.FORMAT_MESSAGE_IGNORE_INSERTS, null, error, langId, lpBuffer, 0, null);
+		return new WindowsError(error, lpBuffer.getValue().getWideString(0));
+	}
+
+	/**
+	 * blocks/polls until success;
+	 *
+	 * @param windowHandle
+	 * @return
+	 */
+	private void openClipboardWhenFree(HWND windowHandle) {
+		// logger.debug("attempting to open clipboard");
+		boolean success = user32.OpenClipboard(windowHandle);
+		// wait for clipboard to be free
+		while (!success) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			logger.debug("clipboard unable to be opened.  Trying again.  Owner=" + user32.GetClipboardOwner() + " ME="
+					+ windowHandle);
+			success = user32.OpenClipboard(windowHandle);
+		}
+	}
+
+	public static class WindowsError {
+		public int error;
+		public String errorMessage;
+
+		public WindowsError(int error, String errorMessage) {
+			this.error = error;
+			this.errorMessage = errorMessage;
+		}
+	}
+
+	@Override
+	public void setClipboardListener(IClipboardListener listener) {
+		this.clipboardListener = listener;
+	}
+
+	@Override
+	public void setDelayedRenderData(ClipboardData clipboardData) {
+		user32.SetClipboardData(clipboardData.getFormat(), clipboardData.getWindowsData());
+	}
+}

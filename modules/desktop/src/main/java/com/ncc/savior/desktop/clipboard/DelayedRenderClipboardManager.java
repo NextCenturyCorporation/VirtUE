@@ -50,18 +50,6 @@ public class DelayedRenderClipboardManager {
 	protected String clipboardBuffer;
 
 	public DelayedRenderClipboardManager() throws InterruptedException {
-		WString className = new WString("delayedRenderClipboardManager");
-		String title = "title";
-		WNDCLASSEX wx = new WNDCLASSEX();
-		wx.clear();
-		wx.lpszClassName = className;
-		wx.lpfnWndProc = callback;
-
-		if (User32.INSTANCE.RegisterClassEx(wx).intValue() != 0) {
-			windowHandle = user32.CreateWindowEx(0, className, title, 0, 0, 0, 0, 0, null, null, null, null);
-			user32.SetClipboardViewer(windowHandle);
-		}
-
 		ThreadFactory threadFactory = new ThreadFactory() {
 			private int i = 1;
 
@@ -76,27 +64,60 @@ public class DelayedRenderClipboardManager {
 			}
 		};
 		executor = Executors.newScheduledThreadPool(1, threadFactory);
+		WString className = new WString("delayedRenderClipboardManager");
+		String title = "title";
+		WNDCLASSEX wx = new WNDCLASSEX();
+		wx.clear();
+		wx.lpszClassName = className;
+		wx.lpfnWndProc = callback;
+
+		if (User32.INSTANCE.RegisterClassEx(wx).intValue() != 0) {
+			windowHandle = user32.CreateWindowEx(0, className, title, 0, 0, 0, 0, 0, null, null, null, null);
+			user32.SetClipboardViewer(windowHandle);
+		}
+
 		getClipboardAndTakeControl();
 	}
 
 	private void getClipboardAndTakeControl() throws InterruptedException {
 		Set<Integer> formats = getClipboardFormatsAvailable();
+		logger.debug("formats: " + (formats));
 		if (formats.contains(1)) {
 			this.clipboardBuffer = getStringClipboardNative();
+		} else {
+			this.clipboardBuffer = null;
 		}
 		writeStringToClipboard(null, windowHandle, true);
 	}
 
-	private static String getStringClipboardNative() {
+	private String getStringClipboardNative() {
 		// logger.debug("cb owner:" + user32.GetClipboardOwner());
-		user32.OpenClipboard(null);
+		openClipboardWhenFree(windowHandle);
 		Pointer p = user32.GetClipboardData(MyUser32.CF_TEXT);
 		user32.CloseClipboard();
 		if (p == null) {
+			logger.debug("got null");
 			return null;
 		} else {
+			logger.debug("got " + p.getString(0));
 			return p.getString(0);
 		}
+	}
+
+	private boolean openClipboardWhenFree(HWND windowHandle) {
+		boolean success = user32.OpenClipboard(windowHandle);
+		// wait for clipboard to be free
+		while (!success) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			logger.debug("clipboard unable to be opened.  Trying again");
+			success = user32.OpenClipboard(windowHandle);
+		}
+		return success;
 	}
 
 	public static void main(String[] args) throws InterruptedException {
@@ -131,28 +152,55 @@ public class DelayedRenderClipboardManager {
 
 	}
 
-	private static boolean writeStringToClipboard(String myString, final HWND windowHandle, boolean normalString)
+	private boolean writeStringToClipboard(String myString, final HWND windowHandle, boolean normalString)
 			throws InterruptedException {
-		boolean success = user32.OpenClipboard(windowHandle);
+		logger.debug("opening clipboard " + myString);
+		boolean success = openClipboardWhenFree(windowHandle);
+		logger.debug("opened clipboard " + myString);
 		if (!success) {
+			logger.error("error opening clipboard");
 			throw new RuntimeException(getLastError("OpenClipboard Error", true));
 		}
-		success = user32.EmptyClipboard();
-		if (!success) {
-			throw new RuntimeException(getLastError("EmptyClipboard Error", true));
-		}
 		try {
-			return putClipboardStringDirectly(myString, normalString);
+			success = user32.EmptyClipboard();
+			logger.debug("emptied clipboard " + myString);
+			if (!success) {
+				logger.error("error emptying clipboard");
+				throw new RuntimeException(getLastError("EmptyClipboard Error", true));
+			}
+			logger.debug("writing " + myString);
+			boolean writeSuccess = putClipboardStringDirectly(myString, normalString);
+			if (!writeSuccess) {
+				logger.debug("error writing " + myString);
+				throw new RuntimeException(getLastError("write Error", true));
+			}
+			HWND owner = user32.GetClipboardOwner();
+			logger.debug(owner + " =? " + windowHandle);
+			if (windowHandle.equals(owner)) {
+				success = user32.CloseClipboard();
+				logger.debug("closed clipboard " + success);
+			} else {
+				logger.debug("clipboard closed somewhere else");
+			}
+			// if (!success) {
+			// throw new RuntimeException(getLastError("CloseClipboard Error", true));
+			// }
+			return writeSuccess;
 		} catch (Throwable t) {
+			logger.error("error");
 			throw new RuntimeException(getLastError("error setting clipboard", true), t);
 		} finally {
-			success = user32.CloseClipboard();
-			if (!success) {
-				throw new RuntimeException(getLastError("CloseClipboard Error", true));
-			}
+
 		}
 	}
 
+	/**
+	 * Returns true if write text
+	 *
+	 * @param myString
+	 * @param normalString
+	 * @return
+	 */
 	private static boolean putClipboardStringDirectly(String myString, boolean normalString) {
 		Pointer pnt;
 		if (myString == null) {
@@ -173,15 +221,17 @@ public class DelayedRenderClipboardManager {
 		}
 
 		Pointer p;
+		logger.debug("writing clipboard " + myString);
 		if (normalString) {
 			p = user32.SetClipboardData(MyUser32.CF_TEXT, pnt);
 		} else {
 			p = user32.SetClipboardData(MyUser32.CF_UNICODE, pnt);
 		}
 		if (myString != null && p == null) {
+			logger.error("Error writing " + myString + " to clipboard");
 			throw new RuntimeException(getLastError("set clipboard", true));
 		}
-		return (p != null);
+		return true;
 	}
 
 	private static String getLastError(String prefix, boolean printOnSuccess) {
@@ -256,6 +306,7 @@ public class DelayedRenderClipboardManager {
 				return new LRESULT(1);
 			case WM_DRAWCLIPBOARD:
 				logger.debug("clipboard changed " + hWnd);
+				logger.debug("clipboard changed new owner" + user32.GetClipboardOwner());
 				onClipboardTaken();
 				return new LRESULT(1);
 			case WM_RENDERFORMAT:
@@ -294,14 +345,23 @@ public class DelayedRenderClipboardManager {
 	}
 
 	protected void onClipboardTaken() {
-		try {
-			HWND owner = user32.GetClipboardOwner();
-			if (owner == null || !owner.equals(windowHandle)) {
-				getClipboardAndTakeControl();
+
+		executor.schedule(new Runnable() {
+			@Override
+			public void run() {
+				try {
+
+					HWND owner = user32.GetClipboardOwner();
+					if (owner == null || !owner.equals(windowHandle)) {
+						logger.debug("getting clipboard from " + owner + " to " + windowHandle);
+						getClipboardAndTakeControl();
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		}, 1, TimeUnit.MICROSECONDS);
+
 	}
 }
