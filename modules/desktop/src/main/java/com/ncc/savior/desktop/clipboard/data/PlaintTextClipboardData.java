@@ -1,13 +1,20 @@
 package com.ncc.savior.desktop.clipboard.data;
 
+import java.io.Serializable;
+
 import com.ncc.savior.desktop.clipboard.windows.IWindowsClipboardUser32;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
-public class PlaintTextClipboardData extends ClipboardData {
+/**
+ * Specific implementation for simple plain text clipboard data
+ *
+ *
+ */
 
+public class PlaintTextClipboardData extends ClipboardData implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private String data;
-	private Memory winMemory;
 
 	public PlaintTextClipboardData(String data) {
 		super(IWindowsClipboardUser32.CF_TEXT);
@@ -16,7 +23,7 @@ public class PlaintTextClipboardData extends ClipboardData {
 
 	@Override
 	public Pointer getWindowsData() {
-		this.winMemory= new Memory(1 * (data.getBytes().length + 1));
+		Memory winMemory = new Memory(1 * (data.getBytes().length + 1));
 		winMemory.clear();
 		winMemory.setString(0, data);
 		return winMemory;

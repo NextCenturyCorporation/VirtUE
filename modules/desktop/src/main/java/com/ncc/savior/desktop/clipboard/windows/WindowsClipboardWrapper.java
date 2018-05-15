@@ -31,6 +31,12 @@ import com.sun.jna.platform.win32.WinUser.WindowProc;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
+/**
+ * Wrapper class wraps the windows clipboard into a generic
+ * {@link IClipboardWrapper}.
+ *
+ *
+ */
 public class WindowsClipboardWrapper implements IClipboardWrapper {
 	private static final Logger logger = LoggerFactory.getLogger(WindowsClipboardWrapper.class);
 	// message for window creation. window is needed for the windows callback.
@@ -95,6 +101,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				return "clipboard-" + i++;
 			}
 		};
+		// We need at least 2 threads. One will read messages forever and any others
+		// will handle the other short running asynchronous tasks.
 		this.executor = Executors.newScheduledThreadPool(3, threadFactory);
 
 		executor.execute(new Runnable() {
@@ -113,6 +121,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 					user32.SetClipboardViewer(windowHandle);
 				}
 				while (true) {
+					// get all messages forever
 					getMessage(windowHandle);
 					try {
 						Thread.sleep(10);
@@ -125,6 +134,12 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		});
 	}
 
+	/**
+	 * Sets the windows clipboard into delayed rendering mode for the given formats.
+	 * In delayed rendering mode, the first time for each format where an
+	 * application attempts to paste, it will callback and ask for the data. We will
+	 * handle that callback.
+	 */
 	@Override
 	public void setDelayedRenderFormats(Collection<Integer> formats) {
 		executor.schedule(new Runnable() {
@@ -139,19 +154,30 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	}
 
-	private static void getMessage(HWND windowHandle) {
-		MSG msg = new WinUser.MSG();
-		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 0);
-		if (hasMessage) {
-			user32.GetMessage(msg, windowHandle, 0, 0);
-			// logger.debug("got message=" + msg.message);
-			if (msg.message != 0xC228) {
-			}
-			user32.TranslateMessage(msg);
-			user32.DispatchMessage(msg);
-		}
+	/**
+	 * sets the listener for clipboard events.
+	 */
+
+	@Override
+	public void setClipboardListener(IClipboardListener listener) {
+		this.clipboardListener = listener;
 	}
 
+	/**
+	 * When data is received from a delayed rendering call, this method is called to
+	 * actually set that data.
+	 */
+	@Override
+	public void setDelayedRenderData(ClipboardData clipboardData) {
+		user32.SetClipboardData(clipboardData.getFormat(), clipboardData.getWindowsData());
+	}
+
+	/**
+	 * Called when delayed rendering callback is called due to a local application
+	 * attempting to paste data.
+	 *
+	 * @param wParam
+	 */
 	protected void onPaste(WPARAM wParam) {
 		if (clipboardListener != null) {
 			clipboardListener.onPasteAttempt(wParam.intValue());
@@ -162,6 +188,9 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
+	/**
+	 * Called when a local application changes the clipboard.
+	 */
 	protected void onClipboardChanged() {
 		HWND owner = user32.GetClipboardOwner();
 		if (!windowHandle.equals(owner)) {
@@ -184,6 +213,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	}
 
+	/**
+	 * Used to write null to the clipboard for all given formats. This sets the
+	 * clipboard into delayed rendering mode for those formats.
+	 *
+	 * @param windowHandle2
+	 * @param formats
+	 */
 	protected void writeNullToClipboard(HWND windowHandle2, Collection<Integer> formats) {
 		openClipboardWhenFree(windowHandle);
 		try {
@@ -227,6 +263,19 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	}
 
+	private static void getMessage(HWND windowHandle) {
+		MSG msg = new WinUser.MSG();
+		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 0);
+		if (hasMessage) {
+			user32.GetMessage(msg, windowHandle, 0, 0);
+			// logger.debug("got message=" + msg.message);
+			if (msg.message != 0xC228) {
+			}
+			user32.TranslateMessage(msg);
+			user32.DispatchMessage(msg);
+		}
+	}
+
 	private RuntimeException windowsErrorToException(String string, WindowsError error, Throwable t) {
 		if (error == null) {
 			error = getLastError();
@@ -251,7 +300,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		int error = kernel32.GetLastError();
 		int langId = 0;
 		PointerByReference lpBuffer = new PointerByReference();
-		int ret = kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
+		kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
 				| WinBase.FORMAT_MESSAGE_IGNORE_INSERTS, null, error, langId, lpBuffer, 0, null);
 		return new WindowsError(error, lpBuffer.getValue().getWideString(0));
 	}
@@ -287,15 +336,5 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			this.error = error;
 			this.errorMessage = errorMessage;
 		}
-	}
-
-	@Override
-	public void setClipboardListener(IClipboardListener listener) {
-		this.clipboardListener = listener;
-	}
-
-	@Override
-	public void setDelayedRenderData(ClipboardData clipboardData) {
-		user32.SetClipboardData(clipboardData.getFormat(), clipboardData.getWindowsData());
 	}
 }

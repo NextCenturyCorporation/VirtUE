@@ -7,12 +7,17 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.win32.W32APIOptions;
 
+/**
+ * Interface to give functions for the clipboard specific calls for Windows. See
+ * windows API for documentation on thses methods.
+ *
+ *
+ */
 public interface IWindowsClipboardUser32 extends User32 {
 	// DEFAULT_OPTIONS is critical for W32 API functions to simplify ASCII/UNICODE
 	// details
 	IWindowsClipboardUser32 INSTANCE = (IWindowsClipboardUser32) Native.loadLibrary("user32",
-			IWindowsClipboardUser32.class,
-			W32APIOptions.DEFAULT_OPTIONS);
+			IWindowsClipboardUser32.class, W32APIOptions.DEFAULT_OPTIONS);
 	int CF_TEXT = 1;
 	int CF_UNICODE = 13;
 

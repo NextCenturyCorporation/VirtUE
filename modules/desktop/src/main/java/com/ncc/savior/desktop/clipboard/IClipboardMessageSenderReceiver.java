@@ -2,7 +2,7 @@ package com.ncc.savior.desktop.clipboard;
 
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 
-public interface IClipboardMessageSenderReciever {
+public interface IClipboardMessageSenderReceiver {
 
 	/**
 	 * Sets a handler class to handle income messages from clipboard hub.

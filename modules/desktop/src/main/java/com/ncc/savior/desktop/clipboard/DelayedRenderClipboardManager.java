@@ -238,7 +238,7 @@ public class DelayedRenderClipboardManager {
 		int error = kernel32.GetLastError();
 		int langId = 0;
 		PointerByReference lpBuffer = new PointerByReference();
-		int ret = kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
+		kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
 				| WinBase.FORMAT_MESSAGE_IGNORE_INSERTS, null, error, langId, lpBuffer, 0, null);
 		if (printOnSuccess || error != 0) {
 			return prefix + " error=" + error + " " + lpBuffer.getValue().getWideString(0);

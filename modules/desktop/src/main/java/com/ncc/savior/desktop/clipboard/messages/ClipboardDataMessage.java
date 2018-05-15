@@ -1,9 +1,21 @@
 package com.ncc.savior.desktop.clipboard.messages;
 
+import java.io.Serializable;
+
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 
-public class ClipboardDataMessage extends BaseClipboardMessage {
+/**
+ * Message containing {@link ClipboardData}. This is often sent in response to a
+ * {@link ClipboardDataRequestMessage}.
+ *
+ *
+ */
+public class ClipboardDataMessage extends BaseClipboardMessage implements Serializable {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
 	private ClipboardData data;
 
 	public ClipboardDataMessage(String ownerId, ClipboardData data) {
@@ -18,7 +30,7 @@ public class ClipboardDataMessage extends BaseClipboardMessage {
 	@Override
 	public String toString() {
 		return "ClipboardDataMessage [data=" + data + ", sendTime=" + sendTime + ", clipboardOwnerId="
-				+ clipboardOwnerId + "]";
+				+ messageSourceId + "]";
 	}
 
 }

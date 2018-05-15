@@ -23,7 +23,7 @@ public class PacketBuilder {
 
 	public Packet buildPacket(List<Object> list) {
 		if (list.isEmpty()) {
-			logger.error("Recieved packed that was too small.  Size=0");
+			logger.error("Received packed that was too small.  Size=0");
 		}
 
 		PacketType type = PacketType.getPacketType((String) list.get(0));

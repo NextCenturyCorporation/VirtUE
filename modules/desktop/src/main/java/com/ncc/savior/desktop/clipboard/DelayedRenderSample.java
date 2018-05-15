@@ -202,7 +202,7 @@ public class DelayedRenderSample {
 	static WindowProc callback = new WindowProc() {
 		@Override
 		public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
-			logger.debug("Message recieved: " + uMsg);
+			logger.debug("Message received: " + uMsg);
 			switch (uMsg) {
 			case WM_NCCREATE:
 				return new LRESULT(1);
