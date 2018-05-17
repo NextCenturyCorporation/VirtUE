@@ -139,7 +139,7 @@ public class ClipboardClient {
 				clipboard.setDelayedRenderFormats(m.getFormats());
 			}
 		} else if (message instanceof ClipboardDataMessage) {
-			storeClipboardData(message);
+			storeClipboardData((ClipboardDataMessage) message);
 		} else if (message instanceof ClipboardDataRequestMessage) {
 			ClipboardDataRequestMessage m = ((ClipboardDataRequestMessage) message);
 			ClipboardData data = clipboard.getClipboardData(m.getFormat());
