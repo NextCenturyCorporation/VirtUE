@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -28,6 +31,7 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
+import com.ncc.savior.desktop.clipboard.windows.IWindowsClipboardUser32;
 
 public class ClipboardHub implements IClipboardMessageHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardHub.class);
@@ -36,9 +40,13 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private String hubId = "Hub-0";
 	private Map<String, IClipboardMessageSenderReceiver> transmitters;
 	private String clipboardOwnerId;
+	private Collection<Integer> validFormats;
 
 	public ClipboardHub() {
 		transmitters = new TreeMap<String, IClipboardMessageSenderReceiver>();
+		validFormats = new TreeSet<Integer>();
+		validFormats.add(IWindowsClipboardUser32.CF_TEXT);
+		validFormats.add(IWindowsClipboardUser32.CF_UNICODE);
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -108,6 +116,8 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		if (message instanceof ClipboardChangedMessage) {
 			// source has taken control of clipboard
 			ClipboardChangedMessage m = (ClipboardChangedMessage) message;
+			Collection<Integer> formats = m.getFormats();
+			filterToValidFormats(formats);
 			this.clipboardOwnerId = m.getSourceId();
 			sendMessageToAllButSource(message);
 		} else if (message instanceof ClipboardDataRequestMessage) {
@@ -129,6 +139,16 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
 			if (transmitter != null) {
 				sendMessageHandleError(message, transmitter, destId);
+			}
+		}
+	}
+
+	private void filterToValidFormats(Collection<Integer> formats) {
+		Iterator<Integer> itr = formats.iterator();
+		while (itr.hasNext()) {
+			Integer format = itr.next();
+			if (!validFormats.contains(format)) {
+				itr.remove();
 			}
 		}
 	}
