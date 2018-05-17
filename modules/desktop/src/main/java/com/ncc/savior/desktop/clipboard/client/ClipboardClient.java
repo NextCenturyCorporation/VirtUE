@@ -127,8 +127,11 @@ public class ClipboardClient {
 	private void storeClipboardData(ClipboardDataMessage message) {
 		String reqId = message.getRequestId();
 		Thread t = requestToThread.get(reqId);
-		requestToData.put(reqId, message.getData());
-		t.interrupt();
+		if (t != null) {
+			requestToData.put(reqId, message.getData());
+			t.interrupt();
+		}
+		// TODO error?
 	}
 
 	protected void onClipboardMessage(IClipboardMessage message) {
