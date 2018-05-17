@@ -38,6 +38,7 @@ import com.ncc.savior.util.JavaUtil;
  */
 public class ClipboardClient {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardClient.class);
+	private static final String DEFAULT_HOSTNAME = "localhost";
 	private IClipboardMessageSenderReceiver transmitter;
 	private IClipboardWrapper clipboard;
 	private String myId;
@@ -116,11 +117,15 @@ public class ClipboardClient {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		int port = ClipboardHub.DEFAULT_PORT;
-		if (args.length > 0) {
-			port = Integer.parseInt(args[0]);
+		String hostname = DEFAULT_HOSTNAME;
+		if (args.length > 1) {
+			hostname = args[0];
+		}
+		if (args.length > 1) {
+			port = Integer.parseInt(args[1]);
 		}
 		WindowsClipboardWrapper clipboardWrapper = new WindowsClipboardWrapper();
-		Socket clientSocket = new Socket("localhost", port);
+		Socket clientSocket = new Socket(hostname, port);
 		// BufferedReader in = new BufferedReader(new
 		// InputStreamReader(clientSocket.getInputStream()));
 		// System.out.println(in.readLine());
