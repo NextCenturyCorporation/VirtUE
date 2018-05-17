@@ -20,6 +20,7 @@ import com.ncc.savior.desktop.clipboard.IClipboardWrapper.IClipboardListener;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
+import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
@@ -99,6 +100,15 @@ public class ClipboardClient {
 			}
 		} else if (message instanceof ClipboardDataMessage) {
 			clipboard.setDelayedRenderData(((ClipboardDataMessage) message).getData());
+		} else if (message instanceof ClipboardDataRequestMessage) {
+			ClipboardDataRequestMessage m = ((ClipboardDataRequestMessage) message);
+			ClipboardData data = clipboard.getClipboardData(m.getFormat());
+			ClipboardDataMessage dataMessage = new ClipboardDataMessage(myId, data, m.getRequestId(), m.getSourceId());
+			try {
+				transmitter.sendMessageToHub(dataMessage);
+			} catch (IOException e) {
+				logger.error("Error sending data message=" + dataMessage);
+			}
 		}
 	}
 
