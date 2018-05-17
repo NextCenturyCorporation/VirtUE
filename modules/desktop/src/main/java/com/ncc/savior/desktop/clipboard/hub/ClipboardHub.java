@@ -167,7 +167,11 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			String destinationId) {
 		try {
 			logger.debug("sending message to " + destinationId + " message=" + message);
-			transmitter.sendMessageToHub(message);
+			if (transmitter.isValid()) {
+				transmitter.sendMessageToHub(message);
+			} else {
+				onTransmissionError(destinationId, transmitter, message, null);
+			}
 		} catch (IOException e) {
 			onTransmissionError(destinationId, transmitter, message, e);
 		}
@@ -179,6 +183,18 @@ public class ClipboardHub implements IClipboardMessageHandler {
 				"Error sending message to client " + clientId + ".  Removing from list of clients.  Message=" + message,
 				e);
 		transmitters.remove(clientId);
+	}
+
+	@Override
+	public void onMessageError(IOException e) {
+		logger.error("message error:", e);
+		Iterator<Entry<String, IClipboardMessageSenderReceiver>> itr = transmitters.entrySet().iterator();
+		while (itr.hasNext()) {
+			Entry<String, IClipboardMessageSenderReceiver> entry = itr.next();
+			if (!entry.getValue().isValid()) {
+				itr.remove();
+			}
+		}
 	}
 
 }

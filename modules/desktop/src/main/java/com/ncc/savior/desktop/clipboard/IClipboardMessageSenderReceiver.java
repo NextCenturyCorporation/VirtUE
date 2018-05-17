@@ -21,4 +21,12 @@ public interface IClipboardMessageSenderReceiver {
 	 * @throws IOException
 	 */
 	void sendMessageToHub(IClipboardMessage message) throws IOException;
+
+	/**
+	 * Returns true as long as the instance hasn't throw an error on transmission.
+	 * Transmission errors are assumed to be fatal.
+	 *
+	 * @return
+	 */
+	public boolean isValid();
 }

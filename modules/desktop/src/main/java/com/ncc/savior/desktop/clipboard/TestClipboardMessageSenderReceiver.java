@@ -49,4 +49,10 @@ public class TestClipboardMessageSenderReceiver implements IClipboardMessageSend
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean isValid() {
+		// TODO Auto-generated method stub
+		return true;
+	}
 }

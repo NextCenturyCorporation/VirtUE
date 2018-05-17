@@ -65,6 +65,13 @@ public class ClipboardClient {
 			public void onMessage(IClipboardMessage message) {
 				onClipboardMessage(message);
 			}
+
+			@Override
+			public void onMessageError(IOException e) {
+				// TODO should we let someone listen to this event?
+				logger.error("Message error.  Client stopped. ", e);
+
+			}
 		};
 		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(serializer, handler, "client");
 		this.myId = transmitter.init();
@@ -129,18 +136,6 @@ public class ClipboardClient {
 		return null;
 	}
 
-	private void storeClipboardData(ClipboardDataMessage message) {
-		String reqId = message.getRequestId();
-		Thread t = requestToThread.get(reqId);
-		if (t != null) {
-			logger.debug("storing data.  request=" + reqId);
-			requestToData.put(reqId, message.getData());
-			t.interrupt();
-		} else {
-			logger.error("unable to find thread to interrupt for clipboard data");
-		}
-	}
-
 	protected void onClipboardMessage(IClipboardMessage message) {
 		logger.debug("got message=" + message);
 		if (message instanceof ClipboardChangedMessage) {
@@ -160,6 +155,29 @@ public class ClipboardClient {
 			} catch (IOException e) {
 				logger.error("Error sending data message=" + dataMessage);
 			}
+		}
+	}
+
+	/**
+	 * Returns true if the internal transmitter is valid. Internal transmitter is
+	 * valid as long as it hasn't throw an error on transmission. Tranmission errors
+	 * are assumed to be fatal.
+	 *
+	 * @return
+	 */
+	public boolean isValid() {
+		return transmitter.isValid();
+	}
+
+	private void storeClipboardData(ClipboardDataMessage message) {
+		String reqId = message.getRequestId();
+		Thread t = requestToThread.get(reqId);
+		if (t != null) {
+			logger.debug("storing data.  request=" + reqId);
+			requestToData.put(reqId, message.getData());
+			t.interrupt();
+		} else {
+			logger.error("unable to find thread to interrupt for clipboard data");
 		}
 	}
 
@@ -199,6 +217,9 @@ public class ClipboardClient {
 		while (true) {
 			// hold
 			JavaUtil.sleepAndLogInterruption(1000);
+			if (!client.isValid()) {
+				break;
+			}
 		}
 	}
 }

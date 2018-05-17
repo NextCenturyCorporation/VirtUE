@@ -18,6 +18,7 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	private Thread receiveThread;
 
 	private boolean stopReadThread = false;
+	private boolean valid = true;
 
 	public MessageTransmitter(IMessageSerializer serializer, IClipboardMessageHandler messageHandler, String threadId) {
 		this.handler = messageHandler;
@@ -45,13 +46,29 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 				}
 			} catch (IOException e) {
 				logger.error("Error trying to deserialize message", e);
+				onMessageError(e);
 			}
 		}
 	}
 
+	private void onMessageError(IOException e) {
+		stopReadThread = true;
+		handler.onMessageError(e);
+		valid = false;
+	}
+
+	public boolean isValid() {
+		return valid;
+	}
+
 	@Override
 	public void sendMessageToHub(IClipboardMessage message) throws IOException {
-		serializer.serialize(message);
+		try {
+			serializer.serialize(message);
+		} catch (IOException e) {
+			valid = false;
+			throw e;
+		}
 	}
 
 	@Override

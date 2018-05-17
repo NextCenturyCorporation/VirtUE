@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.clipboard;
 
+import java.io.IOException;
+
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 
 /**
@@ -14,5 +16,7 @@ public interface IClipboardMessageHandler {
 	 * @param message
 	 */
 	public void onMessage(IClipboardMessage message);
+
+	public void onMessageError(IOException e);
 
 }
