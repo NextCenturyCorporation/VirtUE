@@ -18,6 +18,7 @@ import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
+import com.ncc.savior.desktop.clipboard.data.WideTextClipboardData;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
@@ -358,7 +359,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		case IWindowsClipboardUser32.CF_TEXT:
 			return new PlainTextClipboardData(p.getString(0));
 		case IWindowsClipboardUser32.CF_UNICODE:
-			return new PlainTextClipboardData(p.getWideString(0));
+			String wideString = p.getWideString(0);
+			return new WideTextClipboardData(wideString);
 		default:
 			return new UnknownClipboardData(format);
 		}

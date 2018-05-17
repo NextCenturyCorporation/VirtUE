@@ -46,7 +46,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		transmitters = new TreeMap<String, IClipboardMessageSenderReceiver>();
 		validFormats = new TreeSet<Integer>();
 		validFormats.add(IWindowsClipboardUser32.CF_TEXT);
-		// validFormats.add(IWindowsClipboardUser32.CF_UNICODE);
+		validFormats.add(IWindowsClipboardUser32.CF_UNICODE);
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
