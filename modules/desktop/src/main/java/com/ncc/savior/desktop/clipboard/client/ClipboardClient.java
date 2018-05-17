@@ -79,6 +79,7 @@ public class ClipboardClient {
 				try {
 					ClipboardDataRequestMessage requestMsg = new ClipboardDataRequestMessage(myId, format,
 							UUID.randomUUID().toString());
+					logger.debug("Sending message=" + requestMsg);
 					ClipboardClient.this.transmitter.sendMessageToHub(requestMsg);
 					ClipboardData clipboardData = blockForClipboardData(requestMsg.getRequestId());
 					if (clipboardData != null) {
@@ -93,7 +94,9 @@ public class ClipboardClient {
 			@Override
 			public void onClipboardChanged(Set<Integer> formats) {
 				try {
-					ClipboardClient.this.transmitter.sendMessageToHub(new ClipboardChangedMessage(myId, formats));
+					ClipboardChangedMessage msg = new ClipboardChangedMessage(myId, formats);
+					logger.debug("sending message=" + msg);
+					ClipboardClient.this.transmitter.sendMessageToHub(msg);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -148,6 +151,7 @@ public class ClipboardClient {
 			ClipboardData data = clipboard.getClipboardData(m.getFormat());
 			ClipboardDataMessage dataMessage = new ClipboardDataMessage(myId, data, m.getRequestId(), m.getSourceId());
 			try {
+				logger.debug("sending message=" + dataMessage);
 				transmitter.sendMessageToHub(dataMessage);
 			} catch (IOException e) {
 				logger.error("Error sending data message=" + dataMessage);
