@@ -14,20 +14,26 @@ public class ClipboardDataRequestMessage extends BaseClipboardMessage implements
 	 */
 	private static final long serialVersionUID = 1L;
 	private int format;
+	private String requestId;
 
-	public ClipboardDataRequestMessage(String ownerId, int format) {
+	public ClipboardDataRequestMessage(String ownerId, int format, String requestId) {
 		super(ownerId);
 		this.format = format;
+		this.requestId = requestId;
 	}
 
 	public int getFormat() {
 		return format;
 	}
 
+	public String getRequestId() {
+		return requestId;
+	}
+
 	@Override
 	public String toString() {
-		return "ClipboardDataRequest [format=" + format + ", sendTime=" + sendTime + ", clipboardOwnerId="
-				+ messageSourceId + "]";
+		return "ClipboardDataRequestMessage [format=" + format + ", requestId=" + requestId + ", sendTime=" + sendTime
+				+ ", messageSourceId=" + messageSourceId + "]";
 	}
 
 }

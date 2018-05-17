@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -20,7 +21,6 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 public class BruteForceAwsZenCloudManager implements ICloudManager {
 

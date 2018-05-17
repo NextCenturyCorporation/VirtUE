@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.util;
+package com.ncc.savior.util;
 
 /**
  * Generic exception for savior that could be passed to user or APIs

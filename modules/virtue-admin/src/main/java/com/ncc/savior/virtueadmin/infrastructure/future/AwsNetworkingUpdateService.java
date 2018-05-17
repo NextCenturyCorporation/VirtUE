@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.util.JavaUtil;
 
 /**
  * Service which will try get the networking information for an AWS instance. If

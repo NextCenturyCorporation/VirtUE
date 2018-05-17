@@ -57,4 +57,13 @@ public interface IClipboardWrapper {
 	 * @param clipboardData
 	 */
 	public void setDelayedRenderData(ClipboardData clipboardData);
+
+	/**
+	 * Returns {@link ClipboardData} implementation from the current clipboard in
+	 * the given format.
+	 *
+	 * @param format
+	 * @return
+	 */
+	public ClipboardData getClipboardData(int format);
 }

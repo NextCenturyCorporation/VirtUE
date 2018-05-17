@@ -12,8 +12,12 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.DelayedRenderClipboardManager.MyUser32;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
+import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
+import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
+import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
@@ -335,6 +339,42 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		public WindowsError(int error, String errorMessage) {
 			this.error = error;
 			this.errorMessage = errorMessage;
+		}
+	}
+
+	@Override
+	public ClipboardData getClipboardData(int format) {
+		openClipboardWhenFree(windowHandle);
+		Pointer p = user32.GetClipboardData(format);
+		user32.CloseClipboard();
+		return clipboardPointerToData(format, p);
+	}
+
+	private ClipboardData clipboardPointerToData(int format, Pointer p) {
+		if (p == null) {
+			return new EmptyClipboardData(format);
+		}
+		switch (format) {
+		case IWindowsClipboardUser32.CF_TEXT:
+			return new PlainTextClipboardData(p.getString(0));
+		case IWindowsClipboardUser32.CF_UNICODE:
+			return new PlainTextClipboardData(p.getWideString(0));
+		default:
+			return new UnknownClipboardData(format);
+		}
+	}
+
+	private String getStringClipboardNative() {
+		// logger.debug("cb owner:" + user32.GetClipboardOwner());
+		openClipboardWhenFree(windowHandle);
+		Pointer p = user32.GetClipboardData(MyUser32.CF_TEXT);
+		user32.CloseClipboard();
+		if (p == null) {
+			logger.debug("got null");
+			return null;
+		} else {
+			logger.debug("got " + p.getString(0));
+			return p.getString(0);
 		}
 	}
 }

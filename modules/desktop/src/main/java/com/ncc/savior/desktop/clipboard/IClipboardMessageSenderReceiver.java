@@ -1,20 +1,24 @@
 package com.ncc.savior.desktop.clipboard;
 
+import java.io.IOException;
+
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 
 public interface IClipboardMessageSenderReceiver {
 
 	/**
-	 * Sets a handler class to handle income messages from clipboard hub.
+	 * Should be called initially and returns the ID
 	 *
-	 * @param iClipboardMessageHandler
+	 * @return
+	 * @throws IOException
 	 */
-	void setMessageFromHubHandler(IClipboardMessageHandler iClipboardMessageHandler);
+	String init() throws IOException;
 
 	/**
 	 * Sends a message back to the hub
 	 *
 	 * @param message
+	 * @throws IOException
 	 */
-	void sendMessageToHub(IClipboardMessage message);
+	void sendMessageToHub(IClipboardMessage message) throws IOException;
 }

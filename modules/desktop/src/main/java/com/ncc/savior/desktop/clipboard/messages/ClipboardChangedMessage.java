@@ -24,7 +24,7 @@ public class ClipboardChangedMessage extends BaseClipboardMessage implements Ser
 
 	/**
 	 * Returns the available formats on the clipboard.
-	 * 
+	 *
 	 * @return
 	 */
 	public Collection<Integer> getFormats() {
@@ -33,7 +33,7 @@ public class ClipboardChangedMessage extends BaseClipboardMessage implements Ser
 
 	@Override
 	public String toString() {
-		return "ClipboardChanged [formats=" + formats + ", sendTime=" + sendTime + ", clipboardOwnerId="
+		return "ClipboardChangedMessage [formats=" + formats + ", sendTime=" + sendTime + ", messageSourceId="
 				+ messageSourceId + "]";
 	}
 }

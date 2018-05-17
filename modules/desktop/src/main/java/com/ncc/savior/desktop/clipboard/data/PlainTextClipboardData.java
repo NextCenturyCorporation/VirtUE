@@ -12,11 +12,11 @@ import com.sun.jna.Pointer;
  *
  */
 
-public class PlaintTextClipboardData extends ClipboardData implements Serializable {
+public class PlainTextClipboardData extends ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String data;
 
-	public PlaintTextClipboardData(String data) {
+	public PlainTextClipboardData(String data) {
 		super(IWindowsClipboardUser32.CF_TEXT);
 		this.data = data;
 	}
