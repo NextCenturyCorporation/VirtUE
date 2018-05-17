@@ -34,7 +34,6 @@ public class JavaObjectMessageSerializer implements IMessageSerializer {
 
 	@Override
 	public void serialize(IClipboardMessage message) throws IOException {
-		logger.debug("sending message=" + message);
 		synchronized (writeLock) {
 			out.writeObject(message);
 			out.flush();
@@ -49,7 +48,6 @@ public class JavaObjectMessageSerializer implements IMessageSerializer {
 				obj = in.readObject();
 			}
 			if (obj instanceof IClipboardMessage) {
-				logger.debug("received message=" + obj);
 				return (IClipboardMessage) obj;
 			} else {
 				logger.error("Error deserializing message.  Object did not implement IClipboardMessage.  Obj=" + obj);

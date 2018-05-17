@@ -29,4 +29,9 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 		return winMemory;
 	}
 
+	@Override
+	public String toString() {
+		return "PlainTextClipboardData [data=" + data + "]";
+	}
+
 }

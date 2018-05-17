@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.net.SocketFactory;
@@ -43,6 +45,9 @@ public class ClipboardClient {
 	private IClipboardMessageSenderReceiver transmitter;
 	private IClipboardWrapper clipboard;
 	private String myId;
+	private long timeoutMillis = 50000;
+	private Map<String, Thread> requestToThread;
+	private Map<String, ClipboardData> requestToData;
 
 	/**
 	 *
@@ -53,6 +58,8 @@ public class ClipboardClient {
 	 */
 
 	public ClipboardClient(IMessageSerializer serializer, IClipboardWrapper clipboardWrapper) throws IOException {
+		this.requestToThread = new TreeMap<String, Thread>();
+		this.requestToData = new TreeMap<String, ClipboardData>();
 		IClipboardMessageHandler handler = new IClipboardMessageHandler() {
 			@Override
 			public void onMessage(IClipboardMessage message) {
@@ -70,8 +77,13 @@ public class ClipboardClient {
 			public void onPasteAttempt(int format) {
 				// clipboard.setDelayedRenderData(new PlaintTextClipboardData("it works"));
 				try {
-					ClipboardClient.this.transmitter.sendMessageToHub(
-							new ClipboardDataRequestMessage(myId, format, UUID.randomUUID().toString()));
+					ClipboardDataRequestMessage requestMsg = new ClipboardDataRequestMessage(myId, format,
+							UUID.randomUUID().toString());
+					ClipboardClient.this.transmitter.sendMessageToHub(requestMsg);
+					ClipboardData clipboardData = blockForClipboardData(requestMsg.getRequestId());
+					if (clipboardData != null) {
+						clipboard.setDelayedRenderData(clipboardData);
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -91,6 +103,34 @@ public class ClipboardClient {
 		clipboardWrapper.setClipboardListener(listener);
 	}
 
+	protected ClipboardData blockForClipboardData(String requestId) {
+		requestToThread.put(requestId, Thread.currentThread());
+		try {
+			Thread.sleep(timeoutMillis);
+		} catch (InterruptedException e) {
+			ClipboardData data = requestToData.remove(requestId);
+			if (data == null) {
+				logger.error("Error getting data for request=" + requestId);
+			}
+			// make sure interupt is cleared
+			Thread.interrupted();
+			return data;
+		} finally {
+			// clear the maps always
+			requestToThread.remove(requestId);
+			requestToData.remove(requestId);
+		}
+		logger.error("Request for data with id=" + requestId + " timedout!");
+		return null;
+	}
+
+	private void storeClipboardData(ClipboardDataMessage message) {
+		String reqId = message.getRequestId();
+		Thread t = requestToThread.get(reqId);
+		requestToData.put(reqId, message.getData());
+		t.interrupt();
+	}
+
 	protected void onClipboardMessage(IClipboardMessage message) {
 		logger.debug("got message=" + message);
 		if (message instanceof ClipboardChangedMessage) {
@@ -99,7 +139,7 @@ public class ClipboardClient {
 				clipboard.setDelayedRenderFormats(m.getFormats());
 			}
 		} else if (message instanceof ClipboardDataMessage) {
-			clipboard.setDelayedRenderData(((ClipboardDataMessage) message).getData());
+			storeClipboardData(message);
 		} else if (message instanceof ClipboardDataRequestMessage) {
 			ClipboardDataRequestMessage m = ((ClipboardDataRequestMessage) message);
 			ClipboardData data = clipboard.getClipboardData(m.getFormat());
