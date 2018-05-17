@@ -31,6 +31,7 @@ import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerialize
 
 public class ClipboardHub implements IClipboardMessageHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardHub.class);
+	public static final int DEFAULT_PORT = 10022;
 	private int i = 0;
 	private String hubId = "Hub-0";
 	private Map<String, IClipboardMessageSenderReceiver> transmitters;
@@ -41,7 +42,10 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
-		int port = 1022;
+		int port = DEFAULT_PORT;
+		if (args.length > 0) {
+			port = Integer.parseInt(args[0]);
+		}
 		ServerSocket serverSocket = new ServerSocket(port);
 		ClipboardHub hub = new ClipboardHub();
 		while (true) {

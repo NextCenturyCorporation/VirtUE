@@ -20,6 +20,7 @@ import com.ncc.savior.desktop.clipboard.IClipboardWrapper.IClipboardListener;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
+import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
@@ -114,8 +115,12 @@ public class ClipboardClient {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
+		int port = ClipboardHub.DEFAULT_PORT;
+		if (args.length > 0) {
+			port = Integer.parseInt(args[0]);
+		}
 		WindowsClipboardWrapper clipboardWrapper = new WindowsClipboardWrapper();
-		Socket clientSocket = new Socket("localhost", 1022);
+		Socket clientSocket = new Socket("localhost", port);
 		// BufferedReader in = new BufferedReader(new
 		// InputStreamReader(clientSocket.getInputStream()));
 		// System.out.println(in.readLine());
