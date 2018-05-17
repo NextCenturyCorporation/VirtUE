@@ -45,7 +45,7 @@ public class ClipboardClient {
 	private IClipboardMessageSenderReceiver transmitter;
 	private IClipboardWrapper clipboard;
 	private String myId;
-	private long timeoutMillis = 50000;
+	private long timeoutMillis = 3000;
 	private Map<String, Thread> requestToThread;
 	private Map<String, ClipboardData> requestToData;
 
@@ -109,8 +109,10 @@ public class ClipboardClient {
 	protected ClipboardData blockForClipboardData(String requestId) {
 		requestToThread.put(requestId, Thread.currentThread());
 		try {
+			logger.debug("blocking for data.  request=" + requestId);
 			Thread.sleep(timeoutMillis);
 		} catch (InterruptedException e) {
+			logger.debug("Interrupted!  request=" + requestId);
 			ClipboardData data = requestToData.remove(requestId);
 			if (data == null) {
 				logger.error("Error getting data for request=" + requestId);
@@ -131,10 +133,12 @@ public class ClipboardClient {
 		String reqId = message.getRequestId();
 		Thread t = requestToThread.get(reqId);
 		if (t != null) {
+			logger.debug("storing data.  request=" + reqId);
 			requestToData.put(reqId, message.getData());
 			t.interrupt();
+		} else {
+			logger.error("unable to find thread to interrupt for clipboard data");
 		}
-		// TODO error?
 	}
 
 	protected void onClipboardMessage(IClipboardMessage message) {
