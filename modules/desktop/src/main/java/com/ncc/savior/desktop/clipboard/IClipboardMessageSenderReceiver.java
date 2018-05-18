@@ -29,4 +29,6 @@ public interface IClipboardMessageSenderReceiver {
 	 * @return
 	 */
 	public boolean isValid();
+
+	String getGroupId();
 }

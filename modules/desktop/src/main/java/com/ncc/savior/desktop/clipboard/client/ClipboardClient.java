@@ -62,13 +62,13 @@ public class ClipboardClient {
 		this.requestToData = new TreeMap<String, ClipboardData>();
 		IClipboardMessageHandler handler = new IClipboardMessageHandler() {
 			@Override
-			public void onMessage(IClipboardMessage message) {
+			public void onMessage(IClipboardMessage message, String messageHandlerGroupId) {
 				onClipboardMessage(message);
 			}
 
 			@Override
 			public void onMessageError(IOException e) {
-				// TODO should we let someone listen to this event?
+				// TODO should we let someone else listen to this event?
 				logger.error("Message error.  Client stopped. ", e);
 
 			}
@@ -82,7 +82,6 @@ public class ClipboardClient {
 
 			@Override
 			public void onPasteAttempt(int format) {
-				// clipboard.setDelayedRenderData(new PlaintTextClipboardData("it works"));
 				try {
 					ClipboardDataRequestMessage requestMsg = new ClipboardDataRequestMessage(myId, format,
 							UUID.randomUUID().toString());

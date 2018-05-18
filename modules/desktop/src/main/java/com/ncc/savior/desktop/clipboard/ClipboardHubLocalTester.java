@@ -17,6 +17,7 @@ import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
+import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
@@ -29,21 +30,23 @@ public class ClipboardHubLocalTester {
 		int port = 1022;
 		ServerSocket serverSocket = new ServerSocket(port);
 		WindowsClipboardWrapper wcw = new WindowsClipboardWrapper();
-		ClipboardHub hub = new ClipboardHub();
+		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
 
 		Thread clientThread = createClientThread(port, wcw);
 		clientThread.start();
 		Socket socket = serverSocket.accept();
 		IConnectionWrapper connection = new SocketConnection(socket);
 		IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-		hub.addClient(serializer);
+		String groupId = "client1";
+		hub.addClient(groupId, serializer);
 
 		Thread testThread = createClientThread(port, new TestClipboardWrapper());
 		testThread.start();
 		Socket testSocket = serverSocket.accept();
 		IConnectionWrapper testConnection = new SocketConnection(testSocket);
 		IMessageSerializer testSerializer = new JavaObjectMessageSerializer(testConnection);
-		hub.addClient(testSerializer);
+		groupId = "client2";
+		hub.addClient(groupId, testSerializer);
 
 		while (true) {
 			JavaUtil.sleepAndLogInterruption(1000);

@@ -20,9 +20,17 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	private boolean stopReadThread = false;
 	private boolean valid = true;
 
+	private String groupId;
+
 	public MessageTransmitter(IMessageSerializer serializer, IClipboardMessageHandler messageHandler, String threadId) {
+		this(null, serializer, messageHandler, threadId);
+	}
+
+	public MessageTransmitter(String groupId, IMessageSerializer serializer, IClipboardMessageHandler messageHandler,
+			String threadId) {
 		this.handler = messageHandler;
 		this.serializer = serializer;
+		this.groupId = groupId;
 		this.receiveThread = new Thread(new Runnable() {
 
 			@Override
@@ -40,7 +48,7 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 			try {
 				IClipboardMessage msg = serializer.deserialize();
 				if (handler != null) {
-					handler.onMessage(msg);
+					handler.onMessage(msg, groupId);
 				} else {
 					logger.error("message lost due to null handler.  Message=" + msg);
 				}
@@ -57,8 +65,14 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		valid = false;
 	}
 
+	@Override
 	public boolean isValid() {
 		return valid;
+	}
+
+	@Override
+	public String getGroupId() {
+		return groupId;
 	}
 
 	@Override

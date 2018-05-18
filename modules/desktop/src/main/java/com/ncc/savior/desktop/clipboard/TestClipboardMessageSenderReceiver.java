@@ -21,24 +21,25 @@ public class TestClipboardMessageSenderReceiver implements IClipboardMessageSend
 	private static Logger logger = LoggerFactory.getLogger(TestClipboardMessageSenderReceiver.class);
 	private String testClientId;
 	private IClipboardMessageHandler clipboardMessageHandler;
+	private String groupId;
 
-	public TestClipboardMessageSenderReceiver(String testClientId) {
+	public TestClipboardMessageSenderReceiver(String testClientId, String groupId) {
 		this.testClientId = testClientId;
+		this.groupId = groupId;
 	}
 
 	@Override
 	public void sendMessageToHub(IClipboardMessage message) {
 		logger.debug("Message send to hub " + message);
 		if (message instanceof ClipboardDataRequestMessage) {
-			testReceiveMessage(
-					new ClipboardDataMessage(testClientId, new PlainTextClipboardData(new Date().toString()),
-							((ClipboardDataRequestMessage) message).getRequestId(), message.getSourceId()));
+			testReceiveMessage(new ClipboardDataMessage(testClientId, new PlainTextClipboardData(new Date().toString()),
+					((ClipboardDataRequestMessage) message).getRequestId(), message.getSourceId()));
 		}
 	}
 
 	public void testReceiveMessage(IClipboardMessage message) {
 		logger.debug("received message from hub=" + message);
-		this.clipboardMessageHandler.onMessage(message);
+		this.clipboardMessageHandler.onMessage(message, groupId);
 	}
 
 	public static void main(String[] args) throws InterruptedException {
@@ -54,5 +55,10 @@ public class TestClipboardMessageSenderReceiver implements IClipboardMessageSend
 	public boolean isValid() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	@Override
+	public String getGroupId() {
+		return groupId;
 	}
 }

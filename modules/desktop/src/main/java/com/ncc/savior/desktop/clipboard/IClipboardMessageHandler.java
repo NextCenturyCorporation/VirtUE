@@ -14,8 +14,9 @@ public interface IClipboardMessageHandler {
 	 * Called when an {@link IClipboardMessage} is received
 	 *
 	 * @param message
+	 * @param groupId
 	 */
-	public void onMessage(IClipboardMessage message);
+	public void onMessage(IClipboardMessage message, String groupId);
 
 	public void onMessageError(IOException e);
 

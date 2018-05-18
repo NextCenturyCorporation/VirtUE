@@ -23,7 +23,9 @@ import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
-import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
+import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
+import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.ICrossGroupDataGuard;
 import com.ncc.savior.desktop.clipboard.messages.ClientIdClipboardMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
@@ -41,12 +43,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private Map<String, IClipboardMessageSenderReceiver> transmitters;
 	private String clipboardOwnerId;
 	private Collection<Integer> validFormats;
+	private ICrossGroupDataGuard dataGuard;
 
-	public ClipboardHub() {
+	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
 		transmitters = new TreeMap<String, IClipboardMessageSenderReceiver>();
 		validFormats = new TreeSet<Integer>();
 		validFormats.add(IWindowsClipboardUser32.CF_TEXT);
 		validFormats.add(IWindowsClipboardUser32.CF_UNICODE);
+		this.dataGuard = dataGuard;
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -55,7 +59,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			port = Integer.parseInt(args[0]);
 		}
 		ServerSocket serverSocket = new ServerSocket(port);
-		ClipboardHub hub = new ClipboardHub();
+		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(false));
 		while (true) {
 			Socket socket = serverSocket.accept();
 			// BufferedWriter writer = new BufferedWriter(new
@@ -72,13 +76,19 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			// writer.flush();
 			IConnectionWrapper connection = new SocketConnection(socket);
 			IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-			hub.addClient(serializer);
+			String defaultGroup = "default";
+			hub.addClient(defaultGroup, serializer);
 		}
 	}
 
-	public void addClient(IMessageSerializer serializer) {
+	public void addClient(String groupId, IMessageSerializer serializer) {
 		String newId = getNextId();
-		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(serializer, this, "hub-" + newId);
+		// Not entirely sure where to store and map groupId. I'm not sure it belongs in
+		// MessageTransmitter, but I do need to be able to get the groupID of a message
+		// transmitter (in the HUB, but not in the clients). Creating a separate Map
+		// object seems like overkill and could easily cause issues keeping the Maps in
+		// sync. Wrapping the transmitters seems more clunky than useful
+		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(groupId, serializer, this, "hub-" + newId);
 		ClientIdClipboardMessage idMsg = new ClientIdClipboardMessage(hubId, newId);
 		logger.debug("registering new client");
 		sendMessageHandleError(idMsg, transmitter, newId);
@@ -111,7 +121,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	}
 
 	@Override
-	public void onMessage(IClipboardMessage message) {
+	public void onMessage(IClipboardMessage message, String messageSourceGroupId) {
 		logger.debug("hub received message=" + message);
 		if (message instanceof ClipboardChangedMessage) {
 			// source has taken control of clipboard
@@ -124,12 +134,28 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			ClipboardDataRequestMessage m = (ClipboardDataRequestMessage) message;
 			String destId = this.clipboardOwnerId;
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
-			if (transmitter != null) {
+			boolean allowTransfer = transmitter != null && transmitter.isValid();
+
+			if (allowTransfer) {
+				// we have a transmitter and it is ready to go. Proceed to the next step in
+				// determining if we should transfer
+
+				// Request for data is going to transmitter.getGroupId(), so that will be the
+				// data source
+				String dataSourceGroupId = transmitter.getGroupId();
+				// Request for data came from messageSourceGroupId, so that will be the
+				// destination of the data
+				String dataDestinationGroupId = messageSourceGroupId;
+				allowTransfer = dataGuard.allowDataTransfer(dataSourceGroupId, dataDestinationGroupId);
+			} else {
+				// TODO should we do something since this source is no longer connected?
+			}
+			if (allowTransfer) {
 				sendMessageHandleError(message, transmitter, destId);
 			} else {
-				// TODO clipboard cleared?
 				transmitter = transmitters.get(message.getSourceId());
-				IClipboardMessage dataMessage = new ClipboardDataMessage(hubId, new PlainTextClipboardData(""),
+				int format = ((ClipboardDataRequestMessage) message).getFormat();
+				IClipboardMessage dataMessage = new ClipboardDataMessage(hubId, new EmptyClipboardData(format),
 						m.getRequestId(), m.getSourceId());
 				sendMessageHandleError(dataMessage, transmitter, message.getSourceId());
 			}
