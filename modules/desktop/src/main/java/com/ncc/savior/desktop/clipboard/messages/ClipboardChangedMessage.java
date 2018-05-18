@@ -10,9 +10,6 @@ import java.util.Collection;
  */
 public class ClipboardChangedMessage extends BaseClipboardMessage implements Serializable
 {
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public ClipboardChangedMessage(String sourceId, Collection<Integer> formats) {

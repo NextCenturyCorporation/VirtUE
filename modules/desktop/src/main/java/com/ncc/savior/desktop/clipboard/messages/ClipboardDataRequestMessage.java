@@ -5,13 +5,9 @@ import java.io.Serializable;
 /**
  * Message that requests the current active clipboard data for the given format.
  *
- *
  */
 public class ClipboardDataRequestMessage extends BaseClipboardMessage implements Serializable {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 	private int format;
 	private String requestId;

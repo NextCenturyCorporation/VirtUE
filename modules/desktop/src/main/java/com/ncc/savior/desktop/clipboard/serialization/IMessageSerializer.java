@@ -3,15 +3,31 @@ package com.ncc.savior.desktop.clipboard.serialization;
 import java.io.Closeable;
 import java.io.IOException;
 
+import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 
 /**
- * Serializes and deserializes messages
+ * Abstraction for class that serializes and deserializes
+ * {@link IClipboardMessage}s and passes them on. Typically
+ * {@link IMessageSerializer}s have an {@link IConnectionWrapper} to pass the
+ * serialized messages on.
  *
  *
  */
 public interface IMessageSerializer extends Closeable {
+	/**
+	 * Serializes the message and passes it on to an implementation specific stream.
+	 *
+	 * @param message
+	 * @throws IOException
+	 */
 	public void serialize(IClipboardMessage message) throws IOException;
 
+	/**
+	 * Blocks and deserializes next message from implementation specific stream.
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	public IClipboardMessage deserialize() throws IOException;
 }

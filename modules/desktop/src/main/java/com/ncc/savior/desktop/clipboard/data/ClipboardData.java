@@ -7,7 +7,6 @@ import com.sun.jna.Pointer;
 /**
  * Base class for clipboard data.
  *
- *
  */
 public abstract class ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;

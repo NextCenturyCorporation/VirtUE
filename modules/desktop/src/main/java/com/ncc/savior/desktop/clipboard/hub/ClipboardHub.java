@@ -1,8 +1,6 @@
 package com.ncc.savior.desktop.clipboard.hub;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
@@ -11,9 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocketFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +30,19 @@ import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
 import com.ncc.savior.desktop.clipboard.windows.IWindowsClipboardUser32;
 
+/**
+ * Central hub point for the shared clipboard data. All messages should be sent
+ * to the hub where they will be passed out to the appropriate other clients.
+ *
+ *
+ * The hub will ensuring data does not pass between clients when it is not
+ * allowed based on the {@link ICrossGroupDataGuard}
+ *
+ * The hub will ensure only valid formats are passed between virtues via a
+ * single, central list of implemented formats.
+ *
+ *
+ */
 public class ClipboardHub implements IClipboardMessageHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardHub.class);
 	public static final int DEFAULT_PORT = 10022;
@@ -81,6 +89,13 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		}
 	}
 
+	/**
+	 * Creates a client from the given {@link IMessageSerializer} and addes them to
+	 * the hub.
+	 *
+	 * @param groupId
+	 * @param serializer
+	 */
 	public void addClient(String groupId, IMessageSerializer serializer) {
 		String newId = getNextId();
 		// Not entirely sure where to store and map groupId. I'm not sure it belongs in
@@ -96,28 +111,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		logger.debug("client added to hub with id=" + newId);
 	}
 
+	/**
+	 * creates IDs for the clients
+	 *
+	 * @return
+	 */
 	private synchronized String getNextId() {
 		i++;
 		return "ClipboardClient-" + i;
-	}
-
-	protected static void sslSocketTest() throws IOException, ClassNotFoundException {
-		ServerSocketFactory sFactory = SSLServerSocketFactory.getDefault();
-		ServerSocket server = sFactory.createServerSocket(1022);
-		Socket socket = server.accept();
-		logger.debug("got socket");
-		// ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-		ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-		Object o = null;
-		try {
-			while ((o = in.readObject()) != null) {
-				logger.info("read: " + o);
-			}
-		} catch (EOFException e) {
-			// expected
-		}
-
-		// ServerSocketListener<Client> ssl = new ServerSocketListener
 	}
 
 	@Override
@@ -129,6 +130,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			Collection<Integer> formats = m.getFormats();
 			filterToValidFormats(formats);
 			this.clipboardOwnerId = m.getSourceId();
+			// need to inform all clients that the clipboard has changed
 			sendMessageToAllButSource(message);
 		} else if (message instanceof ClipboardDataRequestMessage) {
 			ClipboardDataRequestMessage m = (ClipboardDataRequestMessage) message;
@@ -160,6 +162,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 				sendMessageHandleError(dataMessage, transmitter, message.getSourceId());
 			}
 		} else if (message instanceof ClipboardDataMessage) {
+			// Data has been returned after a data request
 			ClipboardDataMessage m = (ClipboardDataMessage) message;
 			String destId = m.getDestinationId();
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
@@ -169,6 +172,11 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		}
 	}
 
+	/**
+	 * Reduces the formats in the collection down to what the hub supports
+	 *
+	 * @param formats
+	 */
 	private void filterToValidFormats(Collection<Integer> formats) {
 		Iterator<Integer> itr = formats.iterator();
 		while (itr.hasNext()) {

@@ -18,6 +18,11 @@ public interface IClipboardMessageHandler {
 	 */
 	public void onMessage(IClipboardMessage message, String groupId);
 
+	/**
+	 * Called when there is an error trying to send or receive a clipboard message.
+	 *
+	 * @param e
+	 */
 	public void onMessageError(IOException e);
 
 }

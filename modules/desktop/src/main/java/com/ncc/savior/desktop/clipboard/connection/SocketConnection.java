@@ -7,6 +7,11 @@ import java.net.Socket;
 
 import com.ncc.savior.util.JavaUtil;
 
+/**
+ * Specific implementation of {@link IConnectionWrapper} that is based on a
+ * {@link Socket}.
+ *
+ */
 public class SocketConnection implements IConnectionWrapper {
 
 	private InputStream in;

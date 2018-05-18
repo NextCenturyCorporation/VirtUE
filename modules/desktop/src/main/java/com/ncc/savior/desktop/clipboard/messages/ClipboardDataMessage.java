@@ -5,8 +5,8 @@ import java.io.Serializable;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 
 /**
- * Message containing {@link ClipboardData}. This is often sent in response to a
- * {@link ClipboardDataRequestMessage}.
+ * Message containing {@link ClipboardData}. This should be sent in response to
+ * a {@link ClipboardDataRequestMessage}.
  *
  *
  */

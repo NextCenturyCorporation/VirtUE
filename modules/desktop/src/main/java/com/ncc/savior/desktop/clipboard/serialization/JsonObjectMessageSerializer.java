@@ -10,6 +10,12 @@ import com.ncc.savior.desktop.clipboard.messages.BaseClipboardMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.util.JavaUtil;
 
+/**
+ * WIP - does not currently work because typically JSON deserialization with
+ * jackson requires knowing the exact class you are getting.
+ *
+ *
+ */
 public class JsonObjectMessageSerializer implements IMessageSerializer {
 	private ObjectMapper jsonMapper;
 	private IConnectionWrapper connection;

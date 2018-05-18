@@ -24,6 +24,12 @@ import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerialize
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.ncc.savior.util.JavaUtil;
 
+/**
+ * Local test class that creates a HUB, a client connected to the location
+ * windows system, and a test client which periodically copies and pastes.
+ *
+ *
+ */
 public class ClipboardHubLocalTester {
 
 	public static void main(String[] args) throws IOException {

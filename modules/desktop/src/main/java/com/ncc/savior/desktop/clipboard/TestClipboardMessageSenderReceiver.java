@@ -7,13 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
-import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 
 /**
- * allows local code to somewhat simulate a {@link ClipboardHub}
+ * Test only code.
+ *
+ * Allows local code to somewhat simulate an
+ * {@link IClipboardMessageSenderReceiver}
  *
  *
  */

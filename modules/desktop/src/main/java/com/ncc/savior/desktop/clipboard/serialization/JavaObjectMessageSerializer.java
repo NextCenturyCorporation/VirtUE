@@ -3,6 +3,7 @@ package com.ncc.savior.desktop.clipboard.serialization;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,14 @@ import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.util.JavaUtil;
 
+/**
+ * This implementation of {@link IMessageSerializer} uses Java Object
+ * Serialization and the {@link Serializable} interface to serialize the
+ * {@link IClipboardMessage}s. It passes or receives them from streams provided
+ * by an {@link IConnectionWrapper} passed into the constructor.
+ *
+ *
+ */
 public class JavaObjectMessageSerializer implements IMessageSerializer {
 	private static final Logger logger = LoggerFactory.getLogger(JavaObjectMessageSerializer.class);
 

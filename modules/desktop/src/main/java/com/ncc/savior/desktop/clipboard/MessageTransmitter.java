@@ -9,6 +9,14 @@ import com.ncc.savior.desktop.clipboard.messages.ClientIdClipboardMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 
+/**
+ * Main implementation of {@link IClipboardMessageSenderReceiver} that will
+ * handle reading messages from the serializer and sending messages. It also
+ * helps with initialization and maintaining whether the connection is valid or
+ * what group it is associated with.
+ *
+ *
+ */
 public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	private static final Logger logger = LoggerFactory.getLogger(MessageTransmitter.class);
 
@@ -22,10 +30,27 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 
 	private String groupId;
 
+	/**
+	 *
+	 * @param serializer
+	 * @param messageHandler
+	 * @param threadId
+	 *            - the ID that should be assigned to the thread created. This is
+	 *            mainly for debugging purposes.
+	 */
 	public MessageTransmitter(IMessageSerializer serializer, IClipboardMessageHandler messageHandler, String threadId) {
 		this(null, serializer, messageHandler, threadId);
 	}
 
+	/**
+	 *
+	 * @param groupId
+	 * @param serializer
+	 * @param messageHandler
+	 * @param threadId
+	 *            - the ID that should be assigned to the thread created. This is
+	 *            mainly for debugging purposes.
+	 */
 	public MessageTransmitter(String groupId, IMessageSerializer serializer, IClipboardMessageHandler messageHandler,
 			String threadId) {
 		this.handler = messageHandler;

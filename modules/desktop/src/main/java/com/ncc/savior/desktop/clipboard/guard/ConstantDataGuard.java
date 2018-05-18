@@ -1,5 +1,10 @@
 package com.ncc.savior.desktop.clipboard.guard;
 
+/**
+ * Implementation of {@link ICrossGroupDataGuard} which gives a static response.
+ * The response is based on the value given to the constructor.
+ *
+ */
 public class ConstantDataGuard implements ICrossGroupDataGuard {
 
 	private boolean allow;

@@ -7,8 +7,8 @@ import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
 /**
- * Specific implementation for simple plain text clipboard data
- *
+ * Specific implementation for simple plain text clipboard data. This format is
+ * for standard ASCI text.
  *
  */
 

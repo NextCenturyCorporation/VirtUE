@@ -1,16 +1,11 @@
 package com.ncc.savior.desktop.clipboard.client;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,6 +107,15 @@ public class ClipboardClient {
 		clipboardWrapper.setClipboardListener(listener);
 	}
 
+	/**
+	 * Blocks until the thread is interrupted. It is assumed this will be
+	 * interrupted by {@link #storeClipboardData(ClipboardDataMessage)} call. This
+	 * is because Windows must put the data on the clipboard using the same thread
+	 * that got the DELAYED RENDER requeset.
+	 *
+	 * @param requestId
+	 * @return
+	 */
 	protected ClipboardData blockForClipboardData(String requestId) {
 		requestToThread.put(requestId, Thread.currentThread());
 		try {
@@ -178,19 +182,6 @@ public class ClipboardClient {
 		} else {
 			logger.error("unable to find thread to interrupt for clipboard data");
 		}
-	}
-
-	protected static void socketTest() throws IOException, UnknownHostException, InterruptedException {
-		SocketFactory socketFactory = SSLSocketFactory.getDefault();
-		Socket socket = socketFactory.createSocket("localhost", 1022);
-		ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-		// ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-		for (int i = 0; i < 100; i++) {
-			out.writeObject(i + "asfdfa");
-			logger.debug("wrote " + i);
-		}
-		Thread.sleep(3000);
-		socket.close();
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
