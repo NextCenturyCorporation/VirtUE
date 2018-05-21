@@ -21,7 +21,6 @@ import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
-import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.ncc.savior.util.JavaUtil;
 
 /**
@@ -33,31 +32,35 @@ import com.ncc.savior.util.JavaUtil;
 public class ClipboardHubLocalTester {
 
 	public static void main(String[] args) throws IOException {
-		int port = 1022;
-		ServerSocket serverSocket = new ServerSocket(port);
-		WindowsClipboardWrapper wcw = new WindowsClipboardWrapper();
-		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
+		ServerSocket serverSocket = null;
+		try {
+			int port = 1022;
+			serverSocket = new ServerSocket(port);
+			IClipboardWrapper wcw = ClipboardClient.getClipboardWrapperForOperatingSystem();
+			ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
 
-		Thread clientThread = createClientThread(port, wcw);
-		clientThread.start();
-		Socket socket = serverSocket.accept();
-		IConnectionWrapper connection = new SocketConnection(socket);
-		IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-		String groupId = "client1";
-		hub.addClient(groupId, serializer);
+			Thread clientThread = createClientThread(port, wcw);
+			clientThread.start();
+			Socket socket = serverSocket.accept();
+			IConnectionWrapper connection = new SocketConnection(socket);
+			IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
+			String groupId = "client1";
+			hub.addClient(groupId, serializer);
 
-		Thread testThread = createClientThread(port, new TestClipboardWrapper());
-		testThread.start();
-		Socket testSocket = serverSocket.accept();
-		IConnectionWrapper testConnection = new SocketConnection(testSocket);
-		IMessageSerializer testSerializer = new JavaObjectMessageSerializer(testConnection);
-		groupId = "client2";
-		hub.addClient(groupId, testSerializer);
+			Thread testThread = createClientThread(port, new TestClipboardWrapper());
+			testThread.start();
+			Socket testSocket = serverSocket.accept();
+			IConnectionWrapper testConnection = new SocketConnection(testSocket);
+			IMessageSerializer testSerializer = new JavaObjectMessageSerializer(testConnection);
+			groupId = "client2";
+			hub.addClient(groupId, testSerializer);
 
-		while (true) {
-			JavaUtil.sleepAndLogInterruption(1000);
+			while (true) {
+				JavaUtil.sleepAndLogInterruption(1000);
+			}
+		} finally {
+			serverSocket.close();
 		}
-
 	}
 
 	private static Thread createClientThread(int port, IClipboardWrapper clipboardWrapper) {

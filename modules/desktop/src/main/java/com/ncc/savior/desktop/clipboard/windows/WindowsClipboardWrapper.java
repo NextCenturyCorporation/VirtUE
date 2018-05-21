@@ -366,7 +366,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
-	private String getStringClipboardNative() {
+	protected String getStringClipboardNative() {
 		// logger.debug("cb owner:" + user32.GetClipboardOwner());
 		openClipboardWhenFree(windowHandle);
 		Pointer p = user32.GetClipboardData(MyUser32.CF_TEXT);

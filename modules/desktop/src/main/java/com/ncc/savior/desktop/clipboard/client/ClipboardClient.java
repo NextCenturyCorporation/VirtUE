@@ -27,6 +27,7 @@ import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.virtueadmin.model.OS;
 
 /**
  * Clipboard class to be run on a client machine that we want to connect the
@@ -193,7 +194,7 @@ public class ClipboardClient {
 		if (args.length > 1) {
 			port = Integer.parseInt(args[1]);
 		}
-		WindowsClipboardWrapper clipboardWrapper = new WindowsClipboardWrapper();
+		IClipboardWrapper clipboardWrapper = getClipboardWrapperForOperatingSystem();
 		Socket clientSocket = new Socket(hostname, port);
 		// BufferedReader in = new BufferedReader(new
 		// InputStreamReader(clientSocket.getInputStream()));
@@ -211,5 +212,22 @@ public class ClipboardClient {
 				break;
 			}
 		}
+	}
+
+	public static IClipboardWrapper getClipboardWrapperForOperatingSystem() {
+		OS os = JavaUtil.getOs();
+		IClipboardWrapper clipboardWrapper;
+		switch (os) {
+		case LINUX:
+			throw new RuntimeException("Linux clipboard is currently not supported!");
+		case MAC:
+			throw new RuntimeException("Mac clipboard is currently not supported!");
+		case WINDOWS:
+			clipboardWrapper = new WindowsClipboardWrapper();
+			break;
+		default:
+			throw new RuntimeException("Clipboard is currently not supported on your operating system!");
+		}
+		return clipboardWrapper;
 	}
 }
