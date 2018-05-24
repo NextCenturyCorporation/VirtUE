@@ -47,6 +47,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	public static void main(String[] args) {
 		ILinuxClipboardX11 x11 = ILinuxClipboardX11.INSTANCE;
 		Display display = X11.INSTANCE.XOpenDisplay(null);
+		System.out.println("mydisplay:" + display);
 
 		Window window = X11.INSTANCE.XDefaultRootWindow(display);
 
@@ -83,6 +84,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		// x11.XConvertSelection(display, clipboard_atom, utf8, penguin, window, new
 		// NativeLong(0));
 		// retWin = x11.XGetSelectionOwner(display, clipboard_atom);
+
 		System.out.println("Me=" + window + " clipboard owner=" + retWin);
 
 		for (int i = 0; i < 5000; i++) {
@@ -124,7 +126,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			se.autoWrite();
 			sendEvent.setTypedValue(se);
 			int sendRet = x11.XSendEvent(display, sre.requestor, propagate, new NativeLong(X11.NoEventMask), sendEvent);
-			System.out.println("SelectionRequestEvent received.  Sent event with ret=" + sendRet);
+			System.out.println("SelectionRequestEvent received.  Sent event with ret=" + sendRet + " " + se);
 			break;
 		case X11.SelectionClear:
 			XSelectionClearEvent sce = (XSelectionClearEvent) XEvent.newInstance(XSelectionClearEvent.class,
