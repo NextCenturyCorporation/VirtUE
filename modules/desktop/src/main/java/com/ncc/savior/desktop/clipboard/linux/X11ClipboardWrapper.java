@@ -9,6 +9,7 @@ import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.NativeLong;
 import com.sun.jna.platform.unix.X11;
 import com.sun.jna.platform.unix.X11.Atom;
+import com.sun.jna.platform.unix.X11.AtomByReference;
 import com.sun.jna.platform.unix.X11.Display;
 import com.sun.jna.platform.unix.X11.Window;
 import com.sun.jna.platform.unix.X11.XErrorEvent;
@@ -17,6 +18,9 @@ import com.sun.jna.platform.unix.X11.XEvent;
 import com.sun.jna.platform.unix.X11.XSelectionClearEvent;
 import com.sun.jna.platform.unix.X11.XSelectionEvent;
 import com.sun.jna.platform.unix.X11.XSelectionRequestEvent;
+import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.NativeLongByReference;
+import com.sun.jna.ptr.PointerByReference;
 
 public class X11ClipboardWrapper implements IClipboardWrapper {
 
@@ -70,7 +74,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		String format2 = "STRING";
 		printSelection(x11, display, window, format1);
 		printSelection(x11, display, window, format2);
+		return;
+	}
 
+	public static void other(ILinuxClipboardX11 x11, Display display, Window window) {
 		Atom clipboard_atom = x11.XInternAtom(display, "CLIPBOARD", false);
 		Atom utf8 = x11.XInternAtom(display, "UTF8_STRING", false);
 		Atom penguin = x11.XInternAtom(display, "Penguin", false);
@@ -108,15 +115,64 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
+	// see
+	// https://stackoverflow.com/questions/27378318/c-get-string-from-clipboard-on-linux/44992938#44992938
 	private static void printSelection(ILinuxClipboardX11 x11, Display display, Window window, String format) {
 		Atom clipboard = x11.XInternAtom(display, "CLIPBOARD", false);
 		Atom formatAtom = x11.XInternAtom(display, format, false);
 		Atom property = x11.XInternAtom(display, "XSEL_DATA", false);
 		x11.XConvertSelection(display, clipboard, formatAtom, property, window, new NativeLong(0));
-		XEvent event=new XEvent();
+		XEvent event = new XEvent();
 		// do {
-		//
-		// }while()
+		// x11.XNextEvent(display, event);
+		// } while (event.type != X11.SelectionNotify ||
+		// event.xselection.selection.equals(clipboard));
+		if (event.xselection.property != null || true) {
+			// TODO review this
+			long propSize = 4096 * 2 / 4;
+			boolean delete = false;
+			AtomByReference actualTypeReturn = new AtomByReference();
+			IntByReference actualFormatReturn = new IntByReference();
+			NativeLongByReference nItemsReturn = new NativeLongByReference();
+			NativeLongByReference bytesAfterReturn = new NativeLongByReference();
+			PointerByReference propReturn = new PointerByReference();
+			Atom anyPropAtom = new Atom(X11.AnyPropertyType);
+			System.out.println("prior");
+			int ret = x11.XGetWindowProperty(display, window, property, new NativeLong(0), new NativeLong(propSize),
+					delete, anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn, bytesAfterReturn,
+					propReturn);
+			if (ret != X11.Success) {
+				System.out.println("UNSUCCESSFUL");
+
+			} else {
+				System.out.println("ret=" + ret);
+				System.out.println(actualTypeReturn.getValue());
+				System.out.println(actualFormatReturn.getValue());
+				System.out.println(nItemsReturn.getValue());
+				System.out.println(bytesAfterReturn.getValue());
+				System.out.println(propReturn.getValue());
+
+				System.out.println("String: " + propReturn.getValue().getString(0));
+			}
+
+			/*
+			 * x11.XGetWintdowProperty(display, window, property, 0, LONG_MAX/4, True,
+			 * AnyPropertyType, &fmtid, &resbits, &ressize, &restail, (unsigned
+			 * char**)&result); if (fmtid != incrid) { printf("%.*s", (int)ressize, result);
+			 * } XFree(result);
+			 *
+			 * if (fmtid == incrid) { do { do { XNextEvent(display, &event); } while
+			 * (event.type != PropertyNotify || event.xproperty.atom != propid ||
+			 * event.xproperty.state != PropertyNewValue);
+			 *
+			 * XGetWindowProperty(display, window, propid, 0, LONG_MAX/4, True,
+			 * AnyPropertyType, &fmtid, &resbits, &ressize, &restail, (unsigned
+			 * char**)&result); printf("%.*s", (int)ressize, result); XFree(result); } while
+			 * (ressize > 0); }
+			 *
+			 * return True; } else { return False; }
+			 */
+		}
 
 	}
 
