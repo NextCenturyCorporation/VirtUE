@@ -24,6 +24,36 @@ import com.sun.jna.ptr.PointerByReference;
 
 public class X11ClipboardWrapper implements IClipboardWrapper {
 
+	private static boolean selectionAvailable;
+	private ILinuxClipboardX11 x11;
+	private Display display;
+	private Window window;
+	private Atom clipboardAtom;
+	private Atom selectionDataProperty;
+
+	public X11ClipboardWrapper() {
+		x11 = ILinuxClipboardX11.INSTANCE;
+		display = X11.INSTANCE.XOpenDisplay(null);
+		window = X11.INSTANCE.XDefaultRootWindow(display);
+		System.out.println("MyWindow: " + window);
+		clipboardAtom = x11.XInternAtom(display, "CLIPBOARD", false);
+		selectionDataProperty = x11.XInternAtom(display, "XSEL_DATA", false);
+
+		NativeLong eventMask = new NativeLong(x11.LockMask);
+		x11.XSelectInput(display, window, eventMask);
+		XErrorHandler handler = new XErrorHandler() {
+
+			@Override
+			public int apply(Display display, XErrorEvent errorEvent) {
+				byte[] buffer = new byte[2048];
+				x11.XGetErrorText(display, errorEvent.error_code, buffer, 2048);
+				System.out.println("ERROR: " + new String(buffer));
+				return 1;
+			}
+		};
+		x11.XSetErrorHandler(handler);
+	}
+
 	@Override
 	public void setDelayedRenderFormats(Collection<Integer> formats) {
 		// TODO Auto-generated method stub
@@ -48,33 +78,168 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		return null;
 	}
 
+	public boolean amISelectionOwner() {
+		Window retWin = x11.XGetSelectionOwner(display, clipboardAtom);
+		return window.equals(retWin);
+	}
+
+	public boolean isThereAClipboardOwner() {
+		Window retWin = x11.XGetSelectionOwner(display, clipboardAtom);
+		return retWin != null;
+	}
+
+	public void becomeSelectionOwner() {
+		x11.XSetSelectionOwner(display, clipboardAtom, window, new NativeLong(0l));
+	}
+
 	public static void main(String[] args) {
-		ILinuxClipboardX11 x11 = ILinuxClipboardX11.INSTANCE;
-		Display display = X11.INSTANCE.XOpenDisplay(null);
-		System.out.println("mydisplay:" + display);
+		X11ClipboardWrapper wrapper = new X11ClipboardWrapper();
+		// System.out.println("IAmOwner=" + wrapper.amISelectionOwner());
+		// wrapper.becomeSelectionOwner();
+		// System.out.println("IAmOwner=" + wrapper.amISelectionOwner());
+		// XEvent event = wrapper.getNextEventWithTimeout(2000, 100);
+		// if (event != null) {
+		// System.out.println("Event received! " + event.type);
+		// }
 
-		Window window = X11.INSTANCE.XDefaultRootWindow(display);
-
-		XEvent event = new XEvent();
-		// x11.XNextEvent(display, event_return);
-
-		XErrorHandler handler = new XErrorHandler() {
+		Thread t = new Thread(new Runnable() {
 
 			@Override
-			public int apply(Display display, XErrorEvent errorEvent) {
-				byte[] buffer = new byte[2048];
-				x11.XGetErrorText(display, errorEvent.error_code, buffer, 2048);
-				System.out.println(new String(buffer));
-				return 1;
+			public void run() {
+				String format1 = "UTF_STRING";
+				String format2 = "STRING";
+				while (true) {
+					wrapper.printSelection(format2);
+					JavaUtil.sleepAndLogInterruption(1000);
+				}
 			}
-		};
-		x11.XSetErrorHandler(handler);
 
-		String format1 = "UTF_STRING";
-		String format2 = "STRING";
-		printSelection(x11, display, window, format1);
-		printSelection(x11, display, window, format2);
-		return;
+		});
+		t.start();
+		while (true) {
+			XEvent e = wrapper.getNextEventWithTimeout(1000, 100);
+			System.out.println("EVENT: " + e);
+			if (e.type == X11.SelectionNotify) {
+				selectionAvailable = true;
+			}
+		}
+
+		// wrapper.printSelection(format2, null);
+	}
+
+	/**
+	 * returns null if no event.
+	 *
+	 * @param timeoutMillis
+	 * @param intervalMillis
+	 * @return
+	 */
+	public XEvent getNextEventWithTimeout(long timeoutMillis, int intervalMillis) {
+		long stopTime = System.currentTimeMillis() + timeoutMillis;
+		while (System.currentTimeMillis() < stopTime) {
+			XEvent peekEvent = new XEvent();
+			// System.out.println("peeking");
+			int peekRet = x11.XPeekEvent(display, peekEvent);
+			// System.out.println("Peek Event=" + peekRet);
+			if (peekRet != 0) {
+				XEvent event = blockForEvent();
+				return event;
+			}
+			JavaUtil.sleepAndLogInterruption(intervalMillis);
+		}
+		return null;
+	}
+
+	private XEvent blockForEvent() {
+		XEvent event = new XEvent();
+		int eventReturn = x11.XNextEvent(display, event);
+		if (eventReturn == X11.Success) {
+			return event;
+		} else {
+			throw new RuntimeException("Get next event failed");
+		}
+	}
+
+	private void convertSelectionAndSync(String format) {
+		String selection = "CLIPBOARD";
+		Atom clipboard = x11.XInternAtom(display, selection, false);
+		Atom formatAtom = x11.XInternAtom(display, format, false);
+		x11.XConvertSelection(display, clipboard, formatAtom, selectionDataProperty, window, new NativeLong(0));
+		x11.XSync(display, false);
+	}
+
+	// see
+	// https://stackoverflow.com/questions/27378318/c-get-string-from-clipboard-on-linux/44992938#44992938
+	private void printSelection(String format) {
+		Atom increment = x11.XInternAtom(display, "INCR", false);
+		// default selection is CLIPBOARD
+		convertSelectionAndSync(format);
+		System.out.println("requested format");
+//		XEvent event = null;
+//		event = getNextEventWithTimeout(3000, 100);
+//		event.autoRead();
+//		while (event.type != X11.SelectionNotify) {
+//			System.out.println("event type=" + event.type);
+//			if (event.type == X11.PropertyNotify) {
+//				XPropertyEvent propEvent = (XPropertyEvent) event.getTypedValue(XPropertyEvent.class);
+//				propEvent.autoRead();
+//				System.out.println(propEvent + "  " + propEvent.atom);
+//			}
+//			event = getNextEventWithTimeout(2000, 100);
+//		}
+		while (!selectionAvailable) {
+			JavaUtil.sleepAndLogInterruption(100);
+		}
+//		System.out.println("event type=" + event.type);
+//		XSelectionEvent selEvent = (XSelectionEvent) event.getTypedValue(XSelectionEvent.class);
+//		selEvent.autoRead();
+		// TODO review this
+		long propSize = 4096000 * 2 / 4;
+		boolean delete = false;
+		AtomByReference actualTypeReturn = new AtomByReference();
+		IntByReference actualFormatReturn = new IntByReference();
+		NativeLongByReference nItemsReturn = new NativeLongByReference();
+		NativeLongByReference bytesAfterReturn = new NativeLongByReference();
+		PointerByReference propReturn = new PointerByReference();
+		Atom anyPropAtom = new Atom(X11.AnyPropertyType);
+		System.out.println("prior");
+		int ret = x11.XGetWindowProperty(display, window, selectionDataProperty, new NativeLong(0),
+				new NativeLong(propSize), delete,
+				anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn, bytesAfterReturn, propReturn);
+		if (ret != X11.Success) {
+			System.out.println("UNSUCCESSFUL");
+		} else {
+			System.out.println("ret=" + ret);
+			System.out.println("Type: " + actualTypeReturn.getValue());
+			System.out.println("Format: " + actualFormatReturn.getValue() + "  Incr: " + increment);
+			System.out.println("nItems: " + nItemsReturn.getValue());
+			System.out.println("bytesAfter: " + bytesAfterReturn.getValue());
+			// System.out.println(propReturn.getValue());
+
+			String data = propReturn.getValue().getString(0);
+			int maxLengthToPrint = 64;
+			System.out.println("String: " + data.length() + " - "
+					+ (data.length() > maxLengthToPrint ? data.substring(0, maxLengthToPrint) : data));
+		}
+
+		/*
+		 * x11.XGetWintdowProperty(display, window, property, 0, LONG_MAX/4, True,
+		 * AnyPropertyType, &fmtid, &resbits, &ressize, &restail, (unsigned
+		 * char**)&result); if (fmtid != incrid) { printf("%.*s", (int)ressize, result);
+		 * } XFree(result);
+		 *
+		 * if (fmtid == incrid) { do { do { XNextEvent(display, &event); } while
+		 * (event.type != PropertyNotify || event.xproperty.atom != propid ||
+		 * event.xproperty.state != PropertyNewValue);
+		 *
+		 * XGetWindowProperty(display, window, propid, 0, LONG_MAX/4, True,
+		 * AnyPropertyType, &fmtid, &resbits, &ressize, &restail, (unsigned
+		 * char**)&result); printf("%.*s", (int)ressize, result); XFree(result); } while
+		 * (ressize > 0); }
+		 *
+		 * return True; } else { return False; }
+		 */
+
 	}
 
 	public static void other(ILinuxClipboardX11 x11, Display display, Window window) {
@@ -113,67 +278,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			}
 			JavaUtil.sleepAndLogInterruption(100);
 		}
-	}
-
-	// see
-	// https://stackoverflow.com/questions/27378318/c-get-string-from-clipboard-on-linux/44992938#44992938
-	private static void printSelection(ILinuxClipboardX11 x11, Display display, Window window, String format) {
-		Atom clipboard = x11.XInternAtom(display, "CLIPBOARD", false);
-		Atom formatAtom = x11.XInternAtom(display, format, false);
-		Atom property = x11.XInternAtom(display, "XSEL_DATA", false);
-		x11.XConvertSelection(display, clipboard, formatAtom, property, window, new NativeLong(0));
-		XEvent event = new XEvent();
-		// do {
-		// x11.XNextEvent(display, event);
-		// } while (event.type != X11.SelectionNotify ||
-		// event.xselection.selection.equals(clipboard));
-		if (event.xselection.property != null || true) {
-			// TODO review this
-			long propSize = 4096 * 2 / 4;
-			boolean delete = false;
-			AtomByReference actualTypeReturn = new AtomByReference();
-			IntByReference actualFormatReturn = new IntByReference();
-			NativeLongByReference nItemsReturn = new NativeLongByReference();
-			NativeLongByReference bytesAfterReturn = new NativeLongByReference();
-			PointerByReference propReturn = new PointerByReference();
-			Atom anyPropAtom = new Atom(X11.AnyPropertyType);
-			System.out.println("prior");
-			int ret = x11.XGetWindowProperty(display, window, property, new NativeLong(0), new NativeLong(propSize),
-					delete, anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn, bytesAfterReturn,
-					propReturn);
-			if (ret != X11.Success) {
-				System.out.println("UNSUCCESSFUL");
-
-			} else {
-				System.out.println("ret=" + ret);
-				System.out.println(actualTypeReturn.getValue());
-				System.out.println(actualFormatReturn.getValue());
-				System.out.println(nItemsReturn.getValue());
-				System.out.println(bytesAfterReturn.getValue());
-				System.out.println(propReturn.getValue());
-
-				System.out.println("String: " + propReturn.getValue().getString(0));
-			}
-
-			/*
-			 * x11.XGetWintdowProperty(display, window, property, 0, LONG_MAX/4, True,
-			 * AnyPropertyType, &fmtid, &resbits, &ressize, &restail, (unsigned
-			 * char**)&result); if (fmtid != incrid) { printf("%.*s", (int)ressize, result);
-			 * } XFree(result);
-			 *
-			 * if (fmtid == incrid) { do { do { XNextEvent(display, &event); } while
-			 * (event.type != PropertyNotify || event.xproperty.atom != propid ||
-			 * event.xproperty.state != PropertyNewValue);
-			 *
-			 * XGetWindowProperty(display, window, propid, 0, LONG_MAX/4, True,
-			 * AnyPropertyType, &fmtid, &resbits, &ressize, &restail, (unsigned
-			 * char**)&result); printf("%.*s", (int)ressize, result); XFree(result); } while
-			 * (ressize > 0); }
-			 *
-			 * return True; } else { return False; }
-			 */
-		}
-
 	}
 
 	private static void handleEvent(ILinuxClipboardX11 x11, XEvent event, Display display) {
