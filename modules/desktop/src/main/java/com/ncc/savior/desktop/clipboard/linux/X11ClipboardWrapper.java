@@ -66,6 +66,11 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		};
 		x11.XSetErrorHandler(handler);
 
+		String format1 = "UTF_STRING";
+		String format2 = "STRING";
+		printSelection(x11, display, window, format1);
+		printSelection(x11, display, window, format2);
+
 		Atom clipboard_atom = x11.XInternAtom(display, "CLIPBOARD", false);
 		Atom utf8 = x11.XInternAtom(display, "UTF8_STRING", false);
 		Atom penguin = x11.XInternAtom(display, "Penguin", false);
@@ -101,6 +106,18 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			}
 			JavaUtil.sleepAndLogInterruption(100);
 		}
+	}
+
+	private static void printSelection(ILinuxClipboardX11 x11, Display display, Window window, String format) {
+		Atom clipboard = x11.XInternAtom(display, "CLIPBOARD", false);
+		Atom formatAtom = x11.XInternAtom(display, format, false);
+		Atom property = x11.XInternAtom(display, "XSEL_DATA", false);
+		x11.XConvertSelection(display, clipboard, formatAtom, property, window, new NativeLong(0));
+		XEvent event=new XEvent();
+		// do {
+		//
+		// }while()
+
 	}
 
 	private static void handleEvent(ILinuxClipboardX11 x11, XEvent event, Display display) {
