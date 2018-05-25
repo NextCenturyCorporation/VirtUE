@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.clipboard.linux;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	private Atom clipboardAtom;
 	private Atom selectionDataProperty;
 
+	private Atom targets;
+
+	private IClipboardListener listener;
+
 	public X11ClipboardWrapper() {
 		x11 = ILinuxClipboardX11.INSTANCE;
 		display = X11.INSTANCE.XOpenDisplay(null);
@@ -52,6 +58,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		System.out.println("MyWindow: " + window);
 		clipboardAtom = x11.XInternAtom(display, "CLIPBOARD", false);
 		selectionDataProperty = x11.XInternAtom(display, "XSEL_DATA", false);
+		targets = x11.XInternAtom(display, "TARGETS", false);
 
 		NativeLong eventMask = new NativeLong(X11.PropertyChangeMask);
 		x11.XSelectInput(display, window, eventMask);
@@ -76,7 +83,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	@Override
 	public void setClipboardListener(IClipboardListener listener) {
-		// TODO Auto-generated method stub
+		this.listener = listener;
 
 	}
 
@@ -112,10 +119,16 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	public static void singleThreadedStart() {
 		X11ClipboardWrapper wrapper = new X11ClipboardWrapper();
-		String format1 = "UTF_STRING";
+		String format1 = "UTF_STRING";// OR UTF8_STRING
 		String format2 = "STRING";
 
-		while (true) {
+		WindowProperty prop = wrapper.getClipboardDataRaw(X11.XA_STRING);
+		logger.debug("format1: " + prop.property.getString(0));
+
+		Set<String> formats = wrapper.getAvailableFormats();
+		System.out.println(formats);
+		boolean cont = false;
+		while (cont) {
 			wrapper.setClipboardDataString("test");
 			JavaUtil.sleepAndLogInterruption(5000);
 
@@ -125,6 +138,21 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			JavaUtil.sleepAndLogInterruption(5000);
 		}
 
+	}
+
+	private Set<String> getAvailableFormats() {
+		// is order important? I'm not sure at this point.
+		Set<String> formats = new LinkedHashSet<String>();
+		WindowProperty raw = getClipboardDataRaw(targets);
+		for (int i = 0; i < raw.numItems; i++) {
+			NativeLong nl = raw.property.getNativeLong(i * NativeLong.SIZE);
+			// logger.debug(" " + val + " 0x" + Long.toHexString(val));
+			// logger.debug(" " + nl + " : " + );
+			Atom formatAtom = new Atom(nl.longValue());
+			String formatName = X11.INSTANCE.XGetAtomName(display, formatAtom);
+			formats.add(formatName);
+		}
+		return formats;
 	}
 
 	public static void threadedStart() {
@@ -235,7 +263,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	private ClipboardData getClipboardDataInternal(String format) {
-		WindowProperty prop = getClipboardDataRaw(format);
+		Atom formatAtom = x11.XInternAtom(display, format, false);
+		WindowProperty prop = getClipboardDataRaw(formatAtom);
 		if (prop == null) {
 			// failed
 			// TODO
@@ -256,12 +285,13 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	 *
 	 * @param format
 	 */
-	private WindowProperty getClipboardDataRaw(String format) {
+	private WindowProperty getClipboardDataRaw(Atom format) {
 		// TODO implement increment protocol
 		// Atom increment = x11.XInternAtom(display, "INCR", false);
 		// default selection is CLIPBOARD
 
 		// format="TARGETS"
+
 		convertSelectionAndSync(format);
 		XEvent event = new XEvent();
 		do {
@@ -307,7 +337,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	private void printSelection(String format, boolean checkForEventsInFunction) {
 		Atom increment = x11.XInternAtom(display, "INCR", false);
 		// default selection is CLIPBOARD
-		convertSelectionAndSync(format);
+		Atom formatAtom = x11.XInternAtom(display, format, false);
+		convertSelectionAndSync(formatAtom);
 		System.out.println("requested format");
 		if (checkForEventsInFunction) {
 			XEvent event = null;
@@ -408,10 +439,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
-	private void convertSelectionAndSync(String format) {
+	private void convertSelectionAndSync(Atom formatAtom) {
 		String selection = "CLIPBOARD";
 		Atom clipboard = x11.XInternAtom(display, selection, false);
-		Atom formatAtom = x11.XInternAtom(display, format, false);
 		x11.XConvertSelection(display, clipboard, formatAtom, selectionDataProperty, window, new NativeLong(0));
 		// x11.XConvertSelection(display, clipboard, formatAtom, Atom.None, window, new
 		// NativeLong(0));
