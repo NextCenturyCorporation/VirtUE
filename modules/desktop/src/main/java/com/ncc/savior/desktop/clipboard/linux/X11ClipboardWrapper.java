@@ -119,7 +119,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			wrapper.setClipboardDataString("test");
 			JavaUtil.sleepAndLogInterruption(5000);
 
-			ClipboardData data = wrapper.getClipboardDataRaw(format2);
+			ClipboardData data = wrapper.getClipboardDataInternal(format2);
 			// wrapper.printSelection(format2, true);
 			logger.debug(data.toString());
 			JavaUtil.sleepAndLogInterruption(5000);
@@ -214,7 +214,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				sne.target = sre.target;
 				sne.property = sre.property;
 				sne.autoWrite();
-				logger.debug("selection requested");
+				logger.debug("selection requested " + sre.target + "=" + x11.XGetAtomName(display, sre.target));
 				XEvent eventToSend = new XEvent();
 				eventToSend.setTypedValue(sne);
 				Memory mem = new Memory(1 * (data.getBytes().length + 1));
@@ -234,10 +234,34 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
-	private ClipboardData getClipboardDataRaw(String format) {
+	private ClipboardData getClipboardDataInternal(String format) {
+		WindowProperty prop = getClipboardDataRaw(format);
+		if (prop == null) {
+			// failed
+			// TODO
+			throw new RuntimeException("TODO HANDLE FAILURE");
+		} else {
+			// succeeded
+			if (prop.format == 0) {
+				return new EmptyClipboardData(ClipboardFormat.fromLinux(format));
+			} else {
+				// logger.debug(propReturn.getValue().getString(0));
+				return convertClipboardData(format, prop.property);
+			}
+		}
+	}
+
+	/**
+	 * returns null on error
+	 *
+	 * @param format
+	 */
+	private WindowProperty getClipboardDataRaw(String format) {
 		// TODO implement increment protocol
 		// Atom increment = x11.XInternAtom(display, "INCR", false);
 		// default selection is CLIPBOARD
+
+		// format="TARGETS"
 		convertSelectionAndSync(format);
 		XEvent event = new XEvent();
 		do {
@@ -260,27 +284,21 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		int ret = x11.XGetWindowProperty(display, window, selectionDataProperty, new NativeLong(X11.CurrentTime),
 				new NativeLong(propSize), delete, anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn,
 				bytesAfterReturn, propReturn);
-		if (ret != X11.Success) {
-			// failed
-			// TODO
-			throw new RuntimeException("TODO HANDLE FAILURE GRACEFULLY");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Type: " + actualTypeReturn.getValue() + " Format: " + actualFormatReturn.getValue());
+			logger.debug("nItems: " + nItemsReturn.getValue() + " bytesAfter: " + bytesAfterReturn.getValue());
+		}
+		long bytesLeft = bytesAfterReturn.getValue().longValue();
+		if (bytesLeft > 0) {
+			logger.error("Clipboard data too large.  Only returning partial with " + bytesLeft
+					+ " bytes remaining.  Need to implement increment protocol!");
+		}
+		if (ret == X11.Success) {
+			WindowProperty prop = new WindowProperty(propReturn.getValue(), actualTypeReturn.getValue(),
+					actualFormatReturn.getValue(), nItemsReturn.getValue().longValue());
+			return prop;
 		} else {
-			// succeeded
-			if (bytesAfterReturn.getValue().longValue() > 0) {
-				logger.error(
-						"Clipboard data too large.  Only returning partial.  Need to implement increment protocol!");
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Type: " + actualTypeReturn.getValue() + " Format: " + actualFormatReturn.getValue());
-				logger.debug("nItems: " + nItemsReturn.getValue() + " bytesAfter: " + bytesAfterReturn.getValue());
-			}
-
-			if (actualFormatReturn.getValue() == 0) {
-				return new EmptyClipboardData(ClipboardFormat.fromLinux(format));
-			} else {
-				// logger.debug(propReturn.getValue().getString(0));
-				return convertClipboardData(format, propReturn.getValue());
-			}
+			return null;
 		}
 	}
 
@@ -484,6 +502,22 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	private static NativeLong getNow(int i) {
 		return new NativeLong(new Date().getTime() + i);
+	}
+
+	private static class WindowProperty {
+
+		public Pointer property;
+		public Atom type;
+		public int format;
+		public long numItems;
+
+		public WindowProperty(Pointer property, Atom type, int format, long numItems) {
+			this.property = property;
+			this.type = type;
+			this.format = format;
+			this.numItems = numItems;
+		}
+
 	}
 
 }
