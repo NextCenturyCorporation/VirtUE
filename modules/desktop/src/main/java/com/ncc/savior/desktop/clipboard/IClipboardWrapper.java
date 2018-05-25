@@ -20,7 +20,7 @@ public interface IClipboardWrapper {
 	 *
 	 * @param formats
 	 */
-	public void setDelayedRenderFormats(Collection<Integer> formats);
+	public void setDelayedRenderFormats(Collection<ClipboardFormat> formats);
 
 	/**
 	 * sets the {@link IClipboardListener} to handle clipboard events.
@@ -41,18 +41,20 @@ public interface IClipboardWrapper {
 		 *
 		 * @param format
 		 */
-		void onPasteAttempt(int format);
+		void onPasteAttempt(ClipboardFormat format);
 
 		/**
 		 * Called after a local application changes the clipboard.
 		 *
 		 * @param formats
 		 */
-		void onClipboardChanged(Set<Integer> formats);
+		void onClipboardChanged(Set<ClipboardFormat> formats);
 	}
 
 	/**
-	 * set clipboard data for a delayed render call.
+	 * set clipboard data for a delayed render call. This will be called after a
+	 * paste attempt has been signaled via
+	 * {@link IClipboardListener#onPasteAttempt(int)}
 	 *
 	 * @param clipboardData
 	 */
@@ -65,5 +67,6 @@ public interface IClipboardWrapper {
 	 * @param format
 	 * @return
 	 */
-	public ClipboardData getClipboardData(int format);
+	public ClipboardData getClipboardData(ClipboardFormat format);
+
 }

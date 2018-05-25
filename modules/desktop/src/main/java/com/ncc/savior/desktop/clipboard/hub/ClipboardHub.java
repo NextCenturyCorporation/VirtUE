@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
@@ -28,7 +29,6 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
-import com.ncc.savior.desktop.clipboard.windows.IWindowsClipboardUser32;
 
 /**
  * Central hub point for the shared clipboard data. All messages should be sent
@@ -50,14 +50,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private String hubId = "Hub-0";
 	private Map<String, IClipboardMessageSenderReceiver> transmitters;
 	private String clipboardOwnerId;
-	private Collection<Integer> validFormats;
+	private Collection<ClipboardFormat> validFormats;
 	private ICrossGroupDataGuard dataGuard;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
 		transmitters = new TreeMap<String, IClipboardMessageSenderReceiver>();
-		validFormats = new TreeSet<Integer>();
-		validFormats.add(IWindowsClipboardUser32.CF_TEXT);
-		validFormats.add(IWindowsClipboardUser32.CF_UNICODE);
+		validFormats = new TreeSet<ClipboardFormat>();
+		validFormats.add(ClipboardFormat.TEXT);
+		validFormats.add(ClipboardFormat.WIDE_TEXT);
 		this.dataGuard = dataGuard;
 	}
 
@@ -127,7 +127,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		if (message instanceof ClipboardChangedMessage) {
 			// source has taken control of clipboard
 			ClipboardChangedMessage m = (ClipboardChangedMessage) message;
-			Collection<Integer> formats = m.getFormats();
+			Collection<ClipboardFormat> formats = m.getFormats();
 			filterToValidFormats(formats);
 			this.clipboardOwnerId = m.getSourceId();
 			// need to inform all clients that the clipboard has changed
@@ -156,7 +156,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 				sendMessageHandleError(message, transmitter, destId);
 			} else {
 				transmitter = transmitters.get(message.getSourceId());
-				int format = ((ClipboardDataRequestMessage) message).getFormat();
+				ClipboardFormat format = ((ClipboardDataRequestMessage) message).getFormat();
 				IClipboardMessage dataMessage = new ClipboardDataMessage(hubId, new EmptyClipboardData(format),
 						m.getRequestId(), m.getSourceId());
 				sendMessageHandleError(dataMessage, transmitter, message.getSourceId());
@@ -177,10 +177,10 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	 *
 	 * @param formats
 	 */
-	private void filterToValidFormats(Collection<Integer> formats) {
-		Iterator<Integer> itr = formats.iterator();
+	private void filterToValidFormats(Collection<ClipboardFormat> formats) {
+		Iterator<ClipboardFormat> itr = formats.iterator();
 		while (itr.hasNext()) {
-			Integer format = itr.next();
+			ClipboardFormat format = itr.next();
 			if (!validFormats.contains(format)) {
 				itr.remove();
 			}

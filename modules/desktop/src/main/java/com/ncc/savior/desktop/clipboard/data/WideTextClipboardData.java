@@ -2,7 +2,7 @@ package com.ncc.savior.desktop.clipboard.data;
 
 import java.io.Serializable;
 
-import com.ncc.savior.desktop.clipboard.windows.IWindowsClipboardUser32;
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
@@ -15,7 +15,7 @@ public class WideTextClipboardData extends ClipboardData implements Serializable
 	private String data;
 
 	public WideTextClipboardData(String data) {
-		super(IWindowsClipboardUser32.CF_UNICODE);
+		super(ClipboardFormat.WIDE_TEXT);
 		this.data = data;
 	}
 

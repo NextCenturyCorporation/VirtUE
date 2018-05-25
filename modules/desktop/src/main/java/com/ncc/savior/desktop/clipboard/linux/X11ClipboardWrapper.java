@@ -3,10 +3,20 @@ package com.ncc.savior.desktop.clipboard.linux;
 import java.util.Collection;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
+import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
+import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
+import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
+import com.ncc.savior.desktop.clipboard.data.WideTextClipboardData;
 import com.ncc.savior.util.JavaUtil;
+import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.unix.X11;
 import com.sun.jna.platform.unix.X11.Atom;
 import com.sun.jna.platform.unix.X11.AtomByReference;
@@ -24,6 +34,7 @@ import com.sun.jna.ptr.NativeLongByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 public class X11ClipboardWrapper implements IClipboardWrapper {
+	private static final Logger logger = LoggerFactory.getLogger(X11ClipboardWrapper.class);
 
 	private static boolean selectionAvailable;
 	private ILinuxClipboardX11 x11;
@@ -58,7 +69,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	@Override
-	public void setDelayedRenderFormats(Collection<Integer> formats) {
+	public void setDelayedRenderFormats(Collection<ClipboardFormat> formats) {
 		// TODO Auto-generated method stub
 
 	}
@@ -76,7 +87,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	@Override
-	public ClipboardData getClipboardData(int format) {
+	public ClipboardData getClipboardData(ClipboardFormat format) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -92,7 +103,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	public void becomeSelectionOwner() {
-		x11.XSetSelectionOwner(display, clipboardAtom, window, new NativeLong(0l));
+		x11.XSetSelectionOwner(display, clipboardAtom, window, new NativeLong(X11.CurrentTime));
 	}
 
 	public static void main(String[] args) {
@@ -103,9 +114,15 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		X11ClipboardWrapper wrapper = new X11ClipboardWrapper();
 		String format1 = "UTF_STRING";
 		String format2 = "STRING";
+
 		while (true) {
-			wrapper.printSelection(format1, true);
-			JavaUtil.sleepAndLogInterruption(1000);
+			wrapper.setClipboardDataString("test");
+			JavaUtil.sleepAndLogInterruption(5000);
+
+			ClipboardData data = wrapper.getClipboardDataRaw(format2);
+			// wrapper.printSelection(format2, true);
+			logger.debug(data.toString());
+			JavaUtil.sleepAndLogInterruption(5000);
 		}
 
 	}
@@ -159,9 +176,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		while (System.currentTimeMillis() < stopTime) {
 			XEvent peekEvent = new XEvent();
 			// System.out.println("peeking");
-			 boolean peekRet = x11.XCheckWindowEvent(display, window, new
-			NativeLong(X11.PropertyChangeMask), peekEvent);
-//			boolean peekRet = x11.XPeekEvent(display, peekEvent) == X11.Success;
+			boolean peekRet = x11.XCheckWindowEvent(display, window, new NativeLong(X11.PropertyChangeMask), peekEvent);
+			// boolean peekRet = x11.XPeekEvent(display, peekEvent) == X11.Success;
 			// System.out.println("Peek Event=" + peekRet);
 			if (peekRet) {
 				XEvent event = blockForEvent();
@@ -172,24 +188,100 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		return null;
 	}
 
-	private XEvent blockForEvent() {
+	private void setClipboardDataString(String data) {
+		x11.XSetSelectionOwner(display, clipboardAtom, window, new NativeLong(X11.CurrentTime));
+		Window owner = x11.XGetSelectionOwner(display, clipboardAtom);
+		if (!window.equals(owner)) {
+			logger.warn("Failed to take clipboard ownership");
+			return;
+		}
 		XEvent event = new XEvent();
-		int eventReturn = x11.XNextEvent(display, event);
-		if (eventReturn == X11.Success) {
-			return event;
-		} else {
-			throw new RuntimeException("Get next event failed");
+		while (event.type != X11.SelectionClear) {
+			x11.XNextEvent(display, event);
+			switch (event.type) {
+			case X11.SelectionRequest:
+				// someone wants data to be sent to them
+				XSelectionRequestEvent sre = (XSelectionRequestEvent) event
+						.getTypedValue(X11.XSelectionRequestEvent.class);
+				sre.autoRead();
+
+				XSelectionEvent sne = new XSelectionEvent();
+				sne.display = display;
+				sne.type = X11.SelectionNotify;
+				sne.requestor = sre.requestor;
+				sne.selection = sre.selection;
+				sne.time = sre.time;
+				sne.target = sre.target;
+				sne.property = sre.property;
+				sne.autoWrite();
+				logger.debug("selection requested");
+				XEvent eventToSend = new XEvent();
+				eventToSend.setTypedValue(sne);
+				Memory mem = new Memory(1 * (data.getBytes().length + 1));
+				mem.clear();
+				mem.setString(0, data);
+				x11.XChangeProperty(display, sre.requestor, sre.property, X11.XA_STRING, 8, X11.PropModeReplace, mem,
+						data.length());
+				x11.XSendEvent(display, sre.requestor, X11.NoEventMask, new NativeLong(0), eventToSend);
+				break;
+			case X11.SelectionClear:
+				// someone took selection from me
+				logger.debug("selection taken");
+				break;
+			default:
+				// ignore
+			}
 		}
 	}
 
-	private void convertSelectionAndSync(String format) {
-		String selection = "CLIPBOARD";
-		Atom clipboard = x11.XInternAtom(display, selection, false);
-		Atom formatAtom = x11.XInternAtom(display, format, false);
-		x11.XConvertSelection(display, clipboard, formatAtom, selectionDataProperty, window, new NativeLong(0));
-		// x11.XConvertSelection(display, clipboard, formatAtom, Atom.None, window, new
-		// NativeLong(0));
-		x11.XSync(display, false);
+	private ClipboardData getClipboardDataRaw(String format) {
+		// TODO implement increment protocol
+		// Atom increment = x11.XInternAtom(display, "INCR", false);
+		// default selection is CLIPBOARD
+		convertSelectionAndSync(format);
+		XEvent event = new XEvent();
+		do {
+			int ret = x11.XNextEvent(display, event);
+			event.autoRead();
+			if (logger.isTraceEnabled()) {
+				logger.trace("got event: " + event);
+			}
+		} while (event.type != X11.SelectionNotify);
+		// larger than should be, but this allows us to ignore increment protocol
+		// longer.
+		long propSize = 1024 * 1024 * 2;
+		boolean delete = false;
+		AtomByReference actualTypeReturn = new AtomByReference();
+		IntByReference actualFormatReturn = new IntByReference();
+		NativeLongByReference nItemsReturn = new NativeLongByReference();
+		NativeLongByReference bytesAfterReturn = new NativeLongByReference();
+		PointerByReference propReturn = new PointerByReference();
+		Atom anyPropAtom = new Atom(X11.AnyPropertyType);
+		int ret = x11.XGetWindowProperty(display, window, selectionDataProperty, new NativeLong(X11.CurrentTime),
+				new NativeLong(propSize), delete, anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn,
+				bytesAfterReturn, propReturn);
+		if (ret != X11.Success) {
+			// failed
+			// TODO
+			throw new RuntimeException("TODO HANDLE FAILURE GRACEFULLY");
+		} else {
+			// succeeded
+			if (bytesAfterReturn.getValue().longValue() > 0) {
+				logger.error(
+						"Clipboard data too large.  Only returning partial.  Need to implement increment protocol!");
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Type: " + actualTypeReturn.getValue() + " Format: " + actualFormatReturn.getValue());
+				logger.debug("nItems: " + nItemsReturn.getValue() + " bytesAfter: " + bytesAfterReturn.getValue());
+			}
+
+			if (actualFormatReturn.getValue() == 0) {
+				return new EmptyClipboardData(ClipboardFormat.fromLinux(format));
+			} else {
+				// logger.debug(propReturn.getValue().getString(0));
+				return convertClipboardData(format, propReturn.getValue());
+			}
+		}
 	}
 
 	// see
@@ -244,10 +336,14 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			System.out.println("bytesAfter: " + bytesAfterReturn.getValue());
 			// System.out.println(propReturn.getValue());
 
-			String data = propReturn.getValue().getString(0);
-			int maxLengthToPrint = 64;
-			System.out.println("String: " + data.length() + " - "
-					+ (data.length() > maxLengthToPrint ? data.substring(0, maxLengthToPrint) : data));
+			if (actualTypeReturn.getValue() != null) {
+				String data = propReturn.getValue().getString(0);
+				int maxLengthToPrint = 64;
+				System.out.println("String: " + data.length() + " - "
+						+ (data.length() > maxLengthToPrint ? data.substring(0, maxLengthToPrint) : data));
+			} else {
+				System.out.println("No Data!");
+			}
 		}
 
 		/*
@@ -268,6 +364,40 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		 * return True; } else { return False; }
 		 */
 
+	}
+
+	private ClipboardData convertClipboardData(String format, Pointer dataPointer) {
+		ClipboardFormat cf = ClipboardFormat.fromLinux(format);
+		switch (cf) {
+		case TEXT:
+			String str = dataPointer.getString(0);
+			return new PlainTextClipboardData(str);
+		case WIDE_TEXT:
+			str = dataPointer.getWideString(0);
+			return new WideTextClipboardData(str);
+		default:
+			return new UnknownClipboardData(cf);
+		}
+	}
+
+	private XEvent blockForEvent() {
+		XEvent event = new XEvent();
+		int eventReturn = x11.XNextEvent(display, event);
+		if (eventReturn == X11.Success) {
+			return event;
+		} else {
+			throw new RuntimeException("Get next event failed");
+		}
+	}
+
+	private void convertSelectionAndSync(String format) {
+		String selection = "CLIPBOARD";
+		Atom clipboard = x11.XInternAtom(display, selection, false);
+		Atom formatAtom = x11.XInternAtom(display, format, false);
+		x11.XConvertSelection(display, clipboard, formatAtom, selectionDataProperty, window, new NativeLong(0));
+		// x11.XConvertSelection(display, clipboard, formatAtom, Atom.None, window, new
+		// NativeLong(0));
+		x11.XSync(display, false);
 	}
 
 	public static void other(ILinuxClipboardX11 x11, Display display, Window window) {

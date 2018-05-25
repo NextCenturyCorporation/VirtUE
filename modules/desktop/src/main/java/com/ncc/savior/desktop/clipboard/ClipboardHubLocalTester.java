@@ -101,7 +101,7 @@ public class ClipboardHubLocalTester {
 	public static class TestClipboardWrapper implements IClipboardWrapper {
 		private static final Logger logger = LoggerFactory.getLogger(TestClipboardWrapper.class);
 
-		private ArrayList<Integer> renderFormats;
+		private ArrayList<ClipboardFormat> renderFormats;
 		private IClipboardListener listener;
 		private ClipboardData data;
 		private Thread thread;
@@ -109,7 +109,7 @@ public class ClipboardHubLocalTester {
 		private boolean owner = false;
 
 		public TestClipboardWrapper() {
-			this.renderFormats = new ArrayList<Integer>();
+			this.renderFormats = new ArrayList<ClipboardFormat>();
 			this.thread = new Thread(new Runnable() {
 
 				@Override
@@ -127,8 +127,8 @@ public class ClipboardHubLocalTester {
 		}
 
 		protected void copy() {
-			Set<Integer> formats = new HashSet<Integer>(1);
-			formats.add(1);
+			Set<ClipboardFormat> formats = new HashSet<ClipboardFormat>(1);
+			formats.add(ClipboardFormat.TEXT);
 			if (listener != null) {
 				listener.onClipboardChanged(formats);
 			}
@@ -137,12 +137,13 @@ public class ClipboardHubLocalTester {
 
 		private void paste() {
 			if (!owner && listener != null) {
-				listener.onPasteAttempt(1);
+				ClipboardFormat format = ClipboardFormat.TEXT;
+				listener.onPasteAttempt(format);
 			}
 		}
 
 		@Override
-		public void setDelayedRenderFormats(Collection<Integer> formats) {
+		public void setDelayedRenderFormats(Collection<ClipboardFormat> formats) {
 			owner = false;
 			this.renderFormats.clear();
 			this.renderFormats.addAll(formats);
@@ -160,7 +161,7 @@ public class ClipboardHubLocalTester {
 		}
 
 		@Override
-		public ClipboardData getClipboardData(int format) {
+		public ClipboardData getClipboardData(ClipboardFormat format) {
 			return new PlainTextClipboardData(new Date().toString());
 		}
 

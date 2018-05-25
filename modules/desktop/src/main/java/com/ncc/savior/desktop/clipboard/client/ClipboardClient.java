@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
@@ -77,7 +78,7 @@ public class ClipboardClient {
 		IClipboardListener listener = new IClipboardListener() {
 
 			@Override
-			public void onPasteAttempt(int format) {
+			public void onPasteAttempt(ClipboardFormat format) {
 				try {
 					ClipboardDataRequestMessage requestMsg = new ClipboardDataRequestMessage(myId, format,
 							UUID.randomUUID().toString());
@@ -94,7 +95,7 @@ public class ClipboardClient {
 			}
 
 			@Override
-			public void onClipboardChanged(Set<Integer> formats) {
+			public void onClipboardChanged(Set<ClipboardFormat> formats) {
 				try {
 					ClipboardChangedMessage msg = new ClipboardChangedMessage(myId, formats);
 					logger.debug("sending message=" + msg);

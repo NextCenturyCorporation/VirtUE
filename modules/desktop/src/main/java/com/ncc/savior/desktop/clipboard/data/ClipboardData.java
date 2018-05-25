@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.clipboard.data;
 
 import java.io.Serializable;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Pointer;
 
 /**
@@ -10,9 +11,9 @@ import com.sun.jna.Pointer;
  */
 public abstract class ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private int format;
+	private ClipboardFormat format;
 
-	protected ClipboardData(int format) {
+	protected ClipboardData(ClipboardFormat format) {
 		this.format = format;
 	}
 
@@ -23,7 +24,7 @@ public abstract class ClipboardData implements Serializable {
 	 *
 	 * @return
 	 */
-	public int getFormat() {
+	public ClipboardFormat getFormat() {
 		return format;
 	}
 

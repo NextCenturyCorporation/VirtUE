@@ -3,6 +3,8 @@ package com.ncc.savior.desktop.clipboard.messages;
 import java.io.Serializable;
 import java.util.Collection;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
+
 /**
  * Message that indicates that the clipboard has changed on the source machine
  *
@@ -12,19 +14,19 @@ public class ClipboardChangedMessage extends BaseClipboardMessage implements Ser
 {
 	private static final long serialVersionUID = 1L;
 
-	public ClipboardChangedMessage(String sourceId, Collection<Integer> formats) {
+	public ClipboardChangedMessage(String sourceId, Collection<ClipboardFormat> formats) {
 		super(sourceId);
 		this.formats = formats;
 	}
 
-	private Collection<Integer> formats;
+	private Collection<ClipboardFormat> formats;
 
 	/**
 	 * Returns the available formats on the clipboard.
 	 *
 	 * @return
 	 */
-	public Collection<Integer> getFormats() {
+	public Collection<ClipboardFormat> getFormats() {
 		return formats;
 	}
 
