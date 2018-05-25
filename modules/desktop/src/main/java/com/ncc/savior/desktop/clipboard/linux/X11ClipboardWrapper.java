@@ -15,6 +15,7 @@ import com.sun.jna.platform.unix.X11.Window;
 import com.sun.jna.platform.unix.X11.XErrorEvent;
 import com.sun.jna.platform.unix.X11.XErrorHandler;
 import com.sun.jna.platform.unix.X11.XEvent;
+import com.sun.jna.platform.unix.X11.XPropertyEvent;
 import com.sun.jna.platform.unix.X11.XSelectionClearEvent;
 import com.sun.jna.platform.unix.X11.XSelectionEvent;
 import com.sun.jna.platform.unix.X11.XSelectionRequestEvent;
@@ -34,12 +35,14 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	public X11ClipboardWrapper() {
 		x11 = ILinuxClipboardX11.INSTANCE;
 		display = X11.INSTANCE.XOpenDisplay(null);
-		window = X11.INSTANCE.XDefaultRootWindow(display);
+		int screen = x11.XDefaultScreen(display);
+		Window defaultWindow = X11.INSTANCE.XRootWindow(display, screen);
+		window = x11.XCreateSimpleWindow(display, defaultWindow, 0, 0, 1, 1, 0, 1, 1);
 		System.out.println("MyWindow: " + window);
 		clipboardAtom = x11.XInternAtom(display, "CLIPBOARD", false);
 		selectionDataProperty = x11.XInternAtom(display, "XSEL_DATA", false);
 
-		NativeLong eventMask = new NativeLong(x11.LockMask);
+		NativeLong eventMask = new NativeLong(X11.PropertyChangeMask);
 		x11.XSelectInput(display, window, eventMask);
 		XErrorHandler handler = new XErrorHandler() {
 
@@ -93,6 +96,21 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	public static void main(String[] args) {
+		singleThreadedStart();
+	}
+
+	public static void singleThreadedStart() {
+		X11ClipboardWrapper wrapper = new X11ClipboardWrapper();
+		String format1 = "UTF_STRING";
+		String format2 = "STRING";
+		while (true) {
+			wrapper.printSelection(format1, true);
+			JavaUtil.sleepAndLogInterruption(1000);
+		}
+
+	}
+
+	public static void threadedStart() {
 		X11ClipboardWrapper wrapper = new X11ClipboardWrapper();
 		// System.out.println("IAmOwner=" + wrapper.amISelectionOwner());
 		// wrapper.becomeSelectionOwner();
@@ -109,7 +127,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				String format1 = "UTF_STRING";
 				String format2 = "STRING";
 				while (true) {
-					wrapper.printSelection(format2);
+					wrapper.printSelection(format2, false);
 					JavaUtil.sleepAndLogInterruption(1000);
 				}
 			}
@@ -118,9 +136,11 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		t.start();
 		while (true) {
 			XEvent e = wrapper.getNextEventWithTimeout(1000, 100);
-			System.out.println("EVENT: " + e);
-			if (e.type == X11.SelectionNotify) {
-				selectionAvailable = true;
+			if (e != null) {
+				System.out.println("EVENT: " + e);
+				if (e != null && e.type == X11.SelectionNotify) {
+					selectionAvailable = true;
+				}
 			}
 		}
 
@@ -139,9 +159,11 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		while (System.currentTimeMillis() < stopTime) {
 			XEvent peekEvent = new XEvent();
 			// System.out.println("peeking");
-			int peekRet = x11.XPeekEvent(display, peekEvent);
+			 boolean peekRet = x11.XCheckWindowEvent(display, window, new
+			NativeLong(X11.PropertyChangeMask), peekEvent);
+//			boolean peekRet = x11.XPeekEvent(display, peekEvent) == X11.Success;
 			// System.out.println("Peek Event=" + peekRet);
-			if (peekRet != 0) {
+			if (peekRet) {
 				XEvent event = blockForEvent();
 				return event;
 			}
@@ -165,34 +187,40 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		Atom clipboard = x11.XInternAtom(display, selection, false);
 		Atom formatAtom = x11.XInternAtom(display, format, false);
 		x11.XConvertSelection(display, clipboard, formatAtom, selectionDataProperty, window, new NativeLong(0));
+		// x11.XConvertSelection(display, clipboard, formatAtom, Atom.None, window, new
+		// NativeLong(0));
 		x11.XSync(display, false);
 	}
 
 	// see
 	// https://stackoverflow.com/questions/27378318/c-get-string-from-clipboard-on-linux/44992938#44992938
-	private void printSelection(String format) {
+	private void printSelection(String format, boolean checkForEventsInFunction) {
 		Atom increment = x11.XInternAtom(display, "INCR", false);
 		// default selection is CLIPBOARD
 		convertSelectionAndSync(format);
 		System.out.println("requested format");
-//		XEvent event = null;
-//		event = getNextEventWithTimeout(3000, 100);
-//		event.autoRead();
-//		while (event.type != X11.SelectionNotify) {
-//			System.out.println("event type=" + event.type);
-//			if (event.type == X11.PropertyNotify) {
-//				XPropertyEvent propEvent = (XPropertyEvent) event.getTypedValue(XPropertyEvent.class);
-//				propEvent.autoRead();
-//				System.out.println(propEvent + "  " + propEvent.atom);
-//			}
-//			event = getNextEventWithTimeout(2000, 100);
-//		}
-		while (!selectionAvailable) {
-			JavaUtil.sleepAndLogInterruption(100);
+		if (checkForEventsInFunction) {
+			XEvent event = null;
+			do {
+				event = getNextEventWithTimeout(3000, 100);
+				event.autoRead();
+				System.out.println("event type=" + event.type);
+				if (event.type == X11.PropertyNotify) {
+					XPropertyEvent propEvent = (XPropertyEvent) event.getTypedValue(XPropertyEvent.class);
+					propEvent.autoRead();
+					System.out.println(propEvent + " " + propEvent.atom);
+				}
+			} while (event.type != X11.SelectionNotify);
+		} else {
+			while (!selectionAvailable) {
+				JavaUtil.sleepAndLogInterruption(100);
+			}
 		}
-//		System.out.println("event type=" + event.type);
-//		XSelectionEvent selEvent = (XSelectionEvent) event.getTypedValue(XSelectionEvent.class);
-//		selEvent.autoRead();
+		selectionAvailable = false;
+		// System.out.println("event type=" + event.type);
+		// XSelectionEvent selEvent = (XSelectionEvent)
+		// event.getTypedValue(XSelectionEvent.class);
+		// selEvent.autoRead();
 		// TODO review this
 		long propSize = 4096000 * 2 / 4;
 		boolean delete = false;
@@ -204,8 +232,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		Atom anyPropAtom = new Atom(X11.AnyPropertyType);
 		System.out.println("prior");
 		int ret = x11.XGetWindowProperty(display, window, selectionDataProperty, new NativeLong(0),
-				new NativeLong(propSize), delete,
-				anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn, bytesAfterReturn, propReturn);
+				new NativeLong(propSize), delete, anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn,
+				bytesAfterReturn, propReturn);
 		if (ret != X11.Success) {
 			System.out.println("UNSUCCESSFUL");
 		} else {
