@@ -20,6 +20,7 @@ import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
+import com.ncc.savior.desktop.clipboard.linux.X11ClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
@@ -220,7 +221,8 @@ public class ClipboardClient {
 		IClipboardWrapper clipboardWrapper;
 		switch (os) {
 		case LINUX:
-			throw new RuntimeException("Linux clipboard is currently not supported!");
+			clipboardWrapper = new X11ClipboardWrapper();
+			break;
 		case MAC:
 			throw new RuntimeException("Mac clipboard is currently not supported!");
 		case WINDOWS:

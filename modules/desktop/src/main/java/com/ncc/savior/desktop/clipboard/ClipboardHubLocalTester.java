@@ -34,7 +34,7 @@ public class ClipboardHubLocalTester {
 	public static void main(String[] args) throws IOException {
 		ServerSocket serverSocket = null;
 		try {
-			int port = 1022;
+			int port = 10022;
 			serverSocket = new ServerSocket(port);
 			IClipboardWrapper wcw = ClipboardClient.getClipboardWrapperForOperatingSystem();
 			ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
@@ -59,7 +59,9 @@ public class ClipboardHubLocalTester {
 				JavaUtil.sleepAndLogInterruption(1000);
 			}
 		} finally {
-			serverSocket.close();
+			if (serverSocket != null) {
+				serverSocket.close();
+			}
 		}
 	}
 
@@ -115,10 +117,13 @@ public class ClipboardHubLocalTester {
 				@Override
 				public void run() {
 					while (true) {
+						JavaUtil.sleepAndLogInterruption(10000);
+						logger.debug("test client sending copy");
 						copy();
-						JavaUtil.sleepAndLogInterruption(3000);
+						JavaUtil.sleepAndLogInterruption(10000);
+						logger.debug("test client sending paste");
 						paste();
-						JavaUtil.sleepAndLogInterruption(3000);
+
 					}
 				}
 

@@ -3,7 +3,7 @@ package com.ncc.savior.desktop.clipboard;
 import java.util.HashMap;
 
 public enum ClipboardFormat {
-	TEXT(1, "STRING"), WIDE_TEXT(13, "UTF_STRING");
+	TEXT(1, "STRING"), WIDE_TEXT(13, "UTF8_STRING");
 
 	private static HashMap<Integer, ClipboardFormat> windowsToLinux;
 	private static HashMap<String, ClipboardFormat> linuxToWindows;

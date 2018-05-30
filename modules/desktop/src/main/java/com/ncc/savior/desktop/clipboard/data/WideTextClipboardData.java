@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Wide text or Unicode implementation of {@link ClipboardData}.
@@ -30,5 +31,15 @@ public class WideTextClipboardData extends ClipboardData implements Serializable
 	@Override
 	public String toString() {
 		return "WideTextClipboardData [data=" + data + "]";
+	}
+
+	@Override
+	public int getLinuxData(PointerByReference pbr) {
+		int size = 2 * (data.getBytes().length + 1);
+		Memory mem = new Memory(size);
+		mem.clear();
+		mem.setWideString(0, data);
+		pbr.setValue(mem);
+		return size;
 	}
 }

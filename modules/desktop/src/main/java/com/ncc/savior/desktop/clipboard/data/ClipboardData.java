@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Base class for clipboard data.
@@ -34,4 +35,6 @@ public abstract class ClipboardData implements Serializable {
 	 * @return
 	 */
 	public abstract Pointer getWindowsData();
+
+	public abstract int getLinuxData(PointerByReference pbr);
 }
