@@ -57,7 +57,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		transmitters = new TreeMap<String, IClipboardMessageSenderReceiver>();
 		validFormats = new TreeSet<ClipboardFormat>();
 		validFormats.add(ClipboardFormat.TEXT);
-		validFormats.add(ClipboardFormat.WIDE_TEXT);
+		// validFormats.add(ClipboardFormat.WIDE_TEXT);
 		this.dataGuard = dataGuard;
 	}
 
@@ -67,7 +67,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			port = Integer.parseInt(args[0]);
 		}
 		ServerSocket serverSocket = new ServerSocket(port);
-		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(false));
+		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
 		while (true) {
 			Socket socket = serverSocket.accept();
 			// BufferedWriter writer = new BufferedWriter(new
@@ -181,7 +181,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		Iterator<ClipboardFormat> itr = formats.iterator();
 		while (itr.hasNext()) {
 			ClipboardFormat format = itr.next();
-			if (!validFormats.contains(format)) {
+			if (format == null || !validFormats.contains(format)) {
 				itr.remove();
 			}
 		}

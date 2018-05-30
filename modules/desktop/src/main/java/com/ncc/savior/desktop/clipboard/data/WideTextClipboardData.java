@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Memory;
+import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -22,7 +23,7 @@ public class WideTextClipboardData extends ClipboardData implements Serializable
 
 	@Override
 	public Pointer getWindowsData() {
-		Memory winMemory = new Memory(2 * (data.getBytes().length + 1));
+		Memory winMemory = new Memory(Native.WCHAR_SIZE * (data.getBytes().length + 1));
 		winMemory.clear();
 		winMemory.setWideString(0, data);
 		return winMemory;
@@ -35,7 +36,7 @@ public class WideTextClipboardData extends ClipboardData implements Serializable
 
 	@Override
 	public int getLinuxData(PointerByReference pbr) {
-		int size = 2 * (data.getBytes().length + 1);
+		int size = Native.WCHAR_SIZE * (data.length() + 1);
 		Memory mem = new Memory(size);
 		mem.clear();
 		mem.setWideString(0, data);

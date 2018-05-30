@@ -136,8 +136,24 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 								// Tell the hub that a paste attempt happened. It will send data and that data
 								// will be written in another thread.
 								SelectionNotifyEventToSend = outgoingSne;
-								listener.onPasteAttempt(
-										ClipboardFormat.fromLinux(x11.XGetAtomName(display, outgoingSne.target)));
+								String formatName = x11.XGetAtomName(display, outgoingSne.target);
+								// i wish switch statements had their own variable scope...
+								ClipboardFormat myCf = ClipboardFormat.fromLinux(formatName);
+								logger.debug("send paste event message format=" + myCf + " formatName=" + formatName);
+								if (myCf == null) {
+									// TODO in linux, you sometimes get weird formats even though you said you don't
+									// support them. We should fix this later.
+									logger.warn("requested invalid format=" + formatName);
+									// setDelayedRenderData(new EmptyClipboardData(myCf));
+									myCf = ClipboardFormat.TEXT;
+								}
+								// effectively final so we can use in other threads.
+								ClipboardFormat finalCf = myCf;
+								Runnable runLater = () -> {
+									listener.onPasteAttempt(finalCf);
+								};
+								new Thread(runLater).start();
+
 							}
 
 							break;
@@ -173,6 +189,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 										acf.add(fmt);
 									}
 								}
+								logger.debug("sending clipboard Changed message.  Formats=" + acf);
 								listener.onClipboardChanged(acf);
 								logger.debug("selection taken");
 							};
@@ -398,7 +415,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		dataWindowProp = null;
 		return raw;
 	}
-
 
 	private WindowProperty getWindowProperty() {
 		long propSize = 1024 * 1024 * 2;
