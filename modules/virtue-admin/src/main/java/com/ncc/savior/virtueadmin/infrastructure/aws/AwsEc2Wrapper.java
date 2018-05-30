@@ -48,11 +48,6 @@ public class AwsEc2Wrapper {
 	// force no public ip.
 	private Boolean forcePublicIp;
 
-	public AwsEc2Wrapper(VirtueAwsEc2Provider ec2Provider, Boolean forcePublicIp) {
-		this.ec2 = ec2Provider.getEc2();
-		this.forcePublicIp = forcePublicIp;
-	}
-
 	public AwsEc2Wrapper(VirtueAwsEc2Provider ec2Provider, String forcePublicIp) {
 		this.ec2 = ec2Provider.getEc2();
 		if (!JavaUtil.isNotEmpty(forcePublicIp) || forcePublicIp.equalsIgnoreCase("default")
