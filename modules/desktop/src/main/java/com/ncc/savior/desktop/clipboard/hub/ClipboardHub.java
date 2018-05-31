@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,7 +55,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private ICrossGroupDataGuard dataGuard;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
-		transmitters = new TreeMap<String, IClipboardMessageSenderReceiver>();
+		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
 		validFormats = new TreeSet<ClipboardFormat>();
 		validFormats.add(ClipboardFormat.TEXT);
 		validFormats.add(ClipboardFormat.UNICODE);
@@ -187,7 +188,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		}
 	}
 
-	protected void sendMessageToAllButSource(IClipboardMessage message) {
+	protected synchronized void sendMessageToAllButSource(IClipboardMessage message) {
 		for (Entry<String, IClipboardMessageSenderReceiver> entry : transmitters.entrySet()) {
 			String source = message.getSourceId();
 			if (!entry.getKey().equals(source)) {
