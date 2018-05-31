@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -132,8 +132,7 @@ public class ClipboardHubLocalTester {
 		}
 
 		protected void copy() {
-			Set<ClipboardFormat> formats = new HashSet<ClipboardFormat>(1);
-			formats.add(ClipboardFormat.TEXT);
+			Set<ClipboardFormat> formats = Collections.singleton(ClipboardFormat.TEXT);
 			if (listener != null) {
 				listener.onClipboardChanged(formats);
 			}
