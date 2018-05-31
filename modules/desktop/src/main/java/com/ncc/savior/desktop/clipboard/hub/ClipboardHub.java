@@ -64,7 +64,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		int port = DEFAULT_PORT;
 		if (args.length > 0) {
-			port = Integer.parseInt(args[0]);
+			try {
+				port = Integer.parseInt(args[0]);
+			} catch (Exception e) {
+				usage("Invalid port: " + args[0]);
+			}
+		}
+		if (args.length > 1) {
+			usage("Invalid parameters");
 		}
 		ServerSocket serverSocket = new ServerSocket(port);
 		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(false));
@@ -87,6 +94,16 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			String defaultGroup = "default";
 			hub.addClient(defaultGroup, serializer);
 		}
+	}
+
+	private static void usage(String string) {
+		if (string != null) {
+			System.out.println("Error: " + string);
+		}
+		System.out.println("Usage: executable [listenPort]");
+		System.out.println("  listenPort: optional parameter to set the port to listen for connections on.  Default: "
+				+ DEFAULT_PORT);
+
 	}
 
 	/**

@@ -30,5 +30,10 @@ public interface IClipboardMessageSenderReceiver {
 	 */
 	public boolean isValid();
 
+	/**
+	 * ID used to determine whether data should pass between the two endpoints.
+	 * 
+	 * @return
+	 */
 	String getGroupId();
 }
