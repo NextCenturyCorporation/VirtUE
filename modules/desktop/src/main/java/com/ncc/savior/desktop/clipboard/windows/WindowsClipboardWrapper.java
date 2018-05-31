@@ -12,13 +12,13 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.desktop.clipboard.DelayedRenderClipboardManager.MyUser32;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.ncc.savior.desktop.clipboard.data.WideTextClipboardData;
+import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
@@ -39,6 +39,16 @@ import com.sun.jna.ptr.PointerByReference;
 /**
  * Wrapper class wraps the windows clipboard into a generic
  * {@link IClipboardWrapper}.
+ *
+ * In order to get the Delayed Render to work with JNA, it seems you need the
+ * following steps.
+ * <ol>
+ * <li>Create a window where we can edit the Window Proc and handle
+ * WM_RENDERFORMAT and WM_RENDERALLFORMATS
+ * <li>Write null to the clipboard using the entire process (Open, Empty, write,
+ * close). Make sure the window handle is passed to the open function.
+ * <li>Have a loop to clear the message queue via GetMessage or PeekMessage.
+ * <ol>
  *
  *
  */
@@ -65,6 +75,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		@Override
 		public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
 			// logger.debug("got message(callback)=" + uMsg);
+			// For the below, 1 is success where 0 represents failure
 			switch (uMsg) {
 			case WM_NCCREATE:
 				return new LRESULT(1);
@@ -121,19 +132,17 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				wx.lpszClassName = className;
 				wx.lpfnWndProc = callback;
 
-				if (User32.INSTANCE.RegisterClassEx(wx).intValue() != 0) {
-					windowHandle = user32.CreateWindowEx(0, className, title, 0, 0, 0, 0, 0, null, null, null, null);
-					user32.SetClipboardViewer(windowHandle);
+				while (User32.INSTANCE.RegisterClassEx(wx).intValue() == 0) {
+					WindowsError error = getLastError();
+					logger.error("Error registering class to window: " + error);
 				}
+				windowHandle = user32.CreateWindowEx(0, className, title, 0, 0, 0, 0, 0, null, null, null, null);
+				user32.SetClipboardViewer(windowHandle);
+
 				while (true) {
 					// get all messages forever
-					getMessage(windowHandle);
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					getMessage();
+					JavaUtil.sleepAndLogInterruption(10);
 				}
 			}
 		});
@@ -152,7 +161,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			@Override
 			public void run() {
 				logger.debug("writing null to clipboard formats=" + formats);
-				writeNullToClipboard(windowHandle, formats);
+				writeNullToClipboard(formats);
 			}
 
 		}, 1, TimeUnit.MICROSECONDS);
@@ -225,8 +234,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * @param windowHandle2
 	 * @param formats
 	 */
-	protected void writeNullToClipboard(HWND windowHandle2, Collection<Integer> formats) {
-		openClipboardWhenFree(windowHandle);
+	protected void writeNullToClipboard(Collection<Integer> formats) {
+		openClipboardWhenFree();
 		try {
 			boolean success = user32.EmptyClipboard();
 			if (!success) {
@@ -268,7 +277,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	}
 
-	private static void getMessage(HWND windowHandle) {
+	private void getMessage() {
 		MSG msg = new WinUser.MSG();
 		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 0);
 		if (hasMessage) {
@@ -316,17 +325,12 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * @param windowHandle
 	 * @return
 	 */
-	private void openClipboardWhenFree(HWND windowHandle) {
+	private void openClipboardWhenFree() {
 		// logger.debug("attempting to open clipboard");
 		boolean success = user32.OpenClipboard(windowHandle);
 		// wait for clipboard to be free
 		while (!success) {
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			JavaUtil.sleepAndLogInterruption(1);
 			logger.debug("clipboard unable to be opened.  Trying again.  Owner=" + user32.GetClipboardOwner() + " ME="
 					+ windowHandle);
 			success = user32.OpenClipboard(windowHandle);
@@ -345,7 +349,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	@Override
 	public ClipboardData getClipboardData(int format) {
-		openClipboardWhenFree(windowHandle);
+		openClipboardWhenFree();
 		Pointer p = user32.GetClipboardData(format);
 		user32.CloseClipboard();
 		return clipboardPointerToData(format, p);
@@ -363,20 +367,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			return new WideTextClipboardData(wideString);
 		default:
 			return new UnknownClipboardData(format);
-		}
-	}
-
-	private String getStringClipboardNative() {
-		// logger.debug("cb owner:" + user32.GetClipboardOwner());
-		openClipboardWhenFree(windowHandle);
-		Pointer p = user32.GetClipboardData(MyUser32.CF_TEXT);
-		user32.CloseClipboard();
-		if (p == null) {
-			logger.debug("got null");
-			return null;
-		} else {
-			logger.debug("got " + p.getString(0));
-			return p.getString(0);
 		}
 	}
 }
