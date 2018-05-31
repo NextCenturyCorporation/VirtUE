@@ -58,7 +58,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
 		validFormats = new TreeSet<ClipboardFormat>();
 		validFormats.add(ClipboardFormat.TEXT);
-		// validFormats.add(ClipboardFormat.UNICODE);
+		validFormats.add(ClipboardFormat.UNICODE);
 		this.dataGuard = dataGuard;
 	}
 

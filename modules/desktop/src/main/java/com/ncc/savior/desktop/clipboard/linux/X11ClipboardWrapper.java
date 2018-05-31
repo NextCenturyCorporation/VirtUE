@@ -454,7 +454,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			String str = property.getString(0);
 			return new PlainTextClipboardData(str);
 		case UNICODE:
-			str = property.getString(0, "UTF8");
+			// works with UTF-8 or default
+			str = property.getString(0, "UTF-8");
 			return new UnicodeClipboardData(str);
 		default:
 			return new UnknownClipboardData(cf);

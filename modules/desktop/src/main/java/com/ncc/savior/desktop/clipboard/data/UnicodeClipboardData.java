@@ -38,7 +38,7 @@ public class UnicodeClipboardData extends ClipboardData implements Serializable 
 		int size = Native.WCHAR_SIZE * (data.length() + 1);
 		Memory mem = new Memory(size);
 		mem.clear();
-		mem.setString(0, data, "UTF8");
+		mem.setString(0, data, "UTF-8");
 		return mem;
 	}
 
