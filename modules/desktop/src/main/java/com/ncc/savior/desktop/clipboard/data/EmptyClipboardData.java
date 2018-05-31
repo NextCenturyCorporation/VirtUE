@@ -2,7 +2,6 @@ package com.ncc.savior.desktop.clipboard.data;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Represents data from an empty clipboard. This class should be used when the
@@ -29,8 +28,17 @@ public class EmptyClipboardData extends ClipboardData {
 	}
 
 	@Override
-	public int getLinuxData(PointerByReference pbr) {
-		pbr.setPointer(Pointer.NULL);
+	public Pointer getLinuxData() {
+		return Pointer.NULL;
+	}
+
+	@Override
+	public int getLinuxNumEntries() {
 		return 0;
+	}
+
+	@Override
+	public int getLinuxEntrySizeBits() {
+		return 8;
 	}
 }

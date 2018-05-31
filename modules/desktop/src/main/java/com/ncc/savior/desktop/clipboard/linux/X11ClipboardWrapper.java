@@ -19,7 +19,6 @@ import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.ncc.savior.desktop.clipboard.data.WideTextClipboardData;
 import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
-import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.unix.X11;
@@ -90,7 +89,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				};
 				x11.XSetErrorHandler(handler);
 				delayedFormats.add(ClipboardFormat.TEXT);
-				delayedFormats.add(ClipboardFormat.WIDE_TEXT);
+				delayedFormats.add(ClipboardFormat.UNICODE);
 				// clear?
 				getWindowProperty();
 				becomeSelectionOwner();
@@ -253,18 +252,18 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		runnableQueue.offer(() -> {
 			PointerByReference pbr = new PointerByReference();
 
-			int lengthInBytes = clipboardData.getLinuxData(pbr);
-			Pointer ptr = pbr.getValue();
+			Pointer ptr = clipboardData.getLinuxData();
+			int numItems = clipboardData.getLinuxNumEntries();
+			int itemSize = clipboardData.getLinuxEntrySizeBits();
 			// This is caused by an event from in linux and we need that event.
 			XSelectionEvent sne = this.SelectionNotifyEventToSend;
 			Atom atom = x11.XInternAtom(display, clipboardData.getFormat().getLinux(), false);
 			logger.debug("FIXME HERE: Many apps in linux seem to requied wide text and it isn't formatting properly");
-			if (clipboardData.getFormat().equals(ClipboardFormat.WIDE_TEXT)) {
+			if (clipboardData.getFormat().equals(ClipboardFormat.UNICODE)) {
 				logger.debug("str: " + ptr.getWideString(0));
-				sendSelectionNotifyEvent(lengthInBytes / Native.WCHAR_SIZE + 1, ptr, sne, Native.WCHAR_SIZE, atom);
-			} else {
-				sendSelectionNotifyEvent(lengthInBytes, ptr, sne, 8, atom);
 			}
+			logger.debug("sending notify event: numitems: " + numItems + " itemSize=" + itemSize);
+			sendSelectionNotifyEvent(numItems, ptr, sne, itemSize, atom);
 		});
 	}
 
@@ -460,7 +459,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		case TEXT:
 			String str = property.getString(0);
 			return new PlainTextClipboardData(str);
-		case WIDE_TEXT:
+		case UNICODE:
 			str = property.getWideString(0);
 			return new WideTextClipboardData(str);
 		default:

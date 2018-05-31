@@ -2,7 +2,6 @@ package com.ncc.savior.desktop.clipboard.data;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Generic unknown data implementation.
@@ -24,9 +23,17 @@ public class UnknownClipboardData extends ClipboardData {
 	}
 
 	@Override
-	public int getLinuxData(PointerByReference pbr) {
-		pbr.setPointer(Pointer.NULL);
+	public Pointer getLinuxData() {
+		return Pointer.NULL;
+	}
+
+	@Override
+	public int getLinuxNumEntries() {
 		return 0;
 	}
 
+	@Override
+	public int getLinuxEntrySizeBits() {
+		return 8;
+	}
 }

@@ -6,7 +6,6 @@ import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Wide text or Unicode implementation of {@link ClipboardData}.
@@ -17,7 +16,7 @@ public class WideTextClipboardData extends ClipboardData implements Serializable
 	private String data;
 
 	public WideTextClipboardData(String data) {
-		super(ClipboardFormat.WIDE_TEXT);
+		super(ClipboardFormat.UNICODE);
 		this.data = data;
 	}
 
@@ -25,7 +24,7 @@ public class WideTextClipboardData extends ClipboardData implements Serializable
 	public Pointer getWindowsData() {
 		Memory winMemory = new Memory(Native.WCHAR_SIZE * (data.getBytes().length + 1));
 		winMemory.clear();
-		winMemory.setWideString(0, data);
+		winMemory.setString(0, data, "UTF16");
 		return winMemory;
 	}
 
@@ -35,12 +34,21 @@ public class WideTextClipboardData extends ClipboardData implements Serializable
 	}
 
 	@Override
-	public int getLinuxData(PointerByReference pbr) {
+	public Pointer getLinuxData() {
 		int size = Native.WCHAR_SIZE * (data.length() + 1);
 		Memory mem = new Memory(size);
 		mem.clear();
-		mem.setWideString(0, data);
-		pbr.setValue(mem);
-		return size;
+		mem.setString(0, data, "UTF8");
+		return mem;
+	}
+
+	@Override
+	public int getLinuxNumEntries() {
+		return data.length();
+	}
+
+	@Override
+	public int getLinuxEntrySizeBits() {
+		return 8;
 	}
 }
