@@ -4,6 +4,11 @@ import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.platform.unix.X11;
 
+/**
+ * Interface to wrap the Xlib library and add functions that JNA doesn't
+ * natively contain.
+ *
+ */
 public interface ILinuxClipboardX11 extends X11 {
 	ILinuxClipboardX11 INSTANCE = (ILinuxClipboardX11) Native.loadLibrary("X11", ILinuxClipboardX11.class);
 
@@ -48,7 +53,7 @@ public interface ILinuxClipboardX11 extends X11 {
 	 *            https://tronche.com/gui/x/xlib/window-information/XSetSelectionOwner.html
 	 *
 	 *            <pre>
-	 * 			The XSetSelectionOwner() function changes the owner and
+	 *            The XSetSelectionOwner() function changes the owner and
 	 *            last-change time for the specified selection and has no effect if
 	 *            the specified time is earlier than the current last-change time of
 	 *            the specified selection or is later than the current X server

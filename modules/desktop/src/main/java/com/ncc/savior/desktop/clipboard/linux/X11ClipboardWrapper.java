@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +34,33 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.NativeLongByReference;
 import com.sun.jna.ptr.PointerByReference;
 
+/**
+ * Wrapper class for X11 that wraps the clipboard into a generic
+ * {@link IClipboardWrapper}.
+ *
+ * In X11, clipboards are called selection and there are any number of
+ * selections. There are 3 defined selections, but we are only concerned with 1
+ * which is called 'clipboard' and used for the standard copy/paste mechanic.
+ * Formats in x11 are often called targets. To get the targets/formats,
+ * applications attempt to paste the 'clipboard' selection in the 'TARGETS'
+ * format. This data will be a list of formats.
+ *
+ * X11 clipboard differs from the windows clipboard in that there is no callback
+ * for when the clipboard itself has changed. This will need to be accounted for
+ * in a higher level class as requests for clipboard data when an X11 clipboard
+ * is the owner will ALWAYS need to go all the way back to the owner. In
+ * windows, you are notified whenever the clipboard is changed so you can do
+ * some caching for efficiency.
+ *
+ */
 public class X11ClipboardWrapper implements IClipboardWrapper {
 	private static final Logger logger = LoggerFactory.getLogger(X11ClipboardWrapper.class);
 
 	private ILinuxClipboardX11 x11;
 	private Display display;
 	private Window window;
+
+	// we store some commonly used atoms for easy reuse
 	private Atom clipboardAtom;
 	private Atom selectionDataProperty;
 	private Atom targets;
@@ -206,20 +226,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			}
 		};
 
-		ThreadFactory threadFactory = new ThreadFactory() {
-			private int i = 1;
-
-			@Override
-			public Thread newThread(Runnable r) {
-				return new Thread(r, getName());
-			}
-
-			private synchronized String getName() {
-				// increments after returning value;
-				return "x11-clipboard-" + i++;
-			}
-		};
-
 		mainClipboardThread = new Thread(mainClipboardRunnable, "X11-clipboard-main");
 		// mainClipboardThread.setDaemon(true);
 		mainClipboardThread.start();
@@ -227,6 +233,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	@Override
 	public void setDelayedRenderFormats(Collection<ClipboardFormat> formats) {
+		// X11 is effectively always in delayed render mode when the application owns
+		// the clipboard
 		runnableQueue.offer(() -> {
 			delayedFormats.clear();
 			delayedFormats.addAll(formats);
@@ -237,18 +245,16 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setClipboardListener(IClipboardListener listener) {
 		this.listener = listener;
-		// listenerThread.run();
 	}
 
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		runnableQueue.offer(() -> {
-			PointerByReference pbr = new PointerByReference();
-
 			Pointer ptr = clipboardData.getLinuxData();
 			int numItems = clipboardData.getLinuxNumEntries();
 			int itemSize = clipboardData.getLinuxEntrySizeBits();
-			// This is caused by an event from in linux and we need that event.
+			// This is caused by an event from in linux. We stored an event to send based on
+			// the event received and we need that event.
 			XSelectionEvent sne = this.SelectionNotifyEventToSend;
 			Atom atom = x11.XInternAtom(display, clipboardData.getFormat().getLinux(), false);
 			if (logger.isTraceEnabled()) {
@@ -287,62 +293,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		runnableQueue.offer(() -> {
 			x11.XSetSelectionOwner(display, clipboardAtom, window, new NativeLong(X11.CurrentTime));
 		});
-	}
-
-	public static void main(String[] args) {
-		singleThreadedStart();
-	}
-
-	/**
-	 * TEST CODE
-	 */
-	public static void singleThreadedStart() {
-		X11ClipboardWrapper wrapper = new X11ClipboardWrapper();
-		IClipboardListener myListener = new IClipboardListener() {
-
-			@Override
-			public void onPasteAttempt(ClipboardFormat format) {
-				logger.debug("paste attempt: " + format);
-				wrapper.setDelayedRenderData(new PlainTextClipboardData("it works?"));
-
-			}
-
-			@Override
-			public void onClipboardChanged(Set<ClipboardFormat> formats) {
-				logger.debug("clipboard changed hardcoded callback: " + formats);
-				Runnable r = new Runnable() {
-
-					@Override
-					public void run() {
-						ClipboardData data = wrapper.getClipboardData(formats.iterator().next());
-						logger.debug("data: " + data);
-					}
-
-				};
-				new Thread(r).start();
-			}
-		};
-		wrapper.setClipboardListener(myListener);
-		String format1 = "UTF8_STRING";// OR UTF8_STRING
-		String format2 = "STRING";
-
-		JavaUtil.sleepAndLogInterruption(500);
-		// WindowProperty prop = wrapper.getClipboardDataRaw(X11.XA_STRING);
-		// logger.debug("format1: " + prop.property.getString(0));
-
-		// Set<String> formats = wrapper.getAvailableFormats();
-		// System.out.println(formats);
-		boolean cont = false;
-		while (cont) {
-			// wrapper.setClipboardDataString("test");
-			JavaUtil.sleepAndLogInterruption(5000);
-
-			// ClipboardData data = wrapper.getClipboardDataInternal(format2);
-			// wrapper.printSelection(format2, true);
-			// logger.debug(data.toString());
-			JavaUtil.sleepAndLogInterruption(5000);
-		}
-
 	}
 
 	private void sendSelectionNotifyEvent(int numItems, Pointer ptr, XSelectionEvent sne, int formatOrSizeInBits,
@@ -390,10 +340,14 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	private synchronized WindowProperty waitForUpdatedFormatWindowProp() {
-
+		long stopTime = System.currentTimeMillis() + 2000;
 		while (formatWindowProp == null) {
 			logger.debug("Waiting for format prop... " + formatWindowProp);
 			JavaUtil.sleepAndLogInterruption(100);
+			if (stopTime < System.currentTimeMillis()) {
+				logger.warn("waiting has timed out!");
+				return null;
+			}
 		}
 		logger.debug("format waiting done");
 		WindowProperty raw = formatWindowProp;
@@ -417,6 +371,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		return raw;
 	}
 
+	// TODO need to implement Increment protocol, but for now we just use a very
+	// large buffer
 	private WindowProperty getWindowProperty() {
 		long propSize = 1024 * 1024 * 2;
 		boolean delete = false;
@@ -429,9 +385,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		int ret = x11.XGetWindowProperty(display, window, selectionDataProperty, new NativeLong(X11.CurrentTime),
 				new NativeLong(propSize), delete, anyPropAtom, actualTypeReturn, actualFormatReturn, nItemsReturn,
 				bytesAfterReturn, propReturn);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Type: " + actualTypeReturn.getValue() + " Format: " + actualFormatReturn.getValue());
-			logger.debug("nItems: " + nItemsReturn.getValue() + " bytesAfter: " + bytesAfterReturn.getValue());
+		if (logger.isTraceEnabled()) {
+			logger.trace("Type: " + actualTypeReturn.getValue() + " Format: " + actualFormatReturn.getValue());
+			logger.trace("nItems: " + nItemsReturn.getValue() + " bytesAfter: " + bytesAfterReturn.getValue());
 		}
 		long bytesLeft = bytesAfterReturn.getValue().longValue();
 		if (bytesLeft > 0) {
@@ -476,6 +432,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		// x11.XSync(display, false);
 	}
 
+	/**
+	 * just a storage class of the returns when we call XGetWindowProperty.
+	 *
+	 */
 	private static class WindowProperty {
 
 		public Pointer property;
