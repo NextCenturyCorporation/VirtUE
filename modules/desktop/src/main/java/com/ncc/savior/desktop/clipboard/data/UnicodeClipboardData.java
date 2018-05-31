@@ -24,13 +24,13 @@ public class UnicodeClipboardData extends ClipboardData implements Serializable 
 	public Pointer getWindowsData() {
 		Memory winMemory = new Memory(Native.WCHAR_SIZE * (data.getBytes().length + 1));
 		winMemory.clear();
-		winMemory.setString(0, data, "UTF16");
+		winMemory.setString(0, data, "UTF-16");
 		return winMemory;
 	}
 
 	@Override
 	public String toString() {
-		return "WideTextClipboardData [data=" + data + "]";
+		return "UnicodeClipboardData [data=" + data + "]";
 	}
 
 	@Override

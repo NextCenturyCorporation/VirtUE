@@ -15,8 +15,8 @@ import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
-import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
+import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
@@ -101,7 +101,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 					logger.trace("Events Queued: " + queued);
 					if (queued > 0 || false) {
 						x11.XNextEvent(display, event);
-						logger.debug("processing event " + event.type);
 						switch (event.type) {
 						case X11.SelectionRequest:
 							// a local application has tried to paste data and is requesting the data be
@@ -109,11 +108,11 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 							XSelectionRequestEvent incomingSre = (XSelectionRequestEvent) event
 									.getTypedValue(X11.XSelectionRequestEvent.class);
 							incomingSre.autoRead();
-							logger.debug("read sre");
 							if (incomingSre.target.equals(targets)) {
-								logger.debug("SelectionRequestEvent Targets: " + incomingSre);
+								logger.debug("SelectionRequestEvent Targets: ");
 							} else {
-								logger.debug("SelectionRequestEvent Data: " + incomingSre);
+								logger.debug("SelectionRequestEvent Data  target: "
+										+ x11.XGetAtomName(display, incomingSre.target));
 							}
 
 							XSelectionEvent outgoingSne = new XSelectionEvent();
@@ -125,14 +124,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 							outgoingSne.target = incomingSre.target;
 							outgoingSne.property = incomingSre.property;
 							outgoingSne.autoWrite();
-							logger.debug("SRE target=" + incomingSre.target + "  targets from class=" + targets);
 							if (incomingSre.target.equals(targets)) {
 								// local application is asking for formats
-								logger.debug("Requested targets");
 								sendFormats(outgoingSne);
 							} else {
-								logger.debug("selection requested " + incomingSre.target + "="
-										+ x11.XGetAtomName(display, incomingSre.target));
 								// Tell the hub that a paste attempt happened. It will send data and that data
 								// will be written in another thread.
 								SelectionNotifyEventToSend = outgoingSne;
@@ -191,7 +186,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 								}
 								logger.debug("sending clipboard Changed message.  Formats=" + acf);
 								listener.onClipboardChanged(acf);
-								logger.debug("selection taken");
 							};
 							// should we use something else to handle threads?
 							new Thread(runLater).start();
@@ -237,7 +231,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			delayedFormats.clear();
 			delayedFormats.addAll(formats);
 			becomeSelectionOwner();
-			logger.debug("setting formats and took clipboard: " + formats);
 		});
 	}
 
@@ -258,7 +251,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			// This is caused by an event from in linux and we need that event.
 			XSelectionEvent sne = this.SelectionNotifyEventToSend;
 			Atom atom = x11.XInternAtom(display, clipboardData.getFormat().getLinux(), false);
-			logger.debug("sending notify event: numitems: " + numItems + " itemSize=" + itemSize);
+			if (logger.isTraceEnabled()) {
+				logger.trace("sending notify event: numitems: " + numItems + " itemSize=" + itemSize);
+			}
 			sendSelectionNotifyEvent(numItems, ptr, sne, itemSize, atom);
 		});
 	}
@@ -298,6 +293,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		singleThreadedStart();
 	}
 
+	/**
+	 * TEST CODE
+	 */
 	public static void singleThreadedStart() {
 		X11ClipboardWrapper wrapper = new X11ClipboardWrapper();
 		IClipboardListener myListener = new IClipboardListener() {
