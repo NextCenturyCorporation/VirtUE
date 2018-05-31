@@ -260,7 +260,10 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			Set<ClipboardFormat> set = new HashSet<ClipboardFormat>();
 			int[] arr = Arrays.copyOf(formats, returnedSizeOfFormats.getValue());
 			for (int a : arr) {
-				set.add(ClipboardFormat.fromWindows(a));
+				ClipboardFormat format = ClipboardFormat.fromWindows(a);
+				if (format != null) {
+					set.add(format);
+				}
 			}
 			return set;
 		} else {
