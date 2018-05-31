@@ -15,7 +15,8 @@ import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
  * helps with initialization and maintaining whether the connection is valid or
  * what group it is associated with.
  *
- *
+ * Clients need to make sure they call the {@link #init()} method once they are
+ * connected to receive an ID.
  */
 public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	private static final Logger logger = LoggerFactory.getLogger(MessageTransmitter.class);
@@ -110,6 +111,10 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		}
 	}
 
+	/**
+	 * Needs to be called for clients. This blocks and waits for a
+	 * {@link ClientIdClipboardMessage} which starts the connection.
+	 */
 	@Override
 	public String init() throws IOException {
 		IClipboardMessage msg = null;
