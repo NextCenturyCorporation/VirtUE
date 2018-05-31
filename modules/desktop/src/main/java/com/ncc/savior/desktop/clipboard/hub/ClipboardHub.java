@@ -150,6 +150,9 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			// need to inform all clients that the clipboard has changed
 			sendMessageToAllButSource(message);
 		} else if (message instanceof ClipboardDataRequestMessage) {
+			// Sender of this message is requesting data from the clipboard owner so the hub
+			// must redirect this message to the owner client. The requesting client does
+			// not know who the owner is, only the hub and the owner itself know.
 			ClipboardDataRequestMessage m = (ClipboardDataRequestMessage) message;
 			String destId = this.clipboardOwnerId;
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
@@ -172,11 +175,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			if (allowTransfer) {
 				sendMessageHandleError(message, transmitter, destId);
 			} else {
+				// Data transfer has been denied, but the client still needs a response. We'll
+				// send it an empty data object.
 				transmitter = transmitters.get(message.getSourceId());
 				int format = ((ClipboardDataRequestMessage) message).getFormat();
 				IClipboardMessage dataMessage = new ClipboardDataMessage(hubId, new EmptyClipboardData(format),
 						m.getRequestId(), m.getSourceId());
 				sendMessageHandleError(dataMessage, transmitter, message.getSourceId());
+				// TODO report to user that data was blocked.
 			}
 		} else if (message instanceof ClipboardDataMessage) {
 			// Data has been returned after a data request
