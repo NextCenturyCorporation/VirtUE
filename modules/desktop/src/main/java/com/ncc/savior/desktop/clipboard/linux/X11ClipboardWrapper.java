@@ -16,7 +16,7 @@ import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
-import com.ncc.savior.desktop.clipboard.data.WideTextClipboardData;
+import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
 import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.NativeLong;
@@ -258,10 +258,6 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			// This is caused by an event from in linux and we need that event.
 			XSelectionEvent sne = this.SelectionNotifyEventToSend;
 			Atom atom = x11.XInternAtom(display, clipboardData.getFormat().getLinux(), false);
-			logger.debug("FIXME HERE: Many apps in linux seem to requied wide text and it isn't formatting properly");
-			if (clipboardData.getFormat().equals(ClipboardFormat.UNICODE)) {
-				logger.debug("str: " + ptr.getWideString(0));
-			}
 			logger.debug("sending notify event: numitems: " + numItems + " itemSize=" + itemSize);
 			sendSelectionNotifyEvent(numItems, ptr, sne, itemSize, atom);
 		});
@@ -460,8 +456,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			String str = property.getString(0);
 			return new PlainTextClipboardData(str);
 		case UNICODE:
-			str = property.getWideString(0);
-			return new WideTextClipboardData(str);
+			str = property.getString(0, "UTF8");
+			return new UnicodeClipboardData(str);
 		default:
 			return new UnknownClipboardData(cf);
 		}

@@ -11,11 +11,11 @@ import com.sun.jna.Pointer;
  * Wide text or Unicode implementation of {@link ClipboardData}.
  *
  */
-public class WideTextClipboardData extends ClipboardData implements Serializable {
+public class UnicodeClipboardData extends ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String data;
 
-	public WideTextClipboardData(String data) {
+	public UnicodeClipboardData(String data) {
 		super(ClipboardFormat.UNICODE);
 		this.data = data;
 	}
