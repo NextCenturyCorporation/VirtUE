@@ -153,8 +153,8 @@ export class AddUserComponent implements OnInit {
 
   activateModal(id, mode): void {
 
-    let dialogWidth = 800;
-    let dialogHeight = 600;
+    let dialogWidth = 900;
+    let dialogHeight = 748;
     this.fullImagePath = './assets/images/app-icon-white.png';
 
     if (mode === 'add') {
@@ -170,7 +170,8 @@ export class AddUserComponent implements OnInit {
         id: id,
         dialogMode: mode,
         dialogButton: this.submitBtn,
-        appIcon: this.fullImagePath
+        appIcon: this.fullImagePath,
+        storedVirtues: this.storedVirtues
       },
       panelClass: 'virtue-modal-overlay'
     });
@@ -181,6 +182,8 @@ export class AddUserComponent implements OnInit {
     // dialogRef.afterClosed().subscribe();
     const virtueList = dialogRef.componentInstance.addVirtues.subscribe((data) => {
       this.selVirtues = data;
+      console.log('Received selected virtues: ');
+      console.log(this.selVirtues);
 
       if (this.storedVirtues.length > 0) {
         this.storedVirtues = [];
