@@ -63,4 +63,10 @@ public class TestClipboardMessageSenderReceiver implements IClipboardMessageSend
 	public String getGroupId() {
 		return groupId;
 	}
+
+	@Override
+	public void waitUntilStopped() {
+		// TODO Auto-generated method stub
+
+	}
 }

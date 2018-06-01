@@ -131,4 +131,17 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		return id;
 	}
 
+	/**
+	 * Waits until message receiver thread has stopped. At that point, the
+	 * transmitter should not be used anymore.
+	 */
+	@Override
+	public void waitUntilStopped() {
+		try {
+			receiveThread.join();
+		} catch (InterruptedException e) {
+			logger.warn("Waiting thread was interrupted!", e);
+		}
+	}
+
 }

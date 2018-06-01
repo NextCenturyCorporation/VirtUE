@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.clipboard;
 
-import java.util.Collection;
 import java.util.Set;
 
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
@@ -20,7 +19,7 @@ public interface IClipboardWrapper {
 	 *
 	 * @param formats
 	 */
-	public void setDelayedRenderFormats(Collection<Integer> formats);
+	public void setDelayedRenderFormats(Set<Integer> formats);
 
 	/**
 	 * sets the {@link IClipboardListener} to handle clipboard events.

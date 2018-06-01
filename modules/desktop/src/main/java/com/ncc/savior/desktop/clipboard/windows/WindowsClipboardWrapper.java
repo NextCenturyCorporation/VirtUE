@@ -1,7 +1,6 @@
 package com.ncc.savior.desktop.clipboard.windows;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -109,7 +108,9 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 			@Override
 			public Thread newThread(Runnable r) {
-				return new Thread(r, getName());
+				Thread t = new Thread(r, getName());
+				t.setDaemon(true);
+				return t;
 			}
 
 			private synchronized String getName() {
@@ -155,7 +156,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * handle that callback.
 	 */
 	@Override
-	public void setDelayedRenderFormats(Collection<Integer> formats) {
+	public void setDelayedRenderFormats(Set<Integer> formats) {
 		executor.schedule(new Runnable() {
 
 			@Override
@@ -234,7 +235,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * @param windowHandle2
 	 * @param formats
 	 */
-	protected void writeNullToClipboard(Collection<Integer> formats) {
+	protected void writeNullToClipboard(Set<Integer> formats) {
 		openClipboardWhenFree();
 		try {
 			boolean success = user32.EmptyClipboard();

@@ -26,7 +26,6 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
-import com.ncc.savior.util.JavaUtil;
 
 /**
  * Clipboard class to be run on a client machine that we want to connect the
@@ -210,13 +209,22 @@ public class ClipboardClient {
 		IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
 
 		ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
-		while (true) {
-			// hold
-			JavaUtil.sleepAndLogInterruption(1000);
-			if (!client.isValid()) {
-				break;
-			}
-		}
+		client.waitUntilStopped();
+		// while (true) {
+		// // hold
+		// JavaUtil.sleepAndLogInterruption(1000);
+		// if (!client.isValid()) {
+		// break;
+		// }
+		// }
+	}
+
+	/**
+	 * blocks until client has stopped listening for messages signally that it is
+	 * done or disconnected and should no longer be used.
+	 */
+	public void waitUntilStopped() {
+		transmitter.waitUntilStopped();
 	}
 
 	private static void usage(String string) {

@@ -3,10 +3,10 @@ package com.ncc.savior.desktop.clipboard.hub;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -50,7 +50,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private String hubId = "Hub-0";
 	private Map<String, IClipboardMessageSenderReceiver> transmitters;
 	private String clipboardOwnerId;
-	private Collection<Integer> validFormats;
+	private Set<Integer> validFormats;
 	private ICrossGroupDataGuard dataGuard;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
@@ -144,7 +144,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		if (message instanceof ClipboardChangedMessage) {
 			// source has taken control of clipboard
 			ClipboardChangedMessage m = (ClipboardChangedMessage) message;
-			Collection<Integer> formats = m.getFormats();
+			Set<Integer> formats = m.getFormats();
 			filterToValidFormats(formats);
 			this.clipboardOwnerId = m.getSourceId();
 			// need to inform all clients that the clipboard has changed
@@ -200,7 +200,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	 *
 	 * @param formats
 	 */
-	private void filterToValidFormats(Collection<Integer> formats) {
+	private void filterToValidFormats(Set<Integer> formats) {
 		Iterator<Integer> itr = formats.iterator();
 		while (itr.hasNext()) {
 			Integer format = itr.next();
