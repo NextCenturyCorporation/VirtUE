@@ -30,5 +30,15 @@ public interface IClipboardMessageSenderReceiver {
 	 */
 	public boolean isValid();
 
+	/**
+	 * ID used to determine whether data should pass between the two endpoints.
+	 *
+	 * @return
+	 */
 	String getGroupId();
+
+	/**
+	 * wait until transmitter is stopped and no longer valid.
+	 */
+	void waitUntilStopped();
 }

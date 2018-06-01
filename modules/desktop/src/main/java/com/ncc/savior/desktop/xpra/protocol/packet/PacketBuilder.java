@@ -49,11 +49,7 @@ public class PacketBuilder {
 			logger.warn("Unable to handle building packet.  No type for String=" + list.get(0));
 			for (int i = 0; i < list.size(); i++) {
 				Object o = list.get(i);
-				if (o == null) {
-					logger.debug("param" + i + ": " + o);
-				} else {
-					logger.debug("param" + i + ": " + o.toString());
-				}
+				logger.debug("param" + i + ": " + o);
 			}
 		}
 		return new UnknownPacket(list);

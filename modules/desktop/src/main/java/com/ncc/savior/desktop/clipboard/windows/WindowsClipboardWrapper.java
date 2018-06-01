@@ -1,7 +1,6 @@
 package com.ncc.savior.desktop.clipboard.windows;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -49,7 +48,7 @@ import com.sun.jna.ptr.PointerByReference;
  * <li>Write null to the clipboard using the entire process (Open, Empty, write,
  * close). Make sure the window handle is passed to the open function.
  * <li>Have a loop to clear the message queue via GetMessage or PeekMessage.
- * <ol>
+ * </ol>
  *
  *
  */
@@ -110,7 +109,9 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 			@Override
 			public Thread newThread(Runnable r) {
-				return new Thread(r, getName());
+				Thread t = new Thread(r, getName());
+				t.setDaemon(true);
+				return t;
 			}
 
 			private synchronized String getName() {
@@ -156,7 +157,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * handle that callback.
 	 */
 	@Override
-	public void setDelayedRenderFormats(Collection<ClipboardFormat> formats) {
+	public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
 		executor.schedule(new Runnable() {
 
 			@Override
@@ -235,7 +236,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * @param windowHandle2
 	 * @param formats
 	 */
-	protected void writeNullToClipboard(Collection<ClipboardFormat> formats) {
+	protected void writeNullToClipboard(Set<ClipboardFormat> formats) {
 		openClipboardWhenFree();
 		try {
 			boolean success = user32.EmptyClipboard();

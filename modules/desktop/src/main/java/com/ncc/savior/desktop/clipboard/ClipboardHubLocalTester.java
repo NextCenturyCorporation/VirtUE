@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -147,7 +146,7 @@ public class ClipboardHubLocalTester {
 		}
 
 		@Override
-		public void setDelayedRenderFormats(Collection<ClipboardFormat> formats) {
+		public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
 			owner = false;
 			this.renderFormats.clear();
 			this.renderFormats.addAll(formats);

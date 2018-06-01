@@ -190,11 +190,18 @@ public class ClipboardClient {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		int port = ClipboardHub.DEFAULT_PORT;
 		String hostname = DEFAULT_HOSTNAME;
-		if (args.length > 1) {
+		if (args.length > 0) {
 			hostname = args[0];
 		}
 		if (args.length > 1) {
-			port = Integer.parseInt(args[1]);
+			try {
+				port = Integer.parseInt(args[1]);
+			} catch (Exception e) {
+				usage("Invalid port: " + args[1]);
+			}
+		}
+		if (args.length > 2) {
+			usage("Invalid parameters");
 		}
 		IClipboardWrapper clipboardWrapper = getClipboardWrapperForOperatingSystem();
 		Socket clientSocket = new Socket(hostname, port);
@@ -204,16 +211,36 @@ public class ClipboardClient {
 
 		IConnectionWrapper connection = new SocketConnection(clientSocket);
 		IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-		Thread.sleep(1000);
 
 		ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
-		while (true) {
-			// hold
-			JavaUtil.sleepAndLogInterruption(1000);
-			if (!client.isValid()) {
-				break;
-			}
+		client.waitUntilStopped();
+		// while (true) {
+		// // hold
+		// JavaUtil.sleepAndLogInterruption(1000);
+		// if (!client.isValid()) {
+		// break;
+		// }
+		// }
+	}
+
+	/**
+	 * blocks until client has stopped listening for messages signally that it is
+	 * done or disconnected and should no longer be used.
+	 */
+	public void waitUntilStopped() {
+		transmitter.waitUntilStopped();
+	}
+
+	private static void usage(String string) {
+		if (string != null) {
+			System.out.println("Error: " + string);
 		}
+		System.out.println("Usage: executable [hostname [port]]");
+		System.out.println("  hostname: optional parameter to set the hostname where the hub is running.  Default: "
+				+ DEFAULT_HOSTNAME);
+		System.out.println("  port: optional parameter to set the port where the hub is listening.  Default: "
+				+ ClipboardHub.DEFAULT_PORT);
+
 	}
 
 	public static IClipboardWrapper getClipboardWrapperForOperatingSystem() {

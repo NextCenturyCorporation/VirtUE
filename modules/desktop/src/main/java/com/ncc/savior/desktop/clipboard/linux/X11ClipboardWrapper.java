@@ -232,7 +232,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	@Override
-	public void setDelayedRenderFormats(Collection<ClipboardFormat> formats) {
+	public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
 		// X11 is effectively always in delayed render mode when the application owns
 		// the clipboard
 		runnableQueue.offer(() -> {

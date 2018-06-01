@@ -3,11 +3,11 @@ package com.ncc.savior.desktop.clipboard.hub;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -30,6 +30,7 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
+import com.ncc.savior.util.JavaUtil;
 
 /**
  * Central hub point for the shared clipboard data. All messages should be sent
@@ -51,7 +52,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private String hubId = "Hub-0";
 	private Map<String, IClipboardMessageSenderReceiver> transmitters;
 	private String clipboardOwnerId;
-	private Collection<ClipboardFormat> validFormats;
+	private Set<ClipboardFormat> validFormats;
 	private ICrossGroupDataGuard dataGuard;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
@@ -65,10 +66,18 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		int port = DEFAULT_PORT;
 		if (args.length > 0) {
-			port = Integer.parseInt(args[0]);
+			try {
+				port = Integer.parseInt(args[0]);
+			} catch (Exception e) {
+				usage("Invalid port: " + args[0]);
+			}
+		}
+		if (args.length > 1) {
+			usage("Invalid parameters");
 		}
 		ServerSocket serverSocket = new ServerSocket(port);
 		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
+		try {
 		while (true) {
 			Socket socket = serverSocket.accept();
 			// BufferedWriter writer = new BufferedWriter(new
@@ -88,6 +97,19 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			String defaultGroup = "default";
 			hub.addClient(defaultGroup, serializer);
 		}
+		} finally {
+			JavaUtil.closeIgnoreErrors(serverSocket);
+		}
+	}
+
+	private static void usage(String string) {
+		if (string != null) {
+			System.out.println("Error: " + string);
+		}
+		System.out.println("Usage: executable [listenPort]");
+		System.out.println("  listenPort: optional parameter to set the port to listen for connections on.  Default: "
+				+ DEFAULT_PORT);
+
 	}
 
 	/**
@@ -128,12 +150,15 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		if (message instanceof ClipboardChangedMessage) {
 			// source has taken control of clipboard
 			ClipboardChangedMessage m = (ClipboardChangedMessage) message;
-			Collection<ClipboardFormat> formats = m.getFormats();
+			Set<ClipboardFormat> formats = m.getFormats();
 			filterToValidFormats(formats);
 			this.clipboardOwnerId = m.getSourceId();
 			// need to inform all clients that the clipboard has changed
 			sendMessageToAllButSource(message);
 		} else if (message instanceof ClipboardDataRequestMessage) {
+			// Sender of this message is requesting data from the clipboard owner so the hub
+			// must redirect this message to the owner client. The requesting client does
+			// not know who the owner is, only the hub and the owner itself know.
 			ClipboardDataRequestMessage m = (ClipboardDataRequestMessage) message;
 			String destId = this.clipboardOwnerId;
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
@@ -156,11 +181,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			if (allowTransfer) {
 				sendMessageHandleError(message, transmitter, destId);
 			} else {
+				// Data transfer has been denied, but the client still needs a response. We'll
+				// send it an empty data object.
 				transmitter = transmitters.get(message.getSourceId());
 				ClipboardFormat format = ((ClipboardDataRequestMessage) message).getFormat();
 				IClipboardMessage dataMessage = new ClipboardDataMessage(hubId, new EmptyClipboardData(format),
 						m.getRequestId(), m.getSourceId());
 				sendMessageHandleError(dataMessage, transmitter, message.getSourceId());
+				// TODO report to user that data was blocked.
 			}
 		} else if (message instanceof ClipboardDataMessage) {
 			// Data has been returned after a data request
@@ -178,7 +206,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	 *
 	 * @param formats
 	 */
-	private void filterToValidFormats(Collection<ClipboardFormat> formats) {
+	private void filterToValidFormats(Set<ClipboardFormat> formats) {
 		Iterator<ClipboardFormat> itr = formats.iterator();
 		while (itr.hasNext()) {
 			ClipboardFormat format = itr.next();

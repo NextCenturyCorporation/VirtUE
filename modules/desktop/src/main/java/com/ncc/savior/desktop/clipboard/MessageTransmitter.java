@@ -15,7 +15,8 @@ import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
  * helps with initialization and maintaining whether the connection is valid or
  * what group it is associated with.
  *
- *
+ * Clients need to make sure they call the {@link #init()} method once they are
+ * connected to receive an ID.
  */
 public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	private static final Logger logger = LoggerFactory.getLogger(MessageTransmitter.class);
@@ -45,6 +46,8 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	/**
 	 *
 	 * @param groupId
+	 *            - ID used to determine if data should flow between 2 different
+	 *            clients.
 	 * @param serializer
 	 * @param messageHandler
 	 * @param threadId
@@ -110,6 +113,10 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		}
 	}
 
+	/**
+	 * Needs to be called for clients. This blocks and waits for a
+	 * {@link ClientIdClipboardMessage} which starts the connection.
+	 */
 	@Override
 	public String init() throws IOException {
 		IClipboardMessage msg = null;
@@ -122,6 +129,19 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		receiveThread.setName("MessageReceiver-client-" + id);
 		logger.debug("initialized");
 		return id;
+	}
+
+	/**
+	 * Waits until message receiver thread has stopped. At that point, the
+	 * transmitter should not be used anymore.
+	 */
+	@Override
+	public void waitUntilStopped() {
+		try {
+			receiveThread.join();
+		} catch (InterruptedException e) {
+			logger.warn("Waiting thread was interrupted!", e);
+		}
 	}
 
 }

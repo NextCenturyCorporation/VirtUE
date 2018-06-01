@@ -17,6 +17,9 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 public interface IMessageSerializer extends Closeable {
 	/**
 	 * Serializes the message and passes it on to an implementation specific stream.
+	 * The stream should be flushed before returning. Therefore, this method could
+	 * block if the underlying serialization or stream does not complete
+	 * immediately.
 	 *
 	 * @param message
 	 * @throws IOException
@@ -25,7 +28,7 @@ public interface IMessageSerializer extends Closeable {
 
 	/**
 	 * Blocks and deserializes next message from implementation specific stream.
-	 * 
+	 *
 	 * @return
 	 * @throws IOException
 	 */
