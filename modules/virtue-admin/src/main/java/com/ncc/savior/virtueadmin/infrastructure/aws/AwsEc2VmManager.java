@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
@@ -109,7 +110,8 @@ public class AwsEc2VmManager extends BaseVmManager {
 		// different methods to get credentials.
 		credentialsProvider = new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
 				new SystemPropertiesCredentialsProvider(), new ProfileCredentialsProvider(awsProfile),
-				new PropertiesFileCredentialsProvider("./aws.properties"));
+				new PropertiesFileCredentialsProvider("./aws.properties"),
+				new EC2ContainerCredentialsProviderWrapper());
 		try {
 			credentialsProvider.getCredentials();
 

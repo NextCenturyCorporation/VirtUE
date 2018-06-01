@@ -68,6 +68,7 @@
 	<bean name="ec2Wrapper"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.forceAssignPublicDns:default}"></constructor-arg>
 	</bean>
 
 <!-- 	<bean name="awsVmUpdater" -->
