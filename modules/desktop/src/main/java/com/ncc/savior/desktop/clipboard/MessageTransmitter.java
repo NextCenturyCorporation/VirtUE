@@ -46,6 +46,8 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	/**
 	 *
 	 * @param groupId
+	 *            - ID used to determine if data should flow between 2 different
+	 *            clients.
 	 * @param serializer
 	 * @param messageHandler
 	 * @param threadId

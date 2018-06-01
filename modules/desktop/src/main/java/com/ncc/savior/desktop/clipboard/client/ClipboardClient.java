@@ -208,7 +208,6 @@ public class ClipboardClient {
 
 		IConnectionWrapper connection = new SocketConnection(clientSocket);
 		IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-		Thread.sleep(1000);
 
 		ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
 		while (true) {

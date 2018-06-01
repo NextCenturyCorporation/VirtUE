@@ -48,7 +48,7 @@ import com.sun.jna.ptr.PointerByReference;
  * <li>Write null to the clipboard using the entire process (Open, Empty, write,
  * close). Make sure the window handle is passed to the open function.
  * <li>Have a loop to clear the message queue via GetMessage or PeekMessage.
- * <ol>
+ * </ol>
  *
  *
  */

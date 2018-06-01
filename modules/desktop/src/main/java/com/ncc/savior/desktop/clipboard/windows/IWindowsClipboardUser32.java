@@ -11,7 +11,7 @@ import com.sun.jna.win32.W32APIOptions;
  * Interface to give functions for the clipboard specific calls for Windows. See
  * windows API for documentation on thses methods.
  *
- *
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/ms649014(v=vs.85).aspx
  */
 public interface IWindowsClipboardUser32 extends User32 {
 	// DEFAULT_OPTIONS is critical for W32 API functions to simplify ASCII/UNICODE
