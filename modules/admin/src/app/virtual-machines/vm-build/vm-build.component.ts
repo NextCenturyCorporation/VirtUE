@@ -1,14 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
-import { FormControl, FormGroup } from '@angular/forms';
-import { Routes, RouterModule, Router } from '@angular/router';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
-import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
@@ -16,7 +14,6 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
 @Component({
   selector: 'app-vm-build',
   templateUrl: './vm-build.component.html',
-  styleUrls: ['./vm-build.component.css'],
   providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
 export class VmBuildComponent implements OnInit, OnDestroy {

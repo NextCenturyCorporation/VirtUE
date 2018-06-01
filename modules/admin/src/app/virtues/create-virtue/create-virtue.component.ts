@@ -1,13 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
-import { FormControl, FormGroup } from '@angular/forms';
-import { Routes, RouterModule, Router } from '@angular/router';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
-
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -16,7 +14,7 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
 
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
+// import { VirtualMachine } from '../../shared/models/vm.model';
 
 @Component({
   selector: 'app-create-virtue',
@@ -26,7 +24,7 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 })
 
 export class CreateVirtueComponent implements OnInit {
-  vms: VirtualMachine;
+  // vms: VirtualMachine;
   virtueForm: FormControl;
   activeClass: string;
   baseUrl: string;
@@ -146,7 +144,7 @@ export class CreateVirtueComponent implements OnInit {
 
     this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
       data => {
-        return true;
+        return data;
       },
       error => {
         console.log(error.message);
@@ -164,7 +162,7 @@ export class CreateVirtueComponent implements OnInit {
     this.pageVmList.splice(index, 1);
   }
 
-  activateModal(id: string): void {
+  activateModal() {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
       width: '800px',

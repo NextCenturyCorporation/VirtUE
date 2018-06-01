@@ -1,11 +1,10 @@
 import { Component, EventEmitter, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-dialogs',
-  templateUrl: './dialogs.component.html',
-  styleUrls: ['./dialogs.component.css']
+  templateUrl: './dialogs.component.html'
 })
 export class DialogsComponent implements OnInit {
 

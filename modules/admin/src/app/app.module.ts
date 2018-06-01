@@ -6,7 +6,6 @@ import {
 } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -69,10 +68,10 @@ import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
 import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
 
-import { DialogsComponent } from './dialogs/dialogs.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 import { ActiveClassDirective } from './shared/directives/active-class.directive';
+import { DialogsComponent } from './dialogs/dialogs.component';
 
 import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
 import { JsonFilterPipe } from './shared/pipes/json-filter.pipe';
@@ -120,6 +119,7 @@ import { VirtuesService } from './shared/services/virtues.service';
     VmEditComponent,
     VmDuplicateComponent,
     ActiveClassDirective,
+    DialogsComponent,
     VmAppsComponent,
     VmAppsListComponent,
     AddVmAppComponent,
@@ -132,7 +132,6 @@ import { VirtuesService } from './shared/services/virtues.service';
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    HttpModule,
     MatAutocompleteModule,
     MatDialogModule,
     MatFormFieldModule,

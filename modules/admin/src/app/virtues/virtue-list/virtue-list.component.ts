@@ -6,7 +6,6 @@ import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { Virtue } from '../../shared/models/virtue.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
@@ -28,7 +27,7 @@ export class VirtueListComponent implements OnInit {
   appsList = [];
   virtueEnabled: boolean;
   baseUrl: string;
-  virtueTotal: number;
+  // virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
 
   constructor(
@@ -139,7 +138,7 @@ export class VirtueListComponent implements OnInit {
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((data) => {
+    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe(data => {
       console.log('Dialog Emitter: ' + data);
       if (type === 'delete') {
         this.deleteVirtue(data);

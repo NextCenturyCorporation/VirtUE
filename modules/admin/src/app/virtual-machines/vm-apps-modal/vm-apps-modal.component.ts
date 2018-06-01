@@ -11,14 +11,12 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 @Component({
   selector: 'app-vm-modal',
   templateUrl: './vm-apps-modal.component.html',
-  styleUrls: ['./vm-apps-modal.component.css'],
   providers: [ ApplicationsService, BaseUrlService ]
 })
 export class VmAppsModalComponent implements OnInit {
   @Input() appInput: Application;
 
   form: FormGroup;
-  virtueId: string;
 
   checked = false;
 
@@ -88,6 +86,7 @@ export class VmAppsModalComponent implements OnInit {
   }
 
   removeApp(id: string, index: number) {
+    console.log(index);
     this.selAppList.splice(this.selAppList.indexOf(id), 1);
   }
 

@@ -1,14 +1,10 @@
-import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Routes, RouterModule, Router } from '@angular/router';
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 
 import { Observable } from 'rxjs/Observable';
-import { startWith } from 'rxjs/operators/startWith';
-import { map } from 'rxjs/operators/map';
-
-import { User } from '../../shared/models/user.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
@@ -19,7 +15,6 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
-  styleUrls: ['./add-user.component.css'],
   providers: [BaseUrlService, UsersService, VirtuesService]
 })
 
@@ -31,7 +26,6 @@ export class AddUserComponent implements OnInit {
 
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
-  activeDirUsers = [];
 
   storedVirtues = [];
   selVirtues = [];
@@ -100,7 +94,6 @@ export class AddUserComponent implements OnInit {
     this.usersService.createUser(baseUrl, JSON.stringify(body)).subscribe(
       data => {
         return true;
-        // console.log(data.virtueTemplateIds);
       },
       error => {
         console.error('Error');
@@ -115,7 +108,6 @@ export class AddUserComponent implements OnInit {
     for ( let item of virtues ) {
       this.usersService.assignVirtues(baseUrl, username, item);
     }
-
   }
 
   getVirtues(baseUrl: string) {
@@ -183,7 +175,6 @@ export class AddUserComponent implements OnInit {
       panelClass: 'virtue-modal-overlay'
     });
 
-    let screenWidth = (window.screen.width);
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });

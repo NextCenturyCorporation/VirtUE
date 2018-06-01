@@ -6,8 +6,6 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
-
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
@@ -18,7 +16,6 @@ import { Virtue } from '../../shared/models/virtue.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
-import { DialogsComponent } from '../../dialogs/dialogs.component';
 
 
 @Component({

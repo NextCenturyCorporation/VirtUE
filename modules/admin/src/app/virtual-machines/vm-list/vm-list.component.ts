@@ -1,29 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material';
-import { Routes, RouterModule, Router } from '@angular/router';
+import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
-
 @Component({
   selector: 'app-vm-list',
   providers: [ BaseUrlService, VirtualMachineService, ApplicationsService ],
-  templateUrl: './vm-list.component.html',
-  styleUrls: ['./vm-list.component.css']
+  templateUrl: './vm-list.component.html'
 })
 export class VmListComponent implements OnInit {
 
   vms = [];
   apps = [];
   filterValue = '*';
-  noListData = false;
+  // noListData = false;
 
   baseUrl: string;
-  vmlist: string;
+  // vmlist = [];
   totalVms: number;
   vmStatus: boolean;
 
@@ -98,7 +95,7 @@ export class VmListComponent implements OnInit {
     }
     console.log('updating status for vm #' + id);
     this.vmService.updateStatus(this.baseUrl, id, this.vmStatus).subscribe( data => {
-      return true;
+      return data;
       },
       error => {
         console.log('error: ' + error.message);

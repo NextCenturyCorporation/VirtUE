@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material';
 
 import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -14,7 +13,6 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
 @Component({
   selector: 'app-vm-duplicate',
   templateUrl: './vm-duplicate.component.html',
-  styleUrls: ['./vm-duplicate.component.css'],
   providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
 export class VmDuplicateComponent implements OnInit {
@@ -77,13 +75,14 @@ export class VmDuplicateComponent implements OnInit {
         this.vmData['name'] = 'Copy of ' + this.vmData['name'];
         this.selectedOS = data.os;
         this.pageAppList = data.applicationIds;
-        this.getAppList(data.applicationIds);
+        // this.getAppList(data.applicationIds);
+        this.getAppList();
         this.securityLevel = data.securityTag;
       }
     );
   }
 
-  getAppList(vmApps) {
+  getAppList() {
     const selectedApps = this.pageAppList;
     this.appsService.getAppsList(this.baseUrl)
       .subscribe(apps => {
@@ -141,7 +140,8 @@ export class VmDuplicateComponent implements OnInit {
       }
       this.pageAppList = this.selAppList;
 
-      this.getAppList(this.pageAppList);
+      this.getAppList();
+      // this.getAppList(this.pageAppList);
     });
 
     dialogRef.afterClosed().subscribe(() => {
@@ -158,8 +158,6 @@ export class VmDuplicateComponent implements OnInit {
       'applicationIds': this.pageAppList,
       'securityTag': vmSecurityTag
     };
-    // console.log('duplicateVirtualMachine() => ');
-    // console.log(body);
     this.vmService.createVM(this.baseUrl, JSON.stringify(body));
     this.router.navigate(['/vm']);
   }

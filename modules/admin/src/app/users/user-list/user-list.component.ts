@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, OnDestroy } from '@angular/core';
-import { Routes, RouterModule, Router } from '@angular/router';
+import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
 import { User } from '../../shared/models/user.model';
@@ -7,7 +7,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
 @Component({
@@ -20,10 +20,8 @@ export class UserListComponent implements OnInit {
   @Input() user: User;
 
   awsServer: string;
-  saviorUsers: string;
   users = [];
   virtues = [];
-  isInitialized = false;
 
   constructor(
     private router: Router,

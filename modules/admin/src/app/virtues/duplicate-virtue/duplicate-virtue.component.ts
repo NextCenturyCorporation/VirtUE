@@ -5,10 +5,8 @@ import { MatDialog} from '@angular/material';
 import { ActivatedRoute, Router} from '@angular/router';
 import { Observable} from 'rxjs/Observable';
 
-import { DialogsComponent} from '../../dialogs/dialogs.component';
 import { VmModalComponent} from '../vm-modal/vm-modal.component';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { User} from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -19,7 +17,6 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
 @Component({
   selector: 'app-duplicate-virtue',
   templateUrl: './duplicate-virtue.component.html',
-  styleUrls: ['./duplicate-virtue.component.css'],
   providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
 })
 export class DuplicateVirtueComponent implements OnInit {
@@ -126,25 +123,22 @@ export class DuplicateVirtueComponent implements OnInit {
 
   getUpdatedVmList(baseUrl: string) {
     this.vmList = [];
-    this.vmService.getVmList(baseUrl)
-      .subscribe(data => {
-        for (let sel of this.pageVmList) {
-          for (let vm of data) {
-            if (sel === vm.id) {
-              this.vmList.push(vm);
-              break;
-            }
+    this.vmService.getVmList(baseUrl).subscribe(data => {
+      for (let sel of this.pageVmList) {
+        for (let vm of data) {
+          if (sel === vm.id) {
+            this.vmList.push(vm);
+            break;
           }
         }
-      });
+      }
+    });
   }
 
   removeVm(id: string, index: number): void {
     this.vmList = this.vmList.filter(data => {
       return data.id !== id;
     });
-    // console.log(this.vmList);
-
     this.pageVmList.splice(index, 1);
   }
 
@@ -159,7 +153,6 @@ export class DuplicateVirtueComponent implements OnInit {
 
     this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
       data => {
-        // console.log('Updating ' + data.name + '(' + data.id + ')');
         return true;
       },
       error => {
@@ -174,10 +167,9 @@ export class DuplicateVirtueComponent implements OnInit {
     } else {
       this.virtueEnabled = true;
     }
-    let body = {
-      'enabled': this.virtueEnabled,
-    };
-    // console.log('Virtue is enabled: ' + this.virtueEnabled);
+    // let body = {
+    //   'enabled': this.virtueEnabled,
+    // };
     this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
     this.refreshData();
   }
@@ -192,7 +184,7 @@ export class DuplicateVirtueComponent implements OnInit {
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    const vms = dialogRef.componentInstance.addVms.subscribe((data) => {
+    const vms = dialogRef.componentInstance.addVms.subscribe(data => {
       this.selVmsList = data;
       if (this.pageVmList.length > 0) {
         this.pageVmList = [];
@@ -202,10 +194,6 @@ export class DuplicateVirtueComponent implements OnInit {
 
       this.getVirtueVmList(this.pageVmList);
     });
-
-    // dialogRef.afterClosed().subscribe(() => {
-    //   vms.unsubscribe();
-    // });
   }
 
 }

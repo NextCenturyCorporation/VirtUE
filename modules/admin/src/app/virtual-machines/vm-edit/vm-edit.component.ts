@@ -3,19 +3,16 @@ import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
-import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
 
 @Component({
   selector: 'app-vm-edit',
   templateUrl: './vm-edit.component.html',
-  styleUrls: ['./vm-edit.component.css'],
   providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
 export class VmEditComponent implements OnInit {
