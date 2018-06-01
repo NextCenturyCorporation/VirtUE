@@ -1,8 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
-import { User } from '../../shared/models/user.model';
+// import { User } from '../../shared/models/user.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
@@ -17,9 +17,7 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
   providers: [ BaseUrlService, UsersService ]
 })
 export class UserListComponent implements OnInit {
-  @Input() user: User;
-
-  awsServer: string;
+  baseUrl: string;
   users = [];
   virtues = [];
 
@@ -44,17 +42,18 @@ export class UserListComponent implements OnInit {
       this.getUsers(awsServer);
       this.getVirtues(awsServer);
     });
+    this.refreshData();
   }
 
   getBaseUrl( url: string ) {
-    this.awsServer = url;
+    this.baseUrl = url;
   }
 
-  reloadPage() {
+  refreshData() {
     setTimeout(() => {
       this.router.navigated = false;
-      this.router.navigate([this.router.url]);
-    }, 500);
+      this.getUsers(this.baseUrl);
+    }, 1000);
   }
 
   getUsers( baseUrl: string ): void {
@@ -65,8 +64,8 @@ export class UserListComponent implements OnInit {
 
   deleteUser(username: string) {
     // console.log(username);
-    this.usersService.deleteUser(this.awsServer, username);
-    this.reloadPage();
+    this.usersService.deleteUser(this.baseUrl, username);
+    this.refreshData();
   }
 
   getVirtues(baseUrl: string) {
@@ -84,7 +83,6 @@ export class UserListComponent implements OnInit {
   }
 
   openDialog(id, type, text): void {
-
     const dialogRef = this.dialog.open( DialogsComponent, {
       width: '450px',
       data:  {

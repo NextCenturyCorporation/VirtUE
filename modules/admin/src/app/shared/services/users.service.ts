@@ -52,25 +52,23 @@ export class UsersService {
     console.log(virtue);
 
     let userRecord = baseUrl + this.configUrl + username + '/assign/' + virtue;
-
     return this.httpClient.post(userRecord, virtue, httpOptions).toPromise().then(data => {
-            return data;
-          },
-          error => {
-            console.log('users.service.ts (assignVirtues): looks like there\'s a problem posting virtue ' + virtue);
-          });
+      return data;
+    },
+    error => {
+      console.log(error + ': users.service.ts (assignVirtues): looks like there\'s a problem posting virtue ' + virtue);
+    });
   }
 
   deleteUser(baseUrl: string, username: string) {
     let awsServer = baseUrl + this.configUrl;
     return this.httpClient.delete(awsServer + username).subscribe(
-      data => {
-        return true;
-      },
-      error => {
-        console.error('Error');
-      });
-
+    data => {
+      return true;
+    },
+    error => {
+      console.error('Error');
+    });
   }
 
 }

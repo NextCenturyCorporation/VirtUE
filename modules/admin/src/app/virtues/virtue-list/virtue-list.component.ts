@@ -120,7 +120,7 @@ export class VirtueListComponent implements OnInit {
   }
 
   deleteVirtue(id: string) {
-    console.log('deleting ' + id);
+    // console.log('deleting ' + id);
     this.virtuesService.deleteVirtue(this.baseUrl, id);
     this.refreshData();
   }
