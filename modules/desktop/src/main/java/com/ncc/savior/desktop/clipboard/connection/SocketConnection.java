@@ -14,28 +14,24 @@ import com.ncc.savior.util.JavaUtil;
  */
 public class SocketConnection implements IConnectionWrapper {
 
-	private InputStream in;
-	private OutputStream out;
 	private Socket socket;
 
 	public SocketConnection(Socket clientSocket) throws IOException {
 		this.socket = clientSocket;
-		this.in = clientSocket.getInputStream();
-		this.out = clientSocket.getOutputStream();
 	}
 
 	@Override
-	public InputStream getInputStream() {
-		return in;
+	public InputStream getInputStream() throws IOException {
+		return socket.getInputStream();
 	}
 
 	@Override
-	public OutputStream getOutputStream() {
-		return out;
+	public OutputStream getOutputStream() throws IOException {
+		return socket.getOutputStream();
 	}
 
 	@Override
 	public void close() {
-		JavaUtil.closeIgnoreErrors(in, out, socket);
+		JavaUtil.closeIgnoreErrors(socket);
 	}
 }
