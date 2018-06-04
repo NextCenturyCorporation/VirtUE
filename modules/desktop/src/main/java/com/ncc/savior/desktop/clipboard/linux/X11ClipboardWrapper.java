@@ -306,19 +306,21 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	}
 
 	private void sendFormats(XSelectionEvent sne) {
-		ArrayList<ClipboardFormat> formats = new ArrayList<ClipboardFormat>(delayedFormats);
-		int itemSize = 8;
-		int lengthInBytes = itemSize * formats.size();
-		Memory memory = new Memory(lengthInBytes);
-		memory.clear();
-		logger.debug("itemSize: " + itemSize);
-		for (int i = 0; i < formats.size(); i++) {
-			Atom atom = x11.XInternAtom(display, formats.get(i).getLinux(), false);
-			logger.debug("writting atom to " + i + " " + atom.intValue() + "  " + atom);
-			memory.setNativeLong(i * itemSize, new NativeLong(atom.longValue()));
-			// memory.setLong(i * NativeLong.SIZE, new NativeLong(atom.longValue()));
+		if (delayedFormats.size() > 0) {
+			ArrayList<ClipboardFormat> formats = new ArrayList<ClipboardFormat>(delayedFormats);
+			int itemSize = 8;
+			int lengthInBytes = itemSize * formats.size();
+			Memory memory = new Memory(lengthInBytes);
+			memory.clear();
+			logger.debug("itemSize: " + itemSize);
+			for (int i = 0; i < formats.size(); i++) {
+				Atom atom = x11.XInternAtom(display, formats.get(i).getLinux(), false);
+				logger.debug("writting atom to " + i + " " + atom.intValue() + "  " + atom);
+				memory.setNativeLong(i * itemSize, new NativeLong(atom.longValue()));
+				// memory.setLong(i * NativeLong.SIZE, new NativeLong(atom.longValue()));
+			}
+			sendSelectionNotifyEvent(formats.size(), memory, sne, 32, X11.XA_ATOM);
 		}
-		sendSelectionNotifyEvent(formats.size(), memory, sne, 32, X11.XA_ATOM);
 	}
 
 	private Set<String> waitForAvailableFormats() {

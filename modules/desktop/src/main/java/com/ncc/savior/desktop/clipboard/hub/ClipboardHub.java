@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -217,7 +218,9 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	}
 
 	protected synchronized void sendMessageToAllButSource(IClipboardMessage message) {
-		for (Entry<String, IClipboardMessageSenderReceiver> entry : transmitters.entrySet()) {
+		Map<String, IClipboardMessageSenderReceiver> copyOfTransmitters = new HashMap<String, IClipboardMessageSenderReceiver>(
+				transmitters);
+		for (Entry<String, IClipboardMessageSenderReceiver> entry : copyOfTransmitters.entrySet()) {
 			String source = message.getSourceId();
 			if (!entry.getKey().equals(source)) {
 				IClipboardMessageSenderReceiver transmitter = entry.getValue();
