@@ -1,50 +1,69 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
-
 @Component({
   selector: 'app-vm-list',
   providers: [ BaseUrlService, VirtualMachineService, ApplicationsService ],
-  templateUrl: './vm-list.component.html',
-  styleUrls: ['./vm-list.component.css']
+  templateUrl: './vm-list.component.html'
 })
 export class VmListComponent implements OnInit {
 
   vms = [];
   apps = [];
   filterValue = '*';
-  noListData = false;
+  // noListData = false;
 
-  vmlist: string;
+  baseUrl: string;
+  // vmlist = [];
   totalVms: number;
+  vmStatus: boolean;
 
   constructor(
     private vmService: VirtualMachineService,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
+    private router: Router,
     public dialog: MatDialog
-  ) {}
+  ) {
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-        this.getVmList(awsServer);
-        this.getAppsList(awsServer);
+      this.getBaseUrl(awsServer);
+      this.getVmList(awsServer);
+      this.getAppsList(awsServer);
     });
+    this.refreshData();
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+    console.log('URL: ' + url);
+  }
+
+  refreshData() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.getVmList(this.baseUrl);
+    }, 1000);
   }
 
   getVmList(baseUrl: string) {
-    this.vmService.getVmList(baseUrl)
-      .subscribe(vmlist => {
-        this.vms = vmlist;
-        this.totalVms = vmlist.length;
-      });
+    this.vmService.getVmList(baseUrl).subscribe(vmlist => {
+      this.vms = vmlist;
+      this.totalVms = vmlist.length;
+    });
   }
 
   getAppsList(baseUrl: string) {
@@ -62,37 +81,52 @@ export class VmListComponent implements OnInit {
     }
   }
 
-  listFilter(status: any) {
+  listFilter(isEnabled: any) {
     // console.log('filterValue = ' + status);
-    this.filterValue = status;
+    this.filterValue = isEnabled;
     this.totalVms = this.vms.length;
   }
 
-  updateStatus(id: string): void {
-    const vm = this.vms.filter(data => data['id'] === id);
-    // vm.map((_, i) => {
-    //   vm[i].enabled ? vm[i].enabled = false : vm[i].enabled = true;
-    //   console.log(vm);
-    // });
-    // this.appsService.update(id, app);
+  updateVmStatus(id: string, isEnabled: boolean): void {
+    if (isEnabled) {
+      this.vmStatus = false;
+    } else {
+      this.vmStatus = true;
+    }
+    console.log('updating status for vm #' + id);
+    this.vmService.updateStatus(this.baseUrl, id, this.vmStatus).subscribe( data => {
+      return data;
+      },
+      error => {
+        console.log('error: ' + error.message);
+      });
+    this.refreshData();
+    this.router.navigate(['/vm']);
   }
 
-  openDialog(id, type, action, text): void {
+  deleteVM(id: string) {
+    this.vmService.deleteVM(this.baseUrl, id);
+    this.refreshData();
+  }
+
+  openDialog(id: string, type: string, category: string, description: string): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {
-          dialogText: text,
-          dialogType: type
+          dialogType: type,
+          dialogCategory: category,
+          dialogId: id,
+          dialogDescription: description
         }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((data) => {
+      // console.log('Dialog Emitter: ' + data);
+      if (type === 'delete') {
+        this.deleteVM(data);
+      }
     });
   }
-  // addVM(name: string, status: string) {
-  //   this.vms.push({name: name, status: status});
-  // }
 }

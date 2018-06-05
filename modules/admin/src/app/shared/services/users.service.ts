@@ -13,7 +13,6 @@ const httpOptions = {
 export class UsersService {
 
   private configUrl = 'admin/user/';
-  private restApi = './assets/json/users.json';
 
   constructor( private httpClient: HttpClient ) {}
 
@@ -25,7 +24,7 @@ export class UsersService {
 
   getUser(baseUrl: string, id: string): Observable<any> {
     let src = baseUrl + this.configUrl + id;
-    console.log(src);
+    // console.log(src);
     return this.httpClient.get<any>(src);
   }
 
@@ -52,25 +51,23 @@ export class UsersService {
     console.log(virtue);
 
     let userRecord = baseUrl + this.configUrl + username + '/assign/' + virtue;
-
     return this.httpClient.post(userRecord, virtue, httpOptions).toPromise().then(data => {
-            return data;
-          },
-          error => {
-            console.log('users.service.ts (assignVirtues): looks like there\'s a problem posting virtue ' + virtue);
-          });
+      return true;
+    },
+    error => {
+      console.log(error + ': users.service.ts (assignVirtues): looks like there\'s a problem posting virtue ' + virtue);
+    });
   }
 
   deleteUser(baseUrl: string, username: string) {
     let awsServer = baseUrl + this.configUrl;
     return this.httpClient.delete(awsServer + username).subscribe(
-      data => {
-        return true;
-      },
-      error => {
-        console.error('Error');
-      });
-
+    data => {
+      return true;
+    },
+    error => {
+      console.error('Error');
+    });
   }
 
 }

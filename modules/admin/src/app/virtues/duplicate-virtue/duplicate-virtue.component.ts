@@ -1,43 +1,35 @@
 import { Component, OnInit } from '@angular/core';
-import { Location } from '@angular/common';
-import {  HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { FormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
+import { HttpEvent, HttpHandler, HttpRequest} from '@angular/common/http';
+import { FormControl} from '@angular/forms';
+import { MatDialog} from '@angular/material';
+import { ActivatedRoute, Router} from '@angular/router';
+import { Observable} from 'rxjs/Observable';
 
-import { ApplicationsService } from '../../shared/services/applications.service';
+import { VmModalComponent} from '../vm-modal/vm-modal.component';
+
+import { User} from '../../shared/models/user.model';
+import { Virtue } from '../../shared/models/virtue.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
-import { User } from '../../shared/models/user.model';
-import { Virtue } from '../../shared/models/virtue.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
-
-import { VmModalComponent } from '../vm-modal/vm-modal.component';
-
-
 @Component({
-  selector: 'app-edit-virtue',
-  templateUrl: './edit-virtue.component.html',
-  styleUrls: ['./edit-virtue.component.css'],
+  selector: 'app-duplicate-virtue',
+  templateUrl: './duplicate-virtue.component.html',
   providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
 })
+export class DuplicateVirtueComponent implements OnInit {
 
-export class EditVirtueComponent implements OnInit {
   virtueId: { id: string };
   virtueForm: FormControl;
   virtueEnabled: boolean;
-  virtualMachine: VirtualMachine;
   activeClass: string;
   baseUrl: string;
-  errorMsg: any;
   users: User[];
   virtues: Virtue[];
 
   virtueData = [];
-  vmInfo = [];
   vmList = [];
   appsList = [];
   selVmsList = [];
@@ -50,11 +42,10 @@ export class EditVirtueComponent implements OnInit {
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
-    private location: Location,
     public dialog: MatDialog
   ) {
-      this.virtueForm = new FormControl();
-    }
+    this.virtueForm = new FormControl();
+  }
 
   ngOnInit() {
     this.virtueId = {
@@ -74,6 +65,7 @@ export class EditVirtueComponent implements OnInit {
         this.getVirtueVmList(this.pageVmList);
       }
     });
+    this.refreshData();
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -84,9 +76,10 @@ export class EditVirtueComponent implements OnInit {
     this.baseUrl = url;
   }
 
-  resetRouter() {
+  refreshData() {
     setTimeout(() => {
       this.router.navigated = false;
+      this.getThisVirtue(this.baseUrl, this.virtueId.id);
     }, 1000);
   }
 
@@ -96,14 +89,9 @@ export class EditVirtueComponent implements OnInit {
       this.pageVmList = data.virtualMachineTemplateIds;
       this.virtueEnabled = data.enabled;
       this.getVirtueVmList(data.virtualMachineTemplateIds);
+      this.virtueData['name'] = 'Copy of ' + this.virtueData['name'];
     });
   }
-
-  // getAllVms() {
-  //   this.vmService.getVmList(this.baseUrl).subscribe(vms => {
-  //     this.vmList = vms;
-  //   });
-  // }
 
   getVirtueVmList(virtueVms: any) {
     // loop through the selected VM list
@@ -117,17 +105,6 @@ export class EditVirtueComponent implements OnInit {
           console.log(error.message);
         }
       );
-    }
-  }
-
-  getVmInfo(id: string, prop: string) {
-    let vm = this.vmList.filter(data => id === data.id);
-    if (id !== null) {
-      if (prop === 'name') {
-        return vm[0].name;
-      } else if (prop === 'os') {
-        return vm[0].os;
-      }
     }
   }
 
@@ -146,26 +123,55 @@ export class EditVirtueComponent implements OnInit {
 
   getUpdatedVmList(baseUrl: string) {
     this.vmList = [];
-    this.vmService.getVmList(baseUrl)
-      .subscribe(data => {
-        for (let sel of this.pageVmList) {
-          for (let vm of data) {
-            if (sel === vm.id) {
-              this.vmList.push(vm);
-              break;
-            }
+    this.vmService.getVmList(baseUrl).subscribe(data => {
+      for (let sel of this.pageVmList) {
+        for (let vm of data) {
+          if (sel === vm.id) {
+            this.vmList.push(vm);
+            break;
           }
         }
-      });
+      }
+    });
   }
 
   removeVm(id: string, index: number): void {
     this.vmList = this.vmList.filter(data => {
       return data.id !== id;
     });
-    // console.log(this.vmList);
-
     this.pageVmList.splice(index, 1);
+  }
+
+  duplicateThisVirtue(id: string, virtueName: string, virtueVersion: string) {
+    let body = {
+      'name': virtueName,
+      'version': virtueVersion,
+      'enabled': this.virtueEnabled,
+      'lastEditor': 'admin',
+      'virtualMachineTemplateIds': this.pageVmList
+    };
+
+    this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
+      data => {
+        return true;
+      },
+      error => {
+        console.log(error);
+      });
+    this.router.navigate(['/virtues']);
+  }
+
+  virtueStatus(id: string, isEnabled: boolean): void {
+    if (isEnabled) {
+      this.virtueEnabled = false;
+    } else {
+      this.virtueEnabled = true;
+    }
+    // let body = {
+    //   'enabled': this.virtueEnabled,
+    // };
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
+    this.refreshData();
   }
 
   activateModal(): void {
@@ -178,7 +184,7 @@ export class EditVirtueComponent implements OnInit {
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    const vms = dialogRef.componentInstance.addVms.subscribe((data) => {
+    const vms = dialogRef.componentInstance.addVms.subscribe(data => {
       this.selVmsList = data;
       if (this.pageVmList.length > 0) {
         this.pageVmList = [];
@@ -188,55 +194,6 @@ export class EditVirtueComponent implements OnInit {
 
       this.getVirtueVmList(this.pageVmList);
     });
-
-    // dialogRef.afterClosed().subscribe(() => {
-    //   vms.unsubscribe();
-    // });
   }
 
-  updateThisVirtue(id: string, virtueName: string, virtueVersion: string) {
-    let body = {
-      'name': virtueName,
-      'version': virtueVersion,
-      'enabled': this.virtueEnabled,
-      'virtualMachineTemplateIds': this.pageVmList
-    };
-
-    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body)).subscribe(
-      data => {
-        // console.log('Updating ' + data.name + '(' + data.id + ')');
-        return true;
-      },
-      error => {
-        console.log(error);
-      });
-    this.resetRouter();
-    this.router.navigate(['/virtues']);
-  }
-
-  virtueStatus(id: string, isEnabled: boolean): void {
-    if (isEnabled) {
-      this.virtueEnabled = false;
-    } else {
-      this.virtueEnabled = true;
-    }
-    let body = {
-      'enabled': this.virtueEnabled,
-    };
-    // console.log('Virtue is enabled: ' + this.virtueEnabled);
-    this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
-    this.resetRouter();
-  }
-
-  // deleteVirtue(id): void {
-  //   let dialogRef = this.dialog.open(DialogsComponent, {
-  //     width: '450px'
-  //   });
-  //
-  //   dialogRef.updatePosition({ top: '15%', left: '36%' });
-  //
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     // console.log('This dialog was closed');
-  //   });
-  // }
 }

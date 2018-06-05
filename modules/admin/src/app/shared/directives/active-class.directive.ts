@@ -12,7 +12,6 @@ export class ActiveClassDirective implements OnInit {
   ) {  }
 
   ngOnInit() {
-    // this.renderer.addClass(this.el.nativeElement, 'active');
   }
 
   @HostListener('mouseenter') mouseover(eventData: Event) {

@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Virtual Machines</h1>
-    <button class="titlebar-button" [routerLink]="['vm-build']">Build VM</button>
+    <button class="titlebar-button" [routerLink]="['vm-build']">Build VM Template</button>
     <button class="titlebar-button" [disabled]="true">Import VM</button>
   </div>
 
@@ -33,25 +33,27 @@
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-4">Virtual Machine Name</div>
+          <div class="table-header mui-col-md-3">Virtual Machine Name</div>
           <div class="table-header mui-col-md-2">OS</div>
           <div class="table-header mui-col-md-2">Applications</div>
           <div class="table-header mui-col-md-2">Last Modified By</div>
+          <div class="table-header mui-col-md-1">Security</div>
           <div class="table-header mui-col-md-2">Modified Date</div>
         </div>
         <div *ngFor="let vm of vms | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
-          <div class="table-data mui-col-md-4">
+          <div class="table-data mui-col-md-3">
             <div class="mini-menu">
-              <!-- <a class="edit" [routerLink]="['edit',vm.id]"></a> -->
-              {{ vm.name }}
+              <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.name }}</a>
+
               <!-- if this virtue is enabled show this menu -->
               <span *ngIf="vm.enabled === true" class="menu-options">
-                <a mat-button (click)="updateStatus(vm.id)">Disable</a>
+                <a mat-button (click)="updateVmStatus(vm.id, vm.enabled)">Disable</a> |
+                <a class="edit" [routerLink]="['duplicate',vm.id]">Duplicate</a>
               </span>
 
               <!-- if this virtue is disabled show this menu -->
               <span *ngIf="vm.enabled !== true"class="menu-options">
-                <a mat-button (click)="updateStatus(vm.id)">Enable</a> |
+                <a mat-button (click)="updateVmStatus(vm.id, vm.enabled)">Enable</a> |
                 <a mat-button (click)="openDialog(vm.id, 'delete', 'delete', vm.name)">Delete</a>
               </span>
           </div>
@@ -65,6 +67,7 @@
             </ul>
           </div>
           <div class="table-data mui-col-md-2">{{ vm.lastEditor }}</div>
+          <div class="table-data mui-col-md-1">{{ vm.securityTag }}</div>
           <div class="table-data mui-col-md-2">
             {{vm.enabled ? 'Enabled' : 'Disabled'}}<br />
             {{vm.lastModification | date:'short' }}

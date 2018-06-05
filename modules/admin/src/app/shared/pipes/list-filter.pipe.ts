@@ -1,5 +1,4 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Application } from '../models/application.model';
 
 @Pipe({
   name: 'listFilter'

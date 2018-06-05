@@ -1,31 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpEvent, HttpHeaders, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
-import { FormControl, FormGroup } from '@angular/forms';
-import { Routes, RouterModule, Router } from '@angular/router';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
-
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
+// import { VirtualMachine } from '../../shared/models/vm.model';
 
 @Component({
   selector: 'app-create-virtue',
   templateUrl: './create-virtue.component.html',
   styleUrls: ['./create-virtue.component.css'],
-  providers: [ BaseUrlService, VirtuesService, VirtualMachineService ]
+  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
 })
 
 export class CreateVirtueComponent implements OnInit {
-  vms: VirtualMachine;
+  // vms: VirtualMachine;
   virtueForm: FormControl;
   activeClass: string;
   baseUrl: string;
@@ -33,13 +32,14 @@ export class CreateVirtueComponent implements OnInit {
   virtues: Virtue[];
 
   vmList = [];
-  appList = [];
+  appsList = [];
   selVmsList = [];
   pageVmList = [];
 
   constructor(
     private baseUrlService: BaseUrlService,
     private router: Router,
+    private appsService: ApplicationsService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog
@@ -60,6 +60,7 @@ export class CreateVirtueComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getBaseUrl(awsServer);
+      this.getAppsList(awsServer);
     });
 
     if (this.pageVmList.length > 0) {
@@ -75,7 +76,7 @@ export class CreateVirtueComponent implements OnInit {
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-    }, 500);
+    }, 1000);
   }
 
   getVmList() {
@@ -97,23 +98,19 @@ export class CreateVirtueComponent implements OnInit {
       });
   }
 
-  getAppList() {
-    let vms = this.vmList;
-    let apps = [];
-    for (let vm of vms) {
-      apps = vm.applications;
-      for (let app of apps) {
-        this.appList.push({
-          'name': app.name,
-          'version': app.version,
-          'os': app.os,
-          'launchCommand': app.launchCommand
-        });
-      }
-    }
-    // console.log('getAppList():' + this.appList[0].name);
-    // return this.appList;
+  getAppsList(baseUrl: string) {
+    this.appsService.getAppsList(baseUrl).subscribe(data => {
+      this.appsList = data;
+    });
   }
+
+  getAppName(id: string) {
+    const app = this.appsList.filter(data =>  id === data.id);
+    if (id !== null) {
+      return app[0].name;
+    }
+  }
+
   getUpdatedVmList(baseUrl: string) {
     this.vmList = [];
     this.vmService.getVmList(baseUrl)
@@ -147,7 +144,7 @@ export class CreateVirtueComponent implements OnInit {
 
     this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
       data => {
-        return true;
+        return data;
       },
       error => {
         console.log(error.message);
@@ -165,7 +162,7 @@ export class CreateVirtueComponent implements OnInit {
     this.pageVmList.splice(index, 1);
   }
 
-  activateModal(id: string): void {
+  activateModal() {
 
     let dialogRef = this.dialog.open(VmModalComponent, {
       width: '800px',

@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { ActivatedRoute, Params } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Location } from '@angular/common';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -17,28 +15,21 @@ const httpHeader = {
 
 export class ApplicationsService {
 
-  configUrl = 'admin/application';
-  // restApi = './assets/json/applications.json';
+  configUrl = 'admin/application/';
 
   constructor(
     private httpClient: HttpClient
    ) {  }
 
-  // private getBaseUrl() {
-  //  let baseUrl = './assets/json/baseUrl.json';
-  //  // let jsondata = './assets/json/vm_apps.json';
-  //  return this.httpClient.get(baseUrl);
-  // }
-
   public getAppsList(baseUrl: string): Observable<Application[]> {
-    const src = `${baseUrl + this.configUrl}`;
+    const src = baseUrl + this.configUrl;
     return this.httpClient.get<Application[]>(src);
   }
 
-  public getApp(baseUrl: string, id: string): Observable<Application[]> {
-    const src = `${baseUrl + this.configUrl}/?id=${id}`;
-    // console.log('getApp ID: ' + id + ' @ ' + src);
-    return this.httpClient.get<Application[]>(src);
+  public getApp(baseUrl: string, id: string): Observable<any> {
+    const src = baseUrl + this.configUrl + id;
+    // console.log(src);
+    return this.httpClient.get<Application>(src);
   }
 
 /**
