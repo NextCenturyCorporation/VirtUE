@@ -110,6 +110,10 @@ export class AddUserComponent implements OnInit {
     }
   }
 
+  getVirtue(id: string) {
+
+  }
+
   getVirtues(baseUrl: string) {
     let selectedVirtue = this.storedVirtues;
     this.virtuesService.getVirtues(baseUrl)

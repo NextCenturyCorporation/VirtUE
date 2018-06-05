@@ -17,14 +17,14 @@ export class UsersService {
   constructor( private httpClient: HttpClient ) {}
 
   // Get all users
-  public getUsers( baseUrl: string ): Observable<any> {
+  getUsers( baseUrl: string ): Observable<any> {
     let awsServer = baseUrl + this.configUrl;
     return this.httpClient.get<any>(awsServer);
   }
 
   getUser(baseUrl: string, id: string): Observable<any> {
     let src = baseUrl + this.configUrl + id;
-    // console.log(src);
+    // console.log('getUser() --> ' + src);
     return this.httpClient.get<any>(src);
   }
 
@@ -57,6 +57,12 @@ export class UsersService {
     error => {
       console.log(error + ': users.service.ts (assignVirtues): looks like there\'s a problem posting virtue ' + virtue);
     });
+  }
+
+  public updateUser(baseUrl: string, username: string, userData: any) {
+    let url = baseUrl + this.configUrl + username;
+    console.log(url);
+    return this.httpClient.put(url, userData, httpOptions);
   }
 
   deleteUser(baseUrl: string, username: string) {
