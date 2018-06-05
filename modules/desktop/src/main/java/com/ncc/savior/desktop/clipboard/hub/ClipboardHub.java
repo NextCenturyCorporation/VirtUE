@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -78,25 +79,25 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		ServerSocket serverSocket = new ServerSocket(port);
 		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
 		try {
-		while (true) {
-			Socket socket = serverSocket.accept();
-			// BufferedWriter writer = new BufferedWriter(new
-			// OutputStreamWriter(socket.getOutputStream()));
-			// writer.write("hello??\n");
-			// writer.flush();
-			// writer.write("helsadlo??\n");
-			// writer.flush();
-			// writer.write("heldflo??\n");
-			// writer.write("helldo??\n");
-			// writer.flush();
-			// writer.write("helsdfo??\n");
-			// writer.write("helasdflo??\n");
-			// writer.flush();
-			IConnectionWrapper connection = new SocketConnection(socket);
-			IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-			String defaultGroup = "default";
-			hub.addClient(defaultGroup, serializer);
-		}
+			while (true) {
+				Socket socket = serverSocket.accept();
+				// BufferedWriter writer = new BufferedWriter(new
+				// OutputStreamWriter(socket.getOutputStream()));
+				// writer.write("hello??\n");
+				// writer.flush();
+				// writer.write("helsadlo??\n");
+				// writer.flush();
+				// writer.write("heldflo??\n");
+				// writer.write("helldo??\n");
+				// writer.flush();
+				// writer.write("helsdfo??\n");
+				// writer.write("helasdflo??\n");
+				// writer.flush();
+				IConnectionWrapper connection = new SocketConnection(socket);
+				IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
+				String defaultGroup = "default";
+				hub.addClient(defaultGroup, serializer);
+			}
 		} finally {
 			JavaUtil.closeIgnoreErrors(serverSocket);
 		}
@@ -216,8 +217,10 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		}
 	}
 
-	protected synchronized void sendMessageToAllButSource(IClipboardMessage message) {
-		for (Entry<String, IClipboardMessageSenderReceiver> entry : transmitters.entrySet()) {
+	protected void sendMessageToAllButSource(IClipboardMessage message) {
+		Map<String, IClipboardMessageSenderReceiver> copyOfTransmitters = new HashMap<String, IClipboardMessageSenderReceiver>(
+				transmitters);
+		for (Entry<String, IClipboardMessageSenderReceiver> entry : copyOfTransmitters.entrySet()) {
 			String source = message.getSourceId();
 			if (!entry.getKey().equals(source)) {
 				IClipboardMessageSenderReceiver transmitter = entry.getValue();
