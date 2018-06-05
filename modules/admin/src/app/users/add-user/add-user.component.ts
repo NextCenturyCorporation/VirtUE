@@ -2,37 +2,40 @@ import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material';
 
 import { Observable } from 'rxjs/Observable';
 
+import { User } from '../../shared/models/user.model';
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
-import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
+import { MatDialog } from '@angular/material';
+import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 @Component({
   selector: 'app-add-user',
   templateUrl: './add-user.component.html',
-  providers: [BaseUrlService, UsersService, VirtuesService]
+  providers: [ApplicationsService, BaseUrlService, UsersService, VirtuesService]
 })
 
 export class AddUserComponent implements OnInit {
 
-  submitBtn: any;
-  fullImagePath: string;
-  awsServer: any;
-
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
-
-  storedVirtues = [];
+  appsList = [];
   selVirtues = [];
+  storedVirtues = [];
   virtues = [];
+  awsServer: any;
+  baseUrl: string;
+  fullImagePath: string;
+  submitBtn: any;
 
   constructor(
     public dialog: MatDialog,
+    private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     private router: Router,
     private usersService: UsersService,
@@ -54,7 +57,8 @@ export class AddUserComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe(data => {
       let url = data[0].aws_server;
       this.getBaseUrl(url);
-      this.virtuesService.getVirtues(url);
+      this.getVirtues(url);
+      this.getApps(url);
     });
   }
 
@@ -85,7 +89,8 @@ export class AddUserComponent implements OnInit {
 
     let body = {
       'username': username,
-      'authorities': authorities
+      'authorities': authorities,
+      'virtueTemplateIds': virtueTemplateIds
     };
 
     if (!body.username) { return; }
@@ -110,10 +115,6 @@ export class AddUserComponent implements OnInit {
     }
   }
 
-  getVirtue(id: string) {
-
-  }
-
   getVirtues(baseUrl: string) {
     let selectedVirtue = this.storedVirtues;
     this.virtuesService.getVirtues(baseUrl)
@@ -133,6 +134,50 @@ export class AddUserComponent implements OnInit {
     });
   }
 
+  getApps(baseUrl: string) {
+    if (baseUrl !== null) {
+      this.appsService.getAppsList(baseUrl).subscribe(data => {
+        this.appsList = data;
+      });
+    }
+  }
+
+  getVirtueName(id: string) {
+    let userVirtue = [];
+    if (id !== null) {
+      userVirtue = this.virtues.filter(data => data.id === id)
+        .map(virtue => virtue.name);
+      return userVirtue;
+    }
+  }
+
+  getVirtueAppIds(id: string) {
+    let virtueApps: any;
+    let virtueAppsList: any;
+    if (this.baseUrl !== null) {
+      virtueApps = this.virtues.filter(data => data.id === id)
+        .map(virtue => virtue.applicationIds);
+      virtueAppsList = virtueApps.toString();
+      // console.log(virtueAppsList);
+      return this.getVirtueApps(virtueAppsList);
+    }
+  }
+
+  getVirtueApps(apps: any) {
+    let appList: any;
+    let appInfo: any;
+    let appNames: string = '';
+    let i: number = 0;
+    appList = apps.split(',');
+    for (let id of appList) {
+      i++;
+      appInfo = this.appsList.filter(data => data.id === id)
+        .map(app => app.name);
+      // console.log(appInfo.toString());
+      appNames = appNames + `<li>${appInfo.toString()}</li>`;
+    }
+    return appNames;
+  }
   getUpdatedVirtueList(baseUrl: string) {
     this.virtues = [];
     this.virtuesService.getVirtues(baseUrl)

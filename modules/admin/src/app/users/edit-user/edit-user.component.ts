@@ -20,7 +20,6 @@ import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 export class EditUserComponent implements OnInit {
   @Input() user: User;
 
-  appNames: string;
   baseUrl: string;
   userToEdit: { id: string };
   submitBtn: any;
@@ -202,20 +201,16 @@ export class EditUserComponent implements OnInit {
   }
 
   updateThisUser(username: string, roleUser: any, roleAdmin: any) {
+    let authorities = [];
     if (roleUser) {
-      roleUser = 'ROLE_USER';
-    } else {
-      roleUser = '';
+      authorities.push('ROLE_USER');
     }
     if (roleAdmin) {
-      roleUser = 'ROLE_USER';
-    } else {
-      roleAdmin = '';
+      authorities.push('ROLE_ADMIN');
     }
-    let userAuthorities = [roleUser, roleAdmin];
     let body = {
       'username': username,
-      'authorities': userAuthorities,
+      'authorities': authorities,
       'virtueTemplateIds': this.selVirtues
     };
     console.log(body);
