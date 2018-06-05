@@ -184,8 +184,6 @@ export class EditVirtueComponent implements OnInit {
         this.pageVmList = [];
       }
       this.pageVmList = this.selVmsList;
-
-
       this.getVirtueVmList(this.pageVmList);
     });
 
