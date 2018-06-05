@@ -91,7 +91,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 			@Override
 			public void run() {
-				x11.XInitThreads();
+				// x11.XInitThreads();
 				display = X11.INSTANCE.XOpenDisplay(null);
 				clipboardAtom = x11.XInternAtom(display, "CLIPBOARD", false);
 				selectionDataProperty = x11.XInternAtom(display, "XSEL_DATA", false);
@@ -314,20 +314,11 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		});
 		WindowProperty myprop = waitForUpdatedDataWindowProp();
 		if (myprop == null) {
+			// somewhat to clear the thread if the waiting timed out. this shouldn't happen.
 			myprop = getWindowProperty();
 		}
 		ClipboardData data = convertClipboardData(format, myprop);
 		return data;
-	}
-
-	public boolean amISelectionOwner() {
-		Window retWin = x11.XGetSelectionOwner(display, clipboardAtom);
-		return window.equals(retWin);
-	}
-
-	public boolean isThereAClipboardOwner() {
-		Window retWin = x11.XGetSelectionOwner(display, clipboardAtom);
-		return retWin != null;
 	}
 
 	public void becomeSelectionOwner() {
@@ -337,6 +328,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		});
 	}
 
+	/**
+	 * MUST be called from main loop
+	 */
 	private void sendSelectionNotifyEvent(int numItems, Pointer ptr, XSelectionEvent sne, int formatOrSizeInBits,
 			Atom type) {
 		logger.debug("sending SelectionNotifyEvent: " + type + " " + x11.XGetAtomName(display, type));
@@ -347,6 +341,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		x11.XSendEvent(display, sne.requestor, X11.NoEventMask, new NativeLong(0), eventToSend);
 	}
 
+	// called from event loop
 	private void sendFormats(XSelectionEvent sne) {
 		if (delayedFormats.size() > 0) {
 			ArrayList<ClipboardFormat> formats = new ArrayList<ClipboardFormat>(delayedFormats);
