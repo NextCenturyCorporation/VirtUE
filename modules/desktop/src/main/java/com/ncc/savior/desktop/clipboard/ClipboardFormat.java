@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.clipboard;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public enum ClipboardFormat {
 	TEXT(1, "STRING"), UNICODE(13, "UTF8_STRING");
