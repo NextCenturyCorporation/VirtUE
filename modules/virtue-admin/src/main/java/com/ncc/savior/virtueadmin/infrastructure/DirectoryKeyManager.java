@@ -2,7 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.io.File;
 
-import com.ncc.savior.virtueadmin.util.SshUtil;
+import com.ncc.savior.util.SshUtil;
 
 /**
  * {@link IKeyManager} implementation that reads files from a directory. The

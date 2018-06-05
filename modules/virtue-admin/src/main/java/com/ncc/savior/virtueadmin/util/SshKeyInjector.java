@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.util.RsaKeyGenerator.PublicPrivatePair;
 

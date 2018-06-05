@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.util;
+package com.ncc.savior.util;
 
 import java.io.Closeable;
 

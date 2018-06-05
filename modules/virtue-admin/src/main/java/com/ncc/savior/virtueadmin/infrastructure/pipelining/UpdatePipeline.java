@@ -7,8 +7,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * Implementation of {@link IUpdatePipeline}. See {@link IUpdatePipeline}

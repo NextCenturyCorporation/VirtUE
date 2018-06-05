@@ -2,10 +2,10 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.Map;
 
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * {@link ICloudManager} implementation which delegates individual VM actions to
