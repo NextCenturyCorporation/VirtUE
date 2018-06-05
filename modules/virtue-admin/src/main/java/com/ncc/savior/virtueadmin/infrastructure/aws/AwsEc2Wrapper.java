@@ -33,7 +33,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
- * Class that essentially wraps the AWS EC2 interface to provide a simplier
+ * Class that essentially wraps the AWS EC2 interface to provide a simpler
  * interface for what the project needs.
  * 
  *

@@ -39,7 +39,7 @@ import com.sun.jna.win32.W32APIOptions;
  */
 public class DelayedRenderSample {
 	private static Logger logger = LoggerFactory.getLogger(DelayedRenderSample.class);
-	private static boolean clipboardNotUsed = true;
+	private static volatile boolean clipboardNotUsed = true;
 
 	public static void main(String[] args) throws InterruptedException {
 
