@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.clipboard.messages;
 
 import java.io.Serializable;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
+
 /**
  * Message that requests the current active clipboard data for the given format.
  *
@@ -9,16 +11,16 @@ import java.io.Serializable;
 public class ClipboardDataRequestMessage extends BaseClipboardMessage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private int format;
+	private ClipboardFormat format;
 	private String requestId;
 
-	public ClipboardDataRequestMessage(String ownerId, int format, String requestId) {
+	public ClipboardDataRequestMessage(String ownerId, ClipboardFormat format, String requestId) {
 		super(ownerId);
 		this.format = format;
 		this.requestId = requestId;
 	}
 
-	public int getFormat() {
+	public ClipboardFormat getFormat() {
 		return format;
 	}
 

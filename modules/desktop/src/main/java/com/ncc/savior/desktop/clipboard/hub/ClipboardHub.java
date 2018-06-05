@@ -3,6 +3,8 @@ package com.ncc.savior.desktop.clipboard.hub;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,6 +15,7 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
@@ -28,7 +31,7 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
-import com.ncc.savior.desktop.clipboard.windows.IWindowsClipboardUser32;
+import com.ncc.savior.util.JavaUtil;
 
 /**
  * Central hub point for the shared clipboard data. All messages should be sent
@@ -50,14 +53,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private String hubId = "Hub-0";
 	private Map<String, IClipboardMessageSenderReceiver> transmitters;
 	private String clipboardOwnerId;
-	private Set<Integer> validFormats;
+	private Set<ClipboardFormat> validFormats;
 	private ICrossGroupDataGuard dataGuard;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
-		transmitters = new TreeMap<String, IClipboardMessageSenderReceiver>();
-		validFormats = new TreeSet<Integer>();
-		validFormats.add(IWindowsClipboardUser32.CF_TEXT);
-		validFormats.add(IWindowsClipboardUser32.CF_UNICODE);
+		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
+		validFormats = new TreeSet<ClipboardFormat>();
+		validFormats.add(ClipboardFormat.TEXT);
+		validFormats.add(ClipboardFormat.UNICODE);
 		this.dataGuard = dataGuard;
 	}
 
@@ -74,25 +77,29 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			usage("Invalid parameters");
 		}
 		ServerSocket serverSocket = new ServerSocket(port);
-		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(false));
-		while (true) {
-			Socket socket = serverSocket.accept();
-			// BufferedWriter writer = new BufferedWriter(new
-			// OutputStreamWriter(socket.getOutputStream()));
-			// writer.write("hello??\n");
-			// writer.flush();
-			// writer.write("helsadlo??\n");
-			// writer.flush();
-			// writer.write("heldflo??\n");
-			// writer.write("helldo??\n");
-			// writer.flush();
-			// writer.write("helsdfo??\n");
-			// writer.write("helasdflo??\n");
-			// writer.flush();
-			IConnectionWrapper connection = new SocketConnection(socket);
-			IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-			String defaultGroup = "default";
-			hub.addClient(defaultGroup, serializer);
+		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
+		try {
+			while (true) {
+				Socket socket = serverSocket.accept();
+				// BufferedWriter writer = new BufferedWriter(new
+				// OutputStreamWriter(socket.getOutputStream()));
+				// writer.write("hello??\n");
+				// writer.flush();
+				// writer.write("helsadlo??\n");
+				// writer.flush();
+				// writer.write("heldflo??\n");
+				// writer.write("helldo??\n");
+				// writer.flush();
+				// writer.write("helsdfo??\n");
+				// writer.write("helasdflo??\n");
+				// writer.flush();
+				IConnectionWrapper connection = new SocketConnection(socket);
+				IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
+				String defaultGroup = "default";
+				hub.addClient(defaultGroup, serializer);
+			}
+		} finally {
+			JavaUtil.closeIgnoreErrors(serverSocket);
 		}
 	}
 
@@ -144,7 +151,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		if (message instanceof ClipboardChangedMessage) {
 			// source has taken control of clipboard
 			ClipboardChangedMessage m = (ClipboardChangedMessage) message;
-			Set<Integer> formats = m.getFormats();
+			Set<ClipboardFormat> formats = m.getFormats();
 			filterToValidFormats(formats);
 			this.clipboardOwnerId = m.getSourceId();
 			// need to inform all clients that the clipboard has changed
@@ -178,7 +185,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 				// Data transfer has been denied, but the client still needs a response. We'll
 				// send it an empty data object.
 				transmitter = transmitters.get(message.getSourceId());
-				int format = ((ClipboardDataRequestMessage) message).getFormat();
+				ClipboardFormat format = ((ClipboardDataRequestMessage) message).getFormat();
 				IClipboardMessage dataMessage = new ClipboardDataMessage(hubId, new EmptyClipboardData(format),
 						m.getRequestId(), m.getSourceId());
 				sendMessageHandleError(dataMessage, transmitter, message.getSourceId());
@@ -200,18 +207,20 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	 *
 	 * @param formats
 	 */
-	private void filterToValidFormats(Set<Integer> formats) {
-		Iterator<Integer> itr = formats.iterator();
+	private void filterToValidFormats(Set<ClipboardFormat> formats) {
+		Iterator<ClipboardFormat> itr = formats.iterator();
 		while (itr.hasNext()) {
-			Integer format = itr.next();
-			if (!validFormats.contains(format)) {
+			ClipboardFormat format = itr.next();
+			if (format == null || !validFormats.contains(format)) {
 				itr.remove();
 			}
 		}
 	}
 
-	protected void sendMessageToAllButSource(IClipboardMessage message) {
-		for (Entry<String, IClipboardMessageSenderReceiver> entry : transmitters.entrySet()) {
+	protected synchronized void sendMessageToAllButSource(IClipboardMessage message) {
+		Map<String, IClipboardMessageSenderReceiver> copyOfTransmitters = new HashMap<String, IClipboardMessageSenderReceiver>(
+				transmitters);
+		for (Entry<String, IClipboardMessageSenderReceiver> entry : copyOfTransmitters.entrySet()) {
 			String source = message.getSourceId();
 			if (!entry.getKey().equals(source)) {
 				IClipboardMessageSenderReceiver transmitter = entry.getValue();

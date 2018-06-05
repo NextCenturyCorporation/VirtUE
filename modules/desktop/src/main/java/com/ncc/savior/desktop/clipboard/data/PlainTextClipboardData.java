@@ -2,7 +2,7 @@ package com.ncc.savior.desktop.clipboard.data;
 
 import java.io.Serializable;
 
-import com.ncc.savior.desktop.clipboard.windows.IWindowsClipboardUser32;
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
@@ -17,7 +17,7 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 	private String data;
 
 	public PlainTextClipboardData(String data) {
-		super(IWindowsClipboardUser32.CF_TEXT);
+		super(ClipboardFormat.TEXT);
 		this.data = data;
 	}
 
@@ -32,6 +32,25 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 	@Override
 	public String toString() {
 		return "PlainTextClipboardData [data=" + data + "]";
+	}
+
+	@Override
+	public Pointer getLinuxData() {
+		int size = 1 * (data.length());
+		Memory mem = new Memory(size + 1);
+		mem.clear();
+		mem.setString(0, data);
+		return mem;
+	}
+
+	@Override
+	public int getLinuxNumEntries() {
+		return data.length();
+	}
+
+	@Override
+	public int getLinuxEntrySizeBits() {
+		return 8;
 	}
 
 }

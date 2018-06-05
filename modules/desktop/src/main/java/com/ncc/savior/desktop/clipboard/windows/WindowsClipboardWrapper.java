@@ -11,12 +11,13 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
+import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
-import com.ncc.savior.desktop.clipboard.data.WideTextClipboardData;
 import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
@@ -156,7 +157,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * handle that callback.
 	 */
 	@Override
-	public void setDelayedRenderFormats(Set<Integer> formats) {
+	public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
 		executor.schedule(new Runnable() {
 
 			@Override
@@ -184,7 +185,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 */
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
-		user32.SetClipboardData(clipboardData.getFormat(), clipboardData.getWindowsData());
+		user32.SetClipboardData(clipboardData.getFormat().getWindows(), clipboardData.getWindowsData());
 	}
 
 	/**
@@ -195,7 +196,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 */
 	protected void onPaste(WPARAM wParam) {
 		if (clipboardListener != null) {
-			clipboardListener.onPasteAttempt(wParam.intValue());
+			clipboardListener.onPasteAttempt(ClipboardFormat.fromWindows(wParam.intValue()));
 		} else {
 			Pointer p = new Memory(1);
 			p.setByte(0, (byte) 0);
@@ -212,7 +213,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			executor.schedule(new Runnable() {
 				@Override
 				public void run() {
-					Set<Integer> formats = getClipboardFormatsAvailable();
+					Set<ClipboardFormat> formats = getClipboardFormatsAvailable();
 					clipboardListener.onClipboardChanged(formats);
 				}
 			}, 1, TimeUnit.MICROSECONDS);
@@ -235,15 +236,15 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * @param windowHandle2
 	 * @param formats
 	 */
-	protected void writeNullToClipboard(Set<Integer> formats) {
+	protected void writeNullToClipboard(Set<ClipboardFormat> formats) {
 		openClipboardWhenFree();
 		try {
 			boolean success = user32.EmptyClipboard();
 			if (!success) {
 				throw windowsErrorToException("Error emptying clipboard");
 			}
-			for (Integer format : formats) {
-				user32.SetClipboardData(format, Pointer.NULL);
+			for (ClipboardFormat format : formats) {
+				user32.SetClipboardData(format.getWindows(), Pointer.NULL);
 				WindowsError error = getLastError();
 				if (error.error != 0) {
 					throw windowsErrorToException("Error writing NULL to clipboard with format=" + format, error);
@@ -260,16 +261,19 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
-	private Set<Integer> getClipboardFormatsAvailable() {
+	private Set<ClipboardFormat> getClipboardFormatsAvailable() {
 		IntByReference returnedSizeOfFormats = new IntByReference();
 		int sizeOfFormats = 20;
 		int[] formats = new int[sizeOfFormats];
 		boolean success = user32.GetUpdatedClipboardFormats(formats, sizeOfFormats, returnedSizeOfFormats);
 		if (success) {
-			Set<Integer> set = new HashSet<Integer>();
+			Set<ClipboardFormat> set = new HashSet<ClipboardFormat>();
 			int[] arr = Arrays.copyOf(formats, returnedSizeOfFormats.getValue());
 			for (int a : arr) {
-				set.add(a);
+				ClipboardFormat format = ClipboardFormat.fromWindows(a);
+				if (format != null) {
+					set.add(format);
+				}
 			}
 			return set;
 		} else {
@@ -349,23 +353,25 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	}
 
 	@Override
-	public ClipboardData getClipboardData(int format) {
+
+	public ClipboardData getClipboardData(ClipboardFormat format) {
 		openClipboardWhenFree();
-		Pointer p = user32.GetClipboardData(format);
+		Pointer p = user32.GetClipboardData(format.getWindows());
 		user32.CloseClipboard();
 		return clipboardPointerToData(format, p);
 	}
 
-	private ClipboardData clipboardPointerToData(int format, Pointer p) {
+	private ClipboardData clipboardPointerToData(ClipboardFormat format, Pointer p) {
 		if (p == null) {
 			return new EmptyClipboardData(format);
 		}
-		switch (format) {
+		switch (format.getWindows()) {
 		case IWindowsClipboardUser32.CF_TEXT:
 			return new PlainTextClipboardData(p.getString(0));
 		case IWindowsClipboardUser32.CF_UNICODE:
+			// reads properly
 			String wideString = p.getWideString(0);
-			return new WideTextClipboardData(wideString);
+			return new UnicodeClipboardData(wideString);
 		default:
 			return new UnknownClipboardData(format);
 		}

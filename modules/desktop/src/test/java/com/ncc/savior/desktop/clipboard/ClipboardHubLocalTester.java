@@ -20,7 +20,6 @@ import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
-import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.ncc.savior.util.JavaUtil;
 
 /**
@@ -32,31 +31,37 @@ import com.ncc.savior.util.JavaUtil;
 public class ClipboardHubLocalTester {
 
 	public static void main(String[] args) throws IOException {
-		int port = 1022;
-		ServerSocket serverSocket = new ServerSocket(port);
-		WindowsClipboardWrapper wcw = new WindowsClipboardWrapper();
-		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
+		ServerSocket serverSocket = null;
+		try {
+			int port = 10022;
+			serverSocket = new ServerSocket(port);
+			IClipboardWrapper wcw = ClipboardClient.getClipboardWrapperForOperatingSystem();
+			ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
 
-		Thread clientThread = createClientThread(port, wcw);
-		clientThread.start();
-		Socket socket = serverSocket.accept();
-		IConnectionWrapper connection = new SocketConnection(socket);
-		IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-		String groupId = "client1";
-		hub.addClient(groupId, serializer);
+			Thread clientThread = createClientThread(port, wcw);
+			clientThread.start();
+			Socket socket = serverSocket.accept();
+			IConnectionWrapper connection = new SocketConnection(socket);
+			IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
+			String groupId = "client1";
+			hub.addClient(groupId, serializer);
 
-		Thread testThread = createClientThread(port, new TestClipboardWrapper());
-		testThread.start();
-		Socket testSocket = serverSocket.accept();
-		IConnectionWrapper testConnection = new SocketConnection(testSocket);
-		IMessageSerializer testSerializer = new JavaObjectMessageSerializer(testConnection);
-		groupId = "client2";
-		hub.addClient(groupId, testSerializer);
+			Thread testThread = createClientThread(port, new TestClipboardWrapper());
+			testThread.start();
+			Socket testSocket = serverSocket.accept();
+			IConnectionWrapper testConnection = new SocketConnection(testSocket);
+			IMessageSerializer testSerializer = new JavaObjectMessageSerializer(testConnection);
+			groupId = "client2";
+			hub.addClient(groupId, testSerializer);
 
-		while (true) {
-			JavaUtil.sleepAndLogInterruption(1000);
+			while (true) {
+				JavaUtil.sleepAndLogInterruption(1000);
+			}
+		} finally {
+			if (serverSocket != null) {
+				serverSocket.close();
+			}
 		}
-
 	}
 
 	private static Thread createClientThread(int port, IClipboardWrapper clipboardWrapper) {
@@ -97,7 +102,7 @@ public class ClipboardHubLocalTester {
 	public static class TestClipboardWrapper implements IClipboardWrapper {
 		private static final Logger logger = LoggerFactory.getLogger(TestClipboardWrapper.class);
 
-		private ArrayList<Integer> renderFormats;
+		private ArrayList<ClipboardFormat> renderFormats;
 		private IClipboardListener listener;
 		private ClipboardData data;
 		private Thread thread;
@@ -105,16 +110,19 @@ public class ClipboardHubLocalTester {
 		private boolean owner = false;
 
 		public TestClipboardWrapper() {
-			this.renderFormats = new ArrayList<Integer>();
+			this.renderFormats = new ArrayList<ClipboardFormat>();
 			this.thread = new Thread(new Runnable() {
 
 				@Override
 				public void run() {
 					while (true) {
+						JavaUtil.sleepAndLogInterruption(10000);
+						logger.debug("test client sending copy");
 						copy();
-						JavaUtil.sleepAndLogInterruption(3000);
+						JavaUtil.sleepAndLogInterruption(10000);
+						logger.debug("test client sending paste");
 						paste();
-						JavaUtil.sleepAndLogInterruption(3000);
+
 					}
 				}
 
@@ -123,7 +131,7 @@ public class ClipboardHubLocalTester {
 		}
 
 		protected void copy() {
-			Set<Integer> formats = Collections.singleton(1);
+			Set<ClipboardFormat> formats = Collections.singleton(ClipboardFormat.TEXT);
 			if (listener != null) {
 				listener.onClipboardChanged(formats);
 			}
@@ -132,12 +140,13 @@ public class ClipboardHubLocalTester {
 
 		private void paste() {
 			if (!owner && listener != null) {
-				listener.onPasteAttempt(1);
+				ClipboardFormat format = ClipboardFormat.TEXT;
+				listener.onPasteAttempt(format);
 			}
 		}
 
 		@Override
-		public void setDelayedRenderFormats(Set<Integer> formats) {
+		public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
 			owner = false;
 			this.renderFormats.clear();
 			this.renderFormats.addAll(formats);
@@ -155,7 +164,7 @@ public class ClipboardHubLocalTester {
 		}
 
 		@Override
-		public ClipboardData getClipboardData(int format) {
+		public ClipboardData getClipboardData(ClipboardFormat format) {
 			return new PlainTextClipboardData(new Date().toString());
 		}
 

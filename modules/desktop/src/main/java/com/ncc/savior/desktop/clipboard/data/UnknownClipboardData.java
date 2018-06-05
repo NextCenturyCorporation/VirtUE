@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.clipboard.data;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Pointer;
 
 /**
@@ -12,8 +13,8 @@ public class UnknownClipboardData extends ClipboardData {
 
 	private static final long serialVersionUID = 1L;
 
-	public UnknownClipboardData(int format) {
-		super(format);
+	public UnknownClipboardData(ClipboardFormat cf) {
+		super(cf);
 	}
 
 	@Override
@@ -21,4 +22,18 @@ public class UnknownClipboardData extends ClipboardData {
 		return Pointer.NULL;
 	}
 
+	@Override
+	public Pointer getLinuxData() {
+		return Pointer.NULL;
+	}
+
+	@Override
+	public int getLinuxNumEntries() {
+		return 0;
+	}
+
+	@Override
+	public int getLinuxEntrySizeBits() {
+		return 8;
+	}
 }

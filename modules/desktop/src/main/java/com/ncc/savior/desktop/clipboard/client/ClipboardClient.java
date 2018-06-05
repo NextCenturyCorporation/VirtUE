@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
@@ -19,6 +20,7 @@ import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
+import com.ncc.savior.desktop.clipboard.linux.X11ClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
@@ -26,6 +28,8 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
+import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.virtueadmin.model.OS;
 
 /**
  * Clipboard class to be run on a client machine that we want to connect the
@@ -75,7 +79,7 @@ public class ClipboardClient {
 		IClipboardListener listener = new IClipboardListener() {
 
 			@Override
-			public void onPasteAttempt(int format) {
+			public void onPasteAttempt(ClipboardFormat format) {
 				try {
 					ClipboardDataRequestMessage requestMsg = new ClipboardDataRequestMessage(myId, format,
 							UUID.randomUUID().toString());
@@ -92,7 +96,7 @@ public class ClipboardClient {
 			}
 
 			@Override
-			public void onClipboardChanged(Set<Integer> formats) {
+			public void onClipboardChanged(Set<ClipboardFormat> formats) {
 				try {
 					ClipboardChangedMessage msg = new ClipboardChangedMessage(myId, formats);
 					logger.debug("sending message=" + msg);
@@ -199,7 +203,7 @@ public class ClipboardClient {
 		if (args.length > 2) {
 			usage("Invalid parameters");
 		}
-		WindowsClipboardWrapper clipboardWrapper = new WindowsClipboardWrapper();
+		IClipboardWrapper clipboardWrapper = getClipboardWrapperForOperatingSystem();
 		Socket clientSocket = new Socket(hostname, port);
 		// BufferedReader in = new BufferedReader(new
 		// InputStreamReader(clientSocket.getInputStream()));
@@ -237,5 +241,23 @@ public class ClipboardClient {
 		System.out.println("  port: optional parameter to set the port where the hub is listening.  Default: "
 				+ ClipboardHub.DEFAULT_PORT);
 
+	}
+
+	public static IClipboardWrapper getClipboardWrapperForOperatingSystem() {
+		OS os = JavaUtil.getOs();
+		IClipboardWrapper clipboardWrapper;
+		switch (os) {
+		case LINUX:
+			clipboardWrapper = new X11ClipboardWrapper();
+			break;
+		case MAC:
+			throw new RuntimeException("Mac clipboard is currently not supported!");
+		case WINDOWS:
+			clipboardWrapper = new WindowsClipboardWrapper();
+			break;
+		default:
+			throw new RuntimeException("Clipboard is currently not supported on your operating system!");
+		}
+		return clipboardWrapper;
 	}
 }
