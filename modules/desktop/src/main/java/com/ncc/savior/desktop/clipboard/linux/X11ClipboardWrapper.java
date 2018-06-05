@@ -254,8 +254,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 						if (logger.isTraceEnabled()) {
 							logger.trace("sending clipboard Changed message.  Formats=" + acf);
 						}
-						listener.onClipboardChanged(acf);
-						previousFormats = acf;
+						if (!ownSelection) {
+							previousFormats = acf;
+							listener.onClipboardChanged(acf);
+						}
 					}
 
 				} else {
@@ -372,6 +374,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			logger.debug("Waited for formats format: " + raw.formatBytes + " type: " + raw.type + " "
 					+ x11.XGetAtomName(display, raw.type));
 		}
+		// TODO what if raw is null because it timed out (initialization and no
+		// clipboard)
 		for (int i = 0; i < raw.numItems; i++) {
 			NativeLong nl = raw.property.getNativeLong(i * NativeLong.SIZE);
 			// logger.debug(" " + val + " 0x" + Long.toHexString(val));
