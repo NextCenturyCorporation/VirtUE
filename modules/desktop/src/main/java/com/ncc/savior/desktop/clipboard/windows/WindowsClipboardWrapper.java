@@ -186,6 +186,16 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		user32.SetClipboardData(clipboardData.getFormat().getWindows(), clipboardData.getWindowsData());
+		if (!clipboardData.isCacheable()) {
+			executor.schedule(() -> {
+				openClipboardWhenFree();
+				try {
+					writeNullToClipboard(clipboardData.getFormat());
+				} finally {
+					closeClipboardIfOwner();
+				}
+			}, 5, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	/**
@@ -244,20 +254,28 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				throw windowsErrorToException("Error emptying clipboard");
 			}
 			for (ClipboardFormat format : formats) {
-				user32.SetClipboardData(format.getWindows(), Pointer.NULL);
-				WindowsError error = getLastError();
-				if (error.error != 0) {
-					throw windowsErrorToException("Error writing NULL to clipboard with format=" + format, error);
-				}
+				writeNullToClipboard(format);
 			}
 		} catch (Throwable t) {
 			throw windowsErrorToException("Error attempting to write null to clipboard for formats=" + formats, null,
 					t);
 		} finally {
-			HWND owner = user32.GetClipboardOwner();
-			if (windowHandle.equals(owner)) {
-				user32.CloseClipboard();
-			}
+			closeClipboardIfOwner();
+		}
+	}
+
+	private void closeClipboardIfOwner() {
+		HWND owner = user32.GetClipboardOwner();
+		if (windowHandle.equals(owner)) {
+			user32.CloseClipboard();
+		}
+	}
+
+	private void writeNullToClipboard(ClipboardFormat format) {
+		user32.SetClipboardData(format.getWindows(), Pointer.NULL);
+		WindowsError error = getLastError();
+		if (error.error != 0) {
+			throw windowsErrorToException("Error writing NULL to clipboard with format=" + format, error);
 		}
 	}
 
