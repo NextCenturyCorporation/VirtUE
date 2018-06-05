@@ -79,25 +79,25 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		ServerSocket serverSocket = new ServerSocket(port);
 		ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
 		try {
-		while (true) {
-			Socket socket = serverSocket.accept();
-			// BufferedWriter writer = new BufferedWriter(new
-			// OutputStreamWriter(socket.getOutputStream()));
-			// writer.write("hello??\n");
-			// writer.flush();
-			// writer.write("helsadlo??\n");
-			// writer.flush();
-			// writer.write("heldflo??\n");
-			// writer.write("helldo??\n");
-			// writer.flush();
-			// writer.write("helsdfo??\n");
-			// writer.write("helasdflo??\n");
-			// writer.flush();
-			IConnectionWrapper connection = new SocketConnection(socket);
-			IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-			String defaultGroup = "default";
-			hub.addClient(defaultGroup, serializer);
-		}
+			while (true) {
+				Socket socket = serverSocket.accept();
+				// BufferedWriter writer = new BufferedWriter(new
+				// OutputStreamWriter(socket.getOutputStream()));
+				// writer.write("hello??\n");
+				// writer.flush();
+				// writer.write("helsadlo??\n");
+				// writer.flush();
+				// writer.write("heldflo??\n");
+				// writer.write("helldo??\n");
+				// writer.flush();
+				// writer.write("helsdfo??\n");
+				// writer.write("helasdflo??\n");
+				// writer.flush();
+				IConnectionWrapper connection = new SocketConnection(socket);
+				IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
+				String defaultGroup = "default";
+				hub.addClient(defaultGroup, serializer);
+			}
 		} finally {
 			JavaUtil.closeIgnoreErrors(serverSocket);
 		}
@@ -217,7 +217,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		}
 	}
 
-	protected synchronized void sendMessageToAllButSource(IClipboardMessage message) {
+	protected void sendMessageToAllButSource(IClipboardMessage message) {
 		Map<String, IClipboardMessageSenderReceiver> copyOfTransmitters = new HashMap<String, IClipboardMessageSenderReceiver>(
 				transmitters);
 		for (Entry<String, IClipboardMessageSenderReceiver> entry : copyOfTransmitters.entrySet()) {

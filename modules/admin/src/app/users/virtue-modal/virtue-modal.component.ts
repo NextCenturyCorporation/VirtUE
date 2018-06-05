@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Inject, Input, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 
 import { Virtue } from '../../shared/models/virtue.model';
 import { ApplicationsService } from '../../shared/services/applications.service';
@@ -20,8 +20,10 @@ export class VirtueModalComponent implements OnInit {
   @ViewChild('userVirtue') userVirtueRef: ElementRef;
 
   form: FormGroup;
+  baseUrl: string;
 
   addVirtues = new EventEmitter();
+  appsList = [];
   virtues = [];
   selVirtues = [];
   storedVirtues = [];
@@ -33,13 +35,22 @@ export class VirtueModalComponent implements OnInit {
     private virtuesService: VirtuesService,
     public dialogRef: MatDialogRef<VirtueModalComponent>,
     @Inject( MAT_DIALOG_DATA ) public data: any
-   ) {  }
+   ) {
+    this.storedVirtues = data['storedVirtues'];
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
+      this.getBaseUrl(awsServer);
       this.getVirtues(awsServer);
+      this.getApps(awsServer);
     });
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+    // console.log('getBaseUrl() => ' + this.baseUrl);
   }
 
   getVirtues(baseUrl: string) {
@@ -47,6 +58,15 @@ export class VirtueModalComponent implements OnInit {
       .subscribe(virtues => {
         this.virtues = virtues;
       });
+  }
+
+  getApps(baseUrl: string) {
+    this.appService.getAppsList(baseUrl).subscribe(data => this.appsList = data);
+  }
+
+  getAppName(id: string) {
+    let app = this.appsList.filter(data => data.id === id);
+    return app[0].name;
   }
 
   selectedVirtues(id: string) {
@@ -61,15 +81,17 @@ export class VirtueModalComponent implements OnInit {
     }
   }
 
-  cbVirtueList(event, id: string, index: number) {
+  cbVirtueList(event, id: string) {
     if (event === true) {
       this.selVirtues.push(id);
+      console.log('Added ' + id);
     } else {
-      this.removeVm(id, index);
+      this.removeVm(id);
+      console.log('removed ' + id);
     }
   }
 
-  removeVm(id: string, index: number) {
+  removeVm(id: string) {
     this.selVirtues.splice(this.selVirtues.indexOf(id), 1);
   }
 
@@ -83,6 +105,8 @@ export class VirtueModalComponent implements OnInit {
     //   this.selVmsList = this.storedVirtues;
     // }
     this.addVirtues.emit(this.selVirtues);
+    console.log('Selected Virtues: ');
+    console.log(this.selVirtues);
     this.clearList();
     this.dialogRef.close();
   }

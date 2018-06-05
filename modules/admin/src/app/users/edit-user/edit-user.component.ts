@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { HttpParams } from '@angular/common/http';
 
 import { User } from '../../shared/models/user.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -12,13 +11,12 @@ import { Observable } from 'rxjs/Observable';
 import { startWith } from 'rxjs/operators/startWith';
 import { map } from 'rxjs/operators/map';
 
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 @Component({
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
-  styleUrls: ['./edit-user.component.css'],
   providers: [ BaseUrlService, UsersService, VirtuesService ]
 })
 
@@ -29,16 +27,14 @@ export class EditUserComponent implements OnInit {
   userToEdit: {id: string};
   submitBtn: any;
   fullImagePath: string;
-
-  adUserCtrl: FormControl;
   userData = [];
-  selectedVirtues = [];
+  adUserCtrl: FormControl;
 
   constructor(
     private router: ActivatedRoute,
     private baseUrlService: BaseUrlService,
     private usersService: UsersService,
-    private virtuesService: VirtuesService,
+    // private virtuesService: VirtuesService,
     public dialog: MatDialog
   ) {}
 
@@ -65,14 +61,14 @@ export class EditUserComponent implements OnInit {
     });
   }
 
-  displayUser(userData: any) {
-    this.userData = userData[0];
-  }
+  // displayUser(userData: any) {
+  //   this.userData = userData[0];
+  // }
 
   activateModal(id, mode): void {
     let dialogHeight = 600;
     let dialogWidth = 800;
-    let fullImagePath = './assets/images/app-icon-white.png';
+    // let fullImagePath = './assets/images/app-icon-white.png';
 
     if (mode === 'add') {
       this.submitBtn = 'Add Virtues';
@@ -92,7 +88,6 @@ export class EditUserComponent implements OnInit {
       panelClass: 'virtue-modal-overlay'
     });
 
-    let screenWidth = (window.screen.width);
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
