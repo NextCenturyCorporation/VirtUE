@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes, ExtraOptions } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
@@ -11,11 +11,13 @@ import { VirtuesComponent } from './virtues/virtues.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
+import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
 import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
 import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
+import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
@@ -38,12 +40,14 @@ const routes: Routes = [
     { path: '', component: VirtueListComponent },
     { path: 'create-virtue', component: CreateVirtueComponent, data: {breadcrumb: 'Create Virtue'} },
     { path: 'edit/:id', component: EditVirtueComponent, data: {breadcrumb: 'Edit Virtue'} },
+    { path: 'duplicate/:id', component: DuplicateVirtueComponent, data: {breadcrumb: 'Duplicate Virtue'} },
     { path: 'virtue-settings', component: VirtueSettingsComponent }
   ] },
   { path: 'vm', component: VirtualMachinesComponent, data: {breadcrumb: 'Virtual Machines'}, children: [
     { path: '', component: VmListComponent },
     { path: 'vm-build', component: VmBuildComponent, data: {breadcrumb: 'Build Virtual Machine'} },
     { path: 'edit/:id', component: VmEditComponent, data: {breadcrumb: 'Edit Virtual Machine'} },
+      { path: 'duplicate/:id', component: VmDuplicateComponent, data: {breadcrumb: 'Duplicate Virtual Machine'} },
   ] },
   { path: '**', component: PageNotFoundComponent }
 ];

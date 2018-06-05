@@ -1,84 +1,92 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { Component, Input, OnInit} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
-import { Observable } from 'rxjs/Observable';
 
 import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
 
+import { VirtualMachine } from '../../shared/models/vm.model';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 
 @Component({
-  selector: 'app-vm-build',
-  templateUrl: './vm-build.component.html',
+  selector: 'app-vm-duplicate',
+  templateUrl: './vm-duplicate.component.html',
   providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
-export class VmBuildComponent implements OnInit, OnDestroy {
+export class VmDuplicateComponent implements OnInit {
+  @Input() vm: VirtualMachine;
+
   vmForm: FormControl;
-  activeClass: string;
+  vmId: { id: string };
   baseUrl: string;
+  os: string;
   osValue: string;
   selectedOS: string;
   securityTag: string;
   securityLevel: string;
 
+  vmData = [];
   appList = [];
+  selectedApps = [];
   selAppList = [];
   pageAppList = [];
   osList = [
     { 'name': 'Debian', 'os': 'LINUX' },
     { 'name': 'Windows', 'os': 'WINDOWS' }
   ];
-
   securityOptions = [
-    { 'level': 'default', 'name': 'Default'} ,
+    { 'level': 'default', 'name': 'Default' },
     { 'level': 'email', 'name': 'Email' },
-    { 'level': 'power',  'name': 'Power User' },
+    { 'level': 'power', 'name': 'Power User' },
     { 'level': 'admin', 'name': 'Administrator' }
   ];
 
   constructor(
-    private vmService: VirtualMachineService,
+    private activatedRoute: ActivatedRoute,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     private router: Router,
-    public dialog: MatDialog,
-  ) {
-    this.vmForm = new FormControl();
-  }
-
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    console.log(req);
-    return next.handle(req);
-  }
+    private vmService: VirtualMachineService,
+    public dialog: MatDialog
+  ) { }
 
   ngOnInit() {
+    this.vmId = {
+      id: this.activatedRoute.snapshot.params['id']
+    };
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-        this.getBaseUrl(awsServer);
-        this.getAppList(awsServer);
+      this.getBaseUrl(awsServer);
+      this.getThisVm(awsServer, this.vmId.id);
     });
-  }
-
-  ngOnDestroy() {
   }
 
   getBaseUrl(url: string) {
     this.baseUrl = url;
-    console.log('URL: ' + url);
   }
 
-  getAppList(baseUrl: string) {
+  getThisVm(baseUrl: string, id: string) {
     this.baseUrl = baseUrl;
-    // loop through the selected VM list
+    this.vmService.getVM(baseUrl, id).subscribe(
+      data => {
+        this.vmData = data;
+        this.vmData['name'] = 'Copy of ' + this.vmData['name'];
+        this.selectedOS = data.os;
+        this.pageAppList = data.applicationIds;
+        // this.getAppList(data.applicationIds);
+        this.getAppList();
+        this.securityLevel = data.securityTag;
+      }
+    );
+  }
+
+  getAppList() {
     const selectedApps = this.pageAppList;
-    console.log('page Apps list @ getAppList(): ' + this.pageAppList);
-    this.appsService.getAppsList(baseUrl)
+    this.appsService.getAppsList(this.baseUrl)
       .subscribe(apps => {
-        if (this.appList.length < 1) {
+        if (selectedApps.length < 1) {
           for (let sel of selectedApps) {
             for (let app of apps) {
               if (sel === app.id) {
@@ -88,7 +96,7 @@ export class VmBuildComponent implements OnInit, OnDestroy {
             }
           }
         } else {
-          this.getUpdatedAppList(baseUrl);
+          this.getUpdatedAppList(this.baseUrl);
         }
       });
   }
@@ -115,7 +123,6 @@ export class VmBuildComponent implements OnInit, OnDestroy {
     this.pageAppList.splice(index, 1);
   }
 
-
   activateModal(): void {
 
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
@@ -124,18 +131,17 @@ export class VmBuildComponent implements OnInit, OnDestroy {
         selectedApps: this.pageAppList
       }
     });
-    console.log('Apps sent to dialog: ' + this.pageAppList);
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
     const apps = dialogRef.componentInstance.addApps.subscribe((data) => {
       this.selAppList = data;
-      console.log('Apps from dialog: ' + this.selAppList);
       if (this.pageAppList.length > 0) {
         this.pageAppList = [];
       }
       this.pageAppList = this.selAppList;
 
-      this.getAppList(this.baseUrl);
+      this.getAppList();
+      // this.getAppList(this.pageAppList);
     });
 
     dialogRef.afterClosed().subscribe(() => {
@@ -143,7 +149,7 @@ export class VmBuildComponent implements OnInit, OnDestroy {
     });
   }
 
-  buildVirtualMachine(vmName: string, vmOs: string, vmSecurityTag: string) {
+  duplicateVirtualMachine(vmName: string, vmOs: string, vmSecurityTag: string) {
     let body = {
       'name': vmName,
       'os': vmOs,
@@ -152,8 +158,12 @@ export class VmBuildComponent implements OnInit, OnDestroy {
       'applicationIds': this.pageAppList,
       'securityTag': vmSecurityTag
     };
-    console.log(body);
     this.vmService.createVM(this.baseUrl, JSON.stringify(body));
     this.router.navigate(['/vm']);
   }
+
+  cancel() {
+    this.router.navigate(['/vm']);
+  }
+
 }

@@ -12,9 +12,11 @@ import com.sun.jna.Pointer;
 public abstract class ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private ClipboardFormat format;
+	private boolean isCacheable;
 
 	protected ClipboardData(ClipboardFormat format) {
 		this.format = format;
+		this.isCacheable = false;
 	}
 
 	/**
@@ -41,8 +43,12 @@ public abstract class ClipboardData implements Serializable {
 
 	/**
 	 * must be 8, 16, or 32
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract int getLinuxEntrySizeBits();
+
+	public boolean isCacheable() {
+		return isCacheable;
+	}
 }

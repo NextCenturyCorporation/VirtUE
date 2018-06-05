@@ -14,6 +14,7 @@ import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.InstanceNetworkInterfaceSpecification;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceType;
@@ -25,13 +26,14 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
- * Class that essentially wraps the AWS EC2 interface to provide a simplier
+ * Class that essentially wraps the AWS EC2 interface to provide a simpler
  * interface for what the project needs.
  * 
  *
@@ -42,8 +44,21 @@ public class AwsEc2Wrapper {
 
 	private AmazonEC2 ec2;
 
-	public AwsEc2Wrapper(VirtueAwsEc2Provider ec2Provider) {
+	// If null, use subnet default setting. If true, force public ip. If false,
+	// force no public ip.
+	private Boolean forcePublicIp;
+
+	public AwsEc2Wrapper(VirtueAwsEc2Provider ec2Provider, String forcePublicIp) {
 		this.ec2 = ec2Provider.getEc2();
+		if (!JavaUtil.isNotEmpty(forcePublicIp) || forcePublicIp.equalsIgnoreCase("default")
+				|| forcePublicIp.equalsIgnoreCase("null")) {
+			this.forcePublicIp = null;
+		} else if (forcePublicIp.equalsIgnoreCase("on") || forcePublicIp.equalsIgnoreCase("true")) {
+			this.forcePublicIp = true;
+		} else {
+			this.forcePublicIp = false;
+		}
+		logger.debug("ForcePublicIP set to '" + this.forcePublicIp + "' from property=" + forcePublicIp);
 	}
 
 	public AmazonEC2 getEc2() {
@@ -58,8 +73,18 @@ public class AwsEc2Wrapper {
 
 		String templatePath = vmt.getTemplatePath();
 		runInstancesRequest = runInstancesRequest.withImageId(templatePath).withInstanceType(instanceType)
-				.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName).withSecurityGroupIds(securityGroupIds)
-				.withSubnetId(subnetIds);
+				.withMinCount(1).withMaxCount(1).withKeyName(serverKeyName);
+
+		if (forcePublicIp != null) {
+			InstanceNetworkInterfaceSpecification networkInterfaces = new InstanceNetworkInterfaceSpecification();
+			networkInterfaces.setAssociatePublicIpAddress(forcePublicIp);
+			networkInterfaces.setDeviceIndex(0);
+			networkInterfaces.setSubnetId(subnetIds);
+			networkInterfaces.setGroups(securityGroupIds);
+			runInstancesRequest.withNetworkInterfaces(networkInterfaces);
+		} else {
+			runInstancesRequest.withSubnetId(subnetIds).withSecurityGroupIds(securityGroupIds);
+		}
 
 		// .withSecurityGroups(securityGroups);
 		RunInstancesResult result = ec2.runInstances(runInstancesRequest);

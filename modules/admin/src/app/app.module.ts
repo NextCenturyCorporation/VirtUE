@@ -6,46 +6,22 @@ import {
 } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { AppOverlayContainer } from './appOverlayContainer';
 import { OverlayModule } from '@angular/cdk/overlay';
 
 import {
   MatAutocompleteModule,
-  MatButtonModule,
-  MatButtonToggleModule,
-  MatCardModule,
   MatCheckboxModule,
-  MatChipsModule,
-  MatDatepickerModule,
   MatDialogModule,
-  MatExpansionModule,
   MatFormFieldModule,
-  MatGridListModule,
-  MatIconModule,
   MatInputModule,
-  MatListModule,
-  MatMenuModule,
-  MatNativeDateModule,
-  MatProgressBarModule,
-  MatProgressSpinnerModule,
   MatRadioModule,
-  MatRippleModule,
   MatSelectModule,
-  MatSidenavModule,
-  MatSliderModule,
-  MatSlideToggleModule,
-  MatSnackBarModule,
-  MatStepperModule,
-  MatTableModule,
-  MatTabsModule,
   MatToolbarModule,
-  MatTooltipModule,
 } from '@angular/material';
 
 import { BreadcrumbsModule } from 'ng2-breadcrumbs';
@@ -76,6 +52,7 @@ import { VirtuesComponent } from './virtues/virtues.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
 import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
+import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
@@ -85,15 +62,16 @@ import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.co
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
 import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
 import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
+import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
 
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
 import { AddVmAppComponent } from './vm-apps/add-vm-app/add-vm-app.component';
 
-import { DialogsComponent } from './dialogs/dialogs.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 import { ActiveClassDirective } from './shared/directives/active-class.directive';
+import { DialogsComponent } from './dialogs/dialogs.component';
 
 import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
 import { JsonFilterPipe } from './shared/pipes/json-filter.pipe';
@@ -102,8 +80,6 @@ import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
 import { VirtuesService } from './shared/services/virtues.service';
-
-import { Globals } from './shared/globals';
 
 @NgModule({
   declarations: [
@@ -125,6 +101,7 @@ import { Globals } from './shared/globals';
     VirtueSettingsComponent,
     CreateVirtueComponent,
     EditVirtueComponent,
+    DuplicateVirtueComponent,
     DialogsComponent,
     VirtueModalComponent,
     VmModalComponent,
@@ -140,11 +117,13 @@ import { Globals } from './shared/globals';
     VmListComponent,
     VmBuildComponent,
     VmEditComponent,
+    VmDuplicateComponent,
     ActiveClassDirective,
+    DialogsComponent,
     VmAppsComponent,
     VmAppsListComponent,
     AddVmAppComponent,
-    VmAppsModalComponent
+    VmAppsModalComponent,
   ],
   imports: [
     AppRoutingModule,
@@ -153,7 +132,6 @@ import { Globals } from './shared/globals';
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    HttpModule,
     MatAutocompleteModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -170,7 +148,6 @@ import { Globals } from './shared/globals';
   ],
   providers: [
     OverlayContainer,
-    Globals,
     BaseUrlService,
     MessageService,
     VirtuesService
