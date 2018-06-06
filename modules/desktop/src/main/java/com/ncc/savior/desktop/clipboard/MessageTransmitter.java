@@ -83,6 +83,9 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 			} catch (IOException e) {
 				logger.error("Error trying to deserialize message", e);
 				onMessageError(e);
+			} catch (Throwable e) {
+				logger.error("Unknown error", e);
+				onMessageError(new IOException(e));
 			}
 		}
 	}
