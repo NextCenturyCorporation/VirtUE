@@ -27,6 +27,7 @@ export class VmEditComponent implements OnInit {
   selectedOS: string;
   securityTag: string;
   securityLevel: string;
+  vmEnabled: boolean;
 
   vmData = [];
   appList = [];
@@ -77,6 +78,7 @@ export class VmEditComponent implements OnInit {
         this.pageAppList = data.applicationIds;
         this.getAppList(data.applicationIds);
         this.securityLevel = data.securityTag;
+        this.vmEnabled = data.enabled;
       }
     );
   }
@@ -115,6 +117,14 @@ export class VmEditComponent implements OnInit {
       });
   }
 
+  vmStatus(isEnabled: boolean) {
+    if (isEnabled) {
+      this.vmEnabled = false;
+    } else {
+      this.vmEnabled = true;
+    }
+  }
+
   removeApp(id: string, index: number): void {
     this.appList = this.appList.filter(data => {
       return data.id !== id;
@@ -122,9 +132,7 @@ export class VmEditComponent implements OnInit {
     this.pageAppList.splice(index, 1);
   }
 
-
   activateModal(): void {
-
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
       width: '750px',
       data: {
@@ -153,7 +161,7 @@ export class VmEditComponent implements OnInit {
       'name': vmName,
       'os': vmOs,
       'loginUser': 'system',
-      'enabled': true,
+      'enabled': this.vmEnabled,
       'applicationIds': this.pageAppList,
       'securityTag': vmSecurityTag
     };
