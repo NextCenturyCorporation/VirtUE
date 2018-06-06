@@ -54,8 +54,8 @@ export class EditUserComponent implements OnInit {
       this.getVirtues(url);
       this.getApps(url);
     });
-
   }
+
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
