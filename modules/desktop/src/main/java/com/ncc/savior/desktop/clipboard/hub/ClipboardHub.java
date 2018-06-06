@@ -85,18 +85,6 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		try {
 			while (true) {
 				Socket socket = serverSocket.accept();
-				// BufferedWriter writer = new BufferedWriter(new
-				// OutputStreamWriter(socket.getOutputStream()));
-				// writer.write("hello??\n");
-				// writer.flush();
-				// writer.write("helsadlo??\n");
-				// writer.flush();
-				// writer.write("heldflo??\n");
-				// writer.write("helldo??\n");
-				// writer.flush();
-				// writer.write("helsdfo??\n");
-				// writer.write("helasdflo??\n");
-				// writer.flush();
 				IConnectionWrapper connection = new SocketConnection(socket);
 				IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
 				String defaultGroup = "default";
