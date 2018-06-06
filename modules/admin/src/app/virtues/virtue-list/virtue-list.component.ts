@@ -111,22 +111,6 @@ export class VirtueListComponent implements OnInit {
   }
 
   virtueStatus(id: string, isEnabled: boolean) {
-    // if (isEnabled) {
-    //   this.virtueEnabled = false;
-    // } else {
-    //   this.virtueEnabled = true;
-    // }
-    // let body = {
-    //   'enabled': this.virtueEnabled
-    // };
-    // console.log('Virtue is enabled: ' + this.virtueEnabled);
-    // this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body))
-    //   .subscribe(success => {
-    //     console.log('Successfully toggled status');
-    //   },
-    //   err => {
-    //     console.log(err);
-    //   });
     this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
       this.virtue = data;
     });

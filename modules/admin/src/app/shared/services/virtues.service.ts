@@ -66,18 +66,11 @@ export class VirtuesService {
     console.log(url);
     return this.httpClient.put(url, virtueData, httpOptions)
             .catch(this.errorHandler);
-    // .toPromise().then(
-    //   data => {
-    //     return true;
-    //   },
-    //   error => {
-    //   console.log(error.message);
-    // });
   }
 
   toggleVirtueStatus(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id + '/toggle';
-    console.log(url);
+    // console.log(url);
     return this.httpClient.get(url);
   }
 
