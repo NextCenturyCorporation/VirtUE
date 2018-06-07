@@ -354,14 +354,16 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			if (logger.isTraceEnabled()) {
 				logger.trace("itemSize: " + itemSize);
 			}
+			// For each format, get the Atom for it and put that in memory (as an array).
 			for (int i = 0; i < formats.size(); i++) {
 				Atom atom = x11.XInternAtom(display, formats.get(i).getLinux(), false);
 				if (logger.isTraceEnabled()) {
 					logger.trace("writting atom to " + i + " " + atom.intValue() + "  " + atom);
 				}
+				// write Atom to memory.
 				memory.setNativeLong(i * itemSize, new NativeLong(atom.longValue()));
-				// memory.setLong(i * NativeLong.SIZE, new NativeLong(atom.longValue()));
 			}
+			// 32 bit magic number because thats the size of Atoms
 			sendSelectionNotifyEvent(formats.size(), memory, sne, 32, X11.XA_ATOM);
 		}
 	}
