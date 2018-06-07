@@ -106,7 +106,7 @@ export class VmListComponent implements OnInit {
       'enabled': vmStatus
     };
     console.log(body);
-    this.vmService.updateVmStatus(this.baseUrl, id, JSON.stringify(body)).subscribe(success => {
+    this.vmService.updateVmStatus(this.baseUrl, id).subscribe(success => {
       console.log('success');
     }, err => {
       console.log(err);
