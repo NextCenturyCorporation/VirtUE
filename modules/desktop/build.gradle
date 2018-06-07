@@ -13,6 +13,12 @@ repositories {
 
 mainClassName = "com.ncc.savior.desktop.sidebar.SidebarApplication"
 
+task fatJar(type: Jar) {
+    classifier = 'all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 dependencies {
 	compile project(':common')
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'

@@ -1,7 +1,6 @@
 package com.ncc.savior.desktop.clipboard.client;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -16,10 +15,7 @@ import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper.IClipboardListener;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
-import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
-import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
-import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.linux.X11ClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
@@ -27,7 +23,6 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
-import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -40,7 +35,6 @@ import com.ncc.savior.virtueadmin.model.OS;
  */
 public class ClipboardClient {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardClient.class);
-	private static final String DEFAULT_HOSTNAME = "localhost";
 	private IClipboardMessageSenderReceiver transmitter;
 	private IClipboardWrapper clipboard;
 	private String myId;
@@ -177,6 +171,14 @@ public class ClipboardClient {
 		return transmitter.isValid();
 	}
 
+	/**
+	 * blocks until client has stopped listening for messages signally that it is
+	 * done or disconnected and should no longer be used.
+	 */
+	public void waitUntilStopped() {
+		transmitter.waitUntilStopped();
+	}
+
 	private void storeClipboardData(ClipboardDataMessage message) {
 		String reqId = message.getRequestId();
 		Thread t = requestToThread.get(reqId);
@@ -187,62 +189,6 @@ public class ClipboardClient {
 		} else {
 			logger.error("unable to find thread to interrupt for clipboard data");
 		}
-	}
-
-	public static void main(String[] args) throws IOException, InterruptedException {
-		int port = ClipboardHub.DEFAULT_PORT;
-		String hostname = DEFAULT_HOSTNAME;
-		if (args.length > 0) {
-			hostname = args[0];
-		}
-		if (args.length > 1) {
-			try {
-				port = Integer.parseInt(args[1]);
-			} catch (Exception e) {
-				usage("Invalid port: " + args[1]);
-			}
-		}
-		if (args.length > 2) {
-			usage("Invalid parameters");
-		}
-		IClipboardWrapper clipboardWrapper = getClipboardWrapperForOperatingSystem();
-		Socket clientSocket = new Socket(hostname, port);
-		// BufferedReader in = new BufferedReader(new
-		// InputStreamReader(clientSocket.getInputStream()));
-		// System.out.println(in.readLine());
-
-		IConnectionWrapper connection = new SocketConnection(clientSocket);
-		IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
-
-		ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
-		client.waitUntilStopped();
-		// while (true) {
-		// // hold
-		// JavaUtil.sleepAndLogInterruption(1000);
-		// if (!client.isValid()) {
-		// break;
-		// }
-		// }
-	}
-
-	/**
-	 * blocks until client has stopped listening for messages signally that it is
-	 * done or disconnected and should no longer be used.
-	 */
-	public void waitUntilStopped() {
-		transmitter.waitUntilStopped();
-	}
-
-	private static void usage(String string) {
-		if (string != null) {
-			System.out.println("Error: " + string);
-		}
-		System.out.println("Usage: executable [hostname [port]]");
-		System.out.println("  hostname: optional parameter to set the hostname where the hub is running.  Default: "
-				+ DEFAULT_HOSTNAME);
-		System.out.println("  port: optional parameter to set the port where the hub is listening.  Default: "
-				+ ClipboardHub.DEFAULT_PORT);
-
 	}
 
 	public static IClipboardWrapper getClipboardWrapperForOperatingSystem() {

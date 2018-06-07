@@ -190,7 +190,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 		while (triesLeft > 0) {
 			triesLeft--;
 			try {
-				Session session = JschUtils.getSession(params);
+				Session session = JschUtils.getUnconnectedSession(params);
 				session.connect();
 				return session;
 			} catch (JSchException e) {

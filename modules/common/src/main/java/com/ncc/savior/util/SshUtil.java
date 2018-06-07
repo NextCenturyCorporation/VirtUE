@@ -18,9 +18,11 @@ import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
@@ -44,18 +46,29 @@ public class SshUtil {
 	// }
 	// }
 
-	public static List<String> sendCommandFromSession(Session session, String command)
-			throws JSchException, IOException {
+	public static ChannelExec getChannelFromCommand(Session session, String command) throws JSchException, IOException {
 		logger.debug("sending command: " + command);
 		ChannelExec myChannel = (ChannelExec) session.openChannel("exec");
-		BufferedReader br = null;
-		BufferedReader er = null;
-		ArrayList<String> lines = new ArrayList<String>();
 		try {
 			myChannel.setCommand(command);
 			// OutputStream ops = myChannel.getOutputStream();
 			// PrintStream ps = new PrintStream(ops, true);
 			myChannel.connect();
+			return myChannel;
+		} catch (Exception e) {
+			logger.debug("finished command exceptionally", e);
+			throw e;
+		}
+	}
+
+	public static List<String> sendCommandFromSession(Session session, String command)
+			throws JSchException, IOException {
+		ChannelExec myChannel = null;
+		BufferedReader br = null;
+		BufferedReader er = null;
+		ArrayList<String> lines = new ArrayList<String>();
+		try {
+			myChannel = getChannelFromCommand(session, command);
 			InputStream input = myChannel.getInputStream();
 			InputStreamReader reader = new InputStreamReader(input);
 			br = new BufferedReader(reader);
@@ -79,16 +92,12 @@ public class SshUtil {
 
 	public static List<String> sendCommandFromSessionWithTimeout(Session session, String command, long waitTimeMillis)
 			throws JSchException, IOException {
-		logger.debug("sending command: " + command);
-		ChannelExec myChannel = (ChannelExec) session.openChannel("exec");
+		ChannelExec myChannel = null;
 		InputStreamReader er = null;
 		InputStreamReader reader = null;
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
-			myChannel.setCommand(command);
-			// OutputStream ops = myChannel.getOutputStream();
-			// PrintStream ps = new PrintStream(ops, true);
-			myChannel.connect();
+			myChannel = getChannelFromCommand(session, command);
 			InputStream input = myChannel.getInputStream();
 			reader = new InputStreamReader(input);
 
@@ -106,6 +115,20 @@ public class SshUtil {
 		} finally {
 			JavaUtil.closeIgnoreErrors(reader, er);
 			myChannel.disconnect();
+		}
+	}
+
+	public static void sftpFile(Session session, InputStream source, String destinationFilePath)
+			throws SftpException, JSchException {
+		ChannelSftp ch = null;
+		try {
+			ch = (ChannelSftp) session.openChannel("sftp");
+			ch.connect();
+			ch.put(source, destinationFilePath);
+		} finally {
+			if (ch != null) {
+				ch.disconnect();
+			}
 		}
 	}
 

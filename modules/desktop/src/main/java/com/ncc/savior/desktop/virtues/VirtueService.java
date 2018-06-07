@@ -13,7 +13,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jcraft.jsch.JSchException;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
+import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
@@ -46,6 +48,7 @@ public class VirtueService {
 	private Map<String, List<ApplicationDefinition>> pendingApps;
 	private Map<String, RgbColor> colors;
 	private IRdpClient rdpClient;
+	private IClipboardManager clipboardManager;
 
 	static {
 		startableVirtueStates = new ArrayList<VirtueState>();
@@ -57,12 +60,13 @@ public class VirtueService {
 	}
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
-			IRdpClient rdpClient) {
+			IRdpClient rdpClient, IClipboardManager clipboardManager) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());
 		this.rdpClient = rdpClient;
+		this.clipboardManager = clipboardManager;
 	}
 
 	// public void connectAndStartApp(DesktopVirtue app) throws IOException {
@@ -109,28 +113,40 @@ public class VirtueService {
 		try {
 			String key = app.getPrivateKey();
 
-			SshConnectionParameters params = null;
-			if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
-				File pem = File.createTempFile(app.getName(), ".pem");
-				FileWriter writer = new FileWriter(pem);
-				writer.write(key);
-				writer.close();
-				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
-			} else {
-				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
-			}
+			SshConnectionParameters params = getConnectionParams(app, key);
 			String colorDesc = (color == null ? "" : " with color " + color.toString());
 			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
 			XpraClient client = connectionManager.getExistingClient(params);
 			if (client == null || client.getStatus() == Status.ERROR) {
 				logger.debug("needed new connection");
 				client = connectionManager.createClient(params, color);
+				try {
+					clipboardManager.connectClipboard(params, virtue.getId());
+				} catch (JSchException e) {
+					// TODO Auto-generated catch block
+					logger.error("clipboard manager connection failed!", e);
+					// TODO alert user? allow user to try again?
+				}
 			}
 		} finally {
 			if (file != null && file.exists()) {
 				file.delete();
 			}
 		}
+	}
+
+	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) throws IOException {
+		SshConnectionParameters params = null;
+		if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
+			File pem = File.createTempFile(app.getName(), ".pem");
+			FileWriter writer = new FileWriter(pem);
+			writer.write(key);
+			writer.close();
+			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
+		} else {
+			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
+		}
+		return params;
 	}
 
 	/**

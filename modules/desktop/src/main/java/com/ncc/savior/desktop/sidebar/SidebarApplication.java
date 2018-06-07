@@ -4,6 +4,10 @@ import java.io.File;
 
 import com.ncc.savior.configuration.PropertyManager;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.clipboard.IClipboardManager;
+import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
+import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
+import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.rdp.WindowsRdp;
@@ -67,7 +71,10 @@ public class SidebarApplication extends Application {
 			rdpClient = new WindowsRdp();
 		}
 
-		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient);
+		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
+		String sourceJarPath = "C:\\projects\\VirtUE\\workspace\\VirtUE\\modules\\desktop\\build\\libs\\desktop-0.1.0-SNAPSHOT-all.jar";
+		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
+		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
 		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		controller.init(primaryStage);

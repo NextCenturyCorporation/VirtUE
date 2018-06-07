@@ -48,7 +48,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 		if (params instanceof SshConnectionParameters) {
 			try {
 				SshConnectionParameters p = (SshConnectionParameters) params;
-				Session session = JschUtils.getSession(p);
+				Session session = JschUtils.getUnconnectedSession(p);
 				session.connect();
 				ChannelExec channel = (ChannelExec) session.openChannel("exec");
 				String command = getCommand(commandDir, commandName, commandMode, p.getDisplay());
