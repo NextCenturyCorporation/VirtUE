@@ -24,6 +24,7 @@ import com.ncc.savior.desktop.clipboard.linux.X11ClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
+import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
@@ -108,6 +109,7 @@ public class ClipboardClient {
 			}
 		};
 		clipboardWrapper.setClipboardListener(listener);
+		transmitter.sendMessageToHub(new ClipboardFormatsRequestMessage(myId));
 	}
 
 	/**
