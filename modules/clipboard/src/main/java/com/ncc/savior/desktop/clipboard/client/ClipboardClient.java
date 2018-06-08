@@ -81,12 +81,12 @@ public class ClipboardClient {
 					logger.debug("Sending message=" + requestMsg);
 					ClipboardClient.this.transmitter.sendMessageToHub(requestMsg);
 					ClipboardData clipboardData = blockForClipboardData(requestMsg.getRequestId());
+					logger.debug("Setting data to " + clipboardData);
 					if (clipboardData != null) {
 						clipboard.setDelayedRenderData(clipboardData);
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Error pasting data", e);
 				}
 			}
 

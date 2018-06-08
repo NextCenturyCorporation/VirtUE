@@ -26,16 +26,13 @@ public class StandardInOutClipboardClient {
 				}
 				usage("No Parameters allowed");
 			}
-			logger.debug("Creating clipboard wrapper");
 			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem();
-			logger.debug("wrapper created!");
 
 			IConnectionWrapper connection = new StandardInOutConnection();
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
-			logger.debug("creating client");
 			ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
-			logger.debug("client created");
 			client.waitUntilStopped();
+			System.exit(0);
 		} catch (Throwable t) {
 			logger.error("App stopped by error", t);
 		}

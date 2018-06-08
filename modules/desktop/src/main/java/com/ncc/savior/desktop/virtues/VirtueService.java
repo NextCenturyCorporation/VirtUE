@@ -120,7 +120,6 @@ public class VirtueService {
 			if (client == null || client.getStatus() == Status.ERROR) {
 				logger.debug("needed new connection");
 				client = connectionManager.createClient(params, color);
-			} else {
 				try {
 					logger.debug("connecting clipboard");
 					params.setDisplay(client.getDisplay());

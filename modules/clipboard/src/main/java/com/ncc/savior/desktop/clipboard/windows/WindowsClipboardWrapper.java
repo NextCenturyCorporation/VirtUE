@@ -185,12 +185,16 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		user32.SetClipboardData(clipboardData.getFormat().getWindows(), clipboardData.createWindowsData());
+		logger.debug("setting delayed render data " + clipboardData);
 		if (!clipboardData.isCacheable()) {
 			executor.schedule(() -> {
+				logger.debug("attempting to reset clipboard");
 				openClipboardWhenFree();
 				try {
+					logger.debug("reseting clipboard");
 					writeNullToClipboard(clipboardData.getFormat());
 				} finally {
+					logger.debug("done reseting clipboard");
 					closeClipboardIfOwner();
 				}
 			}, 5, TimeUnit.MILLISECONDS);

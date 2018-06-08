@@ -220,7 +220,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		};
 
 		mainClipboardThread = new Thread(mainClipboardRunnable, "X11-clipboard-main");
-		// mainClipboardThread.setDaemon(true);
+		mainClipboardThread.setDaemon(true);
 		mainClipboardThread.start();
 
 	}

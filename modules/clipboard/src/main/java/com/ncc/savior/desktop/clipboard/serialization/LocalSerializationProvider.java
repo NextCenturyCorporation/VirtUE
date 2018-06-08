@@ -45,7 +45,10 @@ public class LocalSerializationProvider {
 
 		@Override
 		public void serialize(IClipboardMessage message) throws IOException {
+			logger.debug("Local offer (" + outBound.size() + "): " + message);
 			boolean success = outBound.offer(message);
+			logger.debug("Local offered (" + outBound.size() + "): ");
+
 			// these should always be really fast so this should never happen. We should
 			// probably use a blocking call, but for now I want to know if we are ever
 			// waiting on messages.
@@ -58,7 +61,9 @@ public class LocalSerializationProvider {
 		public IClipboardMessage deserialize() throws IOException {
 			IClipboardMessage message;
 			try {
+				logger.debug("Local take (" + outBound.size() + "):");
 				message = inBound.take();
+				logger.debug("Local taken (" + outBound.size() + "): message");
 			} catch (InterruptedException e) {
 				logger.warn("Thread interrupted unexpectedly.  Continueing anyway.", e);
 				message = deserialize();
