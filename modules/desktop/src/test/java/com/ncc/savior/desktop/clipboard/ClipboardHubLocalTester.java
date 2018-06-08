@@ -35,7 +35,7 @@ public class ClipboardHubLocalTester {
 		try {
 			int port = 10022;
 			serverSocket = new ServerSocket(port);
-			IClipboardWrapper wcw = ClipboardClient.getClipboardWrapperForOperatingSystem();
+			IClipboardWrapper wcw = ClipboardClient.getClipboardWrapperForOperatingSystem(true);
 			ClipboardHub hub = new ClipboardHub(new ConstantDataGuard(true));
 
 			Thread clientThread = createClientThread(port, wcw);

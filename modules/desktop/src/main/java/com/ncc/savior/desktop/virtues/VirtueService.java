@@ -119,16 +119,16 @@ public class VirtueService {
 			XpraClient client = connectionManager.getExistingClient(params);
 			if (client == null || client.getStatus() == Status.ERROR) {
 				logger.debug("needed new connection");
-				client = connectionManager.createClient(params, color);
 				try {
+					connectionManager.createXpraServerAndAddDisplayToParams(params);
 					logger.debug("connecting clipboard");
-					params.setDisplay(client.getDisplay());
 					clipboardManager.connectClipboard(params, virtue.getId());
 				} catch (JSchException e) {
 					// TODO Auto-generated catch block
 					logger.error("clipboard manager connection failed!", e);
 					// TODO alert user? allow user to try again?
 				}
+				client = connectionManager.createClient(params, color);
 			}
 		} finally {
 			if (file != null && file.exists()) {

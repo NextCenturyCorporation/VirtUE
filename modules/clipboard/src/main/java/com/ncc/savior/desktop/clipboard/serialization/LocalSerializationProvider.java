@@ -12,6 +12,7 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 public class LocalSerializationProvider {
 	private static final Logger logger = LoggerFactory.getLogger(LocalSerializationProvider.class);
 
+	@SuppressWarnings("resource")
 	public static SerializerContainer createSerializerPair() {
 		BlockingQueue<IClipboardMessage> queueAToB = new ArrayBlockingQueue<IClipboardMessage>(10);
 		BlockingQueue<IClipboardMessage> queueBToA = new ArrayBlockingQueue<IClipboardMessage>(10);
@@ -45,9 +46,9 @@ public class LocalSerializationProvider {
 
 		@Override
 		public void serialize(IClipboardMessage message) throws IOException {
-			logger.debug("Local offer (" + outBound.size() + "): " + message);
+			// logger.debug("Local offer (" + outBound.size() + "): " + message);
 			boolean success = outBound.offer(message);
-			logger.debug("Local offered (" + outBound.size() + "): ");
+			// logger.debug("Local offered (" + outBound.size() + "): ");
 
 			// these should always be really fast so this should never happen. We should
 			// probably use a blocking call, but for now I want to know if we are ever
@@ -61,9 +62,9 @@ public class LocalSerializationProvider {
 		public IClipboardMessage deserialize() throws IOException {
 			IClipboardMessage message;
 			try {
-				logger.debug("Local take (" + outBound.size() + "):");
+				// logger.debug("Local take (" + outBound.size() + "):");
 				message = inBound.take();
-				logger.debug("Local taken (" + outBound.size() + "): message");
+				// logger.debug("Local taken (" + outBound.size() + "): message");
 			} catch (InterruptedException e) {
 				logger.warn("Thread interrupted unexpectedly.  Continueing anyway.", e);
 				message = deserialize();

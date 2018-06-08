@@ -101,7 +101,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	private ScheduledExecutorService executor;
 	private IClipboardListener clipboardListener;
 
-	public WindowsClipboardWrapper() {
+	public WindowsClipboardWrapper(boolean takeClipboard) {
 
 		ThreadFactory threadFactory = new ThreadFactory() {
 			private int i = 1;
@@ -140,6 +140,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				windowHandle = user32.CreateWindowEx(0, className, title, 0, 0, 0, 0, 0, null, null, null, null);
 				user32.SetClipboardViewer(windowHandle);
 
+				if (takeClipboard) {
+					executor.schedule(() -> {
+						Set<ClipboardFormat> formats = new HashSet<ClipboardFormat>();
+						formats.add(ClipboardFormat.TEXT);
+						setDelayedRenderFormats(formats);
+					}, 20, TimeUnit.MILLISECONDS);
+				}
 				while (true) {
 					// get all messages forever
 					getMessage();
@@ -185,16 +192,12 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		user32.SetClipboardData(clipboardData.getFormat().getWindows(), clipboardData.createWindowsData());
-		logger.debug("setting delayed render data " + clipboardData);
 		if (!clipboardData.isCacheable()) {
 			executor.schedule(() -> {
-				logger.debug("attempting to reset clipboard");
 				openClipboardWhenFree();
 				try {
-					logger.debug("reseting clipboard");
 					writeNullToClipboard(clipboardData.getFormat());
 				} finally {
-					logger.debug("done reseting clipboard");
 					closeClipboardIfOwner();
 				}
 			}, 5, TimeUnit.MILLISECONDS);
@@ -308,7 +311,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 0);
 		if (hasMessage) {
 			user32.GetMessage(msg, windowHandle, 0, 0);
-			// logger.debug("got message=" + msg.message);
+			logger.debug("got message=" + msg.message);
 			if (msg.message != 0xC228) {
 			}
 			user32.TranslateMessage(msg);
@@ -356,9 +359,11 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		boolean success = user32.OpenClipboard(windowHandle);
 		// wait for clipboard to be free
 		while (!success) {
-			JavaUtil.sleepAndLogInterruption(1);
 			logger.debug("clipboard unable to be opened.  Trying again.  Owner=" + user32.GetClipboardOwner() + " ME="
 					+ windowHandle);
+			WindowsError error = getLastError();
+			logger.debug("Error: " + error);
+			JavaUtil.sleepAndLogInterruption(10);
 			success = user32.OpenClipboard(windowHandle);
 		}
 	}
@@ -370,6 +375,11 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		public WindowsError(int error, String errorMessage) {
 			this.error = error;
 			this.errorMessage = errorMessage;
+		}
+
+		@Override
+		public String toString() {
+			return "WindowsError [error=" + error + ", errorMessage=" + errorMessage + "]";
 		}
 	}
 

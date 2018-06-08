@@ -16,7 +16,7 @@ import com.sun.jna.win32.W32APIOptions;
 public interface IWindowsClipboardUser32 extends User32 {
 	// DEFAULT_OPTIONS is critical for W32 API functions to simplify ASCII/UNICODE
 	// details
-	IWindowsClipboardUser32 INSTANCE = (IWindowsClipboardUser32) Native.loadLibrary("user32",
+	IWindowsClipboardUser32 INSTANCE = Native.loadLibrary("user32",
 			IWindowsClipboardUser32.class, W32APIOptions.DEFAULT_OPTIONS);
 	int CF_TEXT = 1;
 	int CF_UNICODE = 13;

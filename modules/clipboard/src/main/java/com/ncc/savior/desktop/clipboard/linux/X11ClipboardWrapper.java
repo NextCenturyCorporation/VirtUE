@@ -82,7 +82,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	private volatile boolean ownSelection;
 
-	public X11ClipboardWrapper() {
+	public X11ClipboardWrapper(boolean takeClipboard) {
 		delayedFormats = new TreeSet<ClipboardFormat>();
 		runnableQueue = new ConcurrentLinkedQueue<Runnable>();
 		x11 = ILinuxClipboardX11.INSTANCE;
@@ -120,8 +120,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				delayedFormats.add(ClipboardFormat.UNICODE);
 				// clear?
 				getWindowProperty();
-				becomeSelectionOwner();
-				logger.debug("x11 has taken clipboard");
+				if (takeClipboard) {
+					becomeSelectionOwner();
+					logger.debug("x11 has taken clipboard");
+				}
 
 				XEvent event = new XEvent();
 				while (true) {

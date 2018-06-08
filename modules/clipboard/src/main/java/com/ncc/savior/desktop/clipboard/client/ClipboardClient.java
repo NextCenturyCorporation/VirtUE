@@ -191,17 +191,17 @@ public class ClipboardClient {
 		}
 	}
 
-	public static IClipboardWrapper getClipboardWrapperForOperatingSystem() {
+	public static IClipboardWrapper getClipboardWrapperForOperatingSystem(boolean takeClipboard) {
 		OS os = JavaUtil.getOs();
 		IClipboardWrapper clipboardWrapper;
 		switch (os) {
 		case LINUX:
-			clipboardWrapper = new X11ClipboardWrapper();
+			clipboardWrapper = new X11ClipboardWrapper(takeClipboard);
 			break;
 		case MAC:
 			throw new RuntimeException("Mac clipboard is currently not supported!");
 		case WINDOWS:
-			clipboardWrapper = new WindowsClipboardWrapper();
+			clipboardWrapper = new WindowsClipboardWrapper(takeClipboard);
 			break;
 		default:
 			throw new RuntimeException("Clipboard is currently not supported on your operating system!");

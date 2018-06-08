@@ -54,13 +54,15 @@ public class SshClipboardManager implements IClipboardManager {
 		if (testParam != null) {
 			command += " " + testParam;
 		}
-		connectLocalClient();
+		if (localClipboardClient == null) {
+			connectLocalClient();
+		}
 	}
 
 	private void connectLocalClient() {
 		SerializerContainer pair = LocalSerializationProvider.createSerializerPair();
 		IMessageSerializer localHubSerializer = pair.serializerA;
-		IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem();
+		IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
 		IMessageSerializer localClientSerializer = pair.serializerB;
 		try {
 			this.clipboardHub.addClient(CLIENT_GROUP_ID, localHubSerializer);
@@ -73,6 +75,7 @@ public class SshClipboardManager implements IClipboardManager {
 
 	@Override
 	public void connectClipboard(SshConnectionParameters params, String groupId) throws JSchException {
+
 		// TODO figure out the right way to handle errors here
 		try {
 			Session session = JschUtils.getUnconnectedSession(params);

@@ -62,4 +62,32 @@ public class JavaUtil {
 		throw new RuntimeException("Unsupported OS string=" + prop);
 	}
 
+	public static void startMemLogger(long periodMillis) {
+		Runnable runnable = () -> {
+			while (true) {
+				Runtime rt = Runtime.getRuntime();
+				logger.info("MemLogger: Total=" + getPrintBytes(rt.totalMemory()) + "Free="
+						+ getPrintBytes(rt.freeMemory())
+						+ "Max=" + getPrintBytes(rt.maxMemory()));
+				JavaUtil.sleepAndLogInterruption(periodMillis);
+			}
+		};
+		Thread t = new Thread(runnable, "MemLogger");
+		t.setDaemon(true);
+		t.start();
+	}
+
+	private static String[] byteDenomination = new String[] { "bytes", "KB", "MB", "GB", "TB", "?B" };
+	private static String getPrintBytes(long memory) {
+		double m = memory;
+		int index = 0;
+		while (m > 1024 * 5) {
+			m = m / 1024;
+			index++;
+		}
+		index = (index >= byteDenomination.length ? byteDenomination.length - 1 : index);
+		String denom = byteDenomination[index];
+		return String.format("%.3f %s", m, denom);
+	}
+
 }

@@ -26,7 +26,7 @@ public class StandardInOutClipboardClient {
 				}
 				usage("No Parameters allowed");
 			}
-			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem();
+			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(true);
 
 			IConnectionWrapper connection = new StandardInOutConnection();
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);

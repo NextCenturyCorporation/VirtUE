@@ -28,7 +28,7 @@ public class SocketClipboardClient {
 		if (args.length > 2) {
 			usage("Invalid parameters");
 		}
-		IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem();
+		IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(true);
 		Socket clientSocket = new Socket(hostname, port);
 
 		IConnectionWrapper connection = new SocketConnection(clientSocket);
