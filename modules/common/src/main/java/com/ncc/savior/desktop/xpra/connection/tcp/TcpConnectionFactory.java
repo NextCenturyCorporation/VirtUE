@@ -36,6 +36,7 @@ public class TcpConnectionFactory extends BaseConnectionFactory {
 	public static class TcpConnectionParameters implements IConnectionParameters {
 		private final int port;
 		private final String host;
+		private int display;
 
 		public TcpConnectionParameters(String host, int port) {
 			this.host = host;
@@ -62,7 +63,12 @@ public class TcpConnectionFactory extends BaseConnectionFactory {
 
 		@Override
 		public void setDisplay(int display) {
-			// not used
+			this.display = display;
+		}
+
+		@Override
+		public int getDisplay() {
+			return display;
 		}
 	}
 

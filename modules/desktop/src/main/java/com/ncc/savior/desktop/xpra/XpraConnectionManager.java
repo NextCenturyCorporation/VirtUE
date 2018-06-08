@@ -87,6 +87,7 @@ public class XpraConnectionManager {
 
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.connect(factory, params);
+		client.setDisplay(params.getDisplay());
 
 		// logger.debug("Client connected with params" + params);
 		activeClientsMap.put(params.getConnectionKey(), client);

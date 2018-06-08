@@ -15,9 +15,7 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'desktop'
+rootProject.name = 'clipboard'
 
 include ':common'
 project(':common').projectDir = new File(settingsDir, '../common')
-include ':clipboard'
-project(':clipboard').projectDir = new File(settingsDir, '../clipboard')

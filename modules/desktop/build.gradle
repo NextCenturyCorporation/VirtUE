@@ -13,14 +13,9 @@ repositories {
 
 mainClassName = "com.ncc.savior.desktop.sidebar.SidebarApplication"
 
-task fatJar(type: Jar) {
-    classifier = 'all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
 dependencies {
 	compile project(':common')
+	compile project(':clipboard')
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
