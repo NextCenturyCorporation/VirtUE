@@ -333,6 +333,7 @@ public class Sidebar implements VirtueChangeHandler {
 		vmi.updateVirtue(virtue);
 	}
 
+	// ***Updating Virtues***
 	@Override
 	public void addVirtue(DesktopVirtue virtue) {
 		ObservableList<Node> children = virtuePane.getChildren();

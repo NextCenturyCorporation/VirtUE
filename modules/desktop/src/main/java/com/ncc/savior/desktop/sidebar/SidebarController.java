@@ -65,6 +65,7 @@ public class SidebarController {
 		return v.getTemplateId() + "-" + v.getId();
 	}
 
+	// ****************
 	private void startVirtuePoll() {
 		Runnable runnable = new Runnable() {
 
