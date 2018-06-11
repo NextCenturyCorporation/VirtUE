@@ -51,4 +51,6 @@ public abstract class ClipboardData implements Serializable {
 	public boolean isCacheable() {
 		return isCacheable;
 	}
+
+	public abstract long returnWindowsDataLengthBytes();
 }

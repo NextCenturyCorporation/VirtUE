@@ -46,4 +46,9 @@ public class EmptyClipboardData extends ClipboardData {
 	public int returnLinuxEntrySizeBits() {
 		return 8;
 	}
+
+	@Override
+	public long returnWindowsDataLengthBytes() {
+		return 0;
+	}
 }

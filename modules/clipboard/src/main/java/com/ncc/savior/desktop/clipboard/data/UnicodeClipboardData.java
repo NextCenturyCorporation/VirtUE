@@ -22,7 +22,7 @@ public class UnicodeClipboardData extends ClipboardData implements Serializable 
 
 	@Override
 	public Pointer createWindowsData() {
-		Memory winMemory = new Memory(Native.WCHAR_SIZE * (data.length() + 1));
+		Memory winMemory = new Memory(returnWindowsDataLengthBytes());
 		winMemory.clear();
 		winMemory.setWideString(0, data);
 		return winMemory;
@@ -50,5 +50,10 @@ public class UnicodeClipboardData extends ClipboardData implements Serializable 
 	@Override
 	public int returnLinuxEntrySizeBits() {
 		return 8;
+	}
+
+	@Override
+	public long returnWindowsDataLengthBytes() {
+		return Native.WCHAR_SIZE * (data.length() + 1);
 	}
 }

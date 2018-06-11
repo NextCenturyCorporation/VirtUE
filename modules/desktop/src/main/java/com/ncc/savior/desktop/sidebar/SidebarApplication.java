@@ -33,7 +33,7 @@ import javafx.stage.Stage;
  */
 public class SidebarApplication extends Application {
 	public static void main(String[] args) {
-		JavaUtil.startMemLogger(1000);
+		JavaUtil.startMemLogger(10000);
 		launch(args);
 	}
 

@@ -73,21 +73,27 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	WindowProc callback = new WindowProc() {
 		@Override
 		public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
-			// logger.debug("got message(callback)=" + uMsg);
+			logger.debug("got message(callback)=" + uMsg);
 			// For the below, 1 is success where 0 represents failure
 			switch (uMsg) {
 			case WM_NCCREATE:
+				// must return true
 				return new LRESULT(1);
 			case WM_DESTROYCLIPBOARD:
+				// https://msdn.microsoft.com/en-us/library/windows/desktop/ms649024(v=vs.85).aspx
+				// docs say success should return 0
 				onClipboardEmptied();
-				return new LRESULT(1);
+				return new LRESULT(0);
 			case WM_DRAWCLIPBOARD:
+				// no documentation on return value
 				onClipboardChanged();
 				return new LRESULT(1);
 			case WM_RENDERFORMAT:
 				onPaste(wParam);
-				return new LRESULT(1);
+				// docs say this should return 0
+				return new LRESULT(0);
 			case WM_RENDERALLFORMATS:
+				// if processed, which we don't at hte moment, return 0
 				return new LRESULT(1);
 			case User32.WM_DEVICECHANGE:
 				return new LRESULT(1);
@@ -147,9 +153,11 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 						setDelayedRenderFormats(formats);
 					}, 20, TimeUnit.MILLISECONDS);
 				}
+				MSG msg = new WinUser.MSG();
 				while (true) {
 					// get all messages forever
-					getMessage();
+
+					getMessage(msg);
 					JavaUtil.sleepAndLogInterruption(10);
 				}
 			}
@@ -164,12 +172,14 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 */
 	@Override
 	public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
+		logger.debug("scheduling set delayed render formats");
 		executor.schedule(new Runnable() {
 
 			@Override
 			public void run() {
 				logger.debug("writing null to clipboard formats=" + formats);
 				writeNullToClipboard(formats);
+				logger.debug("wrote null to clipboard done");
 			}
 
 		}, 1, TimeUnit.MICROSECONDS);
@@ -191,16 +201,26 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 */
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
-		user32.SetClipboardData(clipboardData.getFormat().getWindows(), clipboardData.createWindowsData());
-		if (!clipboardData.isCacheable()) {
+		Pointer data = clipboardData.createWindowsData();
+		logger.debug("setting clipboard data");
+		user32.SetClipboardData(clipboardData.getFormat().getWindows(), data);
+		logger.debug("clipboard data set");
+		// System owns the data and application should not handle data after the
+		// SetClipboardData call. This is explicitly called out in microsoft documents.
+		// https://msdn.microsoft.com/en-us/library/windows/desktop/ms649051(v=vs.85).aspx
+		logger.debug("@@@@ disabled cache checking");
+		if (!clipboardData.isCacheable() && false) {
 			executor.schedule(() -> {
 				openClipboardWhenFree();
 				try {
+					logger.debug("reseting clipboard");
 					writeNullToClipboard(clipboardData.getFormat());
+					logger.debug("reset clipboard done");
 				} finally {
-					closeClipboardIfOwner();
+					logger.debug("closing after reset");
+					closeClipboard();
 				}
-			}, 5, TimeUnit.MILLISECONDS);
+			}, 500, TimeUnit.MILLISECONDS);
 		}
 	}
 
@@ -224,12 +244,16 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * Called when a local application changes the clipboard.
 	 */
 	protected void onClipboardChanged() {
+		logger.debug("clipboard changed");
 		HWND owner = user32.GetClipboardOwner();
 		if (!windowHandle.equals(owner)) {
+			logger.debug("clipboard changed with different owner!");
 			executor.schedule(new Runnable() {
 				@Override
 				public void run() {
+					logger.debug("attempting to get formats on clipboard change");
 					Set<ClipboardFormat> formats = getClipboardFormatsAvailable();
+					logger.debug("clipboard on change formats=" + formats);
 					clipboardListener.onClipboardChanged(formats);
 				}
 			}, 1, TimeUnit.MICROSECONDS);
@@ -242,7 +266,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * the moment because we are watching for the clipboard changed call.
 	 */
 	protected void onClipboardEmptied() {
-
+		logger.debug("clipboard was emptied by someone!");
 	}
 
 	/**
@@ -266,7 +290,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			throw windowsErrorToException("Error attempting to write null to clipboard for formats=" + formats, null,
 					t);
 		} finally {
-			closeClipboardIfOwner();
+			closeClipboard();
+		}
+	}
+
+	private void closeClipboard() {
+		if (!user32.CloseClipboard()) {
+			logger.error("### close clipboard failed");
 		}
 	}
 
@@ -274,6 +304,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		HWND owner = user32.GetClipboardOwner();
 		if (windowHandle.equals(owner)) {
 			user32.CloseClipboard();
+		} else {
+			logger.warn("###Clipboard couldn't be closed because we are not owner!");
 		}
 	}
 
@@ -306,15 +338,14 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	}
 
-	private void getMessage() {
-		MSG msg = new WinUser.MSG();
-		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 0);
+	private void getMessage(MSG msg) {
+		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 1);
 		if (hasMessage) {
-			user32.GetMessage(msg, windowHandle, 0, 0);
+			// user32.GetMessage(msg, windowHandle, 0, 0);
 			logger.debug("got message=" + msg.message);
 			if (msg.message != 0xC228) {
 			}
-			user32.TranslateMessage(msg);
+			// user32.TranslateMessage(msg);
 			user32.DispatchMessage(msg);
 		}
 	}
@@ -386,9 +417,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	@Override
 
 	public ClipboardData getClipboardData(ClipboardFormat format) {
-		openClipboardWhenFree();
-		Pointer p = user32.GetClipboardData(format.getWindows());
-		user32.CloseClipboard();
+		Pointer p = null;
+		try {
+			openClipboardWhenFree();
+			p = user32.GetClipboardData(format.getWindows());
+		} finally {
+			closeClipboard();
+		}
 		return clipboardPointerToData(format, p);
 	}
 

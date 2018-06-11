@@ -23,7 +23,7 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 
 	@Override
 	public Pointer createWindowsData() {
-		Memory winMemory = new Memory(1 * (data.getBytes().length + 1));
+		Memory winMemory = new Memory(returnWindowsDataLengthBytes());
 		winMemory.clear();
 		winMemory.setString(0, data);
 		return winMemory;
@@ -51,6 +51,11 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 	@Override
 	public int returnLinuxEntrySizeBits() {
 		return 8;
+	}
+
+	@Override
+	public long returnWindowsDataLengthBytes() {
+		return 1 * (data.getBytes().length + 1);
 	}
 
 }

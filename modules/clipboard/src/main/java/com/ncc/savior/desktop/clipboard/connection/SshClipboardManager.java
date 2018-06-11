@@ -55,7 +55,7 @@ public class SshClipboardManager implements IClipboardManager {
 			command += " " + testParam;
 		}
 		if (localClipboardClient == null) {
-			connectLocalClient();
+			// connectLocalClient();
 		}
 	}
 
