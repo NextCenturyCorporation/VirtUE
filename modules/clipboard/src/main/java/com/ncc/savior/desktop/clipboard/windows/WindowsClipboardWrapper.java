@@ -70,7 +70,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	WindowProc callback = new WindowProc() {
 		@Override
 		public LRESULT callback(HWND hWnd, int uMsg, WPARAM wParam, LPARAM lParam) {
-			logger.debug("got message(callback)=" + uMsg);
+			// logger.debug("got message(callback)=" + uMsg);
 			// For the below, 1 is success where 0 represents failure
 			switch (uMsg) {
 			case WM_NCCREATE:
@@ -166,14 +166,11 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 */
 	@Override
 	public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
-		logger.debug("scheduling set delayed render formats");
 		addToRunLaterQueue(new Runnable() {
 
 			@Override
 			public void run() {
-				logger.debug("writing null to clipboard formats=" + formats);
 				writeNullToClipboard(formats);
-				logger.debug("wrote null to clipboard done");
 			}
 
 		});
@@ -249,16 +246,12 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * Called when a local application changes the clipboard.
 	 */
 	protected void onClipboardChanged() {
-		logger.debug("clipboard changed");
 		HWND owner = user32.GetClipboardOwner();
 		if (!windowHandle.equals(owner)) {
-			logger.debug("clipboard changed with different owner!");
 			addToRunLaterQueue(new Runnable() {
 				@Override
 				public void run() {
-					logger.debug("attempting to get formats on clipboard change");
 					Set<ClipboardFormat> formats = getClipboardFormatsAvailable();
-					logger.debug("clipboard on change formats=" + formats);
 					if (clipboardListener != null) {
 						clipboardListener.onClipboardChanged(formats);
 					}
@@ -368,7 +361,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 1);
 		if (hasMessage) {
 			// user32.GetMessage(msg, windowHandle, 0, 0);
-			logger.debug("got message=" + msg.message);
 			if (msg.message != 0xC228) {
 			}
 			// user32.TranslateMessage(msg);
@@ -420,8 +412,10 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		while (!success) {
 			logger.debug("clipboard unable to be opened.  Trying again.  Owner=" + user32.GetClipboardOwner() + " ME="
 					+ windowHandle);
-			WindowsError error = getLastError();
-			logger.debug("Error: " + error);
+			// Error doesn't seem to work here. always returned 0, operation returned
+			// successfully
+			// WindowsError error = getLastError();
+			// logger.debug("Error: " + error);
 			JavaUtil.sleepAndLogInterruption(10);
 			success = user32.OpenClipboard(windowHandle);
 		}

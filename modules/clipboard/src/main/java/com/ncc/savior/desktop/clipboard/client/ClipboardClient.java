@@ -78,10 +78,14 @@ public class ClipboardClient {
 				try {
 					ClipboardDataRequestMessage requestMsg = new ClipboardDataRequestMessage(myId, format,
 							UUID.randomUUID().toString());
-					logger.debug("Sending message=" + requestMsg);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Sending message=" + requestMsg);
+					}
 					ClipboardClient.this.transmitter.sendMessageToHub(requestMsg);
 					ClipboardData clipboardData = blockForClipboardData(requestMsg.getRequestId());
-					logger.debug("Setting data to " + clipboardData);
+					if (logger.isTraceEnabled()) {
+						logger.trace("Setting data to " + clipboardData);
+					}
 					if (clipboardData != null) {
 						clipboard.setDelayedRenderData(clipboardData);
 					}
@@ -94,7 +98,7 @@ public class ClipboardClient {
 			public void onClipboardChanged(Set<ClipboardFormat> formats) {
 				try {
 					ClipboardChangedMessage msg = new ClipboardChangedMessage(myId, formats);
-					logger.debug("sending message=" + msg);
+					// logger.debug("sending message=" + msg);
 					ClipboardClient.this.transmitter.sendMessageToHub(msg);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -118,10 +122,15 @@ public class ClipboardClient {
 	protected ClipboardData blockForClipboardData(String requestId) {
 		requestToThread.put(requestId, Thread.currentThread());
 		try {
-			logger.debug("blocking for data.  request=" + requestId);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("blocking for data. request=" + requestId);
+			}
 			Thread.sleep(timeoutMillis);
 		} catch (InterruptedException e) {
-			logger.debug("Interrupted!  request=" + requestId);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Interrupted! request=" + requestId);
+			}
 			ClipboardData data = requestToData.remove(requestId);
 			if (data == null) {
 				logger.error("Error getting data for request=" + requestId);
@@ -139,7 +148,9 @@ public class ClipboardClient {
 	}
 
 	protected void onClipboardMessage(IClipboardMessage message) {
-		logger.debug("got message=" + message);
+		if (logger.isTraceEnabled()) {
+			logger.trace("got message=" + message);
+		}
 		if (message instanceof ClipboardChangedMessage) {
 			ClipboardChangedMessage m = (ClipboardChangedMessage) message;
 			if (!myId.equals(message.getSourceId())) {
@@ -152,7 +163,9 @@ public class ClipboardClient {
 			ClipboardData data = clipboard.getClipboardData(m.getFormat());
 			ClipboardDataMessage dataMessage = new ClipboardDataMessage(myId, data, m.getRequestId(), m.getSourceId());
 			try {
-				logger.debug("sending message=" + dataMessage);
+				if (logger.isTraceEnabled()) {
+					logger.trace("sending message=" + dataMessage);
+				}
 				transmitter.sendMessageToHub(dataMessage);
 			} catch (IOException e) {
 				logger.error("Error sending data message=" + dataMessage);
@@ -183,7 +196,9 @@ public class ClipboardClient {
 		String reqId = message.getRequestId();
 		Thread t = requestToThread.get(reqId);
 		if (t != null) {
-			logger.debug("storing data.  request=" + reqId);
+			if (logger.isTraceEnabled()) {
+				logger.trace("storing data.  request=" + reqId);
+			}
 			requestToData.put(reqId, message.getData());
 			t.interrupt();
 		} else {
