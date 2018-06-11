@@ -38,6 +38,7 @@ public class AppsList {
 
 		// GridLayout gl_view = new GridLayout(0, 1);
 		// view.setLayout(gl_view);
+
 		view.validate();
 		view.repaint();
 	}

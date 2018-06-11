@@ -73,6 +73,7 @@ public class AppsTile {
 		JFrame frame = new JFrame("FrameDemo");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(at.getView(), SwingConstants.CENTER);
+
 		frame.setSize(600, 875);
 		frame.setVisible(true);
 	}

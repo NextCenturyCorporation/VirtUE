@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+
 public class TestClass {
 	private JPanel container;
 	// private static boolean applicationsOpen = true;
@@ -36,6 +37,7 @@ public class TestClass {
 		JFrame frame = new JFrame("FrameDemo");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
+
 		frame.getContentPane().add(tc.getContainer());
 		frame.setSize(500, 875);
 		frame.setVisible(true);
