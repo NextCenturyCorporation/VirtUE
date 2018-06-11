@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.swing.JFrame;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +17,6 @@ import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
-
-import javafx.stage.Stage;
 
 public class SidebarController {
 	private static final Logger logger = LoggerFactory.getLogger(SidebarController.class);
@@ -37,7 +37,7 @@ public class SidebarController {
 		this.currentVirtues = new TreeMap<String, DesktopVirtue>();
 	}
 
-	public void init(Stage primaryStage) throws Exception {
+	public void init(JFrame primaryStage) throws Exception {
 		List<DesktopVirtue> initialVirtues;
 		// if (authService.getUser() != null) {
 		// initialVirtues = virtueService.getVirtuesForUser();
@@ -45,8 +45,11 @@ public class SidebarController {
 		initialVirtues = new ArrayList<DesktopVirtue>();
 		// }
 		currentVirtues = getCurrentVirtueMap(initialVirtues);
+
 		sidebar.start(primaryStage, initialVirtues);
 		startVirtuePoll();
+
+		// sidebar.setStartState();
 	}
 
 	private Map<String, DesktopVirtue> getCurrentVirtueMap(List<DesktopVirtue> initialVirtues) {
@@ -66,7 +69,7 @@ public class SidebarController {
 	}
 
 	// ****************
-	private void startVirtuePoll() {
+	public void startVirtuePoll() {
 		Runnable runnable = new Runnable() {
 
 			@Override
@@ -75,6 +78,7 @@ public class SidebarController {
 				while (!terminatePollThread) {
 					try {
 						DesktopUser currentUser = authService.getUser();
+						// DesktopUser currentUser = new DesktopUser("dummy", "");
 						if (currentUser != null) {
 							List<DesktopVirtue> virtues;
 							try {
@@ -104,7 +108,7 @@ public class SidebarController {
 		virtuePollThread.start();
 	}
 
-	protected void updateVirtues(List<DesktopVirtue> virtues) {
+	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {
 		Iterator<DesktopVirtue> itr = virtues.iterator();
 		Map<String, DesktopVirtue> newCurrentVirtues = new TreeMap<String, DesktopVirtue>();
 		while (itr.hasNext()) {
@@ -135,7 +139,8 @@ public class SidebarController {
 	}
 
 	// TODO this still has bugs and should be completely rethought
-	protected void detectChangesAndReport2(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues) {
+	protected void detectChangesAndReport2(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues)
+			throws IOException {
 		DesktopVirtueComparator comparator = new DesktopVirtue.DesktopVirtueComparator();
 		currentVirtues.sort(comparator);
 		virtues.sort(comparator);
@@ -207,7 +212,7 @@ public class SidebarController {
 		changeHandler.removeVirtue(virtue);
 	}
 
-	protected void reportAddedVirtue(DesktopVirtue virtue) {
+	protected void reportAddedVirtue(DesktopVirtue virtue) throws IOException {
 		changeHandler.addVirtue(virtue);
 	}
 
@@ -221,7 +226,7 @@ public class SidebarController {
 
 		void changeVirtue(DesktopVirtue virtue);
 
-		void addVirtue(DesktopVirtue virtue);
+		void addVirtue(DesktopVirtue virtue) throws IOException;
 
 	}
 

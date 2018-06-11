@@ -1,48 +1,43 @@
 package com.ncc.savior.desktop.sidebar;
 
-import java.net.URL;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.SystemColor;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
-import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
-import com.ncc.savior.desktop.sidebar.LoginScreen.ILoginEventListener;
+import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
-import javafx.application.Platform;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 /**
  * Class to start the utility sidebar of the Savior application
@@ -53,110 +48,107 @@ public class Sidebar implements VirtueChangeHandler {
 	private static final Logger logger = LoggerFactory.getLogger(Sidebar.class);
 	private static final int ICON_SIZE = 32;
 	private boolean debug = false;
-	private BorderStroke paneDebugStroke = new BorderStroke(Color.RED, BorderStrokeStyle.DOTTED, new CornerRadii(0),
-			new BorderWidths(2));
-	private BorderStroke sectionDebugStroke = new BorderStroke(Color.ORANGE, BorderStrokeStyle.DOTTED,
-			new CornerRadii(0), new BorderWidths(2));
-	private BorderStroke subSectionDebugStroke = new BorderStroke(Color.YELLOW, BorderStrokeStyle.DOTTED,
-			new CornerRadii(0), new BorderWidths(2));
-	private BorderStroke calloutDebugStroke = new BorderStroke(Color.GREEN, BorderStrokeStyle.DOTTED,
-			new CornerRadii(0), new BorderWidths(2));
 
 	private int width = 300;
 	private int height = 800;
 	private VirtueService virtueService;
 	private VBox virtuePane;
-	private Map<String, VirtueMenuItem> virtueIdToVmi;
+	private Map<String, VirtueContainer> virtueIdToVmi;
 	private AuthorizationService authService;
-	private Label userLabel;
-	private Stage stage;
-	private Image statusImage;
-	private ArrayList<RgbColor> colorList;
-	private Iterator<RgbColor> colorItr;
-	private ImageView userImageView;
+
+	private java.awt.Image statusImage;
 	private String style;
+
+	private Iterator<Color> colorItr;
+	private ArrayList<Color> colorList;
+	private JFrame frame;
+	private LoginPage lp;
+
+	private JPanel desktopContainer;
+	private static boolean applicationsOpen = true;
+	private static boolean tileViewOpen = true;
+	private static boolean favoritesViewOpen = false;
+	private static boolean listViewOpen = false;
+	private JScrollPane sp;
+	private AppsTile at;
+	private AppsList al;
+	private VirtueTile vt;
+	private VirtueList vl;
+	private FavoritesView fv;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors, String style) {
 		this.authService = authService;
-		this.virtueIdToVmi = new HashMap<String, VirtueMenuItem>();
+		this.virtueIdToVmi = new HashMap<String, VirtueContainer>();
 		this.virtueService = virtueService;
-		this.statusImage = new Image("images/loading.gif");
+		// this.statusImage = new Image("images/loading.gif");
 		this.style = style;
-		colorList = new ArrayList<RgbColor>();
-		if (useColors) {
-			colorList.add(new RgbColor(1, 0, 0, .5));
-			colorList.add(new RgbColor(0, 1, 0, .5));
-			colorList.add(new RgbColor(0, 0, 1, .5));
-			colorList.add(new RgbColor(1, 1, 0, .5));
-			colorList.add(new RgbColor(138d / 255, 43d / 255, 226d / 255, .5));
-			colorList.add(new RgbColor(1, 165d / 255, 0, .5));
-		} else {
-			// colorList.add(Color.ORANGE);
-			// colorList.add(Color.PURPLE);
-			// colorList.add(Color.CYAN);
-			// colorList.add(Color.BISQUE);
-			// colorList.add(Color.DARKSALMON);
-			colorList.add(null);
-		}
+
+		colorList = loadColors();
 		colorItr = colorList.iterator();
 	}
 
-	public void start(Stage stage, List<DesktopVirtue> initialVirtues) throws Exception {
-		stage.setTitle("SAVIOR");
-		this.stage = stage;
+	private ArrayList<Color> loadColors() {
+		ArrayList<Color> colors = new ArrayList<Color>();
+		colors.add(new Color(4, 0, 252));
+		colors.add(new Color(0, 135, 255));
+		colors.add(new Color(165, 0, 0));
+		colors.add(new Color(255, 33, 0));
+		colors.add(new Color(209, 195, 0));
+		colors.add(new Color(255, 246, 0));
+		colors.add(new Color(204, 119, 0));
+		colors.add(new Color(255, 140, 0));
+		colors.add(new Color(92, 0, 173));
+		colors.add(new Color(144, 0, 255));
+		colors.add(new Color(191, 0, 156));
+		colors.add(new Color(255, 0, 208));
 
-		VBox pane = new VBox();
-		if (debug) {
-			pane.setBorder(new Border(paneDebugStroke));
-		}
-		pane.setAlignment(Pos.TOP_CENTER);
-		ObservableList<Node> children = pane.getChildren();
-		children.add(getLabel());// , 1, 1);
-		// pane.add(getMinimizeMaximize());
-		children.add(getUserIcon());// , 1, 3);
-		children.add(getUserNameLabel());
-		Node vlist = initialVirtueList(stage, initialVirtues);
-		children.add(vlist);// , 1, 4);
-		// Region region = new Region();
-		// region.setBorder(new Border(sectionDebugStroke));
-		// children.add(region);// , 1, 5);
-		children.add(getLogout());// , 1, 6);
-		VBox.setVgrow(vlist, Priority.ALWAYS);
-		Scene scene = new Scene(pane, width, height);
-		Image icon = new Image("images/saviorLogo.png");
-		URL resource = getClass().getResource("/" + style + ".css");
-		if (resource != null) {
-			scene.getStylesheets().add(resource.toExternalForm());
-		}
-		stage.getIcons().clear();
-		stage.getIcons().add(icon);
-		stage.setScene(scene);
-		stage.show();
-		DesktopUser user = authService.getUser();
-
-		String reqDomain = authService.getRequiredDomain();
-		if (user != null && user.getImage() != null) {
-			userImageView.setImage(user.getImage());
-		}
-		if (user == null || (reqDomain != null && !reqDomain.equals(user.getDomain()))) {
-			initiateLoginScreen(stage);
-		}
+		return colors;
 	}
 
-	private void initiateLoginScreen(Stage stage) {
-		LoginScreen login = new LoginScreen(authService, true);
-		login.addLoginEventListener(new ILoginEventListener() {
+	public void start(JFrame frame, List<DesktopVirtue> initialVirtues)
+			throws Exception {
+		frame.setTitle("SAVIOR");
+		this.frame = frame;
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame.setSize(495, 620);
+
+		startLogin();
+
+		// DesktopUser user = authService.getUser();
+
+		// String reqDomain = authService.getRequiredDomain();
+		// if (user != null && user.getImage() != null) {
+		// userImageView.setImage(user.getImage());
+		// }
+		// if (user == null || (reqDomain != null &&
+		// !reqDomain.equals(user.getDomain()))) {
+		// initiateLoginScreen();
+		// }
+	}
+
+	public void startLogin() throws IOException {
+		this.lp = new LoginPage(authService);
+		frame.getContentPane().removeAll();
+		frame.getContentPane().validate();
+		frame.getContentPane().repaint();
+		this.frame.getContentPane().add(lp.getContainer());
+		frame.getContentPane().validate();
+		frame.getContentPane().repaint();
+		this.frame.setVisible(true);
+		initiateLoginScreen(lp);
+	}
+
+	private void initiateLoginScreen(LoginPage lp) throws IOException {
+		lp.addLoginEventListener(new ILoginEventListener() {
 			@Override
-			public void onLoginSuccess(DesktopUser user) {
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						userLabel.setText(user.getUsername());
-						if (user.getImage() != null) {
-							userImageView.setImage(user.getImage());
-						}
-					}
-				});
+			public void onLoginSuccess(DesktopUser user) throws IOException {
+				frame.getContentPane().removeAll();
+				frame.validate();
+				frame.repaint();
+				setup(user);
+				frame.getContentPane().add(desktopContainer);
+				frame.setSize(495, 620);
+				frame.setVisible(true);
 			}
 
 			@Override
@@ -169,160 +161,11 @@ public class Sidebar implements VirtueChangeHandler {
 				// do nothing, handled elsewhere
 			}
 		});
-		login.start(stage);
-	}
-
-	private Node getLogout() {
-		Image image = new Image("images/logout.png");
-		ImageView view = new ImageView(image);
-		view.setFitWidth(32);
-		view.setFitHeight(32);
-		Button button = new Button("Logout", view);
-		button.setPrefWidth(width);
-		button.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				// do cleanup stuff.
-				try {
-					authService.logout();
-				} catch (Throwable t) {
-					// do nothing
-				}
-				Platform.exit();
-				System.exit(0);
-			}
-		});
-		HBox.setHgrow(button, Priority.ALWAYS);
-		GridPane pane = new GridPane();
-		pane.getChildren().add(button);
-		pane.setAlignment(Pos.CENTER);
-		pane.setMaxHeight(height);
-		pane.setPrefWidth(width);
-		if (debug) {
-			button.setBorder(new Border(subSectionDebugStroke));
-			pane.setBorder(new Border(sectionDebugStroke));
-		}
-		return pane;
-	}
-
-	private Node initialVirtueList(Stage primaryStage, List<DesktopVirtue> initialVirtues) {
-		virtuePane = new VBox();
-		virtuePane.setPrefWidth(width);
-		virtuePane.setAlignment(Pos.BOTTOM_CENTER);
-		ObservableList<Node> children = virtuePane.getChildren();
-		if (debug) {
-			virtuePane.setBorder(new Border(calloutDebugStroke));
-		}
-		for (DesktopVirtue virtue : initialVirtues) {
-			VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, statusImage, width, getNextColor());
-			children.add(vmi.getNode());
-			String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
-			virtueIdToVmi.put(id, vmi);
-		}
-		ScrollPane scroll = new ScrollPane(virtuePane);
-		scroll.setHbarPolicy(ScrollBarPolicy.NEVER);
-		scroll.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
-		scroll.prefHeight(height);
-
-		return scroll;
-	}
-
-	private Node getUserIcon() {
-		Image image = new Image("images/defaultUserIcon.png");
-		userImageView = new ImageView(image);
-		userImageView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent event) {
-				LoginScreen loginScreen = new LoginScreen(authService, false);
-				loginScreen.addLoginEventListener(new ILoginEventListener() {
-					@Override
-					public void onLoginSuccess(DesktopUser user) {
-						try {
-							Platform.runLater(new Runnable() {
-								@Override
-								public void run() {
-									virtuePane.getChildren().clear();
-									virtueIdToVmi.clear();
-									userLabel.setText(user.getUsername());
-									if (user.getImage() != null) {
-										userImageView.setImage(user.getImage());
-									}
-								}
-							});
-						} catch (Throwable t) {
-							logger.debug("Error applying changes to login success.", t);
-						}
-					}
-
-					@Override
-					public void onLoginFailure(String username, String domain, RuntimeException e) {
-						// do nothing
-					}
-
-					@Override
-					public void onCancel() {
-						// do nothing
-					}
-				});
-				loginScreen.start(stage);
-			}
-		});
-
-		int size = 96;
-		int paddingSize = 5;
-		// userImageView.setFitWidth(size);
-		userImageView.setFitHeight(size);
-		userImageView.setPreserveRatio(true);
-		GridPane pane = new GridPane();
-		pane.getChildren().add(userImageView);
-		pane.setPrefWidth(width);
-		pane.setMinHeight(size + 2 * paddingSize);
-		pane.setAlignment(Pos.BOTTOM_CENTER);
-		pane.setPadding(new Insets(paddingSize));
-		if (debug) {
-			pane.setBorder(new Border(sectionDebugStroke));
-		}
-		return pane;
-	}
-
-	private Node getLabel() {
-		Image image = new Image("images/saviorLogo.png");
-		ImageView view = new ImageView(image);
-		view.setFitWidth(ICON_SIZE);
-		view.setFitHeight(ICON_SIZE);
-		Label label = new Label("SAVIOR Desktop", view);
-		label.setPrefWidth(width);
-		label.setAlignment(Pos.CENTER);
-		GridPane pane = new GridPane();
-		pane.getChildren().add(label);
-		pane.setAlignment(Pos.CENTER);
-		pane.setPrefWidth(width);
-		pane.setMinHeight(label.getHeight());
-		if (debug) {
-			label.setBorder(new Border(subSectionDebugStroke));
-			pane.setBorder(new Border(sectionDebugStroke));
-		}
-		return label;
-	}
-
-	private Node getUserNameLabel() {
-		if (userLabel == null) {
-			DesktopUser user;
-			try {
-				user = authService.getUser();
-			} catch (InvalidUserLoginException e) {
-				user = null;
-			}
-			String username = user == null ? "" : user.getUsername();
-			userLabel = new Label(username);
-		}
-		return userLabel;
 	}
 
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
-		VirtueMenuItem vmi = virtueIdToVmi.get(virtue.getId());
+		VirtueContainer vmi = virtueIdToVmi.get(virtue.getId());
 		if (vmi == null) {
 			vmi = virtueIdToVmi.get(virtue.getTemplateId());
 			if (virtue.getId() != null) {
@@ -335,41 +178,330 @@ public class Sidebar implements VirtueChangeHandler {
 
 	// ***Updating Virtues***
 	@Override
-	public void addVirtue(DesktopVirtue virtue) {
-		ObservableList<Node> children = virtuePane.getChildren();
-		VirtueMenuItem vmi = new VirtueMenuItem(virtue, virtueService, statusImage, width, getNextColor());
+	public void addVirtue(DesktopVirtue virtue) throws IOException {
+		VirtueContainer vc = new VirtueContainer(virtue, virtueService, statusImage, width, getNextColor(),
+				getNextColor(), sp);
 		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
-		virtueIdToVmi.put(id, vmi);
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				children.add(vmi.getNode());
-			}
-		});
+		virtueIdToVmi.put(id, vc);
+		vt.addVirtue(vc);
+		al.addTiles(virtue, vc, fv);
+		at.addTiles(virtue, vc, fv);
+		setInitialViewPort();
 	}
 
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
-		ObservableList<Node> children = virtuePane.getChildren();
-		VirtueMenuItem vmi = virtueIdToVmi.remove(virtue.getId());
+		VirtueContainer vmi = virtueIdToVmi.remove(virtue.getId());
 		if (vmi == null) {
 			vmi = virtueIdToVmi.remove(virtue.getTemplateId());
 		}
 		if (vmi != null) {
-			VirtueMenuItem finalVmi = vmi;
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					children.remove(finalVmi.getNode());
-				}
-			});
+			VirtueContainer finalVmi = vmi;
+			finalVmi.removeVirtue(virtue.getName());
 		}
 	}
 
-	private RgbColor getNextColor() {
+	private Color getNextColor() {
 		if (!colorItr.hasNext()) {
 			colorItr = colorList.iterator();
 		}
 		return colorItr.next();
+	}
+
+	// This will setup the main display after login
+	public void setup(DesktopUser user) throws IOException {
+		colorItr = colorList.iterator();
+		this.desktopContainer = new JPanel();
+		this.sp = new JScrollPane();
+		this.at = new AppsTile(virtueService, sp);
+		this.al = new AppsList(virtueService, sp);
+		this.vt = new VirtueTile();
+		this.vl = new VirtueList();
+		this.fv = new FavoritesView(sp);
+		desktopContainer.setLayout(new BorderLayout(0, 0));
+
+		applicationsOpen = true;
+		tileViewOpen = true;
+		favoritesViewOpen = false;
+		listViewOpen = false;
+
+		JPanel topBorder = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) topBorder.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		topBorder.setBackground(Color.DARK_GRAY);
+		topBorder.setSize(20, 100);
+		desktopContainer.add(topBorder, BorderLayout.NORTH);
+
+		JLabel name = new JLabel(user.getUsername());
+		name.setIcon(null);
+		name.setForeground(Color.WHITE);
+		name.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		topBorder.add(name);
+
+		JPanel bottomBorder = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) bottomBorder.getLayout();
+		flowLayout_1.setVgap(0);
+		bottomBorder.setBackground(Color.DARK_GRAY);
+		desktopContainer.add(bottomBorder, BorderLayout.SOUTH);
+
+		JLabel lblNewLabel = new JLabel();
+
+		ImageIcon imageIcon = new ImageIcon(Sidebar.class.getResource("/images/u73.png"));
+		Image image = imageIcon.getImage(); // transform it
+		Image newimg = image.getScaledInstance(27, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+		imageIcon = new ImageIcon(newimg);  // transform it back
+		lblNewLabel.setIcon(imageIcon);
+
+		bottomBorder.add(lblNewLabel);
+
+		JLabel logout = new JLabel("Logout");
+		logout.setFont(new Font("Tahoma", Font.PLAIN, 19));
+		logout.setForeground(Color.WHITE);
+		bottomBorder.add(logout);
+
+		JPanel center = new JPanel();
+		desktopContainer.add(center, BorderLayout.CENTER);
+		center.setLayout(new GridBagLayout());
+
+		GridBagConstraints c = new GridBagConstraints();
+		GridBagConstraints c2 = new GridBagConstraints();
+		GridBagConstraints c3 = new GridBagConstraints();
+		GridBagConstraints c4 = new GridBagConstraints();
+		GridBagConstraints c5 = new GridBagConstraints();
+
+		c.fill = GridBagConstraints.HORIZONTAL;
+
+		JPanel applications = new JPanel();
+		applications.setBorder(new LineBorder(SystemColor.windowBorder));
+		applications.setBackground(SystemColor.scrollbar);
+		c.weightx = 0.5;
+
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 0;
+		c.gridy = 0;
+		center.add(applications, c);
+		applications.setLayout(new BorderLayout(0, 4));
+
+		JLabel lblA = new JLabel("Applications");
+		lblA.setVerticalAlignment(SwingConstants.TOP);
+		lblA.setHorizontalAlignment(SwingConstants.CENTER);
+		applications.add(lblA);
+
+		JPanel applicationsSelected = new JPanel();
+		FlowLayout flowLayout_2 = (FlowLayout) applicationsSelected.getLayout();
+		flowLayout_2.setVgap(1);
+		applicationsSelected.setBackground(new Color(148, 0, 211));
+		applications.add(applicationsSelected, BorderLayout.SOUTH);
+
+		JPanel applicationsHeader = new JPanel();
+		applicationsHeader.setBackground(SystemColor.scrollbar);
+		applications.add(applicationsHeader, BorderLayout.NORTH);
+
+		JPanel virtues = new JPanel();
+		virtues.setBorder(new LineBorder(SystemColor.windowBorder));
+		virtues.setBackground(SystemColor.scrollbar);
+		c2.fill = GridBagConstraints.HORIZONTAL;
+		c2.weightx = 0.5;
+		c2.gridx = 1;
+		c2.gridy = 0;
+		center.add(virtues, c2);
+		virtues.setLayout(new BorderLayout(0, 4));
+
+		JLabel lblVirtues = new JLabel("Virtues");
+		lblVirtues.setHorizontalAlignment(SwingConstants.CENTER);
+		virtues.add(lblVirtues);
+
+		JPanel virtuesHeader = new JPanel();
+		virtuesHeader.setBackground(SystemColor.scrollbar);
+		virtues.add(virtuesHeader, BorderLayout.NORTH);
+
+		JPanel virtuesSelected = new JPanel();
+		FlowLayout flowLayout_3 = (FlowLayout) virtuesSelected.getLayout();
+		flowLayout_3.setVgap(1);
+		virtuesSelected.setBackground(SystemColor.scrollbar);
+		virtues.add(virtuesSelected, BorderLayout.SOUTH);
+
+		JPanel search = new JPanel();
+		search.setBorder(new LineBorder(SystemColor.windowBorder));
+		search.setBackground(SystemColor.scrollbar);
+		FlowLayout flowLayout_4 = (FlowLayout) search.getLayout();
+		flowLayout_4.setVgap(10);
+		c3.fill = GridBagConstraints.HORIZONTAL;
+		c3.weightx = 0.5;
+		c3.gridx = 2;
+		c3.gridy = 0;
+		center.add(search, c3);
+
+		JLabel lblSearch = new JLabel("Search");
+		search.add(lblSearch);
+
+		JPanel icons = new JPanel();
+		icons.setBorder(new LineBorder(SystemColor.windowBorder));
+		icons.setBackground(new Color(248, 248, 255));
+		c4.fill = GridBagConstraints.HORIZONTAL;
+		c4.weightx = 0.0;
+		c4.gridwidth = 3;
+		c4.gridx = 0;
+		c4.gridy = 1;
+		center.add(icons, c4);
+		icons.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+
+		ImageIcon inactiveListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-inactive2.png")));
+		ImageIcon activeListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-active2.png")));
+		JLabel listLabel = new JLabel(inactiveListIcon);
+		listLabel.setBackground(new Color(248, 248, 255));
+
+		ImageIcon inactiveTileIcon = (new ImageIcon(Sidebar.class.getResource("/images/tile-inactive2.png")));
+		ImageIcon activeTileIcon = (new ImageIcon(Sidebar.class.getResource("/images/tile-active2.png")));
+		JLabel tileLabel = new JLabel(activeTileIcon);
+		tileLabel.setBackground(new Color(248, 248, 255));
+
+		ImageIcon inactiveFavoriteIcon = (new ImageIcon(
+				Sidebar.class.getResource("/images/favorite-inactive.png")));
+		ImageIcon activeFavoriteIcon = (new ImageIcon(
+				Sidebar.class.getResource("/images/favorite-active.png")));
+		JLabel favoritesLabel = new JLabel(inactiveFavoriteIcon);
+		favoritesLabel.setBackground(new Color(248, 248, 255));
+
+		JPanel favoritesView = new JPanel();
+		favoritesView.setBackground(new Color(248, 248, 255));
+		favoritesView.add(favoritesLabel);
+		icons.add(favoritesView);
+
+		JPanel listView = new JPanel();
+		listView.setBackground(new Color(248, 248, 255));
+		listView.add(listLabel);
+		icons.add(listView);
+
+		JPanel tileView = new JPanel();
+		tileView.setBackground(new Color(248, 248, 255));
+		tileView.add(tileLabel);
+		icons.add(tileView);
+
+		sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		sp.setSize(300, 800);
+		sp.setPreferredSize(new Dimension(0, 800));
+		sp.getVerticalScrollBar().setUnitIncrement(16);
+		c5.fill = GridBagConstraints.BOTH;
+		c5.ipady = 0;
+		c5.weighty = 1.0; // request any extra vertical space
+		c5.anchor = GridBagConstraints.PAGE_END; // bottom of space
+		c5.gridx = 0;
+		c5.gridwidth = 3; // 3 columns wide
+		c5.gridy = 2; // third row
+		center.add(sp, c5);
+
+		sp.getViewport().revalidate();
+		sp.validate();
+		sp.repaint();
+
+		tileView.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (!tileViewOpen) {
+					tileViewOpen = true;
+					favoritesViewOpen = false;
+					listViewOpen = false;
+					tileLabel.setIcon(activeTileIcon);
+					listLabel.setIcon(inactiveListIcon);
+					favoritesLabel.setIcon(inactiveFavoriteIcon);
+				}
+				if (applicationsOpen) {
+					sp.setViewportView(at.getContainer());
+				} else {
+					sp.setViewportView(vt.getContainer());
+				}
+			}
+		});
+
+		listView.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (!listViewOpen) {
+					listViewOpen = true;
+					tileViewOpen = false;
+					favoritesViewOpen = false;
+					listLabel.setIcon(activeListIcon);
+					tileLabel.setIcon(inactiveTileIcon);
+					favoritesLabel.setIcon(inactiveFavoriteIcon);
+				}
+				if (applicationsOpen) {
+					sp.setViewportView(al.getContainer());
+				} else {
+					sp.setViewportView(vl.getContainer());
+				}
+			}
+		});
+
+		favoritesView.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (!favoritesViewOpen) {
+					favoritesViewOpen = true;
+					tileViewOpen = false;
+					listViewOpen = false;
+					favoritesLabel.setIcon(activeFavoriteIcon);
+					tileLabel.setIcon(inactiveTileIcon);
+					listLabel.setIcon(inactiveListIcon);
+				}
+				if (applicationsOpen) {
+					sp.setViewportView(fv.getView());
+				}
+			}
+		});
+
+		applications.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (!applicationsOpen) {
+					tileViewOpen = true;
+					favoritesViewOpen = false;
+					listViewOpen = false;
+					applicationsOpen = true;
+					listView.setVisible(true);
+					favoritesView.setVisible(true);
+					favoritesLabel.setIcon(inactiveFavoriteIcon);
+					virtuesSelected.setBackground(SystemColor.scrollbar);
+					applicationsSelected.setBackground(new Color(148, 0, 211));
+					sp.setViewportView(at.getContainer());
+				}
+			}
+		});
+
+		virtues.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (applicationsOpen) {
+					applicationsOpen = false;
+					tileLabel.setIcon(activeTileIcon);
+					listLabel.setIcon(inactiveListIcon);
+					listView.setVisible(false);
+					favoritesView.setVisible(false);
+					applicationsSelected.setBackground(SystemColor.scrollbar);
+					virtuesSelected.setBackground(new Color(148, 0, 211));
+					sp.setViewportView(vt.getContainer());
+				}
+			}
+		});
+
+		bottomBorder.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				authService.logout();
+				try {
+					startLogin();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public void setInitialViewPort() {
+		sp.setViewportView(at.getContainer());
+	}
+
+	public JPanel getContainer() {
+		return desktopContainer;
 	}
 }

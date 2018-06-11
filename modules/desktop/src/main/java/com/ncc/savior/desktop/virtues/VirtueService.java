@@ -181,6 +181,9 @@ public class VirtueService {
 			if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
 				app = desktopResourceService.startApplication(virtueId, appDefn);
 				ensureConnection(app, virtue, color);
+			} else if (VirtueState.STOPPED.equals(virtue.getVirtueState())) {
+				startVirtue(virtue);
+				addPendingAppStart(virtue.getId(), appDefn, color);
 			} else {
 				addPendingAppStart(virtue.getId(), appDefn, color);
 			}
@@ -207,6 +210,7 @@ public class VirtueService {
 	public void startVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (startableVirtueStates.contains(virtue.getVirtueState())) {
 			desktopResourceService.startVirtue(virtue.getId());
+			virtue.setVirtueState(VirtueState.RUNNING);
 		}
 	}
 

@@ -18,6 +18,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+/**
+ *
+ * This class should be correctly implemented at some point to provide a second
+ * view for virtues
+ *
+ */
+
 public class VirtueList {
 	private JPanel container;
 	public static boolean dropDown = false;
@@ -33,7 +40,7 @@ public class VirtueList {
 
 		// Entire grid of Artist, Browsers, Math
 		JPanel headerContainer = new JPanel();
-		headerContainer.setPreferredSize(new Dimension(200, 200));
+		headerContainer.setPreferredSize(new Dimension(200, 16));
 		headerContainer.setSize(new Dimension(200, 200));
 
 		// Artist, Browsers, Math
@@ -50,11 +57,12 @@ public class VirtueList {
 		headerContainer.add(tile, BorderLayout.NORTH);
 
 		GridBagConstraints gbc_headerContainer = new GridBagConstraints();
+		gbc_headerContainer.anchor = GridBagConstraints.NORTH;
 		gbc_headerContainer.weighty = 0.1;
 		gbc_headerContainer.weightx = 0.1;
 		gbc_headerContainer.ipadx = 20;
 		gbc_headerContainer.ipady = 20;
-		gbc_headerContainer.fill = GridBagConstraints.BOTH;
+		gbc_headerContainer.fill = GridBagConstraints.HORIZONTAL;
 		gbc_headerContainer.gridx = 0;
 		gbc_headerContainer.gridy = 0;
 		container.add(headerContainer, gbc_headerContainer);
@@ -97,16 +105,6 @@ public class VirtueList {
 		headerContainer.setLayout(new GridLayout(0, 1, 0, 0));
 		headerContainer.add(tile);
 	}
-
-	// public void addHeader(String name, JPanel header) {
-	// header.setBorder(new LineBorder(new Color(128, 128, 128), 1));
-	// header.setBackground(Color.WHITE);
-	// header.setLayout(new GridLayout(0, 1, 0, 0));
-	// JLabel copyLabel = new JLabel(name);
-	// copyLabel.setIcon(new
-	// ImageIcon(AppsList.class.getResource("/images/play.png")));
-	// copyLabel.setHorizontalAlignment(SwingConstants.LEFT);
-	// }
 
 	public static void main(String[] args) throws IOException {
 		VirtueList vt = new VirtueList();
