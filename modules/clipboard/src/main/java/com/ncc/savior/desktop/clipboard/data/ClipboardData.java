@@ -39,6 +39,12 @@ public abstract class ClipboardData implements Serializable {
 
 	public abstract Pointer createLinuxData();
 
+	/**
+	 * Note: called return* instead of get* to avoid serializers that use getters
+	 * (I.E. Jackson)
+	 * 
+	 * @return
+	 */
 	public abstract int returnLinuxNumEntries();
 
 	/**

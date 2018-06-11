@@ -20,7 +20,6 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
-import com.ncc.savior.util.JavaUtil;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -33,7 +32,6 @@ import javafx.stage.Stage;
  */
 public class SidebarApplication extends Application {
 	public static void main(String[] args) {
-		JavaUtil.startMemLogger(10000);
 		launch(args);
 	}
 

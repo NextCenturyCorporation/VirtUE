@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.clipboard.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.sun.jna.Pointer;
 
@@ -18,7 +17,6 @@ public class EmptyClipboardData extends ClipboardData {
 		super(format);
 	}
 
-	@JsonIgnore
 	@Override
 	public Pointer createWindowsData() {
 		return Pointer.NULL;
@@ -29,19 +27,16 @@ public class EmptyClipboardData extends ClipboardData {
 		return "EmptyClipboardData []";
 	}
 
-	@JsonIgnore
 	@Override
 	public Pointer createLinuxData() {
 		return Pointer.NULL;
 	}
 
-	@JsonIgnore
 	@Override
 	public int returnLinuxNumEntries() {
 		return 0;
 	}
 
-	@JsonIgnore
 	@Override
 	public int returnLinuxEntrySizeBits() {
 		return 8;

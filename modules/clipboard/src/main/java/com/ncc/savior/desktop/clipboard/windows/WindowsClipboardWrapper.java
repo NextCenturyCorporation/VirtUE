@@ -196,22 +196,16 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		// retain data to avoid cleanup until we rewrite
 		data = clipboardData.createWindowsData();
-		logger.debug("setting clipboard data");
 		user32.SetClipboardData(clipboardData.getFormat().getWindows(), data);
-		logger.debug("clipboard data set");
 		// System owns the data and application should not handle data after the
 		// SetClipboardData call. This is explicitly called out in microsoft documents.
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/ms649051(v=vs.85).aspx
-		logger.debug("@@@@ disabled cache checking");
-		if (!clipboardData.isCacheable() || true) {
+		if (!clipboardData.isCacheable()) {
 			addToRunLaterQueue(() -> {
 				openClipboardWhenFree();
 				try {
-					logger.debug("reseting clipboard");
 					writeNullToClipboard(clipboardData.getFormat());
-					logger.debug("reset clipboard done");
 				} finally {
-					logger.debug("closing after reset");
 					closeClipboard();
 				}
 			});
@@ -221,19 +215,15 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	@Override
 	public ClipboardData getClipboardData(ClipboardFormat format) {
-		logger.debug("Attempting to read clipboard data");
 		Pointer p = null;
 		try {
 			openClipboardWhenFree();
-			logger.debug("clipboard openned");
 			p = user32.GetClipboardData(format.getWindows());
-			logger.debug("clipboard data retrieved");
 			return clipboardPointerToData(format, p);
 		} finally {
 			// Moved return inside try/finally so we don't close clipboard until we are done
 			// with the data.
 			closeClipboard();
-			logger.debug("clipboard closed after retrieval");
 		}
 	}
 
