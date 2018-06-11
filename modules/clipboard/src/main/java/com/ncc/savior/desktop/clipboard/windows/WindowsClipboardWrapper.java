@@ -3,10 +3,8 @@ package com.ncc.savior.desktop.clipboard.windows;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.ncc.savior.util.JavaUtil;
-import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
@@ -104,31 +101,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		}
 	};
 	private HWND windowHandle;
-	private ScheduledExecutorService executor;
 	private IClipboardListener clipboardListener;
+	private BlockingQueue<Runnable> runLaterQueue;
+	private Pointer data;
 
 	public WindowsClipboardWrapper(boolean takeClipboard) {
-
-		ThreadFactory threadFactory = new ThreadFactory() {
-			private int i = 1;
-
-			@Override
-			public Thread newThread(Runnable r) {
-				Thread t = new Thread(r, getName());
-				t.setDaemon(true);
-				return t;
-			}
-
-			private synchronized String getName() {
-				// increments after returning value;
-				return "clipboard-" + i++;
-			}
-		};
-		// We need at least 2 threads. One will read messages forever and any others
-		// will handle the other short running asynchronous tasks.
-		this.executor = Executors.newScheduledThreadPool(3, threadFactory);
-
-		executor.execute(new Runnable() {
+		this.runLaterQueue = new LinkedBlockingQueue<Runnable>();
+		Runnable mainRunnable = new Runnable() {
 
 			@Override
 			public void run() {
@@ -147,21 +126,36 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				user32.SetClipboardViewer(windowHandle);
 
 				if (takeClipboard) {
-					executor.schedule(() -> {
+					addToRunLaterQueue(() -> {
 						Set<ClipboardFormat> formats = new HashSet<ClipboardFormat>();
 						formats.add(ClipboardFormat.TEXT);
+						formats.add(ClipboardFormat.UNICODE);
 						setDelayedRenderFormats(formats);
-					}, 20, TimeUnit.MILLISECONDS);
+					});
 				}
 				MSG msg = new WinUser.MSG();
 				while (true) {
 					// get all messages forever
-
-					getMessage(msg);
-					JavaUtil.sleepAndLogInterruption(10);
+					boolean processedMessage = getMessage(msg);
+					if (!processedMessage) {
+						// if no message, then run a run later
+						Runnable runNow = runLaterQueue.poll();
+						if (runNow != null) {
+							runNow.run();
+						} else {
+							// if no run later, then wait a bit and try again
+							// however, if we executed something, we want to loop through again to see if
+							// there are more
+							JavaUtil.sleepAndLogInterruption(10);
+						}
+					}
 				}
 			}
-		});
+		};
+
+		Thread mainThread = new Thread(mainRunnable, "Windows-clipboard-main");
+		mainThread.setDaemon(true);
+		mainThread.start();
 	}
 
 	/**
@@ -173,7 +167,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderFormats(Set<ClipboardFormat> formats) {
 		logger.debug("scheduling set delayed render formats");
-		executor.schedule(new Runnable() {
+		addToRunLaterQueue(new Runnable() {
 
 			@Override
 			public void run() {
@@ -182,8 +176,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				logger.debug("wrote null to clipboard done");
 			}
 
-		}, 1, TimeUnit.MICROSECONDS);
-
+		});
 	}
 
 	/**
@@ -201,7 +194,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 */
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
-		Pointer data = clipboardData.createWindowsData();
+		// retain data to avoid cleanup until we rewrite
+		data = clipboardData.createWindowsData();
 		logger.debug("setting clipboard data");
 		user32.SetClipboardData(clipboardData.getFormat().getWindows(), data);
 		logger.debug("clipboard data set");
@@ -209,8 +203,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		// SetClipboardData call. This is explicitly called out in microsoft documents.
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/ms649051(v=vs.85).aspx
 		logger.debug("@@@@ disabled cache checking");
-		if (!clipboardData.isCacheable() && false) {
-			executor.schedule(() -> {
+		if (!clipboardData.isCacheable() || true) {
+			addToRunLaterQueue(() -> {
 				openClipboardWhenFree();
 				try {
 					logger.debug("reseting clipboard");
@@ -220,7 +214,26 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 					logger.debug("closing after reset");
 					closeClipboard();
 				}
-			}, 500, TimeUnit.MILLISECONDS);
+			});
+		}
+		data.dump(0, 1);
+	}
+
+	@Override
+	public ClipboardData getClipboardData(ClipboardFormat format) {
+		logger.debug("Attempting to read clipboard data");
+		Pointer p = null;
+		try {
+			openClipboardWhenFree();
+			logger.debug("clipboard openned");
+			p = user32.GetClipboardData(format.getWindows());
+			logger.debug("clipboard data retrieved");
+			return clipboardPointerToData(format, p);
+		} finally {
+			// Moved return inside try/finally so we don't close clipboard until we are done
+			// with the data.
+			closeClipboard();
+			logger.debug("clipboard closed after retrieval");
 		}
 	}
 
@@ -234,9 +247,11 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		if (clipboardListener != null) {
 			clipboardListener.onPasteAttempt(ClipboardFormat.fromWindows(wParam.intValue()));
 		} else {
-			Pointer p = new Memory(1);
+			Pointer p = new NativlyDeallocatedMemory(1);
 			p.setByte(0, (byte) 0);
 			user32.SetClipboardData(wParam.intValue(), p);
+			logger.error("no listener set!");
+			// Memory is now owned by system so we shouldn't clear it
 		}
 	}
 
@@ -248,15 +263,17 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		HWND owner = user32.GetClipboardOwner();
 		if (!windowHandle.equals(owner)) {
 			logger.debug("clipboard changed with different owner!");
-			executor.schedule(new Runnable() {
+			addToRunLaterQueue(new Runnable() {
 				@Override
 				public void run() {
 					logger.debug("attempting to get formats on clipboard change");
 					Set<ClipboardFormat> formats = getClipboardFormatsAvailable();
 					logger.debug("clipboard on change formats=" + formats);
-					clipboardListener.onClipboardChanged(formats);
+					if (clipboardListener != null) {
+						clipboardListener.onClipboardChanged(formats);
+					}
 				}
-			}, 1, TimeUnit.MICROSECONDS);
+			});
 		}
 	}
 
@@ -292,6 +309,19 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		} finally {
 			closeClipboard();
 		}
+	}
+
+	private void addToRunLaterQueue(Runnable runnable) {
+		try {
+			runLaterQueue.put(runnable);
+		} catch (InterruptedException e) {
+			// Check implementation of runLaterQueue. It will probably be impossible to
+			// block so
+			// this is unimportant.
+			logger.error("Adding to run later queue was interrupted.  Retrying");
+			addToRunLaterQueue(runnable);
+		}
+
 	}
 
 	private void closeClipboard() {
@@ -338,7 +368,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	}
 
-	private void getMessage(MSG msg) {
+	/**
+	 * Returns if a message was received and processed
+	 * 
+	 * @param msg
+	 * @return
+	 */
+	private boolean getMessage(MSG msg) {
 		boolean hasMessage = user32.PeekMessage(msg, windowHandle, 0, 0, 1);
 		if (hasMessage) {
 			// user32.GetMessage(msg, windowHandle, 0, 0);
@@ -348,6 +384,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			// user32.TranslateMessage(msg);
 			user32.DispatchMessage(msg);
 		}
+		return hasMessage;
 	}
 
 	private RuntimeException windowsErrorToException(String string, WindowsError error, Throwable t) {
@@ -376,7 +413,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		PointerByReference lpBuffer = new PointerByReference();
 		kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
 				| WinBase.FORMAT_MESSAGE_IGNORE_INSERTS, null, error, langId, lpBuffer, 0, null);
-		return new WindowsError(error, lpBuffer.getValue().getWideString(0));
+		WindowsError winError = new WindowsError(error, lpBuffer.getValue().getWideString(0));
+		return winError;
 	}
 
 	/**
@@ -412,19 +450,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		public String toString() {
 			return "WindowsError [error=" + error + ", errorMessage=" + errorMessage + "]";
 		}
-	}
-
-	@Override
-
-	public ClipboardData getClipboardData(ClipboardFormat format) {
-		Pointer p = null;
-		try {
-			openClipboardWhenFree();
-			p = user32.GetClipboardData(format.getWindows());
-		} finally {
-			closeClipboard();
-		}
-		return clipboardPointerToData(format, p);
 	}
 
 	private ClipboardData clipboardPointerToData(ClipboardFormat format, Pointer p) {

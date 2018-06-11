@@ -3,6 +3,7 @@ package com.ncc.savior.desktop.clipboard.data;
 import java.io.Serializable;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
+import com.ncc.savior.desktop.clipboard.windows.NativlyDeallocatedMemory;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
@@ -23,7 +24,7 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 
 	@Override
 	public Pointer createWindowsData() {
-		Memory winMemory = new Memory(returnWindowsDataLengthBytes());
+		Memory winMemory = new NativlyDeallocatedMemory(returnWindowsDataLengthBytes());
 		winMemory.clear();
 		winMemory.setString(0, data);
 		return winMemory;
