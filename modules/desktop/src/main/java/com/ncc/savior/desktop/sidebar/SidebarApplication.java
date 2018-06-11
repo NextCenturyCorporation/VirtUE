@@ -21,7 +21,6 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 import com.ncc.savior.util.JavaUtil;
-import com.sun.jna.Native;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -40,8 +39,6 @@ public class SidebarApplication extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		Native.setProtected(true);
-
 		// Plumbing and depedency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
 		String baseUrl = props.getString(PropertyManager.PROPERTY_BASE_API_PATH);
