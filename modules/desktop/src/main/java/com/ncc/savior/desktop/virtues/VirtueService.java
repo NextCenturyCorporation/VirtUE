@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.virtues;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -104,14 +105,29 @@ public class VirtueService {
 
 	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
+		Closeable cc = null;
 		try {
 			String key = app.getPrivateKey();
 			SshConnectionParameters params = getConnectionParams(app, key);
-			clipboardManager.connectClipboard(params, virtue.getId());
+			cc = clipboardManager.connectClipboard(params, virtue.getId());
 		} catch (JSchException e) {
 			logger.error("Failed to connect clipboard", e);
 		}
-		rdpClient.startRdp(app, virtue, color);
+		Closeable clipboardCloseable = cc;
+		Process p = rdpClient.startRdp(app, virtue, color);
+		Thread t = new Thread(() -> {
+			try {
+				p.waitFor();
+				clipboardCloseable.close();
+			} catch (InterruptedException | IOException e) {
+				logger.error("Error tracking RDP connection and closing associated clipboard");
+			} finally {
+
+			}
+
+		}, "RemoteDesktop-checker");
+		t.setDaemon(true);
+		t.start();
 	}
 
 	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)

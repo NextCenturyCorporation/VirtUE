@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.clipboard.connection;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -74,7 +75,7 @@ public class SshClipboardManager implements IClipboardManager {
 	}
 
 	@Override
-	public void connectClipboard(SshConnectionParameters params, String groupId) throws JSchException {
+	public Closeable connectClipboard(SshConnectionParameters params, String groupId) throws JSchException {
 
 		// TODO figure out the right way to handle errors here
 		try {
@@ -82,7 +83,7 @@ public class SshClipboardManager implements IClipboardManager {
 			session.connect();
 			copyClipboardClientIfNeeded(session);
 			// need to get correct display!
-			connectionClient(session, groupId, params.getDisplay());
+			return connectionClient(session, groupId, params.getDisplay());
 		} catch (IOException | SftpException e) {
 			logger.error("Error connecting clipboard!", e);
 			// TODO fix error handling
@@ -90,7 +91,7 @@ public class SshClipboardManager implements IClipboardManager {
 		}
 	}
 
-	private void connectionClient(Session session, String groupId, int display) throws JSchException, IOException {
+	private Closeable connectionClient(Session session, String groupId, int display) throws JSchException, IOException {
 		String myCommand = null;
 		if (display > 0) {
 			myCommand = "export DISPLAY=:" + display + "; " + command;
@@ -119,7 +120,10 @@ public class SshClipboardManager implements IClipboardManager {
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connectionWrapper);
 			clipboardHub.addClient(groupId, serializer);
 		}
-
+		return () -> {
+			channel.disconnect();
+			session.disconnect();
+		};
 	}
 
 	private void copyClipboardClientIfNeeded(Session session)
