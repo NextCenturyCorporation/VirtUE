@@ -124,4 +124,21 @@ public interface ILinuxClipboardX11 extends X11 {
 	 */
 	void XConvertSelection(Display display, Atom selection, Atom target, Atom property, Window requestor,
 			NativeLong time);
+
+	/**
+	 * The XInitThreads() function initializes Xlib support for concurrent threads.
+	 * This function must be the first Xlib function a multi-threaded program calls,
+	 * and it must complete before any other Xlib call is made. This function
+	 * returns a nonzero status if initialization was successful; otherwise, it
+	 * returns zero. On systems that do not support threads, this function always
+	 * returns zero.
+	 *
+	 * It is only necessary to call this function if multiple threads might use Xlib
+	 * concurrently. If all calls to Xlib functions are protected by some other
+	 * access mechanism (for example, a mutual exclusion lock in a toolkit or
+	 * through explicit client programming), Xlib thread initialization is not
+	 * required. It is recommended that single-threaded programs not call this
+	 * function.
+	 */
+	int XInitThreads();
 }

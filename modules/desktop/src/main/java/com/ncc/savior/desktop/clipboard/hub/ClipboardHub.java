@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,6 +29,7 @@ import com.ncc.savior.desktop.clipboard.messages.ClientIdClipboardMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
+import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.JavaObjectMessageSerializer;
@@ -55,9 +57,11 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private String clipboardOwnerId;
 	private Set<ClipboardFormat> validFormats;
 	private ICrossGroupDataGuard dataGuard;
+	private Set<ClipboardFormat> currentFormats;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
 		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
+		currentFormats = new HashSet<ClipboardFormat>();
 		validFormats = new TreeSet<ClipboardFormat>();
 		validFormats.add(ClipboardFormat.TEXT);
 		validFormats.add(ClipboardFormat.UNICODE);
@@ -81,18 +85,6 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		try {
 			while (true) {
 				Socket socket = serverSocket.accept();
-				// BufferedWriter writer = new BufferedWriter(new
-				// OutputStreamWriter(socket.getOutputStream()));
-				// writer.write("hello??\n");
-				// writer.flush();
-				// writer.write("helsadlo??\n");
-				// writer.flush();
-				// writer.write("heldflo??\n");
-				// writer.write("helldo??\n");
-				// writer.flush();
-				// writer.write("helsdfo??\n");
-				// writer.write("helasdflo??\n");
-				// writer.flush();
 				IConnectionWrapper connection = new SocketConnection(socket);
 				IMessageSerializer serializer = new JavaObjectMessageSerializer(connection);
 				String defaultGroup = "default";
@@ -133,6 +125,9 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		sendMessageHandleError(idMsg, transmitter, newId);
 		transmitters.put(newId, transmitter);
 		logger.debug("client added to hub with id=" + newId);
+
+		// on connection, we want to let clients know they don't own the clipboard and
+		// what formats are on the clipboard.
 	}
 
 	/**
@@ -153,6 +148,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			ClipboardChangedMessage m = (ClipboardChangedMessage) message;
 			Set<ClipboardFormat> formats = m.getFormats();
 			filterToValidFormats(formats);
+			this.currentFormats = formats;
 			this.clipboardOwnerId = m.getSourceId();
 			// need to inform all clients that the clipboard has changed
 			sendMessageToAllButSource(message);
@@ -198,6 +194,14 @@ public class ClipboardHub implements IClipboardMessageHandler {
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
 			if (transmitter != null) {
 				sendMessageHandleError(message, transmitter, destId);
+			}
+		} else if (message instanceof ClipboardFormatsRequestMessage) {
+			ClipboardFormatsRequestMessage m = (ClipboardFormatsRequestMessage) message;
+			String destId = m.getSourceId();
+			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
+			if (transmitter != null) {
+				sendMessageHandleError(new ClipboardChangedMessage(clipboardOwnerId, currentFormats), transmitter,
+						destId);
 			}
 		}
 	}

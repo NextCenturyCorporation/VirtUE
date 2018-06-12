@@ -186,6 +186,24 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		user32.SetClipboardData(clipboardData.getFormat().getWindows(), clipboardData.getWindowsData());
+		if (!clipboardData.isCacheable()) {
+			// This call is usually done via windows callback on some unknown thread where
+			// the clipboard is accessible for another application. In those cases, the
+			// thread needs to be released quickly. Any changes to the clipboard before
+			// releasing will occur on the other application's paste. Therefore, we must set
+			// the the null for delayed render in our main thread later. We need to wait for
+			// the clipboard to become available because at the time of this call, some
+			// other application has the clipboard open and is reading. We don't want to
+			// write the data until that application is done.
+			executor.schedule(() -> {
+				openClipboardWhenFree();
+				try {
+					writeNullToClipboard(clipboardData.getFormat());
+				} finally {
+					closeClipboardIfOwner();
+				}
+			}, 5, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	/**
@@ -244,20 +262,28 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				throw windowsErrorToException("Error emptying clipboard");
 			}
 			for (ClipboardFormat format : formats) {
-				user32.SetClipboardData(format.getWindows(), Pointer.NULL);
-				WindowsError error = getLastError();
-				if (error.error != 0) {
-					throw windowsErrorToException("Error writing NULL to clipboard with format=" + format, error);
-				}
+				writeNullToClipboard(format);
 			}
 		} catch (Throwable t) {
 			throw windowsErrorToException("Error attempting to write null to clipboard for formats=" + formats, null,
 					t);
 		} finally {
-			HWND owner = user32.GetClipboardOwner();
-			if (windowHandle.equals(owner)) {
-				user32.CloseClipboard();
-			}
+			closeClipboardIfOwner();
+		}
+	}
+
+	private void closeClipboardIfOwner() {
+		HWND owner = user32.GetClipboardOwner();
+		if (windowHandle.equals(owner)) {
+			user32.CloseClipboard();
+		}
+	}
+
+	private void writeNullToClipboard(ClipboardFormat format) {
+		user32.SetClipboardData(format.getWindows(), Pointer.NULL);
+		WindowsError error = getLastError();
+		if (error.error != 0) {
+			throw windowsErrorToException("Error writing NULL to clipboard with format=" + format, error);
 		}
 	}
 

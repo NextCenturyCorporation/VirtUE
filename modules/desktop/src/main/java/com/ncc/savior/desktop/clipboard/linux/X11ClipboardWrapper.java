@@ -78,14 +78,20 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	private Thread mainClipboardThread;
 
+	private TreeSet<ClipboardFormat> previousFormats;
+
+	private volatile boolean ownSelection;
+
 	public X11ClipboardWrapper() {
 		delayedFormats = new TreeSet<ClipboardFormat>();
 		runnableQueue = new ConcurrentLinkedQueue<Runnable>();
 		x11 = ILinuxClipboardX11.INSTANCE;
+
 		mainClipboardRunnable = new Runnable() {
 
 			@Override
 			public void run() {
+				// x11.XInitThreads();
 				display = X11.INSTANCE.XOpenDisplay(null);
 				clipboardAtom = x11.XInternAtom(display, "CLIPBOARD", false);
 				selectionDataProperty = x11.XInternAtom(display, "XSEL_DATA", false);
@@ -107,6 +113,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 						return 1;
 					}
 				};
+				startTargetPollThread();
+
 				x11.XSetErrorHandler(handler);
 				delayedFormats.add(ClipboardFormat.TEXT);
 				delayedFormats.add(ClipboardFormat.UNICODE);
@@ -179,36 +187,21 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 									.getTypedValue(X11.XSelectionEvent.class);
 							incomingSne.autoRead();
 							if (incomingSne.target.equals(targets)) {
-								logger.debug("Got Event: " + "selection Notify targets");
+								logger.trace("Got Event: selection Notify targets");
 								formatWindowProp = getWindowProperty();
 
 							} else {
-								logger.debug("Got Event: " + "selection Notify data");
+								logger.trace("Got Event: selection Notify data");
 								dataWindowProp = getWindowProperty();
 							}
 
 							break;
 
 						case X11.SelectionClear:
-							logger.debug("Got Event: " + "selection clear");
+							logger.trace("Got Event: selection clear");
+							ownSelection = false;
 							// someone took selection from me
-							convertSelectionAndSync(targets);
-							Runnable runLater = () -> {
-								Set<String> af = waitForAvailableFormats();
-								TreeSet<ClipboardFormat> acf;
-								acf = new TreeSet<ClipboardFormat>();
-								for (String f : af) {
-									ClipboardFormat fmt = ClipboardFormat.fromLinux(f);
-									// logger.debug(f + " -> " + (fmt == null ? null : fmt.getLinux()));
-									if (fmt != null) {
-										acf.add(fmt);
-									}
-								}
-								logger.debug("sending clipboard Changed message.  Formats=" + acf);
-								listener.onClipboardChanged(acf);
-							};
-							// should we use something else to handle threads?
-							new Thread(runLater).start();
+							// handling the loss of selection will be handled in the target poll thread.
 							break;
 						default:
 							// ignore
@@ -229,6 +222,54 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		mainClipboardThread = new Thread(mainClipboardRunnable, "X11-clipboard-main");
 		// mainClipboardThread.setDaemon(true);
 		mainClipboardThread.start();
+
+	}
+
+	private void startTargetPollThread() {
+		Runnable targetPollRunnable = () -> {
+			previousFormats = new TreeSet<ClipboardFormat>();
+			while (true) {
+				if (!ownSelection) {
+					runnableQueue.offer(() -> {
+						if (logger.isTraceEnabled()) {
+							logger.trace("calling convert selection for targets");
+						}
+						convertSelectionAndSync(targets);
+					});
+					Set<String> af = waitForAvailableFormats();
+					if (logger.isTraceEnabled()) {
+						logger.trace("received available targets");
+					}
+					TreeSet<ClipboardFormat> acf;
+					acf = new TreeSet<ClipboardFormat>();
+					for (String f : af) {
+						ClipboardFormat fmt = ClipboardFormat.fromLinux(f);
+						// logger.debug(f + " -> " + (fmt == null ? null : fmt.getLinux()));
+						if (fmt != null) {
+							acf.add(fmt);
+						}
+					}
+					boolean equals = (acf.isEmpty() && previousFormats.isEmpty()) || acf.equals(previousFormats);
+					if (!equals) {
+						if (logger.isTraceEnabled()) {
+							logger.trace("sending clipboard Changed message.  Formats=" + acf);
+						}
+						if (!ownSelection) {
+							previousFormats = acf;
+							listener.onClipboardChanged(acf);
+						}
+					}
+
+				} else {
+					previousFormats = new TreeSet<ClipboardFormat>();
+				}
+				// TODO smarter period control?
+				JavaUtil.sleepAndLogInterruption(100);
+			}
+		};
+		Thread t = new Thread(targetPollRunnable, "TargetsPoller");
+		t.setDaemon(true);
+		t.start();
 	}
 
 	@Override
@@ -269,32 +310,29 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		Atom formatAtom = x11.XInternAtom(display, format.getLinux(), false);
 		runnableQueue.offer(() -> {
 			convertSelectionAndSync(formatAtom);
-			logger.debug("called convert selection for data " + format);
+			if (logger.isTraceEnabled()) {
+				logger.trace("called convert selection for data " + format);
+			}
 		});
 		WindowProperty myprop = waitForUpdatedDataWindowProp();
 		if (myprop == null) {
+			// somewhat to clear the thread if the waiting timed out. this shouldn't happen.
 			myprop = getWindowProperty();
 		}
 		ClipboardData data = convertClipboardData(format, myprop);
 		return data;
 	}
 
-	public boolean amISelectionOwner() {
-		Window retWin = x11.XGetSelectionOwner(display, clipboardAtom);
-		return window.equals(retWin);
-	}
-
-	public boolean isThereAClipboardOwner() {
-		Window retWin = x11.XGetSelectionOwner(display, clipboardAtom);
-		return retWin != null;
-	}
-
 	public void becomeSelectionOwner() {
+		ownSelection = true;
 		runnableQueue.offer(() -> {
 			x11.XSetSelectionOwner(display, clipboardAtom, window, new NativeLong(X11.CurrentTime));
 		});
 	}
 
+	/**
+	 * MUST be called from main loop
+	 */
 	private void sendSelectionNotifyEvent(int numItems, Pointer ptr, XSelectionEvent sne, int formatOrSizeInBits,
 			Atom type) {
 		logger.debug("sending SelectionNotifyEvent: " + type + " " + x11.XGetAtomName(display, type));
@@ -305,28 +343,41 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		x11.XSendEvent(display, sne.requestor, X11.NoEventMask, new NativeLong(0), eventToSend);
 	}
 
+	// called from event loop
 	private void sendFormats(XSelectionEvent sne) {
-		ArrayList<ClipboardFormat> formats = new ArrayList<ClipboardFormat>(delayedFormats);
-		int itemSize = 8;
-		int lengthInBytes = itemSize * formats.size();
-		Memory memory = new Memory(lengthInBytes);
-		memory.clear();
-		logger.debug("itemSize: " + itemSize);
-		for (int i = 0; i < formats.size(); i++) {
-			Atom atom = x11.XInternAtom(display, formats.get(i).getLinux(), false);
-			logger.debug("writting atom to " + i + " " + atom.intValue() + "  " + atom);
-			memory.setNativeLong(i * itemSize, new NativeLong(atom.longValue()));
-			// memory.setLong(i * NativeLong.SIZE, new NativeLong(atom.longValue()));
+		if (delayedFormats.size() > 0) {
+			ArrayList<ClipboardFormat> formats = new ArrayList<ClipboardFormat>(delayedFormats);
+			int itemSize = 8;
+			int lengthInBytes = itemSize * formats.size();
+			Memory memory = new Memory(lengthInBytes);
+			memory.clear();
+			if (logger.isTraceEnabled()) {
+				logger.trace("itemSize: " + itemSize);
+			}
+			// For each format, get the Atom for it and put that in memory (as an array).
+			for (int i = 0; i < formats.size(); i++) {
+				Atom atom = x11.XInternAtom(display, formats.get(i).getLinux(), false);
+				if (logger.isTraceEnabled()) {
+					logger.trace("writting atom to " + i + " " + atom.intValue() + "  " + atom);
+				}
+				// write Atom to memory.
+				memory.setNativeLong(i * itemSize, new NativeLong(atom.longValue()));
+			}
+			// 32 bit magic number because thats the size of Atoms
+			sendSelectionNotifyEvent(formats.size(), memory, sne, 32, X11.XA_ATOM);
 		}
-		sendSelectionNotifyEvent(formats.size(), memory, sne, 32, X11.XA_ATOM);
 	}
 
 	private Set<String> waitForAvailableFormats() {
-		logger.debug("requesting selection: formats");
+		logger.trace("requesting selection: formats");
 		Set<String> formats = new LinkedHashSet<String>();
 		WindowProperty raw = waitForUpdatedFormatWindowProp();
-		logger.debug("Waited for formats format: " + raw.formatBytes + " type: " + raw.type + " "
-				+ x11.XGetAtomName(display, raw.type));
+		if (logger.isTraceEnabled()) {
+			logger.debug("Waited for formats format: " + raw.formatBytes + " type: " + raw.type + " "
+					+ x11.XGetAtomName(display, raw.type));
+		}
+		// TODO what if raw is null because it timed out (initialization and no
+		// clipboard)
 		for (int i = 0; i < raw.numItems; i++) {
 			NativeLong nl = raw.property.getNativeLong(i * NativeLong.SIZE);
 			// logger.debug(" " + val + " 0x" + Long.toHexString(val));
@@ -335,21 +386,22 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			String formatName = x11.XGetAtomName(display, formatAtom);
 			formats.add(formatName);
 		}
-		logger.debug(formats.toString());
 		return formats;
 	}
 
 	private synchronized WindowProperty waitForUpdatedFormatWindowProp() {
 		long stopTime = System.currentTimeMillis() + 2000;
 		while (formatWindowProp == null) {
-			logger.debug("Waiting for format prop... " + formatWindowProp);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Waiting for format prop... " + formatWindowProp);
+			}
 			JavaUtil.sleepAndLogInterruption(100);
 			if (stopTime < System.currentTimeMillis()) {
 				logger.warn("waiting has timed out!");
 				return null;
 			}
 		}
-		logger.debug("format waiting done");
+		logger.trace("format waiting done");
 		WindowProperty raw = formatWindowProp;
 		formatWindowProp = null;
 		return raw;
@@ -358,14 +410,16 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	private synchronized WindowProperty waitForUpdatedDataWindowProp() {
 		long stopTime = System.currentTimeMillis() + 2000;
 		while (dataWindowProp == null) {
-			logger.debug("Waiting for data prop... " + dataWindowProp);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Waiting for data prop... " + dataWindowProp);
+			}
 			JavaUtil.sleepAndLogInterruption(100);
 			if (stopTime < System.currentTimeMillis()) {
 				logger.warn("waiting has timed out!");
 				return null;
 			}
 		}
-		logger.debug("data waiting done");
+		logger.trace("data waiting done");
 		WindowProperty raw = dataWindowProp;
 		dataWindowProp = null;
 		return raw;
