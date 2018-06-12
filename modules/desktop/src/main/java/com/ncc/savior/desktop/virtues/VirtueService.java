@@ -106,28 +106,36 @@ public class VirtueService {
 	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
 		Closeable cc = null;
-		try {
-			String key = app.getPrivateKey();
-			SshConnectionParameters params = getConnectionParams(app, key);
-			cc = clipboardManager.connectClipboard(params, virtue.getId());
-		} catch (JSchException e) {
-			logger.error("Failed to connect clipboard", e);
-		}
-		Closeable clipboardCloseable = cc;
-		Process p = rdpClient.startRdp(app, virtue, color);
-		Thread t = new Thread(() -> {
+		// for now we want to use the RDP clipboard bridge instead of our own app.
+		boolean userRdpClientClipboardBridge = true;
+		if (!userRdpClientClipboardBridge) {
 			try {
-				p.waitFor();
-				clipboardCloseable.close();
-			} catch (InterruptedException | IOException e) {
-				logger.error("Error tracking RDP connection and closing associated clipboard");
-			} finally {
-
+				String key = app.getPrivateKey();
+				SshConnectionParameters params = getConnectionParams(app, key);
+				// For now user
+				cc = clipboardManager.connectClipboard(params, virtue.getId());
+			} catch (JSchException e) {
+				logger.error("Failed to connect clipboard", e);
 			}
+		}
+		Process p = rdpClient.startRdp(app, virtue, color);
+		if (cc != null) {
+			Closeable clipboardCloseable = cc;
 
-		}, "RemoteDesktop-checker");
-		t.setDaemon(true);
-		t.start();
+			Thread t = new Thread(() -> {
+				try {
+					p.waitFor();
+					clipboardCloseable.close();
+				} catch (InterruptedException | IOException e) {
+					logger.error("Error tracking RDP connection and closing associated clipboard");
+				} finally {
+
+				}
+
+			}, "RemoteDesktop-checker");
+			t.setDaemon(true);
+			t.start();
+		}
 	}
 
 	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
