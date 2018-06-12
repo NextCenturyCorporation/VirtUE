@@ -70,20 +70,6 @@ public class VirtueService {
 		this.clipboardManager = clipboardManager;
 	}
 
-	// public void connectAndStartApp(DesktopVirtue app) throws IOException {
-	// IConnectionParameters params = app.getConnectionParams();
-	// // Do we have an existing client/connection for this params? If so, start a
-	// new
-	// // app and be done with it.
-	//
-	// // If we don't have an existing client/connection, then we need to create a
-	// // connection and then start the app.
-	// XpraClient client = connectionManager.getExistingClient(params);
-	// if (client == null || client.getStatus() == Status.ERROR) {
-	// client = connectionManager.createClient(params);
-	// }
-	// connectionManager.startApplication(params, app.getStartCommand());
-	// }
 
 	/**
 	 * Starts a connection for a particularly {@link DesktopVirtueApplication} if

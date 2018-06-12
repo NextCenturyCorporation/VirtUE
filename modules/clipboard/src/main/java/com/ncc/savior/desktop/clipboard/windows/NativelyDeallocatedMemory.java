@@ -9,8 +9,8 @@ import com.sun.jna.Memory;
  * 
  *
  */
-public class NativlyDeallocatedMemory extends Memory {
-	public NativlyDeallocatedMemory(long size) {
+public class NativelyDeallocatedMemory extends Memory {
+	public NativelyDeallocatedMemory(long size) {
 		super(size);
 	}
 

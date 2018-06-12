@@ -5,6 +5,11 @@ import java.io.Closeable;
 import com.jcraft.jsch.JSchException;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 
+/**
+ * Interface to handle connections to clipboard bridges.
+ * 
+ *
+ */
 public interface IClipboardManager {
 
 	/**

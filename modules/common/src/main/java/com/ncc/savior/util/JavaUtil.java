@@ -62,13 +62,19 @@ public class JavaUtil {
 		throw new RuntimeException("Unsupported OS string=" + prop);
 	}
 
+	/**
+	 * Starts a simple thread that will periodically print memory information to
+	 * logger.info. It can be used to monitor memory when other tools are
+	 * unavailable or undesired.
+	 * 
+	 * @param periodMillis
+	 */
 	public static void startMemLogger(long periodMillis) {
 		Runnable runnable = () -> {
 			while (true) {
 				Runtime rt = Runtime.getRuntime();
 				logger.info("MemLogger: Total=" + getPrintBytes(rt.totalMemory()) + "Free="
-						+ getPrintBytes(rt.freeMemory())
-						+ "Max=" + getPrintBytes(rt.maxMemory()));
+						+ getPrintBytes(rt.freeMemory()) + "Max=" + getPrintBytes(rt.maxMemory()));
 				JavaUtil.sleepAndLogInterruption(periodMillis);
 			}
 		};
@@ -78,6 +84,7 @@ public class JavaUtil {
 	}
 
 	private static String[] byteDenomination = new String[] { "bytes", "KB", "MB", "GB", "TB", "?B" };
+
 	private static String getPrintBytes(long memory) {
 		double m = memory;
 		int index = 0;

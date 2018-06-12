@@ -15,6 +15,15 @@ import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.StandardInOutConnection;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 
+/**
+ * Client application that uses standard input and standard output to send
+ * clipboard messages. Care must be taken to ensure no classes read System.in or
+ * write to System.out, including loggers.
+ * 
+ * This class is mainly used with SSH connections to remote machines.
+ * 
+ *
+ */
 public class StandardInOutClipboardClient {
 	private static final Logger logger = LoggerFactory.getLogger(StandardInOutClipboardClient.class);
 

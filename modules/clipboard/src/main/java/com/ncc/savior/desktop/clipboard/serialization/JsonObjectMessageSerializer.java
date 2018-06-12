@@ -16,8 +16,10 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.util.JavaUtil;
 
 /**
- * WIP - does not currently work because typically JSON deserialization with
- * jackson requires knowing the exact class you are getting.
+ * WIP - Did not test serialization of data. This class is generally useful for
+ * testing connection parsing issues since it is human readable. However, we
+ * will eventually want binary data which will be challenging/inefficient for
+ * JSON.
  *
  *
  */

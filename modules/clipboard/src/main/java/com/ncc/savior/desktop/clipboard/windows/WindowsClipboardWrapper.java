@@ -234,7 +234,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		if (clipboardListener != null) {
 			clipboardListener.onPasteAttempt(ClipboardFormat.fromWindows(wParam.intValue()));
 		} else {
-			Pointer p = new NativlyDeallocatedMemory(1);
+			Pointer p = new NativelyDeallocatedMemory(1);
 			p.setByte(0, (byte) 0);
 			user32.SetClipboardData(wParam.intValue(), p);
 			logger.error("no listener set!");

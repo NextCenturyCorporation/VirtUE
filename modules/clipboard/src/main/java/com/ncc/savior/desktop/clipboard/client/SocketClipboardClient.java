@@ -9,6 +9,13 @@ import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 
+/**
+ * Clipboard client application that uses sockets for the connection. This
+ * client is given a hostname and port to connect to where another Socket will
+ * be listening.
+ * 
+ * This class is mainly used for testing.
+ */
 public class SocketClipboardClient {
 	private static final String DEFAULT_HOSTNAME = "localhost";
 

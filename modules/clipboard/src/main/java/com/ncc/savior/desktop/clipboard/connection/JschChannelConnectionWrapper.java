@@ -5,7 +5,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.JSch;
+import com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient;
 
+/**
+ * Implementation of {@link IConnectionWrapper} that uses a {@link JSch}
+ * {@link Channel}. These are often created via connecting to a remote machine
+ * via Jsch's implementaiton of SSH and are used with
+ * {@link StandardInOutClipboardClient}s and {@link StandardInOutConnection} on
+ * the remote machine.
+ * 
+ *
+ */
 public class JschChannelConnectionWrapper implements IConnectionWrapper {
 
 	private Channel channel;

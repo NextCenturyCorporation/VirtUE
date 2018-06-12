@@ -28,6 +28,12 @@ import com.ncc.savior.desktop.xpra.connection.ssh.JschUtils;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.util.SshUtil;
 
+/**
+ * Implementation of {@link IClipboardManager} that uses SSH (Jsch) to start
+ * remote {@link ClipboardClient}s and create the connection's data stream.
+ * 
+ *
+ */
 public class SshClipboardManager implements IClipboardManager {
 	private static final String CLIENT_GROUP_ID = "client-group-id";
 
@@ -91,6 +97,15 @@ public class SshClipboardManager implements IClipboardManager {
 		}
 	}
 
+	/**
+	 * 
+	 * @param session
+	 * @param groupId
+	 * @param display
+	 * @return - returned closeable will close the connection when close is called.
+	 * @throws JSchException
+	 * @throws IOException
+	 */
 	private Closeable connectionClient(Session session, String groupId, int display) throws JSchException, IOException {
 		String myCommand = null;
 		if (display > 0) {

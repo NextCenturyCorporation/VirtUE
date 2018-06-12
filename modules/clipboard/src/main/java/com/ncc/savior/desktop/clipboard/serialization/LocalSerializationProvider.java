@@ -7,11 +7,27 @@ import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.client.ClipboardClient;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 
+/**
+ * Utility class that handles providing {@link IMessageSerializer} for a local
+ * {@link ClipboardClient}. These {@link IMessageSerializer} don't actually
+ * serialize the data, but instead just pass the messages over
+ * {@link BlockingQueue}s. This is easier and more efficient for passing
+ * {@link IClipboardMessage}s inside a JVM.
+ * 
+ *
+ */
 public class LocalSerializationProvider {
 	private static final Logger logger = LoggerFactory.getLogger(LocalSerializationProvider.class);
 
+	/**
+	 * Returns a pair of serializers that can be used for the two endpoints (client
+	 * and hub) of a clipboard connection when both are inside the same JVM.
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("resource")
 	public static SerializerContainer createSerializerPair() {
 		BlockingQueue<IClipboardMessage> queueAToB = new ArrayBlockingQueue<IClipboardMessage>(10);
@@ -29,6 +45,12 @@ public class LocalSerializationProvider {
 		public IMessageSerializer serializerB;
 	}
 
+	/**
+	 * Serializer that doesn't actually serialize, but reads and writes to
+	 * {@link BlockingQueue}s.
+	 * 
+	 *
+	 */
 	public static class QueueSerializer implements IMessageSerializer {
 
 		private BlockingQueue<IClipboardMessage> inBound;

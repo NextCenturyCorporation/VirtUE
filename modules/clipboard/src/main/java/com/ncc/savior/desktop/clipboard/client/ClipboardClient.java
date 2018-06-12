@@ -206,6 +206,13 @@ public class ClipboardClient {
 		}
 	}
 
+	/**
+	 * Returns the appropriate {@link IClipboardWrapper} implementation for the OS
+	 * of the JVM.
+	 * 
+	 * @param takeClipboard
+	 * @return
+	 */
 	public static IClipboardWrapper getClipboardWrapperForOperatingSystem(boolean takeClipboard) {
 		OS os = JavaUtil.getOs();
 		IClipboardWrapper clipboardWrapper;

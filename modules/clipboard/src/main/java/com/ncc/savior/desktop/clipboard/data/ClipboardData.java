@@ -31,17 +31,29 @@ public abstract class ClipboardData implements Serializable {
 	}
 
 	/**
-	 * Gets the memory pointer for the data on a windows machine.
+	 * Gets the memory pointer for the data on a windows machine. This memory will
+	 * NOT be cleared by JNA. It is assumed the Windows clipboard will clear the
+	 * data. However, if this data is pass anywhere else, it needs to be cleared
+	 * manually.
 	 *
 	 * @return
 	 */
 	public abstract Pointer createWindowsData();
 
+	/**
+	 * Gets the memory pointer for the data on a linux machine. This memory will be
+	 * cleared by JNA.
+	 * 
+	 * @return
+	 */
 	public abstract Pointer createLinuxData();
 
+	// Note: Many methods were renamed return* instead of get* to avoid serializers
+	// that use getters (I.E. Jackson)
 	/**
-	 * Note: called return* instead of get* to avoid serializers that use getters
-	 * (I.E. Jackson)
+	 * Gets the number of entries in Linux data. Entries can be either 8, 16, or 32
+	 * bits each (1, 2, or 4 bytes). See {@link #returnLinuxEntrySizeBits()} for the
+	 * size of the entry.
 	 * 
 	 * @return
 	 */
@@ -54,9 +66,23 @@ public abstract class ClipboardData implements Serializable {
 	 */
 	public abstract int returnLinuxEntrySizeBits();
 
+	/**
+	 * Returns whether the OS (the paster) using this data (not the creator/copier)
+	 * can cache the data without rechecking. Typically, data copied from a Windows
+	 * machine can be cached because Windows will notify on clipboard changes. Data
+	 * that originated on a Linux machine cannot be cached becuase Linux does not
+	 * update on clipboard changes.
+	 * 
+	 * @return
+	 */
 	public boolean isCacheable() {
 		return isCacheable;
 	}
 
+	/**
+	 * Length of the data in bytes from {@link #createWindowsData()}
+	 * 
+	 * @return
+	 */
 	public abstract long returnWindowsDataLengthBytes();
 }
