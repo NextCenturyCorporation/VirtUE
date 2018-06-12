@@ -104,6 +104,13 @@ public class VirtueService {
 
 	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
+		try {
+			String key = app.getPrivateKey();
+			SshConnectionParameters params = getConnectionParams(app, key);
+			clipboardManager.connectClipboard(params, virtue.getId());
+		} catch (JSchException e) {
+			logger.error("Failed to connect clipboard", e);
+		}
 		rdpClient.startRdp(app, virtue, color);
 	}
 

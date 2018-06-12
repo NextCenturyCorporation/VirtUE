@@ -48,7 +48,7 @@ public class SshClipboardManager implements IClipboardManager {
 	public SshClipboardManager(ClipboardHub clipboardHub, String sourceJarPath) {
 		this.clipboardHub = clipboardHub;
 		this.sourceJarPath = sourceJarPath;
-		this.destinationFilePath = "./clipboard.jar";
+		this.destinationFilePath = "clipboard.jar";
 		this.clipboardMainClass = "com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient";
 		this.command = "java -cp " + destinationFilePath + " " + clipboardMainClass;
 		if (testParam != null) {
@@ -91,7 +91,12 @@ public class SshClipboardManager implements IClipboardManager {
 	}
 
 	private void connectionClient(Session session, String groupId, int display) throws JSchException, IOException {
-		String myCommand = "export DISPLAY=:" + display + "; " + command;
+		String myCommand = null;
+		if (display > 0) {
+			myCommand = "export DISPLAY=:" + display + "; " + command;
+		} else {
+			myCommand = command;
+		}
 		// myCommand = command;
 		logger.debug("clipboard command:" + myCommand);
 		ChannelExec channel = SshUtil.getChannelFromCommand(session, myCommand);
