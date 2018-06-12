@@ -183,4 +183,35 @@ public class VmTemplateIT {
 		assertThat(updateReturned.isEnabled()).isEqualTo(updatedVm.isEnabled());
 	}
 
+	@Test
+	public void toggleVirtualMachineTemplateEnabledTest() {
+		List<VirtualMachineTemplate> list = given().port(randomServerPort).when().get("/admin/virtualMachine/template/")
+				.then().extract().jsonPath().getList("", VirtualMachineTemplate.class);
+
+		VirtualMachineTemplate myVm = list.get(0);
+
+		VirtualMachineTemplate toggledReturn = given().port(randomServerPort).when()
+				.get("/admin/virtualMachine/template/" + myVm.getId() + "/toggle").then().extract()
+				.as(VirtualMachineTemplate.class);
+
+		VirtualMachineTemplate toggled = given().port(randomServerPort).when()
+				.get("/admin/virtualMachine/template/" + myVm.getId()).then().extract()
+				.as(VirtualMachineTemplate.class);
+
+		assertThat(toggled).isNotNull();
+		assertThat(toggled.getApplicationIds()).isEqualTo(toggledReturn.getApplicationIds());
+		assertThat(toggled.getId()).isEqualTo(toggledReturn.getId());
+		assertThat(toggled.getTemplatePath()).isEqualTo(toggledReturn.getTemplatePath());
+		assertThat(toggled.getName()).isEqualTo(toggledReturn.getName());
+		assertThat(toggled.isEnabled()).isEqualTo(toggledReturn.isEnabled());
+
+		assertThat(myVm.isEnabled()).isEqualTo(!toggledReturn.isEnabled());
+
+		assertThat(toggledReturn).isNotNull();
+		assertThat(toggledReturn.getApplicationIds()).isEqualTo(myVm.getApplicationIds());
+		assertThat(toggledReturn.getId()).isEqualTo(myVm.getId());
+		assertThat(toggledReturn.getTemplatePath()).isEqualTo(myVm.getTemplatePath());
+		assertThat(toggledReturn.getName()).isEqualTo(myVm.getName());
+	}
+
 }
