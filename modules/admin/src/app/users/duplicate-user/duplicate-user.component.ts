@@ -12,12 +12,12 @@ import { MatDialog } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 @Component({
-  selector: 'app-edit-user',
-  templateUrl: './edit-user.component.html',
+  selector: 'app-duplicate-user',
+  templateUrl: './duplicate-user.component.html',
   providers: [ ApplicationsService, BaseUrlService, UsersService, VirtuesService ]
 })
 
-export class EditUserComponent implements OnInit {
+export class DuplicateUserComponent implements OnInit {
   @Input() user: User;
 
   baseUrl: string;
@@ -134,7 +134,6 @@ export class EditUserComponent implements OnInit {
       i++;
       appInfo = this.appsList.filter(data => data.id === id)
         .map(app => app.name);
-      // console.log(appInfo.toString());
       appNames = appNames + `<li>${appInfo.toString()}</li>`;
     }
     return appNames;
@@ -160,6 +159,39 @@ export class EditUserComponent implements OnInit {
       return data.id !== id;
     });
     this.selVirtues.splice(index, 1);
+  }
+
+  addUser( username: string, roleUser: boolean, roleAdmin: boolean ) {
+    username = username.trim().replace(' ', '').toLowerCase();
+    let authorities = [];
+    let virtueTemplateIds = [];
+
+    if (roleUser) {
+      authorities.push('ROLE_USER');
+    }
+    if (roleAdmin) {
+      authorities.push('ROLE_ADMIN');
+    }
+    for (let item of this.selVirtues) {
+      virtueTemplateIds.push(item);
+    }
+
+    let body = {
+      'username': username,
+      'authorities': authorities,
+      'virtueTemplateIds': virtueTemplateIds
+    };
+
+    if (!body.username) { return; }
+
+    this.usersService.createUser(this.baseUrl, JSON.stringify(body)).subscribe(success => {
+        console.log(success);
+      },
+      err => {
+        console.log(err);
+      });
+    this.resetRouter();
+    this.router.navigate(['/users']);
   }
 
   activateModal(id, mode): void {
@@ -199,27 +231,4 @@ export class EditUserComponent implements OnInit {
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
   }
-
-  updateThisUser(username: string, roleUser: any, roleAdmin: any) {
-    let authorities = [];
-    if (roleUser) {
-      authorities.push('ROLE_USER');
-    }
-    if (roleAdmin) {
-      authorities.push('ROLE_ADMIN');
-    }
-    let body = {
-      'username': username,
-      'authorities': authorities,
-      'virtueTemplateIds': this.selVirtues
-    };
-    console.log(body);
-    this.usersService.updateUser(this.baseUrl, username, JSON.stringify(body)).subscribe(
-      error => {
-        console.log(error);
-      });
-    this.resetRouter();
-    this.router.navigate(['/users']);
-  }
-
 }

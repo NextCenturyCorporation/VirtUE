@@ -20,7 +20,7 @@ import { ApplicationsService } from '../../shared/services/applications.service'
 })
 
 export class VirtueListComponent implements OnInit {
-  virtue: Virtue[];
+  virtue: any;
   title = 'Virtues';
   virtues = [];
   vmList = [];
@@ -56,6 +56,12 @@ export class VirtueListComponent implements OnInit {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req);
+  }
+
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 1000);
   }
 
   getBaseUrl(url: string) {
@@ -105,18 +111,11 @@ export class VirtueListComponent implements OnInit {
   }
 
   virtueStatus(id: string, isEnabled: boolean) {
-    if (isEnabled) {
-      this.virtueEnabled = false;
-    } else {
-      this.virtueEnabled = true;
-    }
-    let body = {
-      'enabled': this.virtueEnabled
-    };
-    console.log('Virtue is enabled: ' + this.virtueEnabled);
-    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
-    // this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
-    this.refreshData();
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
+      this.virtue = data;
+    });
+    this.resetRouter();
+    this.router.navigate(['/virtues']);
   }
 
   deleteVirtue(id: string) {

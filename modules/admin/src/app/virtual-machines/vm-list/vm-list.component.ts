@@ -17,12 +17,12 @@ export class VmListComponent implements OnInit {
   vms = [];
   apps = [];
   filterValue = '*';
+
   // noListData = false;
 
   baseUrl: string;
-  // vmlist = [];
+  vm: any;
   totalVms: number;
-  vmStatus: boolean;
 
   constructor(
     private vmService: VirtualMachineService,
@@ -82,24 +82,36 @@ export class VmListComponent implements OnInit {
   }
 
   listFilter(isEnabled: any) {
-    // console.log('filterValue = ' + status);
     this.filterValue = isEnabled;
     this.totalVms = this.vms.length;
   }
 
+  // updateVmStatus(id: string, isEnabled: boolean) {
+    // this.vmService.toggleVmStatus(this.baseUrl, id).subscribe(data => {
+    //   this.vm = data;
+    // });
+  //   this.refreshData();
+  //   this.router.navigate(['/vm']);
+  // }
+
   updateVmStatus(id: string, isEnabled: boolean): void {
+    let vmStatus: boolean;
     if (isEnabled) {
-      this.vmStatus = false;
+      vmStatus = false;
     } else {
-      this.vmStatus = true;
+      vmStatus = true;
     }
     console.log('updating status for vm #' + id);
-    this.vmService.updateStatus(this.baseUrl, id, this.vmStatus).subscribe( data => {
-      return data;
-      },
-      error => {
-        console.log('error: ' + error.message);
-      });
+    let body = {
+      'enabled': vmStatus
+    };
+    console.log(body);
+    this.vmService.updateVmStatus(this.baseUrl, id).subscribe(success => {
+      console.log('success');
+    }, err => {
+      console.log(err);
+      }
+    );
     this.refreshData();
     this.router.navigate(['/vm']);
   }

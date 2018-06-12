@@ -31,7 +31,7 @@
             </div>
 
             <div class="mui-row">
-              <div class="table-container">
+              <div class="mui-container-fluid data-list">
                 <div class="mui-row table-header-group">
                   <div class="table-header mui-col-md-4">
                     <div class="text-align-left margin-left-20 margin-right-0">
@@ -42,40 +42,34 @@
                     Applications
                   </div>
                 </div>
-              </div>
-
-              <!-- if there are no virtues, show this message -->
-              <div class="mui-row">
-                <div class="mui-col-md-12">
-                  <p class="virtue-message" *ngIf="selVirtues.length < 1">
-                    No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mui-row" *ngIf="selVirtues.length > 0">
-              <div class="table-container">
-                <div class="mui-row table-row" *ngFor="let virtue of selVirtues">
-                  <div class="table-data mui-col-md-4">
-                    <div class="virtue-name">
-                      <span class="virtue-color margin-right-10"></span>
-                      <a class="edit" (click)="activateModal(1,'edit')">{{ virtue }}</a>
-                      <!-- This should show if hovered over -->
-                      <span class="active virtue-options"><a href="#">Remove</a></span>
-                    </div>
+                <!-- if there are no virtues, show this message -->
+                <div class="mui-row">
+                  <div class="mui-col-md-12">
+                    <p class="no-data-message" *ngIf="selVirtues.length < 1">
+                      No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
+                    </p>
                   </div>
-                  <div class="table-data mui-col-md-8">[App 1, App 2, App 3, Apps N...]</div>
-                  <div class="clearfix"></div>
+                </div>
+                <div *ngIf="selVirtues.length > 0">
+                  <div class="mui-row table-row" *ngFor="let virtue of selVirtues; let i = index;" appActiveClass>
+                    <div class="table-data mui-col-md-4">
+                      <a class="edit" (click)="activateModal(1,'edit')">{{ getVirtueName(virtue) }}</a>
+                      <!-- This should show if hovered over -->
+                      <span class="menu-options"><a (click)="removeVirtue(virtue, i)">Remove</a></span>
+                    </div>
+                    <div class="table-data mui-col-md-8">
+                      <ul [innerHTML]="getVirtueAppIds(virtue)"></ul>
+                    </div>
+                    <div class="clearfix"></div>
+                  </div>
                 </div>
               </div>
-              <div class="paging">
+              <div class="paging mui-row">
                 <div class="page-number mui-col-md-4">Page # of #</div>
                 <div class="page-controls mui-col-md-4"><< First | < Previous | Next > | Last >></div>
                 <div class="page-item-total mui-col-md-4"># User Accounts</div>
                 <div class="clearfix"></div>
               </div>
-            </div>
               <div class="mui-row">
                 <hr />
                 <div class="mui-col-md-4">&nbsp;</div>

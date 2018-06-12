@@ -220,7 +220,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		}
 	}
 
-	protected void sendMessageToAllButSource(IClipboardMessage message) {
+	protected synchronized void sendMessageToAllButSource(IClipboardMessage message) {
 		Map<String, IClipboardMessageSenderReceiver> copyOfTransmitters = new HashMap<String, IClipboardMessageSenderReceiver>(
 				transmitters);
 		for (Entry<String, IClipboardMessageSenderReceiver> entry : copyOfTransmitters.entrySet()) {

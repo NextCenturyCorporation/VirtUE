@@ -56,12 +56,14 @@ export class VirtualMachineService {
            });
   }
 
-  public updateStatus(baseUrl: string, id: string, isEnabled: boolean): Observable<any> {
+  public toggleVmStatus(baseUrl: string, id: string): Observable<any> {
+    let url = baseUrl + this.configUrl + id + '/toggle';
+    return this.httpClient.get(url);
+  }
+
+  public updateVmStatus(baseUrl: string, id: string): Observable<any> {
     let url = baseUrl + this.configUrl + id;
-    let body = {
-      'enabled': isEnabled
-    };
-    return this.httpClient.put<VirtualMachine>(url, JSON.stringify(body), httpOptions);
+    return this.httpClient.get(url);
   }
 
   public deleteVM(baseUrl: string, id: string) {

@@ -29,9 +29,9 @@ export class EditVirtueComponent implements OnInit {
   virtueId: { id: string };
   virtueForm: FormControl;
   virtueEnabled: boolean;
-  virtualMachine: VirtualMachine;
   activeClass: string;
   baseUrl: string;
+  virtue: any;
   errorMsg: any;
   users: User[];
   virtues: Virtue[];
@@ -98,12 +98,6 @@ export class EditVirtueComponent implements OnInit {
       this.getVirtueVmList(data.virtualMachineTemplateIds);
     });
   }
-
-  // getAllVms() {
-  //   this.vmService.getVmList(this.baseUrl).subscribe(vms => {
-  //     this.vmList = vms;
-  //   });
-  // }
 
   getVirtueVmList(virtueVms: any) {
     // loop through the selected VM list
@@ -184,8 +178,6 @@ export class EditVirtueComponent implements OnInit {
         this.pageVmList = [];
       }
       this.pageVmList = this.selVmsList;
-
-
       this.getVirtueVmList(this.pageVmList);
     });
 
@@ -220,12 +212,6 @@ export class EditVirtueComponent implements OnInit {
     } else {
       this.virtueEnabled = true;
     }
-    let body = {
-      'enabled': this.virtueEnabled,
-    };
-    // console.log('Virtue is enabled: ' + this.virtueEnabled);
-    this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
-    this.resetRouter();
   }
 
   // deleteVirtue(id): void {

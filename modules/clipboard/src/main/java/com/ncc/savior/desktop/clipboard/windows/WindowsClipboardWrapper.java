@@ -198,6 +198,15 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		// SetClipboardData call. This is explicitly called out in microsoft documents.
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/ms649051(v=vs.85).aspx
 		if (!clipboardData.isCacheable()) {
+
+			// This call is usually done via windows callback on some unknown thread where
+			// the clipboard is accessible for another application. In those cases, the
+			// thread needs to be released quickly. Any changes to the clipboard before
+			// releasing will occur on the other application's paste. Therefore, we must set
+			// the the null for delayed render in our main thread later. We need to wait for
+			// the clipboard to become available because at the time of this call, some
+			// other application has the clipboard open and is reading. We don't want to
+			// write the data until that application is done.
 			addToRunLaterQueue(() -> {
 				openClipboardWhenFree();
 				try {
