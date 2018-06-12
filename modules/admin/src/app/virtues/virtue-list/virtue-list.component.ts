@@ -6,7 +6,6 @@ import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { Virtue } from '../../shared/models/virtue.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
@@ -25,7 +24,7 @@ export class VirtueListComponent implements OnInit {
   virtues = [];
   vmList = [];
   appsList = [];
-  virtueEnabled: boolean;
+  enabledValue: any = '*';
   baseUrl: string;
   // virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
@@ -81,6 +80,16 @@ export class VirtueListComponent implements OnInit {
     });
   }
 
+  sortVirtues(sortBy: string) {
+    if (sortBy === 'all') {
+      this.enabledValue = '*';
+    } else if (sortBy === 'enabled') {
+      this.enabledValue = true;
+    } else if (sortBy === 'disabled') {
+      this.enabledValue = false;
+    }
+  }
+
   getApplications(baseUrl: string) {
     this.appsService.getAppsList(baseUrl).subscribe( apps => {
       this.appsList = apps;
@@ -110,7 +119,7 @@ export class VirtueListComponent implements OnInit {
     }
   }
 
-  virtueStatus(id: string, isEnabled: boolean) {
+  virtueStatus(id: string) {
     this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
       this.virtue = data;
     });
