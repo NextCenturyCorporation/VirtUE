@@ -22,6 +22,8 @@ export class VmListComponent implements OnInit {
 
   baseUrl: string;
   vm: any;
+  vmSortDirection: string = 'asc';
+  vmSortType: string = 'enabled'; // This is the default VM datatype
   totalVms: number;
 
   constructor(
@@ -80,8 +82,9 @@ export class VmListComponent implements OnInit {
     }
   }
 
-  listFilter(isEnabled: any) {
-    this.filterValue = isEnabled;
+  listFilter(filterType: string, filterValue: any) {
+    this.filterValue = filterValue;
+    this.vmSortType = filterType;
     this.totalVms = this.vms.length;
   }
 

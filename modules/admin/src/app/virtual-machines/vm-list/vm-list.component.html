@@ -23,24 +23,26 @@
         <div class="mui-row virtues-filters">
           <div class="mui-col-md-12 padding-left-0 filters">
             <span *ngIf="filterValue === '*'">All VMs</span>
-            <a mat-button *ngIf="filterValue !== '*'"  (click)="listFilter('*')">All VMs</a> |
+            <a mat-button *ngIf="filterValue !== '*'"  (click)="listFilter('enabled','*')">All VMs</a> |
             <span *ngIf="filterValue === true">Enabled VMs</span>
-            <a mat-button *ngIf="filterValue !== true" (click)="listFilter(true)">Enabled VMs</a> |
+            <a mat-button *ngIf="filterValue !== true" (click)="listFilter('enabled', true)">Enabled VMs</a> |
             <span *ngIf="filterValue === false">Disabled VMs</span>
-            <a mat-button *ngIf="filterValue !== false" (click)="listFilter(false)">Disabled VMs</a>
+            <a mat-button *ngIf="filterValue !== false" (click)="listFilter('enabled', false)">Disabled VMs</a>
           </div>
         </div>
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-3">Virtual Machine Name</div>
+          <div class="table-header mui-col-md-3">
+            <a (click)="listFilter('name','asc')">Virtual Machine Name <span class="fa fa-chevron-up"></span></a>
+          </div>
           <div class="table-header mui-col-md-2">OS</div>
           <div class="table-header mui-col-md-2">Applications</div>
           <div class="table-header mui-col-md-2">Last Modified By</div>
           <div class="table-header mui-col-md-1">Security</div>
           <div class="table-header mui-col-md-2">Modified Date</div>
         </div>
-        <div *ngFor="let vm of vms | listFilter:filterValue:'enabled'" class="mui-row table-row" appActiveClass>
+        <div *ngFor="let vm of vms | listFilter:filterValue:vmSortType" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-3">
             <div class="mini-menu">
               <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.name }}</a>
