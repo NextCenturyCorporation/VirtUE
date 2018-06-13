@@ -1,7 +1,5 @@
 package com.ncc.savior.desktop.clipboard;
 
-import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,18 +62,6 @@ public class DelayedRenderSample {
 		}
 	}
 
-	private static void printClipboardFormatsAvailable() {
-		IntByReference returnedSizeOfFormats = new IntByReference();
-		int sizeOfFormats = 20;
-		int[] formats = new int[sizeOfFormats];
-		boolean success = user32.GetUpdatedClipboardFormats(formats, sizeOfFormats, returnedSizeOfFormats);
-		if (success) {
-			logger.debug(Arrays.toString(Arrays.copyOf(formats, returnedSizeOfFormats.getValue())));
-		} else {
-			logger.error("Error getting clipboard formats");
-		}
-
-	}
 
 	private static boolean writeStringToClipboard(String myString, final HWND windowHandle, boolean normalString)
 			throws InterruptedException {
@@ -137,7 +123,7 @@ public class DelayedRenderSample {
 		int error = kernel32.GetLastError();
 		int langId = 0;
 		PointerByReference lpBuffer = new PointerByReference();
-		int ret = kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
+		kernel32.FormatMessage(WinBase.FORMAT_MESSAGE_ALLOCATE_BUFFER | WinBase.FORMAT_MESSAGE_FROM_SYSTEM
 				| WinBase.FORMAT_MESSAGE_IGNORE_INSERTS, null, error, langId, lpBuffer, 0, null);
 		if (printOnSuccess || error != 0) {
 			logger.error(prefix + " error=" + error + " " + lpBuffer.getValue().getWideString(0));
@@ -154,7 +140,7 @@ public class DelayedRenderSample {
 			int i = user32.GetMessage(msg, windowHandle, 0, 0);
 			if (msg.message != 0xC228) {
 				user32.TranslateMessage(msg);
-				LRESULT result = user32.DispatchMessage(msg);
+				user32.DispatchMessage(msg);
 				logger.debug("get message i=" + i);
 				logger.debug(msg.toString(false));
 				logger.debug("MSG#" + msg.message);

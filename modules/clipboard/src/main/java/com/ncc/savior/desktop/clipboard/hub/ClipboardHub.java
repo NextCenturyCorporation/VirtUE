@@ -47,7 +47,7 @@ import com.ncc.savior.util.JavaUtil;
  *
  *
  */
-public class ClipboardHub implements IClipboardMessageHandler {
+public class ClipboardHub {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardHub.class);
 	public static final int DEFAULT_PORT = 10022;
 	private int i = 0;
@@ -57,6 +57,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	private Set<ClipboardFormat> validFormats;
 	private ICrossGroupDataGuard dataGuard;
 	private Set<ClipboardFormat> currentFormats;
+	private DisconnectListener disconnectListener;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
 		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
@@ -110,23 +111,74 @@ public class ClipboardHub implements IClipboardMessageHandler {
 	 *
 	 * @param groupId
 	 * @param serializer
+	 * @return id of client. Useful for handling errors to reconnect.
 	 */
-	public void addClient(String groupId, IMessageSerializer serializer) {
-		String newId = getNextId();
+	public String addClient(String groupId, IMessageSerializer serializer) {
+		return addClient(groupId, serializer, null);
+	}
+
+	/**
+	 * Creates a client from the given {@link IMessageSerializer} and addes them to
+	 * the hub.
+	 *
+	 * @param groupId
+	 * @param serializer
+	 * @param clientId
+	 *            -client id if existed before, otherwise should be null
+	 * @return id of client. Useful for handling errors to reconnect.
+	 */
+	public String addClient(String groupId, IMessageSerializer serializer, String clientId) {
+		String newId;
+		if (clientId == null) {
+			newId = getNextId();
+		} else {
+			newId = clientId;
+		}
+		IClipboardMessageHandler messageHandler = new IClipboardMessageHandler() {
+
+			@Override
+			public void onMessageError(String description, IOException e) {
+				ClipboardHub.this.onMessageError(newId, description, e);
+			}
+
+			@Override
+			public void onMessage(IClipboardMessage message, String groupId) {
+				ClipboardHub.this.onMessage(newId, message, groupId);
+			}
+
+			@Override
+			public void closed() {
+				// do nothing
+				// logger.info("client closed. ID=" + newId);
+			}
+		};
 		// Not entirely sure where to store and map groupId. I'm not sure it belongs in
 		// MessageTransmitter, but I do need to be able to get the groupID of a message
 		// transmitter (in the HUB, but not in the clients). Creating a separate Map
 		// object seems like overkill and could easily cause issues keeping the Maps in
 		// sync. Wrapping the transmitters seems more clunky than useful
-		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(groupId, serializer, this, "hub-" + newId);
+		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(groupId, serializer, messageHandler,
+				"hub-" + newId);
 		ClientIdClipboardMessage idMsg = new ClientIdClipboardMessage(hubId, newId);
-		logger.debug("registering new client");
+		logger.trace("registering client");
 		sendMessageHandleError(idMsg, transmitter, newId);
 		transmitters.put(newId, transmitter);
 		logger.debug("client added to hub with id=" + newId);
 
 		// on connection, we want to let clients know they don't own the clipboard and
 		// what formats are on the clipboard.
+		return newId;
+	}
+
+	public void disconnectClient(String clientId) throws IOException {
+		IClipboardMessageSenderReceiver trans = transmitters.get(clientId);
+		if (trans != null) {
+			transmitters.remove(clientId);
+			trans.close();
+			if (disconnectListener != null) {
+				disconnectListener.onDisconnect(clientId);
+			}
+		}
 	}
 
 	/**
@@ -139,8 +191,7 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		return "ClipboardClient-" + i;
 	}
 
-	@Override
-	public void onMessage(IClipboardMessage message, String messageSourceGroupId) {
+	protected void onMessage(String clientId, IClipboardMessage message, String messageSourceGroupId) {
 		logger.debug("hub received message=" + message);
 		if (message instanceof ClipboardChangedMessage) {
 			// source has taken control of clipboard
@@ -251,19 +302,26 @@ public class ClipboardHub implements IClipboardMessageHandler {
 		logger.error(
 				"Error sending message to client " + clientId + ".  Removing from list of clients.  Message=" + message,
 				e);
-		transmitters.remove(clientId);
+		onMessageError(clientId, "Error Sedning message", e);
 	}
 
-	@Override
-	public void onMessageError(IOException e) {
-		logger.error("message error:", e);
-		Iterator<Entry<String, IClipboardMessageSenderReceiver>> itr = transmitters.entrySet().iterator();
-		while (itr.hasNext()) {
-			Entry<String, IClipboardMessageSenderReceiver> entry = itr.next();
-			if (!entry.getValue().isValid()) {
-				itr.remove();
-			}
+	protected void onMessageError(String clientId, String description, IOException e) {
+		logger.error("message error clientId=" + clientId + " : " + description, e);
+		transmitters.remove(clientId);
+		if (disconnectListener != null) {
+			disconnectListener.onDisconnect(clientId, e);
 		}
 	}
 
+	public void setDisconnectListener(DisconnectListener disconnectListener) {
+		this.disconnectListener = disconnectListener;
+	}
+
+	public static interface DisconnectListener {
+
+		public void onDisconnect(String clientId, IOException e);
+
+		public void onDisconnect(String clientId);
+
+	}
 }

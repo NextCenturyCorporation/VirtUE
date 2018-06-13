@@ -43,6 +43,7 @@ public class SocketClipboardClient {
 
 		ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
 		client.waitUntilStopped();
+		client.close();
 	}
 
 	private static void usage(String string) {

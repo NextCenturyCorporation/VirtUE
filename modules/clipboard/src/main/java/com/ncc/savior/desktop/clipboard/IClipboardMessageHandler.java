@@ -20,9 +20,16 @@ public interface IClipboardMessageHandler {
 
 	/**
 	 * Called when there is an error trying to send or receive a clipboard message.
+	 * 
+	 * @param description
 	 *
 	 * @param e
 	 */
-	public void onMessageError(IOException e);
+	public void onMessageError(String description, IOException e);
+
+	/**
+	 * called with transmitter was closed.
+	 */
+	public void closed();
 
 }

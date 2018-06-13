@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.clipboard.linux;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -82,6 +83,12 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	private volatile boolean ownSelection;
 
+	protected boolean stopMainClipboardThread = false;
+
+	private boolean stopTargetPollThread = false;
+
+	private Thread targetPollThread;
+
 	public X11ClipboardWrapper(boolean takeClipboard) {
 		delayedFormats = new TreeSet<ClipboardFormat>();
 		runnableQueue = new ConcurrentLinkedQueue<Runnable>();
@@ -126,7 +133,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				}
 
 				XEvent event = new XEvent();
-				while (true) {
+				while (!stopMainClipboardThread) {
 					int queued = x11.XEventsQueued(display, 2);
 					logger.trace("Events Queued: " + queued);
 					if (queued > 0 || false) {
@@ -218,6 +225,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 						}
 					}
 				}
+				x11.XDestroyWindow(display, window);
+				listener.closed();
 			}
 		};
 
@@ -230,7 +239,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	private void startTargetPollThread() {
 		Runnable targetPollRunnable = () -> {
 			previousFormats = new TreeSet<ClipboardFormat>();
-			while (true) {
+			while (!stopTargetPollThread) {
 				if (!ownSelection) {
 					runnableQueue.offer(() -> {
 						if (logger.isTraceEnabled()) {
@@ -269,9 +278,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				JavaUtil.sleepAndLogInterruption(100);
 			}
 		};
-		Thread t = new Thread(targetPollRunnable, "TargetsPoller");
-		t.setDaemon(true);
-		t.start();
+		targetPollThread = new Thread(targetPollRunnable, "TargetsPoller");
+		targetPollThread.setDaemon(true);
+		targetPollThread.start();
 	}
 
 	@Override
@@ -330,6 +339,19 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		runnableQueue.offer(() -> {
 			x11.XSetSelectionOwner(display, clipboardAtom, window, new NativeLong(X11.CurrentTime));
 		});
+	}
+
+	@Override
+	public void close() throws IOException {
+
+		try {
+			stopTargetPollThread = true;
+			targetPollThread.join();
+		} catch (InterruptedException e) {
+			logger.warn("Waiting for target poll thread to stop interrupted", e);
+		}
+		stopMainClipboardThread = true;
+
 	}
 
 	/**

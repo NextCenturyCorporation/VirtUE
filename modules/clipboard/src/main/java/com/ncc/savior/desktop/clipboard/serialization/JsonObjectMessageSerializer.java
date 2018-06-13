@@ -56,6 +56,7 @@ public class JsonObjectMessageSerializer implements IMessageSerializer {
 		logger.debug("flushed message: " + message);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IClipboardMessage deserialize() throws IOException {
 		logger.debug("reading..");

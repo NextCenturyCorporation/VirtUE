@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.clipboard.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,7 @@ import com.ncc.savior.virtueadmin.model.OS;
  *
  *
  */
-public class ClipboardClient {
+public class ClipboardClient implements Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardClient.class);
 	private IClipboardMessageSenderReceiver transmitter;
 	private IClipboardWrapper clipboard;
@@ -41,6 +42,7 @@ public class ClipboardClient {
 	private long timeoutMillis = 3000;
 	private Map<String, Thread> requestToThread;
 	private Map<String, ClipboardData> requestToData;
+	protected IClipboardErrorListener clipboardErrorListener;
 
 	/**
 	 *
@@ -60,10 +62,22 @@ public class ClipboardClient {
 			}
 
 			@Override
-			public void onMessageError(IOException e) {
+			public void onMessageError(String description, IOException e) {
 				// TODO should we let someone else listen to this event?
-				logger.error("Message error.  Client stopped. ", e);
+				logger.error("Message error.  Client stopped. " + description, e);
+				try {
+					close();
+				} catch (IOException ioe) {
+					logger.warn("Error closing clipboard client with id=" + myId, ioe);
+				}
+				if (clipboardErrorListener != null) {
+					clipboardErrorListener.onError();
+				}
+			}
 
+			@Override
+			public void closed() {
+				logger.debug("Received message transmitter closed event");
 			}
 		};
 		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(serializer, handler, "client");
@@ -104,6 +118,11 @@ public class ClipboardClient {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}
+
+			@Override
+			public void closed() {
+				logger.info("Clipboard wrapper has closed");
 			}
 		};
 		clipboardWrapper.setClipboardListener(listener);
@@ -229,5 +248,11 @@ public class ClipboardClient {
 			throw new RuntimeException("Clipboard is currently not supported on your operating system!");
 		}
 		return clipboardWrapper;
+	}
+
+	@Override
+	public void close() throws IOException {
+		clipboard.close();
+		transmitter.close();
 	}
 }
