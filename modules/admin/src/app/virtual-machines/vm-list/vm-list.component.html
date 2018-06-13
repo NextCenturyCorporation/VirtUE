@@ -47,7 +47,7 @@
 
               <!-- if this virtue is enabled show this menu -->
               <span *ngIf="vm.enabled === true" class="menu-options">
-                <a mat-button (click)="updateVmStatus(vm.id, vm.enabled)">Disable</a> |
+                <a mat-button (click)="vmStatus(vm.id)">Disable</a> |
                 <a class="edit" [routerLink]="['duplicate',vm.id]">Duplicate</a>
               </span>
 

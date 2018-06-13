@@ -65,6 +65,13 @@ export class VmEditComponent implements OnInit {
     });
   }
 
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.getThisVm(this.baseUrl, this.vmId.id);
+    }, 1000);
+  }
+
   getBaseUrl(url: string) {
     this.baseUrl = url;
   }
@@ -166,6 +173,7 @@ export class VmEditComponent implements OnInit {
       'securityTag': vmSecurityTag
     };
     this.vmService.updateVM(this.baseUrl, id, JSON.stringify(body));
+    this.resetRouter();
     this.router.navigate(['/vm']);
   }
 

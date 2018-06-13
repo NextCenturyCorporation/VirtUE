@@ -44,15 +44,14 @@ export class VmListComponent implements OnInit {
       this.getVmList(awsServer);
       this.getAppsList(awsServer);
     });
-    this.refreshData();
+    this.resetRouter();
   }
 
   getBaseUrl(url: string) {
     this.baseUrl = url;
-    console.log('URL: ' + url);
   }
 
-  refreshData() {
+  resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
       this.getVmList(this.baseUrl);
@@ -86,39 +85,17 @@ export class VmListComponent implements OnInit {
     this.totalVms = this.vms.length;
   }
 
-  // updateVmStatus(id: string, isEnabled: boolean) {
-    // this.vmService.toggleVmStatus(this.baseUrl, id).subscribe(data => {
-    //   this.vm = data;
-    // });
-  //   this.refreshData();
-  //   this.router.navigate(['/vm']);
-  // }
-
-  updateVmStatus(id: string, isEnabled: boolean): void {
-    let vmStatus: boolean;
-    if (isEnabled) {
-      vmStatus = false;
-    } else {
-      vmStatus = true;
-    }
-    console.log('updating status for vm #' + id);
-    let body = {
-      'enabled': vmStatus
-    };
-    console.log(body);
-    this.vmService.updateVmStatus(this.baseUrl, id).subscribe(success => {
-      console.log('success');
-    }, err => {
-      console.log(err);
-      }
-    );
-    this.refreshData();
+  vmStatus(id: string) {
+    this.vmService.toggleVmStatus(this.baseUrl, id).subscribe(data => {
+      this.vm = data;
+    });
+    this.resetRouter();
     this.router.navigate(['/vm']);
   }
 
   deleteVM(id: string) {
     this.vmService.deleteVM(this.baseUrl, id);
-    this.refreshData();
+    this.resetRouter();
   }
 
   openDialog(id: string, type: string, category: string, description: string): void {
