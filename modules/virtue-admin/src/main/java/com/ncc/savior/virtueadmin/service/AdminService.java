@@ -146,6 +146,17 @@ public class AdminService {
 		return viTemplate;
 	}
 
+	public VirtualMachineTemplate toggleVirtualMachineTemplateEnabled(String templateId) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtualMachineTemplate vmtTemplate = templateManager.getVmTemplate(templateId);
+		boolean enabled = vmtTemplate.isEnabled();
+		vmtTemplate.setEnabled(!enabled);
+		vmtTemplate.setLastModification(new Date());
+		vmtTemplate.setLastEditor(user.getUsername());
+		templateManager.addVmTemplate(vmtTemplate);
+		return vmtTemplate;
+	}
+
 	public VirtualMachineTemplate getVmTemplate(String templateId) {
 		verifyAndReturnUser();
 		VirtualMachineTemplate vmTemplate = templateManager.getVmTemplate(templateId);
