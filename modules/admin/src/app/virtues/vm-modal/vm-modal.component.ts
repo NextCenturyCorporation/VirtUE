@@ -20,10 +20,7 @@ export class VmModalComponent implements OnInit {
   @Input() appInput: Application;
 
   form: FormGroup;
-  virtueId: string;
-
   checked = false;
-
   addVms = new EventEmitter();
   vmList = [];
   selVmsList = [];

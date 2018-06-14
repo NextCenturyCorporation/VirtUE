@@ -11,22 +11,32 @@
       <div class="mui-container-fluid" *ngIf="virtues.length > 0">
         <div class="mui-row virtues-filters">
           <div class="virtues-filter mui-col-md-12 padding-left-0">
-            <a *ngIf="enabledValue !== '*'" (click)="sortVirtues('all')">All Virtues</a>
-            <span *ngIf="enabledValue === '*'">All Virtues</span> |
-            <a *ngIf="enabledValue !== true" (click)="sortVirtues('enabled')">Enabled Virtues</a>
-            <span *ngIf="enabledValue === true">Enabled Virtues</span> |
-            <a *ngIf="enabledValue !== false" (click)="sortVirtues('disabled')">Disabled Virtues</a>
-            <span *ngIf="enabledValue === false">Disabled Virtues</span>
+            <a *ngIf="sortValue !== '*'" (click)="sortVirtueColumns('enabled','*',sortBy)">All Virtues</a>
+            <span *ngIf="sortValue === '*'">All Virtues</span> |
+            <a *ngIf="sortValue !== true" (click)="sortVirtueColumns('enabled',true,sortBy)">Enabled Virtues</a>
+            <span *ngIf="sortValue === true">Enabled Virtues</span> |
+            <a *ngIf="sortValue !== false" (click)="sortVirtueColumns('enabled',false,sortBy)">Disabled Virtues</a>
+            <span *ngIf="sortValue === false">Disabled Virtues</span>
           </div>
         </div>
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-2">Virtue Name</div>
+          <div class="table-header mui-col-md-2">
+            <a class="sortName" (click)="sortVirtueColumns('name',sortValue,sortBy)">Virtue Name
+              <span *ngIf="sortBy === 'asc'" class="fa fa-sort-up"></span>
+              <span *ngIf="sortBy === 'desc'" class="fa fa-sort-down"></span>
+            </a>
+          </div>
           <div class="table-header mui-col-md-3">Virtual Machines</div>
           <div class="table-header mui-col-md-3">Apps</div>
           <div class="table-header mui-col-md-2">Created By</div>
-          <div class="table-header mui-col-md-2">Date</div>
+          <div class="table-header mui-col-md-2">
+            <a class="sortDate" (click)="sortVirtueColumns('date',sortValue,sortBy)">Date
+              <span *ngIf="sortType=== 'date' && sortBy === 'asc'" class="fa fa-sort-up"></span>
+              <span *ngIf="sortType=== 'date' && sortBy === 'desc'" class="fa fa-sort-down"></span>
+            </a>
+          </div>
         </div>
         <!-- if there are no virtues, show this message -->
         <div class="mui-row margin-top-10" *ngIf="virtues.length < 1">
@@ -36,7 +46,7 @@
             </p>
           </div>
         </div>
-        <div *ngFor="let virtue of virtues | listFilter : enabledValue : 'enabled'" class="mui-row table-row" appActiveClass>
+        <div *ngFor="let virtue of virtues | listFilter : sortType : sortValue : sortBy" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
 

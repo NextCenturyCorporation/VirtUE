@@ -24,8 +24,12 @@ export class VirtueListComponent implements OnInit {
   virtues = [];
   vmList = [];
   appsList = [];
-  enabledValue: any = '*';
   baseUrl: string;
+  // these are the default properties the list sorts by
+  sortType: string = 'name';
+  sortValue: any = '*';
+  sortBy: string = 'asc';
+  defaultSort: string = 'name';
   // virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
 
@@ -35,7 +39,7 @@ export class VirtueListComponent implements OnInit {
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
-    public dialog: MatDialog,
+    public dialog: MatDialog
   ) {
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
@@ -78,15 +82,63 @@ export class VirtueListComponent implements OnInit {
     this.virtuesService.getVirtues(baseUrl).subscribe( data => {
       this.virtues = data;
     });
+    this.sortVirtues(this.sortBy);
   }
 
-  sortVirtues(sortBy: string) {
-    if (sortBy === 'all') {
-      this.enabledValue = '*';
-    } else if (sortBy === 'enabled') {
-      this.enabledValue = true;
-    } else if (sortBy === 'disabled') {
-      this.enabledValue = false;
+  sortVirtues(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.virtues.sort((leftSide, rightSide): number => {
+        if (leftSide['name'] < rightSide['name']) {
+          return -1;
+        }
+        if (leftSide['name'] > rightSide['name']) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      this.virtues.sort((leftSide, rightSide): number => {
+        if (leftSide['name'] < rightSide['name']) {
+          return 1;
+        }
+        if (leftSide['name'] > rightSide['name']) {
+          return -1;
+        }
+        return 0;
+      });
+    }
+  }
+
+  sortVirtueColumns(sortType: string, sortValue: any, sortBy: string) {
+    console.log('default sort: ' + this.defaultSort);
+
+    if (sortType === 'enabled' || sortType === 'name') {
+      this.sortType = sortType;
+      if (sortValue === '*') {
+        this.sortValue = '*';
+      } else if (sortValue === true) {
+        this.sortValue = true;
+      } else if (sortValue === false) {
+        this.sortValue = false;
+      }
+    } else if (sortType === 'date') {
+      this.sortType = sortType;
+      this.sortValue = sortValue;
+      this.sortBy = 'desc';
+    }
+    if (this.sortType === sortType) {
+      this.sortListBy(sortBy);
+    } else {
+      this.sortBy = 'asc';
+    }
+    console.log('new sortBy: ' + sortBy);
+  }
+
+  sortListBy(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.sortBy = 'desc';
+    } else {
+      this.sortBy = 'asc';
     }
   }
 
