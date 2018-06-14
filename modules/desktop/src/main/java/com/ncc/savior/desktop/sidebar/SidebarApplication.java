@@ -50,6 +50,7 @@ public class SidebarApplication extends Application {
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		boolean swing = props.getBoolean(PropertyManager.PROPERTY_SWING, true);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
+		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization, loginUrl,
 				logoutUrl);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
@@ -71,7 +72,6 @@ public class SidebarApplication extends Application {
 		}
 
 		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
-		String sourceJarPath = "C:\\projects\\VirtUE\\workspace\\VirtUE\\modules\\clipboard\\build\\libs\\clipboard-0.1.0-SNAPSHOT-all.jar";
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
 		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);

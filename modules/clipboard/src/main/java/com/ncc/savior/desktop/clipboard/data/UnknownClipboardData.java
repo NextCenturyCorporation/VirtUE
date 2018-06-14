@@ -28,17 +28,17 @@ public class UnknownClipboardData extends ClipboardData {
 	}
 
 	@Override
-	public int returnLinuxNumEntries() {
+	public int getLinuxNumEntries() {
 		return 0;
 	}
 
 	@Override
-	public int returnLinuxEntrySizeBits() {
+	public int getLinuxEntrySizeBits() {
 		return 8;
 	}
 
 	@Override
-	public long returnWindowsDataLengthBytes() {
+	public long getWindowsDataLengthBytes() {
 		return 0;
 	}
 }

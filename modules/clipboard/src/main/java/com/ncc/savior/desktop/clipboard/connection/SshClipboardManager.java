@@ -22,6 +22,7 @@ import com.ncc.savior.desktop.alerting.UserAlertingStub;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.client.ClipboardClient;
+import com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.DisconnectListener;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
@@ -80,7 +81,7 @@ public class SshClipboardManager implements IClipboardManager {
 		});
 		this.sourceJarPath = sourceJarPath;
 		this.destinationFilePath = "clipboard.jar";
-		this.clipboardMainClass = "com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient";
+		this.clipboardMainClass = StandardInOutClipboardClient.class.getCanonicalName();
 		this.command = "java -cp " + destinationFilePath + " " + clipboardMainClass;
 		if (testParam != null) {
 			command += " " + testParam;
@@ -174,19 +175,24 @@ public class SshClipboardManager implements IClipboardManager {
 	 */
 	private String connectClipboardOnce(SshConnectionParameters params, String groupId, String clientId)
 			throws IOException {
-		try {
-			Session session;
-			session = JschUtils.getUnconnectedSession(params);
-			session.connect();
-			copyClipboardClientIfNeeded(session);
-			// need to get correct display!
-			ClipboardClientConnectionProperties props = connectionClient(session, groupId, params.getDisplay(),
-					clientId);
-			props.connectionParameters = params;
-			propertiesMap.put(props.clientId, props);
-			return props.clientId;
-		} catch (JSchException | SftpException e) {
-			throw new IOException(e);
+		if (new File(sourceJarPath).exists()) {
+			try {
+				Session session;
+				session = JschUtils.getUnconnectedSession(params);
+				session.connect();
+				copyClipboardClientIfNeeded(session);
+				// need to get correct display!
+				ClipboardClientConnectionProperties props = connectionClient(session, groupId, params.getDisplay(),
+						clientId);
+				props.connectionParameters = params;
+				propertiesMap.put(props.clientId, props);
+				return props.clientId;
+			} catch (JSchException | SftpException e) {
+				throw new IOException(e);
+			}
+		} else {
+			logger.warn("Clipboard jar not present.  Clipboard will be disabled");
+			return null;
 		}
 	}
 

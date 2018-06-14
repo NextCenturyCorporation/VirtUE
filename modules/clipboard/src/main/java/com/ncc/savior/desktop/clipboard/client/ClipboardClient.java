@@ -112,11 +112,9 @@ public class ClipboardClient implements Closeable {
 			public void onClipboardChanged(Set<ClipboardFormat> formats) {
 				try {
 					ClipboardChangedMessage msg = new ClipboardChangedMessage(myId, formats);
-					// logger.debug("sending message=" + msg);
 					ClipboardClient.this.transmitter.sendMessageToHub(msg);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Error on callback from local clipboard changed", e);
 				}
 			}
 
@@ -204,7 +202,7 @@ public class ClipboardClient implements Closeable {
 	}
 
 	/**
-	 * blocks until client has stopped listening for messages signally that it is
+	 * blocks until client has stopped listening for messages signaling that it is
 	 * done or disconnected and should no longer be used.
 	 */
 	public void waitUntilStopped() {

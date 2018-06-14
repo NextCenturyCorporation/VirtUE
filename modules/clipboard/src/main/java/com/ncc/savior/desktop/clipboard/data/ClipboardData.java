@@ -48,23 +48,21 @@ public abstract class ClipboardData implements Serializable {
 	 */
 	public abstract Pointer createLinuxData();
 
-	// Note: Many methods were renamed return* instead of get* to avoid serializers
-	// that use getters (I.E. Jackson)
 	/**
 	 * Gets the number of entries in Linux data. Entries can be either 8, 16, or 32
-	 * bits each (1, 2, or 4 bytes). See {@link #returnLinuxEntrySizeBits()} for the
+	 * bits each (1, 2, or 4 bytes). See {@link #getLinuxEntrySizeBits()} for the
 	 * size of the entry.
 	 * 
 	 * @return
 	 */
-	public abstract int returnLinuxNumEntries();
+	public abstract int getLinuxNumEntries();
 
 	/**
 	 * must be 8, 16, or 32
 	 *
 	 * @return
 	 */
-	public abstract int returnLinuxEntrySizeBits();
+	public abstract int getLinuxEntrySizeBits();
 
 	/**
 	 * Returns whether the OS (the paster) using this data (not the creator/copier)
@@ -84,5 +82,5 @@ public abstract class ClipboardData implements Serializable {
 	 * 
 	 * @return
 	 */
-	public abstract long returnWindowsDataLengthBytes();
+	public abstract long getWindowsDataLengthBytes();
 }
