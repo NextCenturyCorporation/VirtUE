@@ -20,6 +20,7 @@ import com.jcraft.jsch.SftpException;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.client.ClipboardClient;
+import com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.serialization.LocalSerializationProvider;
@@ -56,7 +57,7 @@ public class SshClipboardManager implements IClipboardManager {
 		this.clipboardHub = clipboardHub;
 		this.sourceJarPath = sourceJarPath;
 		this.destinationFilePath = "clipboard.jar";
-		this.clipboardMainClass = "com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient";
+		this.clipboardMainClass = StandardInOutClipboardClient.class.getCanonicalName();
 		this.command = "java -cp " + destinationFilePath + " " + clipboardMainClass;
 		if (testParam != null) {
 			command += " " + testParam;
@@ -84,16 +85,22 @@ public class SshClipboardManager implements IClipboardManager {
 	public Closeable connectClipboard(SshConnectionParameters params, String groupId) throws JSchException {
 
 		// TODO figure out the right way to handle errors here
-		try {
-			Session session = JschUtils.getUnconnectedSession(params);
-			session.connect();
-			copyClipboardClientIfNeeded(session);
-			// need to get correct display!
-			return connectionClient(session, groupId, params.getDisplay());
-		} catch (IOException | SftpException e) {
-			logger.error("Error connecting clipboard!", e);
-			// TODO fix error handling
-			throw new RuntimeException(e);
+		if (new File(sourceJarPath).exists()) {
+			try {
+				Session session = JschUtils.getUnconnectedSession(params);
+				session.connect();
+				copyClipboardClientIfNeeded(session);
+				// need to get correct display!
+				return connectionClient(session, groupId, params.getDisplay());
+			} catch (IOException | SftpException e) {
+				logger.error("Error connecting clipboard!", e);
+				// TODO fix error handling
+				throw new RuntimeException(e);
+			}
+		} else {
+			logger.warn("Clipboard jar not present.  Clipboard will be disabled");
+			return () -> {
+			};
 		}
 	}
 

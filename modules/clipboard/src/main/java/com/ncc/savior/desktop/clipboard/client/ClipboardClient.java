@@ -185,7 +185,7 @@ public class ClipboardClient {
 	}
 
 	/**
-	 * blocks until client has stopped listening for messages signally that it is
+	 * blocks until client has stopped listening for messages signaling that it is
 	 * done or disconnected and should no longer be used.
 	 */
 	public void waitUntilStopped() {
