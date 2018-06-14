@@ -98,11 +98,9 @@ public class ClipboardClient {
 			public void onClipboardChanged(Set<ClipboardFormat> formats) {
 				try {
 					ClipboardChangedMessage msg = new ClipboardChangedMessage(myId, formats);
-					// logger.debug("sending message=" + msg);
 					ClipboardClient.this.transmitter.sendMessageToHub(msg);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Error on callback from local clipboard changed", e);
 				}
 			}
 		};
