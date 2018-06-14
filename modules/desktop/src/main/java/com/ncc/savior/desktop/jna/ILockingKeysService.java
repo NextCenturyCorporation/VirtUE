@@ -3,6 +3,11 @@ package com.ncc.savior.desktop.jna;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.OS;
 
+/**
+ * Service that provides the state of the locking keys.
+ *
+ *
+ */
 public interface ILockingKeysService {
 
 	boolean getLockingKeyState(int vkCapsLock);
@@ -11,8 +16,8 @@ public interface ILockingKeysService {
 		OS os = JavaUtil.getOs();
 		switch (os) {
 		case WINDOWS:
-			// return new WindowsJnaLockingKeyService();
-			return new JavaLockingKeyService();
+			return new WindowsJnaLockingKeyService();
+		// return new JavaLockingKeyService();
 		case LINUX:
 			return new JavaLockingKeyService();
 		case MAC:

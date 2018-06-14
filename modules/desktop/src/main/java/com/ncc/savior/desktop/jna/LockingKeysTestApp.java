@@ -4,6 +4,11 @@ import java.awt.event.KeyEvent;
 
 import com.ncc.savior.util.JavaUtil;
 
+/**
+ * Test application to allow users to test and see if their system supports the
+ * locking keys.
+ *
+ */
 public class LockingKeysTestApp {
 	public static void main(String[] args) {
 		ILockingKeysService lks = getLockingKeyService(args);
