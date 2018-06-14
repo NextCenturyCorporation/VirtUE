@@ -5,4 +5,6 @@ public interface IConnectionParameters {
 	String getConnectionKey();
 
 	void setDisplay(int display);
+
+	int getDisplay();
 }

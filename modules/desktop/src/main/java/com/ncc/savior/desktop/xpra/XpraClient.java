@@ -59,6 +59,7 @@ public class XpraClient implements Closeable {
 	protected boolean stopReadThread;
 	private static int threadCount = 1;
 	private Status status;
+	private int display;
 
 	public XpraClient() {
 		connectListenerManager = new ConnectListenerManager();
@@ -228,5 +229,13 @@ public class XpraClient implements Closeable {
 			}
 		}
 		stopReadThread = true;
+	}
+
+	public int getDisplay() {
+		return display;
+	}
+
+	public void setDisplay(int display) {
+		this.display = display;
 	}
 }
