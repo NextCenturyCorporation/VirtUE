@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ncc.savior.desktop.jna.ILockingKeysService;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 
@@ -21,6 +22,11 @@ public class SwingUtils {
 	public static final String MOD_SHORTCUT_STRING = "shortcut";
 	public static final String MOD_CAPS_LOCK = "lock";
 	public static final String MOD_NUM_LOCK = "mod2";
+	private static ILockingKeysService lockingKeys;
+
+	{
+		lockingKeys = ILockingKeysService.getLockingKeyService();
+	}
 
 	public static List<String> getModifiers(KeyEvent event) {
 		List<String> mods = new ArrayList<String>();
@@ -65,15 +71,16 @@ public class SwingUtils {
 	}
 
 	private static void addLockKeys(List<String> mods) {
-		boolean capslock = false;
+		boolean capsLock = lockingKeys.getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
 		// Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK);
-		boolean numlock = false;
+		boolean numLock = lockingKeys.getLockingKeyState(KeyEvent.VK_NUM_LOCK);
 		// Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_NUM_LOCK);
-		numlock = true;
-		if (capslock) {
+		boolean scrollLock = lockingKeys.getLockingKeyState(KeyEvent.VK_SCROLL_LOCK);
+		numLock = true;
+		if (capsLock) {
 			mods.add(MOD_CAPS_LOCK);
 		}
-		if (numlock) {
+		if (numLock) {
 			mods.add(MOD_NUM_LOCK);
 		}
 
