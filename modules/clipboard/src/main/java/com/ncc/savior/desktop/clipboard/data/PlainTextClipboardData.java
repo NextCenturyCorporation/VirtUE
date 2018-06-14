@@ -24,7 +24,7 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 
 	@Override
 	public Pointer createWindowsData() {
-		Memory winMemory = new NativelyDeallocatedMemory(returnWindowsDataLengthBytes());
+		Memory winMemory = new NativelyDeallocatedMemory(getWindowsDataLengthBytes());
 		winMemory.clear();
 		winMemory.setString(0, data);
 		return winMemory;
@@ -45,17 +45,17 @@ public class PlainTextClipboardData extends ClipboardData implements Serializabl
 	}
 
 	@Override
-	public int returnLinuxNumEntries() {
+	public int getLinuxNumEntries() {
 		return data.length();
 	}
 
 	@Override
-	public int returnLinuxEntrySizeBits() {
+	public int getLinuxEntrySizeBits() {
 		return 8;
 	}
 
 	@Override
-	public long returnWindowsDataLengthBytes() {
+	public long getWindowsDataLengthBytes() {
 		return 1 * (data.getBytes().length + 1);
 	}
 

@@ -294,8 +294,8 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		runnableQueue.offer(() -> {
 			Pointer ptr = clipboardData.createLinuxData();
-			int numItems = clipboardData.returnLinuxNumEntries();
-			int itemSize = clipboardData.returnLinuxEntrySizeBits();
+			int numItems = clipboardData.getLinuxNumEntries();
+			int itemSize = clipboardData.getLinuxEntrySizeBits();
 			// This is caused by an event from in linux. We stored an event to send based on
 			// the event received and we need that event.
 			XSelectionEvent sne = this.SelectionNotifyEventToSend;
