@@ -24,6 +24,9 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
@@ -37,9 +40,6 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.JavaUtil;
-import com.ncc.savior.virtueadmin.util.SaviorException;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * This class handles creation, deletion, start, and stop among other management

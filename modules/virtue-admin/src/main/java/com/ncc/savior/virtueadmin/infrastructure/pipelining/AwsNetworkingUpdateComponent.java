@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.JavaUtil;
 
 /**
  * Component of an {@link IUpdatePipeline} that will retrieve the networking (IP

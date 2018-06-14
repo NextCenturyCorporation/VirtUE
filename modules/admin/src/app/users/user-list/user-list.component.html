@@ -34,8 +34,8 @@
             <a class="edit" [routerLink]="['edit',su.username]">{{ su.username }}</a>
 
             <!-- if this user is enabled show this menu -->
-            <span class="account-options">
-              <a href="#">Duplicate</a> | <a class="edit" (click)="deleteUser(su.username)">Delete</a>
+            <span class="menu-options">
+              <a [routerLink]="['duplicate',su.username]">Duplicate</a> | <a class="edit" (click)="deleteUser(su.username)">Delete</a>
             </span>
           </div>
           <div class="table-data mui-col-md-3">{{ su.authorities }}

@@ -24,6 +24,8 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
@@ -33,8 +35,6 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.JavaUtil;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Handles creation, starting, stopping, deleting and some other management of

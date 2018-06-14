@@ -11,12 +11,12 @@ import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * Implementation of {@link IActiveVirtueDao} that stores all the Active Virtue

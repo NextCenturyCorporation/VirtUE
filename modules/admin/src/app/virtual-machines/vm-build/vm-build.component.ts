@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 
-import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
 
 import { ApplicationsService } from '../../shared/services/applications.service';
@@ -14,39 +14,61 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
 @Component({
   selector: 'app-vm-build',
   templateUrl: './vm-build.component.html',
-  styleUrls: ['./vm-build.component.css'],
   providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
 })
-export class VmBuildComponent implements OnInit {
-  osValue: string;
-  osInfo: string;
-  osList = [
-    { 'id': 10, 'os_name': 'CentOS', 'os_info': 'http://mirror.centos.org/centos/7/os/x86_64/Packages/' },
-    { 'id': 11, 'os_name': 'Debian', 'os_info': 'https://packages.debian.org/stable/' },
-    { 'id': 12, 'os_name': 'Fedora', 'os_info': 'https://apps.fedoraproject.org/' },
-    { 'id': 13, 'os_name': 'Red Hat Linux', 'os_info': 'https://access.redhat.com/downloads' },
-    { 'id': 14, 'os_name': 'Windows', 'os_info': 'https://www.microsoft.com/en-us/windows/' }
-  ];
-
+export class VmBuildComponent implements OnInit, OnDestroy {
+  vmForm: FormControl;
   activeClass: string;
+  baseUrl: string;
+  osValue: string;
+  selectedOS: string;
+  securityTag: string;
+  securityLevel: string;
 
   appList = [];
   selAppList = [];
   pageAppList = [];
-  baseUrl: string;
+  osList = [
+    { 'name': 'Debian', 'os': 'LINUX' },
+    { 'name': 'Windows', 'os': 'WINDOWS' }
+  ];
+
+  securityOptions = [
+    { 'level': 'default', 'name': 'Default'} ,
+    { 'level': 'email', 'name': 'Email' },
+    { 'level': 'power',  'name': 'Power User' },
+    { 'level': 'admin', 'name': 'Administrator' }
+  ];
 
   constructor(
     private vmService: VirtualMachineService,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
+    private router: Router,
     public dialog: MatDialog,
-  ) { }
+  ) {
+    this.vmForm = new FormControl();
+  }
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log(req);
+    return next.handle(req);
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
+        this.getBaseUrl(awsServer);
         this.getAppList(awsServer);
     });
+  }
+
+  ngOnDestroy() {
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+    console.log('URL: ' + url);
   }
 
   getAppList(baseUrl: string) {
@@ -121,13 +143,17 @@ export class VmBuildComponent implements OnInit {
     });
   }
 
-  onBuildVM(name, os, packages) {
-    // const buildDate: Date = new Date();
-    // const pkgs = packages.replace(/\n/g,'|');
-    // const vmFields='{'vm_name':''+name+''},{'vm_os':''+os+''},{'vm_packages':''+pkgs+''},
-    // {'vm_timestamp':''+buildDate+''},{'vm_status':'disabled'}';
-    // console.log('new values: '+name+','+os+','+pkgs+','+buildDate);
-    // this.jsondataService.addNewData('vms',vmFields);
+  buildVirtualMachine(vmName: string, vmOs: string, vmSecurityTag: string) {
+    let body = {
+      'name': vmName,
+      'os': vmOs,
+      'loginUser': 'system',
+      'enabled': true,
+      'applicationIds': this.pageAppList,
+      'securityTag': vmSecurityTag
+    };
+    console.log(body);
+    this.vmService.createVM(this.baseUrl, JSON.stringify(body));
+    this.router.navigate(['/vm']);
   }
-
 }

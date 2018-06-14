@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.Channel;
-import com.ncc.savior.virtueadmin.util.JavaUtil;
+import com.ncc.savior.util.JavaUtil;
 
 /**
  * Helper class to handle streaming commands over SSH using JSCH.

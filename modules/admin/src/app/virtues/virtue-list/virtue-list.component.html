@@ -11,7 +11,12 @@
       <div class="mui-container-fluid" *ngIf="virtues.length > 0">
         <div class="mui-row virtues-filters">
           <div class="virtues-filter mui-col-md-12 padding-left-0">
-            All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a>
+            <a *ngIf="enabledValue !== '*'" (click)="sortVirtues('all')">All Virtues</a>
+            <span *ngIf="enabledValue === '*'">All Virtues</span> |
+            <a *ngIf="enabledValue !== true" (click)="sortVirtues('enabled')">Enabled Virtues</a>
+            <span *ngIf="enabledValue === true">Enabled Virtues</span> |
+            <a *ngIf="enabledValue !== false" (click)="sortVirtues('disabled')">Disabled Virtues</a>
+            <span *ngIf="enabledValue === false">Disabled Virtues</span>
           </div>
         </div>
       </div>
@@ -31,17 +36,21 @@
             </p>
           </div>
         </div>
-        <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
+        <div *ngFor="let virtue of virtues | listFilter : enabledValue : 'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
 
             <!-- if this virtue is enabled show this menu -->
             <span *ngIf="virtue.enabled" class="menu-options">
-              <a mat-button (click)="virtueStatus(virtue.id)">Disable</a>
+              <a mat-button (click)="virtueStatus(virtue.id, virtue.enabled)">Disable</a> |
+               <a mat-button [routerLink]="['duplicate',virtue.id]">Duplicate</a>
             </span>
 
             <!-- if this virtue is disabled show this menu -->
-            <span *ngIf="virtue.enabled==false" class="menu-options"><a mat-button (click)="virtueStatus(virtue.id)">Enable</a> | <a mat-button (click)="openDialog('virtue.id','delete','virtue')">Delete</a></span>
+            <span *ngIf="virtue.enabled==false" class="menu-options">
+              <a mat-button (click)="virtueStatus(virtue.id)">Enable</a> |
+              <a mat-button (click)="openDialog(virtue.id,'delete','virtue',virtue.name)">Delete</a>
+            </span>
           </div>
           <div class="table-data mui-col-md-3"><!-- virtue.vmTemplates[0].os -->
             <ul>

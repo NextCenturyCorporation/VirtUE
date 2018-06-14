@@ -32,6 +32,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
@@ -54,6 +55,8 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
+import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -61,9 +64,7 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * {@link ICloudManager} implementation that uses AWS EC2 and Cloud Formation to
@@ -126,7 +127,8 @@ public class AwsManager implements ICloudManager {
 		// different methods to get credentials.
 		credentialsProvider = new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(),
 				new SystemPropertiesCredentialsProvider(), new ProfileCredentialsProvider(VIRTUE_PROFILE),
-				new PropertiesFileCredentialsProvider("./aws.properties"));
+				new PropertiesFileCredentialsProvider("./aws.properties"),
+				new EC2ContainerCredentialsProviderWrapper());
 
 		try {
 			credentialsProvider.getCredentials();

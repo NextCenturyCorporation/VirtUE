@@ -1,7 +1,9 @@
 import { Injector, Injectable } from '@angular/core';
 import { AsyncPipe, JsonPipe } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 
+import 'rxjs/add/observable/throw';
+import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
@@ -18,7 +20,7 @@ const httpOptions = {
 
 export class VirtuesService {
 
-  private configUrl = 'admin/virtue/template';
+  private configUrl = 'admin/virtue/template/';
   // private restApi = './assets/json/virtue_list.json';
 
   constructor(
@@ -27,7 +29,7 @@ export class VirtuesService {
   ) {}
 
   getVirtues(baseUrl: string): Observable<Virtue[]> {
-    let src = `${baseUrl + this.configUrl}`;
+    let src = baseUrl + this.configUrl;
     return this.httpClient.get<Virtue[]>(src);
       // .pipe(
       //   tap(virtues => this.log(`fetched virtues`)),
@@ -36,38 +38,52 @@ export class VirtuesService {
   }
 
   public getVirtue(baseUrl: string, id: string): Observable<any> {
-    let url = `${baseUrl + this.configUrl}/${id}`;
+    let url = baseUrl + this.configUrl + id;
     return this.httpClient.get<Virtue>(url);
   }
 
   public createVirtue(baseUrl: string, virtueData: any): Observable<any> {
-    let url = `${baseUrl + this.configUrl}`;
-    if (virtueData) {
-      console.log(virtueData);
-      return this.httpClient.post(url, virtueData, httpOptions);
-    } else {
-      console.log('Sadness, there was a problem creating this virtue:');
-      console.log(virtueData);
-    }
-    // return this.http.post(url, virtueData);
-  }
-/**
-
-  public updateVirtue(id: string, virtue: Virtue): Observable<any> {
-    const src = `${this.restApi}/?id=${id}`;
-    return this.http.put(src, virtue);
+    console.log('createVirtue() => ' + baseUrl);
+    let url = baseUrl + this.configUrl;
+    return this.httpClient.post(url, virtueData, httpOptions);
   }
 
-  public deleteVirtue(virtue: Virtue): Observable<Virtue> {
-    return this.http.delete<Virtue>(`${this.jsondata}/${virtue.id}`);
+  public deleteVirtue(baseUrl: string, id: string) {
+    let url = baseUrl + this.configUrl + id;
+    // console.log('Deleting... ' + url);
+
+    return this.httpClient.delete(url).toPromise().then(
+      data => {
+        return true;
+      },
+      error => {
+      console.log(error.message);
+    });
   }
-*/
+
+  public updateVirtue(baseUrl: string, id: string, virtueData: any) {
+    let url = baseUrl + this.configUrl + id;
+    console.log(url);
+    return this.httpClient.put(url, virtueData, httpOptions)
+            .catch(this.errorHandler);
+  }
+
+  toggleVirtueStatus(baseUrl: string, id: string) {
+    let url = baseUrl + this.configUrl + id + '/toggle';
+    // console.log(url);
+    return this.httpClient.get(url);
+  }
+
   /**
    * Handle Http operation that failed.
    * Let the app continue.
    * @ param operation - name of the operation that failed
    * @ param result - optional value to return as the observable result
    */
+   errorHandler(error: HttpErrorResponse) {
+     return Observable.throw(error.message || 'Server Error');
+   }
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
 
@@ -75,7 +91,7 @@ export class VirtuesService {
       console.error(error); // log to console instead
 
       // better job of transforming error for user consumption
-      this.log(`${operation} failed: ${error.message}`);
+      this.log('operation} failed: ${error.message');
 
       // Let the app keep running by returning an empty result.
       return of(result as T);

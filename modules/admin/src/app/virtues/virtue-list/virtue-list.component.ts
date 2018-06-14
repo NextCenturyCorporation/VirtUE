@@ -1,15 +1,10 @@
-import { Component, Injector, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { filter } from 'rxjs/operators';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
-import { Virtue } from '../../shared/models/virtue.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
-import { Application } from '../../shared/models/application.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
@@ -23,42 +18,76 @@ import { ApplicationsService } from '../../shared/services/applications.service'
   styleUrls: ['./virtue-list.component.css']
 })
 
-export class VirtueListComponent implements OnInit, OnDestroy {
-  virtue: Virtue[];
+export class VirtueListComponent implements OnInit {
+  virtue: any;
   title = 'Virtues';
   virtues = [];
   vmList = [];
   appsList = [];
+  enabledValue: any = '*';
   baseUrl: string;
-  virtueTotal: number;
+  // virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
 
   constructor(
-    private route: ActivatedRoute,
+    private router: Router,
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
     public dialog: MatDialog,
-  ) {}
+  ) {
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
+      this.getBaseUrl(awsServer);
       this.getVirtues(awsServer);
       this.getApplications(awsServer);
       this.getVmList(awsServer);
     });
+    this.refreshData();
   }
 
-  ngOnDestroy() {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return next.handle(req);
+  }
+
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 1000);
+  }
+
+  getBaseUrl(url: string) {
+    this.baseUrl = url;
+  }
+
+  refreshData() {
+    setTimeout(() => {
+      this.router.navigated = false;
+      this.getVirtues(this.baseUrl);
+    }, 1000);
   }
 
   getVirtues(baseUrl: string) {
-    this.baseUrl = baseUrl;
-    this.virtuesService.getVirtues(baseUrl).subscribe( virtues => {
-      this.virtues = virtues;
+    this.virtuesService.getVirtues(baseUrl).subscribe( data => {
+      this.virtues = data;
     });
+  }
+
+  sortVirtues(sortBy: string) {
+    if (sortBy === 'all') {
+      this.enabledValue = '*';
+    } else if (sortBy === 'enabled') {
+      this.enabledValue = true;
+    } else if (sortBy === 'disabled') {
+      this.enabledValue = false;
+    }
   }
 
   getApplications(baseUrl: string) {
@@ -72,10 +101,6 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     this.vmService.getVmList(baseUrl).subscribe( vms => {
       this.vmList = vms;
     });
-  }
-
-  getAppsList(list: any[]) {
-    this.appsList = list;
   }
 
   getAppName(id: string) {
@@ -94,29 +119,38 @@ export class VirtueListComponent implements OnInit, OnDestroy {
     }
   }
 
-  openDialog(id, type, action, text): void {
+  virtueStatus(id: string) {
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
+      this.virtue = data;
+    });
+    this.resetRouter();
+    this.router.navigate(['/virtues']);
+  }
+
+  deleteVirtue(id: string) {
+    // console.log('deleting ' + id);
+    this.virtuesService.deleteVirtue(this.baseUrl, id);
+    this.refreshData();
+  }
+
+  openDialog(id: string, type: string, category: string, description: string): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {
-          dialogText: text,
-          dialogType: type
+          dialogType: type,
+          dialogCategory: category,
+          dialogId: id,
+          dialogDescription: description
         }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe(data => {
+      console.log('Dialog Emitter: ' + data);
+      if (type === 'delete') {
+        this.deleteVirtue(data);
+      }
     });
   }
-
-  virtueStatus(id: string, virtue: Virtue): void {
-    // console.log(id);
-    // const virtueObj = this.virtues.filter(data => id === virtue.id);
-    console.log(id);
-    // virtueObj.map((_, i) => {
-    //   virtueObj[i].enabled ? virtueObj[i].enabled = false : virtueObj[i].enabled = true;
-    // });
-  }
-
 }

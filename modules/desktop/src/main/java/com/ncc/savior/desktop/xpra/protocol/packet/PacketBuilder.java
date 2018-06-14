@@ -23,7 +23,7 @@ public class PacketBuilder {
 
 	public Packet buildPacket(List<Object> list) {
 		if (list.isEmpty()) {
-			logger.error("Recieved packed that was too small.  Size=0");
+			logger.error("Received packed that was too small.  Size=0");
 		}
 
 		PacketType type = PacketType.getPacketType((String) list.get(0));
@@ -47,6 +47,10 @@ public class PacketBuilder {
 			}
 		} else {
 			logger.warn("Unable to handle building packet.  No type for String=" + list.get(0));
+			for (int i = 0; i < list.size(); i++) {
+				Object o = list.get(i);
+				logger.debug("param" + i + ": " + o);
+			}
 		}
 		return new UnknownPacket(list);
 	}

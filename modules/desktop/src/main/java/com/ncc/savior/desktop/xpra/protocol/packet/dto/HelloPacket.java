@@ -120,6 +120,11 @@ public class HelloPacket extends Packet {
 		windowMap.put("raise", true);
 		windowMap.put("initiate-moveresize", true);
 		windowMap.put("resize-counter", true);
+
+		// map.put("clipboard.want_targets", true);
+		// map.put("clipboard.greedy", true);
+		// String[] clipboards = new String[] { "CLIPBOARD", "PRIMARY" };
+		// map.put("clipboard.selections", clipboards);
 		map.put("window", windowMap);
 
 		// map.put(XKBMAP_LAYOUT, "");

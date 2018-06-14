@@ -1,13 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { AddVmAppComponent } from '../add-vm-app/add-vm-app.component';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-
-import { ActiveClassDirective } from '../../shared/directives/active-class.directive';
-import { Application } from '../../shared/models/application.model';
 
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -15,8 +12,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 @Component({
   selector: 'app-vm-apps-list',
   providers: [ ApplicationsService, BaseUrlService ],
-  templateUrl: './vm-apps-list.component.html',
-  styleUrls: ['./vm-apps-list.component.css']
+  templateUrl: './vm-apps-list.component.html'
 })
 export class VmAppsListComponent implements OnInit {
 
@@ -25,7 +21,7 @@ export class VmAppsListComponent implements OnInit {
   apps = [];
 
   totalApps: number;
-  appsfilter: string;
+  // appsfilter: string;
 
   file: string;
   url: string;
