@@ -206,6 +206,22 @@ public class AdminResource {
 		}
 	}
 
+	@GET
+	@Produces("application/json")
+	@Path("virtualMachine/template/{id}/toggle")
+	public VirtualMachineTemplate toggleVirtualMachineTemplateEnabled(@PathParam("id") String templateId) {
+		try {
+			VirtualMachineTemplate virtualMachineTemplate = adminService
+					.toggleVirtualMachineTemplateEnabled(templateId);
+			return virtualMachineTemplate;
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
 	@POST
 	@Produces("application/json")
 	@Path("virtue/template")

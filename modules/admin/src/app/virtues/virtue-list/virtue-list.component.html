@@ -11,7 +11,12 @@
       <div class="mui-container-fluid" *ngIf="virtues.length > 0">
         <div class="mui-row virtues-filters">
           <div class="virtues-filter mui-col-md-12 padding-left-0">
-            All Virtues | <a href="#">Enabled Virtues</a> | <a href="#">Disabled Virtues</a>
+            <a *ngIf="enabledValue !== '*'" (click)="sortVirtues('all')">All Virtues</a>
+            <span *ngIf="enabledValue === '*'">All Virtues</span> |
+            <a *ngIf="enabledValue !== true" (click)="sortVirtues('enabled')">Enabled Virtues</a>
+            <span *ngIf="enabledValue === true">Enabled Virtues</span> |
+            <a *ngIf="enabledValue !== false" (click)="sortVirtues('disabled')">Disabled Virtues</a>
+            <span *ngIf="enabledValue === false">Disabled Virtues</span>
           </div>
         </div>
       </div>
@@ -31,7 +36,7 @@
             </p>
           </div>
         </div>
-        <div *ngFor="let virtue of virtues" class="mui-row table-row" appActiveClass>
+        <div *ngFor="let virtue of virtues | listFilter : enabledValue : 'enabled'" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
 

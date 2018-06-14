@@ -146,7 +146,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void addVmTemplate(VirtualMachineTemplate vmTemplate) {
-		Collection<ApplicationDefinition> apps = vmTemplate.getApplications();
+		Collection<ApplicationDefinition> apps = new HashSet<ApplicationDefinition>();
+		for (ApplicationDefinition app : vmTemplate.getApplications()) {
+			apps.add(app);
+		}
+
 		vmTemplate.setApplications(new HashSet<ApplicationDefinition>());
 		// Adding empty template and then adding applications (that are already in db)
 		// seems to work better for jpa
