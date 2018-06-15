@@ -28,6 +28,7 @@ import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class AppsTile {
+
 	private JPanel container;
 	private VirtueService virtueService;
 	private JScrollPane sp;

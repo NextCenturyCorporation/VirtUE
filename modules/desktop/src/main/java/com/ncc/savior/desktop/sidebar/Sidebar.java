@@ -53,7 +53,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private int height = 800;
 	private VirtueService virtueService;
 	private VBox virtuePane;
-	private Map<String, VirtueContainer> virtueIdToVmi;
+	private Map<String, VirtueContainer> virtueIdToVc;
 	private AuthorizationService authService;
 
 	private java.awt.Image statusImage;
@@ -78,7 +78,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors, String style) {
 		this.authService = authService;
-		this.virtueIdToVmi = new HashMap<String, VirtueContainer>();
+		this.virtueIdToVc = new HashMap<String, VirtueContainer>();
 		this.virtueService = virtueService;
 		// this.statusImage = new Image("images/loading.gif");
 		this.style = style;
@@ -165,12 +165,12 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
-		VirtueContainer vmi = virtueIdToVmi.get(virtue.getId());
+		VirtueContainer vmi = virtueIdToVc.get(virtue.getId());
 		if (vmi == null) {
-			vmi = virtueIdToVmi.get(virtue.getTemplateId());
+			vmi = virtueIdToVc.get(virtue.getTemplateId());
 			if (virtue.getId() != null) {
-				virtueIdToVmi.remove(virtue.getTemplateId());
-				virtueIdToVmi.put(virtue.getId(), vmi);
+				virtueIdToVc.remove(virtue.getTemplateId());
+				virtueIdToVc.put(virtue.getId(), vmi);
 			}
 		}
 		vmi.updateVirtue(virtue);
@@ -182,7 +182,7 @@ public class Sidebar implements VirtueChangeHandler {
 		VirtueContainer vc = new VirtueContainer(virtue, virtueService, statusImage, width, getNextColor(),
 				getNextColor(), sp);
 		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
-		virtueIdToVmi.put(id, vc);
+		virtueIdToVc.put(id, vc);
 		vt.addVirtue(vc);
 		al.addTiles(virtue, vc, fv);
 		at.addTiles(virtue, vc, fv);
@@ -191,9 +191,9 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
-		VirtueContainer vmi = virtueIdToVmi.remove(virtue.getId());
+		VirtueContainer vmi = virtueIdToVc.remove(virtue.getId());
 		if (vmi == null) {
-			vmi = virtueIdToVmi.remove(virtue.getTemplateId());
+			vmi = virtueIdToVc.remove(virtue.getTemplateId());
 		}
 		if (vmi != null) {
 			VirtueContainer finalVmi = vmi;
