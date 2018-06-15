@@ -41,6 +41,8 @@ public class WindowsRdp implements IRdpClient {
 		BufferedWriter writer = null;
 		Process p = null;
 		try {
+			boolean useRdpClipboardBridge = true;
+
 			deletePassword(app.getHostname());
 			sleep(500);
 			savePassword(app.getHostname(), app.getUserName(), app.getPrivateKey());
@@ -53,6 +55,8 @@ public class WindowsRdp implements IRdpClient {
 			writer.write("remoteapplicationmode:i:0");
 			writer.write(nl);
 			writer.write("prompt for credentials:i:0");
+			writer.write(nl);
+			writer.write("redirectclipboard:i:" + (useRdpClipboardBridge ? "1" : "0"));
 			writer.write(nl);
 			writer.close();
 			writer = null;

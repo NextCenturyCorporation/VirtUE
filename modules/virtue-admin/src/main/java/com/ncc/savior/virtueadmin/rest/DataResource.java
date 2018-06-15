@@ -166,16 +166,16 @@ public class DataResource {
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
 				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName);
-
+		vmBrowser.setSecurityTag("power");
 		VirtualMachineTemplate windowsBrowserVm = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Windows",
 				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName);
-
+		windowsBrowserVm.setSecurityTag("power");
 		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
 				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName);
-
+		vmAll.setSecurityTag("power");
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
 				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName);
-
+		vmMath.setSecurityTag("default");
 		Collection<ApplicationDefinition> appsDocEditor = new LinkedList<ApplicationDefinition>();
 		appsDocEditor.add(windowsWord);
 		appsDocEditor.add(windowsExcel);
@@ -231,7 +231,7 @@ public class DataResource {
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
 				OS.LINUX, allLinuxAmi, appsLibreOffice, linuxLoginUser, true, now, systemName);
-
+		vmLibreOffice.setSecurityTag("default");
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		// vmtsSingleAll.add(windowsVm);

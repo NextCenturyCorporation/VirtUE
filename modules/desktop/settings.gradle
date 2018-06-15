@@ -19,3 +19,5 @@ rootProject.name = 'desktop'
 
 include ':common'
 project(':common').projectDir = new File(settingsDir, '../common')
+include ':clipboard'
+project(':clipboard').projectDir = new File(settingsDir, '../clipboard')
