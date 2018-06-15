@@ -42,6 +42,9 @@ export class ListFilterPipe implements PipeTransform {
   }
 
   sortData (data: any, propertyName: string, filterDirection: string) {
+    if (propertyName === 'date') {
+      propertyName = 'lastModification';
+    }
     if (filterDirection === 'desc') {
       console.log('sorting list by desc order');
       data.sort((leftSide, rightSide): number => {
