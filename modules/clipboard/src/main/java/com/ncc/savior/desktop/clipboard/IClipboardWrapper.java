@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.clipboard;
 
+import java.io.Closeable;
 import java.util.Set;
 
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
@@ -9,7 +10,7 @@ import com.ncc.savior.desktop.clipboard.data.ClipboardData;
  *
  *
  */
-public interface IClipboardWrapper {
+public interface IClipboardWrapper extends Closeable {
 
 	/**
 	 * Sets the clipboard in delayed rendering mode. This mode is named after
@@ -48,6 +49,11 @@ public interface IClipboardWrapper {
 		 * @param formats
 		 */
 		void onClipboardChanged(Set<ClipboardFormat> formats);
+
+		/**
+		 * Called when clipboard implementation has been closed
+		 */
+		void closed();
 	}
 
 	/**

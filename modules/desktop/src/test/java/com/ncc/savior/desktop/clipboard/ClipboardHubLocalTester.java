@@ -81,6 +81,7 @@ public class ClipboardHubLocalTester {
 					IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
 					Thread.sleep(1000);
 
+					@SuppressWarnings({ "unused", "resource" }) // ignore due to test nature of this class
 					ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
 					while (true) {
 						// hold
@@ -104,10 +105,12 @@ public class ClipboardHubLocalTester {
 
 		private ArrayList<ClipboardFormat> renderFormats;
 		private IClipboardListener listener;
-		private ClipboardData data;
+		// private ClipboardData data;
 		private Thread thread;
 
 		private boolean owner = false;
+
+		protected boolean stopThread;
 
 		public TestClipboardWrapper() {
 			this.renderFormats = new ArrayList<ClipboardFormat>();
@@ -115,7 +118,7 @@ public class ClipboardHubLocalTester {
 
 				@Override
 				public void run() {
-					while (true) {
+					while (!stopThread) {
 						JavaUtil.sleepAndLogInterruption(10000);
 						logger.debug("test client sending copy");
 						copy();
@@ -160,12 +163,17 @@ public class ClipboardHubLocalTester {
 		@Override
 		public void setDelayedRenderData(ClipboardData clipboardData) {
 			logger.info("Pasted data: " + clipboardData);
-			this.data = clipboardData;
+			// this.data = clipboardData;
 		}
 
 		@Override
 		public ClipboardData getClipboardData(ClipboardFormat format) {
 			return new PlainTextClipboardData(new Date().toString());
+		}
+
+		@Override
+		public void close() throws IOException {
+			stopThread = true;
 		}
 
 	}
