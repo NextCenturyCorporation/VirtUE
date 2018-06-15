@@ -21,7 +21,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -414,8 +413,7 @@ public class AdminService {
 	}
 
 	public Set<String> getAllIconKeys() {
-		throw new NotImplementedException("not implemented");
-		// return templateManager.getAllIconKeys();
+		return templateManager.getAllIconKeys();
 	}
 
 	private VirtueUser verifyAndReturnUser() {

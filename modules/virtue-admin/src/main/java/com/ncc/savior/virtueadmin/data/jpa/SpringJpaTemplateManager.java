@@ -337,4 +337,14 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	public void removeIcon(String iconKey) {
 		iconRepo.deleteById(iconKey);
 	}
+
+	@Override
+	public Set<String> getAllIconKeys() {
+		Iterable<IconModel> itra = iconRepo.findAll();
+		Set<String> set = new HashSet<String>();
+		itra.forEach((IconModel im) -> {
+			set.add(im.getId());
+		});
+		return set;
+	}
 }

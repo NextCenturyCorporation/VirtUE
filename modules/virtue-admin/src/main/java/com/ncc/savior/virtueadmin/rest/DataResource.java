@@ -368,11 +368,13 @@ public class DataResource {
 	}
 
 	private void loadIcons() {
-		InputStream iconStream = DataResource.class.getClassLoader().getResourceAsStream("/icons/savior.png");
+		InputStream iconStream = DataResource.class.getClassLoader().getResourceAsStream("icons/savior.png");
 
 		try {
+			if (iconStream != null) {
 			byte[] bytes = IOUtils.toByteArray(iconStream);
 			templateManager.addIcon(AdminService.DEFAULT_ICON_KEY, bytes);
+			}
 		} catch (IOException e) {
 			logger.error("Failed to load default icon");
 		}
@@ -381,7 +383,7 @@ public class DataResource {
 	}
 
 	private void loadIconsFromIconsFolder() {
-		URL r = DataResource.class.getClassLoader().getResource("/icons");
+		URL r = DataResource.class.getClassLoader().getResource("icons");
 		try {
 			File iconDir = new File(r.toURI());
 			if (iconDir.exists() && iconDir.isDirectory()) {

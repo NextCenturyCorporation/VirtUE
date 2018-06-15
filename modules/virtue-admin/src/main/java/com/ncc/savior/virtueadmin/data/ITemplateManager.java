@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
@@ -161,5 +162,6 @@ public interface ITemplateManager {
 
 	IconModel getIcon(String iconKey);
 
+	Set<String> getAllIconKeys();
 
 }

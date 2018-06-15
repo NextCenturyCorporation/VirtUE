@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -150,6 +151,34 @@ public class AdminResource {
 		try {
 			IconModel iconModel = adminService.getIcon(iconKey);
 			return iconModel.getData();
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("icon")
+	public Set<String> getAllIconKeys() {
+		try {
+			Set<String> keys = adminService.getAllIconKeys();
+			return keys;
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@DELETE
+	@Path("icon/{iconKey}")
+	public void deleteIcon(@PathParam("iconKey") String iconKey) {
+		try {
+			adminService.deleteIcon(iconKey);
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception

@@ -374,20 +374,22 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	@Override
 	public void addIcon(String iconKey, byte[] bytes) {
-		// TODO Auto-generated method stub
-
+		throw new RuntimeException("not implemented");
 	}
 
 	@Override
 	public void removeIcon(String iconKey) {
-		// TODO Auto-generated method stub
-
+		throw new RuntimeException("not implemented");
 	}
 
 	@Override
 	public IconModel getIcon(String iconKey) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Set<String> getAllIconKeys() {
+		throw new RuntimeException("not implemented");
 	}
 
 }
