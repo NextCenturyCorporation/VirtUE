@@ -1,10 +1,11 @@
 package com.ncc.savior.desktop.clipboard;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 
-public interface IClipboardMessageSenderReceiver {
+public interface IClipboardMessageSenderReceiver extends Closeable {
 
 	/**
 	 * Should be called initially and returns the ID

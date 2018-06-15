@@ -81,19 +81,22 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 					logger.error("message lost due to null handler.  Message=" + msg);
 				}
 			} catch (IOException e) {
-				logger.error("Error trying to deserialize message", e);
-				onMessageError(e);
+				onMessageError("Error trying to deserialize message", e);
 			} catch (Throwable e) {
-				logger.error("Unknown error", e);
-				onMessageError(new IOException(e));
+				onMessageError("Unknown error", new IOException(e));
 			}
 		}
 	}
 
-	private void onMessageError(IOException e) {
-		stopReadThread = true;
-		handler.onMessageError(e);
-		valid = false;
+	private void onMessageError(String description, IOException e) {
+		if (!stopReadThread) {
+			handler.onMessageError(description, e);
+			try {
+				close();
+			} catch (IOException ioe) {
+				logger.warn("error closing " + this + ".", ioe);
+			}
+		}
 	}
 
 	@Override
@@ -147,4 +150,30 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		}
 	}
 
+	@Override
+	public void close() throws IOException {
+		stopReadThread = true;
+		valid = false;
+		serializer.close();
+		serializer = new IMessageSerializer() {
+
+			@Override
+			public void close() throws IOException {
+				// do nothing
+			}
+
+			@Override
+			public void serialize(IClipboardMessage message) throws IOException {
+				throw new RuntimeException("MessageTransmitter has been closed!");
+			}
+
+			@Override
+			public IClipboardMessage deserialize() throws IOException {
+				throw new RuntimeException("MessageTransmitter has been closed!");
+			}
+		};
+		if (handler != null) {
+			handler.closed();
+		}
+	}
 }

@@ -41,10 +41,12 @@ public class StandardInOutClipboardClient {
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
 			ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
 			client.waitUntilStopped();
-			System.exit(0);
+			client.close();
+
 		} catch (Throwable t) {
 			logger.error("App stopped by error", t);
 		}
+		System.exit(0);
 	}
 
 	private static void runTest() throws IOException {

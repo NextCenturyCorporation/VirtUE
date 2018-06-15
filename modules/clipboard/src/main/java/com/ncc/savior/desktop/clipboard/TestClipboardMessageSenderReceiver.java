@@ -69,4 +69,10 @@ public class TestClipboardMessageSenderReceiver implements IClipboardMessageSend
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+
+	}
 }

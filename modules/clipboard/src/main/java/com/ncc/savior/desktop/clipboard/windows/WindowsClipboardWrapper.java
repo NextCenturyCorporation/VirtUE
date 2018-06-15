@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.clipboard.windows;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -104,6 +105,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	private IClipboardListener clipboardListener;
 	private BlockingQueue<Runnable> runLaterQueue;
 	private Pointer data;
+	private Thread mainThread;
+	protected volatile boolean stopMainThread;
 
 	public WindowsClipboardWrapper(boolean takeClipboard) {
 		this.runLaterQueue = new LinkedBlockingQueue<Runnable>();
@@ -118,7 +121,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				wx.lpszClassName = className;
 				wx.lpfnWndProc = callback;
 
-				while (User32.INSTANCE.RegisterClassEx(wx).intValue() == 0) {
+				while (user32.RegisterClassEx(wx).intValue() == 0) {
 					WindowsError error = getLastError();
 					logger.error("Error registering class to window: " + error);
 				}
@@ -134,7 +137,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 					});
 				}
 				MSG msg = new WinUser.MSG();
-				while (true) {
+				while (!stopMainThread) {
 					// get all messages forever
 					boolean processedMessage = getMessage(msg);
 					if (!processedMessage) {
@@ -150,10 +153,16 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 						}
 					}
 				}
+				user32.CloseWindow(windowHandle);
+				windowHandle = null;
+				user32.UnregisterClass(className, Kernel32.INSTANCE.GetModuleHandle(null));
+				if (clipboardListener != null) {
+					clipboardListener.closed();
+				}
 			}
 		};
 
-		Thread mainThread = new Thread(mainRunnable, "Windows-clipboard-main");
+		mainThread = new Thread(mainRunnable, "Windows-clipboard-main");
 		mainThread.setDaemon(true);
 		mainThread.start();
 	}
@@ -216,7 +225,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				}
 			});
 		}
-		data.dump(0, 1);
 	}
 
 	@Override
@@ -231,6 +239,15 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			// with the data.
 			closeClipboard();
 		}
+	}
+
+	/**
+	 * Closing may not be finished when this call is returned. Clipboard listener
+	 * should wait for closed callback.
+	 */
+	@Override
+	public void close() throws IOException {
+		stopMainThread = true;
 	}
 
 	/**
@@ -275,7 +292,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * the moment because we are watching for the clipboard changed call.
 	 */
 	protected void onClipboardEmptied() {
-		logger.debug("clipboard was emptied by someone!");
 	}
 
 	/**
@@ -322,14 +338,14 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
-	private void closeClipboardIfOwner() {
-		HWND owner = user32.GetClipboardOwner();
-		if (windowHandle.equals(owner)) {
-			user32.CloseClipboard();
-		} else {
-			logger.warn("###Clipboard couldn't be closed because we are not owner!");
-		}
-	}
+	// private void closeClipboardIfOwner() {
+	// HWND owner = user32.GetClipboardOwner();
+	// if (windowHandle.equals(owner)) {
+	// user32.CloseClipboard();
+	// } else {
+	// logger.warn("###Clipboard couldn't be closed because we are not owner!");
+	// }
+	// }
 
 	private void writeNullToClipboard(ClipboardFormat format) {
 		user32.SetClipboardData(format.getWindows(), Pointer.NULL);

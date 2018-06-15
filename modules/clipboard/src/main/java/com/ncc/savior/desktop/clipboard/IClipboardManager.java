@@ -1,8 +1,7 @@
 package com.ncc.savior.desktop.clipboard;
 
-import java.io.Closeable;
+import java.io.IOException;
 
-import com.jcraft.jsch.JSchException;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 
 /**
@@ -13,14 +12,22 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
 public interface IClipboardManager {
 
 	/**
-	 * connects clipboard and returns an object that will close the connection and
-	 * release any resources from it.
+	 * connects clipboard and returns an id that can be used to close the
+	 * connection.
 	 * 
 	 * @param params
 	 * @param groupId
 	 * @return
-	 * @throws JSchException
+	 * @throws IOException
 	 */
-	Closeable connectClipboard(SshConnectionParameters params, String groupId) throws JSchException;
+	String connectClipboard(SshConnectionParameters params, String groupId) throws IOException;
+
+	/**
+	 * Closes the clipboard connection for the given clipboard Id
+	 * 
+	 * @param clipboardId
+	 * @throws IOException
+	 */
+	void closeConnection(String clipboardId) throws IOException;
 
 }

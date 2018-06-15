@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.virtues;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,7 +13,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.JSchException;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.rdp.IRdpClient;
@@ -70,7 +68,6 @@ public class VirtueService {
 		this.clipboardManager = clipboardManager;
 	}
 
-
 	/**
 	 * Starts a connection for a particularly {@link DesktopVirtueApplication} if
 	 * necessary. If there is one already, this function won't do anything.
@@ -91,7 +88,7 @@ public class VirtueService {
 
 	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
-		Closeable cc = null;
+		String clipboardId = null;
 		// for now we want to use the RDP clipboard bridge instead of our own app.
 		boolean userRdpClientClipboardBridge = true;
 		if (!userRdpClientClipboardBridge) {
@@ -99,19 +96,19 @@ public class VirtueService {
 				String key = app.getPrivateKey();
 				SshConnectionParameters params = getConnectionParams(app, key);
 				// For now user
-				cc = clipboardManager.connectClipboard(params, virtue.getId());
-			} catch (JSchException e) {
+				clipboardId = clipboardManager.connectClipboard(params, virtue.getId());
+			} catch (IOException e) {
 				logger.error("Failed to connect clipboard", e);
 			}
 		}
 		Process p = rdpClient.startRdp(app, virtue, color);
-		if (cc != null) {
-			Closeable clipboardCloseable = cc;
-
+		if (clipboardId != null) {
+			// making the variable effectively final
+			String cId = clipboardId;
 			Thread t = new Thread(() -> {
 				try {
 					p.waitFor();
-					clipboardCloseable.close();
+					clipboardManager.closeConnection(cId);
 				} catch (InterruptedException | IOException e) {
 					logger.error("Error tracking RDP connection and closing associated clipboard");
 				} finally {
@@ -140,7 +137,7 @@ public class VirtueService {
 					connectionManager.createXpraServerAndAddDisplayToParams(params);
 					logger.debug("connecting clipboard");
 					clipboardManager.connectClipboard(params, virtue.getId());
-				} catch (JSchException e) {
+				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.error("clipboard manager connection failed!", e);
 					// TODO alert user? allow user to try again?
