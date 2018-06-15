@@ -3,6 +3,7 @@ buildscript {
 		springBootVersion = '2.0.0.M7'
 		springSecurityVersion = '5.0.0.RELEASE'
         springDataVersion = '2.0.2.RELEASE'
+        jerseyVersion = '2.26'
 	}
 	
 	repositories {
@@ -71,6 +72,8 @@ dependencies {
     compile 'com.amazonaws:aws-java-sdk-route53' 
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
+    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: jerseyVersion
+    
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
 
     compile 'org.springframework:spring-context:5.0.2.RELEASE'
