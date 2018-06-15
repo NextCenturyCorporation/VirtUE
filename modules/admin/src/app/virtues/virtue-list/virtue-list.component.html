@@ -11,11 +11,11 @@
       <div class="mui-container-fluid" *ngIf="virtues.length > 0">
         <div class="mui-row virtues-filters">
           <div class="virtues-filter mui-col-md-12 padding-left-0">
-            <a *ngIf="sortValue !== '*'" (click)="sortVirtueColumns('enabled','*',sortBy)">All Virtues</a>
+            <a *ngIf="sortValue !== '*'" (click)="enabledVirtueList('enabled', '*', sortBy)">All Virtues</a>
             <span *ngIf="sortValue === '*'">All Virtues</span> |
-            <a *ngIf="sortValue !== true" (click)="sortVirtueColumns('enabled',true,sortBy)">Enabled Virtues</a>
+            <a *ngIf="sortValue !== true" (click)="enabledVirtueList('enabled', true, sortBy)">Enabled Virtues</a>
             <span *ngIf="sortValue === true">Enabled Virtues</span> |
-            <a *ngIf="sortValue !== false" (click)="sortVirtueColumns('enabled',false,sortBy)">Disabled Virtues</a>
+            <a *ngIf="sortValue !== false" (click)="enabledVirtueList('enabled', false, sortBy)">Disabled Virtues</a>
             <span *ngIf="sortValue === false">Disabled Virtues</span>
           </div>
         </div>
@@ -23,7 +23,7 @@
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
           <div class="table-header mui-col-md-2">
-            <a class="sortName" (click)="sortVirtueColumns('name',sortValue,sortBy)">Virtue Name
+            <a class="sortName" (click)="sortVirtueColumns('name',sortBy)">Virtue Name
               <span *ngIf="sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortBy === 'desc'" class="fa fa-sort-down"></span>
             </a>
@@ -32,7 +32,7 @@
           <div class="table-header mui-col-md-3">Apps</div>
           <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">
-            <a class="sortDate" (click)="sortVirtueColumns('date',sortValue,sortBy)">Date
+            <a class="sortDate" (click)="sortVirtueColumns('date',sortBy)">Date
               <span *ngIf="sortType=== 'date' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortType=== 'date' && sortBy === 'desc'" class="fa fa-sort-down"></span>
             </a>
@@ -46,7 +46,7 @@
             </p>
           </div>
         </div>
-        <div *ngFor="let virtue of virtues | listFilter : sortType : sortValue : sortBy" class="mui-row table-row" appActiveClass>
+        <div *ngFor="let virtue of virtues | listFilter : sortColumn : sortType : sortValue : sortBy" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
             <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
 

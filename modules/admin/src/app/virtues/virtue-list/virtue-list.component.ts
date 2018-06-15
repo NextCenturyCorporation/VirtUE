@@ -26,7 +26,8 @@ export class VirtueListComponent implements OnInit {
   appsList = [];
   baseUrl: string;
   // these are the default properties the list sorts by
-  sortType: string = 'name';
+  sortColumn: string = 'name';
+  sortType: string = 'enabled';
   sortValue: any = '*';
   sortBy: string = 'asc';
   defaultSort: string = 'name';
@@ -109,29 +110,29 @@ export class VirtueListComponent implements OnInit {
     }
   }
 
-  sortVirtueColumns(sortType: string, sortValue: any, sortBy: string) {
-    console.log('default sort: ' + this.defaultSort);
-
-    if (sortType === 'enabled' || sortType === 'name') {
-      this.sortType = sortType;
-      if (sortValue === '*') {
-        this.sortValue = '*';
-      } else if (sortValue === true) {
-        this.sortValue = true;
-      } else if (sortValue === false) {
-        this.sortValue = false;
-      }
-    } else if (sortType === 'date') {
-      this.sortType = sortType;
-      this.sortValue = sortValue;
-      this.sortBy = 'desc';
+  enabledVirtueList(sortType: string, enabledValue: any, sortBy) {
+    console.log('enabledVirtueList() => ' + enabledValue);
+    if (this.sortValue !== enabledValue) {
+      this.sortBy = 'asc';
+    } else {
+      this.sortListBy(sortBy);
     }
-    if (this.sortType === sortType) {
+    this.sortValue = enabledValue;
+    this.sortType = sortType;
+  }
+
+  sortVirtueColumns(sortColumn: string, sortBy: string) {
+    console.log('default sort: ' + this.defaultSort);
+    if (this.sortColumn === sortColumn) {
       this.sortListBy(sortBy);
     } else {
       this.sortBy = 'asc';
+      if (sortColumn === 'name') {
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'date') {
+        this.sortColumn = sortColumn;
+      }
     }
-    console.log('new sortBy: ' + sortBy);
   }
 
   sortListBy(sortDirection: string) {
