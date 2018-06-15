@@ -22,7 +22,11 @@ export class VmListComponent implements OnInit {
 
   baseUrl: string;
   vm: any;
-  vmSortDirection: string = 'asc';
+  // these are the default properties the list sorts by
+  sortColumn: string = 'name';
+  sortType: string = 'enabled';
+  sortValue: any = '*';
+  sortBy: string = 'asc';
   vmSortType: string = 'enabled'; // This is the default VM datatype
   totalVms: number;
 
@@ -65,6 +69,64 @@ export class VmListComponent implements OnInit {
       this.vms = vmlist;
       this.totalVms = vmlist.length;
     });
+  this.sortVms(this.vms);
+  }
+
+  sortVms(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.vms.sort((leftSide, rightSide): number => {
+        if (leftSide['name'] < rightSide['name']) {
+          return -1;
+        }
+        if (leftSide['name'] > rightSide['name']) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      this.vms.sort((leftSide, rightSide): number => {
+        if (leftSide['name'] < rightSide['name']) {
+          return 1;
+        }
+        if (leftSide['name'] > rightSide['name']) {
+          return -1;
+        }
+        return 0;
+      });
+    }
+  }
+
+  enabledVmList(sortType: string, enabledValue: any, sortBy) {
+    console.log('enabledVirtueList() => ' + enabledValue);
+    if (this.sortValue !== enabledValue) {
+      this.sortBy = 'asc';
+    } else {
+      this.sortListBy(sortBy);
+    }
+    this.sortValue = enabledValue;
+    this.sortType = sortType;
+  }
+
+  sortVmColumns(sortColumn: string, sortBy: string) {
+    if (this.sortColumn === sortColumn) {
+      this.sortListBy(sortBy);
+    } else {
+      if (sortColumn === 'name') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'date') {
+        this.sortColumn = sortColumn;
+        this.sortBy = 'desc';
+      }
+    }
+  }
+
+  sortListBy(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.sortBy = 'desc';
+    } else {
+      this.sortBy = 'asc';
+    }
   }
 
   getAppsList(baseUrl: string) {
@@ -80,12 +142,6 @@ export class VmListComponent implements OnInit {
         return app.name;
       }
     }
-  }
-
-  listFilter(filterType: string, filterValue: any) {
-    this.filterValue = filterValue;
-    this.vmSortType = filterType;
-    this.totalVms = this.vms.length;
   }
 
   vmStatus(id: string) {

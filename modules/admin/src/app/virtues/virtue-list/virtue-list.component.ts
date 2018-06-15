@@ -30,7 +30,6 @@ export class VirtueListComponent implements OnInit {
   sortType: string = 'enabled';
   sortValue: any = '*';
   sortBy: string = 'asc';
-  defaultSort: string = 'name';
   // virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
 
