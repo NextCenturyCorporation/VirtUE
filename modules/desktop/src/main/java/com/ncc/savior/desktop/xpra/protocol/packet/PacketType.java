@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra.protocol.packet;
 
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.ClipboardTokenPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CloseWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
@@ -66,6 +67,7 @@ public enum PacketType {
     RPC_REPLY("rpc-reply"),
     CONTROL("control"),
     INFO_RESPONSE("info-response"),
+    CLIPBOARD_TOKEN("clipboard-token", ClipboardTokenPacket.class),
 	// Packets that are sent by the Client to the Server
     SET_KEYBOARD_SYNC_ENABLED("set-keyboard-sync-enabled"),
     SET_CURSORS("set-cursors"),

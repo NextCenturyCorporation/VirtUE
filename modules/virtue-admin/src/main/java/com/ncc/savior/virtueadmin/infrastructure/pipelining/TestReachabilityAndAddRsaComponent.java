@@ -6,11 +6,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Component of an {@link IUpdatePipeline} that will test for reachability via

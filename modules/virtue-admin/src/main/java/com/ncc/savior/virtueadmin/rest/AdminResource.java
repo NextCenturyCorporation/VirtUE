@@ -20,6 +20,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -29,7 +30,6 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
@@ -198,6 +198,22 @@ public class AdminResource {
 	public void deleteVmTemplate(@PathParam("id") String templateId) {
 		try {
 			adminService.deleteVmTemplate(templateId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("virtualMachine/template/{id}/toggle")
+	public VirtualMachineTemplate toggleVirtualMachineTemplateEnabled(@PathParam("id") String templateId) {
+		try {
+			VirtualMachineTemplate virtualMachineTemplate = adminService
+					.toggleVirtualMachineTemplateEnabled(templateId);
+			return virtualMachineTemplate;
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception

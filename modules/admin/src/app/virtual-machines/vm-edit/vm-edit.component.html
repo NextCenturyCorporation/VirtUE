@@ -1,6 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h2 class="title">Build Virtual Machine</h2>
+    <h2 class="titlebar-title">Build Virtual Machine</h2>
+    <button (click)="vmStatus(vmEnabled)" class="titlebar-button">{{ vmEnabled ? 'Disable VM' : 'Enable VM' }}</button>
   </div>
 
   <div id="content-main" class="border-top">
@@ -82,7 +83,6 @@
       <div class="mui-row">
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Build Another VM</span>
           <button class="button-submit" type="submit" (click)="buildVirtualMachine(vmData.id,vmName.value,selectedOS,securityLevel)">Update Template</button>
           <button class="button-cancel" type="cancel" (click)="cancel()">Cancel</button>
         </div>

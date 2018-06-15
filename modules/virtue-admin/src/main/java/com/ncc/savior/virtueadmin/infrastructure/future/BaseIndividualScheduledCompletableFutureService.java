@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.virtueadmin.util.SaviorException;
+import com.ncc.savior.util.SaviorException;
 
 /**
  * Implementation of {@link BaseCompletableFutureService} where multiple
