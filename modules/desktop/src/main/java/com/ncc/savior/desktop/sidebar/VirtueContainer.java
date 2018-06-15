@@ -13,8 +13,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -34,15 +32,6 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.image.ImageView;
-import javafx.stage.WindowEvent;
-
 /**
  * This represents a Virtue in the sidebar menu. It controls the sub menu when
  * the virtue is selected.
@@ -52,16 +41,7 @@ import javafx.stage.WindowEvent;
 public class VirtueContainer {
 	private static Logger logger = LoggerFactory.getLogger(VirtueContainer.class);
 	private DesktopVirtue virtue;
-	private Node node;
-	private ContextMenu contextMenu;
-	private Label label;
-	protected boolean showingMenu;
 	private VirtueService virtueService;
-	private ImageView statusSpinner;
-	private Image statusImage;
-	private RgbColor color;
-	private Button startButton;
-	private Button stopButton;
 
 	private String headerTitle;
 	private VirtueState status;
@@ -72,25 +52,23 @@ public class VirtueContainer {
 	private JScrollPane sp;
 	private Color bodyColor;
 
+	private static int numRows = 0;
+	private int row;
+
 	private HashMap<String, JPanel> tiles;
 
-	public VirtueContainer(DesktopVirtue virtue, VirtueService virtueService, Image statusImage, int width,
+	public VirtueContainer(DesktopVirtue virtue, VirtueService virtueService,
 			Color headerColor, Color bodyColor, JScrollPane sp) throws IOException {
 		this.virtueService = virtueService;
 		this.virtue = virtue;
-		this.statusImage = statusImage;
 		this.tiles = new HashMap<String, JPanel>();
 		this.headerTitle = virtue.getName();
 		this.status = virtue.getVirtueState();
 		this.sp = sp;
 		this.bodyColor = bodyColor;
-		createContainer(virtue, headerColor, Color.GRAY);
+		createContainer(virtue, headerColor, Color.GRAY, numRows);
 		addTiles();
 
-		int preferredHeight = container.getPreferredSize().height;
-		// container.setPreferredSize(new Dimension(50, preferredHeight));
-		// contextMenu = createContextMenu();
-		// addEventHandlers();
 		logger.debug("loaded");
 	}
 
@@ -116,7 +94,7 @@ public class VirtueContainer {
 
 			tile.addMouseListener(new MouseAdapter() {
 				@Override
-				public void mouseClicked(MouseEvent arg0) {
+				public void mouseClicked(MouseEvent event) {
 					JPopupMenu pm = new JPopupMenu();
 					JMenuItem mi1 = new JMenuItem("Yes");
 					JMenuItem mi2 = new JMenuItem("No");
@@ -155,7 +133,8 @@ public class VirtueContainer {
 		}
 	}
 
-	private void createContainer(DesktopVirtue dv, Color headerColor, Color bodyColor) {
+	private void createContainer(DesktopVirtue dv, Color headerColor, Color bodyColor, int row) {
+		this.row = row;
 		this.container = new JPanel();
 		container.setLayout(new BorderLayout(0, 0));
 
@@ -199,7 +178,7 @@ public class VirtueContainer {
 
 		optionsLabel.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				JPopupMenu pm = new JPopupMenu();
 				JMenuItem mi1 = new JMenuItem("Stop");
 
@@ -228,161 +207,32 @@ public class VirtueContainer {
 		container.add(tileContainer, BorderLayout.CENTER);
 		tileContainer.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 		tileContainer.setBorder(new EmptyBorder(10, 25, 10, 25));
+
+		numRows++;
+	}
+
+	public int getRow() {
+		return row;
+	}
+
+	public void setRow(int row) {
+		this.row = row;
+	}
+
+	public static void resetRows() {
+		numRows = 0;
 	}
 
 	public JPanel getContainer() {
 		return container;
 	}
 
+	public DesktopVirtue getVirtue() {
+		return virtue;
+	}
+
 	public String getName() {
 		return headerTitle;
-	}
-
-	// //
-	// // @Override
-	// // public void handle(ActionEvent event) {
-	// // try {
-	// // virtueService.startVirtue(virtue);
-	// // virtue.setVirtueState(VirtueState.LAUNCHING);
-	// // updateVirtue(virtue);
-	// // } catch (IOException e) {
-	// // String msg = "Error attempting to start virtue=" + virtue;
-	// // logger.error(msg, e);
-	// // }
-	// // }
-	// // });
-	// // stopButton.setOnAction(new EventHandler<ActionEvent>() {
-	// //
-	// // @Override
-	// // public void handle(ActionEvent event) {
-	// // try {
-	// // virtueService.stopVirtue(virtue);
-	// // virtue.setVirtueState(VirtueState.STOPPING);
-	// // updateVirtue(virtue);
-	// // } catch (IOException e) {
-	// // String msg = "Error attempting to stop virtue=" + virtue;
-	// // logger.error(msg, e);
-	// // }
-	// // }
-	// // });
-	//
-	// pane.getChildren().add(startButton);
-	// pane.getChildren().add(stopButton);
-	//
-	// return pane;
-	// }
-
-	private String getLabel(DesktopVirtue virtue) {
-		String name = virtue.getName();
-		if (virtue.getId() != null) {
-			name = name + " (" + virtue.getVirtueState() + ")";
-		}
-		return name;
-	}
-
-	private ContextMenu createContextMenu() {
-		ContextMenu menu = new ContextMenu();
-		for (ApplicationDefinition app : virtue.getApps().values()) {
-			// URI uri = null;// TODO fix icon, app.getIconUri();
-			// Image appImage = null;
-			// if (uri != null) {
-			// try {
-			// appImage = new Image(uri.toURL().openStream());
-			// } catch (Exception e) {
-			//
-			// }
-			// }
-			// if (appImage == null) {
-			// try {
-			// appImage = new Image(app.getIconLocation());
-			// } catch (IllegalArgumentException e) {
-			//
-			// }
-			// }
-			MenuItem menuItem = null;
-			// if (appImage == null) {
-			menuItem = new MenuItem(app.getName());
-			// }
-			// else {
-			// ImageView iv = new ImageView(appImage);
-			// iv.setFitWidth(24);
-			// iv.setFitHeight(24);
-			// menuItem = new MenuItem(app.getName(), iv);
-			// }
-			// menuItem.setOnAction(new EventHandler<ActionEvent>() {
-			// @Override
-			// public void handle(ActionEvent event) {
-			// Thread thread = new Thread(new Runnable() {
-			// @Override
-			// public void run() {
-			// try {
-			// statusSpinner.setImage(statusImage);
-			// // statusSpinner.setVisible(true);
-			// virtueService.startApplication(virtue, app, color);
-			// // statusSpinner.setVisible(false);
-			// } catch (IOException e) {
-			// logger.error("Error starting " + app.getName(), e);
-			// Platform.runLater(new Runnable() {
-			// @Override
-			// public void run() {
-			// statusSpinner.setVisible(false);
-			// Alert alert = new Alert(AlertType.ERROR);
-			// alert.setTitle("Error starting " + app.getName());
-			// alert.setHeaderText("Error starting '" + app.getName() + "'");
-			//
-			// String text = stacktraceToString(e);
-			// alert.setContentText(text);
-			// alert.showAndWait();
-			// }
-			// });
-			// }
-			// }
-			//
-			// });
-			// thread.setDaemon(true);
-			// thread.start();
-			// }
-			// });
-			menu.getItems().add(menuItem);
-		}
-
-		menu.setOnShown(new EventHandler<WindowEvent>() {
-			@Override
-			public void handle(WindowEvent event) {
-				showingMenu = true;
-			}
-		});
-		menu.setOnHidden(new EventHandler<WindowEvent>() {
-			@Override
-			public void handle(WindowEvent event) {
-				showingMenu = false;
-			}
-		});
-		// contextMenu.seton
-		// pane.setAlignment(Pos.CENTER);
-		// pane.setPrefWidth(width);
-		// pane.setMinHeight(label.getHeight());
-		return menu;
-	}
-
-	private String stacktraceToString(IOException e) {
-		String text;
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		e.printStackTrace(pw);
-		text = sw.toString(); // stack trace as a string
-		return text;
-	}
-
-	public Node getNode() {
-		return node;
-	}
-
-	private void setStartStopButtonStatus(DesktopVirtue virtue) {
-		boolean startable = VirtueService.startableVirtueStates.contains(virtue.getVirtueState());
-		boolean stoppable = VirtueService.stopableVirtueStates.contains(virtue.getVirtueState());
-		startButton.setDisable(!startable);
-		stopButton.setDisable(!stoppable);
 	}
 
 	public void removeVirtue(String name) {
@@ -398,7 +248,5 @@ public class VirtueContainer {
 		} else {
 			tileContainer.setBackground(Color.GRAY);
 		}
-		// this.status = virtue.getVirtueState();
-		// this.tiles.get(virtue.getName()).getComponent(1);
 	}
 }

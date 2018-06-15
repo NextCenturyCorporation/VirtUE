@@ -18,6 +18,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  * This class should be correctly implemented at some point to provide a second
@@ -26,6 +29,9 @@ import javax.swing.border.LineBorder;
  */
 
 public class VirtueList {
+
+	private static final Logger logger = LoggerFactory.getLogger(VirtueList.class);
+
 	private JPanel container;
 	public static boolean dropDown = false;
 
@@ -69,7 +75,7 @@ public class VirtueList {
 
 		tile.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				if (!dropDown) {
 					dropDown = true;
 					try {
@@ -77,7 +83,7 @@ public class VirtueList {
 							addTile(i.toString(), headerContainer);
 						}
 					} catch (IOException e) {
-						e.printStackTrace();
+						logger.error("dropdown error");
 					}
 					headerContainer.validate();
 					headerContainer.repaint();

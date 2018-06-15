@@ -18,6 +18,12 @@ import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
 
+/**
+ *
+ * This class provides functionality for retrieving and updating virtues
+ *
+ */
+
 public class SidebarController {
 	private static final Logger logger = LoggerFactory.getLogger(SidebarController.class);
 	private VirtueService virtueService;
@@ -192,21 +198,6 @@ public class SidebarController {
 			nindex++;
 		}
 	}
-
-	// private boolean detectStatusChange(DesktopVirtue cv, DesktopVirtue nv) {
-	// VirtueState cs = cv.getStatus();
-	// VirtueState ns = nv.getStatus();
-	// if (cs == null) {
-	// if (ns == null) {
-	// return false;
-	// } else {
-	// return !ns.equals(cs);
-	// }
-	// } else {
-	// return !cs.equals(ns);
-	// }
-	//
-	// }
 
 	protected void reportRemovedVirtue(DesktopVirtue virtue) {
 		changeHandler.removeVirtue(virtue);

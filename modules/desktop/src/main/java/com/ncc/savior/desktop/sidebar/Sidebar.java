@@ -37,8 +37,6 @@ import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
-import javafx.scene.layout.VBox;
-
 /**
  * Class to start the utility sidebar of the Savior application
  *
@@ -46,18 +44,10 @@ import javafx.scene.layout.VBox;
  */
 public class Sidebar implements VirtueChangeHandler {
 	private static final Logger logger = LoggerFactory.getLogger(Sidebar.class);
-	private static final int ICON_SIZE = 32;
-	private boolean debug = false;
 
-	private int width = 300;
-	private int height = 800;
 	private VirtueService virtueService;
-	private VBox virtuePane;
 	private Map<String, VirtueContainer> virtueIdToVc;
 	private AuthorizationService authService;
-
-	private java.awt.Image statusImage;
-	private String style;
 
 	private Iterator<Color> colorItr;
 	private ArrayList<Color> colorList;
@@ -80,8 +70,6 @@ public class Sidebar implements VirtueChangeHandler {
 		this.authService = authService;
 		this.virtueIdToVc = new HashMap<String, VirtueContainer>();
 		this.virtueService = virtueService;
-		// this.statusImage = new Image("images/loading.gif");
-		this.style = style;
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
@@ -179,11 +167,11 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtue(DesktopVirtue virtue) throws IOException {
-		VirtueContainer vc = new VirtueContainer(virtue, virtueService, statusImage, width, getNextColor(),
+		VirtueContainer vc = new VirtueContainer(virtue, virtueService, getNextColor(),
 				getNextColor(), sp);
 		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 		virtueIdToVc.put(id, vc);
-		vt.addVirtue(vc);
+		vt.addVirtueToRow(virtue, vc, vc.getRow());
 		al.addTiles(virtue, vc, fv);
 		at.addTiles(virtue, vc, fv);
 		setInitialViewPort();
@@ -196,6 +184,10 @@ public class Sidebar implements VirtueChangeHandler {
 			vmi = virtueIdToVc.remove(virtue.getTemplateId());
 		}
 		if (vmi != null) {
+			at.removeVirtue(virtue);
+			al.removeVirtue(virtue);
+			vt.removeVirtue(virtue);
+
 			VirtueContainer finalVmi = vmi;
 			finalVmi.removeVirtue(virtue.getName());
 		}
@@ -217,7 +209,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.al = new AppsList(virtueService, sp);
 		this.vt = new VirtueTile();
 		this.vl = new VirtueList();
-		this.fv = new FavoritesView(sp);
+		this.fv = new FavoritesView(virtueService, sp);
 		desktopContainer.setLayout(new BorderLayout(0, 0));
 
 		applicationsOpen = true;
@@ -397,7 +389,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		tileView.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				if (!tileViewOpen) {
 					tileViewOpen = true;
 					favoritesViewOpen = false;
@@ -416,7 +408,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		listView.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				if (!listViewOpen) {
 					listViewOpen = true;
 					tileViewOpen = false;
@@ -435,7 +427,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		favoritesView.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				if (!favoritesViewOpen) {
 					favoritesViewOpen = true;
 					tileViewOpen = false;
@@ -452,7 +444,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		applications.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				if (!applicationsOpen) {
 					tileViewOpen = true;
 					favoritesViewOpen = false;
@@ -470,7 +462,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		virtues.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				if (applicationsOpen) {
 					applicationsOpen = false;
 					tileLabel.setIcon(activeTileIcon);
@@ -486,12 +478,13 @@ public class Sidebar implements VirtueChangeHandler {
 
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				authService.logout();
 				try {
 					startLogin();
 				} catch (IOException e) {
-					e.printStackTrace();
+					String msg = "Error attempting to logout";
+					logger.error(msg, e);
 				}
 			}
 		});

@@ -22,10 +22,21 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 
+/**
+ *
+ * This is the initial login page for the application
+ *
+ */
+
 public class LoginPage {
+	private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
+
 	private JPanel container;
 	private AuthorizationService authService;
 	private Set<ILoginEventListener> loginListeners;
@@ -46,6 +57,7 @@ public class LoginPage {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
 		c.gridy = 0;
+		c.weighty = .5;
 		c.insets = new Insets(30, 0, 0, 0);
 
 		ImageIcon saviorIcon = new ImageIcon(LoginPage.class.getResource("/images/saviorLogo.png"));
@@ -62,6 +74,7 @@ public class LoginPage {
 		c.weightx = 0.5;
 		c.gridx = 0;
 		c.gridy = 1;
+		c.weighty = 0.0;
 		JLabel header1 = new JLabel("Good morning.");
 		header1.setFont(new Font("Tahoma", Font.PLAIN, 22));
 		header1.setHorizontalAlignment(SwingConstants.CENTER);
@@ -156,13 +169,13 @@ public class LoginPage {
 
 		loginContainer.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mouseClicked(MouseEvent event) {
 				String username = textField.getText();
 				String password1 = password.getName();
 				try {
 					doLogin(domain, username, password1);
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Login error");
 				}
 			}
 		});

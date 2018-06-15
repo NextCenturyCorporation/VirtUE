@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -23,26 +22,29 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.VirtueState;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
-public class FavoritesView {
-	private JPanel view;
-	private JScrollPane sp;
-	private HashMap<String, JPanel> favorites;
+public class FavoritesView extends AbstractAppsView {
 
-	public FavoritesView(JScrollPane sp) throws IOException {
-		this.view = new JPanel();
-		this.sp = sp;
-		this.favorites = new HashMap<String, JPanel>();
-		view.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
+	private static final Logger logger = LoggerFactory.getLogger(FavoritesView.class);
 
-		view.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
-		view.validate();
-		view.repaint();
+	public FavoritesView(VirtueService vs, JScrollPane sp) throws IOException {
+		super(vs, sp);
+		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
+
+		container.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
+		container.validate();
+		container.repaint();
 	}
 
-	public void addFavorite(ApplicationDefinition ad) throws IOException {
-		if (favorites.get(ad.getName()) == null) {
+	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueContainer vc) throws IOException {
+		if (tiles.get(ad.getName()) == null) {
 			JPanel tile = new JPanel();
 			tile.setPreferredSize(new Dimension(90, 90));
 			tile.setBackground(Color.WHITE);
@@ -61,24 +63,38 @@ public class FavoritesView {
 			tile.add(appName, BorderLayout.SOUTH);
 			tile.setSize(0, 40);
 
-			addListener(tile, ad.getName());
+			addListener(tile, vc, virtue, ad);
 
-			view.validate();
-			view.repaint();
-			view.add(tile);
-			favorites.put(ad.getName(), tile);
+			container.validate();
+			container.repaint();
+			container.add(tile);
+			tiles.put(ad.getName(), tile);
 		}
 	}
 
-	public void addListener(JPanel tile, String name) {
+	public void addListener(JPanel tile, VirtueContainer vc, DesktopVirtue virtue, ApplicationDefinition ad) {
 		tile.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if (SwingUtilities.isLeftMouseButton(arg0)) {
+			public void mouseClicked(MouseEvent event) {
+				if (SwingUtilities.isLeftMouseButton(event)) {
 					JPopupMenu pm = new JPopupMenu();
 					JMenuItem mi1 = new JMenuItem("Yes");
 					JMenuItem mi2 = new JMenuItem("No");
-					pm.add(new JLabel("Would you like to start a " + name + " application?"));
+					pm.add(new JLabel("Would you like to start a " + ad.getName() + " application?"));
+
+					mi1.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent evt) {
+							try {
+								virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
+								virtue.setVirtueState(VirtueState.LAUNCHING);
+								vc.updateVirtue(virtue);
+							} catch (IOException e) {
+								String msg = "Error attempting to start a " + ad.getName() + " application";
+								logger.error(msg, e);
+							}
+						}
+					});
 
 					pm.setPopupSize(415, 75);
 					pm.add(mi1);
@@ -88,15 +104,15 @@ public class FavoritesView {
 					JPopupMenu pm = new JPopupMenu();
 					JMenuItem mi1 = new JMenuItem("Yes");
 					JMenuItem mi2 = new JMenuItem("No");
-					pm.add(new JLabel("Would you like to unfavorite the " + name + " application?"));
+					pm.add(new JLabel("Would you like to unfavorite the " + ad.getName() + " application?"));
 
 					mi1.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent evt) {
-							view.remove(favorites.get(name));
-							view.validate();
-							view.repaint();
-							favorites.remove(name);
+							container.remove(tiles.get(ad.getName()));
+							container.validate();
+							container.repaint();
+							tiles.remove(ad.getName());
 						}
 					});
 
@@ -110,6 +126,6 @@ public class FavoritesView {
 	}
 
 	public JPanel getView() {
-		return view;
+		return container;
 	}
 }

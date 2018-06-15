@@ -48,7 +48,6 @@ public class SidebarApplication {
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization, loginUrl,
 				logoutUrl);
-		// authService.login("dummy", "", null); // bypassing login
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager;
 		if (swing) {

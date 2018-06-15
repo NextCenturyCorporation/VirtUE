@@ -4,34 +4,61 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.swing.JPanel;
 
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
+
+/**
+ * This is the virtue tile component that can be set as the view to the sidebar
+ * scrollPane. It contains multiple virtueContainers
+ *
+ */
+
 public class VirtueTile {
 	private JPanel container;
-	private static int row = 0;
+	private HashMap<String, VirtueContainer> virtues;
 
 	public VirtueTile() throws IOException {
 		this.container = new JPanel();
+		this.virtues = new HashMap<String, VirtueContainer>();
 		GridBagLayout gbl = new GridBagLayout();
 		gbl.columnWidths = new int[] { 455, 0 };
 		gbl.rowHeights = new int[] { 100, 100, 0 };
 		gbl.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
 		gbl.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		container.setLayout(gbl);
-		row = 0;
+		VirtueContainer.resetRows();
 	}
 
-	public void addVirtue(VirtueContainer panel) {
+	public void removeVirtue(DesktopVirtue virtue) {
+		VirtueContainer removedVc = virtues.get(virtue.getName());
+		int removedRow = removedVc.getRow();
+		container.remove(removedVc.getContainer());
+		virtues.remove(virtue.getName());
+
+		for (VirtueContainer vc : virtues.values()) {
+			if (vc.getRow() > removedRow) {
+				container.remove(vc.getContainer());
+				virtues.get(vc.getName()).setRow(vc.getRow() - 1);
+				addVirtueToRow(vc.getVirtue(), vc, vc.getRow());
+				container.validate();
+				container.repaint();
+			}
+		}
+	}
+
+	public void addVirtueToRow(DesktopVirtue virtue, VirtueContainer vc, int row) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(0, 0, 10, 0);
 		gbc.weightx = 1.0;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = row;
-		container.add(panel.getContainer(), gbc);
+		container.add(vc.getContainer(), gbc);
 
-		row++;
+		virtues.put(virtue.getName(), vc);
 	}
 
 	public JPanel getContainer() {
