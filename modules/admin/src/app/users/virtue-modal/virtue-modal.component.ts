@@ -46,11 +46,13 @@ export class VirtueModalComponent implements OnInit {
       this.getVirtues(awsServer);
       this.getApps(awsServer);
     });
+    if (this.storedVirtues.length > 0) {
+      this.selVirtues = this.storedVirtues;
+    }
   }
 
   getBaseUrl(url: string) {
     this.baseUrl = url;
-    // console.log('getBaseUrl() => ' + this.baseUrl);
   }
 
   getVirtues(baseUrl: string) {
@@ -101,12 +103,9 @@ export class VirtueModalComponent implements OnInit {
   }
 
   onAddVirtues(): void {
-    // if (this.storedVirtues.length > 0) {
-    //   this.selVmsList = this.storedVirtues;
-    // }
     this.addVirtues.emit(this.selVirtues);
-    console.log('Selected Virtues: ');
-    console.log(this.selVirtues);
+    // console.log('Selected Virtues: ');
+    // console.log(this.selVirtues);
     this.clearList();
     this.dialogRef.close();
   }

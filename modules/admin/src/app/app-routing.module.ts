@@ -6,6 +6,7 @@ import { ConfigComponent } from './config/config.component';
 import { UsersComponent } from './users/users.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { AddUserComponent } from './users/add-user/add-user.component';
+import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.component';
 import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { VirtuesComponent } from './virtues/virtues.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
@@ -30,7 +31,8 @@ const routes: Routes = [
   { path: 'users', component: UsersComponent, data: {breadcrumb: 'Users'}, children: [
     { path: '', component:  UserListComponent },
     { path: 'add', component: AddUserComponent, data: {breadcrumb: 'Add User Account'} },
-    { path: 'edit/:id', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} }
+    { path: 'edit/:id', component: EditUserComponent, data: {breadcrumb: 'Edit User Account'} },
+    { path: 'duplicate/:id', component: DuplicateUserComponent, data: {breadcrumb: 'Duplicate User Account'} }
   ] },
   { path: 'vm-apps', component: VmAppsComponent, data: {breadcrumb: 'Applications'}, children: [
     { path: '', component: VmAppsListComponent },

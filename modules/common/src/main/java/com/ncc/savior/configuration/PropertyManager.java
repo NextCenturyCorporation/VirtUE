@@ -40,6 +40,7 @@ public class PropertyManager {
 	public static final String PROPERTY_LOGOUT_API_PATH = "savior.api.path.logout";
 	public static final String PROPERTY_BASE_API_PATH = "savior.api.path.base";
 	public static final String PROPERTY_FREERDP_PATH = "savior.desktop.freerdp.path";
+	public static final String PROPERTY_CLIPBOARD_JAR_PATH = "savior.desktop.clipboard.jar";
 	private Properties props;
 	private boolean warnOnMissingFile = false;
 

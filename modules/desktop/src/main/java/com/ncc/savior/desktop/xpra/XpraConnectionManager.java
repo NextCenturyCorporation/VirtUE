@@ -63,10 +63,31 @@ public class XpraConnectionManager {
 		return activeClientsMap.get(params.getConnectionKey());
 	}
 
+	/**
+	 * needs display in params
+	 *
+	 * @param params
+	 * @param color
+	 * @return
+	 * @throws IOException
+	 */
 	public XpraClient createClient(IConnectionParameters params, RgbColor color) throws IOException {
-		// logger.debug("creating client with params=" + params);
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
+		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
+		client.connect(factory, params);
+		client.setDisplay(params.getDisplay());
+
+		// logger.debug("Client connected with params" + params);
+		activeClientsMap.put(params.getConnectionKey(), client);
+		activeAppManagers.put(params.getConnectionKey(), applicationManager);
+
+		return client;
+	}
+
+	public void createXpraServerAndAddDisplayToParams(IConnectionParameters params) throws IOException {
+		// logger.debug("creating client with params=" + params);
+
 		IXpraInitatorFactory initiatorFactory = initiaterMap.get(params.getClass());
 		if (initiatorFactory != null) {
 			IXpraInitiator init = initiatorFactory.getXpraInitiator(params);
@@ -84,15 +105,6 @@ public class XpraConnectionManager {
 			// // logger.debug("Display " + d + " started");
 			// }
 		}
-
-		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
-		client.connect(factory, params);
-
-		// logger.debug("Client connected with params" + params);
-		activeClientsMap.put(params.getConnectionKey(), client);
-		activeAppManagers.put(params.getConnectionKey(), applicationManager);
-
-		return client;
 	}
 
 	public void startApplication(IConnectionParameters params, String startCommand) throws IOException {

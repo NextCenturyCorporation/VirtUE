@@ -9,6 +9,8 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorException;
+
 /**
  * Created to facilitate a consistent error reporting and returning mechanism
  * throughout the system. We may need to modify this to fit with JHU's API.

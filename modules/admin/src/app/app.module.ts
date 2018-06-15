@@ -80,6 +80,7 @@ import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
 import { VirtuesService } from './shared/services/virtues.service';
+import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.component';
 
 @NgModule({
   declarations: [
@@ -124,6 +125,7 @@ import { VirtuesService } from './shared/services/virtues.service';
     VmAppsListComponent,
     AddVmAppComponent,
     VmAppsModalComponent,
+    DuplicateUserComponent,
   ],
   imports: [
     AppRoutingModule,

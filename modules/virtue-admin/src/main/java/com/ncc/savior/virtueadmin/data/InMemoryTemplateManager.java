@@ -15,12 +15,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * Implementation of {@link ITemplateManager} that stores all the template data

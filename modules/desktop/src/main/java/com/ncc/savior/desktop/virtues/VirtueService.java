@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
+import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
@@ -46,6 +47,7 @@ public class VirtueService {
 	private Map<String, List<ApplicationDefinition>> pendingApps;
 	private Map<String, RgbColor> colors;
 	private IRdpClient rdpClient;
+	private IClipboardManager clipboardManager;
 
 	static {
 		startableVirtueStates = new ArrayList<VirtueState>();
@@ -57,28 +59,14 @@ public class VirtueService {
 	}
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
-			IRdpClient rdpClient) {
+			IRdpClient rdpClient, IClipboardManager clipboardManager) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());
 		this.rdpClient = rdpClient;
+		this.clipboardManager = clipboardManager;
 	}
-
-	// public void connectAndStartApp(DesktopVirtue app) throws IOException {
-	// IConnectionParameters params = app.getConnectionParams();
-	// // Do we have an existing client/connection for this params? If so, start a
-	// new
-	// // app and be done with it.
-	//
-	// // If we don't have an existing client/connection, then we need to create a
-	// // connection and then start the app.
-	// XpraClient client = connectionManager.getExistingClient(params);
-	// if (client == null || client.getStatus() == Status.ERROR) {
-	// client = connectionManager.createClient(params);
-	// }
-	// connectionManager.startApplication(params, app.getStartCommand());
-	// }
 
 	/**
 	 * Starts a connection for a particularly {@link DesktopVirtueApplication} if
@@ -100,7 +88,37 @@ public class VirtueService {
 
 	private void ensureConnectionWindows(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
 			throws IOException {
-		rdpClient.startRdp(app, virtue, color);
+		String clipboardId = null;
+		// for now we want to use the RDP clipboard bridge instead of our own app.
+		boolean userRdpClientClipboardBridge = true;
+		if (!userRdpClientClipboardBridge) {
+			try {
+				String key = app.getPrivateKey();
+				SshConnectionParameters params = getConnectionParams(app, key);
+				// For now user
+				clipboardId = clipboardManager.connectClipboard(params, virtue.getId());
+			} catch (IOException e) {
+				logger.error("Failed to connect clipboard", e);
+			}
+		}
+		Process p = rdpClient.startRdp(app, virtue, color);
+		if (clipboardId != null) {
+			// making the variable effectively final
+			String cId = clipboardId;
+			Thread t = new Thread(() -> {
+				try {
+					p.waitFor();
+					clipboardManager.closeConnection(cId);
+				} catch (InterruptedException | IOException e) {
+					logger.error("Error tracking RDP connection and closing associated clipboard");
+				} finally {
+
+				}
+
+			}, "RemoteDesktop-checker");
+			t.setDaemon(true);
+			t.start();
+		}
 	}
 
 	private void ensureConnectionLinux(DesktopVirtueApplication app, DesktopVirtue virtue, RgbColor color)
@@ -109,21 +127,21 @@ public class VirtueService {
 		try {
 			String key = app.getPrivateKey();
 
-			SshConnectionParameters params = null;
-			if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
-				File pem = File.createTempFile(app.getName(), ".pem");
-				FileWriter writer = new FileWriter(pem);
-				writer.write(key);
-				writer.close();
-				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
-			} else {
-				params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
-			}
+			SshConnectionParameters params = getConnectionParams(app, key);
 			String colorDesc = (color == null ? "" : " with color " + color.toString());
 			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
 			XpraClient client = connectionManager.getExistingClient(params);
 			if (client == null || client.getStatus() == Status.ERROR) {
 				logger.debug("needed new connection");
+				try {
+					connectionManager.createXpraServerAndAddDisplayToParams(params);
+					logger.debug("connecting clipboard");
+					clipboardManager.connectClipboard(params, virtue.getId());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					logger.error("clipboard manager connection failed!", e);
+					// TODO alert user? allow user to try again?
+				}
 				client = connectionManager.createClient(params, color);
 			}
 		} finally {
@@ -131,6 +149,20 @@ public class VirtueService {
 				file.delete();
 			}
 		}
+	}
+
+	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) throws IOException {
+		SshConnectionParameters params = null;
+		if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
+			File pem = File.createTempFile(app.getName(), ".pem");
+			FileWriter writer = new FileWriter(pem);
+			writer.write(key);
+			writer.close();
+			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
+		} else {
+			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
+		}
+		return params;
 	}
 
 	/**
