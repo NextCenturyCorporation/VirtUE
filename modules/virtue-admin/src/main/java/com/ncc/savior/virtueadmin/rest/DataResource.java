@@ -1,5 +1,12 @@
 package com.ncc.savior.virtueadmin.rest;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -19,6 +26,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +49,7 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.service.AdminService;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -75,43 +84,45 @@ public class DataResource {
 	@Path("templates/preload")
 	public Response preloadTemplates() {
 		logger.info("attempting to preload data");
+		loadIcons();
+
 		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Linux)",
-				"1.0", OS.LINUX, "google-chrome");
+				"1.0", OS.LINUX, "chrome", "google-chrome");
 		ApplicationDefinition linuxFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
-				OS.LINUX, "firefox");
+				OS.LINUX, "firefox", "firefox");
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
-				OS.LINUX, "gnome-calculator");
+				OS.LINUX, "calc", "gnome-calculator");
 		ApplicationDefinition lowriter = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Writer",
-				"1.0", OS.LINUX, "lowriter");
+				"1.0", OS.LINUX, "lo-writer", "lowriter");
 		ApplicationDefinition localc = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Calc",
-				"1.0", OS.LINUX, "localc");
+				"1.0", OS.LINUX, "lo-calc", "localc");
 		ApplicationDefinition lodraw = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Draw",
-				"1.0", OS.LINUX, "lodraw");
+				"1.0", OS.LINUX, "lo-draw", "lodraw");
 		ApplicationDefinition loimpress = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Impress",
-				"1.0", OS.LINUX, "loimpress");
+				"1.0", OS.LINUX, "lo-impress", "loimpress");
 		ApplicationDefinition linuxTerminal = new ApplicationDefinition(UUID.randomUUID().toString(), "Terminal", "1.0",
-				OS.LINUX, "xterm");
+				OS.LINUX, "linux-terminal", "xterm");
 		ApplicationDefinition thunderBird = new ApplicationDefinition(UUID.randomUUID().toString(), "Thunderbird",
-				"1.0", OS.LINUX, "thunderbird");
+				"1.0", OS.LINUX, "thunderbird", "thunderbird");
 
 		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Win)",
-				"1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+				"1.0", OS.WINDOWS, "chrome", "c:\\windows\\notepad.exe");
 		// "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 		ApplicationDefinition windowsEdge = new ApplicationDefinition(UUID.randomUUID().toString(), "Microsoft Edge",
-				"1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+				"1.0", OS.WINDOWS, "ms-edge", "c:\\windows\\notepad.exe");
 		ApplicationDefinition windowsWord = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Word 2013", "1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+				"Microsoft Word 2013", "1.0", OS.WINDOWS, "ms-word", "c:\\windows\\notepad.exe");
 		ApplicationDefinition windowsExcel = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Excel 2013", "1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+				"Microsoft Excel 2013", "1.0", OS.WINDOWS, "ms-excel", "c:\\windows\\notepad.exe");
 		ApplicationDefinition windowsOutlook = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Outlook 2013", "1.0", OS.WINDOWS, "c:\\windows\\notepad.exe");
+				"Microsoft Outlook 2013", "1.0", OS.WINDOWS, "ms-outlook", "c:\\windows\\notepad.exe");
 		ApplicationDefinition windowsPowershell = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Windows Powershell", "1.0", OS.WINDOWS,
+				"Windows Powershell", "1.0", OS.WINDOWS, "ms-powershell",
 				"c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe");
 		ApplicationDefinition windowsSkype = new ApplicationDefinition(UUID.randomUUID().toString(), "Skype", "1.0",
-				OS.WINDOWS, "c:\\windows\\notepad.exe");
+				OS.WINDOWS, "skype", "c:\\windows\\notepad.exe");
 		ApplicationDefinition windowsCommandTerminal = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Windows Command Terminal", "1.0", OS.WINDOWS, "c:\\windows\\system32\\cmd.exe");
+				"Windows Command Terminal", "1.0", OS.WINDOWS, "ms-terminal", "c:\\windows\\system32\\cmd.exe");
 
 		// ApplicationDefinition gedit = new
 		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,
@@ -354,6 +365,47 @@ public class DataResource {
 
 		logger.info("Data preloaded");
 		return Response.ok().entity("success").build();
+	}
+
+	private void loadIcons() {
+		InputStream iconStream = DataResource.class.getClassLoader().getResourceAsStream("/icons/savior.png");
+
+		try {
+			byte[] bytes = IOUtils.toByteArray(iconStream);
+			templateManager.addIcon(AdminService.DEFAULT_ICON_KEY, bytes);
+		} catch (IOException e) {
+			logger.error("Failed to load default icon");
+		}
+
+		loadIconsFromIconsFolder();
+	}
+
+	private void loadIconsFromIconsFolder() {
+		URL r = DataResource.class.getClassLoader().getResource("/icons");
+		try {
+			File iconDir = new File(r.toURI());
+			if (iconDir.exists() && iconDir.isDirectory()) {
+				File[] files = iconDir.listFiles(new FileFilter() {
+
+					@Override
+					public boolean accept(File pathname) {
+						return (pathname.isFile() && pathname.getPath().toLowerCase().endsWith(".png"));
+					}
+				});
+				for (File file : files) {
+					try {
+						byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
+						String name = file.getName();
+						name = name.substring(0, name.lastIndexOf("."));
+						templateManager.addIcon(name, bytes);
+					} catch (IOException e) {
+						logger.error("Failed to load icon at " + file.getPath());
+					}
+				}
+			}
+		} catch (URISyntaxException e) {
+			logger.error("failed to load icons folder");
+		}
 	}
 
 	@GET

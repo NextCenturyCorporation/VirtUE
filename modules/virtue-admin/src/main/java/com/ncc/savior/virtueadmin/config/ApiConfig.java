@@ -11,6 +11,7 @@ package com.ncc.savior.virtueadmin.config;
 
 import javax.ws.rs.ApplicationPath;
 
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.context.annotation.PropertySource;
@@ -46,6 +47,7 @@ public class ApiConfig extends ResourceConfig {
 		register(AdminResource.class);
 		register(UserResource.class);
 		register(WebServiceUtil.class);
+		register(MultiPartFeature.class);
 		
 		register(CorsFilter.class);
 		

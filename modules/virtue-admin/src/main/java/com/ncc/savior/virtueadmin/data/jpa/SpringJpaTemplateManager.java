@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -32,6 +33,8 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	private VirtualMachineTemplateRepository vmtRepository;
 	@Autowired
 	private UserRepository userRepo;
+	@Autowired
+	private IconRepository iconRepo;
 
 	public SpringJpaTemplateManager(VirtueTemplateRepository vtRepository,
 			VirtualMachineTemplateRepository vmtRepository, ApplicationDefinitionRepository appRepository,
@@ -314,4 +317,24 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		return vtRepository.existsById(id);
 	}
 
+	@Override
+	public void addIcon(String iconKey, byte[] bytes) {
+		IconModel icon = new IconModel(iconKey, bytes);
+		iconRepo.save(icon);
+	}
+
+	@Override
+	public IconModel getIcon(String iconKey) {
+		Optional<IconModel> icon = iconRepo.findById(iconKey);
+		if (icon.isPresent()) {
+			return icon.get();
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public void removeIcon(String iconKey) {
+		iconRepo.deleteById(iconKey);
+	}
 }

@@ -76,7 +76,7 @@ public class ApplicationIT {
 
 	@Test
 	public void deleteValidApplicationsByIdTest() {
-		ApplicationDefinition app1 = new ApplicationDefinition(null, "Test Template", "", OS.LINUX);
+		ApplicationDefinition app1 = new ApplicationDefinition(null, "Test Template", "", OS.LINUX, null);
 		ContentType contentType = ContentType.JSON;
 		Application application = given().port(randomServerPort).when().body(app1).contentType(contentType)
 				.post("/admin/application").then().extract().as(Application.class);
@@ -105,7 +105,7 @@ public class ApplicationIT {
 	@Test
 	public void createApplicationTest() {
 
-		ApplicationDefinition app = new ApplicationDefinition(null, "Test Template", "", OS.LINUX);
+		ApplicationDefinition app = new ApplicationDefinition(null, "Test Template", "", OS.LINUX, null);
 		ContentType contentType = ContentType.JSON;
 		Application application = given().port(randomServerPort).when().body(app).contentType(contentType)
 				.post("/admin/application").then().extract().as(Application.class);
