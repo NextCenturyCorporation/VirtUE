@@ -301,6 +301,26 @@ content {
   display: flex;
   align-items: flex-end;
 }
+.table-header span.list-sorter {
+  display: block;
+  float: left;
+  height: 15px;
+  padding: 0;
+  position: relative;
+  top: -3px;
+  width: 10px;
+  span {
+    position: absolute;
+    display: block;
+    margin: 0;
+    &.fa-sort-down, &.fa-sort-up {
+      z-index: 1;
+    }
+    &.fa-sort {
+      z-index: 0;
+    }
+  }
+}
 .table-header span {
   margin-left: 10px;
   margin-right: 10px;

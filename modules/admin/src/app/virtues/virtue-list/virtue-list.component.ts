@@ -122,15 +122,15 @@ export class VirtueListComponent implements OnInit {
   }
 
   sortVirtueColumns(sortColumn: string, sortBy: string) {
-    console.log('default sort: ' + this.defaultSort);
     if (this.sortColumn === sortColumn) {
       this.sortListBy(sortBy);
     } else {
-      this.sortBy = 'asc';
       if (sortColumn === 'name') {
+        this.sortBy = 'asc';
         this.sortColumn = sortColumn;
       } else if (sortColumn === 'date') {
         this.sortColumn = sortColumn;
+        this.sortBy = 'desc';
       }
     }
   }
