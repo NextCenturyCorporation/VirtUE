@@ -83,9 +83,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	private volatile boolean ownSelection;
 
-	protected boolean stopMainClipboardThread = false;
+	protected volatile boolean stopMainClipboardThread = false;
 
-	private boolean stopTargetPollThread = false;
+	private volatile boolean stopTargetPollThread = false;
 
 	private Thread targetPollThread;
 

@@ -71,7 +71,7 @@ public class ClipboardClient implements Closeable {
 					logger.warn("Error closing clipboard client with id=" + myId, ioe);
 				}
 				if (clipboardErrorListener != null) {
-					clipboardErrorListener.onError();
+					clipboardErrorListener.onError(description, e);
 				}
 			}
 

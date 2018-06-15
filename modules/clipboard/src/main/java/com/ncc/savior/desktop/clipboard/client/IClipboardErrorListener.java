@@ -8,6 +8,13 @@ package com.ncc.savior.desktop.clipboard.client;
  */
 public interface IClipboardErrorListener {
 
-	void onError();
+	/**
+	 * Error description and/or exception included. Neither are required but often
+	 * provided for more information.
+	 * 
+	 * @param description
+	 * @param e
+	 */
+	void onError(String description, Exception e);
 
 }

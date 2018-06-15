@@ -106,7 +106,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	private BlockingQueue<Runnable> runLaterQueue;
 	private Pointer data;
 	private Thread mainThread;
-	protected boolean stopMainThread;
+	protected volatile boolean stopMainThread;
 
 	public WindowsClipboardWrapper(boolean takeClipboard) {
 		this.runLaterQueue = new LinkedBlockingQueue<Runnable>();
