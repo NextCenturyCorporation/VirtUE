@@ -36,17 +36,17 @@ public abstract class AbstractAppsView {
 	protected JPanel container;
 	protected VirtueService virtueService;
 	protected JScrollPane sp;
-	protected HashMap<String, JPanel> tiles;
+	protected HashMap<ApplicationDefinition, JPanel> tiles;
 
 	public AbstractAppsView(VirtueService vs, JScrollPane sp) {
 		this.container = new JPanel();
 		this.virtueService = vs;
 		this.sp = sp;
-		this.tiles = new HashMap<String, JPanel>();
+		this.tiles = new HashMap<ApplicationDefinition, JPanel>();
 	}
 
 	public void addListener(JPanel tile, VirtueContainer vc, FavoritesView fv, ApplicationDefinition ad,
-			DesktopVirtue virtue) {
+			DesktopVirtue virtue, JLabel favorite) {
 		tile.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
@@ -75,30 +75,33 @@ public abstract class AbstractAppsView {
 					pm.add(mi2);
 					pm.show(sp, 50, 150);
 				}
+			}
+		});
 
-				if (SwingUtilities.isRightMouseButton(event)) {
-					JPopupMenu pm = new JPopupMenu();
-					JMenuItem mi1 = new JMenuItem("Yes");
-					JMenuItem mi2 = new JMenuItem("No");
-					pm.add(new JLabel("Would you like to favorite the " + ad.getName() + " application?"));
+		favorite.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				JPopupMenu pm = new JPopupMenu();
+				JMenuItem mi1 = new JMenuItem("Yes");
+				JMenuItem mi2 = new JMenuItem("No");
+				pm.add(new JLabel("Would you like to favorite the " + ad.getName() + " application?"));
 
-					mi1.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent evt) {
-							try {
-								fv.addFavorite(ad, virtue, vc);
-							} catch (IOException e) {
-								String msg = "Error attempting to favorite a " + ad.getName() + " application";
-								logger.error(msg, e);
-							}
+				mi1.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent evt) {
+						try {
+							fv.addFavorite(ad, virtue, vc);
+						} catch (IOException e) {
+							String msg = "Error attempting to favorite a " + ad.getName() + " application";
+							logger.error(msg, e);
 						}
-					});
+					}
+				});
 
-					pm.setPopupSize(375, 75);
-					pm.add(mi1);
-					pm.add(mi2);
-					pm.show(sp, 50, 150);
-				}
+				pm.setPopupSize(375, 75);
+				pm.add(mi1);
+				pm.add(mi2);
+				pm.show(sp, 50, 150);
 			}
 		});
 	}
@@ -110,6 +113,10 @@ public abstract class AbstractAppsView {
 		tiles.remove(virtue.getName());
 		container.validate();
 		container.repaint();
+	}
+
+	public JPanel getContainer() {
+		return container;
 	}
 
 }

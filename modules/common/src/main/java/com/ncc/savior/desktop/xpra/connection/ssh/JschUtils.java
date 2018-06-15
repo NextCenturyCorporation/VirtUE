@@ -26,7 +26,7 @@ public class JschUtils {
 	 * @throws JSchException
 	 */
 	// TODO review parameters for sanity!
-	public static Session getSession(SshConnectionParameters params) throws JSchException {
+	public static Session getUnconnectedSession(SshConnectionParameters params) throws JSchException {
 		JSch jsch = new JSch();
 		 com.jcraft.jsch.Logger sshLogger = new  com.jcraft.jsch.Logger() {
 

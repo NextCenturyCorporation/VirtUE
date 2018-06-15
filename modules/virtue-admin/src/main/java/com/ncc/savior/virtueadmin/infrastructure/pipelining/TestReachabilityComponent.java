@@ -3,9 +3,9 @@ package com.ncc.savior.virtueadmin.infrastructure.pipelining;
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Component of an {@link IUpdatePipeline} that will test for reachability via

@@ -61,18 +61,23 @@ public class FavoritesView extends AbstractAppsView {
 			JLabel picLabel = new JLabel(imageIcon);
 			tile.add(picLabel);
 			tile.add(appName, BorderLayout.SOUTH);
-			tile.setSize(0, 40);
 
-			addListener(tile, vc, virtue, ad);
+			JLabel removeFavorite = new JLabel();
+			removeFavorite.setIcon(new ImageIcon(AppsList.class.getResource("/images/remove-from-favorites.png")));
+			removeFavorite.setHorizontalAlignment(SwingConstants.LEFT);
+			tile.add(removeFavorite, BorderLayout.NORTH);
+
+			addListener(removeFavorite, tile, vc, virtue, ad);
 
 			container.validate();
 			container.repaint();
 			container.add(tile);
-			tiles.put(ad.getName(), tile);
+			tiles.put(ad, tile);
 		}
 	}
 
-	public void addListener(JPanel tile, VirtueContainer vc, DesktopVirtue virtue, ApplicationDefinition ad) {
+	public void addListener(JLabel removeFavorite, JPanel tile, VirtueContainer vc, DesktopVirtue virtue,
+			ApplicationDefinition ad) {
 		tile.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
@@ -123,6 +128,47 @@ public class FavoritesView extends AbstractAppsView {
 				}
 			}
 		});
+
+		removeFavorite.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+					JPopupMenu pm = new JPopupMenu();
+					JMenuItem mi1 = new JMenuItem("Yes");
+					JMenuItem mi2 = new JMenuItem("No");
+					pm.add(new JLabel("Would you like to unfavorite the " + ad.getName() + " application?"));
+
+					mi1.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent evt) {
+						container.remove(tiles.get(ad));
+							container.validate();
+							container.repaint();
+						tiles.remove(ad);
+						}
+					});
+
+					pm.setPopupSize(415, 75);
+					pm.add(mi1);
+					pm.add(mi2);
+					pm.show(sp, 50, 150);
+			}
+		});
+	}
+
+	public void addFavorite(JPanel tile, ApplicationDefinition ad) {
+		// container.validate();
+		// container.repaint();
+		container.add(tile);
+		tiles.put(ad, tile);
+	}
+
+	public void removeFavorite(ApplicationDefinition ad) {
+		if (tiles != null) {
+			container.remove(tiles.get(ad));
+			container.validate();
+			container.repaint();
+			tiles.remove(ad);
+		}
 	}
 
 	public JPanel getView() {

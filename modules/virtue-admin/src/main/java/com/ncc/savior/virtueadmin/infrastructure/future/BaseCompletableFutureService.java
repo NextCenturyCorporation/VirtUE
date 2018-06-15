@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.virtueadmin.util.SaviorException;
+import com.ncc.savior.util.SaviorException;
 
 /**
  * Base class for services services that may be asynchronous and use

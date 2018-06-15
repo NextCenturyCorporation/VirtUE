@@ -36,7 +36,6 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  * This represents a Virtue in the sidebar menu. It controls the sub menu when
  * the virtue is selected.
  *
- *
  */
 public class VirtueContainer {
 	private static Logger logger = LoggerFactory.getLogger(VirtueContainer.class);
@@ -67,9 +66,16 @@ public class VirtueContainer {
 		this.sp = sp;
 		this.bodyColor = bodyColor;
 		createContainer(virtue, headerColor, Color.GRAY, numRows);
-		addTiles();
 
 		logger.debug("loaded");
+	}
+
+	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) {
+		JPanel tile = va.getVirtueTileContainer();
+
+		tiles.put(ad.getName(), tile);
+
+		tileContainer.add(tile);
 	}
 
 	public void addTiles() throws IOException {
@@ -90,7 +96,6 @@ public class VirtueContainer {
 			JLabel picLabel = new JLabel(imageIcon);
 			tile.add(picLabel);
 			tile.add(application, BorderLayout.SOUTH);
-			tile.setSize(0, 40);
 
 			tile.addMouseListener(new MouseAdapter() {
 				@Override
@@ -110,8 +115,7 @@ public class VirtueContainer {
 									logger.debug("virtue started");
 								}
 								// virtueService.startVirtue(virtue);
-								virtueService.startApplication(virtue, ad,
-										new RgbColor(0, 0, 0, 0));
+								virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
 								virtue.setVirtueState(VirtueState.LAUNCHING);
 								updateVirtue(virtue);
 							} catch (IOException e) {

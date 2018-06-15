@@ -6,7 +6,6 @@ import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { Virtue } from '../../shared/models/virtue.model';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
@@ -20,13 +19,18 @@ import { ApplicationsService } from '../../shared/services/applications.service'
 })
 
 export class VirtueListComponent implements OnInit {
-  virtue: Virtue[];
+  virtue: any;
   title = 'Virtues';
   virtues = [];
   vmList = [];
   appsList = [];
-  virtueEnabled: boolean;
   baseUrl: string;
+  // these are the default properties the list sorts by
+  sortColumn: string = 'name';
+  sortType: string = 'enabled';
+  sortValue: any = '*';
+  sortBy: string = 'asc';
+  defaultSort: string = 'name';
   // virtueTotal: number;
   os: Observable<Array<VirtuesService>>;
 
@@ -36,7 +40,7 @@ export class VirtueListComponent implements OnInit {
     private baseUrlService: BaseUrlService,
     private virtuesService: VirtuesService,
     private vmService: VirtualMachineService,
-    public dialog: MatDialog,
+    public dialog: MatDialog
   ) {
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
@@ -58,6 +62,12 @@ export class VirtueListComponent implements OnInit {
     return next.handle(req);
   }
 
+  resetRouter() {
+    setTimeout(() => {
+      this.router.navigated = false;
+    }, 1000);
+  }
+
   getBaseUrl(url: string) {
     this.baseUrl = url;
   }
@@ -73,6 +83,64 @@ export class VirtueListComponent implements OnInit {
     this.virtuesService.getVirtues(baseUrl).subscribe( data => {
       this.virtues = data;
     });
+    this.sortVirtues(this.sortBy);
+  }
+
+  sortVirtues(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.virtues.sort((leftSide, rightSide): number => {
+        if (leftSide['name'] < rightSide['name']) {
+          return -1;
+        }
+        if (leftSide['name'] > rightSide['name']) {
+          return 1;
+        }
+        return 0;
+      });
+    } else {
+      this.virtues.sort((leftSide, rightSide): number => {
+        if (leftSide['name'] < rightSide['name']) {
+          return 1;
+        }
+        if (leftSide['name'] > rightSide['name']) {
+          return -1;
+        }
+        return 0;
+      });
+    }
+  }
+
+  enabledVirtueList(sortType: string, enabledValue: any, sortBy) {
+    console.log('enabledVirtueList() => ' + enabledValue);
+    if (this.sortValue !== enabledValue) {
+      this.sortBy = 'asc';
+    } else {
+      this.sortListBy(sortBy);
+    }
+    this.sortValue = enabledValue;
+    this.sortType = sortType;
+  }
+
+  sortVirtueColumns(sortColumn: string, sortBy: string) {
+    console.log('default sort: ' + this.defaultSort);
+    if (this.sortColumn === sortColumn) {
+      this.sortListBy(sortBy);
+    } else {
+      this.sortBy = 'asc';
+      if (sortColumn === 'name') {
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'date') {
+        this.sortColumn = sortColumn;
+      }
+    }
+  }
+
+  sortListBy(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.sortBy = 'desc';
+    } else {
+      this.sortBy = 'asc';
+    }
   }
 
   getApplications(baseUrl: string) {
@@ -104,19 +172,12 @@ export class VirtueListComponent implements OnInit {
     }
   }
 
-  virtueStatus(id: string, isEnabled: boolean) {
-    if (isEnabled) {
-      this.virtueEnabled = false;
-    } else {
-      this.virtueEnabled = true;
-    }
-    let body = {
-      'enabled': this.virtueEnabled
-    };
-    console.log('Virtue is enabled: ' + this.virtueEnabled);
-    this.virtuesService.updateVirtue(this.baseUrl, id, JSON.stringify(body));
-    // this.virtuesService.toggleVirtueStatus(this.baseUrl, id);
-    this.refreshData();
+  virtueStatus(id: string) {
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
+      this.virtue = data;
+    });
+    this.resetRouter();
+    this.router.navigate(['/virtues']);
   }
 
   deleteVirtue(id: string) {

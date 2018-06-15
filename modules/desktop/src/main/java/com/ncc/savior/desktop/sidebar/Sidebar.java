@@ -35,6 +35,7 @@ import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
@@ -48,6 +49,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private VirtueService virtueService;
 	private Map<String, VirtueContainer> virtueIdToVc;
 	private AuthorizationService authService;
+	private HashMap<String, ArrayList<VirtueApplicationItem>> virtues;
 
 	private Iterator<Color> colorItr;
 	private ArrayList<Color> colorList;
@@ -69,6 +71,7 @@ public class Sidebar implements VirtueChangeHandler {
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors, String style) {
 		this.authService = authService;
 		this.virtueIdToVc = new HashMap<String, VirtueContainer>();
+		this.virtues = new HashMap<String, ArrayList<VirtueApplicationItem>>();
 		this.virtueService = virtueService;
 
 		colorList = loadColors();
@@ -172,8 +175,20 @@ public class Sidebar implements VirtueChangeHandler {
 		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 		virtueIdToVc.put(id, vc);
 		vt.addVirtueToRow(virtue, vc, vc.getRow());
-		al.addTiles(virtue, vc, fv);
-		at.addTiles(virtue, vc, fv);
+
+		virtues.put(virtue.getName(), new ArrayList<VirtueApplicationItem>());
+		ArrayList<VirtueApplicationItem> applicationList = virtues.get(virtue.getName());
+		for (ApplicationDefinition ad : virtue.getApps().values()) {
+			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc);
+			applicationList.add(va);
+			va.setup(vc, fv, ad, virtue);
+			al.addApplication(ad, va);
+			at.addApplication(ad, va);
+			vc.addApplication(ad, va);
+		}
+
+		// at.renderTiles(); // for some reason it has to be done this way for this view
+
 		setInitialViewPort();
 	}
 

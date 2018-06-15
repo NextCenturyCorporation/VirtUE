@@ -12,12 +12,12 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.util.SaviorException;
 
 /**
  * {@link ITemplateManager} that uses Spring and JPA.
@@ -146,7 +146,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void addVmTemplate(VirtualMachineTemplate vmTemplate) {
-		Collection<ApplicationDefinition> apps = vmTemplate.getApplications();
+		Collection<ApplicationDefinition> apps = new HashSet<ApplicationDefinition>();
+		for (ApplicationDefinition app : vmTemplate.getApplications()) {
+			apps.add(app);
+		}
+
 		vmTemplate.setApplications(new HashSet<ApplicationDefinition>());
 		// Adding empty template and then adding applications (that are already in db)
 		// seems to work better for jpa

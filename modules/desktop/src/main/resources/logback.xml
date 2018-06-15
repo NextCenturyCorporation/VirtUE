@@ -78,7 +78,7 @@
   </appender>
   -->
 
-    <logger name="com.ncc.savior.desktop" additivity="false">
+    <logger name="com.ncc.savior" additivity="false">
         <level value="DEBUG"/>
         <!--<if condition='p("logback.printToConsole").contains("enabled")'>
           <then>

@@ -66,7 +66,7 @@ public class SidebarApplication {
 			rdpClient = new WindowsRdp();
 		}
 
-		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient);
+		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, null);
 		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		controller.init(primaryFrame);

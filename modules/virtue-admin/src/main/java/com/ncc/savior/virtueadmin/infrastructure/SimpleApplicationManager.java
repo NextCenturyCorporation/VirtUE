@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
+import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
-import com.ncc.savior.virtueadmin.util.SaviorException;
-import com.ncc.savior.virtueadmin.util.SshUtil;
 
 /**
  * Simple {@link IApplicationManager} implementation that uses the
