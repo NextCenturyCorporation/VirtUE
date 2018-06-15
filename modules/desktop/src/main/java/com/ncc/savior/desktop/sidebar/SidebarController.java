@@ -37,7 +37,7 @@ public class SidebarController {
 		this.currentVirtues = new TreeMap<String, DesktopVirtue>();
 	}
 
-	public void init(JFrame primaryStage) throws Exception {
+	public void init(JFrame primaryFrame) throws Exception {
 		List<DesktopVirtue> initialVirtues;
 		// if (authService.getUser() != null) {
 		// initialVirtues = virtueService.getVirtuesForUser();
@@ -46,7 +46,7 @@ public class SidebarController {
 		// }
 		currentVirtues = getCurrentVirtueMap(initialVirtues);
 
-		sidebar.start(primaryStage, initialVirtues);
+		sidebar.start(primaryFrame, initialVirtues);
 		startVirtuePoll();
 
 		// sidebar.setStartState();
