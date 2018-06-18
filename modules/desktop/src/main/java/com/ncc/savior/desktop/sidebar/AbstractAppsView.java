@@ -1,26 +1,12 @@
 package com.ncc.savior.desktop.sidebar;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.HashMap;
 
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueState;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
  *
@@ -30,8 +16,6 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  */
 
 public abstract class AbstractAppsView {
-
-	private static final Logger logger = LoggerFactory.getLogger(AbstractAppsView.class);
 
 	protected JPanel container;
 	protected VirtueService virtueService;
@@ -45,72 +29,11 @@ public abstract class AbstractAppsView {
 		this.tiles = new HashMap<ApplicationDefinition, JPanel>();
 	}
 
-	public void addListener(JPanel tile, VirtueContainer vc, FavoritesView fv, ApplicationDefinition ad,
-			DesktopVirtue virtue, JLabel favorite) {
-		tile.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				if (SwingUtilities.isLeftMouseButton(event)) {
-					JPopupMenu pm = new JPopupMenu();
-					JMenuItem mi1 = new JMenuItem("Yes");
-					JMenuItem mi2 = new JMenuItem("No");
-					pm.add(new JLabel("Would you like to start a " + ad.getName() + " application?"));
-
-					mi1.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent evt) {
-							try {
-								virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
-								virtue.setVirtueState(VirtueState.LAUNCHING);
-								vc.updateVirtue(virtue);
-							} catch (IOException e) {
-								String msg = "Error attempting to start a " + ad.getName() + " application";
-								logger.error(msg, e);
-							}
-						}
-					});
-
-					pm.setPopupSize(375, 75);
-					pm.add(mi1);
-					pm.add(mi2);
-					pm.show(sp, 50, 150);
-				}
-			}
-		});
-
-		favorite.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				JPopupMenu pm = new JPopupMenu();
-				JMenuItem mi1 = new JMenuItem("Yes");
-				JMenuItem mi2 = new JMenuItem("No");
-				pm.add(new JLabel("Would you like to favorite the " + ad.getName() + " application?"));
-
-				mi1.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent evt) {
-						try {
-							fv.addFavorite(ad, virtue, vc);
-						} catch (IOException e) {
-							String msg = "Error attempting to favorite a " + ad.getName() + " application";
-							logger.error(msg, e);
-						}
-					}
-				});
-
-				pm.setPopupSize(375, 75);
-				pm.add(mi1);
-				pm.add(mi2);
-				pm.show(sp, 50, 150);
-			}
-		});
-	}
-
-	public void removeVirtue(DesktopVirtue virtue) {
-		container.remove(tiles.get(virtue.getName()));
+	public void removeApplication(ApplicationDefinition ad) {
+		container.remove(tiles.get(ad));
 		container.validate();
 		container.repaint();
-		tiles.remove(virtue.getName());
+		tiles.remove(ad);
 		container.validate();
 		container.repaint();
 	}

@@ -21,6 +21,9 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueState;
@@ -28,11 +31,15 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class VirtueApplicationItem {
 
+	private static final Logger logger = LoggerFactory.getLogger(SidebarController.class);
+
 	private boolean isFavorited = false;
 
-	private VirtueService virtueService;
-	private ApplicationDefinition ad;
+	private ImageIcon favoritedImage = new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png"));
+	private ImageIcon unfavoritedImage = new ImageIcon(
+			VirtueApplicationItem.class.getResource("/images/unfavorited.png"));
 
+	private VirtueService virtueService;
 	private JScrollPane sp;
 
 	private JLabel tileFavoritedLabel;
@@ -56,7 +63,6 @@ public class VirtueApplicationItem {
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueContainer vc) {
-		this.ad = ad;
 		this.sp = sp;
 		this.virtueService = virtueService;
 		String name = ad.getName();
@@ -99,7 +105,7 @@ public class VirtueApplicationItem {
 
 		appIcon.setIcon(imageIcon);
 
-		favoritedLabel.setIcon(new ImageIcon(AppsList.class.getResource("/images/unfavorited.png")));
+		favoritedLabel.setIcon(unfavoritedImage);
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
 		container.add(appIcon, BorderLayout.CENTER);
@@ -116,7 +122,7 @@ public class VirtueApplicationItem {
 		listAppIcon.setHorizontalAlignment(SwingConstants.LEFT);
 
 		this.listFavoritedLabel = new JLabel();
-		listFavoritedLabel.setIcon(new ImageIcon(AppsList.class.getResource("/images/unfavorited.png")));
+		listFavoritedLabel.setIcon(unfavoritedImage);
 		listFavoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
 		listContainer.add(listFavoritedLabel, BorderLayout.NORTH);
@@ -157,6 +163,7 @@ public class VirtueApplicationItem {
 							vc.updateVirtue(virtue);
 						} catch (IOException e) {
 							String msg = "Error attempting to start a " + ad.getName() + " application";
+							logger.error(msg);
 						}
 					}
 				});
@@ -196,21 +203,18 @@ public class VirtueApplicationItem {
 
 	public void favorite() {
 		isFavorited = true;
-		listFavoritedLabel.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png")));
-		tileFavoritedLabel.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png")));
-		favoriteFavoritedLabel.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png")));
-		virtueTileFavoritedLabel
-				.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png")));
+		listFavoritedLabel.setIcon(favoritedImage);
+		tileFavoritedLabel.setIcon(favoritedImage);
+		favoriteFavoritedLabel.setIcon(favoritedImage);
+		virtueTileFavoritedLabel.setIcon(favoritedImage);
 	}
 
 	public void unfavorite() {
 		isFavorited = false;
-		listFavoritedLabel.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/unfavorited.png")));
-		tileFavoritedLabel.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/unfavorited.png")));
-		favoriteFavoritedLabel
-				.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/unfavorited.png")));
-		virtueTileFavoritedLabel
-				.setIcon(new ImageIcon(VirtueApplicationItem.class.getResource("/images/unfavorited.png")));
+		listFavoritedLabel.setIcon(unfavoritedImage);
+		tileFavoritedLabel.setIcon(unfavoritedImage);
+		favoriteFavoritedLabel.setIcon(unfavoritedImage);
+		virtueTileFavoritedLabel.setIcon(unfavoritedImage);
 	}
 
 }

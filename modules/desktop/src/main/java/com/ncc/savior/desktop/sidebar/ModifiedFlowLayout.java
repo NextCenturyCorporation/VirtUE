@@ -9,7 +9,7 @@ import java.awt.Insets;
 /**
  * A modified version of FlowLayout that allows containers using this Layout to
  * behave in a reasonable manner when placed inside a JScrollPane
- * 
+ *
  * @author Babu Kalakrishnan Modifications by greearb and jzd
  */
 

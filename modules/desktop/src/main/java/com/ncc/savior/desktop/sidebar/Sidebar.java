@@ -187,8 +187,6 @@ public class Sidebar implements VirtueChangeHandler {
 			vc.addApplication(ad, va);
 		}
 
-		// at.renderTiles(); // for some reason it has to be done this way for this view
-
 		setInitialViewPort();
 	}
 
@@ -199,10 +197,12 @@ public class Sidebar implements VirtueChangeHandler {
 			vmi = virtueIdToVc.remove(virtue.getTemplateId());
 		}
 		if (vmi != null) {
-			at.removeVirtue(virtue);
-			al.removeVirtue(virtue);
-			vt.removeVirtue(virtue);
+			for (ApplicationDefinition ad : virtue.getApps().values()) {
+				at.removeApplication(ad);
+				al.removeApplication(ad);
+			}
 
+			vt.removeVirtue(virtue);
 			VirtueContainer finalVmi = vmi;
 			finalVmi.removeVirtue(virtue.getName());
 		}
@@ -452,7 +452,7 @@ public class Sidebar implements VirtueChangeHandler {
 					listLabel.setIcon(inactiveListIcon);
 				}
 				if (applicationsOpen) {
-					sp.setViewportView(fv.getView());
+					sp.setViewportView(fv.getContainer());
 				}
 			}
 		});
