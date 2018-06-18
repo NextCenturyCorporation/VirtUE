@@ -16,14 +16,14 @@ public interface ILockingKeysService {
 		OS os = JavaUtil.getOs();
 		switch (os) {
 		case WINDOWS:
-			return new WindowsJnaLockingKeyService();
-		// return new JavaLockingKeyService();
+			return WindowsJnaLockingKeyService.getInstance();
+		// return JavaLockingKeyService.getInstance();
 		case LINUX:
-			return new JavaLockingKeyService();
+			return JavaLockingKeyService.getInstance();
 		case MAC:
-			return new JavaLockingKeyService();
+			return JavaLockingKeyService.getInstance();
 		default:
-			return new JavaLockingKeyService();
+			return JavaLockingKeyService.getInstance();
 		}
 	}
 }

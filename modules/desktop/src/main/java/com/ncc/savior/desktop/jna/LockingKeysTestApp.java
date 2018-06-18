@@ -34,7 +34,7 @@ public class LockingKeysTestApp {
 		} else if (args[0].equalsIgnoreCase("native")) {
 			return ILockingKeysService.getLockingKeyService();
 		} else if (args[0].equalsIgnoreCase("java")) {
-			return new JavaLockingKeyService();
+			return JavaLockingKeyService.getInstance();
 		}
 		usage();
 		System.exit(-1);
