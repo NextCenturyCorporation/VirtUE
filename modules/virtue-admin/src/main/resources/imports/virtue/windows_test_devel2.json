@@ -1,0 +1,9 @@
+{
+	"name": "Windows Test/Development 2",
+	"version": "1.0",
+	"enabled": true,
+	"awsTemplateName": "default-template",
+	"virtualMachineTemplateIds": [
+		"IMPORT_windows_all"
+	]
+}

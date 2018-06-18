@@ -1,0 +1,12 @@
+{
+    "name": "Power User VM Windows",
+    "os": "WINDOWS",
+    "templatePath": "ami-cfcd68b0",
+    "loginUser": "administrator",
+    "enabled": true,
+    "applicationIds": [
+      "IMPORT_windows_cmd",
+      "IMPORT_windows_powershell"
+    ],
+    "securityTag": "power"
+  }

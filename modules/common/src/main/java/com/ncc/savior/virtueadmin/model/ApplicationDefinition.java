@@ -24,15 +24,17 @@ public class ApplicationDefinition {
 		this.name = name;
 		this.version = version;
 		this.os = os;
+		this.iconKey = iconKey;
 	}
 
-	public ApplicationDefinition(String id, String displayName, String version, OS os, String launchCommand,
-			String iconKey) {
-		this.id=id;
-		this.name=displayName;
-		this.version=version;
-		this.os=os;
-		this.launchCommand=launchCommand;
+	public ApplicationDefinition(String id, String displayName, String version, OS os, String iconKey,
+			String launchCommand) {
+		this.id = id;
+		this.name = displayName;
+		this.version = version;
+		this.os = os;
+		this.launchCommand = launchCommand;
+		this.iconKey = iconKey;
 	}
 
 	/**
@@ -91,11 +93,11 @@ public class ApplicationDefinition {
 		this.launchCommand = launchCommand;
 	}
 
-	protected String getIconKey() {
+	public String getIconKey() {
 		return iconKey;
 	}
 
-	protected void setIconKey(String iconKey) {
+	public void setIconKey(String iconKey) {
 		this.iconKey = iconKey;
 	}
 

@@ -368,6 +368,11 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
+	public boolean containsVirtualMachineTemplate(String id) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
 	public boolean containsVirtueTemplate(String id) {
 		throw new RuntimeException("not implemented");
 	}

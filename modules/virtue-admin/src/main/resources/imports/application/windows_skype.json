@@ -1,0 +1,7 @@
+{
+    "name": "Skype",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe",
+    "iconKey": "skype"
+  }

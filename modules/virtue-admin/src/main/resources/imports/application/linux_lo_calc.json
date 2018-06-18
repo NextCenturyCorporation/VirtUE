@@ -1,0 +1,7 @@
+{
+	"name": "LibreOffice Calc",
+	"version": "1.0",
+	"os": "LINUX",
+	"launchCommand": "localc",
+	"iconKey": "lo-calc"
+}

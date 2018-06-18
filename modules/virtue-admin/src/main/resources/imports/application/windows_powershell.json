@@ -1,0 +1,7 @@
+{
+    "name": "Windows Powershell",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe",
+    "iconKey": "ms-powershell"
+  }

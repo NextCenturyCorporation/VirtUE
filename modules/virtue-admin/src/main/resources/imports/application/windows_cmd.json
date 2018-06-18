@@ -1,0 +1,7 @@
+{
+    "name": "Windows Command Terminal",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\system32\\cmd.exe",
+    "iconKey": "ms-terminal"
+  }

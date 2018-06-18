@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.PathResource;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -33,23 +35,29 @@ import com.ncc.savior.virtueadmin.security.SecurityUserService;
 public class ImportExportService {
 	private static final Logger logger = LoggerFactory.getLogger(ImportExportService.class);
 	private static final String IMPORT_ID_PREFIX = "IMPORT_";
-	private static final String TYPE_USER = "user";
-	private static final String TYPE_APPLICATION = "application";
-	private static final String TYPE_VIRTUE = "virtue";
-	private static final String TYPE_VIRTUAL_MACHINE = "virtualmachines";
+	public static final String TYPE_USER = "user";
+	public static final String TYPE_APPLICATION = "application";
+	public static final String TYPE_VIRTUE = "virtue";
+	public static final String TYPE_VIRTUAL_MACHINE = "virtualmachines";
 	private ObjectMapper jsonMapper;
-	private File root;
+	private File rootClassPath;
 	private ITemplateManager templateManager;
 	private IUserManager userManager;
+	private File rootCwd;
 
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager) {
 		this.jsonMapper = new ObjectMapper();
 		this.templateManager = templateManager;
 		this.userManager = userManager;
 		try {
-			this.root = new ClassPathResource("imports").getFile();
+			this.rootClassPath = new ClassPathResource("imports").getFile();
 		} catch (IOException e) {
-			logger.error("Unable to initialize import source.  Imports will not work.");
+			logger.error("Unable to initialize class path import source.  Imports may not work.");
+		}
+		try {
+			this.rootCwd = new PathResource("./imports").getFile();
+		} catch (IOException e) {
+			logger.error("Unable to initialize working directory import source.  Imports may not work.");
 		}
 	}
 
@@ -78,6 +86,7 @@ public class ImportExportService {
 	}
 
 	public void importSystem(InputStream stream) throws IOException {
+		verifyAndReturnUser();
 		JsonNode node = jsonMapper.readTree(stream);
 		ArrayNode appsNode = (ArrayNode) node.get(TYPE_APPLICATION);
 		Iterator<JsonNode> itr = appsNode.iterator();
@@ -142,9 +151,19 @@ public class ImportExportService {
 	}
 
 	public VirtueUser importUser(String testUser) {
+		verifyAndReturnUser();
 		VirtueUser user = read(TYPE_USER, testUser, VirtueUser.class);
+		Collection<VirtueTemplate> vts = new ArrayList<VirtueTemplate>();
 		VirtueUser existingUser = userManager.getUser(user.getUsername());
 		if (existingUser == null) {
+			for (String vtId : user.getVirtueTemplateIds()) {
+				if (vtId.startsWith(IMPORT_ID_PREFIX)) {
+					String vtKey = vtId.substring(IMPORT_ID_PREFIX.length(), vtId.length());
+					VirtueTemplate vt = importVirtueTemplate(vtKey);
+					vts.add(vt);
+				}
+			}
+			user.setVirtueTemplates(vts);
 			userManager.addUser(user);
 		} else {
 			user = existingUser;
@@ -152,39 +171,81 @@ public class ImportExportService {
 		return user;
 	}
 
-	public String importApplication(String testApplication) {
+	public ApplicationDefinition importApplication(String testApplication) {
+		verifyAndReturnUser();
 		ApplicationDefinition app = read(TYPE_APPLICATION, testApplication, ApplicationDefinition.class);
 		String id = IMPORT_ID_PREFIX + testApplication;
 		app.setId(id);
 		boolean exists = templateManager.containsApplication(id);
 		if (!exists) {
 			templateManager.addApplicationDefinition(app);
+		} else {
+			app = templateManager.getApplicationDefinition(id);
 		}
-		return id;
+		return app;
 	}
 
-	public String importVirtueTemplate(String testVirtue) {
+	public VirtualMachineTemplate importVirtualMachineTemplate(String testVirtualMachine) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtualMachineTemplate vmt = read(TYPE_VIRTUAL_MACHINE, testVirtualMachine, VirtualMachineTemplate.class);
+		String id = IMPORT_ID_PREFIX + testVirtualMachine;
+		vmt.setId(id);
+		Collection<ApplicationDefinition> applications = new ArrayList<ApplicationDefinition>();
+		boolean exists = templateManager.containsVirtualMachineTemplate(id);
+		if (!exists) {
+			for (String appId : vmt.getApplicationIds()) {
+				if (appId.startsWith(IMPORT_ID_PREFIX)) {
+					String appKey = appId.substring(IMPORT_ID_PREFIX.length(), appId.length());
+					ApplicationDefinition app = importApplication(appKey);
+					applications.add(app);
+				}
+			}
+			vmt.setApplications(applications);
+			vmt.setLastEditor(user.getUsername());
+			vmt.setLastModification(new Date());
+			templateManager.addVmTemplate(vmt);
+		} else {
+			vmt = templateManager.getVmTemplate(id);
+		}
+		return vmt;
+	}
+
+	public VirtueTemplate importVirtueTemplate(String testVirtue) {
+		VirtueUser user = verifyAndReturnUser();
 		VirtueTemplate vt = read(TYPE_VIRTUE, testVirtue, VirtueTemplate.class);
 		String id = IMPORT_ID_PREFIX + testVirtue;
 		vt.setId(id);
+		Collection<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
 		boolean exists = templateManager.containsVirtueTemplate(id);
 		if (!exists) {
+			for (String vmtId : vt.getVirtualMachineTemplateIds()) {
+				if (vmtId.startsWith(IMPORT_ID_PREFIX)) {
+					String vmtKey = vmtId.substring(IMPORT_ID_PREFIX.length(), vmtId.length());
+					VirtualMachineTemplate vmt = importVirtualMachineTemplate(vmtKey);
+					vmts.add(vmt);
+				}
+			}
+			vt.setVmTemplates(vmts);
+			vt.setLastEditor(user.getUsername());
+			vt.setLastModification(new Date());
 			templateManager.addVirtueTemplate(vt);
+		} else {
+			vt = templateManager.getVirtueTemplate(id);
 		}
-		return id;
-	}
-
-	public String importVirtue(String testApplication) {
-		ApplicationDefinition app = read(TYPE_APPLICATION, testApplication, ApplicationDefinition.class);
-		templateManager.addApplicationDefinition(app);
-		return app.getId();
+		return vt;
 	}
 
 	private <T> T read(String type, String name, Class<T> klass) {
-		File dir = new File(root, type);
+		name = name + ".json";
+		File dir = new File(rootCwd, type);
 		File file = new File(dir, name);
 		if (!file.exists()) {
-			throw new SaviorException(SaviorException.IMPORT_NOT_FOUND, "Import of type=" + type + " was not found");
+			dir = new File(rootClassPath, type);
+			file = new File(dir, name);
+			if (!file.exists()) {
+				throw new SaviorException(SaviorException.IMPORT_NOT_FOUND,
+						"Import of type=" + type + " was not found");
+			}
 		}
 		T instance;
 		try {
