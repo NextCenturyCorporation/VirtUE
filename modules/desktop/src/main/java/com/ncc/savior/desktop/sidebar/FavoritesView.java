@@ -13,7 +13,7 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 public class FavoritesView extends AbstractAppsView {
 
 	public FavoritesView(VirtueService vs, JScrollPane sp) throws IOException {
-		super(vs, sp);
+		super();
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
 		container.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));

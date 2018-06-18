@@ -15,7 +15,7 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 public class AppsList extends AbstractAppsView {
 
 	public AppsList(VirtueService vs, JScrollPane sp) throws IOException {
-		super(vs, sp);
+		super();
 		container.setLayout(new ModifiedFlowLayout());
 	}
 

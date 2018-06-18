@@ -16,8 +16,9 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 
 public class AppsTile extends AbstractAppsView {
 
-	public AppsTile(VirtueService vs, JScrollPane sp) throws IOException {
-		super(vs, sp);
+	public AppsTile(VirtueService virtueService, JScrollPane sp)
+			throws IOException {
+		super();
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
 		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

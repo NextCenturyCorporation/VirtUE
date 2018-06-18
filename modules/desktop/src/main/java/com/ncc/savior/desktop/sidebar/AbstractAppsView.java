@@ -3,9 +3,7 @@ package com.ncc.savior.desktop.sidebar;
 import java.util.HashMap;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
-import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 
 /**
@@ -18,14 +16,10 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 public abstract class AbstractAppsView {
 
 	protected JPanel container;
-	protected VirtueService virtueService;
-	protected JScrollPane sp;
 	protected HashMap<ApplicationDefinition, JPanel> tiles;
 
-	public AbstractAppsView(VirtueService vs, JScrollPane sp) {
+	public AbstractAppsView() {
 		this.container = new JPanel();
-		this.virtueService = vs;
-		this.sp = sp;
 		this.tiles = new HashMap<ApplicationDefinition, JPanel>();
 	}
 

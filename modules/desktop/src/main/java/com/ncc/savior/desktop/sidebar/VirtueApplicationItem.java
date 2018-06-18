@@ -9,7 +9,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -32,6 +35,8 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 public class VirtueApplicationItem {
 
 	private static final Logger logger = LoggerFactory.getLogger(SidebarController.class);
+
+	private ArrayList<PropertyChangeListener> listeners;
 
 	private boolean isFavorited = false;
 
@@ -67,6 +72,8 @@ public class VirtueApplicationItem {
 		this.virtueService = virtueService;
 		String name = ad.getName();
 
+		this.listeners = new ArrayList<PropertyChangeListener>();
+
 		this.tileAppIcon = new JLabel();
 		this.tileContainer = new JPanel();
 		this.tileFavoritedLabel = new JLabel();
@@ -89,6 +96,27 @@ public class VirtueApplicationItem {
 		tileSetup(virtueTileContainer, virtueTileAppName, virtueTileAppIcon, virtueTileFavoritedLabel);
 
 		listSetup(name);
+
+		addListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if ((boolean) evt.getNewValue() == true) {
+					isFavorited = true;
+					listFavoritedLabel.setIcon(favoritedImage);
+					tileFavoritedLabel.setIcon(favoritedImage);
+					favoriteFavoritedLabel.setIcon(favoritedImage);
+					virtueTileFavoritedLabel.setIcon(favoritedImage);
+				} else {
+					isFavorited = false;
+					listFavoritedLabel.setIcon(unfavoritedImage);
+					tileFavoritedLabel.setIcon(unfavoritedImage);
+					favoriteFavoritedLabel.setIcon(unfavoritedImage);
+					virtueTileFavoritedLabel.setIcon(unfavoritedImage);
+				}
+			}
+
+		});
 	}
 
 	public void tileSetup(JPanel container, JLabel appName, JLabel appIcon, JLabel favoritedLabel) {
@@ -189,6 +217,16 @@ public class VirtueApplicationItem {
 		});
 	}
 
+	public void addListener(PropertyChangeListener listener) {
+		listeners.add(listener);
+	}
+
+	private void sendChangeEvent(PropertyChangeEvent propertyChangeEvent) {
+		for (PropertyChangeListener listener : listeners) {
+			listener.propertyChange(propertyChangeEvent);
+		}
+	}
+
 	public JPanel getTileContainer() {
 		return tileContainer;
 	}
@@ -202,19 +240,11 @@ public class VirtueApplicationItem {
 	}
 
 	public void favorite() {
-		isFavorited = true;
-		listFavoritedLabel.setIcon(favoritedImage);
-		tileFavoritedLabel.setIcon(favoritedImage);
-		favoriteFavoritedLabel.setIcon(favoritedImage);
-		virtueTileFavoritedLabel.setIcon(favoritedImage);
+		sendChangeEvent(new PropertyChangeEvent("favorite", "isFavorited", false, true));
 	}
 
 	public void unfavorite() {
-		isFavorited = false;
-		listFavoritedLabel.setIcon(unfavoritedImage);
-		tileFavoritedLabel.setIcon(unfavoritedImage);
-		favoriteFavoritedLabel.setIcon(unfavoritedImage);
-		virtueTileFavoritedLabel.setIcon(unfavoritedImage);
+		sendChangeEvent(new PropertyChangeEvent("favorite", "isFavorited", true, false));
 	}
 
 }
