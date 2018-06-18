@@ -1,11 +1,13 @@
 package com.ncc.savior.virtueadmin.service;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -150,24 +152,24 @@ public class ImportExportService {
 
 	}
 
-	public VirtueUser importUser(String testUser) {
+	public VirtueUser importUser(String userKey) {
 		verifyAndReturnUser();
-		VirtueUser user = read(TYPE_USER, testUser, VirtueUser.class);
+		VirtueUser user = read(TYPE_USER, userKey, VirtueUser.class);
 		Collection<VirtueTemplate> vts = new ArrayList<VirtueTemplate>();
-		VirtueUser existingUser = userManager.getUser(user.getUsername());
-		if (existingUser == null) {
-			for (String vtId : user.getVirtueTemplateIds()) {
-				if (vtId.startsWith(IMPORT_ID_PREFIX)) {
-					String vtKey = vtId.substring(IMPORT_ID_PREFIX.length(), vtId.length());
-					VirtueTemplate vt = importVirtueTemplate(vtKey);
-					vts.add(vt);
-				}
+		// boolean exists = userManager.userExists(user.getUsername());
+		// if (!exists) {
+		for (String vtId : user.getVirtueTemplateIds()) {
+			if (vtId.startsWith(IMPORT_ID_PREFIX)) {
+				String vtKey = vtId.substring(IMPORT_ID_PREFIX.length(), vtId.length());
+				VirtueTemplate vt = importVirtueTemplate(vtKey);
+				vts.add(vt);
 			}
-			user.setVirtueTemplates(vts);
-			userManager.addUser(user);
-		} else {
-			user = existingUser;
 		}
+		user.setVirtueTemplates(vts);
+		userManager.addUser(user);
+		// } else {
+		// user = userManager.getUser(user.getUsername());
+		// }
 		return user;
 	}
 
@@ -176,12 +178,12 @@ public class ImportExportService {
 		ApplicationDefinition app = read(TYPE_APPLICATION, testApplication, ApplicationDefinition.class);
 		String id = IMPORT_ID_PREFIX + testApplication;
 		app.setId(id);
-		boolean exists = templateManager.containsApplication(id);
-		if (!exists) {
-			templateManager.addApplicationDefinition(app);
-		} else {
-			app = templateManager.getApplicationDefinition(id);
-		}
+		// boolean exists = templateManager.containsApplication(id);
+		// if (!exists) {
+		templateManager.addApplicationDefinition(app);
+		// } else {
+		// app = templateManager.getApplicationDefinition(id);
+		// }
 		return app;
 	}
 
@@ -191,22 +193,22 @@ public class ImportExportService {
 		String id = IMPORT_ID_PREFIX + testVirtualMachine;
 		vmt.setId(id);
 		Collection<ApplicationDefinition> applications = new ArrayList<ApplicationDefinition>();
-		boolean exists = templateManager.containsVirtualMachineTemplate(id);
-		if (!exists) {
-			for (String appId : vmt.getApplicationIds()) {
-				if (appId.startsWith(IMPORT_ID_PREFIX)) {
-					String appKey = appId.substring(IMPORT_ID_PREFIX.length(), appId.length());
-					ApplicationDefinition app = importApplication(appKey);
-					applications.add(app);
-				}
+		// boolean exists = templateManager.containsVirtualMachineTemplate(id);
+		// if (!exists) {
+		for (String appId : vmt.getApplicationIds()) {
+			if (appId.startsWith(IMPORT_ID_PREFIX)) {
+				String appKey = appId.substring(IMPORT_ID_PREFIX.length(), appId.length());
+				ApplicationDefinition app = importApplication(appKey);
+				applications.add(app);
 			}
-			vmt.setApplications(applications);
-			vmt.setLastEditor(user.getUsername());
-			vmt.setLastModification(new Date());
-			templateManager.addVmTemplate(vmt);
-		} else {
-			vmt = templateManager.getVmTemplate(id);
 		}
+		vmt.setApplications(applications);
+		vmt.setLastEditor(user.getUsername());
+		vmt.setLastModification(new Date());
+		templateManager.addVmTemplate(vmt);
+		// } else {
+		// vmt = templateManager.getVmTemplate(id);
+		// }
 		return vmt;
 	}
 
@@ -216,23 +218,93 @@ public class ImportExportService {
 		String id = IMPORT_ID_PREFIX + testVirtue;
 		vt.setId(id);
 		Collection<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
-		boolean exists = templateManager.containsVirtueTemplate(id);
-		if (!exists) {
-			for (String vmtId : vt.getVirtualMachineTemplateIds()) {
-				if (vmtId.startsWith(IMPORT_ID_PREFIX)) {
-					String vmtKey = vmtId.substring(IMPORT_ID_PREFIX.length(), vmtId.length());
-					VirtualMachineTemplate vmt = importVirtualMachineTemplate(vmtKey);
-					vmts.add(vmt);
-				}
+		// boolean exists = templateManager.containsVirtueTemplate(id);
+		// if (!exists) {
+		for (String vmtId : vt.getVirtualMachineTemplateIds()) {
+			if (vmtId.startsWith(IMPORT_ID_PREFIX)) {
+				String vmtKey = vmtId.substring(IMPORT_ID_PREFIX.length(), vmtId.length());
+				VirtualMachineTemplate vmt = importVirtualMachineTemplate(vmtKey);
+				vmts.add(vmt);
 			}
-			vt.setVmTemplates(vmts);
-			vt.setLastEditor(user.getUsername());
-			vt.setLastModification(new Date());
-			templateManager.addVirtueTemplate(vt);
-		} else {
-			vt = templateManager.getVirtueTemplate(id);
 		}
+		vt.setVmTemplates(vmts);
+		vt.setLastEditor(user.getUsername());
+		vt.setLastModification(new Date());
+		templateManager.addVirtueTemplate(vt);
+		// } else {
+		// vt = templateManager.getVirtueTemplate(id);
+		// }
 		return vt;
+	}
+
+	public int importAll() {
+		int items = 0;
+		verifyAndReturnUser();
+		for (String name : getJsonFileNames(TYPE_APPLICATION)) {
+			try {
+				importApplication(name);
+				items++;
+			} catch (Throwable t) {
+				logger.error("Error trying to import application with name=" + name, t);
+			}
+		}
+		for (String name : getJsonFileNames(TYPE_VIRTUAL_MACHINE)) {
+			try {
+				importVirtualMachineTemplate(name);
+				items++;
+			} catch (Throwable t) {
+				logger.error("Error trying to import virtual machine template with name=" + name, t);
+			}
+		}
+		for (String name : getJsonFileNames(TYPE_VIRTUE)) {
+			try {
+				importVirtueTemplate(name);
+				items++;
+			} catch (Throwable t) {
+				logger.error("Error trying to import virtue template with name=" + name, t);
+			}
+		}
+		for (String name : getJsonFileNames(TYPE_USER)) {
+			try {
+				importUser(name);
+				items++;
+			} catch (Throwable t) {
+				logger.error("Error trying to import user with name=" + name, t);
+			}
+		}
+		return items;
+	}
+
+	private Set<String> getJsonFileNames(String type) {
+		File dir1 = new File(rootClassPath, type);
+		File dir2 = new File(rootCwd, type);
+		FilenameFilter filter = new FilenameFilter() {
+
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".json") || name.endsWith(".JSON");
+			}
+		};
+		Set<File> allFiles = new HashSet<File>();
+		File[] files;
+		if (dir1.exists()) {
+			files = dir1.listFiles(filter);
+			Collections.addAll(allFiles, files);
+		}
+		if (dir2.exists()) {
+			files = dir2.listFiles(filter);
+			Collections.addAll(allFiles, files);
+		}
+		Set<String> allStrings = new HashSet<String>();
+		for (File f : allFiles) {
+			String name = f.getName();
+			int dot = name.lastIndexOf(".");
+			if (dot >= 0) {
+				name = name.substring(0, dot);
+			}
+			allStrings.add(name);
+		}
+		return allStrings;
 	}
 
 	private <T> T read(String type, String name, Class<T> klass) {

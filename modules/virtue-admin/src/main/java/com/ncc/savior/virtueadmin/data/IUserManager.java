@@ -13,10 +13,18 @@ public interface IUserManager {
 
 	Iterable<VirtueUser> getAllUsers();
 
+	/**
+	 * Clears all virtues from all users. If removeAllUsers is true, it then deletes
+	 * those users.
+	 * 
+	 * @param removeAllUsers
+	 */
 	void clear(boolean removeAllUsers);
 
 	void removeUser(VirtueUser user);
 
 	void removeUser(String usernameToRemove);
+
+	boolean userExists(String username);
 
 }

@@ -50,6 +50,7 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.service.AdminService;
+import com.ncc.savior.virtueadmin.service.ImportExportService;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -76,8 +77,19 @@ public class DataResource {
 	@Autowired
 	private SessionRegistry sessionRegistry;
 
+	@Autowired
+	private ImportExportService importExportService;
+
 	public DataResource() {
 		logger.warn("***Data Resource is currently enabled.  Please disable for production systems.***");
+	}
+
+	@GET
+	@Path("import/all")
+	@Produces("text/plain")
+	public String importAll() {
+		int items = importExportService.importAll();
+		return "imported " + items + " items.";
 	}
 
 	@GET
@@ -372,8 +384,8 @@ public class DataResource {
 
 		try {
 			if (iconStream != null) {
-			byte[] bytes = IOUtils.toByteArray(iconStream);
-			templateManager.addIcon(AdminService.DEFAULT_ICON_KEY, bytes);
+				byte[] bytes = IOUtils.toByteArray(iconStream);
+				templateManager.addIcon(AdminService.DEFAULT_ICON_KEY, bytes);
 			}
 		} catch (IOException e) {
 			logger.error("Failed to load default icon");

@@ -675,7 +675,7 @@ public class AdminResource {
 
 	@GET
 	@Path("import/{type}/{name}")
-	@Produces("plain/text")
+	@Produces("text/plain")
 	public String importItem(@PathParam("type") String type, @PathParam("name") String name) {
 		try {
 			switch (type) {
@@ -695,6 +695,21 @@ public class AdminResource {
 				throw WebServiceUtil.createWebserviceException(
 						new SaviorException(SaviorException.IMPORT_NOT_FOUND, "Invalid import type=" + type));
 			}
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Path("import/all")
+	@Produces("text/plain")
+	public String importAll() {
+		try {
+			int items = importExportService.importAll();
+			return "imported " + items + " items.";
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
