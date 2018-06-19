@@ -73,7 +73,7 @@ public class VirtueContainer {
 	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) {
 		JPanel tile = va.getContainer();
 
-		tiles.put(ad.getName(), tile);
+		tiles.put(ad.getId(), tile);
 
 		tileContainer.add(tile);
 	}
@@ -237,11 +237,6 @@ public class VirtueContainer {
 
 	public String getName() {
 		return headerTitle;
-	}
-
-	public void removeVirtue(String name) {
-		tileContainer.remove(tiles.get(name));
-		tiles.remove(name);
 	}
 
 	public void updateVirtue(DesktopVirtue virtue) {

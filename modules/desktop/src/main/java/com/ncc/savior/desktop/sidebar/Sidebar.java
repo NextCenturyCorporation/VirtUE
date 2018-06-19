@@ -50,8 +50,6 @@ public class Sidebar implements VirtueChangeHandler {
 	private Map<String, VirtueContainer> virtueIdToVc;
 	private AuthorizationService authService;
 
-	private HashMap<DesktopVirtue, HashMap<ApplicationDefinition, ApplicationDom>> virtues;
-
 	private Iterator<Color> colorItr;
 	private ArrayList<Color> colorList;
 	private JFrame frame;
@@ -72,7 +70,6 @@ public class Sidebar implements VirtueChangeHandler {
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors, String style) {
 		this.authService = authService;
 		this.virtueIdToVc = new HashMap<String, VirtueContainer>();
-		this.virtues = new HashMap<DesktopVirtue, HashMap<ApplicationDefinition, ApplicationDom>>();
 		this.virtueService = virtueService;
 
 		colorList = loadColors();
@@ -178,7 +175,6 @@ public class Sidebar implements VirtueChangeHandler {
 		virtueIdToVc.put(id, vc);
 		vt.addVirtueToRow(virtue, vc, vc.getRow());
 
-		virtues.put(virtue, new HashMap<ApplicationDefinition, ApplicationDom>());
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
 			ApplicationDom dom = new ApplicationDom(ad);
 
@@ -205,7 +201,6 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(appsListVa.getChangeListener());
 			dom.addListener(vcAppsTileVa.getChangeListener());
 
-			virtues.get(virtue).put(ad, dom);
 		}
 		sp.getViewport().validate();
 	}
@@ -223,8 +218,6 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 
 			vt.removeVirtue(virtue);
-			VirtueContainer finalVmi = vmi;
-			finalVmi.removeVirtue(virtue.getName());
 		}
 	}
 

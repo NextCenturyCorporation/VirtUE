@@ -19,16 +19,16 @@ public abstract class AbstractAppsView {
 
 	protected VirtueService virtueService;
 	protected JPanel container;
-	protected HashMap<ApplicationDefinition, VirtueApplicationItem> tiles;
+	protected HashMap<String, VirtueApplicationItem> tiles;
 
 	public AbstractAppsView(VirtueService virtueService) {
 		this.virtueService = virtueService;
 		this.container = new JPanel();
-		this.tiles = new HashMap<ApplicationDefinition, VirtueApplicationItem>();
+		this.tiles = new HashMap<String, VirtueApplicationItem>();
 	}
 
 	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) throws IOException {
-		tiles.put(ad, va);
+		tiles.put(ad.getId(), va);
 		container.add(va.getContainer());
 
 		container.validate();
@@ -36,10 +36,10 @@ public abstract class AbstractAppsView {
 	}
 
 	public void removeApplication(ApplicationDefinition ad) {
-		container.remove(tiles.get(ad).getContainer());
+		container.remove(tiles.get(ad.getId()).getContainer());
 		container.validate();
 		container.repaint();
-		tiles.remove(ad);
+		tiles.remove(ad.getId());
 		container.validate();
 		container.repaint();
 	}

@@ -33,15 +33,16 @@ public class VirtueTile {
 	}
 
 	public void removeVirtue(DesktopVirtue virtue) {
-		VirtueContainer removedVc = virtues.get(virtue.getName());
+		VirtueContainer removedVc = virtues.get(virtue.getTemplateId());
+
 		int removedRow = removedVc.getRow();
 		container.remove(removedVc.getContainer());
-		virtues.remove(virtue.getName());
+		virtues.remove(virtue.getTemplateId());
 
 		for (VirtueContainer vc : virtues.values()) {
 			if (vc.getRow() > removedRow) {
 				container.remove(vc.getContainer());
-				virtues.get(vc.getName()).setRow(vc.getRow() - 1);
+				vc.setRow(vc.getRow() - 1);
 				addVirtueToRow(vc.getVirtue(), vc, vc.getRow());
 				container.validate();
 				container.repaint();
@@ -58,7 +59,7 @@ public class VirtueTile {
 		gbc.gridy = row;
 		container.add(vc.getContainer(), gbc);
 
-		virtues.put(virtue.getName(), vc);
+		virtues.put(virtue.getVirtueKey(), vc);
 	}
 
 	public JPanel getContainer() {

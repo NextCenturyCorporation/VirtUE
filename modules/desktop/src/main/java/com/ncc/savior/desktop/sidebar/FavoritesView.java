@@ -29,22 +29,22 @@ public class FavoritesView extends AbstractAppsView {
 
 	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueContainer vc, JScrollPane sp,
 			PropertyChangeListener listener) {
-		if (tiles.get(ad) == null) {
+		if (tiles.get(ad.getId()) == null) {
 			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener);
 			va.tileSetup();
 			va.setToFavorited();
 
 			container.add(va.getContainer());
-			tiles.put(ad, va);
+			tiles.put(ad.getId(), va);
 		}
 	}
 
 	public void removeFavorite(ApplicationDefinition ad) {
-		if (tiles != null && tiles.get(ad) != null) {
-			container.remove(tiles.get(ad).getContainer());
+		if (tiles != null && tiles.get(ad.getId()) != null) {
+			container.remove(tiles.get(ad.getId()).getContainer());
 			container.validate();
 			container.repaint();
-			tiles.remove(ad);
+			tiles.remove(ad.getId());
 		}
 	}
 }
