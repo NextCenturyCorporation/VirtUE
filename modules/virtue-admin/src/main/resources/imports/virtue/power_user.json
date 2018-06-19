@@ -1,0 +1,10 @@
+{
+    "name": "Windows and Linux Power User",
+    "version": "1.0",
+    "enabled": true,
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "IMPORT_windows_power_user",
+      "IMPORT_linux_power_user"
+    ]
+  }

@@ -1,0 +1,12 @@
+{
+    "name": "External Internet Consumer VM",
+    "os": "WINDOWS",
+    "templatePath": "ami-cfcd68b0",
+    "loginUser": "administrator",
+    "enabled": true,
+    "applicationIds": [
+      "IMPORT_windows_chrome",
+      "IMPORT_windows_skype"
+    ],
+    "securityTag": "power"
+  }

@@ -1,0 +1,12 @@
+{
+    "name": "Router Admin VM",
+    "os": "LINUX",
+    "templatePath": "ami-2b500951",
+    "loginUser": "user",
+    "enabled": true,
+    "applicationIds": [
+      "IMPORT_linux_terminal",
+      "IMPORT_linux_firefox"
+    ],
+    "securityTag": "power"
+  }

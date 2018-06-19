@@ -1,0 +1,7 @@
+{
+    "name": "Chrome (Linux)",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "google-chrome",
+    "iconKey": "chrome"
+}

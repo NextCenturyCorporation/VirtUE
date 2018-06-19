@@ -1,0 +1,7 @@
+{
+	"name": "Calculator",
+	"version": "1.0",
+	"os": "LINUX",
+	"launchCommand": "gnome-calculator",
+	"iconKey": "calc"
+}

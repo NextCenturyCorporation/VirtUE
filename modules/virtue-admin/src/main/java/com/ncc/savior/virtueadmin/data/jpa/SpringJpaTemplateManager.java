@@ -313,6 +313,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
+	public boolean containsVirtualMachineTemplate(String id) {
+		return vmtRepository.existsById(id);
+	}
+
+	@Override
 	public boolean containsVirtueTemplate(String id) {
 		return vtRepository.existsById(id);
 	}

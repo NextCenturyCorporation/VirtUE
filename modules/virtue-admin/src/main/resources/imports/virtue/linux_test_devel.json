@@ -1,0 +1,9 @@
+{
+	"name": "Linux Test/Development 1",
+	"version": "1.0",
+	"enabled": true,
+	"awsTemplateName": "default-template",
+	"virtualMachineTemplateIds": [
+		"IMPORT_linux_all"
+	]
+}

@@ -1,0 +1,18 @@
+{
+	"name": "windows All VM",
+	"os": "WINDOWS",
+	"templatePath": "ami-cfcd68b0",
+	"loginUser": "administrator",
+	"enabled": true,
+	"applicationIds": [
+		"IMPORT_windows_cmd",
+		"IMPORT_windows_chrome",
+		"IMPORT_windows_edge",
+		"IMPORT_windows_excel",
+		"IMPORT_windows_outlook",
+		"IMPORT_windows_skype",
+		"IMPORT_windows_powershell",
+		"IMPORT_windows_word"
+	],
+	"securityTag": "power"
+}

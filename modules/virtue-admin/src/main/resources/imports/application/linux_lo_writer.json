@@ -1,0 +1,7 @@
+{
+	"name": "LibreOffice Writer",
+	"version": "1.0",
+	"os": "LINUX",
+	"launchCommand": "lowriter",
+	"iconKey": "lo-writer"
+}
