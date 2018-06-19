@@ -14,7 +14,6 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.RaiseWindowPacket;
 
-
 /**
  * Swing Application manager keeps track of and controls
  * {@link SwingApplication}s. An Application is defined as window that has its
