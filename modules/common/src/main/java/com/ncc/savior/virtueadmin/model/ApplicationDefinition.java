@@ -16,8 +16,9 @@ public class ApplicationDefinition {
 	private String version;
 	private OS os;
 	private String launchCommand;
+	private String iconKey;
 
-	public ApplicationDefinition(String id, String name, String version, OS os) {
+	public ApplicationDefinition(String id, String name, String version, OS os, String iconKey) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -25,7 +26,8 @@ public class ApplicationDefinition {
 		this.os = os;
 	}
 
-	public ApplicationDefinition(String id, String displayName, String version, OS os, String launchCommand) {
+	public ApplicationDefinition(String id, String displayName, String version, OS os, String launchCommand,
+			String iconKey) {
 		this.id=id;
 		this.name=displayName;
 		this.version=version;
@@ -89,9 +91,17 @@ public class ApplicationDefinition {
 		this.launchCommand = launchCommand;
 	}
 
+	protected String getIconKey() {
+		return iconKey;
+	}
+
+	protected void setIconKey(String iconKey) {
+		this.iconKey = iconKey;
+	}
+
 	@Override
 	public String toString() {
 		return "ApplicationDefinition [id=" + id + ", name=" + name + ", version=" + version + ", os=" + os
-				+ ", launchCommand=" + launchCommand + "]";
+				+ ", launchCommand=" + launchCommand + ", iconKey=" + iconKey + "]";
 	}
 }

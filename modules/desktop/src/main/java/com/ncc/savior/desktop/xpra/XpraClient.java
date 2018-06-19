@@ -60,6 +60,7 @@ public class XpraClient implements Closeable {
 	private static int threadCount = 1;
 	private Status status;
 	private int display;
+	protected IConnectionErrorCallback errorCallback;
 
 	public XpraClient() {
 		connectListenerManager = new ConnectListenerManager();
@@ -67,6 +68,7 @@ public class XpraClient implements Closeable {
 		packetReceivedListenerManager = new PacketListenerManager();
 		packetSentListenerManager = new PacketListenerManager();
 		status = Status.DISCONNECTED;
+
 
 		internalPacketDistributer.addPacketHandler(PacketType.HELLO, new BasePacketHandler(PacketType.HELLO) {
 
@@ -117,15 +119,18 @@ public class XpraClient implements Closeable {
 	public void callOnSuccess(IConnection connection) {
 		// logger.debug("success on connection = " + connection + " client=" + this);
 		status = Status.CONNECTED;
-		IConnectionErrorCallback errorCallback = new IConnectionErrorCallback() {
-			@Override
-			public void onError(String description, IOException e) {
-				onIoException(e);
-			}
-		};
 
 		try {
-			packetSender = new OutputStreamPacketSender(connection.getOutputStream(), sendEncoder, errorCallback);
+			IConnectionErrorCallback myErrorCallback = new IConnectionErrorCallback() {
+				@Override
+				public void onError(String description, IOException e) {
+					onIoException(e);
+					if (errorCallback != null) {
+						errorCallback.onError(description, e);
+					}
+				}
+			};
+			packetSender = new OutputStreamPacketSender(connection.getOutputStream(), sendEncoder, myErrorCallback);
 			packetSender.setPacketListenerManager(packetSentListenerManager);
 			Runnable runnable = new Runnable() {
 
@@ -237,5 +242,9 @@ public class XpraClient implements Closeable {
 
 	public void setDisplay(int display) {
 		this.display = display;
+	}
+
+	public void setErrorCallback(IConnectionErrorCallback errorCallback) {
+		this.errorCallback = errorCallback;
 	}
 }

@@ -6,6 +6,10 @@ import java.util.ArrayList;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 
+/**
+ * This is the domain object for applications
+ */
+
 public class ApplicationDom {
 
 	private ChangeListener changeListener;

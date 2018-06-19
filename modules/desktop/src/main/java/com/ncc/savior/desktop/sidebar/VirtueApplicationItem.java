@@ -28,8 +28,12 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
+
+/**
+ * This is the application list component that can be set as the view to the
+ * sidebar scrollPane
+ */
 
 public class VirtueApplicationItem {
 
@@ -138,8 +142,8 @@ public class VirtueApplicationItem {
 					public void actionPerformed(ActionEvent evt) {
 						try {
 							virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
-							virtue.setVirtueState(VirtueState.LAUNCHING);
-							vc.updateVirtue(virtue);
+							// virtue.setVirtueState(VirtueState.LAUNCHING);
+							// vc.updateVirtue(virtue);
 						} catch (IOException e) {
 							String msg = "Error attempting to start a " + ad.getName() + " application";
 							logger.error(msg);

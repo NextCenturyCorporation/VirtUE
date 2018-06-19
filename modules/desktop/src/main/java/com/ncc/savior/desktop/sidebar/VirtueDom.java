@@ -6,6 +6,10 @@ import java.util.ArrayList;
 
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * This is the domain object for virtues
+ */
+
 public class VirtueDom {
 
 	private ChangeListener changeListener;

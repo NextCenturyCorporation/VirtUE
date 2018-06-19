@@ -10,11 +10,6 @@ export class ListFilterPipe implements PipeTransform {
     if (value.length === 0) {
       return value;
     }
-    // console.log('listFilter info: ');
-    // console.log('filterType: ' + filterType);
-    // console.log('filterValue: ' + filterValue);
-    // console.log('filterDirection: ' + filterDirection);
-
     let sortedList = value.slice(0);
     let resultArray = [];
 
@@ -26,8 +21,6 @@ export class ListFilterPipe implements PipeTransform {
       sortedList = value;
     }
     resultArray = this.sortByColumn(sortedList, filterColumn, filterValue, filterDirection);
-
-    console.log(resultArray);
     return resultArray;
   }
 
@@ -46,7 +39,7 @@ export class ListFilterPipe implements PipeTransform {
       propertyName = 'lastModification';
     }
     if (filterDirection === 'desc') {
-      console.log('sorting list by desc order');
+      // console.log('sorting list by desc order');
       data.sort((leftSide, rightSide): number => {
         if (leftSide[propertyName] < rightSide[propertyName]) {
           return 1;
@@ -57,7 +50,7 @@ export class ListFilterPipe implements PipeTransform {
         return 0;
       });
     } else {
-      console.log('sorting list by asc order');
+      // console.log('sorting list by asc order');
       data.sort((leftSide, rightSide): number => {
 
         if (leftSide[propertyName] < rightSide[propertyName]) {

@@ -11,6 +11,11 @@ import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * This is the favorites component that can be set as the view to the sidebar
+ * scrollPane
+ */
+
 public class FavoritesView extends AbstractAppsView {
 
 	public FavoritesView(VirtueService virtueService) throws IOException {

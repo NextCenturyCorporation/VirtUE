@@ -2,8 +2,10 @@ package com.ncc.savior.virtueadmin.data;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -153,4 +155,13 @@ public interface ITemplateManager {
 	boolean containsApplication(String id);
 
 	boolean containsVirtueTemplate(String id);
+
+	void addIcon(String iconKey, byte[] bytes);
+
+	void removeIcon(String iconKey);
+
+	IconModel getIcon(String iconKey);
+
+	Set<String> getAllIconKeys();
+
 }
