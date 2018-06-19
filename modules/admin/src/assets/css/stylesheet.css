@@ -3750,29 +3750,54 @@ content #content.content {
 }
 
 /* line 304, ../scss/_styles.scss */
+.table-header span.list-sorter {
+  display: block;
+  float: left;
+  height: 15px;
+  padding: 0;
+  position: relative;
+  top: -3px;
+  width: 10px;
+}
+/* line 312, ../scss/_styles.scss */
+.table-header span.list-sorter span {
+  position: absolute;
+  display: block;
+  margin: 0;
+}
+/* line 316, ../scss/_styles.scss */
+.table-header span.list-sorter span.fa-sort-down, .table-header span.list-sorter span.fa-sort-up {
+  z-index: 1;
+}
+/* line 319, ../scss/_styles.scss */
+.table-header span.list-sorter span.fa-sort {
+  z-index: 0;
+}
+
+/* line 324, ../scss/_styles.scss */
 .table-header span {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-/* line 309, ../scss/_styles.scss */
+/* line 329, ../scss/_styles.scss */
 .table-row.active .menu-options {
   display: block;
 }
 
-/* line 313, ../scss/_styles.scss */
+/* line 333, ../scss/_styles.scss */
 .table-data {
   font-family: 'Raleway', Arial, sans-serif;
   background-color: #FFF;
   display: table-cell;
 }
-/* line 317, ../scss/_styles.scss */
+/* line 337, ../scss/_styles.scss */
 .table-data span {
   margin-left: 10px;
   margin-right: 10px;
   text-align: left;
 }
-/* line 322, ../scss/_styles.scss */
+/* line 342, ../scss/_styles.scss */
 .table-data .menu-options {
   clear: both;
   display: none;
@@ -3780,7 +3805,7 @@ content #content.content {
   font-weight: 600;
   margin: 0;
 }
-/* line 329, ../scss/_styles.scss */
+/* line 349, ../scss/_styles.scss */
 .table-data .menu-options button {
   background-color: transparent;
   border: none;
@@ -3790,26 +3815,26 @@ content #content.content {
   padding: 0;
   text-decoration: none;
 }
-/* line 338, ../scss/_styles.scss */
+/* line 358, ../scss/_styles.scss */
 .table-data .menu-options button:hover {
   text-decoration: underline;
 }
 
-/* line 345, ../scss/_styles.scss */
+/* line 365, ../scss/_styles.scss */
 .tab-pane-content {
   min-height: 506px;
   overflow-y: scroll;
   padding: 1.5rem;
 }
 
-/* line 350, ../scss/_styles.scss */
+/* line 370, ../scss/_styles.scss */
 .tab-pane-content:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 353, ../scss/_styles.scss */
+/* line 373, ../scss/_styles.scss */
 .titlebar {
   clear: both;
   display: block;
@@ -3817,39 +3842,39 @@ content #content.content {
   margin-bottom: 1.2rem;
   min-height: 1rem;
 }
-/* line 360, ../scss/_styles.scss */
+/* line 380, ../scss/_styles.scss */
 .titlebar:after {
   clear: both;
   content: ' ';
   display: block;
   height: 1px;
 }
-/* line 366, ../scss/_styles.scss */
+/* line 386, ../scss/_styles.scss */
 .titlebar h1, .titlebar h2, .titlebar h3, .titlebar h4, .titlebar h5 {
   margin-top: 0;
 }
-/* line 367, ../scss/_styles.scss */
+/* line 387, ../scss/_styles.scss */
 .titlebar h2 {
   font-size: 28px;
 }
-/* line 368, ../scss/_styles.scss */
+/* line 388, ../scss/_styles.scss */
 .titlebar h3 {
   font-size: 24px;
 }
-/* line 369, ../scss/_styles.scss */
+/* line 389, ../scss/_styles.scss */
 .titlebar h4 {
   font-size: 20px;
 }
-/* line 370, ../scss/_styles.scss */
+/* line 390, ../scss/_styles.scss */
 .titlebar h5 {
   font-size: 18px;
 }
-/* line 372, ../scss/_styles.scss */
+/* line 392, ../scss/_styles.scss */
 .titlebar .titlebar-title {
   float: left;
   margin: 0;
 }
-/* line 376, ../scss/_styles.scss */
+/* line 396, ../scss/_styles.scss */
 .titlebar .titlebar-button {
   background-color: #E9E3E6;
   border: 1px solid #B2B2B2;
@@ -3860,7 +3885,7 @@ content #content.content {
   padding: 0.5rem 0.7rem;
 }
 
-/* line 387, ../scss/_styles.scss */
+/* line 407, ../scss/_styles.scss */
 .no-data-message {
   display: block;
   border: none;
@@ -3868,7 +3893,7 @@ content #content.content {
   margin-right: 25px;
 }
 
-/* line 394, ../scss/_styles.scss */
+/* line 414, ../scss/_styles.scss */
 vertical-split-pane {
   border-bottom: 1px solid #B2B2B2;
   display: block;
@@ -3876,19 +3901,19 @@ vertical-split-pane {
 }
 
 /* Footer Global Layout */
-/* line 401, ../scss/_styles.scss */
+/* line 421, ../scss/_styles.scss */
 app-footer {
   margin-top: 50px;
   width: 100%;
 }
-/* line 404, ../scss/_styles.scss */
+/* line 424, ../scss/_styles.scss */
 app-footer:after {
   clear: both;
   content: ' ';
   display: block;
 }
 
-/* line 408, ../scss/_styles.scss */
+/* line 428, ../scss/_styles.scss */
 footer {
   background: #e9e3e6;
   border-top: 1px solid #FAFAFA;
@@ -3897,7 +3922,7 @@ footer {
   position: relative;
 }
 
-/* line 415, ../scss/_styles.scss */
+/* line 435, ../scss/_styles.scss */
 #footer-content {
   font-family: 'Raleway', Arial, sans-serif;
   font-size: 0.88rem;

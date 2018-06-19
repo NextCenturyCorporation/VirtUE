@@ -38,4 +38,6 @@ public interface IWindowsClipboardUser32 extends User32 {
 	boolean GetUpdatedClipboardFormats(int[] formats, int sizeOfFormats, IntByReference returnedSizeOfFormats);
 
 	WinDef.HWND SetClipboardViewer(WinDef.HWND handle);
+
+	short GetKeyState(int vKey);
 }

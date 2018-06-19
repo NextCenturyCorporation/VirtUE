@@ -24,21 +24,22 @@
         <div class="mui-row table-header-group">
           <div class="table-header mui-col-md-2">
             <a class="sortName" (click)="sortVirtueColumns('name',sortBy)">Virtue Name</a>
-            <span *ngIf="sortColumn === 'name' && sortBy === 'asc'" class="margin-bottom: 3px">
-              <span class="fa fa-sort-up"></span>
-              <span class="fa fa-sort-down"></span>
-              </span>
-            <span *ngIf="sortColumn !== 'name'" class="fa fa-sort font-color-gray" style="margin-bottom: 3px"></span>
+            <span class="list-sorter">
+              <span *ngIf="sortColumn === 'name' && sortBy === 'asc'" class="fa fa-sort-up"></span>
+              <span *ngIf="sortColumn === 'name' && sortBy === 'desc'" class="fa fa-sort-down"></span>
+              <span class="fa fa-sort font-color-gray"></span>
+            </span>
           </div>
           <div class="table-header mui-col-md-3">Virtual Machines</div>
           <div class="table-header mui-col-md-3">Apps</div>
           <div class="table-header mui-col-md-2">Created By</div>
           <div class="table-header mui-col-md-2">
-            <a class="sortDate" (click)="sortVirtueColumns('date',sortBy)">Date
+            <a class="sortDate" (click)="sortVirtueColumns('date',sortBy)">Date</a>
+            <span class="list-sorter">
               <span *ngIf="sortColumn === 'date' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'date' && sortBy === 'desc'" class="fa fa-sort-down"></span>
-            </a>
-              <span *ngIf="sortColumn !== 'date'" class="fa fa-sort font-color-gray" style="margin-bottom: 3px"></span>
+              <span class="fa fa-sort font-color-gray"></span>
+            </span>
           </div>
         </div>
         <!-- if there are no virtues, show this message -->

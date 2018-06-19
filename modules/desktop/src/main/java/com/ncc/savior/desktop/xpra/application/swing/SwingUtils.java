@@ -5,6 +5,10 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.desktop.jna.ILockingKeysService;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
 
@@ -14,6 +18,8 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
  *
  */
 public class SwingUtils {
+	private static final Logger logger = LoggerFactory.getLogger(SwingUtils.class);
+
 	public static final String MOD_ALT_STRING = "alt";
 	public static final String MOD_CONTROL_STRING = "control";
 	public static final String MOD_SHIFT_STRING = "shift";
@@ -21,6 +27,11 @@ public class SwingUtils {
 	public static final String MOD_SHORTCUT_STRING = "shortcut";
 	public static final String MOD_CAPS_LOCK = "lock";
 	public static final String MOD_NUM_LOCK = "mod2";
+	private static ILockingKeysService lockingKeys;
+
+	static {
+		lockingKeys = ILockingKeysService.getLockingKeyService();
+	}
 
 	public static List<String> getModifiers(KeyEvent event) {
 		List<String> mods = new ArrayList<String>();
@@ -65,18 +76,21 @@ public class SwingUtils {
 	}
 
 	private static void addLockKeys(List<String> mods) {
-		boolean capslock = false;
-		// Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK);
-		boolean numlock = false;
-		// Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_NUM_LOCK);
-		numlock = true;
-		if (capslock) {
+		boolean capsLock = false, numLock = false;
+		try {
+			capsLock = lockingKeys.getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+			numLock = lockingKeys.getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+			// boolean scrollLock = lockingKeys.getLockingKeyState(KeyEvent.VK_SCROLL_LOCK);
+		} catch (Throwable t) {
+			logger.error("Error getting locking key state", t);
+		}
+		numLock = true;
+		if (capsLock) {
 			mods.add(MOD_CAPS_LOCK);
 		}
-		if (numlock) {
+		if (numLock) {
 			mods.add(MOD_NUM_LOCK);
 		}
-
 	}
 
 	public static KeyCodeDto getKeyCodeFromEvent(KeyEvent e, SwingKeyboard keyboard) {
