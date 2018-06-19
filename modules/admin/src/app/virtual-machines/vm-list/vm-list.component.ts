@@ -14,8 +14,8 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 })
 export class VmListComponent implements OnInit {
 
-  vms = [];
-  apps = [];
+  vms: any[];
+  apps: any[];
   filterValue = '*';
 
   // noListData = false;
@@ -68,8 +68,8 @@ export class VmListComponent implements OnInit {
     this.vmService.getVmList(baseUrl).subscribe(vmlist => {
       this.vms = vmlist;
       this.totalVms = vmlist.length;
+      this.sortVms(vmlist);
     });
-  this.sortVms(this.vms);
   }
 
   sortVms(sortDirection: string) {
