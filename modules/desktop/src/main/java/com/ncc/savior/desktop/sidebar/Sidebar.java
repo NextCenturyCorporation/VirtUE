@@ -141,7 +141,6 @@ public class Sidebar implements VirtueChangeHandler {
 				frame.getContentPane().add(desktopContainer);
 				frame.setSize(495, 620);
 				setInitialViewPort();
-				at.refresh();
 				frame.setVisible(true);
 			}
 
@@ -208,6 +207,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 			virtues.get(virtue).put(ad, dom);
 		}
+		sp.getViewport().validate();
 	}
 
 	@Override

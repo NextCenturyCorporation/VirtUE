@@ -24,9 +24,4 @@ public class AppsTile extends AbstractAppsView {
 		container.repaint();
 	}
 
-	public void refresh() {
-		container.validate();
-		container.repaint();
-	}
-
 }
