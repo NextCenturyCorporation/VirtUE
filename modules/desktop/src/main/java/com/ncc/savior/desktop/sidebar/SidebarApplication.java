@@ -7,6 +7,10 @@ import javax.swing.JFrame;
 
 import com.ncc.savior.configuration.PropertyManager;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.clipboard.IClipboardManager;
+import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
+import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
+import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.rdp.WindowsRdp;
@@ -46,6 +50,7 @@ public class SidebarApplication {
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		boolean swing = props.getBoolean(PropertyManager.PROPERTY_SWING, true);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
+		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization, loginUrl,
 				logoutUrl);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
@@ -66,7 +71,9 @@ public class SidebarApplication {
 			rdpClient = new WindowsRdp();
 		}
 
-		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, null);
+		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
+		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
+		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
 		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		controller.init(primaryFrame);
