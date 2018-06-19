@@ -1,0 +1,33 @@
+---
+# Deploy cifs-proxy server
+#
+
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+
+    - name: Provision a Windows AD DS
+      ec2:
+        #assign_public_ip: True
+        # Windows Server 2016 R2
+        image: ami-2a9a1655
+        count_tag:
+          Owner: "{{ lookup('env', 'USER') }}"
+          class: activedirectory
+        exact_count: 1
+        group:
+          default_windows_rdp
+          NextCentury-VA
+          NextCentury-VPN
+        instance_tags:
+          Name: Windows AD DS - Ansible-started 
+          Owner: "{{ lookup('env', 'USER') }}"
+          class: activedirectory
+        instance_type: t2.micro
+        region: us-east-1
+        state: running
+        vpc_subnet_id: subnet-77a38e2d
+        wait: True
+      register: ec2
