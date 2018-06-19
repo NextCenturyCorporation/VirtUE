@@ -34,6 +34,7 @@ public class VirtueDom {
 		listenerList.add(listener);
 	}
 
+	@SuppressWarnings("unused")
 	private void sendChangeEvent(PropertyChangeEvent propertyChangeEvent) {
 		for (PropertyChangeListener listener : listenerList) {
 			listener.propertyChange(propertyChangeEvent);

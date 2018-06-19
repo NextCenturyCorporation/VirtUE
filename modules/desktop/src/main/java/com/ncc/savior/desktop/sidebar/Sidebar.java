@@ -177,7 +177,6 @@ public class Sidebar implements VirtueChangeHandler {
 		vt.addVirtueToRow(virtue, vc, vc.getRow());
 
 		virtues.put(virtue.getName(), new ArrayList<VirtueApplicationItem>());
-		ArrayList<VirtueApplicationItem> applicationList = virtues.get(virtue.getName());
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
 			ApplicationDom dom = new ApplicationDom(ad);
 
