@@ -1,0 +1,12 @@
+{
+	"name": "Windows Corperate Email User VM",
+	"os": "WINDOWS",
+	"templatePath": "ami-cfcd68b0",
+	"loginUser": "administrator",
+	"enabled": true,
+	"applicationIds": [
+		"IMPORT_windows_edge",
+		"IMPORT_windows_outlook"
+	],
+	"securityTag": "email"
+}

@@ -1,0 +1,7 @@
+{
+    "name": "Firefox",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "firefox",
+    "iconKey": "firefox"
+  }

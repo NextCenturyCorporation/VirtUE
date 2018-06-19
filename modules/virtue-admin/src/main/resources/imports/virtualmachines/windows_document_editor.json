@@ -1,0 +1,13 @@
+{
+    "name": "Document Editor VM",
+    "os": "WINDOWS",
+    "templatePath": "ami-cfcd68b0",
+    "loginUser": "administrator",
+    "enabled": true,
+    "applicationIds": [
+      "IMPORT_windows_word",
+      "IMPORT_windows_excel",
+      "IMPORT_windows_edge"
+    ],
+    "securityTag": "default"
+  }

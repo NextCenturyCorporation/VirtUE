@@ -1,0 +1,7 @@
+  {
+	"name": "LibreOffice Draw",
+	"version": "1.0",
+	"os": "LINUX",
+	"launchCommand": "lodraw",
+	"iconKey": "lo-draw"
+}

@@ -61,4 +61,9 @@ public class SpringJpaUserManager implements IUserManager {
 		userRepo.deleteById(usernameToRemove);
 	}
 
+	@Override
+	public boolean userExists(String username) {
+		return userRepo.existsById(username);
+	}
+
 }

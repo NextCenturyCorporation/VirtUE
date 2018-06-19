@@ -1,0 +1,9 @@
+{
+    "name": "Router Admin",
+    "version": "1.0",
+    "enabled": true,
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "IMPORT_linux_router_admin"
+    ]
+  }

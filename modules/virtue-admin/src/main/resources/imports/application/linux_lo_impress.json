@@ -1,0 +1,7 @@
+  {
+	"name": "LibreOffice Impress",
+	"version": "1.0",
+	"os": "LINUX",
+	"launchCommand": "loimpress",
+	"iconKey": "lo-impress"
+}

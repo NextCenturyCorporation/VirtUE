@@ -1,0 +1,7 @@
+{
+    "name": "Thunderbird",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "thunderbird",
+    "iconKey": "thunderbird"
+  }

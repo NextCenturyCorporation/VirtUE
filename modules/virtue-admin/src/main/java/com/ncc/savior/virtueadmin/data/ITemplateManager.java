@@ -154,6 +154,8 @@ public interface ITemplateManager {
 
 	boolean containsApplication(String id);
 
+	boolean containsVirtualMachineTemplate(String id);
+
 	boolean containsVirtueTemplate(String id);
 
 	void addIcon(String iconKey, byte[] bytes);

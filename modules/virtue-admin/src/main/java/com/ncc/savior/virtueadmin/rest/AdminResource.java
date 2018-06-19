@@ -674,6 +674,51 @@ public class AdminResource {
 	}
 
 	@GET
+	@Path("import/{type}/{name}")
+	@Produces("text/plain")
+	public String importItem(@PathParam("type") String type, @PathParam("name") String name) {
+		try {
+			switch (type) {
+			case ImportExportService.TYPE_APPLICATION:
+				ApplicationDefinition app = importExportService.importApplication(name);
+				return app.getId();
+			case ImportExportService.TYPE_VIRTUAL_MACHINE:
+				VirtualMachineTemplate vmt = importExportService.importVirtualMachineTemplate(name);
+				return vmt.getId();
+			case ImportExportService.TYPE_VIRTUE:
+				VirtueTemplate vt = importExportService.importVirtueTemplate(name);
+				return vt.getId();
+			case ImportExportService.TYPE_USER:
+				VirtueUser user = importExportService.importUser(name);
+				return user.getUsername();
+			default:
+				throw WebServiceUtil.createWebserviceException(
+						new SaviorException(SaviorException.IMPORT_NOT_FOUND, "Invalid import type=" + type));
+			}
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Path("import/all")
+	@Produces("text/plain")
+	public String importAll() {
+		try {
+			int items = importExportService.importAll();
+			return "imported " + items + " items.";
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
 	@Path("sensing")
 	@Produces("application/json")
 	public Response getSensing() throws IOException {

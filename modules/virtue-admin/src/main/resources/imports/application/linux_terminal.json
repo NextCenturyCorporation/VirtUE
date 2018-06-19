@@ -1,0 +1,7 @@
+{
+    "name": "Terminal",
+    "version": "1.0",
+    "os": "LINUX",
+    "launchCommand": "xterm",
+    "iconKey": "linux-terminal"
+  }

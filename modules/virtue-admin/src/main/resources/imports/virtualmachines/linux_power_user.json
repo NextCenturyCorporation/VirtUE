@@ -1,0 +1,12 @@
+{
+    "name": "Power User Vm Linux",
+    "os": "LINUX",
+    "templatePath": "ami-2b500951",
+    "loginUser": "user",
+    "enabled": true,
+    "applicationIds": [
+      "IMPORT_linux_chrome",
+      "IMPORT_linux_terminal"
+    ],
+    "securityTag": "power"
+  }
