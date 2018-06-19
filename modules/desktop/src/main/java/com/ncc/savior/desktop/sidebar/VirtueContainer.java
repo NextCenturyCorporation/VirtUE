@@ -71,7 +71,7 @@ public class VirtueContainer {
 	}
 
 	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) {
-		JPanel tile = va.getVirtueTileContainer();
+		JPanel tile = va.getContainer();
 
 		tiles.put(ad.getName(), tile);
 

@@ -4,10 +4,8 @@ import java.awt.FlowLayout;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
-import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 
 /**
  * This is the application tile component that can be set as the view to the
@@ -16,19 +14,14 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 
 public class AppsTile extends AbstractAppsView {
 
-	public AppsTile(VirtueService virtueService, JScrollPane sp)
+	public AppsTile(VirtueService virtueService)
 			throws IOException {
-		super();
+		super(virtueService);
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
 		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		container.validate();
 		container.repaint();
-	}
-
-	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) throws IOException {
-		container.add(va.getTileContainer());
-		tiles.put(ad, va.getTileContainer());
 	}
 
 }

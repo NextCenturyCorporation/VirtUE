@@ -179,12 +179,30 @@ public class Sidebar implements VirtueChangeHandler {
 		virtues.put(virtue.getName(), new ArrayList<VirtueApplicationItem>());
 		ArrayList<VirtueApplicationItem> applicationList = virtues.get(virtue.getName());
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
-			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc);
-			applicationList.add(va);
-			va.setup(vc, fv, ad, virtue);
-			al.addApplication(ad, va);
-			at.addApplication(ad, va);
-			vc.addApplication(ad, va);
+			ApplicationDom dom = new ApplicationDom(ad);
+
+			VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv,
+					dom.getChangeListener());
+			appsTileVa.tileSetup();
+			appsTileVa.registerListener(dom.getChangeListener());
+
+			VirtueApplicationItem vcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv,
+					dom.getChangeListener());
+			vcAppsTileVa.tileSetup();
+			vcAppsTileVa.registerListener(dom.getChangeListener());
+
+			VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv,
+					dom.getChangeListener());
+			appsListVa.listSetup();
+			appsListVa.registerListener(dom.getChangeListener());
+
+			al.addApplication(ad, appsListVa);
+			at.addApplication(ad, appsTileVa);
+			vc.addApplication(ad, vcAppsTileVa);
+
+			dom.addListener(appsTileVa.getChangeListener());
+			dom.addListener(appsListVa.getChangeListener());
+			dom.addListener(vcAppsTileVa.getChangeListener());
 		}
 
 		setInitialViewPort();
@@ -220,11 +238,11 @@ public class Sidebar implements VirtueChangeHandler {
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
 		this.sp = new JScrollPane();
-		this.at = new AppsTile(virtueService, sp);
-		this.al = new AppsList(virtueService, sp);
+		this.at = new AppsTile(virtueService);
+		this.al = new AppsList(virtueService);
 		this.vt = new VirtueTile();
 		this.vl = new VirtueList();
-		this.fv = new FavoritesView(virtueService, sp);
+		this.fv = new FavoritesView(virtueService);
 		desktopContainer.setLayout(new BorderLayout(0, 0));
 
 		applicationsOpen = true;
