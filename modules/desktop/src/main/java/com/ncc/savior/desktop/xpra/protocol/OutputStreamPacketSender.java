@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class OutputStreamPacketSender implements IPacketSender {
 		this.encoder = encoder;
 		this.threaded = true;
 		if (threaded) {
-			this.queue = new ArrayBlockingQueue<Packet>(20);
+			this.queue = new ArrayBlockingQueue<Packet>(50);
 			Runnable packetSendingRunnable = new Runnable() {
 				@Override
 				public void run() {
@@ -78,7 +79,12 @@ public class OutputStreamPacketSender implements IPacketSender {
 	public void sendPacket(Packet packet) throws IOException {
 		if (threaded) {
 			try {
-				queue.put(packet);
+				boolean success = queue.offer(packet, 100, TimeUnit.MILLISECONDS);
+				if (!success) {
+					// This should never happen as the queue should be read off quickly and if there
+					// is a connection error, the windows should be closed.
+					logger.error("Packet sending timed out! This should never happen!" + packet);
+				}
 			} catch (InterruptedException e) {
 				logger.debug("Packet Sender interrupted.  This may be intentionally by a close().", e);
 			}

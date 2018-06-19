@@ -75,6 +75,9 @@ public class XpraConnectionManager {
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
+		client.setErrorCallback((msg, e) -> {
+			applicationManager.closeAllWindows();
+		});
 		client.connect(factory, params);
 		client.setDisplay(params.getDisplay());
 

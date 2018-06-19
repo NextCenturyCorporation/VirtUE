@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -47,11 +48,11 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	private void initTestDatabase() throws Exception {
 		ApplicationDefinition chrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome", "1.0",
-				OS.LINUX, "google-chrome");
+				OS.LINUX, null, "google-chrome");
 		ApplicationDefinition firefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
-				OS.LINUX, "firefox");
+				OS.LINUX, null, "firefox");
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
-				OS.LINUX, "gnome-calculator");
+				OS.LINUX, null, "gnome-calculator");
 
 		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();
@@ -69,7 +70,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		Date now = new Date();
 		String systemName = "system";
-//		String allTemplate = "default-template";
+		// String allTemplate = "default-template";
 		String loginUser = "loginUser";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Linux Browsers",
 				OS.LINUX, "Linux Browsers", appsBrowsers, loginUser, true, now, systemName);
@@ -368,6 +369,26 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	@Override
 	public boolean containsVirtueTemplate(String id) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public void addIcon(String iconKey, byte[] bytes) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public void removeIcon(String iconKey) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public IconModel getIcon(String iconKey) {
+		throw new RuntimeException("not implemented");
+	}
+
+	@Override
+	public Set<String> getAllIconKeys() {
 		throw new RuntimeException("not implemented");
 	}
 

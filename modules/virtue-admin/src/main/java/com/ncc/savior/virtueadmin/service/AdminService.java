@@ -20,6 +20,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,6 +33,7 @@ import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
@@ -46,7 +48,7 @@ import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
  * ROLE_ADMIN.
  */
 public class AdminService {
-
+	public static final String DEFAULT_ICON_KEY = "DEFAULT";
 	private IActiveVirtueManager virtueManager;
 	private ITemplateManager templateManager;
 	private IUserManager userManager;
@@ -390,6 +392,30 @@ public class AdminService {
 		return sessionMap;
 	}
 
+	public void uploadIcon(String iconKey, InputStream inputStream) throws IOException {
+		verifyAndReturnUser();
+		byte[] bytes = IOUtils.toByteArray(inputStream);
+		templateManager.addIcon(iconKey, bytes);
+	}
+
+	public IconModel getIcon(String iconKey) {
+		IconModel icon = templateManager.getIcon(iconKey);
+		if (icon == null) {
+			icon = templateManager.getIcon(DEFAULT_ICON_KEY);
+		}
+		return icon;
+	}
+
+	public void deleteIcon(String iconKey) {
+		if (!DEFAULT_ICON_KEY.equals(iconKey)) {
+			templateManager.removeIcon(iconKey);
+		}
+	}
+
+	public Set<String> getAllIconKeys() {
+		return templateManager.getAllIconKeys();
+	}
+
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
@@ -414,5 +440,4 @@ public class AdminService {
 			throw new IllegalArgumentException("No sensing URI was set");
 		}
 	}
-
 }
