@@ -121,13 +121,18 @@ public class SidebarController {
 			DesktopVirtue v = itr.next();
 			String key = getMapKey(v);
 			if (currentVirtues.containsKey(key)) {
-				currentVirtues.remove(key);
+				DesktopVirtue old = currentVirtues.remove(key);
 				newCurrentVirtues.put(getMapKey(v), v);
-				reportChangedVirtue(v);
+				if (virtueChanged(old, v)) {
+					reportChangedVirtue(v);
+				}
 			} else if (currentVirtues.containsKey(v.getTemplateId())) {
-				currentVirtues.remove(v.getTemplateId());
+				key = v.getTemplateId();
+				DesktopVirtue old = currentVirtues.remove(key);
 				newCurrentVirtues.put(getMapKey(v), v);
-				reportChangedVirtue(v);
+				if (virtueChanged(old, v)) {
+					reportChangedVirtue(v);
+				}
 			} else {
 				reportAddedVirtue(v);
 				newCurrentVirtues.put(getMapKey(v), v);
@@ -142,6 +147,10 @@ public class SidebarController {
 		}
 
 		currentVirtues = newCurrentVirtues;
+	}
+
+	private boolean virtueChanged(DesktopVirtue old, DesktopVirtue v) {
+		return !old.equals(v);
 	}
 
 	// TODO this still has bugs and should be completely rethought

@@ -73,8 +73,15 @@ public class HelloPacket extends Packet {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
 		int maxW = -1;
 		int maxH = -1;
-		maxW = 1440;
-		maxH = 900;
+		int[][] monitors = getMonitorSizes();
+		for (int[] monitor : monitors) {
+			if (monitor[0] > maxW) {
+				maxW = monitor[0];
+			}
+			if (monitor[1] > maxH) {
+				maxH = monitor[1];
+			}
+		}
 		int[] screen = new int[] { maxW, maxH };
 		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
 		map.put(VERSION, XpraClient.VERSION);
@@ -82,7 +89,7 @@ public class HelloPacket extends Packet {
 		map.put(DPI, 96);
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
 		// map.put(SCREEN_SIZES, new int[][] {});
-		int[][] screenSizes = getMonitorSizes();
+		int[][] screenSizes = monitors;
 		map.put(SCREEN_SIZES, screenSizes);
 		map.put(ENCODINGS, encodings);
 		map.put(ZLIB, true);

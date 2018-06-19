@@ -141,7 +141,7 @@ public class VirtueApplicationItem {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
 						try {
-							virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
+							virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
 							// virtue.setVirtueState(VirtueState.LAUNCHING);
 							// vc.updateVirtue(virtue);
 						} catch (IOException e) {
