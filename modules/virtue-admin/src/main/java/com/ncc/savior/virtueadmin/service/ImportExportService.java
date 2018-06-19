@@ -34,7 +34,21 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 
+/**
+ * Service that manages importing and exporting data from files. The files are
+ * read from classpath://imports and ./imports. The non-classpath entry
+ * overrides the classpath entry for users to override the data. When importing
+ * Users, Virtue Templates, or Virtual Machine Templates, the system will also
+ * attempt to import dependencies. If an item or its dependency are not found,
+ * an exception will be thrown.
+ * 
+ * Additionally, this service can import and export the entire database via
+ * streams.
+ * 
+ *
+ */
 public class ImportExportService {
+	private static final String IMPORTS_LOCATION = "imports";
 	private static final Logger logger = LoggerFactory.getLogger(ImportExportService.class);
 	private static final String IMPORT_ID_PREFIX = "IMPORT_";
 	public static final String TYPE_USER = "user";
@@ -52,12 +66,12 @@ public class ImportExportService {
 		this.templateManager = templateManager;
 		this.userManager = userManager;
 		try {
-			this.rootClassPath = new ClassPathResource("imports").getFile();
+			this.rootClassPath = new ClassPathResource(IMPORTS_LOCATION).getFile();
 		} catch (IOException e) {
 			logger.error("Unable to initialize class path import source.  Imports may not work.");
 		}
 		try {
-			this.rootCwd = new PathResource("./imports").getFile();
+			this.rootCwd = new PathResource("./" + IMPORTS_LOCATION).getFile();
 		} catch (IOException e) {
 			logger.error("Unable to initialize working directory import source.  Imports may not work.");
 		}
@@ -237,6 +251,12 @@ public class ImportExportService {
 		return vt;
 	}
 
+	/**
+	 * Imports all data that can be found in the import repository files. For an
+	 * item to be imported, all of its dependencies need to be importable as well.
+	 * 
+	 * @return
+	 */
 	public int importAll() {
 		int items = 0;
 		verifyAndReturnUser();
