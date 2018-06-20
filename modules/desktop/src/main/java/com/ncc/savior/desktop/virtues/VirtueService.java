@@ -186,8 +186,16 @@ public class VirtueService {
 					// moved such that if connection fails, we don't retry forever starting a ton of
 					// applications
 					itr.remove();
-					DesktopVirtueApplication app = desktopResourceService.startApplication(virtue.getId(), appDefn);
-					ensureConnection(app, virtue, color);
+					Thread t = new Thread(() -> {
+						try {
+							DesktopVirtueApplication app = desktopResourceService.startApplication(virtue.getId(),
+									appDefn);
+							ensureConnection(app, virtue, color);
+						} catch (Exception e) {
+							logger.error("error starting pending application", e);
+						}
+					});
+					t.start();
 				}
 			}
 		}
@@ -203,8 +211,7 @@ public class VirtueService {
 	 * @param color
 	 * @throws IOException
 	 */
-	public void startApplication(DesktopVirtue v, ApplicationDefinition appDefn, RgbColor color)
-			throws IOException {
+	public void startApplication(DesktopVirtue v, ApplicationDefinition appDefn, RgbColor color) throws IOException {
 		// TODO check to see if we have an XPRA connection
 		Thread t = new Thread(() -> {
 			DesktopVirtue virtue = v;

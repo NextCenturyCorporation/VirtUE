@@ -117,7 +117,7 @@ public class VirtueContainer {
 								// virtueService.startVirtue(virtue);
 								virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
 								// virtue.setVirtueState(VirtueState.LAUNCHING);
-								updateVirtue(virtue);
+								// updateVirtue(virtue);
 							} catch (IOException e) {
 								String msg = "Error attempting to start virtue=" + virtue;
 								logger.error(msg, e);
@@ -211,7 +211,7 @@ public class VirtueContainer {
 		container.add(tileContainer, BorderLayout.CENTER);
 		tileContainer.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 		tileContainer.setBorder(new EmptyBorder(10, 25, 10, 25));
-
+		updateVirtue(virtue);
 		numRows++;
 	}
 
