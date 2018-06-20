@@ -68,10 +68,11 @@ public class SidebarController {
 	}
 
 	private String getMapKey(DesktopVirtue v) {
-		if (v.getId() == null || v.getId().trim().equals("")) {
-			return v.getTemplateId();
-		}
-		return v.getTemplateId() + "-" + v.getId();
+		// if (v.getId() == null || v.getId().trim().equals("")) {
+		// return v.getTemplateId();
+		// }
+		// return v.getTemplateId() + "-" + v.getId();
+		return v.getTemplateId();
 	}
 
 	// ****************
@@ -241,7 +242,7 @@ public class SidebarController {
 			}
 			changeHandler.changeVirtue(virtue);
 		} catch (Exception e) {
-			logger.error("Error sending remove virtue event", e);
+			logger.error("Error sending change virtue event", e);
 		}
 	}
 
