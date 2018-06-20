@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.virtues;
 
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -178,6 +180,17 @@ public class DesktopResourceService {
 		}
 	}
 
+	private Image getImage(WebTarget target, String method)
+			throws IOException, InvalidUserLoginException {
+		Builder builder = target.request(MediaType.MEDIA_TYPE_WILDCARD);
+		addAuthorization(builder, targetHost);
+		Response response = builder.method(method);
+		InputStream in = (InputStream) response.getEntity();
+		Image image = ImageIO.read(in);
+		return image;
+
+	}
+
 	private void addAuthorization(Builder builder, String targetHost) throws InvalidUserLoginException {
 		// Temporary implementation until we really tie in active directory.
 		DesktopUser user = authService.getUser();
@@ -215,5 +228,14 @@ public class DesktopResourceService {
 			logger.trace("Stopping virtue=" + virtue);
 		}
 		return virtue;
+	}
+
+	public Image getIcon(String iconKey) throws InvalidUserLoginException, IOException {
+		WebTarget target = baseApi.path("icon").path(iconKey);
+		Image img = getImage(target, "GET");
+		if (logger.isTraceEnabled()) {
+			logger.trace("Retrieving image");
+		}
+		return img;
 	}
 }
