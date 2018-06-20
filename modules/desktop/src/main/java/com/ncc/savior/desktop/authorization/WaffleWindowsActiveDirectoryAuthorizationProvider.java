@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.authorization;
 
-import java.io.InputStream;
 import java.util.Base64;
 
 import javax.ws.rs.client.Invocation.Builder;
@@ -8,7 +7,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.image.Image;
 import waffle.windows.auth.IWindowsCredentialsHandle;
 import waffle.windows.auth.IWindowsIdentity;
 import waffle.windows.auth.IWindowsImpersonationContext;
@@ -39,21 +37,11 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 		String fqd = WindowsAccountImpl.getCurrentUsername();
 
 		DesktopUser user = DesktopUser.fromFullyQualifiedDomainName(fqd);
-		setCurrentImage(user);
 		if (imp != null) {
 			imp.revertToSelf();
 		}
 		return user;
 
-	}
-
-	private void setCurrentImage(DesktopUser user) {
-		String uri = "/images/user/" + user.getUsername() + ".jpg";
-		InputStream stream = DesktopUser.class.getResourceAsStream(uri);
-		if (stream != null) {
-			Image img = new Image(stream);
-			user.setImage(img);
-		}
 	}
 
 	@Override
@@ -64,7 +52,6 @@ public class WaffleWindowsActiveDirectoryAuthorizationProvider implements IActiv
 		imp = impersonatedUser.impersonate();
 		logger.debug("impersonating new user: " + WindowsAccountImpl.getCurrentUsername());
 		DesktopUser user = new DesktopUser(domain, username);
-		setCurrentImage(user);
 		imp.revertToSelf();
 		return user;
 	}
