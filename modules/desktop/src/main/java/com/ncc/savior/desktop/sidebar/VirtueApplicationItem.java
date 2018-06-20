@@ -143,7 +143,7 @@ public class VirtueApplicationItem {
 						try {
 							virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
 							// virtue.setVirtueState(VirtueState.LAUNCHING);
-							// vc.updateVirtue(virtue);
+							vc.updateVirtue(virtue);
 						} catch (IOException e) {
 							String msg = "Error attempting to start a " + ad.getName() + " application";
 							logger.error(msg);

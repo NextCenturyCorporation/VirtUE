@@ -117,7 +117,7 @@ public class VirtueContainer {
 								// virtueService.startVirtue(virtue);
 								virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
 								// virtue.setVirtueState(VirtueState.LAUNCHING);
-								// updateVirtue(virtue);
+								updateVirtue(virtue);
 							} catch (IOException e) {
 								String msg = "Error attempting to start virtue=" + virtue;
 								logger.error(msg, e);

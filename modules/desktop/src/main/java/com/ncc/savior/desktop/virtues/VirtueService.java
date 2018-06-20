@@ -214,6 +214,9 @@ public class VirtueService {
 				if (virtueId == null) {
 					virtue = desktopResourceService.createVirtue(virtue.getTemplateId());
 					addPendingAppStart(virtue.getId(), appDefn, color);
+					// Set old object with new status
+					v.setId(virtue.getId());
+					v.setVirtueState(virtue.getVirtueState());
 				} else {
 					if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
 						app = desktopResourceService.startApplication(virtueId, appDefn);
