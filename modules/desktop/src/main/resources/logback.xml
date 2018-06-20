@@ -90,12 +90,12 @@
         <appender-ref ref="INFO"/>
     </logger>
     
-    <logger name="com.ncc.savior.desktop.sidebar.SidebarController" additivity="false">
-        <level value="TRACE" />
-         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="DEBUG"/>
-        <appender-ref ref="INFO"/>
-    </logger>
+<!--     <logger name="com.ncc.savior.desktop.sidebar.SidebarController" additivity="false"> -->
+<!--         <level value="TRACE" /> -->
+<!--          <appender-ref ref="CONSOLE"/> -->
+<!--         <appender-ref ref="DEBUG"/> -->
+<!--         <appender-ref ref="INFO"/> -->
+<!--     </logger> -->
     
 
     <logger name="com" additivity="false">
