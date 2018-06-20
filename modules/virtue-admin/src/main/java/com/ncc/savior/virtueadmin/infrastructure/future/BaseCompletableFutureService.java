@@ -109,7 +109,7 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 	}
 
 	protected void onFailure(P initial, CompletableFuture<R> cf) {
-		SaviorException se = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error with value" + initial);
+		SaviorException se = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error with value " + initial);
 		if (logger.isDebugEnabled()) {
 			logger.debug(getServiceName() + " failed with initial data=" + initial + " and error:", se);
 		}

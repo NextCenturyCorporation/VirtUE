@@ -76,14 +76,6 @@ public class DesktopVirtue {
 	public void setVirtueState(VirtueState virtueState) {
 		this.virtueState = virtueState;
 	}
-	
-	public String getVirtueKey() {
-		if (id != null) {
-			return id;
-		} else {
-			return templateId;
-		}
-	}
 
 	@Override
 	public String toString() {

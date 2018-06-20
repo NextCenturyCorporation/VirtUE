@@ -68,10 +68,11 @@ public class SidebarController {
 	}
 
 	private String getMapKey(DesktopVirtue v) {
-		if (v.getId() == null || v.getId().trim().equals("")) {
-			return v.getTemplateId();
-		}
-		return v.getTemplateId() + "-" + v.getId();
+		// if (v.getId() == null || v.getId().trim().equals("")) {
+		// return v.getTemplateId();
+		// }
+		// return v.getTemplateId() + "-" + v.getId();
+		return v.getTemplateId();
 	}
 
 	// ****************
@@ -117,12 +118,16 @@ public class SidebarController {
 	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {
 		Iterator<DesktopVirtue> itr = virtues.iterator();
 		Map<String, DesktopVirtue> newCurrentVirtues = new TreeMap<String, DesktopVirtue>();
+		if (logger.isTraceEnabled()) {
+			logger.trace("current Virtues: (" + currentVirtues.size() + ") " + currentVirtues);
+		}
 		while (itr.hasNext()) {
 			DesktopVirtue v = itr.next();
 			String key = getMapKey(v);
 			if (currentVirtues.containsKey(key)) {
 				DesktopVirtue old = currentVirtues.remove(key);
-				newCurrentVirtues.put(getMapKey(v), v);
+				String newKey = getMapKey(v);
+				newCurrentVirtues.put(newKey, v);
 				if (virtueChanged(old, v)) {
 					reportChangedVirtue(v);
 				}
@@ -209,15 +214,36 @@ public class SidebarController {
 	}
 
 	protected void reportRemovedVirtue(DesktopVirtue virtue) {
-		changeHandler.removeVirtue(virtue);
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.trace("removing virtue " + virtue);
+			}
+			changeHandler.removeVirtue(virtue);
+		} catch (Exception e) {
+			logger.error("Error sending remove virtue event", e);
+		}
 	}
 
 	protected void reportAddedVirtue(DesktopVirtue virtue) throws IOException {
-		changeHandler.addVirtue(virtue);
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.debug("adding virtue " + virtue);
+			}
+			changeHandler.addVirtue(virtue);
+		} catch (Exception e) {
+			logger.error("Error sending remove virtue event", e);
+		}
 	}
 
 	protected void reportChangedVirtue(DesktopVirtue virtue) {
-		changeHandler.changeVirtue(virtue);
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.debug("changing virtue " + virtue);
+			}
+			changeHandler.changeVirtue(virtue);
+		} catch (Exception e) {
+			logger.error("Error sending change virtue event", e);
+		}
 	}
 
 	public static interface VirtueChangeHandler {

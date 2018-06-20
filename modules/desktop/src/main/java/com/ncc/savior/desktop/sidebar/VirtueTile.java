@@ -59,7 +59,7 @@ public class VirtueTile {
 		gbc.gridy = row;
 		container.add(vc.getContainer(), gbc);
 
-		virtues.put(virtue.getVirtueKey(), vc);
+		virtues.put(virtue.getTemplateId(), vc);
 	}
 
 	public JPanel getContainer() {

@@ -155,14 +155,14 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
-		VirtueContainer vmi = virtueIdToVc.get(virtue.getId());
-		if (vmi == null) {
-			vmi = virtueIdToVc.get(virtue.getTemplateId());
-			if (virtue.getId() != null) {
-				virtueIdToVc.remove(virtue.getTemplateId());
-				virtueIdToVc.put(virtue.getId(), vmi);
-			}
-		}
+		VirtueContainer vmi = virtueIdToVc.get(virtue.getTemplateId());
+		// if (vmi == null) {
+		// vmi = virtueIdToVc.get(virtue.getTemplateId());
+//			if (virtue.getId() != null) {
+//				virtueIdToVc.remove(virtue.getTemplateId());
+//				virtueIdToVc.put(virtue.getId(), vmi);
+//			}
+		// }
 		vmi.updateVirtue(virtue);
 	}
 
@@ -171,8 +171,8 @@ public class Sidebar implements VirtueChangeHandler {
 	public void addVirtue(DesktopVirtue virtue) throws IOException {
 		VirtueContainer vc = new VirtueContainer(virtue, virtueService, getNextColor(),
 				getNextColor(), sp);
-		String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
-		virtueIdToVc.put(id, vc);
+		// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+		virtueIdToVc.put(virtue.getTemplateId(), vc);
 		vt.addVirtueToRow(virtue, vc, vc.getRow());
 
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
@@ -207,10 +207,10 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
-		VirtueContainer vmi = virtueIdToVc.remove(virtue.getId());
-		if (vmi == null) {
-			vmi = virtueIdToVc.remove(virtue.getTemplateId());
-		}
+		VirtueContainer vmi = virtueIdToVc.remove(virtue.getTemplateId());
+		// if (vmi == null) {
+		// vmi = virtueIdToVc.remove(virtue.getTemplateId());
+		// }
 		if (vmi != null) {
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
 				at.removeApplication(ad);
