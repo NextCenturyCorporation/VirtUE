@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
@@ -129,6 +130,21 @@ public class DesktopRestService {
 	public DesktopVirtue stopVirtue(@PathParam("virtueId") String virtueId) {
 		try {
 			return desktopService.stopVirtue(virtueId);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
+	@GET
+	@Produces({ "image/png", "image/jpeg" })
+	@Path("icon/{iconKey}")
+	public byte[] getIcon(@PathParam("iconKey") String iconKey) {
+		try {
+			IconModel iconModel = desktopService.getIcon(iconKey);
+			return iconModel.getData();
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
 			// Probably need to create our own exception
