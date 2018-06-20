@@ -35,7 +35,6 @@ public class PropertyManager {
 	public static final String PROPERTY_ALLOW_INSECURE_SSL = "savior.desktop.allowInsecureSsl";
 	public static final String PROPERTY_USE_COLORS = "savior.desktop.useColors";
 	public static final String PROPERTY_STYLE = "savior.desktop.style";
-	public static final String PROPERTY_SWING = "savior.desktop.swing";
 	public static final String PROPERTY_LOGIN_API_PATH = "savior.api.path.login";
 	public static final String PROPERTY_LOGOUT_API_PATH = "savior.api.path.logout";
 	public static final String PROPERTY_BASE_API_PATH = "savior.api.path.base";
