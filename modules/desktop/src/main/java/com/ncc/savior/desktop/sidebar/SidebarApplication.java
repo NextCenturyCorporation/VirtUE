@@ -15,6 +15,7 @@ import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.rdp.WindowsRdp;
 import com.ncc.savior.desktop.virtues.DesktopResourceService;
+import com.ncc.savior.desktop.virtues.IconResourceService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.application.swing.SwingApplicationManagerFactory;
@@ -66,7 +67,8 @@ public class SidebarApplication {
 		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
-		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);
+		IconResourceService iconService = new IconResourceService(drs);
+		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		controller.init(primaryFrame);
 	}

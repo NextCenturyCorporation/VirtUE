@@ -34,6 +34,7 @@ import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
+import com.ncc.savior.desktop.virtues.IconResourceService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -49,6 +50,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private VirtueService virtueService;
 	private Map<String, VirtueContainer> virtueIdToVc;
 	private AuthorizationService authService;
+	private IconResourceService iconService;
 
 	private Iterator<Color> colorItr;
 	private ArrayList<Color> colorList;
@@ -67,10 +69,12 @@ public class Sidebar implements VirtueChangeHandler {
 	private VirtueList vl;
 	private FavoritesView fv;
 
-	public Sidebar(VirtueService virtueService, AuthorizationService authService, boolean useColors, String style) {
+	public Sidebar(VirtueService virtueService, AuthorizationService authService, IconResourceService iconService,
+			boolean useColors, String style) {
 		this.authService = authService;
 		this.virtueIdToVc = new HashMap<String, VirtueContainer>();
 		this.virtueService = virtueService;
+		this.iconService = iconService;
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
@@ -177,19 +181,21 @@ public class Sidebar implements VirtueChangeHandler {
 
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
 			ApplicationDom dom = new ApplicationDom(ad);
+			Image appImage = iconService.getImage(ad.getIconKey());
+			iconService.addToCache(ad.getIconKey(), appImage);
 
 			VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv,
-					dom.getChangeListener());
+					dom.getChangeListener(), appImage);
 			appsTileVa.tileSetup();
 			appsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv,
-					dom.getChangeListener());
+					dom.getChangeListener(), appImage);
 			vcAppsTileVa.tileSetup();
 			vcAppsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv,
-					dom.getChangeListener());
+					dom.getChangeListener(), appImage);
 			appsListVa.listSetup();
 			appsListVa.registerListener(dom.getChangeListener());
 
