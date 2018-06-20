@@ -85,7 +85,7 @@ public class SidebarControllerTest {
 		sc.updateVirtues(nv);
 
 		Assert.assertArrayEquals(new String[] { "10", "4" }, added.toArray());
-		Assert.assertArrayEquals(new String[] { "3", "7", "5", "9" }, changed.toArray());
+		Assert.assertArrayEquals(new String[] { "3", "7" }, changed.toArray());
 		Assert.assertArrayEquals(new String[] { "1", "2" }, deleted.toArray());
 	}
 
