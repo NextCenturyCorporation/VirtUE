@@ -18,8 +18,8 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class FavoritesView extends AbstractAppsView {
 
-	public FavoritesView(VirtueService virtueService) throws IOException {
-		super(virtueService);
+	public FavoritesView(VirtueService virtueService, JScrollPane sp) throws IOException {
+		super(virtueService, sp);
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
 		container.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
@@ -29,22 +29,22 @@ public class FavoritesView extends AbstractAppsView {
 
 	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueContainer vc, JScrollPane sp,
 			PropertyChangeListener listener) {
-		if (tiles.get(ad.getId()) == null) {
+		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
 			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener);
 			va.tileSetup();
 			va.setToFavorited();
 
 			container.add(va.getContainer());
-			tiles.put(ad.getId(), va);
+			tiles.put(ad.getId() + virtue.getTemplateId(), va);
 		}
 	}
 
-	public void removeFavorite(ApplicationDefinition ad) {
-		if (tiles != null && tiles.get(ad.getId()) != null) {
-			container.remove(tiles.get(ad.getId()).getContainer());
+	public void removeFavorite(ApplicationDefinition ad, DesktopVirtue virtue) {
+		if (tiles != null && tiles.get(ad.getId() + virtue.getTemplateId()) != null) {
+			container.remove(tiles.get(ad.getId() + virtue.getTemplateId()).getContainer());
 			container.validate();
 			container.repaint();
-			tiles.remove(ad.getId());
+			tiles.remove(ad.getId() + virtue.getTemplateId());
 		}
 	}
 }
