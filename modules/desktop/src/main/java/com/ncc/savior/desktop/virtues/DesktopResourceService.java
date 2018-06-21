@@ -38,6 +38,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
 public class DesktopResourceService {
 	private static final Logger logger = LoggerFactory.getLogger(DesktopResourceService.class);
+	private static final String DEFAULT_ICON_KEY = "DEFAULT";
 	private Client client;
 	private ObjectMapper jsonMapper;
 	private WebTarget baseApi;
@@ -231,6 +232,9 @@ public class DesktopResourceService {
 	}
 
 	public Image getIcon(String iconKey) throws InvalidUserLoginException, IOException {
+		if (iconKey == null) {
+			iconKey = DEFAULT_ICON_KEY;
+		}
 		WebTarget target = baseApi.path("icon").path(iconKey);
 		Image img = getImage(target, "GET");
 		if (logger.isTraceEnabled()) {
