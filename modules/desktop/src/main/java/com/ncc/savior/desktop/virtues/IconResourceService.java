@@ -6,12 +6,12 @@ import java.util.HashMap;
 
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 
-public class IconResourceService implements IIconService {
+/**
+ * This class is a service that is used to retrieve icons for different
+ * applications
+ */
 
-	/**
-	 * This class is a service that is used to retrieve icons for different
-	 * applications
-	 */
+public class IconResourceService implements IIconService {
 
 	private DesktopResourceService desktopService;
 
