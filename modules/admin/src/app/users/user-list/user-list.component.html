@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Users</h1>
-    <button class="titlebar-button" [routerLink]="['add']">Add User</button>
+    <button class="titlebar-button" routerLink="/users/add">Add User</button>
   </div>
 
   <div id="content-main">
@@ -31,11 +31,11 @@
 
         <div class="mui-row table-row" *ngFor="let su of users" appActiveClass>
           <div class="table-data mui-col-md-2">
-            <a class="edit" [routerLink]="['edit',su.username]">{{ su.username }}</a>
+            <a class="edit" routerLink="/users/edit/{{su.username}}">{{ su.username }}</a>
 
             <!-- if this user is enabled show this menu -->
             <span class="menu-options">
-              <a [routerLink]="['duplicate',su.username]">Duplicate</a> | <a class="edit" (click)="deleteUser(su.username)">Delete</a>
+              <a routerLink="/users/duplicate/{{su.username}}">Duplicate</a> | <a class="edit" (click)="deleteUser(su.username)">Delete</a>
             </span>
           </div>
           <div class="table-data mui-col-md-3">{{ su.authorities }}

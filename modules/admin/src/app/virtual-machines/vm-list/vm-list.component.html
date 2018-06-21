@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Virtual Machines</h1>
-    <button class="titlebar-button" [routerLink]="['vm-build']">Build VM Template</button>
+    <button class="titlebar-button" routerLink="/virtual-machines/vm-build">Build VM Template</button>
     <button class="titlebar-button" [disabled]="true">Import VM</button>
   </div>
 
@@ -57,12 +57,12 @@
         <div *ngFor="let vm of vms | listFilter : sortColumn : sortType : sortValue : sortBy" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-3">
             <div class="mini-menu">
-              <a class="edit" [routerLink]="['edit',vm.id]">{{ vm.name }}</a>
+              <a class="edit" routerLink="/virtual-machines/edit/{{vm.id}}">{{ vm.name }}</a>
 
               <!-- if this virtue is enabled show this menu -->
               <span *ngIf="vm.enabled === true" class="menu-options">
                 <a (click)="vmStatus(vm.id)">Disable</a> |
-                <a class="edit" [routerLink]="['duplicate',vm.id]">Duplicate</a>
+                <a class="edit" routerLink="/virtual-machines/duplicate/{{vm.id}}">Duplicate</a>
               </span>
 
               <!-- if this virtue is disabled show this menu -->
