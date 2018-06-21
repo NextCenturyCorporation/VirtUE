@@ -192,6 +192,14 @@ public class VirtueApplicationItem {
 		return changeListener;
 	}
 
+	public String getApplicationName() {
+		return ad.getName();
+	}
+
+	public ApplicationDefinition getApplication() {
+		return ad;
+	}
+
 	public void registerListener(PropertyChangeListener listener) {
 		this.listener = listener;
 	}
@@ -199,6 +207,7 @@ public class VirtueApplicationItem {
 	private void sendChangeEvent(PropertyChangeEvent propertyChangeEvent) {
 		listener.propertyChange(propertyChangeEvent);
 	}
+
 
 	private class ChangeListener implements PropertyChangeListener {
 

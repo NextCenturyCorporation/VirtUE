@@ -9,6 +9,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.SystemColor;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
@@ -99,7 +102,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.setTitle("SAVIOR");
 		this.frame = frame;
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setSize(495, 620);
+		this.frame.setSize(485, 620);
 
 		startLogin();
 
@@ -136,7 +139,7 @@ public class Sidebar implements VirtueChangeHandler {
 				frame.repaint();
 				setup(user);
 				frame.getContentPane().add(desktopContainer);
-				frame.setSize(495, 620);
+				frame.setSize(485, 620);
 				setInitialViewPort();
 				frame.setVisible(true);
 			}
@@ -288,6 +291,7 @@ public class Sidebar implements VirtueChangeHandler {
 		GridBagConstraints c3 = new GridBagConstraints();
 		GridBagConstraints c4 = new GridBagConstraints();
 		GridBagConstraints c5 = new GridBagConstraints();
+		GridBagConstraints c6 = new GridBagConstraints();
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 
@@ -344,16 +348,34 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel search = new JPanel();
 		search.setBorder(new LineBorder(SystemColor.windowBorder));
 		search.setBackground(SystemColor.scrollbar);
-		FlowLayout flowLayout_4 = (FlowLayout) search.getLayout();
-		flowLayout_4.setVgap(10);
-		c3.fill = GridBagConstraints.HORIZONTAL;
+		search.setLayout(new GridBagLayout());
+		c3.fill = GridBagConstraints.BOTH;
 		c3.weightx = 0.5;
 		c3.gridx = 2;
 		c3.gridy = 0;
 		center.add(search, c3);
 
-		JLabel lblSearch = new JLabel("Search");
-		search.add(lblSearch);
+		c6.gridx = 0;
+		c6.gridy = 0;
+		c6.weightx = 1.0;
+		c6.fill = GridBagConstraints.BOTH;
+
+		JLabel lblSearch = new JLabel();
+		ImageIcon searchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
+		Image searchImage = searchIcon.getImage();
+		Image newSearchImage = searchImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		searchIcon = new ImageIcon(newSearchImage);
+
+		lblSearch.setIcon(searchIcon);
+
+		JTextField textField = new JTextField();
+		textField.setColumns(6);
+
+		search.add(textField, c6);
+
+		c6.weightx = 0.0;
+		c6.gridx = 1;
+		search.add(lblSearch, c6);
 
 		JPanel icons = new JPanel();
 		icons.setBorder(new LineBorder(SystemColor.windowBorder));
@@ -513,6 +535,19 @@ public class Sidebar implements VirtueChangeHandler {
 				} catch (IOException e) {
 					String msg = "Error attempting to logout";
 					logger.error(msg, e);
+				}
+			}
+		});
+
+		textField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+					String keyword = textField.getText();
+					at.search(keyword);
+					al.search(keyword);
+					fv.search(keyword);
+					sp.setViewportView(sp.getViewport().getView());
 				}
 			}
 		});

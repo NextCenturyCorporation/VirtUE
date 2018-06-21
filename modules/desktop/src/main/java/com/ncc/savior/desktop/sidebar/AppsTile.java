@@ -24,4 +24,19 @@ public class AppsTile extends AbstractAppsView {
 		container.repaint();
 	}
 
+	// @SuppressWarnings("unchecked")
+	// public void sort() {
+	// container.removeAll();
+	// Collection<VirtueApplicationItem> vas = tiles.values();
+	// ArrayList<VirtueApplicationItem> vaList = new
+	// ArrayList<VirtueApplicationItem>();
+	// vaList.addAll(vas);
+	// Collections.sort(vaList);
+	// for (VirtueApplicationItem va : vaList) {
+	// container.add(va.getContainer());
+	// }
+	// container.validate();
+	// container.repaint();
+	// }
+
 }
