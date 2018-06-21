@@ -9,8 +9,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.SystemColor;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -28,7 +26,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private static boolean tileViewOpen = true;
 	private static boolean favoritesViewOpen = false;
 	private static boolean listViewOpen = false;
+	private static boolean searchMode = false;
 	private JScrollPane sp;
 	private AppsTile at;
 	private AppsList al;
@@ -102,7 +104,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.setTitle("SAVIOR");
 		this.frame = frame;
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setSize(485, 620);
+		this.frame.setSize(491, 620);
 
 		startLogin();
 
@@ -139,7 +141,7 @@ public class Sidebar implements VirtueChangeHandler {
 				frame.repaint();
 				setup(user);
 				frame.getContentPane().add(desktopContainer);
-				frame.setSize(485, 620);
+				frame.setSize(491, 620);
 				setInitialViewPort();
 				frame.setVisible(true);
 			}
@@ -173,7 +175,7 @@ public class Sidebar implements VirtueChangeHandler {
 	@Override
 	public void addVirtue(DesktopVirtue virtue) throws IOException {
 		VirtueContainer vc = new VirtueContainer(virtue, virtueService, getNextColor(),
-				getNextColor(), sp);
+				getNextColor());
 		// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 		virtueIdToVc.put(virtue.getTemplateId(), vc);
 		vt.addVirtueToRow(virtue, vc, vc.getRow());
@@ -203,8 +205,18 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(appsTileVa.getChangeListener());
 			dom.addListener(appsListVa.getChangeListener());
 			dom.addListener(vcAppsTileVa.getChangeListener());
-
 		}
+
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				al.renderSorted(null);
+				at.renderSorted(null);
+				fv.renderSorted(null);
+				vt.renderSorted(null);
+			}
+		});
+
 		sp.getViewport().validate();
 	}
 
@@ -216,8 +228,8 @@ public class Sidebar implements VirtueChangeHandler {
 		// }
 		if (vmi != null) {
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
-				at.removeApplication(ad);
-				al.removeApplication(ad);
+				at.removeApplication(ad, virtue);
+				al.removeApplication(ad, virtue);
 			}
 
 			vt.removeVirtue(virtue);
@@ -360,13 +372,15 @@ public class Sidebar implements VirtueChangeHandler {
 		c6.weightx = 1.0;
 		c6.fill = GridBagConstraints.BOTH;
 
-		JLabel lblSearch = new JLabel();
+		JLabel searchLabel = new JLabel();
+		searchLabel.setBackground(SystemColor.scrollbar);
 		ImageIcon searchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
 		Image searchImage = searchIcon.getImage();
 		Image newSearchImage = searchImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
-		searchIcon = new ImageIcon(newSearchImage);
+		ImageIcon searchIcon2 = new ImageIcon(newSearchImage);
 
-		lblSearch.setIcon(searchIcon);
+		ImageIcon closeIcon = (new ImageIcon(Sidebar.class.getResource("/images/close.png")));
+		searchLabel.setIcon(searchIcon2);
 
 		JTextField textField = new JTextField();
 		textField.setColumns(6);
@@ -375,7 +389,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		c6.weightx = 0.0;
 		c6.gridx = 1;
-		search.add(lblSearch, c6);
+		search.add(searchLabel, c6);
 
 		JPanel icons = new JPanel();
 		icons.setBorder(new LineBorder(SystemColor.windowBorder));
@@ -539,18 +553,55 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		});
 
-		textField.addKeyListener(new KeyAdapter() {
+		searchLabel.addMouseListener(new MouseAdapter() {
 			@Override
-			public void keyPressed(KeyEvent event) {
-				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-					String keyword = textField.getText();
-					at.search(keyword);
-					al.search(keyword);
-					fv.search(keyword);
-					sp.setViewportView(sp.getViewport().getView());
+			public void mouseClicked(MouseEvent event) {
+				if (searchMode) {
+					searchMode = false;
+					searchLabel.setIcon(searchIcon2);
+					textField.setText("");
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							al.renderSorted(null);
+							at.renderSorted(null);
+							fv.renderSorted(null);
+							vt.renderSorted(null);
+							sp.setViewportView(sp.getViewport().getView());
+						}
+					});
 				}
 			}
 		});
+
+		textField.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				searchMode = true;
+				String keyword = textField.getText();
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						at.search(keyword);
+						al.search(keyword);
+						fv.search(keyword);
+						vt.search(keyword);
+						sp.setViewportView(sp.getViewport().getView());
+					}
+				});
+				searchLabel.setIcon(closeIcon);
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+			}
+
+		});
+
 	}
 
 	public void setInitialViewPort() {

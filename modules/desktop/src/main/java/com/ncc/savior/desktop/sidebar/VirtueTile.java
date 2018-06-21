@@ -4,7 +4,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
 
@@ -18,11 +24,13 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class VirtueTile {
 	private JPanel container;
-	private HashMap<String, VirtueContainer> virtues;
+	private ConcurrentHashMap<String, VirtueContainer> virtues;
+
+	private static int row = 0;
 
 	public VirtueTile() throws IOException {
 		this.container = new JPanel();
-		this.virtues = new HashMap<String, VirtueContainer>();
+		this.virtues = new ConcurrentHashMap<String, VirtueContainer>();
 		GridBagLayout gbl = new GridBagLayout();
 		gbl.columnWidths = new int[] { 455, 0 };
 		gbl.rowHeights = new int[] { 100, 100, 0 };
@@ -47,6 +55,52 @@ public class VirtueTile {
 				container.validate();
 				container.repaint();
 			}
+		}
+	}
+
+	// Basically a reset function. Renders all the virtues and their tiles
+	// alphabetically
+	public void renderSorted(Comparator<VirtueContainer> comp) {
+		row = 0;
+		container.removeAll();
+		Collection<VirtueContainer> vcs = virtues.values();
+		ArrayList<VirtueContainer> vcList = new ArrayList<VirtueContainer>();
+		vcList.addAll(vcs);
+
+		if (comp != null) {
+			Collections.sort(vcList, comp);
+		} else {
+			Collections.sort(vcList);
+		}
+
+		for (VirtueContainer vc : vcList) {
+			addVirtueToRow(vc.getVirtue(), vc, row);
+			row++;
+		}
+
+		for (VirtueContainer vc : virtues.values()) {
+			vc.renderSorted();
+		}
+
+		container.validate();
+		container.repaint();
+	}
+
+	public void search(String keyword) {
+		row = 0;
+		container.removeAll();
+		Collection<VirtueContainer> vcs = virtues.values();
+		List<VirtueContainer> matchedVcs = vcs.stream()
+				.filter(vc -> vc.containsKeyword(keyword))
+				.collect(Collectors.toList());
+		Collections.sort(matchedVcs);
+
+		for (VirtueContainer vc : matchedVcs) {
+			vc.search(keyword);
+			addVirtueToRow(vc.getVirtue(), vc, row);
+			row++;
+			container.validate();
+			container.repaint();
 		}
 	}
 
