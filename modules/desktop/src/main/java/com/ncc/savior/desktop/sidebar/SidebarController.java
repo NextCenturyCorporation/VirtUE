@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.swing.JFrame;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +18,11 @@ import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue.DesktopVirtueComparator;
 
-import javafx.stage.Stage;
+/**
+ *
+ * This class provides functionality for retrieving and updating virtues
+ *
+ */
 
 public class SidebarController {
 	private static final Logger logger = LoggerFactory.getLogger(SidebarController.class);
@@ -37,7 +43,7 @@ public class SidebarController {
 		this.currentVirtues = new TreeMap<String, DesktopVirtue>();
 	}
 
-	public void init(Stage primaryStage) throws Exception {
+	public void init(JFrame primaryFrame) throws Exception {
 		List<DesktopVirtue> initialVirtues;
 		// if (authService.getUser() != null) {
 		// initialVirtues = virtueService.getVirtuesForUser();
@@ -45,8 +51,11 @@ public class SidebarController {
 		initialVirtues = new ArrayList<DesktopVirtue>();
 		// }
 		currentVirtues = getCurrentVirtueMap(initialVirtues);
-		sidebar.start(primaryStage, initialVirtues);
+
+		sidebar.start(primaryFrame, initialVirtues);
 		startVirtuePoll();
+
+		// sidebar.setStartState();
 	}
 
 	private Map<String, DesktopVirtue> getCurrentVirtueMap(List<DesktopVirtue> initialVirtues) {
@@ -59,13 +68,15 @@ public class SidebarController {
 	}
 
 	private String getMapKey(DesktopVirtue v) {
-		if (v.getId() == null || v.getId().trim().equals("")) {
-			return v.getTemplateId();
-		}
-		return v.getTemplateId() + "-" + v.getId();
+		// if (v.getId() == null || v.getId().trim().equals("")) {
+		// return v.getTemplateId();
+		// }
+		// return v.getTemplateId() + "-" + v.getId();
+		return v.getTemplateId();
 	}
 
-	private void startVirtuePoll() {
+	// ****************
+	public void startVirtuePoll() {
 		Runnable runnable = new Runnable() {
 
 			@Override
@@ -74,6 +85,7 @@ public class SidebarController {
 				while (!terminatePollThread) {
 					try {
 						DesktopUser currentUser = authService.getUser();
+						// DesktopUser currentUser = new DesktopUser("dummy", "");
 						if (currentUser != null) {
 							List<DesktopVirtue> virtues;
 							try {
@@ -103,20 +115,29 @@ public class SidebarController {
 		virtuePollThread.start();
 	}
 
-	protected void updateVirtues(List<DesktopVirtue> virtues) {
+	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {
 		Iterator<DesktopVirtue> itr = virtues.iterator();
 		Map<String, DesktopVirtue> newCurrentVirtues = new TreeMap<String, DesktopVirtue>();
+		if (logger.isTraceEnabled()) {
+			logger.trace("current Virtues: (" + currentVirtues.size() + ") " + currentVirtues);
+		}
 		while (itr.hasNext()) {
 			DesktopVirtue v = itr.next();
 			String key = getMapKey(v);
 			if (currentVirtues.containsKey(key)) {
-				currentVirtues.remove(key);
-				newCurrentVirtues.put(getMapKey(v), v);
-				reportChangedVirtue(v);
+				DesktopVirtue old = currentVirtues.remove(key);
+				String newKey = getMapKey(v);
+				newCurrentVirtues.put(newKey, v);
+				if (virtueChanged(old, v)) {
+					reportChangedVirtue(v);
+				}
 			} else if (currentVirtues.containsKey(v.getTemplateId())) {
-				currentVirtues.remove(v.getTemplateId());
+				key = v.getTemplateId();
+				DesktopVirtue old = currentVirtues.remove(key);
 				newCurrentVirtues.put(getMapKey(v), v);
-				reportChangedVirtue(v);
+				if (virtueChanged(old, v)) {
+					reportChangedVirtue(v);
+				}
 			} else {
 				reportAddedVirtue(v);
 				newCurrentVirtues.put(getMapKey(v), v);
@@ -133,8 +154,13 @@ public class SidebarController {
 		currentVirtues = newCurrentVirtues;
 	}
 
+	private boolean virtueChanged(DesktopVirtue old, DesktopVirtue v) {
+		return !old.equals(v);
+	}
+
 	// TODO this still has bugs and should be completely rethought
-	protected void detectChangesAndReport2(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues) {
+	protected void detectChangesAndReport2(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues)
+			throws IOException {
 		DesktopVirtueComparator comparator = new DesktopVirtue.DesktopVirtueComparator();
 		currentVirtues.sort(comparator);
 		virtues.sort(comparator);
@@ -187,31 +213,37 @@ public class SidebarController {
 		}
 	}
 
-	// private boolean detectStatusChange(DesktopVirtue cv, DesktopVirtue nv) {
-	// VirtueState cs = cv.getStatus();
-	// VirtueState ns = nv.getStatus();
-	// if (cs == null) {
-	// if (ns == null) {
-	// return false;
-	// } else {
-	// return !ns.equals(cs);
-	// }
-	// } else {
-	// return !cs.equals(ns);
-	// }
-	//
-	// }
-
 	protected void reportRemovedVirtue(DesktopVirtue virtue) {
-		changeHandler.removeVirtue(virtue);
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.trace("removing virtue " + virtue);
+			}
+			changeHandler.removeVirtue(virtue);
+		} catch (Exception e) {
+			logger.error("Error sending remove virtue event", e);
+		}
 	}
 
-	protected void reportAddedVirtue(DesktopVirtue virtue) {
-		changeHandler.addVirtue(virtue);
+	protected void reportAddedVirtue(DesktopVirtue virtue) throws IOException {
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.debug("adding virtue " + virtue);
+			}
+			changeHandler.addVirtue(virtue);
+		} catch (Exception e) {
+			logger.error("Error sending remove virtue event", e);
+		}
 	}
 
 	protected void reportChangedVirtue(DesktopVirtue virtue) {
-		changeHandler.changeVirtue(virtue);
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.debug("changing virtue " + virtue);
+			}
+			changeHandler.changeVirtue(virtue);
+		} catch (Exception e) {
+			logger.error("Error sending change virtue event", e);
+		}
 	}
 
 	public static interface VirtueChangeHandler {
@@ -220,7 +252,7 @@ public class SidebarController {
 
 		void changeVirtue(DesktopVirtue virtue);
 
-		void addVirtue(DesktopVirtue virtue);
+		void addVirtue(DesktopVirtue virtue) throws IOException;
 
 	}
 

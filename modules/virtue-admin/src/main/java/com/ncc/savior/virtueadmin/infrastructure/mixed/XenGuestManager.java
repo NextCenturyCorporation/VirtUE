@@ -98,6 +98,7 @@ public class XenGuestManager {
 				logger.debug("Starting provision of guest=" + vm);
 				vm.setUserName(vmt.getLoginUser());
 				vm.setState(VmState.LAUNCHING);
+				serviceProvider.getVmNotifierService().startFutures(vm, null);
 				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
 						vmt.getSecurityTag(), vm, true);
 				externalSensingPort += numSensingPorts;
@@ -128,6 +129,7 @@ public class XenGuestManager {
 	private void createStartGuestVm(Session session, int externalSshPort, int externalSensingPort,
 			int startingInternalPort, int numSensingPorts, String role, VirtualMachine vm, boolean create)
 			throws JSchException, IOException, SftpException {
+
 		String ipAddress = "0.0.0.0";
 		String name = vm.getName();
 		String loginUsername = vm.getUserName();
@@ -374,6 +376,7 @@ public class XenGuestManager {
 				int startingInternalPort = 11001;
 				int numSensingPorts = 3;
 				vm.setState(VmState.LAUNCHING);
+				serviceProvider.getVmNotifierService().startFutures(vm, null);
 				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
 						null, vm, false);
 			}

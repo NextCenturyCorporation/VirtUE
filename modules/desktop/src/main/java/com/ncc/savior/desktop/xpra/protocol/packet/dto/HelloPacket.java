@@ -17,9 +17,6 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
-import javafx.geometry.Rectangle2D;
-import javafx.stage.Screen;
-
 /**
  * Packet used for initial handshaking. Client should send this Packet initially
  * with all of its capabilities and properties. The server will send another
@@ -76,10 +73,14 @@ public class HelloPacket extends Packet {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
 		int maxW = -1;
 		int maxH = -1;
-		for (Screen screen : Screen.getScreens()) {
-			Rectangle2D b = screen.getBounds();
-			maxW = (int) (b.getMaxX() > maxW ? b.getMaxX() : maxW);
-			maxH = (int) (b.getMaxY() > maxH ? b.getMaxY() : maxH);
+		int[][] monitors = getMonitorSizes();
+		for (int[] monitor : monitors) {
+			if (monitor[0] > maxW) {
+				maxW = monitor[0];
+			}
+			if (monitor[1] > maxH) {
+				maxH = monitor[1];
+			}
 		}
 		int[] screen = new int[] { maxW, maxH };
 		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
@@ -88,7 +89,7 @@ public class HelloPacket extends Packet {
 		map.put(DPI, 96);
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
 		// map.put(SCREEN_SIZES, new int[][] {});
-		int[][] screenSizes = getMonitorSizes();
+		int[][] screenSizes = monitors;
 		map.put(SCREEN_SIZES, screenSizes);
 		map.put(ENCODINGS, encodings);
 		map.put(ZLIB, true);

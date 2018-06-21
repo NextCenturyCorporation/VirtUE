@@ -183,9 +183,19 @@ public class VirtueService {
 				while (itr.hasNext()) {
 					ApplicationDefinition appDefn = itr.next();
 					logger.debug("starting pending application=" + appDefn);
-					DesktopVirtueApplication app = desktopResourceService.startApplication(virtue.getId(), appDefn);
-					ensureConnection(app, virtue, color);
+					// moved such that if connection fails, we don't retry forever starting a ton of
+					// applications
 					itr.remove();
+					Thread t = new Thread(() -> {
+						try {
+							DesktopVirtueApplication app = desktopResourceService.startApplication(virtue.getId(),
+									appDefn);
+							ensureConnection(app, virtue, color);
+						} catch (Exception e) {
+							logger.error("error starting pending application", e);
+						}
+					});
+					t.start();
 				}
 			}
 		}
@@ -201,23 +211,35 @@ public class VirtueService {
 	 * @param color
 	 * @throws IOException
 	 */
-	public void startApplication(DesktopVirtue virtue, ApplicationDefinition appDefn, RgbColor color)
-			throws IOException {
+	public void startApplication(DesktopVirtue v, ApplicationDefinition appDefn, RgbColor color) throws IOException {
 		// TODO check to see if we have an XPRA connection
-		String virtueId = virtue.getId();
-		DesktopVirtueApplication app;
-		if (virtueId == null) {
-			virtue = desktopResourceService.createVirtue(virtue.getTemplateId());
-			addPendingAppStart(virtue.getId(), appDefn, color);
-		} else {
-			if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
-				app = desktopResourceService.startApplication(virtueId, appDefn);
-				ensureConnection(app, virtue, color);
-			} else {
-				addPendingAppStart(virtue.getId(), appDefn, color);
+		Thread t = new Thread(() -> {
+			DesktopVirtue virtue = v;
+			try {
+				String virtueId = virtue.getId();
+				DesktopVirtueApplication app;
+				if (virtueId == null) {
+					virtue = desktopResourceService.createVirtue(virtue.getTemplateId());
+					addPendingAppStart(virtue.getId(), appDefn, color);
+					// Set old object with new status
+					v.setId(virtue.getId());
+					v.setVirtueState(virtue.getVirtueState());
+				} else {
+					if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
+						app = desktopResourceService.startApplication(virtueId, appDefn);
+						ensureConnection(app, virtue, color);
+					} else if (VirtueState.STOPPED.equals(virtue.getVirtueState())) {
+						startVirtue(virtue);
+						addPendingAppStart(virtue.getId(), appDefn, color);
+					} else {
+						addPendingAppStart(virtue.getId(), appDefn, color);
+					}
+				}
+			} catch (Throwable e) {
+				logger.error("Error starting application", e);
 			}
-		}
-
+		});
+		t.start();
 	}
 
 	private void addPendingAppStart(String virtueId, ApplicationDefinition appDefn, RgbColor color) {
@@ -239,6 +261,7 @@ public class VirtueService {
 	public void startVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (startableVirtueStates.contains(virtue.getVirtueState())) {
 			desktopResourceService.startVirtue(virtue.getId());
+			virtue.setVirtueState(VirtueState.RUNNING);
 		}
 	}
 

@@ -15,7 +15,7 @@ import com.ncc.savior.desktop.xpra.application.swing.SwingUtils;
  */
 public class SwingKeyboard implements IKeyboard {
 	@SuppressWarnings("unused")
-	private static final Logger logger = LoggerFactory.getLogger(JavaFxKeyboard.class);
+	private static final Logger logger = LoggerFactory.getLogger(SwingKeyboard.class);
 	private IKeyMap keymap;
 
 	public SwingKeyboard(IKeyMap keymap) {
