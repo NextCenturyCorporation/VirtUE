@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
@@ -28,9 +29,10 @@ public class FavoritesView extends AbstractAppsView {
 	}
 
 	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueContainer vc, JScrollPane sp,
-			PropertyChangeListener listener) {
+			PropertyChangeListener listener, Image image) {
 		if (tiles.get(ad.getId()) == null) {
-			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener);
+			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener,
+					image);
 			va.tileSetup();
 			va.setToFavorited();
 
