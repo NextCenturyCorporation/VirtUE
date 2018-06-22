@@ -399,6 +399,7 @@ public class AdminService {
 	}
 
 	public IconModel getIcon(String iconKey) {
+		verifyAndReturnUser();
 		IconModel icon = templateManager.getIcon(iconKey);
 		if (icon == null) {
 			icon = templateManager.getIcon(DEFAULT_ICON_KEY);
@@ -407,12 +408,14 @@ public class AdminService {
 	}
 
 	public void deleteIcon(String iconKey) {
+		verifyAndReturnUser();
 		if (!DEFAULT_ICON_KEY.equals(iconKey)) {
 			templateManager.removeIcon(iconKey);
 		}
 	}
 
 	public Set<String> getAllIconKeys() {
+		verifyAndReturnUser();
 		return templateManager.getAllIconKeys();
 	}
 

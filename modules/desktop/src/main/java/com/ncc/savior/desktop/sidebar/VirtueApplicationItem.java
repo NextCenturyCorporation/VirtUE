@@ -45,6 +45,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private ImageIcon favoritedImage = new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png"));
 	private ImageIcon unfavoritedImage = new ImageIcon(
 			VirtueApplicationItem.class.getResource("/images/unfavorited.png"));
+	private Image image;
 
 	private VirtueService virtueService;
 	private JScrollPane sp;
@@ -61,13 +62,15 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private JPanel container;
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
-			VirtueContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener) {
+			VirtueContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
+			Image image) {
 		this.sp = sp;
 		this.vc = vc;
 		this.virtueService = virtueService;
 		this.ad = ad;
 		this.virtue = virtue;
 		this.fv = fv;
+		this.image = image;
 
 		this.appIcon = new JLabel();
 		this.container = new JPanel();
@@ -86,10 +89,8 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		appName.setHorizontalAlignment(SwingConstants.CENTER);
 		container.setLayout(new BorderLayout(0, 0));
 
-		ImageIcon imageIcon = new ImageIcon(AppsTile.class.getResource("/images/Test.png"));
-		Image image = imageIcon.getImage(); // transform it
 		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		imageIcon = new ImageIcon(newimg); // transform it back
+		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
 
 		appIcon.setIcon(imageIcon);
 
@@ -108,7 +109,11 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.setBorder(new LineBorder(Color.GRAY, 1));
 		container.setBackground(Color.WHITE);
 		this.appIcon = new JLabel(ad.getName());
-		appIcon.setIcon(new ImageIcon(AppsList.class.getResource("/images/play.png")));
+
+		Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+
+		appIcon.setIcon(imageIcon);
 		appIcon.setHorizontalAlignment(SwingConstants.LEFT);
 
 		this.favoritedLabel = new JLabel();
@@ -175,7 +180,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	}
 
 	public void favorite() {
-		fv.addFavorite(ad, virtue, vc, sp, listener);
+		fv.addFavorite(ad, virtue, vc, sp, listener, image);
 		favoritedLabel.setIcon(favoritedImage);
 	}
 

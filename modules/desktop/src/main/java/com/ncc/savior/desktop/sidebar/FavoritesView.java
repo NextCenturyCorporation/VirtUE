@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 

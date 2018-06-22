@@ -17,6 +17,7 @@ import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -199,5 +200,14 @@ public class DesktopVirtueService {
 		VirtueInstance instance = createVirtue(templateId);
 		DesktopVirtue dv = convertVirtueInstanceToDesktopVirtue(instance);
 		return dv;
+	}
+
+	public IconModel getIcon(String iconKey) {
+		verifyAndReturnUser();
+		IconModel icon = templateManager.getIcon(iconKey);
+		if (icon == null) {
+			icon = templateManager.getIcon(AdminService.DEFAULT_ICON_KEY);
+		}
+		return icon;
 	}
 }
