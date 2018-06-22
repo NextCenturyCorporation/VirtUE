@@ -12,11 +12,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
@@ -75,19 +76,6 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 		tiles.put(ad.getId() + va.getVirtue().getTemplateId(), va);
 
 		tileContainer.add(va.getContainer());
-	}
-
-	public void renderSorted() {
-		tileContainer.removeAll();
-		Collection<VirtueApplicationItem> vas = tiles.values();
-		ArrayList<VirtueApplicationItem> vaList = new ArrayList<VirtueApplicationItem>();
-		vaList.addAll(vas);
-		Collections.sort(vaList);
-		for (VirtueApplicationItem va : vaList) {
-			tileContainer.add(va.getContainer());
-		}
-		tileContainer.validate();
-		tileContainer.repaint();
 	}
 
 	private void createContainer(DesktopVirtue dv, Color headerColor, Color bodyColor, int row) {
@@ -201,13 +189,23 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 		return false;
 	}
 
-	public void search(String keyword) {
+	public void search(Comparator<VirtueApplicationItem> comp,
+			Predicate<VirtueApplicationItem> predicate) {
 		tileContainer.removeAll();
 		Collection<VirtueApplicationItem> vai = tiles.values();
-		List<VirtueApplicationItem> matchedTiles = vai.stream()
-				.filter(va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()))
-				.collect(Collectors.toList());
-		Collections.sort(matchedTiles);
+		List<VirtueApplicationItem> matchedTiles;
+
+		if (predicate != null) {
+			matchedTiles = vai.stream().filter(predicate).collect(Collectors.toList());
+		} else {
+			matchedTiles = vai.stream().collect(Collectors.toList());
+		}
+
+		if (comp != null) {
+			Collections.sort(matchedTiles, comp);
+		} else {
+			Collections.sort(matchedTiles);
+		}
 
 		for (VirtueApplicationItem va : matchedTiles) {
 			tileContainer.add(va.getContainer());

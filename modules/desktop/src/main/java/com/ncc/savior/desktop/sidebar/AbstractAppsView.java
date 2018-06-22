@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
@@ -61,41 +62,29 @@ public abstract class AbstractAppsView {
 		container.repaint();
 	}
 
-	public void renderSorted(Comparator<VirtueApplicationItem> comp) {
+	public void search(String keyword, Comparator<VirtueApplicationItem> comp,
+			Predicate<VirtueApplicationItem> predicate) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				container.removeAll();
 				appsInView.clear();
 				Collection<VirtueApplicationItem> vas = tiles.values();
-				ArrayList<VirtueApplicationItem> vaList = new ArrayList<VirtueApplicationItem>();
-				vaList.addAll(vas);
-				if (comp != null) {
-					Collections.sort(vaList, comp);
-				} else {
-					Collections.sort(vaList);
-				}
-				for (VirtueApplicationItem va : vaList) {
-					container.add(va.getContainer());
-				}
-				container.validate();
-				container.repaint();
-				sp.setViewportView(sp.getViewport().getView());
-			}
-		});
-	}
+				List<VirtueApplicationItem> matchedVas;
 
-	public void search(String keyword) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				container.removeAll();
-				appsInView.clear();
-				Collection<VirtueApplicationItem> vas = tiles.values();
-				List<VirtueApplicationItem> matchedVas = vas.stream()
-						.filter(va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()))
-						.collect(Collectors.toList());
-				Collections.sort(matchedVas);
+				if (predicate != null) {
+					matchedVas = vas.stream()
+							.filter(predicate)
+							.collect(Collectors.toList());
+				} else {
+					matchedVas = vas.stream().collect(Collectors.toList());
+				}
+
+				if (comp != null) {
+					Collections.sort(matchedVas, comp);
+				} else {
+					Collections.sort(matchedVas);
+				}
 
 				for (VirtueApplicationItem va : matchedVas) {
 					container.add(va.getContainer());

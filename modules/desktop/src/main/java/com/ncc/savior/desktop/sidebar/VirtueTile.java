@@ -49,7 +49,7 @@ public class VirtueTile {
 	}
 
 	public void removeVirtue(DesktopVirtue virtue) {
-		renderSorted(null);
+		search(null, null, null);
 
 		VirtueContainer removedVc = virtues.get(virtue.getTemplateId());
 
@@ -71,9 +71,7 @@ public class VirtueTile {
 		}
 	}
 
-	// Basically a reset function. Renders all the virtues and their tiles
-	// alphabetically by default
-	public void renderSorted(Comparator<VirtueContainer> comp) {
+	public void search(String keyword, Comparator<VirtueContainer> vcComp, Comparator<VirtueApplicationItem> vaiComp) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -81,46 +79,32 @@ public class VirtueTile {
 				container.removeAll();
 				virtuesInView.clear();
 				Collection<VirtueContainer> vcs = virtues.values();
-				ArrayList<VirtueContainer> vcList = new ArrayList<VirtueContainer>();
-				vcList.addAll(vcs);
+				List<VirtueContainer> matchedVcs;
 
-				if (comp != null) {
-					Collections.sort(vcList, comp);
+				if (keyword != null) {
+					matchedVcs = vcs.stream().filter(vc -> vc.containsKeyword(keyword)).collect(Collectors.toList());
 				} else {
-					Collections.sort(vcList);
+					matchedVcs = vcs.stream().collect(Collectors.toList());
 				}
 
-				for (VirtueContainer vc : vcList) {
-					vc.setRow(row);
-					addVirtueToRow(vc.getVirtue(), vc, row);
-					row++;
+				if (vcComp != null) {
+					Collections.sort(matchedVcs, vcComp);
+				} else {
+					Collections.sort(matchedVcs);
 				}
-
-				for (VirtueContainer vc : virtues.values()) {
-					vc.renderSorted();
-				}
-
-				container.validate();
-				container.repaint();
-				sp.setViewportView(sp.getViewport().getView());
-			}
-		});
-	}
-
-	public void search(String keyword) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				row = 0;
-				container.removeAll();
-				virtuesInView.clear();
-				Collection<VirtueContainer> vcs = virtues.values();
-				List<VirtueContainer> matchedVcs = vcs.stream().filter(vc -> vc.containsKeyword(keyword))
-						.collect(Collectors.toList());
-				Collections.sort(matchedVcs);
 
 				for (VirtueContainer vc : matchedVcs) {
-					vc.search(keyword);
+					if (keyword != null) {
+						if (vaiComp != null) {
+							vc.search(vaiComp,
+									va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						} else {
+							vc.search(null,
+									va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						}
+					} else {
+						vc.search(null, null);
+					}
 					vc.setRow(row);
 					addVirtueToRow(vc.getVirtue(), vc, row);
 					row++;

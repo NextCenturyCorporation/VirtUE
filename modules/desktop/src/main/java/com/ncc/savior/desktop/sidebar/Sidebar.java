@@ -215,10 +215,11 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(vcAppsTileVa.getChangeListener());
 		}
 
-		al.renderSorted(null);
-		at.renderSorted(null);
-		fv.renderSorted(null);
-		vt.renderSorted(null);
+		al.search(null, null, null);
+		at.search(null, null, null);
+		fv.search(null, null, null);
+		vt.search(null, null, null);
+		vt.search(null, null, null);
 
 		sp.getViewport().validate();
 	}
@@ -559,10 +560,11 @@ public class Sidebar implements VirtueChangeHandler {
 					searchMode = false;
 					searchLabel.setIcon(searchIcon);
 					textField.setText("");
-					al.renderSorted(null);
-					at.renderSorted(null);
-					fv.renderSorted(null);
-					vt.renderSorted(null);
+					al.search(null, null, null);
+					at.search(null, null, null);
+					fv.search(null, null, null);
+					vt.search(null, null, null);
+					vt.search(null, null, null);
 					sp.setViewportView(sp.getViewport().getView());
 				}
 			}
@@ -573,10 +575,10 @@ public class Sidebar implements VirtueChangeHandler {
 			public void insertUpdate(DocumentEvent e) {
 				searchMode = true;
 				String keyword = textField.getText();
-				at.search(keyword);
-				al.search(keyword);
-				fv.search(keyword);
-				vt.search(keyword);
+				at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+				al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+				fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+				vt.search(keyword, null, null);
 				sp.setViewportView(sp.getViewport().getView());
 				searchLabel.setIcon(closeIcon);
 			}
@@ -599,18 +601,21 @@ public class Sidebar implements VirtueChangeHandler {
 						searchMode = false;
 						searchLabel.setIcon(searchIcon);
 						textField.setText("");
-						al.renderSorted(null);
-						at.renderSorted(null);
-						fv.renderSorted(null);
-						vt.renderSorted(null);
+						al.search(null, null, null);
+						at.search(null, null, null);
+						fv.search(null, null, null);
+						vt.search(null, null, null);
 						sp.setViewportView(sp.getViewport().getView());
 					} else {
 						searchMode = true;
 						String keyword = textField.getText();
-						at.search(keyword);
-						al.search(keyword);
-						fv.search(keyword);
-						vt.search(keyword);
+						at.search(keyword, null,
+								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						al.search(keyword, null,
+								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						fv.search(keyword, null,
+								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						vt.search(keyword, null, null);
 						sp.setViewportView(sp.getViewport().getView());
 						searchLabel.setIcon(closeIcon);
 					}
