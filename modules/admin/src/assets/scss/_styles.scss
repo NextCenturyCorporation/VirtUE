@@ -57,9 +57,6 @@ hr {
   padding: 0;
 }
 
-.app-icon-white {
-  background-image: url(/assets/images/app-icon-white.png) no-repeat;
-}
 #wrapper {
   display: block;
   margin: 0;
@@ -75,13 +72,13 @@ header {
   background-color: #2E294E;
   display: block;
   height: 34px;
-  margin-bottom: 50px;
+  margin-bottom: 1rem;
 }
-breadcrumb {
+app-breadcrumbs {
   display: block;
   font-size: 0.9rem;
   margin-top: 1.2rem;
-  margin-left: 20px;
+  margin-left: 2rem;
   ol {
     list-style-type: none;
     padding: 0;
@@ -160,7 +157,7 @@ button {
    text-shadow: 1px 1px #3E3F4E;
  }
   &.button-delete, &.button-cancel {
-    background-color: none;
+    background-color: unset;
     border: none;
     border-radius: 0;
     color: $grayBlue;
@@ -178,8 +175,8 @@ button {
 select {
   background-color: $white;
   -webkit-appearance: none;
-  -moz-appearance:    none;
-  appearance:         none;
+  -moz-appearance: none;
+  appearance: none;
   -webkit-border-radius: 0;  /* Safari 3-4, iOS 1-3.2, Android 1.6- */
   -moz-border-radius: 0;  /* Firefox 1-3.6 */
   border-radius: 0;
@@ -213,7 +210,7 @@ app-root {
 content {
   display: block;
   min-height: 560px;
-  margin: 4rem 0 1rem;
+  margin: 1rem 0rem 4rem 0rem;
   position: relative;
   &:after {
     clear: both;

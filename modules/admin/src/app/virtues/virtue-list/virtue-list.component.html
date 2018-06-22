@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Virtues</h1>
-    <button mat-button class="titlebar-button" [routerLink]="['create-virtue']">Create New</button>
+    <button mat-button class="titlebar-button" routerLink="/virtues/create-virtue">Create New</button>
     <button mat-button class="titlebar-button" disabled>Import Virtue</button>
   </div>
 
@@ -52,12 +52,12 @@
         </div>
         <div *ngFor="let virtue of virtues | listFilter : sortColumn : sortType : sortValue : sortBy" class="mui-row table-row" appActiveClass>
           <div class="table-data mui-col-md-2">
-            <a class="edit" [routerLink]="['edit',virtue.id]">{{ virtue.name }}</a>
+            <a class="edit" routerLink="/virtues/edit/{{virtue.id}}">{{ virtue.name }}</a>
 
             <!-- if this virtue is enabled show this menu -->
             <span *ngIf="virtue.enabled" class="menu-options">
               <a mat-button (click)="virtueStatus(virtue.id, virtue.enabled)">Disable</a> |
-               <a mat-button [routerLink]="['duplicate',virtue.id]">Duplicate</a>
+               <a mat-button routerLink="/virtues/duplicate/{{virtue.id}}">Duplicate</a>
             </span>
 
             <!-- if this virtue is disabled show this menu -->
