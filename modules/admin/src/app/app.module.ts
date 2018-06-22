@@ -78,7 +78,7 @@ import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
 import { JsonFilterPipe } from './shared/pipes/json-filter.pipe';
 import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
 
-import { BreadcrumbProvider } from "./shared/providers/breadcrumb";
+import { BreadcrumbProvider } from './shared/providers/breadcrumb';
 
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
