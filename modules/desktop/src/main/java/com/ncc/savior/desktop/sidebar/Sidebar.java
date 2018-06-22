@@ -277,15 +277,15 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.setBackground(Color.DARK_GRAY);
 		desktopContainer.add(bottomBorder, BorderLayout.SOUTH);
 
-		JLabel lblNewLabel = new JLabel();
+		JLabel logoutLabel = new JLabel();
 
 		ImageIcon imageIcon = new ImageIcon(Sidebar.class.getResource("/images/u73.png"));
 		Image image = imageIcon.getImage(); // transform it
 		Image newimg = image.getScaledInstance(27, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
 		imageIcon = new ImageIcon(newimg);  // transform it back
-		lblNewLabel.setIcon(imageIcon);
+		logoutLabel.setIcon(imageIcon);
 
-		bottomBorder.add(lblNewLabel);
+		bottomBorder.add(logoutLabel);
 
 		JLabel logout = new JLabel("Logout");
 		logout.setFont(new Font("Tahoma", Font.PLAIN, 19));
@@ -297,11 +297,6 @@ public class Sidebar implements VirtueChangeHandler {
 		center.setLayout(new GridBagLayout());
 
 		GridBagConstraints c = new GridBagConstraints();
-		GridBagConstraints c2 = new GridBagConstraints();
-		GridBagConstraints c3 = new GridBagConstraints();
-		GridBagConstraints c4 = new GridBagConstraints();
-		GridBagConstraints c5 = new GridBagConstraints();
-		GridBagConstraints c6 = new GridBagConstraints();
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 
@@ -334,11 +329,11 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel virtues = new JPanel();
 		virtues.setBorder(new LineBorder(SystemColor.windowBorder));
 		virtues.setBackground(SystemColor.scrollbar);
-		c2.fill = GridBagConstraints.HORIZONTAL;
-		c2.weightx = 0.5;
-		c2.gridx = 1;
-		c2.gridy = 0;
-		center.add(virtues, c2);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.5;
+		c.gridx = 1;
+		c.gridy = 0;
+		center.add(virtues, c);
 		virtues.setLayout(new BorderLayout(0, 4));
 
 		JLabel virtuesLabel = new JLabel("Virtues");
@@ -359,16 +354,16 @@ public class Sidebar implements VirtueChangeHandler {
 		search.setBorder(new LineBorder(SystemColor.windowBorder));
 		search.setBackground(SystemColor.scrollbar);
 		search.setLayout(new GridBagLayout());
-		c3.fill = GridBagConstraints.BOTH;
-		c3.weightx = 0.5;
-		c3.gridx = 2;
-		c3.gridy = 0;
-		center.add(search, c3);
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 0.5;
+		c.gridx = 2;
+		c.gridy = 0;
+		center.add(search, c);
 
-		c6.gridx = 0;
-		c6.gridy = 0;
-		c6.weightx = 1.0;
-		c6.fill = GridBagConstraints.BOTH;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.BOTH;
 
 		JLabel searchLabel = new JLabel();
 		searchLabel.setBackground(SystemColor.scrollbar);
@@ -384,21 +379,21 @@ public class Sidebar implements VirtueChangeHandler {
 		textField.setColumns(6);
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
 
-		search.add(textField, c6);
+		search.add(textField, c);
 
-		c6.weightx = 0.0;
-		c6.gridx = 1;
-		search.add(searchLabel, c6);
+		c.weightx = 0.0;
+		c.gridx = 1;
+		search.add(searchLabel, c);
 
 		JPanel icons = new JPanel();
 		icons.setBorder(new LineBorder(SystemColor.windowBorder));
 		icons.setBackground(new Color(248, 248, 255));
-		c4.fill = GridBagConstraints.HORIZONTAL;
-		c4.weightx = 0.0;
-		c4.gridwidth = 3;
-		c4.gridx = 0;
-		c4.gridy = 1;
-		center.add(icons, c4);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.0;
+		c.gridwidth = 3;
+		c.gridx = 0;
+		c.gridy = 1;
+		center.add(icons, c);
 		icons.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
 		ImageIcon inactiveListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-inactive2.png")));
@@ -437,14 +432,14 @@ public class Sidebar implements VirtueChangeHandler {
 		sp.setSize(300, 800);
 		sp.setPreferredSize(new Dimension(0, 800));
 		sp.getVerticalScrollBar().setUnitIncrement(16);
-		c5.fill = GridBagConstraints.BOTH;
-		c5.ipady = 0;
-		c5.weighty = 1.0; // request any extra vertical space
-		c5.anchor = GridBagConstraints.PAGE_END; // bottom of space
-		c5.gridx = 0;
-		c5.gridwidth = 3; // 3 columns wide
-		c5.gridy = 2; // third row
-		center.add(sp, c5);
+		c.fill = GridBagConstraints.BOTH;
+		c.ipady = 0;
+		c.weighty = 1.0; // request any extra vertical space
+		c.anchor = GridBagConstraints.PAGE_END; // bottom of space
+		c.gridx = 0;
+		c.gridwidth = 3; // 3 columns wide
+		c.gridy = 2; // third row
+		center.add(sp, c);
 
 		sp.getViewport().revalidate();
 		sp.validate();
