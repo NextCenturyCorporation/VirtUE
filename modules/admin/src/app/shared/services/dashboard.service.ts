@@ -3,10 +3,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import 'rxjs/add/operator/toPromise';
 import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
-import { catchError, map, tap } from 'rxjs/operators';
-
-import { SensingModel } from '../models/sensing.model';
 
 const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
