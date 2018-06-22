@@ -70,7 +70,6 @@ export class CreateVirtueComponent implements OnInit {
 
   getBaseUrl(url: string) {
     this.baseUrl = url;
-    console.log('URL: ' + url);
   }
 
   resetRouter() {

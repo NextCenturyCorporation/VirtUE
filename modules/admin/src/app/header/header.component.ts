@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { MatToolbarModule } from '@angular/material';
 
 @Component({
   selector: 'app-header',
@@ -10,13 +9,12 @@ export class HeaderComponent implements OnInit {
 
   navigation = [
     {value: 'Dashboard', link: '/dashboard'},
-    {value: 'Settings', link: '/config'},
+    {value: 'Settings', link: '/settings'},
     {value: 'Users', link: '/users'},
-    {value: 'Applications', link: '/vm-apps'},
-    {value: 'Virtual Machines', link: '/vm'},
+    {value: 'Applications', link: '/applications'},
+    {value: 'Virtual Machines', link: '/virtual-machines'},
     {value: 'Virtues', link: '/virtues'}
   ];
-
 
   ngOnInit() {}
 

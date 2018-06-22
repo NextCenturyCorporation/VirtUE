@@ -24,7 +24,6 @@ import {
   MatToolbarModule,
 } from '@angular/material';
 
-import { BreadcrumbsModule } from 'ng2-breadcrumbs';
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
 
 import { AppComponent } from './app.component';
@@ -73,9 +72,13 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { ActiveClassDirective } from './shared/directives/active-class.directive';
 import { DialogsComponent } from './dialogs/dialogs.component';
 
+import {BreadcrumbsComponent} from './breadcrumbs/breadcrumbs.component';
+
 import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
 import { JsonFilterPipe } from './shared/pipes/json-filter.pipe';
 import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
+
+import { BreadcrumbProvider } from './shared/providers/breadcrumb';
 
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
@@ -85,14 +88,15 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
 @NgModule({
   declarations: [
     AppComponent,
-    HeaderComponent,
-    FooterComponent,
-    DashboardComponent,
-    VirtuesComponent,
-    ConfigComponent,
+    BreadcrumbsComponent,
     ConfigActiveDirComponent,
     ConfigAppVmComponent,
+    ConfigComponent,
     ConfigResourcesComponent,
+    FooterComponent,
+    HeaderComponent,
+    DashboardComponent,
+    VirtuesComponent,
     UsersComponent,
     UserListComponent,
     AddUserComponent,
@@ -129,7 +133,6 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
   ],
   imports: [
     AppRoutingModule,
-    BreadcrumbsModule,
     BrowserAnimationsModule,
     BrowserModule,
     FormsModule,
@@ -149,6 +152,7 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
     OverlayModule
   ],
   providers: [
+    BreadcrumbProvider,
     OverlayContainer,
     BaseUrlService,
     MessageService,
@@ -156,11 +160,11 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
   ],
   bootstrap: [AppComponent],
   entryComponents: [
+    DialogsComponent,
+    ResourceModalComponent,
     VmAppsModalComponent,
     VmModalComponent,
-    DialogsComponent,
-    VirtueModalComponent,
-    ResourceModalComponent
+    VirtueModalComponent
   ]
 })
 export class AppModule { }
