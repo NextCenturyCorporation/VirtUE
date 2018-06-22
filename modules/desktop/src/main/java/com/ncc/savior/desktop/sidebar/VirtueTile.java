@@ -38,6 +38,7 @@ public class VirtueTile {
 		this.virtues = new ConcurrentHashMap<String, VirtueContainer>();
 		this.virtuesInView = new ArrayList<String>();
 		this.sp = sp;
+
 		GridBagLayout gbl = new GridBagLayout();
 		gbl.columnWidths = new int[] { 455, 0 };
 		gbl.rowHeights = new int[] { 100, 100, 0 };

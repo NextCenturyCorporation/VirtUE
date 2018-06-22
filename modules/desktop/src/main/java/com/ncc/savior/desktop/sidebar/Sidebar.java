@@ -617,7 +617,6 @@ public class Sidebar implements VirtueChangeHandler {
 				}
 			}
 		});
-
 	}
 
 	public void setInitialViewPort() {
