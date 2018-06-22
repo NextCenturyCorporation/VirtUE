@@ -18,3 +18,5 @@ samba-config-*
 **/src/assets/.sass-cache/*
 modules/freerdp-java/.cache
 /modules/freerdp-java/core
+*.retry
+/modules/ecosystem/cifs-proxy/src/terraform/.plan.out
