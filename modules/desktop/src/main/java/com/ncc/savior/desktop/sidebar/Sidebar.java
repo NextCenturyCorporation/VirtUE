@@ -62,6 +62,8 @@ public class Sidebar implements VirtueChangeHandler {
 	private JFrame frame;
 	private LoginPage lp;
 
+	private JTextField textField;
+
 	private JPanel desktopContainer;
 	private static boolean applicationsOpen = true;
 	private static boolean tileViewOpen = true;
@@ -81,6 +83,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.virtueIdToVc = new HashMap<String, VirtueContainer>();
 		this.virtueService = virtueService;
 		this.iconService = iconService;
+		this.textField = new JTextField();
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
@@ -215,11 +218,11 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(vcAppsTileVa.getChangeListener());
 		}
 
-		al.search(null, null, null);
-		at.search(null, null, null);
-		fv.search(null, null, null);
-		vt.search(null, null, null);
-		vt.search(null, null, null);
+		String keyword = textField.getText();
+		at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+		al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+		fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+		vt.search(keyword, null, null);
 
 		sp.getViewport().validate();
 	}
@@ -381,7 +384,6 @@ public class Sidebar implements VirtueChangeHandler {
 		ImageIcon closeIcon = (new ImageIcon(Sidebar.class.getResource("/images/close.png")));
 		searchLabel.setIcon(searchIcon);
 
-		JTextField textField = new JTextField();
 		textField.setColumns(6);
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
 
