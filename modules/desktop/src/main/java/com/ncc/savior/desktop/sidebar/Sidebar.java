@@ -226,14 +226,10 @@ public class Sidebar implements VirtueChangeHandler {
 		// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 		virtueIdToVc.put(virtue.getTemplateId(), vc);
 		vt.addVirtueToRow(virtue, vc, vc.getRow());
+		boolean isFavorited;
 
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
-			boolean isFavorited;
-			if (favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false)) {
-				isFavorited = true;
-			} else {
-				isFavorited = false;
-			}
+			isFavorited = favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false);
 			ApplicationDom dom = new ApplicationDom(ad, isFavorited);
 			Image appImage = iconService.getImage(ad.getIconKey());
 
