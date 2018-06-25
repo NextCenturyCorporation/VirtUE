@@ -121,6 +121,8 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 		optionsLabel.setIcon(optionsIcon);
 		header.add(optionsLabel, gbc3);
 
+		optionsLabel.setToolTipText("Click to start or stop a virtue");
+
 		optionsLabel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {

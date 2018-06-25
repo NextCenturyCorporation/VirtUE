@@ -28,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -252,6 +253,9 @@ public class Sidebar implements VirtueChangeHandler {
 
 	// This will setup the main display after login
 	public void setup(DesktopUser user) throws IOException {
+		ToolTipManager.sharedInstance().setReshowDelay(1);
+		ToolTipManager.sharedInstance().setInitialDelay(1250);
+
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
 		this.sp = new JScrollPane();
@@ -425,16 +429,19 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setBackground(new Color(248, 248, 255));
 		favoritesView.add(favoritesLabel);
 		icons.add(favoritesView);
+		favoritesView.setToolTipText("Favorites view");
 
 		JPanel listView = new JPanel();
 		listView.setBackground(new Color(248, 248, 255));
 		listView.add(listLabel);
 		icons.add(listView);
+		listView.setToolTipText("List view");
 
 		JPanel tileView = new JPanel();
 		tileView.setBackground(new Color(248, 248, 255));
 		tileView.add(tileLabel);
 		icons.add(tileView);
+		tileView.setToolTipText("Tile view");
 
 		sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		sp.setSize(300, 800);
