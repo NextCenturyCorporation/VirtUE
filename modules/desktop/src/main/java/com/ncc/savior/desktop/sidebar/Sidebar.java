@@ -231,8 +231,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	// This will setup the main display after login
 	public void setup(DesktopUser user) throws IOException {
-		ToolTipManager.sharedInstance().setInitialDelay(2000);
-		ToolTipManager.sharedInstance().setReshowDelay(2000);
+		ToolTipManager.sharedInstance().setReshowDelay(1);
+		ToolTipManager.sharedInstance().setInitialDelay(1250);
 
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();

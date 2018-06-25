@@ -20,9 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JToolTip;
 import javax.swing.SwingConstants;
-import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
 
 import org.slf4j.Logger;
@@ -77,21 +75,8 @@ public class VirtueApplicationItem {
 		this.appName = new JLabel(ad.getName());
 		this.appIcon.setHorizontalAlignment(SwingConstants.CENTER);
 
-		JToolTip tt = new JToolTip();
-		tt.setTipText("OS: " + ad.getOs());
-
-		container.add(tt);
-
-		ToolTipManager ttm = ToolTipManager.sharedInstance();
-		ttm.registerComponent(container);
-		ttm.registerComponent(tt);
-
-		ttm.setReshowDelay(2000);
-		ttm.setInitialDelay(2000);
-		ToolTipManager.sharedInstance().setInitialDelay(2000);
-		ToolTipManager.sharedInstance().setReshowDelay(2000);
-
-		container.setToolTipText("OS: sfdsf " + ad.getOs());
+		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getName() + "<br>"
+				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
 
 		this.changeListener = new ChangeListener();
 		this.listener = listener;
@@ -122,7 +107,6 @@ public class VirtueApplicationItem {
 	}
 
 	public void listSetup() {
-		this.container = new JPanel();
 		container.setBorder(new LineBorder(Color.GRAY, 1));
 		container.setBackground(Color.WHITE);
 		this.appIcon = new JLabel(ad.getName());
