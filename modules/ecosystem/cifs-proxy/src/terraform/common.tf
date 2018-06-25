@@ -31,7 +31,14 @@ variable "domain" {
 	default = "test.savior"
 }
 
-data "aws_subnet" "subnet" {
+data "aws_subnet" "private_subnet" {
+	filter {
+		name = "tag:Name"
+		values = [ "Private_clong" ]
+	}
+}
+
+data "aws_subnet" "public_subnet" {
 	filter {
 		name = "tag:Name"
 		values = [ "Public_clong" ]
@@ -45,3 +52,15 @@ data "aws_security_group" "sg" {
 		values = [ "${element(var.security_group_names, count.index)}" ]
 	}
 }
+
+data "aws_ami" "windows_server2016" {
+  most_recent = true
+
+  owners      = ["amazon"]
+
+  filter {
+	name   = "name"
+	values = ["Windows_Server-2016-English-Full-Base*"]
+  }
+}
+

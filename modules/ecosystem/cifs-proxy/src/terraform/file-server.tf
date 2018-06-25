@@ -1,11 +1,13 @@
+# For AWS managed AD DC, the admin user is "Admin", not "Administrator"
+
 
 resource "aws_instance" "file_server" {
-	ami           = "${data.aws_ami.adds_ami.image_id}"
+	ami           = "${data.aws_ami.windows_server2016.image_id}"
 	instance_type = "${var.instance_type}"
 	key_name      = "vrtu"
 
 	vpc_security_group_ids = [ "${data.aws_security_group.sg.*.id}" ]
-	subnet_id = "${data.aws_subnet.subnet.id}"
+	subnet_id = "${data.aws_subnet.public_subnet.id}"
 
 	tags {
 		Name = "Windows File Server"
@@ -45,5 +47,5 @@ resource "aws_instance" "file_server" {
 </powershell>
 EOF
 
-	depends_on = [ "aws_instance.active_directory" ]
+	depends_on = [ "aws_directory_service_directory.active_directory" ]
 }
