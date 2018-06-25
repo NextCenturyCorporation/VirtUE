@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
 
 import org.slf4j.Logger;
@@ -230,6 +231,9 @@ public class Sidebar implements VirtueChangeHandler {
 
 	// This will setup the main display after login
 	public void setup(DesktopUser user) throws IOException {
+		ToolTipManager.sharedInstance().setInitialDelay(2000);
+		ToolTipManager.sharedInstance().setReshowDelay(2000);
+
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
 		this.sp = new JScrollPane();

@@ -20,6 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToolTip;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
@@ -76,12 +77,21 @@ public class VirtueApplicationItem {
 		this.appName = new JLabel(ad.getName());
 		this.appIcon.setHorizontalAlignment(SwingConstants.CENTER);
 
+		JToolTip tt = new JToolTip();
+		tt.setTipText("OS: " + ad.getOs());
+
+		container.add(tt);
+
 		ToolTipManager ttm = ToolTipManager.sharedInstance();
+		ttm.registerComponent(container);
+		ttm.registerComponent(tt);
 
 		ttm.setReshowDelay(2000);
 		ttm.setInitialDelay(2000);
+		ToolTipManager.sharedInstance().setInitialDelay(2000);
+		ToolTipManager.sharedInstance().setReshowDelay(2000);
 
-		container.setToolTipText("OS: " + ad.getOs());
+		container.setToolTipText("OS: sfdsf " + ad.getOs());
 
 		this.changeListener = new ChangeListener();
 		this.listener = listener;
