@@ -391,16 +391,19 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setBackground(new Color(248, 248, 255));
 		favoritesView.add(favoritesLabel);
 		icons.add(favoritesView);
+		favoritesView.setToolTipText("Favorites view");
 
 		JPanel listView = new JPanel();
 		listView.setBackground(new Color(248, 248, 255));
 		listView.add(listLabel);
 		icons.add(listView);
+		listView.setToolTipText("List view");
 
 		JPanel tileView = new JPanel();
 		tileView.setBackground(new Color(248, 248, 255));
 		tileView.add(tileLabel);
 		icons.add(tileView);
+		tileView.setToolTipText("Tile view");
 
 		sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		sp.setSize(300, 800);
