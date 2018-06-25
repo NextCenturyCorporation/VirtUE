@@ -35,7 +35,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  * sidebar scrollPane
  */
 
-public class VirtueApplicationItem {
+public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> {
 
 	private static final Logger logger = LoggerFactory.getLogger(VirtueApplicationItem.class);
 
@@ -189,12 +189,20 @@ public class VirtueApplicationItem {
 	}
 
 	public void unfavorite() {
-		fv.removeFavorite(ad);
+		fv.removeFavorite(ad, virtue);
 		favoritedLabel.setIcon(unfavoritedImage);
 	}
 
 	public ChangeListener getChangeListener() {
 		return changeListener;
+	}
+
+	public String getApplicationName() {
+		return ad.getName();
+	}
+
+	public ApplicationDefinition getApplication() {
+		return ad;
 	}
 
 	public void registerListener(PropertyChangeListener listener) {
@@ -204,6 +212,7 @@ public class VirtueApplicationItem {
 	private void sendChangeEvent(PropertyChangeEvent propertyChangeEvent) {
 		listener.propertyChange(propertyChangeEvent);
 	}
+
 
 	private class ChangeListener implements PropertyChangeListener {
 
@@ -215,6 +224,11 @@ public class VirtueApplicationItem {
 				unfavorite();
 			}
 		}
+	}
+
+	@Override
+	public int compareTo(VirtueApplicationItem va) {
+		return ad.getName().compareTo(va.getApplicationName());
 	}
 
 }

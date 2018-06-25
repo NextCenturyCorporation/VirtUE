@@ -175,7 +175,7 @@ public class SshClipboardManager implements IClipboardManager {
 	 */
 	private String connectClipboardOnce(SshConnectionParameters params, String groupId, String clientId)
 			throws IOException {
-		if (new File(sourceJarPath).exists()) {
+		if (sourceJarPath != null && new File(sourceJarPath).exists()) {
 			try {
 				Session session;
 				session = JschUtils.getUnconnectedSession(params);
@@ -192,6 +192,7 @@ public class SshClipboardManager implements IClipboardManager {
 			}
 		} else {
 			logger.warn("Clipboard jar not present.  Clipboard will be disabled");
+			// TODO Alert user
 			return null;
 		}
 	}

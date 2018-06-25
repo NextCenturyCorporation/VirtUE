@@ -2,7 +2,6 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -13,14 +12,19 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -37,7 +41,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  * the virtue is selected.
  *
  */
-public class VirtueContainer {
+public class VirtueContainer implements Comparable<VirtueContainer> {
 	private static Logger logger = LoggerFactory.getLogger(VirtueContainer.class);
 	private DesktopVirtue virtue;
 	private VirtueService virtueService;
@@ -48,22 +52,20 @@ public class VirtueContainer {
 	private JPanel container;
 	private JPanel tileContainer;
 	private JPanel header;
-	private JScrollPane sp;
 	private Color bodyColor;
 
 	private static int numRows = 0;
 	private int row;
 
-	private HashMap<String, JPanel> tiles;
+	private HashMap<String, VirtueApplicationItem> tiles;
 
 	public VirtueContainer(DesktopVirtue virtue, VirtueService virtueService,
-			Color headerColor, Color bodyColor, JScrollPane sp) throws IOException {
+			Color headerColor, Color bodyColor) throws IOException {
 		this.virtueService = virtueService;
 		this.virtue = virtue;
-		this.tiles = new HashMap<String, JPanel>();
+		this.tiles = new HashMap<String, VirtueApplicationItem>();
 		this.headerTitle = virtue.getName();
 		this.status = virtue.getVirtueState();
-		this.sp = sp;
 		this.bodyColor = bodyColor;
 		createContainer(virtue, headerColor, Color.GRAY, numRows);
 
@@ -71,70 +73,9 @@ public class VirtueContainer {
 	}
 
 	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) {
-		JPanel tile = va.getContainer();
+		tiles.put(ad.getId() + va.getVirtue().getTemplateId(), va);
 
-		tiles.put(ad.getId(), tile);
-
-		tileContainer.add(tile);
-	}
-
-	public void addTiles() throws IOException {
-		for (ApplicationDefinition ad : virtue.getApps().values()) {
-			JPanel tile = new JPanel();
-			tile.setPreferredSize(new Dimension(90, 90));
-			tile.setBackground(Color.WHITE);
-			JLabel application = new JLabel(ad.getName());
-			application.setFont(new Font("Tahoma", Font.PLAIN, 11));
-			application.setHorizontalAlignment(SwingConstants.CENTER);
-			tile.setLayout(new BorderLayout(0, 0));
-
-			ImageIcon imageIcon = new ImageIcon(VirtueContainer.class.getResource("/images/Test.png"));
-			Image image = imageIcon.getImage(); // transform it
-			Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-			imageIcon = new ImageIcon(newimg); // transform it back
-
-			JLabel picLabel = new JLabel(imageIcon);
-			tile.add(picLabel);
-			tile.add(application, BorderLayout.SOUTH);
-
-			tile.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent event) {
-					JPopupMenu pm = new JPopupMenu();
-					JMenuItem mi1 = new JMenuItem("Yes");
-					JMenuItem mi2 = new JMenuItem("No");
-					JLabel prompt = new JLabel("Would you like to start a " + ad.getName() + " application?");
-					pm.add(new JLabel("Would you like to start a " + ad.getName() + " application?"));
-					prompt.setHorizontalAlignment(SwingConstants.CENTER);
-
-					mi1.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent evt) {
-							try {
-								if (logger.isDebugEnabled()) {
-									logger.debug("virtue started");
-								}
-								// virtueService.startVirtue(virtue);
-								virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
-								// virtue.setVirtueState(VirtueState.LAUNCHING);
-								// updateVirtue(virtue);
-							} catch (IOException e) {
-								String msg = "Error attempting to start virtue=" + virtue;
-								logger.error(msg, e);
-							}
-						}
-					});
-
-					pm.setPopupSize(375, 75);
-					pm.add(mi1);
-					pm.add(mi2);
-					pm.show(sp, 50, 150);
-				}
-			});
-
-			tiles.put(ad.getName(), tile);
-			tileContainer.add(tile);
-		}
+		tileContainer.add(va.getContainer());
 	}
 
 	private void createContainer(DesktopVirtue dv, Color headerColor, Color bodyColor, int row) {
@@ -239,6 +180,41 @@ public class VirtueContainer {
 		return headerTitle;
 	}
 
+	public boolean containsKeyword(String keyword) {
+		for (ApplicationDefinition ad : virtue.getApps().values()) {
+			if (ad.getName().toLowerCase().contains(keyword.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void search(Comparator<VirtueApplicationItem> comp,
+			Predicate<VirtueApplicationItem> predicate) {
+		tileContainer.removeAll();
+		Collection<VirtueApplicationItem> vai = tiles.values();
+		List<VirtueApplicationItem> matchedTiles;
+
+		if (predicate != null) {
+			matchedTiles = vai.stream().filter(predicate).collect(Collectors.toList());
+		} else {
+			matchedTiles = vai.stream().collect(Collectors.toList());
+		}
+
+		if (comp != null) {
+			Collections.sort(matchedTiles, comp);
+		} else {
+			Collections.sort(matchedTiles);
+		}
+
+		for (VirtueApplicationItem va : matchedTiles) {
+			tileContainer.add(va.getContainer());
+		}
+
+		tileContainer.validate();
+		tileContainer.repaint();
+	}
+
 	public void updateVirtue(DesktopVirtue virtue) {
 		this.virtue = virtue;
 		this.statusLabel.setText(virtue.getVirtueState().toString());
@@ -247,5 +223,10 @@ public class VirtueContainer {
 		} else {
 			tileContainer.setBackground(Color.GRAY);
 		}
+	}
+
+	@Override
+	public int compareTo(VirtueContainer vc) {
+		return headerTitle.compareTo(vc.getName());
 	}
 }

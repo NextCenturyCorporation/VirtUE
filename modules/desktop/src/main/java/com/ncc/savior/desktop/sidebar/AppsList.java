@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
 
+import javax.swing.JScrollPane;
+
 import com.ncc.savior.desktop.virtues.VirtueService;
 
 /**
@@ -11,8 +13,8 @@ import com.ncc.savior.desktop.virtues.VirtueService;
 
 public class AppsList extends AbstractAppsView {
 
-	public AppsList(VirtueService virtueService) throws IOException {
-		super(virtueService);
+	public AppsList(VirtueService virtueService, JScrollPane sp) throws IOException {
+		super(virtueService, sp);
 		container.setLayout(new ModifiedFlowLayout());
 	}
 
