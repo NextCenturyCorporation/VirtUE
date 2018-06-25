@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
 
 import org.slf4j.Logger;
@@ -74,6 +75,13 @@ public class VirtueApplicationItem {
 		this.favoritedLabel = new JLabel();
 		this.appName = new JLabel(ad.getName());
 		this.appIcon.setHorizontalAlignment(SwingConstants.CENTER);
+
+		ToolTipManager ttm = ToolTipManager.sharedInstance();
+
+		ttm.setReshowDelay(2000);
+		ttm.setInitialDelay(2000);
+
+		container.setToolTipText("OS: " + ad.getOs());
 
 		this.changeListener = new ChangeListener();
 		this.listener = listener;
