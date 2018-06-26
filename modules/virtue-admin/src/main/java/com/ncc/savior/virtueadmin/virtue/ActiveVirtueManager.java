@@ -113,16 +113,18 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 
 	@Override
 	public void adminDeleteVirtue(String instanceId) {
-		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
-		if (vi == null) {
+		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(instanceId);
+		if (!opt.isPresent()) {
 			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
+		} else {
+			VirtueInstance vi = opt.get();
+			CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();
+			cloudManager.deleteVirtue(vi, future);
+			future.thenAccept((virtue) -> {
+				virtueDao.deleteVirtue(virtue);
+			});
 		}
-		CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();
-		cloudManager.deleteVirtue(vi, future);
-		future.thenAccept((virtue) -> {
-			virtueDao.deleteVirtue(virtue);
-		});
 	}
 
 	@Override
