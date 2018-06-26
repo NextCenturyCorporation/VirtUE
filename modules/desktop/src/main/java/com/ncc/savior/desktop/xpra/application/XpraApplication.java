@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
@@ -32,6 +33,7 @@ public abstract class XpraApplication implements Closeable {
 	protected int baseWindowId;
 	protected boolean debugOutput;
 	public static Set<String> noToolbarTypes;
+	protected IDndDragHandler dndHandler;
 
 	static {
 		noToolbarTypes = new TreeSet<String>();
@@ -121,4 +123,9 @@ public abstract class XpraApplication implements Closeable {
 	public abstract void fullscreen();
 
 	public abstract void notFullScreen();
+
+	public void setDndHandler(IDndDragHandler dndHandler) {
+		this.dndHandler = dndHandler;
+
+	}
 }

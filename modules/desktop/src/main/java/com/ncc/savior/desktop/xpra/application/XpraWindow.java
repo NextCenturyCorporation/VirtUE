@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DamageSequencePacket;
@@ -33,6 +34,7 @@ public abstract class XpraWindow implements IXpraWindow {
 	protected IFocusNotifier focusNotifier;
 	protected boolean graphicsSet;
 	protected IKeyboard keyboard;
+	private IDndDragHandler dndHandler;
 
 	public XpraWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
 			IFocusNotifier focusNotifier) {
@@ -102,6 +104,19 @@ public abstract class XpraWindow implements IXpraWindow {
 		} catch (IOException e) {
 			logger.error("Error attempting to send damage packet=" + sendPacket, e);
 		}
+	}
+
+	protected void onDragLeave(int x, int y, List<String> modifiers) {
+		dndHandler.onDragLeave(x, y, modifiers, id);
+	}
+
+	protected void onDragEnter(int x, int y, List<String> modifiers) {
+		dndHandler.onDragEnter(x, y, modifiers, id);
+	}
+
+	@Override
+	public void setDndHandler(IDndDragHandler dndHandler) {
+		this.dndHandler = dndHandler;
 	}
 
 	public abstract void doClose();

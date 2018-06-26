@@ -42,7 +42,6 @@ public class InputStreamPacketReader implements IPacketReader {
 
 	private IEncoder bencoder;
 
-
 	public InputStreamPacketReader(InputStream in, PacketBuilder packetBuilder) {
 		this.in = in;
 		this.packetBuilder = packetBuilder;
@@ -92,6 +91,7 @@ public class InputStreamPacketReader implements IPacketReader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Built " + packet.toString() + " from " + list.toString());
 		}
+
 		// if (!(packet instanceof PingPacket) && !(packet instanceof DrawPacket) &&
 		// !(packet instanceof CursorPacket)) {
 		// logger.debug("Receive:" + packet.toString());

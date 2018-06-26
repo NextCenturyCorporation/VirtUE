@@ -96,35 +96,59 @@ public class SwingWindow extends XpraWindow {
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
+				// logger.debug("Mouse exited");
 
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
+				// logger.debug("Mouse entered");
 
 			}
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 		});
 		this.canvas.addMouseMotionListener(new MouseMotionListener() {
+
+			private boolean dragInside;
+			private boolean dragOutside;
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				List<String> modifiers = SwingUtils.getModifiers(e);
 				onMouseMove((int) e.getXOnScreen(), (int) e.getYOnScreen(), modifiers);
-
+				dragInside = false;
+				dragOutside = false;
 			}
 
 			@Override
 			public void mouseDragged(MouseEvent event) {
 				List<String> modifiers = SwingUtils.getModifiers(event);
 				onMouseMove((int) event.getXOnScreen(), (int) event.getYOnScreen(), modifiers);
+				sendDragEvents(event, modifiers);
+			}
+
+			private void sendDragEvents(MouseEvent event, List<String> modifiers) {
+				int localX = event.getX();
+				int localY = event.getY();
+				boolean outside = outsideWindow(canvas, localX, localY);
+				if (!dragOutside && outside) {
+					dragInside=false;
+					dragOutside=true;
+					onDragLeave(event.getXOnScreen(), event.getYOnScreen(), modifiers);
+				}else if (!dragInside && !outside) {
+					dragInside=true;
+					dragOutside=false;
+					onDragEnter(event.getXOnScreen(), event.getYOnScreen(), modifiers);
+				}
+				// logger.debug("dragin: " + dragInside + "dragout: " + dragOutside);
+
+			}
+
+			private boolean outsideWindow(JCanvas canvas, int localX, int localY) {
+				return localX < 0 || localX > canvas.getWidth() || localY < 0 || localY > canvas.getHeight();
 			}
 		});
 		this.canvas.addMouseWheelListener(new MouseWheelListener() {

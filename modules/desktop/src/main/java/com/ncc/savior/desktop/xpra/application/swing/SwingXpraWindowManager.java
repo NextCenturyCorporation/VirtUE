@@ -69,6 +69,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 	@Override
 	protected IXpraWindow createNewWindow(NewWindowPacket packet, IPacketSender packetSender) {
 		SwingWindow window = new SwingWindow(packet, packetSender, client.getKeyboard(), /* IFocusNotifier */this);
+		// window.setDndHandler(dndHandler);
 		window.setColor(color);
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override

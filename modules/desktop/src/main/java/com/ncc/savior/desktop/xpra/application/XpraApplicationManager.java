@@ -3,12 +3,14 @@ package com.ncc.savior.desktop.xpra.application;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.DisconnectPacket;
@@ -16,6 +18,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MousePointerPositionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
@@ -41,12 +44,34 @@ public abstract class XpraApplicationManager {
 	protected Map<Integer, XpraApplication> windowIdsToApplications;
 	private boolean show = false;
 	private boolean setDebugOutput;
+	private Set<Integer> hiddenWindowIds = new HashSet<Integer>();
+	protected IDndDragHandler dndHandler;
 
 	public XpraApplicationManager(XpraClient client) {
 		this.client = client;
 		this.applications = new HashMap<Integer, XpraApplication>();
 		this.windowIdsToApplications = new HashMap<Integer, XpraApplication>();
 		initPacketHandling();
+		dndHandler = new IDndDragHandler() {
+
+			@Override
+			public void onDragLeave(int x, int y, List<String> modifiers, int id) {
+				for (Integer destId : hiddenWindowIds) {
+					Packet packet = new MousePointerPositionPacket(destId, x, y, modifiers);
+					try {
+						client.getPacketSender().sendPacket(packet);
+					} catch (IOException e) {
+						logger.error("error sending packet to register possible drag", e);
+					}
+				}
+			}
+
+			@Override
+			public void onDragEnter(int x, int y, List<String> modifiers, int id) {
+				logger.debug("DRAG ENTER event not implemented yet");
+
+			}
+		};
 	}
 
 	public void setDebugOutput(boolean b) {
@@ -67,8 +92,23 @@ public abstract class XpraApplicationManager {
 			@Override
 			public void handlePacket(Packet packet) {
 				// These are actions that need to be handled by the application, not the window.
+				if (packet instanceof WindowPacket) {
+					if (hiddenWindowIds.contains(((WindowPacket) packet).getWindowId())) {
+						return;
+					}
+				}
 				switch (packet.getType()) {
 				case NEW_WINDOW:
+					if (packet instanceof NewWindowPacket) {
+						NewWindowPacket p = (NewWindowPacket) packet;
+						if (p.getMetadata().getTitle().equals("DONOTSHOW")) {
+							hiddenWindowIds.add(p.getWindowId());
+						}
+					}
+					// if (packet instanceof WindowPacket && ignoreIds.contains(((WindowPacket)
+					// packet).getWindowId())) {
+					// logger.debug("ignoring packet=" + packet);
+					// } else {
 					NewWindowPacket p = (NewWindowPacket) packet;
 					int parentId = p.getMetadata().getParentId();
 					// boolean isModal = p.getMetadata().getModal();
@@ -76,8 +116,9 @@ public abstract class XpraApplicationManager {
 						XpraApplication parent = applications.get(parentId);
 						onModal(p, parent);
 					} else {
-						onNewWindow(p);
+						onNewWindow(p, !hiddenWindowIds.contains(p.getWindowId()));
 					}
+					// }
 					break;
 				case LOST_WINDOW:
 					onLostWindow((LostWindowPacket) packet);
@@ -195,9 +236,10 @@ public abstract class XpraApplicationManager {
 		}
 	}
 
-	private void onNewWindow(NewWindowPacket packet) {
-		XpraApplication app = createXpraApplication(packet);
-		if (show) {
+	private void onNewWindow(NewWindowPacket packet, boolean showable) {
+		XpraApplication app = createXpraApplication(packet, showable);
+		app.setDndHandler(dndHandler);
+		if (show && showable) {
 			app.Show();
 		}
 		int baseWindowId = packet.getWindowId();
@@ -210,7 +252,8 @@ public abstract class XpraApplicationManager {
 		// int id = packet.getWindowId();
 		// windowIdsToApplications.put(id, windowIdsToApplications.get(parentId));
 
-		XpraApplication app = createXpraApplication(packet, parent);
+		XpraApplication app = createXpraApplication(packet, parent, true);
+		app.setDndHandler(dndHandler);
 		app.setDebugOutput(this.setDebugOutput);
 		if (show) {
 			app.Show();
@@ -226,7 +269,7 @@ public abstract class XpraApplicationManager {
 		if (parent != null) {
 			windowIdsToApplications.put(id, parent);
 		} else {
-			onNewWindow(packet);
+			onNewWindow(packet, true);
 		}
 	}
 
@@ -274,9 +317,10 @@ public abstract class XpraApplicationManager {
 		}
 	}
 
-	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet);
+	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet, boolean showable);
 
-	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet, XpraApplication parent);
+	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet, XpraApplication parent,
+			boolean showable);
 
 	public void closeAllWindows() {
 		for (XpraApplication app : this.applications.values()) {

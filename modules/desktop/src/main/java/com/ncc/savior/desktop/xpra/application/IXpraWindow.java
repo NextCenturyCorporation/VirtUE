@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.xpra.application;
 
 import java.io.Closeable;
 
+import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.DrawPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowIconPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
@@ -20,4 +21,6 @@ public interface IXpraWindow extends Closeable {
 	public void updateWindowMetadata(WindowMetadataPacket packet);
 
 	public void resize(int width, int height);
+
+	void setDndHandler(IDndDragHandler dndHandler);
 }

@@ -32,12 +32,13 @@ public class SwingApplicationManager extends XpraApplicationManager {
 	}
 
 	@Override
-	protected synchronized XpraApplication createXpraApplication(NewWindowPacket packet) {
-		return createNewSwingXpraApplication(packet, null);
+	protected synchronized XpraApplication createXpraApplication(NewWindowPacket packet, boolean showable) {
+		return createNewSwingXpraApplication(packet, null, showable);
 	}
 
-	private XpraApplication createNewSwingXpraApplication(NewWindowPacket packet, SwingApplication parent) {
-		SwingApplication app = new SwingApplication(client, packet, parent, color);
+	private XpraApplication createNewSwingXpraApplication(NewWindowPacket packet, SwingApplication parent,
+			boolean showable) {
+		SwingApplication app = new SwingApplication(client, packet, parent, color, dndHandler, showable);
 		return app;
 	}
 
@@ -55,12 +56,12 @@ public class SwingApplicationManager extends XpraApplicationManager {
 	}
 
 	@Override
-	protected XpraApplication createXpraApplication(NewWindowPacket packet, XpraApplication parent) {
+	protected XpraApplication createXpraApplication(NewWindowPacket packet, XpraApplication parent, boolean showable) {
 		SwingApplication p = null;
 		if (parent instanceof SwingApplication) {
 			p = (SwingApplication) parent;
 		}
-		return createNewSwingXpraApplication(packet, p);
+		return createNewSwingXpraApplication(packet, p, showable);
 	}
 
 	public void setColor(Color color) {

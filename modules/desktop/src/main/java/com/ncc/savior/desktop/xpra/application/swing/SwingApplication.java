@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.XpraApplication;
 import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
@@ -76,10 +77,15 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 	private boolean fullscreen;
 
-	public SwingApplication(XpraClient client, NewWindowPacket packet, SwingApplication parent, Color color) {
+	private boolean showable;
+
+	public SwingApplication(XpraClient client, NewWindowPacket packet, SwingApplication parent, Color color,
+			IDndDragHandler dndHandler, boolean showable) {
 		super(client, packet.getWindowId());
 		this.color = color;
 		this.parent = parent;
+		this.dndHandler = dndHandler;
+		this.showable = showable;
 		init(packet);
 	}
 
@@ -98,6 +104,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		SwingXpraPacketHandler applicationPacketHandler = new SwingXpraPacketHandler(frame);
 		client.addPacketListener(applicationPacketHandler);
 		windowManager = new SwingXpraWindowManager(client, packet.getWindowId());
+		windowManager.setDndHandler(dndHandler);
 		((SwingXpraWindowManager) windowManager).setColor(color);
 		windowManager.setDebugOutput(debugOutput);
 		fullScreenBounds = frame.getMaximizedBounds();
@@ -198,7 +205,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// stage.getHeight());
 				try {
 					sender.sendPacket(sendPacket);
-					frame.setVisible(true);
+					frame.setVisible(showable);
 				} catch (IOException e) {
 					logger.error("Error sending packet=" + packet);
 				}
@@ -441,7 +448,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					frame.setVisible(true);
+					frame.setVisible(showable);
 				}
 			});
 		}

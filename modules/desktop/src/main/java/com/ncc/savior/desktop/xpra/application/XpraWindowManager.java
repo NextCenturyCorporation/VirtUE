@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
@@ -50,6 +51,8 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 	private Queue<Packet> packetQueue;
 	private boolean graphicsInit = false;
 	protected int baseWindowId;
+
+	private IDndDragHandler dndHandler;
 
 	public XpraWindowManager(XpraClient client, int baseWindowId) {
 		this.client = client;
@@ -245,6 +248,7 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 	private void onNewWindow(NewWindowPacket packet) {
 		int id = packet.getWindowId();
 		IXpraWindow window = createNewWindow(packet, client.getPacketSender());
+		window.setDndHandler(dndHandler);
 		window.setDebugOutput(debugOutput);
 		windows.put(id, window);
 	}
@@ -276,5 +280,9 @@ public abstract class XpraWindowManager implements IPacketHandler, IFocusNotifie
 		if (window != null) {
 			window.resize(width, height);
 		}
+	}
+
+	public void setDndHandler(IDndDragHandler dndHandler) {
+		this.dndHandler = dndHandler;
 	}
 }
