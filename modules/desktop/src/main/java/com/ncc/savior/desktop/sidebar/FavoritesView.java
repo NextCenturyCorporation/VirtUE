@@ -33,7 +33,7 @@ public class FavoritesView extends AbstractAppsView {
 		container.repaint();
 	}
 
-	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueContainer vc, JScrollPane sp,
+	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueTileContainer vc, JScrollPane sp,
 			PropertyChangeListener listener, Image image) {
 		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
 			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener,

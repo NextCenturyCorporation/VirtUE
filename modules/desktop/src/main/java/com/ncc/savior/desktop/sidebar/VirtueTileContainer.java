@@ -7,24 +7,21 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -41,34 +38,23 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  * the virtue is selected.
  *
  */
-public class VirtueContainer implements Comparable<VirtueContainer> {
-	private static Logger logger = LoggerFactory.getLogger(VirtueContainer.class);
-	private DesktopVirtue virtue;
-	private VirtueService virtueService;
+public class VirtueTileContainer extends AbstractVirtueContainer implements Comparable<VirtueTileContainer> {
+	private static Logger logger = LoggerFactory.getLogger(VirtueTileContainer.class);
 
-	private String headerTitle;
-	private VirtueState status;
-	private JLabel statusLabel;
-	private JPanel container;
 	private JPanel tileContainer;
-	private JPanel header;
 	private Color bodyColor;
 
-	private static int numRows = 0;
-	private int row;
+	public VirtueTileContainer(DesktopVirtue virtue, VirtueService virtueService,
+			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField) throws IOException {
+		super(virtue, virtueService, sp, textField);
+		dropDown = true;
 
-	private HashMap<String, VirtueApplicationItem> tiles;
+		container = new JPanel();
+		container.setLayout(new BorderLayout(0, 0));
 
-	public VirtueContainer(DesktopVirtue virtue, VirtueService virtueService,
-			Color headerColor, Color bodyColor) throws IOException {
-		this.virtueService = virtueService;
-		this.virtue = virtue;
-		this.tiles = new HashMap<String, VirtueApplicationItem>();
-		this.headerTitle = virtue.getName();
-		this.status = virtue.getVirtueState();
 		this.bodyColor = bodyColor;
-		createContainer(virtue, headerColor, Color.GRAY, numRows);
 
+		createContainer(virtue, headerColor, Color.GRAY, numRows);
 		logger.debug("loaded");
 	}
 
@@ -80,7 +66,7 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 
 	private void createContainer(DesktopVirtue dv, Color headerColor, Color bodyColor, int row) {
 		this.row = row;
-		this.container = new JPanel();
+		container = new JPanel();
 		container.setLayout(new BorderLayout(0, 0));
 
 		this.header = new JPanel();
@@ -112,40 +98,37 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 		GridBagConstraints gbc3 = new GridBagConstraints();
 		gbc3.gridx = 2;
 		gbc3.gridy = 0;
-		JLabel optionsLabel = new JLabel();
+		optionsLabel = new JLabel();
 		optionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		ImageIcon optionsIcon = new ImageIcon(VirtueContainer.class.getResource("/images/options.png"));
+		ImageIcon optionsIcon = new ImageIcon(VirtueTileContainer.class.getResource("/images/options.png"));
 		Image optionsImage = optionsIcon.getImage(); // transform it
 		Image newOptionsImg = optionsImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
 		optionsIcon = new ImageIcon(newOptionsImg);
 		optionsLabel.setIcon(optionsIcon);
 		header.add(optionsLabel, gbc3);
 
-		optionsLabel.setToolTipText("Click to start or stop a virtue");
+		addOptionsListener();
 
-		optionsLabel.addMouseListener(new MouseAdapter() {
+		header.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent event) {
-				JPopupMenu pm = new JPopupMenu();
-				JMenuItem mi1 = new JMenuItem("Stop");
+			public void mouseClicked(MouseEvent arg0) {
+				if (!dropDown) {
+					dropDown = true;
+					String keyword = textField.getText();
+					search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+					tileContainer.validate();
+					tileContainer.repaint();
+					sp.validate();
+					sp.getViewport().revalidate();
 
-				mi1.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent evt) {
-						try {
-							virtueService.stopVirtue(virtue);
-							virtue.setVirtueState(VirtueState.STOPPING);
-							updateVirtue(virtue);
-						} catch (IOException e) {
-							String msg = "Error attempting to stop virtue=" + virtue;
-							logger.error(msg, e);
-						}
-					}
-				});
-
-				pm.setPopupSize(45, 38);
-				pm.add(mi1);
-				pm.show(optionsLabel, -20, 24);
+				} else {
+					tileContainer.removeAll();
+					tileContainer.validate();
+					tileContainer.repaint();
+					dropDown = false;
+					sp.validate();
+					sp.getViewport().revalidate();
+				}
 			}
 		});
 
@@ -158,41 +141,7 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 		numRows++;
 	}
 
-	public int getRow() {
-		return row;
-	}
-
-	public void setRow(int row) {
-		this.row = row;
-	}
-
-	public static void resetRows() {
-		numRows = 0;
-	}
-
-	public JPanel getContainer() {
-		return container;
-	}
-
-	public DesktopVirtue getVirtue() {
-		return virtue;
-	}
-
-	public String getName() {
-		return headerTitle;
-	}
-
-	public boolean containsKeyword(String keyword) {
-		for (ApplicationDefinition ad : virtue.getApps().values()) {
-			if (ad.getName().toLowerCase().contains(keyword.toLowerCase())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public void search(Comparator<VirtueApplicationItem> comp,
-			Predicate<VirtueApplicationItem> predicate) {
+	public void search(Comparator<VirtueApplicationItem> comp, Predicate<VirtueApplicationItem> predicate) {
 		tileContainer.removeAll();
 		Collection<VirtueApplicationItem> vai = tiles.values();
 		List<VirtueApplicationItem> matchedTiles;
@@ -213,10 +162,11 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 			tileContainer.add(va.getContainer());
 		}
 
-		tileContainer.validate();
-		tileContainer.repaint();
+		container.validate();
+		container.repaint();
 	}
 
+	@Override
 	public void updateVirtue(DesktopVirtue virtue) {
 		this.virtue = virtue;
 		this.statusLabel.setText(virtue.getVirtueState().toString());
@@ -228,7 +178,7 @@ public class VirtueContainer implements Comparable<VirtueContainer> {
 	}
 
 	@Override
-	public int compareTo(VirtueContainer vc) {
+	public int compareTo(VirtueTileContainer vc) {
 		return headerTitle.compareTo(vc.getName());
 	}
 }

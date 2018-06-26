@@ -1,10 +1,8 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
@@ -24,34 +21,21 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  *
  */
 
-public class VirtueTile {
-	private JPanel container;
-	private ConcurrentHashMap<String, VirtueContainer> virtues;
-	private ArrayList<String> virtuesInView;
+public class VirtueTile extends AbstractVirtueView {
 
-	private static int row = 0;
-
-	private JScrollPane sp;
+	private ConcurrentHashMap<String, VirtueTileContainer> virtues;
 
 	public VirtueTile(JScrollPane sp) throws IOException {
-		this.container = new JPanel();
-		this.virtues = new ConcurrentHashMap<String, VirtueContainer>();
-		this.virtuesInView = new ArrayList<String>();
-		this.sp = sp;
-
-		GridBagLayout gbl = new GridBagLayout();
-		gbl.columnWidths = new int[] { 455, 0 };
-		gbl.rowHeights = new int[] { 100, 100, 0 };
-		gbl.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-		gbl.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
-		container.setLayout(gbl);
-		VirtueContainer.resetRows();
+		super(sp);
+		this.virtues = new ConcurrentHashMap<String, VirtueTileContainer>();
 	}
 
 	public void removeVirtue(DesktopVirtue virtue) {
-		search(null, null, null);
+		row--;
+		container.remove(footer);
+		moveFooter(row);
 
-		VirtueContainer removedVc = virtues.get(virtue.getTemplateId());
+		VirtueTileContainer removedVc = virtues.get(virtue.getTemplateId());
 
 		int removedRow = removedVc.getRow();
 		virtues.remove(virtue.getTemplateId());
@@ -59,7 +43,7 @@ public class VirtueTile {
 		if (virtuesInView.contains(virtue.getTemplateId())) {
 			container.remove(removedVc.getContainer());
 
-			for (VirtueContainer vc : virtues.values()) {
+			for (VirtueTileContainer vc : virtues.values()) {
 				if (vc.getRow() > removedRow) {
 					container.remove(vc.getContainer());
 					vc.setRow(vc.getRow() - 1);
@@ -71,15 +55,15 @@ public class VirtueTile {
 		}
 	}
 
-	public void search(String keyword, Comparator<VirtueContainer> vcComp, Comparator<VirtueApplicationItem> vaiComp) {
+	public void search(String keyword, Comparator<VirtueTileContainer> vcComp, Comparator<VirtueApplicationItem> vaiComp) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				row = 0;
 				container.removeAll();
 				virtuesInView.clear();
-				Collection<VirtueContainer> vcs = virtues.values();
-				List<VirtueContainer> matchedVcs;
+				Collection<VirtueTileContainer> vcs = virtues.values();
+				List<VirtueTileContainer> matchedVcs;
 
 				if (keyword != null) {
 					matchedVcs = vcs.stream().filter(vc -> vc.containsKeyword(keyword)).collect(Collectors.toList());
@@ -93,7 +77,7 @@ public class VirtueTile {
 					Collections.sort(matchedVcs);
 				}
 
-				for (VirtueContainer vc : matchedVcs) {
+				for (VirtueTileContainer vc : matchedVcs) {
 					if (keyword != null) {
 						if (vaiComp != null) {
 							vc.search(vaiComp,
@@ -116,21 +100,20 @@ public class VirtueTile {
 		});
 	}
 
-	public void addVirtueToRow(DesktopVirtue virtue, VirtueContainer vc, int row) {
+	public void addVirtueToRow(DesktopVirtue virtue, VirtueTileContainer vc, int row) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(0, 0, 10, 0);
 		gbc.weightx = 1.0;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = row;
+		gbc.anchor = GridBagConstraints.PAGE_START;
+		container.remove(footer);
 		container.add(vc.getContainer(), gbc);
+		moveFooter(row + 1);
 		virtuesInView.add(virtue.getTemplateId());
 
 		virtues.put(virtue.getTemplateId(), vc);
-	}
-
-	public JPanel getContainer() {
-		return container;
 	}
 
 }
