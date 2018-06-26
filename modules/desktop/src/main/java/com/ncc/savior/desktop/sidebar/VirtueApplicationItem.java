@@ -64,9 +64,11 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private JLabel appIcon;
 	private JPanel container;
 
+	private boolean isFavorited;
+
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
-			Image image) {
+			Image image, boolean isFavorited) {
 		this.sp = sp;
 		this.vc = vc;
 		this.virtueService = virtueService;
@@ -80,6 +82,8 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.favoritedLabel = new JLabel();
 		this.appName = new JLabel(ad.getName());
 		this.appIcon.setHorizontalAlignment(SwingConstants.CENTER);
+
+		this.isFavorited = isFavorited;
 
 		favoritedLabel.setToolTipText("Click to favorite or unfavorite");
 		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getName() + "<br>"
@@ -107,7 +111,12 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 		appIcon.setIcon(imageIcon);
 
-		favoritedLabel.setIcon(unfavoritedImage);
+		if (isFavorited) {
+			favoritedLabel.setIcon(favoritedImage);
+		} else {
+			favoritedLabel.setIcon(unfavoritedImage);
+		}
+
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		favoritedContainer.add(favoritedLabel, gbc);
 
@@ -130,7 +139,13 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		appIcon.setHorizontalAlignment(SwingConstants.LEFT);
 
 		this.favoritedLabel = new JLabel();
-		favoritedLabel.setIcon(unfavoritedImage);
+
+		if (isFavorited) {
+			favoritedLabel.setIcon(favoritedImage);
+		} else {
+			favoritedLabel.setIcon(unfavoritedImage);
+		}
+
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
 		container.add(favoritedLabel, BorderLayout.NORTH);

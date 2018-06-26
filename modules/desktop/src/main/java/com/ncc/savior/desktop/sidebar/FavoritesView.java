@@ -4,6 +4,7 @@ import java.awt.FlowLayout;
 import java.awt.Image;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
@@ -19,8 +20,12 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class FavoritesView extends AbstractAppsView {
 
-	public FavoritesView(VirtueService virtueService, JScrollPane sp) throws IOException {
+	private Preferences favorites;
+
+	public FavoritesView(VirtueService virtueService, JScrollPane sp, Preferences favorites) throws IOException {
 		super(virtueService, sp);
+		this.favorites = favorites;
+
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
 		container.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
@@ -32,9 +37,11 @@ public class FavoritesView extends AbstractAppsView {
 			PropertyChangeListener listener, Image image) {
 		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
 			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener,
-					image);
+					image, true);
 			va.tileSetup();
 			va.setToFavorited();
+
+			favorites.putBoolean(ad.getId() + virtue.getTemplateId(), true);
 
 			container.add(va.getContainer());
 			tiles.put(ad.getId() + virtue.getTemplateId(), va);
@@ -46,6 +53,8 @@ public class FavoritesView extends AbstractAppsView {
 			container.remove(tiles.get(ad.getId() + virtue.getTemplateId()).getContainer());
 			container.validate();
 			container.repaint();
+
+			favorites.remove(ad.getId() + virtue.getTemplateId());
 			tiles.remove(ad.getId() + virtue.getTemplateId());
 		}
 	}

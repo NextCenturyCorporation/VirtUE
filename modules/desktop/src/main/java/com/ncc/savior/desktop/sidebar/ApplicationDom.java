@@ -18,9 +18,9 @@ public class ApplicationDom {
 	private ApplicationDefinition ad;
 	private boolean isFavorited;
 
-	public ApplicationDom(ApplicationDefinition ad) {
+	public ApplicationDom(ApplicationDefinition ad, boolean isFavorited) {
 		this.ad = ad;
-		this.isFavorited = false;
+		this.isFavorited = isFavorited;
 		this.changeListener = new ChangeListener();
 		listenerList = new ArrayList<PropertyChangeListener>();
 	}
