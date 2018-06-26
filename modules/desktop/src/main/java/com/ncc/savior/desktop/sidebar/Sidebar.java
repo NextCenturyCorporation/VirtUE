@@ -9,6 +9,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.SystemColor;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -23,9 +25,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +63,14 @@ public class Sidebar implements VirtueChangeHandler {
 	private JFrame frame;
 	private LoginPage lp;
 
+	private JTextField textField;
+
 	private JPanel desktopContainer;
 	private static boolean applicationsOpen = true;
 	private static boolean tileViewOpen = true;
 	private static boolean favoritesViewOpen = false;
 	private static boolean listViewOpen = false;
+	private static boolean searchMode = false;
 	private JScrollPane sp;
 	private AppsTile at;
 	private AppsList al;
@@ -75,6 +84,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.virtueIdToVc = new HashMap<String, VirtueContainer>();
 		this.virtueService = virtueService;
 		this.iconService = iconService;
+		this.textField = new JTextField();
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
@@ -84,6 +94,8 @@ public class Sidebar implements VirtueChangeHandler {
 		ArrayList<Color> colors = new ArrayList<Color>();
 		colors.add(new Color(4, 0, 252));
 		colors.add(new Color(0, 135, 255));
+		colors.add(new Color(0, 153, 0));
+		colors.add(new Color(0, 204, 0));
 		colors.add(new Color(165, 0, 0));
 		colors.add(new Color(255, 33, 0));
 		colors.add(new Color(209, 195, 0));
@@ -103,7 +115,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.setTitle("SAVIOR");
 		this.frame = frame;
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setSize(495, 620);
+		this.frame.setSize(491, 620);
 
 		startLogin();
 
@@ -140,7 +152,7 @@ public class Sidebar implements VirtueChangeHandler {
 				frame.repaint();
 				setup(user);
 				frame.getContentPane().add(desktopContainer);
-				frame.setSize(495, 620);
+				frame.setSize(491, 620);
 				setInitialViewPort();
 				frame.setVisible(true);
 			}
@@ -174,7 +186,7 @@ public class Sidebar implements VirtueChangeHandler {
 	@Override
 	public void addVirtue(DesktopVirtue virtue) throws IOException {
 		VirtueContainer vc = new VirtueContainer(virtue, virtueService, getNextColor(),
-				getNextColor(), sp);
+				getNextColor());
 		// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 		virtueIdToVc.put(virtue.getTemplateId(), vc);
 		vt.addVirtueToRow(virtue, vc, vc.getRow());
@@ -205,8 +217,14 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(appsTileVa.getChangeListener());
 			dom.addListener(appsListVa.getChangeListener());
 			dom.addListener(vcAppsTileVa.getChangeListener());
-
 		}
+
+		String keyword = textField.getText();
+		at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+		al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+		fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+		vt.search(keyword, null, null);
+
 		sp.getViewport().validate();
 	}
 
@@ -218,8 +236,8 @@ public class Sidebar implements VirtueChangeHandler {
 		// }
 		if (vmi != null) {
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
-				at.removeApplication(ad);
-				al.removeApplication(ad);
+				at.removeApplication(ad, virtue);
+				al.removeApplication(ad, virtue);
 			}
 
 			vt.removeVirtue(virtue);
@@ -235,14 +253,17 @@ public class Sidebar implements VirtueChangeHandler {
 
 	// This will setup the main display after login
 	public void setup(DesktopUser user) throws IOException {
+		ToolTipManager.sharedInstance().setReshowDelay(1);
+		ToolTipManager.sharedInstance().setInitialDelay(1250);
+
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
 		this.sp = new JScrollPane();
-		this.at = new AppsTile(virtueService);
-		this.al = new AppsList(virtueService);
-		this.vt = new VirtueTile();
+		this.at = new AppsTile(virtueService, sp);
+		this.al = new AppsList(virtueService, sp);
+		this.vt = new VirtueTile(sp);
 		this.vl = new VirtueList();
-		this.fv = new FavoritesView(virtueService);
+		this.fv = new FavoritesView(virtueService, sp);
 		desktopContainer.setLayout(new BorderLayout(0, 0));
 
 		applicationsOpen = true;
@@ -269,15 +290,15 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.setBackground(Color.DARK_GRAY);
 		desktopContainer.add(bottomBorder, BorderLayout.SOUTH);
 
-		JLabel lblNewLabel = new JLabel();
+		JLabel logoutLabel = new JLabel();
 
 		ImageIcon imageIcon = new ImageIcon(Sidebar.class.getResource("/images/u73.png"));
 		Image image = imageIcon.getImage(); // transform it
 		Image newimg = image.getScaledInstance(27, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
 		imageIcon = new ImageIcon(newimg);  // transform it back
-		lblNewLabel.setIcon(imageIcon);
+		logoutLabel.setIcon(imageIcon);
 
-		bottomBorder.add(lblNewLabel);
+		bottomBorder.add(logoutLabel);
 
 		JLabel logout = new JLabel("Logout");
 		logout.setFont(new Font("Tahoma", Font.PLAIN, 19));
@@ -289,10 +310,6 @@ public class Sidebar implements VirtueChangeHandler {
 		center.setLayout(new GridBagLayout());
 
 		GridBagConstraints c = new GridBagConstraints();
-		GridBagConstraints c2 = new GridBagConstraints();
-		GridBagConstraints c3 = new GridBagConstraints();
-		GridBagConstraints c4 = new GridBagConstraints();
-		GridBagConstraints c5 = new GridBagConstraints();
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 
@@ -307,10 +324,10 @@ public class Sidebar implements VirtueChangeHandler {
 		center.add(applications, c);
 		applications.setLayout(new BorderLayout(0, 4));
 
-		JLabel lblA = new JLabel("Applications");
-		lblA.setVerticalAlignment(SwingConstants.TOP);
-		lblA.setHorizontalAlignment(SwingConstants.CENTER);
-		applications.add(lblA);
+		JLabel applicationsLabel = new JLabel("Applications");
+		applicationsLabel.setVerticalAlignment(SwingConstants.TOP);
+		applicationsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		applications.add(applicationsLabel);
 
 		JPanel applicationsSelected = new JPanel();
 		FlowLayout flowLayout_2 = (FlowLayout) applicationsSelected.getLayout();
@@ -325,16 +342,16 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel virtues = new JPanel();
 		virtues.setBorder(new LineBorder(SystemColor.windowBorder));
 		virtues.setBackground(SystemColor.scrollbar);
-		c2.fill = GridBagConstraints.HORIZONTAL;
-		c2.weightx = 0.5;
-		c2.gridx = 1;
-		c2.gridy = 0;
-		center.add(virtues, c2);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.5;
+		c.gridx = 1;
+		c.gridy = 0;
+		center.add(virtues, c);
 		virtues.setLayout(new BorderLayout(0, 4));
 
-		JLabel lblVirtues = new JLabel("Virtues");
-		lblVirtues.setHorizontalAlignment(SwingConstants.CENTER);
-		virtues.add(lblVirtues);
+		JLabel virtuesLabel = new JLabel("Virtues");
+		virtuesLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		virtues.add(virtuesLabel);
 
 		JPanel virtuesHeader = new JPanel();
 		virtuesHeader.setBackground(SystemColor.scrollbar);
@@ -349,26 +366,46 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel search = new JPanel();
 		search.setBorder(new LineBorder(SystemColor.windowBorder));
 		search.setBackground(SystemColor.scrollbar);
-		FlowLayout flowLayout_4 = (FlowLayout) search.getLayout();
-		flowLayout_4.setVgap(10);
-		c3.fill = GridBagConstraints.HORIZONTAL;
-		c3.weightx = 0.5;
-		c3.gridx = 2;
-		c3.gridy = 0;
-		center.add(search, c3);
+		search.setLayout(new GridBagLayout());
+		c.fill = GridBagConstraints.BOTH;
+		c.weightx = 0.5;
+		c.gridx = 2;
+		c.gridy = 0;
+		center.add(search, c);
 
-		JLabel lblSearch = new JLabel("Search");
-		search.add(lblSearch);
+		c.gridx = 0;
+		c.gridy = 0;
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.BOTH;
+
+		JLabel searchLabel = new JLabel();
+		searchLabel.setBackground(SystemColor.scrollbar);
+		ImageIcon initialSearchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
+		Image searchImage = initialSearchIcon.getImage();
+		Image newSearchImage = searchImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		ImageIcon searchIcon = new ImageIcon(newSearchImage);
+
+		ImageIcon closeIcon = (new ImageIcon(Sidebar.class.getResource("/images/close.png")));
+		searchLabel.setIcon(searchIcon);
+
+		textField.setColumns(6);
+		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
+
+		search.add(textField, c);
+
+		c.weightx = 0.0;
+		c.gridx = 1;
+		search.add(searchLabel, c);
 
 		JPanel icons = new JPanel();
 		icons.setBorder(new LineBorder(SystemColor.windowBorder));
 		icons.setBackground(new Color(248, 248, 255));
-		c4.fill = GridBagConstraints.HORIZONTAL;
-		c4.weightx = 0.0;
-		c4.gridwidth = 3;
-		c4.gridx = 0;
-		c4.gridy = 1;
-		center.add(icons, c4);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0.0;
+		c.gridwidth = 3;
+		c.gridx = 0;
+		c.gridy = 1;
+		center.add(icons, c);
 		icons.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
 		ImageIcon inactiveListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-inactive2.png")));
@@ -392,29 +429,32 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setBackground(new Color(248, 248, 255));
 		favoritesView.add(favoritesLabel);
 		icons.add(favoritesView);
+		favoritesView.setToolTipText("Favorites view");
 
 		JPanel listView = new JPanel();
 		listView.setBackground(new Color(248, 248, 255));
 		listView.add(listLabel);
 		icons.add(listView);
+		listView.setToolTipText("List view");
 
 		JPanel tileView = new JPanel();
 		tileView.setBackground(new Color(248, 248, 255));
 		tileView.add(tileLabel);
 		icons.add(tileView);
+		tileView.setToolTipText("Tile view");
 
 		sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		sp.setSize(300, 800);
 		sp.setPreferredSize(new Dimension(0, 800));
 		sp.getVerticalScrollBar().setUnitIncrement(16);
-		c5.fill = GridBagConstraints.BOTH;
-		c5.ipady = 0;
-		c5.weighty = 1.0; // request any extra vertical space
-		c5.anchor = GridBagConstraints.PAGE_END; // bottom of space
-		c5.gridx = 0;
-		c5.gridwidth = 3; // 3 columns wide
-		c5.gridy = 2; // third row
-		center.add(sp, c5);
+		c.fill = GridBagConstraints.BOTH;
+		c.ipady = 0;
+		c.weighty = 1.0; // request any extra vertical space
+		c.anchor = GridBagConstraints.PAGE_END; // bottom of space
+		c.gridx = 0;
+		c.gridwidth = 3; // 3 columns wide
+		c.gridy = 2; // third row
+		center.add(sp, c);
 
 		sp.getViewport().revalidate();
 		sp.validate();
@@ -518,6 +558,76 @@ public class Sidebar implements VirtueChangeHandler {
 				} catch (IOException e) {
 					String msg = "Error attempting to logout";
 					logger.error(msg, e);
+				}
+			}
+		});
+
+		searchLabel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				if (searchMode) {
+					searchMode = false;
+					searchLabel.setIcon(searchIcon);
+					textField.setText("");
+					al.search(null, null, null);
+					at.search(null, null, null);
+					fv.search(null, null, null);
+					vt.search(null, null, null);
+					vt.search(null, null, null);
+					sp.setViewportView(sp.getViewport().getView());
+				}
+			}
+		});
+
+		textField.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				searchMode = true;
+				String keyword = textField.getText();
+				at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+				al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+				fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+				vt.search(keyword, null, null);
+				sp.setViewportView(sp.getViewport().getView());
+				searchLabel.setIcon(closeIcon);
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+			}
+
+		});
+
+		textField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+					if (textField.getText().equals("")) {
+						searchMode = false;
+						searchLabel.setIcon(searchIcon);
+						textField.setText("");
+						al.search(null, null, null);
+						at.search(null, null, null);
+						fv.search(null, null, null);
+						vt.search(null, null, null);
+						sp.setViewportView(sp.getViewport().getView());
+					} else {
+						searchMode = true;
+						String keyword = textField.getText();
+						at.search(keyword, null,
+								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						al.search(keyword, null,
+								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						fv.search(keyword, null,
+								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						vt.search(keyword, null, null);
+						sp.setViewportView(sp.getViewport().getView());
+						searchLabel.setIcon(closeIcon);
+					}
 				}
 			}
 		});

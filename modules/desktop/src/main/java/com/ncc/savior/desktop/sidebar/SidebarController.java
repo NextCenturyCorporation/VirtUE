@@ -54,7 +54,6 @@ public class SidebarController {
 
 		sidebar.start(primaryFrame, initialVirtues);
 		startVirtuePoll();
-
 		// sidebar.setStartState();
 	}
 

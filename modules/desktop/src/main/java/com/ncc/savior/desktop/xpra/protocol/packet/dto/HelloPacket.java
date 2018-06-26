@@ -71,18 +71,39 @@ public class HelloPacket extends Packet {
 
 	public static HelloPacket createDefaultRequest() {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-		int maxW = -1;
-		int maxH = -1;
+		double maxW = -1;
+		double maxH = -1;
+		double maxX = 0;
+		double maxY = 0;
+		double cornerWidth = 0;
+		double cornerHeight = 0;
+		double y = 0;
+		double x = 0;
 		int[][] monitors = getMonitorSizes();
-		for (int[] monitor : monitors) {
-			if (monitor[0] > maxW) {
-				maxW = monitor[0];
+		GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+		for (GraphicsDevice d : devices) {
+			double currHeight = d.getDefaultConfiguration().getBounds().getHeight();
+			double currWidth = d.getDefaultConfiguration().getBounds().getWidth();
+			x = d.getDefaultConfiguration().getBounds().getX();
+			y = d.getDefaultConfiguration().getBounds().getY();
+			if (y >= maxY) {
+				maxY = y;
+				if (currHeight > cornerHeight) {
+					cornerHeight = currHeight;
+				}
 			}
-			if (monitor[1] > maxH) {
-				maxH = monitor[1];
+			if (x >= maxX) {
+				maxX = x;
+				if (currWidth > cornerWidth) {
+					cornerWidth = currWidth;
+				}
 			}
 		}
-		int[] screen = new int[] { maxW, maxH };
+
+		maxH = y + cornerHeight;
+		maxW = x + cornerWidth;
+
+		int[] screen = new int[] { (int) maxW, (int) maxH };
 		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);

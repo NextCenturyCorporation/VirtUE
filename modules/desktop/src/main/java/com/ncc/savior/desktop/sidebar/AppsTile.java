@@ -4,6 +4,7 @@ import java.awt.FlowLayout;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
 
@@ -14,9 +15,9 @@ import com.ncc.savior.desktop.virtues.VirtueService;
 
 public class AppsTile extends AbstractAppsView {
 
-	public AppsTile(VirtueService virtueService)
+	public AppsTile(VirtueService virtueService, JScrollPane sp)
 			throws IOException {
-		super(virtueService);
+		super(virtueService, sp);
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
 		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

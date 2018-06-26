@@ -8,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
@@ -54,6 +56,11 @@ public class VirtueList {
 		tile.setBorder(new LineBorder(new Color(128, 128, 128), 1));
 		tile.setBackground(Color.ORANGE);
 		JLabel lblNewLabel_1 = new JLabel("Firefox");
+		lblNewLabel_1.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent arg0) {
+			}
+		});
 		lblNewLabel_1.setIcon(new ImageIcon(AppsList.class.getResource("/images/play.png")));
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.LEFT);
 		tile.setLayout(new BoxLayout(tile, BoxLayout.X_AXIS));

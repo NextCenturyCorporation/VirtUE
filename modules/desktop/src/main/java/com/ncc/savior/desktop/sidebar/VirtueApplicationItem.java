@@ -4,7 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -35,7 +38,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  * sidebar scrollPane
  */
 
-public class VirtueApplicationItem {
+public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> {
 
 	private static final Logger logger = LoggerFactory.getLogger(VirtueApplicationItem.class);
 
@@ -78,11 +81,21 @@ public class VirtueApplicationItem {
 		this.appName = new JLabel(ad.getName());
 		this.appIcon.setHorizontalAlignment(SwingConstants.CENTER);
 
+		favoritedLabel.setToolTipText("Click to favorite or unfavorite");
+		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getName() + "<br>"
+				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
+
 		this.changeListener = new ChangeListener();
 		this.listener = listener;
 	}
 
 	public void tileSetup() {
+		JPanel favoritedContainer = new JPanel();
+		favoritedContainer.setLayout(new GridBagLayout());
+		favoritedContainer.setBackground(Color.WHITE);
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets(0, 0, 0, 65);
+
 		container.setPreferredSize(new Dimension(90, 90));
 		container.setBackground(Color.WHITE);
 		appName.setFont(new Font("Tahoma", Font.PLAIN, 11));
@@ -96,16 +109,16 @@ public class VirtueApplicationItem {
 
 		favoritedLabel.setIcon(unfavoritedImage);
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		favoritedContainer.add(favoritedLabel, gbc);
 
 		container.add(appIcon, BorderLayout.CENTER);
 		container.add(appName, BorderLayout.SOUTH);
-		container.add(favoritedLabel, BorderLayout.NORTH);
+		container.add(favoritedContainer, BorderLayout.NORTH);
 
 		addListener(vc, fv, ad, virtue);
 	}
 
 	public void listSetup() {
-		this.container = new JPanel();
 		container.setBorder(new LineBorder(Color.GRAY, 1));
 		container.setBackground(Color.WHITE);
 		this.appIcon = new JLabel(ad.getName());
@@ -189,12 +202,20 @@ public class VirtueApplicationItem {
 	}
 
 	public void unfavorite() {
-		fv.removeFavorite(ad);
+		fv.removeFavorite(ad, virtue);
 		favoritedLabel.setIcon(unfavoritedImage);
 	}
 
 	public ChangeListener getChangeListener() {
 		return changeListener;
+	}
+
+	public String getApplicationName() {
+		return ad.getName();
+	}
+
+	public ApplicationDefinition getApplication() {
+		return ad;
 	}
 
 	public void registerListener(PropertyChangeListener listener) {
@@ -204,6 +225,7 @@ public class VirtueApplicationItem {
 	private void sendChangeEvent(PropertyChangeEvent propertyChangeEvent) {
 		listener.propertyChange(propertyChangeEvent);
 	}
+
 
 	private class ChangeListener implements PropertyChangeListener {
 
@@ -215,6 +237,11 @@ public class VirtueApplicationItem {
 				unfavorite();
 			}
 		}
+	}
+
+	@Override
+	public int compareTo(VirtueApplicationItem va) {
+		return ad.getName().compareTo(va.getApplicationName());
 	}
 
 }
