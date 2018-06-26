@@ -100,7 +100,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private DesktopView desktopView;
 
-	private Boolean searchMode = false;
+	private boolean searchMode = false;
 
 	private JScrollPane sp;
 	private AppsTile at;
