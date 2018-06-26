@@ -2,10 +2,10 @@
 # Start an Active Directory Domain Server
 #
 
+# For AWS managed AD DC, the admin user is "Admin", not "Administrator"
 
 resource "aws_directory_service_directory" "active_directory" {
-	short_name = "adds"
-	name = "adds.${var.domain}"
+	name = "${var.domain}"
 	password = "${var.admin_password}"
 	edition = "Standard"
 	type     = "MicrosoftAD"

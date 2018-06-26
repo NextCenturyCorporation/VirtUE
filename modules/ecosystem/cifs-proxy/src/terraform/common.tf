@@ -31,6 +31,15 @@ variable "domain" {
 	default = "test.savior"
 }
 
+variable "linux_ami" {
+	description = "Amazon Linux 2 LTS Candidate 2 AMI (HVM), SSD Volume Type"
+	default = "ami-afd15ed0"
+}
+
+variable "linux_instance_type" {
+	default = "t2.micro"
+}
+
 data "aws_subnet" "private_subnet" {
 	filter {
 		name = "tag:Name"
