@@ -1,27 +1,20 @@
 package com.ncc.savior.desktop.sidebar;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.Insets;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.border.LineBorder;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
  *
@@ -30,110 +23,110 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class VirtueList {
+public class VirtueList extends AbstractVirtueView {
 
-	private static final Logger logger = LoggerFactory.getLogger(VirtueList.class);
+	private ConcurrentHashMap<String, VirtueListContainer> virtues;
 
-	private JPanel container;
-	public static boolean dropDown = false;
+	public VirtueList(JScrollPane sp) throws IOException {
+		super(sp);
+		this.virtues = new ConcurrentHashMap<String, VirtueListContainer>();
+	}
 
-	public VirtueList() throws IOException {
-		this.container = new JPanel();
-		GridBagLayout gbl_container = new GridBagLayout();
-		gbl_container.columnWidths = new int[] { 584, 0 };
-		gbl_container.rowHeights = new int[] { 837, 0 };
-		gbl_container.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-		gbl_container.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-		container.setLayout(gbl_container);
+	public void removeVirtue(DesktopVirtue virtue) {
+		row--;
+		container.remove(footer);
+		moveFooter(row);
 
-		// Entire grid of Artist, Browsers, Math
-		JPanel headerContainer = new JPanel();
-		headerContainer.setPreferredSize(new Dimension(200, 16));
-		headerContainer.setSize(new Dimension(200, 200));
+		VirtueListContainer removedVc = virtues.get(virtue.getTemplateId());
 
-		// Artist, Browsers, Math
-		JPanel tile = new JPanel();
-		tile.setBorder(new LineBorder(new Color(128, 128, 128), 1));
-		tile.setBackground(Color.ORANGE);
-		JLabel lblNewLabel_1 = new JLabel("Firefox");
-		lblNewLabel_1.addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent arg0) {
-			}
-		});
-		lblNewLabel_1.setIcon(new ImageIcon(AppsList.class.getResource("/images/play.png")));
-		lblNewLabel_1.setHorizontalAlignment(SwingConstants.LEFT);
-		tile.setLayout(new BoxLayout(tile, BoxLayout.X_AXIS));
-		tile.add(lblNewLabel_1);
-		headerContainer.setBorder(new LineBorder(new Color(128, 128, 128), 1));
-		headerContainer.setLayout(new BorderLayout(0, 0));
-		headerContainer.add(tile, BorderLayout.NORTH);
+		int removedRow = removedVc.getRow();
+		virtues.remove(virtue.getTemplateId());
 
-		GridBagConstraints gbc_headerContainer = new GridBagConstraints();
-		gbc_headerContainer.anchor = GridBagConstraints.NORTH;
-		gbc_headerContainer.weighty = 0.1;
-		gbc_headerContainer.weightx = 0.1;
-		gbc_headerContainer.ipadx = 20;
-		gbc_headerContainer.ipady = 20;
-		gbc_headerContainer.fill = GridBagConstraints.HORIZONTAL;
-		gbc_headerContainer.gridx = 0;
-		gbc_headerContainer.gridy = 0;
-		container.add(headerContainer, gbc_headerContainer);
+		if (virtuesInView.contains(virtue.getTemplateId())) {
+			container.remove(removedVc.getContainer());
 
-		tile.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				if (!dropDown) {
-					dropDown = true;
-					try {
-						for (Integer i = 0; i < 6; i++) {
-							addTile(i.toString(), headerContainer);
-						}
-					} catch (IOException e) {
-						logger.error("dropdown error");
-					}
-					headerContainer.validate();
-					headerContainer.repaint();
-				} else {
-					dropDown = false;
-					headerContainer.removeAll();
-					headerContainer.validate();
-					headerContainer.repaint();
-					headerContainer.add(tile);
+			for (VirtueListContainer vc : virtues.values()) {
+				if (vc.getRow() > removedRow) {
+					container.remove(vc.getContainer());
+					vc.setRow(vc.getRow() - 1);
+					addVirtueToRow(vc.getVirtue(), vc, vc.getRow());
+					container.validate();
+					container.repaint();
 				}
 			}
+		}
+	}
+
+	public void addVirtueToRow(DesktopVirtue virtue, VirtueListContainer vlc, int row) {
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.weightx = 1.0;
+		gbc.weighty = 0.0;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.gridx = 0;
+		gbc.gridy = row;
+		gbc.anchor = GridBagConstraints.PAGE_START;
+		container.remove(footer);
+		container.add(vlc.getContainer(), gbc);
+		moveFooter(row + 1);
+		virtuesInView.add(virtue.getTemplateId());
+
+		virtues.put(virtue.getTemplateId(), vlc);
+	}
+
+	public void search(String keyword, Comparator<VirtueListContainer> vlcComp,
+			Comparator<VirtueApplicationItem> vaiComp) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				row = 0;
+				container.removeAll();
+				virtuesInView.clear();
+				Collection<VirtueListContainer> vlcs = virtues.values();
+				List<VirtueListContainer> matchedVlcs;
+
+				if (keyword != null) {
+					matchedVlcs = vlcs.stream().filter(vlc -> vlc.containsKeyword(keyword))
+							.collect(Collectors.toList());
+				} else {
+					matchedVlcs = vlcs.stream().collect(Collectors.toList());
+				}
+
+				if (vlcComp != null) {
+					Collections.sort(matchedVlcs, vlcComp);
+				} else {
+					Collections.sort(matchedVlcs);
+				}
+
+				for (VirtueListContainer vlc : matchedVlcs) {
+					if (keyword != null) {
+						if (vaiComp != null) {
+							vlc.search(vaiComp,
+									va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						} else {
+							vlc.search(null,
+									va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+						}
+					} else {
+						vlc.search(null, null);
+					}
+					vlc.setRow(row);
+					addVirtueToRow(vlc.getVirtue(), vlc, row);
+					row++;
+					container.validate();
+					container.repaint();
+				}
+				sp.setViewportView(sp.getViewport().getView());
+			}
 		});
 	}
 
-	public void addTile(String name, JPanel headerContainer) throws IOException {
-		JPanel tile = new JPanel();
-		tile.setBorder(new LineBorder(new Color(128, 128, 128), 1));
-		tile.setBackground(Color.WHITE);
-		JLabel lblNewLabel_1 = new JLabel(name);
-		lblNewLabel_1.setIcon(new ImageIcon(AppsList.class.getResource("/images/stop.png")));
-		lblNewLabel_1.setHorizontalAlignment(SwingConstants.LEFT);
-		tile.setLayout(new BoxLayout(tile, BoxLayout.X_AXIS));
-		tile.add(lblNewLabel_1);
-		headerContainer.setBorder(new LineBorder(new Color(128, 128, 128), 1));
-		headerContainer.setLayout(new GridLayout(0, 1, 0, 0));
-		headerContainer.add(tile);
+	public JScrollPane getScroll() {
+		return sp;
 	}
 
-	public static void main(String[] args) throws IOException {
-		VirtueList vt = new VirtueList();
-		JFrame frame = new JFrame("FrameDemo");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().add(vt.getContainer());
-		frame.setSize(600, 875);
-		frame.setVisible(true);
-	}
-
+	@Override
 	public JPanel getContainer() {
 		return container;
 	}
-
-	public void setDropDownToFalse() {
-		dropDown = false;
-	}
-
 }
