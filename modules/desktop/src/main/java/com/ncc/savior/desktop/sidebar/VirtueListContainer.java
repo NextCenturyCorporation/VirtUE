@@ -37,15 +37,15 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		this.container = new JPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
-		createContainer(virtue, headerColor, numRows);
+		createContainer(virtue, headerColor);
 	}
 
 	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) {
 		tiles.put(ad.getId() + va.getVirtue().getTemplateId(), va);
 	}
 
-	private void createContainer(DesktopVirtue dv, Color headerColor, int row) {
-		this.row = row;
+	private void createContainer(DesktopVirtue dv, Color headerColor) {
+		this.row = numRows;
 		this.header = new JPanel();
 		header.setSize(new Dimension(450, 70));
 		header.setMinimumSize(new Dimension(450, 70));

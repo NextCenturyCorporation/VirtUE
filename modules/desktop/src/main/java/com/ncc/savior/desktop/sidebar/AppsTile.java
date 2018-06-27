@@ -25,4 +25,8 @@ public class AppsTile extends AbstractAppsView {
 		container.repaint();
 	}
 
+	public void addTile(VirtueApplicationItem va) {
+		container.add(va.getContainer());
+	}
+
 }
