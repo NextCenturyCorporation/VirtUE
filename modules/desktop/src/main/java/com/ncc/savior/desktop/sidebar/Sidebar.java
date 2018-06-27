@@ -112,6 +112,8 @@ public class Sidebar implements VirtueChangeHandler {
 	private Preferences favorites;
 	private Preferences lastView;
 
+	public static boolean askAgain = true;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			boolean useColors, String style) {
 		this.authService = authService;
@@ -147,6 +149,8 @@ public class Sidebar implements VirtueChangeHandler {
 	public void start(JFrame frame, List<DesktopVirtue> initialVirtues)
 			throws Exception {
 		frame.setTitle("SAVIOR");
+		ImageIcon saviorIcon = new ImageIcon(AppsTile.class.getResource("/images/saviorLogo.png"));
+		frame.setIconImage(saviorIcon.getImage());
 		this.frame = frame;
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.setSize(491, 620);
@@ -240,22 +244,22 @@ public class Sidebar implements VirtueChangeHandler {
 			Image appImage = iconService.getImage(ad.getIconKey());
 
 			VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited);
+					dom.getChangeListener(), appImage, isFavorited, frame);
 			appsTileVa.tileSetup();
 			appsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vtcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited);
+					dom.getChangeListener(), appImage, isFavorited, frame);
 			vtcAppsTileVa.tileSetup();
 			vtcAppsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vlcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited);
+					dom.getChangeListener(), appImage, isFavorited, frame);
 			vlcAppsTileVa.listSetup();
 			vlcAppsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited);
+					dom.getChangeListener(), appImage, isFavorited, frame);
 			appsListVa.listSetup();
 			appsListVa.registerListener(dom.getChangeListener());
 
@@ -265,7 +269,7 @@ public class Sidebar implements VirtueChangeHandler {
 			vlc.addApplication(ad, vlcAppsTileVa);
 
 			if (isFavorited) {
-				fv.addFavorite(ad, virtue, vtc, sp, dom.getChangeListener(), appImage);
+				fv.addFavorite(ad, virtue, vtc, sp, dom.getChangeListener(), appImage, frame);
 			}
 
 			dom.addListener(appsTileVa.getChangeListener());
@@ -293,10 +297,11 @@ public class Sidebar implements VirtueChangeHandler {
 		if (vmi != null) {
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
 				at.removeApplication(ad, virtue);
-				al.removeApplication(ad, virtue);
 			}
 
+			al.removeVirtue(virtue);
 			vt.removeVirtue(virtue);
+			vl.removeVirtue(virtue);
 		}
 	}
 

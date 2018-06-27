@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -34,10 +35,10 @@ public class FavoritesView extends AbstractAppsView {
 	}
 
 	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueTileContainer vc, JScrollPane sp,
-			PropertyChangeListener listener, Image image) {
+			PropertyChangeListener listener, Image image, JFrame frame) {
 		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
 			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener,
-					image, true);
+					image, true, frame);
 			va.tileSetup();
 			va.setToFavorited();
 
@@ -57,5 +58,10 @@ public class FavoritesView extends AbstractAppsView {
 			favorites.remove(ad.getId() + virtue.getTemplateId());
 			tiles.remove(ad.getId() + virtue.getTemplateId());
 		}
+	}
+
+	@Override
+	public void addTile(VirtueApplicationItem va) {
+		container.add(va.getContainer());
 	}
 }

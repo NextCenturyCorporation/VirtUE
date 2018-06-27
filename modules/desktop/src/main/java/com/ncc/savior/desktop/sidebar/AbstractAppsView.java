@@ -87,7 +87,7 @@ public abstract class AbstractAppsView {
 				}
 
 				for (VirtueApplicationItem va : matchedVas) {
-					container.add(va.getContainer());
+					addTile(va);
 				}
 
 				container.validate();
@@ -100,5 +100,7 @@ public abstract class AbstractAppsView {
 	public JPanel getContainer() {
 		return container;
 	}
+
+	public abstract void addTile(VirtueApplicationItem va);
 
 }
