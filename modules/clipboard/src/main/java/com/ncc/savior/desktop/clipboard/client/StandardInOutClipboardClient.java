@@ -5,7 +5,9 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.StandardInOutConnection;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
@@ -37,7 +39,11 @@ public class StandardInOutClipboardClient {
 
 			IConnectionWrapper connection = new StandardInOutConnection();
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
-			ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
+			IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(serializer, "client");
+			String id = transmitter.init();
+			logger.debug("new client created with id=" + id);
+
+			ClipboardClient client = new ClipboardClient(transmitter, clipboardWrapper);
 			client.waitUntilStopped();
 			client.close();
 

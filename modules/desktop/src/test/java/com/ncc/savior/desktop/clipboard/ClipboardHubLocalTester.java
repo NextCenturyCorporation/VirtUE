@@ -81,8 +81,11 @@ public class ClipboardHubLocalTester {
 					IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
 					Thread.sleep(1000);
 
+					MessageTransmitter transmitter = new MessageTransmitter(serializer, "test-client");
+					transmitter.init();
+
 					@SuppressWarnings({ "unused", "resource" }) // ignore due to test nature of this class
-					ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
+					ClipboardClient client = new ClipboardClient(transmitter, clipboardWrapper);
 					while (true) {
 						// hold
 						JavaUtil.sleepAndLogInterruption(1000);

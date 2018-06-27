@@ -23,7 +23,7 @@ public class ClipboardDataMessage extends BaseClipboardMessage implements Serial
 	}
 
 	public ClipboardDataMessage(String ownerId, ClipboardData data, String requestId, String destinationId) {
-		super(ownerId);
+		super(ownerId, MessageType.CLIPBOARD);
 		this.data = data;
 		this.requestId = requestId;
 		this.destinationId = destinationId;

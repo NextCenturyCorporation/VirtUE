@@ -42,4 +42,25 @@ public interface IClipboardMessageSenderReceiver extends Closeable {
 	 * wait until transmitter is stopped and no longer valid.
 	 */
 	void waitUntilStopped();
+
+	/**
+	 * Gets the messsage passing client id.
+	 * 
+	 * @return
+	 */
+	String getClientId();
+
+	/**
+	 * Set handler that will only be passed Clipboard messages
+	 * 
+	 * @param clipboardMessageHandler
+	 */
+	void setClipboardMessageHandler(IClipboardMessageHandler clipboardMessageHandler);
+
+	/**
+	 * set handler that will only be passed Drag and Drop messages.
+	 * 
+	 * @param dndMessageHandler
+	 */
+	void setDndMessageHandler(IClipboardMessageHandler dndMessageHandler);
 }

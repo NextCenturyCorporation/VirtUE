@@ -15,7 +15,6 @@ import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper.IClipboardListener;
-import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.linux.X11ClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
@@ -23,7 +22,6 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
-import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -52,7 +50,8 @@ public class ClipboardClient implements Closeable {
 	 *            - abstraction for clipboard functions.
 	 */
 
-	public ClipboardClient(IMessageSerializer serializer, IClipboardWrapper clipboardWrapper) throws IOException {
+	public ClipboardClient(IClipboardMessageSenderReceiver transmitter, IClipboardWrapper clipboardWrapper)
+			throws IOException {
 		this.requestToThread = new TreeMap<String, Thread>();
 		this.requestToData = new TreeMap<String, ClipboardData>();
 		IClipboardMessageHandler handler = new IClipboardMessageHandler() {
@@ -80,10 +79,9 @@ public class ClipboardClient implements Closeable {
 				logger.debug("Received message transmitter closed event");
 			}
 		};
-		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(serializer, handler, "client");
-		this.myId = transmitter.init();
-		logger.debug("new client created with id=" + myId);
 		this.transmitter = transmitter;
+		this.myId=transmitter.getClientId();
+		transmitter.setClipboardMessageHandler(handler);
 		this.clipboard = clipboardWrapper;
 		IClipboardListener listener = new IClipboardListener() {
 

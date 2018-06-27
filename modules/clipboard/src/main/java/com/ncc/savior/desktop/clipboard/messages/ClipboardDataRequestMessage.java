@@ -20,7 +20,7 @@ public class ClipboardDataRequestMessage extends BaseClipboardMessage implements
 	}
 
 	public ClipboardDataRequestMessage(String ownerId, ClipboardFormat format, String requestId) {
-		super(ownerId);
+		super(ownerId, MessageType.CLIPBOARD);
 		this.format = format;
 		this.requestId = requestId;
 	}

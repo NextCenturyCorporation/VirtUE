@@ -17,7 +17,7 @@ public class ClientIdClipboardMessage extends BaseClipboardMessage implements IC
 	}
 
 	public ClientIdClipboardMessage(String messageSourceId, String newId) {
-		super(messageSourceId);
+		super(messageSourceId, MessageType.CLIPBOARD);
 		this.newId = newId;
 	}
 

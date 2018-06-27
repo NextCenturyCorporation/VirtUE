@@ -21,6 +21,7 @@ import com.jcraft.jsch.SftpException;
 import com.ncc.savior.desktop.alerting.UserAlertingStub;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.client.ClipboardClient;
 import com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
@@ -127,7 +128,9 @@ public class SshClipboardManager implements IClipboardManager {
 		IMessageSerializer localClientSerializer = pair.serializerB;
 		try {
 			this.clipboardHub.addClient(CLIENT_GROUP_ID, localHubSerializer);
-			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
+			MessageTransmitter transmitter = new MessageTransmitter(localClientSerializer, "client");
+			transmitter.init();
+			this.localClipboardClient = new ClipboardClient(transmitter, clipboardWrapper);
 		} catch (IOException e) {
 			UserAlertingStub.sendStubAlert(
 					"Local clipboard initialization failed.  Local clipboard will not be connected with virtues.");

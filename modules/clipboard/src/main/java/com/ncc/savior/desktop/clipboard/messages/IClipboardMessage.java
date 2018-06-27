@@ -22,4 +22,12 @@ public interface IClipboardMessage {
 	 * @return
 	 */
 	String getSourceId();
+
+	/**
+	 * Get the message type which is used to determine what subsystem (I.E.
+	 * clipboard, drag and drop) should handle the message.
+	 * 
+	 * @return
+	 */
+	MessageType getType();
 }

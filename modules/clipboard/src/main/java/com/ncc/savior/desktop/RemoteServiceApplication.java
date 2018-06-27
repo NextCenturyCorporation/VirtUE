@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.client.ClipboardClient;
 import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.StandardInOutConnection;
@@ -21,13 +22,16 @@ public class RemoteServiceApplication {
 			if (args.length > 0) {
 				usage("No Parameters allowed");
 			} else {
-				DndBackdrop dnd = new DndBackdrop();
-				dnd.setVisible(true);
+
 				IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(true);
 
 				IConnectionWrapper connection = new StandardInOutConnection();
 				IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
-				ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
+				MessageTransmitter transmitter = new MessageTransmitter(serializer, "client");
+				transmitter.init();
+				DndBackdrop dnd = new DndBackdrop(transmitter);
+				dnd.setVisible(true);
+				ClipboardClient client = new ClipboardClient(transmitter, clipboardWrapper);
 				client.waitUntilStopped();
 				client.close();
 			}

@@ -157,8 +157,9 @@ public class ClipboardHub {
 		// transmitter (in the HUB, but not in the clients). Creating a separate Map
 		// object seems like overkill and could easily cause issues keeping the Maps in
 		// sync. Wrapping the transmitters seems more clunky than useful
-		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(groupId, serializer, messageHandler,
-				"hub-" + newId);
+		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(groupId, serializer, "hub-" + newId);
+		transmitter.setClipboardMessageHandler(messageHandler);
+		transmitter.setDndMessageHandler(messageHandler);
 		ClientIdClipboardMessage idMsg = new ClientIdClipboardMessage(hubId, newId);
 		logger.trace("registering client");
 		sendMessageHandleError(idMsg, transmitter, newId);

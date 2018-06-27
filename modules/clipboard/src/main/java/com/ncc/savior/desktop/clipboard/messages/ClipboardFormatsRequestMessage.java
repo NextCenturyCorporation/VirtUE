@@ -15,6 +15,6 @@ public class ClipboardFormatsRequestMessage extends BaseClipboardMessage {
 	}
 
 	public ClipboardFormatsRequestMessage(String messageSourceId) {
-		super(messageSourceId);
+		super(messageSourceId, MessageType.CLIPBOARD);
 	}
 }

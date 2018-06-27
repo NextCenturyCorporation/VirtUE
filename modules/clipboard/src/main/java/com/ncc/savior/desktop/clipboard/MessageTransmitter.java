@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.messages.ClientIdClipboardMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
+import com.ncc.savior.desktop.clipboard.messages.MessageType;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 
 /**
@@ -21,7 +22,8 @@ import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	private static final Logger logger = LoggerFactory.getLogger(MessageTransmitter.class);
 
-	private IClipboardMessageHandler handler;
+	private IClipboardMessageHandler clipboardMessageHandler;
+	private IClipboardMessageHandler dndMessageHandler;
 	private IMessageSerializer serializer;
 
 	private Thread receiveThread;
@@ -31,6 +33,8 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 
 	private String groupId;
 
+	private String clientId;
+
 	/**
 	 *
 	 * @param serializer
@@ -39,8 +43,8 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	 *            - the ID that should be assigned to the thread created. This is
 	 *            mainly for debugging purposes.
 	 */
-	public MessageTransmitter(IMessageSerializer serializer, IClipboardMessageHandler messageHandler, String threadId) {
-		this(null, serializer, messageHandler, threadId);
+	public MessageTransmitter(IMessageSerializer serializer, String threadId) {
+		this(null, serializer, threadId);
 	}
 
 	/**
@@ -54,9 +58,7 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	 *            - the ID that should be assigned to the thread created. This is
 	 *            mainly for debugging purposes.
 	 */
-	public MessageTransmitter(String groupId, IMessageSerializer serializer, IClipboardMessageHandler messageHandler,
-			String threadId) {
-		this.handler = messageHandler;
+	public MessageTransmitter(String groupId, IMessageSerializer serializer, String threadId) {
 		this.serializer = serializer;
 		this.groupId = groupId;
 		this.receiveThread = new Thread(new Runnable() {
@@ -75,6 +77,16 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		while (!stopReadThread) {
 			try {
 				IClipboardMessage msg = serializer.deserialize();
+				MessageType type = msg.getType();
+				IClipboardMessageHandler handler = null;
+				switch (type) {
+				case CLIPBOARD:
+					handler = clipboardMessageHandler;
+					break;
+				case DND:
+					handler = dndMessageHandler;
+					break;
+				}
 				if (handler != null) {
 					handler.onMessage(msg, groupId);
 				} else {
@@ -90,7 +102,7 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 
 	private void onMessageError(String description, IOException e) {
 		if (!stopReadThread) {
-			handler.onMessageError(description, e);
+			clipboardMessageHandler.onMessageError(description, e);
 			try {
 				close();
 			} catch (IOException ioe) {
@@ -131,10 +143,10 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		}
 		ClientIdClipboardMessage cicm = (ClientIdClipboardMessage) msg;
 
-		String id = cicm.getNewId();
-		receiveThread.setName("MessageReceiver-client-" + id);
+		clientId = cicm.getNewId();
+		receiveThread.setName("MessageReceiver-client-" + clientId);
 		logger.debug("initialized");
-		return id;
+		return clientId;
 	}
 
 	/**
@@ -172,8 +184,26 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 				throw new RuntimeException("MessageTransmitter has been closed!");
 			}
 		};
-		if (handler != null) {
-			handler.closed();
+		if (clipboardMessageHandler != null) {
+			clipboardMessageHandler.closed();
 		}
+		if (dndMessageHandler != null) {
+			dndMessageHandler.closed();
+		}
+	}
+
+	@Override
+	public void setClipboardMessageHandler(IClipboardMessageHandler clipboardMessageHandler) {
+		this.clipboardMessageHandler = clipboardMessageHandler;
+	}
+
+	@Override
+	public void setDndMessageHandler(IClipboardMessageHandler dndMessageHandler) {
+		this.dndMessageHandler = dndMessageHandler;
+	}
+
+	@Override
+	public String getClientId() {
+		return clientId;
 	}
 }

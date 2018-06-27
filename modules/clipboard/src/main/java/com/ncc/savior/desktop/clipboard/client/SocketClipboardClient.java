@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.SocketConnection;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
@@ -41,7 +42,9 @@ public class SocketClipboardClient {
 		IConnectionWrapper connection = new SocketConnection(clientSocket);
 		IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
 
-		ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
+		MessageTransmitter transmitter = new MessageTransmitter(serializer, "client");
+		transmitter.init();
+		ClipboardClient client = new ClipboardClient(transmitter, clipboardWrapper);
 		client.waitUntilStopped();
 		client.close();
 	}

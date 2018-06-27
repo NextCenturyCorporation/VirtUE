@@ -17,13 +17,15 @@ public class BaseClipboardMessage implements IClipboardMessage, Serializable {
 	private static final long serialVersionUID = 1L;
 	protected Date sendTime;
 	protected String messageSourceId;
+	private MessageType messageType;
 
 	// For Jackson (de)serialization
 	protected BaseClipboardMessage() {
-		this(null);
+		this(null, null);
 	}
 
-	public BaseClipboardMessage(String messageSourceId) {
+	public BaseClipboardMessage(String messageSourceId, MessageType type) {
+		this.messageType = type;
 		this.sendTime = new Date();
 		this.messageSourceId = messageSourceId;
 	}
@@ -44,6 +46,11 @@ public class BaseClipboardMessage implements IClipboardMessage, Serializable {
 
 	public void setSourceId(String messageSourceId) {
 		this.messageSourceId = messageSourceId;
+	}
+
+	@Override
+	public MessageType getType() {
+		return messageType;
 	}
 
 }

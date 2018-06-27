@@ -18,11 +18,16 @@ import javax.swing.text.JTextComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.MessageTransmitter;
+
 
 public class DndBackdrop extends JFrame {
+	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(DndBackdrop.class);
+	private MessageTransmitter transmitter;
 
-	public DndBackdrop() {
+	public DndBackdrop(MessageTransmitter transmitter) {
+		this.transmitter = transmitter;
 		logger.debug("started dnd do not show");
 		this.setTitle("DONOTSHOW");
 		this.setSize(1600, 1200);
@@ -38,19 +43,21 @@ public class DndBackdrop extends JFrame {
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
-			DndBackdrop frame = new DndBackdrop();
+			DndBackdrop frame = new DndBackdrop(null);
 			// frame.pack();
 			frame.setVisible(true);
 		});
 	}
 
 	class ListTransferHandler extends TransferHandler {
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public int getSourceActions(JComponent c) {
 			return TransferHandler.COPY_OR_MOVE;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected Transferable createTransferable(JComponent source) {
 			logger.debug("create transferable");

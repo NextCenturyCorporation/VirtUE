@@ -20,7 +20,7 @@ public class ClipboardChangedMessage extends BaseClipboardMessage implements Ser
 	}
 
 	public ClipboardChangedMessage(String sourceId, Set<ClipboardFormat> formats) {
-		super(sourceId);
+		super(sourceId, MessageType.CLIPBOARD);
 		this.formats = formats;
 	}
 

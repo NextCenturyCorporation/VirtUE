@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 public class DndTest extends JFrame {
+	private static final long serialVersionUID = 1L;
 	private JTextField newTextField = new JTextField(10);
 	private JList<String> sourceList = new JList<>(new DefaultListModel<>());
 	private JList<String> destList = new JList<>(new DefaultListModel<>());
@@ -75,8 +76,7 @@ public class DndTest extends JFrame {
 }
 
 class ListTransferHandler extends TransferHandler {
-
-	private String test = "if you can see this, it worked";
+	private static final long serialVersionUID = 1L;
 	@Override
 	public int getSourceActions(JComponent c) {
 		return TransferHandler.COPY_OR_MOVE;
@@ -85,6 +85,7 @@ class ListTransferHandler extends TransferHandler {
 	@Override
 	protected Transferable createTransferable(JComponent source) {
 		System.out.println("create transferable");
+		@SuppressWarnings("unchecked")
 		JList<String> sourceList = (JList<String>) source;
 		String data = sourceList.getSelectedValue();
 		Transferable t = new StringSelection(data);
@@ -131,6 +132,7 @@ class ListTransferHandler extends TransferHandler {
 		}
 		JList.DropLocation dropLocation = (JList.DropLocation) support.getDropLocation();
 		int dropIndex = dropLocation.getIndex();
+		@SuppressWarnings("unchecked")
 		JList<String> targetList = (JList<String>) support.getComponent();
 		DefaultListModel<String> listModel = (DefaultListModel<String>) targetList.getModel();
 		if (dropLocation.isInsert()) {

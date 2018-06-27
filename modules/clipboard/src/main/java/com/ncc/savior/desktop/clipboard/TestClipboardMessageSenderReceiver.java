@@ -75,4 +75,22 @@ public class TestClipboardMessageSenderReceiver implements IClipboardMessageSend
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public String getClientId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setClipboardMessageHandler(IClipboardMessageHandler clipboardMessageHandler) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setDndMessageHandler(IClipboardMessageHandler dndMessageHandler) {
+		// TODO Auto-generated method stub
+
+	}
 }
