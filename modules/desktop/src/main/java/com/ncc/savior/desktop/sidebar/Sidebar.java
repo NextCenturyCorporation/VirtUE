@@ -582,15 +582,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				if (searchMode) {
-					searchMode = false;
-					searchLabel.setIcon(searchIcon);
-					textField.setText("");
-					al.search(null, null, null);
-					at.search(null, null, null);
-					fv.search(null, null, null);
-					vt.search(null, null, null);
-					vl.search(null, null, null);
-					sp.setViewportView(sp.getViewport().getView());
+					resetViews();
 				}
 			}
 		});
@@ -624,15 +616,7 @@ public class Sidebar implements VirtueChangeHandler {
 			public void keyReleased(KeyEvent event) {
 				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
 					if (textField.getText().equals("")) {
-						searchMode = false;
-						searchLabel.setIcon(searchIcon);
-						textField.setText("");
-						al.search(null, null, null);
-						at.search(null, null, null);
-						fv.search(null, null, null);
-						vt.search(null, null, null);
-						vl.search(null, null, null);
-						sp.setViewportView(sp.getViewport().getView());
+						resetViews();
 					} else {
 						searchMode = true;
 						String keyword = textField.getText();
@@ -713,6 +697,18 @@ public class Sidebar implements VirtueChangeHandler {
 		applicationsSelected.setBackground(SystemColor.scrollbar);
 		virtuesSelected.setBackground(new Color(148, 0, 211));
 		sp.setViewportView(vl.getContainer());
+	}
+
+	public void resetViews() {
+		searchMode = false;
+		searchLabel.setIcon(searchIcon);
+		textField.setText("");
+		al.search(null, null, null);
+		at.search(null, null, null);
+		fv.search(null, null, null);
+		vt.search(null, null, null);
+		vl.search(null, null, null);
+		sp.setViewportView(sp.getViewport().getView());
 	}
 
 	public void setInitialViewPort() {

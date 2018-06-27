@@ -18,6 +18,8 @@ import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -65,6 +67,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private JPanel container;
 
 	private boolean isFavorited;
+	private boolean askAgain = true;
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
@@ -165,29 +168,58 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				JPopupMenu pm = new JPopupMenu();
-				JMenuItem mi1 = new JMenuItem("Yes");
-				JMenuItem mi2 = new JMenuItem("No");
-				pm.add(new JLabel("Would you like to start a " + ad.getName() + " application?"));
-
-				mi1.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent evt) {
-						try {
-							virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
-							// virtue.setVirtueState(VirtueState.LAUNCHING);
-							// vc.updateVirtue(virtue);
-						} catch (IOException e) {
-							String msg = "Error attempting to start a " + ad.getName() + " application";
-							logger.error(msg);
-						}
+				if (!askAgain) {
+					try {
+						virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+						// virtue.setVirtueState(VirtueState.LAUNCHING);
+						// vc.updateVirtue(virtue);
+					} catch (IOException e) {
+						String msg = "Error attempting to start a " + ad.getName() + " application";
+						logger.error(msg);
 					}
-				});
+				} else {
 
-				pm.setPopupSize(375, 75);
-				pm.add(mi1);
-				pm.add(mi2);
-				pm.show(sp, 50, 150);
+					JPopupMenu pm = new JPopupMenu();
+					JMenuItem mi1 = new JMenuItem("Yes");
+					JMenuItem mi2 = new JMenuItem("No");
+					JCheckBoxMenuItem mi3 = new JCheckBoxMenuItem("Don't ask me again");
+					pm.add(new JLabel("Would you like to start a " + ad.getName() + " application?"));
+
+					mi1.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent evt) {
+							try {
+								virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+								// virtue.setVirtueState(VirtueState.LAUNCHING);
+								// vc.updateVirtue(virtue);
+							} catch (IOException e) {
+								String msg = "Error attempting to start a " + ad.getName() + " application";
+								logger.error(msg);
+							}
+						}
+					});
+
+					mi3.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent evt) {
+							if (mi3.isSelected()) {
+								askAgain = false;
+							}
+						}
+					});
+
+					JFrame frame = new JFrame();
+					frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					frame.setSize(40, 40);
+
+					pm.setPopupSize(375, 75);
+					pm.addSeparator();
+					pm.add(mi1);
+					pm.add(mi2);
+					mi3.setUI(new StayOpenCheckBoxMenuItem());
+					pm.add(mi3);
+					pm.show(sp, 50, 150);
+				}
 			}
 		});
 
