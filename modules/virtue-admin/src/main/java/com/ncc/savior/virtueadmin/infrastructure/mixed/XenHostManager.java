@@ -66,13 +66,14 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
-			Collection<String> securityGroupsNames, String subnetName, String xenAmi, String xenLoginUser,
-			String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns) {
+			Collection<String> securityGroupsNames, String vpcName, String subnetName, String xenAmi,
+			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns) {
 		this.xenVmDao = vmDao;
 		this.serviceProvider = serviceProvider;
 		this.ec2Wrapper = ec2Wrapper;
-		this.subnetId = AwsUtil.getSubnetIdFromName(subnetName, ec2Wrapper);
-		String vpcId = AwsUtil.getVpcIdFromSubnetId(subnetId, ec2Wrapper);
+		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
+		this.subnetId = AwsUtil.getSubnetIdFromName(vpcId, subnetName, ec2Wrapper);
+
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
 		this.xenInstanceType = xenInstanceType;
@@ -85,10 +86,11 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
-			String securityGroupsCommaSeparated, String subnetId, String xenAmi, String xenUser, String xenKeyName,
-			String xenInstanceType, boolean usePublicDns) {
+			String securityGroupsCommaSeparated, String vpcName, String subnetName, String xenAmi, String xenUser,
+			String xenKeyName, String xenInstanceType, boolean usePublicDns) {
 		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, splitOnComma(securityGroupsCommaSeparated),
-				subnetId, xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType), usePublicDns);
+				vpcName, subnetName, xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType),
+				usePublicDns);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -120,8 +122,7 @@ public class XenHostManager {
 		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName,
-				xenInstanceType,
-				subnetId);
+				xenInstanceType, subnetId);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,

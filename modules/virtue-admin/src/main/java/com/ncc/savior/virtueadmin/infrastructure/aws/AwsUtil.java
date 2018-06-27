@@ -21,6 +21,8 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
+import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
+import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
 import com.amazonaws.services.ec2.model.InstanceStatus;
@@ -32,6 +34,7 @@ import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
+import com.amazonaws.services.ec2.model.Vpc;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -155,7 +158,8 @@ public class AwsUtil {
 		}
 	}
 
-	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<VirtualMachine> vms, long periodMillis, boolean usePublicDns) {
+	public static void waitUntilAllNetworkingUpdated(AmazonEC2 ec2, Collection<VirtualMachine> vms, long periodMillis,
+			boolean usePublicDns) {
 		// create copy so we can alter
 		vms = new ArrayList<VirtualMachine>(vms);
 		while (true) {
@@ -252,23 +256,25 @@ public class AwsUtil {
 		return subnets.get(0).getVpcId();
 	}
 
-	public static String getSubnetIdFromName(String subnetName, AwsEc2Wrapper ec2Wrapper) {
+	public static String getSubnetIdFromName(String vpcId, String subnetName, AwsEc2Wrapper ec2Wrapper) {
 		String newSubnetId = null;
 		try {
 			DescribeSubnetsRequest req = new DescribeSubnetsRequest();
 			DescribeSubnetsResult sub = ec2Wrapper.getEc2().describeSubnets(req);
 
 			for (Subnet subnet : sub.getSubnets()) {
-				List<Tag> tags = subnet.getTags();
-				for (Tag tag : tags) {
-					if (tag.getKey().equalsIgnoreCase("name")) {
-						if (tag.getValue().equalsIgnoreCase(subnetName)) {
-							// match!
-							if (newSubnetId == null) {
-								newSubnetId = subnet.getSubnetId();
-							} else {
-								throw new SaviorException(SaviorException.UNKNOWN_ERROR,
-										"Found multiple subnets with the name=" + subnetName);
+				if (subnet.getVpcId().equals(vpcId)) {
+					List<Tag> tags = subnet.getTags();
+					for (Tag tag : tags) {
+						if (tag.getKey().equalsIgnoreCase("name")) {
+							if (tag.getValue().equalsIgnoreCase(subnetName)) {
+								// match!
+								if (newSubnetId == null) {
+									newSubnetId = subnet.getSubnetId();
+								} else {
+									throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+											"Found multiple subnets with the name=" + subnetName);
+								}
 							}
 						}
 					}
@@ -278,6 +284,40 @@ public class AwsUtil {
 			logger.error("Error with AWS.  Using null subnet", e);
 		}
 		return newSubnetId;
+	}
+
+	public static String getVpcIdFromVpcName(String vpcName, AwsEc2Wrapper ec2Wrapper) {
+		if (vpcName == null) {
+			logger.error("Error no VPC Name.  Cannot get VPC ID.");
+			return null;
+		}
+		String newVpcId = null;
+		try {
+			DescribeVpcsRequest req = new DescribeVpcsRequest();
+			DescribeVpcsResult sub = ec2Wrapper.getEc2().describeVpcs();
+			List<Vpc> vpcs = sub.getVpcs();
+
+			for (Vpc vpc : vpcs) {
+				List<Tag> tags = vpc.getTags();
+				for (Tag tag : tags) {
+					if (tag.getKey().equalsIgnoreCase("name")) {
+						if (tag.getValue().equalsIgnoreCase(vpcName)) {
+
+							// match!
+							if (newVpcId == null) {
+								newVpcId = vpc.getVpcId();
+							} else {
+								throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+										"Found multiple VPCs with the name=" + vpcName);
+							}
+						}
+					}
+				}
+			}
+		} catch (SdkClientException e) {
+			logger.error("Error with AWS.  Using null vpc", e);
+		}
+		return newVpcId;
 	}
 
 	public static Collection<String> getSecurityGroupIdsByNameAndVpcId(Collection<String> defaultSecurityGroups,
