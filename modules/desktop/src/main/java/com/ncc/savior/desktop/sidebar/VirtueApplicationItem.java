@@ -57,7 +57,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private DesktopVirtue virtue;
 
 	private FavoritesView fv;
-	private VirtueContainer vc;
+	private VirtueTileContainer vc;
 
 	private JLabel favoritedLabel;
 	private JLabel appName;
@@ -67,7 +67,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private boolean isFavorited;
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
-			VirtueContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
+			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
 			Image image, boolean isFavorited) {
 		this.sp = sp;
 		this.vc = vc;
@@ -152,15 +152,15 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.add(appIcon);
 
 		container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
-		container.setSize(new Dimension(475, 70));
-		container.setMinimumSize(new Dimension(475, 70));
-		container.setMaximumSize(new Dimension(475, 70));
-		container.setPreferredSize(new Dimension(475, 70));
+		container.setSize(new Dimension(450, 70));
+		container.setMinimumSize(new Dimension(450, 70));
+		container.setMaximumSize(new Dimension(10000, 70));
+		container.setPreferredSize(new Dimension(450, 70));
 
 		addListener(vc, fv, ad, virtue);
 	}
 
-	public void addListener(VirtueContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue) {
+	public void addListener(VirtueTileContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue) {
 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
