@@ -3,27 +3,27 @@
 #
 
 resource "aws_instance" "user_facing_server" {
-	ami           = "${var.linux_ami}"
-	instance_type = "${var.linux_instance_type}"
-	key_name      = "vrtu"
-	iam_instance_profile = "${aws_iam_instance_profile.instance_profile_file_server.name}"
+  ami           = "${var.linux_ami}"
+  instance_type = "${var.linux_instance_type}"
+  key_name      = "vrtu"
+  iam_instance_profile = "${aws_iam_instance_profile.instance_profile_file_server.name}"
 
-	vpc_security_group_ids = [ "${data.aws_security_group.sg.*.id}" ]
-	subnet_id = "${data.aws_subnet.public_subnet.id}"
+  vpc_security_group_ids = [ "${data.aws_security_group.sg.*.id}" ]
+  subnet_id = "${data.aws_subnet.public_subnet.id}"
 
-	tags {
-		Name = "User Service"
-		Owner = "${data.external.local_user.result.user}"
-		class = "webapp"
-		automated = "terraform"
-	}
-	lifecycle {
-		prevent_destroy = false
-		#    ignore_changes = ["user_data"]
-	}
+  tags {
+	Name = "user-service"
+	Owner = "${data.external.local_user.result.user}"
+	class = "webapp"
+	automated = "terraform"
+  }
+  lifecycle {
+	prevent_destroy = false
+	#    ignore_changes = ["user_data"]
+  }
 
-	# TODO: enable sharing some files
-	user_data = <<EOF
+  # TODO: enable sharing some files
+  user_data = <<EOF
 #!/bin/bash
 set -x
 exec > /var/log/user_data.log 2>&1
@@ -41,5 +41,6 @@ systemctl start sssd.service
 date
 EOF
 
-	depends_on = [ "aws_directory_service_directory.active_directory" ]
+  depends_on = [ "aws_directory_service_directory.active_directory" ]
+  
 }

@@ -7,59 +7,69 @@ provider "aws" {
 }
 
 data "external" "local_user" {
-	program = ["python", "-c", "import os; print '{ \"user\": \"%s\" }' % os.environ['USER']"]
+  program = ["python", "-c", "import os; print '{ \"user\": \"%s\" }' % os.environ['USER']"]
 }
 
 variable "admin_password" {
-	# Define this in a .auto.tfvars file that's not checked into git
+  # Define this in a .auto.tfvars file that's not checked into git
 }
 
 variable "instance_type" {
-	# t2.micro is free, but maybe too small for Windows 2016 Server to run well
-	default = "t2.medium"
+  # t2.micro is free, but maybe too small for Windows 2016 Server to run well
+  default = "t2.medium"
 }
 
 variable "security_group_names" {
-	default = [ "default_sg", "rdp_sg", "open_private_dev_sg" ]
+  default = [ "default_sg_ad", "rdp_sg_ad", "open_private_dev_sg_ad" ]
 }
 
 variable "subnet_name" {
-	default = "public_clong"
+  default = "public_1a"
 }
 
 variable "domain" {
-	default = "test.savior"
+  default = "test.savior"
 }
 
 variable "linux_ami" {
-	description = "Amazon Linux 2 LTS Candidate 2 AMI (HVM), SSD Volume Type"
-	default = "ami-afd15ed0"
+  description = "Amazon Linux 2 LTS Candidate 2 AMI (HVM), SSD Volume Type"
+  default = "ami-afd15ed0"
 }
 
 variable "linux_instance_type" {
-	default = "t2.micro"
+  default = "t2.micro"
+}
+
+data "aws_vpc" "ad_vpc" {
+  filter {
+	name = "tag:Name"
+	values = [ "ADTEST" ]
+  }
 }
 
 data "aws_subnet" "private_subnet" {
-	filter {
-		name = "tag:Name"
-		values = [ "Private_clong" ]
-	}
+  vpc_id = "${data.aws_vpc.ad_vpc.id}"
+  filter {
+	name = "tag:Name"
+	values = [ "Private_1b" ]
+  }
 }
 
 data "aws_subnet" "public_subnet" {
-	filter {
-		name = "tag:Name"
-		values = [ "Public_clong" ]
-	}
+  vpc_id = "${data.aws_vpc.ad_vpc.id}"
+  filter {
+	name = "tag:Name"
+	values = [ "Public_1a" ]
+  }
 }
 
 data "aws_security_group" "sg" {
-	count = "${length(var.security_group_names)}"
-	filter {
-		name = "tag:Name"
-		values = [ "${element(var.security_group_names, count.index)}" ]
-	}
+  vpc_id = "${data.aws_vpc.ad_vpc.id}"
+  count = "${length(var.security_group_names)}"
+  filter {
+	name = "tag:Name"
+	values = [ "${element(var.security_group_names, count.index)}" ]
+  }
 }
 
 data "aws_ami" "windows_server2016" {

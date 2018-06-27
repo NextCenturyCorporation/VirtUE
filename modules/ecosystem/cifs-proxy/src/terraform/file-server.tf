@@ -1,7 +1,7 @@
 // factor out raw text to make any future refactoring/reuse easier
 
 locals {
-	rolePolicy = <<EOF
+  rolePolicy = <<EOF
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -17,7 +17,7 @@ locals {
 }
 EOF
 
-	domainJoinPolicy = <<EOF
+  domainJoinPolicy = <<EOF
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -70,9 +70,9 @@ resource "aws_iam_role_policy" "policy_allow_all_ssm" {
 }
 
 resource "aws_ssm_document" "file_server_default_doc" {
-	name  = "file_server_default_doc"
-	document_type = "Command"
-	content = <<EOF
+  name  = "file_server_default_doc"
+  document_type = "Command"
+  content = <<EOF
 {
         "schemaVersion": "1.0",
         "description": "Join an instance to a domain (inline doc)",
@@ -93,43 +93,43 @@ EOF
 }
 
 resource "aws_ssm_association" "file_server" {
-	name = "file_server_default_doc"
-	instance_id = "${aws_instance.file_server.id}"
-	depends_on = ["aws_ssm_document.file_server_default_doc"]
+  name = "file_server_default_doc"
+  instance_id = "${aws_instance.file_server.id}"
+  depends_on = ["aws_ssm_document.file_server_default_doc"]
 }
 
 resource "aws_instance" "file_server" {
-	ami           = "${data.aws_ami.windows_server2016.image_id}"
-	instance_type = "${var.instance_type}"
-	key_name      = "vrtu"
-	iam_instance_profile = "${aws_iam_instance_profile.instance_profile_file_server.name}"
+  ami           = "${data.aws_ami.windows_server2016.image_id}"
+  instance_type = "${var.instance_type}"
+  key_name      = "vrtu"
+  iam_instance_profile = "${aws_iam_instance_profile.instance_profile_file_server.name}"
 
-	vpc_security_group_ids = [ "${data.aws_security_group.sg.*.id}" ]
-	subnet_id = "${data.aws_subnet.public_subnet.id}"
+  vpc_security_group_ids = [ "${data.aws_security_group.sg.*.id}" ]
+  subnet_id = "${data.aws_subnet.public_subnet.id}"
 
-	tags {
-		Name = "Windows File Server"
-		Owner = "${data.external.local_user.result.user}"
-		class = "cifs"
-		automated = "terraform"
-	}
-	lifecycle {
-		prevent_destroy = false
-		#    ignore_changes = ["user_data"]
-	}
+  tags {
+	Name = "Windows File Server"
+	Owner = "${data.external.local_user.result.user}"
+	class = "cifs"
+	automated = "terraform"
+  }
+  lifecycle {
+	prevent_destroy = false
+	#    ignore_changes = ["user_data"]
+  }
 
-	connection {
-		type     = "winrm"
-		user     = "Administrator"
-		password = "${var.admin_password}"
-		https    = true
-		
-		# set from default of 5m to 10m to avoid winrm timeout5
-		timeout = "10m"
-	}
+  connection {
+	type     = "winrm"
+	user     = "Administrator"
+	password = "${var.admin_password}"
+	https    = true
+	
+	# set from default of 5m to 10m to avoid winrm timeout5
+	timeout = "10m"
+  }
 
-	# TODO: enable sharing some files
-	user_data = <<EOF
+  # TODO: enable sharing some files; use Grant-SMBShareAccess to give access
+  user_data = <<EOF
 <powershell>
   Start-Transcript -Path "c:\user_data.log" -append -force 
   echo Setting password
@@ -142,5 +142,5 @@ resource "aws_instance" "file_server" {
 </powershell>
 EOF
 
-	depends_on = [ "aws_directory_service_directory.active_directory" ]
+  depends_on = [ "aws_directory_service_directory.active_directory" ]
 }
