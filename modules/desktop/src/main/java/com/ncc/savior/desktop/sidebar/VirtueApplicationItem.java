@@ -19,16 +19,19 @@ import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.Comparator;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
@@ -72,12 +75,17 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private JPanel container;
 
 	private boolean isFavorited;
+	private JTextField textField;
+	private JComboBox<String> cb;
+
+	private Comparator<VirtueApplicationItem> sortAppsByStatus;
 
 	private JFrame frame;
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
-			Image image, boolean isFavorited, JFrame frame) {
+			Image image, boolean isFavorited, JFrame frame, JTextField textField, JComboBox<String> cb,
+			Comparator<VirtueApplicationItem> sortAppsByStatus) {
 		this.sp = sp;
 		this.vc = vc;
 		this.virtueService = virtueService;
@@ -86,6 +94,9 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.fv = fv;
 		this.image = image;
 		this.frame = frame;
+		this.textField = textField;
+		this.cb = cb;
+		this.sortAppsByStatus = sortAppsByStatus;
 
 		this.appIcon = new JLabel();
 		this.container = new JPanel();
@@ -96,15 +107,15 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.isFavorited = isFavorited;
 
 		favoritedLabel.setToolTipText("Click to favorite or unfavorite");
-		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getName() + "<br>"
+		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
 				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
 
 		this.changeListener = new ChangeListener();
 		this.listener = listener;
-		container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
 	}
 
 	public void tileSetup() {
+		container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
 		JPanel favoritedContainer = new JPanel();
 		favoritedContainer.setLayout(new GridBagLayout());
 		favoritedContainer.setBackground(Color.WHITE);
@@ -135,7 +146,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.add(appName, BorderLayout.SOUTH);
 		container.add(favoritedContainer, BorderLayout.NORTH);
 
-		addListener(vc, fv, ad, virtue);
+		addListener(vc, fv, ad, virtue, false);
 	}
 
 	public void listSetup() {
@@ -168,10 +179,11 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.setMaximumSize(new Dimension(10000, 70));
 		container.setPreferredSize(new Dimension(450, 70));
 
-		addListener(vc, fv, ad, virtue);
+		addListener(vc, fv, ad, virtue, true);
 	}
 
-	public void addListener(VirtueTileContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue) {
+	public void addListener(VirtueTileContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue,
+			boolean fullBorder) {
 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
@@ -186,7 +198,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 						logger.error(msg);
 					}
 				} else {
-					setupDialog();
+					setupDialog(fullBorder);
 				}
 			}
 		});
@@ -199,7 +211,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		});
 	}
 
-	public void setupDialog() {
+	public void setupDialog(boolean fullBorder) {
 		JDialog dialog = new JDialog();
 		dialog.setUndecorated(true);
 
@@ -284,7 +296,11 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 			@Override
 			public void windowActivated(WindowEvent arg0) {
-				container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+				if (fullBorder) {
+					container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
+				} else {
+					container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+				}
 			}
 
 			@Override
@@ -301,7 +317,11 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			@Override
 			public void windowDeactivated(WindowEvent arg0) {
 				dialog.setVisible(false);
-				container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+				if (fullBorder) {
+					container.setBorder(new LineBorder(Color.GRAY, 1));
+				} else {
+					container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+				}
 			}
 
 			@Override
@@ -340,7 +360,15 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	}
 
 	public void favorite() {
-		fv.addFavorite(ad, virtue, vc, sp, listener, image, frame);
+		String selected = (String) cb.getSelectedItem();
+		switch (selected) {
+			case "Alphabetical":
+				fv.addFavorite(ad, virtue, vc, sp, listener, image, frame, textField, cb, null);
+				break;
+			case "Status":
+				fv.addFavorite(ad, virtue, vc, sp, listener, image, frame, textField, cb, sortAppsByStatus);
+				break;
+		}
 		favoritedLabel.setIcon(favoritedImage);
 	}
 
@@ -373,6 +401,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		listener.propertyChange(propertyChangeEvent);
 	}
 
+	public void update(DesktopVirtue virtue) {
+		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
+				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
+	}
 
 	private class ChangeListener implements PropertyChangeListener {
 

@@ -5,23 +5,30 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -95,6 +102,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private JPanel bottomBorder;
 
+	private JComboBox<String> cb;
+
 	private JPanel desktopContainer;
 	private boolean applicationsOpen = true;
 
@@ -111,8 +120,13 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private Preferences favorites;
 	private Preferences lastView;
+	private Preferences lastSort;
 
 	public static boolean askAgain = true;
+
+	private Comparator<VirtueApplicationItem> sortAppsByStatus;
+	private Comparator<VirtueTileContainer> sortVtByStatus;
+	private Comparator<VirtueListContainer> sortVlByStatus;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			boolean useColors, String style) {
@@ -124,6 +138,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
+		setupComparators();
 	}
 
 	private ArrayList<Color> loadColors() {
@@ -157,6 +172,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		this.favorites = Preferences.userRoot().node("VirtUE/Desktop/favorites");
 		this.lastView = Preferences.userRoot().node("VirtUE/Desktop/lastView");
+		this.lastSort = Preferences.userRoot().node("VirtUE/Desktop/lastSort");
 
 		startLogin();
 
@@ -221,6 +237,14 @@ public class Sidebar implements VirtueChangeHandler {
 //			}
 		// }
 		vmi.updateVirtue(virtue);
+
+		for (ApplicationDefinition ad : virtue.getApps().values()) {
+			al.updateApp(ad, virtue);
+			at.updateApp(ad, virtue);
+			fv.updateApp(ad, virtue);
+			vl.updateApp(ad, virtue);
+			vt.updateApp(ad, virtue);
+		}
 	}
 
 	// ***Updating Virtues***
@@ -238,28 +262,29 @@ public class Sidebar implements VirtueChangeHandler {
 		virtueIdToVc.put(virtue.getTemplateId(), vtc);
 		boolean isFavorited;
 
+		String keyword = textField.getText();
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
 			isFavorited = favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false);
 			ApplicationDom dom = new ApplicationDom(ad, isFavorited);
 			Image appImage = iconService.getImage(ad.getIconKey());
 
 			VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited, frame);
+					dom.getChangeListener(), appImage, isFavorited, frame, textField, cb, sortAppsByStatus);
 			appsTileVa.tileSetup();
 			appsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vtcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited, frame);
+					dom.getChangeListener(), appImage, isFavorited, frame, textField, cb, sortAppsByStatus);
 			vtcAppsTileVa.tileSetup();
 			vtcAppsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vlcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited, frame);
+					dom.getChangeListener(), appImage, isFavorited, frame, textField, cb, sortAppsByStatus);
 			vlcAppsTileVa.listSetup();
 			vlcAppsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), appImage, isFavorited, frame);
+					dom.getChangeListener(), appImage, isFavorited, frame, textField, cb, sortAppsByStatus);
 			appsListVa.listSetup();
 			appsListVa.registerListener(dom.getChangeListener());
 
@@ -269,7 +294,16 @@ public class Sidebar implements VirtueChangeHandler {
 			vlc.addApplication(ad, vlcAppsTileVa);
 
 			if (isFavorited) {
-				fv.addFavorite(ad, virtue, vtc, sp, dom.getChangeListener(), appImage, frame);
+				String selected = (String) cb.getSelectedItem();
+				switch (selected) {
+					case "Alphabetical":
+						fv.addFavorite(ad, virtue, vtc, sp, dom.getChangeListener(), appImage, frame, textField, cb, null);
+						break;
+					case "Status":
+						fv.addFavorite(ad, virtue, vtc, sp, dom.getChangeListener(), appImage, frame, textField, cb,
+								sortAppsByStatus);
+						break;
+				}
 			}
 
 			dom.addListener(appsTileVa.getChangeListener());
@@ -278,12 +312,7 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(vlcAppsTileVa.getChangeListener());
 		}
 
-		String keyword = textField.getText();
-		at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-		al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-		fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-		vt.search(keyword, null, null);
-		vl.search(keyword, null, null);
+		sortByOption(keyword);
 
 		sp.getViewport().validate();
 	}
@@ -313,6 +342,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	// This will setup the main display after login
+	@SuppressWarnings("serial")
 	public void setup(DesktopUser user) throws IOException {
 		ToolTipManager.sharedInstance().setReshowDelay(1);
 		ToolTipManager.sharedInstance().setInitialDelay(1250);
@@ -370,8 +400,10 @@ public class Sidebar implements VirtueChangeHandler {
 		GridBagConstraints c = new GridBagConstraints();
 
 		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.CENTER;
 
 		this.applications = new JPanel();
+		applications.setMinimumSize(new Dimension(140, 38));
 		applications.setBorder(new LineBorder(SystemColor.windowBorder));
 		applications.setBackground(SystemColor.scrollbar);
 		c.weightx = 0.5;
@@ -398,6 +430,7 @@ public class Sidebar implements VirtueChangeHandler {
 		applications.add(applicationsHeader, BorderLayout.NORTH);
 
 		this.virtues = new JPanel();
+		virtues.setMinimumSize(new Dimension(140, 38));
 		virtues.setBorder(new LineBorder(SystemColor.windowBorder));
 		virtues.setBackground(SystemColor.scrollbar);
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -422,6 +455,8 @@ public class Sidebar implements VirtueChangeHandler {
 		virtues.add(virtuesSelected, BorderLayout.SOUTH);
 
 		JPanel search = new JPanel();
+		search.setMinimumSize(new Dimension(140, 38));
+		search.setMinimumSize(new Dimension(140, 38));
 		search.setBorder(new LineBorder(SystemColor.windowBorder));
 		search.setBackground(SystemColor.scrollbar);
 		search.setLayout(new GridBagLayout());
@@ -454,16 +489,43 @@ public class Sidebar implements VirtueChangeHandler {
 		c.gridx = 1;
 		search.add(searchLabel, c);
 
-		JPanel icons = new JPanel();
-		icons.setBorder(new LineBorder(SystemColor.windowBorder));
-		icons.setBackground(new Color(248, 248, 255));
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.0;
-		c.gridwidth = 3;
-		c.gridx = 0;
+		c.weightx = 0.5;
+		c.gridx = 2;
 		c.gridy = 1;
+
+		JPanel icons = new JPanel();
+		icons.setBackground(new Color(248, 248, 255));
 		center.add(icons, c);
 		icons.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+
+		c.fill = GridBagConstraints.BOTH;
+		c.gridx = 0;
+		c.gridwidth = 2;
+		JPanel sortBy = new JPanel();
+		sortBy.setBackground(new Color(248, 248, 255));
+		sortBy.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		center.add(sortBy, c);
+
+		JLabel sortByLabel = new JLabel("sorted by: ");
+		sortByLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+		String[] sortingOptions = { "Alphabetical", "Status" };
+		this.cb = new JComboBox<String>(sortingOptions);
+		cb.setSelectedItem(lastSort.get("sort", "Alphabetical"));
+		cb.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+		cb.setBackground(new Color(248, 248, 255));
+		Color bgColor = cb.getBackground();
+		cb.setRenderer(new DefaultListCellRenderer() {
+			@Override
+			public void paint(Graphics g) {
+				setBackground(bgColor);
+				super.paint(g);
+			}
+		});
+
+		cb.setVisible(true);
+		sortBy.add(sortByLabel);
+		sortBy.add(cb);
 
 		this.listLabel = new JLabel(inactiveListIcon);
 		listLabel.setBackground(new Color(248, 248, 255));
@@ -597,11 +659,7 @@ public class Sidebar implements VirtueChangeHandler {
 			public void insertUpdate(DocumentEvent e) {
 				searchMode = true;
 				String keyword = textField.getText();
-				at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-				al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-				fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-				vt.search(keyword, null, null);
-				vl.search(keyword, null, null);
+				sortByOption(keyword);
 				sp.setViewportView(sp.getViewport().getView());
 				searchLabel.setIcon(closeIcon);
 			}
@@ -624,21 +682,47 @@ public class Sidebar implements VirtueChangeHandler {
 						resetViews();
 					} else {
 						searchMode = true;
-						String keyword = textField.getText();
-						at.search(keyword, null,
-								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-						al.search(keyword, null,
-								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-						fv.search(keyword, null,
-								va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-						vt.search(keyword, null, null);
-						vl.search(keyword, null, null);
+						sortByOption(textField.getText());
 						sp.setViewportView(sp.getViewport().getView());
 						searchLabel.setIcon(closeIcon);
 					}
 				}
 			}
 		});
+
+		cb.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String selected = (String) cb.getSelectedItem();
+				lastSort.put("sort", selected);
+				sortByOption(textField.getText());
+			}
+
+		});
+	}
+
+	public void sortByOption(String keyword) {
+		String selected = (String) cb.getSelectedItem();
+		switch (selected) {
+		case "Alphabetical":
+			al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			vt.search(keyword, null, null);
+			vl.search(keyword, null, null);
+			break;
+		case "Status":
+			al.search(keyword, sortAppsByStatus,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			at.search(keyword, sortAppsByStatus,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			fv.search(keyword, sortAppsByStatus,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			vt.search(keyword, sortVtByStatus, null);
+			vl.search(keyword, sortVlByStatus, null);
+			break;
+		}
 	}
 
 	public void renderFavoritesView() {
@@ -708,12 +792,80 @@ public class Sidebar implements VirtueChangeHandler {
 		searchMode = false;
 		searchLabel.setIcon(searchIcon);
 		textField.setText("");
-		al.search(null, null, null);
-		at.search(null, null, null);
-		fv.search(null, null, null);
-		vt.search(null, null, null);
-		vl.search(null, null, null);
+		String selected = (String) cb.getSelectedItem();
+		switch (selected) {
+			case "Alphabetical":
+				al.search(null, null, null);
+				at.search(null, null, null);
+				fv.search(null, null, null);
+				vt.search(null, null, null);
+				vl.search(null, null, null);
+				break;
+			case "Status":
+				al.search(null, sortAppsByStatus, null);
+				at.search(null, sortAppsByStatus, null);
+				fv.search(null, sortAppsByStatus, null);
+				vt.search(null, sortVtByStatus, null);
+				vl.search(null, sortVlByStatus, null);
+				break;
+		}
 		sp.setViewportView(sp.getViewport().getView());
+	}
+
+	public void setupComparators() {
+		this.sortAppsByStatus = new Comparator<VirtueApplicationItem>() {
+
+			@Override
+			public int compare(VirtueApplicationItem va1, VirtueApplicationItem va2) {
+
+				Integer va1State = va1.getVirtue().getVirtueState().getValue();
+				Integer va2State = va2.getVirtue().getVirtueState().getValue();
+
+				int valComp = va1State.compareTo(va2State);
+
+				if (valComp != 0) {
+					return valComp;
+				}
+
+				return va1.getApplicationName().compareTo(va2.getApplicationName());
+			}
+		};
+
+		this.sortVtByStatus = new Comparator<VirtueTileContainer>() {
+
+			@Override
+			public int compare(VirtueTileContainer va1, VirtueTileContainer va2) {
+
+				Integer va1State = va1.getVirtue().getVirtueState().getValue();
+				Integer va2State = va2.getVirtue().getVirtueState().getValue();
+
+				int valComp = va1State.compareTo(va2State);
+
+				if (valComp != 0) {
+					return valComp;
+				}
+
+				return va1.getName().compareTo(va2.getName());
+			}
+		};
+
+		this.sortVlByStatus = new Comparator<VirtueListContainer>() {
+
+			@Override
+			public int compare(VirtueListContainer va1, VirtueListContainer va2) {
+
+				Integer va1State = va1.getVirtue().getVirtueState().getValue();
+				Integer va2State = va2.getVirtue().getVirtueState().getValue();
+
+				int valComp = va1State.compareTo(va2State);
+
+				if (valComp != 0) {
+					return valComp;
+				}
+
+				return va1.getName().compareTo(va2.getName());
+			}
+		};
 	}
 
 	public void setInitialViewPort() {
