@@ -20,3 +20,8 @@ modules/freerdp-java/.cache
 /modules/freerdp-java/core
 *.retry
 /modules/ecosystem/cifs-proxy/src/terraform/.plan.out
+/modules/ecosystem/cifs-proxy/CMakeCache.txt
+CMakeFiles
+/modules/ecosystem/cifs-proxy/cmake_install.cmake
+/modules/ecosystem/cifs-proxy/makeccache
+modules/ecosystem/cifs-proxy/Makefile
