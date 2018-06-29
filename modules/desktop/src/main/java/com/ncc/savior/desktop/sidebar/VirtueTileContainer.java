@@ -54,7 +54,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 
 		this.bodyColor = bodyColor;
 
-		createContainer(virtue, headerColor, Color.GRAY, numRows);
+		createContainer(virtue, headerColor, Color.LIGHT_GRAY, numRows);
 		logger.debug("loaded");
 	}
 
@@ -136,7 +136,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		tileContainer.setBackground(bodyColor);
 		container.add(tileContainer, BorderLayout.CENTER);
 		tileContainer.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
-		tileContainer.setBorder(new EmptyBorder(10, 25, 10, 25));
+		tileContainer.setBorder(new EmptyBorder(0, 25, 20, 25));
 		updateVirtue(virtue);
 		numRows++;
 	}
@@ -175,7 +175,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		if (virtue.getVirtueState() == VirtueState.RUNNING) {
 			tileContainer.setBackground(bodyColor);
 		} else {
-			tileContainer.setBackground(Color.GRAY);
+			tileContainer.setBackground(Color.LIGHT_GRAY);
 		}
 	}
 
