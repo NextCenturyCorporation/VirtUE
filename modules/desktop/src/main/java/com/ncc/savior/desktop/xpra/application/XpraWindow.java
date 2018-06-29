@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra.application;
 
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.List;
 
@@ -112,6 +113,11 @@ public abstract class XpraWindow implements IXpraWindow {
 
 	protected void onDragEnter(int x, int y, List<String> modifiers) {
 		dndHandler.onDragEnter(x, y, modifiers, id);
+	}
+
+	protected void onAllDrag(MouseEvent event, List<String> modifiers) {
+		dndHandler.onMouseDrag(event);
+
 	}
 
 	@Override

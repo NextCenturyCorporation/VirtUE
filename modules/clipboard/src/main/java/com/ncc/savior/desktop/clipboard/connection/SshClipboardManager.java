@@ -18,12 +18,14 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import com.ncc.savior.desktop.RemoteServiceApplication;
 import com.ncc.savior.desktop.alerting.UserAlertingStub;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
+import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
+import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.client.ClipboardClient;
-import com.ncc.savior.desktop.clipboard.client.StandardInOutClipboardClient;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.DisconnectListener;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
@@ -82,8 +84,9 @@ public class SshClipboardManager implements IClipboardManager {
 		});
 		this.sourceJarPath = sourceJarPath;
 		this.destinationFilePath = "clipboard.jar";
-		this.clipboardMainClass = StandardInOutClipboardClient.class.getCanonicalName();
-		this.command = "java -cp " + destinationFilePath + " " + clipboardMainClass;
+		this.clipboardMainClass = RemoteServiceApplication.class.getCanonicalName();
+		String logConfig = "-Dlogback.configurationFile=logback-remote.xml";
+		this.command = "java -cp " + destinationFilePath + " " + logConfig + " " + clipboardMainClass;
 		if (testParam != null) {
 			command += " " + testParam;
 		}
@@ -269,6 +272,16 @@ public class SshClipboardManager implements IClipboardManager {
 		public String clientId;
 		public SshConnectionParameters connectionParameters;
 		public String groupId;
+	}
+
+	@Override
+	public void addMessageHandler(IClipboardMessageHandler dndMessageHandler) {
+		clipboardHub.addDndMessageHandler(dndMessageHandler);
+	}
+
+	@Override
+	public IClipboardMessageSenderReceiver getTransmitter(String clipboardClientId) {
+		return clipboardHub.getTransmitter(clipboardClientId);
 	}
 
 }

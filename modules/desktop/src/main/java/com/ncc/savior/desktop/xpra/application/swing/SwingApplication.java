@@ -105,6 +105,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		client.addPacketListener(applicationPacketHandler);
 		windowManager = new SwingXpraWindowManager(client, packet.getWindowId());
 		windowManager.setDndHandler(dndHandler);
+		((SwingXpraWindowManager) windowManager).setTransferHandler(dndHandler.getTransferHandler());
 		((SwingXpraWindowManager) windowManager).setColor(color);
 		windowManager.setDebugOutput(debugOutput);
 		fullScreenBounds = frame.getMaximizedBounds();
@@ -340,6 +341,11 @@ public class SwingApplication extends XpraApplication implements Closeable {
 
 			@Override
 			public void mouseDragged(MouseEvent event) {
+				// ((JCanvas)
+				// event.getComponent()).getTransferHandler().exportAsDrag((JComponent)
+				// event.getComponent(),
+				// event,
+				// TransferHandler.COPY);
 				if (draggingApp) {
 					frame.setLocation((event.getXOnScreen() - clickSceneX), (event.getYOnScreen() - clickSceneY));
 				}

@@ -30,4 +30,8 @@ public interface IClipboardManager {
 	 */
 	void closeConnection(String clipboardId) throws IOException;
 
+	void addMessageHandler(IClipboardMessageHandler dndMessageHandler);
+
+	IClipboardMessageSenderReceiver getTransmitter(String clipboardClientId);
+
 }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,8 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 
 	private MouseAdapter mouseAdapter;
 
+	protected TransferHandler transferHandler;
+
 	public SwingXpraWindowManager(XpraClient client, int baseWindowId) {
 		super(client, baseWindowId);
 		IKeyboard kb = client.getKeyboard();
@@ -77,6 +80,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 				JCanvas canvas = new JCanvas(packet.getWidth(), packet.getHeight());
 				canvas.addMouseListener(mouseAdapter);
 				canvas.addMouseMotionListener(mouseAdapter);
+				canvas.setTransferHandler(transferHandler);
 
 				// int baseWindowId = SwingXpraWindowManager.this.baseWindowId;
 				boolean isMainWindow = baseWindowId == packet.getWindowId();
@@ -216,5 +220,9 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 
 	public void setMouseAdapter(MouseAdapter mouseAdapter) {
 		this.mouseAdapter = mouseAdapter;
+	}
+
+	public void setTransferHandler(TransferHandler transferHandler) {
+		this.transferHandler = transferHandler;
 	}
 }

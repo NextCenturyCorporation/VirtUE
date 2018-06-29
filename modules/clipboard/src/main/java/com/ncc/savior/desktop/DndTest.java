@@ -18,7 +18,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DndTest extends JFrame {
+
 	private static final long serialVersionUID = 1L;
 	private JTextField newTextField = new JTextField(10);
 	private JList<String> sourceList = new JList<>(new DefaultListModel<>());
@@ -76,6 +80,7 @@ public class DndTest extends JFrame {
 }
 
 class ListTransferHandler extends TransferHandler {
+	private static final Logger logger = LoggerFactory.getLogger(DndTest.class);
 	private static final long serialVersionUID = 1L;
 	@Override
 	public int getSourceActions(JComponent c) {
@@ -106,6 +111,7 @@ class ListTransferHandler extends TransferHandler {
 
 	@Override
 	public boolean canImport(TransferHandler.TransferSupport support) {
+		logger.debug("test");
 		System.out.println("test");
 		if (!support.isDrop()) {
 			return false;

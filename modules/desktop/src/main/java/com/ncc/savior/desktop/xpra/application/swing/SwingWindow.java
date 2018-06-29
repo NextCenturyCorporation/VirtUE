@@ -12,6 +12,7 @@ import java.awt.event.MouseWheelListener;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,44 @@ public class SwingWindow extends XpraWindow {
 
 	public void initSwing(JCanvas canvas, WindowFrame frame) {
 		this.canvas = canvas;
+		// MyTransferHandler th = new MyTransferHandler();
+		// canvas.setTransferHandler(th);
+		// DropTarget dt = new DropTarget();
+		// try {
+		// dt.addDropTargetListener(new DropTargetListener() {
+		//
+		// @Override
+		// public void dropActionChanged(DropTargetDragEvent dtde) {
+		// logger.debug("a");
+		//
+		// }
+		//
+		// @Override
+		// public void drop(DropTargetDropEvent dtde) {
+		// logger.debug("a");
+		//
+		// }
+		//
+		// @Override
+		// public void dragOver(DropTargetDragEvent dtde) {
+		// logger.debug("a");
+		// }
+		//
+		// @Override
+		// public void dragExit(DropTargetEvent dte) {
+		// logger.debug("a");
+		// }
+		//
+		// @Override
+		// public void dragEnter(DropTargetDragEvent dtde) {
+		// logger.debug("a");
+		// }
+		// });
+		// } catch (TooManyListenersException e1) {
+		// // TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// }
+		// canvas.setDropTarget(dt);
 		this.window = frame;
 		if (type.contains("NORMAL")) {
 			SwingUtilities.invokeLater(new Runnable() {
@@ -135,14 +174,15 @@ public class SwingWindow extends XpraWindow {
 				int localY = event.getY();
 				boolean outside = outsideWindow(canvas, localX, localY);
 				if (!dragOutside && outside) {
-					dragInside=false;
-					dragOutside=true;
+					dragInside = false;
+					dragOutside = true;
 					onDragLeave(event.getXOnScreen(), event.getYOnScreen(), modifiers);
-				}else if (!dragInside && !outside) {
-					dragInside=true;
-					dragOutside=false;
+				} else if (!dragInside && !outside) {
+					dragInside = true;
+					dragOutside = false;
 					onDragEnter(event.getXOnScreen(), event.getYOnScreen(), modifiers);
 				}
+				onAllDrag(event, modifiers);
 				// logger.debug("dragin: " + dragInside + "dragout: " + dragOutside);
 
 			}
@@ -287,5 +327,9 @@ public class SwingWindow extends XpraWindow {
 
 	public void setColor(Color color) {
 		this.color = color;
+	}
+
+	public static class MyTransferHandler extends TransferHandler {
+
 	}
 }

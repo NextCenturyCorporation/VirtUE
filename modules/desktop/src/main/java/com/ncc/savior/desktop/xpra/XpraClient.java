@@ -7,6 +7,8 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
+import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.xpra.connection.BaseConnectListener;
 import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ConnectListenerManager;
@@ -61,6 +63,9 @@ public class XpraClient implements Closeable {
 	private Status status;
 	private int display;
 	protected IConnectionErrorCallback errorCallback;
+	private IClipboardMessageHandler dndMessageHandler;
+	private String clipboardClientId;
+	private IClipboardMessageSenderReceiver clipboardTransmitter;
 
 	public XpraClient() {
 		connectListenerManager = new ConnectListenerManager();
@@ -247,4 +252,29 @@ public class XpraClient implements Closeable {
 	public void setErrorCallback(IConnectionErrorCallback errorCallback) {
 		this.errorCallback = errorCallback;
 	}
+
+	public IClipboardMessageHandler getDndMessageHandler() {
+		return dndMessageHandler;
+	}
+
+	public void setDndMessageHandler(IClipboardMessageHandler dndMessageHandler) {
+		this.dndMessageHandler = dndMessageHandler;
+	}
+
+	public void setClipboardClientId(String clipboardClientId) {
+		this.clipboardClientId = clipboardClientId;
+	}
+
+	public String getClipboardClientId() {
+		return clipboardClientId;
+	}
+
+	public void setClipboardTransmitter(IClipboardMessageSenderReceiver transmitter) {
+		this.clipboardTransmitter = transmitter;
+	}
+
+	public IClipboardMessageSenderReceiver getClipboardTransmitter() {
+		return clipboardTransmitter;
+	}
+
 }

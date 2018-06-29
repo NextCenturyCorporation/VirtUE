@@ -58,8 +58,10 @@ public class ClipboardHub {
 	private ICrossGroupDataGuard dataGuard;
 	private Set<ClipboardFormat> currentFormats;
 	private DisconnectListener disconnectListener;
+	private MultiMessageHandler dndHandlers;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
+		dndHandlers = new MultiMessageHandler();
 		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
 		currentFormats = new HashSet<ClipboardFormat>();
 		validFormats = new TreeSet<ClipboardFormat>();
@@ -159,7 +161,7 @@ public class ClipboardHub {
 		// sync. Wrapping the transmitters seems more clunky than useful
 		IClipboardMessageSenderReceiver transmitter = new MessageTransmitter(groupId, serializer, "hub-" + newId);
 		transmitter.setClipboardMessageHandler(messageHandler);
-		transmitter.setDndMessageHandler(messageHandler);
+		transmitter.setDndMessageHandler(dndHandlers);
 		ClientIdClipboardMessage idMsg = new ClientIdClipboardMessage(hubId, newId);
 		logger.trace("registering client");
 		sendMessageHandleError(idMsg, transmitter, newId);
@@ -324,5 +326,17 @@ public class ClipboardHub {
 
 		public void onDisconnect(String clientId);
 
+	}
+
+	public void addDndMessageHandler(IClipboardMessageHandler handler) {
+		dndHandlers.addHandler(handler);
+	}
+
+	public void removeDndMessageHandler(IClipboardMessageHandler handler) {
+		dndHandlers.removeHandler(handler);
+	}
+
+	public IClipboardMessageSenderReceiver getTransmitter(String clipboardClientId) {
+		return transmitters.get(clipboardClientId);
 	}
 }

@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
+import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
+import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
@@ -133,16 +135,23 @@ public class VirtueService {
 			XpraClient client = connectionManager.getExistingClient(params);
 			if (client == null || client.getStatus() == Status.ERROR) {
 				logger.debug("needed new connection");
+				String clipboardClientId = null;
+				IClipboardMessageSenderReceiver transmitter = null;
 				try {
 					connectionManager.createXpraServerAndAddDisplayToParams(params);
 					logger.debug("connecting clipboard");
-					clipboardManager.connectClipboard(params, virtue.getId());
+					 clipboardClientId = clipboardManager.connectClipboard(params, virtue.getId());
+					transmitter = clipboardManager.getTransmitter(clipboardClientId);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.error("clipboard manager connection failed!", e);
 					// TODO alert user? allow user to try again?
 				}
 				client = connectionManager.createClient(params, color);
+				client.setClipboardClientId(clipboardClientId);
+				client.setClipboardTransmitter(transmitter);
+				IClipboardMessageHandler dndMessageHandler = client.getDndMessageHandler();
+				clipboardManager.addMessageHandler(dndMessageHandler);
 			}
 		} finally {
 			if (file != null && file.exists()) {

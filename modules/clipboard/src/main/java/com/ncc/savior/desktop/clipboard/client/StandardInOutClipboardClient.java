@@ -11,7 +11,6 @@ import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.connection.IConnectionWrapper;
 import com.ncc.savior.desktop.clipboard.connection.StandardInOutConnection;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
-import com.ncc.savior.desktop.dnd.DndBackdrop;
 
 /**
  * Client application that uses standard input and standard output to send
@@ -26,7 +25,6 @@ public class StandardInOutClipboardClient {
 	private static final Logger logger = LoggerFactory.getLogger(StandardInOutClipboardClient.class);
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		DndBackdrop.main(args);
 		try {
 			if (args.length > 0) {
 				if (args[0].equals("test")) {

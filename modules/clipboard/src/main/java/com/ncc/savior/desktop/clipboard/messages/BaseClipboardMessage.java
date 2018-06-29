@@ -20,7 +20,8 @@ public class BaseClipboardMessage implements IClipboardMessage, Serializable {
 	private MessageType messageType;
 
 	// For Jackson (de)serialization
-	protected BaseClipboardMessage() {
+	@SuppressWarnings("unused")
+	private BaseClipboardMessage() {
 		this(null, null);
 	}
 

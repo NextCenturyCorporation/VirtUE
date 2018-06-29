@@ -77,6 +77,7 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 		while (!stopReadThread) {
 			try {
 				IClipboardMessage msg = serializer.deserialize();
+				logger.debug("got message " + msg);
 				MessageType type = msg.getType();
 				IClipboardMessageHandler handler = null;
 				switch (type) {
@@ -124,6 +125,7 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 	@Override
 	public void sendMessageToHub(IClipboardMessage message) throws IOException {
 		try {
+			logger.debug("sending message " + message);
 			serializer.serialize(message);
 		} catch (IOException e) {
 			valid = false;
