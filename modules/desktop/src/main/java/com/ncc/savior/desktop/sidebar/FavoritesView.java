@@ -4,10 +4,14 @@ import java.awt.FlowLayout;
 import java.awt.Image;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -34,10 +38,11 @@ public class FavoritesView extends AbstractAppsView {
 	}
 
 	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueTileContainer vc, JScrollPane sp,
-			PropertyChangeListener listener, Image image) {
+			PropertyChangeListener listener, Image image, JFrame frame, JTextField textField, JComboBox<String> cb,
+			Comparator<VirtueApplicationItem> comp) {
 		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
 			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener,
-					image, true);
+					image, true, frame, textField, cb, comp);
 			va.tileSetup();
 			va.setToFavorited();
 
@@ -46,6 +51,8 @@ public class FavoritesView extends AbstractAppsView {
 			container.add(va.getContainer());
 			tiles.put(ad.getId() + virtue.getTemplateId(), va);
 		}
+		String keyword = textField.getText();
+		search(keyword, comp, currVa -> currVa.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 	}
 
 	public void removeFavorite(ApplicationDefinition ad, DesktopVirtue virtue) {
@@ -57,5 +64,10 @@ public class FavoritesView extends AbstractAppsView {
 			favorites.remove(ad.getId() + virtue.getTemplateId());
 			tiles.remove(ad.getId() + virtue.getTemplateId());
 		}
+	}
+
+	@Override
+	public void addTile(VirtueApplicationItem va) {
+		container.add(va.getContainer());
 	}
 }

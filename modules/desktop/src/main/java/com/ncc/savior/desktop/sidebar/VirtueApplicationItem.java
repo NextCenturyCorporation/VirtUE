@@ -10,20 +10,30 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.Comparator;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 
 import org.slf4j.Logger;
@@ -65,10 +75,17 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private JPanel container;
 
 	private boolean isFavorited;
+	private JTextField textField;
+	private JComboBox<String> cb;
+
+	private Comparator<VirtueApplicationItem> sortAppsByStatus;
+
+	private JFrame frame;
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
-			Image image, boolean isFavorited) {
+			Image image, boolean isFavorited, JFrame frame, JTextField textField, JComboBox<String> cb,
+			Comparator<VirtueApplicationItem> sortAppsByStatus) {
 		this.sp = sp;
 		this.vc = vc;
 		this.virtueService = virtueService;
@@ -76,6 +93,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.virtue = virtue;
 		this.fv = fv;
 		this.image = image;
+		this.frame = frame;
+		this.textField = textField;
+		this.cb = cb;
+		this.sortAppsByStatus = sortAppsByStatus;
 
 		this.appIcon = new JLabel();
 		this.container = new JPanel();
@@ -86,7 +107,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.isFavorited = isFavorited;
 
 		favoritedLabel.setToolTipText("Click to favorite or unfavorite");
-		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getName() + "<br>"
+		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
 				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
 
 		this.changeListener = new ChangeListener();
@@ -94,6 +115,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	}
 
 	public void tileSetup() {
+		container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
 		JPanel favoritedContainer = new JPanel();
 		favoritedContainer.setLayout(new GridBagLayout());
 		favoritedContainer.setBackground(Color.WHITE);
@@ -124,7 +146,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.add(appName, BorderLayout.SOUTH);
 		container.add(favoritedContainer, BorderLayout.NORTH);
 
-		addListener(vc, fv, ad, virtue);
+		addListener(vc, fv, ad, virtue, false);
 	}
 
 	public void listSetup() {
@@ -157,37 +179,27 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.setMaximumSize(new Dimension(10000, 70));
 		container.setPreferredSize(new Dimension(450, 70));
 
-		addListener(vc, fv, ad, virtue);
+		addListener(vc, fv, ad, virtue, true);
 	}
 
-	public void addListener(VirtueTileContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue) {
+	public void addListener(VirtueTileContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue,
+			boolean fullBorder) {
 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				JPopupMenu pm = new JPopupMenu();
-				JMenuItem mi1 = new JMenuItem("Yes");
-				JMenuItem mi2 = new JMenuItem("No");
-				pm.add(new JLabel("Would you like to start a " + ad.getName() + " application?"));
-
-				mi1.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent evt) {
-						try {
-							virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
-							// virtue.setVirtueState(VirtueState.LAUNCHING);
-							// vc.updateVirtue(virtue);
-						} catch (IOException e) {
-							String msg = "Error attempting to start a " + ad.getName() + " application";
-							logger.error(msg);
-						}
+				if (!Sidebar.askAgain) {
+					try {
+						virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+						// virtue.setVirtueState(VirtueState.LAUNCHING);
+						// vc.updateVirtue(virtue);
+					} catch (IOException e) {
+						String msg = "Error attempting to start a " + ad.getName() + " application";
+						logger.error(msg);
 					}
-				});
-
-				pm.setPopupSize(375, 75);
-				pm.add(mi1);
-				pm.add(mi2);
-				pm.show(sp, 50, 150);
+				} else {
+					setupDialog(fullBorder);
+				}
 			}
 		});
 
@@ -196,6 +208,146 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			public void mouseClicked(MouseEvent event) {
 				sendChangeEvent(new PropertyChangeEvent("", "isFavorited", null, null));
 			}
+		});
+	}
+
+	public void setupDialog(boolean fullBorder) {
+		JDialog dialog = new JDialog();
+		dialog.setUndecorated(true);
+
+		JPanel dialogContainer = new JPanel();
+		dialogContainer.setBorder(new LineBorder(Color.DARK_GRAY, 2));
+		dialogContainer.setLayout(new BorderLayout());
+		dialogContainer.setBackground(Color.WHITE);
+
+		JLabel prompt = new JLabel("Would you like to start a " + ad.getName() + " application?");
+		prompt.setBackground(Color.WHITE);
+		prompt.setHorizontalAlignment(SwingConstants.CENTER);
+		dialogContainer.add(prompt, BorderLayout.NORTH);
+
+		JCheckBox checkBox = new JCheckBox("Don't show me again");
+		checkBox.setHorizontalAlignment(SwingConstants.CENTER);
+		dialogContainer.add(checkBox, BorderLayout.CENTER);
+		checkBox.setBackground(Color.WHITE);
+
+
+		JPanel bottomContainer = new JPanel();
+		bottomContainer.setBackground(Color.WHITE);
+		bottomContainer.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.weightx = 1.0;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		dialogContainer.add(bottomContainer, BorderLayout.SOUTH);
+
+		JButton yesButton = new JButton("Yes");
+		yesButton.setSize(new Dimension(50, 30));
+		bottomContainer.add(yesButton, gbc);
+
+		gbc.gridx = 1;
+		JButton noButton = new JButton("No");
+		noButton.setSize(new Dimension(50, 30));
+		bottomContainer.add(noButton, gbc);
+
+		dialog.setModal(false);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.add(dialogContainer);
+		dialog.setLocationRelativeTo(container);
+		dialog.setSize(new Dimension(375, 100));
+		dialog.setVisible(true);
+
+		yesButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dialog.setVisible(false);
+				try {
+					virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+					// virtue.setVirtueState(VirtueState.LAUNCHING);
+					// vc.updateVirtue(virtue);
+				} catch (IOException e1) {
+					String msg = "Error attempting to start a " + ad.getName() + " application";
+					logger.error(msg);
+				}
+			}
+		});
+
+		noButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dialog.setVisible(false);
+			}
+		});
+
+		checkBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				if (checkBox.isSelected()) {
+					Sidebar.askAgain = false;
+				} else {
+					Sidebar.askAgain = true;
+				}
+			}
+		});
+
+		dialog.addWindowListener(new WindowListener() {
+
+			@Override
+			public void windowActivated(WindowEvent arg0) {
+				if (fullBorder) {
+					container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
+				} else {
+					container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+				}
+			}
+
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				// do nothing
+
+			}
+
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				// do nothing
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {
+				dialog.setVisible(false);
+				if (fullBorder) {
+					container.setBorder(new LineBorder(Color.GRAY, 1));
+				} else {
+					container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+				}
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent arg0) {
+				// do nothing
+			}
+
+			@Override
+			public void windowIconified(WindowEvent arg0) {
+				// do nothing
+
+			}
+
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+				// do nothing
+			}
+
+		});
+
+		sp.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent arg0) {
+				dialog.setVisible(false);
+			}
+
 		});
 	}
 
@@ -208,7 +360,15 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	}
 
 	public void favorite() {
-		fv.addFavorite(ad, virtue, vc, sp, listener, image);
+		String selected = (String) cb.getSelectedItem();
+		switch (selected) {
+			case "Alphabetical":
+				fv.addFavorite(ad, virtue, vc, sp, listener, image, frame, textField, cb, null);
+				break;
+			case "Status":
+				fv.addFavorite(ad, virtue, vc, sp, listener, image, frame, textField, cb, sortAppsByStatus);
+				break;
+		}
 		favoritedLabel.setIcon(favoritedImage);
 	}
 
@@ -241,6 +401,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		listener.propertyChange(propertyChangeEvent);
 	}
 
+	public void update(DesktopVirtue virtue) {
+		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
+				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
+	}
 
 	private class ChangeListener implements PropertyChangeListener {
 

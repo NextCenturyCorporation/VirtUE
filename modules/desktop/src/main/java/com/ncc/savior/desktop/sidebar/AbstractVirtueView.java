@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public abstract class AbstractVirtueView {
@@ -64,6 +65,13 @@ public abstract class AbstractVirtueView {
 
 	public JPanel getContainer() {
 		return container;
+	}
+
+	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
+		VirtueApplicationItem va = virtues.get(ad.getId()).tiles.get(ad.getId() + virtue.getTemplateId());
+		if (va != null) {
+			va.update(virtue);
+		}
 	}
 
 }

@@ -142,28 +142,30 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 	}
 
 	public void search(Comparator<VirtueApplicationItem> comp, Predicate<VirtueApplicationItem> predicate) {
-		tileContainer.removeAll();
-		Collection<VirtueApplicationItem> vai = tiles.values();
-		List<VirtueApplicationItem> matchedTiles;
+		if (dropDown) {
+			tileContainer.removeAll();
+			Collection<VirtueApplicationItem> vai = tiles.values();
+			List<VirtueApplicationItem> matchedTiles;
 
-		if (predicate != null) {
-			matchedTiles = vai.stream().filter(predicate).collect(Collectors.toList());
-		} else {
-			matchedTiles = vai.stream().collect(Collectors.toList());
+			if (predicate != null) {
+				matchedTiles = vai.stream().filter(predicate).collect(Collectors.toList());
+			} else {
+				matchedTiles = vai.stream().collect(Collectors.toList());
+			}
+
+			if (comp != null) {
+				Collections.sort(matchedTiles, comp);
+			} else {
+				Collections.sort(matchedTiles);
+			}
+
+			for (VirtueApplicationItem va : matchedTiles) {
+				tileContainer.add(va.getContainer());
+			}
+
+			container.validate();
+			container.repaint();
 		}
-
-		if (comp != null) {
-			Collections.sort(matchedTiles, comp);
-		} else {
-			Collections.sort(matchedTiles);
-		}
-
-		for (VirtueApplicationItem va : matchedTiles) {
-			tileContainer.add(va.getContainer());
-		}
-
-		container.validate();
-		container.repaint();
 	}
 
 	@Override
