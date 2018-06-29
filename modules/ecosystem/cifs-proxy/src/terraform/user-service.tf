@@ -2,6 +2,10 @@
 # User-facing service
 #
 
+locals {
+  myname = "webserver"
+}
+
 resource "aws_instance" "user_facing_server" {
   ami           = "${var.linux_ami}"
   instance_type = "${var.linux_instance_type}"
@@ -12,9 +16,9 @@ resource "aws_instance" "user_facing_server" {
   subnet_id = "${data.aws_subnet.public_subnet.id}"
 
   tags {
-	Name = "user-service"
+	Name = "${local.myname}"
 	Owner = "${data.external.local_user.result.user}"
-	class = "webapp"
+	class = "webserver"
 	automated = "terraform"
   }
   lifecycle {
@@ -29,11 +33,13 @@ set -x
 exec > /var/log/user_data.log 2>&1
 date
 yum -y update && yum -y install sssd realmd krb5-workstation samba-common-tools
+hostnamectl set-hostname ${local.myname}.${var.domain}
+sed -i 's/\(^127\.0\.0\.1 *\)/\1${local.myname} ${local.myname}.${var.domain} /' /etc/hosts
 (echo supersede domain-name-servers "${aws_directory_service_directory.active_directory.dns_ip_addresses[0]}", "${aws_directory_service_directory.active_directory.dns_ip_addresses[1]}" ';'
 echo supersede domain-search \"${var.domain}\";
 echo supersede domain-name \"${var.domain}\";
 ) >> /etc/dhcp/dhclient.conf
-sudo systemctl restart network.service
+systemctl restart network.service
 echo ${var.admin_password} | realm join --user Admin ${var.domain}
 echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 systemctl restart sshd.service
@@ -42,5 +48,4 @@ date
 EOF
 
   depends_on = [ "aws_directory_service_directory.active_directory" ]
-  
 }
