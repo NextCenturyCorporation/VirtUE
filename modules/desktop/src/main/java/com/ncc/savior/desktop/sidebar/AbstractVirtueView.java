@@ -29,7 +29,7 @@ public abstract class AbstractVirtueView {
 		this.virtuesInView = new ArrayList<String>();
 
 		GridBagLayout gbl = new GridBagLayout();
-		gbl.columnWidths = new int[] { 455, 0 };
+		// gbl.columnWidths = new int[] { 455, 0 };
 		gbl.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
 		gbl.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		container.setLayout(gbl);
