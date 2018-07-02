@@ -2,14 +2,11 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.awt.FlowLayout;
 import java.awt.Image;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
@@ -37,15 +34,9 @@ public class FavoritesView extends AbstractAppsView {
 		container.repaint();
 	}
 
-	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueTileContainer vc, JScrollPane sp,
-			PropertyChangeListener listener, Image image, JFrame frame, JTextField textField, JComboBox<String> cb,
-			Comparator<VirtueApplicationItem> comp) {
+	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueApplicationItem va,
+			JTextField textField, Comparator<VirtueApplicationItem> comp) {
 		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
-			VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, this, listener,
-					image, true, frame, textField, cb, comp);
-			va.tileSetup();
-			va.setToFavorited();
-
 			favorites.putBoolean(ad.getId() + virtue.getTemplateId(), true);
 
 			container.add(va.getContainer());
@@ -63,6 +54,13 @@ public class FavoritesView extends AbstractAppsView {
 
 			favorites.remove(ad.getId() + virtue.getTemplateId());
 			tiles.remove(ad.getId() + virtue.getTemplateId());
+		}
+	}
+
+	public void setTileImage(ApplicationDefinition ad, DesktopVirtue virtue, Image image) {
+		VirtueApplicationItem va = tiles.get(ad.getId() + virtue.getTemplateId());
+		if (va != null) {
+			va.setTileImage(image);
 		}
 	}
 
