@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.AuthorizationService.ILogoutEventListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -53,6 +54,15 @@ public class SidebarController {
 		currentVirtues = getCurrentVirtueMap(initialVirtues);
 
 		sidebar.start(primaryFrame, initialVirtues);
+		authService.addLogoutEventListener(new ILogoutEventListener() {
+			@Override
+			public void onLogoutSuccess(DesktopUser user) throws IOException {
+
+				currentVirtues.clear();
+
+			}
+		});
+
 		startVirtuePoll();
 		// sidebar.setStartState();
 	}
@@ -82,6 +92,7 @@ public class SidebarController {
 			public void run() {
 				String previousUser = null;
 				while (!terminatePollThread) {
+					logger.debug("Still running");
 					try {
 						DesktopUser currentUser = authService.getUser();
 						// DesktopUser currentUser = new DesktopUser("dummy", "");
@@ -121,6 +132,7 @@ public class SidebarController {
 			logger.trace("current Virtues: (" + currentVirtues.size() + ") " + currentVirtues);
 		}
 		while (itr.hasNext()) {
+			logger.debug("There are this many virtues: " + virtues.size());
 			DesktopVirtue v = itr.next();
 			String key = getMapKey(v);
 			if (currentVirtues.containsKey(key)) {

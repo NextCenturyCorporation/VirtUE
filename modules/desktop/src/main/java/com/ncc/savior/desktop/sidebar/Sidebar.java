@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.AuthorizationService.ILogoutEventListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
@@ -190,9 +191,6 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public void startLogin() throws IOException {
 		this.lp = new LoginPage(authService);
-		frame.getContentPane().removeAll();
-		frame.getContentPane().validate();
-		frame.getContentPane().repaint();
 		this.frame.getContentPane().add(lp.getContainer());
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
@@ -204,7 +202,7 @@ public class Sidebar implements VirtueChangeHandler {
 		lp.addLoginEventListener(new ILoginEventListener() {
 			@Override
 			public void onLoginSuccess(DesktopUser user) throws IOException {
-				frame.getContentPane().removeAll();
+				frame.getContentPane().remove(lp.getContainer());
 				frame.validate();
 				frame.repaint();
 				setup(user);
@@ -223,6 +221,18 @@ public class Sidebar implements VirtueChangeHandler {
 			public void onCancel() {
 				// do nothing, handled elsewhere
 			}
+		});
+	}
+
+	private void initiateLogout() throws IOException {
+		authService.addLogoutEventListener(new ILogoutEventListener() {
+			@Override
+			public void onLogoutSuccess(DesktopUser user) throws IOException {
+				frame.getContentPane().removeAll();
+				frame.getContentPane().validate();
+				frame.getContentPane().repaint();
+			}
+
 		});
 	}
 
@@ -637,8 +647,11 @@ public class Sidebar implements VirtueChangeHandler {
 			public void mouseClicked(MouseEvent event) {
 				authService.logout();
 				try {
+					initiateLogout();
+					DesktopUser user = authService.getUser();
+					authService.triggerLoginSuccessListener(user);
 					startLogin();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					String msg = "Error attempting to logout";
 					logger.error(msg, e);
 				}

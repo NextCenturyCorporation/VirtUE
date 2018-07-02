@@ -1,5 +1,9 @@
 package com.ncc.savior.desktop.authorization;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.ws.rs.client.Invocation.Builder;
 
 import org.slf4j.Logger;
@@ -18,6 +22,8 @@ public class AuthorizationService {
 	private String loginUrl;
 	private String logoutUrl;
 
+	private Set<ILogoutEventListener> logoutListeners;
+
 	public AuthorizationService(String requiredDomain, boolean dummySecurity, String loginUrl, String logoutUrl) {
 		this.requiredDomain = requiredDomain;
 		if (this.requiredDomain != null && this.requiredDomain.equals("")) {
@@ -27,6 +33,7 @@ public class AuthorizationService {
 		this.os = JavaUtil.getOs();
 		this.loginUrl = loginUrl;
 		this.logoutUrl = logoutUrl;
+		this.logoutListeners = new HashSet<ILogoutEventListener>();
 		createAuthProviderChain();
 	}
 
@@ -105,6 +112,24 @@ public class AuthorizationService {
 
 	public void addAuthorizationTicket(Builder builder, String targetHost) throws InvalidUserLoginException {
 		authProvider.addAuthorizationTicket(builder, targetHost);
+	}
+
+	public void addLogoutEventListener(ILogoutEventListener listener) {
+		logoutListeners.add(listener);
+	}
+
+	public void removeLogoutEventListener(ILogoutEventListener listener) {
+		logoutListeners.remove(listener);
+	}
+
+	public void triggerLoginSuccessListener(DesktopUser user) throws IOException {
+		for (ILogoutEventListener listener : logoutListeners) {
+			listener.onLogoutSuccess(user);
+		}
+	}
+
+	public static interface ILogoutEventListener {
+		public void onLogoutSuccess(DesktopUser user) throws IOException;
 	}
 
 }
