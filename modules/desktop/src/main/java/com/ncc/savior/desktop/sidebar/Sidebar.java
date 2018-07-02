@@ -150,20 +150,39 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private ArrayList<Color> loadColors() {
 		ArrayList<Color> colors = new ArrayList<Color>();
-		colors.add(new Color(4, 0, 252));
-		colors.add(new Color(0, 135, 255));
-		colors.add(new Color(0, 153, 0));
-		colors.add(new Color(0, 204, 0));
-		colors.add(new Color(165, 0, 0));
-		colors.add(new Color(255, 33, 0));
-		colors.add(new Color(209, 195, 0));
-		colors.add(new Color(255, 246, 0));
-		colors.add(new Color(204, 119, 0));
-		colors.add(new Color(255, 140, 0));
-		colors.add(new Color(92, 0, 173));
-		colors.add(new Color(144, 0, 255));
-		colors.add(new Color(191, 0, 156));
-		colors.add(new Color(255, 0, 208));
+		colors.add(new Color(189, 0, 38));
+		colors.add(new Color(227, 26, 28));
+
+		colors.add(new Color(34, 94, 168));
+		colors.add(new Color(29, 145, 192));
+
+		colors.add(new Color(35, 132, 67));
+		colors.add(new Color(65, 171, 93));
+
+		colors.add(new Color(204, 76, 2));
+		colors.add(new Color(236, 112, 20));
+
+
+		colors.add(new Color(136, 65, 157));
+		colors.add(new Color(140, 107, 177));
+
+		colors.add(new Color(206, 18, 86));
+		colors.add(new Color(231, 41, 138));
+
+		colors.add(new Color(106, 81, 163));
+		colors.add(new Color(128, 125, 186));
+
+		colors.add(new Color(203, 24, 29));
+		colors.add(new Color(239, 59, 44));
+
+		colors.add(new Color(191, 129, 45));
+		colors.add(new Color(223, 194, 125));
+
+		colors.add(new Color(53, 151, 143));
+		colors.add(new Color(128, 205, 193));
+
+		colors.add(new Color(127, 188, 65));
+		colors.add(new Color(184, 225, 134));
 
 		return colors;
 	}

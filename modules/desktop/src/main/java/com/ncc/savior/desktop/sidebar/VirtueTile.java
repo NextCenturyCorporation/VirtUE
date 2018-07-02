@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
@@ -52,6 +53,13 @@ public class VirtueTile extends AbstractVirtueView {
 					container.repaint();
 				}
 			}
+		}
+	}
+
+	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
+		VirtueApplicationItem va = virtues.get(virtue.getTemplateId()).tiles.get(ad.getId() + virtue.getTemplateId());
+		if (va != null) {
+			va.update(virtue);
 		}
 	}
 
