@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.virtues;
 
 import java.awt.Image;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 /**
  * This is an interface that will help encapsulate the IconResourceService class
@@ -9,6 +11,7 @@ import java.io.IOException;
 
 public interface IIconService {
 
-	public Image getImage(String iconKey) throws IOException;
+	public void getImage(String iconKey, Consumer<Image> consumer)
+			throws IOException, InterruptedException, ExecutionException;
 
 }
