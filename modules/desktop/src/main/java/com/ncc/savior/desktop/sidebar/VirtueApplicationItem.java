@@ -253,8 +253,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		dialog.setModal(false);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.add(dialogContainer);
-		dialog.setLocationRelativeTo(container);
+
+		dialog.pack();
 		dialog.setSize(new Dimension(375, 100));
+		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
 
 		yesButton.addActionListener(new ActionListener() {
