@@ -383,14 +383,12 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 				va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, image,
 					true, frame, textField, cb, null);
 				va.tileSetup();
-				va.setToFavorited();
 				fv.addFavorite(ad, virtue, va, textField, null);
 				break;
 			case "Status":
 				va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener,
 					image, true, frame, textField, cb, sortAppsByStatus);
 				va.tileSetup();
-				va.setToFavorited();
 				fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus);
 				break;
 		}
