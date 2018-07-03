@@ -18,6 +18,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.session.SessionRegistry;
@@ -27,6 +29,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
 
@@ -57,10 +61,28 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
+		AuthenticationFailureHandler authenticationFailureHandler = new AuthenticationFailureHandler() {
+
+			@Override
+			public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+					AuthenticationException exception) throws IOException, ServletException {
+				response.setStatus(401);
+				response.getWriter().write("Login failure: " + exception.getMessage());
+			}
+		};
+		AuthenticationSuccessHandler successHandler=new AuthenticationSuccessHandler() {
+			
+			@Override
+			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+					Authentication authentication) throws IOException, ServletException {
+				response.setStatus(200);
+				response.getWriter().println("Login success");
+			}
+		};
 		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
 				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**").hasRole(USER_ROLE)
-				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin().loginPage("/login")
-				.permitAll().and().logout().permitAll();
+				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
+				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login").permitAll().and().logout().permitAll();
 
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
