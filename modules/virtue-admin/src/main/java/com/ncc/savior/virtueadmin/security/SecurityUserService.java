@@ -36,6 +36,8 @@ public class SecurityUserService {
 			if (user == null) {
 				throw new SaviorException(SaviorException.USER_NOT_FOUND,
 						"User=" + name + " not found in user database!");
+			} else if (!user.isEnabled()) {
+				throw new SaviorException(SaviorException.USER_DISABLED, "User=" + name + " is disabled!");
 			}
 			return user;
 		}
