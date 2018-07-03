@@ -2,18 +2,23 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -51,115 +56,134 @@ public class LoginPage {
 
 	public void setup() {
 		container.setBackground(Color.DARK_GRAY);
-		container.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
+		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridx = 0;
-		c.gridy = 0;
-		c.weighty = .5;
-		c.insets = new Insets(30, 0, 0, 0);
+		JPanel saviorContainer = new JPanel();
+		saviorContainer.setBackground(Color.DARK_GRAY);
+		container.add(saviorContainer);
+		saviorContainer.setLayout(new BorderLayout(0, 0));
 
+		JLabel saviorLogo = new JLabel("");
+		saviorLogo.setHorizontalAlignment(SwingConstants.CENTER);
+		saviorContainer.add(saviorLogo);
 		ImageIcon saviorIcon = new ImageIcon(LoginPage.class.getResource("/images/saviorLogo.png"));
 		Image image = saviorIcon.getImage();
 		Image newimg = image.getScaledInstance(80, 75, java.awt.Image.SCALE_SMOOTH);
 		saviorIcon = new ImageIcon(newimg);
+		saviorLogo.setIcon(saviorIcon);
 
-		JLabel saviorImage = new JLabel();
-		saviorImage.setHorizontalAlignment(SwingConstants.CENTER);
-		saviorImage.setIcon(saviorIcon);
-		container.add(saviorImage, c);
+		JPanel greetingsContainer = new JPanel();
+		greetingsContainer.setBackground(Color.DARK_GRAY);
+		container.add(greetingsContainer);
+		greetingsContainer.setLayout(new BorderLayout(0, 0));
 
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.5;
-		c.gridx = 0;
-		c.gridy = 1;
-		c.weighty = 0.0;
-		JLabel header1 = new JLabel("Good morning.");
-		header1.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		header1.setHorizontalAlignment(SwingConstants.CENTER);
-		header1.setForeground(Color.WHITE);
-		container.add(header1, c);
+		JLabel greetings = new JLabel("Good Morning.");
+		greetings.setFont(new Font("Roboto", Font.PLAIN, 18));
+		greetings.setForeground(Color.WHITE);
+		greetings.setHorizontalAlignment(SwingConstants.CENTER);
+		greetingsContainer.add(greetings, BorderLayout.CENTER);
 
-		c.gridy = 2;
-		JLabel header2 = new JLabel("Please login to begin your");
-		header2.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		header2.setForeground(Color.WHITE);
-		header2.setHorizontalAlignment(SwingConstants.CENTER);
-		container.add(header2, c);
+		JPanel promptContainer = new JPanel();
+		promptContainer.setBackground(Color.DARK_GRAY);
+		container.add(promptContainer);
+		promptContainer.setLayout(new BorderLayout(0, 0));
 
-		c.gridy = 3;
-		JLabel header3 = new JLabel("Savior Desktop session");
-		header3.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		header3.setForeground(Color.WHITE);
-		header3.setVerticalAlignment(SwingConstants.TOP);
-		header3.setHorizontalAlignment(SwingConstants.CENTER);
-		container.add(header3, c);
+		JLabel prompt = new JLabel(
+				"<html><center> Please login to begin your <br> Savior Desktop session </center></html>");
+		prompt.setFont(new Font("Roboto", Font.PLAIN, 18));
+		prompt.setForeground(Color.WHITE);
+		prompt.setHorizontalAlignment(SwingConstants.CENTER);
+		promptContainer.add(prompt, BorderLayout.CENTER);
 
-		c.gridy = 4;
+		JPanel usernameContainer = new JPanel();
+		usernameContainer.setBackground(Color.DARK_GRAY);
+		container.add(usernameContainer);
+		GridBagLayout gbl_usernameContainer = new GridBagLayout();
+		gbl_usernameContainer.columnWeights = new double[] { 1.0 };
+		usernameContainer.setLayout(gbl_usernameContainer);
+
 		JLabel usernameLabel = new JLabel("Username");
-		usernameLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		usernameLabel.setFont(new Font("Roboto", Font.PLAIN, 18));
 		usernameLabel.setForeground(Color.WHITE);
+		usernameLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 75));
 		usernameLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		usernameLabel.setBounds(159, 388, 86, 30);
-		container.add(usernameLabel, c);
+		GridBagConstraints gbc_usernameLabel = new GridBagConstraints();
+		gbc_usernameLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_usernameLabel.fill = GridBagConstraints.BOTH;
+		gbc_usernameLabel.gridx = 0;
+		gbc_usernameLabel.gridy = 0;
+		usernameContainer.add(usernameLabel, gbc_usernameLabel);
 
-		c.gridy = 5;
-		c.ipadx = 85;
-		c.fill = GridBagConstraints.NONE;
-		JTextField textField = new JTextField();
-		textField.setHorizontalAlignment(SwingConstants.CENTER);
-		textField.setFont(new Font("Arial", Font.PLAIN, 18));
-		textField.setColumns(10);
-		textField.setMinimumSize(new Dimension(143, 26));
-		container.add(textField, c);
+		JTextField usernameField = new JTextField();
+		usernameField.setHorizontalAlignment(SwingConstants.CENTER);
+		usernameField.setFont(new Font("Arial", Font.PLAIN, 18));
+		GridBagConstraints gbc_usernameField = new GridBagConstraints();
+		gbc_usernameField.gridx = 0;
+		gbc_usernameField.gridy = 1;
+		usernameContainer.add(usernameField, gbc_usernameField);
+		usernameField.setColumns(12);
+		usernameField.setPreferredSize(new Dimension(160, 30));
+		usernameField.setMinimumSize(new Dimension(160, 30));
 
-		c.gridy = 6;
-		c.ipadx = 0;
+		JPanel passwordContainer = new JPanel();
+		passwordContainer.setBackground(Color.DARK_GRAY);
+		GridBagLayout gbl_passwordContainer = new GridBagLayout();
+		gbl_passwordContainer.columnWeights = new double[] { 1.0 };
+		passwordContainer.setLayout(gbl_passwordContainer);
+		container.add(passwordContainer);
+
 		JLabel passwordLabel = new JLabel("Password");
-		passwordLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		passwordLabel.setFont(new Font("Roboto", Font.PLAIN, 18));
 		passwordLabel.setForeground(Color.WHITE);
+		passwordLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 75));
 		passwordLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		container.add(passwordLabel, c);
+		GridBagConstraints gbc_passwordLabel = new GridBagConstraints();
+		gbc_passwordLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_passwordLabel.gridx = 0;
+		gbc_passwordLabel.gridy = 0;
+		passwordContainer.add(passwordLabel, gbc_passwordLabel);
 
-		c.gridy = 7;
-		c.fill = GridBagConstraints.NONE;
-		JPasswordField password = new JPasswordField();
-		password.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		password.setHorizontalAlignment(SwingConstants.CENTER);
-		password.setColumns(15);
-		password.setMinimumSize(new Dimension(230, 26));
-		container.add(password, c);
+		JPasswordField passwordField = new JPasswordField();
+		passwordField.setHorizontalAlignment(SwingConstants.CENTER);
+		passwordField.setColumns(12);
+		passwordField.setPreferredSize(new Dimension(160, 30));
+		passwordField.setMinimumSize(new Dimension(160, 30));
+		passwordField.setFont(new Font("Roboto", Font.PLAIN, 18));
+		GridBagConstraints gbc_passwordField = new GridBagConstraints();
+		gbc_passwordField.gridx = 0;
+		gbc_passwordField.gridy = 1;
+		passwordContainer.add(passwordField, gbc_passwordField);
 
-		c.gridy = 8;
-		c.ipadx = 150;
-		c.ipady = 40;
 		JPanel loginContainer = new JPanel();
-		loginContainer.setBorder(new LineBorder(new Color(255, 255, 255)));
-		loginContainer.setBackground(new Color(51, 204, 51));
-		loginContainer.setLayout(new BorderLayout(0, 0));
-		container.add(loginContainer, c);
+		loginContainer.setBackground(Color.DARK_GRAY);
+		container.add(loginContainer);
+		GridBagLayout gbl_loginContainer = new GridBagLayout();
+		gbl_loginContainer.rowWeights = new double[] { 1.0 };
+		gbl_loginContainer.columnWeights = new double[] { 1.0 };
+		loginContainer.setLayout(gbl_loginContainer);
+
+		JPanel loginBox = new JPanel();
+		loginBox.setPreferredSize(new Dimension(172, 10));
+		loginBox.setMinimumSize(new Dimension(172, 10));
+		loginBox.setBackground(new Color(51, 204, 51));
+		GridBagConstraints gbc_loginBox = new GridBagConstraints();
+		gbc_loginBox.ipady = 40;
+		gbc_loginBox.gridx = 0;
+		gbc_loginBox.gridy = 0;
+		loginContainer.add(loginBox, gbc_loginBox);
+		loginBox.setLayout(new BorderLayout(0, 0));
+		loginBox.setBorder(new LineBorder(new Color(255, 255, 255)));
 
 		JLabel loginLabel = new JLabel("Login");
-		loginLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		loginContainer.add(loginLabel);
+		loginLabel.setFont(new Font("Roboto", Font.PLAIN, 18));
 		loginLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		loginLabel.setVerticalAlignment(SwingConstants.CENTER);
-
-		c.ipadx = 0;
-		c.ipady = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
+		loginBox.add(loginLabel);
+		loginBox.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
 		JPanel footer = new JPanel();
 		footer.setBackground(Color.DARK_GRAY);
-		c.fill = GridBagConstraints.BOTH;
-		c.ipady = 0;
-		c.weighty = 1.0;
-		c.insets = new Insets(0, 0, 0, 0);
-		c.gridx = 0;
-		c.gridwidth = 1;
-		c.gridy = 9;
-		container.add(footer, c);
+		container.add(footer);
+		footer.setLayout(new BorderLayout(0, 0));
 
 		String initialDomain = "";
 		if (authService.getRequiredDomain() != null) {
@@ -170,12 +194,42 @@ public class LoginPage {
 		loginContainer.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				String username = textField.getText();
-				String password1 = new String(password.getPassword());
+				String username = usernameField.getText();
+				String password1 = new String(passwordField.getPassword());
 				try {
 					doLogin(domain, username, password1);
 				} catch (IOException e) {
 					logger.error("Login error");
+				}
+			}
+		});
+
+		passwordField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+					String username = usernameField.getText();
+					String password1 = new String(passwordField.getPassword());
+					try {
+						doLogin(domain, username, password1);
+					} catch (IOException e) {
+						logger.error("Login error");
+					}
+				}
+			}
+		});
+
+		usernameField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+					String username = usernameField.getText();
+					String password1 = new String(passwordField.getPassword());
+					try {
+						doLogin(domain, username, password1);
+					} catch (IOException e) {
+						logger.error("Login error");
+					}
 				}
 			}
 		});

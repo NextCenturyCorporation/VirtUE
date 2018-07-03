@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -80,7 +81,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private ImageIcon saviorIcon = new ImageIcon(AppsTile.class.getResource("/images/saviorLogo.png"));
 
 	private ImageIcon searchIcon;
-	private ImageIcon closeIcon = new ImageIcon(Sidebar.class.getResource("/images/close.png"));
+	private ImageIcon closeIcon = new ImageIcon(Sidebar.class.getResource("/images/close-button.png"));
 
 	private VirtueService virtueService;
 	private Map<String, VirtueTileContainer> virtueIdToVc;
@@ -91,6 +92,8 @@ public class Sidebar implements VirtueChangeHandler {
 	private ArrayList<Color> colorList;
 	private JFrame frame;
 	private LoginPage lp;
+
+	private GhostText ghostText;
 
 	private JTextField textField;
 	private JLabel favoritesLabel;
@@ -222,7 +225,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public void startLogin() throws IOException {
 		this.lp = new LoginPage(authService);
-		frame.setMinimumSize(new Dimension(350, 200));
+		frame.setMinimumSize(new Dimension(380, 200));
 		frame.getContentPane().removeAll();
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
@@ -368,6 +371,9 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(vlcAppsListVa.getChangeListener());
 		}
 
+		if (ghostText.getIsVisible()) {
+			keyword = "";
+		}
 		sortByOption(keyword);
 
 		sp.getViewport().validate();
@@ -403,6 +409,10 @@ public class Sidebar implements VirtueChangeHandler {
 		ToolTipManager.sharedInstance().setReshowDelay(1);
 		ToolTipManager.sharedInstance().setInitialDelay(1250);
 
+		Image closeImage = closeIcon.getImage();
+		Image newCloseImg = closeImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		closeIcon = new ImageIcon(newCloseImg);
+
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
 		this.sp = new JScrollPane();
@@ -422,14 +432,19 @@ public class Sidebar implements VirtueChangeHandler {
 		desktopContainer.add(topBorder, BorderLayout.NORTH);
 
 		JLabel name = new JLabel(user.getUsername());
+		name.setFont(new Font("Roboto", Font.PLAIN, 17));
+		name.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
 		name.setIcon(null);
 		name.setForeground(Color.WHITE);
-		name.setFont(new Font("Tahoma", Font.PLAIN, 17));
 		topBorder.add(name, BorderLayout.WEST);
 
-		ImageIcon aboutIcon = new ImageIcon(Sidebar.class.getResource("/images/play.png"));
+		ImageIcon aboutIcon = new ImageIcon(Sidebar.class.getResource("/images/info-icon.png"));
+		Image aboutImage = aboutIcon.getImage();
+		Image newAboutImg = aboutImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		aboutIcon = new ImageIcon(newAboutImg);
 		this.about = new JLabel();
 		about.setIcon(aboutIcon);
+		about.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
 		topBorder.add(about, BorderLayout.EAST);
 
 		this.bottomBorder = new JPanel();
@@ -449,7 +464,7 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.add(logoutLabel);
 
 		JLabel logout = new JLabel("Logout");
-		logout.setFont(new Font("Tahoma", Font.PLAIN, 19));
+		logout.setFont(new Font("Roboto", Font.PLAIN, 19));
 		logout.setForeground(Color.WHITE);
 		bottomBorder.add(logout);
 
@@ -465,60 +480,76 @@ public class Sidebar implements VirtueChangeHandler {
 		this.applications = new JPanel();
 		applications.setMinimumSize(new Dimension(140, 38));
 		applications.setBorder(new LineBorder(SystemColor.windowBorder));
-		applications.setBackground(SystemColor.scrollbar);
+		applications.setBackground(new Color(239, 239, 239));
 		c.weightx = 0.5;
 
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
 		c.gridy = 0;
 		center.add(applications, c);
-		applications.setLayout(new BorderLayout(0, 4));
+		applications.setLayout(new GridBagLayout());
+
+		GridBagConstraints appConstraints = new GridBagConstraints();
+		appConstraints.gridx = 0;
+		appConstraints.gridy = 0;
+		appConstraints.insets = new Insets(8, 0, 0, 0);
 
 		JLabel applicationsLabel = new JLabel("Applications");
-		applicationsLabel.setVerticalAlignment(SwingConstants.TOP);
+		applicationsLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
+		applicationsLabel.setVerticalAlignment(SwingConstants.CENTER);
 		applicationsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		applications.add(applicationsLabel);
+		applications.add(applicationsLabel, appConstraints);
 
+		appConstraints.gridy = 1;
+		appConstraints.insets = new Insets(6, 0, 0, 0);
+		appConstraints.ipady = 1;
+		appConstraints.weightx = 1.0;
+		appConstraints.anchor = GridBagConstraints.PAGE_END;
+		appConstraints.fill = GridBagConstraints.HORIZONTAL;
 		this.applicationsSelected = new JPanel();
 		FlowLayout flowLayout_2 = (FlowLayout) applicationsSelected.getLayout();
 		flowLayout_2.setVgap(1);
-		applicationsSelected.setBackground(new Color(148, 0, 211));
-		applications.add(applicationsSelected, BorderLayout.SOUTH);
-
-		JPanel applicationsHeader = new JPanel();
-		applicationsHeader.setBackground(SystemColor.scrollbar);
-		applications.add(applicationsHeader, BorderLayout.NORTH);
+		applicationsSelected.setBackground(new Color(153, 51, 204));
+		applications.add(applicationsSelected, appConstraints);
 
 		this.virtues = new JPanel();
 		virtues.setMinimumSize(new Dimension(140, 38));
 		virtues.setBorder(new LineBorder(SystemColor.windowBorder));
-		virtues.setBackground(SystemColor.scrollbar);
+		virtues.setBackground(new Color(239, 239, 239));
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.5;
 		c.gridx = 1;
 		c.gridy = 0;
 		center.add(virtues, c);
-		virtues.setLayout(new BorderLayout(0, 4));
+		virtues.setLayout(new GridBagLayout());
+
+		GridBagConstraints virtuesConstraints = new GridBagConstraints();
+		virtuesConstraints.gridx = 0;
+		virtuesConstraints.gridy = 0;
+		virtuesConstraints.insets = new Insets(8, 0, 0, 0);
 
 		JLabel virtuesLabel = new JLabel("Virtues");
+		virtuesLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
 		virtuesLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		virtues.add(virtuesLabel);
+		virtues.add(virtuesLabel, virtuesConstraints);
 
-		JPanel virtuesHeader = new JPanel();
-		virtuesHeader.setBackground(SystemColor.scrollbar);
-		virtues.add(virtuesHeader, BorderLayout.NORTH);
-
+		virtuesConstraints.gridy = 1;
+		virtuesConstraints.insets = new Insets(6, 0, 0, 0);
+		virtuesConstraints.ipady = 1;
+		virtuesConstraints.weightx = 1.0;
+		virtuesConstraints.anchor = GridBagConstraints.PAGE_END;
+		virtuesConstraints.fill = GridBagConstraints.HORIZONTAL;
 		this.virtuesSelected = new JPanel();
 		FlowLayout flowLayout_3 = (FlowLayout) virtuesSelected.getLayout();
 		flowLayout_3.setVgap(1);
-		virtuesSelected.setBackground(SystemColor.scrollbar);
-		virtues.add(virtuesSelected, BorderLayout.SOUTH);
+		virtuesSelected.setBackground(new Color(239, 239, 239));
+		virtues.add(virtuesSelected, virtuesConstraints);
 
 		JPanel search = new JPanel();
 		search.setMinimumSize(new Dimension(140, 38));
 		search.setMinimumSize(new Dimension(140, 38));
 		search.setBorder(new LineBorder(SystemColor.windowBorder));
-		search.setBackground(SystemColor.scrollbar);
+		search.setBackground(new Color(239, 239, 239));
 		search.setLayout(new GridBagLayout());
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 0.5;
@@ -532,7 +563,7 @@ public class Sidebar implements VirtueChangeHandler {
 		c.fill = GridBagConstraints.BOTH;
 
 		this.searchLabel = new JLabel();
-		searchLabel.setBackground(SystemColor.scrollbar);
+		searchLabel.setBackground(new Color(239, 239, 239));
 		ImageIcon initialSearchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
 		Image searchImage = initialSearchIcon.getImage();
 		Image newSearchImage = searchImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
@@ -541,14 +572,20 @@ public class Sidebar implements VirtueChangeHandler {
 		searchLabel.setIcon(searchIcon);
 
 		textField.setColumns(6);
+		textField.setForeground(Color.BLACK);
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		ghostText = new GhostText(textField, "search", searchLabel, searchIcon);
+
+		c.insets = new Insets(0, 9, 0, 0);
 
 		search.add(textField, c);
 
+		c.insets = new Insets(0, 5, 0, 5);
 		c.weightx = 0.0;
 		c.gridx = 1;
 		search.add(searchLabel, c);
 
+		c.insets = new Insets(0, 0, 0, 0);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.5;
 		c.gridx = 2;
@@ -557,7 +594,7 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel icons = new JPanel();
 		icons.setBackground(new Color(248, 248, 255));
 		center.add(icons, c);
-		icons.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		icons.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 0));
 
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0;
@@ -568,7 +605,8 @@ public class Sidebar implements VirtueChangeHandler {
 		center.add(sortBy, c);
 
 		JLabel sortByLabel = new JLabel("sorted by: ");
-		sortByLabel.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+		sortByLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
+		sortByLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0));
 		String[] sortingOptions = { "Alphabetical", "Status" };
 		this.cb = new JComboBox<String>(sortingOptions);
 		cb.setSelectedItem(lastSort.get("sort", "Alphabetical"));
@@ -721,6 +759,9 @@ public class Sidebar implements VirtueChangeHandler {
 			public void insertUpdate(DocumentEvent e) {
 				searchMode = true;
 				String keyword = textField.getText();
+				if (ghostText.getIsVisible()) {
+					keyword = "";
+				}
 				sortByOption(keyword);
 				sp.setViewportView(sp.getViewport().getView());
 				searchLabel.setIcon(closeIcon);
@@ -732,6 +773,14 @@ public class Sidebar implements VirtueChangeHandler {
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
+				searchMode = true;
+				String keyword = textField.getText();
+				if (ghostText.getIsVisible()) {
+					keyword = "";
+				}
+				sortByOption(keyword);
+				sp.setViewportView(sp.getViewport().getView());
+				searchLabel.setIcon(closeIcon);
 			}
 
 		});
@@ -744,7 +793,11 @@ public class Sidebar implements VirtueChangeHandler {
 						resetViews();
 					} else {
 						searchMode = true;
-						sortByOption(textField.getText());
+						String keyword = textField.getText();
+						if (ghostText.getIsVisible()) {
+							keyword = "";
+						}
+						sortByOption(keyword);
 						sp.setViewportView(sp.getViewport().getView());
 						searchLabel.setIcon(closeIcon);
 					}
@@ -758,7 +811,11 @@ public class Sidebar implements VirtueChangeHandler {
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) cb.getSelectedItem();
 				lastSort.put("sort", selected);
-				sortByOption(textField.getText());
+				String keyword = textField.getText();
+				if (ghostText.getIsVisible()) {
+					keyword = "";
+				}
+				sortByOption(keyword);
 			}
 
 		});
@@ -799,8 +856,8 @@ public class Sidebar implements VirtueChangeHandler {
 		desktopView = DesktopView.FAVORITES;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
-		virtuesSelected.setBackground(SystemColor.scrollbar);
-		applicationsSelected.setBackground(new Color(148, 0, 211));
+		virtuesSelected.setBackground(new Color(239, 239, 239));
+		applicationsSelected.setBackground(new Color(153, 51, 204));
 		favoritesLabel.setIcon(activeFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(inactiveListIcon);
@@ -812,8 +869,8 @@ public class Sidebar implements VirtueChangeHandler {
 		desktopView = DesktopView.APPS_LIST;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
-		virtuesSelected.setBackground(SystemColor.scrollbar);
-		applicationsSelected.setBackground(new Color(148, 0, 211));
+		virtuesSelected.setBackground(new Color(239, 239, 239));
+		applicationsSelected.setBackground(new Color(153, 51, 204));
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(activeListIcon);
@@ -825,8 +882,8 @@ public class Sidebar implements VirtueChangeHandler {
 		desktopView = DesktopView.APPS_TILE;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
-		virtuesSelected.setBackground(SystemColor.scrollbar);
-		applicationsSelected.setBackground(new Color(148, 0, 211));
+		virtuesSelected.setBackground(new Color(239, 239, 239));
+		applicationsSelected.setBackground(new Color(153, 51, 204));
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(activeTileIcon);
 		listLabel.setIcon(inactiveListIcon);
@@ -840,8 +897,8 @@ public class Sidebar implements VirtueChangeHandler {
 		tileLabel.setIcon(activeTileIcon);
 		listLabel.setIcon(inactiveListIcon);
 		favoritesView.setVisible(false);
-		applicationsSelected.setBackground(SystemColor.scrollbar);
-		virtuesSelected.setBackground(new Color(148, 0, 211));
+		applicationsSelected.setBackground(new Color(239, 239, 239));
+		virtuesSelected.setBackground(new Color(153, 51, 204));
 		sp.setViewportView(vt.getContainer());
 	}
 
@@ -852,8 +909,8 @@ public class Sidebar implements VirtueChangeHandler {
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(activeListIcon);
 		favoritesView.setVisible(false);
-		applicationsSelected.setBackground(SystemColor.scrollbar);
-		virtuesSelected.setBackground(new Color(148, 0, 211));
+		applicationsSelected.setBackground(new Color(239, 239, 239));
+		virtuesSelected.setBackground(new Color(153, 51, 204));
 		sp.setViewportView(vl.getContainer());
 	}
 
