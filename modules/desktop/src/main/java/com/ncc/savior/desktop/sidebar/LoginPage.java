@@ -9,6 +9,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -198,6 +200,36 @@ public class LoginPage {
 					doLogin(domain, username, password1);
 				} catch (IOException e) {
 					logger.error("Login error");
+				}
+			}
+		});
+
+		passwordField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+					String username = usernameField.getText();
+					String password1 = new String(passwordField.getPassword());
+					try {
+						doLogin(domain, username, password1);
+					} catch (IOException e) {
+						logger.error("Login error");
+					}
+				}
+			}
+		});
+
+		usernameField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
+					String username = usernameField.getText();
+					String password1 = new String(passwordField.getPassword());
+					try {
+						doLogin(domain, username, password1);
+					} catch (IOException e) {
+						logger.error("Login error");
+					}
 				}
 			}
 		});
