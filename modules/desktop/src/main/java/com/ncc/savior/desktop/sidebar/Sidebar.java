@@ -81,7 +81,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private ImageIcon saviorIcon = new ImageIcon(AppsTile.class.getResource("/images/saviorLogo.png"));
 
 	private ImageIcon searchIcon;
-	private ImageIcon closeIcon = new ImageIcon(Sidebar.class.getResource("/images/close.png"));
+	private ImageIcon closeIcon = new ImageIcon(Sidebar.class.getResource("/images/close-button.png"));
 
 	private VirtueService virtueService;
 	private Map<String, VirtueTileContainer> virtueIdToVc;
@@ -92,6 +92,8 @@ public class Sidebar implements VirtueChangeHandler {
 	private ArrayList<Color> colorList;
 	private JFrame frame;
 	private LoginPage lp;
+
+	private GhostText ghostText;
 
 	private JTextField textField;
 	private JLabel favoritesLabel;
@@ -369,6 +371,9 @@ public class Sidebar implements VirtueChangeHandler {
 			dom.addListener(vlcAppsListVa.getChangeListener());
 		}
 
+		if (ghostText.getIsVisible()) {
+			keyword = "";
+		}
 		sortByOption(keyword);
 
 		sp.getViewport().validate();
@@ -404,6 +409,10 @@ public class Sidebar implements VirtueChangeHandler {
 		ToolTipManager.sharedInstance().setReshowDelay(1);
 		ToolTipManager.sharedInstance().setInitialDelay(1250);
 
+		Image closeImage = closeIcon.getImage();
+		Image newCloseImg = closeImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		closeIcon = new ImageIcon(newCloseImg);
+
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
 		this.sp = new JScrollPane();
@@ -424,15 +433,18 @@ public class Sidebar implements VirtueChangeHandler {
 
 		JLabel name = new JLabel(user.getUsername());
 		name.setFont(new Font("Roboto", Font.PLAIN, 17));
-		name.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		name.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
 		name.setIcon(null);
 		name.setForeground(Color.WHITE);
 		topBorder.add(name, BorderLayout.WEST);
 
-		ImageIcon aboutIcon = new ImageIcon(Sidebar.class.getResource("/images/play.png"));
+		ImageIcon aboutIcon = new ImageIcon(Sidebar.class.getResource("/images/info-icon.png"));
+		Image aboutImage = aboutIcon.getImage();
+		Image newAboutImg = aboutImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		aboutIcon = new ImageIcon(newAboutImg);
 		this.about = new JLabel();
 		about.setIcon(aboutIcon);
-		about.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+		about.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
 		topBorder.add(about, BorderLayout.EAST);
 
 		this.bottomBorder = new JPanel();
@@ -560,9 +572,12 @@ public class Sidebar implements VirtueChangeHandler {
 		searchLabel.setIcon(searchIcon);
 
 		textField.setColumns(6);
+		textField.setForeground(Color.BLACK);
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		ghostText = new GhostText(textField, "search", searchLabel, searchIcon);
 
 		c.insets = new Insets(0, 9, 0, 0);
+
 		search.add(textField, c);
 
 		c.insets = new Insets(0, 5, 0, 5);
@@ -744,6 +759,9 @@ public class Sidebar implements VirtueChangeHandler {
 			public void insertUpdate(DocumentEvent e) {
 				searchMode = true;
 				String keyword = textField.getText();
+				if (ghostText.getIsVisible()) {
+					keyword = "";
+				}
 				sortByOption(keyword);
 				sp.setViewportView(sp.getViewport().getView());
 				searchLabel.setIcon(closeIcon);
@@ -755,6 +773,14 @@ public class Sidebar implements VirtueChangeHandler {
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
+				searchMode = true;
+				String keyword = textField.getText();
+				if (ghostText.getIsVisible()) {
+					keyword = "";
+				}
+				sortByOption(keyword);
+				sp.setViewportView(sp.getViewport().getView());
+				searchLabel.setIcon(closeIcon);
 			}
 
 		});
@@ -767,7 +793,11 @@ public class Sidebar implements VirtueChangeHandler {
 						resetViews();
 					} else {
 						searchMode = true;
-						sortByOption(textField.getText());
+						String keyword = textField.getText();
+						if (ghostText.getIsVisible()) {
+							keyword = "";
+						}
+						sortByOption(keyword);
 						sp.setViewportView(sp.getViewport().getView());
 						searchLabel.setIcon(closeIcon);
 					}
@@ -781,7 +811,11 @@ public class Sidebar implements VirtueChangeHandler {
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) cb.getSelectedItem();
 				lastSort.put("sort", selected);
-				sortByOption(textField.getText());
+				String keyword = textField.getText();
+				if (ghostText.getIsVisible()) {
+					keyword = "";
+				}
+				sortByOption(keyword);
 			}
 
 		});
