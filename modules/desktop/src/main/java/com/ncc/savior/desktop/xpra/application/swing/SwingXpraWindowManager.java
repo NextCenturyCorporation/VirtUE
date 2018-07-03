@@ -11,13 +11,13 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.IXpraWindow;
+import com.ncc.savior.desktop.xpra.application.XpraApplicationManager.TransferHandlerFactory;
 import com.ncc.savior.desktop.xpra.application.XpraWindowManager;
 import com.ncc.savior.desktop.xpra.protocol.IPacketSender;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyboard;
@@ -51,7 +51,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 
 	private MouseAdapter mouseAdapter;
 
-	protected TransferHandler transferHandler;
+	protected TransferHandlerFactory transferHandlerFactory;
 
 	public SwingXpraWindowManager(XpraClient client, int baseWindowId) {
 		super(client, baseWindowId);
@@ -80,7 +80,7 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 				JCanvas canvas = new JCanvas(packet.getWidth(), packet.getHeight());
 				canvas.addMouseListener(mouseAdapter);
 				canvas.addMouseMotionListener(mouseAdapter);
-				canvas.setTransferHandler(transferHandler);
+				canvas.setTransferHandler(transferHandlerFactory.getTransferHandler(packet.getWindowId()));
 
 				// int baseWindowId = SwingXpraWindowManager.this.baseWindowId;
 				boolean isMainWindow = baseWindowId == packet.getWindowId();
@@ -222,7 +222,8 @@ public class SwingXpraWindowManager extends XpraWindowManager {
 		this.mouseAdapter = mouseAdapter;
 	}
 
-	public void setTransferHandler(TransferHandler transferHandler) {
-		this.transferHandler = transferHandler;
+	public void setTransferHandlerFactory(TransferHandlerFactory transferHandlerFactory) {
+		this.transferHandlerFactory = transferHandlerFactory;
 	}
+
 }

@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
-import com.ncc.savior.desktop.dnd.messages.DndCanImportRequestMessage;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportResponseMessage;
+import com.ncc.savior.desktop.dnd.messages.DndStartDragMessage;
 
 public class DndBackdrop extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -127,7 +127,7 @@ public class DndBackdrop extends JFrame {
 			boolean ret = true;
 			try {
 				String requestId = UUID.randomUUID().toString();
-				DndCanImportRequestMessage message = new DndCanImportRequestMessage(messageSourceId, requestId,
+				DndStartDragMessage message = new DndStartDragMessage(messageSourceId, requestId,
 						support);
 				int timeout = 3000;
 				ret = sendMessageAndWaitForResponseWithTimeout(ret, requestId, message, timeout);

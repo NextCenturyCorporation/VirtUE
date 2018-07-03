@@ -1,17 +1,25 @@
 package com.ncc.savior.desktop.xpra.application;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
@@ -25,6 +33,8 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportRequestMessage;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportResponseMessage;
+import com.ncc.savior.desktop.dnd.messages.DndDataRequestMessage;
+import com.ncc.savior.desktop.dnd.messages.DndStartDragMessage;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.swing.JCanvas;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
@@ -62,16 +72,20 @@ public abstract class XpraApplicationManager {
 	private Set<Integer> hiddenWindowIds = new HashSet<Integer>();
 	protected IDndDragHandler dndHandler;
 	protected volatile boolean clientIsDragging;
+	protected DataFlavor[] dragFlavors;
+	protected Map<String, CompletableFuture> dragFutures;
 
 	public XpraApplicationManager(XpraClient client) {
 		this.clientIsDragging = false;
+		this.dragFutures = Collections.synchronizedMap(new HashMap<String, CompletableFuture>());
 		this.client = client;
 		this.applications = new HashMap<Integer, XpraApplication>();
 		this.windowIdsToApplications = new HashMap<Integer, XpraApplication>();
 		initPacketHandling();
-		TestTransferHandler globalTransferHandler = new TestTransferHandler();
+		// TestTransferHandler globalTransferHandler = new TestTransferHandler(-1);
 		// TransferHandler globalTransferHandler = new TransferHandler("text");
-		globalTransferHandler.setValue("test");
+		// globalTransferHandler.setValue("test");
+		TransferHandlerFactory transferHandlerFactory = new TransferHandlerFactory();
 		dndHandler = new IDndDragHandler() {
 
 			@Override
@@ -106,8 +120,8 @@ public abstract class XpraApplicationManager {
 			}
 
 			@Override
-			public TransferHandler getTransferHandler() {
-				return globalTransferHandler;
+			public TransferHandlerFactory getTransferHandlerFactory() {
+				return transferHandlerFactory;
 			}
 		};
 
@@ -124,28 +138,43 @@ public abstract class XpraApplicationManager {
 				if (message instanceof DndCanImportRequestMessage) {
 					DndCanImportRequestMessage m = (DndCanImportRequestMessage) message;
 					String cci = client.getClipboardClientId();
-					IClipboardMessageSenderReceiver transmitter = client.getClipboardTransmitter();
 					if (m.getSourceId().equals(cci)) {
+						clientIsDragging = true;
+						dragFlavors = m.getFlavors();
+						respondToCanImportRequest(client, message, m, m.getRequestId());
+					}
+				} else if (message instanceof DndStartDragMessage) {
+					DndStartDragMessage m = (DndStartDragMessage) message;
+
+					String cci = client.getClipboardClientId();
+
+					if (m.getSourceId().equals(cci)) {
+						dragFlavors = m.getFlavors();
 						logger.debug("got can import request");
 						// message form OUR drag and drop client so this is relevant to us
 						clientIsDragging = true;
-						String destId = message.getSourceId();
-						boolean allowTransfer = transmitter != null && transmitter.isValid();
-						if (allowTransfer) {
-							DndCanImportResponseMessage response = new DndCanImportResponseMessage("hubId", destId,
-									m.getRequestId(), false);
-							try {
-								logger.debug("sending response");
-								transmitter.sendMessageToHub(response);
-								logger.debug("sent response");
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
+
+						respondToCanImportRequest(client, message, m, m.getRequestId());
 					}
 				}
 
+			}
+
+			private void respondToCanImportRequest(XpraClient client, IClipboardMessage message, IClipboardMessage m,
+					String requestId) {
+				String destId = message.getSourceId();
+				IClipboardMessageSenderReceiver transmitter = client.getClipboardTransmitter();
+				boolean allowTransfer = transmitter != null && transmitter.isValid();
+				if (allowTransfer) {
+					DndCanImportResponseMessage response = new DndCanImportResponseMessage("hubId", destId, requestId,
+							false);
+					try {
+						transmitter.sendMessageToHub(response);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 
 			@Override
@@ -153,6 +182,7 @@ public abstract class XpraApplicationManager {
 				// TODO Auto-generated method stub
 
 			}
+
 		};
 		client.setDndMessageHandler(dndMessageHandler);
 	}
@@ -415,10 +445,21 @@ public abstract class XpraApplicationManager {
 		}
 	}
 
+	public class TransferHandlerFactory {
+		public TestTransferHandler getTransferHandler(int windowId) {
+			return new TestTransferHandler(windowId);
+		}
+	}
+
 	public class TestTransferHandler extends TransferHandler {
 		private static final long serialVersionUID = 1L;
-		public final DataFlavor SUPPORTED_DATE_FLAVOR = DataFlavor.stringFlavor;
+		public final DataFlavor SUPPORTED_DATA_FLAVOR = DataFlavor.stringFlavor;
 		private String value;
+		private int windowId;
+
+		TestTransferHandler(int windowId) {
+			this.windowId = windowId;
+		}
 
 		public void setValue(String value) {
 			this.value = value;
@@ -440,13 +481,60 @@ public abstract class XpraApplicationManager {
 		@Override
 		protected Transferable createTransferable(JComponent c) {
 			logger.debug("creating transferable");
-			Transferable t = new StringSelection(getValue());
+			Transferable t = new Transferable() {
+
+				@Override
+				public boolean isDataFlavorSupported(DataFlavor flavor) {
+					return flavor.equals(SUPPORTED_DATA_FLAVOR);
+					// for (DataFlavor supportedFlavor:dragFlavors) {
+					// if (flavor.equals(supportedFlavor)) {
+					// return true;
+					// }
+					// }
+					// return false;
+				}
+
+				@Override
+				public DataFlavor[] getTransferDataFlavors() {
+					return new DataFlavor[] { SUPPORTED_DATA_FLAVOR };
+				}
+
+				@Override
+				public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
+					logger.debug("trying to get transfer data");
+					IClipboardMessageSenderReceiver transmitter = client.getClipboardTransmitter();
+					String requestId = UUID.randomUUID().toString();
+					DndDataRequestMessage message = new DndDataRequestMessage("dndHub", flavor, requestId);
+					transmitter.sendMessageToHub(message);
+					CompletableFuture<Object> completableFuture = new CompletableFuture<Object>();
+					dragFutures.put(requestId, completableFuture);
+					try {
+						Object obj = completableFuture.get(2000, TimeUnit.MILLISECONDS);
+						logger.debug("got future response for clipboard data: " + obj);
+						return obj;
+					} catch (TimeoutException | InterruptedException | ExecutionException e) {
+						logger.error("timeout with getting drag and drop data", e);
+						return "timeout";
+					}
+				}
+			};
+
 			return t;
 		}
 
 		@Override
 		public boolean canImport(TransferHandler.TransferSupport support) {
 			logger.debug("can import " + support.getDropLocation().getDropPoint().getX());
+			Point point = support.getDropLocation().getDropPoint();
+			List<String> mod = new ArrayList<String>();
+			logger.debug("not sure if x,y is correct here: " + point.getX() + " : " + point.getY());
+			MousePointerPositionPacket packet = new MousePointerPositionPacket(windowId, (int) point.getX(),
+					(int) point.getY(), mod);
+			try {
+				client.getPacketSender().sendPacket(packet);
+			} catch (IOException e) {
+				logger.error("Error sending mouse data via TransferHandler", e);
+			}
 			return true;
 		}
 

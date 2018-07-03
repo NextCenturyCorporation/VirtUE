@@ -3,7 +3,7 @@ package com.ncc.savior.desktop.dnd;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-import javax.swing.TransferHandler;
+import com.ncc.savior.desktop.xpra.application.XpraApplicationManager.TransferHandlerFactory;
 
 public interface IDndDragHandler {
 
@@ -13,6 +13,6 @@ public interface IDndDragHandler {
 
 	void onMouseDrag(MouseEvent event);
 
-	TransferHandler getTransferHandler();
+	TransferHandlerFactory getTransferHandlerFactory();
 
 }

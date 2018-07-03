@@ -105,7 +105,7 @@ public class SwingApplication extends XpraApplication implements Closeable {
 		client.addPacketListener(applicationPacketHandler);
 		windowManager = new SwingXpraWindowManager(client, packet.getWindowId());
 		windowManager.setDndHandler(dndHandler);
-		((SwingXpraWindowManager) windowManager).setTransferHandler(dndHandler.getTransferHandler());
+		((SwingXpraWindowManager) windowManager).setTransferHandlerFactory(dndHandler.getTransferHandlerFactory());
 		((SwingXpraWindowManager) windowManager).setColor(color);
 		windowManager.setDebugOutput(debugOutput);
 		fullScreenBounds = frame.getMaximizedBounds();

@@ -8,10 +8,6 @@ import com.ncc.savior.desktop.clipboard.messages.BaseClipboardMessage;
 import com.ncc.savior.desktop.clipboard.messages.MessageType;
 
 public class DndCanImportRequestMessage extends BaseClipboardMessage {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private String requestId;
 	private DataFlavor[] flavors;

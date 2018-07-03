@@ -19,6 +19,8 @@ buildscript {
 }
 plugins {
     id 'org.unbroken-dome.test-sets' version '1.4.5'
+    
+     id "com.github.ManifestClasspath" version "0.1.0-RELEASE"
 }
 
 apply plugin: "io.spring.dependency-management"
@@ -42,6 +44,7 @@ jar {enabled = true}
 group = 'com.ncc.savior'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
+
 
 
 repositories {
