@@ -54,13 +54,15 @@ public class UsernamePasswordKerberosAuthorizationService implements IActiveDire
 	}
 
 	@Override
-	public synchronized DesktopUser login(String domain, String username, String password) {
+	public synchronized DesktopUser login(String domain, String username, String password)
+			throws InvalidUserLoginException {
 		if (currentUser != null) {
 			logout();
 		}
 		MultivaluedMap<String, String> formData = new MultivaluedHashMap<String, String>();
 		formData.add("username", username);
 		formData.add("password", password);
+		// loginTarget.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE);
 		Builder builder = loginTarget.request(MediaType.TEXT_HTML);
 		Entity<Form> entity = Entity.form(formData);
 		Response response = builder.post(entity);
@@ -73,7 +75,17 @@ public class UsernamePasswordKerberosAuthorizationService implements IActiveDire
 		// logger.error("Failed to read response", e);
 		// }
 		// }
+
 		Map<String, NewCookie> cookies = response.getCookies();
+		MultivaluedMap<String, Object> headers = response.getHeaders();
+		if (response.getStatus() >= 400) {
+			throw new InvalidUserLoginException("login failed");
+		} else if (response.getStatus() == 302) {
+			String location = (String) headers.getFirst("Location");
+			if (location.contains("error")) {
+				throw new InvalidUserLoginException("login failed");
+			}
+		}
 		NewCookie jcookie = cookies.get(JSESSION_HEADER);
 		if (jcookie != null) {
 			token = jcookie.getValue();
