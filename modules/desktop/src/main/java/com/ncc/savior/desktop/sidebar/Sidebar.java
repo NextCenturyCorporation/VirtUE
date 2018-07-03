@@ -68,7 +68,8 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 public class Sidebar implements VirtueChangeHandler {
 	private static final Logger logger = LoggerFactory.getLogger(Sidebar.class);
 
-	private ImageIcon inactiveFavoriteIcon = (new ImageIcon(Sidebar.class.getResource("/images/favorite-inactive.png")));
+	private ImageIcon inactiveFavoriteIcon = (new ImageIcon(
+			Sidebar.class.getResource("/images/favorite-inactive.png")));
 	private ImageIcon activeFavoriteIcon = (new ImageIcon(Sidebar.class.getResource("/images/favorite-active.png")));
 
 	private ImageIcon inactiveTileIcon = (new ImageIcon(Sidebar.class.getResource("/images/tile-inactive2.png")));
@@ -153,26 +154,44 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private ArrayList<Color> loadColors() {
 		ArrayList<Color> colors = new ArrayList<Color>();
-		colors.add(new Color(4, 0, 252));
-		colors.add(new Color(0, 135, 255));
-		colors.add(new Color(0, 153, 0));
-		colors.add(new Color(0, 204, 0));
-		colors.add(new Color(165, 0, 0));
-		colors.add(new Color(255, 33, 0));
-		colors.add(new Color(209, 195, 0));
-		colors.add(new Color(255, 246, 0));
-		colors.add(new Color(204, 119, 0));
-		colors.add(new Color(255, 140, 0));
-		colors.add(new Color(92, 0, 173));
-		colors.add(new Color(144, 0, 255));
-		colors.add(new Color(191, 0, 156));
-		colors.add(new Color(255, 0, 208));
+		colors.add(new Color(189, 0, 38));
+		colors.add(new Color(227, 26, 28));
+
+		colors.add(new Color(34, 94, 168));
+		colors.add(new Color(29, 145, 192));
+
+		colors.add(new Color(35, 132, 67));
+		colors.add(new Color(65, 171, 93));
+
+		colors.add(new Color(204, 76, 2));
+		colors.add(new Color(236, 112, 20));
+
+
+		colors.add(new Color(136, 65, 157));
+		colors.add(new Color(140, 107, 177));
+
+		colors.add(new Color(206, 18, 86));
+		colors.add(new Color(231, 41, 138));
+
+		colors.add(new Color(106, 81, 163));
+		colors.add(new Color(128, 125, 186));
+
+		colors.add(new Color(203, 24, 29));
+		colors.add(new Color(239, 59, 44));
+
+		colors.add(new Color(191, 129, 45));
+		colors.add(new Color(223, 194, 125));
+
+		colors.add(new Color(53, 151, 143));
+		colors.add(new Color(128, 205, 193));
+
+		colors.add(new Color(127, 188, 65));
+		colors.add(new Color(184, 225, 134));
 
 		return colors;
 	}
 
-	public void start(JFrame frame, List<DesktopVirtue> initialVirtues)
-			throws Exception {
+	public void start(JFrame frame, List<DesktopVirtue> initialVirtues) throws Exception {
 		frame.setTitle("SAVIOR");
 		frame.setIconImage(saviorIcon.getImage());
 		this.frame = frame;
@@ -183,7 +202,12 @@ public class Sidebar implements VirtueChangeHandler {
 		this.lastView = Preferences.userRoot().node("VirtUE/Desktop/lastView");
 		this.lastSort = Preferences.userRoot().node("VirtUE/Desktop/lastSort");
 
-		startLogin();
+		DesktopUser user = authService.getUser();
+		if (user != null) {
+			onLogin(user);
+		} else {
+			startLogin();
+		}
 
 		// DesktopUser user = authService.getUser();
 
@@ -214,14 +238,7 @@ public class Sidebar implements VirtueChangeHandler {
 		lp.addLoginEventListener(new ILoginEventListener() {
 			@Override
 			public void onLoginSuccess(DesktopUser user) throws IOException {
-				frame.getContentPane().removeAll();
-				frame.validate();
-				frame.repaint();
-				setup(user);
-				frame.getContentPane().add(desktopContainer);
-				frame.setSize(491, 620);
-				setInitialViewPort();
-				frame.setVisible(true);
+				onLogin(user);
 			}
 
 			@Override
@@ -236,15 +253,26 @@ public class Sidebar implements VirtueChangeHandler {
 		});
 	}
 
+	protected void onLogin(DesktopUser user) throws IOException {
+		frame.getContentPane().removeAll();
+		frame.validate();
+		frame.repaint();
+		setup(user);
+		frame.getContentPane().add(desktopContainer);
+		frame.setSize(491, 620);
+		setInitialViewPort();
+		frame.setVisible(true);
+	}
+
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
 		VirtueTileContainer vmi = virtueIdToVc.get(virtue.getTemplateId());
 		// if (vmi == null) {
 		// vmi = virtueIdToVc.get(virtue.getTemplateId());
-//			if (virtue.getId() != null) {
-//				virtueIdToVc.remove(virtue.getTemplateId());
-//				virtueIdToVc.put(virtue.getId(), vmi);
-//			}
+		// if (virtue.getId() != null) {
+		// virtueIdToVc.remove(virtue.getTemplateId());
+		// virtueIdToVc.put(virtue.getId(), vmi);
+		// }
 		// }
 		vmi.updateVirtue(virtue);
 
@@ -261,8 +289,8 @@ public class Sidebar implements VirtueChangeHandler {
 	@Override
 	public void addVirtue(DesktopVirtue virtue) throws IOException, InterruptedException, ExecutionException {
 		Color headerColor = getNextColor();
-		VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor,
-				getNextColor(), sp, textField);
+		VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
+				textField);
 		vt.addVirtueToRow(virtue, vtc, vtc.getRow());
 
 		VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField);
@@ -418,7 +446,7 @@ public class Sidebar implements VirtueChangeHandler {
 		ImageIcon imageIcon = new ImageIcon(Sidebar.class.getResource("/images/u73.png"));
 		Image image = imageIcon.getImage(); // transform it
 		Image newimg = image.getScaledInstance(27, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		imageIcon = new ImageIcon(newimg);  // transform it back
+		imageIcon = new ImageIcon(newimg); // transform it back
 		logoutLabel.setIcon(imageIcon);
 
 		bottomBorder.add(logoutLabel);
@@ -761,7 +789,7 @@ public class Sidebar implements VirtueChangeHandler {
 		about.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-					setupDialog();
+				setupDialog();
 			}
 		});
 	}
@@ -858,20 +886,20 @@ public class Sidebar implements VirtueChangeHandler {
 		textField.setText("");
 		String selected = (String) cb.getSelectedItem();
 		switch (selected) {
-			case "Alphabetical":
-				al.search(null, null, null);
-				at.search(null, null, null);
-				fv.search(null, null, null);
-				vt.search(null, null, null);
-				vl.search(null, null, null);
-				break;
-			case "Status":
-				al.search(null, sortAppsByStatus, null);
-				at.search(null, sortAppsByStatus, null);
-				fv.search(null, sortAppsByStatus, null);
-				vt.search(null, sortVtByStatus, null);
-				vl.search(null, sortVlByStatus, null);
-				break;
+		case "Alphabetical":
+			al.search(null, null, null);
+			at.search(null, null, null);
+			fv.search(null, null, null);
+			vt.search(null, null, null);
+			vl.search(null, null, null);
+			break;
+		case "Status":
+			al.search(null, sortAppsByStatus, null);
+			at.search(null, sortAppsByStatus, null);
+			fv.search(null, sortAppsByStatus, null);
+			vt.search(null, sortVtByStatus, null);
+			vl.search(null, sortVlByStatus, null);
+			break;
 		}
 		sp.setViewportView(sp.getViewport().getView());
 	}
@@ -940,21 +968,21 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 
 		switch (view) {
-			case "at":
-				renderAppsTileView();
-				break;
-			case "al":
-				renderAppsListView();
-				break;
-			case "fv":
-				renderFavoritesView();
-				break;
-			case "vt":
-				renderVirtueTileView();
-				break;
-			case "vl":
-				renderVirtueListView();
-				break;
+		case "at":
+			renderAppsTileView();
+			break;
+		case "al":
+			renderAppsListView();
+			break;
+		case "fv":
+			renderFavoritesView();
+			break;
+		case "vt":
+			renderVirtueTileView();
+			break;
+		case "vl":
+			renderVirtueListView();
+			break;
 		}
 	}
 

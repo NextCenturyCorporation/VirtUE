@@ -193,7 +193,7 @@ public class LoginPage {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				String username = usernameField.getText();
-				String password1 = passwordField.getName();
+				String password1 = new String(passwordField.getPassword());
 				try {
 					doLogin(domain, username, password1);
 				} catch (IOException e) {
