@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -51,6 +52,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		header.setMinimumSize(new Dimension(450, 70));
 		header.setMaximumSize(new Dimension(10000, 70));
 		header.setPreferredSize(new Dimension(450, 70));
+		header.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, Color.BLACK));
 		container.add(header);
 
 		header.setLayout(new GridBagLayout());
