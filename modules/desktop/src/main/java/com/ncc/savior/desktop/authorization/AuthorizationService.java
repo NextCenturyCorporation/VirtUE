@@ -80,7 +80,7 @@ public class AuthorizationService {
 		}
 	}
 
-	public DesktopUser login(String domain, String username, String password) {
+	public DesktopUser login(String domain, String username, String password) throws InvalidUserLoginException {
 		if (!dummySecurity && !(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 			// if (requiredDomain == null || requiredDomain.equals(domain)) {

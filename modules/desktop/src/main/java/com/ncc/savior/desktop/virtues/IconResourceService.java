@@ -3,6 +3,11 @@ package com.ncc.savior.desktop.virtues;
 import java.awt.Image;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 
@@ -13,24 +18,36 @@ import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 
 public class IconResourceService implements IIconService {
 
+	private IconExecutor executor;
+
 	private DesktopResourceService desktopService;
+
+	private static final Logger logger = LoggerFactory.getLogger(IconResourceService.class);
 
 	private HashMap<String, Image> imageCache;
 
 	public IconResourceService(DesktopResourceService desktopService) {
 		this.desktopService = desktopService;
+		this.executor = new IconExecutor();
 		this.imageCache = new HashMap<String, Image>();
 	}
 
 	@Override
-	public Image getImage(String iconKey) throws InvalidUserLoginException, IOException {
+	public void getImage(String iconKey, Consumer<Image> consumer)
+			throws InvalidUserLoginException, IOException, InterruptedException, ExecutionException {
 		Image img = imageCache.get(iconKey);
 		if (img != null) {
-			return img;
+			consumer.accept(img);
 		} else {
-			Image foundImg = desktopService.getIcon(iconKey);
-			imageCache.put(iconKey, img);
-			return foundImg;
+			Runnable runnable = () -> {
+				try {
+					Image foundImg = desktopService.getIcon(iconKey);
+					consumer.accept(foundImg);
+				} catch (IOException e) {
+					logger.debug("Error with image retrieval");
+				}
+			};
+			executor.submitThread(runnable);
 		}
 	}
 

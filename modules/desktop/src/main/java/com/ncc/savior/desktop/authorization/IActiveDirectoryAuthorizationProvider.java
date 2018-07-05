@@ -28,8 +28,9 @@ public interface IActiveDirectoryAuthorizationProvider {
 	 * @param username
 	 * @param password
 	 * @return
+	 * @throws InvalidUserLoginException
 	 */
-	DesktopUser login(String domain, String username, String password);
+	DesktopUser login(String domain, String username, String password) throws InvalidUserLoginException;
 
 	/**
 	 * Returns current token for single sign on.

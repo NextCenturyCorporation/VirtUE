@@ -253,8 +253,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		dialog.setModal(false);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.add(dialogContainer);
-		dialog.setLocationRelativeTo(container);
+
+		dialog.pack();
 		dialog.setSize(new Dimension(375, 100));
+		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
 
 		yesButton.addActionListener(new ActionListener() {
@@ -359,14 +361,35 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		return container;
 	}
 
+	public void setTileImage(Image image) {
+		this.image = image;
+		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		appIcon.setIcon(imageIcon);
+	}
+
+	public void setListImage(Image image) {
+		this.image = image;
+		Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		appIcon.setIcon(imageIcon);
+	}
+
 	public void favorite() {
 		String selected = (String) cb.getSelectedItem();
+		VirtueApplicationItem va;
 		switch (selected) {
 			case "Alphabetical":
-				fv.addFavorite(ad, virtue, vc, sp, listener, image, frame, textField, cb, null);
+				va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, image,
+					true, frame, textField, cb, null);
+				va.tileSetup();
+				fv.addFavorite(ad, virtue, va, textField, null);
 				break;
 			case "Status":
-				fv.addFavorite(ad, virtue, vc, sp, listener, image, frame, textField, cb, sortAppsByStatus);
+				va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener,
+					image, true, frame, textField, cb, sortAppsByStatus);
+				va.tileSetup();
+				fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus);
 				break;
 		}
 		favoritedLabel.setIcon(favoritedImage);

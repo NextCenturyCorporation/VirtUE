@@ -125,16 +125,16 @@ public class SshClipboardManager implements IClipboardManager {
 	}
 
 	private void connectLocalClient() {
-		SerializerContainer pair = LocalSerializationProvider.createSerializerPair();
-		IMessageSerializer localHubSerializer = pair.serializerA;
-		IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
-		IMessageSerializer localClientSerializer = pair.serializerB;
 		try {
+			SerializerContainer pair = LocalSerializationProvider.createSerializerPair();
+			IMessageSerializer localHubSerializer = pair.serializerA;
+			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
+			IMessageSerializer localClientSerializer = pair.serializerB;
 			this.clipboardHub.addClient(CLIENT_GROUP_ID, localHubSerializer);
 			MessageTransmitter transmitter = new MessageTransmitter(localClientSerializer, "client");
 			transmitter.init();
 			this.localClipboardClient = new ClipboardClient(transmitter, clipboardWrapper);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			UserAlertingStub.sendStubAlert(
 					"Local clipboard initialization failed.  Local clipboard will not be connected with virtues.");
 			logger.error("Local clipboard client initialization failed", e);
