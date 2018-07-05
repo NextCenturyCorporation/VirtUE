@@ -33,6 +33,7 @@ public class ApplicationIT {
 		public String version;
 		public String os;
 		public String launchCommand;
+		public String iconKey;
 	}
 
 	@LocalServerPort
@@ -105,7 +106,7 @@ public class ApplicationIT {
 	@Test
 	public void createApplicationTest() {
 
-		ApplicationDefinition app = new ApplicationDefinition(null, "Test Template", "", OS.LINUX, null);
+		ApplicationDefinition app = new ApplicationDefinition(null, "Test Template", "", OS.LINUX, "default");
 		ContentType contentType = ContentType.JSON;
 		Application application = given().port(randomServerPort).when().body(app).contentType(contentType)
 				.post("/admin/application").then().extract().as(Application.class);

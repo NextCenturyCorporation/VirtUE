@@ -66,4 +66,16 @@ public class SpringJpaUserManager implements IUserManager {
 		return userRepo.existsById(username);
 	}
 
+	@Override
+	public void enableDisableUser(String username, Boolean enable) {
+		Optional<VirtueUser> userContainer = userRepo.findById(username);
+		if (userContainer.isPresent()) {
+			VirtueUser user = userContainer.get();
+			user.setEnabled(enable);
+			userRepo.save(user);
+		} else {
+			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
+		}
+	}
+
 }
