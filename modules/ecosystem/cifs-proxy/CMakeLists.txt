@@ -10,3 +10,9 @@ add_executable(makeccache
   )
 target_include_directories(makeccache INTERFACE ${KRB5_INCLUDE_DIRS})
 target_link_libraries(makeccache ${KRB5_LIBRARIES})
+
+add_executable(getserviceticket
+  src/cpp/getserviceticket.cpp
+  )
+target_include_directories(getserviceticket INTERFACE ${KRB5_INCLUDE_DIRS})
+target_link_libraries(getserviceticket ${KRB5_LIBRARIES})
