@@ -12,7 +12,6 @@ import java.awt.event.MouseWheelListener;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -327,9 +326,5 @@ public class SwingWindow extends XpraWindow {
 
 	public void setColor(Color color) {
 		this.color = color;
-	}
-
-	public static class MyTransferHandler extends TransferHandler {
-
 	}
 }
