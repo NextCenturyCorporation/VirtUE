@@ -113,7 +113,11 @@ public class DataResource {
 	@Path("templates/preload")
 	public Response preloadTemplates() {
 		logger.info("attempting to preload data");
-		loadIcons();
+		try {
+			loadIcons();
+		} catch (Throwable t) {
+			logger.warn("Failed to load icons", t);
+		}
 
 		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Linux)",
 				"1.0", OS.LINUX, "chrome", "google-chrome");
