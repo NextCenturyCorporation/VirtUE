@@ -18,8 +18,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.ncc.savior.virtueadmin.UserIT.User;
 
-import io.restassured.response.Response;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource("/application-test.properties")
@@ -43,7 +41,7 @@ public class ImportIT {
 	public void listApplicationsTest() {
 		String response = given().port(randomServerPort).when().get("/admin/import/all").prettyPrint();
 		assertThat(response).isNotEmpty();
-		Response resp = given().port(randomServerPort).when().get("/admin/user").thenReturn();
+		given().port(randomServerPort).when().get("/admin/user").thenReturn();
 		List<User> list = given().port(randomServerPort).when().get("/admin/user").then().extract().jsonPath()
 				.getList("", User.class);
 		// at least the 3 from the imports should be there. Depending on settings, there
