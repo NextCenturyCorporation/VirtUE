@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import com.ncc.savior.virtueadmin.RoleIT.Role;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -33,6 +35,7 @@ public class UserIT {
 		public List<String> authorities;
 		public String username;
 		public List<String> virtueTemplateIds;
+		public boolean enabled;
 	}
 
 	@LocalServerPort
@@ -88,6 +91,54 @@ public class UserIT {
 					.as(User.class);
 			assertThat(user).isEqualToComparingFieldByFieldRecursively(retrievedUser);
 		}
+	}
+
+	@Test
+	public void disableAndThenEnableUserTest() {
+		List<User> list = given().port(randomServerPort).when().get("/admin/user").then().extract().jsonPath()
+				.getList("", User.class);
+		User user = null;
+		Iterator<User> itr = list.iterator();
+		while (itr.hasNext()) {
+			User u = itr.next();
+			if (!u.username.equals("admin")) {
+				user = u;
+				break;
+			}
+		}
+		// If null, then the preload is not sufficient for this test
+		assertThat(user).isNotNull();
+		boolean enabled = user.enabled;
+		ContentType contentType = ContentType.JSON;
+		// POST user/{username}/enable
+		String enableDisablePath = "/admin/user/{username}/enable";
+		String getUserPath = "/admin/user/{username}";
+
+		Response r = given().port(randomServerPort).when().body(Boolean.toString(!enabled)).contentType(contentType)
+				.post(enableDisablePath, user.username).andReturn();
+		assertThat(r.getStatusCode()).isGreaterThanOrEqualTo(200).isLessThan(300);
+
+		User retrievedUser = given().port(randomServerPort).when().get(getUserPath, user.username)
+				.as(User.class);
+		assertThat(user.enabled).isNotEqualTo(retrievedUser.enabled);
+		// make sure that if we undo our change, the user is identical
+		retrievedUser.enabled = user.enabled;
+		assertThat(user).isEqualToComparingFieldByFieldRecursively(retrievedUser);
+		// change it back
+		r = given().port(randomServerPort).when().body(Boolean.toString(enabled)).contentType(contentType)
+				.post(enableDisablePath,
+				user.username).andReturn();
+		retrievedUser = given().port(randomServerPort).when().get(getUserPath, user.username)
+				.as(User.class);
+		assertThat(user).isEqualToComparingFieldByFieldRecursively(retrievedUser);
+		// make sure we don't toggle
+		r = given().port(randomServerPort).when().body(Boolean.toString(enabled)).contentType(contentType)
+				.post(enableDisablePath,
+				user.username).andReturn();
+		retrievedUser = given().port(randomServerPort).when().get(getUserPath, user.username)
+				.as(User.class);
+		assertThat(user).isEqualToComparingFieldByFieldRecursively(retrievedUser);
+
 	}
 
 	@Test

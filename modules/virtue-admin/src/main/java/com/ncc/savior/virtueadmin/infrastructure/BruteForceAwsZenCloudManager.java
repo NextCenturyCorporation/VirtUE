@@ -43,7 +43,7 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 		this.instanceType = InstanceType.T2Small;
 		this.defaultSecurityGroups = vmSecurityGroups;
 		this.serverKeyName = vmKeyName;
-		this.xenUser = new VirtueUser("XenUser", new ArrayList<String>());
+		this.xenUser = new VirtueUser("XenUser", new ArrayList<String>(), true);
 		this.xenVmt = new VirtualMachineTemplate(UUID.randomUUID().toString(), "ZenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), "admin", false, new Date(0), "system");
 		//TODO redo xen config

@@ -27,4 +27,6 @@ public interface IUserManager {
 
 	boolean userExists(String username);
 
+	void enableDisableUser(String username, Boolean enable);
+
 }
