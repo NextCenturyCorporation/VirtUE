@@ -38,6 +38,7 @@ apply plugin: 'war'
 //Springboot creates executable jars, but breaks the rest of the distribution mechanism.  This fixes distributions.
 bootJar { enabled = false }
 jar {enabled = true}
+war {enabled = true}
 
 group = 'com.ncc.savior'
 version = '0.0.1-SNAPSHOT'

@@ -780,7 +780,11 @@ public class Sidebar implements VirtueChangeHandler {
 				}
 				sortByOption(keyword);
 				sp.setViewportView(sp.getViewport().getView());
-				searchLabel.setIcon(closeIcon);
+				if (keyword.equals("")) {
+					searchLabel.setIcon(searchIcon);
+				} else {
+					searchLabel.setIcon(closeIcon);
+				}
 			}
 
 		});
