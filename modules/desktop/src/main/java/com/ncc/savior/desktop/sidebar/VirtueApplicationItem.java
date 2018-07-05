@@ -21,7 +21,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.Comparator;
 
-import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -152,6 +152,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	public void listSetup() {
 		container.setBorder(new LineBorder(Color.GRAY, 1));
 		container.setBackground(Color.WHITE);
+		container.setLayout(new BorderLayout());
 		this.appIcon = new JLabel(ad.getName());
 
 		Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
@@ -170,14 +171,16 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
-		container.add(favoritedLabel, BorderLayout.NORTH);
-		container.add(appIcon);
+		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 7));
+		appIcon.setBorder(BorderFactory.createEmptyBorder(0, 7, 0, 0));
 
-		container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
-		container.setSize(new Dimension(450, 70));
-		container.setMinimumSize(new Dimension(450, 70));
-		container.setMaximumSize(new Dimension(10000, 70));
-		container.setPreferredSize(new Dimension(450, 70));
+		container.add(favoritedLabel, BorderLayout.EAST);
+		container.add(appIcon, BorderLayout.WEST);
+
+		container.setSize(new Dimension(450, 57));
+		// container.setMinimumSize(new Dimension(450, 57));
+		// container.setMaximumSize(new Dimension(10000, 57));
+		container.setPreferredSize(new Dimension(450, 57));
 
 		addListener(vc, fv, ad, virtue, true);
 	}
@@ -377,18 +380,14 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 	public void favorite() {
 		String selected = (String) cb.getSelectedItem();
-		VirtueApplicationItem va;
+		VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, image,
+				true, frame, textField, cb, sortAppsByStatus);
+		va.tileSetup();
 		switch (selected) {
 			case "Alphabetical":
-				va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, image,
-					true, frame, textField, cb, null);
-				va.tileSetup();
 				fv.addFavorite(ad, virtue, va, textField, null);
 				break;
 			case "Status":
-				va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener,
-					image, true, frame, textField, cb, sortAppsByStatus);
-				va.tileSetup();
 				fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus);
 				break;
 		}

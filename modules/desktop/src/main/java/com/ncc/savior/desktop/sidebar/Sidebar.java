@@ -198,7 +198,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.setIconImage(saviorIcon.getImage());
 		this.frame = frame;
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setSize(491, 620);
+		this.frame.setSize(491, 600);
 
 		this.favorites = Preferences.userRoot().node("VirtUE/Desktop/favorites");
 		this.lastView = Preferences.userRoot().node("VirtUE/Desktop/lastView");
@@ -261,7 +261,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.repaint();
 		setup(user);
 		frame.getContentPane().add(desktopContainer);
-		frame.setSize(491, 620);
+		frame.setSize(491, 600);
 		setInitialViewPort();
 		frame.setVisible(true);
 	}
@@ -440,7 +440,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		ImageIcon aboutIcon = new ImageIcon(Sidebar.class.getResource("/images/info-icon.png"));
 		Image aboutImage = aboutIcon.getImage();
-		Image newAboutImg = aboutImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		Image newAboutImg = aboutImage.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
 		aboutIcon = new ImageIcon(newAboutImg);
 		this.about = new JLabel();
 		about.setIcon(aboutIcon);
@@ -450,6 +450,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.bottomBorder = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) bottomBorder.getLayout();
 		flowLayout_1.setVgap(0);
+		bottomBorder.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
 		bottomBorder.setBackground(Color.DARK_GRAY);
 		desktopContainer.add(bottomBorder, BorderLayout.SOUTH);
 
@@ -464,7 +465,7 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.add(logoutLabel);
 
 		JLabel logout = new JLabel("Logout");
-		logout.setFont(new Font("Roboto", Font.PLAIN, 19));
+		logout.setFont(new Font("Roboto", Font.PLAIN, 17));
 		logout.setForeground(Color.WHITE);
 		bottomBorder.add(logout);
 
@@ -566,7 +567,7 @@ public class Sidebar implements VirtueChangeHandler {
 		searchLabel.setBackground(new Color(239, 239, 239));
 		ImageIcon initialSearchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
 		Image searchImage = initialSearchIcon.getImage();
-		Image newSearchImage = searchImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		Image newSearchImage = searchImage.getScaledInstance(22, 22, java.awt.Image.SCALE_SMOOTH);
 		this.searchIcon = new ImageIcon(newSearchImage);
 
 		searchLabel.setIcon(searchIcon);
