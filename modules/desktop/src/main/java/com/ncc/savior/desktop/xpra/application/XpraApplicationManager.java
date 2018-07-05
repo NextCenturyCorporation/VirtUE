@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.xpra.application;
 
 import java.awt.Component;
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -34,6 +35,7 @@ import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportRequestMessage;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportResponseMessage;
 import com.ncc.savior.desktop.dnd.messages.DndDataRequestMessage;
+import com.ncc.savior.desktop.dnd.messages.DndDataResponseMessage;
 import com.ncc.savior.desktop.dnd.messages.DndStartDragMessage;
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.application.swing.JCanvas;
@@ -43,6 +45,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.ConfigureOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.InitiateMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.LostWindowPacket;
+import com.ncc.savior.desktop.xpra.protocol.packet.dto.MouseButtonActionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.MousePointerPositionPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowOverrideRedirectPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.NewWindowPacket;
@@ -156,6 +159,13 @@ public abstract class XpraApplicationManager {
 
 						respondToCanImportRequest(client, message, m, m.getRequestId());
 					}
+				} else if (message instanceof DndDataResponseMessage) {
+					DndDataResponseMessage m = (DndDataResponseMessage) message;
+					CompletableFuture f = dragFutures.remove(m.getRequestId());
+					if (f != null) {
+						f.complete(m.getData());
+					}
+					// TODO end the drag/drop action
 				}
 
 			}
@@ -501,20 +511,31 @@ public abstract class XpraApplicationManager {
 
 				@Override
 				public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-					logger.debug("trying to get transfer data");
-					IClipboardMessageSenderReceiver transmitter = client.getClipboardTransmitter();
-					String requestId = UUID.randomUUID().toString();
-					DndDataRequestMessage message = new DndDataRequestMessage("dndHub", flavor, requestId);
-					transmitter.sendMessageToHub(message);
-					CompletableFuture<Object> completableFuture = new CompletableFuture<Object>();
-					dragFutures.put(requestId, completableFuture);
 					try {
+						logger.debug("trying to get transfer data");
+						for (Integer id : hiddenWindowIds) {
+							Point p = MouseInfo.getPointerInfo().getLocation();
+							int x = (int) p.getX();
+							int y = (int) p.getY();
+							client.getPacketSender().sendPacket(new MousePointerPositionPacket(id, x, y));
+							client.getPacketSender().sendPacket(new MouseButtonActionPacket(id, 1, false, x, y));
+						}
+						IClipboardMessageSenderReceiver transmitter = client.getClipboardTransmitter();
+						String requestId = UUID.randomUUID().toString();
+						DndDataRequestMessage message = new DndDataRequestMessage("dndHub", flavor, requestId);
+						transmitter.sendMessageToHub(message);
+						CompletableFuture<Object> completableFuture = new CompletableFuture<Object>();
+						dragFutures.put(requestId, completableFuture);
+
 						Object obj = completableFuture.get(2000, TimeUnit.MILLISECONDS);
 						logger.debug("got future response for clipboard data: " + obj);
 						return obj;
 					} catch (TimeoutException | InterruptedException | ExecutionException e) {
 						logger.error("timeout with getting drag and drop data", e);
 						return "timeout";
+					} catch (Throwable t) {
+						logger.error("Unexpected exception!", t);
+						return "ERROR";
 					}
 				}
 			};

@@ -128,6 +128,7 @@ public class MessageTransmitter implements IClipboardMessageSenderReceiver {
 			logger.debug("sending message " + message);
 			serializer.serialize(message);
 		} catch (IOException e) {
+			logger.error("Error sending message=" + message, e);
 			valid = false;
 			throw e;
 		}

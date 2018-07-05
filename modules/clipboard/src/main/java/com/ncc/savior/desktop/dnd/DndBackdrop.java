@@ -30,6 +30,8 @@ import com.ncc.savior.desktop.clipboard.IClipboardMessageHandler;
 import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportResponseMessage;
+import com.ncc.savior.desktop.dnd.messages.DndDataRequestMessage;
+import com.ncc.savior.desktop.dnd.messages.DndDataResponseMessage;
 import com.ncc.savior.desktop.dnd.messages.DndStartDragMessage;
 
 public class DndBackdrop extends JFrame {
@@ -64,6 +66,15 @@ public class DndBackdrop extends JFrame {
 						logger.debug("Future completed success=" + success + " key: " + key + " f: " + future);
 					} else {
 						logger.debug("unable to complete future " + future);
+					}
+				} else if (message instanceof DndDataRequestMessage) {
+					DndDataRequestMessage m = (DndDataRequestMessage) message;
+					DndDataResponseMessage response = new DndDataResponseMessage(transmitter.getClientId(), m,
+							"remoteHardCodedTextData");
+					try {
+						transmitter.sendMessageToHub(response);
+					} catch (IOException e) {
+						logger.debug("failed to send message", e);
 					}
 				}
 			}
@@ -127,8 +138,7 @@ public class DndBackdrop extends JFrame {
 			boolean ret = true;
 			try {
 				String requestId = UUID.randomUUID().toString();
-				DndStartDragMessage message = new DndStartDragMessage(messageSourceId, requestId,
-						support);
+				DndStartDragMessage message = new DndStartDragMessage(messageSourceId, requestId, support);
 				int timeout = 3000;
 				ret = sendMessageAndWaitForResponseWithTimeout(ret, requestId, message, timeout);
 			} catch (IOException e) {
@@ -144,7 +154,7 @@ public class DndBackdrop extends JFrame {
 			CompletableFuture<T> f = new CompletableFuture<T>();
 			logger.debug("Adding future " + requestId + " : " + f);
 			futureMap.put(requestId, f);
-			logger.debug("Sending message to hub: " + "xmit: " + transmitter);
+			logger.debug("Sending message to hub: " + "msg: " + message);
 			transmitter.sendMessageToHub(message);
 			logger.debug("Sent message to hub: " + "xmit: " + transmitter);
 			T ret = timeoutValue;
@@ -162,7 +172,7 @@ public class DndBackdrop extends JFrame {
 
 		@Override
 		public boolean importData(TransferHandler.TransferSupport support) {
-			logger.debug("do import");
+			logger.debug("GETTNG DATA!!!!!!!!!!!!!!!!!!");
 			if (!this.canImport(support)) {
 				return false;
 			}

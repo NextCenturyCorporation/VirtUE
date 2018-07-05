@@ -24,4 +24,10 @@ public class DndDataRequestMessage extends BaseClipboardMessage {
 	public String getRequestId() {
 		return requestId;
 	}
+
+	@Override
+	public String toString() {
+		return "DndDataRequestMessage [flavor=" + flavor + ", requestId=" + requestId + ", sendTime=" + sendTime
+				+ ", messageSourceId=" + messageSourceId + "]";
+	}
 }

@@ -70,6 +70,7 @@ public class JavaObjectMessageSerializer implements IMessageSerializer {
 
 	@Override
 	public void close() throws IOException {
+		logger.debug("Closing " + this);
 		JavaUtil.closeIgnoreErrors(connection);
 	}
 
