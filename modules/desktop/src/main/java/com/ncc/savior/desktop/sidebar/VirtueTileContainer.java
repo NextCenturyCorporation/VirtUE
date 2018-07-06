@@ -46,8 +46,9 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 	private Color bodyColor;
 
 	public VirtueTileContainer(DesktopVirtue virtue, VirtueService virtueService,
-			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField) throws IOException {
-		super(virtue, virtueService, sp, textField);
+			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField, GhostText ghostText)
+			throws IOException {
+		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = true;
 
 		container = new JPanel();
@@ -124,7 +125,10 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 				if (!dropDown) {
 					dropDown = true;
 					String keyword = textField.getText();
-					search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+					if (ghostText.getIsVisible()) {
+						keyword = "";
+					}
+					dropDownSearch(keyword);
 					tileContainer.validate();
 					tileContainer.repaint();
 					sp.validate();
@@ -148,6 +152,10 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		tileContainer.setBorder(new EmptyBorder(0, 25, 20, 25));
 		updateVirtue(virtue);
 		numRows++;
+	}
+
+	public void dropDownSearch(String keyword) {
+		search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 	}
 
 	public void search(Comparator<VirtueApplicationItem> comp, Predicate<VirtueApplicationItem> predicate) {

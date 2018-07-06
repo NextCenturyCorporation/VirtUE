@@ -32,8 +32,8 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 public class VirtueListContainer extends AbstractVirtueContainer implements Comparable<VirtueListContainer> {
 
 	public VirtueListContainer(DesktopVirtue virtue, VirtueService virtueService, Color headerColor,
-			JScrollPane sp, JTextField textField) {
-		super(virtue, virtueService, sp, textField);
+			JScrollPane sp, JTextField textField, GhostText ghostText) {
+		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = false;
 
 		this.container = new JPanel();
@@ -109,7 +109,10 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 				if (!dropDown) {
 					dropDown = true;
 					String keyword = textField.getText();
-					search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+					if (ghostText.getIsVisible()) {
+						keyword = "";
+					}
+					dropDownSearch(keyword);
 					container.validate();
 					container.repaint();
 					sp.validate();
@@ -127,6 +130,10 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		});
 
 		numRows++;
+	}
+
+	public void dropDownSearch(String keyword) {
+		search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 	}
 
 	public void search(Comparator<VirtueApplicationItem> comp, Predicate<VirtueApplicationItem> predicate) {

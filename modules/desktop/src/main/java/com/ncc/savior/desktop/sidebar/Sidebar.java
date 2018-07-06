@@ -148,6 +148,17 @@ public class Sidebar implements VirtueChangeHandler {
 		this.virtueService = virtueService;
 		this.iconService = iconService;
 		this.textField = new JTextField();
+		this.searchLabel = new JLabel();
+		textField.setColumns(6);
+		textField.setForeground(Color.BLACK);
+		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
+
+		ImageIcon initialSearchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
+		Image searchImage = initialSearchIcon.getImage();
+		Image newSearchImage = searchImage.getScaledInstance(22, 22, java.awt.Image.SCALE_SMOOTH);
+		this.searchIcon = new ImageIcon(newSearchImage);
+
+		this.ghostText = new GhostText(textField, "search", searchLabel, searchIcon);
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
@@ -292,10 +303,10 @@ public class Sidebar implements VirtueChangeHandler {
 	public void addVirtue(DesktopVirtue virtue) throws IOException, InterruptedException, ExecutionException {
 		Color headerColor = getNextColor();
 		VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
-				textField);
+				textField, ghostText);
 		vt.addVirtueToRow(virtue, vtc, vtc.getRow());
 
-		VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField);
+		VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField, ghostText);
 		vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 
 		// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
@@ -410,7 +421,7 @@ public class Sidebar implements VirtueChangeHandler {
 		ToolTipManager.sharedInstance().setInitialDelay(1250);
 
 		Image closeImage = closeIcon.getImage();
-		Image newCloseImg = closeImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		Image newCloseImg = closeImage.getScaledInstance(22, 22, java.awt.Image.SCALE_SMOOTH);
 		closeIcon = new ImageIcon(newCloseImg);
 
 		colorItr = colorList.iterator();
@@ -563,19 +574,9 @@ public class Sidebar implements VirtueChangeHandler {
 		c.weightx = 1.0;
 		c.fill = GridBagConstraints.BOTH;
 
-		this.searchLabel = new JLabel();
 		searchLabel.setBackground(new Color(239, 239, 239));
-		ImageIcon initialSearchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
-		Image searchImage = initialSearchIcon.getImage();
-		Image newSearchImage = searchImage.getScaledInstance(22, 22, java.awt.Image.SCALE_SMOOTH);
-		this.searchIcon = new ImageIcon(newSearchImage);
 
 		searchLabel.setIcon(searchIcon);
-
-		textField.setColumns(6);
-		textField.setForeground(Color.BLACK);
-		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		ghostText = new GhostText(textField, "search", searchLabel, searchIcon);
 
 		c.insets = new Insets(0, 9, 0, 0);
 
@@ -1055,7 +1056,7 @@ public class Sidebar implements VirtueChangeHandler {
 		footer.setBackground(Color.WHITE);
 		container.add(footer, BorderLayout.SOUTH);
 
-		JLabel copyright = new JLabel("©2018-2019 Next Century Corporation. All rights reserved");
+		JLabel copyright = new JLabel("\u00a92018-2019 Next Century Corporation. All rights reserved");
 		footer.add(copyright);
 
 		JScrollPane scrollPane = new JScrollPane();
@@ -1069,7 +1070,7 @@ public class Sidebar implements VirtueChangeHandler {
 		JLabel disclaimerHeader = new JLabel("<html><center> Disclaimer Third Parties <br><br></center></html>",
 				SwingConstants.CENTER);
 		JLabel disclaimers = new JLabel(
-				"<html><center> All product and company names are trademarks™ or <br> registered® trademarks of their respective holders. Use of <br> them does not imply any affiliation with or endorsement by them.<br><br>"
+				"<html><center> All product and company names are trademarks\u2122 or <br> registered\u00ae trademarks of their respective holders. Use of <br> them does not imply any affiliation with or endorsement by them.<br><br>"
 						+ "All specifications are subject to change without notice.<br><br>"
 						+ "Chrome and Chromium are trademarks owned by Google LLC.<br><br>"
 						+ "Firefox and the Firefox logos are trademarks of the <br> Mozilla Foundation.<br><br>"

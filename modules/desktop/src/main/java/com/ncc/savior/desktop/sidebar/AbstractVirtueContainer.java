@@ -43,11 +43,13 @@ public abstract class AbstractVirtueContainer {
 	protected HashMap<String, VirtueApplicationItem> tiles;
 	protected String headerTitle;
 
+	protected GhostText ghostText;
+
 	protected JScrollPane sp;
 	protected JTextField textField;
 
 	public AbstractVirtueContainer(DesktopVirtue virtue, VirtueService virtueService, JScrollPane sp,
-			JTextField textField) {
+			JTextField textField, GhostText ghostText) {
 		this.virtue = virtue;
 		this.virtueService = virtueService;
 		this.sp = sp;
@@ -55,6 +57,7 @@ public abstract class AbstractVirtueContainer {
 		this.headerTitle = virtue.getName();
 		this.status = virtue.getVirtueState();
 		this.textField = textField;
+		this.ghostText = ghostText;
 
 		resetRows();
 	}
