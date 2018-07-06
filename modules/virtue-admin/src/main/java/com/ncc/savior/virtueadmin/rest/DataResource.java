@@ -3,7 +3,6 @@ package com.ncc.savior.virtueadmin.rest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -84,6 +83,11 @@ public class DataResource {
 		this.resolver = new PathMatchingResourcePatternResolver();
 	}
 
+	/**
+	 * Imports all data in the import folder on the classpath.
+	 * 
+	 * @return
+	 */
 	@GET
 	@Path("import/all")
 	@Produces("text/plain")
@@ -400,6 +404,9 @@ public class DataResource {
 		return Response.ok().entity("success").build();
 	}
 
+	/**
+	 * Load all the icons that are stored in the icons folder on the classpath
+	 */
 	private void loadIcons() {
 		InputStream iconStream = DataResource.class.getClassLoader().getResourceAsStream("icons/savior.png");
 
@@ -415,10 +422,12 @@ public class DataResource {
 		loadIconsFromIconsFolder();
 	}
 
+	/**
+	 * Load all the icons that are stored in the icons folder on the classpath
+	 */
 	private void loadIconsFromIconsFolder() {
 		try {
 			Resource[] resources = resolver.getResources("icons/**.png");
-			logger.debug("" + Arrays.toString(resources));
 			for (Resource resource : resources) {
 				try {
 					byte[] bytes = IOUtils.toByteArray(resource.getInputStream());

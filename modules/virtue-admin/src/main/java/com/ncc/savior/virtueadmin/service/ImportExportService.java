@@ -98,9 +98,16 @@ public class ImportExportService {
 		jsonMapper.writeValue(out, export);
 	}
 
+	/**
+	 * Imports the entire database. Used in conjunction with export system.
+	 * 
+	 * @param stream
+	 * @throws IOException
+	 */
 	public void importSystem(InputStream stream) throws IOException {
 		verifyAndReturnUser();
 		JsonNode node = jsonMapper.readTree(stream);
+		// load all applications
 		ArrayNode appsNode = (ArrayNode) node.get(TYPE_APPLICATION);
 		Iterator<JsonNode> itr = appsNode.iterator();
 		while (itr.hasNext()) {
@@ -108,7 +115,7 @@ public class ImportExportService {
 			ApplicationDefinition app = jsonMapper.treeToValue(appNode, ApplicationDefinition.class);
 			templateManager.addApplicationDefinition(app);
 		}
-
+		// load all virtual machines
 		ArrayNode vmtsNode = (ArrayNode) node.get(TYPE_VIRTUAL_MACHINE);
 		itr = vmtsNode.iterator();
 		while (itr.hasNext()) {
@@ -126,7 +133,7 @@ public class ImportExportService {
 
 			templateManager.addVmTemplate(vmt);
 		}
-
+		// load all virtue templates
 		ArrayNode vtsNode = (ArrayNode) node.get(TYPE_VIRTUE);
 		itr = vtsNode.iterator();
 		while (itr.hasNext()) {
@@ -143,7 +150,7 @@ public class ImportExportService {
 			vt.setVmTemplates(myVmts);
 			templateManager.addVirtueTemplate(vt);
 		}
-
+		// load all users
 		ArrayNode usersNode = (ArrayNode) node.get(TYPE_USER);
 		itr = usersNode.iterator();
 		while (itr.hasNext()) {
@@ -163,6 +170,12 @@ public class ImportExportService {
 
 	}
 
+	/**
+	 * Imports a user from a set of test users provided by APL.
+	 * 
+	 * @param userKey
+	 * @return
+	 */
 	public VirtueUser importUser(String userKey) {
 		verifyAndReturnUser();
 		VirtueUser user = read(TYPE_USER, userKey, VirtueUser.class);
@@ -184,6 +197,12 @@ public class ImportExportService {
 		return user;
 	}
 
+	/**
+	 * Imports a applications from a set of test applications provided by APL.
+	 * 
+	 * @param testApplication
+	 * @return
+	 */
 	public ApplicationDefinition importApplication(String testApplication) {
 		verifyAndReturnUser();
 		ApplicationDefinition app = read(TYPE_APPLICATION, testApplication, ApplicationDefinition.class);
@@ -198,6 +217,13 @@ public class ImportExportService {
 		return app;
 	}
 
+	/**
+	 * Imports a virtual machine from a set of test virtual machines provided by
+	 * APL.
+	 * 
+	 * @param testVirtualMachine
+	 * @return
+	 */
 	public VirtualMachineTemplate importVirtualMachineTemplate(String testVirtualMachine) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtualMachineTemplate vmt = read(TYPE_VIRTUAL_MACHINE, testVirtualMachine, VirtualMachineTemplate.class);
@@ -223,6 +249,12 @@ public class ImportExportService {
 		return vmt;
 	}
 
+	/**
+	 * Imports a virtue from a set of test virtues provided by APL.
+	 * 
+	 * @param testVirtue
+	 * @return
+	 */
 	public VirtueTemplate importVirtueTemplate(String testVirtue) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueTemplate vt = read(TYPE_VIRTUE, testVirtue, VirtueTemplate.class);
