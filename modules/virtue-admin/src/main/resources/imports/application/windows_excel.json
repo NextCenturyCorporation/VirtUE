@@ -1,0 +1,7 @@
+{
+    "name": "Microsoft Excel 2013",
+    "version": "1.0",
+    "os": "WINDOWS",
+    "launchCommand": "c:\\windows\\notepad.exe",
+    "iconKey": "ms-excel"
+  }

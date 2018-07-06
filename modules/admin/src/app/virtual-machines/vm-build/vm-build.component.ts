@@ -68,14 +68,13 @@ export class VmBuildComponent implements OnInit, OnDestroy {
 
   getBaseUrl(url: string) {
     this.baseUrl = url;
-    console.log('URL: ' + url);
   }
 
   getAppList(baseUrl: string) {
     this.baseUrl = baseUrl;
     // loop through the selected VM list
     const selectedApps = this.pageAppList;
-    console.log('page Apps list @ getAppList(): ' + this.pageAppList);
+    // console.log('page Apps list @ getAppList(): ' + this.pageAppList);
     this.appsService.getAppsList(baseUrl)
       .subscribe(apps => {
         if (this.appList.length < 1) {

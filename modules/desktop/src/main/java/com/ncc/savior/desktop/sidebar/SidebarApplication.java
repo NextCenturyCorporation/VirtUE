@@ -1,6 +1,9 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.awt.HeadlessException;
 import java.io.File;
+
+import javax.swing.JFrame;
 
 import com.ncc.savior.configuration.PropertyManager;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
@@ -12,17 +15,13 @@ import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.rdp.WindowsRdp;
 import com.ncc.savior.desktop.virtues.DesktopResourceService;
+import com.ncc.savior.desktop.virtues.IIconService;
+import com.ncc.savior.desktop.virtues.IconResourceService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
-import com.ncc.savior.desktop.xpra.application.javafx.JavaFxApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.application.swing.SwingApplicationManagerFactory;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxKeyboard;
-import com.ncc.savior.desktop.xpra.protocol.keyboard.JavaFxXpraKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyMap;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.SwingKeyboard;
-
-import javafx.application.Application;
-import javafx.stage.Stage;
 
 /**
  * This is the main class to start just the sidebar application. This may or may
@@ -30,14 +29,14 @@ import javafx.stage.Stage;
  *
  *
  */
-public class SidebarApplication extends Application {
-	public static void main(String[] args) {
-		launch(args);
+public class SidebarApplication {
+	public static void main(String[] args) throws HeadlessException, Exception {
+		start(new JFrame());
 	}
 
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		// Plumbing and depedency injection
+	public static void start(JFrame primaryFrame) throws Exception {
+
+		// Plumbing and dependency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
 		String baseUrl = props.getString(PropertyManager.PROPERTY_BASE_API_PATH);
 		String desktopUrl = baseUrl + props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
@@ -48,18 +47,13 @@ public class SidebarApplication extends Application {
 		boolean dummyAuthorization = props.getBoolean(PropertyManager.PROPERTY_DUMMY_AUTHORIZATION, false);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
-		boolean swing = props.getBoolean(PropertyManager.PROPERTY_SWING, true);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
 		AuthorizationService authService = new AuthorizationService(requiredDomain, dummyAuthorization, loginUrl,
 				logoutUrl);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager;
-		if (swing) {
-			appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
-		} else {
-			appManager = new JavaFxApplicationManagerFactory(new JavaFxKeyboard(new JavaFxXpraKeyMap()));
-		}
+		appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
 		File freerdpExe = null;
 		if (freerdpPath != null) {
 			freerdpExe = new File(freerdpPath);
@@ -74,8 +68,9 @@ public class SidebarApplication extends Application {
 		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
-		Sidebar sidebar = new Sidebar(virtueService, authService, useColors, style);
+		IIconService iconService = new IconResourceService(drs);
+		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
-		controller.init(primaryStage);
+		controller.init(primaryFrame);
 	}
 }

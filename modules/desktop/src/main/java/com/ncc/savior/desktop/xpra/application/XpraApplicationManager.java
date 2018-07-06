@@ -277,4 +277,14 @@ public abstract class XpraApplicationManager {
 	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet);
 
 	protected abstract XpraApplication createXpraApplication(NewWindowPacket packet, XpraApplication parent);
+
+	public void closeAllWindows() {
+		for (XpraApplication app : this.applications.values()) {
+			try {
+				app.close();
+			} catch (IOException e) {
+				logger.error("Error closing app=" + app.getBaseWindowId());
+			}
+		}
+	}
 }

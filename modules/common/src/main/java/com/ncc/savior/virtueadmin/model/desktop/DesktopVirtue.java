@@ -83,6 +83,52 @@ public class DesktopVirtue {
 				+ ", virtueState=" + virtueState + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((apps == null) ? 0 : apps.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((templateId == null) ? 0 : templateId.hashCode());
+		result = prime * result + ((virtueState == null) ? 0 : virtueState.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DesktopVirtue other = (DesktopVirtue) obj;
+		if (apps == null) {
+			if (other.apps != null)
+				return false;
+		} else if (!apps.equals(other.apps))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (templateId == null) {
+			if (other.templateId != null)
+				return false;
+		} else if (!templateId.equals(other.templateId))
+			return false;
+		if (virtueState != other.virtueState)
+			return false;
+		return true;
+	}
+
 	public static class DesktopVirtueComparator implements Comparator<DesktopVirtue> {
 
 		@Override

@@ -62,7 +62,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	 *            passed to {@link ProfileCredentialsProvider}.
 	 */
 	public AsyncAwsEc2VmManager(CompletableFutureServiceProvider serviceProvider, IKeyManager keyManager,
-			AwsEc2Wrapper ec2Wrapper) {
+			AwsEc2Wrapper ec2Wrapper, String vpcName, String subnetName) {
 		this.ec2Wrapper = ec2Wrapper;
 		this.defaultSecurityGroups = new ArrayList<String>();
 		this.defaultSecurityGroups.add("default");
@@ -70,6 +70,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		this.serverUser = System.getProperty("user.name");
 		this.instanceType = InstanceType.T2Small;
 		this.serviceProvider = serviceProvider;
+		getVpcAndSubnetIds(subnetName, vpcName);
 	}
 
 	@Override
@@ -272,12 +273,13 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(defaultSecurityGroups, vpcId, ec2Wrapper);
 	}
 
-	public void setDefaultSubnetName(String subnetName) {
-		String newSubnetId = AwsUtil.getSubnetIdFromName(subnetName, ec2Wrapper);
-		String vpc = AwsUtil.getVpcIdFromSubnetId(newSubnetId, ec2Wrapper);
+	public void getVpcAndSubnetIds(String subnetName, String vpcName) {
+		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
+		String newSubnetId = AwsUtil.getSubnetIdFromName(vpcId, subnetName, ec2Wrapper);
+
 		if (newSubnetId != null) {
 			subnetId = newSubnetId;
-			this.vpcId = vpc;
+			this.vpcId = vpcId;
 		} else {
 			logger.error("Failed to find subnet with name=" + subnetName);
 		}

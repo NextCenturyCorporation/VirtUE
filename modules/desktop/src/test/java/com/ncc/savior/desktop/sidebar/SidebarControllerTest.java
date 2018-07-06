@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 public class SidebarControllerTest {
 
 	@Test
-	public void testDetectChangesAndReport() {
+	public void testDetectChangesAndReport() throws IOException {
 		ArrayList<String> changed = new ArrayList<String>();
 		ArrayList<String> added = new ArrayList<String>();
 		ArrayList<String> deleted = new ArrayList<String>();
@@ -84,7 +85,7 @@ public class SidebarControllerTest {
 		sc.updateVirtues(nv);
 
 		Assert.assertArrayEquals(new String[] { "10", "4" }, added.toArray());
-		Assert.assertArrayEquals(new String[] { "3", "7", "5", "9" }, changed.toArray());
+		Assert.assertArrayEquals(new String[] { "3", "7" }, changed.toArray());
 		Assert.assertArrayEquals(new String[] { "1", "2" }, deleted.toArray());
 	}
 

@@ -1,0 +1,9 @@
+ {
+    "name": "Windows Corporate Email User",
+    "version": "1.0",
+    "enabled": true,
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "c0b31b11-ed0d-43e6-a9da-a5270ae5c91b"
+    ]
+  }

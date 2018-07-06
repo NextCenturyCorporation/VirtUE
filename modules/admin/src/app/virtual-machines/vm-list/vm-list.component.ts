@@ -16,8 +16,6 @@ export class VmListComponent implements OnInit {
 
   vms = [];
   apps = [];
-  filterValue = '*';
-
   // noListData = false;
 
   baseUrl: string;
@@ -27,8 +25,7 @@ export class VmListComponent implements OnInit {
   sortType: string = 'enabled';
   sortValue: any = '*';
   sortBy: string = 'asc';
-  vmSortType: string = 'enabled'; // This is the default VM datatype
-  totalVms: number;
+  totalVms: number = 0;
 
   constructor(
     private vmService: VirtualMachineService,
@@ -68,8 +65,8 @@ export class VmListComponent implements OnInit {
     this.vmService.getVmList(baseUrl).subscribe(vmlist => {
       this.vms = vmlist;
       this.totalVms = vmlist.length;
+      this.sortVms(vmlist);
     });
-  this.sortVms(this.vms);
   }
 
   sortVms(sortDirection: string) {
@@ -136,11 +133,13 @@ export class VmListComponent implements OnInit {
     });
   }
 
-  getAppName(id: string): void {
-    for (let app of this.apps) {
-      if (id === app.id) {
-        return app.name;
-      }
+  getAppName(id: string) {
+    if (id) {
+      let selApp = this.apps.filter(app => id === app.id)
+        .map(appName => {
+          return appName.name;
+        });
+      return selApp;
     }
   }
 

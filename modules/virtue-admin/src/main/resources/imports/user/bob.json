@@ -1,0 +1,13 @@
+{
+	"username": "bob",
+	"authorities": [
+		"ROLE_USER"
+	],
+	"virtueTemplateIds": [
+		"IMPORT_document_editor",
+		"IMPORT_external_internet_consumer",
+		"IMPORT_linux_corporate_email_user",
+		"IMPORT_windows_corporate_email_user"
+	],
+	"enabled": true
+}

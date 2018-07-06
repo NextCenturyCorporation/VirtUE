@@ -1,0 +1,20 @@
+{
+	"username": "admin",
+	"authorities": [
+		"ROLE_USER",
+		"ROLE_ADMIN"
+	],
+	"virtueTemplateIds": [
+		"IMPORT_document_editor",
+		"IMPORT_external_internet_consumer",
+		"IMPORT_linux_corporate_email_user",
+		"IMPORT_linux_test_devel",
+		"IMPORT_linux_test_devel2",
+		"IMPORT_power_user",
+		"IMPORT_router_admin",
+		"IMPORT_windows_corporate_email_user",
+		"IMPORT_windows_test_devel",
+		"IMPORT_windows_test_devel2"
+	],
+	"enabled": true
+}

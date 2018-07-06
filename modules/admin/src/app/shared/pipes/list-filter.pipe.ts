@@ -7,7 +7,7 @@ This filter can be used with virtue, virtual machine list pages
 })
 export class ListFilterPipe implements PipeTransform {
   transform(value: any, filterColumn: string, filterType: string, filterValue: any, filterDirection: string) {
-    if (value.length === 0) {
+    if (value.length < 1) {
       return value;
     }
     let sortedList = value.slice(0);

@@ -89,23 +89,14 @@
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="INFO"/>
     </logger>
-    <!--
-    <logger name="com.ncc" additivity="false">
-        <level value="DEBUG" />
-        <if condition='p("logback.printToConsole").contains("enabled")'>
-          <then>
-            <appender-ref ref="CONSOLE" />
-          </then>
-        </if>
-        <appender-ref ref="DEBUG" />
-        <appender-ref ref="INFO" />
-        <if condition='p("USER_FILE").contains("enabled")'>
-          <then>
-            <appender-ref ref="SIFT" />
-          </then>
-        </if>
-    </logger>
-    -->
+    
+<!--     <logger name="com.ncc.savior.desktop.sidebar.SidebarController" additivity="false"> -->
+<!--         <level value="TRACE" /> -->
+<!--          <appender-ref ref="CONSOLE"/> -->
+<!--         <appender-ref ref="DEBUG"/> -->
+<!--         <appender-ref ref="INFO"/> -->
+<!--     </logger> -->
+    
 
     <logger name="com" additivity="false">
         <level value="ERROR"/>

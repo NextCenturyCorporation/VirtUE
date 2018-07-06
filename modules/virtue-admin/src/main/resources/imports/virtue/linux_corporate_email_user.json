@@ -1,0 +1,9 @@
+{
+    "name": "Linux Corporate Email User",
+    "version": "1.0",
+    "enabled": true,
+    "awsTemplateName": "default-template",
+    "virtualMachineTemplateIds": [
+      "e5683de5-a730-4bea-b8d8-29b323a3a34d"
+    ]
+  }

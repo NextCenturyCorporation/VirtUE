@@ -33,24 +33,26 @@ public class VirtueUser {
 	private Collection<VirtueTemplate> virtueTemplates;
 	@Transient
 	private Collection<String> virtueTemplateIds;
+	private boolean enabled;
 
 	static {
-		testUser = new VirtueUser("testUser", new ArrayList<String>());
-		anonymousUser = new VirtueUser("anonymous", new ArrayList<String>());
+		testUser = new VirtueUser("testUser", new ArrayList<String>(), true);
+		anonymousUser = new VirtueUser("anonymous", new ArrayList<String>(), true);
 		ArrayList<String> adminAuths = new ArrayList<String>();
 		adminAuths.add("ROLE_ADMIN");
 		adminAuths.add("ROLE_USER");
-		adminUser = new VirtueUser("admin", adminAuths);
+		adminUser = new VirtueUser("admin", adminAuths, true);
 	}
 
 	protected VirtueUser() {
 
 	}
 
-	public VirtueUser(String name, Collection<String> authorities) {
+	public VirtueUser(String name, Collection<String> authorities, boolean enabled) {
 		this.username = name;
 		this.authorities = authorities;
 		this.virtueTemplates = new HashSet<VirtueTemplate>();
+		this.enabled = enabled;
 	}
 
 	public static VirtueUser testUser() {
@@ -96,11 +98,19 @@ public class VirtueUser {
 	@Override
 	public String toString() {
 		return "VirtueUser [username=" + username + ", authorities=" + authorities + ", virtueTemplates="
-				+ virtueTemplates + "]";
+				+ virtueTemplates + ", virtueTemplateIds=" + virtueTemplateIds + ", enabled=" + enabled + "]";
 	}
 
 	public void removeAllVirtueTemplates() {
 		virtueTemplates.clear();
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 	@JsonGetter

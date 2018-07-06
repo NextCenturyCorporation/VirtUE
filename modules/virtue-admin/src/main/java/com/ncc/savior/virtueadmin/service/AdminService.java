@@ -37,6 +37,7 @@ import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
@@ -86,7 +87,7 @@ public class AdminService {
 				Collection<String> authorities = new ArrayList<String>(2);
 				authorities.add("ROLE_ADMIN");
 				authorities.add("ROLE_USER");
-				VirtueUser user = new VirtueUser(admin, authorities);
+				VirtueUser user = new VirtueUser(admin, authorities, true);
 				userManager.addUser(user);
 			}
 		}
@@ -300,7 +301,35 @@ public class AdminService {
 
 	public void removeUser(String usernameToRemove) {
 		verifyAndReturnUser();
-		userManager.removeUser(usernameToRemove);
+		try {
+			VirtueUser user = userManager.getUser(usernameToRemove);
+			if (user != null) {
+				Collection<VirtueInstance> virtues = virtueManager.getVirtuesForUser(user);
+				virtues.parallelStream().forEach((v) -> {
+					virtueManager.deleteVirtue(user, v.getId());
+				});
+			}
+		} finally {
+			userManager.removeUser(usernameToRemove);
+		}
+	}
+
+	public void enableDisableUser(String username, Boolean enable) {
+		verifyAndReturnUser();
+		userManager.enableDisableUser(username, enable);
+		if (!enable) {
+			// disabling a user has the following side effects:
+			// stop their running virtues
+			VirtueUser user = userManager.getUser(username);
+			Collection<VirtueInstance> virtues = virtueManager.getVirtuesForUser(user);
+			virtues.parallelStream().filter((v) -> {
+				return v.getState().equals(VirtueState.RUNNING) || v.getState().equals(VirtueState.CREATING)
+						|| v.getState().equals(VirtueState.LAUNCHING) || v.getState().equals(VirtueState.RESUMING);
+
+			}).forEach((v) -> {
+				virtueManager.stopVirtue(user, v.getId());
+			});
+		}
 	}
 
 	public Iterable<VirtueUser> getAllUsers() {
@@ -399,6 +428,7 @@ public class AdminService {
 	}
 
 	public IconModel getIcon(String iconKey) {
+		verifyAndReturnUser();
 		IconModel icon = templateManager.getIcon(iconKey);
 		if (icon == null) {
 			icon = templateManager.getIcon(DEFAULT_ICON_KEY);
@@ -407,12 +437,14 @@ public class AdminService {
 	}
 
 	public void deleteIcon(String iconKey) {
+		verifyAndReturnUser();
 		if (!DEFAULT_ICON_KEY.equals(iconKey)) {
 			templateManager.removeIcon(iconKey);
 		}
 	}
 
 	public Set<String> getAllIconKeys() {
+		verifyAndReturnUser();
 		return templateManager.getAllIconKeys();
 	}
 

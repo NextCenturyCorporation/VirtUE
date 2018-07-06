@@ -121,14 +121,14 @@ public class SshClipboardManager implements IClipboardManager {
 	}
 
 	private void connectLocalClient() {
-		SerializerContainer pair = LocalSerializationProvider.createSerializerPair();
-		IMessageSerializer localHubSerializer = pair.serializerA;
-		IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
-		IMessageSerializer localClientSerializer = pair.serializerB;
 		try {
+			SerializerContainer pair = LocalSerializationProvider.createSerializerPair();
+			IMessageSerializer localHubSerializer = pair.serializerA;
+			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
+			IMessageSerializer localClientSerializer = pair.serializerB;
 			this.clipboardHub.addClient(CLIENT_GROUP_ID, localHubSerializer);
 			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			UserAlertingStub.sendStubAlert(
 					"Local clipboard initialization failed.  Local clipboard will not be connected with virtues.");
 			logger.error("Local clipboard client initialization failed", e);
@@ -175,7 +175,7 @@ public class SshClipboardManager implements IClipboardManager {
 	 */
 	private String connectClipboardOnce(SshConnectionParameters params, String groupId, String clientId)
 			throws IOException {
-		if (new File(sourceJarPath).exists()) {
+		if (sourceJarPath != null && new File(sourceJarPath).exists()) {
 			try {
 				Session session;
 				session = JschUtils.getUnconnectedSession(params);
@@ -192,6 +192,7 @@ public class SshClipboardManager implements IClipboardManager {
 			}
 		} else {
 			logger.warn("Clipboard jar not present.  Clipboard will be disabled");
+			// TODO Alert user
 			return null;
 		}
 	}

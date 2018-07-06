@@ -17,9 +17,6 @@ import com.ncc.savior.desktop.xpra.protocol.keyboard.KeyCodeDto;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
 
-import javafx.geometry.Rectangle2D;
-import javafx.stage.Screen;
-
 /**
  * Packet used for initial handshaking. Client should send this Packet initially
  * with all of its capabilities and properties. The server will send another
@@ -74,21 +71,46 @@ public class HelloPacket extends Packet {
 
 	public static HelloPacket createDefaultRequest() {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-		int maxW = -1;
-		int maxH = -1;
-		for (Screen screen : Screen.getScreens()) {
-			Rectangle2D b = screen.getBounds();
-			maxW = (int) (b.getMaxX() > maxW ? b.getMaxX() : maxW);
-			maxH = (int) (b.getMaxY() > maxH ? b.getMaxY() : maxH);
+		double maxW = -1;
+		double maxH = -1;
+		double maxX = 0;
+		double maxY = 0;
+		double cornerWidth = 0;
+		double cornerHeight = 0;
+		double y = 0;
+		double x = 0;
+		int[][] monitors = getMonitorSizes();
+		GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+		for (GraphicsDevice d : devices) {
+			double currHeight = d.getDefaultConfiguration().getBounds().getHeight();
+			double currWidth = d.getDefaultConfiguration().getBounds().getWidth();
+			x = d.getDefaultConfiguration().getBounds().getX();
+			y = d.getDefaultConfiguration().getBounds().getY();
+			if (y >= maxY) {
+				maxY = y;
+				if (currHeight > cornerHeight) {
+					cornerHeight = currHeight;
+				}
+			}
+			if (x >= maxX) {
+				maxX = x;
+				if (currWidth > cornerWidth) {
+					cornerWidth = currWidth;
+				}
+			}
 		}
-		int[] screen = new int[] { maxW, maxH };
+
+		maxH = y + cornerHeight;
+		maxW = x + cornerWidth;
+
+		int[] screen = new int[] { (int) maxW, (int) maxH };
 		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
 		map.put(DPI, 96);
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
 		// map.put(SCREEN_SIZES, new int[][] {});
-		int[][] screenSizes = getMonitorSizes();
+		int[][] screenSizes = monitors;
 		map.put(SCREEN_SIZES, screenSizes);
 		map.put(ENCODINGS, encodings);
 		map.put(ZLIB, true);
