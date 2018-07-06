@@ -1,13 +1,9 @@
 package com.ncc.savior.virtueadmin.rest;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
@@ -79,9 +77,11 @@ public class DataResource {
 
 	@Autowired
 	private ImportExportService importExportService;
+	private PathMatchingResourcePatternResolver resolver;
 
 	public DataResource() {
 		logger.warn("***Data Resource is currently enabled.  Please disable for production systems.***");
+		this.resolver = new PathMatchingResourcePatternResolver();
 	}
 
 	@GET
@@ -416,30 +416,21 @@ public class DataResource {
 	}
 
 	private void loadIconsFromIconsFolder() {
-		URL r = DataResource.class.getClassLoader().getResource("icons");
 		try {
-			File iconDir = new File(r.toURI());
-			if (iconDir.exists() && iconDir.isDirectory()) {
-				File[] files = iconDir.listFiles(new FileFilter() {
-
-					@Override
-					public boolean accept(File pathname) {
-						return (pathname.isFile() && pathname.getPath().toLowerCase().endsWith(".png"));
-					}
-				});
-				for (File file : files) {
-					try {
-						byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
-						String name = file.getName();
-						name = name.substring(0, name.lastIndexOf("."));
-						templateManager.addIcon(name, bytes);
-					} catch (IOException e) {
-						logger.error("Failed to load icon at " + file.getPath());
-					}
+			Resource[] resources = resolver.getResources("icons/**.png");
+			logger.debug("" + Arrays.toString(resources));
+			for (Resource resource : resources) {
+				try {
+					byte[] bytes = IOUtils.toByteArray(resource.getInputStream());
+					String name = resource.getFilename();
+					name = name.substring(0, name.lastIndexOf("."));
+					templateManager.addIcon(name, bytes);
+				} catch (IOException e) {
+					logger.error("Failed to load icon at " + resource.getDescription());
 				}
 			}
-		} catch (URISyntaxException e) {
-			logger.error("failed to load icons folder");
+		} catch (IOException e) {
+			logger.error("failed to load icons folder", e);
 		}
 	}
 
