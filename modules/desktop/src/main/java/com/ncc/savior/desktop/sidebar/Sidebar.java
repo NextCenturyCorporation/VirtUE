@@ -1033,6 +1033,11 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public void setupDialog() {
 		JDialog dialog = new JDialog();
+
+		String registeredSymbol = "\u00ae";
+		String trademarkSymbol = "\u2122";
+		String copyrightSymbol = "\u00a9";
+
 		dialog.setIconImage(saviorIcon.getImage());
 
 		JPanel container = new JPanel();
@@ -1057,7 +1062,7 @@ public class Sidebar implements VirtueChangeHandler {
 		footer.setBackground(Color.WHITE);
 		container.add(footer, BorderLayout.SOUTH);
 
-		JLabel copyright = new JLabel("\u00a92018-2019 Next Century Corporation. All rights reserved");
+		JLabel copyright = new JLabel(copyrightSymbol + " 2018-2019 Next Century Corporation. All rights reserved");
 		footer.add(copyright);
 
 		JScrollPane scrollPane = new JScrollPane();
@@ -1071,7 +1076,9 @@ public class Sidebar implements VirtueChangeHandler {
 		JLabel disclaimerHeader = new JLabel("<html><center> Disclaimer Third Parties <br><br></center></html>",
 				SwingConstants.CENTER);
 		JLabel disclaimers = new JLabel(
-				"<html><center> All product and company names are trademarks\u2122 or <br> registered\u00ae trademarks of their respective holders. Use of <br> them does not imply any affiliation with or endorsement by them.<br><br>"
+				"<html><center> All product and company names are trademarks" + trademarkSymbol + " or <br> registered"
+						+ registeredSymbol
+						+ " trademarks of their respective holders. Use of <br> them does not imply any affiliation with or endorsement by them.<br><br>"
 						+ "All specifications are subject to change without notice.<br><br>"
 						+ "Chrome and Chromium are trademarks owned by Google LLC.<br><br>"
 						+ "Firefox and the Firefox logos are trademarks of the <br> Mozilla Foundation.<br><br>"
