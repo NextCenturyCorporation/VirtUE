@@ -15,5 +15,6 @@
 		"IMPORT_windows_corporate_email_user",
 		"IMPORT_windows_test_devel",
 		"IMPORT_windows_test_devel2"
-	]
+	],
+	"enabled": true
 }

@@ -532,6 +532,21 @@ public class AdminResource {
 		}
 	}
 
+	@POST
+	@Produces("application/json")
+	@Path("user/{username}/enable")
+	public void removeUser(@PathParam("username") String username, String enableString) {
+		try {
+			boolean enable = Boolean.parseBoolean(enableString);
+			adminService.enableDisableUser(username, enable);
+		} catch (RuntimeException e) {
+			// TODO fix createWebserviceException
+			// Probably need to create our own exception
+			// Needs to create ExceptionMapper for jersey.
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+
 	// JHU - Admin API - user role authorize
 	@POST
 	@Produces("application/json")

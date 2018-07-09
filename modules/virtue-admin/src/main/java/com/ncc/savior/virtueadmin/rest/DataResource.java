@@ -93,10 +93,31 @@ public class DataResource {
 	}
 
 	@GET
+	@Path("import/user/admin")
+	@Produces("application/json")
+	public VirtueUser ensureAdminExists() {
+		String username = "admin";
+		try {
+			return userManager.getUser(username);
+		} catch (RuntimeException e) {
+			Collection<String> authorities = new ArrayList<String>();
+			authorities.add("ROLE_ADMIN");
+			authorities.add("ROLE_USER");
+			VirtueUser admin = new VirtueUser("admin", authorities, true);
+			userManager.addUser(admin);
+			return admin;
+		}
+	}
+
+	@GET
 	@Path("templates/preload")
 	public Response preloadTemplates() {
 		logger.info("attempting to preload data");
-		loadIcons();
+		try {
+			loadIcons();
+		} catch (Throwable t) {
+			logger.warn("Failed to load icons", t);
+		}
 
 		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Linux)",
 				"1.0", OS.LINUX, "chrome", "google-chrome");
@@ -335,13 +356,13 @@ public class DataResource {
 		adminRoles.add("ROLE_USER");
 		adminRoles.add("ROLE_ADMIN");
 
-		VirtueUser admin = new VirtueUser("admin", adminRoles);
-		VirtueUser presenter = new VirtueUser("presenter", userRoles);
-		VirtueUser office = new VirtueUser("office", userRoles);
-		VirtueUser math = new VirtueUser("math", userRoles);
-		VirtueUser browser = new VirtueUser("browser", userRoles);
-		VirtueUser nerd = new VirtueUser("nerd", userRoles);
-		VirtueUser developer = new VirtueUser("developer", userRoles);
+		VirtueUser admin = new VirtueUser("admin", adminRoles, true);
+		VirtueUser presenter = new VirtueUser("presenter", userRoles, true);
+		VirtueUser office = new VirtueUser("office", userRoles, true);
+		VirtueUser math = new VirtueUser("math", userRoles, true);
+		VirtueUser browser = new VirtueUser("browser", userRoles, true);
+		VirtueUser nerd = new VirtueUser("nerd", userRoles, true);
+		VirtueUser developer = new VirtueUser("developer", userRoles, true);
 
 		userManager.addUser(admin);
 		userManager.addUser(presenter);
@@ -437,7 +458,7 @@ public class DataResource {
 			for (String a : auth) {
 				newAuth.add(a);
 			}
-			newUser = new VirtueUser(newUserName, source.getAuthorities());
+			newUser = new VirtueUser(newUserName, source.getAuthorities(), true);
 			userManager.addUser(newUser);
 		}
 		Collection<String> ids = templateManager.getVirtueTemplateIdsForUser(source);
@@ -452,7 +473,7 @@ public class DataResource {
 	@Path("user/{sourceUser}")
 	@Produces("application/json")
 	public Map<String, VirtueTemplate> assignUser(@PathParam("sourceUser") String sourceUserName) {
-		VirtueUser source = new VirtueUser(sourceUserName, new ArrayList<String>());
+		VirtueUser source = new VirtueUser(sourceUserName, new ArrayList<String>(), true);
 		Map<String, VirtueTemplate> ids = templateManager.getVirtueTemplatesForUser(source);
 		return ids;
 	}
@@ -469,6 +490,13 @@ public class DataResource {
 	@Produces("application/json")
 	public Iterable<VirtueUser> getUsers() {
 		return userManager.getAllUsers();
+	}
+
+	@GET
+	@Path("user/{username}/enable")
+	@Produces("application/json")
+	public void enableUser(@PathParam("username") String username) {
+		userManager.enableDisableUser(username, true);
 	}
 
 	@GET

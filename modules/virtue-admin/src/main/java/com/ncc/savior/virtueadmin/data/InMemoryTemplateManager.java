@@ -121,12 +121,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		addVirtueTemplate(virtueSingleAll);
 		addVirtueTemplate(virtueMath);
 
-		VirtueUser user = new VirtueUser("user", new ArrayList<String>());
-		VirtueUser user2 = new VirtueUser("user2", new ArrayList<String>());
-		VirtueUser user3 = new VirtueUser("user3", new ArrayList<String>());
-		VirtueUser admin = new VirtueUser("admin", new ArrayList<String>());
-		VirtueUser kdrumm = new VirtueUser("kdrumm", new ArrayList<String>());
-		VirtueUser kdrummTest = new VirtueUser("kdrumm_test", new ArrayList<String>());
+		VirtueUser user = new VirtueUser("user", new ArrayList<String>(), true);
+		VirtueUser user2 = new VirtueUser("user2", new ArrayList<String>(), true);
+		VirtueUser user3 = new VirtueUser("user3", new ArrayList<String>(), true);
+		VirtueUser admin = new VirtueUser("admin", new ArrayList<String>(), true);
+		VirtueUser kdrumm = new VirtueUser("kdrumm", new ArrayList<String>(), true);
+		VirtueUser kdrummTest = new VirtueUser("kdrumm_test", new ArrayList<String>(), true);
 
 		assignVirtueTemplateToUser(user, virtueAllVms.getId());
 		assignVirtueTemplateToUser(user, virtueSingleBrowsers.getId());

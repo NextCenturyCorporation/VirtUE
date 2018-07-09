@@ -217,7 +217,7 @@ public class VirtueTemplateIT {
 		assertThat(myVirtue.isEnabled()).isEqualTo(!updateReturned.isEnabled());
 
 		assertThat(updateReturned).isNotNull();
-		assertThat(updateReturned.getVirtualMachineTemplateIds()).isEqualTo(myVirtue.getVirtualMachineTemplateIds());
+		assertThat(updateReturned.getVirtualMachineTemplateIds()).containsAll(myVirtue.getVirtualMachineTemplateIds());
 		assertThat(updateReturned.getId()).isEqualTo(myVirtue.getId());
 		assertThat(updateReturned.getVersion()).isEqualTo(myVirtue.getVersion());
 		assertThat(updateReturned.getName()).isEqualTo(myVirtue.getName());
