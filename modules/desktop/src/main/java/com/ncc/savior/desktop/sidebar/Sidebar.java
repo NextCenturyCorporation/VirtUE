@@ -252,6 +252,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void onLoginSuccess(DesktopUser user) throws IOException {
 				onLogin(user);
+				ghostText.reset();
 			}
 
 			@Override
@@ -612,7 +613,7 @@ public class Sidebar implements VirtueChangeHandler {
 		String[] sortingOptions = { "Alphabetical", "Status" };
 		this.cb = new JComboBox<String>(sortingOptions);
 		cb.setSelectedItem(lastSort.get("sort", "Alphabetical"));
-		cb.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+		cb.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		cb.setBackground(new Color(248, 248, 255));
 		Color bgColor = cb.getBackground();
 		cb.setRenderer(new DefaultListCellRenderer() {

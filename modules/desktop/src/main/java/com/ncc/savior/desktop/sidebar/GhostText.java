@@ -69,6 +69,13 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
 		}
 	}
 
+	public void reset() {
+		isVisible = true;
+		textfield.setText(ghostText);
+		textfield.setForeground(ghostColor);
+		searchLabel.setIcon(search);
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		updateState();
