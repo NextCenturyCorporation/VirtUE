@@ -30,12 +30,10 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
 		this.ghostText = ghostText;
 		this.ghostColor = Color.LIGHT_GRAY;
 		this.foregroundColor = textfield.getForeground();
+		this.textfield.setForeground(ghostColor);
 		textfield.addFocusListener(this);
 		registerListeners();
 		updateState();
-		if (!this.textfield.hasFocus()) {
-			focusLost(null);
-		}
 	}
 
 	private void registerListeners() {
@@ -69,6 +67,13 @@ public class GhostText implements FocusListener, DocumentListener, PropertyChang
 			textfield.setForeground(ghostColor);
 			searchLabel.setIcon(search);
 		}
+	}
+
+	public void reset() {
+		isVisible = true;
+		textfield.setText(ghostText);
+		textfield.setForeground(ghostColor);
+		searchLabel.setIcon(search);
 	}
 
 	@Override

@@ -148,6 +148,17 @@ public class Sidebar implements VirtueChangeHandler {
 		this.virtueService = virtueService;
 		this.iconService = iconService;
 		this.textField = new JTextField();
+		this.searchLabel = new JLabel();
+		textField.setColumns(6);
+		textField.setForeground(Color.BLACK);
+		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
+
+		ImageIcon initialSearchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
+		Image searchImage = initialSearchIcon.getImage();
+		Image newSearchImage = searchImage.getScaledInstance(22, 22, java.awt.Image.SCALE_SMOOTH);
+		this.searchIcon = new ImageIcon(newSearchImage);
+
+		this.ghostText = new GhostText(textField, "search", searchLabel, searchIcon);
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
@@ -198,7 +209,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.setIconImage(saviorIcon.getImage());
 		this.frame = frame;
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setSize(491, 620);
+		this.frame.setSize(491, 600);
 
 		this.favorites = Preferences.userRoot().node("VirtUE/Desktop/favorites");
 		this.lastView = Preferences.userRoot().node("VirtUE/Desktop/lastView");
@@ -241,6 +252,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void onLoginSuccess(DesktopUser user) throws IOException {
 				onLogin(user);
+				ghostText.reset();
 			}
 
 			@Override
@@ -261,7 +273,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.repaint();
 		setup(user);
 		frame.getContentPane().add(desktopContainer);
-		frame.setSize(491, 620);
+		frame.setSize(491, 600);
 		setInitialViewPort();
 		frame.setVisible(true);
 	}
@@ -292,10 +304,10 @@ public class Sidebar implements VirtueChangeHandler {
 	public void addVirtue(DesktopVirtue virtue) throws IOException, InterruptedException, ExecutionException {
 		Color headerColor = getNextColor();
 		VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
-				textField);
+				textField, ghostText);
 		vt.addVirtueToRow(virtue, vtc, vtc.getRow());
 
-		VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField);
+		VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField, ghostText);
 		vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 
 		// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
@@ -410,7 +422,7 @@ public class Sidebar implements VirtueChangeHandler {
 		ToolTipManager.sharedInstance().setInitialDelay(1250);
 
 		Image closeImage = closeIcon.getImage();
-		Image newCloseImg = closeImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		Image newCloseImg = closeImage.getScaledInstance(22, 22, java.awt.Image.SCALE_SMOOTH);
 		closeIcon = new ImageIcon(newCloseImg);
 
 		colorItr = colorList.iterator();
@@ -440,7 +452,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		ImageIcon aboutIcon = new ImageIcon(Sidebar.class.getResource("/images/info-icon.png"));
 		Image aboutImage = aboutIcon.getImage();
-		Image newAboutImg = aboutImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+		Image newAboutImg = aboutImage.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
 		aboutIcon = new ImageIcon(newAboutImg);
 		this.about = new JLabel();
 		about.setIcon(aboutIcon);
@@ -450,6 +462,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.bottomBorder = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) bottomBorder.getLayout();
 		flowLayout_1.setVgap(0);
+		bottomBorder.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
 		bottomBorder.setBackground(Color.DARK_GRAY);
 		desktopContainer.add(bottomBorder, BorderLayout.SOUTH);
 
@@ -464,7 +477,7 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.add(logoutLabel);
 
 		JLabel logout = new JLabel("Logout");
-		logout.setFont(new Font("Roboto", Font.PLAIN, 19));
+		logout.setFont(new Font("Roboto", Font.PLAIN, 17));
 		logout.setForeground(Color.WHITE);
 		bottomBorder.add(logout);
 
@@ -562,19 +575,9 @@ public class Sidebar implements VirtueChangeHandler {
 		c.weightx = 1.0;
 		c.fill = GridBagConstraints.BOTH;
 
-		this.searchLabel = new JLabel();
 		searchLabel.setBackground(new Color(239, 239, 239));
-		ImageIcon initialSearchIcon = new ImageIcon(AppsTile.class.getResource("/images/search.png"));
-		Image searchImage = initialSearchIcon.getImage();
-		Image newSearchImage = searchImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
-		this.searchIcon = new ImageIcon(newSearchImage);
 
 		searchLabel.setIcon(searchIcon);
-
-		textField.setColumns(6);
-		textField.setForeground(Color.BLACK);
-		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		ghostText = new GhostText(textField, "search", searchLabel, searchIcon);
 
 		c.insets = new Insets(0, 9, 0, 0);
 
@@ -610,7 +613,7 @@ public class Sidebar implements VirtueChangeHandler {
 		String[] sortingOptions = { "Alphabetical", "Status" };
 		this.cb = new JComboBox<String>(sortingOptions);
 		cb.setSelectedItem(lastSort.get("sort", "Alphabetical"));
-		cb.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
+		cb.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		cb.setBackground(new Color(248, 248, 255));
 		Color bgColor = cb.getBackground();
 		cb.setRenderer(new DefaultListCellRenderer() {
@@ -780,7 +783,11 @@ public class Sidebar implements VirtueChangeHandler {
 				}
 				sortByOption(keyword);
 				sp.setViewportView(sp.getViewport().getView());
-				searchLabel.setIcon(closeIcon);
+				if (keyword.equals("")) {
+					searchLabel.setIcon(searchIcon);
+				} else {
+					searchLabel.setIcon(closeIcon);
+				}
 			}
 
 		});
@@ -1026,6 +1033,11 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public void setupDialog() {
 		JDialog dialog = new JDialog();
+
+		String registeredSymbol = "\u00ae";
+		String trademarkSymbol = "\u2122";
+		String copyrightSymbol = "\u00a9";
+
 		dialog.setIconImage(saviorIcon.getImage());
 
 		JPanel container = new JPanel();
@@ -1050,7 +1062,7 @@ public class Sidebar implements VirtueChangeHandler {
 		footer.setBackground(Color.WHITE);
 		container.add(footer, BorderLayout.SOUTH);
 
-		JLabel copyright = new JLabel("©2018-2019 Next Century Corporation. All rights reserved");
+		JLabel copyright = new JLabel(copyrightSymbol + " 2018-2019 Next Century Corporation. All rights reserved");
 		footer.add(copyright);
 
 		JScrollPane scrollPane = new JScrollPane();
@@ -1064,7 +1076,9 @@ public class Sidebar implements VirtueChangeHandler {
 		JLabel disclaimerHeader = new JLabel("<html><center> Disclaimer Third Parties <br><br></center></html>",
 				SwingConstants.CENTER);
 		JLabel disclaimers = new JLabel(
-				"<html><center> All product and company names are trademarks™ or <br> registered® trademarks of their respective holders. Use of <br> them does not imply any affiliation with or endorsement by them.<br><br>"
+				"<html><center> All product and company names are trademarks" + trademarkSymbol + " or <br> registered"
+						+ registeredSymbol
+						+ " trademarks of their respective holders. Use of <br> them does not imply any affiliation with or endorsement by them.<br><br>"
 						+ "All specifications are subject to change without notice.<br><br>"
 						+ "Chrome and Chromium are trademarks owned by Google LLC.<br><br>"
 						+ "Firefox and the Firefox logos are trademarks of the <br> Mozilla Foundation.<br><br>"
