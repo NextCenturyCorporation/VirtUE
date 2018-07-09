@@ -16,3 +16,9 @@ add_executable(getserviceticket
   )
 target_include_directories(getserviceticket INTERFACE ${KRB5_INCLUDE_DIRS})
 target_link_libraries(getserviceticket ${KRB5_LIBRARIES})
+
+add_executable(gsscache
+  src/cpp/gsscache.cpp
+  )
+target_include_directories(gsscache INTERFACE ${KRB5_INCLUDE_DIRS})
+target_link_libraries(gsscache ${KRB5_LIBRARIES})

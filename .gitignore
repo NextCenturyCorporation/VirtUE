@@ -25,3 +25,7 @@ CMakeFiles
 /modules/ecosystem/cifs-proxy/cmake_install.cmake
 /modules/ecosystem/cifs-proxy/makeccache
 modules/ecosystem/cifs-proxy/Makefile
+/modules/ecosystem/cifs-proxy/credstore
+/modules/ecosystem/cifs-proxy/getserviceticket
+/modules/ecosystem/cifs-proxy/gsscache
+/modules/ecosystem/cifs-proxy/my_ccache
