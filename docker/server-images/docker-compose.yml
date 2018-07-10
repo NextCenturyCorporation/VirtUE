@@ -1,0 +1,8 @@
+version: '3'
+services:
+  workbench:
+    build: ./workbench
+    ports:
+    - "8080:8080"
+  virtue-admin:
+    build: ./virtue-admin
