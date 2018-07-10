@@ -21,7 +21,6 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JTextArea;
 import javax.swing.TransferHandler;
-import javax.swing.text.JTextComponent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +39,7 @@ public class DndBackdrop extends JFrame {
 	private IClipboardMessageSenderReceiver transmitter;
 	private String messageSourceId;
 	public Map<String, CompletableFuture> futureMap;
+	private JTextArea allBox;
 
 	public DndBackdrop(IClipboardMessageSenderReceiver transmitter) {
 		futureMap = Collections.synchronizedMap(new HashMap<String, CompletableFuture>());
@@ -68,6 +68,8 @@ public class DndBackdrop extends JFrame {
 						logger.debug("unable to complete future " + future);
 					}
 				} else if (message instanceof DndDataRequestMessage) {
+					logger.debug("***DATA REQUEST***");
+
 					DndDataRequestMessage m = (DndDataRequestMessage) message;
 					DndDataResponseMessage response = new DndDataResponseMessage(transmitter.getClientId(), m,
 							"remoteHardCodedTextData");
@@ -91,7 +93,7 @@ public class DndBackdrop extends JFrame {
 		this.setSize(1600, 1200);
 		this.setLocation(0, 0);
 		this.setUndecorated(true);
-		JTextArea allBox = new JTextArea();
+		allBox = new JTextArea();
 		this.getContentPane().add(allBox, BorderLayout.CENTER);
 
 		allBox.setDragEnabled(true);
@@ -160,6 +162,7 @@ public class DndBackdrop extends JFrame {
 			T ret = timeoutValue;
 			try {
 				ret = f.get(timeout, TimeUnit.MILLISECONDS);
+				logger.debug("received: " + ret);
 			} catch (TimeoutException | InterruptedException | ExecutionException e) {
 				logger.error("Drag and Drop canImport test did not complete succesfully", e);
 				// we want the default
@@ -172,14 +175,15 @@ public class DndBackdrop extends JFrame {
 
 		@Override
 		public boolean importData(TransferHandler.TransferSupport support) {
-			logger.debug("GETTNG DATA!!!!!!!!!!!!!!!!!!");
+			logger.debug("GETTING DATA!!!!!!!!!!!!!!!!!!");
 			if (!this.canImport(support)) {
 				return false;
 			}
+			DataFlavor flavor = DataFlavor.stringFlavor;
 			Transferable t = support.getTransferable();
 			String data = null;
 			try {
-				data = (String) t.getTransferData(DataFlavor.stringFlavor);
+				data = (String) t.getTransferData(flavor);
 				if (data == null) {
 					return false;
 				}
@@ -187,23 +191,14 @@ public class DndBackdrop extends JFrame {
 				e.printStackTrace();
 				return false;
 			}
-			JTextComponent.DropLocation dropLocation = (JTextArea.DropLocation) support.getDropLocation();
-			int dropIndex = dropLocation.getIndex();
-			JTextComponent textComp = (JTextComponent) support.getComponent();
-			String text = textComp.getText();
-			String newText = text;
-			if (dropIndex != -1) {
-				try {
-					newText = text.substring(0, dropIndex);
-					newText += data;
-					if (dropIndex < text.length()) {
-						newText += text.substring(dropIndex + 1, text.length());
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			String requestId = UUID.randomUUID().toString();
+			DndDataResponseMessage message = new DndDataResponseMessage(messageSourceId, flavor, requestId, data);
+			try {
+				transmitter.sendMessageToHub(message);
+			} catch (IOException e) {
+				logger.error("error failed to send data message=" + message, e);
+				return false;
 			}
-			textComp.setText(newText);
 			return true;
 		}
 	}

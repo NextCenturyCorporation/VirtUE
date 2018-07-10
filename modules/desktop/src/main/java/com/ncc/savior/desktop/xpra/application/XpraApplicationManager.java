@@ -3,23 +3,23 @@ package com.ncc.savior.desktop.xpra.application;
 import java.awt.Component;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.swing.JComponent;
@@ -34,7 +34,6 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.dnd.IDndDragHandler;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportRequestMessage;
 import com.ncc.savior.desktop.dnd.messages.DndCanImportResponseMessage;
-import com.ncc.savior.desktop.dnd.messages.DndDataRequestMessage;
 import com.ncc.savior.desktop.dnd.messages.DndDataResponseMessage;
 import com.ncc.savior.desktop.dnd.messages.DndStartDragMessage;
 import com.ncc.savior.desktop.xpra.XpraClient;
@@ -57,6 +56,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadata;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMetadataPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowMoveResizePacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.WindowPacket;
+import com.ncc.savior.util.JavaUtil;
 
 /**
  * This is the abstract base class that manages all the {@link XpraApplication}s
@@ -77,6 +77,7 @@ public abstract class XpraApplicationManager {
 	protected volatile boolean clientIsDragging;
 	protected DataFlavor[] dragFlavors;
 	protected Map<String, CompletableFuture> dragFutures;
+	protected volatile DndDataResponseMessage dataMessage;
 
 	public XpraApplicationManager(XpraClient client) {
 		this.clientIsDragging = false;
@@ -97,6 +98,7 @@ public abstract class XpraApplicationManager {
 					Packet packet = new MousePointerPositionPacket(destId, x, y, modifiers);
 					try {
 						client.getPacketSender().sendPacket(packet);
+						logger.debug("sent packet1 " + packet);
 					} catch (IOException e) {
 						logger.error("error sending packet to register possible drag", e);
 					}
@@ -139,6 +141,7 @@ public abstract class XpraApplicationManager {
 			@Override
 			public void onMessage(IClipboardMessage message, String groupId) {
 				if (message instanceof DndCanImportRequestMessage) {
+					logger.debug("got import request");
 					DndCanImportRequestMessage m = (DndCanImportRequestMessage) message;
 					String cci = client.getClipboardClientId();
 					if (m.getSourceId().equals(cci)) {
@@ -153,7 +156,7 @@ public abstract class XpraApplicationManager {
 
 					if (m.getSourceId().equals(cci)) {
 						dragFlavors = m.getFlavors();
-						logger.debug("got can import request");
+						logger.debug("got drag start request");
 						// message form OUR drag and drop client so this is relevant to us
 						clientIsDragging = true;
 
@@ -161,10 +164,12 @@ public abstract class XpraApplicationManager {
 					}
 				} else if (message instanceof DndDataResponseMessage) {
 					DndDataResponseMessage m = (DndDataResponseMessage) message;
-					CompletableFuture f = dragFutures.remove(m.getRequestId());
-					if (f != null) {
-						f.complete(m.getData());
-					}
+					logger.debug("got data and setting data message to " + m);
+					dataMessage = m;
+					// CompletableFuture f = dragFutures.remove(m.getRequestId());
+					// if (f != null) {
+					// f.complete(m.getData());
+					// }
 					// TODO end the drag/drop action
 				}
 
@@ -177,7 +182,7 @@ public abstract class XpraApplicationManager {
 				boolean allowTransfer = transmitter != null && transmitter.isValid();
 				if (allowTransfer) {
 					DndCanImportResponseMessage response = new DndCanImportResponseMessage("hubId", destId, requestId,
-							false);
+							true);
 					try {
 						transmitter.sendMessageToHub(response);
 					} catch (IOException e) {
@@ -466,6 +471,8 @@ public abstract class XpraApplicationManager {
 		public final DataFlavor SUPPORTED_DATA_FLAVOR = DataFlavor.stringFlavor;
 		private String value;
 		private int windowId;
+		private Thread thread;
+		private boolean terminateThread;
 
 		TestTransferHandler(int windowId) {
 			this.windowId = windowId;
@@ -486,6 +493,12 @@ public abstract class XpraApplicationManager {
 			// } else {
 			// return 0;
 			// }
+		}
+
+		@Override
+		public void exportAsDrag(JComponent comp, InputEvent e, int action) {
+			onDragStart();
+			super.exportAsDrag(comp, e, action);
 		}
 
 		@Override
@@ -517,20 +530,36 @@ public abstract class XpraApplicationManager {
 							Point p = MouseInfo.getPointerInfo().getLocation();
 							int x = (int) p.getX();
 							int y = (int) p.getY();
-							client.getPacketSender().sendPacket(new MousePointerPositionPacket(id, x, y));
-							client.getPacketSender().sendPacket(new MouseButtonActionPacket(id, 1, false, x, y));
+							MousePointerPositionPacket p1 = new MousePointerPositionPacket(id, x, y);
+							MouseButtonActionPacket p2 = new MouseButtonActionPacket(id, 1, false, x, y);
+							client.getPacketSender().sendPacket(p1);
+							client.getPacketSender().sendPacket(p2);
+							// logger.debug("send packets 2" + p1);
+							// logger.debug("send packets 2" + p2);
 						}
-						IClipboardMessageSenderReceiver transmitter = client.getClipboardTransmitter();
-						String requestId = UUID.randomUUID().toString();
-						DndDataRequestMessage message = new DndDataRequestMessage("dndHub", flavor, requestId);
-						transmitter.sendMessageToHub(message);
-						CompletableFuture<Object> completableFuture = new CompletableFuture<Object>();
-						dragFutures.put(requestId, completableFuture);
-
-						Object obj = completableFuture.get(2000, TimeUnit.MILLISECONDS);
-						logger.debug("got future response for clipboard data: " + obj);
+						// IClipboardMessageSenderReceiver transmitter =
+						// client.getClipboardTransmitter();
+						// String requestId = UUID.randomUUID().toString();
+						// DndDataRequestMessage message = new DndDataRequestMessage("dndHub", flavor,
+						// requestId);
+						// transmitter.sendMessageToHub(message);
+						// CompletableFuture<Object> completableFuture = new
+						// CompletableFuture<Object>();
+						// dragFutures.put(requestId, completableFuture);
+						//
+						// Object obj = completableFuture.get(2000, TimeUnit.MILLISECONDS);
+						// logger.debug("got future response for clipboard data: " + obj);
+						long timeoutTimeMillis = System.currentTimeMillis() + 2000;
+						while (dataMessage == null) {
+							if (timeoutTimeMillis < System.currentTimeMillis()) {
+								throw new TimeoutException();
+							}
+							JavaUtil.sleepAndLogInterruption(5);
+						}
+						Object obj = dataMessage.getData();
+						dataMessage = null;
 						return obj;
-					} catch (TimeoutException | InterruptedException | ExecutionException e) {
+					} catch (TimeoutException e) {
 						logger.error("timeout with getting drag and drop data", e);
 						return "timeout";
 					} catch (Throwable t) {
@@ -545,25 +574,71 @@ public abstract class XpraApplicationManager {
 
 		@Override
 		public boolean canImport(TransferHandler.TransferSupport support) {
-			logger.debug("can import " + support.getDropLocation().getDropPoint().getX());
-			Point point = support.getDropLocation().getDropPoint();
-			List<String> mod = new ArrayList<String>();
-			logger.debug("not sure if x,y is correct here: " + point.getX() + " : " + point.getY());
-			MousePointerPositionPacket packet = new MousePointerPositionPacket(windowId, (int) point.getX(),
-					(int) point.getY(), mod);
-			try {
-				client.getPacketSender().sendPacket(packet);
-			} catch (IOException e) {
-				logger.error("Error sending mouse data via TransferHandler", e);
-			}
+			// logger.debug("can import " +
+			// support.getDropLocation().getDropPoint().getX());
+			sendMousePosition(windowId, false);
 			return true;
 		}
 
 		@Override
 		protected void exportDone(JComponent source, Transferable data, int action) {
+			onDragStop();
 			super.exportDone(source, data, action);
 			logger.debug("export done");
 			// Decide what to do after the drop has been accepted
+		}
+
+		public boolean isMouseWithinComponent(Component c) {
+			Point mousePos = MouseInfo.getPointerInfo().getLocation();
+			Rectangle bounds = c.getBounds();
+			bounds.setLocation(c.getLocationOnScreen());
+			return bounds.contains(mousePos);
+		}
+
+		public void sendMousePosition(int targetWindowId, boolean includeMouseUp) {
+			List<String> mod = new ArrayList<String>();
+			Point loc = MouseInfo.getPointerInfo().getLocation();
+			int x = loc.x;
+			int y = loc.y;
+			try {
+				MousePointerPositionPacket packet = new MousePointerPositionPacket(targetWindowId, x, y, mod);
+				client.getPacketSender().sendPacket(packet);
+				// logger.debug("sent packet 3 " + packet);
+				if (includeMouseUp) {
+					MouseButtonActionPacket p;
+
+					p = new MouseButtonActionPacket(windowId, 1, false, x, y);
+					client.getPacketSender().sendPacket(p);
+
+					// p = new MouseButtonActionPacket(targetWindowId, 1, false, x, y);
+					// client.getPacketSender().sendPacket(p);
+					// logger.debug("sent packet 3.2 " + p);
+
+				}
+			} catch (IOException e) {
+				logger.error("Error sending mouse data via TransferHandler", e);
+			}
+		}
+
+		private void onDragStart() {
+			terminateThread = false;
+			thread = new Thread(() -> {
+				while (!terminateThread) {
+					Iterator<Integer> itr = hiddenWindowIds.iterator();
+					if (itr.hasNext()) {
+						windowId = itr.next();
+						sendMousePosition(windowId, false);
+					}
+					JavaUtil.sleepAndLogInterruption(500);
+				}
+				sendMousePosition(windowId, true);
+			});
+
+			thread.start();
+		}
+
+		private void onDragStop() {
+			terminateThread = true;
 		}
 	}
 }
