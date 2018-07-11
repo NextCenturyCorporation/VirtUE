@@ -55,10 +55,17 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private ChangeListener changeListener;
 	private PropertyChangeListener listener;
 
-	private ImageIcon favoritedImage = new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png"));
-	private ImageIcon unfavoritedImage = new ImageIcon(
+	private static ImageIcon favoritedImage = new ImageIcon(
+			VirtueApplicationItem.class.getResource("/images/favorited.png"));
+	private static ImageIcon unfavoritedImage = new ImageIcon(
 			VirtueApplicationItem.class.getResource("/images/unfavorited.png"));
 	private Image image;
+
+	private static ImageIcon saviorIcon = new ImageIcon(
+			VirtueApplicationItem.class.getResource("/images/saviorLogo.png"));
+	private static Image defaultImage = saviorIcon.getImage();
+	private static Image saviorTile = defaultImage.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
+	private static Image saviorList = defaultImage.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
 
 	private VirtueService virtueService;
 	private JScrollPane sp;
@@ -128,8 +135,13 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		appName.setHorizontalAlignment(SwingConstants.CENTER);
 		container.setLayout(new BorderLayout(0, 0));
 
-		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		ImageIcon imageIcon;
+		if (image != null) {
+			Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+			imageIcon = new ImageIcon(newimg); // transform it back
+		} else {
+			imageIcon = new ImageIcon(saviorTile);
+		}
 
 		appIcon.setIcon(imageIcon);
 
@@ -154,8 +166,13 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.setBackground(Color.WHITE);
 		this.appIcon = new JLabel(ad.getName());
 
-		Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		ImageIcon imageIcon;
+		if (image != null) {
+			Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+			imageIcon = new ImageIcon(newimg); // transform it back
+		} else {
+			imageIcon = new ImageIcon(saviorList);
+		}
 
 		appIcon.setIcon(imageIcon);
 		appIcon.setHorizontalAlignment(SwingConstants.LEFT);

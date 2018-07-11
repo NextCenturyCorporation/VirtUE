@@ -147,7 +147,6 @@ public class Sidebar implements VirtueChangeHandler {
 		this.virtueIdToVc = new HashMap<String, VirtueTileContainer>();
 		this.virtueService = virtueService;
 		this.iconService = iconService;
-		this.textField = new JTextField();
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
@@ -203,6 +202,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.favorites = Preferences.userRoot().node("VirtUE/Desktop/favorites");
 		this.lastView = Preferences.userRoot().node("VirtUE/Desktop/lastView");
 		this.lastSort = Preferences.userRoot().node("VirtUE/Desktop/lastSort");
+		this.textField = new JTextField();
 
 		DesktopUser user = authService.getUser();
 		if (user != null) {
@@ -309,25 +309,25 @@ public class Sidebar implements VirtueChangeHandler {
 
 			// Image appImage = iconService.getImage(ad.getIconKey(), null);
 
-			Image defaultImage = saviorIcon.getImage();
+			// Image defaultImage = saviorIcon.getImage();
 
 			VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), null, isFavorited, frame, textField, cb, sortAppsByStatus);
 			appsTileVa.tileSetup();
 			appsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vtcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), null, isFavorited, frame, textField, cb, sortAppsByStatus);
 			vtcAppsTileVa.tileSetup();
 			vtcAppsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vlcAppsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), null, isFavorited, frame, textField, cb, sortAppsByStatus);
 			vlcAppsListVa.listSetup();
 			vlcAppsListVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), null, isFavorited, frame, textField, cb, sortAppsByStatus);
 			appsListVa.listSetup();
 			appsListVa.registerListener(dom.getChangeListener());
 
@@ -342,13 +342,13 @@ public class Sidebar implements VirtueChangeHandler {
 				switch (selected) {
 				case "Alphabetical":
 					favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-							dom.getChangeListener(), defaultImage, true, frame, textField, cb, null);
+							dom.getChangeListener(), null, true, frame, textField, cb, null);
 					favoritedVa.tileSetup();
 					fv.addFavorite(ad, virtue, favoritedVa, textField, null);
 					break;
 				case "Status":
 					favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-							dom.getChangeListener(), defaultImage, true, frame, textField, cb, null);
+							dom.getChangeListener(), null, true, frame, textField, cb, null);
 					favoritedVa.tileSetup();
 					fv.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus);
 					break;
