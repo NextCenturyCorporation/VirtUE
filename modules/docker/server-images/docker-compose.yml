@@ -5,6 +5,8 @@ services:
     ports:
     - "8080:8080"
   virtue-admin:
+    volumes: 
+    - ./modules/virtue-admin/database:/opt/virtue/virtue-admin/build/distributions/virtue-admin-0.0.1-SNAPSHOT/database
     build:
         context: ../../../
         dockerfile: modules/docker/server-images/virtue-admin/Dockerfile
