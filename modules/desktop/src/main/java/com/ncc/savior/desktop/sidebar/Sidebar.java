@@ -318,7 +318,6 @@ public class Sidebar implements VirtueChangeHandler {
 					ghostText);
 			vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 
-			// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
 			virtueIdToVc.put(virtue.getTemplateId(), vtc);
 
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
