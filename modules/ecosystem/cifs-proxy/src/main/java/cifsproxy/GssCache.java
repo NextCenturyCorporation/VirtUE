@@ -8,17 +8,22 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 import com.sun.jna.Memory;
+import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
+import cifsproxy.GssApi.gss_OID_desc;
+import cifsproxy.GssApi.gss_OID_set_desc;
 import cifsproxy.GssApi.gss_buffer_desc;
 import cifsproxy.GssApi.gss_cred_id_t;
+import cifsproxy.GssApi.gss_name_t;
 
 public class GssCache {
 
 	public static void main(String[] args) throws GSSException {
+		Native.setProtected(true);
 		GssApi gssapi = GssApi.INSTANCE;
 
 		IntByReference minorStatus = new IntByReference();
@@ -30,13 +35,13 @@ public class GssCache {
 			targetName.value = targetNameBuffer;
 			targetName.length = new NativeLong(target.length() + 1);
 			PointerByReference tempPtr = new PointerByReference();
-			int retval = gssapi.gss_import_name(minorStatus, targetName, GssApi.GSS_C_NT_HOSTBASED_SERVICE,
-					tempPtr);
+			System.out.println("global OID: " + GssApi.GSS_C_NT_HOSTBASED_SERVICE);
+
+			int retval = gssapi.gss_import_name(minorStatus, targetName, GssApi.GSS_C_NT_HOSTBASED_SERVICE, tempPtr);
 			if (retval != 0) {
-				System.err.println("error importing name: " + retval + "." + minorStatus.getValue());
-				return;
+				throw new GSSException(retval, minorStatus.getValue(), "importing name");
 			}
-			gssTargetName = tempPtr.getPointer();
+			gssTargetName = tempPtr.getValue();
 			System.out.println("imported name (" + target + ", " + gssTargetName + ", " + tempPtr + ")");
 		}
 
@@ -48,18 +53,40 @@ public class GssCache {
 			gss_buffer_desc outputToken = new gss_buffer_desc();
 			IntByReference retFlags = new IntByReference();
 			IntByReference retTime = new IntByReference();
-			PointerByReference contextRef = new PointerByReference();
-			int retval = gssapi.gss_init_sec_context(minorStatus, initCred, contextRef, gssTargetName,
-					GssApi.MECH_KRB5, 0, 0, GssApi.GSS_C_NO_CHANNEL_BINDINGS, inputToken, actualMechType, outputToken,
-					retFlags, retTime);
+			PointerByReference contextRef = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
+			int retval = gssapi.gss_init_sec_context(minorStatus, initCred, contextRef, gssTargetName, GssApi.MECH_KRB5,
+					0, 0, GssApi.GSS_C_NO_CHANNEL_BINDINGS, inputToken, actualMechType, outputToken, retFlags, retTime);
 			if (retval != 0) {
 				System.err.println("error initializing context: " + retval + "." + minorStatus.getValue());
-				return;
+				throw new GSSException(retval, minorStatus.getValue(), "initializing context");
 			}
-			contextHandle = contextRef.getPointer();
+			contextHandle = contextRef.getValue();
 			System.out.println("initialized context: " + contextHandle);
+			System.out.println("output token: " + outputToken);
 		}
-		return;
+
+		{
+			gss_name_t desiredName = GssApi.GSS_C_NO_NAME;
+			gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
+			desiredMechs.count = new NativeLong(1);
+			desiredMechs.elements = new gss_OID_desc.ByReference();
+			// there might be an easier way to reuse the predefined one, but ByReference
+			// makes it challenging
+			desiredMechs.elements.length = GssApi.MECH_KRB5.length;
+			desiredMechs.elements.elements = GssApi.MECH_KRB5.elements;
+			int credUsage = GssApi.GSS_C_INITIATE;
+			PointerByReference acquiredCredHandle = new PointerByReference();
+			PointerByReference actualMechs = new PointerByReference();
+			IntByReference retTime = new IntByReference();
+			int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs, credUsage,
+					acquiredCredHandle, actualMechs, retTime);
+			if (retval != 0) {
+				System.err.println("error acquiring credential: " + retval + "." + minorStatus.getValue());
+				throw new GSSException(retval, minorStatus.getValue(), "acquiring credential");
+			}
+			System.out.println("credential acquired");			
+		}
+		
 	}
 
 	private static final Oid KERB_V5_OID;

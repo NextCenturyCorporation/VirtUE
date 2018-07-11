@@ -17,9 +17,10 @@ public class JnaUtils {
 		return memory;
 	}
 	
-	static Memory newMemory(byte[] bytes) {
+	static Memory newMemory(byte... bytes) {
 		Memory memory = new Memory(bytes.length);
 		memory.write(0, bytes, 0, bytes.length);
 		return memory;
 	}
+	
 }
