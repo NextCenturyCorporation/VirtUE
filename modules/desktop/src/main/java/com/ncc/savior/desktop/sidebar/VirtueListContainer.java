@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
@@ -48,10 +49,10 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 	private void createContainer(DesktopVirtue dv, Color headerColor) {
 		this.row = numRows;
 		this.header = new JPanel();
-		header.setSize(new Dimension(450, 57));
-		header.setMinimumSize(new Dimension(450, 57));
-		header.setMaximumSize(new Dimension(10000, 57));
-		header.setPreferredSize(new Dimension(450, 57));
+		header.setSize(new Dimension(450, 50));
+		header.setMinimumSize(new Dimension(450, 50));
+		header.setMaximumSize(new Dimension(10000, 50));
+		header.setPreferredSize(new Dimension(450, 50));
 		header.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, Color.BLACK));
 		container.add(header);
 
@@ -62,6 +63,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		gbc.weightx = 1.0;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		gbc.insets = new Insets(0, 15, 0, 0);
 
 		JLabel title = new JLabel(dv.getName());
 		title.setHorizontalAlignment(SwingConstants.CENTER);
@@ -79,7 +81,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		this.statusLabel = new JLabel(this.status.toString());
 		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		statusLabel.setForeground(new Color(255, 255, 255));
-		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 50));
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 35));
 
 		JPanel statusOptionsContainer = new JPanel();
 		statusOptionsContainer.setBackground(headerColor);
@@ -91,6 +93,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		optionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		ImageIcon optionsIcon = new ImageIcon(scaledOptionsImage);
 		optionsLabel.setIcon(optionsIcon);
+		optionsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 9));
 
 		statusOptionsContainer.add(statusLabel);
 		statusOptionsContainer.add(optionsLabel);

@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		container.setLayout(new BorderLayout(0, 0));
 
 		this.header = new JPanel();
-		header.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
+		header.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
 		container.add(header, BorderLayout.NORTH);
 		header.setLayout(new GridBagLayout());
 		header.setBackground(headerColor);
@@ -80,6 +81,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		gbc.weightx = 1.0;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
+		gbc.insets = new Insets(0, 5, 0, 0);
 
 		JLabel title = new JLabel(dv.getName());
 		title.setHorizontalAlignment(SwingConstants.CENTER);
@@ -97,7 +99,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		this.statusLabel = new JLabel(this.status.toString());
 		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		statusLabel.setForeground(new Color(255, 255, 255));
-		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 50));
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 35));
 
 		JPanel statusOptionsContainer = new JPanel();
 		statusOptionsContainer.setBackground(headerColor);
@@ -109,6 +111,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		optionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		ImageIcon optionsIcon = new ImageIcon(scaledOptionsImage);
 		optionsLabel.setIcon(optionsIcon);
+		optionsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 9));
 
 		statusOptionsContainer.add(statusLabel);
 		statusOptionsContainer.add(optionsLabel);
