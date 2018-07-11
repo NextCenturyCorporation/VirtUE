@@ -48,7 +48,9 @@ public class SidebarControllerTest {
 
 			@Override
 			public void addVirtues(List<DesktopVirtue> virtues) {
-				// added.add(virtues.getId());
+				for (DesktopVirtue virtue : virtues) {
+					added.add(virtue.getId());
+				}
 			}
 		};
 		SidebarController sc = new SidebarController(null, null, null);
