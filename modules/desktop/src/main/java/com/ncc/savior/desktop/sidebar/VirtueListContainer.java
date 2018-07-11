@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
@@ -90,9 +89,6 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 
 		optionsLabel = new JLabel();
 		optionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		ImageIcon optionsIcon = new ImageIcon(VirtueTileContainer.class.getResource("/images/options.png"));
-		Image optionsImage = optionsIcon.getImage();
-		Image newOptionsImg = optionsImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
 		optionsIcon = new ImageIcon(newOptionsImg);
 		optionsLabel.setIcon(optionsIcon);
 
