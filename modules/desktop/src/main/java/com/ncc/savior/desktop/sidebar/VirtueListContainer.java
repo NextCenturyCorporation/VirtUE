@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -31,8 +32,8 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 public class VirtueListContainer extends AbstractVirtueContainer implements Comparable<VirtueListContainer> {
 
 	public VirtueListContainer(DesktopVirtue virtue, VirtueService virtueService, Color headerColor,
-			JScrollPane sp, JTextField textField) {
-		super(virtue, virtueService, sp, textField);
+			JScrollPane sp, JTextField textField, GhostText ghostText) {
+		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = false;
 
 		this.container = new JPanel();
@@ -48,10 +49,10 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 	private void createContainer(DesktopVirtue dv, Color headerColor) {
 		this.row = numRows;
 		this.header = new JPanel();
-		header.setSize(new Dimension(450, 70));
-		header.setMinimumSize(new Dimension(450, 70));
-		header.setMaximumSize(new Dimension(10000, 70));
-		header.setPreferredSize(new Dimension(450, 70));
+		header.setSize(new Dimension(450, 57));
+		header.setMinimumSize(new Dimension(450, 57));
+		header.setMaximumSize(new Dimension(10000, 57));
+		header.setPreferredSize(new Dimension(450, 57));
 		header.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, Color.BLACK));
 		container.add(header);
 
@@ -70,18 +71,23 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		header.add(title, gbc);
 
 		GridBagConstraints gbc2 = new GridBagConstraints();
-		gbc2.anchor = GridBagConstraints.WEST;
+		gbc2.anchor = GridBagConstraints.EAST;
 		gbc2.weightx = 1.0;
 		gbc2.gridx = 1;
+		gbc2.gridwidth = 1;
 		gbc2.gridy = 0;
+
 		this.statusLabel = new JLabel(this.status.toString());
 		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		statusLabel.setForeground(new Color(255, 255, 255));
-		header.add(statusLabel, gbc2);
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 50));
 
-		GridBagConstraints gbc3 = new GridBagConstraints();
-		gbc3.gridx = 2;
-		gbc3.gridy = 0;
+		JPanel statusOptionsContainer = new JPanel();
+		statusOptionsContainer.setBackground(headerColor);
+		statusOptionsContainer.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+
+		header.add(statusOptionsContainer, gbc2);
+
 		optionsLabel = new JLabel();
 		optionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		ImageIcon optionsIcon = new ImageIcon(VirtueTileContainer.class.getResource("/images/options.png"));
@@ -89,29 +95,34 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		Image newOptionsImg = optionsImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
 		optionsIcon = new ImageIcon(newOptionsImg);
 		optionsLabel.setIcon(optionsIcon);
-		header.add(optionsLabel, gbc3);
+
+		statusOptionsContainer.add(statusLabel);
+		statusOptionsContainer.add(optionsLabel);
 
 		container.add(header);
 
 		addOptionsListener();
 
-		container.addMouseListener(new MouseAdapter() {
+		header.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if (!dropDown) {
 					dropDown = true;
 					String keyword = textField.getText();
-					search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+					if (ghostText.getIsVisible()) {
+						keyword = "";
+					}
+					dropDownSearch(keyword);
 					container.validate();
 					container.repaint();
 					sp.validate();
 					sp.getViewport().revalidate();
 				} else {
+					dropDown = false;
 					container.removeAll();
 					container.add(header);
 					container.validate();
 					container.repaint();
-					dropDown = false;
 					sp.validate();
 					sp.getViewport().revalidate();
 				}
@@ -119,6 +130,10 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 		});
 
 		numRows++;
+	}
+
+	public void dropDownSearch(String keyword) {
+		search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 	}
 
 	public void search(Comparator<VirtueApplicationItem> comp, Predicate<VirtueApplicationItem> predicate) {

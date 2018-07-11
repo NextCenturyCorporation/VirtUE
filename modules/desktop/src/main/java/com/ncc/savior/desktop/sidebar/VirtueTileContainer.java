@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -45,8 +46,9 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 	private Color bodyColor;
 
 	public VirtueTileContainer(DesktopVirtue virtue, VirtueService virtueService,
-			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField) throws IOException {
-		super(virtue, virtueService, sp, textField);
+			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField, GhostText ghostText)
+			throws IOException {
+		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = true;
 
 		container = new JPanel();
@@ -70,6 +72,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		container.setLayout(new BorderLayout(0, 0));
 
 		this.header = new JPanel();
+		header.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
 		container.add(header, BorderLayout.NORTH);
 		header.setLayout(new GridBagLayout());
 		header.setBackground(headerColor);
@@ -86,18 +89,23 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		header.add(title, gbc);
 
 		GridBagConstraints gbc2 = new GridBagConstraints();
-		gbc2.anchor = GridBagConstraints.WEST;
+		gbc2.anchor = GridBagConstraints.EAST;
 		gbc2.weightx = 1.0;
 		gbc2.gridx = 1;
+		gbc2.gridwidth = 1;
 		gbc2.gridy = 0;
+
 		this.statusLabel = new JLabel(this.status.toString());
 		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		statusLabel.setForeground(new Color(255, 255, 255));
-		header.add(statusLabel, gbc2);
+		statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 50));
 
-		GridBagConstraints gbc3 = new GridBagConstraints();
-		gbc3.gridx = 2;
-		gbc3.gridy = 0;
+		JPanel statusOptionsContainer = new JPanel();
+		statusOptionsContainer.setBackground(headerColor);
+		statusOptionsContainer.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+
+		header.add(statusOptionsContainer, gbc2);
+
 		optionsLabel = new JLabel();
 		optionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		ImageIcon optionsIcon = new ImageIcon(VirtueTileContainer.class.getResource("/images/options.png"));
@@ -105,7 +113,9 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		Image newOptionsImg = optionsImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
 		optionsIcon = new ImageIcon(newOptionsImg);
 		optionsLabel.setIcon(optionsIcon);
-		header.add(optionsLabel, gbc3);
+
+		statusOptionsContainer.add(statusLabel);
+		statusOptionsContainer.add(optionsLabel);
 
 		addOptionsListener();
 
@@ -115,7 +125,10 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 				if (!dropDown) {
 					dropDown = true;
 					String keyword = textField.getText();
-					search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+					if (ghostText.getIsVisible()) {
+						keyword = "";
+					}
+					dropDownSearch(keyword);
 					tileContainer.validate();
 					tileContainer.repaint();
 					sp.validate();
@@ -139,6 +152,10 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		tileContainer.setBorder(new EmptyBorder(0, 25, 20, 25));
 		updateVirtue(virtue);
 		numRows++;
+	}
+
+	public void dropDownSearch(String keyword) {
+		search(null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 	}
 
 	public void search(Comparator<VirtueApplicationItem> comp, Predicate<VirtueApplicationItem> predicate) {
