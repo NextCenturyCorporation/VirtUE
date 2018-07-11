@@ -324,22 +324,26 @@ public class Sidebar implements VirtueChangeHandler {
 			Image defaultImage = saviorIcon.getImage();
 
 			VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus,
+					ghostText);
 			appsTileVa.tileSetup();
 			appsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vtcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus,
+					ghostText);
 			vtcAppsTileVa.tileSetup();
 			vtcAppsTileVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem vlcAppsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus,
+					ghostText);
 			vlcAppsListVa.listSetup();
 			vlcAppsListVa.registerListener(dom.getChangeListener());
 
 			VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus);
+					dom.getChangeListener(), defaultImage, isFavorited, frame, textField, cb, sortAppsByStatus,
+					ghostText);
 			appsListVa.listSetup();
 			appsListVa.registerListener(dom.getChangeListener());
 
@@ -354,15 +358,15 @@ public class Sidebar implements VirtueChangeHandler {
 				switch (selected) {
 				case "Alphabetical":
 					favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-							dom.getChangeListener(), defaultImage, true, frame, textField, cb, null);
+							dom.getChangeListener(), defaultImage, true, frame, textField, cb, null, ghostText);
 					favoritedVa.tileSetup();
-					fv.addFavorite(ad, virtue, favoritedVa, textField, null);
+					fv.addFavorite(ad, virtue, favoritedVa, textField, null, ghostText);
 					break;
 				case "Status":
 					favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-							dom.getChangeListener(), defaultImage, true, frame, textField, cb, null);
+							dom.getChangeListener(), defaultImage, true, frame, textField, cb, null, ghostText);
 					favoritedVa.tileSetup();
-					fv.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus);
+					fv.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus, ghostText);
 					break;
 				}
 			}
