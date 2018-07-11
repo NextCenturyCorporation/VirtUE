@@ -93,7 +93,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.ad = ad;
 		this.virtue = virtue;
 		this.fv = fv;
-		this.image = image;
+		this.image = image; // Must be 47x50 for tileView and 30x30 for listView
 		this.frame = frame;
 		this.textField = textField;
 		this.cb = cb;
