@@ -31,7 +31,7 @@ public abstract class AbstractVirtueContainer {
 	protected static ImageIcon optionsIcon = new ImageIcon(
 			AbstractVirtueContainer.class.getResource("/images/options.png"));
 	protected static Image optionsImage = optionsIcon.getImage(); // transform it
-	protected static Image newOptionsImg = optionsImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
+	protected static Image scaledOptionsImage = optionsImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
 
 	protected DesktopVirtue virtue;
 	protected VirtueService virtueService;

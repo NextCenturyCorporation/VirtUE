@@ -31,7 +31,7 @@ public class SidebarControllerTest {
 			}
 
 			@Override
-			public void addVirtue(DesktopVirtue virtue) {
+			public void addVirtues(List<DesktopVirtue> virtues) {
 			}
 		};
 		VirtueChangeHandler vch = new VirtueChangeHandler() {
@@ -47,8 +47,8 @@ public class SidebarControllerTest {
 			}
 
 			@Override
-			public void addVirtue(DesktopVirtue virtue) {
-				added.add(virtue.getId());
+			public void addVirtues(List<DesktopVirtue> virtues) {
+				// added.add(virtues.getId());
 			}
 		};
 		SidebarController sc = new SidebarController(null, null, null);

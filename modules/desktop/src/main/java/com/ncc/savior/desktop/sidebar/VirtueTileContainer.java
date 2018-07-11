@@ -107,7 +107,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 
 		optionsLabel = new JLabel();
 		optionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		optionsIcon = new ImageIcon(newOptionsImg);
+		ImageIcon optionsIcon = new ImageIcon(scaledOptionsImage);
 		optionsLabel.setIcon(optionsIcon);
 
 		statusOptionsContainer.add(statusLabel);

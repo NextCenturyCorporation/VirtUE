@@ -43,6 +43,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
@@ -306,88 +307,100 @@ public class Sidebar implements VirtueChangeHandler {
 
 	// ***Updating Virtues***
 	@Override
-	public void addVirtue(DesktopVirtue virtue) throws IOException, InterruptedException, ExecutionException {
-		Color headerColor = getNextColor();
-		VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
-				textField, ghostText);
-		vt.addVirtueToRow(virtue, vtc, vtc.getRow());
+	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
+		for (DesktopVirtue virtue : virtues) {
+			Color headerColor = getNextColor();
+			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
+					textField, ghostText);
+			vt.addVirtueToRow(virtue, vtc, vtc.getRow());
 
-		VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField, ghostText);
-		vl.addVirtueToRow(virtue, vlc, vlc.getRow());
+			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField,
+					ghostText);
+			vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 
-		// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
-		virtueIdToVc.put(virtue.getTemplateId(), vtc);
-		boolean isFavorited;
+			// String id = virtue.getId() == null ? virtue.getTemplateId() : virtue.getId();
+			virtueIdToVc.put(virtue.getTemplateId(), vtc);
 
-		String keyword = textField.getText();
-		for (ApplicationDefinition ad : virtue.getApps().values()) {
-			isFavorited = favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false);
-			ApplicationDom dom = new ApplicationDom(ad, isFavorited);
+			for (ApplicationDefinition ad : virtue.getApps().values()) {
 
-			// Image appImage = iconService.getImage(ad.getIconKey(), null);
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							boolean isFavorited = favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false);
+							ApplicationDom dom = new ApplicationDom(ad, isFavorited);
 
-			// Image defaultImage = saviorIcon.getImage();
+							VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
+									virtue, fv, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb,
+									sortAppsByStatus);
+							appsTileVa.tileSetup();
+							appsTileVa.registerListener(dom.getChangeListener());
+							at.addApplication(ad, appsTileVa);
 
-			VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb, sortAppsByStatus);
-			appsTileVa.tileSetup();
-			appsTileVa.registerListener(dom.getChangeListener());
+							VirtueApplicationItem vtcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
+									virtue, fv, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb,
+									sortAppsByStatus);
+							vtcAppsTileVa.tileSetup();
+							vtcAppsTileVa.registerListener(dom.getChangeListener());
 
-			VirtueApplicationItem vtcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb, sortAppsByStatus);
-			vtcAppsTileVa.tileSetup();
-			vtcAppsTileVa.registerListener(dom.getChangeListener());
+							VirtueApplicationItem vlcAppsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
+									virtue, fv, dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb,
+									sortAppsByStatus);
+							vlcAppsListVa.listSetup();
+							vlcAppsListVa.registerListener(dom.getChangeListener());
 
-			VirtueApplicationItem vlcAppsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb, sortAppsByStatus);
-			vlcAppsListVa.listSetup();
-			vlcAppsListVa.registerListener(dom.getChangeListener());
+							VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue,
+									fv, dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb,
+									sortAppsByStatus);
+							appsListVa.listSetup();
+							appsListVa.registerListener(dom.getChangeListener());
 
-			VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-					dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb, sortAppsByStatus);
-			appsListVa.listSetup();
-			appsListVa.registerListener(dom.getChangeListener());
+							al.addApplication(ad, appsListVa);
+							vtc.addApplication(ad, vtcAppsTileVa);
+							vlc.addApplication(ad, vlcAppsListVa);
 
-			al.addApplication(ad, appsListVa);
-			at.addApplication(ad, appsTileVa);
-			vtc.addApplication(ad, vtcAppsTileVa);
-			vlc.addApplication(ad, vlcAppsListVa);
+							Consumer<Image> consumer = i -> {
+								appsTileVa.setTileImage(i);
+								vtcAppsTileVa.setTileImage(i);
+								vlcAppsListVa.setListImage(i);
+								appsListVa.setListImage(i);
+								fv.setTileImage(ad, virtue, i);
+							};
 
-			if (isFavorited) {
-				String selected = (String) cb.getSelectedItem();
-				VirtueApplicationItem favoritedVa;
-				switch (selected) {
-				case "Alphabetical":
-					favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-							dom.getChangeListener(), saviorTile, true, frame, textField, cb, null);
-					favoritedVa.tileSetup();
-					fv.addFavorite(ad, virtue, favoritedVa, textField, null);
-					break;
-				case "Status":
-					favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-							dom.getChangeListener(), saviorTile, true, frame, textField, cb, null);
-					favoritedVa.tileSetup();
-					fv.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus);
-					break;
-				}
+							iconService.getImage(ad.getIconKey(), consumer);
+
+							dom.addListener(appsTileVa.getChangeListener());
+							dom.addListener(appsListVa.getChangeListener());
+							dom.addListener(vtcAppsTileVa.getChangeListener());
+							dom.addListener(vlcAppsListVa.getChangeListener());
+
+							if (isFavorited) {
+								String selected = (String) cb.getSelectedItem();
+								VirtueApplicationItem favoritedVa;
+								switch (selected) {
+								case "Alphabetical":
+									favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
+											dom.getChangeListener(), saviorTile, true, frame, textField, cb, null);
+									favoritedVa.tileSetup();
+									fv.addFavorite(ad, virtue, favoritedVa, textField, null);
+									break;
+								case "Status":
+									favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
+											dom.getChangeListener(), saviorTile, true, frame, textField, cb, null);
+									favoritedVa.tileSetup();
+									fv.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus);
+									break;
+								}
+							}
+						} catch (Exception e) {
+							logger.debug("Error with adding virtues");
+						}
+					}
+				});
 			}
-
-			Consumer<Image> consumer = i -> {
-				appsTileVa.setTileImage(i);
-				vtcAppsTileVa.setTileImage(i);
-				vlcAppsListVa.setListImage(i);
-				appsListVa.setListImage(i);
-				fv.setTileImage(ad, virtue, i);
-			};
-
-			iconService.getImage(ad.getIconKey(), consumer);
-
-			dom.addListener(appsTileVa.getChangeListener());
-			dom.addListener(appsListVa.getChangeListener());
-			dom.addListener(vtcAppsTileVa.getChangeListener());
-			dom.addListener(vlcAppsListVa.getChangeListener());
 		}
 
+		String keyword = textField.getText();
 		if (ghostText.getIsVisible()) {
 			keyword = "";
 		}
