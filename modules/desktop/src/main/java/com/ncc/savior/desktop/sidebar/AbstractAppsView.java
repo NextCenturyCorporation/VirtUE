@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -29,7 +29,7 @@ public abstract class AbstractAppsView {
 
 	protected VirtueService virtueService;
 	protected JPanel container;
-	protected HashMap<String, VirtueApplicationItem> tiles;
+	protected ConcurrentHashMap<String, VirtueApplicationItem> tiles;
 	protected JScrollPane sp;
 
 	protected ArrayList<String> appsInView;
@@ -38,7 +38,7 @@ public abstract class AbstractAppsView {
 		this.virtueService = virtueService;
 		this.sp = sp;
 		this.container = new JPanel();
-		this.tiles = new HashMap<String, VirtueApplicationItem>();
+		this.tiles = new ConcurrentHashMap<String, VirtueApplicationItem>();
 		this.appsInView = new ArrayList<String>();
 	}
 

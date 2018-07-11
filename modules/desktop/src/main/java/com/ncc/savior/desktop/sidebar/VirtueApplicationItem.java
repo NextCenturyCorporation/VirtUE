@@ -55,8 +55,9 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private ChangeListener changeListener;
 	private PropertyChangeListener listener;
 
-	private ImageIcon favoritedImage = new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png"));
-	private ImageIcon unfavoritedImage = new ImageIcon(
+	private static ImageIcon favoritedImage = new ImageIcon(
+			VirtueApplicationItem.class.getResource("/images/favorited.png"));
+	private static ImageIcon unfavoritedImage = new ImageIcon(
 			VirtueApplicationItem.class.getResource("/images/unfavorited.png"));
 	private Image image;
 
@@ -93,7 +94,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.ad = ad;
 		this.virtue = virtue;
 		this.fv = fv;
-		this.image = image;
+		this.image = image; // Must be 47x50 for tileView and 30x30 for listView
 		this.frame = frame;
 		this.textField = textField;
 		this.cb = cb;
@@ -130,8 +131,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		appName.setHorizontalAlignment(SwingConstants.CENTER);
 		container.setLayout(new BorderLayout(0, 0));
 
-		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		ImageIcon imageIcon = new ImageIcon(image);
 
 		appIcon.setIcon(imageIcon);
 
@@ -157,8 +157,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.setLayout(new BorderLayout());
 		this.appIcon = new JLabel(ad.getName());
 
-		Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		ImageIcon imageIcon = new ImageIcon(image);
 
 		appIcon.setIcon(imageIcon);
 		appIcon.setHorizontalAlignment(SwingConstants.LEFT);
