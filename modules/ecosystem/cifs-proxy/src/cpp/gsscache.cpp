@@ -87,10 +87,10 @@ int main(int argc, char** argv) {
 	const gss_name_t desiredName = GSS_C_NO_NAME;
 	gss_OID_set_desc desiredMechs = { 1, kerbMechanism } ;
 	gss_cred_usage_t credUsage = GSS_C_INITIATE;
-	gss_cred_id_t outputCredHandle = 0;
+	gss_cred_id_t acquiredCredHandle = 0;
 	gss_OID_set actualMechs;
 	majorStatus = gss_acquire_cred(&minorStatus, desiredName, timeReq, &desiredMechs,
-			credUsage, &outputCredHandle, &actualMechs, &timeRec);
+			credUsage, &acquiredCredHandle, &actualMechs, &timeRec);
 	if (GSS_ERROR(majorStatus)) {
 		std::cerr << "error on acquire_cred: "
 				<< majorStatus
@@ -100,9 +100,12 @@ int main(int argc, char** argv) {
 		printErrors(majorStatus);
 		return 1;
 	}
-
-	std::cout << "credential acquired" << std::endl;
-
+	std::cout << "credential(s) acquired" << std::endl;
+	gss_name_t outName;
+	unsigned int outLifetime;
+	int outUsage;
+	gss_OID_set outMechs;
+	gss_inquire_cred(&minorStatus, acquiredCredHandle, &outName, &outLifetime, &outUsage, &outMechs);
 
 	//gss_cred_id_t inputCredHandle;
 	OM_uint32 overwriteCred = 1;
@@ -116,7 +119,7 @@ int main(int argc, char** argv) {
 
 	gss_OID_set elementsStored;
 	gss_cred_usage_t credUsageStored;
-	majorStatus = gss_store_cred_into(&minorStatus, outputCredHandle, GSS_C_INITIATE,
+	majorStatus = gss_store_cred_into(&minorStatus, acquiredCredHandle, GSS_C_INITIATE,
 			GSS_C_NULL_OID, overwriteCred, defaultCred, &credStore,
 			&elementsStored, &credUsageStored);
 	if (GSS_ERROR(majorStatus)) {
@@ -128,7 +131,7 @@ int main(int argc, char** argv) {
 		printErrors(majorStatus);
 		return 1;
 	}
-	std::cout << "credential stored" << std::endl;
+	std::cout << "stored " << elementsStored << " credentials"<< std::endl;
 
     std::ofstream token("token", std::ios::binary);
     token.write(reinterpret_cast<const char*>(outputToken.value), outputToken.length);
