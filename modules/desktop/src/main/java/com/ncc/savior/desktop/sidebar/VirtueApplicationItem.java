@@ -75,6 +75,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private JLabel appIcon;
 	private JPanel container;
 
+	private GhostText ghostText;
 	private boolean isFavorited;
 	private JTextField textField;
 	private JComboBox<String> cb;
@@ -86,7 +87,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
 			Image image, boolean isFavorited, JFrame frame, JTextField textField, JComboBox<String> cb,
-			Comparator<VirtueApplicationItem> sortAppsByStatus) {
+			Comparator<VirtueApplicationItem> sortAppsByStatus, GhostText ghostText) {
 		this.sp = sp;
 		this.vc = vc;
 		this.virtueService = virtueService;
@@ -98,6 +99,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.textField = textField;
 		this.cb = cb;
 		this.sortAppsByStatus = sortAppsByStatus;
+		this.ghostText = ghostText;
 
 		this.appIcon = new JLabel();
 		this.container = new JPanel();
@@ -380,14 +382,14 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	public void favorite() {
 		String selected = (String) cb.getSelectedItem();
 		VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, image,
-				true, frame, textField, cb, sortAppsByStatus);
+				true, frame, textField, cb, sortAppsByStatus, ghostText);
 		va.tileSetup();
 		switch (selected) {
 			case "Alphabetical":
-				fv.addFavorite(ad, virtue, va, textField, null);
+			fv.addFavorite(ad, virtue, va, textField, null, ghostText);
 				break;
 			case "Status":
-				fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus);
+			fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus, ghostText);
 				break;
 		}
 		favoritedLabel.setIcon(favoritedImage);

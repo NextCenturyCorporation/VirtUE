@@ -35,14 +35,18 @@ public class FavoritesView extends AbstractAppsView {
 	}
 
 	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueApplicationItem va,
-			JTextField textField, Comparator<VirtueApplicationItem> comp) {
+			JTextField textField, Comparator<VirtueApplicationItem> comp, GhostText ghostText) {
 		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
 			favorites.putBoolean(ad.getId() + virtue.getTemplateId(), true);
 
 			container.add(va.getContainer());
 			tiles.put(ad.getId() + virtue.getTemplateId(), va);
 		}
-		String keyword = textField.getText();
+		String input = textField.getText();
+		if (ghostText.getIsVisible()) {
+			input = "";
+		}
+		String keyword = input;
 		search(keyword, comp, currVa -> currVa.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 	}
 
