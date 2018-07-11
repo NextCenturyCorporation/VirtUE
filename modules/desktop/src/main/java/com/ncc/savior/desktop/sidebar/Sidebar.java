@@ -85,6 +85,8 @@ public class Sidebar implements VirtueChangeHandler {
 	private static Image saviorTile = defaultImage.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
 	private static Image saviorList = defaultImage.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
 
+	private static ImageIcon loadingIcon = new ImageIcon(AppsTile.class.getResource("/images/loading.gif"));
+
 	private ImageIcon searchIcon;
 	private ImageIcon closeIcon = new ImageIcon(Sidebar.class.getResource("/images/close-button.png"));
 
@@ -141,10 +143,13 @@ public class Sidebar implements VirtueChangeHandler {
 	private Preferences lastSort;
 
 	public static boolean askAgain = true;
+	private boolean loading = true;
 
 	private Comparator<VirtueApplicationItem> sortAppsByStatus;
 	private Comparator<VirtueTileContainer> sortVtByStatus;
 	private Comparator<VirtueListContainer> sortVlByStatus;
+
+	private JPanel loadingContainer;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			boolean useColors, String style) {
@@ -169,6 +174,17 @@ public class Sidebar implements VirtueChangeHandler {
 		colorList = loadColors();
 		colorItr = colorList.iterator();
 		setupComparators();
+		setupLoadingGif();
+	}
+
+	private void setupLoadingGif() {
+		this.loadingContainer = new JPanel();
+		loadingContainer.setLayout(new BorderLayout());
+		JLabel gifLabel = new JLabel();
+		gifLabel.setIcon(loadingIcon);
+		gifLabel.setVerticalAlignment(SwingConstants.CENTER);
+		gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		loadingContainer.add(gifLabel, BorderLayout.CENTER);
 	}
 
 	private ArrayList<Color> loadColors() {
@@ -281,6 +297,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.getContentPane().add(desktopContainer);
 		frame.setSize(491, 600);
 		setInitialViewPort();
+		sp.setViewportView(loadingContainer);
 		frame.setVisible(true);
 	}
 
@@ -308,6 +325,12 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
+		if (loading) {
+			System.out.println("setting initial viewport");
+			loading = false;
+			setInitialViewPort();
+		}
+
 		for (DesktopVirtue virtue : virtues) {
 			Color headerColor = getNextColor();
 			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
@@ -759,6 +782,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				authService.logout();
+				loading = true;
 				try {
 					startLogin();
 				} catch (IOException e) {
@@ -888,7 +912,9 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(activeFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		sp.setViewportView(fv.getContainer());
+		if (!loading) {
+			sp.setViewportView(fv.getContainer());
+		}
 	}
 
 	public void renderAppsListView() {
@@ -901,7 +927,9 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(activeListIcon);
-		sp.setViewportView(al.getContainer());
+		if (!loading) {
+			sp.setViewportView(al.getContainer());
+		}
 	}
 
 	public void renderAppsTileView() {
@@ -914,7 +942,9 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(activeTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		sp.setViewportView(at.getContainer());
+		if (!loading) {
+			sp.setViewportView(at.getContainer());
+		}
 	}
 
 	public void renderVirtueTileView() {
@@ -926,7 +956,9 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		sp.setViewportView(vt.getContainer());
+		if (!loading) {
+			sp.setViewportView(vt.getContainer());
+		}
 	}
 
 	public void renderVirtueListView() {
@@ -938,7 +970,9 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		sp.setViewportView(vl.getContainer());
+		if (!loading) {
+			sp.setViewportView(vl.getContainer());
+		}
 	}
 
 	public void resetViews() {
