@@ -123,7 +123,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		favoritedContainer.setLayout(new GridBagLayout());
 		favoritedContainer.setBackground(Color.WHITE);
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(0, 0, 0, 65);
+		gbc.insets = new Insets(0, 55, 0, 0);
 
 		container.setPreferredSize(new Dimension(90, 90));
 		container.setBackground(Color.WHITE);
@@ -141,7 +141,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			favoritedLabel.setIcon(unfavoritedImage);
 		}
 
-		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		favoritedLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		favoritedContainer.add(favoritedLabel, gbc);
 
 		container.add(appIcon, BorderLayout.CENTER);
@@ -172,16 +172,16 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
-		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 7));
-		appIcon.setBorder(BorderFactory.createEmptyBorder(0, 7, 0, 0));
+		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 9));
+		appIcon.setBorder(BorderFactory.createEmptyBorder(0, 13, 0, 0));
 
 		container.add(favoritedLabel, BorderLayout.EAST);
 		container.add(appIcon, BorderLayout.WEST);
 
-		container.setSize(new Dimension(450, 57));
+		container.setSize(new Dimension(450, 50));
 		// container.setMinimumSize(new Dimension(450, 57));
 		// container.setMaximumSize(new Dimension(10000, 57));
-		container.setPreferredSize(new Dimension(450, 57));
+		container.setPreferredSize(new Dimension(450, 50));
 
 		addListener(vc, fv, ad, virtue, true);
 	}
@@ -381,7 +381,8 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 	public void favorite() {
 		String selected = (String) cb.getSelectedItem();
-		VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, image,
+		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
+		VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, newimg,
 				true, frame, textField, cb, sortAppsByStatus, ghostText);
 		va.tileSetup();
 		switch (selected) {

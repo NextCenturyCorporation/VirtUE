@@ -29,7 +29,7 @@ public class FavoritesView extends AbstractAppsView {
 
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
-		container.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		container.validate();
 		container.repaint();
 	}

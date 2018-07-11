@@ -107,7 +107,7 @@ public abstract class AbstractVirtueContainer {
 					public void actionPerformed(ActionEvent evt) {
 						try {
 							virtueService.stopVirtue(virtue);
-							virtue.setVirtueState(VirtueState.STOPPING);
+							// virtue.setVirtueState(VirtueState.STOPPING);
 							updateVirtue(virtue);
 						} catch (IOException e) {
 							String msg = "Error attempting to stop virtue=" + virtue;
@@ -118,7 +118,7 @@ public abstract class AbstractVirtueContainer {
 
 				pm.setPopupSize(45, 38);
 				pm.add(mi1);
-				pm.show(optionsLabel, -20, 24);
+				pm.show(optionsLabel, -11, 26);
 			}
 		});
 	}
