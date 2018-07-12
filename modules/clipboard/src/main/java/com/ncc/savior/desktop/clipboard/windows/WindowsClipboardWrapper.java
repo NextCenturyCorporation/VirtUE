@@ -472,6 +472,8 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			// reads properly
 			String wideString = p.getWideString(0);
 			return new UnicodeClipboardData(wideString);
+		case IWindowsClipboardUser32.CF_HDROP:
+
 		default:
 			return new UnknownClipboardData(format);
 		}

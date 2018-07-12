@@ -535,7 +535,7 @@ public class AdminResource {
 	@POST
 	@Produces("application/json")
 	@Path("user/{username}/enable")
-	public void removeUser(@PathParam("username") String username, String enableString) {
+	public void updateUser(@PathParam("username") String username, String enableString) {
 		try {
 			boolean enable = Boolean.parseBoolean(enableString);
 			adminService.enableDisableUser(username, enable);
