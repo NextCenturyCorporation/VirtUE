@@ -16,7 +16,7 @@ public interface GssApi extends Library {
 
 	final gss_cred_id_t GSS_C_NO_CREDENTIAL = new gss_cred_id_t(Pointer.NULL);
 	final gss_channel_bindings_struct GSS_C_NO_CHANNEL_BINDINGS = null;
-	final Pointer GSS_C_NO_CONTEXT = Pointer.createConstant(0);
+	final Pointer GSS_C_NO_CONTEXT = Pointer.NULL;
 	final gss_name_t GSS_C_NO_NAME = new gss_name_t(Pointer.NULL);
 
 	final gss_OID_desc GSS_C_NT_HOSTBASED_SERVICE = new gss_OID_desc(10,
@@ -92,10 +92,10 @@ public interface GssApi extends Library {
 
 	class gss_channel_bindings_struct extends Structure {
 		public int initiator_addrtype;
-		public gss_buffer_desc.ByReference initiator_address;
+		public gss_buffer_desc initiator_address;
 		public int acceptor_addrtype;
-		public gss_buffer_desc.ByReference acceptor_address;
-		public gss_buffer_desc.ByReference application_data;
+		public gss_buffer_desc acceptor_address;
+		public gss_buffer_desc application_data;
 
 		@Override
 		protected List<String> getFieldOrder() {
@@ -121,12 +121,13 @@ public interface GssApi extends Library {
 	 * prevent passing the wrong type to a function.
 	 */
 	
-	class gss_cred_id_t extends PointerByReference {
-		public gss_cred_id_t() {
+	class gss_cred_id_t extends Pointer {
+		public gss_cred_id_t(long peer) {
+			super(peer);
 		}
 
-		gss_cred_id_t(Pointer p) {
-			super(p);
+		public gss_cred_id_t(Pointer p) {
+			super(Pointer.nativeValue(p));
 		}
 	}
 
@@ -142,10 +143,10 @@ public interface GssApi extends Library {
 			gss_cred_id_t credHandle, /* claimant_cred_handle */
 			PointerByReference contextHandle, /* context_handle */
 			Pointer gssTargetName, /* target_name */
-			gss_OID_desc mechKrb5, /* mech_type (used to be const) */
+			gss_OID_desc mechType, /* mech_type (used to be const) */
 			int flags, /* req_flags */
 			int time, /* time_req */
-			gss_channel_bindings_struct gssCNoChannelBindings, /* input_chan_bindings */
+			gss_channel_bindings_struct gssInputChannelBindings, /* input_chan_bindings */
 			gss_buffer_desc inputToken, /* input_token */
 			PointerByReference actualMechType, /* actual_mech_type */
 			gss_buffer_desc outputToken, /* output_token */

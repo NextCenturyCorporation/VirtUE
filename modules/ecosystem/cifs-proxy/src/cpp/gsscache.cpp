@@ -47,9 +47,9 @@ int main(int argc, char** argv) {
 	gss_OID kerbMechanism = &mech_krb5;
 	OM_uint32 reqFlags = 0; // GSS_C_DELEG_FLAG
 	OM_uint32 timeReq = 0;
-	gss_OID actualMechType;
+	gss_OID actualMechType = 0;
 	gss_buffer_desc inputToken;
-	gss_buffer_desc outputToken;
+	gss_buffer_desc outputToken = { 0, 0 };
 	unsigned int retFlags;
 	unsigned int timeRec;
 	OM_uint32 majorStatus;
