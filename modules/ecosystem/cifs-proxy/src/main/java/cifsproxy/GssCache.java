@@ -14,6 +14,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
+import cifsproxy.GssApi.GssCredentialUsage;
 import cifsproxy.GssApi.gss_OID_desc;
 import cifsproxy.GssApi.gss_OID_set_desc;
 import cifsproxy.GssApi.gss_buffer_desc;
@@ -36,6 +37,7 @@ public class GssCache {
 
 		Pointer acquiredCred = acquireCred(gssapi, minorStatus);
 		storeCredInto(gssapi, minorStatus, acquiredCred);
+		System.out.println("Done");
 	}
 
 	private static Pointer acquireCred(GssApi gssapi, IntByReference minorStatus) throws GSSException {
@@ -47,13 +49,13 @@ public class GssCache {
 		// makes it challenging
 		desiredMechs.elements.length = GssApi.MECH_KRB5.length;
 		desiredMechs.elements.elements = GssApi.MECH_KRB5.elements;
-		int credUsage = GssApi.GSS_C_INITIATE;
+		GssCredentialUsage credUsage = GssCredentialUsage.GSS_C_INITIATE;
 		PointerByReference acquiredCredHandle = new PointerByReference();
 		Pointer actualMechsPtr = new Pointer(0);
 		PointerByReference actualMechsHandle = new PointerByReference(actualMechsPtr);
 		IntByReference retTime = new IntByReference();
-		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs, credUsage, acquiredCredHandle,
-				actualMechsHandle, retTime);
+		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs, credUsage.getValue(),
+				acquiredCredHandle, actualMechsHandle, retTime);
 		if (retval != 0) {
 			System.err.println("error acquiring credential: " + retval + "." + minorStatus.getValue());
 			throw new GSSException(retval, minorStatus.getValue(), "acquiring credential");
@@ -106,7 +108,8 @@ public class GssCache {
 			throws GSSException {
 		int overwriteCred = 1;
 		int defaultCred = 0;
-		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:jcredstore");
+		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache",
+				"FILE:jcredstore");
 		gss_key_value_set credStore = new gss_key_value_set();
 		credStore.count = 1;
 		credStore.elements = credElement;
@@ -114,8 +117,8 @@ public class GssCache {
 		PointerByReference oidsStoredHandle = new PointerByReference(oidsStored);
 		IntByReference credStored = new IntByReference();
 		System.out.println("about to store...");
-		int retval = gssapi.gss_store_cred_into(minorStatus, acquiredCred, GssApi.GSS_C_INITIATE, GssApi.GSS_C_NO_OID,
-				overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
+		int retval = gssapi.gss_store_cred_into(minorStatus, acquiredCred, GssCredentialUsage.GSS_C_INITIATE.getValue(),
+				GssApi.GSS_C_NO_OID, overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
 		if (retval != 0) {
 			System.err.println("storing credential: " + retval + "." + minorStatus.getValue());
 			throw new GSSException(retval, minorStatus.getValue(), "storing credential");
