@@ -18,6 +18,8 @@ import cifsproxy.GssApi.gss_OID_desc;
 import cifsproxy.GssApi.gss_OID_set_desc;
 import cifsproxy.GssApi.gss_buffer_desc;
 import cifsproxy.GssApi.gss_cred_id_t;
+import cifsproxy.GssApi.gss_key_value_element;
+import cifsproxy.GssApi.gss_key_value_set;
 import cifsproxy.GssApi.gss_name_t;
 
 public class GssCache {
@@ -32,32 +34,32 @@ public class GssCache {
 		gss_cred_id_t initCred = GssApi.GSS_C_NO_CREDENTIAL;
 		initSecContext(gssapi, minorStatus, gssTargetName, initCred);
 
-		acquireCred(gssapi, minorStatus);
-
+		Pointer acquiredCred = acquireCred(gssapi, minorStatus);
+		storeCredInto(gssapi, minorStatus, acquiredCred);
 	}
 
-	private static void acquireCred(GssApi gssapi, IntByReference minorStatus) throws GSSException {
-		{
-			gss_name_t desiredName = GssApi.GSS_C_NO_NAME;
-			gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
-			desiredMechs.count = new NativeLong(1);
-			desiredMechs.elements = new gss_OID_desc.ByReference();
-			// there might be an easier way to reuse the predefined one, but ByReference
-			// makes it challenging
-			desiredMechs.elements.length = GssApi.MECH_KRB5.length;
-			desiredMechs.elements.elements = GssApi.MECH_KRB5.elements;
-			int credUsage = GssApi.GSS_C_INITIATE;
-			PointerByReference acquiredCredHandle = new PointerByReference();
-			PointerByReference actualMechs = new PointerByReference();
-			IntByReference retTime = new IntByReference();
-			int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs, credUsage,
-					acquiredCredHandle, actualMechs, retTime);
-			if (retval != 0) {
-				System.err.println("error acquiring credential: " + retval + "." + minorStatus.getValue());
-				throw new GSSException(retval, minorStatus.getValue(), "acquiring credential");
-			}
-			System.out.println("credential acquired");
+	private static Pointer acquireCred(GssApi gssapi, IntByReference minorStatus) throws GSSException {
+		gss_name_t desiredName = GssApi.GSS_C_NO_NAME;
+		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
+		desiredMechs.count = new NativeLong(1);
+		desiredMechs.elements = new gss_OID_desc.ByReference();
+		// there might be an easier way to reuse the predefined one, but ByReference
+		// makes it challenging
+		desiredMechs.elements.length = GssApi.MECH_KRB5.length;
+		desiredMechs.elements.elements = GssApi.MECH_KRB5.elements;
+		int credUsage = GssApi.GSS_C_INITIATE;
+		PointerByReference acquiredCredHandle = new PointerByReference();
+		Pointer actualMechsPtr = new Pointer(0);
+		PointerByReference actualMechsHandle = new PointerByReference(actualMechsPtr);
+		IntByReference retTime = new IntByReference();
+		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs, credUsage, acquiredCredHandle,
+				actualMechsHandle, retTime);
+		if (retval != 0) {
+			System.err.println("error acquiring credential: " + retval + "." + minorStatus.getValue());
+			throw new GSSException(retval, minorStatus.getValue(), "acquiring credential");
 		}
+		System.out.println("credential acquired");
+		return acquiredCredHandle.getValue();
 	}
 
 	private static void initSecContext(GssApi gssapi, IntByReference minorStatus, Pointer gssTargetName,
@@ -97,6 +99,28 @@ public class GssCache {
 		gssTargetName = tempPtr.getValue();
 		System.out.println("imported name (" + target + ", " + gssTargetName + ", " + tempPtr + ")");
 		return gssTargetName;
+
+	}
+
+	private static void storeCredInto(GssApi gssapi, IntByReference minorStatus, Pointer acquiredCred)
+			throws GSSException {
+		int overwriteCred = 1;
+		int defaultCred = 0;
+		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:jcredstore");
+		gss_key_value_set credStore = new gss_key_value_set();
+		credStore.count = 1;
+		credStore.elements = credElement;
+		Pointer oidsStored = new Pointer(0);
+		PointerByReference oidsStoredHandle = new PointerByReference(oidsStored);
+		IntByReference credStored = new IntByReference();
+		System.out.println("about to store...");
+		int retval = gssapi.gss_store_cred_into(minorStatus, acquiredCred, GssApi.GSS_C_INITIATE, GssApi.GSS_C_NO_OID,
+				overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
+		if (retval != 0) {
+			System.err.println("storing credential: " + retval + "." + minorStatus.getValue());
+			throw new GSSException(retval, minorStatus.getValue(), "storing credential");
+		}
+		System.out.println("credential stored");
 	}
 
 	private static final Oid KERB_V5_OID;

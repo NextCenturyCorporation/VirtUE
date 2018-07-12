@@ -19,9 +19,9 @@ public interface GssApi extends Library {
 	final Pointer GSS_C_NO_CONTEXT = Pointer.NULL;
 	final gss_name_t GSS_C_NO_NAME = new gss_name_t(Pointer.NULL);
 
-	final gss_OID_desc GSS_C_NT_HOSTBASED_SERVICE = new gss_OID_desc(10,
-			JnaUtils.newMemory(new byte[] { 0x2a, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xf7, 0x12, 0x01, 0x02, 0x01, 0x04 }));
-					//"\0x2a\0x86\0x48\0x86\0xf7\0x12\0x01\0x02\0x01\0x04"));
+	final gss_OID_desc GSS_C_NT_HOSTBASED_SERVICE = new gss_OID_desc(10, JnaUtils
+			.newMemory(new byte[] { 0x2a, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xf7, 0x12, 0x01, 0x02, 0x01, 0x04 }));
+	// "\0x2a\0x86\0x48\0x86\0xf7\0x12\0x01\0x02\0x01\0x04"));
 
 	final gss_OID_desc MECH_KRB5 = new gss_OID_desc(9,
 			JnaUtils.newMemory(new byte[] { 052, (byte) 0206, 0110, (byte) 0206, (byte) 0367, 022, 001, 002, 002, 0 }));
@@ -30,7 +30,9 @@ public interface GssApi extends Library {
 	final int GSS_C_BOTH = 0;
 	final int GSS_C_INITIATE = 1;
 	final int GSS_C_ACCEPT = 2;
-	
+
+	final gss_OID_desc GSS_C_NO_OID = null;
+
 	class gss_buffer_desc extends Structure {
 		public NativeLong length;
 		public Pointer value;
@@ -83,7 +85,7 @@ public interface GssApi extends Library {
 	class gss_OID_set_desc extends Structure {
 		public NativeLong count;
 		public gss_OID_desc.ByReference elements; // gss_OID_desc[]
-		
+
 		@Override
 		protected List<String> getFieldOrder() {
 			return createFieldsOrder("count", "elements");
@@ -108,7 +110,7 @@ public interface GssApi extends Library {
 
 		public gss_name_t() {
 		}
-		
+
 		gss_name_t(Pointer p) {
 			super();
 			peer = Pointer.nativeValue(p);
@@ -165,5 +167,54 @@ public interface GssApi extends Library {
 	int gss_import_sec_context(IntByReference minorStatus, /* minor_status */
 			gss_buffer_desc buffer, /* interprocess_token */
 			gss_ctx_id_t context); /* context_handle */
+
+	// from gssapi_ext.h
+
+	class gss_key_value_element extends Structure {
+		public String key;
+		public String value;
+
+		public gss_key_value_element(String key, String value) {
+			this.key = key;
+			this.value = value;		
+		}
+		
+		@Override
+		protected List<String> getFieldOrder() {
+			return createFieldsOrder("key", "value");
+		}
+
+		public static class ByReference extends gss_key_value_element implements Structure.ByReference {
+			public ByReference(String key, String value) {
+				super(key, value);
+			}
+		}
+
+		public static class ByValue extends gss_key_value_element implements Structure.ByValue {
+			public ByValue(String key, String value) {
+				super(key, value);
+			}
+		}
+	}
+
+	class gss_key_value_set extends Structure {
+		public int count;
+		public gss_key_value_element.ByReference elements;
+
+		@Override
+		protected List<String> getFieldOrder() {
+			return createFieldsOrder("count", "elements");
+		}
+	}
+
+	int gss_store_cred_into(IntByReference minorStatus, /* minor_status */
+			Pointer credHandle, /* input_cred_handle */
+			int credUsage, /* input_usage */
+			gss_OID_desc desiredMech, /* desired_mech */
+			int overwriteCred, /* overwrite_cred */
+			int defaultCred, /* default_cred */
+			gss_key_value_set credStore, /* cred_store */
+			PointerByReference oidsStored, /* elements_stored */
+			IntByReference credStored); /* cred_usage_stored */
 
 }
