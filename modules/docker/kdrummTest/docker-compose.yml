@@ -1,13 +1,14 @@
 version: '3'
 services:
   workbench:
-    build: 
-        context: ./workbench
+    build: ./workbench
     ports:
     - "8080:8080"
-  virtue-admin:
+  va-b:
     volumes: 
-    - ./modules/virtue-admin/database:/opt/virtue/virtue-admin/build/distributions/virtue-admin-0.0.1-SNAPSHOT/database
+    - ./modules/:/opt/virtue/modules:q
     build:
         context: ../../../
         dockerfile: modules/docker/server-images/virtue-admin/Dockerfile
+  test-image:
+    image: nginx:latest
