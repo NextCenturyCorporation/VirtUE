@@ -196,13 +196,25 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 				if (!Sidebar.askAgain) {
 					try {
 						virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
-						container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+
+						if (fullBorder) {
+							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
+						} else {
+							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+						}
+
 						Timer timer = new Timer(160, new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+								if (fullBorder) {
+									container.setBorder(new LineBorder(Color.GRAY, 1));
+								} else {
+									container.setBorder(
+											new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+								}
 							}
 						});
+
 						timer.start();
 
 						// virtue.setVirtueState(VirtueState.LAUNCHING);
