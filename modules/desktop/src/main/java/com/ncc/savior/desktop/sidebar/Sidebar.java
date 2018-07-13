@@ -91,7 +91,8 @@ public class Sidebar implements VirtueChangeHandler {
 	private ImageIcon closeIcon = new ImageIcon(Sidebar.class.getResource("/images/close-button.png"));
 
 	private VirtueService virtueService;
-	private Map<String, VirtueTileContainer> virtueIdToVc;
+	private Map<String, VirtueTileContainer> virtueIdToVtc;
+	private Map<String, VirtueListContainer> virtueIdToVlc;
 	private AuthorizationService authService;
 	private IIconService iconService;
 
@@ -154,7 +155,8 @@ public class Sidebar implements VirtueChangeHandler {
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			boolean useColors, String style) {
 		this.authService = authService;
-		this.virtueIdToVc = new HashMap<String, VirtueTileContainer>();
+		this.virtueIdToVtc = new HashMap<String, VirtueTileContainer>();
+		this.virtueIdToVlc = new HashMap<String, VirtueListContainer>();
 		this.virtueService = virtueService;
 		this.iconService = iconService;
 
@@ -303,7 +305,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
-		VirtueTileContainer vmi = virtueIdToVc.get(virtue.getTemplateId());
+		VirtueTileContainer vtc = virtueIdToVtc.get(virtue.getTemplateId());
+		VirtueListContainer vlc = virtueIdToVlc.get(virtue.getTemplateId());
 		// if (vmi == null) {
 		// vmi = virtueIdToVc.get(virtue.getTemplateId());
 		// if (virtue.getId() != null) {
@@ -311,7 +314,8 @@ public class Sidebar implements VirtueChangeHandler {
 		// virtueIdToVc.put(virtue.getId(), vmi);
 		// }
 		// }
-		vmi.updateVirtue(virtue);
+		vtc.updateVirtue(virtue);
+		vlc.updateVirtue(virtue);
 
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
 			al.updateApp(ad, virtue);
@@ -341,7 +345,8 @@ public class Sidebar implements VirtueChangeHandler {
 					ghostText);
 			vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 
-			virtueIdToVc.put(virtue.getTemplateId(), vtc);
+			virtueIdToVtc.put(virtue.getTemplateId(), vtc);
+			virtueIdToVlc.put(virtue.getTemplateId(), vlc);
 
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
 
@@ -436,11 +441,12 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
-		VirtueTileContainer vmi = virtueIdToVc.remove(virtue.getTemplateId());
+		VirtueTileContainer vtc = virtueIdToVtc.remove(virtue.getTemplateId());
+		virtueIdToVlc.remove(virtue.getTemplateId());
 		// if (vmi == null) {
 		// vmi = virtueIdToVc.remove(virtue.getTemplateId());
 		// }
-		if (vmi != null) {
+		if (vtc != null) {
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
 				at.removeApplication(ad, virtue);
 			}
