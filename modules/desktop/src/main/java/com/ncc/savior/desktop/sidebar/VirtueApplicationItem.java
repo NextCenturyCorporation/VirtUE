@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 
@@ -195,9 +196,30 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 				if (!Sidebar.askAgain) {
 					try {
 						virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+
+						if (fullBorder) {
+							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
+						} else {
+							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+						}
+
+						Timer timer = new Timer(160, new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								if (fullBorder) {
+									container.setBorder(new LineBorder(Color.GRAY, 1));
+								} else {
+									container.setBorder(
+											new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+								}
+							}
+						});
+
+						timer.start();
+
 						// virtue.setVirtueState(VirtueState.LAUNCHING);
 						// vc.updateVirtue(virtue);
-					} catch (IOException e) {
+					} catch (Exception e) {
 						String msg = "Error attempting to start a " + ad.getName() + " application";
 						logger.error(msg);
 					}
