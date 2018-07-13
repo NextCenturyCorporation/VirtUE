@@ -2,6 +2,8 @@ package com.ncc.savior.desktop.clipboard.linux;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
+import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
 import com.ncc.savior.desktop.clipboard.data.FileClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
@@ -307,9 +310,20 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		runnableQueue.offer(() -> {
-			Pointer ptr = clipboardData.createLinuxData();
-			int numItems = clipboardData.getLinuxNumEntries();
-			int itemSize = clipboardData.getLinuxEntrySizeBits();
+			Pointer ptr;
+			int numItems;
+			int itemSize;
+			try {
+				ptr = clipboardData.createLinuxData();
+				numItems = clipboardData.getLinuxNumEntries();
+				itemSize = clipboardData.getLinuxEntrySizeBits();
+			} catch (Throwable t) {
+				logger.debug("failed to get clipboard data attributes", t);
+				EmptyClipboardData ecd = new EmptyClipboardData(clipboardData.getFormat());
+				ptr = ecd.createLinuxData();
+				numItems = ecd.getLinuxNumEntries();
+				itemSize = ecd.getLinuxEntrySizeBits();
+			}
 			// This is caused by an event from in linux. We stored an event to send based on
 			// the event received and we need that event.
 			XSelectionEvent sne = this.SelectionNotifyEventToSend;
@@ -515,7 +529,19 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				File file = new File(line);
 				logger.debug("Exists: " + file.exists() + " file: " + file);
 				if (file.exists()) {
+					logger.debug("adding file as java file");
 					files.add(file);
+				} else {
+					try {
+						URI uri = new URI(line);
+						file = new File(uri.getPath());
+						if (file.exists()) {
+							logger.debug("adding file as java uri");
+							files.add(file);
+						}
+					} catch (URISyntaxException e) {
+						logger.warn("failed to attempting to add file as uri", e);
+					}
 				}
 			}
 			FileClipboardData data = new FileClipboardData(files);

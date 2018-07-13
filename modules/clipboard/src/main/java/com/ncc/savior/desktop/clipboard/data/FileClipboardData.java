@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -27,29 +27,35 @@ import com.sun.jna.Pointer;
 public class FileClipboardData extends ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(FileClipboardData.class);
-	private List<File> files;
+	private List<File> sourceFiles;
+	private List<File> destinationFiles;
 	private byte[] zipData;
 
 	public FileClipboardData(List<File> files) {
 		super(ClipboardFormat.FILES);
-		this.files = files;
+		this.sourceFiles = files;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try (ZipOutputStream zs = new ZipOutputStream(baos)) {
 			for (File file : files) {
-				ZipEntry ze = new ZipEntry(file.getName());
-				try {
-					zs.putNextEntry(ze);
-					Files.copy(file.toPath(), zs);
-					zs.closeEntry();
-				} catch (IOException e) {
-					logger.error("Error attempting to zip file " + file.getName() + " for transmission", e);
+				if (file.isDirectory()) {
+
+				}
+				if (file.isFile()) {
+					ZipEntry ze = new ZipEntry(file.getName());
+					try {
+						zs.putNextEntry(ze);
+						Files.copy(file.toPath(), zs);
+						zs.closeEntry();
+					} catch (IOException e) {
+						logger.error("Error attempting to zip file " + file.getName() + " for transmission", e);
+					}
 				}
 			}
 		} catch (IOException e) {
 			logger.error("zip failed", e);
 		}
 		this.zipData = baos.toByteArray();
-		logger.debug("BAOS (" + baos.size() + "): " + Arrays.toString(zipData));
+		logger.debug("BAOS (" + baos.size() + ")");
 	}
 
 	public static void pack(String sourceDirPath) throws IOException {
@@ -71,18 +77,23 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 
 	@Override
 	public Pointer createWindowsData() {
-		writeFilesFromZip();
-		Memory winMemory = new NativelyDeallocatedMemory(getWindowsDataLengthBytes());
-		winMemory.clear();
-		String data = getClipboardStringData();
-		winMemory.setString(0, data);
-		return winMemory;
+		try {
+			destinationFiles = writeFilesFromZip();
+			Memory winMemory = new NativelyDeallocatedMemory(getWindowsDataLengthBytes());
+			winMemory.clear();
+			String data = getClipboardStringData(destinationFiles);
+			winMemory.setString(0, data);
+			return winMemory;
+		} catch (Throwable t) {
+			logger.error("remove me error", t);
+			throw t;
+		}
 	}
 
 	@Override
 	public Pointer createLinuxData() {
-		writeFilesFromZip();
-		String path = getClipboardStringData();
+		destinationFiles = writeFilesFromZip();
+		String path = getClipboardStringData(destinationFiles);
 		int size = 1 * (path.length());
 		Memory mem = new Memory(size + 1);
 		mem.clear();
@@ -90,7 +101,8 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 		return mem;
 	}
 
-	private void writeFilesFromZip() {
+	private List<File> writeFilesFromZip() {
+		List<File> newFiles = new ArrayList<File>();
 		ByteArrayInputStream bais = new ByteArrayInputStream(zipData);
 		try (ZipInputStream zs = new ZipInputStream(bais)) {
 			ZipEntry entry;
@@ -98,7 +110,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 			byte[] buffer = new byte[2048];
 			while ((entry = zs.getNextEntry()) != null) {
 				String name = entry.getName();
-				File file = File.createTempFile("", name);
+				File file = File.createTempFile("cbxfer", name);
 				logger.debug("writing file " + name + " to " + file.getAbsolutePath());
 				FileOutputStream fos = new FileOutputStream(file);
 				BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length);
@@ -107,16 +119,19 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 				}
 				bos.flush();
 				bos.close();
+				file.deleteOnExit();
 				logger.debug("finished writting " + file.getAbsolutePath());
+				newFiles.add(file);
 			}
 		} catch (IOException e) {
 			logger.error("zip failed", e);
 		}
+		return newFiles;
 	}
 
 	@Override
 	public int getLinuxNumEntries() {
-		String path = getClipboardStringData();
+		String path = getClipboardStringData(destinationFiles);
 		return path.length();
 	}
 
@@ -127,17 +142,22 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 
 	@Override
 	public long getWindowsDataLengthBytes() {
-		String data = getClipboardStringData();
+		String data = getClipboardStringData(destinationFiles);
 		return 1 * (data.getBytes().length + 1);
 	}
 
-	private String getClipboardStringData() {
+	private String getClipboardStringData(List<File> files) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("copy");
 		for (File file : files) {
-			sb.append(System.lineSeparator()).append(file);
+			sb.append(System.lineSeparator()).append("file://").append(file);
 		}
-		return files.get(0).getAbsolutePath();
+		return sb.toString();
+	}
+
+	@Override
+	public String toString() {
+		return "FileClipboardData [sourceFiles=" + sourceFiles + ", destinationFiles=" + destinationFiles + "]";
 	}
 
 }
