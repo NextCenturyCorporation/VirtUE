@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -30,6 +32,9 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	private List<File> sourceFiles;
 	private List<File> destinationFiles;
 	private byte[] zipData;
+	private static File TEMP_DIR = new File("tmp");
+	private static String dateFormat = "yyyy-MM-dd-HH-mm-ss-SSS";
+	private static SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 
 	public FileClipboardData(List<File> files) {
 		super(ClipboardFormat.FILES);
@@ -38,7 +43,20 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 		try (ZipOutputStream zs = new ZipOutputStream(baos)) {
 			for (File file : files) {
 				if (file.isDirectory()) {
-
+					logger.debug("walking directory: " + file.getAbsolutePath());
+					Path pp = file.getParentFile().toPath();
+					Files.walk(file.toPath()).filter(path -> !Files.isDirectory(path)).forEach(path -> {
+						String relPath = pp.relativize(path).toString();
+						logger.debug("relative path=" + relPath);
+						ZipEntry zipEntry = new ZipEntry(relPath);
+						try {
+							zs.putNextEntry(zipEntry);
+							Files.copy(path, zs);
+							zs.closeEntry();
+						} catch (IOException e) {
+							logger.error("Error attempting to zip file for transmission");
+						}
+					});
 				}
 				if (file.isFile()) {
 					ZipEntry ze = new ZipEntry(file.getName());
@@ -94,6 +112,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	public Pointer createLinuxData() {
 		destinationFiles = writeFilesFromZip();
 		String path = getClipboardStringData(destinationFiles);
+		logger.debug("paths: " + path);
 		int size = 1 * (path.length());
 		Memory mem = new Memory(size + 1);
 		mem.clear();
@@ -102,6 +121,10 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	}
 
 	private List<File> writeFilesFromZip() {
+		if (!TEMP_DIR.exists()) {
+			TEMP_DIR.mkdirs();
+		}
+		File xferDir = getThisTransferDir();
 		List<File> newFiles = new ArrayList<File>();
 		ByteArrayInputStream bais = new ByteArrayInputStream(zipData);
 		try (ZipInputStream zs = new ZipInputStream(bais)) {
@@ -110,8 +133,9 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 			byte[] buffer = new byte[2048];
 			while ((entry = zs.getNextEntry()) != null) {
 				String name = entry.getName();
-				File file = File.createTempFile("cbxfer", name);
+				File file = new File(xferDir, name);
 				logger.debug("writing file " + name + " to " + file.getAbsolutePath());
+				file.getParentFile().mkdirs();
 				FileOutputStream fos = new FileOutputStream(file);
 				BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length);
 				while ((size = zs.read(buffer, 0, buffer.length)) != -1) {
@@ -121,12 +145,23 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 				bos.close();
 				file.deleteOnExit();
 				logger.debug("finished writting " + file.getAbsolutePath());
-				newFiles.add(file);
 			}
 		} catch (IOException e) {
 			logger.error("zip failed", e);
 		}
+		File[] files = xferDir.listFiles();
+		for (File file : files) {
+			newFiles.add(file);
+		}
+		logger.debug("files: " + newFiles);
 		return newFiles;
+	}
+
+	private static File getThisTransferDir() {
+		String date = dateFormatter.format(new Date());
+		File file = new File(TEMP_DIR, date);
+		file.mkdirs();
+		return file;
 	}
 
 	@Override
@@ -150,7 +185,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("copy");
 		for (File file : files) {
-			sb.append(System.lineSeparator()).append("file://").append(file);
+			sb.append(System.lineSeparator()).append("file://").append(file.getAbsolutePath());
 		}
 		return sb.toString();
 	}
