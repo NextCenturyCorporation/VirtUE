@@ -248,42 +248,46 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		Runnable targetPollRunnable = () -> {
 			previousFormats = new TreeSet<ClipboardFormat>();
 			while (!stopTargetPollThread) {
-				if (!ownSelection) {
-					runnableQueue.offer(() -> {
+				try {
+					if (!ownSelection) {
+						runnableQueue.offer(() -> {
+							if (logger.isTraceEnabled()) {
+								logger.trace("calling convert selection for targets");
+							}
+							convertSelectionAndSync(targets);
+						});
+						Set<String> af = waitForAvailableFormats();
 						if (logger.isTraceEnabled()) {
-							logger.trace("calling convert selection for targets");
+							logger.trace("received available targets");
 						}
-						convertSelectionAndSync(targets);
-					});
-					Set<String> af = waitForAvailableFormats();
-					if (logger.isTraceEnabled()) {
-						logger.trace("received available targets");
-					}
-					TreeSet<ClipboardFormat> acf;
-					acf = new TreeSet<ClipboardFormat>();
-					for (String f : af) {
-						ClipboardFormat fmt = ClipboardFormat.fromLinux(f);
-						// logger.debug(f + " -> " + (fmt == null ? null : fmt.getLinux()));
-						if (fmt != null) {
-							acf.add(fmt);
+						TreeSet<ClipboardFormat> acf;
+						acf = new TreeSet<ClipboardFormat>();
+						for (String f : af) {
+							ClipboardFormat fmt = ClipboardFormat.fromLinux(f);
+							// logger.debug(f + " -> " + (fmt == null ? null : fmt.getLinux()));
+							if (fmt != null) {
+								acf.add(fmt);
+							}
 						}
-					}
-					boolean equals = (acf.isEmpty() && previousFormats.isEmpty()) || acf.equals(previousFormats);
-					if (!equals) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("sending clipboard Changed message.  Formats=" + acf);
+						boolean equals = (acf.isEmpty() && previousFormats.isEmpty()) || acf.equals(previousFormats);
+						if (!equals) {
+							if (logger.isTraceEnabled()) {
+								logger.trace("sending clipboard Changed message.  Formats=" + acf);
+							}
+							if (!ownSelection) {
+								previousFormats = acf;
+								listener.onClipboardChanged(acf);
+							}
 						}
-						if (!ownSelection) {
-							previousFormats = acf;
-							listener.onClipboardChanged(acf);
-						}
-					}
 
-				} else {
-					previousFormats = new TreeSet<ClipboardFormat>();
+					} else {
+						previousFormats = new TreeSet<ClipboardFormat>();
+					}
+					// TODO smarter period control?
+					JavaUtil.sleepAndLogInterruption(100);
+				} catch (Throwable t) {
+					logger.error("error in target polling thread", t);
 				}
-				// TODO smarter period control?
-				JavaUtil.sleepAndLogInterruption(100);
 			}
 		};
 		targetPollThread = new Thread(targetPollRunnable, "TargetsPoller");
@@ -425,14 +429,16 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		// TODO what if raw is null because it timed out (initialization and no
 		// clipboard)
 		// logger.debug(" formatPollStart");
-		for (int i = 0; i < raw.numItems; i++) {
-			NativeLong nl = raw.property.getNativeLong(i * NativeLong.SIZE);
-			// logger.debug(" " + val + " 0x" + Long.toHexString(val));
-			// logger.debug(" " + nl + " : " + nl);
-			Atom formatAtom = new Atom(nl.longValue());
-			String formatName = x11.XGetAtomName(display, formatAtom);
-			// logger.debug(" format: " + formatName);
-			formats.add(formatName);
+		if (raw != null) {
+			for (int i = 0; i < raw.numItems; i++) {
+				NativeLong nl = raw.property.getNativeLong(i * NativeLong.SIZE);
+				// logger.debug(" " + val + " 0x" + Long.toHexString(val));
+				// logger.debug(" " + nl + " : " + nl);
+				Atom formatAtom = new Atom(nl.longValue());
+				String formatName = x11.XGetAtomName(display, formatAtom);
+				// logger.debug(" format: " + formatName);
+				formats.add(formatName);
+			}
 		}
 		return formats;
 	}
@@ -516,37 +522,40 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			str = property.getString(0, "UTF-8");
 			return new UnicodeClipboardData(str);
 		case FILES:
-			str = property.getString(0);
-			logger.debug("files data " + str);
-			String[] lines = str.split(System.lineSeparator());
-			logger.debug("lines: " + Arrays.toString(lines));
-			if ("cut".equals(lines[0]) || "copy".equals(lines[0])) {
-				lines = Arrays.copyOfRange(lines, 1, lines.length);
-				logger.debug("lines altered: " + Arrays.toString(lines));
-			}
-			List<File> files = new ArrayList<File>(lines.length);
-			for (String line : lines) {
-				File file = new File(line);
-				logger.debug("Exists: " + file.exists() + " file: " + file);
-				if (file.exists()) {
-					logger.debug("adding file as java file");
-					files.add(file);
-				} else {
-					try {
-						URI uri = new URI(line);
-						file = new File(uri.getPath());
-						if (file.exists()) {
-							logger.debug("adding file as java uri");
-							files.add(file);
+			if (property != null) {
+				str = property.getString(0);
+				logger.debug("files data " + str);
+				String[] lines = str.split(System.lineSeparator());
+				logger.debug("lines: " + Arrays.toString(lines));
+				if ("cut".equals(lines[0]) || "copy".equals(lines[0])) {
+					lines = Arrays.copyOfRange(lines, 1, lines.length);
+					logger.debug("lines altered: " + Arrays.toString(lines));
+				}
+				List<File> files = new ArrayList<File>(lines.length);
+				for (String line : lines) {
+					File file = new File(line);
+					logger.debug("Exists: " + file.exists() + " file: " + file);
+					if (file.exists()) {
+						logger.debug("adding file as java file");
+						files.add(file);
+					} else {
+						try {
+							URI uri = new URI(line);
+							file = new File(uri.getPath());
+							if (file.exists()) {
+								logger.debug("adding file as java uri");
+								files.add(file);
+							}
+						} catch (URISyntaxException e) {
+							logger.warn("failed to attempting to add file as uri", e);
 						}
-					} catch (URISyntaxException e) {
-						logger.warn("failed to attempting to add file as uri", e);
 					}
 				}
+				FileClipboardData data = new FileClipboardData(files);
+				logger.debug("data: " + data);
+				return data;
 			}
-			FileClipboardData data = new FileClipboardData(files);
-			logger.debug("data: " + data);
-			return data;
+			return new UnknownClipboardData(cf);
 		default:
 			return new UnknownClipboardData(cf);
 		}
