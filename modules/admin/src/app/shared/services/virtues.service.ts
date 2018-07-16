@@ -70,7 +70,7 @@ export class VirtuesService {
 
   toggleVirtueStatus(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id + '/toggle';
-    // console.log(url);
+    console.log(url);
     return this.httpClient.get(url);
   }
 

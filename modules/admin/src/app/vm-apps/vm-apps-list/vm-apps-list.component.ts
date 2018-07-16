@@ -20,6 +20,10 @@ export class VmAppsListComponent implements OnInit {
   filterValue = '*';
   apps = [];
 
+  sortColumn: string = 'name';
+  sortType: string = 'enabled';
+  sortValue: any = '*';
+  sortBy: string = 'asc';
   totalApps: number;
   // appsfilter: string;
 
@@ -45,6 +49,8 @@ export class VmAppsListComponent implements OnInit {
     .subscribe( appsList => {
       this.apps = appsList;
       this.totalApps = appsList.length;
+      // sortApps('asc'); apparently an initial sort isn't needed?
+      // the called function is commented out below as well.
     });
   }
 
@@ -55,6 +61,72 @@ export class VmAppsListComponent implements OnInit {
       console.log(app);
     });
 
+  }
+
+  // Appears to be unnecessary. See comment in getApplications()
+  // sortApps(sortDirection: string) {
+  //   console.log("sortApps");
+  //   if (sortDirection === 'asc') {
+  //     this.apps.sort((leftSide, rightSide): number => {
+  //       console.log("asc");
+  //       console.log(JSON.stringify(leftSide));
+  //       if (leftSide['name'] < rightSide['name']) {
+  //         return -1;
+  //       }
+  //       if (leftSide['name'] > rightSide['name']) {
+  //         return 1;
+  //       }
+  //       return 0;
+  //     });
+  //   } else {
+  //     this.apps.sort((leftSide, rightSide): number => {
+  //       console.log("dsc");
+  //       // console.log(JSON.stringify(leftSide));
+  //       if (leftSide['name'] < rightSide['name']) {
+  //         return 1;
+  //       }
+  //       if (leftSide['name'] > rightSide['name']) {
+  //         return -1;
+  //       }
+  //       return 0;
+  //     });
+  //   }
+  // }
+
+  sortAppColumns(sortColumn: string, sortBy: string) {
+    console.log("sortAppColumns");
+    console.log(this.apps[0]["name"]);
+    if (this.sortColumn === sortColumn) {
+      this.sortListBy(sortBy);
+    } else {
+      if (sortColumn === 'name') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'os') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      // } else if (sortColumn === 'apps') {
+      //   this.sortColumn = sortColumn;
+      //   this.sortBy = 'desc';
+      } else if (sortColumn === 'lastEditor') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'securityTag') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'date') {
+        this.sortColumn = sortColumn;
+        this.sortBy = 'desc';
+      }
+    }
+  }
+
+  sortListBy(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.sortBy = 'desc';
+    } else {
+      this.sortBy = 'asc';
+    }
   }
 
   listFilter(status: any) {

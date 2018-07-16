@@ -153,6 +153,6 @@ export class VmBuildComponent implements OnInit, OnDestroy {
     };
     console.log(body);
     this.vmService.createVM(this.baseUrl, JSON.stringify(body));
-    this.router.navigate(['/vm']);
+    this.router.navigate(['/virtual-machines']);
   }
 }

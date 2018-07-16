@@ -30,7 +30,8 @@ export class VirtueListComponent implements OnInit {
   sortType: string = 'enabled';
   sortValue: any = '*';
   sortBy: string = 'asc';
-  // virtueTotal: number;
+  totalVirtues: number = 0;
+  // virtueTotal: number; I hope this wasn't commented out for a good reason
   os: Observable<Array<VirtuesService>>;
 
   constructor(
@@ -79,35 +80,39 @@ export class VirtueListComponent implements OnInit {
   }
 
   getVirtues(baseUrl: string) {
-    this.virtuesService.getVirtues(baseUrl).subscribe( data => {
-      this.virtues = data;
+    this.virtuesService.getVirtues(baseUrl).subscribe( virtueList => {
+      this.virtues = virtueList;
+      this.totalVirtues = virtueList.length;
     });
-    this.sortVirtues(this.sortBy);
+    // changing or even commenting this line out entirely doesn't seem to
+    // affect the order, initial or otherwise, of the shown data.
+    // this.sortVirtues(this.sortBy);
   }
 
-  sortVirtues(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.virtues.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return -1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return 1;
-        }
-        return 0;
-      });
-    } else {
-      this.virtues.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return 1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return -1;
-        }
-        return 0;
-      });
-    }
-  }
+  // Apparently unnecessary. see comment in getVirtues.
+  // sortVirtues(sortDirection: string) {
+  //   if (sortDirection === 'asc') {
+  //     this.virtues.sort((leftSide, rightSide): number => {
+  //       if (leftSide['name'] < rightSide['name']) {
+  //         return -1;
+  //       }
+  //       if (leftSide['name'] > rightSide['name']) {
+  //         return 1;
+  //       }
+  //       return 0;
+  //     });
+  //   } else {
+  //     this.virtues.sort((leftSide, rightSide): number => {
+  //       if (leftSide['name'] < rightSide['name']) {
+  //         return 1;
+  //       }
+  //       if (leftSide['name'] > rightSide['name']) {
+  //         return -1;
+  //       }
+  //       return 0;
+  //     });
+  //   }
+  // }
 
   enabledVirtueList(sortType: string, enabledValue: any, sortBy) {
     console.log('enabledVirtueList() => ' + enabledValue);
@@ -125,6 +130,9 @@ export class VirtueListComponent implements OnInit {
       this.sortListBy(sortBy);
     } else {
       if (sortColumn === 'name') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'lastEditor') {
         this.sortBy = 'asc';
         this.sortColumn = sortColumn;
       } else if (sortColumn === 'date') {

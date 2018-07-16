@@ -159,11 +159,11 @@ export class VmDuplicateComponent implements OnInit {
       'securityTag': vmSecurityTag
     };
     this.vmService.createVM(this.baseUrl, JSON.stringify(body));
-    this.router.navigate(['/vm']);
+    this.router.navigate(['/virtual-machines']);
   }
 
   cancel() {
-    this.router.navigate(['/vm']);
+    this.router.navigate(['/virtual-machines']);
   }
 
 }
