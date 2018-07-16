@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 
@@ -55,8 +56,9 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private ChangeListener changeListener;
 	private PropertyChangeListener listener;
 
-	private ImageIcon favoritedImage = new ImageIcon(VirtueApplicationItem.class.getResource("/images/favorited.png"));
-	private ImageIcon unfavoritedImage = new ImageIcon(
+	private static ImageIcon favoritedImage = new ImageIcon(
+			VirtueApplicationItem.class.getResource("/images/favorited.png"));
+	private static ImageIcon unfavoritedImage = new ImageIcon(
 			VirtueApplicationItem.class.getResource("/images/unfavorited.png"));
 	private Image image;
 
@@ -74,6 +76,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	private JLabel appIcon;
 	private JPanel container;
 
+	private GhostText ghostText;
 	private boolean isFavorited;
 	private JTextField textField;
 	private JComboBox<String> cb;
@@ -85,18 +88,19 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
 			Image image, boolean isFavorited, JFrame frame, JTextField textField, JComboBox<String> cb,
-			Comparator<VirtueApplicationItem> sortAppsByStatus) {
+			Comparator<VirtueApplicationItem> sortAppsByStatus, GhostText ghostText) {
 		this.sp = sp;
 		this.vc = vc;
 		this.virtueService = virtueService;
 		this.ad = ad;
 		this.virtue = virtue;
 		this.fv = fv;
-		this.image = image;
+		this.image = image; // Must be 47x50 for tileView and 30x30 for listView
 		this.frame = frame;
 		this.textField = textField;
 		this.cb = cb;
 		this.sortAppsByStatus = sortAppsByStatus;
+		this.ghostText = ghostText;
 
 		this.appIcon = new JLabel();
 		this.container = new JPanel();
@@ -120,7 +124,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		favoritedContainer.setLayout(new GridBagLayout());
 		favoritedContainer.setBackground(Color.WHITE);
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(0, 0, 0, 65);
+		gbc.insets = new Insets(0, 55, 0, 0);
 
 		container.setPreferredSize(new Dimension(90, 90));
 		container.setBackground(Color.WHITE);
@@ -128,8 +132,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		appName.setHorizontalAlignment(SwingConstants.CENTER);
 		container.setLayout(new BorderLayout(0, 0));
 
-		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		ImageIcon imageIcon = new ImageIcon(image);
 
 		appIcon.setIcon(imageIcon);
 
@@ -139,7 +142,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			favoritedLabel.setIcon(unfavoritedImage);
 		}
 
-		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		favoritedLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		favoritedContainer.add(favoritedLabel, gbc);
 
 		container.add(appIcon, BorderLayout.CENTER);
@@ -155,8 +158,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.setLayout(new BorderLayout());
 		this.appIcon = new JLabel(ad.getName());
 
-		Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
+		ImageIcon imageIcon = new ImageIcon(image);
 
 		appIcon.setIcon(imageIcon);
 		appIcon.setHorizontalAlignment(SwingConstants.LEFT);
@@ -171,16 +173,16 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
-		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 7));
-		appIcon.setBorder(BorderFactory.createEmptyBorder(0, 7, 0, 0));
+		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 9));
+		appIcon.setBorder(BorderFactory.createEmptyBorder(0, 13, 0, 0));
 
 		container.add(favoritedLabel, BorderLayout.EAST);
 		container.add(appIcon, BorderLayout.WEST);
 
-		container.setSize(new Dimension(450, 57));
+		container.setSize(new Dimension(450, 50));
 		// container.setMinimumSize(new Dimension(450, 57));
 		// container.setMaximumSize(new Dimension(10000, 57));
-		container.setPreferredSize(new Dimension(450, 57));
+		container.setPreferredSize(new Dimension(450, 50));
 
 		addListener(vc, fv, ad, virtue, true);
 	}
@@ -194,9 +196,30 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 				if (!Sidebar.askAgain) {
 					try {
 						virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+
+						if (fullBorder) {
+							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
+						} else {
+							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+						}
+
+						Timer timer = new Timer(160, new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent arg0) {
+								if (fullBorder) {
+									container.setBorder(new LineBorder(Color.GRAY, 1));
+								} else {
+									container.setBorder(
+											new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+								}
+							}
+						});
+
+						timer.start();
+
 						// virtue.setVirtueState(VirtueState.LAUNCHING);
 						// vc.updateVirtue(virtue);
-					} catch (IOException e) {
+					} catch (Exception e) {
 						String msg = "Error attempting to start a " + ad.getName() + " application";
 						logger.error(msg);
 					}
@@ -380,15 +403,16 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 	public void favorite() {
 		String selected = (String) cb.getSelectedItem();
-		VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, image,
-				true, frame, textField, cb, sortAppsByStatus);
+		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
+		VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, newimg,
+				true, frame, textField, cb, sortAppsByStatus, ghostText);
 		va.tileSetup();
 		switch (selected) {
 			case "Alphabetical":
-				fv.addFavorite(ad, virtue, va, textField, null);
+			fv.addFavorite(ad, virtue, va, textField, null, ghostText);
 				break;
 			case "Status":
-				fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus);
+			fv.addFavorite(ad, virtue, va, textField, sortAppsByStatus, ghostText);
 				break;
 		}
 		favoritedLabel.setIcon(favoritedImage);

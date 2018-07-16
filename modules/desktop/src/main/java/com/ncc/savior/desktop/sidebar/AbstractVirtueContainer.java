@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -7,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -25,6 +27,11 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 public abstract class AbstractVirtueContainer {
 
 	private static Logger logger = LoggerFactory.getLogger(AbstractVirtueContainer.class);
+
+	protected static ImageIcon optionsIcon = new ImageIcon(
+			AbstractVirtueContainer.class.getResource("/images/options.png"));
+	protected static Image optionsImage = optionsIcon.getImage(); // transform it
+	protected static Image scaledOptionsImage = optionsImage.getScaledInstance(24, 24, java.awt.Image.SCALE_SMOOTH);
 
 	protected DesktopVirtue virtue;
 	protected VirtueService virtueService;
@@ -100,7 +107,7 @@ public abstract class AbstractVirtueContainer {
 					public void actionPerformed(ActionEvent evt) {
 						try {
 							virtueService.stopVirtue(virtue);
-							virtue.setVirtueState(VirtueState.STOPPING);
+							// virtue.setVirtueState(VirtueState.STOPPING);
 							updateVirtue(virtue);
 						} catch (IOException e) {
 							String msg = "Error attempting to stop virtue=" + virtue;
@@ -111,7 +118,7 @@ public abstract class AbstractVirtueContainer {
 
 				pm.setPopupSize(45, 38);
 				pm.add(mi1);
-				pm.show(optionsLabel, -20, 24);
+				pm.show(optionsLabel, -11, 26);
 			}
 		});
 	}
