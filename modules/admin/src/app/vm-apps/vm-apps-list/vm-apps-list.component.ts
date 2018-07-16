@@ -49,8 +49,6 @@ export class VmAppsListComponent implements OnInit {
     .subscribe( appsList => {
       this.apps = appsList;
       this.totalApps = appsList.length;
-      // sortApps('asc'); apparently an initial sort isn't needed?
-      // the called function is commented out below as well.
     });
   }
 
@@ -62,36 +60,6 @@ export class VmAppsListComponent implements OnInit {
     });
 
   }
-
-  // Appears to be unnecessary. See comment in getApplications()
-  // sortApps(sortDirection: string) {
-  //   console.log("sortApps");
-  //   if (sortDirection === 'asc') {
-  //     this.apps.sort((leftSide, rightSide): number => {
-  //       console.log("asc");
-  //       console.log(JSON.stringify(leftSide));
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return -1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return 1;
-  //       }
-  //       return 0;
-  //     });
-  //   } else {
-  //     this.apps.sort((leftSide, rightSide): number => {
-  //       console.log("dsc");
-  //       // console.log(JSON.stringify(leftSide));
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return 1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-  // }
 
   sortAppColumns(sortColumn: string, sortBy: string) {
     console.log("sortAppColumns");

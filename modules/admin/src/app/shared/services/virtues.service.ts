@@ -63,14 +63,14 @@ export class VirtuesService {
 
   public updateVirtue(baseUrl: string, id: string, virtueData: any) {
     let url = baseUrl + this.configUrl + id;
-    console.log(url);
+    // console.log(url);
     return this.httpClient.put(url, virtueData, httpOptions)
             .catch(this.errorHandler);
   }
 
   toggleVirtueStatus(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id + '/toggle';
-    console.log(url);
+    // console.log(url);
     return this.httpClient.get(url);
   }
 

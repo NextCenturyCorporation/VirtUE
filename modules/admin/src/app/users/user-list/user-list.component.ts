@@ -69,14 +69,12 @@ export class UserListComponent implements OnInit {
       for (var user of this.users) {
         user.status = user.enabled ? 'enabled' : 'disabled';
       }
-      // this.sortUsers(userList); apparently an initial sort isn't needed?
-      // the called function is commented out below as well.
     });
   }
 
   userStatus(username: string, newStatus: string) {
     console.log("here");
-    
+
     this.usersService.setUserStatus(this.baseUrl, username, newStatus).subscribe(userList => {
       this.users = userList;
     });
@@ -119,38 +117,6 @@ export class UserListComponent implements OnInit {
       console.log('The dialog to delete {{data.dialogText}} was closed');
     });
   }
-
-
-  // Appears to be unnecessary. See comment in getUsers()
-  // sortUsers(sortDirection: string) {
-  //   console.log("sortUsers");
-  //   console.log("***", this.users[0]["username"]);
-  //   if (sortDirection === 'asc') {
-  //     this.users.sort((leftSide, rightSide): number => {
-  //       console.log("asc");
-  //       console.log(JSON.stringify(leftSide));
-  //       if (leftSide['username'] < rightSide['username']) {
-  //         return -1;
-  //       }
-  //       if (leftSide['username'] > rightSide['username']) {
-  //         return 1;
-  //       }
-  //       return 0;
-  //     });
-  //   } else {
-  //     this.users.sort((leftSide, rightSide): number => {
-  //       console.log("dsc");
-  //       console.log(JSON.stringify(leftSide));
-  //       if (leftSide['username'] < rightSide['username']) {
-  //         return 1;
-  //       }
-  //       if (leftSide['username'] > rightSide['username']) {
-  //         return -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-  // }
 
     enabledUserList(sortType: string, enabledValue: any, sortBy) {
       console.log('enabledUserList() => ' + enabledValue);
