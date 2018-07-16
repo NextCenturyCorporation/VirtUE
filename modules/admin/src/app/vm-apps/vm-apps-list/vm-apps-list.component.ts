@@ -61,42 +61,6 @@ export class VmAppsListComponent implements OnInit {
 
   }
 
-  sortAppColumns(sortColumn: string, sortBy: string) {
-    console.log("sortAppColumns");
-    console.log(this.apps[0]["name"]);
-    if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
-    } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'os') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      // } else if (sortColumn === 'apps') {
-      //   this.sortColumn = sortColumn;
-      //   this.sortBy = 'desc';
-      } else if (sortColumn === 'lastEditor') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'securityTag') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'date') {
-        this.sortColumn = sortColumn;
-        this.sortBy = 'desc';
-      }
-    }
-  }
-
-  sortListBy(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.sortBy = 'desc';
-    } else {
-      this.sortBy = 'asc';
-    }
-  }
-
   listFilter(status: any) {
     console.log('filterValue = ' + status);
     this.filterValue = status;
