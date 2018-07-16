@@ -1,13 +1,10 @@
 version: '3'
 services:
   workbench:
-    build: 
-        context: ./workbench
+    image: 236d866621b6         
     ports:
-    - "8080:8080"
+      - "8080:8080"
   virtue-admin:
+    image: 6f04ca57414a
     volumes: 
     - ./modules/virtue-admin/database:/opt/virtue/virtue-admin/build/distributions/virtue-admin-0.0.1-SNAPSHOT/database
-    build:
-        context: ../../../
-        dockerfile: modules/docker/server-images/virtue-admin/Dockerfile
