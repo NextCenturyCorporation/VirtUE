@@ -1,10 +1,10 @@
 version: '3'
 services:
   workbench:
-    image: 236d866621b6         
+    image: "413717123433.dkr.ecr.us-east-1.amazonaws.com/virtue-docker-images:workbench"         
     ports:
       - "8080:8080"
   virtue-admin:
-    image: 6f04ca57414a
+    image: "413717123433.dkr.ecr.us-east-1.amazonaws.com/virtue-docker-images:virtue-admin"
     volumes: 
     - ./modules/virtue-admin/database:/opt/virtue/virtue-admin/build/distributions/virtue-admin-0.0.1-SNAPSHOT/database
