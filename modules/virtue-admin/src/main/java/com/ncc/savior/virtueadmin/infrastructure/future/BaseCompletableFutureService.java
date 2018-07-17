@@ -125,8 +125,10 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 		if (this.timeoutMillis > 0) {
 			long timeoutTime = wrapper.startTimeMillis + timeoutMillis;
 			long current = System.currentTimeMillis();
-			logger.debug("Testing timeout: \ncurrent=  " + current + " \ntimeout=  " + timeoutTime
-					+ " \nstartTime=" + wrapper.startTimeMillis + " \ntimeout=" + timeoutMillis);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Testing timeout: \ncurrent=  " + current + " \ntimeout=  " + timeoutTime + " \nstartTime="
+						+ wrapper.startTimeMillis + " \ntimeout=" + timeoutMillis);
+			}
 			if (timeoutTime < current) {
 				SaviorException e = new SaviorException(SaviorException.SERVICE_TIMEOUT,
 						"Job timed out in service " + this.getServiceName() + " with wrapper=" + wrapper);
