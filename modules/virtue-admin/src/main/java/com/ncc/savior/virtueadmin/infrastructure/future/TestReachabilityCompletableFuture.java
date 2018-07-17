@@ -23,10 +23,10 @@ public class TestReachabilityCompletableFuture
 	private static final Logger logger = LoggerFactory.getLogger(TestReachabilityCompletableFuture.class);
 	private IKeyManager keyManager;
 
-	public TestReachabilityCompletableFuture(ScheduledExecutorService executor, IKeyManager keyManager) {
+	public TestReachabilityCompletableFuture(ScheduledExecutorService executor, IKeyManager keyManager,
+			int timeoutMillis) {
 		super(executor, true, 3000, 3000);
 		this.keyManager = keyManager;
-		this.timeoutMillis = 10 * 60 * 1000;
 	}
 
 	@Override

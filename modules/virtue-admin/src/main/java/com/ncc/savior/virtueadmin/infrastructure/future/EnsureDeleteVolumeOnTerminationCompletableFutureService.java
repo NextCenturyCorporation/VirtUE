@@ -30,9 +30,11 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 			.getLogger(EnsureDeleteVolumeOnTerminationCompletableFutureService.class);
 	private AmazonEC2 ec2;
 
-	public EnsureDeleteVolumeOnTerminationCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2) {
+	public EnsureDeleteVolumeOnTerminationCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2,
+			int timeoutMillis) {
 		super(executor, true, 10, 1000);
 		this.ec2 = ec2;
+		this.timeoutMillis = timeoutMillis;
 	}
 
 	@Override

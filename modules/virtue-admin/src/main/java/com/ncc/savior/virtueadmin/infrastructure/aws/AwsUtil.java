@@ -21,7 +21,6 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
@@ -295,7 +294,6 @@ public class AwsUtil {
 		}
 		String newVpcId = null;
 		try {
-			DescribeVpcsRequest req = new DescribeVpcsRequest();
 			DescribeVpcsResult sub = ec2Wrapper.getEc2().describeVpcs();
 			List<Vpc> vpcs = sub.getVpcs();
 

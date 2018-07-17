@@ -22,9 +22,11 @@ public class AwsUpdateStatusCompletableFutureService
 
 	private AmazonEC2 ec2;
 
-	protected AwsUpdateStatusCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2) {
+	protected AwsUpdateStatusCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2,
+			int timeoutMillis) {
 		super(executor, true, 2000, 2500);
 		this.ec2 = ec2;
+		this.timeoutMillis = timeoutMillis;
 	}
 
 	@Override
