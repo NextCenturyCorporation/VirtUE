@@ -71,4 +71,8 @@ public interface IActiveVirtueManager {
 
 	VirtueInstance stopVirtue(VirtueUser user, String virtueId);
 
+	VirtualMachine getVm(String id);
+
+	Iterable<VirtualMachine> getAllVirtualMachines();
+
 }

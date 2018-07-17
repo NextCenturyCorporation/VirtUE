@@ -187,4 +187,19 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		virtueDao.updateVms(vms);
 
 	}
+
+	@Override
+	public VirtualMachine getVm(String id) {
+		Optional<VirtualMachine> vm = virtueDao.getXenVm(id);
+		if (vm.isPresent()) {
+			return vm.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+		}
+	}
+
+	@Override
+	public Iterable<VirtualMachine> getAllVirtualMachines() {
+		return virtueDao.getAllVirtualMachines();
+	}
 }
