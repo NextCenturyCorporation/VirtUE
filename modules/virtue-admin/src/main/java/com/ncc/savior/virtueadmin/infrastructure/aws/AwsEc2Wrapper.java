@@ -95,8 +95,11 @@ public class AwsEc2Wrapper {
 		}
 
 		Instance instance = instances.get(0);
-
-		String name = namePrefix;
+		
+		String virtueName = vmt.getName();
+		virtueName = virtueName.replace(" ", "-");
+		virtueName = virtueName.replace("XenTemplate", "");
+		String name = namePrefix + virtueName;
 		String loginUsername = vmt.getLoginUser();
 		String privateKeyName = serverKeyName;
 
