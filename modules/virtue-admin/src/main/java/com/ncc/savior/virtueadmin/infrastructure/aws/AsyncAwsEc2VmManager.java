@@ -337,4 +337,17 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public void setUpdateListener(IUpdateListener<VirtualMachine> listener) {
 		addVmUpdateListener(listener);
 	}
+
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		
+		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
+		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		stopVirtualMachine(vm, stopFuture);
+		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
+			startVirtualMachine(vm, vmFutureFinal);
+		});	
+	}
 }

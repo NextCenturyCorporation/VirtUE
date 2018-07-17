@@ -769,4 +769,15 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
+	
+	@GET
+	@Path("vm/reboot/{id}")
+	@Produces("application/json")
+	public void rebootVm(@PathParam("id") String id) {
+		try {
+			adminService.rebootVm(id);
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
 }

@@ -47,4 +47,10 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 		vmManager.stopVirtualMachines(virtueInstance.getVms(), null);
 		return virtueInstance;
 	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm) {
+		// TODO Auto-generated method stub
+		
+	}
 }

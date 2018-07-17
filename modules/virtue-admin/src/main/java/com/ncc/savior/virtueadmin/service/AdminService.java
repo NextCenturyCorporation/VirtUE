@@ -483,4 +483,9 @@ public class AdminService {
 		verifyAndReturnUser();
 		return virtueManager.getVm(id);
 	}
+	
+	public void rebootVm(String id) {
+		verifyAndReturnUser();
+		virtueManager.rebootVm(id);
+	}
 }

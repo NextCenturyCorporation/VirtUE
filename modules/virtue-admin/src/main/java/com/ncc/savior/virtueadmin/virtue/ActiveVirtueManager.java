@@ -202,4 +202,18 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public Iterable<VirtualMachine> getAllVirtualMachines() {
 		return virtueDao.getAllVirtualMachines();
 	}
+	
+	@Override
+	public void rebootVm(String id) {
+		Optional<VirtualMachine> vm = virtueDao.getXenVm(id);
+		VirtualMachine vmToReboot;
+		
+		if (vm.isPresent()) {
+			vmToReboot = vm.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+		}
+		
+		cloudManager.rebootVm(vmToReboot);
+	}
 }

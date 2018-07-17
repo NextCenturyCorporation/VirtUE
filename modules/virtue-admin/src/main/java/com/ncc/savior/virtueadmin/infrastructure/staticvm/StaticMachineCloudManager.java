@@ -56,4 +56,10 @@ public class StaticMachineCloudManager implements ICloudManager {
 		return virtueInstance;
 	}
 
+	@Override
+	public void rebootVm(VirtualMachine vm) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

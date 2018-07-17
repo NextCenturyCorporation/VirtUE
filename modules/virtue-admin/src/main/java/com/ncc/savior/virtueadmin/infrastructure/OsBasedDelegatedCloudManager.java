@@ -39,4 +39,10 @@ public class OsBasedDelegatedCloudManager extends BaseDelegatedCloudManager {
 		}
 		return manager;
 	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm) {
+		// TODO Auto-generated method stub
+		
+	}
 }

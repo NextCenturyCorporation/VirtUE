@@ -28,6 +28,7 @@ import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
+import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
@@ -39,6 +40,7 @@ import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
@@ -49,7 +51,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * 
  *
  */
-public class XenHostManager {
+public class XenHostManager extends BaseVmManager {
 	private static final String VM_PREFIX = "VRTU-XG-";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private VirtualMachineTemplate xenVmTemplate;
@@ -454,6 +456,120 @@ public class XenHostManager {
 		if (serverUser != null && !serverUser.trim().equals("")) {
 			this.serverUser = serverUser;
 		}
+	}
+	
+	public VirtualMachine startVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms = startVirtualMachines(vms, vmFuture);
+		return vms.iterator().next();
+	}
+
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms = stopVirtualMachines(vms, vmFuture);
+		return vms.iterator().next();
+	}
+
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			ec2Wrapper.startVirtualMachines(vms);
+			notifyOnUpdateVms(vms);
+			addVmsToStartingPipeline(vms, vmFuture);
+		}
+		return vms;
+	}
+	
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			ec2Wrapper.stopVirtualMachines(vms);
+			notifyOnUpdateVms(vms);
+			addVmsToStoppingPipeline(vms, vmFuture);
+		}
+		return vms;
+	}
+
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		
+		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
+		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		stopVirtualMachine(vm, stopFuture);
+		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
+			startVirtualMachine(vm, vmFutureFinal);
+		});	
+	}
+	
+	private void addVmsToStartingPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
+		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsNetworkingUpdateService().startFutures(vm, v);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
+		}
+		fc.combineFutures(future);
+	}
+	
+	private void addVmsToStoppingPipeline(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {
+		Void v = null;
+		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
+		for (VirtualMachine vm : vms) {
+			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+
+			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPED);
+			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+			fc.addFuture(cf);
+		}
+		fc.combineFutures(future);
+	}
+
+	@Override
+	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
+			CompletableFuture<Collection<VirtualMachine>> vmFutures) {
+		return null;
+	}
+
+	@Override
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures) {
+		return null;
+	}
+
+	@Override
+	public void deleteVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {		
+	}
+
+	@Override
+	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> future) {		
+	}
+
+	@Override
+	public VmState getVirtualMachineState(VirtualMachine vm) {
+		return null;
 	}
 
 }

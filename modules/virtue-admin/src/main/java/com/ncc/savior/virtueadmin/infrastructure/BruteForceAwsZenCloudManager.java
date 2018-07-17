@@ -123,4 +123,10 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 		return null;
 	}
 
+	@Override
+	public void rebootVm(VirtualMachine vm) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

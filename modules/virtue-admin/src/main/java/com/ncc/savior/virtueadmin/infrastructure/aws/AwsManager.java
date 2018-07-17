@@ -485,4 +485,10 @@ public class AwsManager implements ICloudManager {
 	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
 		throw new NotImplementedException();
 	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm) {
+		// TODO Auto-generated method stub
+		
+	}
 }
