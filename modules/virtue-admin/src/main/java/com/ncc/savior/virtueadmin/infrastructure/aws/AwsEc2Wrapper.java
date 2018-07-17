@@ -96,7 +96,7 @@ public class AwsEc2Wrapper {
 
 		Instance instance = instances.get(0);
 
-		String name = namePrefix + instance.getInstanceId();
+		String name = namePrefix;
 		String loginUsername = vmt.getLoginUser();
 		String privateKeyName = serverKeyName;
 

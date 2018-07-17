@@ -224,7 +224,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			}
 			Instance instance = instances.get(0);
 			String clientUser = user.getUsername();
-			String name = VM_PREFIX + clientUser + "-" + serverUser + "-" + instance.getInstanceId();
+			String name = VM_PREFIX + clientUser + "-" + serverUser;
 			String loginUsername = vmt.getLoginUser();
 			String keyName = instance.getKeyName();
 			String privateKey = null;
