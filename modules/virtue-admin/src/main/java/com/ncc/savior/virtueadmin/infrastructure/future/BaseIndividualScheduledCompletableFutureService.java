@@ -113,6 +113,7 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 			@Override
 			public void run() {
 				try {
+					checkTimeout(wrapper);
 					onExecute(id, wrapper);
 				} catch (SaviorException e) {
 					onFailure(id, wrapper.param, e, wrapper.future);

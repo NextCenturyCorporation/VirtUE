@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure.future;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.elasticmapreduce.util.ResizeJobFlowStep.OnFailure;
+import com.ncc.savior.util.SaviorException;
 
 /**
  * Implementation of {@link BaseCompletableFutureService} where multiple
@@ -75,6 +77,16 @@ public abstract class BaseGroupedScheduledCompletableFutureService<P, R, X>
 				try {
 					if (!collection.isEmpty()) {
 						ArrayList<Wrapper> elements = new ArrayList<Wrapper>(collection);
+						Iterator<BaseCompletableFutureService<P, R, X>.Wrapper> itr = elements.iterator();
+						while (itr.hasNext()) {
+							BaseCompletableFutureService<P, R, X>.Wrapper wrapper = itr.next();
+							try {
+								checkTimeout(wrapper);
+							} catch (SaviorException e) {
+								itr.remove();
+								onFailure(wrapper, e);
+							}
+						}
 						onExecute(elements);
 					}
 				} catch (Throwable t) {

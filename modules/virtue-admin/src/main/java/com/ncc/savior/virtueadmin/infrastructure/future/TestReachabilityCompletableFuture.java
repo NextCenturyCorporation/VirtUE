@@ -26,6 +26,7 @@ public class TestReachabilityCompletableFuture
 	public TestReachabilityCompletableFuture(ScheduledExecutorService executor, IKeyManager keyManager) {
 		super(executor, true, 3000, 3000);
 		this.keyManager = keyManager;
+		this.timeoutMillis = 10 * 60 * 1000;
 	}
 
 	@Override

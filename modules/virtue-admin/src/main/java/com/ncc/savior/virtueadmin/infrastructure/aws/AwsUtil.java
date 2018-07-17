@@ -63,7 +63,9 @@ public class AwsUtil {
 		while (itr.hasNext()) {
 			InstanceStatus status = itr.next();
 			VirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
-			vm.setState(awsStatusToSaviorState(status));
+			if (vm != null) {
+				vm.setState(awsStatusToSaviorState(status));
+			}
 		}
 		return vms;
 	}
