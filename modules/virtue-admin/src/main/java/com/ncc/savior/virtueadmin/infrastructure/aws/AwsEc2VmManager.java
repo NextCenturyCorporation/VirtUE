@@ -43,6 +43,7 @@ import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.util.SshKeyInjector;
@@ -127,7 +128,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			CompletableFuture<Collection<VirtualMachine>> future) {
 		Collection<VirtualMachineTemplate> vmTemplates = new ArrayList<VirtualMachineTemplate>(1);
 		vmTemplates.add(vmt);
-		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future);
+		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future, null);
 		if (vms.size() != 1) {
 			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
 			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
@@ -207,7 +208,8 @@ public class AwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future) {
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future,
+			VirtueTemplate template) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -224,7 +226,9 @@ public class AwsEc2VmManager extends BaseVmManager {
 			}
 			Instance instance = instances.get(0);
 			String clientUser = user.getUsername();
-			String name = VM_PREFIX + clientUser + "-" + serverUser;
+			String virtueName = template == null ? "" : "-" + template.getName();
+			virtueName = virtueName.replace(" ", "-");
+			String name = VM_PREFIX + clientUser + "-" + serverUser + virtueName;
 			String loginUsername = vmt.getLoginUser();
 			String keyName = instance.getKeyName();
 			String privateKey = null;

@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 
@@ -58,7 +59,7 @@ public interface IVmManager {
 	 * @return
 	 */
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures);
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures, VirtueTemplate template);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
@@ -116,5 +117,6 @@ public interface IVmManager {
 	 * @return
 	 */
 	public VmState getVirtualMachineState(VirtualMachine vm);
+
 
 }
