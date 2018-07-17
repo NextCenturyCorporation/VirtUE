@@ -209,7 +209,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future,
-			VirtueTemplate template) {
+			String virtue) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -226,7 +226,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			}
 			Instance instance = instances.get(0);
 			String clientUser = user.getUsername();
-			String virtueName = template == null ? "" : "-" + template.getName();
+			String virtueName = virtue == null ? "" : "-" + virtue;
 			virtueName = virtueName.replace(" ", "-");
 			String name = VM_PREFIX + clientUser + "-" + serverUser + virtueName;
 			String loginUsername = vmt.getLoginUser();

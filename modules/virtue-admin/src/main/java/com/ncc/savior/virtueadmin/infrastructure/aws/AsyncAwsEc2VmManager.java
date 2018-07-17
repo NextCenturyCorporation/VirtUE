@@ -92,14 +92,14 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures, VirtueTemplate template) {
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures, String virtue) {
 		if (vmFutures == null) {
 			vmFutures = new CompletableFuture<Collection<VirtualMachine>>();
 		}
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			String clientUser = user.getUsername();
-			String virtueName = template == null ? "" : "-" + template.getName();
+			String virtueName = virtue == null ? "" : "-" + virtue;
 			virtueName = virtueName.replace(" ", "-");
 			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + virtueName;
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, securityGroupIds, serverKeyName, instanceType,

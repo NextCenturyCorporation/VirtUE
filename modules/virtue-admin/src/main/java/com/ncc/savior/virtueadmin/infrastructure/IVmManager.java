@@ -59,7 +59,7 @@ public interface IVmManager {
 	 * @return
 	 */
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures, VirtueTemplate template);
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures, String virtue);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
