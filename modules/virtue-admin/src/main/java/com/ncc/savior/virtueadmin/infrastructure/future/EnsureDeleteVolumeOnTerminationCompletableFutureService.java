@@ -32,9 +32,8 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 
 	public EnsureDeleteVolumeOnTerminationCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2,
 			int timeoutMillis) {
-		super(executor, true, 10, 1000);
+		super(executor, true, 10, 1000, timeoutMillis);
 		this.ec2 = ec2;
-		this.timeoutMillis = timeoutMillis;
 	}
 
 	@Override

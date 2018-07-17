@@ -27,9 +27,8 @@ public class AwsRenamingCompletableFutureService
 
 	public AwsRenamingCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2,
 			int timeoutMillis) {
-		super(executor, true, 10, 3000);
+		super(executor, true, 10, 3000, timeoutMillis);
 		this.ec2 = ec2;
-		this.timeoutMillis = timeoutMillis;
 	}
 
 	@Override

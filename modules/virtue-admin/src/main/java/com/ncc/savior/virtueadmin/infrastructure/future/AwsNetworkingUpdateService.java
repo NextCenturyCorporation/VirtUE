@@ -27,10 +27,9 @@ public class AwsNetworkingUpdateService
 
 	public AwsNetworkingUpdateService(ScheduledExecutorService executor, AmazonEC2 ec2, boolean usePublicDns,
 			int timeoutMillis) {
-		super(executor, false, 1000, 5000);
+		super(executor, false, 1000, 5000, timeoutMillis);
 		this.ec2 = ec2;
 		this.usePublicDns = usePublicDns;
-		this.timeoutMillis = timeoutMillis;
 	}
 
 	@Override

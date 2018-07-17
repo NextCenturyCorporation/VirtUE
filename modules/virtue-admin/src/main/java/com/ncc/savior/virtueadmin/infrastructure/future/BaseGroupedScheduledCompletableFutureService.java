@@ -54,7 +54,8 @@ public abstract class BaseGroupedScheduledCompletableFutureService<P, R, X>
 	private Collection<Wrapper> collection;
 
 	protected BaseGroupedScheduledCompletableFutureService(ScheduledExecutorService executor, boolean isFixedRate,
-			long initialDelayMillis, long periodOrDelayMillis) {
+			long initialDelayMillis, long periodOrDelayMillis, int timeoutMillis) {
+		this.timeoutMillis = timeoutMillis;
 		this.executor = executor;
 		this.isFixedRate = isFixedRate;
 		this.initialDelayMillis = initialDelayMillis;
