@@ -65,7 +65,9 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	// appropriate.
 	protected static final int WM_RENDERALLFORMATS = 0x0306;
 
+
 	static IWindowsClipboardUser32 user32 = IWindowsClipboardUser32.INSTANCE;
+	static IWindowsClipboardShell32 shell32 = IWindowsClipboardShell32.INSTANCE;
 	static Kernel32 kernel32 = Kernel32.INSTANCE;
 
 	WindowProc callback = new WindowProc() {
@@ -473,7 +475,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			String wideString = p.getWideString(0);
 			return new UnicodeClipboardData(wideString);
 		case IWindowsClipboardUser32.CF_HDROP:
-
+			int numFiles = shell32.DragQueryFileA(p, IWindowsClipboardShell32.DRAG_QUERY_GET_NUM_FILES_INDEX,
+					Pointer.NULL, 0);
+			logger.debug(numFiles + " files copied.");
+			for (int i = 0; i < numFiles; i++) {
+				int charactersNeeded = shell32.DragQueryFileA(p, i, Pointer.NULL, 0);
+				logger.debug("  File #" + i + " lenght=" + charactersNeeded);
+			}
 		default:
 			return new UnknownClipboardData(format);
 		}

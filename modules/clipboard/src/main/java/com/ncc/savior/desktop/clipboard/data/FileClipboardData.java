@@ -33,7 +33,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	private List<File> destinationFiles;
 	private byte[] zipData;
 	private static File TEMP_DIR = new File(".tmp");
-	private static String dateFormat = "yyyy-MM-dd-HH-mm-ss-SSS";
+	private static String dateFormat = "yyyyMMdd-HHmmssSSS";
 	private static SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 
 	public FileClipboardData(List<File> files) {
@@ -162,6 +162,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 		String date = dateFormatter.format(new Date());
 		File file = new File(TEMP_DIR, date);
 		file.mkdirs();
+		file.deleteOnExit();
 		return file;
 	}
 
