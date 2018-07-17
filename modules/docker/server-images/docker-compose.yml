@@ -1,10 +1,16 @@
 version: '3'
 services:
   workbench:
-    build: ./workbench
+    build: 
+        context: ../../../
+        dockerfile: modules/docker/server-images/workbench/Local-Build-Dockerfile
+    image: "413717123433.dkr.ecr.us-east-1.amazonaws.com/virtue-docker-images:workbench"         
     ports:
-    - "8080:8080"
+      - "8080:8080"
   virtue-admin:
     build:
-        context: ../../../
-        dockerfile: modules/docker/server-images/virtue-admin/Dockerfile
+            context: ../../../
+            dockerfile: modules/docker/server-images/virtue-admin/Dockerfile
+    image: "413717123433.dkr.ecr.us-east-1.amazonaws.com/virtue-docker-images:virtue-admin"
+    volumes: 
+    - ./modules/virtue-admin/database:/opt/virtue/virtue-admin/build/distributions/virtue-admin-0.0.1-SNAPSHOT/database
