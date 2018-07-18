@@ -213,16 +213,16 @@ public class DataResource {
 		String linuxLoginUser = "user";
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
-				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmBrowser.setSecurityTag("power");
 		VirtualMachineTemplate windowsBrowserVm = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Windows",
-				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName);
+				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName, "System", new Date());
 		windowsBrowserVm.setSecurityTag("power");
 		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
-				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName);
+				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmAll.setSecurityTag("power");
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
-				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName);
+				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmMath.setSecurityTag("default");
 		Collection<ApplicationDefinition> appsDocEditor = new LinkedList<ApplicationDefinition>();
 		appsDocEditor.add(windowsWord);
