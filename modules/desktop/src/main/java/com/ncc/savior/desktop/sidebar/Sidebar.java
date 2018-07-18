@@ -330,7 +330,6 @@ public class Sidebar implements VirtueChangeHandler {
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
 		if (loading) {
-			System.out.println("setting initial viewport");
 			loading = false;
 			setInitialViewPort();
 		}
