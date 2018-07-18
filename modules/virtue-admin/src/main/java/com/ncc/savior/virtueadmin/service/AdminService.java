@@ -219,6 +219,8 @@ public class AdminService {
 		Iterator<VirtualMachineTemplate> itr = vmts.iterator();
 		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
+			template.setUserCreatedBy(user.getUsername());
+			template.setTimeCreatedAt(new Date());
 		}
 
 		Set<VirtualMachineTemplate> vmTemplates = new HashSet<VirtualMachineTemplate>();
@@ -244,6 +246,8 @@ public class AdminService {
 		}
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
+			vmTemplate.setUserCreatedBy(user.getUsername());
+			vmTemplate.setTimeCreatedAt(new Date());
 		}
 
 		Collection<ApplicationDefinition> applications = new HashSet<ApplicationDefinition>();
