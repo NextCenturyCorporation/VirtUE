@@ -234,10 +234,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.frame = frame;
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.setSize(491, 600);
-
-		this.favorites = Preferences.userRoot().node("VirtUE/Desktop/favorites");
-		this.lastView = Preferences.userRoot().node("VirtUE/Desktop/lastView");
-		this.lastSort = Preferences.userRoot().node("VirtUE/Desktop/lastSort");
+		this.frame.setMinimumSize(new Dimension(380, 200));
 
 		DesktopUser user = authService.getUser();
 		if (user != null) {
@@ -260,7 +257,6 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public void startLogin() throws IOException {
 		this.lp = new LoginPage(authService);
-		frame.setMinimumSize(new Dimension(380, 200));
 		frame.getContentPane().removeAll();
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
@@ -292,6 +288,10 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	protected void onLogin(DesktopUser user) throws IOException {
+		favorites = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/favorites");
+		lastView = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/lastView");
+		lastSort = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/lastSort");
+
 		frame.getContentPane().removeAll();
 		frame.validate();
 		frame.repaint();
