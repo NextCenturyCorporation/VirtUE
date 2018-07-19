@@ -28,6 +28,8 @@ dependencies {
 	//waffle 1.8.1 brings in JNA 4.2.1 which doesn't work with the clipboard
 	// JNA's latest (as of 6/4) is 4.5.1
 	compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.1'
+	
+	compile 'org.jcodec:jcodec:0.2.3'
 	//waffles latest (as of 5/18) is 1.8.3 which uses jna 4.3.0, but 4.3.0 does not work with copy paste
 	//compile group: 'net.java.dev.jna', name: 'jna', version: '4.3.0'
 	//4.4.0 seems to have the fix for copy/paste

@@ -9,6 +9,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.jcodec.common.model.ColorSpace;
+import org.jcodec.common.model.Picture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,23 @@ public class SwingImageEncoder {
 			// Transparency.TRANSLUCENT, DataBuffer.TYPE_INT);
 			// image = new BufferedImage(cm, image.getRaster(), true, null);
 			return image;
+		case h264:
+			Picture output = Picture.create(1920, 1088, ColorSpace.YUV420);
+			byte[] d0 = output.getData()[0];
+			byte[] d1 = output.getData()[1];
+			byte[] d2 = output.getData()[2];
+
+			for (int i = 0, j0 = 0, j1 = 0, j2 = 0; i < data.length; i += 6, j0 += 4, ++j1, ++j2) {
+				d0[j0] = (byte) (data[i] & 0xff);
+				d0[j0 + 1] = (byte) (data[i + 1] & 0xff);
+				d0[j0 + 2] = (byte) (data[i + 2] & 0xff);
+				d0[j0 + 3] = (byte) (data[i + 3] & 0xff);
+
+				d1[j1] = (byte) (data[i + 4] & 0xff);
+				d2[j2] = (byte) (data[i + 5] & 0xff);
+			}
+
+			return AWTUtil.toBufferedImage(output);
 
 		default:
 			logger.error("Unable to decode image with encoding=" + encoding.getCode());
