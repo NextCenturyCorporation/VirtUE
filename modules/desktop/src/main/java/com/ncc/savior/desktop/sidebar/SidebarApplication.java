@@ -48,7 +48,7 @@ public class SidebarApplication {
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
-		AuthorizationService authService = new AuthorizationService(requiredDomain, false, loginUrl,
+		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl,
 				logoutUrl);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager;
