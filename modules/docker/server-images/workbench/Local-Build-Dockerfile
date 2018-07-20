@@ -1,0 +1,26 @@
+FROM node:latest AS nodeStage
+
+COPY ./modules /opt/virtue/
+WORKDIR /opt/virtue/admin
+RUN pwd
+RUN npm cache verify
+RUN npm install
+RUN npm run-script lint
+RUN npm run-script build
+RUN mkdir -p build
+WORKDIR /opt/virtue/admin/dist
+RUN tar -zcvf ../build/admin.tar.gz *
+
+FROM nginx:alpine
+
+COPY --from=nodeStage /opt/virtue/admin/build/admin.tar.gz /usr/share/nginx/html/
+COPY ./modules/docker/server-images/workbench/default /etc/nginx/conf.d/default.conf
+WORKDIR /usr/share/nginx/html
+RUN ls -l
+RUN tar -xvf admin.tar.gz
+COPY ./modules/docker/server-images/workbench/baseUrl.json /usr/share/nginx/html/assets/json/
+WORKDIR /usr/share/nginx/html
+
+RUN ls
+
+EXPOSE 8080

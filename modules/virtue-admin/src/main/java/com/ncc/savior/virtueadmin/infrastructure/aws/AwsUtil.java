@@ -231,7 +231,7 @@ public class AwsUtil {
 		}
 		Instance instance = instances.get(0);
 
-		String name = namePrefix + instance.getInstanceId();
+		String name = namePrefix;
 		String loginUsername = vmt.getLoginUser();
 		String privateKeyName = serverKeyName;
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,

@@ -30,7 +30,6 @@ public class PropertyManager {
 	public static final String PROPERTY_LOCATION_KEY = "savior.property.path";
 	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "savior-user.properties";
 	public static final String PROPERTY_REQUIRED_DOMAIN = "savior.domain";
-	public static final String PROPERTY_DUMMY_AUTHORIZATION = "savior.desktop.security.dummy";
 	public static final String PROPERTY_DEFAULT_PEM = "savior.desktop.defaultPem";
 	public static final String PROPERTY_ALLOW_INSECURE_SSL = "savior.desktop.allowInsecureSsl";
 	public static final String PROPERTY_USE_COLORS = "savior.desktop.useColors";

@@ -34,6 +34,9 @@ public class VirtueTemplate {
 	private boolean enabled;
 	private Date lastModification;
 	private String lastEditor;
+	
+	private String userCreatedBy;
+	private Date timeCreatedAt;
 
 	private String awsTemplateName;
 
@@ -101,6 +104,21 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
+	}
+	
+	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
+			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor, String userCreatedBy, Date timeCreatedAt) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.version = version;
+		this.vmTemplates = vmTemplates;
+		this.enabled = enabled;
+		this.lastModification = lastModification;
+		this.lastEditor = lastEditor;
+		this.awsTemplateName = awsTemplateName;
+		this.userCreatedBy = userCreatedBy;
+		this.timeCreatedAt = timeCreatedAt;
 	}
 
 	protected VirtueTemplate() {
@@ -212,5 +230,21 @@ public class VirtueTemplate {
 	public void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
 		this.vmTemplates = null;
 		this.virtualMachineTemplateIds = virtualMachineTemplateIds;
+	}
+
+	public Date getTimeCreatedAt() {
+		return timeCreatedAt;
+	}
+
+	public void setTimeCreatedAt(Date timeCreatedAt) {
+		this.timeCreatedAt = timeCreatedAt;
+	}
+
+	public String getUserCreatedBy() {
+		return userCreatedBy;
+	}
+
+	public void setUserCreatedBy(String userCreatedBy) {
+		this.userCreatedBy = userCreatedBy;
 	}
 }
