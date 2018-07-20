@@ -65,8 +65,8 @@ public class AwsEc2Wrapper {
 		return ec2;
 	}
 
-	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String name,
-			Collection<String> securityGroupIds, String serverKeyName, InstanceType instanceType, String subnetIds) {
+	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String name, Collection<String> securityGroupIds,
+			String serverKeyName, InstanceType instanceType, String subnetIds) {
 
 		VirtualMachine vm = null;
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -95,7 +95,7 @@ public class AwsEc2Wrapper {
 		}
 
 		Instance instance = instances.get(0);
-		
+
 		String loginUsername = vmt.getLoginUser();
 		String privateKeyName = serverKeyName;
 
