@@ -104,7 +104,7 @@ public class HelloPacket extends Packet {
 		maxW = x + cornerWidth;
 
 		int[] screen = new int[] { (int) maxW, (int) maxH };
-		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
+		String[] encodings = new String[] { "h264" };
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
 		map.put(DPI, 96);
