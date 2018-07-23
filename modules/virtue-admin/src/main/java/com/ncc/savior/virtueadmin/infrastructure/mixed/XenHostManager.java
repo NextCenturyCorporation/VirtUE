@@ -498,8 +498,7 @@ public class XenHostManager {
 		if (vms.isEmpty()) {
 			vmFuture.complete(vms);
 		} else {
-			VirtualMachine v = vms.iterator().next();
-			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(v);
+			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(vms.iterator().next());
 			guestManager.stopGuests(vms, vmFuture);
 		}
 		return vms;
