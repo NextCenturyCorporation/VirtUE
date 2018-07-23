@@ -29,6 +29,8 @@ import com.sun.jna.Pointer;
 public class FileClipboardData extends ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(FileClipboardData.class);
+	private static final int WIN_DROPFILES_BASE_BYTES = 20;
+	private boolean windowsWideText = true;
 	private List<File> sourceFiles;
 	private List<File> destinationFiles;
 	private byte[] zipData;
@@ -73,7 +75,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 			logger.error("zip failed", e);
 		}
 		this.zipData = baos.toByteArray();
-		logger.debug("BAOS (" + baos.size() + ")");
+		this.windowsWideText = true;
 	}
 
 	public static void pack(String sourceDirPath) throws IOException {
@@ -96,14 +98,35 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	@Override
 	public Pointer createWindowsData() {
 		try {
+			boolean wide = windowsWideText;
 			destinationFiles = writeFilesFromZip();
-			Memory winMemory = new NativelyDeallocatedMemory(getWindowsDataLengthBytes());
+			long length = getWindowsDataLengthBytes();
+			Memory winMemory = new NativelyDeallocatedMemory(length);
 			winMemory.clear();
-			String data = getClipboardStringData(destinationFiles);
-			winMemory.setString(0, data);
+			// offset is always 20, 4 bytes
+			winMemory.setInt(0, 20);
+			// 8 bytes of 0 for point member
+			// 4 bytes of boolean false
+			// 4 bytes of boolean true for wide text.
+			winMemory.setInt(16, 1);
+			// rest for string, double null terminated
+			int i = 20;
+			for (File file : destinationFiles) {
+				if (file.exists()) {
+					String path = file.getAbsolutePath();
+					if (wide) {
+						winMemory.setWideString(i, path);
+						i += (path.length() + 1) * 2;
+					} else {
+						winMemory.setString(i, path);
+						i += (path.length() + 1) * 2;
+					}
+				}
+				winMemory.setByte(i, (byte) 0);
+			}
 			return winMemory;
 		} catch (Throwable t) {
-			logger.error("remove me error", t);
+			logger.error("remove me error ", t);
 			throw t;
 		}
 	}
@@ -179,8 +202,21 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 
 	@Override
 	public long getWindowsDataLengthBytes() {
-		String data = getClipboardStringData(destinationFiles);
-		return 1 * (data.getBytes().length + 1);
+		// Documentation says the CF_HDROP format is STGMEDIUM with the union being
+		// HGLOBAL which is actually a DROPFILES structure. Inspection seems to indicate
+		// it is only a DROPFILES structure. We will experiment.
+		boolean wide = windowsWideText;
+		int size = WIN_DROPFILES_BASE_BYTES;
+		for (File file : destinationFiles) {
+			if (file.exists()) {
+				int lengthPlusNull = file.getAbsolutePath().length() + 1;
+				lengthPlusNull = (wide ? lengthPlusNull * 2 : lengthPlusNull);
+				size += lengthPlusNull;
+			}
+			// add for 2nd of ending double null.
+			size += (wide ? 2 : 1);
+		}
+		return size;
 	}
 
 	private String getClipboardStringData(List<File> files) {

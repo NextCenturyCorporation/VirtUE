@@ -1,8 +1,11 @@
 package com.ncc.savior.desktop.clipboard.windows;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,10 +17,12 @@ import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
+import com.ncc.savior.desktop.clipboard.data.FileClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.ncc.savior.util.JavaUtil;
+import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
@@ -64,7 +69,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	// formats. We probably want to ignore this. TODO figure out if ignore is
 	// appropriate.
 	protected static final int WM_RENDERALLFORMATS = 0x0306;
-
 
 	static IWindowsClipboardUser32 user32 = IWindowsClipboardUser32.INSTANCE;
 	static IWindowsClipboardShell32 shell32 = IWindowsClipboardShell32.INSTANCE;
@@ -475,13 +479,39 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			String wideString = p.getWideString(0);
 			return new UnicodeClipboardData(wideString);
 		case IWindowsClipboardUser32.CF_HDROP:
+			List<File> files = new ArrayList<File>();
 			int numFiles = shell32.DragQueryFileA(p, IWindowsClipboardShell32.DRAG_QUERY_GET_NUM_FILES_INDEX,
 					Pointer.NULL, 0);
 			logger.debug(numFiles + " files copied.");
 			for (int i = 0; i < numFiles; i++) {
 				int charactersNeeded = shell32.DragQueryFileA(p, i, Pointer.NULL, 0);
+				// Structure t = StructStgMedium.newInstance(StructStgMedium.class, p);
 				logger.debug("  File #" + i + " lenght=" + charactersNeeded);
+				logger.debug(p.dump(0, 256));
+				logger.debug(p.getString(20, true));
+				logger.debug(p.getString(8));
+				logger.debug(p.getString(16));
+				logger.debug(p.getString(24));
+				logger.debug(p.getString(32));
+				logger.debug(p.getString(40));
+				logger.debug(p.getString(48));
+				int memSize = charactersNeeded + 1;
+				Memory memory = new Memory(memSize);
+				int success = shell32.DragQueryFileA(p, i, memory, memSize);
+				if (success == 0) {
+					logger.warn("Failed to copy file with index=" + i);
+				} else {
+					String filePath = memory.getString(0);
+					logger.debug("File to be copied" + filePath);
+					File file = new File(filePath);
+					if (file.exists()) {
+						files.add(file);
+					} else {
+						logger.warn("File to be copied at '" + file.getAbsolutePath() + "' does not exist");
+					}
+				}
 			}
+			return new FileClipboardData(files);
 		default:
 			return new UnknownClipboardData(format);
 		}
