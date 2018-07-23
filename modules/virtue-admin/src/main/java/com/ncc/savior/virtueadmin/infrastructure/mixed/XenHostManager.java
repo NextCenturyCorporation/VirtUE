@@ -51,7 +51,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * 
  *
  */
-public class XenHostManager extends BaseVmManager {
+public class XenHostManager {
 	private static final String VM_PREFIX = "VRTU-XG-";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private VirtualMachineTemplate xenVmTemplate;
@@ -482,9 +482,8 @@ public class XenHostManager extends BaseVmManager {
 		if (vms.isEmpty()) {
 			vmFuture.complete(vms);
 		} else {
-			ec2Wrapper.startVirtualMachines(vms);
-			notifyOnUpdateVms(vms);
-			addVmsToStartingPipeline(vms, vmFuture);
+			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(vms.iterator().next());
+			guestManager.startGuests(vms, vmFuture);
 		}
 		return vms;
 	}
@@ -497,9 +496,9 @@ public class XenHostManager extends BaseVmManager {
 		if (vms.isEmpty()) {
 			vmFuture.complete(vms);
 		} else {
-			ec2Wrapper.stopVirtualMachines(vms);
-			notifyOnUpdateVms(vms);
-			addVmsToStoppingPipeline(vms, vmFuture);
+			VirtualMachine v = vms.iterator().next();
+			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(v);
+			guestManager.stopGuests(vms, vmFuture);
 		}
 		return vms;
 	}
@@ -548,30 +547,6 @@ public class XenHostManager extends BaseVmManager {
 		fc.combineFutures(future);
 	}
 
-	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
-			CompletableFuture<Collection<VirtualMachine>> vmFutures) {
-		return null;
-	}
-
-	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures) {
-		return null;
-	}
-
-	@Override
-	public void deleteVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {		
-	}
-
-	@Override
-	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> future) {		
-	}
-
-	@Override
-	public VmState getVirtualMachineState(VirtualMachine vm) {
-		return null;
-	}
+	
 
 }
