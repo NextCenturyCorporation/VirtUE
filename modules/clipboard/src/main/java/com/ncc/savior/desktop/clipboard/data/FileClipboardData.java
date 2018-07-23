@@ -26,6 +26,13 @@ import com.ncc.savior.desktop.clipboard.windows.NativelyDeallocatedMemory;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
+/**
+ * Clipboard Data container used for copying files between virtues. This class
+ * transports the files as a byte array and therefore shouldn't be used for
+ * large data.
+ * 
+ *
+ */
 public class FileClipboardData extends ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(FileClipboardData.class);
@@ -95,6 +102,15 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 		}
 	}
 
+	/**
+	 * Windows documentation mentions a STGMEDIUM structure, that inspection didn't
+	 * seem to be used. Instead, we write a DROPFILES structure.
+	 * 
+	 * Copy/paste files -
+	 * https://docs.microsoft.com/en-us/windows/desktop/shell/clipboard#formats-for-transferring-file-system-objects
+	 * DROPFILES -
+	 * https://docs.microsoft.com/en-us/windows/desktop/api/shlobj_core/ns-shlobj_core-_dropfiles
+	 */
 	@Override
 	public Pointer createWindowsData() {
 		try {
@@ -135,7 +151,6 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	public Pointer createLinuxData() {
 		destinationFiles = writeFilesFromZip();
 		String path = getClipboardStringData(destinationFiles);
-		logger.debug("paths: " + path);
 		int size = 1 * (path.length());
 		Memory mem = new Memory(size + 1);
 		mem.clear();
@@ -158,7 +173,9 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 			while ((entry = zs.getNextEntry()) != null) {
 				String name = entry.getName();
 				File file = new File(xferDir, name);
-				logger.debug("writing file " + name + " to " + file.getAbsolutePath());
+				if (logger.isTraceEnabled()) {
+					logger.trace("writing file " + name + " to " + file.getAbsolutePath());
+				}
 				file.getParentFile().mkdirs();
 				FileOutputStream fos = new FileOutputStream(file);
 				BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length);
@@ -168,7 +185,9 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 				bos.flush();
 				bos.close();
 				file.deleteOnExit();
-				logger.debug("finished writting " + file.getAbsolutePath());
+				if (logger.isTraceEnabled()) {
+					logger.trace("finished writting " + file.getAbsolutePath());
+				}
 			}
 		} catch (IOException e) {
 			logger.error("zip failed", e);
@@ -177,7 +196,6 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 		for (File file : files) {
 			newFiles.add(file);
 		}
-		logger.debug("files: " + newFiles);
 		return newFiles;
 	}
 
@@ -204,7 +222,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	public long getWindowsDataLengthBytes() {
 		// Documentation says the CF_HDROP format is STGMEDIUM with the union being
 		// HGLOBAL which is actually a DROPFILES structure. Inspection seems to indicate
-		// it is only a DROPFILES structure. We will experiment.
+		// it is only a DROPFILES structure.
 		boolean wide = windowsWideText;
 		int size = WIN_DROPFILES_BASE_BYTES;
 		for (File file : destinationFiles) {

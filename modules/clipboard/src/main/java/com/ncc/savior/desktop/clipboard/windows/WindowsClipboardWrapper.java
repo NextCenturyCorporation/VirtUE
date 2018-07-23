@@ -486,15 +486,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			for (int i = 0; i < numFiles; i++) {
 				int charactersNeeded = shell32.DragQueryFileA(p, i, Pointer.NULL, 0);
 				// Structure t = StructStgMedium.newInstance(StructStgMedium.class, p);
-				logger.debug("  File #" + i + " lenght=" + charactersNeeded);
-				logger.debug(p.dump(0, 256));
-				logger.debug(p.getString(20, true));
-				logger.debug(p.getString(8));
-				logger.debug(p.getString(16));
-				logger.debug(p.getString(24));
-				logger.debug(p.getString(32));
-				logger.debug(p.getString(40));
-				logger.debug(p.getString(48));
 				int memSize = charactersNeeded + 1;
 				Memory memory = new Memory(memSize);
 				int success = shell32.DragQueryFileA(p, i, memory, memSize);
