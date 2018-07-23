@@ -49,6 +49,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
+import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -530,12 +531,40 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("vm")
+	@Path("vms")
 	@Produces("application/json")
 	public Iterable<VirtualMachine> getAllVms() {
 		return activeVirtueDao.getAllVirtualMachines();
 	}
-
+	
+	@GET
+	@Path("vm/{id}")
+	@Produces("application/json")
+	public VirtualMachine getVm(@PathParam("id") String id) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(id);
+		if (vm.isPresent()) {
+			return vm.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+		}
+	}
+	
+	@GET
+	@Path("vm/reboot/{id}")
+	@Produces("application/json")
+	public void rebootVm(@PathParam("id") String id) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(id);
+		VirtualMachine vmToReboot;
+		
+		if (vm.isPresent()) {
+			vmToReboot = vm.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+		}
+		
+		cloudManager.rebootVm(vmToReboot);
+	}
+	
 	@GET
 	@Path("session")
 	@Produces("application/json")
