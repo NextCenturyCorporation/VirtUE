@@ -132,6 +132,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public VirtualMachine startVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
 		vms = startVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
@@ -140,6 +141,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
 		vms = stopVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
