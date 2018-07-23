@@ -433,6 +433,7 @@ public class XenGuestManager {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.STOPPING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.STOPPED);
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			fc.addFuture(cf);
