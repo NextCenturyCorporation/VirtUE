@@ -108,7 +108,7 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 
 	private String getNamePrefix(VirtueUser user, VirtualMachineTemplate vmt) {
 		String serverUser = System.getProperty("user.name");
-		return "VRTU-" + serverUser + "-" + user.getUsername() + "-";
+		return "VRTU-" + serverUser + "-" + user.getUsername();
 	}
 
 	@Override

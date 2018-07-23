@@ -215,16 +215,16 @@ public class DataResource {
 		String linuxLoginUser = "user";
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
-				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmBrowser.setSecurityTag("power");
 		VirtualMachineTemplate windowsBrowserVm = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Windows",
-				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName);
+				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName, "System", new Date());
 		windowsBrowserVm.setSecurityTag("power");
 		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
-				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName);
+				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmAll.setSecurityTag("power");
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
-				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName);
+				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmMath.setSecurityTag("default");
 		Collection<ApplicationDefinition> appsDocEditor = new LinkedList<ApplicationDefinition>();
 		appsDocEditor.add(windowsWord);
@@ -249,30 +249,32 @@ public class DataResource {
 		appsLinuxCorpEmail.add(thunderBird);
 		appsLinuxCorpEmail.add(linuxFirefox);
 		VirtualMachineTemplate vmDocEditor = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Document Editor VM", OS.WINDOWS, windowsAmi, appsDocEditor, windowsLoginUser, true, now, systemName);
+				"Document Editor VM", OS.WINDOWS, windowsAmi, appsDocEditor, windowsLoginUser, true, now, systemName,
+				"System", new Date());
 		vmDocEditor.setSecurityTag("default");
 		VirtualMachineTemplate vmWinCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Windows Corperate Email User VM", OS.WINDOWS, windowsAmi, appsWinCorpEmail, windowsLoginUser, true,
-				now, systemName);
+				now, systemName, "System", new Date());
 		vmWinCorpEmail.setSecurityTag("email");
 		VirtualMachineTemplate vmExternalInternet = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"External Internet Consumer VM", OS.WINDOWS, windowsAmi, appsExternalInternet, windowsLoginUser, true,
-				now, systemName);
+				now, systemName, "System", new Date());
 		vmExternalInternet.setSecurityTag("power");
 		VirtualMachineTemplate vmPowerUserWin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Power User VM Windows", OS.WINDOWS, windowsAmi, appsPowerUserWin, windowsLoginUser, true, now,
-				systemName);
+				systemName, "System", new Date());
 		vmPowerUserWin.setSecurityTag("power");
 		VirtualMachineTemplate vmPowerUserLinux = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Power User Vm Linux", OS.LINUX, allLinuxAmi, appsPowerUserLinux, linuxLoginUser, true, now,
-				systemName);
+				systemName, "System", new Date());
 		vmPowerUserLinux.setSecurityTag("power");
 		VirtualMachineTemplate vmRouterAdmin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName);
+				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName, 
+				"System", new Date());
 		vmRouterAdmin.setSecurityTag("power");
 		VirtualMachineTemplate vmLinuxCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Linux Corperate Email User VM", OS.LINUX, allLinuxAmi, appsLinuxCorpEmail, linuxLoginUser, true, now,
-				systemName);
+				systemName, "System", new Date());
 		vmLinuxCorpEmail.setSecurityTag("email");
 
 		// VirtualMachineTemplate vmDrawing = new
@@ -280,50 +282,67 @@ public class DataResource {
 		// allLinuxAmi, appsDrawing, linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
-				OS.LINUX, allLinuxAmi, appsLibreOffice, linuxLoginUser, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsLibreOffice, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmLibreOffice.setSecurityTag("default");
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		// vmtsSingleAll.add(windowsVm);
 		String allTemplate = "default-template";
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue", "1.0",
-				vmtsSingleAll, allTemplate, true, now, systemName);
+				vmtsSingleAll, allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsLinuxAndWinBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsLinuxAndWinBrowsers.add(vmBrowser);
 		vmtsLinuxAndWinBrowsers.add(windowsBrowserVm);
 		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue (Both OS)", "1.0",
-				vmtsLinuxAndWinBrowsers, allTemplate, true, now, systemName);
+				vmtsLinuxAndWinBrowsers, allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsLibre = new HashSet<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
 		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0", vmtsLibre,
-				allTemplate, true, now, systemName);
+				allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsWindows = new HashSet<VirtualMachineTemplate>();
 		vmtsWindows.add(windowsBrowserVm);
 		VirtueTemplate virtueWindows = new VirtueTemplate(UUID.randomUUID().toString(), "Windows Virtue", "1.0",
-				vmtsWindows, allTemplate, true, now, systemName);
+				vmtsWindows, allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsMath = new HashSet<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0", vmtsMath,
-				allTemplate, true, now, systemName);
+				allTemplate, true, now, systemName, "System", new Date());
 
 		VirtueTemplate virtueDocumentEditor = new VirtueTemplate(UUID.randomUUID().toString(), "Document Editor", "1.0",
 				allTemplate, true, now, systemName, vmDocEditor);
+		virtueDocumentEditor.setUserCreatedBy("System");
+		virtueDocumentEditor.setTimeCreatedAt(new Date());
+		
 		VirtueTemplate virtueWinCorpEmail = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows Corporate Email User", "1.0", allTemplate, true, now, systemName, vmWinCorpEmail);
+		virtueWinCorpEmail.setUserCreatedBy("System");
+		virtueWinCorpEmail.setTimeCreatedAt(new Date());
+		
 		VirtueTemplate virtueRouterAdmin = new VirtueTemplate(UUID.randomUUID().toString(), "Router Admin", "1.0",
 				allTemplate, true, now, systemName, vmRouterAdmin);
+		virtueRouterAdmin.setUserCreatedBy("System");
+		virtueRouterAdmin.setTimeCreatedAt(new Date());
+		
 		VirtueTemplate virtueLinuxCorporateEmailUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Linux Corporate Email User", "1.0", allTemplate, true, now, systemName, vmLinuxCorpEmail);
+		virtueLinuxCorporateEmailUser.setUserCreatedBy("System");
+		virtueLinuxCorporateEmailUser.setTimeCreatedAt(new Date());
+		
 		VirtueTemplate virtueExternalInternet = new VirtueTemplate(UUID.randomUUID().toString(),
 				"External Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
+		virtueExternalInternet.setUserCreatedBy("System");
+		virtueExternalInternet.setTimeCreatedAt(new Date());
+		
 		VirtueTemplate virtuePowerUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows and Linux Power User", "1.0", allTemplate, true, now, systemName, vmPowerUserWin,
 				vmPowerUserLinux);
-
+		virtuePowerUser.setUserCreatedBy("System");
+		virtuePowerUser.setTimeCreatedAt(new Date());
+		
 		for (ApplicationDefinition app : appsAll) {
 			templateManager.addApplicationDefinition(app);
 		}

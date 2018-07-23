@@ -122,8 +122,10 @@ public class XenHostManager {
 		}
 		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
 		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
+		String virtueName = virtue.getName();
+		virtueName = virtueName.replace(" ", "-");
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName,
+				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
 				xenInstanceType, subnetId);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,

@@ -168,31 +168,28 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-
+		throw new RuntimeException("not yet implemented");
 	}
 
 	@Override
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not yet implemented");
 	}
 
 	@Override
 	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not yet implemented");
+	}
+
+	@Override
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
+			String virtue) {
+		throw new RuntimeException("not yet implemented");
 	}
 
 }
