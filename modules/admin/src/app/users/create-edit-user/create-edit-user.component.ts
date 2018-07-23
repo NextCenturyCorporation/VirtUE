@@ -1,6 +1,9 @@
+import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+
+import { Observable } from 'rxjs/Observable';
 
 import { User } from '../../shared/models/user.model';
 import { ApplicationsService } from '../../shared/services/applications.service';
@@ -12,12 +15,12 @@ import { MatDialog } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 @Component({
-  selector: 'app-edit-user',
-  templateUrl: './edit-user.component.html',
+  selector: 'app-create-edit-user',
+  templateUrl: './create-edit-user.component.html',
   providers: [ ApplicationsService, BaseUrlService, UsersService, VirtuesService ]
 })
 
-export class EditUserComponent implements OnInit {
+export class CreateEditUserComponent implements OnInit {
 
   baseUrl: string;
   submitBtn: any;
@@ -26,17 +29,14 @@ export class EditUserComponent implements OnInit {
     username: string,
     data: string,
     enabled: boolean,
-    roles: any,
-    virtueIDs: any,
-    virtues: any
+    roles: string[],
+    virtueIDs: any[],
+    virtues: any[]
   }
 
   mode: string;
   actionName: string;
 
-  // userRoles = [];
-  // userData = [];
-  // userVirtueIDs = [];
   allVirtues = [];
   allApps = [];
   adUserCtrl: FormControl;
@@ -50,6 +50,7 @@ export class EditUserComponent implements OnInit {
     private virtuesService: VirtuesService,
     public dialog: MatDialog
   ) {
+    this.setMode();
     this.user = {
       username : '',
       data : '',
@@ -58,18 +59,87 @@ export class EditUserComponent implements OnInit {
       virtueIDs: [],
       virtues: [],
     };
+     //maybe? originally this was only called in addUser's constructor, but in Virtues it was called in create, edit, and duplicate.
+     //I don't know what it does, but it wouldn't persist once you leave the creation screen anyway. So let's make it every time.
+    this.adUserCtrl = new FormControl();
+
+
+    // override the route reuse strategy
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
   }
 
   ngOnInit() {
-    this.user.username = this.activatedRoute.snapshot.params['id'];
+    if (this.mode === "e" || this.mode === "d") {//if "d" or "e"
+      this.user.username = this.activatedRoute.snapshot.params['id'];
+    }
 
     this.baseUrlService.getBaseUrl().subscribe(data => {
       let url = data[0].aws_server;
       this.setBaseUrl(url);
-      this.getUserData();
       this.getAllVirtues();
       this.getAllApps();
     });
+
+    this.refreshData();
+  }
+
+  //I'm not sure this gets used anywhere.
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log(req);
+    return next.handle(req);
+  }
+
+  //This checks the current routing info (the end of the current url)
+  //and uses that to set what mode (create/edit/duplicate) the page
+  // ought to be in.
+  // Create new user: 'c', Edit user: 'e', Duplicate user: 'd'
+  setMode() {
+    // console.log(this.router.routerState.snapshot.url);
+    let url = this.router.routerState.snapshot.url;
+    if (url[0] === '/') {
+      url = url.substr(1);
+    }
+    this.mode = 'c';
+
+    //Parse url, making sure it's set up the expected way.
+    let urlValid = true;
+
+    let route = url.split('/');
+    if (route[0] !== 'users') {
+      //something about the routing system has changed.
+      urlValid = false;
+    }
+    if (route[1] === 'create') {
+        this.mode = 'c';
+        this.actionName = "Create";
+    } else if (route[1] === 'edit') {
+        this.mode = 'e';
+        this.actionName = "Edit";
+    } else if (route[1] === 'duplicate') {
+        this.mode = 'd';
+        this.actionName = "Duplicate";
+    } else {
+        //something about the routing system has changed.
+        urlValid = false;
+    }
+    if (!urlValid) {
+      if (this.router.routerState.snapshot.url === "/users") {
+        // apparently any time an error happens on this page, the system
+        // quits and returns to /virtues, and then for some reason re-calls the
+        // constructor for CreateEditVirtueComponent. Which leads here and then
+        // breaks because the URL is wrong. Strange.
+        return false;
+      }
+      console.log("ERROR: Can't decipher URL; Something about \
+the routing system has changed. Returning to virtues page.\n       Expects something like \
+/users/create, /users/duplicate/username, or /users/edit/username,\
+ but got: \n       " + this.router.routerState.snapshot.url);
+      this.router.navigate(['/users']);
+      return false;
+    }
+    return true;
   }
 
   resetRouter() {
@@ -80,16 +150,16 @@ export class EditUserComponent implements OnInit {
 
   refreshData() {
     setTimeout(() => {
-      this.getUserData();
-    }, 1000);
+      this.getUserData(this.user.username);
+    }, 400);
   }
 
   setBaseUrl( url: string ) {
     this.baseUrl = url;
   }
 
-  getUserData() {
-    this.usersService.getUser(this.baseUrl, this.user.username).subscribe(uData => {
+  getUserData(username: string) {
+    this.usersService.getUser(this.baseUrl, username).subscribe(uData => {
       this.user.data = uData;
       this.user.roles = uData.authorities;
       this.user.enabled = uData.enabled;
@@ -148,6 +218,7 @@ export class EditUserComponent implements OnInit {
 
   generateAppsListHTML(virtue: any) {
     let appsString = virtue.applicationIds.toString();
+    // console.log("here", appsString);
     let appList: any;
     let appInfo: any;
     let appNames: string = '';
@@ -224,13 +295,18 @@ export class EditUserComponent implements OnInit {
     if (roleAdmin) {
       roles.push('ROLE_ADMIN');
     }
+
+    if (!this.user.username) {
+      return confirm("You need to enter a username.");
+    }
+
     let body = {
       'username': this.user.username,
       'authorities': roles,
       'virtueTemplateIds': this.user.virtueIDs,
       'enabled': this.user.enabled
     };
-    console.log(body);
+    // console.log(body);
     this.usersService.updateUser(this.baseUrl, this.user.username, JSON.stringify(body)).subscribe(
       error => {
         console.log(error);

@@ -4,6 +4,7 @@ mat-toolbar.mat-primary {
 .mat-toolbar {
   clear: both;
   display: block;
+  /* height: 102px; */
   height: 34px;
   width: 100%;
   padding: 0;
@@ -12,7 +13,8 @@ mat-toolbar.mat-primary {
   padding: 0 16px;
 }
 .mat-toolbar span.navbar-brand {
-  color: rgb(255,255,255);
+  /* color: rgb(50,50,50); */
+  color: rgb(255,255,255); /* title color */
   display: inline-block;
   padding: 0 2.4rem 0 1.5rem;
 }
@@ -26,11 +28,14 @@ mat-toolbar.mat-primary {
   font-size: 1.1rem;
   margin: 0;
 }
-.mat-toolbar li.active {
+.mat-toolbar li.active { /*TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO  This puts the active one on top of the thing below!
+  USE this somehow on the template drop down, and then change things so the normal things stay on the same row.*/
+  /* background-color: #2E294E *//*background in hex */
   background-color: #540D6E
 }
 .mat-toolbar li a {
-  color: rgb(255,255,255);
+  color: rgb(255,255,255); /* tab color */
+  /* color: rgb(50,50,0); */
   display: block;
   margin: 0;
   /* padding: 0.47rem 2.4rem 0.47rem; */

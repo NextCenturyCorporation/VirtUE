@@ -43,15 +43,18 @@ import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.c
 
 import { UsersComponent } from './users/users.component';
 import { UserListComponent } from './users/user-list/user-list.component';
+import {CreateEditUserComponent} from './users/create-edit-user/create-edit-user.component';
 import { AddUserComponent } from './users/add-user/add-user.component';
 import { EditUserComponent } from './users/edit-user/edit-user.component';
 import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
 
-import { VirtuesComponent } from './virtues/virtues.component';
+import { VirtuesWrapperComponent } from './virtues/virtues.wrapper.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
-import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
-import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
-import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
+// import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
+// import {CreateEditComponent} from './virtues/create-edit-virtue/create-edit-virtue.component';
+import {VirtueComponent} from './virtues/virtue/virtue.component';
+// import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
+// import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
@@ -96,17 +99,20 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
-    VirtuesComponent,
     UsersComponent,
     UserListComponent,
     AddUserComponent,
+    CreateEditUserComponent,
     EditUserComponent,
-    VirtuesComponent,
+    // VirtuesComponent,
+    VirtuesWrapperComponent,
     VirtueListComponent,
     VirtueSettingsComponent,
-    CreateVirtueComponent,
-    EditVirtueComponent,
-    DuplicateVirtueComponent,
+    // CreateVirtueComponent,
+    VirtueComponent,
+    // CreateEditVirtueComponent,
+    // EditVirtueComponent,
+    // DuplicateVirtueComponent,
     DialogsComponent,
     VirtueModalComponent,
     VmModalComponent,

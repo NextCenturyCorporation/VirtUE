@@ -16,6 +16,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 })
 export class VmAppsListComponent implements OnInit {
 
+  baseUrl: string;
   title = 'Applications';
   filterValue = '*';
   apps = [];
@@ -40,25 +41,21 @@ export class VmAppsListComponent implements OnInit {
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-        this.getApplications(awsServer);
+      this.setBaseUrl(awsServer);
+      this.getApplications();
     });
   }
 
-  getApplications(baseUrl: string) {
-    this.appsService.getAppsList(baseUrl)
+  setBaseUrl(url: string) {
+    this.baseUrl = url;
+  }
+
+  getApplications() {
+    this.appsService.getAppsList(this.baseUrl)
     .subscribe( appsList => {
       this.apps = appsList;
       this.totalApps = appsList.length;
     });
-  }
-
-  updateStatus(id: string): void {
-    const app = this.apps.filter(data => data['id'] === id);
-    app.map((_, i) => {
-      app[i].enabled ? app[i].enabled = false : app[i].enabled = true;
-      console.log(app);
-    });
-
   }
 
   listFilter(status: any) {
@@ -94,4 +91,25 @@ export class VmAppsListComponent implements OnInit {
     });
   }
 
+  sortAppColumns(sortColumn: string, sortBy: string) {
+    if (this.sortColumn === sortColumn) {
+      this.sortListBy(sortBy);
+    } else {
+      if (sortColumn === 'name') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'os') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      }
+    }
+  }
+
+  sortListBy(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.sortBy = 'desc';
+    } else {
+      this.sortBy = 'asc';
+    }
+  }
 }

@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Virtues</h1>
-    <button mat-button class="titlebar-button" routerLink="/virtues/create-virtue">Create New</button>
+    <button mat-button class="titlebar-button" routerLink="/virtues/create">Create New</button>
     <button mat-button class="titlebar-button" disabled>Import Virtue</button>
   </div>
 
@@ -22,8 +22,8 @@
       </div>
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-2">
-            <a class="sortName" (click)="sortVirtueColumns('name',sortBy)">Virtue Name</a>
+          <div class="table-header mui-col-md-3">
+            <a class="sortName" (click)="setColumnSortDirection('name',sortBy)">Virtue Name</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'name' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'name' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -31,10 +31,9 @@
             </span>
           </div>
           <div class="table-header mui-col-md-3">Virtual Machines</div>
-          <div class="table-header mui-col-md-3">Apps</div>
-          <!-- <div class="table-header mui-col-md-2">Created By</div> -->
+          <div class="table-header mui-col-md-2">Apps</div>
             <div class="table-header mui-col-md-2">
-              <a class="sortName" (click)="sortVirtueColumns('lastEditor',sortBy)">Last Edited By</a>
+              <a class="sortEdit" (click)="setColumnSortDirection('lastEditor',sortBy)">Last Edited By</a>
               <span class="list-sorter">
                 <span *ngIf="sortColumn === 'lastEditor' && sortBy === 'asc'" class="fa fa-sort-up"></span>
                 <span *ngIf="sortColumn === 'lastEditor' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -42,10 +41,18 @@
               </span>
             </div>
           <div class="table-header mui-col-md-2">
-            <a class="sortDate" (click)="sortVirtueColumns('date',sortBy)">Date</a>
+            <a class="sortDate" (click)="setColumnSortDirection('date',sortBy)"> Modified Date</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'date' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'date' && sortBy === 'desc'" class="fa fa-sort-down"></span>
+              <span class="fa fa-sort font-color-gray"></span>
+            </span>
+          </div>
+          <div class="table-header mui-col-md-1">
+            <a class="sortStatus" (click)="setColumnSortDirection('enabled',sortBy)">Status</a>
+            <span class="list-sorter">
+              <span *ngIf="sortColumn === 'enabled' && sortBy === 'asc'" class="fa fa-sort-up"></span>
+              <span *ngIf="sortColumn === 'enabled' && sortBy === 'desc'" class="fa fa-sort-down"></span>
               <span class="fa fa-sort font-color-gray"></span>
             </span>
           </div>
@@ -65,14 +72,15 @@
             <a class="edit" routerLink="/virtues/edit/{{virtue.id}}">{{ virtue.name }}</a>
 
             <!-- if this virtue is enabled show this menu -->
-            <span *ngIf="virtue.enabled" class="menu-options">
-              <a mat-button (click)="virtueStatus(virtue.id, virtue.enabled)">Disable</a> |
-               <a mat-button routerLink="/virtues/duplicate/{{virtue.id}}">Duplicate</a>
-            </span>
+            <!-- <span *ngIf="virtue.enabled" class="menu-options">
+              <a mat-button routerLink="/virtues/duplicate/{{virtue.id}}">Duplicate</a>
+            </span> -->
 
             <!-- if this virtue is disabled show this menu -->
-            <span *ngIf="virtue.enabled==false" class="menu-options">
-              <a mat-button (click)="virtueStatus(virtue.id)">Enable</a> |
+            <span class="menu-options">
+              <a *ngIf="virtue.enabled" mat-button (click)="virtueStatus(virtue.id, virtue.enabled)">Disable | </a>
+              <a *ngIf="!virtue.enabled" mat-button (click)="virtueStatus(virtue.id)">Enable | </a>
+              <a class="edit" routerLink="/virtues/duplicate/{{virtue.id}}">Duplicate</a> |
               <a mat-button (click)="openDialog(virtue.id,'delete','virtue',virtue.name)">Delete</a>
             </span>
           </div>
@@ -86,11 +94,9 @@
               <li *ngFor="let app of virtue.applicationIds">{{ getAppName(app) }}</li>
             </ul>
           </div>
-          <div class="table-data mui-col-md-2 virtue-transparent">{{virtue.lastEditor}}</div>
-          <div class="table-data mui-col-md-2 virtue-transparent">
-            {{virtue.enabled ? 'Enabled' : 'Disabled'}}<br />
-            {{virtue.lastModification | date:'short' }}
-          </div>
+          <div class="table-data mui-col-md-1 virtue-transparent">{{virtue.lastEditor}}</div>
+          <div class="table-data mui-col-md-2 virtue-transparent">{{virtue.lastModification | date:'short' }}</div>
+          <div class="table-data mui-col-md-1 virtue-transparent">{{virtue.enabled ? 'Enabled' : 'Disabled'}}</div>
           <div class="clearfix"></div>
         </div>
       </div>

@@ -45,8 +45,8 @@ export class VmListComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getBaseUrl(awsServer);
-      this.getVmList(awsServer);
-      this.getAppsList(awsServer);
+      this.getVmList();
+      this.getAppsList();
     });
     this.resetRouter();
   }
@@ -58,57 +58,16 @@ export class VmListComponent implements OnInit {
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-      this.getVmList(this.baseUrl);
+      // this.getVmList();
     }, 1000);
   }
 
-  getVmList(baseUrl: string) {
-    this.vmService.getVmList(baseUrl).subscribe(vmlist => {
-      this.vms = vmlist;
-      // console.log("*****");
-      // console.log(this.vms[0]);
-      for (var vm of this.vms) {
-        vm.status = vm.enabled ? 'enabled' : 'disabled';
-      }
-      // console.log(this.vms[0]);
-      this.totalVms = vmlist.length;
-      // this.sortVms(vmlist); //what? This should be expecting a sortDirection, no?
-      // this.sortVms('dsc');
-      // oh and changing or even commenting this line out entirely doesn't seem to
-      // affect the order, initial or otherwise, of the shown data.
-      // the called function is commented out below as well.
+  getVmList() {
+    this.vmService.getVmList(this.baseUrl).subscribe(vmList => {
+      this.vms = vmList;
+      this.totalVms = vmList.length;
     });
   }
-
-  // Appears to be unnecessary. See comment in getVmList()
-  // sortVms(sortDirection: string) {
-  //   console.log("sortVms");
-  //   if (sortDirection === 'asc') {
-  //     this.vms.sort((leftSide, rightSide): number => {
-  //       console.log("asc");
-  //       // console.log(JSON.stringify(leftSide));
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return -1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return 1;
-  //       }
-  //       return 0;
-  //     });
-  //   } else {
-  //     this.vms.sort((leftSide, rightSide): number => {
-  //       console.log("dsc");
-  //       // console.log(JSON.stringify(leftSide));
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return 1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-  // }
 
   enabledVmList(sortType: string, enabledValue: any, sortBy) {
     console.log('enabledVmList() => ' + enabledValue);
@@ -157,8 +116,8 @@ export class VmListComponent implements OnInit {
     }
   }
 
-  getAppsList(baseUrl: string) {
-    this.appsService.getAppsList(baseUrl)
+  getAppsList() {
+    this.appsService.getAppsList(this.baseUrl)
     .subscribe(appList => {
       this.apps = appList;
     });

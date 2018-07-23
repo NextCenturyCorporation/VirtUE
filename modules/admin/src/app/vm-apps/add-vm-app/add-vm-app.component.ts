@@ -26,4 +26,14 @@ export class AddVmAppComponent implements OnInit {
     this.selectedDist = null;
   }
 
+  handleFileInput(inputFile : any) {
+    console.log("User selected ", inputFile, " for input. Nothing happens with it yet. #TODO");
+  }
+
+  onInstall(): void {
+    console.log("Install is not implemented.");
+
+
+    // this.dialogRef.close();
+  }
 }

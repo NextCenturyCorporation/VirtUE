@@ -20,7 +20,7 @@ export class VmEditComponent implements OnInit {
   @Input() vm: VirtualMachine;
 
   vmForm: FormControl;
-  vmId: { id: string };
+  vmId: string;
   baseUrl: string;
   os: string;
   osValue: string;
@@ -31,9 +31,7 @@ export class VmEditComponent implements OnInit {
 
   vmData = [];
   appList = [];
-  selectedApps = [];
-  selAppList = [];
-  pageAppList = [];
+  appIDsList = [];
   osList = [
     { 'name': 'Debian', 'os': 'LINUX' },
     { 'name': 'Windows', 'os': 'WINDOWS' }
@@ -55,107 +53,77 @@ export class VmEditComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.vmId = {
-      id: this.activatedRoute.snapshot.params['id']
-    };
+    this.vmId = this.activatedRoute.snapshot.params['id'];
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-      this.getBaseUrl(awsServer);
-      this.getThisVm(awsServer, this.vmId.id);
+      this.setBaseUrl(awsServer);
+      this.getThisVm(this.vmId);
     });
   }
 
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-      this.getThisVm(this.baseUrl, this.vmId.id);
+      this.getThisVm(this.vmId);
     }, 1000);
   }
 
-  getBaseUrl(url: string) {
+  setBaseUrl(url: string) {
     this.baseUrl = url;
   }
 
-  getThisVm(baseUrl: string, id: string) {
-    this.baseUrl = baseUrl;
-    this.vmService.getVM(baseUrl, id).subscribe(
+  getThisVm(id: string) {
+    this.vmService.getVM(this.baseUrl, id).subscribe(
       data => {
         this.vmData = data;
         this.selectedOS = data.os;
-        this.pageAppList = data.applicationIds;
-        this.getAppList(data.applicationIds);
+        this.updateAppList(data.applicationIds);
         this.securityLevel = data.securityTag;
         this.vmEnabled = data.enabled;
       }
     );
   }
 
-  getAppList(vmApps) {
-    const selectedApps = this.pageAppList;
-    this.appsService.getAppsList(this.baseUrl)
-      .subscribe(apps => {
-        if (selectedApps.length < 1) {
-          for (let sel of selectedApps) {
-            for (let app of apps) {
-              if (sel === app.id) {
-                this.appList.push(app);
-                break;
-              }
-            }
-          }
-        } else {
-          this.getUpdatedAppList(this.baseUrl);
-        }
-      });
-  }
-
-  getUpdatedAppList(baseUrl: string) {
+  updateAppList(newAppList) {
+    // loop through the selected VM list
     this.appList = [];
-    this.appsService.getAppsList(baseUrl)
-      .subscribe(apps => {
-        for (let sel of this.pageAppList) {
-          for (let app of apps) {
-            if (sel === app.id) {
-              this.appList.push(app);
-              break;
-            }
-          }
+    this.appIDsList = newAppList;
+    // console.log('vm's app list @ updateAppList(): ' + this.appIDsList);
+    const vmAppIDs = newAppList;
+    for (let appID of vmAppIDs) {
+      this.appsService.getApp(this.baseUrl, appID).subscribe(
+        appData => {
+          this.appList.push(appData);
+        },
+        error => {
+          console.log(error.message);
         }
-      });
+      );
+    }
   }
 
-  vmStatus(isEnabled: boolean) {
-    if (isEnabled) {
-      this.vmEnabled = false;
-    } else {
-      this.vmEnabled = true;
-    }
+  toggleVmStatus(isEnabled: boolean) {
+    this.vmEnabled = !isEnabled;
   }
 
   removeApp(id: string, index: number): void {
     this.appList = this.appList.filter(data => {
       return data.id !== id;
     });
-    this.pageAppList.splice(index, 1);
+    this.appIDsList.splice(index, 1);
   }
 
   activateModal(): void {
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
       width: '750px',
       data: {
-        selectedApps: this.pageAppList
+        selectedApps: this.appIDsList
       }
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    const apps = dialogRef.componentInstance.addApps.subscribe((data) => {
-      this.selAppList = data;
-      if (this.pageAppList.length > 0) {
-        this.pageAppList = [];
-      }
-      this.pageAppList = this.selAppList;
-
-      this.getAppList(this.pageAppList);
+    const apps = dialogRef.componentInstance.addApps.subscribe((dialogAppsList) => {
+      this.updateAppList(dialogAppsList);
     });
 
     dialogRef.afterClosed().subscribe(() => {
@@ -169,7 +137,7 @@ export class VmEditComponent implements OnInit {
       'os': vmOs,
       'loginUser': 'system',
       'enabled': this.vmEnabled,
-      'applicationIds': this.pageAppList,
+      'applicationIds': this.appIDsList,
       'securityTag': vmSecurityTag
     };
     this.vmService.updateVM(this.baseUrl, id, JSON.stringify(body));

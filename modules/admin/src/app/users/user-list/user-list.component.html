@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Users</h1>
-    <button class="titlebar-button" routerLink="/users/add">Add User</button>
+    <button class="titlebar-button" routerLink="/users/create">Add User</button>
   </div>
 
   <div id="content-main">
@@ -18,13 +18,12 @@
       </div>
       <!-- if there are users, show this list -->
       <div *ngIf="users.length > 0" class="mui-container-fluid">
-        <div class="mui-row virtues-filters">
-          <!-- <div class="virtues-filter mui-col-md-12 padding-left-0">All User Accounts | <a href="#">Active Accounts</a> | <a>Disabled Accounts</a></div> -->
+        <div class="mui-row users-filters">
           <div class="mui-col-md-12 padding-left-0 filters">
             <span *ngIf="sortValue === '*'">All User Accounts</span>
             <a *ngIf="sortValue !== '*'"  (click)="enabledUserList('enabled','*', sortType)">All User Accounts</a> |
             <span *ngIf="sortValue === true">Active Accounts</span>
-            <a *ngIf="sortValue !== true" (click)="enabledUserList('enabled', true, sortType)">Active Accounts</a> |
+            <a *ngIf="sortValue !== true" (click)="enabledUserList('enabled', true, sortType)">Enabled Accounts</a> |
             <span *ngIf="sortValue === false">Disabled Accounts</span>
             <a *ngIf="sortValue !== false" (click)="enabledUserList('enabled', false, sortType)">Disabled Accounts</a>
           </div>
@@ -34,7 +33,7 @@
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
           <div class="table-header mui-col-md-3">
-            <a (click)="sortUserColumns('username',sortBy)">Username</a>
+            <a (click)="setColumnSortDirection('username',sortBy)">Username</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'username' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'username' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -44,7 +43,7 @@
 
           <!-- <div class="table-header mui-col-md-3">Authorities</div> -->
           <div class="table-header mui-col-md-3">
-            <a (click)="sortUserColumns('authorities',sortBy)">Authorities</a>
+            <a (click)="setColumnSortDirection('authorities',sortBy)">Authorized Roles</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'authorities' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'authorities' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -52,10 +51,10 @@
             </span>
           </div>
 
-          <div class="table-header mui-col-md-4">Virtues</div>
+          <div class="table-header mui-col-md-4">Available Virtues</div>
           <!-- <div class="table-header mui-col-md-3">Status</div> -->
           <div class="table-header mui-col-md-3">
-            <a (click)="sortUserColumns('status',sortBy)">Status</a>
+            <a (click)="setColumnSortDirection('status',sortBy)">User Status</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'status' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'status' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -64,41 +63,42 @@
           </div>
 
         </div>
-        <div class="mui-row table-row" *ngFor="let su of users | listFilter : sortColumn : sortType : sortValue : sortBy"
-              [ngStyle]="{'background-color':su.enabled ? '#ffffff' : '#eeeeee' }" appActiveClass>
+        <div class="mui-row table-row" *ngFor="let u of users | listFilter : sortColumn : sortType : sortValue : sortBy"
+              [ngStyle]="{'background-color':u.enabled ? '#ffffff' : '#eeeeee' }" appActiveClass>
           <div class="table-data mui-col-md-2 user-transparent">
             <div class="mini-menu">
-              <a class="edit" routerLink="/users/edit/{{su.username}}">{{ su.username }}</a>
+              <a class="edit" routerLink="/users/edit/{{u.username}}">{{ u.username }}</a>
 
               <!-- if this user is enabled show this menu -->
-              <span *ngIf="su.enabled === true" class="menu-options">
-                <a (click)="userStatus(su.username, 'False')">Disable</a> |
-                <a class="edit" routerLink="/user/duplicate/{{su.username}}">Duplicate</a>
+              <span *ngIf="u.enabled === true" class="menu-options">
+                <a (click)="setUserStatus(u.username, 'False')">Disable</a> |
+                <a class="edit" routerLink="/user/duplicate/{{u.username}}">Duplicate</a>
               </span>
 
               <!-- if this user is disabled show this menu -->
-              <span *ngIf="su.enabled === false" class="menu-options">
-                <a (click)="userStatus(su.username, 'True')">Enable</a> |
-                <a (click)="openDialog(su.username, 'delete', 'delete', su.username)">Delete</a>
+              <span *ngIf="u.enabled === false" class="menu-options">
+                <a (click)="setUserStatus(u.username, 'True')">Enable</a> |
+                <a class="edit" routerLink="/users/duplicate/{{u.username}}">Duplicate</a> |
+                <a (click)="openDialog('delete', u.username)">Delete</a>
               </span>
           </div>
 
-            <!-- <a class="edit" routerLink="/users/edit/{{su.username}}">{{ su.username }}</a> -->
+            <!-- <a class="edit" routerLink="/users/edit/{{u.username}}">{{ u.username }}</a> -->
 
             <!-- if this user is enabled show this menu -->
             <!-- <span class="menu-options">
-              <a routerLink="/users/duplicate/{{su.username}}">Duplicate</a> | <a class="edit" (click)="deleteUser(su.username)">Delete</a>
+              <a routerLink="/users/duplicate/{{u.username}}">Duplicate</a> | <a class="edit" (click)="deleteUser(u.username)">Delete</a>
             </span> -->
           </div>
-          <div class="table-data mui-col-md-3 user-transparent">{{ su.authorities.sort() }}<!--  Sorted so all roles appear in same order   -->
+          <div class="table-data mui-col-md-3 user-transparent">{{ u.authorities.sort() }}<!--  Sorted so all roles appear in same order   -->
           </div>
           <div class="table-data mui-col-md-4 user-transparent">
             <ul>
-              <li *ngFor="let virtue of su.virtueTemplateIds">{{ getVirtueName(virtue) }}</li>
+              <li *ngFor="let virtue of u.virtueTemplateIds">{{ getVirtueName(virtue) }}</li>
             </ul>
           </div>
           <div class="table-data mui-col-md-3 user-transparent">
-            {{ su.enabled ? 'Enabled' : 'Disabled' }}
+            {{ u.enabled ? 'Enabled' : 'Disabled' }}
           </div>
           <div class="clearfix"></div>
         </div>

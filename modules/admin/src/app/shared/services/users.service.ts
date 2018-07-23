@@ -19,21 +19,28 @@ export class UsersService {
   // Get all users
   getUsers( baseUrl: string ): Observable<any> {
     let awsServer = baseUrl + this.configUrl;
+    // console.log('getUsers => ');
+    // console.log(awsServer);
     return this.httpClient.get<any>(awsServer);
   }
 
   getUser(baseUrl: string, id: string): Observable<any> {
-    let src = baseUrl + this.configUrl + id;
-    // console.log('getUser() --> ' + src);
-    return this.httpClient.get<any>(src);
+    let url = baseUrl + this.configUrl + id;
+    // console.log('getUser => ');
+    // console.log(url);
+    return this.httpClient.get<any>(url);
   }
 
   createUser( baseUrl: string, userData: any ): Observable<any> {
-    let awsServer = baseUrl + this.configUrl;
+    let url = baseUrl + this.configUrl;
     let newUser = userData;
+    // console.log('createUser() => ');
+    // console.log(url);
+    // console.log(userData);
+    // return "";
     if (userData) {
       // console.log('Posting user: ' + newUser);
-      return this.httpClient.post(awsServer, newUser, httpOptions);
+      return this.httpClient.post(url, newUser, httpOptions);
     } else {
       console.log('Sadness, there was a problem creating this user:');
       console.log(newUser);
@@ -46,11 +53,12 @@ export class UsersService {
   }*/
 
   assignVirtues(baseUrl: string, username: string, virtue: string) {
-    console.log('assignVirtues => ');
-    console.log(username);
-    console.log(virtue);
+    // console.log('assignVirtues => ');
+    // console.log(username);
+    // console.log(virtue);
 
     let userRecord = baseUrl + this.configUrl + username + '/assign/' + virtue;
+    // console.log(userRecord);
     return this.httpClient.post(userRecord, virtue, httpOptions).toPromise().then(data => {
       return true;
     },
@@ -61,21 +69,26 @@ export class UsersService {
 
   public updateUser(baseUrl: string, username: string, userData: any) {
     let url = baseUrl + this.configUrl + username;
-    console.log(url);
+    // console.log("updateUser");
+    // console.log(url);
     return this.httpClient.put(url, userData, httpOptions);
   }
 
   public setUserStatus(baseUrl: string, username: string, newStatus: string): Observable<any> {
     let url = baseUrl + this.configUrl + username + '/enable';
+    // console.log("setUserStatus");
     // console.log(url);
     return this.httpClient.post(url, newStatus);
   }
 
 
   deleteUser(baseUrl: string, username: string) {
-    let awsServer = baseUrl + this.configUrl;
-    return this.httpClient.delete(awsServer + username).subscribe(
+    let url = baseUrl + this.configUrl;
+    // console.log("deleteUser");
+    // console.log(url);
+    return this.httpClient.delete(url + username).subscribe(
     data => {
+      console.log(data);
       return true;
     },
     error => {

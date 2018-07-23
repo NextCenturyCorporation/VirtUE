@@ -32,7 +32,7 @@
           <div class="mui-col-md-4">
             <mat-form-field class="form-field">
               <mat-select [(ngModel)]="securityTag" #vmSecurityTag [ngModelOptions]="{standalone: true}" placeholder="Select One" [(value)]="securityLevel" disableRipple>
-                <mat-option *ngFor="let item of securityOptions" [value]="item.level">{{ item.name }} </mat-option>
+                <mat-option *ngFor="let item of securityOptions"  [value]="item.level">{{ item.name }} </mat-option>
               </mat-select>
             </mat-form-field>
           </div>

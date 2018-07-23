@@ -10,9 +10,11 @@ export class ListFilterPipe implements PipeTransform {
     if (value.length < 1) {
       return value;
     }
+
     let sortedList = value.slice(0);
     let resultArray = [];
 
+    //filterValue can be true, false, or *. Default is *.
     if (filterType === 'enabled' && filterValue === true) {
       sortedList = value.filter(result => result[filterType] === filterValue);
     } else if (filterType === 'enabled' && filterValue === false) {
@@ -25,13 +27,13 @@ export class ListFilterPipe implements PipeTransform {
   }
 
   sortByColumn(data: any, column: string, columnValue: any, filterDirection: string) {
-    if (column === 'enabled') {
-      let sortList = data.filter(results => results[column] === columnValue);
-      return this.sortData(sortList, column, filterDirection);
-    } else {
+    // if (column === 'enabled') {
+    //   let sortList = data.filter(results => results[column] === columnValue);
+    //   return this.sortData(sortList, column, filterDirection);
+    // } else {
       let sortList = this.sortData(data, column, filterDirection);
       return sortList;
-    }
+    // }
   }
 
   sortData (data: any, propertyName: string, filterDirection: string) {
@@ -41,10 +43,18 @@ export class ListFilterPipe implements PipeTransform {
     if (filterDirection === 'desc') {
       // console.log('sorting list by desc order');
       data.sort((leftSide, rightSide): number => {
-        if (leftSide[propertyName] < rightSide[propertyName]) {
+        let left = leftSide[propertyName];
+        let right = rightSide[propertyName];
+        if (typeof left ==='string') {
+          left = left.toUpperCase();
+        }
+        if (typeof right ==='string') {
+          right = right.toUpperCase();
+        }
+        if (left < right) {
           return 1;
         }
-        if (leftSide[propertyName] > rightSide[propertyName]) {
+        if (left > right) {
           return -1;
         }
         return 0;
@@ -52,11 +62,18 @@ export class ListFilterPipe implements PipeTransform {
     } else {
       // console.log('sorting list by asc order');
       data.sort((leftSide, rightSide): number => {
-
-        if (leftSide[propertyName] < rightSide[propertyName]) {
+        let left = leftSide[propertyName];
+        let right = rightSide[propertyName];
+        if (typeof left ==='string') {
+          left = left.toUpperCase();
+        }
+        if (typeof right ==='string') {
+          right = right.toUpperCase();
+        }
+        if (left < right) {
           return -1;
         }
-        if (leftSide[propertyName] > rightSide[propertyName]) {
+        if (left > right) {
           return 1;
         }
         return 0;

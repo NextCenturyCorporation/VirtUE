@@ -6,14 +6,18 @@ import {DashboardComponent} from './dashboard/dashboard.component';
 import {ConfigComponent} from './config/config.component';
 import {UsersComponent} from './users/users.component';
 import {UserListComponent} from './users/user-list/user-list.component';
+import {CreateEditUserComponent} from './users/create-edit-user/create-edit-user.component';
 import {AddUserComponent} from './users/add-user/add-user.component';
 import {DuplicateUserComponent} from './users/duplicate-user/duplicate-user.component';
 import {EditUserComponent} from './users/edit-user/edit-user.component';
-import {VirtuesComponent} from './virtues/virtues.component';
+import {VirtuesWrapperComponent} from './virtues/virtues.wrapper.component';
+// import {VirtuesComponent} from './virtues/virtues.component';
 import {VirtueListComponent} from './virtues/virtue-list/virtue-list.component';
-import {CreateVirtueComponent} from './virtues/create-virtue/create-virtue.component';
-import {EditVirtueComponent} from './virtues/edit-virtue/edit-virtue.component';
-import {DuplicateVirtueComponent} from './virtues/duplicate-virtue/duplicate-virtue.component';
+// import {CreateVirtueComponent} from './virtues/create-virtue/create-virtue.component';
+import {VirtueComponent} from './virtues/virtue/virtue.component';
+// import {CreateEditVirtueComponent} from './virtues/create-edit-virtue/create-edit-virtue.component';
+// import {EditVirtueComponent} from './virtues/edit-virtue/edit-virtue.component';
+// import {DuplicateVirtueComponent} from './virtues/duplicate-virtue/duplicate-virtue.component';
 import {VirtueSettingsComponent} from './virtues/virtue-settings/virtue-settings.component';
 import {VirtualMachinesComponent} from './virtual-machines/virtual-machines.component';
 import {VmListComponent} from './virtual-machines/vm-list/vm-list.component';
@@ -47,7 +51,7 @@ const routes: Routes = [
     component: UsersComponent,
     data: {
       breadcrumbs: [
-        new Breadcrumb('Users', '/user')
+        new Breadcrumb('Users', '/users')
       ]
     },
     children: [
@@ -55,27 +59,30 @@ const routes: Routes = [
         path: '',
         component: UserListComponent
       }, {
-      path: 'add',
-        component: AddUserComponent,
+      path: 'create',
+        component: CreateEditUserComponent,
+        // component: AddUserComponent,
         data: {
           breadcrumbs: [
-            new Breadcrumb('Add User Account', '/add-user')
+            new Breadcrumb('Add User Account', '/create')
           ]
         }
       }, {
         path: 'edit/:id',
-        component: EditUserComponent,
+        component: CreateEditUserComponent,
+        // component: EditUserComponent,
         data: {
           breadcrumbs: [
-            new Breadcrumb('Edit User Account', '/edit-user')
+            new Breadcrumb('Edit User Account', '/edit')
           ]
         }
       }, {
         path: 'duplicate/:id',
-        component: DuplicateUserComponent,
+        component: CreateEditUserComponent,
+        // component: DuplicateUserComponent,
         data: {
           breadcrumbs: [
-            new Breadcrumb('Duplicate User Account',  '/duplicate-user')
+            new Breadcrumb('Duplicate User Account',  '/duplicate')
           ]
         }
       }
@@ -85,7 +92,7 @@ const routes: Routes = [
     component: VmAppsComponent,
     data: {
       breadcrumbs: [
-        new Breadcrumb('Applications', '/applications')
+        new Breadcrumb('Applications', '/apps')
       ]
     },
     children: [
@@ -93,38 +100,40 @@ const routes: Routes = [
         path: '',
         component: VmAppsListComponent
       }, {
-        path: 'add-app',
+        path: 'add',
         component: AddVmAppComponent,
         data: {
           breadcrumbs: [
-            new Breadcrumb('Install New App', '/add-application')
+            new Breadcrumb('Install New App', '/add')
           ]
         }
       }
     ]
   }, {
     path: 'virtues',
-    component: VirtuesComponent,
-    data: {
-      breadcrumbs: [
-        new Breadcrumb('Virtues', '/virtues')
-      ]
-    },
+    component: VirtuesWrapperComponent,
     children: [
       {
         path: '',
-        component: VirtueListComponent
-      }, {
-        path: 'create-virtue',
-        component: CreateVirtueComponent,
+        component: VirtueListComponent,
         data: {
           breadcrumbs: [
-            new Breadcrumb('Create Virtue', '/create-virtue')
+            new Breadcrumb('Virtues', '/virtues')
+          ]
+        }
+      }, {
+        path: 'create',
+        // component: CreateVirtueComponent,
+        component: VirtueComponent,
+        data: {
+          breadcrumbs: [
+            new Breadcrumb('Create Virtue', '/create')
           ]
         }
       }, {
       path: 'edit/:id',
-        component: EditVirtueComponent,
+        // component: EditVirtueComponent,
+        component: VirtueComponent,
         data: {
           breadcrumbs: [
             new Breadcrumb('Edit Virtue', '/edit')
@@ -132,7 +141,8 @@ const routes: Routes = [
         }
       }, {
         path: 'duplicate/:id',
-        component: DuplicateVirtueComponent,
+        // component: DuplicateVirtueComponent,
+        component: VirtueComponent,
         data: {
           breadcrumbs: [
             new Breadcrumb('Duplicate Virtue', '/duplicate')
@@ -156,11 +166,11 @@ const routes: Routes = [
         path: '',
         component: VmListComponent
       }, {
-        path: 'vm-build',
+        path: 'create',
         component: VmBuildComponent,
         data: {
           breadcrumbs: [
-            new Breadcrumb('Build Virtual Machine', '/vm-build')
+            new Breadcrumb('Build Virtual Machine', '/create')
           ]
         }
       }, {

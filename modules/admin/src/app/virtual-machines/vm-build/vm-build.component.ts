@@ -26,13 +26,13 @@ export class VmBuildComponent implements OnInit, OnDestroy {
   securityLevel: string;
 
   appList = [];
-  selAppList = [];
-  pageAppList = [];
+  appIDsList = [];
   osList = [
     { 'name': 'Debian', 'os': 'LINUX' },
     { 'name': 'Windows', 'os': 'WINDOWS' }
   ];
 
+//TODO this doesn't appear to be used anywhere
   securityOptions = [
     { 'level': 'default', 'name': 'Default'} ,
     { 'level': 'email', 'name': 'Email' },
@@ -58,60 +58,41 @@ export class VmBuildComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-        this.getBaseUrl(awsServer);
-        this.getAppList(awsServer);
+        this.setBaseUrl(awsServer);
+        this.updateAppList([]);
     });
   }
 
   ngOnDestroy() {
   }
 
-  getBaseUrl(url: string) {
+  setBaseUrl(url: string) {
     this.baseUrl = url;
   }
 
-  getAppList(baseUrl: string) {
-    this.baseUrl = baseUrl;
+  updateAppList(newAppList) {
     // loop through the selected VM list
-    const selectedApps = this.pageAppList;
-    // console.log('page Apps list @ getAppList(): ' + this.pageAppList);
-    this.appsService.getAppsList(baseUrl)
-      .subscribe(apps => {
-        if (this.appList.length < 1) {
-          for (let sel of selectedApps) {
-            for (let app of apps) {
-              if (sel === app.id) {
-                this.appList.push(app);
-                break;
-              }
-            }
-          }
-        } else {
-          this.getUpdatedAppList(baseUrl);
-        }
-      });
-  }
-
-  getUpdatedAppList(baseUrl: string) {
     this.appList = [];
-    this.appsService.getAppsList(baseUrl)
-      .subscribe(apps => {
-        for (let sel of this.pageAppList) {
-          for (let app of apps) {
-            if (sel === app.id) {
-              this.appList.push(app);
-              break;
-            }
-          }
+    this.appIDsList = newAppList;
+    // console.log('vm's app list @ updateAppList(): ' + this.appIDsList);
+    const vmAppIDs = newAppList;
+    for (let appID of vmAppIDs) {
+      this.appsService.getApp(this.baseUrl, appID).subscribe(
+        appData => {
+          this.appList.push(appData);
+        },
+        error => {
+          console.log(error.message);
         }
-      });
+      );
+    }
   }
 
   removeApp(id: string, index: number): void {
     this.appList = this.appList.filter(data => {
       return data.id !== id;
     });
-    this.pageAppList.splice(index, 1);
+    this.appIDsList.splice(index, 1);
   }
 
 
@@ -120,21 +101,16 @@ export class VmBuildComponent implements OnInit, OnDestroy {
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
       width: '750px',
       data: {
-        selectedApps: this.pageAppList
+        selectedApps: this.appIDsList
       }
     });
-    console.log('Apps sent to dialog: ' + this.pageAppList);
+    console.log('Apps sent to dialog: ' + this.appIDsList);
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    const apps = dialogRef.componentInstance.addApps.subscribe((data) => {
-      this.selAppList = data;
-      console.log('Apps from dialog: ' + this.selAppList);
-      if (this.pageAppList.length > 0) {
-        this.pageAppList = [];
-      }
-      this.pageAppList = this.selAppList;
+    const apps = dialogRef.componentInstance.addApps.subscribe((dialogAppsList) => {
+      console.log('Apps from dialog: ' + dialogAppsList);
 
-      this.getAppList(this.baseUrl);
+      this.updateAppList(dialogAppsList);
     });
 
     dialogRef.afterClosed().subscribe(() => {
@@ -148,7 +124,7 @@ export class VmBuildComponent implements OnInit, OnDestroy {
       'os': vmOs,
       'loginUser': 'system',
       'enabled': true,
-      'applicationIds': this.pageAppList,
+      'applicationIds': this.appIDsList,
       'securityTag': vmSecurityTag
     };
     console.log(body);

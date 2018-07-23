@@ -1,8 +1,8 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h1 class="titlebar-title">Virtual Machines</h1>
-    <button class="titlebar-button" routerLink="/virtual-machines/vm-build">Build VM Template</button>
-    <button class="titlebar-button" [disabled]="true">Import VM</button>
+    <h1 class="titlebar-title">Virtual Machine Templates</h1>
+    <button class="titlebar-button" routerLink="/virtual-machines/vm-build">Create New Template</button>
+    <button class="titlebar-button" [disabled]="true">Import Template</button>
   </div>
 
   <div id="content-main">
@@ -22,12 +22,12 @@
       <div *ngIf="vms.length > 0" class="mui-container-fluid">
         <div class="mui-row virtues-filters">
           <div class="mui-col-md-12 padding-left-0 filters">
-            <span *ngIf="sortValue === '*'">All VMs</span>
-            <a *ngIf="sortValue !== '*'"  (click)="enabledVmList('enabled','*', sortType)">All VMs</a> |
-            <span *ngIf="sortValue === true">Enabled VMs</span>
-            <a *ngIf="sortValue !== true" (click)="enabledVmList('enabled', true, sortType)">Enabled VMs</a> |
-            <span *ngIf="sortValue === false">Disabled VMs</span>
-            <a *ngIf="sortValue !== false" (click)="enabledVmList('enabled', false, sortType)">Disabled VMs</a>
+            <span *ngIf="sortValue === '*'">All VM Templates</span>
+            <a *ngIf="sortValue !== '*'"  (click)="enabledVmList('enabled','*', sortType)">All VM Templates</a> |
+            <span *ngIf="sortValue === true">Enabled Templates</span>
+            <a *ngIf="sortValue !== true" (click)="enabledVmList('enabled', true, sortType)">Enabled Templates</a> |
+            <span *ngIf="sortValue === false">Disabled Templates</span>
+            <a *ngIf="sortValue !== false" (click)="enabledVmList('enabled', false, sortType)">Disabled Templates</a>
           </div>
         </div>
       </div>

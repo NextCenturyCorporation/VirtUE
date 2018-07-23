@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h1 class="titlebar-title">Edit Virtue</h1>
-    <button (click)="virtueStatus(virtueData.id, virtueEnabled)" class="titlebar-button">{{ virtueEnabled ? 'Disable Virtue' : 'Enable Virtue' }}</button>
+    <h1 class="titlebar-title">{{actionName}} Virtue</h1>
+    <button (click)="toggleVirtueStatus()" class="titlebar-button">{{ virtue.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button>
   </div>
   <div id="content-main">
       <div id="content" class="border-top virtue-content">
@@ -16,9 +16,10 @@
 
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
-                <input type="text" #virtueName [(value)]="virtueData.name" placeholder="Virtue Name" matInput />
+                <input type="text" [(ngModel)]="virtue.name" placeholder="Virtue Name" matInput />
+                <!-- <input type="text" #virtue.name [(value)]="virtue.name" placeholder="Virtue Name" matInput /> -->
                 <br />
-                <span style="clear: both;color: #ccc; font-size:10px;margin-top:5px;">ID: {{ virtueId.id }}</span>
+                <span *ngIf="mode!=='c'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ virtue.id }}</span>
               </div>
             </div>
             <div class="mui-row form-item margin-top-15">
@@ -26,13 +27,13 @@
                 <label>Version: </label>
               </div>
               <div class="mui-col-md-2">
-                <input type="text" #virtueVersion [(value)]="virtueData.version"  matInput />
+                <input type="text" [(ngModel)]="virtue.version" placeholder="1.0" matInput />
               </div>
             </div>
             <div class="mui-row titlebar">
               <div class="mui-col-md-12">
                 <h2 class="titlebar-title">Virtual Machines</h2>
-                <button mat-button class="titlebar-button" (click)="activateModal(virtueData.id)">Add VM</button>
+                <button mat-button class="titlebar-button" (click)="activateModal(virtue.id)">Add VM</button>
               </div>
             </div>
             <!-- if there are virtual machines, show this list -->
@@ -75,7 +76,7 @@
               <div class="mui-row paging">
                 <div class="mui-col-md-4 page-number padding-left-0">&nbsp;</div>
                 <div class="mui-col-md-4 page-controls">&nbsp;</div>
-                <div class="mui-col-md-4 page-item-total padding-right-0"># Virtual Machine(s)</div>
+                <div class="mui-col-md-4 page-item-total padding-right-3">{{vmList.length}} Virtual Machine{{(vmList.length === 1) ? '': 's'}}</div>
                 <div class="clearfix"></div>
               </div>
             </div>
@@ -86,15 +87,15 @@
               <div class="virtue-titlebar">
                 <h3> Virtue Settings</h3>
               </div>
-              <app-virtue-settings></app-virtue-settings>
+              <app-virtue-settings #settingsPane></app-virtue-settings>
             </div>
           </div>
         </vertical-split-pane>
         <div class="mui-row border-top">
           <div class="mui-col-md-4">&nbsp;</div>
           <div class="mui-col-md-4 form-item text-align-center">
-            <button class="button-submit" type="submit" (click)="updateThisVirtue(virtueData.id, virtueName.value, virtueVersion.value)">Save</button>
-            <button class="button-cancel" type="cancel">Cancel</button>
+            <button class="button-submit" type="submit" (click)="saveOrUpdate()">Save</button>
+            <button class="button-cancel" type="cancel" (click)="router.navigate(['/virtues'])">Cancel</button>
           </div>
           <div class="mui-col-md-4"></div>
         </div>

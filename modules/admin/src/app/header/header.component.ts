@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgModule } from '@angular/core';
 
 @Component({
   selector: 'app-header',
@@ -6,16 +6,38 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
-
+  showDropDown:boolean = false;
   navigation = [
     {value: 'Dashboard', link: '/dashboard'},
     {value: 'Settings', link: '/settings'},
     {value: 'Users', link: '/users'},
     {value: 'Applications', link: '/applications'},
+    // {value: 'Templates', link: '/'}
     {value: 'Virtual Machines', link: '/virtual-machines'},
     {value: 'Virtues', link: '/virtues'}
   ];
+  templateLinks = [
+    {value: 'Virtual Machines', link: '/virtual-machines'},
+    {value: 'Virtues', link: '/virtues'}
+  ]
 
-  ngOnInit() {}
+  ngOnInit() {
+
+  }
+
+  getValue(n) {
+    console.log(n);
+    console.log(n.value);
+    return n.value;
+  }
+
+  toggleCollapse() {
+    this.showDropDown = !this.showDropDown;
+  }
+
+  getDropDown() {
+    console.log(this.showDropDown);
+    return this.showDropDown;
+  }
 
 }

@@ -48,16 +48,21 @@ export class UserListComponent implements OnInit {
       this.getUsers(awsServer);
       this.getVirtues(awsServer);
     });
-    this.refreshData();
+    this.resetRouter();
   }
 
   getBaseUrl( url: string ) {
     this.baseUrl = url;
   }
 
-  refreshData() {
+  resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
+    }, 1000);
+  }
+
+  refreshData() {
+    setTimeout(() => {
       this.getUsers(this.baseUrl);
     }, 1000);
   }
@@ -72,14 +77,23 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  userStatus(username: string, newStatus: string) {
-    console.log("here");
-
-    this.usersService.setUserStatus(this.baseUrl, username, newStatus).subscribe(userList => {
-      this.users = userList;
-    });
-    this.refreshData();
-    this.router.navigate(['/users']);
+  setUserStatus(username: string, newStatus: string) {
+    // console.log("here");
+    if (username.toUpperCase() === "ADMIN") {
+      //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
+      // this.openDialog('disable', username + " and lock everyone out of the system?");
+      if (!confirm("Are you sure to disable "+ username + " and lock everyone out of the system, including you?")) {
+        console.log("Leaving " + username + " intact.");
+        return;
+      }
+      console.log("Request to disable " + username + " ignored.");
+      //we're not disabling that
+      return;
+    }
+    // this.usersService.setUserStatus(this.baseUrl, username, newStatus).subscribe(userList => {
+    //   this.users = userList;
+    // });
+    // this.refreshData();
   }
 
   deleteUser(username: string) {
@@ -102,57 +116,58 @@ export class UserListComponent implements OnInit {
     }
   }
 
-  openDialog(id, type, text): void {
+  //The message will be ""
+  openDialog(verb: string, directObject: string): void {
     const dialogRef = this.dialog.open( DialogsComponent, {
       width: '450px',
       data:  {
-          dialogText: text,
-          dialogType: type
+          dialogType: verb,
+          dialogDescription: directObject
         }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog to delete {{data.dialogText}} was closed');
+      console.log('The dialog to ' + verb + ' ' + directObject + ' was closed');
     });
   }
 
-    enabledUserList(sortType: string, enabledValue: any, sortBy) {
-      console.log('enabledUserList() => ' + enabledValue);
-      if (this.sortValue !== enabledValue) {
+  enabledUserList(sortType: string, enabledValue: any, sortBy) {
+    // console.log('enabledUserList() => ' + enabledValue);
+    if (this.sortValue !== enabledValue) {
+      this.sortBy = 'asc';
+    } else {
+      this.reverseSorting(sortBy);
+    }
+    this.sortValue = enabledValue;
+    this.sortType = sortType;
+  }
+
+  setColumnSortDirection(sortColumn: string, sortBy: string) {
+    if (this.sortColumn === sortColumn) {
+      this.reverseSorting(sortBy);
+    } else {
+      if (sortColumn === 'username') {
         this.sortBy = 'asc';
-      } else {
-        this.sortListBy(sortBy);
-      }
-      this.sortValue = enabledValue;
-      this.sortType = sortType;
-    }
-
-    sortUserColumns(sortColumn: string, sortBy: string) {
-      if (this.sortColumn === sortColumn) {
-        this.sortListBy(sortBy);
-      } else {
-        if (sortColumn === 'username') {
-          this.sortBy = 'asc';
-          this.sortColumn = sortColumn;
-        } else if (sortColumn === 'authorities') {
-          this.sortBy = 'asc';
-          this.sortColumn = sortColumn;
-        } else if (sortColumn === 'status') {
-          this.sortBy = 'desc';
-          this.sortColumn = sortColumn;
-        }
-      }
-    }
-
-    sortListBy(sortDirection: string) {
-      if (sortDirection === 'asc') {
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'authorities') {
+        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'status') {
         this.sortBy = 'desc';
-      } else {
-        this.sortBy = 'asc';
+        this.sortColumn = sortColumn;
       }
     }
+  }
+
+  reverseSorting(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.sortBy = 'desc';
+    } else {
+      this.sortBy = 'asc';
+    }
+  }
 
 
 }

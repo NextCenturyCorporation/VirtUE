@@ -50,16 +50,21 @@ export class VirtueListComponent implements OnInit {
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
-      this.getBaseUrl(awsServer);
-      this.getVirtues(awsServer);
-      this.getApplications(awsServer);
-      this.getVmList(awsServer);
+      this.setBaseUrl(awsServer);
+      this.getVirtues();
+      this.getApplications();
+      this.getVmList();
     });
     this.refreshData();
+    this.resetRouter();
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req);
+  }
+
+  setBaseUrl(url: string) {
+    this.baseUrl = url;
   }
 
   resetRouter() {
@@ -68,97 +73,65 @@ export class VirtueListComponent implements OnInit {
     }, 1000);
   }
 
-  getBaseUrl(url: string) {
-    this.baseUrl = url;
-  }
-
   refreshData() {
     setTimeout(() => {
-      this.router.navigated = false;
-      this.getVirtues(this.baseUrl);
+      this.getVirtues();
     }, 1000);
   }
 
-  getVirtues(baseUrl: string) {
-    this.virtuesService.getVirtues(baseUrl).subscribe( virtueList => {
+  getVirtues() {
+    this.virtuesService.getVirtues(this.baseUrl).subscribe( virtueList => {
       this.virtues = virtueList;
       this.totalVirtues = virtueList.length;
     });
-    // changing or even commenting this line out entirely doesn't seem to
-    // affect the order, initial or otherwise, of the shown data.
-    // this.sortVirtues(this.sortBy);
   }
 
-  // Apparently unnecessary. see comment in getVirtues.
-  // sortVirtues(sortDirection: string) {
-  //   if (sortDirection === 'asc') {
-  //     this.virtues.sort((leftSide, rightSide): number => {
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return -1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return 1;
-  //       }
-  //       return 0;
-  //     });
-  //   } else {
-  //     this.virtues.sort((leftSide, rightSide): number => {
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return 1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-  // }
 
   enabledVirtueList(sortType: string, enabledValue: any, sortBy) {
     console.log('enabledVirtueList() => ' + enabledValue);
     if (this.sortValue !== enabledValue) {
       this.sortBy = 'asc';
     } else {
-      this.sortListBy(sortBy);
+      this.reverseSorting(sortBy);
     }
     this.sortValue = enabledValue;
-    this.sortType = sortType;
+    // this.sortType = sortType;
   }
 
-  sortVirtueColumns(sortColumn: string, sortBy: string) {
+  setColumnSortDirection(sortColumn: string, sortBy: string) {
     if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
+      this.reverseSorting(sortBy);
     } else {
       if (sortColumn === 'name') {
         this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
       } else if (sortColumn === 'lastEditor') {
         this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
+      } else if (sortColumn === 'enabled') {
+        this.sortBy = 'asc';
       } else if (sortColumn === 'date') {
-        this.sortColumn = sortColumn;
         this.sortBy = 'desc';
       }
+        this.sortColumn = sortColumn;
     }
   }
 
-  sortListBy(sortDirection: string) {
-    if (sortDirection === 'asc') {
+  reverseSorting(currentSortDirection: string) {
+    if (currentSortDirection === 'asc') {
       this.sortBy = 'desc';
     } else {
       this.sortBy = 'asc';
     }
   }
 
-  getApplications(baseUrl: string) {
-    this.appsService.getAppsList(baseUrl).subscribe( apps => {
+  getApplications() {
+    this.appsService.getAppsList(this.baseUrl).subscribe( apps => {
       this.appsList = apps;
       // this.getAppsList(data);
     });
   }
 
-  getVmList(baseUrl: string) {
-    this.vmService.getVmList(baseUrl).subscribe( vms => {
+  getVmList() {
+    this.vmService.getVmList(this.baseUrl).subscribe( vms => {
       this.vmList = vms;
     });
   }

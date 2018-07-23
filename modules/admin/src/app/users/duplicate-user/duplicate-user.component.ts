@@ -26,8 +26,7 @@ export class DuplicateUserComponent implements OnInit {
   fullImagePath: string;
   userRoles = [];
   userData = [];
-  storedVirtues = [];
-  selVirtues = [];
+  userVirtueIDs = [];
   virtues = [];
   appsList = [];
   adUserCtrl: FormControl;
@@ -48,11 +47,11 @@ export class DuplicateUserComponent implements OnInit {
     };
 
     this.baseUrlService.getBaseUrl().subscribe(data => {
-      let url = data[0].aws_server;
-      this.getBaseUrl(url);
-      this.getUserToEdit(url, this.userToEdit.id);
-      this.getVirtues(url);
-      this.getApps(url);
+      let awsServer = data[0].aws_server;
+      this.setBaseUrl(awsServer);
+      this.getUserToEdit(this.userToEdit.id);
+      this.getVirtues();
+      this.getApps();
     });
   }
 
@@ -62,16 +61,15 @@ export class DuplicateUserComponent implements OnInit {
     }, 1000);
   }
 
-  getBaseUrl( url: string ) {
+  setBaseUrl( url: string ) {
     this.baseUrl = url;
   }
 
-  getUserToEdit(baseUrl: string, username: string) {
-    this.usersService.getUser(baseUrl, username).subscribe(data => {
+  getUserToEdit( username: string) {
+    this.usersService.getUser(this.baseUrl, username).subscribe(data => {
       this.userData = data;
       this.userRoles = data.authorities;
-      this.selVirtues = data.virtueTemplateIds;
-      this.storedVirtues = data.virtueTemplateIds;
+      this.userVirtueIDs = data.virtueTemplateIds;
     });
   }
 
@@ -87,17 +85,17 @@ export class DuplicateUserComponent implements OnInit {
     }
   }
 
-  getVirtues(baseUrl: string) {
-    if (baseUrl !== null) {
-      this.virtuesService.getVirtues(baseUrl).subscribe(data => {
+  getVirtues() {
+    if (this.baseUrl !== null) {
+      this.virtuesService.getVirtues(this.baseUrl).subscribe(data => {
         this.virtues = data;
       });
     }
   }
 
-  getApps(baseUrl: string) {
-    if (baseUrl !== null) {
-      this.appsService.getAppsList(baseUrl).subscribe(data => {
+  getApps() {
+    if (this.baseUrl !== null) {
+      this.appsService.getAppsList(this.baseUrl).subscribe(data => {
         this.appsList = data;
       });
     }
@@ -143,7 +141,7 @@ export class DuplicateUserComponent implements OnInit {
     this.virtues = [];
     this.virtuesService.getVirtues(this.baseUrl)
       .subscribe(data => {
-        for (let sel of this.selVirtues) {
+        for (let sel of this.userVirtueIDs) {
           for (let virtue of data) {
             if (sel === virtue.id) {
               this.virtues.push(virtue);
@@ -158,7 +156,7 @@ export class DuplicateUserComponent implements OnInit {
     this.virtues = this.virtues.filter(data => {
       return data.id !== id;
     });
-    this.selVirtues.splice(index, 1);
+    this.userVirtueIDs.splice(index, 1);
   }
 
   addUser( username: string, roleUser: boolean, roleAdmin: boolean ) {
@@ -172,7 +170,7 @@ export class DuplicateUserComponent implements OnInit {
     if (roleAdmin) {
       authorities.push('ROLE_ADMIN');
     }
-    for (let item of this.selVirtues) {
+    for (let item of this.userVirtueIDs) {
       virtueTemplateIds.push(item);
     }
 
@@ -213,18 +211,18 @@ export class DuplicateUserComponent implements OnInit {
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath,
-        storedVirtues: this.selVirtues
+        userVirtueIDs: this.userVirtueIDs
       },
       panelClass: 'virtue-modal-overlay'
     });
 
     let virtueList = dialogRef.componentInstance.addVirtues.subscribe((data) => {
-      this.selVirtues = data;
-      if (this.storedVirtues.length > 0) {
-        this.storedVirtues = [];
+      this.userVirtueIDs = data;
+      if (this.userVirtueIDs.length > 0) {
+        this.userVirtueIDs = [];
       }
-      this.storedVirtues = this.selVirtues;
-      this.getUpdatedVirtueList(this.storedVirtues);
+      this.userVirtueIDs = this.userVirtueIDs;
+      this.getUpdatedVirtueList(this.userVirtueIDs);
     });
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 

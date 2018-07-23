@@ -45,15 +45,15 @@
                 <!-- if there are no virtues, show this message -->
                 <div class="mui-row">
                   <div class="mui-col-md-12">
-                    <p class="no-data-message" *ngIf="selVirtues.length < 1">
+                    <p class="no-data-message" *ngIf="userVirtueIDs.length < 1">
                       No virtues have been added at this time. To add a virtue, click on the button "Add Virtue" above.
                     </p>
                   </div>
                 </div>
-                <div *ngIf="selVirtues.length > 0">
-                  <div class="mui-row table-row" *ngFor="let virtue of selVirtues; let i = index;" appActiveClass>
+                <div *ngIf="userVirtueIDs.length > 0">
+                  <div class="mui-row table-row" *ngFor="let virtue of virtues; let vID of userVirtueIDs; let i of index;" appActiveClass>
                     <div class="table-data mui-col-md-4">
-                      <a class="edit" (click)="activateModal(1,'edit')">{{ getVirtueName(virtue) }}</a>
+                      <a class="edit" (click)="activateModal(1,'edit')">{{ virtue.name }}</a>
                       <!-- This should show if hovered over -->
                       <span class="menu-options"><a (click)="removeVirtue(virtue, i)">Remove</a></span>
                     </div>

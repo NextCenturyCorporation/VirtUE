@@ -25,8 +25,7 @@ export class AddUserComponent implements OnInit {
   adUserCtrl: FormControl;
   filteredUsers: Observable<any[]>;
   appsList = [];
-  selVirtues = [];
-  storedVirtues = [];
+  userVirtueIDs = [];
   virtues = [];
   awsServer: any;
   baseUrl: string;
@@ -55,10 +54,10 @@ export class AddUserComponent implements OnInit {
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(data => {
-      let url = data[0].aws_server;
-      this.getBaseUrl(url);
-      this.getVirtues(url);
-      this.getApps(url);
+      let awsServer = data[0].aws_server;
+      this.setBaseUrl(awsServer);
+      this.updateVirtueList([]);
+      this.getApps();
     });
   }
 
@@ -68,14 +67,13 @@ export class AddUserComponent implements OnInit {
     }, 500);
   }
 
-  getBaseUrl( url: string ) {
-    this.awsServer = url;
+  setBaseUrl( url: string ) {
+    this.baseUrl = url;
   }
 
   addUser( username: string, roleUser: boolean, roleAdmin: boolean ) {
     username = username.trim().replace(' ', '').toLowerCase();
     let authorities = [];
-    let virtueTemplateIds = [];
 
     if (roleUser) {
       authorities.push('ROLE_USER');
@@ -83,20 +81,18 @@ export class AddUserComponent implements OnInit {
     if (roleAdmin) {
       authorities.push('ROLE_ADMIN');
     }
-    for (let item of this.selVirtues) {
-      virtueTemplateIds.push(item);
-    }
 
     let body = {
       'username': username,
       'authorities': authorities,
-      'virtueTemplateIds': virtueTemplateIds
+      'virtueTemplateIds': this.userVirtueIDs
     };
 
-    if (!body.username) { return; }
+    if (!body.username) {
+      return;
+    }
 
-    let baseUrl = this.awsServer;
-    this.usersService.createUser(baseUrl, JSON.stringify(body)).subscribe(
+    this.usersService.createUser(this.baseUrl, JSON.stringify(body)).subscribe(
       data => {
         return true;
       },
@@ -104,41 +100,43 @@ export class AddUserComponent implements OnInit {
         console.error('Error');
       }
     );
-    this.assignUserVirtues(baseUrl, username, virtueTemplateIds);
+    this.assignUserVirtues(username, this.userVirtueIDs);
     this.resetRouter();
     this.router.navigate(['/users']);
   }
 
-  assignUserVirtues(baseUrl: string, username: string, virtues: any[]) {
+  assignUserVirtues(username: string, virtues: any[]) {
     for ( let item of virtues ) {
-      this.usersService.assignVirtues(baseUrl, username, item);
+      this.usersService.assignVirtues(this.baseUrl, username, item);
     }
   }
 
-  getVirtues(baseUrl: string) {
-    let selectedVirtue = this.storedVirtues;
-    this.virtuesService.getVirtues(baseUrl)
-    .subscribe(data => {
-      if (this.selVirtues.length < 1) {
-        for (let virtue of data) {
-          for (let sel of selectedVirtue) {
-            if (sel === virtue.id) {
-              this.selVirtues = data;
-              break;
-            }
-          }
-        }
-      } else {
-        this.getUpdatedVirtueList(baseUrl);
-      }
-    });
-  }
-
-  getApps(baseUrl: string) {
-    if (baseUrl !== null) {
-      this.appsService.getAppsList(baseUrl).subscribe(data => {
+  getApps() {
+    if (this.baseUrl !== null) {
+      this.appsService.getAppsList(this.baseUrl).subscribe(data => {
         this.appsList = data;
       });
+    }
+  }
+
+  updateVirtueList( newVirtIDs : any[] ) {
+    // console.log("updateVirtList");
+    // console.log(this.userVirtueIDs);
+    // console.log(this.virtues);
+    // console.log("[\\]");
+    // loop through the selected VM list
+    this.virtues = [];
+    this.userVirtueIDs = newVirtIDs;
+    const virtueVmIds = newVirtIDs;
+    for (let vID of virtueVmIds) {
+      this.virtuesService.getVirtue(this.baseUrl, vID).subscribe(
+        data => {
+          this.virtues.push(data);
+        },
+        error => {
+          console.log(error.message);
+        }
+      );
     }
   }
 
@@ -157,6 +155,7 @@ export class AddUserComponent implements OnInit {
     if (this.baseUrl !== null) {
       virtueApps = this.virtues.filter(data => data.id === id)
         .map(virtue => virtue.applicationIds);
+      // console.log(virtueApps);
       virtueAppsList = virtueApps.toString();
       // console.log(virtueAppsList);
       return this.getVirtueApps(virtueAppsList);
@@ -176,28 +175,15 @@ export class AddUserComponent implements OnInit {
       // console.log(appInfo.toString());
       appNames = appNames + `<li>${appInfo.toString()}</li>`;
     }
+    // console.log(appNames);
     return appNames;
-  }
-  getUpdatedVirtueList(baseUrl: string) {
-    this.virtues = [];
-    this.virtuesService.getVirtues(baseUrl)
-    .subscribe(data => {
-      for (let sel of this.selVirtues) {
-        for (let virtue of data) {
-          if (sel === virtue.id) {
-            this.virtues.push(virtue);
-            break;
-          }
-        }
-      }
-    });
   }
 
   removeVirtue(id: string, index: number): void {
     this.virtues = this.virtues.filter(data => {
       return data.id !== id;
     });
-    this.storedVirtues.splice(index, 1);
+    this.userVirtueIDs.splice(index, 1);
   }
 
   activateModal(id, mode): void {
@@ -220,7 +206,7 @@ export class AddUserComponent implements OnInit {
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath,
-        storedVirtues: this.storedVirtues
+        userVirtueIDs: this.userVirtueIDs
       },
       panelClass: 'virtue-modal-overlay'
     });
@@ -229,17 +215,8 @@ export class AddUserComponent implements OnInit {
 
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
     // dialogRef.afterClosed().subscribe();
-    const virtueList = dialogRef.componentInstance.addVirtues.subscribe((data) => {
-      this.selVirtues = data;
-      console.log('Received selected virtues: ');
-      console.log(this.selVirtues);
-
-      if (this.storedVirtues.length > 0) {
-        this.storedVirtues = [];
-      }
-      this.storedVirtues = this.selVirtues;
-
-      this.getVirtues(this.awsServer);
+    const virtueList = dialogRef.componentInstance.addVirtues.subscribe((dialogVirtueIDS) => {
+      this.updateVirtueList(dialogVirtueIDS);
     });
   }
 
