@@ -1,13 +1,11 @@
 package com.ncc.savior.virtueadmin.service;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,8 +15,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -56,20 +55,18 @@ public class ImportExportService {
 	public static final String TYPE_VIRTUE = "virtue";
 	public static final String TYPE_VIRTUAL_MACHINE = "virtualmachines";
 	private ObjectMapper jsonMapper;
-	private File rootClassPath;
+	private String rootClassPath;
 	private ITemplateManager templateManager;
 	private IUserManager userManager;
 	private File rootCwd;
+	private PathMatchingResourcePatternResolver resourceResolver;
 
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager) {
 		this.jsonMapper = new ObjectMapper();
 		this.templateManager = templateManager;
 		this.userManager = userManager;
-		try {
-			this.rootClassPath = new ClassPathResource(IMPORTS_LOCATION).getFile();
-		} catch (IOException e) {
-			logger.error("Unable to initialize class path import source.  Imports may not work.");
-		}
+		resourceResolver = new PathMatchingResourcePatternResolver();
+		this.rootClassPath = IMPORTS_LOCATION;
 		try {
 			this.rootCwd = new PathResource("./" + IMPORTS_LOCATION).getFile();
 		} catch (IOException e) {
@@ -101,9 +98,16 @@ public class ImportExportService {
 		jsonMapper.writeValue(out, export);
 	}
 
+	/**
+	 * Imports the entire database. Used in conjunction with export system.
+	 * 
+	 * @param stream
+	 * @throws IOException
+	 */
 	public void importSystem(InputStream stream) throws IOException {
 		verifyAndReturnUser();
 		JsonNode node = jsonMapper.readTree(stream);
+		// load all applications
 		ArrayNode appsNode = (ArrayNode) node.get(TYPE_APPLICATION);
 		Iterator<JsonNode> itr = appsNode.iterator();
 		while (itr.hasNext()) {
@@ -111,7 +115,7 @@ public class ImportExportService {
 			ApplicationDefinition app = jsonMapper.treeToValue(appNode, ApplicationDefinition.class);
 			templateManager.addApplicationDefinition(app);
 		}
-
+		// load all virtual machines
 		ArrayNode vmtsNode = (ArrayNode) node.get(TYPE_VIRTUAL_MACHINE);
 		itr = vmtsNode.iterator();
 		while (itr.hasNext()) {
@@ -129,7 +133,7 @@ public class ImportExportService {
 
 			templateManager.addVmTemplate(vmt);
 		}
-
+		// load all virtue templates
 		ArrayNode vtsNode = (ArrayNode) node.get(TYPE_VIRTUE);
 		itr = vtsNode.iterator();
 		while (itr.hasNext()) {
@@ -146,7 +150,7 @@ public class ImportExportService {
 			vt.setVmTemplates(myVmts);
 			templateManager.addVirtueTemplate(vt);
 		}
-
+		// load all users
 		ArrayNode usersNode = (ArrayNode) node.get(TYPE_USER);
 		itr = usersNode.iterator();
 		while (itr.hasNext()) {
@@ -166,6 +170,12 @@ public class ImportExportService {
 
 	}
 
+	/**
+	 * Imports a user from a set of test users provided by APL.
+	 * 
+	 * @param userKey
+	 * @return
+	 */
 	public VirtueUser importUser(String userKey) {
 		verifyAndReturnUser();
 		VirtueUser user = read(TYPE_USER, userKey, VirtueUser.class);
@@ -187,6 +197,12 @@ public class ImportExportService {
 		return user;
 	}
 
+	/**
+	 * Imports a applications from a set of test applications provided by APL.
+	 * 
+	 * @param testApplication
+	 * @return
+	 */
 	public ApplicationDefinition importApplication(String testApplication) {
 		verifyAndReturnUser();
 		ApplicationDefinition app = read(TYPE_APPLICATION, testApplication, ApplicationDefinition.class);
@@ -201,6 +217,13 @@ public class ImportExportService {
 		return app;
 	}
 
+	/**
+	 * Imports a virtual machine from a set of test virtual machines provided by
+	 * APL.
+	 * 
+	 * @param testVirtualMachine
+	 * @return
+	 */
 	public VirtualMachineTemplate importVirtualMachineTemplate(String testVirtualMachine) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtualMachineTemplate vmt = read(TYPE_VIRTUAL_MACHINE, testVirtualMachine, VirtualMachineTemplate.class);
@@ -226,6 +249,12 @@ public class ImportExportService {
 		return vmt;
 	}
 
+	/**
+	 * Imports a virtue from a set of test virtues provided by APL.
+	 * 
+	 * @param testVirtue
+	 * @return
+	 */
 	public VirtueTemplate importVirtueTemplate(String testVirtue) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueTemplate vt = read(TYPE_VIRTUE, testVirtue, VirtueTemplate.class);
@@ -260,64 +289,51 @@ public class ImportExportService {
 	public int importAll() {
 		int items = 0;
 		verifyAndReturnUser();
-		for (String name : getJsonFileNames(TYPE_APPLICATION)) {
-			try {
-				importApplication(name);
-				items++;
-			} catch (Throwable t) {
-				logger.error("Error trying to import application with name=" + name, t);
+		try {
+			for (String name : getJsonFileNames(TYPE_APPLICATION)) {
+				try {
+					importApplication(name);
+					items++;
+				} catch (Throwable t) {
+					logger.error("Error trying to import application with name=" + name, t);
+				}
 			}
-		}
-		for (String name : getJsonFileNames(TYPE_VIRTUAL_MACHINE)) {
-			try {
-				importVirtualMachineTemplate(name);
-				items++;
-			} catch (Throwable t) {
-				logger.error("Error trying to import virtual machine template with name=" + name, t);
+			for (String name : getJsonFileNames(TYPE_VIRTUAL_MACHINE)) {
+				try {
+					importVirtualMachineTemplate(name);
+					items++;
+				} catch (Throwable t) {
+					logger.error("Error trying to import virtual machine template with name=" + name, t);
+				}
 			}
-		}
-		for (String name : getJsonFileNames(TYPE_VIRTUE)) {
-			try {
-				importVirtueTemplate(name);
-				items++;
-			} catch (Throwable t) {
-				logger.error("Error trying to import virtue template with name=" + name, t);
+			for (String name : getJsonFileNames(TYPE_VIRTUE)) {
+				try {
+					importVirtueTemplate(name);
+					items++;
+				} catch (Throwable t) {
+					logger.error("Error trying to import virtue template with name=" + name, t);
+				}
 			}
-		}
-		for (String name : getJsonFileNames(TYPE_USER)) {
-			try {
-				importUser(name);
-				items++;
-			} catch (Throwable t) {
-				logger.error("Error trying to import user with name=" + name, t);
+			for (String name : getJsonFileNames(TYPE_USER)) {
+				try {
+					importUser(name);
+					items++;
+				} catch (Throwable t) {
+					logger.error("Error trying to import user with name=" + name, t);
+				}
 			}
+		} catch (IOException e) {
+			logger.error("Error importing all");
 		}
 		return items;
 	}
 
-	private Set<String> getJsonFileNames(String type) {
-		File dir1 = new File(rootClassPath, type);
-		File dir2 = new File(rootCwd, type);
-		FilenameFilter filter = new FilenameFilter() {
-
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".json") || name.endsWith(".JSON");
-			}
-		};
-		Set<File> allFiles = new HashSet<File>();
-		File[] files;
-		if (dir1.exists()) {
-			files = dir1.listFiles(filter);
-			Collections.addAll(allFiles, files);
-		}
-		if (dir2.exists()) {
-			files = dir2.listFiles(filter);
-			Collections.addAll(allFiles, files);
-		}
+	private Set<String> getJsonFileNames(String type) throws IOException {
+		String path = rootClassPath + "/" + type + "/**.json";
+		Resource[] resources = resourceResolver.getResources(path);
 		Set<String> allStrings = new HashSet<String>();
-		for (File f : allFiles) {
-			String name = f.getName();
+		for (Resource r : resources) {
+			String name = r.getFilename();
 			int dot = name.lastIndexOf(".");
 			if (dot >= 0) {
 				name = name.substring(0, dot);
@@ -329,19 +345,14 @@ public class ImportExportService {
 
 	private <T> T read(String type, String name, Class<T> klass) {
 		name = name + ".json";
-		File dir = new File(rootCwd, type);
-		File file = new File(dir, name);
-		if (!file.exists()) {
-			dir = new File(rootClassPath, type);
-			file = new File(dir, name);
-			if (!file.exists()) {
-				throw new SaviorException(SaviorException.IMPORT_NOT_FOUND,
-						"Import of type=" + type + " was not found");
-			}
+		Resource resource = resourceResolver.getResource(rootClassPath + "/" + type + "/" + name);
+		if (resource == null) {
+			throw new SaviorException(SaviorException.IMPORT_NOT_FOUND, "Import of type=" + type + " was not found");
 		}
+
 		T instance;
 		try {
-			instance = jsonMapper.readValue(file, klass);
+			instance = jsonMapper.readValue(resource.getInputStream(), klass);
 		} catch (IOException e) {
 			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
 					"Unknown Error attempting to find import of type=" + type + " name=" + name);

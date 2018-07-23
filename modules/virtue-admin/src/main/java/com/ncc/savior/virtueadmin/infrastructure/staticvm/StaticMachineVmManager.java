@@ -78,7 +78,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future) {
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future, String virtue) {
 		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
