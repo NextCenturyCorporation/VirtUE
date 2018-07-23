@@ -461,6 +461,7 @@ public class XenHostManager extends BaseVmManager {
 	public VirtualMachine startVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
 		vms = startVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
