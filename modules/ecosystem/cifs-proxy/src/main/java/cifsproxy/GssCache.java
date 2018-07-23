@@ -33,11 +33,32 @@ public class GssCache {
 		Pointer gssTargetName = importName(gssapi, minorStatus);
 
 		gss_cred_id_t initCred = GssApi.GSS_C_NO_CREDENTIAL;
-		initSecContext(gssapi, minorStatus, gssTargetName, initCred);
+		gss_buffer_desc outputToken = initSecContext(gssapi, minorStatus, gssTargetName, initCred);
+
+		acceptSecContext(gssapi, outputToken);
 
 		Pointer acquiredCred = acquireCred(gssapi, minorStatus);
 		storeCredInto(gssapi, minorStatus, acquiredCred);
 		System.out.println("Done");
+	}
+
+	private static void acceptSecContext(GssApi gssapi, gss_buffer_desc clientToken) throws GSSException {
+		IntByReference minorStatus = new IntByReference();
+		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
+		PointerByReference srcName = new PointerByReference(GssApi.GSS_C_NO_NAME);
+		PointerByReference mechType = new PointerByReference(GssApi.MECH_KRB5.getPointer());
+		gss_buffer_desc outputToken = new gss_buffer_desc();
+		IntByReference retFlags = new IntByReference();
+		IntByReference timeRec = new IntByReference();
+		PointerByReference delegatedCredHandle = new PointerByReference(new Pointer(0));
+		int retval = gssapi.gss_accept_sec_context(minorStatus, contextHandle, GssApi.GSS_C_NO_CREDENTIAL, clientToken,
+				GssApi.GSS_C_NO_CHANNEL_BINDINGS, srcName, mechType, outputToken, retFlags, timeRec,
+				delegatedCredHandle);
+		if (retval != 0) {
+			System.err.println("error accepting context: " + retval + "." + minorStatus.getValue());
+			throw new GSSException(retval, minorStatus.getValue(), "accepting context");
+		}
+		System.out.println("credential acquired");
 	}
 
 	private static Pointer acquireCred(GssApi gssapi, IntByReference minorStatus) throws GSSException {
@@ -64,7 +85,7 @@ public class GssCache {
 		return acquiredCredHandle.getValue();
 	}
 
-	private static void initSecContext(GssApi gssapi, IntByReference minorStatus, Pointer gssTargetName,
+	private static gss_buffer_desc initSecContext(GssApi gssapi, IntByReference minorStatus, Pointer gssTargetName,
 			gss_cred_id_t initCred) throws GSSException {
 		gss_buffer_desc inputToken = new gss_buffer_desc();
 		Pointer actualMechType = new Pointer(0);
@@ -82,6 +103,7 @@ public class GssCache {
 		Pointer contextHandle = contextRef.getValue();
 		System.out.println("initialized context: " + contextHandle);
 		System.out.println("output token: " + outputToken);
+		return outputToken;
 	}
 
 	private static Pointer importName(GssApi gssapi, IntByReference minorStatus) throws GSSException {

@@ -299,6 +299,18 @@ public interface GssApi extends Library {
 			IntByReference retFlags, /* ret_flags */
 			IntByReference retTime); /* time_rec */
 
+	int gss_accept_sec_context(IntByReference minorStatus, /* minor_status */
+			PointerByReference contextHandle, /* context_handle */
+			gss_cred_id_t credHandle, /* acceptor_cred_handle */
+			gss_buffer_desc inputToken, /* input_token_buffer */
+			gss_channel_bindings_struct inputChannelBindings, /* input_chan_bindings */
+			PointerByReference sourceName, /* src_name (gss_name_t *) */
+			PointerByReference mechType, /* mech_type (gss_OID*) */
+			gss_buffer_desc outputToken, /* output_token */
+			IntByReference retFlags, /* ret_flags */
+			IntByReference timeRec, /* time_rec */
+			PointerByReference delegatedCredHandle); /* delegated_cred_handle (gss_cred_id_t*) */
+
 	/**
 	 * Assume a global identity; Obtain a GSS-API credential handle for pre-existing
 	 * credentials. (from RFC 2744)

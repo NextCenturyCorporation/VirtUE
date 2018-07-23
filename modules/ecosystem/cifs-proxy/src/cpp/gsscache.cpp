@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
 	OM_uint32 majorStatus;
 
 	targetName.value = (void*) "cifs@WS9.HQ.NEXTCENTURY.COM";
+	//targetName.value = (void*) "cifs/pc-5000-cl.hq.nextcentury.com@HQ.NEXTCENTURY.COM";
 	targetName.length = strlen((char*) targetName.value) + 1;
 	majorStatus = gss_import_name(&minorStatus, &targetName,
 			GSS_C_NT_HOSTBASED_SERVICE, &gssTargetName);
@@ -83,14 +84,32 @@ int main(int argc, char** argv) {
 	}
 
 	std::cout << "context initialized" << std::endl;
+	gss_ctx_id_t acceptContext = GSS_C_NO_CONTEXT;
+	gss_name_t srcName = GSS_C_NO_NAME;
+	gss_buffer_desc acceptOutToken;
+	gss_cred_id_t delegatedCredHandle;
+	majorStatus = gss_accept_sec_context(&minorStatus, &acceptContext,
+			GSS_C_NO_CREDENTIAL, &outputToken, GSS_C_NO_CHANNEL_BINDINGS,
+			&srcName, &kerbMechanism, &acceptOutToken, &retFlags, &timeRec,
+			&delegatedCredHandle);
+	if (GSS_ERROR(majorStatus)) {
+		std::cerr << "error on accept_sec_context: "
+				<< majorStatus
+				<< "."
+				<< minorStatus
+				<< std::endl;
+		printErrors(majorStatus);
+		return 1;
+	}
 
 	const gss_name_t desiredName = GSS_C_NO_NAME;
-	gss_OID_set_desc desiredMechs = { 1, kerbMechanism } ;
+	gss_OID_set_desc desiredMechs = { 1, kerbMechanism };
 	gss_cred_usage_t credUsage = GSS_C_INITIATE;
 	gss_cred_id_t acquiredCredHandle = 0;
 	gss_OID_set actualMechs;
-	majorStatus = gss_acquire_cred(&minorStatus, desiredName, timeReq, &desiredMechs,
-			credUsage, &acquiredCredHandle, &actualMechs, &timeRec);
+	majorStatus = gss_acquire_cred(&minorStatus, desiredName, timeReq,
+			&desiredMechs, credUsage, &acquiredCredHandle, &actualMechs,
+			&timeRec);
 	if (GSS_ERROR(majorStatus)) {
 		std::cerr << "error on acquire_cred: "
 				<< majorStatus
@@ -105,7 +124,8 @@ int main(int argc, char** argv) {
 	unsigned int outLifetime;
 	int outUsage;
 	gss_OID_set outMechs;
-	gss_inquire_cred(&minorStatus, acquiredCredHandle, &outName, &outLifetime, &outUsage, &outMechs);
+	gss_inquire_cred(&minorStatus, acquiredCredHandle, &outName, &outLifetime,
+			&outUsage, &outMechs);
 
 	//gss_cred_id_t inputCredHandle;
 	OM_uint32 overwriteCred = 1;
@@ -119,9 +139,10 @@ int main(int argc, char** argv) {
 
 	gss_OID_set elementsStored;
 	gss_cred_usage_t credUsageStored;
-	majorStatus = gss_store_cred_into(&minorStatus, acquiredCredHandle, GSS_C_INITIATE,
-			GSS_C_NULL_OID, overwriteCred, defaultCred, &credStore,
-			&elementsStored, &credUsageStored);
+	majorStatus = gss_store_cred_into(&minorStatus, acquiredCredHandle,
+	GSS_C_INITIATE,
+	GSS_C_NULL_OID, overwriteCred, defaultCred, &credStore, &elementsStored,
+			&credUsageStored);
 	if (GSS_ERROR(majorStatus)) {
 		std::cerr << "error on store_cred_into: "
 				<< majorStatus
@@ -131,11 +152,12 @@ int main(int argc, char** argv) {
 		printErrors(majorStatus);
 		return 1;
 	}
-	std::cout << "stored " << elementsStored << " credentials"<< std::endl;
+	std::cout << "stored " << elementsStored << " credentials" << std::endl;
 
-    std::ofstream token("token", std::ios::binary);
-    token.write(reinterpret_cast<const char*>(outputToken.value), outputToken.length);
-    token.close();
+	std::ofstream token("token", std::ios::binary);
+	token.write(reinterpret_cast<const char*>(outputToken.value),
+			outputToken.length);
+	token.close();
 	//std::cout << login(context, argv[1], argv[2]) << std::endl;
 
 	//    gss_release_buffer(&minorStatus, &targetName);
