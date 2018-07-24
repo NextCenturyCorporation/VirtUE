@@ -461,93 +461,64 @@ public class XenHostManager {
 	}
 	
 	public VirtualMachine startVirtualMachine(VirtualMachine vm,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 		vms.add(vm);
-		vms = startVirtualMachines(vms, vmFuture);
+		vms = startVirtualMachines(vms, vmFuture, virtue);
 		return vms.iterator().next();
 	}
 
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 		vms.add(vm);
-		vms = stopVirtualMachines(vms, vmFuture);
+		vms = stopVirtualMachines(vms, vmFuture, virtue);
 		return vms.iterator().next();
 	}
 
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		if (vmFuture == null) {
 			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
 		if (vms.isEmpty()) {
 			vmFuture.complete(vms);
 		} else {
-			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(vms.iterator().next());
+			Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtue);
+			VirtualMachine xenVm = vmo.get();
+			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 			guestManager.startGuests(vms, vmFuture);
 		}
 		return vms;
 	}
 	
 	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		if (vmFuture == null) {
 			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
 		if (vms.isEmpty()) {
 			vmFuture.complete(vms);
 		} else {
-			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(vms.iterator().next());
+			Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtue);
+			VirtualMachine xenVm = vmo.get();
+			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 			guestManager.stopGuests(vms, vmFuture);
 		}
 		return vms;
 	}
 
-	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		if (vmFuture == null) {
 			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
 		
 		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
 		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		stopVirtualMachine(vm, stopFuture);
+		stopVirtualMachine(vm, stopFuture, virtue);
 		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
-			startVirtualMachine(vm, vmFutureFinal);
+			startVirtualMachine(vm, vmFutureFinal, virtue);
 		});	
 	}
-	
-	private void addVmsToStartingPipeline(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> future) {
-		Void v = null;
-		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
-		for (VirtualMachine vm : vms) {
-			CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsNetworkingUpdateService().startFutures(vm, v);
-			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
-			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
-			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-			fc.addFuture(cf);
-		}
-		fc.combineFutures(future);
-	}
-	
-	private void addVmsToStoppingPipeline(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> future) {
-		Void v = null;
-		FutureCombiner<VirtualMachine> fc = new FutureCombiner<VirtualMachine>();
-		for (VirtualMachine vm : vms) {
-			CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(vm, false);
-
-			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
-			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-			cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.STOPPED);
-			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-			fc.addFuture(cf);
-		}
-		fc.combineFutures(future);
-	}
-
-	
 
 }

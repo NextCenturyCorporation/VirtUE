@@ -569,19 +569,26 @@ public class DataResource {
 	}
 	
 	@GET
-	@Path("vm/reboot/{id}")
+	@Path("vm/reboot/{vmId}/{virtueId}")
 	@Produces("application/json")
-	public void rebootVm(@PathParam("id") String id) {
-		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(id);
+	public void rebootVm(@PathParam("vmId") String vmId, @PathParam("virtueId") String virtueId) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(vmId);
 		VirtualMachine vmToReboot;
 		
 		if (vm.isPresent()) {
 			vmToReboot = vm.get();
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
 		}
 		
-		cloudManager.rebootVm(vmToReboot);
+		Optional<VirtueInstance> optionalVirtue = activeVirtueDao.getVirtueInstance(virtueId);
+		
+		if (optionalVirtue.isPresent()) {
+			cloudManager.rebootVm(vmToReboot, virtueId);
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+		}
+		
 	}
 	
 	@GET

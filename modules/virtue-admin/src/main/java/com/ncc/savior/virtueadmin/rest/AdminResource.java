@@ -773,9 +773,9 @@ public class AdminResource {
 	@GET
 	@Path("vm/reboot/{id}")
 	@Produces("application/json")
-	public void rebootVm(@PathParam("id") String id) {
+	public void rebootVm(@PathParam("vmId") String vmId, @PathParam("virtueId") String virtueId) {
 		try {
-			adminService.rebootVm(id);
+			adminService.rebootVm(vmId, virtueId);
 		} catch (Exception e) {
 			throw WebServiceUtil.createWebserviceException(e);
 		}

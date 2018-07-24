@@ -68,6 +68,6 @@ public interface ICloudManager {
 	 */
 	VirtueInstance stopVirtue(VirtueInstance virtueInstance);
 	
-	void rebootVm(VirtualMachine vm);
+	void rebootVm(VirtualMachine vm, String virtueId);
 
 }

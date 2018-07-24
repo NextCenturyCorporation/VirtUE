@@ -57,7 +57,7 @@ public class StaticMachineCloudManager implements ICloudManager {
 	}
 
 	@Override
-	public void rebootVm(VirtualMachine vm) {
+	public void rebootVm(VirtualMachine vm, String virtue) {
 		// TODO Auto-generated method stub
 		
 	}
