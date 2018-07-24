@@ -111,7 +111,7 @@ public class XenGuestManager {
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
 			addVmToProvisionPipeline(vms, xenGuestFuture);
 		} catch (JSchException e) {
-			logger.error("Vm is not reachable yet: " + e.getMessage());
+			logger.error("Vm is not reachable yet: ", e);
 			xenGuestFuture.completeExceptionally(e);
 		} catch (Exception e) {
 			logger.error("error in SSH", e);

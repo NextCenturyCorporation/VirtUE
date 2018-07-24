@@ -222,6 +222,12 @@ public class XenHostManager {
 			}
 			return xenVm2;
 		});
+		linuxFuture.handle((myVms, ex) -> {
+			if (ex != null) {
+				handleError(virtue, finalXenFuture, xenVm, ex);
+			}
+			return myVms;
+		});
 		// xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
