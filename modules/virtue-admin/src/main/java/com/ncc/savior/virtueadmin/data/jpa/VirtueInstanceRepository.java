@@ -22,6 +22,6 @@ public interface VirtueInstanceRepository extends CrudRepository<VirtueInstance,
 
 	VirtueInstance findByVms(VirtualMachine vm);
 
-	VirtueInstance findByVms_Id(VirtualMachine vm);
+	VirtueInstance findByVms_Id(String vm);
 
 }
