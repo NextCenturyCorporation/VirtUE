@@ -9,6 +9,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 
 /**
@@ -30,9 +31,9 @@ public class WebServiceUtil implements ExceptionMapper<SaviorException> {
 		}
 		SaviorException exception;
 		if (message == null) {
-			exception = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error", e);
+			exception = new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Unknown error", e);
 		} else {
-			exception = new SaviorException(SaviorException.UNKNOWN_ERROR, message, e);
+			exception = new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, message, e);
 		}
 		return exception;
 	}

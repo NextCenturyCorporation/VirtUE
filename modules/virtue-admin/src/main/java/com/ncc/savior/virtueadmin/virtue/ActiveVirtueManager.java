@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
@@ -74,7 +75,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		} catch (Exception e) {
 			// TODO fix cloud manager to not throw exception. Throw something more specific.
 			logger.error("error creating virtue!", e);
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "unknown error creating virtue.", e);
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "unknown error creating virtue.", e);
 		}
 		// List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
 		// Map<String, VirtualMachine> vms =
@@ -95,7 +96,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public void deleteVirtue(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
 
@@ -106,7 +107,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 				virtueDao.deleteVirtue(virtue);
 			});
 		} else {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User=" + user.getUsername()
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
 		}
 	}
@@ -115,7 +116,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public void adminDeleteVirtue(String instanceId) {
 		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(instanceId);
 		if (!opt.isPresent()) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		} else {
 			VirtueInstance vi = opt.get();
@@ -142,7 +143,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
 		if (vi == null) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
 					"Cannot find virtue with id=" + instanceId + " for user=" + user.getUsername());
 		}
 		return vi;
@@ -157,11 +158,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 				virtue = cloudManager.startVirtue(virtue);
 				return virtue;
 			} else {
-				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+				throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED,
 						"User=" + user.getUsername() + " is not authorized to start virtueId=" + virtueId);
 			}
 		} else {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
 		}
 	}
 
@@ -174,11 +175,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 				virtue = cloudManager.stopVirtue(virtue);
 				return virtue;
 			} else {
-				throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED,
+				throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED,
 						"User=" + user.getUsername() + " is not authorized to stop virtueId=" + virtueId);
 			}
 		} else {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
 		}
 	}
 
@@ -194,7 +195,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		if (vm.isPresent()) {
 			return vm.get();
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + id);
 		}
 	}
 
@@ -211,7 +212,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		if (vm.isPresent()) {
 			vmToReboot = vm.get();
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
 		}
 		
 		VirtueInstance virtue = virtueDao.getVirtueByVmId(vmId);
@@ -219,7 +220,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		if (virtue != null) {
 			cloudManager.rebootVm(vmToReboot, virtue.getId());
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
 		}
 	}
 }

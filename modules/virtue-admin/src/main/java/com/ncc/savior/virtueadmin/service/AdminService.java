@@ -29,6 +29,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
@@ -402,7 +403,7 @@ public class AdminService {
 				}
 			}
 		}
-		throw new SaviorException(SaviorException.REQUESTED_USER_NOT_LOGGED_IN,
+		throw new SaviorException(SaviorErrorCode.REQUESTED_USER_NOT_LOGGED_IN,
 				"User=" + username + " was not logged in");
 
 	}
@@ -456,7 +457,7 @@ public class AdminService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "User did not have ADMIN role");
 		}
 		return user;
 	}

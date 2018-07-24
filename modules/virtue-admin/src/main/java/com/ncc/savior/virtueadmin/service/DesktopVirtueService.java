@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
@@ -120,7 +121,7 @@ public class DesktopVirtueService {
 			if (VirtueState.CREATING.equals(s) || VirtueState.LAUNCHING.equals(s)) {
 				continue;
 			} else {
-				throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error with virtue state! " + s);
+				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error with virtue state! " + s);
 			}
 		}
 		DesktopVirtueApplication app = startApplication(instance.getId(), applicationId);
@@ -131,7 +132,7 @@ public class DesktopVirtueService {
 
 	public void stopApplication(String virtueId, String applicationId) throws IOException {
 		verifyAndReturnUser();
-		throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED, "Stop application is not yet implemented.");
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Stop application is not yet implemented.");
 	}
 
 	public void deleteVirtue(String instanceId) {
@@ -143,7 +144,8 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
 		if (template == null) {
-			throw new SaviorException(SaviorException.INVALID_TEMPATE_ID, "Unable to find template " + templateId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+					"Unable to find template " + templateId);
 		}
 		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
 		return instance;
@@ -153,7 +155,7 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance instance = activeVirtueManager.startVirtue(user, virtueId);
 		if (instance == null) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
 		}
 		return convertVirtueInstanceToDesktopVirtue(instance);
 	}
@@ -162,7 +164,7 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance instance = activeVirtueManager.stopVirtue(user, virtueId);
 		if (instance == null) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
 		}
 		return convertVirtueInstanceToDesktopVirtue(instance);
 	}
@@ -191,7 +193,7 @@ public class DesktopVirtueService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_USER")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have USER role");
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have USER role");
 		}
 		return user;
 	}

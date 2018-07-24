@@ -34,6 +34,7 @@ import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
@@ -563,7 +564,7 @@ public class DataResource {
 		if (vm.isPresent()) {
 			return vm.get();
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + id);
 		}
 	}
 	
@@ -577,7 +578,7 @@ public class DataResource {
 		if (vm.isPresent()) {
 			vmToReboot = vm.get();
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
 		}
 		
 		VirtueInstance virtue = activeVirtueDao.getVirtueByVmId(vmId);
@@ -585,7 +586,7 @@ public class DataResource {
 		if (virtue != null) {
 			cloudManager.rebootVm(vmToReboot, virtue.getId());
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
 		}
 	}
 	

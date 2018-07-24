@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -28,7 +29,7 @@ public class SpringJpaUserManager implements IUserManager {
 		if (user.isPresent()) {
 			return user.get();
 		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " was not found");
+			throw new SaviorException(SaviorErrorCode.USER_NOT_FOUND, "User=" + username + " was not found");
 		}
 	}
 
@@ -74,7 +75,7 @@ public class SpringJpaUserManager implements IUserManager {
 			user.setEnabled(enable);
 			userRepo.save(user);
 		} else {
-			throw new SaviorException(SaviorException.USER_NOT_FOUND, "User=" + username + " not found");
+			throw new SaviorException(SaviorErrorCode.USER_NOT_FOUND, "User=" + username + " not found");
 		}
 	}
 

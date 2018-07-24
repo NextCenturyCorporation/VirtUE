@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -138,7 +139,7 @@ public class UserResource {
 	@Path("virtue/{virtueId}")
 	public void launchVirtue(@PathParam("virtueId") String virtueId) {
 		try {
-			throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED,
+			throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
 					"Launch virtue not yet implemented.  Virtues are lauched when created.");
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException
@@ -155,7 +156,7 @@ public class UserResource {
 	@Path("virtue/{virtueId}/stop")
 	public void stopVirtue(@PathParam("virtueId") String virtueId) {
 		try {
-			throw new SaviorException(SaviorException.NOT_YET_IMPLEMENTED,
+			throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
 					"Stop virtue not yet implemented.  Virtues must be stopped and destroyed manually");
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException

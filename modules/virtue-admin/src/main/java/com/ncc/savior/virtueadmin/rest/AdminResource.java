@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -26,6 +25,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
@@ -477,7 +477,7 @@ public class AdminResource {
 	public VirtueUser updateUser(@PathParam("username") String username, VirtueUser newUser) {
 		try {
 			if (!newUser.getUsername().equals(username)) {
-				throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
 						"Given user doesn't match username in path.  Username=" + username + ". NewUser=" + newUser);
 			}
 			return adminService.createUpdateUser(newUser);
@@ -710,7 +710,7 @@ public class AdminResource {
 				return user.getUsername();
 			default:
 				throw WebServiceUtil.createWebserviceException(
-						new SaviorException(SaviorException.IMPORT_NOT_FOUND, "Invalid import type=" + type));
+						new SaviorException(SaviorErrorCode.IMPORT_NOT_FOUND, "Invalid import type=" + type));
 			}
 		} catch (RuntimeException e) {
 			// TODO fix createWebserviceException

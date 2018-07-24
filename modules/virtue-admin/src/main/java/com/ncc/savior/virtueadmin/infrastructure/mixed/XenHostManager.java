@@ -25,6 +25,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
@@ -323,7 +324,7 @@ public class XenHostManager {
 				});
 			});
 		} else {
-			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR,
+			SaviorException e = new SaviorException(SaviorErrorCode.VM_NOT_FOUND,
 					"Unable to find Xen VM with id=" + id);
 			linuxFuture.completeExceptionally(e);
 			xenFuture.completeExceptionally(e);

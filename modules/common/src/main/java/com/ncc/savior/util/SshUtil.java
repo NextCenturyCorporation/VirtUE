@@ -272,7 +272,7 @@ public class SshUtil {
 			String s = new String(cbuf, 0, n);
 			return s;
 		} catch (IOException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
 					"Error attempting to read file=" + privateKey.getAbsolutePath(), e);
 		} finally {
 			if (reader != null) {

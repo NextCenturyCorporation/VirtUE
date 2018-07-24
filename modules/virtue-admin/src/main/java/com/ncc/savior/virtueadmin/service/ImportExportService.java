@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
@@ -339,14 +340,14 @@ public class ImportExportService {
 		name = name + ".json";
 		Resource resource = resourceResolver.getResource(rootClassPath + "/" + type + "/" + name);
 		if (resource == null) {
-			throw new SaviorException(SaviorException.IMPORT_NOT_FOUND, "Import of type=" + type + " was not found");
+			throw new SaviorException(SaviorErrorCode.IMPORT_NOT_FOUND, "Import of type=" + type + " was not found");
 		}
 
 		T instance;
 		try {
 			instance = jsonMapper.readValue(resource.getInputStream(), klass);
 		} catch (IOException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
 					"Unknown Error attempting to find import of type=" + type + " name=" + name);
 		}
 		return instance;
@@ -355,7 +356,7 @@ public class ImportExportService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
 		}
 		return user;
 	}
