@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,7 +14,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -58,7 +56,6 @@ public class ImportExportService {
 	private String rootClassPath;
 	private ITemplateManager templateManager;
 	private IUserManager userManager;
-	private File rootCwd;
 	private PathMatchingResourcePatternResolver resourceResolver;
 
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager) {
@@ -67,11 +64,6 @@ public class ImportExportService {
 		this.userManager = userManager;
 		resourceResolver = new PathMatchingResourcePatternResolver();
 		this.rootClassPath = IMPORTS_LOCATION;
-		try {
-			this.rootCwd = new PathResource("./" + IMPORTS_LOCATION).getFile();
-		} catch (IOException e) {
-			logger.error("Unable to initialize working directory import source.  Imports may not work.");
-		}
 	}
 
 	@Autowired
