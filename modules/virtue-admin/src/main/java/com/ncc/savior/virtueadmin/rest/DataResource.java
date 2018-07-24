@@ -582,9 +582,8 @@ public class DataResource {
 		}
 		
 		VirtueInstance virtue = activeVirtueDao.getVirtueByVmId(vmId);
-		VirtueInstance virtue2 = activeVirtueDao.getVirtue(vmToReboot);
 		
-		if (virtue != null || virtue2 != null) {
+		if (virtue != null) {
 			cloudManager.rebootVm(vmToReboot, virtue.getId());
 		} else {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
