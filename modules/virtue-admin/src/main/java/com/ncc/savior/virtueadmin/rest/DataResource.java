@@ -549,7 +549,7 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("vms")
+	@Path("vm")
 	@Produces("application/json")
 	public Iterable<VirtualMachine> getAllVms() {
 		return activeVirtueDao.getAllVirtualMachines();
