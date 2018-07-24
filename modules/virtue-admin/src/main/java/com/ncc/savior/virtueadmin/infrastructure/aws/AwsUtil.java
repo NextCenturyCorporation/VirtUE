@@ -58,9 +58,8 @@ public class AwsUtil {
 		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
 		describeInstanceStatusRequest.setIncludeAllInstances(true);
 		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
-		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
-		while (itr.hasNext()) {
-			InstanceStatus status = itr.next();
+		List<InstanceStatus> list = statusResult.getInstanceStatuses();
+		for (InstanceStatus status : list) {
 			VirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
 			if (vm != null) {
 				vm.setState(awsStatusToSaviorState(status));
