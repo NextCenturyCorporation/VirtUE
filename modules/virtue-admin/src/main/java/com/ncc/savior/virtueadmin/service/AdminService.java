@@ -488,8 +488,8 @@ public class AdminService {
 		return virtueManager.getVm(id);
 	}
 	
-	public void rebootVm(String vmId, String virtueId) {
+	public void rebootVm(String vmId) {
 		verifyAndReturnUser();
-		virtueManager.rebootVm(vmId, virtueId);
+		virtueManager.rebootVm(vmId);
 	}
 }

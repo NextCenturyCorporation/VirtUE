@@ -204,7 +204,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	}
 	
 	@Override
-	public void rebootVm(String vmId, String virtueId) {
+	public void rebootVm(String vmId) {
 		Optional<VirtualMachine> vm = virtueDao.getXenVm(vmId);
 		VirtualMachine vmToReboot;
 		
@@ -214,13 +214,12 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
 		}
 		
-		Optional<VirtueInstance> optionalVirtue = virtueDao.getVirtueInstance(virtueId);
+		VirtueInstance virtue = virtueDao.getVirtueByVmId(vmId);
 		
-		if (optionalVirtue.isPresent()) {
-			cloudManager.rebootVm(vmToReboot, virtueId);
+		if (virtue != null) {
+			cloudManager.rebootVm(vmToReboot, virtue.getId());
 		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
 		}
-		
 	}
 }
