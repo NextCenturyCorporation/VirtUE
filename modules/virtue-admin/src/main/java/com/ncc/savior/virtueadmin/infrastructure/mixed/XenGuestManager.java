@@ -345,7 +345,7 @@ public class XenGuestManager {
 		String line = null;
 		while ((line = ch.readLine()) != null) {
 			// System.out.println((line));
-			if (line.contains("virtue-ip")) {
+			if (line.contains("My IP address:")) {
 				virtue_ip = findIP(line);
 				return virtue_ip;
 			}
