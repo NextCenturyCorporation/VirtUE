@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -463,17 +462,17 @@ public class XenGuestManager {
 			linuxFuture.complete(linuxVms);
 		}
 	}
-	
-	public VirtualMachine startVirtualMachine(VirtualMachine vm,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+
+	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture,
+			String virtue) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 		vms.add(vm);
 		vms = startVirtualMachines(vms, vmFuture, virtue);
 		return vms.iterator().next();
 	}
 
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture,
+			String virtue) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 		vms.add(vm);
 		vms = stopVirtualMachines(vms, vmFuture, virtue);
@@ -492,7 +491,7 @@ public class XenGuestManager {
 		}
 		return vms;
 	}
-	
+
 	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		if (vmFuture == null) {
@@ -506,16 +505,32 @@ public class XenGuestManager {
 		return vms;
 	}
 
-	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		if (vmFuture == null) {
-			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+		vms.add(vm);
+		rebootVms(vms, linuxFuture);
+	}
+
+	public void rebootVms(Collection<VirtualMachine> vms, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Session session = null;
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
-		
-		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
-		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		stopVirtualMachine(vm, stopFuture, virtue);
-		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
-			startVirtualMachine(vm, vmFutureFinal, virtue);
-		});	
+		try {
+			CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
+			for (VirtualMachine vm : vms) {
+				SshUtil.sendCommandFromSession(session, "sudo xl reboot " + vm.getName());
+			}
+			CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = linuxFuture;
+			addToStopPipeline(vms, stopFuture);
+			stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
+				addToStartPipeline(stoppedVm, vmFutureFinal);
+			});
+		} catch (JSchException | IOException e) {
+			linuxFuture.completeExceptionally(e);
+		} finally {
+			SshUtil.disconnectLogErrors(session);
+		}
 	}
 }
