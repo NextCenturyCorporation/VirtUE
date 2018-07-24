@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 
 /**
@@ -18,5 +19,9 @@ public interface VirtueInstanceRepository extends CrudRepository<VirtueInstance,
 	Collection<VirtueInstance> findByUsername(String username);
 
 	VirtueInstance findByUsernameAndId(String username, String instanceId);
+
+	VirtueInstance findByVms(VirtualMachine vm);
+
+	VirtueInstance findByVms_Id(VirtualMachine vm);
 
 }
