@@ -463,18 +463,6 @@ public class XenHostManager {
 		VirtualMachine xenVm = vmo.get();
 		return xenGuestManagerFactory.getXenGuestManager(xenVm);
 	}
-	
-	public VirtualMachine startVirtualMachine(VirtualMachine vm,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		XenGuestManager guestManager = getGuestManager(virtue);
-		return guestManager.startVirtualMachine(vm, vmFuture, virtue);
-	}
-
-	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		XenGuestManager guestManager = getGuestManager(virtue);
-		return guestManager.stopVirtualMachine(vm, vmFuture, virtue);
-	}
 
 	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		XenGuestManager guestManager = getGuestManager(virtue);
