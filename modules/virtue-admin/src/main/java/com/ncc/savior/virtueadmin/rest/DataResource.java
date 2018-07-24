@@ -581,14 +581,14 @@ public class DataResource {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
 		}
 		
-		Iterable<VirtueInstance> virtues = activeVirtueDao.getAllActiveVirtues();
-				
-		if (optionalVirtue.isPresent()) {
-			cloudManager.rebootVm(vmToReboot, virtueId);
-		} else {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
-		}
+		VirtueInstance virtue = activeVirtueDao.getVirtueByVmId(vmId);
+		VirtueInstance virtue2 = activeVirtueDao.getVirtue(vmToReboot);
 		
+		if (virtue != null || virtue2 != null) {
+			cloudManager.rebootVm(vmToReboot, virtue.getId());
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
+		}
 	}
 	
 	@GET
