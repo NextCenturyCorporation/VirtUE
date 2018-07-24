@@ -49,7 +49,6 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
-import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -582,9 +581,8 @@ public class DataResource {
 		}
 		
 		VirtueInstance virtue = activeVirtueDao.getVirtueByVmId(vmId);
-		VirtueInstance virtue2 = activeVirtueDao.getVirtue(vmToReboot);
 		
-		if (virtue != null || virtue2 != null) {
+		if (virtue != null) {
 			cloudManager.rebootVm(vmToReboot, virtue.getId());
 		} else {
 			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
