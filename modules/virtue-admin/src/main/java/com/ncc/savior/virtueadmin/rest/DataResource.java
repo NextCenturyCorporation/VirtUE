@@ -49,7 +49,6 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
-import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
