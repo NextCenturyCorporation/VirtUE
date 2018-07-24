@@ -175,7 +175,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 	@Override
 	public void rebootVm(VirtualMachine vm, String virtue) {
 		if (OS.LINUX.equals(vm.getOs())) {
-			xenHostManager.rebootVm(vm, null, virtue);
+			XenGuestManager guestManager = xenHostManager.getGuestManager(virtue);
+			guestManager.rebootVm(vm, null);
 		} else if (OS.WINDOWS.equals(vm.getOs())) {
 			awsVmManager.rebootVm(vm, null);
 		}

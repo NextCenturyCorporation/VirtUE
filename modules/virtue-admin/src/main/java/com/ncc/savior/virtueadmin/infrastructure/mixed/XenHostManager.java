@@ -464,9 +464,4 @@ public class XenHostManager {
 		return xenGuestManagerFactory.getXenGuestManager(xenVm);
 	}
 
-	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		XenGuestManager guestManager = getGuestManager(virtue);
-		guestManager.rebootVm(vm, vmFuture);
-	}
-
 }
