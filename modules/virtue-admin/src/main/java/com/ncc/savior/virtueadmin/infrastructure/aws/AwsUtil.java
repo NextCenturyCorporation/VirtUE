@@ -273,7 +273,7 @@ public class AwsUtil {
 								if (newSubnetId == null) {
 									newSubnetId = subnet.getSubnetId();
 								} else {
-									throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
+									throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
 											"Found multiple subnets with the name=" + subnetName);
 								}
 							}
@@ -307,7 +307,7 @@ public class AwsUtil {
 							if (newVpcId == null) {
 								newVpcId = vpc.getVpcId();
 							} else {
-								throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
+								throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
 										"Found multiple VPCs with the name=" + vpcName);
 							}
 						}

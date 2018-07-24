@@ -19,6 +19,9 @@ public enum SaviorErrorCode {
 	VM_NOT_FOUND(23, "Virtual Machine not found"), 
 	USER_NOT_FOUND(24, "User not found"), 
 	APPLICATION_ID_NOT_FOUND(25, "Application not found"),
+	ID_MISMATCH(26, "Object IDs do not match"),
+	//Ownership?
+	USER_DOES_NOT_OWN_OBJECT(50, "User does not own object that was to be manipulated"),
 	//Configuration errors
 	CONFIGURATION_ERROR(100, "Configuration error"),
 	//Configuration specific to import
@@ -26,9 +29,14 @@ public enum SaviorErrorCode {
 	//Runtime like errors
 	SERVICE_TIMEOUT(200, "Service timed out"),
 	XPRA_FAILED(201, "Error with XPRA server"),
+	AWS_ERROR(202, "Error with AWS"),
+	JSON_ERROR(203, "Error reading json"),
+	INVALID_STATE(204, "Object in invalid state to perform action"),
 	//Other
 	NOT_IMPLEMENTED(254, "function not implemented"), 
-	UNKNOWN_ERROR(255, "unknown error");
+	UNKNOWN_ERROR(255, "unknown error"), 
+	//Errors we shouldn't see because its older code
+	VIRTUAL_BOX_ERROR(1001, "Error with virtual box") ;
 	//@formatter:on
 	private final int errorCode;
 	private final String readableString;

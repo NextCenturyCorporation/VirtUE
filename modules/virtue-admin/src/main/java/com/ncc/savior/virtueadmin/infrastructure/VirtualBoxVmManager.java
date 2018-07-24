@@ -60,7 +60,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			vm.setState(VmState.RUNNING);
 			return vm;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error attempting to start VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to start VM.  VM=" + vm, e);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			vm.setState(VmState.STOPPED);
 			return vm;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error attempting to stop VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to stop VM.  VM=" + vm, e);
 		}
 	}
 
@@ -90,7 +90,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 
 			p.waitFor();
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error attempting to delete VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to delete VM.  VM=" + vm, e);
 		}
 	}
 
@@ -103,7 +103,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			p.waitFor();
 			return true;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error attempting to pause VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to pause VM.  VM=" + vm, e);
 		}
 	}
 
@@ -116,7 +116,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			p.waitFor();
 			return true;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error attempting to resume VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to resume VM.  VM=" + vm, e);
 		}
 	}
 
@@ -163,7 +163,8 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 				return null;
 			}
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error attempting to get vm state.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to get vm state.  VM=" + vm,
+					e);
 		}
 
 	}

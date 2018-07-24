@@ -457,7 +457,7 @@ public class AdminService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "User did not have ADMIN role");
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
 		}
 		return user;
 	}

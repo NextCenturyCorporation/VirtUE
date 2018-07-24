@@ -264,7 +264,7 @@ public class AwsManager implements ICloudManager {
 				logger.error("  Error Type:       " + ase.getErrorType());
 				logger.error("  Request ID:       " + ase.getRequestId());
 			}
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error Creating stack", ase);
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Error Creating stack", ase);
 
 		} catch (AmazonClientException ace) {
 			logger.error("Caught an AmazonClientException, which means the client encountered "

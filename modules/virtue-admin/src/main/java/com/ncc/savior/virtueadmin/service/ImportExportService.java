@@ -347,7 +347,7 @@ public class ImportExportService {
 		try {
 			instance = jsonMapper.readValue(resource.getInputStream(), klass);
 		} catch (IOException e) {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
 					"Unknown Error attempting to find import of type=" + type + " name=" + name);
 		}
 		return instance;

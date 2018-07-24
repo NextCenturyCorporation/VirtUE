@@ -75,7 +75,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		} catch (Exception e) {
 			// TODO fix cloud manager to not throw exception. Throw something more specific.
 			logger.error("error creating virtue!", e);
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "unknown error creating virtue.", e);
+			if (e instanceof SaviorException) {
+				throw (SaviorException) e;
+			} else {
+				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "unknown error creating virtue.", e);
+			}
 		}
 		// List<VirtualMachineTemplate> vmTemplates = template.getVmTemplates();
 		// Map<String, VirtualMachine> vms =
@@ -107,7 +111,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 				virtueDao.deleteVirtue(virtue);
 			});
 		} else {
-			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "User=" + user.getUsername()
+			throw new SaviorException(SaviorErrorCode.USER_DOES_NOT_OWN_OBJECT, "User=" + user.getUsername()
 					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
 		}
 	}
@@ -203,20 +207,20 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public Iterable<VirtualMachine> getAllVirtualMachines() {
 		return virtueDao.getAllVirtualMachines();
 	}
-	
+
 	@Override
 	public void rebootVm(String vmId) {
 		Optional<VirtualMachine> vm = virtueDao.getXenVm(vmId);
 		VirtualMachine vmToReboot;
-		
+
 		if (vm.isPresent()) {
 			vmToReboot = vm.get();
 		} else {
 			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
 		}
-		
+
 		VirtueInstance virtue = virtueDao.getVirtueByVmId(vmId);
-		
+
 		if (virtue != null) {
 			cloudManager.rebootVm(vmToReboot, virtue.getId());
 		} else {

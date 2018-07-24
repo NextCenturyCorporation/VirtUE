@@ -121,7 +121,7 @@ public class DesktopVirtueService {
 			if (VirtueState.CREATING.equals(s) || VirtueState.LAUNCHING.equals(s)) {
 				continue;
 			} else {
-				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Error with virtue state! " + s);
+				throw new SaviorException(SaviorErrorCode.INVALID_STATE, "Error with virtue state! " + s);
 			}
 		}
 		DesktopVirtueApplication app = startApplication(instance.getId(), applicationId);

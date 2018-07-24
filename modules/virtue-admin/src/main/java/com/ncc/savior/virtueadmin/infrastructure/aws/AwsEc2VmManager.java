@@ -131,7 +131,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future, null);
 		if (vms.size() != 1) {
 			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
-			SaviorException e = new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, msg);
+			SaviorException e = new SaviorException(SaviorErrorCode.AWS_ERROR, msg);
 			logger.error(msg, e);
 			throw e;
 		}
