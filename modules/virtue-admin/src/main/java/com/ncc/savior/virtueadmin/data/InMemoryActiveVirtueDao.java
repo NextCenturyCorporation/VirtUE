@@ -166,4 +166,16 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public VirtueInstance getVirtue(VirtualMachine vm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public VirtueInstance getVirtueByVmId(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

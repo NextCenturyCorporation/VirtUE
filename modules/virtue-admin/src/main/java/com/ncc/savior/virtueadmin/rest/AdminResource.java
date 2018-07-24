@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
@@ -744,5 +746,38 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 
+	}
+	
+	@GET
+	@Path("vm")
+	@Produces("application/json")
+	public Iterable<VirtualMachine> getAllVms() {
+		try {
+			return adminService.getAllVirtualMachines();
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+	
+	@GET
+	@Path("vm/{id}")
+	@Produces("application/json")
+	public VirtualMachine getVm(@PathParam("id") String id) {
+		try {
+			return adminService.getVm(id);
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+	}
+	
+	@GET
+	@Path("vm/reboot/{id}")
+	@Produces("application/json")
+	public void rebootVm(@PathParam("id") String vmId) {
+		try {
+			adminService.rebootVm(vmId);
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
 	}
 }

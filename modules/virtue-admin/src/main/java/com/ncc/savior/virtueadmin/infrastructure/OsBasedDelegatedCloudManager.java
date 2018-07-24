@@ -6,6 +6,7 @@ import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
 
 /**
  * {@link ICloudManager} implementation which delegates individual VM actions to
@@ -38,5 +39,11 @@ public class OsBasedDelegatedCloudManager extends BaseDelegatedCloudManager {
 					this.getClass().getCanonicalName() + " not configured with IVmManager for OS=" + vmt.getOs());
 		}
 		return manager;
+	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm, String virtue) {
+		// TODO Auto-generated method stub
+		
 	}
 }

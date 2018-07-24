@@ -457,5 +457,11 @@ public class XenHostManager {
 			this.serverUser = serverUser;
 		}
 	}
+	
+	public XenGuestManager getGuestManager(String virtueId) {
+		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueId);
+		VirtualMachine xenVm = vmo.get();
+		return xenGuestManagerFactory.getXenGuestManager(xenVm);
+	}
 
 }
