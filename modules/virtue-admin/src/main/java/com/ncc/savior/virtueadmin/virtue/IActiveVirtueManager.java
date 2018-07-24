@@ -75,6 +75,6 @@ public interface IActiveVirtueManager {
 
 	Iterable<VirtualMachine> getAllVirtualMachines();
 
-	void rebootVm(String vmId, String virtueId);
+	void rebootVm(String vmId);
 
 }
