@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -461,5 +462,60 @@ public class XenGuestManager {
 		} finally {
 			linuxFuture.complete(linuxVms);
 		}
+	}
+	
+	public VirtualMachine startVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
+		vms = startVirtualMachines(vms, vmFuture, virtue);
+		return vms.iterator().next();
+	}
+
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
+		vms = stopVirtualMachines(vms, vmFuture, virtue);
+		return vms.iterator().next();
+	}
+
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			startGuests(vms, vmFuture);
+		}
+		return vms;
+	}
+	
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			stopGuests(vms, vmFuture);
+		}
+		return vms;
+	}
+
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		
+		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
+		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		stopVirtualMachine(vm, stopFuture, virtue);
+		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
+			startVirtualMachine(vm, vmFutureFinal, virtue);
+		});	
 	}
 }

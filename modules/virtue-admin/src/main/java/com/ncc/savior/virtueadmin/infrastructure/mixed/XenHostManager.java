@@ -460,65 +460,27 @@ public class XenHostManager {
 		}
 	}
 	
+	public XenGuestManager getGuestManager(String virtueId) {
+		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueId);
+		VirtualMachine xenVm = vmo.get();
+		return xenGuestManagerFactory.getXenGuestManager(xenVm);
+	}
+	
 	public VirtualMachine startVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		vms.add(vm);
-		vms = startVirtualMachines(vms, vmFuture, virtue);
-		return vms.iterator().next();
+		XenGuestManager guestManager = getGuestManager(virtue);
+		return guestManager.startVirtualMachine(vm, vmFuture, virtue);
 	}
 
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
-		vms.add(vm);
-		vms = stopVirtualMachines(vms, vmFuture, virtue);
-		return vms.iterator().next();
-	}
-
-	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		if (vmFuture == null) {
-			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		}
-		if (vms.isEmpty()) {
-			vmFuture.complete(vms);
-		} else {
-			Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtue);
-			VirtualMachine xenVm = vmo.get();
-			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
-			guestManager.startGuests(vms, vmFuture);
-		}
-		return vms;
-	}
-	
-	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
-			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		if (vmFuture == null) {
-			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		}
-		if (vms.isEmpty()) {
-			vmFuture.complete(vms);
-		} else {
-			Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtue);
-			VirtualMachine xenVm = vmo.get();
-			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
-			guestManager.stopGuests(vms, vmFuture);
-		}
-		return vms;
+		XenGuestManager guestManager = getGuestManager(virtue);
+		return guestManager.stopVirtualMachine(vm, vmFuture, virtue);
 	}
 
 	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
-		if (vmFuture == null) {
-			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		}
-		
-		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
-		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		stopVirtualMachine(vm, stopFuture, virtue);
-		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
-			startVirtualMachine(vm, vmFutureFinal, virtue);
-		});	
+		XenGuestManager guestManager = getGuestManager(virtue);
+		guestManager.rebootVm(vm, vmFuture, virtue);
 	}
 
 }
