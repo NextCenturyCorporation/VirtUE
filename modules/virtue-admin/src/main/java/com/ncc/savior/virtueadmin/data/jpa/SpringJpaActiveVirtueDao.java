@@ -153,7 +153,14 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public VirtueInstance getVirtue(VirtualMachine vm) {
-		return virtueRepository.findByVms(vm);
+		String id = vm.getId();
+		Iterable<VirtueInstance> all = virtueRepository.findAll();
+		Iterable<VirtualMachine> allVms = vmRepository.findAll();
+		VirtueInstance vi = virtueRepository.findByVms(vm);
+		VirtueInstance vi1 = virtueRepository.findByVmsId(vm.getId());
+		VirtueInstance vi2 = virtueRepository.findByVms_Id(id);
+
+		return vi;
 	}
 
 	@Override

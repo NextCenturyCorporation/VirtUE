@@ -28,7 +28,6 @@ import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
-import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
@@ -40,7 +39,6 @@ import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
-import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
@@ -480,7 +478,7 @@ public class XenHostManager {
 
 	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
 		XenGuestManager guestManager = getGuestManager(virtue);
-		guestManager.rebootVm(vm, vmFuture, virtue);
+		guestManager.rebootVm(vm, vmFuture);
 	}
 
 }
