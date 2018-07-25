@@ -55,6 +55,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Tag;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
@@ -93,7 +94,7 @@ public class AwsManager implements ICloudManager {
 		try {
 			init();
 		} catch (Exception e) {
-			throw new SaviorException(SaviorException.CONFIGURATION_ERROR,
+			throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
 					"Unable to start AwsManager due to configuration.", e);
 		}
 		this.sshKeyInjector = new SshKeyInjector();
@@ -263,7 +264,7 @@ public class AwsManager implements ICloudManager {
 				logger.error("  Error Type:       " + ase.getErrorType());
 				logger.error("  Request ID:       " + ase.getRequestId());
 			}
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error Creating stack", ase);
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Error Creating stack", ase);
 
 		} catch (AmazonClientException ace) {
 			logger.error("Caught an AmazonClientException, which means the client encountered "

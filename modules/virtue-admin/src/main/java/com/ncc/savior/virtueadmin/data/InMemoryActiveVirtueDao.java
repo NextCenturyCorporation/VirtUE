@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -101,10 +102,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 			}
 			// if we drop out of the list of vms, we couldn't find the vm with that
 			// application id.
-			throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND,
 					"Cannot find application with ID=" + applicationId + " in virtue id=" + virtueId);
 		} else {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with ID=" + virtueId);
 		}
 	}
 

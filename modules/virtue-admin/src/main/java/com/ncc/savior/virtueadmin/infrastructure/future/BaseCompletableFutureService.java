@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 
 /**
@@ -112,7 +113,7 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 	}
 
 	protected void onFailure(P initial, CompletableFuture<R> cf) {
-		SaviorException se = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error with value " + initial);
+		SaviorException se = new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Unknown error with value " + initial);
 		if (logger.isDebugEnabled()) {
 			logger.debug(getServiceName() + " failed with initial data=" + initial + " and error:", se);
 		}
@@ -130,7 +131,7 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 						+ wrapper.startTimeMillis + " \ntimeout=" + timeoutMillis);
 			}
 			if (timeoutTime < current) {
-				SaviorException e = new SaviorException(SaviorException.SERVICE_TIMEOUT,
+				SaviorException e = new SaviorException(SaviorErrorCode.SERVICE_TIMEOUT,
 						"Job timed out in service " + this.getServiceName() + " with wrapper=" + wrapper);
 				logger.warn("Service timed out!", e);
 				throw e;
