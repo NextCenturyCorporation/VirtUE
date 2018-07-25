@@ -108,30 +108,22 @@ public class ImportExportService {
 		}
 		// load all applications
 		ArrayNode appsNode = (ArrayNode) node.get(TYPE_APPLICATION);
-		Iterator<JsonNode> itr = appsNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode appNode = itr.next();
+		for (JsonNode appNode : appsNode) {
 			importApplicationFromNode(appNode);
 		}
 		// load all virtual machines
 		ArrayNode vmtsNode = (ArrayNode) node.get(TYPE_VIRTUAL_MACHINE);
-		itr = vmtsNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode vmtNode = itr.next();
+		for (JsonNode vmtNode : vmtsNode) {
 			importVirtualMachineTemplateFromNode(vmtNode);
 		}
 		// load all virtue templates
 		ArrayNode vtsNode = (ArrayNode) node.get(TYPE_VIRTUE);
-		itr = vtsNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode vtNode = itr.next();
+		for (JsonNode vtNode : vtsNode) {
 			importVirtueTemplateFromNode(vtNode);
 		}
 		// load all users
 		ArrayNode usersNode = (ArrayNode) node.get(TYPE_USER);
-		itr = usersNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode userNode = itr.next();
+		for (JsonNode userNode : usersNode) {
 			importUserFromNode(userNode);
 		}
 

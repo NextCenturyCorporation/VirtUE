@@ -44,9 +44,7 @@ public enum SaviorErrorCode {
 	private int httpResponseCode;
 
 	SaviorErrorCode(int errorCode, String readableString) {
-		this.errorCode = errorCode;
-		this.readableString = readableString;
-		this.httpResponseCode = 400;
+		this(errorCode, readableString, 400);
 	}
 
 	SaviorErrorCode(int errorCode, String readableString, int httpResponseCode) {
