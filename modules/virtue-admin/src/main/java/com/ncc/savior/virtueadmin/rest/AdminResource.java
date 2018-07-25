@@ -477,7 +477,7 @@ public class AdminResource {
 	public VirtueUser updateUser(@PathParam("username") String username, VirtueUser newUser) {
 		try {
 			if (!newUser.getUsername().equals(username)) {
-				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
+				throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
 						"Given user doesn't match username in path.  Username=" + username + ". NewUser=" + newUser);
 			}
 			return adminService.createUpdateUser(newUser);
