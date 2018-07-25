@@ -49,8 +49,8 @@ export class VmListComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getBaseUrl(awsServer);
-      this.getVms();
       this.getAppsList();
+      this.getVms();
     });
     this.resetRouter();
   }

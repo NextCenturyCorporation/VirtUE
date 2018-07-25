@@ -194,24 +194,23 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     let userVirtue = [];
     if (id !== null) {
       userVirtue = this.allVirtues.filter(virt => virt.id === id)
-        .map(virtue => virtue.username);
+        .map(virtue => virtue.name);
       return userVirtue;
     }
   }
 
   generateAppsListHTML(virtue: any) {
     let appsString = virtue.applicationIds.toString();
-    // console.log("here", appsString);
     let appList: any;
     let appInfo: any;
     let appNames: string = '';
     let i: number = 0;
     appList = appsString.split(',');
     for (let id of appList) {
+      // console.log("here")
       i++;
       appInfo = this.allApps.filter(data => data.id === id)
-        .map(app => app.username);
-      // console.log(appInfo.toString());
+        .map(app => app.name);
       appNames = appNames + `<li>${appInfo.toString()}</li>`;
     }
     return appNames;
@@ -219,7 +218,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   updateVirtueList(newVirtueIDs: any) {
     this.user.virtueIDs = newVirtueIDs;
-    this.user.virtues = [];
+    this.user.virtues = new Array<Virtue>();
       for (let vID of newVirtueIDs) {
         for (let virtue of this.allVirtues) {
           if (vID === virtue.id) {

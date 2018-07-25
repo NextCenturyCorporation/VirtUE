@@ -126,7 +126,6 @@ export class VirtueListComponent implements OnInit {
   getApplications() {
     this.appsService.getAppsList(this.baseUrl).subscribe( apps => {
       this.appsList = apps;
-      // this.getAppsList(data);
     });
   }
 
