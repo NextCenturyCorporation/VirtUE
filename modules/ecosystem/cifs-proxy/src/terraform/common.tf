@@ -32,8 +32,8 @@ variable "domain" {
 }
 
 variable "linux_ami" {
-  description = "Amazon Linux 2 LTS Candidate 2 AMI (HVM), SSD Volume Type"
-  default = "ami-afd15ed0"
+  description = "Amazon-provided Canonical, Ubuntu, 16.04 LTS, amd64 xenial image build on 2018-06-27"
+  default = "ami-759bc50a"
 }
 
 variable "linux_instance_type" {
