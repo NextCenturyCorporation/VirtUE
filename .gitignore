@@ -27,3 +27,7 @@ modules/freerdp-java/.cache
 yarn-error.log
 /modules/admin/src/app/credentials
 /modules/virtue-admin/src/main/resources/application-context.xml
+docker/server-images/virtue-admin/virtue-admin-0.0.1-SNAPSHOT.tar
+docker/server-images/virtue-admin/virtue-admin-0.0.1-SNAPSHOT.war
+docker/server-images/virtue-admin/virtue-admin-0.0.1-SNAPSHOT.zip
+docker/server-images/workbench/admin.tar.gz

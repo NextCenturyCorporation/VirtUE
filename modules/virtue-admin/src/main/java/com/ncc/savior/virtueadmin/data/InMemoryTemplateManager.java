@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
@@ -121,12 +122,12 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		addVirtueTemplate(virtueSingleAll);
 		addVirtueTemplate(virtueMath);
 
-		VirtueUser user = new VirtueUser("user", new ArrayList<String>());
-		VirtueUser user2 = new VirtueUser("user2", new ArrayList<String>());
-		VirtueUser user3 = new VirtueUser("user3", new ArrayList<String>());
-		VirtueUser admin = new VirtueUser("admin", new ArrayList<String>());
-		VirtueUser kdrumm = new VirtueUser("kdrumm", new ArrayList<String>());
-		VirtueUser kdrummTest = new VirtueUser("kdrumm_test", new ArrayList<String>());
+		VirtueUser user = new VirtueUser("user", new ArrayList<String>(), true);
+		VirtueUser user2 = new VirtueUser("user2", new ArrayList<String>(), true);
+		VirtueUser user3 = new VirtueUser("user3", new ArrayList<String>(), true);
+		VirtueUser admin = new VirtueUser("admin", new ArrayList<String>(), true);
+		VirtueUser kdrumm = new VirtueUser("kdrumm", new ArrayList<String>(), true);
+		VirtueUser kdrummTest = new VirtueUser("kdrumm_test", new ArrayList<String>(), true);
 
 		assignVirtueTemplateToUser(user, virtueAllVms.getId());
 		assignVirtueTemplateToUser(user, virtueSingleBrowsers.getId());
@@ -185,7 +186,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	public ApplicationDefinition getApplicationDefinition(String applicationId) {
 		ApplicationDefinition app = applications.get(applicationId);
 		if (app == null) {
-			throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND, "not found");
+			throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND, "not found");
 		}
 		return app;
 	}
@@ -230,7 +231,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 			}
 			list.add(virtueTemplateId);
 		} else {
-			throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_ID_NOT_FOUND,
 					"Unable to find Virtue Template Id=" + virtueTemplateId);
 		}
 	}
@@ -243,7 +244,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 				list.remove(virtueTemplateId);
 			}
 		} else {
-			throw new SaviorException(SaviorException.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_ID_NOT_FOUND,
 					"Unable to find Virtue Template Id=" + virtueTemplateId);
 		}
 	}
@@ -255,7 +256,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	private void verifyVmTemplatesExist(Collection<VirtualMachineTemplate> vmts) {
 		for (VirtualMachineTemplate vmt : vmts) {
 			if (!vmTemplates.containsKey(vmt.getId())) {
-				throw new SaviorException(SaviorException.VM_TEMPLATE_NOT_FOUND,
+				throw new SaviorException(SaviorErrorCode.VM_TEMPLATE_NOT_FOUND,
 						"VM Template ID=" + vmt.getId() + " not found.");
 			}
 			Collection<ApplicationDefinition> appIds = vmt.getApplications();
@@ -266,7 +267,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	private void verifyAppsExist(Collection<ApplicationDefinition> apps) {
 		for (ApplicationDefinition app : apps) {
 			if (!applications.containsKey(app.getId())) {
-				throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+				throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND,
 						"Application ID=" + app + " not found.");
 			}
 		}

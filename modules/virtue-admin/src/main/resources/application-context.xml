@@ -12,6 +12,7 @@
     	http://www.springframework.org/schema/data/repository
         http://www.springframework.org/schema/data/repository/spring-repository-1.5.xsd">
 
+
 	<bean name="certificatesDirectory" class="java.io.File">
 		<constructor-arg value="${virtue.aws.server.keyDirectory}" />
 	</bean>
@@ -59,8 +60,9 @@
 		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.profile}"></constructor-arg>
 	</bean>
-	
-	<bean name="awsRoute53" class="com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager">
+
+	<bean name="awsRoute53"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 		<constructor-arg value="${virtue.aws.domain}"></constructor-arg>
 	</bean>
@@ -71,17 +73,17 @@
 		<constructor-arg value="${virtue.aws.forceAssignPublicDns:default}"></constructor-arg>
 	</bean>
 
-<!-- 	<bean name="awsVmUpdater" -->
-<!-- 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater"> -->
-<!-- 		<constructor-arg ref="awsEc2Provider"></constructor-arg> -->
-<!-- 		<constructor-arg ref="activeVirtueUpdater" /> -->
-<!-- 		<constructor-arg ref="keyManager" /> -->
-<!-- 		<constructor-arg value="false"></constructor-arg> -->
-<!-- 		<constructor-arg value="false"></constructor-arg> -->
-<!-- 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg> -->
-<!-- 	</bean> -->
+	<!-- <bean name="awsVmUpdater" -->
+	<!-- class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater"> -->
+	<!-- <constructor-arg ref="awsEc2Provider"></constructor-arg> -->
+	<!-- <constructor-arg ref="activeVirtueUpdater" /> -->
+	<!-- <constructor-arg ref="keyManager" /> -->
+	<!-- <constructor-arg value="false"></constructor-arg> -->
+	<!-- <constructor-arg value="false"></constructor-arg> -->
+	<!-- <constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg> -->
+	<!-- </bean> -->
 	<bean name="futureServiceProvider"
-		class="com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider">
+		class="com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider" init-method="init">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater" />
 		<constructor-arg ref="keyManager" />
@@ -93,7 +95,7 @@
 		<constructor-arg ref="keyManager" />
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
-		<constructor-arg value="${virtue.aws.server.subnet.name}"/>
+		<constructor-arg value="${virtue.aws.server.subnet.name}" />
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
 		<!-- <property name="awsProfile" value="">${virtue.aws.profile}</property> -->
@@ -122,8 +124,9 @@
 		<constructor-arg ref="awsVmManager"></constructor-arg>
 		<constructor-arg ref="windowStartupService"></constructor-arg>
 	</bean>
-	
-	<bean name="windowStartupService" class="com.ncc.savior.virtueadmin.infrastructure.mixed.WindowsStartupAppsService">
+
+	<bean name="windowStartupService"
+		class="com.ncc.savior.virtueadmin.infrastructure.mixed.WindowsStartupAppsService">
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="keyManager"></constructor-arg>
 	</bean>

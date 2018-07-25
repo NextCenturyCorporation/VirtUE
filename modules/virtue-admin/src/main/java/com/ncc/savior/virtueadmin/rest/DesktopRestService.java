@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.rest;
 
-import java.io.IOException;
 import java.util.Set;
 
 import javax.ws.rs.GET;
@@ -14,7 +13,6 @@ import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
-import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
  * Rest resource that handles endpoints specifically for the desktop
@@ -40,15 +38,8 @@ public class DesktopRestService {
 	@Produces("application/json")
 	@Path("virtue")
 	public Set<DesktopVirtue> getAllVirtueByUser() {
-		try {
-			Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser();
-			return virtues;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		Set<DesktopVirtue> virtues = desktopService.getDesktopVirtuesForUser();
+		return virtues;
 	}
 
 	/**
@@ -63,14 +54,7 @@ public class DesktopRestService {
 	@Path("virtue/{virtueId}/{applicationId}/start")
 	public DesktopVirtueApplication startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
-		try {
-			return desktopService.startApplication(virtueId, applicationId);
-		} catch (RuntimeException | IOException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return desktopService.startApplication(virtueId, applicationId);
 	}
 
 	/**
@@ -86,70 +70,35 @@ public class DesktopRestService {
 	@Path("template/{templateId}/{applicationId}/start")
 	public DesktopVirtueApplication startApplicationFromTemplate(@PathParam("templateId") String templateId,
 			@PathParam("applicationId") String applicationId) {
-		try {
-			return desktopService.startApplicationFromTemplate(templateId, applicationId);
-		} catch (RuntimeException | IOException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return desktopService.startApplicationFromTemplate(templateId, applicationId);
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("template/{templateId}/start")
 	public DesktopVirtue createVirtue(@PathParam("templateId") String templateId) {
-		try {
-			return desktopService.createVirtueAsDesktopVirtue(templateId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return desktopService.createVirtueAsDesktopVirtue(templateId);
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/start")
 	public DesktopVirtue startVirtue(@PathParam("virtueId") String virtueId) {
-		try {
-			return desktopService.startVirtue(virtueId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return desktopService.startVirtue(virtueId);
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/stop")
 	public DesktopVirtue stopVirtue(@PathParam("virtueId") String virtueId) {
-		try {
-			return desktopService.stopVirtue(virtueId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return desktopService.stopVirtue(virtueId);
 	}
 
 	@GET
 	@Produces({ "image/png", "image/jpeg" })
 	@Path("icon/{iconKey}")
 	public byte[] getIcon(@PathParam("iconKey") String iconKey) {
-		try {
-			IconModel iconModel = desktopService.getIcon(iconKey);
-			return iconModel.getData();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		IconModel iconModel = desktopService.getIcon(iconKey);
+		return iconModel.getData();
 	}
 }

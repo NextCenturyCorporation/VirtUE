@@ -111,7 +111,7 @@ public class XenGuestManager {
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
 			addVmToProvisionPipeline(vms, xenGuestFuture);
 		} catch (JSchException e) {
-			logger.error("Vm is not reachable yet: " + e.getMessage());
+			logger.error("Vm is not reachable yet: ", e);
 			xenGuestFuture.completeExceptionally(e);
 		} catch (Exception e) {
 			logger.error("error in SSH", e);
@@ -345,7 +345,7 @@ public class XenGuestManager {
 		String line = null;
 		while ((line = ch.readLine()) != null) {
 			// System.out.println((line));
-			if (line.contains("virtue-ip")) {
+			if (line.contains("My IP address:")) {
 				virtue_ip = findIP(line);
 				return virtue_ip;
 			}
@@ -433,6 +433,7 @@ public class XenGuestManager {
 			CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.STOPPING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			cf = serviceProvider.getTestUpDown().startFutures(vm, false);
+			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.STOPPED);
 			cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			fc.addFuture(cf);
@@ -459,6 +460,77 @@ public class XenGuestManager {
 			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames, e);
 		} finally {
 			linuxFuture.complete(linuxVms);
+		}
+	}
+
+	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture,
+			String virtue) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
+		vms = startVirtualMachines(vms, vmFuture, virtue);
+		return vms.iterator().next();
+	}
+
+	public VirtualMachine stopVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture,
+			String virtue) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
+		vms = stopVirtualMachines(vms, vmFuture, virtue);
+		return vms.iterator().next();
+	}
+
+	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			startGuests(vms, vmFuture);
+		}
+		return vms;
+	}
+
+	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
+			CompletableFuture<Collection<VirtualMachine>> vmFuture, String virtue) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		if (vms.isEmpty()) {
+			vmFuture.complete(vms);
+		} else {
+			stopGuests(vms, vmFuture);
+		}
+		return vms;
+	}
+
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>(1);
+		vms.add(vm);
+		rebootVms(vms, linuxFuture);
+	}
+
+	public void rebootVms(Collection<VirtualMachine> vms, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+		Session session = null;
+		if (linuxFuture == null) {
+			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		try {
+			CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
+			session = SshUtil.getConnectedSession(xenVm, keyFile);
+			for (VirtualMachine vm : vms) {
+				SshUtil.sendCommandFromSession(session, "sudo xl reboot " + vm.getName());
+			}
+			CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = linuxFuture;
+			addToStopPipeline(vms, stopFuture);
+			stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
+				addToStartPipeline(stoppedVm, vmFutureFinal);
+			});
+		} catch (JSchException | IOException e) {
+			linuxFuture.completeExceptionally(e);
+		} finally {
+			SshUtil.disconnectLogErrors(session);
 		}
 	}
 }

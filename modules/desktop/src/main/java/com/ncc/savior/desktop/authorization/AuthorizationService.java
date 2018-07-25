@@ -14,16 +14,14 @@ public class AuthorizationService {
 	private OS os;
 	private IActiveDirectoryAuthorizationProvider authProvider;
 	private String requiredDomain;
-	private boolean dummySecurity;
 	private String loginUrl;
 	private String logoutUrl;
 
-	public AuthorizationService(String requiredDomain, boolean dummySecurity, String loginUrl, String logoutUrl) {
+	public AuthorizationService(String requiredDomain, String loginUrl, String logoutUrl) {
 		this.requiredDomain = requiredDomain;
 		if (this.requiredDomain != null && this.requiredDomain.equals("")) {
 			this.requiredDomain = null;
 		}
-		this.dummySecurity = dummySecurity;
 		this.os = JavaUtil.getOs();
 		this.loginUrl = loginUrl;
 		this.logoutUrl = logoutUrl;
@@ -31,14 +29,10 @@ public class AuthorizationService {
 	}
 
 	public AuthorizationService(String loginUrl, String logoutUrl) {
-		this(null, false, loginUrl, logoutUrl);
+		this(null, loginUrl, logoutUrl);
 	}
 
 	private void createAuthProviderChain() {
-		if (dummySecurity) {
-			authProvider = new DummyAuthentication();
-		}
-
 		switch (os) {
 		case WINDOWS:
 			authProvider = new WaffleWindowsActiveDirectoryAuthorizationProvider();
@@ -81,7 +75,7 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser login(String domain, String username, String password) throws InvalidUserLoginException {
-		if (!dummySecurity && !(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
+		if (!(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 			// if (requiredDomain == null || requiredDomain.equals(domain)) {
 			// return authProvider.login(domain, username, password);

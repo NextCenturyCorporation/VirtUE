@@ -25,6 +25,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
@@ -120,8 +121,10 @@ public class XenHostManager {
 		}
 		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
 		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
+		String virtueName = virtue.getName();
+		virtueName = virtueName.replace(" ", "-");
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-", securityGroupIds, xenKeyName,
+				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
 				xenInstanceType, subnetId);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
@@ -220,6 +223,12 @@ public class XenHostManager {
 			}
 			return xenVm2;
 		});
+		linuxFuture.handle((myVms, ex) -> {
+			if (ex != null) {
+				handleError(virtue, finalXenFuture, xenVm, ex);
+			}
+			return myVms;
+		});
 		// xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
@@ -315,7 +324,7 @@ public class XenHostManager {
 				});
 			});
 		} else {
-			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR,
+			SaviorException e = new SaviorException(SaviorErrorCode.VM_NOT_FOUND,
 					"Unable to find Xen VM with id=" + id);
 			linuxFuture.completeExceptionally(e);
 			xenFuture.completeExceptionally(e);
@@ -454,6 +463,12 @@ public class XenHostManager {
 		if (serverUser != null && !serverUser.trim().equals("")) {
 			this.serverUser = serverUser;
 		}
+	}
+	
+	public XenGuestManager getGuestManager(String virtueId) {
+		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueId);
+		VirtualMachine xenVm = vmo.get();
+		return xenGuestManagerFactory.getXenGuestManager(xenVm);
 	}
 
 }

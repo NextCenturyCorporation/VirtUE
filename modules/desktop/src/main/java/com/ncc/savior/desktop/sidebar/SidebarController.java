@@ -117,6 +117,7 @@ public class SidebarController {
 
 	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {
 		Iterator<DesktopVirtue> itr = virtues.iterator();
+		List<DesktopVirtue> addedVirtues = new ArrayList<DesktopVirtue>();
 		Map<String, DesktopVirtue> newCurrentVirtues = new TreeMap<String, DesktopVirtue>();
 		if (logger.isTraceEnabled()) {
 			logger.trace("current Virtues: (" + currentVirtues.size() + ") " + currentVirtues);
@@ -139,9 +140,12 @@ public class SidebarController {
 					reportChangedVirtue(v);
 				}
 			} else {
-				reportAddedVirtue(v);
+				addedVirtues.add(v);
 				newCurrentVirtues.put(getMapKey(v), v);
 			}
+		}
+		if (!addedVirtues.isEmpty()) {
+			reportAddedVirtues(addedVirtues);
 		}
 
 		Iterator<DesktopVirtue> removeItr = currentVirtues.values().iterator();
@@ -162,6 +166,7 @@ public class SidebarController {
 	protected void detectChangesAndReport2(List<DesktopVirtue> currentVirtues, List<DesktopVirtue> virtues)
 			throws IOException {
 		DesktopVirtueComparator comparator = new DesktopVirtue.DesktopVirtueComparator();
+		List<DesktopVirtue> addedVirtues = new ArrayList<DesktopVirtue>();
 		currentVirtues.sort(comparator);
 		virtues.sort(comparator);
 		int cindex = 0;
@@ -191,7 +196,7 @@ public class SidebarController {
 				cindex++;
 				nindex++;
 			} else if (0 < compare) {
-				reportAddedVirtue(nv);
+				addedVirtues.add(nv);
 				nindex++;
 			} else if (0 > compare) {
 				reportRemovedVirtue(cv);
@@ -208,9 +213,10 @@ public class SidebarController {
 		}
 		while (nindex < virtues.size()) {
 			DesktopVirtue v = virtues.get(nindex);
-			reportAddedVirtue(v);
+			addedVirtues.add(v);
 			nindex++;
 		}
+		reportAddedVirtues(addedVirtues);
 	}
 
 	protected void reportRemovedVirtue(DesktopVirtue virtue) {
@@ -224,12 +230,12 @@ public class SidebarController {
 		}
 	}
 
-	protected void reportAddedVirtue(DesktopVirtue virtue) throws IOException {
+	protected void reportAddedVirtues(List<DesktopVirtue> virtues) throws IOException {
 		try {
 			if (logger.isTraceEnabled()) {
-				logger.debug("adding virtue " + virtue);
+				logger.debug("adding virtues " + virtues);
 			}
-			changeHandler.addVirtue(virtue);
+			changeHandler.addVirtues(virtues);
 		} catch (Exception e) {
 			logger.error("Error sending remove virtue event", e);
 		}
@@ -252,7 +258,7 @@ public class SidebarController {
 
 		void changeVirtue(DesktopVirtue virtue);
 
-		void addVirtue(DesktopVirtue virtue) throws IOException, InterruptedException, ExecutionException;
+		void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException;
 
 	}
 

@@ -1,12 +1,7 @@
 package com.ncc.savior.virtueadmin.rest;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -15,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -31,11 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
@@ -79,11 +78,18 @@ public class DataResource {
 
 	@Autowired
 	private ImportExportService importExportService;
+	private PathMatchingResourcePatternResolver resolver;
 
 	public DataResource() {
 		logger.warn("***Data Resource is currently enabled.  Please disable for production systems.***");
+		this.resolver = new PathMatchingResourcePatternResolver();
 	}
 
+	/**
+	 * Imports all data in the import folder on the classpath.
+	 * 
+	 * @return
+	 */
 	@GET
 	@Path("import/all")
 	@Produces("text/plain")
@@ -93,10 +99,31 @@ public class DataResource {
 	}
 
 	@GET
+	@Path("import/user/admin")
+	@Produces("application/json")
+	public VirtueUser ensureAdminExists() {
+		String username = "admin";
+		try {
+			return userManager.getUser(username);
+		} catch (RuntimeException e) {
+			Collection<String> authorities = new ArrayList<String>();
+			authorities.add(VirtueUser.ROLE_ADMIN);
+			authorities.add(VirtueUser.ROLE_USER);
+			VirtueUser admin = new VirtueUser("admin", authorities, true);
+			userManager.addUser(admin);
+			return admin;
+		}
+	}
+
+	@GET
 	@Path("templates/preload")
 	public Response preloadTemplates() {
 		logger.info("attempting to preload data");
-		loadIcons();
+		try {
+			loadIcons();
+		} catch (Throwable t) {
+			logger.warn("Failed to load icons", t);
+		}
 
 		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Linux)",
 				"1.0", OS.LINUX, "chrome", "google-chrome");
@@ -188,16 +215,17 @@ public class DataResource {
 		String linuxLoginUser = "user";
 		String windowsLoginUser = "administrator";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
-				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmBrowser.setSecurityTag("power");
 		VirtualMachineTemplate windowsBrowserVm = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Windows",
-				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName);
+				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName, "System",
+				new Date());
 		windowsBrowserVm.setSecurityTag("power");
 		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
-				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName);
+				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmAll.setSecurityTag("power");
 		VirtualMachineTemplate vmMath = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Math", OS.LINUX,
-				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName);
+				allLinuxAmi, appsMath, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmMath.setSecurityTag("default");
 		Collection<ApplicationDefinition> appsDocEditor = new LinkedList<ApplicationDefinition>();
 		appsDocEditor.add(windowsWord);
@@ -222,30 +250,32 @@ public class DataResource {
 		appsLinuxCorpEmail.add(thunderBird);
 		appsLinuxCorpEmail.add(linuxFirefox);
 		VirtualMachineTemplate vmDocEditor = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Document Editor VM", OS.WINDOWS, windowsAmi, appsDocEditor, windowsLoginUser, true, now, systemName);
+				"Document Editor VM", OS.WINDOWS, windowsAmi, appsDocEditor, windowsLoginUser, true, now, systemName,
+				"System", new Date());
 		vmDocEditor.setSecurityTag("default");
 		VirtualMachineTemplate vmWinCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Windows Corperate Email User VM", OS.WINDOWS, windowsAmi, appsWinCorpEmail, windowsLoginUser, true,
-				now, systemName);
+				now, systemName, "System", new Date());
 		vmWinCorpEmail.setSecurityTag("email");
 		VirtualMachineTemplate vmExternalInternet = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"External Internet Consumer VM", OS.WINDOWS, windowsAmi, appsExternalInternet, windowsLoginUser, true,
-				now, systemName);
+				now, systemName, "System", new Date());
 		vmExternalInternet.setSecurityTag("power");
 		VirtualMachineTemplate vmPowerUserWin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Power User VM Windows", OS.WINDOWS, windowsAmi, appsPowerUserWin, windowsLoginUser, true, now,
-				systemName);
+				systemName, "System", new Date());
 		vmPowerUserWin.setSecurityTag("power");
 		VirtualMachineTemplate vmPowerUserLinux = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Power User Vm Linux", OS.LINUX, allLinuxAmi, appsPowerUserLinux, linuxLoginUser, true, now,
-				systemName);
+				"Power User Vm Linux", OS.LINUX, allLinuxAmi, appsPowerUserLinux, linuxLoginUser, true, now, systemName,
+				"System", new Date());
 		vmPowerUserLinux.setSecurityTag("power");
 		VirtualMachineTemplate vmRouterAdmin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName);
+				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName, "System",
+				new Date());
 		vmRouterAdmin.setSecurityTag("power");
 		VirtualMachineTemplate vmLinuxCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Linux Corperate Email User VM", OS.LINUX, allLinuxAmi, appsLinuxCorpEmail, linuxLoginUser, true, now,
-				systemName);
+				systemName, "System", new Date());
 		vmLinuxCorpEmail.setSecurityTag("email");
 
 		// VirtualMachineTemplate vmDrawing = new
@@ -253,49 +283,66 @@ public class DataResource {
 		// allLinuxAmi, appsDrawing, linuxLoginUser, true, now, systemName);
 
 		VirtualMachineTemplate vmLibreOffice = new VirtualMachineTemplate(UUID.randomUUID().toString(), "LibreOffice",
-				OS.LINUX, allLinuxAmi, appsLibreOffice, linuxLoginUser, true, now, systemName);
+				OS.LINUX, allLinuxAmi, appsLibreOffice, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmLibreOffice.setSecurityTag("default");
 		Set<VirtualMachineTemplate> vmtsSingleAll = new HashSet<VirtualMachineTemplate>();
 		vmtsSingleAll.add(vmAll);
 		// vmtsSingleAll.add(windowsVm);
 		String allTemplate = "default-template";
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue", "1.0",
-				vmtsSingleAll, allTemplate, true, now, systemName);
+				vmtsSingleAll, allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsLinuxAndWinBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsLinuxAndWinBrowsers.add(vmBrowser);
 		vmtsLinuxAndWinBrowsers.add(windowsBrowserVm);
 		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue (Both OS)", "1.0",
-				vmtsLinuxAndWinBrowsers, allTemplate, true, now, systemName);
+				vmtsLinuxAndWinBrowsers, allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsLibre = new HashSet<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
 		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0", vmtsLibre,
-				allTemplate, true, now, systemName);
+				allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsWindows = new HashSet<VirtualMachineTemplate>();
 		vmtsWindows.add(windowsBrowserVm);
 		VirtueTemplate virtueWindows = new VirtueTemplate(UUID.randomUUID().toString(), "Windows Virtue", "1.0",
-				vmtsWindows, allTemplate, true, now, systemName);
+				vmtsWindows, allTemplate, true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsMath = new HashSet<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0", vmtsMath,
-				allTemplate, true, now, systemName);
+				allTemplate, true, now, systemName, "System", new Date());
 
 		VirtueTemplate virtueDocumentEditor = new VirtueTemplate(UUID.randomUUID().toString(), "Document Editor", "1.0",
 				allTemplate, true, now, systemName, vmDocEditor);
+		virtueDocumentEditor.setUserCreatedBy("System");
+		virtueDocumentEditor.setTimeCreatedAt(new Date());
+
 		VirtueTemplate virtueWinCorpEmail = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows Corporate Email User", "1.0", allTemplate, true, now, systemName, vmWinCorpEmail);
+		virtueWinCorpEmail.setUserCreatedBy("System");
+		virtueWinCorpEmail.setTimeCreatedAt(new Date());
+
 		VirtueTemplate virtueRouterAdmin = new VirtueTemplate(UUID.randomUUID().toString(), "Router Admin", "1.0",
 				allTemplate, true, now, systemName, vmRouterAdmin);
+		virtueRouterAdmin.setUserCreatedBy("System");
+		virtueRouterAdmin.setTimeCreatedAt(new Date());
+
 		VirtueTemplate virtueLinuxCorporateEmailUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Linux Corporate Email User", "1.0", allTemplate, true, now, systemName, vmLinuxCorpEmail);
+		virtueLinuxCorporateEmailUser.setUserCreatedBy("System");
+		virtueLinuxCorporateEmailUser.setTimeCreatedAt(new Date());
+
 		VirtueTemplate virtueExternalInternet = new VirtueTemplate(UUID.randomUUID().toString(),
 				"External Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
+		virtueExternalInternet.setUserCreatedBy("System");
+		virtueExternalInternet.setTimeCreatedAt(new Date());
+
 		VirtueTemplate virtuePowerUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows and Linux Power User", "1.0", allTemplate, true, now, systemName, vmPowerUserWin,
 				vmPowerUserLinux);
+		virtuePowerUser.setUserCreatedBy("System");
+		virtuePowerUser.setTimeCreatedAt(new Date());
 
 		for (ApplicationDefinition app : appsAll) {
 			templateManager.addApplicationDefinition(app);
@@ -330,18 +377,18 @@ public class DataResource {
 		templateManager.addVirtueTemplate(virtuePowerUser);
 
 		ArrayList<String> userRoles = new ArrayList<String>();
-		userRoles.add("ROLE_USER");
+		userRoles.add(VirtueUser.ROLE_USER);
 		ArrayList<String> adminRoles = new ArrayList<String>();
-		adminRoles.add("ROLE_USER");
-		adminRoles.add("ROLE_ADMIN");
+		adminRoles.add(VirtueUser.ROLE_USER);
+		adminRoles.add(VirtueUser.ROLE_ADMIN);
 
-		VirtueUser admin = new VirtueUser("admin", adminRoles);
-		VirtueUser presenter = new VirtueUser("presenter", userRoles);
-		VirtueUser office = new VirtueUser("office", userRoles);
-		VirtueUser math = new VirtueUser("math", userRoles);
-		VirtueUser browser = new VirtueUser("browser", userRoles);
-		VirtueUser nerd = new VirtueUser("nerd", userRoles);
-		VirtueUser developer = new VirtueUser("developer", userRoles);
+		VirtueUser admin = new VirtueUser("admin", adminRoles, true);
+		VirtueUser presenter = new VirtueUser("presenter", userRoles, true);
+		VirtueUser office = new VirtueUser("office", userRoles, true);
+		VirtueUser math = new VirtueUser("math", userRoles, true);
+		VirtueUser browser = new VirtueUser("browser", userRoles, true);
+		VirtueUser nerd = new VirtueUser("nerd", userRoles, true);
+		VirtueUser developer = new VirtueUser("developer", userRoles, true);
 
 		userManager.addUser(admin);
 		userManager.addUser(presenter);
@@ -379,6 +426,9 @@ public class DataResource {
 		return Response.ok().entity("success").build();
 	}
 
+	/**
+	 * Load all the icons that are stored in the icons folder on the classpath
+	 */
 	private void loadIcons() {
 		InputStream iconStream = DataResource.class.getClassLoader().getResourceAsStream("icons/savior.png");
 
@@ -394,31 +444,24 @@ public class DataResource {
 		loadIconsFromIconsFolder();
 	}
 
+	/**
+	 * Load all the icons that are stored in the icons folder on the classpath
+	 */
 	private void loadIconsFromIconsFolder() {
-		URL r = DataResource.class.getClassLoader().getResource("icons");
 		try {
-			File iconDir = new File(r.toURI());
-			if (iconDir.exists() && iconDir.isDirectory()) {
-				File[] files = iconDir.listFiles(new FileFilter() {
-
-					@Override
-					public boolean accept(File pathname) {
-						return (pathname.isFile() && pathname.getPath().toLowerCase().endsWith(".png"));
-					}
-				});
-				for (File file : files) {
-					try {
-						byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
-						String name = file.getName();
-						name = name.substring(0, name.lastIndexOf("."));
-						templateManager.addIcon(name, bytes);
-					} catch (IOException e) {
-						logger.error("Failed to load icon at " + file.getPath());
-					}
+			Resource[] resources = resolver.getResources("icons/**.png");
+			for (Resource resource : resources) {
+				try {
+					byte[] bytes = IOUtils.toByteArray(resource.getInputStream());
+					String name = resource.getFilename();
+					name = name.substring(0, name.lastIndexOf("."));
+					templateManager.addIcon(name, bytes);
+				} catch (IOException e) {
+					logger.error("Failed to load icon at " + resource.getDescription());
 				}
 			}
-		} catch (URISyntaxException e) {
-			logger.error("failed to load icons folder");
+		} catch (IOException e) {
+			logger.error("failed to load icons folder", e);
 		}
 	}
 
@@ -437,7 +480,7 @@ public class DataResource {
 			for (String a : auth) {
 				newAuth.add(a);
 			}
-			newUser = new VirtueUser(newUserName, source.getAuthorities());
+			newUser = new VirtueUser(newUserName, source.getAuthorities(), true);
 			userManager.addUser(newUser);
 		}
 		Collection<String> ids = templateManager.getVirtueTemplateIdsForUser(source);
@@ -452,7 +495,7 @@ public class DataResource {
 	@Path("user/{sourceUser}")
 	@Produces("application/json")
 	public Map<String, VirtueTemplate> assignUser(@PathParam("sourceUser") String sourceUserName) {
-		VirtueUser source = new VirtueUser(sourceUserName, new ArrayList<String>());
+		VirtueUser source = new VirtueUser(sourceUserName, new ArrayList<String>(), true);
 		Map<String, VirtueTemplate> ids = templateManager.getVirtueTemplatesForUser(source);
 		return ids;
 	}
@@ -469,6 +512,13 @@ public class DataResource {
 	@Produces("application/json")
 	public Iterable<VirtueUser> getUsers() {
 		return userManager.getAllUsers();
+	}
+
+	@GET
+	@Path("user/{username}/enable")
+	@Produces("application/json")
+	public void enableUser(@PathParam("username") String username) {
+		userManager.enableDisableUser(username, true);
 	}
 
 	@GET
@@ -505,6 +555,40 @@ public class DataResource {
 	@Produces("application/json")
 	public Iterable<VirtualMachine> getAllVms() {
 		return activeVirtueDao.getAllVirtualMachines();
+	}
+
+	@GET
+	@Path("vm/{id}")
+	@Produces("application/json")
+	public VirtualMachine getVm(@PathParam("id") String id) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(id);
+		if (vm.isPresent()) {
+			return vm.get();
+		} else {
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+		}
+	}
+
+	@GET
+	@Path("vm/reboot/{vmId}")
+	@Produces("application/json")
+	public void rebootVm(@PathParam("vmId") String vmId) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(vmId);
+		VirtualMachine vmToReboot;
+
+		if (vm.isPresent()) {
+			vmToReboot = vm.get();
+		} else {
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
+		}
+
+		VirtueInstance virtue = activeVirtueDao.getVirtueByVmId(vmId);
+
+		if (virtue != null) {
+			cloudManager.rebootVm(vmToReboot, virtue.getId());
+		} else {
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
+		}
 	}
 
 	@GET

@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 
@@ -32,7 +33,7 @@ public class UpdatePipeline<T> implements IUpdatePipeline<T>, IUpdatePipelineRes
 	@Override
 	public void addPipelineComponent(IPipelineComponent<T> component, int index) {
 		if (component == null) {
-			throw new SaviorException(SaviorException.CONFIGURATION_ERROR,
+			throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
 					"Attempted to add a null pipeline component to pipeline");
 		}
 		if (index >= pipeline.size()) {

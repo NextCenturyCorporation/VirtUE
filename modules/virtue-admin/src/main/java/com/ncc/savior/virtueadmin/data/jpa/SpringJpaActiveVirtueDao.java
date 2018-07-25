@@ -11,6 +11,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -66,7 +67,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	public void updateVmState(String vmId, VmState state) {
 		Optional<VirtualMachine> vm = vmRepository.findById(vmId);
 		if (!vm.isPresent()) {
-			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Unable to find virtual machine with id=" + vmId);
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Unable to find virtual machine with id=" + vmId);
 		}
 		vm.get().setState(state);
 		vmRepository.save(vm.get());
@@ -77,7 +78,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 		// TODO could be more efficient
 		Optional<VirtueInstance> virtue = virtueRepository.findById(virtueId);
 		if (!virtue.isPresent()) {
-			throw new SaviorException(SaviorException.VIRTUE_ID_NOT_FOUND, "Unable to find virtue with id=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Unable to find virtue with id=" + virtueId);
 		}
 		Collection<VirtualMachine> vms = virtue.get().getVms();
 		for (VirtualMachine vm : vms) {
@@ -88,7 +89,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 				}
 			}
 		}
-		throw new SaviorException(SaviorException.APPLICATION_ID_NOT_FOUND,
+		throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND,
 				"Unable to find a VM with application with id=" + applicationId + " in virtue with id=" + virtueId);
 	}
 
@@ -149,5 +150,16 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	@Override
 	public void deleteVm(VirtualMachine vm) {
 		vmRepository.deleteById(vm.getId());
+	}
+
+	@Override
+	public VirtueInstance getVirtue(VirtualMachine vm) {
+		VirtueInstance vi = virtueRepository.findByVms(vm);
+		return vi;
+	}
+
+	@Override
+	public VirtueInstance getVirtueByVmId(String id) {
+		return virtueRepository.findByVms_Id(id);
 	}
 }

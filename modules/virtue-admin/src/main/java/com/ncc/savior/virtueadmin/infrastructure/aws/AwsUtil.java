@@ -21,7 +21,6 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
@@ -36,6 +35,7 @@ import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -59,11 +59,12 @@ public class AwsUtil {
 		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
 		describeInstanceStatusRequest.setIncludeAllInstances(true);
 		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
-		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
-		while (itr.hasNext()) {
-			InstanceStatus status = itr.next();
+		List<InstanceStatus> list = statusResult.getInstanceStatuses();
+		for (InstanceStatus status : list) {
 			VirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
-			vm.setState(awsStatusToSaviorState(status));
+			if (vm != null) {
+				vm.setState(awsStatusToSaviorState(status));
+			}
 		}
 		return vms;
 	}
@@ -136,7 +137,7 @@ public class AwsUtil {
 			if (VmState.RUNNING.equals(state)) {
 				continue;
 			} else if (throwOnErrorState && (state == null || VmState.ERROR.equals(state))) {
-				throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Vm state is in error.  VM=" + vm);
+				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Vm state is in error.  VM=" + vm);
 			} else {
 				return false;
 			}
@@ -231,7 +232,7 @@ public class AwsUtil {
 		}
 		Instance instance = instances.get(0);
 
-		String name = namePrefix + instance.getInstanceId();
+		String name = namePrefix;
 		String loginUsername = vmt.getLoginUser();
 		String privateKeyName = serverKeyName;
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
@@ -272,7 +273,7 @@ public class AwsUtil {
 								if (newSubnetId == null) {
 									newSubnetId = subnet.getSubnetId();
 								} else {
-									throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+									throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
 											"Found multiple subnets with the name=" + subnetName);
 								}
 							}
@@ -293,7 +294,6 @@ public class AwsUtil {
 		}
 		String newVpcId = null;
 		try {
-			DescribeVpcsRequest req = new DescribeVpcsRequest();
 			DescribeVpcsResult sub = ec2Wrapper.getEc2().describeVpcs();
 			List<Vpc> vpcs = sub.getVpcs();
 
@@ -307,7 +307,7 @@ public class AwsUtil {
 							if (newVpcId == null) {
 								newVpcId = vpc.getVpcId();
 							} else {
-								throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+								throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
 										"Found multiple VPCs with the name=" + vpcName);
 							}
 						}

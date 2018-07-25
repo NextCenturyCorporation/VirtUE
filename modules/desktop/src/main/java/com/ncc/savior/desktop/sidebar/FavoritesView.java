@@ -29,20 +29,24 @@ public class FavoritesView extends AbstractAppsView {
 
 		container.setLayout(new ModifiedFlowLayout(FlowLayout.CENTER, 20, 20));
 
-		container.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
+		container.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		container.validate();
 		container.repaint();
 	}
 
 	public void addFavorite(ApplicationDefinition ad, DesktopVirtue virtue, VirtueApplicationItem va,
-			JTextField textField, Comparator<VirtueApplicationItem> comp) {
+			JTextField textField, Comparator<VirtueApplicationItem> comp, GhostText ghostText) {
 		if (tiles.get(ad.getId() + virtue.getTemplateId()) == null) {
 			favorites.putBoolean(ad.getId() + virtue.getTemplateId(), true);
 
 			container.add(va.getContainer());
 			tiles.put(ad.getId() + virtue.getTemplateId(), va);
 		}
-		String keyword = textField.getText();
+		String input = textField.getText();
+		if (ghostText.getIsVisible()) {
+			input = "";
+		}
+		String keyword = input;
 		search(keyword, comp, currVa -> currVa.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 	}
 

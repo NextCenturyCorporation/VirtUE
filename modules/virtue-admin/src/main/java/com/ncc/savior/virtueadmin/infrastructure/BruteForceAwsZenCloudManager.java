@@ -43,7 +43,7 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 		this.instanceType = InstanceType.T2Small;
 		this.defaultSecurityGroups = vmSecurityGroups;
 		this.serverKeyName = vmKeyName;
-		this.xenUser = new VirtueUser("XenUser", new ArrayList<String>());
+		this.xenUser = new VirtueUser("XenUser", new ArrayList<String>(), true);
 		this.xenVmt = new VirtualMachineTemplate(UUID.randomUUID().toString(), "ZenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), "admin", false, new Date(0), "system");
 		//TODO redo xen config
@@ -108,7 +108,7 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 
 	private String getNamePrefix(VirtueUser user, VirtualMachineTemplate vmt) {
 		String serverUser = System.getProperty("user.name");
-		return "VRTU-" + serverUser + "-" + user.getUsername() + "-";
+		return "VRTU-" + serverUser + "-" + user.getUsername();
 	}
 
 	@Override
@@ -121,6 +121,12 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm, String virtue) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

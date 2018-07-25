@@ -29,14 +29,17 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
+import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
@@ -84,9 +87,9 @@ public class AdminService {
 					return;
 				}
 				Collection<String> authorities = new ArrayList<String>(2);
-				authorities.add("ROLE_ADMIN");
-				authorities.add("ROLE_USER");
-				VirtueUser user = new VirtueUser(admin, authorities);
+				authorities.add(VirtueUser.ROLE_ADMIN);
+				authorities.add(VirtueUser.ROLE_USER);
+				VirtueUser user = new VirtueUser(admin, authorities, true);
 				userManager.addUser(user);
 			}
 		}
@@ -218,6 +221,8 @@ public class AdminService {
 		Iterator<VirtualMachineTemplate> itr = vmts.iterator();
 		if (!templateId.equals(template.getId())) {
 			template = new VirtueTemplate(templateId, template);
+			template.setUserCreatedBy(user.getUsername());
+			template.setTimeCreatedAt(new Date());
 		}
 
 		Set<VirtualMachineTemplate> vmTemplates = new HashSet<VirtualMachineTemplate>();
@@ -243,6 +248,8 @@ public class AdminService {
 		}
 		if (!templateId.equals(vmTemplate.getId())) {
 			vmTemplate = new VirtualMachineTemplate(templateId, vmTemplate);
+			vmTemplate.setUserCreatedBy(user.getUsername());
+			vmTemplate.setTimeCreatedAt(new Date());
 		}
 
 		Collection<ApplicationDefinition> applications = new HashSet<ApplicationDefinition>();
@@ -300,7 +307,35 @@ public class AdminService {
 
 	public void removeUser(String usernameToRemove) {
 		verifyAndReturnUser();
-		userManager.removeUser(usernameToRemove);
+		try {
+			VirtueUser user = userManager.getUser(usernameToRemove);
+			if (user != null) {
+				Collection<VirtueInstance> virtues = virtueManager.getVirtuesForUser(user);
+				virtues.parallelStream().forEach((v) -> {
+					virtueManager.deleteVirtue(user, v.getId());
+				});
+			}
+		} finally {
+			userManager.removeUser(usernameToRemove);
+		}
+	}
+
+	public void enableDisableUser(String username, Boolean enable) {
+		verifyAndReturnUser();
+		userManager.enableDisableUser(username, enable);
+		if (!enable) {
+			// disabling a user has the following side effects:
+			// stop their running virtues
+			VirtueUser user = userManager.getUser(username);
+			Collection<VirtueInstance> virtues = virtueManager.getVirtuesForUser(user);
+			virtues.parallelStream().filter((v) -> {
+				return v.getState().equals(VirtueState.RUNNING) || v.getState().equals(VirtueState.CREATING)
+						|| v.getState().equals(VirtueState.LAUNCHING) || v.getState().equals(VirtueState.RESUMING);
+
+			}).forEach((v) -> {
+				virtueManager.stopVirtue(user, v.getId());
+			});
+		}
 	}
 
 	public Iterable<VirtueUser> getAllUsers() {
@@ -368,7 +403,7 @@ public class AdminService {
 				}
 			}
 		}
-		throw new SaviorException(SaviorException.REQUESTED_USER_NOT_LOGGED_IN,
+		throw new SaviorException(SaviorErrorCode.REQUESTED_USER_NOT_LOGGED_IN,
 				"User=" + username + " was not logged in");
 
 	}
@@ -392,10 +427,14 @@ public class AdminService {
 		return sessionMap;
 	}
 
-	public void uploadIcon(String iconKey, InputStream inputStream) throws IOException {
+	public void uploadIcon(String iconKey, InputStream inputStream) {
 		verifyAndReturnUser();
-		byte[] bytes = IOUtils.toByteArray(inputStream);
-		templateManager.addIcon(iconKey, bytes);
+		try {
+			byte[] bytes = IOUtils.toByteArray(inputStream);
+			templateManager.addIcon(iconKey, bytes);
+		} catch (IOException e) {
+			throw new SaviorException(SaviorErrorCode.INVALID_INPUT, "Unable to read input stream into byte array", e);
+		}
 	}
 
 	public IconModel getIcon(String iconKey) {
@@ -421,8 +460,8 @@ public class AdminService {
 
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
-		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have ADMIN role");
+		if (!user.getAuthorities().contains(VirtueUser.ROLE_ADMIN)) {
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
 		}
 		return user;
 	}
@@ -442,5 +481,20 @@ public class AdminService {
 		} else {
 			throw new IllegalArgumentException("No sensing URI was set");
 		}
+	}
+
+	public Iterable<VirtualMachine> getAllVirtualMachines() {
+		verifyAndReturnUser();
+		return virtueManager.getAllVirtualMachines();
+	}
+
+	public VirtualMachine getVm(String id) {
+		verifyAndReturnUser();
+		return virtueManager.getVm(id);
+	}
+
+	public void rebootVm(String vmId) {
+		verifyAndReturnUser();
+		virtueManager.rebootVm(vmId);
 	}
 }
