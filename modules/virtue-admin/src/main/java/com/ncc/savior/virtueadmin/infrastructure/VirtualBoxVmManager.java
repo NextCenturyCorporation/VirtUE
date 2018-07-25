@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -59,7 +60,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			vm.setState(VmState.RUNNING);
 			return vm;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error attempting to start VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to start VM.  VM=" + vm, e);
 		}
 	}
 
@@ -74,7 +75,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			vm.setState(VmState.STOPPED);
 			return vm;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error attempting to stop VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to stop VM.  VM=" + vm, e);
 		}
 	}
 
@@ -89,7 +90,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 
 			p.waitFor();
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error attempting to delete VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to delete VM.  VM=" + vm, e);
 		}
 	}
 
@@ -102,7 +103,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			p.waitFor();
 			return true;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error attempting to pause VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to pause VM.  VM=" + vm, e);
 		}
 	}
 
@@ -115,7 +116,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 			p.waitFor();
 			return true;
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error attempting to resume VM.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to resume VM.  VM=" + vm, e);
 		}
 	}
 
@@ -162,37 +163,35 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 				return null;
 			}
 		} catch (IOException | InterruptedException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "Error attempting to get vm state.  VM=" + vm, e);
+			throw new SaviorException(SaviorErrorCode.VIRTUAL_BOX_ERROR, "Error attempting to get vm state.  VM=" + vm,
+					e);
 		}
 
 	}
 
 	@Override
-	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void deleteVirtualMachines(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-
+		throw new RuntimeException("not yet implemented");
 	}
 
 	@Override
 	public Collection<VirtualMachine> startVirtualMachines(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not yet implemented");
 	}
 
 	@Override
 	public Collection<VirtualMachine> stopVirtualMachines(Collection<VirtualMachine> vms,
 			CompletableFuture<Collection<VirtualMachine>> future) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("not yet implemented");
+	}
+
+	@Override
+	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
+			String virtue) {
+		throw new RuntimeException("not yet implemented");
 	}
 
 }

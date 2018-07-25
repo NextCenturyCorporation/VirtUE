@@ -31,7 +31,7 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 	@Override
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, template.getVmTemplates(),
-				null);
+				null, template.getName());
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		return vi;
 	}
@@ -46,5 +46,11 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
 		vmManager.stopVirtualMachines(virtueInstance.getVms(), null);
 		return virtueInstance;
+	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm, String virtue) {
+		// TODO Auto-generated method stub
+		
 	}
 }

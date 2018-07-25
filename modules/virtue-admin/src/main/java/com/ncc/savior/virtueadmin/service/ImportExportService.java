@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,15 +14,16 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
@@ -58,7 +58,6 @@ public class ImportExportService {
 	private String rootClassPath;
 	private ITemplateManager templateManager;
 	private IUserManager userManager;
-	private File rootCwd;
 	private PathMatchingResourcePatternResolver resourceResolver;
 
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager) {
@@ -67,11 +66,6 @@ public class ImportExportService {
 		this.userManager = userManager;
 		resourceResolver = new PathMatchingResourcePatternResolver();
 		this.rootClassPath = IMPORTS_LOCATION;
-		try {
-			this.rootCwd = new PathResource("./" + IMPORTS_LOCATION).getFile();
-		} catch (IOException e) {
-			logger.error("Unable to initialize working directory import source.  Imports may not work.");
-		}
 	}
 
 	@Autowired
@@ -104,22 +98,49 @@ public class ImportExportService {
 	 * @param stream
 	 * @throws IOException
 	 */
-	public void importSystem(InputStream stream) throws IOException {
+	public void importSystem(InputStream stream) {
 		verifyAndReturnUser();
-		JsonNode node = jsonMapper.readTree(stream);
+		JsonNode node;
+		try {
+			node = jsonMapper.readTree(stream);
+		} catch (IOException e) {
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR, "Error attempting to read json import stream", e);
+		}
 		// load all applications
 		ArrayNode appsNode = (ArrayNode) node.get(TYPE_APPLICATION);
-		Iterator<JsonNode> itr = appsNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode appNode = itr.next();
-			ApplicationDefinition app = jsonMapper.treeToValue(appNode, ApplicationDefinition.class);
-			templateManager.addApplicationDefinition(app);
+		for (JsonNode appNode : appsNode) {
+			importApplicationFromNode(appNode);
 		}
 		// load all virtual machines
 		ArrayNode vmtsNode = (ArrayNode) node.get(TYPE_VIRTUAL_MACHINE);
-		itr = vmtsNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode vmtNode = itr.next();
+		for (JsonNode vmtNode : vmtsNode) {
+			importVirtualMachineTemplateFromNode(vmtNode);
+		}
+		// load all virtue templates
+		ArrayNode vtsNode = (ArrayNode) node.get(TYPE_VIRTUE);
+		for (JsonNode vtNode : vtsNode) {
+			importVirtueTemplateFromNode(vtNode);
+		}
+		// load all users
+		ArrayNode usersNode = (ArrayNode) node.get(TYPE_USER);
+		for (JsonNode userNode : usersNode) {
+			importUserFromNode(userNode);
+		}
+
+	}
+
+	private void importApplicationFromNode(JsonNode appNode) {
+		try {
+			ApplicationDefinition app = jsonMapper.treeToValue(appNode, ApplicationDefinition.class);
+			templateManager.addApplicationDefinition(app);
+		} catch (JsonProcessingException e) {
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
+					"Error attempting to convert json node into application.  JSON=" + appNode, e);
+		}
+	}
+
+	private void importVirtualMachineTemplateFromNode(JsonNode vmtNode) {
+		try {
 			VirtualMachineTemplate vmt = jsonMapper.treeToValue(vmtNode, VirtualMachineTemplate.class);
 			// convert app Ids to Apps
 			Collection<String> appIds = vmt.getApplicationIds();
@@ -132,12 +153,14 @@ public class ImportExportService {
 			vmt.setApplications(myApps);
 
 			templateManager.addVmTemplate(vmt);
+		} catch (JsonProcessingException e) {
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
+					"Error attempting to convert json node into virtual machine template.  JSON=" + vmtNode, e);
 		}
-		// load all virtue templates
-		ArrayNode vtsNode = (ArrayNode) node.get(TYPE_VIRTUE);
-		itr = vtsNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode vtNode = itr.next();
+	}
+
+	private void importVirtueTemplateFromNode(JsonNode vtNode) {
+		try {
 			VirtueTemplate vt = jsonMapper.treeToValue(vtNode, VirtueTemplate.class);
 			// convert vmt Ids to vmt
 			Collection<String> vmtIds = vt.getVirtualMachineTemplateIds();
@@ -149,12 +172,14 @@ public class ImportExportService {
 			}
 			vt.setVmTemplates(myVmts);
 			templateManager.addVirtueTemplate(vt);
+		} catch (JsonProcessingException e) {
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
+					"Error attempting to convert json node into virtue template.  JSON=" + vtNode, e);
 		}
-		// load all users
-		ArrayNode usersNode = (ArrayNode) node.get(TYPE_USER);
-		itr = usersNode.iterator();
-		while (itr.hasNext()) {
-			JsonNode userNode = itr.next();
+	}
+
+	private void importUserFromNode(JsonNode userNode) {
+		try {
 			VirtueUser user = jsonMapper.treeToValue(userNode, VirtueUser.class);
 			// convert vmt Ids to vmt
 			Collection<String> vtIds = user.getVirtueTemplateIds();
@@ -166,8 +191,10 @@ public class ImportExportService {
 			}
 			user.setVirtueTemplates(myVts);
 			userManager.addUser(user);
+		} catch (JsonProcessingException e) {
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
+					"Error attempting to convert json node into user.  JSON=" + userNode, e);
 		}
-
 	}
 
 	/**
@@ -347,14 +374,14 @@ public class ImportExportService {
 		name = name + ".json";
 		Resource resource = resourceResolver.getResource(rootClassPath + "/" + type + "/" + name);
 		if (resource == null) {
-			throw new SaviorException(SaviorException.IMPORT_NOT_FOUND, "Import of type=" + type + " was not found");
+			throw new SaviorException(SaviorErrorCode.IMPORT_NOT_FOUND, "Import of type=" + type + " was not found");
 		}
 
 		T instance;
 		try {
 			instance = jsonMapper.readValue(resource.getInputStream(), klass);
 		} catch (IOException e) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR,
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
 					"Unknown Error attempting to find import of type=" + type + " name=" + name);
 		}
 		return instance;
@@ -362,8 +389,8 @@ public class ImportExportService {
 
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
-		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
-			throw new SaviorException(SaviorException.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
+		if (!user.getAuthorities().contains(VirtueUser.ROLE_ADMIN)) {
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
 		}
 		return user;
 	}

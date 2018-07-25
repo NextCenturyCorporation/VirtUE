@@ -107,7 +107,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
-				windowsFuture);
+				windowsFuture, template.getName());
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		// if (!linuxVmts.isEmpty()) {
 
@@ -170,5 +170,15 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		xenHostManager.stopVirtue(virtueInstance, linuxVms, null, null);
 		awsVmManager.stopVirtualMachines(windowsVms, null);
 		return virtueInstance;
+	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm, String virtue) {
+		if (OS.LINUX.equals(vm.getOs())) {
+			XenGuestManager guestManager = xenHostManager.getGuestManager(virtue);
+			guestManager.rebootVm(vm, null);
+		} else if (OS.WINDOWS.equals(vm.getOs())) {
+			awsVmManager.rebootVm(vm, null);
+		}
 	}
 }

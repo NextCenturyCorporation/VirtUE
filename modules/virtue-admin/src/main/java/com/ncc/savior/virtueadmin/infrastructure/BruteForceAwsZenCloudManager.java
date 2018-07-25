@@ -108,7 +108,7 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 
 	private String getNamePrefix(VirtueUser user, VirtualMachineTemplate vmt) {
 		String serverUser = System.getProperty("user.name");
-		return "VRTU-" + serverUser + "-" + user.getUsername() + "-";
+		return "VRTU-" + serverUser + "-" + user.getUsername();
 	}
 
 	@Override
@@ -121,6 +121,12 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void rebootVm(VirtualMachine vm, String virtue) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
