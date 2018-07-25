@@ -52,7 +52,7 @@ public class CreateDestroyVirtueIT {
 		assertThat(templates).isNotEmpty();
 		String templateId = templates.get(0).getId();
 
-		// create a virtue template.
+		// create a virtue instance.
 		VirtueInstance instance = given().port(randomServerPort).when().post("/user/virtue/template/" + templateId)
 				.then().extract().as(VirtueInstance.class);
 		assertThat(instance).isNotNull();
