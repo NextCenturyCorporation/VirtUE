@@ -35,23 +35,24 @@ export class VirtueComponent implements OnInit {
   //  When editing, virtue.id holds the id of the virtue being edited.
   //  When duplicating, virtue.id holds the id of the old virtue being duplicated.
   //  New IDs for creation and duplication are generated server-side.
-  virtueId: string;
-  virtueName: string;
-  virtueVersion: string;
+  // virtueId: string;
+  // virtueName: string;
+  // virtueVersion: string;
   virtueForm: FormControl;
   // virtueEnabled: boolean;
   // virtueVersion: string;
   activeClass: string;
   baseUrl: string;
   errorMsg: any;
-  virtue: {
-    id : string,
-    name : string,
-    enabled: boolean,
-    color: string,
-    version: string,
-    data: any
-  };
+  // virtue: {
+  //   id : string,
+  //   name : string,
+  //   enabled: boolean,
+  //   color: string,
+  //   version: string,
+  //   data: any
+  // };
+  virtue: Virtue;
 
   //not used, for use later in Inter-virtue sttings I think.
   users: User[];
@@ -60,19 +61,15 @@ export class VirtueComponent implements OnInit {
   mode : string; //"c" if creating new virtue, "e" for editing existing, "d" for creating a duplicate.
   actionName: string; //for the html - 'Create', 'Edit', or 'Duplicate'
 
+  parentDomain: string;
+
   //data on existing virtue (obv. for edit, but holds base virtues values when
   //duplicating, and is empty when creating)
-  virtueData = [];
+  virtueData = {};
 
   // The set of all apps available across the Savior/VirtUE system.
   // Not what's installed on any particular vm.
   appsList = [];
-
-  //the IDs of all vms added to this virtue
-  vmIDList = [];
-
-  //the data on each vm added to this virtue.
-  vmList = [];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -85,18 +82,12 @@ export class VirtueComponent implements OnInit {
     public dialog: MatDialog
   ) {
     console.log("constructor");
+    this.parentDomain = '/virtues'
     this.setMode();
     //set up empty, will get filled in ngOnInit if not mode is not 'create'
-    this.virtue = {
-      id : '',
-      name : '',
-      enabled: true,
-      color: '',
-      version: '',
-      data: {}
-    };
+    this.virtue = new Virtue();
 
-    this.vmIDList = [];
+    this.virtueData = {};
 
     if (this.mode === "c") {
       this.virtue.color = "#cccccc";
@@ -127,7 +118,7 @@ export class VirtueComponent implements OnInit {
     let urlValid = true;
 
     let route = url.split('/');
-    if (route[0] !== 'virtues') {
+    if (route[0] !== this.parentDomain.substr(1)) {
       //something about the routing system has changed.
       urlValid = false;
     }
@@ -156,7 +147,7 @@ export class VirtueComponent implements OnInit {
 the routing system has changed. Returning to virtues page.\n       Expects something like \
 /virtues/create, /virtues/duplicate/long-machine-key-value, or /virtues/edit/long-machine-key-value,\
  but got: \n       " + this.router.routerState.snapshot.url);
-      this.router.navigate(['/virtues']);
+      this.router.navigate([this.parentDomain]);
       return false;
     }
     return true;
@@ -173,14 +164,14 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       this.setBaseUrl(awsServer);
 
       if (this.mode !== "c") {//if "d" or "e"
-        this.getVirtueData(this.virtue.id);
+        this.pullVirtueData(this.virtue.id);
       }
       this.settingsPane.setColor(this.virtue.color);
       this.getAppsList();
     });
 
 
-    console.log("end of init: ", this.vmIDList);
+    console.log("end of init: ", this.virtue.vmIDs);
     this.resetRouter();
   }
 
@@ -193,7 +184,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   refreshData() {
     console.log("refreshData");
     setTimeout(() => {
-      this.getVirtueData(this.virtue.id);
+      this.pullVirtueData(this.virtue.id);
     }, 1000);
   }
 
@@ -205,16 +196,16 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     return next.handle(req);
   }
 
-  updateVmList( newVmIDs : any[] ) {
-    console.log("updateVmList");
+  updateVmList( newvmIDs : any[] ) {
+    // console.log("updateVmList");
     // loop through the selected VM list
-    this.vmList = [];
-    this.vmIDList = newVmIDs;
-    const virtueVmIds = newVmIDs;
-    for (let vmID of virtueVmIds) {
+    this.virtue.vms = [];
+    this.virtue.vmIDs = newvmIDs;
+    const virtuevmIDs = newvmIDs;
+    for (let vmID of virtuevmIDs) {
       this.vmService.getVM(this.baseUrl, vmID).subscribe(
-        data => {
-          this.vmList.push(data);
+        vm => {
+          this.virtue.vms.push(vm);
         },
         error => {
           console.log(error.message);
@@ -223,20 +214,21 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
-  getVirtueData(id: string) {
+  pullVirtueData(id: string) {
     this.virtuesService.getVirtue(this.baseUrl, id).subscribe(vData => {
       if (! vData.color) {
         vData.color = vData.enabled ? "#BB00AA" : "#00DD33"
       }
-      if (! vData.vmIDList) {
-        vData.vmIDList = [];
+      console.log(vData);
+      if (! vData.vmIDs) {
+        vData.vmIDs = [];
       }
       if (! vData.version) {
         vData.version = '1.0';
       }
       // console.log("###", id);
       // console.log(vData.virtualMachineTemplateIds);
-      this.virtue.data = vData;
+      this.virtueData = vData;
       this.virtue.name = vData.name;
       this.virtue.id = vData.id;
       this.virtue.color = vData.color;
@@ -262,10 +254,10 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   removeVm(id: string, index: number): void {
-    this.vmList = this.vmList.filter(data => {
+    this.virtue.vms = this.virtue.vms.filter(data => {
       return data.id !== id;
     });
-    this.vmIDList.splice(index, 1);
+    this.virtue.vmIDs.splice(index, 1);
   }
 
 
@@ -274,13 +266,13 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     let dialogRef = this.dialog.open(VmModalComponent, {
       width: '750px',
       data: {
-        selectedVms: this.vmIDList
+        selectedVms: this.virtue.vmIDs
       }
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    const vms = dialogRef.componentInstance.addVms.subscribe((dialogVmIDs) => {
-      this.updateVmList(dialogVmIDs);
+    const vms = dialogRef.componentInstance.addVms.subscribe((dialogvmIDs) => {
+      this.updateVmList(dialogvmIDs);
     });
 
     // dialogRef.afterClosed().subscribe(() => {
@@ -288,33 +280,27 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     // });
   }
 
-  saveOrUpdate() {
+  createOrUpdate() {
     if (this.mode === 'd' || this.mode === 'c') {
-      this.saveVirtue();
+      this.createVirtue();
     }
     else if ( this.mode === 'e') {
       this.updateThisVirtue();
     }
     else {
-      console.log("Could not save or update - mode not set.");
+      console.log("Could not save or update - mode not valid. Mode set to: ", this.mode);
     }
   }
 
-  //Shouldn't all this data already exist? Like, aren't I just rebuilding this.virtue? TODO
   updateThisVirtue() {
-  //note this doesn't have an id.
-  //I guess it shouldn't?..
-  //TODO TODO TODO TODO TODO TODO TODO TODO
-  //If this creates anything, it shouldn't. Use the create function, because virtue.id shouldn't exist
-  //if we're creating.
     let body = {
       'name': this.virtue.name,
       'version': this.virtue.version,
       'enabled': this.virtue.enabled,
       'color' : this.settingsPane.getColor(),
-      'virtualMachineTemplateIds': this.vmIDList
+      'virtualMachineTemplateIds': this.virtue.vmIDs
     };
-    // console.log("saving: ", this.virtue.name, "|", this.virtue.name, "|", this.virtue.version, "|", this.vmIDList);
+    // console.log("saving: ", this.virtue.name, "|", this.virtue.name, "|", this.virtue.version, "|", this.virtue.vmIDs);
     this.virtuesService.updateVirtue(this.baseUrl, this.virtue.id, JSON.stringify(body)).subscribe(
       data => {
         // console.log('Updating ' + data.name + '(' + data.id + ')');
@@ -324,12 +310,12 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
         console.log(error);
       });
     this.refreshData();
-    this.router.navigate(['/virtues']);
+    this.router.navigate([this.parentDomain]);
   }
 
-  saveVirtue() {
+  createVirtue() {
     // console.log(virtueName);
-    // console.log(this.vmIDList);
+    // console.log(this.virtue.vmIDs);
     if (! this.virtue.version) {
       this.virtue.version = '1.0';
     }
@@ -339,7 +325,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       'version': this.virtue.version,
       'enabled': this.virtue.enabled,
       'color' : this.settingsPane.getColor(),
-      'virtualMachineTemplateIds': this.vmIDList
+      'virtualMachineTemplateIds': this.virtue.vmIDs
     };
     // console.log('New Virtue: ');
     // console.log(body);
@@ -353,11 +339,15 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       });
 
     this.resetRouter();
-    this.router.navigate(['/virtues']);
+    this.router.navigate([this.parentDomain]);
   }
 
   toggleVirtueStatus() {
     this.virtue.enabled = !this.virtue.enabled;
+  }
+
+  cancel() {
+    this.router.navigate([this.parentDomain]);
   }
 
   // deleteVirtue(id): void {

@@ -1,33 +1,24 @@
+
+import { Application } from '../../shared/models/application.model';
+
+
 export class VirtualMachine {
   id: string;
   name: string;
+  enabled: boolean;
+  appIDs: any[];
+  apps: Application[];
+
   os: string;
   templatePath: string;
   loginUser: string;
-  enabled: boolean;
   lastModification: string;
   lastEditor: string;
-  applicationIds: any[];
+  securityTag: string;
 
-  public VirtualMachine(
-    id: string,
-    name: string,
-    os: string,
-    templatePath: string,
-    loginUser: string,
-    enabled: boolean,
-    lastModification: string,
-    lastEditor: string,
-    applicationIds: any[]
-  ) {
-    this.id = id;
-    this.name = name;
-    this.os = os;
-    this.templatePath = templatePath;
-    this.loginUser = loginUser;
-    this.enabled = enabled;
-    this.lastModification = lastModification;
-    this.lastEditor = lastEditor;
-    this.applicationIds = applicationIds;
+  constructor() {
+    this.appIDs = [];
+    this.enabled = true;
+    this.apps = new Array<Application>();
   }
 }

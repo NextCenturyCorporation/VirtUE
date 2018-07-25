@@ -64,7 +64,7 @@ export class UserListComponent implements OnInit {
   refreshData() {
     setTimeout(() => {
       this.getUsers(this.baseUrl);
-    }, 1000);
+    }, 200);
   }
 
   getUsers( baseUrl: string ): void {
@@ -90,10 +90,15 @@ export class UserListComponent implements OnInit {
       //we're not disabling that
       return;
     }
-    // this.usersService.setUserStatus(this.baseUrl, username, newStatus).subscribe(userList => {
-    //   this.users = userList;
+    //for some reason, I need to subscribe in order for the toggle
+    //to work, even if I don't do anything with the stuff I'm subscribed to.
+    // That data certainly isn't supposed to go there.
+    this.usersService.setUserStatus(this.baseUrl, username, newStatus).subscribe();//data => {
+    //   this.users = data;
+    //   // console.log(data);
     // });
-    // this.refreshData();
+
+    this.refreshData();
   }
 
   deleteUser(username: string) {
@@ -116,7 +121,6 @@ export class UserListComponent implements OnInit {
     }
   }
 
-  //The message will be ""
   openDialog(verb: string, directObject: string): void {
     const dialogRef = this.dialog.open( DialogsComponent, {
       width: '450px',
@@ -128,9 +132,13 @@ export class UserListComponent implements OnInit {
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
+    console.log(dialogRef);
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog to ' + verb + ' ' + directObject + ' was closed');
+      console.log(result);
+      console.log(dialogRef);
     });
+
   }
 
   enabledUserList(sortType: string, enabledValue: any, sortBy) {

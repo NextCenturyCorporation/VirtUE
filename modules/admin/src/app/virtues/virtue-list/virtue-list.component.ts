@@ -152,7 +152,7 @@ export class VirtueListComponent implements OnInit {
     }
   }
 
-  virtueStatus(id: string) {
+  toggleVirtueStatus(id: string) {
     this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
       this.virtue = data;
     });

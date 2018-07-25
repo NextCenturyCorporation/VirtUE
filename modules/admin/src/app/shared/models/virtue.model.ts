@@ -1,34 +1,24 @@
+
+import { VirtualMachine } from '../../shared/models/vm.model';
+
 export class Virtue {
-  id: any;
+  id: string;
   name: string;
-  version: string;
-  virtualMachineTemplateIds: any[];
   enabled: boolean;
+  vmIDs: any[];
+  vms: VirtualMachine[];
+  version: string;
   lastEditor: string;
   lastModification: any;
   awsTemplateName: string;
-  applicationIds: any[];
+  appIDs: any[];
+  color: string;
 
-  public Virtue(
-    id: any,
-    name: string,
-    version: string,
-    virtualMachineTemplateIds: any[],
-    enabled: boolean,
-    lastEditor: string,
-    lastModification: any,
-    awsTemplateName: string,
-    applicationIds: any[]
-  ) {
-    this.id = id;
-    this.name = name;
-    this.version = version;
-    this.virtualMachineTemplateIds = virtualMachineTemplateIds;
-    this.enabled = enabled;
-    this.lastEditor = lastEditor;
-    this.lastModification = lastModification;
-    this.awsTemplateName = awsTemplateName;
-    this.applicationIds = applicationIds;
+
+  constructor() {
+    this.vmIDs = [];
+    this.vms = new Array<VirtualMachine>();
+    this.enabled = true;
+    this.appIDs = [];
   }
-  constructor() { }
 }

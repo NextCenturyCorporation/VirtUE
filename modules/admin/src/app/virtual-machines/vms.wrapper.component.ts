@@ -2,14 +2,14 @@ import { HashLocationStrategy, Location, LocationStrategy } from '@angular/commo
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-virtual-machines',
-  templateUrl: './virtual-machines.component.html',
+  selector: 'app-vms',
+  templateUrl: './vms.wrapper.component.html',
   providers: [
     Location,
     { provide: LocationStrategy, useClass: HashLocationStrategy }
   ]
 })
-export class VirtualMachinesComponent implements OnInit {
+export class VmsWrapperComponent implements OnInit {
 
   location: Location;
 

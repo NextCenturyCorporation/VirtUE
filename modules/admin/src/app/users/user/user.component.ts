@@ -15,27 +15,24 @@ import { MatDialog } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
 @Component({
-  selector: 'app-create-edit-user',
-  templateUrl: './create-edit-user.component.html',
+  selector: 'app-user',
+  templateUrl: './user.component.html',
   providers: [ ApplicationsService, BaseUrlService, UsersService, VirtuesService ]
 })
 
-export class CreateEditUserComponent implements OnInit {
+export class UserComponent implements OnInit {
 
   baseUrl: string;
   submitBtn: any;
   fullImagePath: string;
-  user: {
-    username: string,
-    data: string,
-    enabled: boolean,
-    roles: string[],
-    virtueIDs: any[],
-    virtues: any[]
-  }
+
+  user: User;
+  userData: string;
 
   mode: string;
   actionName: string;
+
+  parentDomain: string;
 
   allVirtues = [];
   allApps = [];
@@ -51,19 +48,15 @@ export class CreateEditUserComponent implements OnInit {
     public dialog: MatDialog
   ) {
     this.setMode();
-    this.user = {
-      username : '',
-      data : '',
-      enabled : false,
-      roles: [],
-      virtueIDs: [],
-      virtues: [],
-    };
+    this.user = new User();
+
+    console.log(this.user);
+
      //maybe? originally this was only called in addUser's constructor, but in Virtues it was called in create, edit, and duplicate.
      //I don't know what it does, but it wouldn't persist once you leave the creation screen anyway. So let's make it every time.
     this.adUserCtrl = new FormControl();
 
-
+    this.parentDomain = "/users";
     // override the route reuse strategy
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
@@ -82,7 +75,9 @@ export class CreateEditUserComponent implements OnInit {
       this.getAllApps();
     });
 
-    this.refreshData();
+    if (this.mode === "e" || this.mode === "d") {//if "d" or "e"
+      this.refreshData();
+    }
   }
 
   //I'm not sure this gets used anywhere.
@@ -160,7 +155,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   getUserData(username: string) {
     this.usersService.getUser(this.baseUrl, username).subscribe(uData => {
-      this.user.data = uData;
+      this.userData = uData;
       this.user.roles = uData.authorities;
       this.user.enabled = uData.enabled;
       this.updateVirtueList(uData.virtueTemplateIds);
@@ -199,22 +194,10 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     let userVirtue = [];
     if (id !== null) {
       userVirtue = this.allVirtues.filter(virt => virt.id === id)
-        .map(virtue => virtue.name);
+        .map(virtue => virtue.username);
       return userVirtue;
     }
   }
-
-  // getAppsHTML(virtue: any) {
-  //   let virtueApps: any;
-  //   let virtueAppsList: any;
-  //   if (this.baseUrl !== null) {
-  //     virtueAppsList = this.allVirtues.filter(virt => virt.id === vID)
-  //       .map(virtue => virtue.applicationIds);
-  //     virtueAppsString = virtueAppsList.toString();
-  //     // console.log(virtueAppsList);
-  //     return this.generateAppsListHTML(virtueAppsString);
-  //   }
-  // }
 
   generateAppsListHTML(virtue: any) {
     let appsString = virtue.applicationIds.toString();
@@ -227,7 +210,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     for (let id of appList) {
       i++;
       appInfo = this.allApps.filter(data => data.id === id)
-        .map(app => app.name);
+        .map(app => app.username);
       // console.log(appInfo.toString());
       appNames = appNames + `<li>${appInfo.toString()}</li>`;
     }

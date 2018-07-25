@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Inject } from '@angular/core';
+import { Component, EventEmitter, OnInit, Inject, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 import { FormGroup } from '@angular/forms';
 
@@ -13,7 +13,7 @@ export class DialogsComponent implements OnInit {
   dialogCategory: string;
   dialogDescription: string;
   dialogId: string;
-  dialogEmitter = new EventEmitter();
+  @Output() dialogEmitter: EventEmitter<any> = new EventEmitter();
 
   constructor( public dialogRef: MatDialogRef<DialogsComponent>, @Inject( MAT_DIALOG_DATA ) public data: any ) {
     // console.log(this.data);
@@ -29,6 +29,22 @@ export class DialogsComponent implements OnInit {
   confirmSelection() {
     if (this.dialogType === 'delete') {
       this.dialogEmitter.emit(this.dialogId);
+    }
+    this.dialogRef.close();
+  }
+
+  submit() {
+    if (this.dialogType === 'delete') {
+      // this.dialogEmitter.emit(this.dialogId); //What's this supposed to do?
+      this.dialogEmitter.emit('adfg');
+    }
+    this.dialogRef.close();
+  }
+  //
+  cancel() {
+    if (this.dialogType === 'delete') {
+      // this.dialogEmitter.emit(this.dialogId); //What's this supposed to do?
+      this.dialogEmitter.emit(0);
     }
     this.dialogRef.close();
   }

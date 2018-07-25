@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">Virtual Machine Templates</h1>
-    <button class="titlebar-button" routerLink="/virtual-machines/vm-build">Create New Template</button>
+    <button class="titlebar-button" routerLink="/vm-templates/create">Create New Template</button>
     <button class="titlebar-button" [disabled]="true">Import Template</button>
   </div>
 
@@ -84,19 +84,26 @@
          class="mui-row table-row"  appActiveClass >
           <div class="table-data mui-col-md-3 vm-transparent">
             <div class="mini-menu">
-              <a class="edit" routerLink="/virtual-machines/edit/{{vm.id}}">{{ vm.name }}</a>
+              <a class="edit" routerLink="/vm-templates/edit/{{vm.id}}">{{ vm.name }}</a>
 
               <!-- if this virtual machine is enabled show this menu -->
-              <span *ngIf="vm.enabled === true" class="menu-options">
-                <a (click)="vmStatus(vm.id)">Disable</a> |
-                <a class="edit" routerLink="/virtual-machines/duplicate/{{vm.id}}">Duplicate</a>
+              <span class="menu-options">
+                <a *ngIf="vm.enabled === false" (click)="toggleVmStatus(vm.id)">Enable</a>
+                <a *ngIf="vm.enabled === false"> | </a>
+                <a *ngIf="vm.enabled === true"  (click)="toggleVmStatus(vm.id)">Disable</a>
+                <a *ngIf="vm.enabled === true"> | </a>
+                <a class="edit" routerLink="/vm-templates/edit/{{vm.id}}">Edit</a>
+                <a> | </a>
+                <a class="edit" routerLink="/vm-templates/duplicate/{{vm.id}}">Duplicate</a>
+                <a> | </a>
+                <a (click)="openDialog(vm.id, 'delete', 'delete', vm.name)">Delete</a>
               </span>
 
               <!-- if this virtual machine is disabled show this menu -->
-              <span *ngIf="vm.enabled === false" class="menu-options">
-                <a (click)="vmStatus(vm.id)">Enable</a> |
+              <!-- <span *ngIf="vm.enabled === false" class="menu-options">
+                <a (click)="toggleVmStatus(vm.id)">Enable</a> |
                 <a (click)="openDialog(vm.id, 'delete', 'delete', vm.name)">Delete</a>
-              </span>
+              </span> -->
             </div>
           </div>
           <div class="table-data mui-col-md-2 vm-transparent">{{ vm.os }}</div>

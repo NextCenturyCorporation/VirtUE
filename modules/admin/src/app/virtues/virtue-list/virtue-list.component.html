@@ -78,8 +78,8 @@
 
             <!-- if this virtue is disabled show this menu -->
             <span class="menu-options">
-              <a *ngIf="virtue.enabled" mat-button (click)="virtueStatus(virtue.id, virtue.enabled)">Disable | </a>
-              <a *ngIf="!virtue.enabled" mat-button (click)="virtueStatus(virtue.id)">Enable | </a>
+              <a *ngIf="virtue.enabled" mat-button (click)="toggleVirtueStatus(virtue.id)">Disable | </a>
+              <a *ngIf="!virtue.enabled" mat-button (click)="toggleVirtueStatus(virtue.id)">Enable | </a>
               <a class="edit" routerLink="/virtues/duplicate/{{virtue.id}}">Duplicate</a> |
               <a mat-button (click)="openDialog(virtue.id,'delete','virtue',virtue.name)">Delete</a>
             </span>

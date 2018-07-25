@@ -9,6 +9,8 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 
+import { Application } from '../../shared/models/application.model';
+
 @Component({
   selector: 'app-vm-apps-list',
   providers: [ ApplicationsService, BaseUrlService ],
@@ -19,13 +21,12 @@ export class VmAppsListComponent implements OnInit {
   baseUrl: string;
   title = 'Applications';
   filterValue = '*';
-  apps = [];
+  apps: Application[];
 
   sortColumn: string = 'name';
   sortType: string = 'enabled';
   sortValue: any = '*';
   sortBy: string = 'asc';
-  totalApps: number;
   // appsfilter: string;
 
   file: string;
@@ -36,7 +37,9 @@ export class VmAppsListComponent implements OnInit {
     private appsService: ApplicationsService,
     private baseUrlService: BaseUrlService,
     public dialog: MatDialog
-  ) { }
+  ) {
+    this.apps = new Array<Application>()
+  }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
@@ -54,14 +57,12 @@ export class VmAppsListComponent implements OnInit {
     this.appsService.getAppsList(this.baseUrl)
     .subscribe( appsList => {
       this.apps = appsList;
-      this.totalApps = appsList.length;
     });
   }
 
   listFilter(status: any) {
     console.log('filterValue = ' + status);
     this.filterValue = status;
-    this.totalApps = this.apps.length;
   }
 
   openDialogPrompt(id, type, text): void {

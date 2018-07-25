@@ -41,30 +41,26 @@ import { FileShareComponent } from './config/resource-modal/file-share/file-shar
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
-import { UsersComponent } from './users/users.component';
+import { UsersWrapperComponent } from './users/users.wrapper.component';
 import { UserListComponent } from './users/user-list/user-list.component';
-import {CreateEditUserComponent} from './users/create-edit-user/create-edit-user.component';
-import { AddUserComponent } from './users/add-user/add-user.component';
-import { EditUserComponent } from './users/edit-user/edit-user.component';
+import { UserComponent} from './users/user/user.component';
 import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
 
 import { VirtuesWrapperComponent } from './virtues/virtues.wrapper.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
-// import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
-// import {CreateEditComponent} from './virtues/create-edit-virtue/create-edit-virtue.component';
-import {VirtueComponent} from './virtues/virtue/virtue.component';
-// import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
-// import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
+import { VirtueComponent} from './virtues/virtue/virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
 import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-modal.component';
 
-import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
+// import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
+import {VmsWrapperComponent} from './virtual-machines/vms.wrapper.component';
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
-import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
-import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
-import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
+import { VmComponent} from './virtual-machines/vm/vm.component';
+// import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
+// import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
+// import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
 
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
@@ -86,7 +82,6 @@ import { BreadcrumbProvider } from './shared/providers/breadcrumb';
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
 import { VirtuesService } from './shared/services/virtues.service';
-import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.component';
 
 @NgModule({
   declarations: [
@@ -99,20 +94,16 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
-    UsersComponent,
+
+    UsersWrapperComponent,
     UserListComponent,
-    AddUserComponent,
-    CreateEditUserComponent,
-    EditUserComponent,
-    // VirtuesComponent,
+    UserComponent,
+
     VirtuesWrapperComponent,
     VirtueListComponent,
     VirtueSettingsComponent,
-    // CreateVirtueComponent,
     VirtueComponent,
-    // CreateEditVirtueComponent,
-    // EditVirtueComponent,
-    // DuplicateVirtueComponent,
+
     DialogsComponent,
     VirtueModalComponent,
     VmModalComponent,
@@ -124,18 +115,21 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
     JsonFilterPipe,
     CountFilterPipe,
     PageNotFoundComponent,
-    VirtualMachinesComponent,
+
+    // VirtualMachinesComponent,
+    VmsWrapperComponent,
     VmListComponent,
-    VmBuildComponent,
-    VmEditComponent,
-    VmDuplicateComponent,
+    VmComponent,
+    // VmBuildComponent,
+    // VmEditComponent,
+    // VmDuplicateComponent,
+
     ActiveClassDirective,
-    DialogsComponent,
+
     VmAppsComponent,
     VmAppsListComponent,
     AddVmAppComponent,
     VmAppsModalComponent,
-    DuplicateUserComponent,
   ],
   imports: [
     AppRoutingModule,

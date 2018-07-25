@@ -7,10 +7,10 @@
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button type="submit" (click)="confirmSelection();">
+  <button mat-button type="submit" (click)="submit();" mat-dialog-close>
   Yes
   </button>
-  <button mat-button type="button" mat-dialog-close>
+  <button mat-button type="button" (click)="cancel();" mat-dialog-close>
     No
   </button>
 </div>

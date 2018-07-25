@@ -7,6 +7,9 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
+import { Application } from '../../shared/models/application.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
+
 @Component({
   selector: 'app-vm-list',
   providers: [ BaseUrlService, VirtualMachineService, ApplicationsService ],
@@ -15,12 +18,12 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 })
 export class VmListComponent implements OnInit {
 
-  vms = [];
-  apps = [];
+  vms: VirtualMachine[];
+  allApps: Application[];
   // noListData = false;
 
   baseUrl: string;
-  vm: any;
+  // vm: any;
   // these are the default properties the list sorts by
   sortColumn: string = 'name';
   sortType: string = 'enabled';
@@ -35,6 +38,7 @@ export class VmListComponent implements OnInit {
     private router: Router,
     public dialog: MatDialog
   ) {
+    this.vms = new Array<VirtualMachine>()
     // override the route reuse strategy
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
@@ -45,7 +49,7 @@ export class VmListComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getBaseUrl(awsServer);
-      this.getVmList();
+      this.getVms();
       this.getAppsList();
     });
     this.resetRouter();
@@ -58,16 +62,22 @@ export class VmListComponent implements OnInit {
   resetRouter() {
     setTimeout(() => {
       this.router.navigated = false;
-      // this.getVmList();
     }, 1000);
   }
 
-  getVmList() {
+  refreshData() {
+    setTimeout(() => {
+      this.getVms();
+    }, 300);
+  }
+
+  getVms() {
     this.vmService.getVmList(this.baseUrl).subscribe(vmList => {
-      this.vms = vmList;
+      this.vms = vmList; //TODO fix backend to give new Virtue objects
       this.totalVms = vmList.length;
     });
   }
+
 
   enabledVmList(sortType: string, enabledValue: any, sortBy) {
     console.log('enabledVmList() => ' + enabledValue);
@@ -82,7 +92,6 @@ export class VmListComponent implements OnInit {
 
   sortVmColumns(sortColumn: string, sortBy: string) {
     console.log("sortVmColumns");
-    console.log(this.vms[0]["name"]);
     if (this.sortColumn === sortColumn) {
       this.sortListBy(sortBy);
     } else {
@@ -92,9 +101,6 @@ export class VmListComponent implements OnInit {
       } else if (sortColumn === 'os') {
         this.sortBy = 'asc';
         this.sortColumn = sortColumn;
-      // } else if (sortColumn === 'apps') {
-      //   this.sortColumn = sortColumn;
-      //   this.sortBy = 'desc';
       } else if (sortColumn === 'lastEditor') {
         this.sortBy = 'asc';
         this.sortColumn = sortColumn;
@@ -119,13 +125,13 @@ export class VmListComponent implements OnInit {
   getAppsList() {
     this.appsService.getAppsList(this.baseUrl)
     .subscribe(appList => {
-      this.apps = appList;
+      this.allApps = appList;
     });
   }
 
   getAppName(id: string) {
     if (id) {
-      let selApp = this.apps.filter(app => id === app.id)
+      let selApp = this.allApps.filter(app => id === app.id)
         .map(appName => {
           return appName.name;
         });
@@ -133,17 +139,20 @@ export class VmListComponent implements OnInit {
     }
   }
 
-  vmStatus(id: string) {
-    this.vmService.toggleVmStatus(this.baseUrl, id).subscribe(data => {
-      this.vm = data;
-    });
-    this.resetRouter();
-    this.router.navigate(['/virtual-machines']);
+  toggleVmStatus(id: string) {
+    //for some reason, I need to subscribe in order for the toggle
+    //to work, even if I don't do anything with the stuff I'm subscribed to
+    // That data certainly isn't supposed to go there.
+    this.vmService.toggleVmStatus(this.baseUrl, id).subscribe();//data => {
+    //    this.vm = data;
+    // });
+    this.refreshData();
+
   }
 
   deleteVM(id: string) {
     this.vmService.deleteVM(this.baseUrl, id);
-    this.resetRouter();
+    this.refreshData();
   }
 
   openDialog(id: string, type: string, category: string, description: string): void {

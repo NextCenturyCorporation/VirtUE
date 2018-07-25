@@ -72,7 +72,7 @@
               <!-- if this user is enabled show this menu -->
               <span *ngIf="u.enabled === true" class="menu-options">
                 <a (click)="setUserStatus(u.username, 'False')">Disable</a> |
-                <a class="edit" routerLink="/user/duplicate/{{u.username}}">Duplicate</a>
+                <a class="edit" routerLink="/users/duplicate/{{u.username}}">Duplicate</a>
               </span>
 
               <!-- if this user is disabled show this menu -->

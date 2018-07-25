@@ -3,14 +3,14 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-users',
-  templateUrl: './users.component.html',
+  templateUrl: './users.wrapper.component.html',
   providers: [
     Location,
     { provide: LocationStrategy, useClass: HashLocationStrategy }
   ]
 })
 
-export class UsersComponent implements OnInit {
+export class UsersWrapperComponent implements OnInit {
 
   location: Location;
 
