@@ -51,12 +51,13 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 	private Map<String, ScheduledFuture<?>> futureMap;
 
 	public BaseIndividualScheduledCompletableFutureService(ScheduledExecutorService executor, boolean isFixedRate,
-			long initialDelayMillis, long periodOrDelayMillis) {
+			long initialDelayMillis, long periodOrDelayMillis, int timeoutMillis) {
 		this.executor = executor;
 		this.isFixedRate = isFixedRate;
 		this.initialDelayMillis = initialDelayMillis;
 		this.periodOrDelayMillis = periodOrDelayMillis;
 		this.futureMap = Collections.synchronizedMap(new HashMap<String, ScheduledFuture<?>>());
+		this.timeoutMillis = timeoutMillis;
 	}
 
 	@Override
@@ -113,6 +114,7 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 			@Override
 			public void run() {
 				try {
+					checkTimeout(wrapper);
 					onExecute(id, wrapper);
 				} catch (SaviorException e) {
 					onFailure(id, wrapper.param, e, wrapper.future);

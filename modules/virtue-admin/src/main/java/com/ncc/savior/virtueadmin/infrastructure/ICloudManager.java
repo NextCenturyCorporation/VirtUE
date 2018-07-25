@@ -11,6 +11,7 @@ package com.ncc.savior.virtueadmin.infrastructure;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -66,5 +67,7 @@ public interface ICloudManager {
 	 * @return
 	 */
 	VirtueInstance stopVirtue(VirtueInstance virtueInstance);
+	
+	void rebootVm(VirtualMachine vm, String virtueId);
 
 }

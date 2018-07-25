@@ -21,7 +21,6 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceState;
@@ -59,11 +58,12 @@ public class AwsUtil {
 		describeInstanceStatusRequest.setInstanceIds(instanceIdsToVm.keySet());
 		describeInstanceStatusRequest.setIncludeAllInstances(true);
 		DescribeInstanceStatusResult statusResult = ec2.describeInstanceStatus(describeInstanceStatusRequest);
-		Iterator<InstanceStatus> itr = statusResult.getInstanceStatuses().iterator();
-		while (itr.hasNext()) {
-			InstanceStatus status = itr.next();
+		List<InstanceStatus> list = statusResult.getInstanceStatuses();
+		for (InstanceStatus status : list) {
 			VirtualMachine vm = instanceIdsToVm.get(status.getInstanceId());
-			vm.setState(awsStatusToSaviorState(status));
+			if (vm != null) {
+				vm.setState(awsStatusToSaviorState(status));
+			}
 		}
 		return vms;
 	}
@@ -293,7 +293,6 @@ public class AwsUtil {
 		}
 		String newVpcId = null;
 		try {
-			DescribeVpcsRequest req = new DescribeVpcsRequest();
 			DescribeVpcsResult sub = ec2Wrapper.getEc2().describeVpcs();
 			List<Vpc> vpcs = sub.getVpcs();
 

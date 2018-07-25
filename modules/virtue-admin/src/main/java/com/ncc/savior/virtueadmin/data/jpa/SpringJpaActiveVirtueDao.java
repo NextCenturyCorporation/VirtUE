@@ -150,4 +150,15 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 	public void deleteVm(VirtualMachine vm) {
 		vmRepository.deleteById(vm.getId());
 	}
+
+	@Override
+	public VirtueInstance getVirtue(VirtualMachine vm) {
+		VirtueInstance vi = virtueRepository.findByVms(vm);
+		return vi;
+	}
+
+	@Override
+	public VirtueInstance getVirtueByVmId(String id) {
+		return virtueRepository.findByVms_Id(id);
+	}
 }

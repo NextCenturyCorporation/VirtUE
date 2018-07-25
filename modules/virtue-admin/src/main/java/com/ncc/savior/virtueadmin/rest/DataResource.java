@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -553,7 +554,41 @@ public class DataResource {
 	public Iterable<VirtualMachine> getAllVms() {
 		return activeVirtueDao.getAllVirtualMachines();
 	}
-
+	
+	@GET
+	@Path("vm/{id}")
+	@Produces("application/json")
+	public VirtualMachine getVm(@PathParam("id") String id) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(id);
+		if (vm.isPresent()) {
+			return vm.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+		}
+	}
+	
+	@GET
+	@Path("vm/reboot/{vmId}")
+	@Produces("application/json")
+	public void rebootVm(@PathParam("vmId") String vmId) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(vmId);
+		VirtualMachine vmToReboot;
+		
+		if (vm.isPresent()) {
+			vmToReboot = vm.get();
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
+		}
+		
+		VirtueInstance virtue = activeVirtueDao.getVirtueByVmId(vmId);
+		
+		if (virtue != null) {
+			cloudManager.rebootVm(vmToReboot, virtue.getId());
+		} else {
+			throw new SaviorException(SaviorException.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
+		}
+	}
+	
 	@GET
 	@Path("session")
 	@Produces("application/json")

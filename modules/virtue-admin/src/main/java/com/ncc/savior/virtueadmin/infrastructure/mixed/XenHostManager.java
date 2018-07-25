@@ -222,6 +222,12 @@ public class XenHostManager {
 			}
 			return xenVm2;
 		});
+		linuxFuture.handle((myVms, ex) -> {
+			if (ex != null) {
+				handleError(virtue, finalXenFuture, xenVm, ex);
+			}
+			return myVms;
+		});
 		// xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
@@ -456,6 +462,12 @@ public class XenHostManager {
 		if (serverUser != null && !serverUser.trim().equals("")) {
 			this.serverUser = serverUser;
 		}
+	}
+	
+	public XenGuestManager getGuestManager(String virtueId) {
+		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueId);
+		VirtualMachine xenVm = vmo.get();
+		return xenGuestManagerFactory.getXenGuestManager(xenVm);
 	}
 
 }

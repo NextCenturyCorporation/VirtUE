@@ -34,6 +34,7 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
@@ -475,5 +476,20 @@ public class AdminService {
 		} else {
 			throw new IllegalArgumentException("No sensing URI was set");
 		}
+	}
+
+	public Iterable<VirtualMachine> getAllVirtualMachines() {
+		verifyAndReturnUser();
+		return virtueManager.getAllVirtualMachines();
+	}
+
+	public VirtualMachine getVm(String id) {
+		verifyAndReturnUser();
+		return virtueManager.getVm(id);
+	}
+	
+	public void rebootVm(String vmId) {
+		verifyAndReturnUser();
+		virtueManager.rebootVm(vmId);
 	}
 }

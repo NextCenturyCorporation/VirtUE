@@ -69,6 +69,7 @@ public class SshUtil {
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
 			myChannel = getChannelFromCommand(session, command);
+			myChannel.setPty(true);
 			InputStream input = myChannel.getInputStream();
 			InputStreamReader reader = new InputStreamReader(input);
 			br = new BufferedReader(reader);

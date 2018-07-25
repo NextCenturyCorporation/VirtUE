@@ -135,6 +135,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public VirtualMachine startVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
 		vms = startVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
@@ -143,6 +144,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
 		vms = stopVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
@@ -339,5 +341,18 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 	public void setUpdateListener(IUpdateListener<VirtualMachine> listener) {
 		addVmUpdateListener(listener);
+	}
+
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		
+		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
+		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		stopVirtualMachine(vm, stopFuture);
+		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
+			startVirtualMachine(vm, vmFutureFinal);
+		});	
 	}
 }
