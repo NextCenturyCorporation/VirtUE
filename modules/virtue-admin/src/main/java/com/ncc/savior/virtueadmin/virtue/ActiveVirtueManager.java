@@ -104,15 +104,16 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 					"Virtue id=" + instanceId + " was not found");
 		}
 
-		if (vi.getUsername().equals(user.getUsername())) {
+		if (vi.getUsername().equals(user.getUsername()) || VirtueUser.isAdmin(user)) {
 			CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();
 			cloudManager.deleteVirtue(vi, future);
 			future.thenAccept((virtue) -> {
 				virtueDao.deleteVirtue(virtue);
 			});
 		} else {
-			throw new SaviorException(SaviorErrorCode.USER_DOES_NOT_OWN_OBJECT, "User=" + user.getUsername()
-					+ " does not own virtue with id=" + instanceId + " and thus cannot delete that virtue");
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED,
+					"User=" + user.getUsername() + " does not own virtue with id=" + instanceId
+							+ " and is not admin.  Therefore, " + user.getUsername() + " cannot delete that virtue");
 		}
 	}
 

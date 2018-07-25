@@ -76,14 +76,7 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("application")
 	public ApplicationDefinition createNewApplicationDefinition(ApplicationDefinition appDef) {
-		try {
-			return adminService.createNewApplicationDefinition(appDef);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.createNewApplicationDefinition(appDef);
 	}
 
 	// JHU - Admin API - application list
@@ -91,28 +84,14 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("application")
 	public Iterable<ApplicationDefinition> getAllApplicationDefinitions() {
-		try {
-			return adminService.getAllApplicationTemplates();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getAllApplicationTemplates();
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("application/{id}")
 	public ApplicationDefinition getApplicationDefinition(@PathParam("id") String templateId) {
-		try {
-			return adminService.getApplicationDefinition(templateId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getApplicationDefinition(templateId);
 	}
 
 	@PUT
@@ -120,14 +99,7 @@ public class AdminResource {
 	@Path("application/{templateId}")
 	public ApplicationDefinition updateApplicationDefinitions(@PathParam("templateId") String templateId,
 			ApplicationDefinition appDef) {
-		try {
-			return adminService.updateApplicationDefinitions(templateId, appDef);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.updateApplicationDefinitions(templateId, appDef);
 	}
 
 	@PUT
@@ -136,70 +108,35 @@ public class AdminResource {
 	@Path("icon/{iconKey}")
 	public void uploadIcon(@PathParam("iconKey") String iconKey, @FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail) {
-		try {
-			adminService.uploadIcon(iconKey, uploadedInputStream);
-		} catch (RuntimeException | IOException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.uploadIcon(iconKey, uploadedInputStream);
 	}
 
 	@GET
 	@Produces({ "image/png", "image/jpeg" })
 	@Path("icon/{iconKey}")
 	public byte[] getIcon(@PathParam("iconKey") String iconKey) {
-		try {
-			IconModel iconModel = adminService.getIcon(iconKey);
-			return iconModel.getData();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		IconModel iconModel = adminService.getIcon(iconKey);
+		return iconModel.getData();
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("icon")
 	public Set<String> getAllIconKeys() {
-		try {
-			Set<String> keys = adminService.getAllIconKeys();
-			return keys;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		Set<String> keys = adminService.getAllIconKeys();
+		return keys;
 	}
 
 	@DELETE
 	@Path("icon/{iconKey}")
 	public void deleteIcon(@PathParam("iconKey") String iconKey) {
-		try {
-			adminService.deleteIcon(iconKey);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.deleteIcon(iconKey);
 	}
 
 	@DELETE
 	@Path("application/{id}")
 	public void deleteApplicationDefinitions(@PathParam("id") String templateId) {
-		try {
-			adminService.deleteApplicationDefinition(templateId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.deleteApplicationDefinition(templateId);
 	}
 
 	// JHU - Admin API - role create
@@ -207,28 +144,14 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtualMachine/template/")
 	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate templateId) {
-		try {
-			return adminService.createVmTemplate(templateId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.createVmTemplate(templateId);
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("virtualMachine/template/{id}")
 	public VirtualMachineTemplate getVmTemplate(@PathParam("id") String templateId) {
-		try {
-			return adminService.getVmTemplate(templateId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getVmTemplate(templateId);
 	}
 
 	// JHU - Admin API - role list
@@ -236,72 +159,36 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtualMachine/template")
 	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
-		try {
-			return adminService.getAllVmTemplates();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getAllVmTemplates();
 	}
 
 	@PUT
 	@Produces("application/json")
 	@Path("virtualMachine/template/{id}")
 	public VirtualMachineTemplate updateVmTemplate(@PathParam("id") String templateId, VirtualMachineTemplate vmt) {
-		try {
-			return adminService.updateVmTemplate(templateId, vmt);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.updateVmTemplate(templateId, vmt);
 	}
 
 	@DELETE
 	@Path("virtualMachine/template/{id}")
 	public void deleteVmTemplate(@PathParam("id") String templateId) {
-		try {
-			adminService.deleteVmTemplate(templateId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.deleteVmTemplate(templateId);
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("virtualMachine/template/{id}/toggle")
 	public VirtualMachineTemplate toggleVirtualMachineTemplateEnabled(@PathParam("id") String templateId) {
-		try {
-			VirtualMachineTemplate virtualMachineTemplate = adminService
-					.toggleVirtualMachineTemplateEnabled(templateId);
-			return virtualMachineTemplate;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		VirtualMachineTemplate virtualMachineTemplate = adminService.toggleVirtualMachineTemplateEnabled(templateId);
+		return virtualMachineTemplate;
 	}
 
 	@POST
 	@Produces("application/json")
 	@Path("virtue/template")
 	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
-		try {
-			VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate(template);
-			return virtueTemplate;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate(template);
+		return virtueTemplate;
 	}
 
 	/**
@@ -314,19 +201,12 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtue/template")
 	public Iterable<VirtueTemplate> getAllVirtueTemplates(@QueryParam("user") String user) {
-		try {
-			if (user == null || user.trim().equals("")) {
-				Iterable<VirtueTemplate> virtueTemplates = adminService.getAllVirtueTemplates();
-				return virtueTemplates;
-			} else {
-				Iterable<VirtueTemplate> virtueTemplates = adminService.getVirtueTemplatesForUser(user);
-				return virtueTemplates;
-			}
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
+		if (user == null || user.trim().equals("")) {
+			Iterable<VirtueTemplate> virtueTemplates = adminService.getAllVirtueTemplates();
+			return virtueTemplates;
+		} else {
+			Iterable<VirtueTemplate> virtueTemplates = adminService.getVirtueTemplatesForUser(user);
+			return virtueTemplates;
 		}
 	}
 
@@ -334,59 +214,31 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public VirtueTemplate getVirtueTemplate(@PathParam("id") String templateId) {
-		try {
-			VirtueTemplate virtueTemplate = adminService.getVirtueTemplate(templateId);
-			return virtueTemplate;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		VirtueTemplate virtueTemplate = adminService.getVirtueTemplate(templateId);
+		return virtueTemplate;
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("virtue/template/{id}/toggle")
 	public VirtueTemplate toggleVirtueTemplateEnabled(@PathParam("id") String templateId) {
-		try {
-			VirtueTemplate virtueTemplate = adminService.toggleVirtueTemplateEnabled(templateId);
-			return virtueTemplate;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		VirtueTemplate virtueTemplate = adminService.toggleVirtueTemplateEnabled(templateId);
+		return virtueTemplate;
 	}
 
 	@PUT
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
-		try {
-			VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
-			return virtueTemplate;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
+		return virtueTemplate;
 	}
 
 	@DELETE
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public void deleteVirtueTemplate(@PathParam("id") String templateId) {
-		try {
-			adminService.deleteVirtueTemplate(templateId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.deleteVirtueTemplate(templateId);
 	}
 
 	/**
@@ -401,14 +253,7 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("createvirtue/type/{templateId}")
 	public VirtueInstance createVirtueFromTemplate(@PathParam("templateId") String templateId) {
-		try {
-			return desktopService.createVirtue(templateId);
-		} catch (Exception e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return desktopService.createVirtue(templateId);
 	}
 
 	// JHU - Admin API - user virtue list
@@ -416,17 +261,10 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtues")
 	public Iterable<VirtueInstance> getAllActiveVirtues(@QueryParam("user") String username) {
-		try {
-			if (username == null || username.trim().equals("")) {
-				return adminService.getAllActiveVirtues();
-			} else {
-				return adminService.getAllActiveVirtuesForUser(username);
-			}
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
+		if (username == null || username.trim().equals("")) {
+			return adminService.getAllActiveVirtues();
+		} else {
+			return adminService.getAllActiveVirtuesForUser(username);
 		}
 	}
 
@@ -434,74 +272,39 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtues/{id}")
 	public VirtueInstance getActiveVirtue(@PathParam("id") String virtueId) {
-		try {
-			return adminService.getActiveVirtue(virtueId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getActiveVirtue(virtueId);
 	}
 
 	@GET
 	@Path("deletevirtue/instance/{instanceId}")
 	public void deleteVirtue(@PathParam("instanceId") String instanceId) {
-		try {
-			adminService.deleteVirtue(instanceId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.deleteVirtue(instanceId);
 	}
 
 	@POST
 	@Produces("application/json")
 	@Path("user/")
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
-		try {
-			return adminService.createUpdateUser(newUser);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.createUpdateUser(newUser);
 	}
 
 	@PUT
 	@Produces("application/json")
 	@Path("user/{username}")
 	public VirtueUser updateUser(@PathParam("username") String username, VirtueUser newUser) {
-		try {
-			if (!newUser.getUsername().equals(username)) {
-				throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
-						"Given user doesn't match username in path.  Username=" + username + ". NewUser=" + newUser);
-			}
-			return adminService.createUpdateUser(newUser);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
+		if (!newUser.getUsername().equals(username)) {
+			throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
+					"Given user doesn't match username in path.  Username=" + username + ". NewUser=" + newUser);
 		}
+		return adminService.createUpdateUser(newUser);
 	}
 
 	@GET
 	@Produces("application/json")
 	@Path("user/{username}")
 	public VirtueUser getUser(@PathParam("username") String usernameToRetrieve) {
-		try {
-			VirtueUser returnedUser = adminService.getUser(usernameToRetrieve);
-			return returnedUser;
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		VirtueUser returnedUser = adminService.getUser(usernameToRetrieve);
+		return returnedUser;
 	}
 
 	// JHU - Admin API - user list
@@ -509,14 +312,7 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("user")
 	public Iterable<VirtueUser> getAllUsers() {
-		try {
-			return adminService.getAllUsers();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getAllUsers();
 	}
 
 	// JHU - Admin API - user get
@@ -524,29 +320,15 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("user/{username}")
 	public void removeUser(@PathParam("username") String usernameToRemove) {
-		try {
-			adminService.removeUser(usernameToRemove);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.removeUser(usernameToRemove);
 	}
 
 	@POST
 	@Produces("application/json")
 	@Path("user/{username}/enable")
 	public void removeUser(@PathParam("username") String username, String enableString) {
-		try {
-			boolean enable = Boolean.parseBoolean(enableString);
-			adminService.enableDisableUser(username, enable);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		boolean enable = Boolean.parseBoolean(enableString);
+		adminService.enableDisableUser(username, enable);
 	}
 
 	// JHU - Admin API - user role authorize
@@ -555,14 +337,7 @@ public class AdminResource {
 	@Path("user/{username}/assign/{templateId}")
 	public void assignTemplateToUser(@PathParam("username") String username,
 			@PathParam("templateId") String templateId) {
-		try {
-			adminService.assignTemplateToUser(templateId, username);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.assignTemplateToUser(templateId, username);
 	}
 
 	// JHU - Admin API - user role unauthorize
@@ -571,28 +346,14 @@ public class AdminResource {
 	@Path("user/{username}/revoke/{templateId}")
 	public void revokeTemplateToUser(@PathParam("username") String username,
 			@PathParam("templateId") String templateId) {
-		try {
-			adminService.revokeTemplateFromUser(templateId, username);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.revokeTemplateFromUser(templateId, username);
 	}
 
 	@GET
 	@Path("user/active")
 	@Produces("application/json")
 	public Iterable<VirtueUser> getActiveUsers() {
-		try {
-			return adminService.getActiveUsers();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getActiveUsers();
 	}
 
 	// JHU - Admin API - user logout
@@ -600,14 +361,7 @@ public class AdminResource {
 	@Path("user/{username}/logout")
 	@Produces("application/json")
 	public void logoutUser(@PathParam("username") String username) {
-		try {
-			adminService.logoutUser(username);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.logoutUser(username);
 	}
 
 	// JHU - Admin API - usertoken list
@@ -615,108 +369,64 @@ public class AdminResource {
 	@Path("session")
 	@Produces("application/json")
 	public Map<String, List<String>> getAllSessions() {
-		try {
-			return adminService.getActiveSessions();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getActiveSessions();
 	}
 
 	@GET
 	@Path("session/{sessionId}")
 	@Produces("application/json")
 	public VirtueSession getSession(@PathParam("sessionId") String sessionId) {
-		try {
-			return adminService.getActiveSession(sessionId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getActiveSession(sessionId);
 	}
 
 	@DELETE
 	@Path("session/{sessionId}")
 	@Produces("application/json")
 	public void invalidateSession(@PathParam("sessionId") String sessionId) {
-		try {
-			adminService.invalidateSession(sessionId);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		adminService.invalidateSession(sessionId);
 	}
 
 	@GET
 	@Path("export")
 	@Produces("application/json")
 	public Response exportSystem() {
-		try {
-			StreamingOutput stream = new StreamingOutput() {
-				@Override
-				public void write(OutputStream os) throws IOException, WebApplicationException {
-					importExportService.exportSystem(os);
-					os.flush();
-				}
-			};
-			return Response.ok(stream).build();
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportSystem(os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream).build();
 	}
 
 	@POST
 	@Path("import")
 	@Produces("application/json")
 	public void importSystem(InputStream stream) {
-		try {
-			importExportService.importSystem(stream);
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		} catch (IOException e) {
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		importExportService.importSystem(stream);
 	}
 
 	@GET
 	@Path("import/{type}/{name}")
 	@Produces("text/plain")
 	public String importItem(@PathParam("type") String type, @PathParam("name") String name) {
-		try {
-			switch (type) {
-			case ImportExportService.TYPE_APPLICATION:
-				ApplicationDefinition app = importExportService.importApplication(name);
-				return app.getId();
-			case ImportExportService.TYPE_VIRTUAL_MACHINE:
-				VirtualMachineTemplate vmt = importExportService.importVirtualMachineTemplate(name);
-				return vmt.getId();
-			case ImportExportService.TYPE_VIRTUE:
-				VirtueTemplate vt = importExportService.importVirtueTemplate(name);
-				return vt.getId();
-			case ImportExportService.TYPE_USER:
-				VirtueUser user = importExportService.importUser(name);
-				return user.getUsername();
-			default:
-				throw WebServiceUtil.createWebserviceException(
-						new SaviorException(SaviorErrorCode.IMPORT_NOT_FOUND, "Invalid import type=" + type));
-			}
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
+		switch (type) {
+		case ImportExportService.TYPE_APPLICATION:
+			ApplicationDefinition app = importExportService.importApplication(name);
+			return app.getId();
+		case ImportExportService.TYPE_VIRTUAL_MACHINE:
+			VirtualMachineTemplate vmt = importExportService.importVirtualMachineTemplate(name);
+			return vmt.getId();
+		case ImportExportService.TYPE_VIRTUE:
+			VirtueTemplate vt = importExportService.importVirtueTemplate(name);
+			return vt.getId();
+		case ImportExportService.TYPE_USER:
+			VirtueUser user = importExportService.importUser(name);
+			return user.getUsername();
+		default:
+			throw WebServiceUtil.createWebserviceException(
+					new SaviorException(SaviorErrorCode.IMPORT_NOT_FOUND, "Invalid import type=" + type));
 		}
 	}
 
@@ -724,15 +434,8 @@ public class AdminResource {
 	@Path("import/all")
 	@Produces("text/plain")
 	public String importAll() {
-		try {
-			int items = importExportService.importAll();
-			return "imported " + items + " items.";
-		} catch (RuntimeException e) {
-			// TODO fix createWebserviceException
-			// Probably need to create our own exception
-			// Needs to create ExceptionMapper for jersey.
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		int items = importExportService.importAll();
+		return "imported " + items + " items.";
 	}
 
 	@GET
@@ -747,7 +450,7 @@ public class AdminResource {
 		}
 
 	}
-	
+
 	@GET
 	@Path("vm")
 	@Produces("application/json")
@@ -758,7 +461,7 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
-	
+
 	@GET
 	@Path("vm/{id}")
 	@Produces("application/json")
@@ -769,7 +472,7 @@ public class AdminResource {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
 	}
-	
+
 	@GET
 	@Path("vm/reboot/{id}")
 	@Produces("application/json")

@@ -1,6 +1,5 @@
 package com.ncc.savior.virtueadmin.service;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -85,7 +84,7 @@ public class DesktopVirtueService {
 		return virtues;
 	}
 
-	public DesktopVirtueApplication startApplication(String virtueId, String applicationId) throws IOException {
+	public DesktopVirtueApplication startApplication(String virtueId, String applicationId) {
 		verifyAndReturnUser();
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId);
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
@@ -104,8 +103,7 @@ public class DesktopVirtueService {
 		return dva;
 	}
 
-	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, String applicationId)
-			throws IOException {
+	public DesktopVirtueApplication startApplicationFromTemplate(String templateId, String applicationId) {
 		logger.debug("Attempting to start application from template.  TemplateId=" + templateId + " applicationId="
 				+ applicationId);
 		long a = System.currentTimeMillis();
@@ -130,7 +128,7 @@ public class DesktopVirtueService {
 		return app;
 	}
 
-	public void stopApplication(String virtueId, String applicationId) throws IOException {
+	public void stopApplication(String virtueId, String applicationId) {
 		verifyAndReturnUser();
 		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Stop application is not yet implemented.");
 	}
@@ -192,7 +190,7 @@ public class DesktopVirtueService {
 
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
-		if (!user.getAuthorities().contains("ROLE_USER")) {
+		if (!user.getAuthorities().contains(VirtueUser.ROLE_USER)) {
 			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have USER role");
 		}
 		return user;

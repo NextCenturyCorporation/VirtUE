@@ -21,8 +21,8 @@ public enum SaviorErrorCode {
 	USER_NOT_FOUND(24, "User not found", 400), 
 	APPLICATION_ID_NOT_FOUND(25, "Application not found", 400),
 	ID_MISMATCH(26, "Object IDs do not match"),
-	//Ownership?
-	USER_DOES_NOT_OWN_OBJECT(50, "User does not own object that was to be manipulated", 403),
+	//bad data?
+	INVALID_INPUT(50, "Invalid input"),
 	//Configuration errors
 	CONFIGURATION_ERROR(100, "Configuration error", 500),
 	//Configuration specific to import

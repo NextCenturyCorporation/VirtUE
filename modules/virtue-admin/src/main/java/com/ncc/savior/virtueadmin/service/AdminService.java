@@ -87,8 +87,8 @@ public class AdminService {
 					return;
 				}
 				Collection<String> authorities = new ArrayList<String>(2);
-				authorities.add("ROLE_ADMIN");
-				authorities.add("ROLE_USER");
+				authorities.add(VirtueUser.ROLE_ADMIN);
+				authorities.add(VirtueUser.ROLE_USER);
 				VirtueUser user = new VirtueUser(admin, authorities, true);
 				userManager.addUser(user);
 			}
@@ -427,10 +427,14 @@ public class AdminService {
 		return sessionMap;
 	}
 
-	public void uploadIcon(String iconKey, InputStream inputStream) throws IOException {
+	public void uploadIcon(String iconKey, InputStream inputStream) {
 		verifyAndReturnUser();
-		byte[] bytes = IOUtils.toByteArray(inputStream);
-		templateManager.addIcon(iconKey, bytes);
+		try {
+			byte[] bytes = IOUtils.toByteArray(inputStream);
+			templateManager.addIcon(iconKey, bytes);
+		} catch (IOException e) {
+			throw new SaviorException(SaviorErrorCode.INVALID_INPUT, "Unable to read input stream into byte array", e);
+		}
 	}
 
 	public IconModel getIcon(String iconKey) {
@@ -456,7 +460,7 @@ public class AdminService {
 
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
-		if (!user.getAuthorities().contains("ROLE_ADMIN")) {
+		if (!user.getAuthorities().contains(VirtueUser.ROLE_ADMIN)) {
 			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
 		}
 		return user;
@@ -488,7 +492,7 @@ public class AdminService {
 		verifyAndReturnUser();
 		return virtueManager.getVm(id);
 	}
-	
+
 	public void rebootVm(String vmId) {
 		verifyAndReturnUser();
 		virtueManager.rebootVm(vmId);
