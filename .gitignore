@@ -1,7 +1,13 @@
 .DS_Store
 */.DS_Store
 .gradle
+.gitignore
 **/*~
+**/=2.3.1
+**/=3.2.1
+**/=5.4.0
+**/=6.0.0-beta.0
+**/.metadata/
 modules/*/build
 **/node_modules
 **/.terraform
@@ -18,3 +24,6 @@ samba-config-*
 **/src/assets/.sass-cache/*
 modules/freerdp-java/.cache
 /modules/freerdp-java/core
+yarn-error.log
+/modules/admin/src/app/credentials
+/modules/virtue-admin/src/main/resources/application-context.xml
