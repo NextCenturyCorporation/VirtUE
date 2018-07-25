@@ -14,6 +14,8 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.route53.AmazonRoute53Async;
 import com.amazonaws.services.route53.AmazonRoute53AsyncClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 /**
  * Provides AWS support classes such as {@link AmazonEC2} or
@@ -30,6 +32,7 @@ public class VirtueAwsEc2Provider {
 	private AWSCredentialsProviderChain credentialsProvider;
 	private AmazonEC2 ec2;
 	private AmazonRoute53Async route53Client;
+	private AmazonS3 s3;
 
 	public VirtueAwsEc2Provider(String region, String awsProfile) {
 		this.region = region;
@@ -60,6 +63,7 @@ public class VirtueAwsEc2Provider {
 			logger.warn("Cannot load the credentials from the credential profiles file.  "
 					+ "Use CLI to create credentials or add to ./aws.properties file.", e);
 		}
+		s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
 		route53Client = AmazonRoute53AsyncClientBuilder.standard().withCredentials(credentialsProvider)
 				.withRegion(region).build();
@@ -79,6 +83,10 @@ public class VirtueAwsEc2Provider {
 
 	public AmazonEC2 getEc2() {
 		return ec2;
+	}
+
+	public AmazonS3 getS3() {
+		return s3;
 	}
 
 	public AmazonRoute53Async getRoute53Client() {

@@ -25,8 +25,9 @@ public class AwsRenamingCompletableFutureService
 	private static final Logger logger = LoggerFactory.getLogger(AwsRenamingCompletableFutureService.class);
 	private AmazonEC2 ec2;
 
-	public AwsRenamingCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2) {
-		super(executor, true, 10, 3000);
+	public AwsRenamingCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2,
+			int timeoutMillis) {
+		super(executor, true, 10, 3000, timeoutMillis);
 		this.ec2 = ec2;
 	}
 

@@ -10,9 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
+import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
-import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
@@ -107,7 +108,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 					// no tries left but no displays
 					String msg = "Unable to create Xpra server.";
 					logger.error(msg);
-					throw new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
+					throw new SaviorException(SaviorErrorCode.XPRA_FAILED, msg);
 				} else {
 					display = set.iterator().next();
 					logger.debug("Attempt to create display succeeded.  display: " + display);
@@ -120,7 +121,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 		} catch (IOException | InterruptedException e) {
 			String msg = "Error attempting to start application!";
 			logger.error(msg, e);
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, msg);
 		} finally {
 			if (certificate != null && certificate.exists()) {
 				certificate.delete();
