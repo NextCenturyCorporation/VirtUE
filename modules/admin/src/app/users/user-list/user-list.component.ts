@@ -71,9 +71,6 @@ export class UserListComponent implements OnInit {
     this.usersService.getUsers(baseUrl).subscribe(userList => {
       this.users = userList;
       this.totalUsers = userList.length;
-      for (var user of this.users) {
-        user.status = user.enabled ? 'enabled' : 'disabled';
-      }
     });
   }
 
@@ -162,7 +159,7 @@ export class UserListComponent implements OnInit {
       } else if (sortColumn === 'authorities') {
         this.sortBy = 'asc';
         this.sortColumn = sortColumn;
-      } else if (sortColumn === 'status') {
+      } else if (sortColumn === 'enabled') {
         this.sortBy = 'desc';
         this.sortColumn = sortColumn;
       }

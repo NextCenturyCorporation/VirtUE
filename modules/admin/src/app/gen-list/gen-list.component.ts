@@ -12,25 +12,29 @@ import { VirtualMachineService } from '../../shared/services/vm.service';
 import { ApplicationsService } from '../../shared/services/applications.service';
 
 @Component({
-  selector: 'app-virtue-list',
+  selector: 'app-gen-list',
   providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ],
-  templateUrl: './virtue-list.component.html',
-  styleUrls: ['./virtue-list.component.css']
+  templateUrl: './gen-list.component.html',
+  styleUrls: ['./gen-list.component.css']
 })
 
-export class VirtueListComponent implements OnInit {
+export class GeneralListComponent implements OnInit {
 
-  title = 'Virtues';
-  virtues = [];
-  vmList = [];
-  appsList = [];
+  title: string;
+  items = [];
+  
+  allUsers = [];
+  allVirtues = [];
+  allVms = [];
+  allApps = [];
+
   baseUrl: string;
   // these are the default properties the list sorts by
   sortColumn: string = 'name';
   sortType: string = 'enabled';
   sortValue: any = '*';
   sortBy: string = 'asc';
-  totalVirtues: number = 0;
+
   // virtueTotal: number; I hope this wasn't commented out for a good reason
   os: Observable<Array<VirtuesService>>;
 
@@ -51,9 +55,11 @@ export class VirtueListComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
       this.setBaseUrl(awsServer);
-      this.getVirtues();
-      this.getApplications();
-      this.getVmList();
+
+      this.pullUsers();
+      this.pullVirtues();
+      this.pullVms();
+      this.pullApplications();
     });
     this.refreshData();
     this.resetRouter();
@@ -75,20 +81,12 @@ export class VirtueListComponent implements OnInit {
 
   refreshData() {
     setTimeout(() => {
-      this.getVirtues();
+      this.pullData();
     }, 400);
   }
 
-  getVirtues() {
-    this.virtuesService.getVirtues(this.baseUrl).subscribe( virtueList => {
-      this.virtues = virtueList;
-      this.totalVirtues = virtueList.length;
-    });
-  }
-
-
-  enabledVirtueList(sortType: string, enabledValue: any, sortBy) {
-    console.log('enabledVirtueList() => ' + enabledValue);
+  enabledItemList(sortType: string, enabledValue: any, sortBy) {
+    console.log('enabledItemList() => ' + enabledValue);
     if (this.sortValue !== enabledValue) {
       this.sortBy = 'asc';
     } else {
@@ -102,16 +100,17 @@ export class VirtueListComponent implements OnInit {
     if (this.sortColumn === sortColumn) {
       this.reverseSorting(sortBy);
     } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-      } else if (sortColumn === 'lastEditor') {
-        this.sortBy = 'asc';
-      } else if (sortColumn === 'enabled') {
-        this.sortBy = 'asc';
-      } else if (sortColumn === 'date') {
-        this.sortBy = 'desc';
-      }
+      switch( sortColumn ) {
+        case 'name' :
+        case 'lastEditor':
+        case 'enabled':
+          this.sortBy = 'asc';
+          break;
+        case 'date':
+          this.sortBy = 'desc';
+          break;
         this.sortColumn = sortColumn;
+      }
     }
   }
 
@@ -123,20 +122,32 @@ export class VirtueListComponent implements OnInit {
     }
   }
 
-  getApplications() {
+  pullApplications() {
     this.appsService.getAppsList(this.baseUrl).subscribe( apps => {
-      this.appsList = apps;
+      this.allApps = apps;
     });
   }
 
-  getVmList() {
+  pullVms() {
     this.vmService.getVmList(this.baseUrl).subscribe( vms => {
-      this.vmList = vms;
+      this.allVms = vms;
+    });
+  }
+
+  pullVirtues() {
+    this.virtuesService.getVirtues(this.baseUrl).subscribe( virtueList => {
+      this.allVirtues = virtueList;
+    });
+  }
+
+  pullUsers( baseUrl: string ): void {
+    this.usersService.getUsers(baseUrl).subscribe(userList => {
+      this.allUsers = userList;
     });
   }
 
   getAppName(id: string) {
-    for (let app of this.appsList) {
+    for (let app of this.allApps) {
       if (id === app.id) {
         return app.name;
       }
@@ -144,18 +155,27 @@ export class VirtueListComponent implements OnInit {
   }
 
   getVmName(id: string): void {
-    for (let vm of this.vmList) {
+    for (let vm of this.allVms) {
       if (id === vm.id) {
         return vm.name;
       }
     }
   }
 
+  getVirtueName(id: string): void {
+    for (let v of this.allVirtues) {
+      if (id === v.id) {
+        return v.name;
+      }
+    }
+  }
+
   toggleVirtueStatus(id: string) {
-    this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
-      // holds the virtue that was just toggled. No reason to save, I think.
-      // this.virtue = data;
-    });
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe();
+    //data holds the item just toggled. I don't think we need it though.
+    //data => {
+    //   this.item = data;
+    // });
     this.resetRouter();
     this.router.navigate(['/virtues']);
   }
