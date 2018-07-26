@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ClipboardFormat {
-	TEXT(1, "STRING"), UNICODE(13, "UTF8_STRING");
+	TEXT(1, "STRING"), UNICODE(13, "UTF8_STRING"), HTML(13, "TEXT/HTML");
 
 	private static Map<Integer, ClipboardFormat> windowsToLinux;
 	private static Map<String, ClipboardFormat> linuxToWindows;

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
+import com.ncc.savior.desktop.clipboard.data.HtmlClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
@@ -483,6 +484,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 
 	private ClipboardData convertClipboardData(ClipboardFormat cf, WindowProperty myprop) {
 		Pointer property = myprop.property;
+		logger.debug("Converting data of type: " + cf.getLinux());
 		switch (cf) {
 		case TEXT:
 			String str = property.getString(0);
@@ -491,6 +493,9 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			// works with UTF-8 or default
 			str = property.getString(0, "UTF-8");
 			return new UnicodeClipboardData(str);
+		case HTML:
+			str = property.getString(0);
+			return new HtmlClipboardData(str);
 		default:
 			return new UnknownClipboardData(cf);
 		}
