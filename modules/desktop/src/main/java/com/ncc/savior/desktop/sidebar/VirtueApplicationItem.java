@@ -157,13 +157,14 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		gbc.gridx = 1;
 		favoritedContainer.add(favoritedLabel, gbc);
 		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 5));
+
 		gbc.weightx = 1.0;
 		gbc.gridy = 0;
 		gbc.gridx = 0;
 		gbc.fill = GridBagConstraints.BOTH;
 		favoritedContainer.add(flag, gbc);
-		container.add(favoritedContainer, BorderLayout.NORTH);
 
+		container.add(favoritedContainer, BorderLayout.NORTH);
 		container.add(appIcon, BorderLayout.CENTER);
 		container.add(appName, BorderLayout.SOUTH);
 
@@ -196,14 +197,11 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		VirtueFlag flag = new VirtueFlag(flagColor);
 		flag.setPreferredSize(new Dimension(23, 50));
 		container.add(flag, BorderLayout.WEST);
-		// appIcon.setBorder(BorderFactory.createEmptyBorder(0, 45, 0, 0));
 		container.add(appIcon, BorderLayout.CENTER);
 
 		container.add(favoritedLabel, BorderLayout.EAST);
 
 		container.setSize(new Dimension(450, 50));
-		// container.setMinimumSize(new Dimension(450, 57));
-		// container.setMaximumSize(new Dimension(10000, 57));
 		container.setPreferredSize(new Dimension(450, 50));
 
 		addListener(vc, fv, ad, virtue);
