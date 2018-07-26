@@ -34,7 +34,7 @@
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
           <div class="table-header mui-col-md-3">
-            <a (click)="sortVmColumns('name',sortBy)">Virtual Machine Name</a>
+            <a (click)="setColumnSort('name',sortBy)">Virtual Machine Name</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'name' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'name' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -43,7 +43,7 @@
           </div>
           <!-- <div class="table-header mui-col-md-2">OS</div> -->
           <div class="table-header mui-col-md-2">
-            <a (click)="sortVmColumns('os',sortBy)">OS</a>
+            <a (click)="setColumnSort('os',sortBy)">OS</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'os' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'os' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -54,7 +54,7 @@
 
           <!-- <div class="table-header mui-col-md-2">Last Modified By</div> -->
           <div class="table-header mui-col-md-2">
-            <a (click)="sortVmColumns('lastEditor',sortBy)">Last Modified By</a>
+            <a (click)="setColumnSort('lastEditor',sortBy)">Last Modified By</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'lastEditor' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'lastEditor' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -63,7 +63,7 @@
           </div>
           <!-- <div class="table-header mui-col-md-1">Security</div> -->
           <div class="table-header mui-col-md-1">
-            <a (click)="sortVmColumns('securityTag',sortBy)">Security</a>
+            <a (click)="setColumnSort('securityTag',sortBy)">Security</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'securityTag' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'securityTag' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -71,7 +71,7 @@
             </span>
           </div>
           <div class="table-header mui-col-md-2">
-            <a (click)="sortVmColumns('date',sortBy)">Modified Date</a>
+            <a (click)="setColumnSort('date',sortBy)">Modified Date</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'date' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'date' && sortBy === 'desc'" class="fa fa-sort-down"></span>

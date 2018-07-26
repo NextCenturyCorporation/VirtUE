@@ -22,7 +22,7 @@ export class VmAppsListComponent implements OnInit {
 
   sortColumn: string = 'name';
   sortType: string = 'enabled';
-  sortValue: any = '*';
+  sortValue: string = '*';
   sortBy: string = 'asc';
   totalApps: number;
   // appsfilter: string;
@@ -93,5 +93,23 @@ export class VmAppsListComponent implements OnInit {
       console.log('The dialog was closed');
     });
   }
+
+  
+  setColumnSort(sortColumn: string, sortBy: string) {
+    if (this.sortColumn === sortColumn) {
+      this.reverseSortDirection(sortBy);
+    } else {
+      this.sortBy = 'asc';
+      this.sortColumn = sortColumn;
+    }
+  }
+
+  reverseSortDirection(sortDirection: string) {
+    if (sortDirection === 'asc') {
+      this.sortBy = 'desc';
+    } else {
+      this.sortBy = 'asc';
+    }
+}
 
 }

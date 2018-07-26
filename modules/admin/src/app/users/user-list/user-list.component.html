@@ -34,7 +34,7 @@
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
           <div class="table-header mui-col-md-3">
-            <a (click)="sortUserColumns('username',sortBy)">Username</a>
+            <a (click)="setColumnSort('username',sortBy)">Username</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'username' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'username' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -44,7 +44,7 @@
 
           <!-- <div class="table-header mui-col-md-3">Authorities</div> -->
           <div class="table-header mui-col-md-3">
-            <a (click)="sortUserColumns('authorities',sortBy)">Authorities</a>
+            <a (click)="setColumnSort('authorities',sortBy)">Authorities</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'authorities' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'authorities' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -55,7 +55,7 @@
           <div class="table-header mui-col-md-4">Virtues</div>
           <!-- <div class="table-header mui-col-md-3">Status</div> -->
           <div class="table-header mui-col-md-3">
-            <a (click)="sortUserColumns('status',sortBy)">Status</a>
+            <a (click)="setColumnSort('status',sortBy)">Status</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'status' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'status' && sortBy === 'desc'" class="fa fa-sort-down"></span>

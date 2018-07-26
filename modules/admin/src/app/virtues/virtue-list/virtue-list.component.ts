@@ -84,65 +84,37 @@ export class VirtueListComponent implements OnInit {
       this.virtues = virtueList;
       this.totalVirtues = virtueList.length;
     });
-    // changing or even commenting this line out entirely doesn't seem to
-    // affect the order, initial or otherwise, of the shown data.
-    // this.sortVirtues(this.sortBy);
   }
-
-  // Apparently unnecessary. see comment in getVirtues.
-  // sortVirtues(sortDirection: string) {
-  //   if (sortDirection === 'asc') {
-  //     this.virtues.sort((leftSide, rightSide): number => {
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return -1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return 1;
-  //       }
-  //       return 0;
-  //     });
-  //   } else {
-  //     this.virtues.sort((leftSide, rightSide): number => {
-  //       if (leftSide['name'] < rightSide['name']) {
-  //         return 1;
-  //       }
-  //       if (leftSide['name'] > rightSide['name']) {
-  //         return -1;
-  //       }
-  //       return 0;
-  //     });
-  //   }
-  // }
 
   enabledVirtueList(sortType: string, enabledValue: any, sortBy) {
     console.log('enabledVirtueList() => ' + enabledValue);
     if (this.sortValue !== enabledValue) {
       this.sortBy = 'asc';
     } else {
-      this.sortListBy(sortBy);
+      this.reverseSortDirection(sortBy);
     }
     this.sortValue = enabledValue;
     this.sortType = sortType;
   }
 
-  sortVirtueColumns(sortColumn: string, sortBy: string) {
+  setColumnSort(sortColumn: string, sortBy: string) {
     if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
+      this.reverseSortDirection(sortBy);
     } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'lastEditor') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'date') {
-        this.sortColumn = sortColumn;
-        this.sortBy = 'desc';
+      switch( sortColumn ) {
+        case 'name' :
+        case 'lastEditor':
+          this.sortBy = 'asc';
+	  break;
+        case 'date':
+          this.sortBy = 'desc';
+	  break;
       }
+      this.sortColumn = sortColumn;
     }
   }
 
-  sortListBy(sortDirection: string) {
+  reverseSortDirection(sortDirection: string) {
     if (sortDirection === 'asc') {
       this.sortBy = 'desc';
     } else {

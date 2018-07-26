@@ -32,7 +32,7 @@
         <div class="mui-row table-header-group">
           <!-- <div class="table-header mui-col-md-6">Application Name</div> -->
           <div class="table-header mui-col-md-6">
-            <a (click)="sortAppColumns('name',sortBy)">Application Name</a>
+            <a (click)="setColumnSort('name',sortBy)">Application Name</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'name' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'name' && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -42,7 +42,7 @@
           <div class="table-header mui-col-md-2">Version</div>
           <!-- <div class="table-header mui-col-md-2">OS</div> -->
           <div class="table-header mui-col-md-4">
-            <a (click)="sortAppColumns('os',sortBy)">OS</a>
+            <a (click)="setColumnSort('os',sortBy)">OS</a>
             <span class="list-sorter">
               <span *ngIf="sortColumn === 'os' && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn === 'os' && sortBy === 'desc'" class="fa fa-sort-down"></span>

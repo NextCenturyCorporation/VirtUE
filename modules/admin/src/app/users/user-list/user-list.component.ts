@@ -123,30 +123,30 @@ export class UserListComponent implements OnInit {
       if (this.sortValue !== enabledValue) {
         this.sortBy = 'asc';
       } else {
-        this.sortListBy(sortBy);
+        this.reverseSortDirection(sortBy);
       }
       this.sortValue = enabledValue;
-      this.sortType = sortType;
+      //this.sortType = sortType;
     }
 
-    sortUserColumns(sortColumn: string, sortBy: string) {
+    setColumnSort(sortColumn: string, sortBy: string) {
       if (this.sortColumn === sortColumn) {
-        this.sortListBy(sortBy);
+        this.reverseSortDirection(sortBy);
       } else {
-        if (sortColumn === 'username') {
-          this.sortBy = 'asc';
-          this.sortColumn = sortColumn;
-        } else if (sortColumn === 'authorities') {
-          this.sortBy = 'asc';
-          this.sortColumn = sortColumn;
-        } else if (sortColumn === 'status') {
-          this.sortBy = 'desc';
-          this.sortColumn = sortColumn;
+        switch( sortColumn ) {
+          case 'username' :
+          case 'authorities':
+            this.sortBy = 'asc';
+ 	    break;
+          case 'status':
+            this.sortBy = 'desc';
+	    break;
         }
+        this.sortColumn = sortColumn;
       }
     }
 
-    sortListBy(sortDirection: string) {
+    reverseSortDirection(sortDirection: string) {
       if (sortDirection === 'asc') {
         this.sortBy = 'desc';
       } else {

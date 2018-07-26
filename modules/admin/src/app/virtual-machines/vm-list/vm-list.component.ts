@@ -45,8 +45,8 @@ export class VmListComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getBaseUrl(awsServer);
-      this.getVmList(awsServer);
       this.getAppsList(awsServer);
+      this.getVmList(awsServer);
     });
     this.resetRouter();
   }
@@ -115,41 +115,34 @@ export class VmListComponent implements OnInit {
     if (this.sortValue !== enabledValue) {
       this.sortBy = 'asc';
     } else {
-      this.sortListBy(sortBy);
+      this.reverseSortDirection(sortBy);
     }
     this.sortValue = enabledValue;
     this.sortType = sortType;
   }
 
-  sortVmColumns(sortColumn: string, sortBy: string) {
+  setColumnSort(sortColumn: string, sortBy: string) {
     console.log("sortVmColumns");
     console.log(this.vms[0]["name"]);
     if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
+      this.reverseSortDirection(sortBy);
     } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'os') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      // } else if (sortColumn === 'apps') {
-      //   this.sortColumn = sortColumn;
-      //   this.sortBy = 'desc';
-      } else if (sortColumn === 'lastEditor') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'securityTag') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'date') {
-        this.sortColumn = sortColumn;
-        this.sortBy = 'desc';
+      switch( sortColumn ) {
+        case 'name' :
+        case 'os':
+        case 'lastEditor':
+        case 'securityTag':
+          this.sortBy = 'asc';
+	  break;
+        case 'date':
+          this.sortBy = 'desc';
+	  break;
       }
+      this.sortColumn = sortColumn;
     }
   }
 
-  sortListBy(sortDirection: string) {
+  reverseSortDirection(sortDirection: string) {
     if (sortDirection === 'asc') {
       this.sortBy = 'desc';
     } else {
