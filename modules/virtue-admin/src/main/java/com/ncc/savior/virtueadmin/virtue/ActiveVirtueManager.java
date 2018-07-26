@@ -141,7 +141,11 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	@Override
 	public VirtueInstance getActiveVirtue(String virtueId) {
 		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
-		return opt.isPresent() ? opt.get() : null;
+		if (opt.isPresent()) {
+			return opt.get();
+		} else {
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with id=" + virtueId);
+		}
 	}
 
 	@Override
