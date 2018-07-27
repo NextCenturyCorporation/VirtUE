@@ -337,11 +337,11 @@ public class Sidebar implements VirtueChangeHandler {
 		for (DesktopVirtue virtue : virtues) {
 			Color headerColor = getNextColor();
 			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
-					textField, ghostText);
+					textField, ghostText, vt);
 			vt.addVirtueToRow(virtue, vtc, vtc.getRow());
 
 			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField,
-					ghostText);
+					ghostText, vl);
 			vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 
 			virtueIdToVtc.put(virtue.getTemplateId(), vtc);

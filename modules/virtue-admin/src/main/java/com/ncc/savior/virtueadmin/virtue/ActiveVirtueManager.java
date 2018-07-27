@@ -97,7 +97,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	// }
 
 	@Override
-	public void deleteVirtue(VirtueUser user, String instanceId) {
+	public VirtueInstance deleteVirtue(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
 			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
@@ -115,6 +115,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 					"User=" + user.getUsername() + " does not own virtue with id=" + instanceId
 							+ " and is not admin.  Therefore, " + user.getUsername() + " cannot delete that virtue");
 		}
+		
+		return vi;
 	}
 
 	@Override

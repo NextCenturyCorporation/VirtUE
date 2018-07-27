@@ -101,13 +101,14 @@ public abstract class AbstractVirtueContainer {
 			public void mouseClicked(MouseEvent event) {
 				JPopupMenu pm = new JPopupMenu();
 				JMenuItem mi1 = new JMenuItem("Stop");
+				JMenuItem mi2 = new JMenuItem("Start");
+				JMenuItem mi3 = new JMenuItem("Terminate");
 
 				mi1.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
 						try {
 							virtueService.stopVirtue(virtue);
-							// virtue.setVirtueState(VirtueState.STOPPING);
 							updateVirtue(virtue);
 						} catch (IOException e) {
 							String msg = "Error attempting to stop virtue=" + virtue;
@@ -116,9 +117,39 @@ public abstract class AbstractVirtueContainer {
 					}
 				});
 
-				pm.setPopupSize(45, 38);
+				mi2.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent evt) {
+						try {
+							virtueService.startVirtue(virtue);
+							updateVirtue(virtue);
+						} catch (IOException e) {
+							String msg = "Error attempting to start virtue=" + virtue;
+							logger.error(msg, e);
+						}
+					}
+				});
+
+				mi2.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent evt) {
+						try {
+							virtueService.terminateVirtue(virtue);
+							updateVirtue(virtue);
+						} catch (IOException e) {
+							String msg = "Error attempting to start virtue=" + virtue;
+							logger.error(msg, e);
+						}
+					}
+				});
+
+				pm.setPopupSize(78, 78);
 				pm.add(mi1);
-				pm.show(optionsLabel, -11, 26);
+				pm.addSeparator();
+				pm.add(mi2);
+				pm.addSeparator();
+				pm.add(mi3);
+				pm.show(optionsLabel, -44, 26);
 			}
 		});
 	}

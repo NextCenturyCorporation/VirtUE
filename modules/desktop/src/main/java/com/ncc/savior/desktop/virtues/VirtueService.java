@@ -261,13 +261,18 @@ public class VirtueService {
 	public void startVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (startableVirtueStates.contains(virtue.getVirtueState())) {
 			desktopResourceService.startVirtue(virtue.getId());
-			virtue.setVirtueState(VirtueState.RUNNING);
 		}
 	}
 
 	// TODO see notes above and apply to this
 	public void stopVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (stopableVirtueStates.contains(virtue.getVirtueState())) {
+			desktopResourceService.stopVirtue(virtue.getId());
+		}
+	}
+
+	public void terminateVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
+		if (virtue.getVirtueState() != VirtueState.UNPROVISIONED) {
 			desktopResourceService.stopVirtue(virtue.getId());
 		}
 	}

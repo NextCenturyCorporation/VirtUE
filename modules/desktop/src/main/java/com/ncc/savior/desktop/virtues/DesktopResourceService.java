@@ -231,6 +231,15 @@ public class DesktopResourceService {
 		return virtue;
 	}
 
+	public DesktopVirtue terminateVirtue(String virtueId) throws InvalidUserLoginException, IOException {
+		WebTarget target = baseApi.path("virtue").path(virtueId).path("terminate");
+		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Stopping virtue=" + virtue);
+		}
+		return virtue;
+	}
+
 	public Image getIcon(String iconKey) throws InvalidUserLoginException, IOException {
 		if (iconKey == null) {
 			iconKey = DEFAULT_ICON_KEY;

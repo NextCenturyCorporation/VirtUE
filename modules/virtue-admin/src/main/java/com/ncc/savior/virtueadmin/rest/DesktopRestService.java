@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.rest;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -10,6 +11,7 @@ import javax.ws.rs.Produces;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
@@ -101,4 +103,11 @@ public class DesktopRestService {
 		IconModel iconModel = desktopService.getIcon(iconKey);
 		return iconModel.getData();
 	}
+	
+	@GET
+	@Path("virtue/{virtueId}/terminate")
+	public DesktopVirtue terminateVirtue(@PathParam("virtueId") String virtueId) {
+		return desktopService.terminateVirtue(virtueId);
+	}
+
 }

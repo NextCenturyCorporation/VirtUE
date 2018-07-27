@@ -210,4 +210,10 @@ public class DesktopVirtueService {
 		}
 		return icon;
 	}
+
+	public DesktopVirtue terminateVirtue(String id) {
+		VirtueUser user = verifyAndReturnUser();
+		VirtueInstance instance =  activeVirtueManager.deleteVirtue(user, id);
+		return convertVirtueInstanceToDesktopVirtue(instance);
+	}
 }
