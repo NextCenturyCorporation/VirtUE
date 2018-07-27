@@ -319,11 +319,6 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		if (loading) {
-			loading = false;
-			setInitialViewPort();
-		}
-
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -410,6 +405,10 @@ public class Sidebar implements VirtueChangeHandler {
 								}
 							}
 						}
+					}
+					if (loading) {
+						loading = false;
+						setInitialViewPort();
 					}
 				} catch (Exception e) {
 							logger.debug("Error with adding virtues");

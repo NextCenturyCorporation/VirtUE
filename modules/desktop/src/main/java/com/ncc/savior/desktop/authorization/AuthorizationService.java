@@ -118,7 +118,7 @@ public class AuthorizationService {
 		loginListeners.remove(listener);
 	}
 
-	public void triggerOnLogin() {
+	protected void triggerOnLogin() {
 		for (ILoginListener listener : loginListeners) {
 			listener.onLogin();
 		}
