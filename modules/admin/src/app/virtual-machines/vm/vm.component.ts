@@ -56,7 +56,7 @@ export class VmComponent implements OnInit {
     this.parentDomain = "/vm-templates";
     this.setMode();
 
-    this.vm = new VirtualMachine();
+    this.vm = new VirtualMachine('', '');
 
     this.form = new FormControl();
   }

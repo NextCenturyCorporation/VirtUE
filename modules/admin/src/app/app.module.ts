@@ -41,6 +41,8 @@ import { FileShareComponent } from './config/resource-modal/file-share/file-shar
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
+import { GeneralListComponent } from './gen-list/gen-list.component';
+
 import { UsersWrapperComponent } from './users/users.wrapper.component';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent} from './users/user/user.component';
@@ -54,13 +56,9 @@ import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
 import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-modal.component';
 
-// import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
 import {VmsWrapperComponent} from './virtual-machines/vms.wrapper.component';
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
 import { VmComponent} from './virtual-machines/vm/vm.component';
-// import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
-// import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
-// import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
 
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
@@ -94,6 +92,8 @@ import { VirtuesService } from './shared/services/virtues.service';
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
+
+    GeneralListComponent,
 
     UsersWrapperComponent,
     UserListComponent,

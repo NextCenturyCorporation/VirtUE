@@ -43,6 +43,7 @@ export class VmListComponent implements OnInit {
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
+    this.allApps = [];
   }
 
   ngOnInit() {

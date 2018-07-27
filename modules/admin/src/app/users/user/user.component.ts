@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { User } from '../../shared/models/user.model';
+import { Virtue } from '../../shared/models/virtue.model';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
@@ -48,7 +49,7 @@ export class UserComponent implements OnInit {
     public dialog: MatDialog
   ) {
     this.setMode();
-    this.user = new User();
+    this.user = new User('');
 
     console.log(this.user);
 

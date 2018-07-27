@@ -2,95 +2,103 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
-// import { User } from '../../shared/models/user.model';
+import { Item } from '../../shared/models/item.model';
+import { User } from '../../shared/models/user.model';
+import { Virtue } from '../../shared/models/virtue.model';
+import { Column } from '../../shared/models/column.model';
+import { DictList, Dict } from '../../shared/models/dictionary.model';
+
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
+import { VirtualMachineService } from '../../shared/services/vm.service';
+import { ApplicationsService } from '../../shared/services/applications.service';
 
 import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
+import { GeneralListComponent } from '../../gen-list/gen-list.component';
+
 @Component({
   selector: 'app-user-list',
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css'],
-  providers: [ BaseUrlService, UsersService ]
+  templateUrl: '../../gen-list/gen-list.component.html',
+  styleUrls: ['../../gen-list/gen-list.component.css'],
+  providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
-export class UserListComponent implements OnInit {
-  baseUrl: string;
-  users = [];
-  virtues = [];
-
-  sortColumn: string = 'username';
-  sortType: string = 'enabled';
-  sortValue: any = '*';
-  sortBy: string = 'asc';
-  totalUsers: number = 0;
+export class UserListComponent extends GeneralListComponent {
 
   constructor(
-    private router: Router,
-    private location: Location,
-    private baseUrlService: BaseUrlService,
-    private usersService: UsersService,
-    private virtuesService: VirtuesService,
-    public dialog: MatDialog
+    router: Router,
+    baseUrlService: BaseUrlService,
+    usersService: UsersService,
+    virtuesService: VirtuesService,
+    vmService: VirtualMachineService,
+    appsService: ApplicationsService,
+    dialog: MatDialog
   ) {
-    // override the route reuse strategy
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+
+    this.prettyTitle = "Users";
+
+    this.colData = [
+      {name: 'username', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'roles', prettyName: 'Authorized Roles', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.formatRoles},
+      {name: 'virtues', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildrenListHTMLstring},
+      {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}
+    ];
+
+    this.prettyTitle = "Users";
+    this.itemName = "User";
+    this.noDataMessage = "No users have been added at this time. To add a user, click on the button \"Add User\" above.";
+    this.domain = '/users';
+    // this.showAllMessage = "All User Accounts";
+    // this.showEnabledMessage = "Enabled Accounts";
+    // this.showDisabledMessage = "Disabled Accounts";
+
+
   }
 
-  ngOnInit() {
-    this.baseUrlService.getBaseUrl().subscribe( _url => {
-      let awsServer = _url[0].aws_server;
-      this.getBaseUrl(awsServer);
-      this.getUsers(awsServer);
-      this.getVirtues(awsServer);
-    });
-    this.resetRouter();
+  // Overrides parent
+  pullData() {
+    this.pullUsers();
+    this.pullVirtues();
+    // this.linkItems(this.allUsersD, this.allVirtuesD, new DictList<Virtue>());
+    // this.items = this.allUsersL;
+    this.linkItems(this.allUsers, this.allVirtues);
+    this.items = this.allUsers.getL();
   }
 
-  getBaseUrl( url: string ) {
-    this.baseUrl = url;
+  // overrides parent
+  // updateItems() {
+    // this.items = ;
+  // }
+
+  formatRoles( user: User ): string {
+    return user.roles.sort().toString();
   }
 
-  resetRouter() {
-    setTimeout(() => {
-      this.router.navigated = false;
-    }, 1000);
+  formatStatus( user: User ): string {
+    return user.enabled ? 'Enabled' : 'Disabled';
   }
 
-  refreshData() {
-    setTimeout(() => {
-      this.getUsers(this.baseUrl);
-    }, 200);
-  }
-
-  getUsers( baseUrl: string ): void {
-    this.usersService.getUsers(baseUrl).subscribe(userList => {
-      this.users = userList;
-      this.totalUsers = userList.length;
-    });
-  }
-
-  setUserStatus(username: string, newStatus: string) {
+  // Overrides parent
+  toggleItemStatus(u: User) {
+    console.log(u);
+    let newStatus = !u.enabled ? 'disable': 'enable';
     // console.log("here");
-    if (username.toUpperCase() === "ADMIN") {
+    if (u.getName().toUpperCase() === "ADMIN") {
       //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
       // this.openDialog('disable', username + " and lock everyone out of the system?");
-      if (!confirm("Are you sure to disable "+ username + " and lock everyone out of the system, including you?")) {
-        console.log("Leaving " + username + " intact.");
+      if (!confirm("Are you sure to disable "+ u.getName() + " and lock everyone out of the system, including you?")) {
+        console.log("Leaving " + u.getName() + " intact.");
         return;
       }
-      console.log("Request to disable " + username + " ignored.");
+      console.log("Request to disable " + u.getName() + " ignored.");
       //we're not disabling that
       return;
     }
-    //for some reason, I need to subscribe in order for the toggle
-    //to work, even if I don't do anything with the stuff I'm subscribed to.
-    // That data certainly isn't supposed to go there.
-    this.usersService.setUserStatus(this.baseUrl, username, newStatus).subscribe();//data => {
+    //I don't know what 'data' is here, but it isn't a list of users.
+    this.usersService.setUserStatus(this.baseUrl, u.getName(), newStatus).subscribe();//data => {
     //   this.users = data;
     //   // console.log(data);
     // });
@@ -103,76 +111,5 @@ export class UserListComponent implements OnInit {
     this.usersService.deleteUser(this.baseUrl, username);
     this.refreshData();
   }
-
-  getVirtues(baseUrl: string) {
-    this.virtuesService.getVirtues(baseUrl).subscribe( virtues => {
-      this.virtues = virtues;
-    });
-  }
-
-  getVirtueName(id: string) {
-    for (let virtue of this.virtues) {
-      if (id === virtue.id) {
-        return virtue.name;
-      }
-    }
-  }
-
-  openDialog(verb: string, directObject: string): void {
-    const dialogRef = this.dialog.open( DialogsComponent, {
-      width: '450px',
-      data:  {
-          dialogType: verb,
-          dialogDescription: directObject
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    console.log(dialogRef);
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog to ' + verb + ' ' + directObject + ' was closed');
-      console.log(result);
-      console.log(dialogRef);
-    });
-
-  }
-
-  enabledUserList(sortType: string, enabledValue: any, sortBy) {
-    // console.log('enabledUserList() => ' + enabledValue);
-    if (this.sortValue !== enabledValue) {
-      this.sortBy = 'asc';
-    } else {
-      this.reverseSorting(sortBy);
-    }
-    this.sortValue = enabledValue;
-    this.sortType = sortType;
-  }
-
-  setColumnSortDirection(sortColumn: string, sortBy: string) {
-    if (this.sortColumn === sortColumn) {
-      this.reverseSorting(sortBy);
-    } else {
-      if (sortColumn === 'username') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'authorities') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'enabled') {
-        this.sortBy = 'desc';
-        this.sortColumn = sortColumn;
-      }
-    }
-  }
-
-  reverseSorting(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.sortBy = 'desc';
-    } else {
-      this.sortBy = 'asc';
-    }
-  }
-
 
 }

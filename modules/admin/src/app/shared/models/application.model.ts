@@ -1,14 +1,20 @@
 
-export class Application {
-  id: string;
+import { Item } from './item.model';
+
+export class Application extends Item{
+  // id: string;
   name: string;
-  enabled: boolean;
 
   version: string;
   os: string;
   launchCommand: string;
 
-  constructor() {
-    this.enabled = true;
+  constructor(id: string) {
+    super(id, '');
+    // this.enabled = undefined; //probably unnecessary. Apps can't be disabled.
+  }
+
+  getName() {
+    return this.name;
   }
 }

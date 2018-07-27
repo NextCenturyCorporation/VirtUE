@@ -13,12 +13,12 @@ export class HeaderComponent implements OnInit {
     {value: 'Users', link: '/users'},
     {value: 'Applications', link: '/applications'},
     // {value: 'Templates', link: '/'}
-    {value: 'Virtual Machines', link: '/vm-templates'},
-    {value: 'Virtues', link: '/virtues'}
+    {value: 'Virtual Machine Images', link: '/vm-templates'},
+    {value: 'Virtue Images', link: '/virtues'}
   ];
   templateLinks = [
-    {value: 'Virtual Machines', link: '/vm-templates'},
-    {value: 'Virtues', link: '/virtues'}
+    {value: 'Virtual Machine Templates', link: '/vm-templates'},
+    {value: 'Virtue Templates', link: '/virtues'}
   ]
 
   ngOnInit() {

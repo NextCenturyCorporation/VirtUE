@@ -30,28 +30,17 @@ import { VirtueSettingsComponent } from '../virtue-settings/virtue-settings.comp
 
 export class VirtueComponent implements OnInit {
   @ViewChild(VirtueSettingsComponent) settingsPane: VirtueSettingsComponent;
-  //Note:
-  //  when creating, virtue.id is empty.
-  //  When editing, virtue.id holds the id of the virtue being edited.
-  //  When duplicating, virtue.id holds the id of the old virtue being duplicated.
-  //  New IDs for creation and duplication are generated server-side.
-  // virtueId: string;
-  // virtueName: string;
-  // virtueVersion: string;
+
   virtueForm: FormControl;
-  // virtueEnabled: boolean;
-  // virtueVersion: string;
   activeClass: string;
   baseUrl: string;
   errorMsg: any;
-  // virtue: {
-  //   id : string,
-  //   name : string,
-  //   enabled: boolean,
-  //   color: string,
-  //   version: string,
-  //   data: any
-  // };
+
+  //Note:
+  //  when creating, virtue id is empty.
+  //  When editing, virtue id holds the id of the virtue being edited.
+  //  When duplicating, virtue.id holds the id of the old virtue being duplicated.
+  //  New IDs for creation and duplication are generated server-side.
   virtue: Virtue;
 
   //not used, for use later in Inter-virtue sttings I think.
@@ -85,7 +74,7 @@ export class VirtueComponent implements OnInit {
     this.parentDomain = '/virtues'
     this.setMode();
     //set up empty, will get filled in ngOnInit if not mode is not 'create'
-    this.virtue = new Virtue();
+    this.virtue = new Virtue('', '');
 
     this.virtueData = {};
 
