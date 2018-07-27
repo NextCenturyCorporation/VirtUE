@@ -83,7 +83,8 @@
 	<!-- <constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg> -->
 	<!-- </bean> -->
 	<bean name="futureServiceProvider"
-		class="com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider" init-method="init">
+		class="com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider"
+		init-method="init">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
 		<constructor-arg ref="activeVirtueUpdater" />
 		<constructor-arg ref="keyManager" />
@@ -169,5 +170,13 @@
 
 	<bean name="securityService"
 		class="com.ncc.savior.virtueadmin.security.SecurityUserService"></bean>
+
+	<bean name="permissionDao"
+		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaPermissionDao"></bean>
+
+	<bean name="permissionService" class="com.ncc.savior.virtueadmin.service.PermissionService" init-method="test">
+		<constructor-arg ref="permissionDao" />
+		<property name="defaultClipboardPermission" value="ASK" />
+	</bean>
 
 </beans>  

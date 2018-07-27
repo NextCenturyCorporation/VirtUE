@@ -12,4 +12,6 @@ public interface ClipboardPermissionRepository extends CrudRepository<ClipboardP
 
 	List<ClipboardPermission> findBySourceGroupId(String sourceGroupId);
 
+	List<ClipboardPermission> findByDestinationGroupId(String destinationId);
+
 }

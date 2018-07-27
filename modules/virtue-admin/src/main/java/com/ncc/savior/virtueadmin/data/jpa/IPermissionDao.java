@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
+import java.util.List;
+
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 
@@ -22,5 +24,11 @@ public interface IPermissionDao {
 	ClipboardPermission getClipboardPermission(String sourceGroupId, String destinationGroupId);
 
 	void setClipboardPermission(String sourceId, String destinationId, ClipboardPermissionOption option);
+
+	List<ClipboardPermission> getClipboardPermissionForSource(String sourceId);
+
+	List<ClipboardPermission> getClipboardPermissionForDestination(String destinationId);
+
+	Iterable<ClipboardPermission> getAllClipboardPermissions();
 
 }
