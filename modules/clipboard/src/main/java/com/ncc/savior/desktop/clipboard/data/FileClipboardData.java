@@ -120,13 +120,13 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 			Memory winMemory = new NativelyDeallocatedMemory(length);
 			winMemory.clear();
 			// offset is always 20, 4 bytes
-			winMemory.setInt(0, 20);
+			winMemory.setInt(0, WIN_DROPFILES_BASE_BYTES);
 			// 8 bytes of 0 for point member
 			// 4 bytes of boolean false
 			// 4 bytes of boolean true for wide text.
 			winMemory.setInt(16, 1);
 			// rest for string, double null terminated
-			int i = 20;
+			int i = WIN_DROPFILES_BASE_BYTES;
 			for (File file : destinationFiles) {
 				if (file.exists()) {
 					String path = file.getAbsolutePath();

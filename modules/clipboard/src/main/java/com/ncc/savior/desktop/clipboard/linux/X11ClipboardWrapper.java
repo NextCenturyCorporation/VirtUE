@@ -322,6 +322,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				numItems = clipboardData.getLinuxNumEntries();
 				itemSize = clipboardData.getLinuxEntrySizeBits();
 			} catch (Throwable t) {
+				// Something failed in our clipboard operation. We still need to push clipboard
+				// data to the application or bad things happen (usually locks the application
+				// for a couple seconds). The easiest way around this is to just pass blank
+				// data.
 				logger.debug("failed to get clipboard data attributes", t);
 				EmptyClipboardData ecd = new EmptyClipboardData(clipboardData.getFormat());
 				ptr = ecd.createLinuxData();
