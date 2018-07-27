@@ -271,7 +271,6 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void onLoginSuccess(DesktopUser user) throws IOException {
 				onLogin(user);
-				authService.triggerPollStartListener();
 				ghostText.reset();
 			}
 
@@ -282,7 +281,7 @@ public class Sidebar implements VirtueChangeHandler {
 		});
 	}
 
-	protected void onLogin(DesktopUser user) throws IOException {
+	private void onLogin(DesktopUser user) throws IOException {
 		favorites = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/favorites");
 		lastView = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/lastView");
 		lastSort = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/lastSort");
@@ -294,7 +293,9 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.getContentPane().add(desktopContainer);
 		frame.setSize(491, 600);
 		setInitialViewPort();
-		sp.setViewportView(loadingContainer);
+		if (loading) {
+			sp.setViewportView(loadingContainer);
+		}
 		frame.setVisible(true);
 	}
 
@@ -323,25 +324,24 @@ public class Sidebar implements VirtueChangeHandler {
 			setInitialViewPort();
 		}
 
-		for (DesktopVirtue virtue : virtues) {
-			Color headerColor = getNextColor();
-			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
-					textField, ghostText);
-			vt.addVirtueToRow(virtue, vtc, vtc.getRow());
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					for (DesktopVirtue virtue : virtues) {
+						Color headerColor = getNextColor();
+						VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor,
+								getNextColor(), sp, textField, ghostText);
 
-			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField,
-					ghostText);
-			vl.addVirtueToRow(virtue, vlc, vlc.getRow());
+						VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp,
+								textField, ghostText);
 
-			virtueIdToVtc.put(virtue.getTemplateId(), vtc);
-			virtueIdToVlc.put(virtue.getTemplateId(), vlc);
+						virtueIdToVtc.put(virtue.getTemplateId(), vtc);
+						virtueIdToVlc.put(virtue.getTemplateId(), vlc);
 
-			for (ApplicationDefinition ad : virtue.getApps().values()) {
-
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
+						for (ApplicationDefinition ad : virtue.getApps().values()) {
+							vt.addVirtueToRow(virtue, vtc, vtc.getRow());
+							vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 							boolean isFavorited = favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false);
 							ApplicationDom dom = new ApplicationDom(ad, isFavorited);
 
@@ -409,14 +409,14 @@ public class Sidebar implements VirtueChangeHandler {
 									break;
 								}
 							}
-						} catch (Exception e) {
-							logger.debug("Error with adding virtues");
 						}
 					}
-				});
-
+				} catch (Exception e) {
+							logger.debug("Error with adding virtues");
+				}
 			}
-		}
+		});
+
 
 		String keyword = textField.getText();
 		if (ghostText.getIsVisible()) {
@@ -773,7 +773,6 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				authService.triggerPollStopListener();
 				authService.logout();
 				loading = true;
 				try {

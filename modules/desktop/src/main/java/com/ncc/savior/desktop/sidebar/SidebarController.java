@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
-import com.ncc.savior.desktop.authorization.AuthorizationService.IPollEventListener;
+import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -48,15 +48,15 @@ public class SidebarController {
 	}
 
 	public void registerAsListener() {
-		authService.addPollEventListener(new IPollEventListener() {
+		authService.addLoginListener(new ILoginListener() {
 
 			@Override
-			public void onPollStart() {
+			public void onLogin() {
 				startVirtuePoll();
 			}
 
 			@Override
-			public void onPollStop() {
+			public void onLogout() {
 				stopVirtuePoll();
 			}
 

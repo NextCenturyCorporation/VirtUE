@@ -20,7 +20,7 @@ public class AuthorizationService {
 	private String loginUrl;
 	private String logoutUrl;
 
-	private Set<IPollEventListener> pollListeners;
+	private Set<ILoginListener> loginListeners;
 
 	public AuthorizationService(String requiredDomain, String loginUrl, String logoutUrl) {
 		this.requiredDomain = requiredDomain;
@@ -30,7 +30,7 @@ public class AuthorizationService {
 		this.os = JavaUtil.getOs();
 		this.loginUrl = loginUrl;
 		this.logoutUrl = logoutUrl;
-		this.pollListeners = new HashSet<IPollEventListener>();
+		this.loginListeners = new HashSet<ILoginListener>();
 		createAuthProviderChain();
 	}
 
@@ -69,6 +69,7 @@ public class AuthorizationService {
 				|| !requiredDomain.toUpperCase().equals(user.getDomain().toUpperCase())) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 		}
+		triggerOnLogin();
 	}
 
 	public DesktopUser getUser() throws InvalidUserLoginException {
@@ -81,6 +82,7 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser login(String domain, String username, String password) throws InvalidUserLoginException {
+		triggerOnLogin();
 		if (!(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 			// if (requiredDomain == null || requiredDomain.equals(domain)) {
@@ -96,6 +98,7 @@ public class AuthorizationService {
 	}
 
 	public void logout() {
+		triggerOnLogout();
 		authProvider.logout();
 	}
 
@@ -107,30 +110,30 @@ public class AuthorizationService {
 		authProvider.addAuthorizationTicket(builder, targetHost);
 	}
 
-	public void addPollEventListener(IPollEventListener listener) {
-		pollListeners.add(listener);
+	public void addLoginListener(ILoginListener listener) {
+		loginListeners.add(listener);
 	}
 
-	public void removePollEventListener(IPollEventListener listener) {
-		pollListeners.remove(listener);
+	public void removeLoginListener(ILoginListener listener) {
+		loginListeners.remove(listener);
 	}
 
-	public void triggerPollStartListener() {
-		for (IPollEventListener listener : pollListeners) {
-			listener.onPollStart();
+	public void triggerOnLogin() {
+		for (ILoginListener listener : loginListeners) {
+			listener.onLogin();
 		}
 	}
 
-	public void triggerPollStopListener() {
-		for (IPollEventListener listener : pollListeners) {
-			listener.onPollStop();
+	protected void triggerOnLogout() {
+		for (ILoginListener listener : loginListeners) {
+			listener.onLogout();
 		}
 	}
 
-	public static interface IPollEventListener {
-		public void onPollStart();
+	public static interface ILoginListener {
+		public void onLogin();
 
-		public void onPollStop();
+		public void onLogout();
 	}
 
 }
