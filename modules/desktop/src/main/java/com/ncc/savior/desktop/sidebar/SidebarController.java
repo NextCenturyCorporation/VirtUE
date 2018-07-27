@@ -118,7 +118,6 @@ public class SidebarController {
 							}
 
 							updateVirtues(virtues);
-
 						}
 
 						Thread.sleep(pollPeriodMillis);
