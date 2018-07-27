@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.IIconService;
@@ -175,8 +176,17 @@ public class Sidebar implements VirtueChangeHandler {
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
+
 		setupComparators();
 		setupLoadingGif();
+		AbstractVirtueContainer.addUpdateListener(new IUpdateListener() {
+
+			@Override
+			public void onUpdate() {
+				sortWithKeyword();
+			}
+
+		});
 	}
 
 	private void setupLoadingGif() {
@@ -242,17 +252,6 @@ public class Sidebar implements VirtueChangeHandler {
 		} else {
 			startLogin();
 		}
-
-		// DesktopUser user = authService.getUser();
-
-		// String reqDomain = authService.getRequiredDomain();
-		// if (user != null && user.getImage() != null) {
-		// userImageView.setImage(user.getImage());
-		// }
-		// if (user == null || (reqDomain != null &&
-		// !reqDomain.equals(user.getDomain()))) {
-		// initiateLoginScreen();
-		// }
 	}
 
 	public void startLogin() throws IOException {
@@ -272,17 +271,13 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void onLoginSuccess(DesktopUser user) throws IOException {
 				onLogin(user);
+				authService.triggerPollStartListener();
 				ghostText.reset();
 			}
 
 			@Override
 			public void onLoginFailure(String username, String domain, RuntimeException e) {
 				logger.warn("Login failure for domain=" + domain + " username=" + username, e);
-			}
-
-			@Override
-			public void onCancel() {
-				// do nothing, handled elsewhere
 			}
 		});
 	}
@@ -307,13 +302,7 @@ public class Sidebar implements VirtueChangeHandler {
 	public void changeVirtue(DesktopVirtue virtue) {
 		VirtueTileContainer vtc = virtueIdToVtc.get(virtue.getTemplateId());
 		VirtueListContainer vlc = virtueIdToVlc.get(virtue.getTemplateId());
-		// if (vmi == null) {
-		// vmi = virtueIdToVc.get(virtue.getTemplateId());
-		// if (virtue.getId() != null) {
-		// virtueIdToVc.remove(virtue.getTemplateId());
-		// virtueIdToVc.put(virtue.getId(), vmi);
-		// }
-		// }
+
 		vtc.updateVirtue(virtue);
 		vlc.updateVirtue(virtue);
 
@@ -442,9 +431,7 @@ public class Sidebar implements VirtueChangeHandler {
 	public void removeVirtue(DesktopVirtue virtue) {
 		VirtueTileContainer vtc = virtueIdToVtc.remove(virtue.getTemplateId());
 		virtueIdToVlc.remove(virtue.getTemplateId());
-		// if (vmi == null) {
-		// vmi = virtueIdToVc.remove(virtue.getTemplateId());
-		// }
+
 		if (vtc != null) {
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
 				at.removeApplication(ad, virtue);
@@ -786,6 +773,7 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
+				authService.triggerPollStopListener();
 				authService.logout();
 				loading = true;
 				try {
@@ -810,11 +798,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 				searchMode = true;
-				String keyword = textField.getText();
-				if (ghostText.getIsVisible()) {
-					keyword = "";
-				}
-				sortByOption(keyword);
+				sortWithKeyword();
 				sp.setViewportView(sp.getViewport().getView());
 				searchLabel.setIcon(closeIcon);
 			}
@@ -827,10 +811,7 @@ public class Sidebar implements VirtueChangeHandler {
 			public void removeUpdate(DocumentEvent e) {
 				searchMode = true;
 				String keyword = textField.getText();
-				if (ghostText.getIsVisible()) {
-					keyword = "";
-				}
-				sortByOption(keyword);
+				sortWithKeyword();
 				sp.setViewportView(sp.getViewport().getView());
 				if (keyword.equals("")) {
 					searchLabel.setIcon(searchIcon);
@@ -849,11 +830,7 @@ public class Sidebar implements VirtueChangeHandler {
 						resetViews();
 					} else {
 						searchMode = true;
-						String keyword = textField.getText();
-						if (ghostText.getIsVisible()) {
-							keyword = "";
-						}
-						sortByOption(keyword);
+						sortWithKeyword();
 						sp.setViewportView(sp.getViewport().getView());
 						searchLabel.setIcon(closeIcon);
 					}
@@ -867,11 +844,7 @@ public class Sidebar implements VirtueChangeHandler {
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) cb.getSelectedItem();
 				lastSort.put("sort", selected);
-				String keyword = textField.getText();
-				if (ghostText.getIsVisible()) {
-					keyword = "";
-				}
-				sortByOption(keyword);
+				sortWithKeyword();
 			}
 
 		});
@@ -882,6 +855,14 @@ public class Sidebar implements VirtueChangeHandler {
 				setupDialog();
 			}
 		});
+	}
+
+	public void sortWithKeyword() {
+		String keyword = textField.getText();
+		if (ghostText.getIsVisible()) {
+			keyword = "";
+		}
+		sortByOption(keyword);
 	}
 
 	public void sortByOption(String keyword) {

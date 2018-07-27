@@ -193,6 +193,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		} else {
 			tileContainer.setBackground(Color.LIGHT_GRAY);
 		}
+		triggerUpdateListener();
 	}
 
 	@Override

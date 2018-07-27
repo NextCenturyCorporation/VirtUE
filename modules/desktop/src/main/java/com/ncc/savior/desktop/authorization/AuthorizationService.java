@@ -1,5 +1,8 @@
 package com.ncc.savior.desktop.authorization;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.ws.rs.client.Invocation.Builder;
 
 import org.slf4j.Logger;
@@ -17,6 +20,8 @@ public class AuthorizationService {
 	private String loginUrl;
 	private String logoutUrl;
 
+	private Set<IPollEventListener> pollListeners;
+
 	public AuthorizationService(String requiredDomain, String loginUrl, String logoutUrl) {
 		this.requiredDomain = requiredDomain;
 		if (this.requiredDomain != null && this.requiredDomain.equals("")) {
@@ -25,6 +30,7 @@ public class AuthorizationService {
 		this.os = JavaUtil.getOs();
 		this.loginUrl = loginUrl;
 		this.logoutUrl = logoutUrl;
+		this.pollListeners = new HashSet<IPollEventListener>();
 		createAuthProviderChain();
 	}
 
@@ -99,6 +105,32 @@ public class AuthorizationService {
 
 	public void addAuthorizationTicket(Builder builder, String targetHost) throws InvalidUserLoginException {
 		authProvider.addAuthorizationTicket(builder, targetHost);
+	}
+
+	public void addPollEventListener(IPollEventListener listener) {
+		pollListeners.add(listener);
+	}
+
+	public void removePollEventListener(IPollEventListener listener) {
+		pollListeners.remove(listener);
+	}
+
+	public void triggerPollStartListener() {
+		for (IPollEventListener listener : pollListeners) {
+			listener.onPollStart();
+		}
+	}
+
+	public void triggerPollStopListener() {
+		for (IPollEventListener listener : pollListeners) {
+			listener.onPollStop();
+		}
+	}
+
+	public static interface IPollEventListener {
+		public void onPollStart();
+
+		public void onPollStop();
 	}
 
 }

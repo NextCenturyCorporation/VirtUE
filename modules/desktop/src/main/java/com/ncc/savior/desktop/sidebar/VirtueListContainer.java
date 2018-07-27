@@ -167,6 +167,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 	public void updateVirtue(DesktopVirtue virtue) {
 		this.virtue = virtue;
 		this.statusLabel.setText(virtue.getVirtueState().toString());
+		triggerUpdateListener();
 	}
 
 	@Override
