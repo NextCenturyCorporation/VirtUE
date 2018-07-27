@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.awt.HeadlessException;
 import java.io.File;
+import java.net.URL;
 
 import javax.swing.JFrame;
 
@@ -38,19 +39,19 @@ public class SidebarApplication {
 
 		// Plumbing and dependency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
-		String baseUrl = props.getString(PropertyManager.PROPERTY_BASE_API_PATH);
-		String desktopUrl = baseUrl + props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
-		String loginUrl = baseUrl + props.getString(PropertyManager.PROPERTY_LOGIN_API_PATH);
-		String logoutUrl = baseUrl + props.getString(PropertyManager.PROPERTY_LOGOUT_API_PATH);
+		URL baseUrl = new URL(props.getString(PropertyManager.PROPERTY_BASE_API_PATH));
+		URL desktopUrl = new URL(baseUrl, props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH));
+		URL loginUrl = new URL(baseUrl, props.getString(PropertyManager.PROPERTY_LOGIN_API_PATH));
+		URL logoutUrl = new URL(baseUrl, props.getString(PropertyManager.PROPERTY_LOGOUT_API_PATH));
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
-		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl,
-				logoutUrl);
-		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
+		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
+				logoutUrl.toString());
+		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl);
 		IApplicationManagerFactory appManager;
 		appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
 		File freerdpExe = null;
