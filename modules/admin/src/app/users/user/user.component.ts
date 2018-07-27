@@ -36,6 +36,7 @@ export class UserComponent implements OnInit {
   parentDomain: string;
 
   allVirtues = [];
+  // allVirtues: DictList<Virtue>;
   allApps = [];
   adUserCtrl: FormControl;
 
@@ -49,7 +50,7 @@ export class UserComponent implements OnInit {
     public dialog: MatDialog
   ) {
     this.setMode();
-    this.user = new User('');
+    this.user = new User(undefined);
 
     console.log(this.user);
 
@@ -62,6 +63,8 @@ export class UserComponent implements OnInit {
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
+
+    // this.allVirtues = new DictList<Virtue>();
   }
 
   ngOnInit() {
@@ -147,7 +150,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   refreshData() {
     setTimeout(() => {
       this.getUserData(this.user.username);
-    }, 400);
+    }, 200);
   }
 
   setBaseUrl( url: string ) {
@@ -157,8 +160,9 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   getUserData(username: string) {
     this.usersService.getUser(this.baseUrl, username).subscribe(uData => {
       this.userData = uData;
-      this.user.roles = uData.authorities;
-      this.user.enabled = uData.enabled;
+      this.user = new User(uData);
+      // this.user.roles = uData.authorities;
+      // this.user.enabled = uData.enabled;
       this.updateVirtueList(uData.virtueTemplateIds);
     });
   }
@@ -191,15 +195,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
-  getVirtueName(id: string) {
-    let userVirtue = [];
-    if (id !== null) {
-      userVirtue = this.allVirtues.filter(virt => virt.id === id)
-        .map(virtue => virtue.name);
-      return userVirtue;
-    }
-  }
-
   generateAppsListHTML(virtue: any) {
     let appsString = virtue.applicationIds.toString();
     let appList: any;
@@ -218,9 +213,12 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   updateVirtueList(newVirtueIDs: any) {
-    this.user.virtueIDs = newVirtueIDs;
+    console.log("asdkjfhbasdkjgdfglasgf");
+    this.user.childIDs = newVirtueIDs;
+    // this.user.children = new DictList<Virtue>();
     this.user.virtues = new Array<Virtue>();
       for (let vID of newVirtueIDs) {
+        // this.user.children.add(vID, this.allVirtues.get(vID));
         for (let virtue of this.allVirtues) {
           if (vID === virtue.id) {
             this.user.virtues.push(virtue);
@@ -234,7 +232,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.user.virtues = this.user.virtues.filter(virt => {
       return virt.id !== id;
     });
-    this.user.virtueIDs.splice(index, 1);
+    this.user.childIDs.splice(index, 1);
   }
 
   activateModal(mode: string): void {
@@ -256,7 +254,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath,
-        userVirtueIDs: this.user.virtueIDs
+        userVirtueIDs: this.user.childIDs
       },
       panelClass: 'virtue-modal-overlay'
     });
@@ -286,7 +284,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     let body = {
       'username': this.user.username,
       'authorities': roles,
-      'virtueTemplateIds': this.user.virtueIDs,
+      'virtueTemplateIds': this.user.childIDs,
       'enabled': this.user.enabled
     };
     // console.log(body);

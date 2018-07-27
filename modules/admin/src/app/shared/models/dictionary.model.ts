@@ -2,6 +2,8 @@ export class DictList<T> {
   private d: Dict<T> = {};
   private l: T[] = [];
 
+  length: number = 0;
+
   add(key: string, e: T) {
     if (key in this.d) {
       console.log("Key ", key + ": ", e, " already in dict.");
@@ -9,6 +11,7 @@ export class DictList<T> {
     }
     this.d[key] = e;
     this.l.push(e);
+    this.length += 1;
   }
 
 

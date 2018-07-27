@@ -15,13 +15,19 @@ export class Virtue extends Item{
   appIDs: any[];
   color: string;
 
-
-  constructor(id: string, name: string) {
-    super(id, name);
-    this.vmIDs = [];
-    this.vms = new Array<VirtualMachine>();
-    // this.enabled = true;
-    this.appIDs = [];
+  constructor(virtueObj) {
+    if (virtueObj) {
+      super(virtueObj.id, virtueObj.name);
+      this.enabled = virtueObj.enabled;
+      this.version = virtueObj.version;
+      this.lastEditor = virtueObj.lastEditor;
+      this.lastModification = virtueObj.lastModification;
+      this.color = virtueObj.color;
+      this.status = virtueObj.enabled ? 'enabled' : 'disabled';
+    }
+    else {
+      super('', '');
+    }
   }
 
   getName() {

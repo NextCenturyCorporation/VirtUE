@@ -3,6 +3,7 @@ import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
 
 import { DialogsComponent } from '../dialogs/dialogs.component';
 
@@ -18,6 +19,7 @@ import { Item } from '../shared/models/item.model';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { UsersService } from '../shared/services/users.service';
 import { VirtuesService } from '../shared/services/virtues.service';
+import { ItemService } from '../shared/services/item.service';
 import { VirtualMachineService } from '../shared/services/vm.service';
 import { ApplicationsService } from '../shared/services/applications.service';
 
@@ -39,25 +41,11 @@ export class GeneralListComponent implements OnInit {
   domain: string; // like /users, /virtues, etc.
 
   //will cause error if not instantialized before page loads; the pull functions
-  //don't initialize these immediately.
-  // note that this isn't very pretty, but we need lists in order to do sorting,
-  // and we need to be able to link the virtue ids in each user with the virtue objects quickly
-  //(and vms in virtues, and apps in vms), and so we probably want to use dicts to do that lookup.
-  //There has to be a better way to do this
-  // Maybe the dict class could be written to allow access like a list? it has to be sortable.
-  // So
+  //don't initialize these immediately
   allUsers: DictList<User>;
   allVirtues: DictList<Virtue>;
   allVms: DictList<VirtualMachine>;
   allApps: DictList<Application>;
-  // allUsersD: Dict<User>;
-  // allVirtuesD: Dict<Virtue>;
-  // allVmsD: Dict<VirtualMachine>;
-  // allAppsD: Dict<Application>;
-  // allUsersL: User[];
-  // allVirtuesL: Virtue[];
-  // allVmsL: VirtualMachine[];
-  // allAppsL: Application[];
 
   noDataMessage: string;
 
@@ -71,6 +59,7 @@ export class GeneralListComponent implements OnInit {
   sortDirection: string = 'asc';
 
   os: Observable<Array<VirtuesService>>;
+
 
   constructor(
     protected router: Router,
@@ -90,14 +79,6 @@ export class GeneralListComponent implements OnInit {
     this.allVirtues = new DictList<Virtue>();
     this.allVms = new DictList<VirtualMachine>();
     this.allApps = new DictList<Application>();
-    // this.allUsersD = {};
-    // this.allUsersL = [];
-    // this.allVirtuesD = {};
-    // this.allVirtuesL = [];
-    // this.allVmsD = {};
-    // this.allVmsL = [];
-    // this.allAppsD = {};
-    // this.allAppsL = [];
   }
 
   ngOnInit() {
@@ -114,11 +95,8 @@ export class GeneralListComponent implements OnInit {
     this.resetRouter();
   }
 
-  // virtual function, must be overriden
-  // updateItems() {}
 
-  // virtual function, must be overriden
-  //this should update items too. ??
+  //must be overriden
   pullData() {}
 
 
@@ -139,7 +117,7 @@ export class GeneralListComponent implements OnInit {
   refreshData() {
     setTimeout(() => {
       this.pullData();
-    }, 600);
+    }, 300);
   }
 
   filterList(filterValue: string) {
@@ -166,7 +144,7 @@ export class GeneralListComponent implements OnInit {
     return item.childrenListHTMLstring;
   }
 
-  pullApplications() {
+  pullApplications(isChildType: boolean) {
     // console.log("pulling apps");
     this.appsService.getAppsList(this.baseUrl).subscribe( apps => {
       this.allApps.clear()
@@ -178,7 +156,7 @@ export class GeneralListComponent implements OnInit {
     });
   }
 
-  pullVms() {
+  pullVms(isChildType: boolean) {
     // console.log("pulling vms");
     this.vmService.getVmList(this.baseUrl).subscribe( vms => {
       this.allVms.clear()
@@ -189,86 +167,127 @@ export class GeneralListComponent implements OnInit {
         this.allVms.add(v.id, v);
       }
       vms = null;
+    },
+    error => {},
+    () => {
+      if (!isChildType) {
+        this.items = this.allVms.getL();
+        for (let v of this.allVms.getL()) {
+          v.formatChildrenList(this.allApps);
+        }
+      }
     });
   }
 
-  pullVirtues() {
+  pullVirtues(isChildType: boolean) {
+
     // console.log("pulling virtues");
     this.virtuesService.getVirtues(this.baseUrl).subscribe( virtues => {
-      this.allVirtues.clear()
+      this.allVirtues.clear() // not sure if this is needed
       this.allVirtues = new DictList<Virtue>();
+      let virt = null;
       for (let v of virtues) {
-        // v.childIDs = v.vmIDs;
-        v.status = v.enabled ? 'enabled' : 'disabled';
-        this.allVirtues.add(v.id, v);
+        virt = new Virtue(v);
+        // virt.childIDs = v.virtualMachineTemplateIds;
+        // virt.formatChildrenList(this.allVms);
+        this.allVirtues.add(v.id, virt);
       }
+      virt = null;
       virtues = null;
+    },
+    error => {},
+    () => {
+      if (!isChildType) {
+        this.items = this.allVirtues.getL();
+        for (let v of this.allVirtues.getL()) {
+          v.formatChildrenList(this.allVms);
+        }
+      }
     });
   }
 
-  pullUsers(): void {
-    // console.log("pulling users");
+  //note isChildType is never used, bc Users can't be something else' child, but
+  // hopefully these will all be refactored into one function later.
+  pullUsers(isChildType: boolean) {
     this.usersService.getUsers(this.baseUrl).subscribe(users => {
+      // console.log("start users", this.allVirtues.length);
     // console.log("**", users[0]);
-      this.allUsers.clear() // not sure if this is needed
+      this.allUsers.clear(); // not sure if this is needed
       this.allUsers = new DictList<User>();
       let user = null;
       for (let u of users) {
         user = new User(u);
-        u.childIDs = u.virtueTemplateIds;
-        user.formatChildrenList();
-        this.allUsers.add(u.username, user);
+        this.allUsers.add(user.getName(), user);
       }
       user = null;
       users = null;
       // console.log(this.allUsers);
+    },
+    error => {},
+    () => {
+      if (!isChildType) {
+        console.log(this.allVirtues.length);
+        this.items = this.allUsers.getL();
+        for (let u of this.allUsers.getL()) {
+          u.formatChildrenList(this.allVirtues);
+        }
+      }
     });
+    // console.log("pulling users");
+    // this.usersService.getUsers(this.baseUrl).subscribe(userDict => {
+    //     console.log(userDict);
+    //     this.allUsers = userDict;
+    //     this.items = this.allUsers.getL();
+    //     for (let u of this.allUsers.getL()) {
+    //       u.formatChildrenList(this.allVirtues);
+    //     }
+    //     console.log("back here", this.allVirtues.length, this.allUsers.length);
+    // });
+    //
+    // let usersDict = new DictList<User>();
+    // this.pullUserData(baseUrl).subscribe(users => {
+    //   console.log(users.length);
+    //   let user: User = null;
+    //   for (let u of users) {
+    //     user = new User(u);
+    //     usersDict.add(user.getID(), user);
+    //   }
+    //   user = null;
+    //   users = null;
+    //   // console.log(usersDict);
+    //   let temp = Observable.of(usersDict);
+    //   console.log("leaving second", usersDict.length, temp);
+    //   return temp;
+    // },
+    // error => {},
+    // () => {});
+    //
+    //
+    //
+    // console.log("end2", this.allVirtues.length, this.allUsers.length);
   }
-
-  //see if this works. If so, then do below.
-  // pullUsers(): void {
-  //   this.allUsers = this.usersService.getUsers(this.baseUrl).subscribe(userList => {
-  //     for (let u of userList) {
-  //       u['childIDs'] = u.
-  //       u['status'] = u.enabled ? 'enabled' : 'disabled';
-  //     }
-  //     return userList;
-  //   });
-  //   // And just do this for everything?
-  //   //this.allUsers = this.usersService.getUsers(this.baseUrl).subscribe();
-  // }
-
-
-  //These could be condensed into one function if childIDs were implemented
-  // linkUsersToVirtues() {
-  //   for (let u of this.allUsers) {
-  //     u['virtues'] = Dict<Virtue>{};
-  //     for (let v of this.allVirtues) {
-  //       u.virtues[v.id] = v;
-  //     }
+  // this.usersService.getUsers(this.baseUrl).subscribe(users => {
+  //   // console.log("start users", this.allVirtues.length);
+  // // console.log("**", users[0]);
+  //   this.allUsers.clear() // not sure if this is needed
+  //   this.allUsers = new DictList<User>();
+  //   let user = null;
+  //   for (let u of users) {
+  //     user = new User(u);
+  //     this.allUsers.add(u.username, user);
+  //   }
+  //   user = null;
+  //   users = null;
+  //   // console.log(this.allUsers);
+  // },
+  // error => {},
+  // () => {
+  //   this.items = this.allUsers.getL();
+  //   for (let u of this.allUsers.getL()) {
+  //     u.formatChildrenList(this.allVirtues);
   //   }
   // }
-
-  //All parents and all children of all parents [like: linkItems(this.allUsers, this.allVirtues, new Dict)  ]
-  // Can type this once
-  linkItems(parents: DictList<Item>, allChildren: DictList<Item>) {
-    for (let p of parents.getL()) {
-      // console.log(p, "CHECK HERE THAT the value is an Item, not a number/string/index");
-      p.children = new DictList<Item>();
-      // p['children']: Dict = {};
-      for (let cID of p.childIDs) {
-        p.children.add(cID, allChildren.get(cID));
-      }
-    }
-  }
-
-    // for (let p of parents) {
-    //   p.children = newChildDict;
-    //   // p['children']: Dict = {};
-    //   for (let cID of p.childIDs) {
-    //     p.children[cID] = allChildren[cID];
-    //   }
-    // }
+  // );
 
   getName(dl: DictList<Item>, id: string) {
     return dl.get(id).getName();

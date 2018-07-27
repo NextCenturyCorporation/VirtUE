@@ -13,8 +13,8 @@ export class HeaderComponent implements OnInit {
     {value: 'Users', link: '/users'},
     {value: 'Applications', link: '/applications'},
     // {value: 'Templates', link: '/'}
-    {value: 'Virtual Machine Images', link: '/vm-templates'},
-    {value: 'Virtue Images', link: '/virtues'}
+    {value: 'Virtual Machine Templates', link: '/vm-templates'},
+    {value: 'Virtue Templates', link: '/virtues'}
   ];
   templateLinks = [
     {value: 'Virtual Machine Templates', link: '/vm-templates'},

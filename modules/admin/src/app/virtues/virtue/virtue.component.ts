@@ -74,7 +74,7 @@ export class VirtueComponent implements OnInit {
     this.parentDomain = '/virtues'
     this.setMode();
     //set up empty, will get filled in ngOnInit if not mode is not 'create'
-    this.virtue = new Virtue('', '');
+    this.virtue = new Virtue(undefined);
 
     this.virtueData = {};
 

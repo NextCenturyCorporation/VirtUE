@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { User } from '../models/user.model';
+import { Item } from '../models/item.model';
+import { DictList } from '../models/dictionary.model';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -17,12 +19,38 @@ export class UsersService {
   constructor( private httpClient: HttpClient ) {}
 
   // Get all users
-  getUsers( baseUrl: string ): Observable<any> {
+  getUsers(baseUrl: string): Observable<User[]> {
     let awsServer = baseUrl + this.configUrl;
-    // console.log('getUsers => ');
-    // console.log(awsServer);
-    return this.httpClient.get<any>(awsServer);
+    return this.httpClient.get<User[]>(awsServer);
   }
+  // pullUserData( baseUrl: string ): Observable<any> {
+  //
+  //   let awsServer = baseUrl + this.configUrl;
+  //   return this.httpClient.get<User[]>(awsServer);
+  // }
+  // getUsers(baseUrl: string): Observable<DictList<User>> {
+  //   let usersDict = new DictList<User>();
+  //   this.pullUserData(baseUrl).subscribe(users => {
+  //     console.log(users.length);
+  //     let user: User = null;
+  //     for (let u of users) {
+  //       user = new User(u);
+  //       usersDict.add(user.getID(), user);
+  //     }
+  //     user = null;
+  //     users = null;
+  //     // console.log(usersDict);
+  //     let temp = Observable.of(usersDict);
+  //     console.log("leaving second", usersDict.length, temp);
+  //     return temp;
+  //   },
+  //   error => {},
+  //   () => {});
+  //
+  //
+  //   console.log("leaving once");
+  //   return Observable.of(usersDict);
+  // }
 
   getUser(baseUrl: string, id: string): Observable<any> {
     let url = baseUrl + this.configUrl + id;
@@ -34,10 +62,6 @@ export class UsersService {
   createUser( baseUrl: string, userData: any ): Observable<any> {
     let url = baseUrl + this.configUrl;
     let newUser = userData;
-    // console.log('createUser() => ');
-    // console.log(url);
-    // console.log(userData);
-    // return "";
     if (userData) {
       // console.log('Posting user: ' + newUser);
       return this.httpClient.post(url, newUser, httpOptions);

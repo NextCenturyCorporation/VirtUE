@@ -6,28 +6,40 @@ export class User extends Item {
   // id: string;
   username: string;
   // enabled: boolean;
-  virtueIDs: any[];
+  // virtueIDs: any[];
   virtues: Virtue[];
-  roles: any[];
+  roles: string[];
+
 
   //whatever form the user object is in the database.
   constructor(userObj) {
     if (userObj) {
       super('', userObj.username);
-      this.roles = userObj.authorities;
+      if (!userObj.authorities) {
+        this.roles = [];
+      }
+      else {
+        this.roles = userObj.authorities;
+        // console.log(this.roles);
+      }
+
+      if (!userObj.virtueTemplateIds) {
+        this.childIDs = [];
+      }
+      else {
+        this.childIDs = userObj.virtueTemplateIds;
+      }
+
       this.enabled = userObj.enabled;
       this.status = userObj.enabled ? 'enabled' : 'disabled';
     }
     else {
       super('', '');
+      this.childIDs = [];
+      this.roles = [];
     }
 
-
-    // console.log(this);
-    this.virtues = new Array<Virtue>();
-    this.virtueIDs = [];
-    // this.enabled = true;
-    this.roles = [];
+    this.virtues = [];
   }
 
   setName(s: string) {
@@ -35,6 +47,11 @@ export class User extends Item {
   }
 
   getName(): string {
+    return this.username;
+  }
+
+  //Overrides Item
+  getID(): string {
     return this.username;
   }
 }

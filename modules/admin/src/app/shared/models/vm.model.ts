@@ -17,14 +17,22 @@ export class VirtualMachine extends Item {
   lastEditor: string;
   securityTag: string;
 
-  constructor(id: string, name: string) {
-    super(id, name);
-    this.appIDs = [];
-    this.enabled = true;
-    this.apps = new Array<Application>();
+  constructor(userObj) {
+    if (userObj) {
+      super('', userObj.username);
+      this.enabled = userObj.enabled;
+      this.status = userObj.enabled ? 'enabled' : 'disabled';
+    }
+    else {
+      super('', '');
+    }
   }
 
-  getName() {
+  setName(s: string) {
+    this.name = s;
+  }
+
+  getName(): string {
     return this.name;
   }
 }

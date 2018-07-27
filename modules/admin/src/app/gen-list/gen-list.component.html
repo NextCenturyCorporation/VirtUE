@@ -53,11 +53,11 @@
         It is passed the preceeding list, followed by the values between colons -->
         <div class="mui-row table-row"
               *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
+              [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }"
               appActiveClass>
 
           <div *ngFor="let c of colData; let idx=index"
-              [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }"
-              class="table-data mui-col-md-{{c.colWidth}}">
+              class="table-data mui-col-md-{{c.colWidth}} transparent">
 
             <div *ngIf="idx === 0" class="mini-menu">
               <a class="edit" routerLink="{{domain}}/edit/{{i[c.name]}}">{{ i[c.name] }}</a>
@@ -73,8 +73,10 @@
                 <a (click)="openDialog(i[c.name], 'delete', 'delete', i[c.name])">Delete</a>
               </span>
             </div>
-            <!-- <div *ngIf="!c.isList && idx !== 0 "> -->
-            <div *ngIf="idx !== 0 ">
+            <div *ngIf="c.isList && idx !== 0 ">
+              <ul [innerHTML]="i.childrenListHTMLstring"></ul>
+            </div>
+            <div *ngIf="!c.isList && idx !== 0 ">
               {{ c.formatValue(i) }}
             </div>
           </div>

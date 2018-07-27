@@ -60,20 +60,39 @@ export class UserListComponent extends GeneralListComponent {
 
   // Overrides parent
   pullData() {
-    this.pullUsers();
-    this.pullVirtues();
-    // this.linkItems(this.allUsersD, this.allVirtuesD, new DictList<Virtue>());
-    // this.items = this.allUsersL;
-    this.linkItems(this.allUsers, this.allVirtues);
-    this.items = this.allUsers.getL();
+    // console.log("starting pull");
+    // this.virtuesService.getVirtues(this.baseUrl).subscribe( virtues => {
+    //     console.log("start virts");
+    //     this.allVirtues.clear() // not sure if this is needed
+    //     this.allVirtues = new DictList<Virtue>();
+    //     let virt = null;
+    //     for (let v of virtues) {
+    //       virt = new Virtue(v);
+    //       this.allVirtues.add(v.id, virt);
+    //     }
+    //     virt = null;
+    //     virtues = null;
+    //     console.log("done virts", this.allVirtues.length);
+    //   },
+    //   error => {},
+    //   () => this.pullUsers()
+    // );
+
+    //this doesn't necessarily guarantee that users will be loaded afer the virtues
+    //are.
+    //It seems to always work though.
+    //Could use a settimeout of 0 and call pullUsers on the completion though.
+
+    this.pullVirtues(true);
+    this.pullUsers(false);
+
   }
 
-  // overrides parent
-  // updateItems() {
-    // this.items = ;
-  // }
-
   formatRoles( user: User ): string {
+
+    if (!user.roles) {
+      return '';
+    }
     return user.roles.sort().toString();
   }
 
@@ -81,10 +100,14 @@ export class UserListComponent extends GeneralListComponent {
     return user.enabled ? 'Enabled' : 'Disabled';
   }
 
+  getChildrenListHTMLstring( user: User ): string {
+    return user.childrenListHTMLstring;
+  }
+
   // Overrides parent
   toggleItemStatus(u: User) {
     console.log(u);
-    let newStatus = !u.enabled ? 'disable': 'enable';
+    let newStatus = u.enabled ? 'disable': 'enable';
     // console.log("here");
     if (u.getName().toUpperCase() === "ADMIN") {
       //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
