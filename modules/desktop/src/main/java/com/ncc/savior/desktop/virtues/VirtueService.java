@@ -273,7 +273,7 @@ public class VirtueService {
 
 	public void terminateVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (virtue.getVirtueState() != VirtueState.UNPROVISIONED) {
-			desktopResourceService.stopVirtue(virtue.getId());
+			desktopResourceService.terminateVirtue(virtue.getId());
 		}
 	}
 }

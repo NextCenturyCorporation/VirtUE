@@ -103,6 +103,7 @@ public abstract class AbstractVirtueContainer {
 				JMenuItem mi1 = new JMenuItem("Stop");
 				JMenuItem mi2 = new JMenuItem("Start");
 				JMenuItem mi3 = new JMenuItem("Terminate");
+				JMenuItem mi4 = new JMenuItem("Reconnect");
 
 				mi1.addActionListener(new ActionListener() {
 					@Override
@@ -130,25 +131,34 @@ public abstract class AbstractVirtueContainer {
 					}
 				});
 
-				mi2.addActionListener(new ActionListener() {
+				mi3.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
 						try {
 							virtueService.terminateVirtue(virtue);
 							updateVirtue(virtue);
 						} catch (IOException e) {
-							String msg = "Error attempting to start virtue=" + virtue;
+							String msg = "Error attempting to terminate virtue=" + virtue;
 							logger.error(msg, e);
 						}
 					}
 				});
 
-				pm.setPopupSize(78, 78);
+				mi4.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent evt) {
+						logger.debug("Reconnect not implemented yet");
+					}
+				});
+
+				pm.setPopupSize(78, 97);
 				pm.add(mi1);
 				pm.addSeparator();
 				pm.add(mi2);
 				pm.addSeparator();
 				pm.add(mi3);
+				pm.addSeparator();
+				pm.add(mi4);
 				pm.show(optionsLabel, -44, 26);
 			}
 		});
