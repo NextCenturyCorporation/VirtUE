@@ -23,8 +23,9 @@ public class TestReachabilityCompletableFuture
 	private static final Logger logger = LoggerFactory.getLogger(TestReachabilityCompletableFuture.class);
 	private IKeyManager keyManager;
 
-	public TestReachabilityCompletableFuture(ScheduledExecutorService executor, IKeyManager keyManager) {
-		super(executor, true, 3000, 3000);
+	public TestReachabilityCompletableFuture(ScheduledExecutorService executor, IKeyManager keyManager,
+			int timeoutMillis) {
+		super(executor, true, 3000, 3000, timeoutMillis);
 		this.keyManager = keyManager;
 	}
 

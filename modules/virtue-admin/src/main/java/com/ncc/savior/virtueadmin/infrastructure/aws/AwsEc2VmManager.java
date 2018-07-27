@@ -35,6 +35,7 @@ import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
@@ -130,7 +131,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future, null);
 		if (vms.size() != 1) {
 			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
-			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
+			SaviorException e = new SaviorException(SaviorErrorCode.AWS_ERROR, msg);
 			logger.error(msg, e);
 			throw e;
 		}

@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -33,6 +34,7 @@ import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
@@ -105,8 +107,8 @@ public class DataResource {
 			return userManager.getUser(username);
 		} catch (RuntimeException e) {
 			Collection<String> authorities = new ArrayList<String>();
-			authorities.add("ROLE_ADMIN");
-			authorities.add("ROLE_USER");
+			authorities.add(VirtueUser.ROLE_ADMIN);
+			authorities.add(VirtueUser.ROLE_USER);
 			VirtueUser admin = new VirtueUser("admin", authorities, true);
 			userManager.addUser(admin);
 			return admin;
@@ -216,7 +218,8 @@ public class DataResource {
 				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmBrowser.setSecurityTag("power");
 		VirtualMachineTemplate windowsBrowserVm = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Windows",
-				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName, "System", new Date());
+				OS.WINDOWS, windowsAmi, appsBrowsersWindows, windowsLoginUser, true, now, systemName, "System",
+				new Date());
 		windowsBrowserVm.setSecurityTag("power");
 		VirtualMachineTemplate vmAll = new VirtualMachineTemplate(UUID.randomUUID().toString(), "All", OS.LINUX,
 				allLinuxAmi, appsAllLinux, linuxLoginUser, true, now, systemName, "System", new Date());
@@ -263,12 +266,12 @@ public class DataResource {
 				systemName, "System", new Date());
 		vmPowerUserWin.setSecurityTag("power");
 		VirtualMachineTemplate vmPowerUserLinux = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Power User Vm Linux", OS.LINUX, allLinuxAmi, appsPowerUserLinux, linuxLoginUser, true, now,
-				systemName, "System", new Date());
+				"Power User Vm Linux", OS.LINUX, allLinuxAmi, appsPowerUserLinux, linuxLoginUser, true, now, systemName,
+				"System", new Date());
 		vmPowerUserLinux.setSecurityTag("power");
 		VirtualMachineTemplate vmRouterAdmin = new VirtualMachineTemplate(UUID.randomUUID().toString(),
-				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName, 
-				"System", new Date());
+				"Router Admin VM", OS.LINUX, allLinuxAmi, appsRouter, linuxLoginUser, true, now, systemName, "System",
+				new Date());
 		vmRouterAdmin.setSecurityTag("power");
 		VirtualMachineTemplate vmLinuxCorpEmail = new VirtualMachineTemplate(UUID.randomUUID().toString(),
 				"Linux Corperate Email User VM", OS.LINUX, allLinuxAmi, appsLinuxCorpEmail, linuxLoginUser, true, now,
@@ -314,33 +317,33 @@ public class DataResource {
 				allTemplate, true, now, systemName, vmDocEditor);
 		virtueDocumentEditor.setUserCreatedBy("System");
 		virtueDocumentEditor.setTimeCreatedAt(new Date());
-		
+
 		VirtueTemplate virtueWinCorpEmail = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows Corporate Email User", "1.0", allTemplate, true, now, systemName, vmWinCorpEmail);
 		virtueWinCorpEmail.setUserCreatedBy("System");
 		virtueWinCorpEmail.setTimeCreatedAt(new Date());
-		
+
 		VirtueTemplate virtueRouterAdmin = new VirtueTemplate(UUID.randomUUID().toString(), "Router Admin", "1.0",
 				allTemplate, true, now, systemName, vmRouterAdmin);
 		virtueRouterAdmin.setUserCreatedBy("System");
 		virtueRouterAdmin.setTimeCreatedAt(new Date());
-		
+
 		VirtueTemplate virtueLinuxCorporateEmailUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Linux Corporate Email User", "1.0", allTemplate, true, now, systemName, vmLinuxCorpEmail);
 		virtueLinuxCorporateEmailUser.setUserCreatedBy("System");
 		virtueLinuxCorporateEmailUser.setTimeCreatedAt(new Date());
-		
+
 		VirtueTemplate virtueExternalInternet = new VirtueTemplate(UUID.randomUUID().toString(),
 				"External Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
 		virtueExternalInternet.setUserCreatedBy("System");
 		virtueExternalInternet.setTimeCreatedAt(new Date());
-		
+
 		VirtueTemplate virtuePowerUser = new VirtueTemplate(UUID.randomUUID().toString(),
 				"Windows and Linux Power User", "1.0", allTemplate, true, now, systemName, vmPowerUserWin,
 				vmPowerUserLinux);
 		virtuePowerUser.setUserCreatedBy("System");
 		virtuePowerUser.setTimeCreatedAt(new Date());
-		
+
 		for (ApplicationDefinition app : appsAll) {
 			templateManager.addApplicationDefinition(app);
 		}
@@ -374,10 +377,10 @@ public class DataResource {
 		templateManager.addVirtueTemplate(virtuePowerUser);
 
 		ArrayList<String> userRoles = new ArrayList<String>();
-		userRoles.add("ROLE_USER");
+		userRoles.add(VirtueUser.ROLE_USER);
 		ArrayList<String> adminRoles = new ArrayList<String>();
-		adminRoles.add("ROLE_USER");
-		adminRoles.add("ROLE_ADMIN");
+		adminRoles.add(VirtueUser.ROLE_USER);
+		adminRoles.add(VirtueUser.ROLE_ADMIN);
 
 		VirtueUser admin = new VirtueUser("admin", adminRoles, true);
 		VirtueUser presenter = new VirtueUser("presenter", userRoles, true);
@@ -552,6 +555,40 @@ public class DataResource {
 	@Produces("application/json")
 	public Iterable<VirtualMachine> getAllVms() {
 		return activeVirtueDao.getAllVirtualMachines();
+	}
+
+	@GET
+	@Path("vm/{id}")
+	@Produces("application/json")
+	public VirtualMachine getVm(@PathParam("id") String id) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(id);
+		if (vm.isPresent()) {
+			return vm.get();
+		} else {
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + id);
+		}
+	}
+
+	@GET
+	@Path("vm/reboot/{vmId}")
+	@Produces("application/json")
+	public void rebootVm(@PathParam("vmId") String vmId) {
+		Optional<VirtualMachine> vm = activeVirtueDao.getXenVm(vmId);
+		VirtualMachine vmToReboot;
+
+		if (vm.isPresent()) {
+			vmToReboot = vm.get();
+		} else {
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find vm with ID=" + vmId);
+		}
+
+		VirtueInstance virtue = activeVirtueDao.getVirtueByVmId(vmId);
+
+		if (virtue != null) {
+			cloudManager.rebootVm(vmToReboot, virtue.getId());
+		} else {
+			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
+		}
 	}
 
 	@GET

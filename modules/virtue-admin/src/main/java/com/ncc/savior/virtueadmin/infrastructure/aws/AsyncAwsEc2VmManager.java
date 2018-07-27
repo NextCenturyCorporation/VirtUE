@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
@@ -82,7 +83,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future, null);
 		if (vms.size() != 1) {
 			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
-			SaviorException e = new SaviorException(SaviorException.UNKNOWN_ERROR, msg);
+			SaviorException e = new SaviorException(SaviorErrorCode.AWS_ERROR, msg);
 			logger.error(msg, e);
 			throw e;
 		}
@@ -134,6 +135,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public VirtualMachine startVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
 		vms = startVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
@@ -142,6 +144,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	public VirtualMachine stopVirtualMachine(VirtualMachine vm,
 			CompletableFuture<Collection<VirtualMachine>> vmFuture) {
 		Collection<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+		vms.add(vm);
 		vms = stopVirtualMachines(vms, vmFuture);
 		return vms.iterator().next();
 	}
@@ -338,5 +341,18 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 	public void setUpdateListener(IUpdateListener<VirtualMachine> listener) {
 		addVmUpdateListener(listener);
+	}
+
+	public void rebootVm(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> vmFuture) {
+		if (vmFuture == null) {
+			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		}
+		
+		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
+		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
+		stopVirtualMachine(vm, stopFuture);
+		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
+			startVirtualMachine(vm, vmFutureFinal);
+		});	
 	}
 }

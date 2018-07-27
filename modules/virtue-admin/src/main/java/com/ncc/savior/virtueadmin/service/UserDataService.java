@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -75,8 +76,8 @@ public class UserDataService {
 
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
-		if (!user.getAuthorities().contains("ROLE_USER")) {
-			throw new SaviorException(SaviorException.UNKNOWN_ERROR, "User did not have USER role");
+		if (!user.getAuthorities().contains(VirtueUser.ROLE_USER)) {
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have USER role");
 		}
 		return user;
 	}

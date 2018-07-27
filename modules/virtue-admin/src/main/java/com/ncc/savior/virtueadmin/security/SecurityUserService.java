@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -34,10 +35,10 @@ public class SecurityUserService {
 			String name = auth.getName();
 			VirtueUser user = userManager.getUser(name);
 			if (user == null) {
-				throw new SaviorException(SaviorException.USER_NOT_FOUND,
+				throw new SaviorException(SaviorErrorCode.USER_NOT_FOUND,
 						"User=" + name + " not found in user database!");
 			} else if (!user.isEnabled()) {
-				throw new SaviorException(SaviorException.USER_DISABLED, "User=" + name + " is disabled!");
+				throw new SaviorException(SaviorErrorCode.USER_DISABLED, "User=" + name + " is disabled!");
 			}
 			return user;
 		}

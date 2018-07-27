@@ -15,6 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.ncc.savior.virtueadmin.model.VirtueUser;
+
 /**
  * Pulls username and some role information from header. Not for production use!
  * 
@@ -35,9 +37,9 @@ public class HeaderFilter extends OncePerRequestFilter {
 		String name = request.getHeader("X-Authorization");
 		if (name != null) {
 			ArrayList<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-			authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+			authorities.add(new SimpleGrantedAuthority(VirtueUser.ROLE_USER));
 			if (request.getHeader("X-admin") != null) {
-				authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+				authorities.add(new SimpleGrantedAuthority(VirtueUser.ROLE_ADMIN));
 			}
 			if (request.getHeader("X-noroles") != null) {
 				authorities.clear();
