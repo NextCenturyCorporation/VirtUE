@@ -7,7 +7,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
@@ -36,6 +35,7 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,12 +83,16 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 	private Comparator<VirtueApplicationItem> sortAppsByStatus;
 
+	private Color flagColor;
+	private DesktopView view;
+
 	private JFrame frame;
 
 	public VirtueApplicationItem(ApplicationDefinition ad, VirtueService virtueService, JScrollPane sp,
 			VirtueTileContainer vc, DesktopVirtue virtue, FavoritesView fv, PropertyChangeListener listener,
 			Image image, boolean isFavorited, JFrame frame, JTextField textField, JComboBox<String> cb,
-			Comparator<VirtueApplicationItem> sortAppsByStatus, GhostText ghostText) {
+			Comparator<VirtueApplicationItem> sortAppsByStatus, GhostText ghostText, Color flagColor,
+			DesktopView view) {
 		this.sp = sp;
 		this.vc = vc;
 		this.virtueService = virtueService;
@@ -101,12 +105,15 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		this.cb = cb;
 		this.sortAppsByStatus = sortAppsByStatus;
 		this.ghostText = ghostText;
+		this.view = view;
 
 		this.appIcon = new JLabel();
 		this.container = new JPanel();
 		this.favoritedLabel = new JLabel();
 		this.appName = new JLabel(ad.getName());
 		this.appIcon.setHorizontalAlignment(SwingConstants.CENTER);
+
+		this.flagColor = flagColor;
 
 		this.isFavorited = isFavorited;
 
@@ -119,16 +126,14 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 	}
 
 	public void tileSetup() {
-		container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+		container.setBorder(new MatteBorder(0, 0, 2, 2, Color.DARK_GRAY));
 		JPanel favoritedContainer = new JPanel();
 		favoritedContainer.setLayout(new GridBagLayout());
 		favoritedContainer.setBackground(Color.WHITE);
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.insets = new Insets(0, 55, 0, 0);
 
-		container.setPreferredSize(new Dimension(90, 90));
+		container.setPreferredSize(new Dimension(95, 95));
 		container.setBackground(Color.WHITE);
-		appName.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		appName.setFont(new Font("Roboto", Font.PLAIN, 11));
 		appName.setHorizontalAlignment(SwingConstants.CENTER);
 		container.setLayout(new BorderLayout(0, 0));
 
@@ -143,19 +148,33 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		}
 
 		favoritedLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		favoritedContainer.add(favoritedLabel, gbc);
 
+		GridBagConstraints gbc = new GridBagConstraints();
+
+		VirtueFlag flag = new VirtueFlag(flagColor);
+
+		gbc.gridy = 0;
+		gbc.gridx = 1;
+		favoritedContainer.add(favoritedLabel, gbc);
+		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 5));
+
+		gbc.weightx = 1.0;
+		gbc.gridy = 0;
+		gbc.gridx = 0;
+		gbc.fill = GridBagConstraints.BOTH;
+		favoritedContainer.add(flag, gbc);
+
+		container.add(favoritedContainer, BorderLayout.NORTH);
 		container.add(appIcon, BorderLayout.CENTER);
 		container.add(appName, BorderLayout.SOUTH);
-		container.add(favoritedContainer, BorderLayout.NORTH);
 
-		addListener(vc, fv, ad, virtue, false);
+		addListener(vc, fv, ad, virtue);
 	}
 
 	public void listSetup() {
 		container.setBorder(new LineBorder(Color.GRAY, 1));
 		container.setBackground(Color.WHITE);
-		container.setLayout(new BorderLayout());
+		container.setLayout(new BorderLayout(10, 0));
 		this.appIcon = new JLabel(ad.getName());
 
 		ImageIcon imageIcon = new ImageIcon(image);
@@ -174,21 +193,21 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		favoritedLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
 		favoritedLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 9));
-		appIcon.setBorder(BorderFactory.createEmptyBorder(0, 13, 0, 0));
+
+		VirtueFlag flag = new VirtueFlag(flagColor);
+		flag.setPreferredSize(new Dimension(23, 50));
+		container.add(flag, BorderLayout.WEST);
+		container.add(appIcon, BorderLayout.CENTER);
 
 		container.add(favoritedLabel, BorderLayout.EAST);
-		container.add(appIcon, BorderLayout.WEST);
 
 		container.setSize(new Dimension(450, 50));
-		// container.setMinimumSize(new Dimension(450, 57));
-		// container.setMaximumSize(new Dimension(10000, 57));
 		container.setPreferredSize(new Dimension(450, 50));
 
-		addListener(vc, fv, ad, virtue, true);
+		addListener(vc, fv, ad, virtue);
 	}
 
-	public void addListener(VirtueTileContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue,
-			boolean fullBorder) {
+	public void addListener(VirtueTileContainer vc, FavoritesView fv, ApplicationDefinition ad, DesktopVirtue virtue) {
 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
@@ -197,20 +216,19 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 					try {
 						virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
 
-						if (fullBorder) {
+						if (hasFullBorder()) {
 							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
 						} else {
-							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+							container.setBorder(new MatteBorder(2, 2, 0, 0, Color.DARK_GRAY));
 						}
 
 						Timer timer = new Timer(160, new ActionListener() {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
-								if (fullBorder) {
+								if (hasFullBorder()) {
 									container.setBorder(new LineBorder(Color.GRAY, 1));
 								} else {
-									container.setBorder(
-											new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+									container.setBorder(new MatteBorder(0, 0, 2, 2, Color.DARK_GRAY));
 								}
 							}
 						});
@@ -224,7 +242,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 						logger.error(msg);
 					}
 				} else {
-					setupDialog(fullBorder);
+					setupDialog();
 				}
 			}
 		});
@@ -237,7 +255,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		});
 	}
 
-	public void setupDialog(boolean fullBorder) {
+	public void setupDialog() {
 		JDialog dialog = new JDialog();
 		dialog.setUndecorated(true);
 
@@ -291,7 +309,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
 				try {
-					virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+					virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
 					// virtue.setVirtueState(VirtueState.LAUNCHING);
 					// vc.updateVirtue(virtue);
 				} catch (IOException e1) {
@@ -324,10 +342,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 			@Override
 			public void windowActivated(WindowEvent arg0) {
-				if (fullBorder) {
+				if (hasFullBorder()) {
 					container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
 				} else {
-					container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.WHITE, Color.DARK_GRAY));
+					container.setBorder(new MatteBorder(2, 2, 0, 0, Color.DARK_GRAY));
 				}
 			}
 
@@ -345,10 +363,10 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			@Override
 			public void windowDeactivated(WindowEvent arg0) {
 				dialog.setVisible(false);
-				if (fullBorder) {
+				if (hasFullBorder()) {
 					container.setBorder(new LineBorder(Color.GRAY, 1));
 				} else {
-					container.setBorder(new BevelBorder(BevelBorder.RAISED, Color.WHITE, Color.DARK_GRAY));
+					container.setBorder(new MatteBorder(0, 0, 2, 2, Color.DARK_GRAY));
 				}
 			}
 
@@ -405,7 +423,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		String selected = (String) cb.getSelectedItem();
 		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
 		VirtueApplicationItem va = new VirtueApplicationItem(ad, virtueService, sp, vc, virtue, fv, listener, newimg,
-				true, frame, textField, cb, sortAppsByStatus, ghostText);
+				true, frame, textField, cb, sortAppsByStatus, ghostText, flagColor, view);
 		va.tileSetup();
 		switch (selected) {
 			case "Alphabetical":
@@ -445,6 +463,22 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 
 	private void sendChangeEvent(PropertyChangeEvent propertyChangeEvent) {
 		listener.propertyChange(propertyChangeEvent);
+	}
+
+	public boolean hasFullBorder() {
+		if (view == DesktopView.APPS_LIST || view == DesktopView.VIRTUE_LIST) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean isAppsView() {
+		if (view == DesktopView.APPS_LIST || view == DesktopView.APPS_TILE) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void update(DesktopVirtue virtue) {
