@@ -29,10 +29,6 @@ public class PermissionService {
 		this.defaultClipboardPermission = ClipboardPermissionOption.DENY;
 	}
 
-	public void test() {
-		logger.debug("all: " + permissionDao.getAllClipboardPermissions());
-	}
-
 	/**
 	 * Returns the clipboard permission for a given source and destination. If none
 	 * was set, it will first check the default for the source. IF none was found,

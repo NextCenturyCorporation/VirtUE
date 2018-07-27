@@ -174,9 +174,9 @@
 	<bean name="permissionDao"
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaPermissionDao"></bean>
 
-	<bean name="permissionService" class="com.ncc.savior.virtueadmin.service.PermissionService" init-method="test">
+	<bean name="permissionService" class="com.ncc.savior.virtueadmin.service.PermissionService">
 		<constructor-arg ref="permissionDao" />
-		<property name="defaultClipboardPermission" value="ASK" />
+		<!-- <property name="defaultClipboardPermission" value="ASK" /> -->
 	</bean>
 
 </beans>  
