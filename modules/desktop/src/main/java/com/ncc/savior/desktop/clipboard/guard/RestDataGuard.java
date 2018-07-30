@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.swing.JOptionPane;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -42,7 +40,7 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	}
 
 	@Override
-	public boolean allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId) {
+	public ClipboardPermissionOption allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId) {
 		ImmutablePair<String, String> pair = new ImmutablePair<String, String>(dataSourceGroupId,
 				dataDestinationGroupId);
 		// try to avoid synchronized on as many calls as possible, but when we don't
@@ -57,23 +55,25 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 			}
 		}
 		ClipboardPermissionOption po = cache.get(pair);
-		switch (po) {
-		case ALLOW:
-			return true;
-		case ASK:
-			int dialogButton = JOptionPane.YES_NO_OPTION;
-			int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to copy this data?", "Warning",
-					dialogButton);
-			if (dialogResult == JOptionPane.YES_OPTION) {
-				return true;
-			}
-			return false;
-		case DENY:
-			return false;
-		default:
-			logger.error("Error getting permission option.  Option was=" + po);
-			return false;
-		}
+		return po;
+		// switch (po) {
+		// case ALLOW:
+		// return true;
+		// case ASK:
+		// int dialogButton = JOptionPane.YES_NO_OPTION;
+		// int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to
+		// copy this data?", "Warning",
+		// dialogButton);
+		// if (dialogResult == JOptionPane.YES_OPTION) {
+		// return true;
+		// }
+		// return false;
+		// case DENY:
+		// return false;
+		// default:
+		// logger.error("Error getting permission option. Option was=" + po);
+		// return false;
+		// }
 	}
 
 }
