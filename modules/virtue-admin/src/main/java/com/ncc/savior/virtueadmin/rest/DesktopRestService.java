@@ -1,5 +1,8 @@
 package com.ncc.savior.virtueadmin.rest;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.GET;
@@ -9,10 +12,13 @@ import javax.ws.rs.Produces;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.ncc.savior.virtueadmin.model.ClipboardPermission;
+import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
+import com.ncc.savior.virtueadmin.service.PermissionService;
 
 /**
  * Rest resource that handles endpoints specifically for the desktop
@@ -25,6 +31,9 @@ public class DesktopRestService {
 
 	@Autowired
 	private DesktopVirtueService desktopService;
+
+	@Autowired
+	private PermissionService permissionService;
 
 	/**
 	 * Gets all virtues as {@link DesktopVirtue}s for the user including Virtues
@@ -100,5 +109,25 @@ public class DesktopRestService {
 	public byte[] getIcon(@PathParam("iconKey") String iconKey) {
 		IconModel iconModel = desktopService.getIcon(iconKey);
 		return iconModel.getData();
+	}
+
+	@GET
+	@Path("permissions")
+	@Produces("application/json")
+	public List<ClipboardPermission> getAllComputedPermissions() {
+		Iterable<DesktopVirtue> templates = desktopService.getDesktopVirtuesForUser();
+		Collection<String> sourceIds = new ArrayList<String>();
+		for (DesktopVirtue t : templates) {
+			sourceIds.add(t.getTemplateId());
+		}
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		return permissionService.getAllPermissionsForSources(sourceIds);
+	}
+
+	@GET
+	@Path("permissions/default")
+	public ClipboardPermissionOption getServiceDefaultPermission() {
+		ClipboardPermissionOption option = permissionService.getDefaultClipboardPermission();
+		return option;
 	}
 }

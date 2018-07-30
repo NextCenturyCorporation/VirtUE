@@ -674,7 +674,8 @@ public class DataResource {
 		for (VirtueTemplate t : templates) {
 			sourceIds.add(t.getId());
 		}
-		return permissionService.getAllPermissionsForSources(sourceIds);
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		return permissionService.getAllPermissionsForSourcesAsMap(sourceIds);
 	}
 
 	@GET
@@ -700,24 +701,32 @@ public class DataResource {
 		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
 		Collection<String> destIds = new ArrayList<String>();
 		ArrayList<String> sourceIds = new ArrayList<String>();
+		Map<String, String> idToName = new HashMap<String, String>();
 		for (VirtueTemplate t : templates) {
 			sourceIds.add(t.getId());
 			destIds.add(t.getId());
+			idToName.put(t.getId(), t.getName());
 		}
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		destIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
 		destIds.add(ClipboardPermission.DEFAULT_DESTINATION);
 		Map<Pair<String, String>, ClipboardPermissionOption> activePermissions = permissionService
-				.getAllPermissionsForSources(destIds);
+				.getAllPermissionsForSourcesAsMap(destIds);
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html><body><table border='2'>").append("\n");
 
 		sb.append("  <tr><th>src\\dest</th>").append("\n");
 		for (String destId : destIds) {
-			sb.append("    <th>").append(destId).append("</th>").append("\n");
+			sb.append("    <td>").append(destId);
+			sb.append("<br><b>").append(idToName.get(destId));
+			sb.append("</b></td>").append("\n");
 		}
 		sb.append("  </tr>").append("\n");
 		for (String sourceId : sourceIds) {
 			sb.append("  <tr>").append("\n");
-			sb.append("    <td><b>").append(sourceId).append("</b></td>");
+			sb.append("    <td>").append(sourceId);
+			sb.append("<br><b>").append(idToName.get(sourceId));
+			sb.append("</b></td>");
 			for (String destId : destIds) {
 				ImmutablePair<String, String> key = new ImmutablePair<String, String>(sourceId, destId);
 				ClipboardPermissionOption permission = activePermissions.get(key);

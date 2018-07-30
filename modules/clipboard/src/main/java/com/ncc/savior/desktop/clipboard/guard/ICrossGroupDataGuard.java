@@ -20,4 +20,10 @@ public interface ICrossGroupDataGuard {
 	 */
 	boolean allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId);
 
+	/**
+	 * do any initialization that the data guard requires after the system has been
+	 * setup. This could be tasks such as initializing caches.
+	 */
+	public void init();
+
 }

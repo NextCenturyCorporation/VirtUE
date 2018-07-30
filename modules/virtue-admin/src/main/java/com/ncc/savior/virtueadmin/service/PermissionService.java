@@ -1,6 +1,8 @@
 package com.ncc.savior.virtueadmin.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,6 +22,7 @@ import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
  *
  */
 public class PermissionService {
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(PermissionService.class);
 	private IPermissionDao permissionDao;
 	private ClipboardPermissionOption defaultClipboardPermission;
@@ -85,7 +88,7 @@ public class PermissionService {
 		return map;
 	}
 
-	public Map<Pair<String, String>, ClipboardPermissionOption> getAllPermissionsForSources(
+	public Map<Pair<String, String>, ClipboardPermissionOption> getAllPermissionsForSourcesAsMap(
 			Collection<String> sourceIds) {
 		// Map<Pair<String, String>, ClipboardPermissionOption> map = new
 		// TreeMap<Pair<String, String>, ClipboardPermissionOption>();
@@ -100,6 +103,25 @@ public class PermissionService {
 			}
 		}
 		return rawMap;
+	}
+
+	public List<ClipboardPermission> getAllPermissionsForSources(Collection<String> sourceIds) {
+		List<ClipboardPermission> list = new ArrayList<ClipboardPermission>();
+		Map<Pair<String, String>, ClipboardPermissionOption> rawMap = getAllRawPermissionsAsMap();
+		for (String sourceId : sourceIds) {
+			for (String destinationId : sourceIds) {
+				ImmutablePair<String, String> pair = new ImmutablePair<String, String>(sourceId, destinationId);
+				ClipboardPermissionOption permission;
+				if (rawMap.containsKey(pair)) {
+					permission = rawMap.get(pair);
+				} else {
+					permission = getPermissionWithDefaults(pair, rawMap);
+				}
+				ClipboardPermission cp = new ClipboardPermission(sourceId, destinationId, permission);
+				list.add(cp);
+			}
+		}
+		return list;
 	}
 
 	/**

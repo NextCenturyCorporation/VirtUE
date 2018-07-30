@@ -32,6 +32,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.JschUtils;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SshUtil;
+import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 
 /**
  * Implementation of {@link IClipboardManager} that uses SSH (Jsch) to start
@@ -41,8 +42,6 @@ import com.ncc.savior.util.SshUtil;
  */
 public class SshClipboardManager implements IClipboardManager {
 	private int numRetriesAfterSuccess = 5;
-
-	private static final String CLIENT_GROUP_ID = "client-group-id";
 
 	private static final Logger logger = LoggerFactory.getLogger(SshClipboardManager.class);
 
@@ -126,7 +125,7 @@ public class SshClipboardManager implements IClipboardManager {
 			IMessageSerializer localHubSerializer = pair.serializerA;
 			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
 			IMessageSerializer localClientSerializer = pair.serializerB;
-			this.clipboardHub.addClient(CLIENT_GROUP_ID, localHubSerializer);
+			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_ID, localHubSerializer);
 			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
 		} catch (Exception e) {
 			UserAlertingStub.sendStubAlert(

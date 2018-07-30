@@ -18,4 +18,10 @@ public class ConstantDataGuard implements ICrossGroupDataGuard {
 		return allow;
 	}
 
+	@Override
+	public void init() {
+		// TODO Auto-generated method stub
+
+	}
+
 }

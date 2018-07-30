@@ -9,7 +9,8 @@ import com.ncc.savior.configuration.PropertyManager;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
-import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.ICrossGroupDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.RestDataGuard;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
@@ -48,8 +49,7 @@ public class SidebarApplication {
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
-		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl,
-				logoutUrl);
+		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl, logoutUrl);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager;
 		appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
@@ -64,7 +64,8 @@ public class SidebarApplication {
 			rdpClient = new WindowsRdp();
 		}
 
-		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
+		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs);
+		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
 		IIconService iconService = new IconResourceService(drs);

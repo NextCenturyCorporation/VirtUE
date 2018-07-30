@@ -27,12 +27,17 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
 
@@ -181,8 +186,7 @@ public class DesktopResourceService {
 		}
 	}
 
-	private Image getImage(WebTarget target, String method)
-			throws IOException, InvalidUserLoginException {
+	private Image getImage(WebTarget target, String method) throws IOException, InvalidUserLoginException {
 		Builder builder = target.request(MediaType.MEDIA_TYPE_WILDCARD);
 		addAuthorization(builder, targetHost);
 		Response response = builder.method(method);
@@ -229,6 +233,29 @@ public class DesktopResourceService {
 			logger.trace("Stopping virtue=" + virtue);
 		}
 		return virtue;
+	}
+
+	public List<ClipboardPermission> getAllComputedPermissions() {
+		try {
+			Response r = getListOfClass("permissions", "GET");
+			InputStream in = (InputStream) r.getEntity();
+			List<ClipboardPermission> instances;
+			if (r.getStatus() >= 400) {
+				String data = streamToString(in);
+				logger.error("response (" + r.getStatus() + "): " + data);
+				instances = new ArrayList<ClipboardPermission>();
+			} else {
+				instances = jsonMapper.readValue(in, new TypeReference<List<ClipboardPermission>>() {
+				});
+			}
+			return instances;
+		} catch (InvalidUserLoginException e) {
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User not authorized to get permissions", e);
+		} catch (JsonParseException | JsonMappingException e) {
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR, "Error trying to parse permissions", e);
+		} catch (IOException e) {
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Unknown error trying to get permissions", e);
+		}
 	}
 
 	public Image getIcon(String iconKey) throws InvalidUserLoginException, IOException {
