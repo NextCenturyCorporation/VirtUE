@@ -64,7 +64,7 @@ public class SidebarApplication {
 			rdpClient = new WindowsRdp();
 		}
 
-		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs);
+		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, 10000);
 		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);

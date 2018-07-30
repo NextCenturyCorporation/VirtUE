@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.swing.JOptionPane;
+
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -19,8 +22,20 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	private DesktopResourceService resource;
 	private Map<Pair<String, String>, ClipboardPermissionOption> cache;
 
-	public RestDataGuard(DesktopResourceService resource) {
+	private PassiveExpiringMap<Pair<String, String>, ClipboardPermissionOption> tempCache;
+
+	/**
+	 *
+	 * @param resource
+	 * @param askStickyTimeoutMillis
+	 *            - When the {@link ClipboardPermissionOption} is set to ASK, we
+	 *            only Ask once and then that option sticks for a period of time
+	 *            equal to this parameter.
+	 */
+	public RestDataGuard(DesktopResourceService resource, long askStickyTimeoutMillis) {
 		this.resource = resource;
+		this.tempCache = new PassiveExpiringMap<Pair<String, String>, ClipboardPermissionOption>(
+				askStickyTimeoutMillis);
 	}
 
 	@Override
@@ -40,7 +55,7 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	}
 
 	@Override
-	public ClipboardPermissionOption allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId) {
+	public boolean allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId) {
 		ImmutablePair<String, String> pair = new ImmutablePair<String, String>(dataSourceGroupId,
 				dataDestinationGroupId);
 		// try to avoid synchronized on as many calls as possible, but when we don't
@@ -54,26 +69,46 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 				}
 			}
 		}
+		ClipboardPermissionOption po = getPermissionOptionIncludingTemporary(pair);
+		switch (po) {
+		case ALLOW:
+			return true;
+		case ASK:
+			int dialogButton = JOptionPane.YES_NO_OPTION;
+			int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to copy this data?", "Warning",
+					dialogButton);
+			ClipboardPermissionOption tempOption = (dialogResult == JOptionPane.YES_OPTION
+					? ClipboardPermissionOption.ALLOW
+					: ClipboardPermissionOption.DENY);
+			addToTemporary(pair, tempOption);
+			return false;
+		case DENY:
+			return false;
+		default:
+			logger.error("Error getting permission option.  Option was=" + po);
+			return false;
+		}
+	}
+
+	private void addToTemporary(ImmutablePair<String, String> pair, ClipboardPermissionOption tempOption) {
+		tempCache.put(pair, tempOption);
+	}
+
+	/**
+	 * Need to be careful as the map isn't synchronized
+	 *
+	 * @param pair
+	 * @return
+	 */
+	private ClipboardPermissionOption getPermissionOptionIncludingTemporary(ImmutablePair<String, String> pair) {
 		ClipboardPermissionOption po = cache.get(pair);
+		if (ClipboardPermissionOption.ASK.equals(po)) {
+			ClipboardPermissionOption temp = tempCache.get(pair);
+			if (temp != null) {
+				return temp;
+			}
+		}
 		return po;
-		// switch (po) {
-		// case ALLOW:
-		// return true;
-		// case ASK:
-		// int dialogButton = JOptionPane.YES_NO_OPTION;
-		// int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to
-		// copy this data?", "Warning",
-		// dialogButton);
-		// if (dialogResult == JOptionPane.YES_OPTION) {
-		// return true;
-		// }
-		// return false;
-		// case DENY:
-		// return false;
-		// default:
-		// logger.error("Error getting permission option. Option was=" + po);
-		// return false;
-		// }
 	}
 
 }

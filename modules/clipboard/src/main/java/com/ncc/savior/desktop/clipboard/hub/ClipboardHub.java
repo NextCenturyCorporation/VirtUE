@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.swing.JOptionPane;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +30,9 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
-import com.ncc.savior.desktop.clipboard.messages.ExtendTimeoutClipboardMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.util.JavaUtil;
-import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 
 /**
  * Central hub point for the shared clipboard data. All messages should be sent
@@ -214,7 +210,7 @@ public class ClipboardHub {
 			String destId = this.clipboardOwnerId;
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
 			boolean allowTransfer = transmitter != null && transmitter.isValid();
-			boolean delay = false;
+
 			if (allowTransfer) {
 				// we have a transmitter and it is ready to go. Proceed to the next step in
 				// determining if we should transfer
@@ -225,23 +221,9 @@ public class ClipboardHub {
 				// Request for data came from messageSourceGroupId, so that will be the
 				// destination of the data
 				String dataDestinationGroupId = messageSourceGroupId;
-				ClipboardPermissionOption cpo = dataGuard.allowDataTransfer(dataSourceGroupId, dataDestinationGroupId);
-				delay = ClipboardPermissionOption.ASK.equals(cpo);
-				allowTransfer = allowTransfer && (ClipboardPermissionOption.ALLOW.equals(cpo) || delay);
+				allowTransfer = dataGuard.allowDataTransfer(dataSourceGroupId, dataDestinationGroupId);
 			} else {
 				// TODO should we do something since this source is no longer connected?
-			}
-			if (delay) {
-				ExtendTimeoutClipboardMessage delayMessage = new ExtendTimeoutClipboardMessage(hubId,
-						((ClipboardDataRequestMessage) message).getRequestId());
-				sendMessageHandleError(delayMessage, transmitter, destId);
-				int dialogButton = JOptionPane.YES_NO_OPTION;
-				int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to copy this data?", "Warning",
-						dialogButton);
-				if (dialogResult == JOptionPane.YES_OPTION) {
-					allowTransfer = true;
-				}
-				allowTransfer = false;
 			}
 			if (allowTransfer) {
 				sendMessageHandleError(message, transmitter, destId);

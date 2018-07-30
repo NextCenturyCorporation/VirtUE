@@ -1,7 +1,5 @@
 package com.ncc.savior.desktop.clipboard.guard;
 
-import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
-
 /**
  * Determines whether data can flow between groupIds (VirtueId's in our specific
  * scenario). Group IDs are just a generic ID set for whatever group of machines
@@ -20,7 +18,7 @@ public interface ICrossGroupDataGuard {
 	 * @param dataDestinationGroupId
 	 * @return
 	 */
-	ClipboardPermissionOption allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId);
+	boolean allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId);
 
 	/**
 	 * do any initialization that the data guard requires after the system has been
