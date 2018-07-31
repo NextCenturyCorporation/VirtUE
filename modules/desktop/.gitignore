@@ -5,6 +5,7 @@
 /out/
 .gradle/
 /bin1/
+/.tmp/
 /certs/*
 savior-user.properties
 /src/main/resources/images/user/*
