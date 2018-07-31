@@ -32,6 +32,12 @@ public class SpringJpaPermissionDao implements IPermissionDao {
 	}
 
 	@Override
+	public List<ClipboardPermission> getClipboardPermissionForSource(String sourceId, List<String> destinationIds) {
+		List<ClipboardPermission> list = clipboardPermissionRepository.findBySourceGroupId(sourceId);
+		return list;
+	}
+
+	@Override
 	public List<ClipboardPermission> getClipboardPermissionForDestination(String destinationId) {
 		List<ClipboardPermission> list = clipboardPermissionRepository.findByDestinationGroupId(destinationId);
 		return list;
@@ -40,5 +46,11 @@ public class SpringJpaPermissionDao implements IPermissionDao {
 	@Override
 	public Iterable<ClipboardPermission> getAllClipboardPermissions() {
 		return clipboardPermissionRepository.findAll();
+	}
+
+	@Override
+	public void clearPermission(String sourceId, String destId) {
+		ClipboardPermission entity = new ClipboardPermission(sourceId, destId, null);
+		clipboardPermissionRepository.delete(entity);
 	}
 }

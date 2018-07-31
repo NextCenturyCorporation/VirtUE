@@ -27,8 +27,12 @@ public interface IPermissionDao {
 
 	List<ClipboardPermission> getClipboardPermissionForSource(String sourceId);
 
+	List<ClipboardPermission> getClipboardPermissionForSource(String sourceId, List<String> destinationIds);
+
 	List<ClipboardPermission> getClipboardPermissionForDestination(String destinationId);
 
 	Iterable<ClipboardPermission> getAllClipboardPermissions();
+
+	void clearPermission(String sourceId, String destId);
 
 }

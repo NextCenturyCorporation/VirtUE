@@ -3,12 +3,15 @@ package com.ncc.savior.virtueadmin.rest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -21,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.ClipboardPermission;
+import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -38,6 +44,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
+import com.ncc.savior.virtueadmin.service.PermissionService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
@@ -56,6 +63,9 @@ public class AdminResource {
 
 	@Autowired
 	private ImportExportService importExportService;
+
+	@Autowired
+	private PermissionService permissionService;
 
 	public AdminResource() {
 
@@ -482,5 +492,86 @@ public class AdminResource {
 		} catch (Exception e) {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
+	}
+
+	@GET
+	@Path("permissions/raw")
+	@Produces("application/json")
+	public Iterable<ClipboardPermission> getAllRawPermissions() {
+		Iterable<ClipboardPermission> p = permissionService.getAllRawPermissions();
+		return p;
+	}
+
+	@GET
+	@Path("permissions/computed")
+	@Produces("application/json")
+	public Map<Pair<String, String>, ClipboardPermissionOption> getAllComputedPermissions() {
+		Collection<String> sourceIds = getAllSourceIds();
+		return permissionService.getAllPermissionsForSourcesAsMap(sourceIds);
+	}
+
+	@POST
+	@Path("permission/{sourceId}/{destId}")
+	public String setPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
+			String optionStr) {
+		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
+		permissionService.setClipboardPermission(sourceId, destId, option);
+		return "Success, go back and refresh";
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("permission/{sourceId}/{destId}")
+	public ClipboardPermission getPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
+			@DefaultValue("false") @QueryParam("raw") boolean raw) {
+		ClipboardPermission p;
+		if (raw) {
+			p = permissionService.getRawClipboardPermission(sourceId, destId);
+		} else {
+			p = permissionService.getClipboardPermission(sourceId, destId);
+		}
+		if (p == null) {
+			throw new SaviorException(SaviorErrorCode.PERMISSION_NOT_FOUND, (raw ? "Raw c" : "C")
+					+ "lipboard permission for source=" + sourceId + " and dest=" + destId + " was not found");
+		}
+		return p;
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("permission/{sourceId}")
+	public List<ClipboardPermission> getPermissionsForSource(@PathParam("sourceId") String sourceId,
+			@DefaultValue("false") @QueryParam("raw") boolean raw) {
+		List<ClipboardPermission> p;
+		if (raw) {
+			p = permissionService.getRawClipboardPermissionForSource(sourceId);
+		} else {
+			Collection<String> sourceIds = getAllSourceIds();
+			p = permissionService.getClipboardPermissionForSource(sourceId, sourceIds);
+		}
+		return p;
+	}
+
+	@DELETE
+	@Path("permission/{sourceId}/{destId}")
+	public void clearPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId) {
+		permissionService.clearClipboardPermission(sourceId, destId);
+	}
+
+	@GET
+	@Path("permission/default/{option}")
+	public void setServiceDefaultPermission(@PathParam("option") String optionStr) {
+		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
+		permissionService.setDefaultClipboardPermission(option);
+	}
+
+	private Collection<String> getAllSourceIds() {
+		Iterable<VirtueTemplate> templates = adminService.getAllVirtueTemplates();
+		Collection<String> sourceIds = new ArrayList<String>();
+		for (VirtueTemplate t : templates) {
+			sourceIds.add(t.getId());
+		}
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		return sourceIds;
 	}
 }
