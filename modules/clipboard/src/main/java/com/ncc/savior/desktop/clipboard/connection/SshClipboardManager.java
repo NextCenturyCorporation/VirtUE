@@ -104,7 +104,7 @@ public class SshClipboardManager implements IClipboardManager {
 					if (i > 0) {
 						JavaUtil.sleepAndLogInterruption(retryPeriodMillis);
 					}
-					connectClipboardOnce(props.connectionParameters, props.groupId, props.clientId);
+					connectClipboardOnce(props.connectionParameters, props.groupId, props.displayName, props.clientId);
 					return;
 				} catch (IOException e) {
 					logger.warn(
@@ -125,7 +125,7 @@ public class SshClipboardManager implements IClipboardManager {
 			IMessageSerializer localHubSerializer = pair.serializerA;
 			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
 			IMessageSerializer localClientSerializer = pair.serializerB;
-			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_ID, localHubSerializer);
+			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_ID, localHubSerializer, "Local Desktop");
 			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
 		} catch (Exception e) {
 			UserAlertingStub.sendStubAlert(
@@ -135,11 +135,12 @@ public class SshClipboardManager implements IClipboardManager {
 	}
 
 	@Override
-	public String connectClipboard(SshConnectionParameters params, String groupId) throws IOException {
+	public String connectClipboard(SshConnectionParameters params, String displayName, String groupId)
+			throws IOException {
 		Exception lastException = null;
 		for (int i = 0; i < numRetriesAfterSuccess; i++) {
 			try {
-				String id = connectClipboardOnce(params, groupId, null);
+				String id = connectClipboardOnce(params, groupId, displayName, null);
 				return id;
 			} catch (Exception e) {
 				logger.error("Attempt to connect to clipboard failed.  Attempt #" + (i + 1) + " of "
@@ -169,11 +170,12 @@ public class SshClipboardManager implements IClipboardManager {
 	 * @param params
 	 * @param groupId
 	 * @param clientId
+	 * @param clientId
 	 * @return
 	 * @throws IOException
 	 */
-	private String connectClipboardOnce(SshConnectionParameters params, String groupId, String clientId)
-			throws IOException {
+	private String connectClipboardOnce(SshConnectionParameters params, String groupId, String displayName,
+			String clientId) throws IOException {
 		if (sourceJarPath != null && new File(sourceJarPath).exists()) {
 			try {
 				Session session;
@@ -182,7 +184,7 @@ public class SshClipboardManager implements IClipboardManager {
 				copyClipboardClientIfNeeded(session);
 				// need to get correct display!
 				ClipboardClientConnectionProperties props = connectionClient(session, groupId, params.getDisplay(),
-						clientId);
+						displayName, clientId);
 				props.connectionParameters = params;
 				propertiesMap.put(props.clientId, props);
 				return props.clientId;
@@ -208,7 +210,7 @@ public class SshClipboardManager implements IClipboardManager {
 	 * @throws IOException
 	 */
 	private ClipboardClientConnectionProperties connectionClient(Session session, String groupId, int display,
-			String clientId) throws JSchException, IOException {
+			String displayName, String clientId) throws JSchException, IOException {
 		String myCommand = null;
 		if (display > 0) {
 			myCommand = "export DISPLAY=:" + display + "; " + command;
@@ -237,7 +239,7 @@ public class SshClipboardManager implements IClipboardManager {
 			IConnectionWrapper connectionWrapper = new JschChannelConnectionWrapper(channel);
 			// connectionWrapper = new TestConnectionWrapper(connectionWrapper);
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connectionWrapper);
-			clientId = clipboardHub.addClient(groupId, serializer, clientId);
+			clientId = clipboardHub.addClient(groupId, serializer, displayName, clientId);
 		}
 		String cId = clientId;
 		@SuppressWarnings("resource") // closed through call to closeConnection()
@@ -247,6 +249,7 @@ public class SshClipboardManager implements IClipboardManager {
 			session.disconnect();
 		};
 		ClipboardClientConnectionProperties props = new ClipboardClientConnectionProperties();
+		props.displayName = displayName;
 		props.closeable = closeable;
 		props.clientId = clientId;
 		props.groupId = groupId;
@@ -261,6 +264,7 @@ public class SshClipboardManager implements IClipboardManager {
 	}
 
 	private static class ClipboardClientConnectionProperties {
+		public String displayName;
 		public Closeable closeable;
 		public String clientId;
 		public SshConnectionParameters connectionParameters;

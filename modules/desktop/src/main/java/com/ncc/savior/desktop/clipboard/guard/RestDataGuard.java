@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.clipboard.guard;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -23,6 +24,8 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	private Map<Pair<String, String>, ClipboardPermissionOption> cache;
 
 	private PassiveExpiringMap<Pair<String, String>, ClipboardPermissionOption> tempCache;
+
+	private HashMap<String, String> groupIdToDisplayName;
 
 	/**
 	 *
@@ -75,10 +78,8 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 			return true;
 		case ASK:
 			int dialogButton = JOptionPane.YES_NO_OPTION;
-			int dialogResult = JOptionPane.showConfirmDialog(null,
-					"Would you like allow copying between these systems for 15 minutes?",
-					"Warning",
-					dialogButton);
+			int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like allow copy/pasting 15 minutes from '"
+					+ getName(pair.left) + "' to '" + getName(pair.right) + "'?", "Warning", dialogButton);
 			ClipboardPermissionOption tempOption = (dialogResult == JOptionPane.YES_OPTION
 					? ClipboardPermissionOption.ALLOW
 					: ClipboardPermissionOption.DENY);
@@ -90,6 +91,14 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 			logger.error("Error getting permission option.  Option was=" + po);
 			return false;
 		}
+	}
+
+	private String getName(String groupId) {
+		String displayName = groupIdToDisplayName.get(groupId);
+		if (displayName == null) {
+			displayName = "ID=" + groupId;
+		}
+		return displayName;
 	}
 
 	private void addToTemporary(ImmutablePair<String, String> pair, ClipboardPermissionOption tempOption) {
@@ -111,6 +120,11 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 			}
 		}
 		return po;
+	}
+
+	@Override
+	public void setGroupIdToDisplayNameMap(HashMap<String, String> groupIdToDisplayName) {
+		this.groupIdToDisplayName = groupIdToDisplayName;
 	}
 
 }

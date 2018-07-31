@@ -44,7 +44,7 @@ public class ClipboardHubLocalTester {
 			IConnectionWrapper connection = new SocketConnection(socket);
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
 			String groupId = "client1";
-			hub.addClient(groupId, serializer);
+			hub.addClient(groupId, serializer, "test-1");
 
 			Thread testThread = createClientThread(port, new TestClipboardWrapper());
 			testThread.start();
@@ -52,7 +52,7 @@ public class ClipboardHubLocalTester {
 			IConnectionWrapper testConnection = new SocketConnection(testSocket);
 			IMessageSerializer testSerializer = new JavaObjectMessageSerializer(testConnection);
 			groupId = "client2";
-			hub.addClient(groupId, testSerializer);
+			hub.addClient(groupId, testSerializer, "test-2");
 
 			while (true) {
 				JavaUtil.sleepAndLogInterruption(1000);
