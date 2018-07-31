@@ -7,6 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 
+/**
+ * Spring JPA implementation of {@link IPermissionDao}, using
+ * {@link ClipboardPermissionRepository}.
+ * 
+ *
+ */
 public class SpringJpaPermissionDao implements IPermissionDao {
 	@Autowired
 	private ClipboardPermissionRepository clipboardPermissionRepository;
@@ -27,12 +33,6 @@ public class SpringJpaPermissionDao implements IPermissionDao {
 
 	@Override
 	public List<ClipboardPermission> getClipboardPermissionForSource(String sourceId) {
-		List<ClipboardPermission> list = clipboardPermissionRepository.findBySourceGroupId(sourceId);
-		return list;
-	}
-
-	@Override
-	public List<ClipboardPermission> getClipboardPermissionForSource(String sourceId, List<String> destinationIds) {
 		List<ClipboardPermission> list = clipboardPermissionRepository.findBySourceGroupId(sourceId);
 		return list;
 	}

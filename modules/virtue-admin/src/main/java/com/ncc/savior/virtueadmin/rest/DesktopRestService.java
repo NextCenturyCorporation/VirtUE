@@ -120,7 +120,7 @@ public class DesktopRestService {
 		for (DesktopVirtue t : templates) {
 			sourceIds.add(t.getTemplateId());
 		}
-		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
 		return permissionService.getAllPermissionsForSources(sourceIds);
 	}
 

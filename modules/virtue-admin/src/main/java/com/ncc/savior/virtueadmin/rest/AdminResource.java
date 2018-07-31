@@ -24,7 +24,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -494,22 +493,38 @@ public class AdminResource {
 		}
 	}
 
+	/**
+	 * Retrieves all the available permissions. If the query parameter 'raw' is set
+	 * to true, only permissions stored in the database are returned. Otherwise, all
+	 * returnable computed permissions are returned. This typically is a permission
+	 * for every possible pair of virtue template ID to every other virtue template
+	 * ID in both directions and every virtue template ID to the default setting.
+	 * 
+	 * @param raw
+	 * @return
+	 */
 	@GET
-	@Path("permissions/raw")
+	@Path("permissions")
 	@Produces("application/json")
-	public Iterable<ClipboardPermission> getAllRawPermissions() {
-		Iterable<ClipboardPermission> p = permissionService.getAllRawPermissions();
-		return p;
+	public Iterable<ClipboardPermission> getAllPermissions(@DefaultValue("false") @QueryParam("raw") boolean raw) {
+		if (raw) {
+			Iterable<ClipboardPermission> p = permissionService.getAllRawPermissions();
+			return p;
+		} else {
+			Collection<String> sourceIds = getAllSourceIds();
+			return permissionService.getAllPermissionsForSources(sourceIds);
+		}
 	}
 
-	@GET
-	@Path("permissions/computed")
-	@Produces("application/json")
-	public Map<Pair<String, String>, ClipboardPermissionOption> getAllComputedPermissions() {
-		Collection<String> sourceIds = getAllSourceIds();
-		return permissionService.getAllPermissionsForSourcesAsMap(sourceIds);
-	}
-
+	/**
+	 * Set a new value for a permission. The value should be sent as the body of the
+	 * POST.
+	 * 
+	 * @param sourceId
+	 * @param destId
+	 * @param optionStr
+	 * @return
+	 */
 	@POST
 	@Path("permission/{sourceId}/{destId}")
 	public String setPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
@@ -519,6 +534,17 @@ public class AdminResource {
 		return "Success, go back and refresh";
 	}
 
+	/**
+	 * Retrieves a permission from the system. By default, the permission will be
+	 * computed taking into account any defaults when a more specific setting cannot
+	 * be found. To get just the raw permission that is stored in the data, set the
+	 * query parameter 'raw' to true.
+	 * 
+	 * @param sourceId
+	 * @param destId
+	 * @param raw
+	 * @return
+	 */
 	@GET
 	@Produces("application/json")
 	@Path("permission/{sourceId}/{destId}")
@@ -537,6 +563,15 @@ public class AdminResource {
 		return p;
 	}
 
+	/**
+	 * Get list of permissions for a given source ID. If the query parameter 'raw'
+	 * is set to true, only permissions stored in the database are returned.
+	 * Otherwise, all returnable computed permissions are returned.
+	 * 
+	 * @param sourceId
+	 * @param raw
+	 * @return
+	 */
 	@GET
 	@Produces("application/json")
 	@Path("permission/{sourceId}")
@@ -552,12 +587,25 @@ public class AdminResource {
 		return p;
 	}
 
+	/**
+	 * Clear a permission from the system if it exists. Once this operation occurs,
+	 * the computed permission should return a default value either from the source
+	 * ID or the system.
+	 * 
+	 * @param sourceId
+	 * @param destId
+	 */
 	@DELETE
 	@Path("permission/{sourceId}/{destId}")
 	public void clearPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId) {
 		permissionService.clearClipboardPermission(sourceId, destId);
 	}
 
+	/**
+	 * Returns the system default {@link ClipboardPermissionOption}.
+	 * 
+	 * @param optionStr
+	 */
 	@GET
 	@Path("permission/default/{option}")
 	public void setServiceDefaultPermission(@PathParam("option") String optionStr) {
@@ -571,7 +619,7 @@ public class AdminResource {
 		for (VirtueTemplate t : templates) {
 			sourceIds.add(t.getId());
 		}
-		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
 		return sourceIds;
 	}
 }

@@ -125,7 +125,7 @@ public class SshClipboardManager implements IClipboardManager {
 			IMessageSerializer localHubSerializer = pair.serializerA;
 			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
 			IMessageSerializer localClientSerializer = pair.serializerB;
-			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_ID, localHubSerializer, "Local Desktop");
+			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID, localHubSerializer, "Local Desktop");
 			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
 		} catch (Exception e) {
 			UserAlertingStub.sendStubAlert(

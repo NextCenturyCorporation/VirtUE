@@ -91,7 +91,7 @@ public class ClipboardHub {
 				Socket socket = serverSocket.accept();
 				IConnectionWrapper connection = new SocketConnection(socket);
 				IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
-				String defaultGroup = ClipboardPermission.DESKTOP_CLIENT_ID;
+				String defaultGroup = ClipboardPermission.DESKTOP_CLIENT_GROUP_ID;
 				String desktopClientName = "Local Desktop";
 				hub.addClient(defaultGroup, serializer, desktopClientName);
 			}

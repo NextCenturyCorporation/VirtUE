@@ -674,7 +674,7 @@ public class DataResource {
 		for (VirtueTemplate t : templates) {
 			sourceIds.add(t.getId());
 		}
-		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
 		return permissionService.getAllPermissionsForSourcesAsMap(sourceIds);
 	}
 
@@ -695,6 +695,15 @@ public class DataResource {
 		return "Success, go back and refresh";
 	}
 
+	/**
+	 * Returns a very simple HTML view of the permission set. This (along with this
+	 * entire class) is intended only to be used for testing and debugging and not
+	 * intended to be used in a production system.
+	 * 
+	 * It is purely functional and ugly.
+	 * 
+	 * @return
+	 */
 	@GET
 	@Path("permissions/html")
 	public Response getAllPermissionsHtmlView() {
@@ -707,8 +716,8 @@ public class DataResource {
 			destIds.add(t.getId());
 			idToName.put(t.getId(), t.getName());
 		}
-		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
-		destIds.add(ClipboardPermission.DESKTOP_CLIENT_ID);
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
+		destIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
 		destIds.add(ClipboardPermission.DEFAULT_DESTINATION);
 		Map<Pair<String, String>, ClipboardPermissionOption> activePermissions = permissionService
 				.getAllPermissionsForSourcesAsMap(destIds);

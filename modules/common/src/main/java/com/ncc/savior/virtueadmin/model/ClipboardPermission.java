@@ -26,7 +26,7 @@ public class ClipboardPermission implements Serializable {
 	 * permission for new virtues.
 	 */
 	public static final String DEFAULT_DESTINATION = "DEFAULT";
-	public static final String DESKTOP_CLIENT_ID = "Desktop-client";
+	public static final String DESKTOP_CLIENT_GROUP_ID = "Desktop-client";
 	// @Column(nullable = false)
 	@Id
 	private String sourceGroupId;

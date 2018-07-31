@@ -17,6 +17,14 @@ import com.ncc.savior.desktop.virtues.DesktopResourceService;
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 
+/**
+ * {@link ICrossGroupDataGuard} implementation that pulls
+ * {@link ClipboardPermissionOption}s from a rest service. This guard pulls the
+ * data down once and caches that data. It does not update the cache. For
+ * {@link ClipboardPermission}s that are set as
+ * {@link ClipboardPermissionOption#ASK}, there is an timeout cache that keeps
+ * the users responses for a period of time.
+ */
 public class RestDataGuard implements ICrossGroupDataGuard {
 	private static final Logger logger = LoggerFactory.getLogger(RestDataGuard.class);
 

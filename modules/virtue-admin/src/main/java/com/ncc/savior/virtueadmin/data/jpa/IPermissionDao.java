@@ -23,16 +23,42 @@ public interface IPermissionDao {
 	 */
 	ClipboardPermission getClipboardPermission(String sourceGroupId, String destinationGroupId);
 
+	/**
+	 * Set a single permission
+	 * 
+	 * @param sourceId
+	 * @param destinationId
+	 * @param option
+	 */
 	void setClipboardPermission(String sourceId, String destinationId, ClipboardPermissionOption option);
 
+	/**
+	 * Retrieve all permissions stored in the database with a given source ID.
+	 * 
+	 * @param sourceId
+	 * @return
+	 */
 	List<ClipboardPermission> getClipboardPermissionForSource(String sourceId);
 
-	List<ClipboardPermission> getClipboardPermissionForSource(String sourceId, List<String> destinationIds);
-
+	/**
+	 * Retrieve all permissions stored in the database with a given destination ID.
+	 * 
+	 * @param sourceId
+	 * @return
+	 */
 	List<ClipboardPermission> getClipboardPermissionForDestination(String destinationId);
 
+	/**
+	 * Retrieve all permissions stored in the database.
+	 * 
+	 * @param sourceId
+	 * @return
+	 */
 	Iterable<ClipboardPermission> getAllClipboardPermissions();
 
+	/**
+	 * Deletes a permission from the database
+	 */
 	void clearPermission(String sourceId, String destId);
 
 }
