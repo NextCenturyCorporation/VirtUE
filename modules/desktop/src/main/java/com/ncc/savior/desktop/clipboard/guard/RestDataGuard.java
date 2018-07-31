@@ -75,7 +75,9 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 			return true;
 		case ASK:
 			int dialogButton = JOptionPane.YES_NO_OPTION;
-			int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like to copy this data?", "Warning",
+			int dialogResult = JOptionPane.showConfirmDialog(null,
+					"Would you like allow copying between these systems for 15 minutes?",
+					"Warning",
 					dialogButton);
 			ClipboardPermissionOption tempOption = (dialogResult == JOptionPane.YES_OPTION
 					? ClipboardPermissionOption.ALLOW
