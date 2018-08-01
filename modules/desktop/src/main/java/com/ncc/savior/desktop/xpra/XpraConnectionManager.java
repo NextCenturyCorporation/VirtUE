@@ -7,6 +7,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.alerting.UserAlertingStub;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.application.XpraApplicationManager;
 import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
@@ -77,6 +78,8 @@ public class XpraConnectionManager {
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.setErrorCallback((msg, e) -> {
 			applicationManager.closeAllWindows();
+			UserAlertingStub
+					.sendStubAlert("Connection to virtue closed unexpectedly.  " + msg + e.getLocalizedMessage());
 		});
 		client.connect(factory, params);
 		client.setDisplay(params.getDisplay());

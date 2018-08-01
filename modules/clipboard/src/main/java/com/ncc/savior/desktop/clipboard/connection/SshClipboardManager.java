@@ -76,7 +76,7 @@ public class SshClipboardManager implements IClipboardManager {
 			@Override
 			public void onDisconnect(String clientId, IOException e) {
 				logger.error("Clipboard client " + clientId + " closed with exception", e);
-				onDisconnectError(clientId);
+				onDisconnectWithError(clientId);
 			}
 		});
 		this.sourceJarPath = sourceJarPath;
@@ -91,7 +91,7 @@ public class SshClipboardManager implements IClipboardManager {
 		}
 	}
 
-	protected void onDisconnectError(String clientId) {
+	protected void onDisconnectWithError(String clientId) {
 		// TODO new thread?
 
 		if (propertiesMap.containsKey(clientId)) {

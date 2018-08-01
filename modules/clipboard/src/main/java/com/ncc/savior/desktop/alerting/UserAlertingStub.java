@@ -15,6 +15,7 @@ public class UserAlertingStub {
 	private static final Logger logger = LoggerFactory.getLogger(UserAlertingStub.class);
 
 	public static void sendStubAlert(String message) {
+		new ToastMessage(message, 2000);
 		logger.info("*ALERT*: " + message);
 	}
 }
