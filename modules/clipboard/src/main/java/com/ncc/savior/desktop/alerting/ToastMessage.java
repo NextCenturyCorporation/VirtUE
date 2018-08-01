@@ -6,14 +6,14 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
 import javafx.scene.shape.Rectangle;
 
-public class ToastMessage extends JDialog {
+public class ToastMessage extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,10 +32,11 @@ public class ToastMessage extends JDialog {
 		toastLabel.setForeground(Color.WHITE);
 
 		setBounds(100, 100, toastLabel.getPreferredSize().width + 20, 31);
-
+		setFocusable(false);
+		setFocusableWindowState(false);
+		setAutoRequestFocus(false);
 		setAlwaysOnTop(true);
 		panel.add(toastLabel);
-
 	}
 
 	public Rectangle setLocation(int bottom) {
