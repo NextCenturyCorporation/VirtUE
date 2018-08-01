@@ -18,7 +18,8 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
-import com.ncc.savior.desktop.alerting.UserAlertingStub;
+import com.ncc.savior.desktop.alerting.PlainAlertMessage;
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.client.ClipboardClient;
@@ -114,7 +115,9 @@ public class SshClipboardManager implements IClipboardManager {
 			}
 			// reconnect failed since we return on success
 			logger.error("Clipboard reconnect failed for client=" + clientId);
-			UserAlertingStub.sendStubAlert("Clipboard connection retries failed.");
+			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
+					"Clipboard connection unable to reconnect after retries");
+			UserAlertingServiceHolder.sendAlert(pam);
 		} else {
 			logger.error("Error: Unable to find properties for client=" + clientId + " after disconnected with error.");
 		}
@@ -129,8 +132,9 @@ public class SshClipboardManager implements IClipboardManager {
 			this.clipboardHub.addClient(CLIENT_GROUP_ID, localHubSerializer);
 			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
 		} catch (Exception e) {
-			UserAlertingStub.sendStubAlert(
+			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
 					"Local clipboard initialization failed.  Local clipboard will not be connected with virtues.");
+			UserAlertingServiceHolder.sendAlert(pam);
 			logger.error("Local clipboard client initialization failed", e);
 		}
 	}

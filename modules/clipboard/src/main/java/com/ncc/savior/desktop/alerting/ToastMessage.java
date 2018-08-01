@@ -11,13 +11,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import javafx.scene.shape.Rectangle;
+
 public class ToastMessage extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	int milliseconds;
 
-	public ToastMessage(String toastString, int timeToLiveMillis) {
-		this.milliseconds = timeToLiveMillis;
+	public ToastMessage(String toastTitle, String toastString) {
 		setUndecorated(true);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
@@ -34,23 +34,22 @@ public class ToastMessage extends JDialog {
 		setBounds(100, 100, toastLabel.getPreferredSize().width + 20, 31);
 
 		setAlwaysOnTop(true);
-		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		int y = dim.height / 2 - getSize().height / 2;
-		int half = y / 2;
-		setLocation(dim.width / 2 - getSize().width / 2, y + half);
 		panel.add(toastLabel);
-		setVisible(false);
 
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(milliseconds);
-					dispose();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}.start();
+	}
+
+	public Rectangle setLocation(int bottom) {
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		// int y = dim.height / 2 - getSize().height / 2;
+		// int half = y / 2;
+		Dimension size = getSize();
+		int width = size.width;
+		int height = size.height;
+		int y = bottom - height;
+		int x = dim.width / 2 - width / 2;
+		setLocation(x, y);
+		setVisible(true);
+		Rectangle r = new Rectangle(x, y, width, height);
+		return r;
 	}
 }

@@ -6,6 +6,8 @@ import java.io.File;
 import javax.swing.JFrame;
 
 import com.ncc.savior.configuration.PropertyManager;
+import com.ncc.savior.desktop.alerting.ToastUserAlertService;
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
@@ -63,7 +65,7 @@ public class SidebarApplication {
 		} else {
 			rdpClient = new WindowsRdp();
 		}
-
+		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService());
 		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);

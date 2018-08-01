@@ -142,7 +142,7 @@ public class VirtueService {
 					logger.error("clipboard manager connection failed!", e);
 					// TODO alert user? allow user to try again?
 				}
-				client = connectionManager.createClient(params, color);
+				client = connectionManager.createClient(params, color, virtue);
 			}
 		} finally {
 			if (file != null && file.exists()) {
