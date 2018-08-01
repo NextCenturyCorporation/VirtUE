@@ -4,10 +4,24 @@
 
 provider "aws" {
   region = "us-east-1"
+  version = "~> 1.23"
+}
+
+provider "external" {
+  version = "~> 1.0"
+}
+
+provider "null" {
+  version = "~> 1.0"
 }
 
 data "external" "local_user" {
   program = ["python", "-c", "import os; print '{ \"user\": \"%s\" }' % os.environ['USER']"]
+}
+
+variable "user_private_key_file" {
+  # the private key to use to ssh into a machine we create (as a normal user)
+  default = "vrtu.pem"
 }
 
 variable "admin_password" {
