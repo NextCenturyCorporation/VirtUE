@@ -104,16 +104,17 @@ public class VirtueInstance {
 	}
 
 	public VirtueState getState() {
-		return getVirtueStateFrom(vms);
+		this.state = getVirtueStateFrom(vms);
+		return state;
 	}
 
 	@Override
 	public String toString() {
 		return "VirtueInstance [id=" + id + ", name=" + name + ", username=" + username + ", templateid=" + templateId
-				+ ", vms=" + vms + ", state=" + state + "]";
+				+ ", vms=" + vms + ", state=" + getState() + "]";
 	}
 
-	public void setState(VirtueState state) {
+	protected void setState(VirtueState state) {
 		this.state = state;
 	}
 

@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.AmazonClientException;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -446,15 +447,24 @@ public class XenGuestManager {
 		if (linuxFuture == null) {
 			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
+		Void v = null;
 		Collection<String> hostnames = new ArrayList<String>();
 		try {
 			for (VirtualMachine vm : linuxVms) {
 				if (JavaUtil.isNotEmpty(vm.getInternalHostname())) {
 					hostnames.add(vm.getInternalHostname());
 				}
+				CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm,
+						VmState.DELETING);
+				serviceProvider.getVmNotifierService().chainFutures(cf, v);
 			}
+			// TODO roll route53 into a microservice
 			if (!hostnames.isEmpty()) {
-				route53.deleteARecords(hostnames);
+				try {
+					route53.deleteARecords(hostnames);
+				} catch (AmazonClientException e) {
+					logger.warn("Failed to delete DNS record for one of " + hostnames);
+				}
 			}
 		} catch (Exception e) {
 			logger.error("Failed to delete hostnames from DNS.  Hostnames=" + hostnames, e);
