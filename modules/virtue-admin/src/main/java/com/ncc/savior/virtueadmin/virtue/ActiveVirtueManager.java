@@ -144,6 +144,9 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		if (opt.isPresent()) {
 			return opt.get();
 		} else {
+			// We throw an exception here mainly because nulls are handled strangely by
+			// Jersey (They return a 204 which means success with no content). Throwing an
+			// exception allows our exception handling system deal with the error better.
 			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with id=" + virtueId);
 		}
 	}
