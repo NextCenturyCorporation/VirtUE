@@ -63,7 +63,7 @@ public class PropertyManager {
 	}
 
 	public PropertyManager(String... resourcePaths) {
-		this(resourcePathesToStreams(resourcePaths));
+		this(resourcePathsToStreams(resourcePaths));
 	}
 
 	private static List<InputStream> filesToStreams(File[] files) {
@@ -82,7 +82,7 @@ public class PropertyManager {
 		return list;
 	}
 
-	private static List<InputStream> resourcePathesToStreams(String[] resourcePaths) {
+	private static List<InputStream> resourcePathsToStreams(String[] resourcePaths) {
 		PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
 		List<InputStream> list = new ArrayList<InputStream>();
 		for (String path : resourcePaths) {
