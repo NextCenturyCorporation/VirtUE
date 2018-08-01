@@ -8,6 +8,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
  * Manages and controls active {@link VirtueInstance}s for the system. This
@@ -55,7 +56,7 @@ public interface IActiveVirtueManager {
 	 */
 	VirtueInstance provisionTemplate(VirtueUser user, VirtueTemplate template);
 
-	void deleteVirtue(VirtueUser user, String instanceId);
+	VirtueInstance deleteVirtue(VirtueUser user, String instanceId);
 
 	Iterable<VirtueInstance> getAllActiveVirtues();
 

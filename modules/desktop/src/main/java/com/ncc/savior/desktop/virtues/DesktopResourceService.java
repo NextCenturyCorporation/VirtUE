@@ -223,7 +223,17 @@ public class DesktopResourceService {
 	}
 
 	public DesktopVirtue stopVirtue(String virtueId) throws InvalidUserLoginException, IOException {
+		System.out.println("Step 2");
 		WebTarget target = baseApi.path("virtue").path(virtueId).path("stop");
+		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Stopping virtue=" + virtue);
+		}
+		return virtue;
+	}
+
+	public DesktopVirtue terminateVirtue(String virtueId) throws InvalidUserLoginException, IOException {
+		WebTarget target = baseApi.path("virtue").path(virtueId).path("terminate");
 		DesktopVirtue virtue = getClass(target, "GET", DesktopVirtue.class);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Stopping virtue=" + virtue);
