@@ -1,9 +1,14 @@
 package com.ncc.savior.desktop.clipboard.linux;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
+import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
+import com.ncc.savior.desktop.clipboard.data.FileClipboardData;
 import com.ncc.savior.desktop.clipboard.data.PlainTextClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnicodeClipboardData;
 import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
@@ -125,6 +132,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				x11.XSetErrorHandler(handler);
 				delayedFormats.add(ClipboardFormat.TEXT);
 				delayedFormats.add(ClipboardFormat.UNICODE);
+				delayedFormats.add(ClipboardFormat.FILES);
 				// clear?
 				getWindowProperty();
 				if (takeClipboard) {
@@ -240,42 +248,46 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		Runnable targetPollRunnable = () -> {
 			previousFormats = new TreeSet<ClipboardFormat>();
 			while (!stopTargetPollThread) {
-				if (!ownSelection) {
-					runnableQueue.offer(() -> {
+				try {
+					if (!ownSelection) {
+						runnableQueue.offer(() -> {
+							if (logger.isTraceEnabled()) {
+								logger.trace("calling convert selection for targets");
+							}
+							convertSelectionAndSync(targets);
+						});
+						Set<String> af = waitForAvailableFormats();
 						if (logger.isTraceEnabled()) {
-							logger.trace("calling convert selection for targets");
+							logger.trace("received available targets");
 						}
-						convertSelectionAndSync(targets);
-					});
-					Set<String> af = waitForAvailableFormats();
-					if (logger.isTraceEnabled()) {
-						logger.trace("received available targets");
-					}
-					TreeSet<ClipboardFormat> acf;
-					acf = new TreeSet<ClipboardFormat>();
-					for (String f : af) {
-						ClipboardFormat fmt = ClipboardFormat.fromLinux(f);
-						// logger.debug(f + " -> " + (fmt == null ? null : fmt.getLinux()));
-						if (fmt != null) {
-							acf.add(fmt);
+						TreeSet<ClipboardFormat> acf;
+						acf = new TreeSet<ClipboardFormat>();
+						for (String f : af) {
+							ClipboardFormat fmt = ClipboardFormat.fromLinux(f);
+							// logger.debug(f + " -> " + (fmt == null ? null : fmt.getLinux()));
+							if (fmt != null) {
+								acf.add(fmt);
+							}
 						}
-					}
-					boolean equals = (acf.isEmpty() && previousFormats.isEmpty()) || acf.equals(previousFormats);
-					if (!equals) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("sending clipboard Changed message.  Formats=" + acf);
+						boolean equals = (acf.isEmpty() && previousFormats.isEmpty()) || acf.equals(previousFormats);
+						if (!equals) {
+							if (logger.isTraceEnabled()) {
+								logger.trace("sending clipboard Changed message.  Formats=" + acf);
+							}
+							if (!ownSelection) {
+								previousFormats = acf;
+								listener.onClipboardChanged(acf);
+							}
 						}
-						if (!ownSelection) {
-							previousFormats = acf;
-							listener.onClipboardChanged(acf);
-						}
-					}
 
-				} else {
-					previousFormats = new TreeSet<ClipboardFormat>();
+					} else {
+						previousFormats = new TreeSet<ClipboardFormat>();
+					}
+					// TODO smarter period control?
+					JavaUtil.sleepAndLogInterruption(100);
+				} catch (Throwable t) {
+					logger.error("error in target polling thread", t);
 				}
-				// TODO smarter period control?
-				JavaUtil.sleepAndLogInterruption(100);
 			}
 		};
 		targetPollThread = new Thread(targetPollRunnable, "TargetsPoller");
@@ -302,9 +314,24 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		runnableQueue.offer(() -> {
-			Pointer ptr = clipboardData.createLinuxData();
-			int numItems = clipboardData.getLinuxNumEntries();
-			int itemSize = clipboardData.getLinuxEntrySizeBits();
+			Pointer ptr;
+			int numItems;
+			int itemSize;
+			try {
+				ptr = clipboardData.createLinuxData();
+				numItems = clipboardData.getLinuxNumEntries();
+				itemSize = clipboardData.getLinuxEntrySizeBits();
+			} catch (Throwable t) {
+				// Something failed in our clipboard operation. We still need to push clipboard
+				// data to the application or bad things happen (usually locks the application
+				// for a couple seconds). The easiest way around this is to just pass blank
+				// data.
+				logger.debug("failed to get clipboard data attributes", t);
+				EmptyClipboardData ecd = new EmptyClipboardData(clipboardData.getFormat());
+				ptr = ecd.createLinuxData();
+				numItems = ecd.getLinuxNumEntries();
+				itemSize = ecd.getLinuxEntrySizeBits();
+			}
 			// This is caused by an event from in linux. We stored an event to send based on
 			// the event received and we need that event.
 			XSelectionEvent sne = this.SelectionNotifyEventToSend;
@@ -325,12 +352,15 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				logger.trace("called convert selection for data " + format);
 			}
 		});
+		logger.debug("waiting for data for format " + format);
 		WindowProperty myprop = waitForUpdatedDataWindowProp();
 		if (myprop == null) {
 			// somewhat to clear the thread if the waiting timed out. this shouldn't happen.
 			myprop = getWindowProperty();
 		}
+		logger.debug("got data for format " + format);
 		ClipboardData data = convertClipboardData(format, myprop);
+		logger.debug("converted data to " + data);
 		return data;
 	}
 
@@ -397,18 +427,22 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 		Set<String> formats = new LinkedHashSet<String>();
 		WindowProperty raw = waitForUpdatedFormatWindowProp();
 		if (logger.isTraceEnabled()) {
-			logger.debug("Waited for formats format: " + raw.formatBytes + " type: " + raw.type + " "
+			logger.trace("Waited for formats format: " + raw.formatBytes + " type: " + raw.type + " "
 					+ x11.XGetAtomName(display, raw.type));
 		}
 		// TODO what if raw is null because it timed out (initialization and no
 		// clipboard)
-		for (int i = 0; i < raw.numItems; i++) {
-			NativeLong nl = raw.property.getNativeLong(i * NativeLong.SIZE);
-			// logger.debug(" " + val + " 0x" + Long.toHexString(val));
-			// logger.debug(" " + nl + " : " + nl);
-			Atom formatAtom = new Atom(nl.longValue());
-			String formatName = x11.XGetAtomName(display, formatAtom);
-			formats.add(formatName);
+		// logger.debug(" formatPollStart");
+		if (raw != null) {
+			for (int i = 0; i < raw.numItems; i++) {
+				NativeLong nl = raw.property.getNativeLong(i * NativeLong.SIZE);
+				// logger.debug(" " + val + " 0x" + Long.toHexString(val));
+				// logger.debug(" " + nl + " : " + nl);
+				Atom formatAtom = new Atom(nl.longValue());
+				String formatName = x11.XGetAtomName(display, formatAtom);
+				// logger.debug(" format: " + formatName);
+				formats.add(formatName);
+			}
 		}
 		return formats;
 	}
@@ -491,6 +525,41 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			// works with UTF-8 or default
 			str = property.getString(0, "UTF-8");
 			return new UnicodeClipboardData(str);
+		case FILES:
+			if (property != null) {
+				str = property.getString(0);
+				logger.debug("files data " + str);
+				String[] lines = str.split(System.lineSeparator());
+				logger.debug("lines: " + Arrays.toString(lines));
+				if ("cut".equals(lines[0]) || "copy".equals(lines[0])) {
+					lines = Arrays.copyOfRange(lines, 1, lines.length);
+					logger.debug("lines altered: " + Arrays.toString(lines));
+				}
+				List<File> files = new ArrayList<File>(lines.length);
+				for (String line : lines) {
+					File file = new File(line);
+					logger.debug("Exists: " + file.exists() + " file: " + file);
+					if (file.exists()) {
+						logger.debug("adding file as java file");
+						files.add(file);
+					} else {
+						try {
+							URI uri = new URI(line);
+							file = new File(uri.getPath());
+							if (file.exists()) {
+								logger.debug("adding file as java uri");
+								files.add(file);
+							}
+						} catch (URISyntaxException e) {
+							logger.warn("failed to attempting to add file as uri", e);
+						}
+					}
+				}
+				FileClipboardData data = new FileClipboardData(files);
+				logger.debug("data: " + data);
+				return data;
+			}
+			return new UnknownClipboardData(cf);
 		default:
 			return new UnknownClipboardData(cf);
 		}
