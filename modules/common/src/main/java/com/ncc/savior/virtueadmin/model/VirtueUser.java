@@ -25,6 +25,9 @@ public class VirtueUser {
 	private static final VirtueUser anonymousUser;
 	private static VirtueUser adminUser;
 
+	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+	public static final String ROLE_USER = "ROLE_USER";
+
 	@Id
 	private String username;
 	@ElementCollection(targetClass = String.class)
@@ -39,8 +42,8 @@ public class VirtueUser {
 		testUser = new VirtueUser("testUser", new ArrayList<String>(), true);
 		anonymousUser = new VirtueUser("anonymous", new ArrayList<String>(), true);
 		ArrayList<String> adminAuths = new ArrayList<String>();
-		adminAuths.add("ROLE_ADMIN");
-		adminAuths.add("ROLE_USER");
+		adminAuths.add(ROLE_ADMIN);
+		adminAuths.add(ROLE_USER);
 		adminUser = new VirtueUser("admin", adminAuths, true);
 	}
 
@@ -126,6 +129,17 @@ public class VirtueUser {
 
 	protected void setVirtueTemplateIds(Collection<String> virtueTemplateIds) {
 		this.virtueTemplateIds = virtueTemplateIds;
+	}
+
+	public static boolean isAdmin(VirtueUser user) {
+		return isRole(user, ROLE_ADMIN);
+	}
+
+	public static boolean isRole(VirtueUser user, String role) {
+		if (user != null && user.getAuthorities() != null) {
+			return user.getAuthorities().contains(role);
+		}
+		return false;
 	}
 
 }

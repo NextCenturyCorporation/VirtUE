@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
@@ -38,6 +39,25 @@ public class CompletableFutureServiceProvider {
 	private BaseCompletableFutureService<VirtualMachine, VirtualMachine, VirtualMachine> networkCopyingService;
 	private BaseCompletableFutureService<VirtualMachine, VirtualMachine, Void> errorCausingService;
 
+	@Value("${virtue.services.timeout.updown:0}")
+	private int upDownTimeoutMillis;
+	@Value("${virtue.services.timeout.aws.rename:0}")
+	private int renameTimeoutMillis;
+	@Value("${virtue.services.timeout.aws.networking:0}")
+	private int networkTimeoutMillis;
+	@Value("${virtue.services.timeout.aws.ensureDelete:0}")
+	private int ensureDeleteTimeoutMillis;
+	@Value("${virtue.services.timeout.rsa:0}")
+	private int rsaTimeoutMillis;
+	@Value("${virtue.services.timeout.aws.status:0}")
+	private int awsStatusTimeoutMillis;
+	@Value("${virtue.sensing.redirectUrl}")
+	private String sensingUri;
+	private boolean usePublicDns;
+	private VirtueAwsEc2Provider ec2Provider;
+	private IKeyManager keyManager;
+	private IUpdateListener<VirtualMachine> vmNotifier;
+
 	public CompletableFutureServiceProvider(VirtueAwsEc2Provider ec2Provider,
 			IUpdateListener<VirtualMachine> vmNotifier, IKeyManager keyManager, boolean usePublicDns) {
 		this.executor = Executors.newScheduledThreadPool(6, new ThreadFactory() {
@@ -50,13 +70,26 @@ public class CompletableFutureServiceProvider {
 				return new Thread(r, name);
 			}
 		});
+		this.usePublicDns = usePublicDns;
+		this.ec2Provider = ec2Provider;
+		this.keyManager = keyManager;
+		this.vmNotifier = vmNotifier;
+	}
+
+	/**
+	 * needs to be called after constructor due to timeouts. This is done
+	 * automatically via Spring with the init-method attribute in the
+	 * application-context.xml
+	 */
+	protected void init() {
 		AmazonEC2 ec2 = ec2Provider.getEc2();
-		awsRenamingService = new AwsRenamingCompletableFutureService(executor, ec2);
-		awsNetworkingUpdateService = new AwsNetworkingUpdateService(executor, ec2, usePublicDns);
-		ensureDeleteVolumeOnTermination = new EnsureDeleteVolumeOnTerminationCompletableFutureService(executor, ec2);
-		testUpDown = new TestReachabilityCompletableFuture(executor, keyManager);
-		addRsa = new AddRsaKeyCompletableFutureService(executor, keyManager);
-		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2);
+		awsRenamingService = new AwsRenamingCompletableFutureService(executor, ec2, renameTimeoutMillis);
+		awsNetworkingUpdateService = new AwsNetworkingUpdateService(executor, ec2, usePublicDns, networkTimeoutMillis);
+		ensureDeleteVolumeOnTermination = new EnsureDeleteVolumeOnTerminationCompletableFutureService(executor, ec2,
+				ensureDeleteTimeoutMillis);
+		testUpDown = new TestReachabilityCompletableFuture(executor, keyManager, upDownTimeoutMillis);
+		addRsa = new AddRsaKeyCompletableFutureService(executor, keyManager, rsaTimeoutMillis);
+		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2, awsStatusTimeoutMillis);
 		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(
 				"alterStatus") {
 			@Override

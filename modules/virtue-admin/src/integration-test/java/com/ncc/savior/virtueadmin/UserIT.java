@@ -22,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.ncc.savior.virtueadmin.RoleIT.Role;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
+import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -59,7 +60,7 @@ public class UserIT {
 		User userToPost = new User();
 		userToPost.username = "ItTestUser1";
 		userToPost.authorities = new ArrayList<String>();
-		userToPost.authorities.add("ROLE_USER");
+		userToPost.authorities.add(VirtueUser.ROLE_USER);
 		userToPost.virtueTemplateIds = new ArrayList<String>();
 		userToPost.virtueTemplateIds.add(listOfTemplates.get(0).getId());
 

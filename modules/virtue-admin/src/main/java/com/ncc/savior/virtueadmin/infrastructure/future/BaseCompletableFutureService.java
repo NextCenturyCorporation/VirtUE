@@ -1,11 +1,13 @@
 package com.ncc.savior.virtueadmin.infrastructure.future;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 
 /**
@@ -34,8 +36,10 @@ import com.ncc.savior.util.SaviorException;
  */
 public abstract class BaseCompletableFutureService<P, R, X> {
 	private static final Logger logger = LoggerFactory.getLogger(BaseCompletableFutureService.class);
+	protected long timeoutMillis;
 
 	public BaseCompletableFutureService() {
+		timeoutMillis = 0;
 	}
 
 	public CompletableFuture<R> startFutures(P param, X extra) {
@@ -109,7 +113,7 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 	}
 
 	protected void onFailure(P initial, CompletableFuture<R> cf) {
-		SaviorException se = new SaviorException(SaviorException.UNKNOWN_ERROR, "Unknown error with value " + initial);
+		SaviorException se = new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Unknown error with value " + initial);
 		if (logger.isDebugEnabled()) {
 			logger.debug(getServiceName() + " failed with initial data=" + initial + " and error:", se);
 		}
@@ -118,16 +122,43 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 
 	public abstract void onServiceStart();
 
+	protected void checkTimeout(BaseCompletableFutureService<P, R, X>.Wrapper wrapper) throws TimeoutException {
+		if (this.timeoutMillis > 0) {
+			long timeoutTime = wrapper.startTimeMillis + timeoutMillis;
+			long current = System.currentTimeMillis();
+			if (logger.isTraceEnabled()) {
+				logger.trace("Testing timeout: \ncurrent=  " + current + " \ntimeout=  " + timeoutTime + " \nstartTime="
+						+ wrapper.startTimeMillis + " \ntimeout=" + timeoutMillis);
+			}
+			if (timeoutTime < current) {
+				SaviorException e = new SaviorException(SaviorErrorCode.SERVICE_TIMEOUT,
+						"Job timed out in service " + this.getServiceName() + " with wrapper=" + wrapper);
+				logger.warn("Service timed out!", e);
+				throw e;
+			}
+		}
+	}
+
+	public long getTimeoutMillis() {
+		return timeoutMillis;
+	}
+
+	public void setTimeoutMillis(long timeoutMillis) {
+		this.timeoutMillis = timeoutMillis;
+	}
+
 	protected class Wrapper {
 		P param;
 		X extra;
 		CompletableFuture<R> future;
 		R result;
+		long startTimeMillis;
 
 		Wrapper(P p, X x, CompletableFuture<R> future) {
 			this.param = p;
 			this.extra = x;
 			this.future = future;
+			this.startTimeMillis = System.currentTimeMillis();
 		}
 	}
 }
