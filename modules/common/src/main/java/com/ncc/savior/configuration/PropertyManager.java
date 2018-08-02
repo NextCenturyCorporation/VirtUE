@@ -2,13 +2,17 @@ package com.ncc.savior.configuration;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
  * Property manager that aggregates multiple sources of properties with specific
@@ -23,12 +27,12 @@ import org.slf4j.LoggerFactory;
  */
 
 public class PropertyManager {
-	private static final String DEFAULT_PROPERTIES_PATH = "default.properties";
-	private static final String SAVIOR_DEFAULT_PROPERTY_LOCATION = "./savior.properties";
+	private static final String DEFAULT_PROPERTIES_PATH = "classpath:default.properties";
+	private static final String SAVIOR_DEFAULT_PROPERTY_LOCATION = "file:./savior.properties";
 	private static final Logger logger = LoggerFactory.getLogger(PropertyManager.class);
 	public static final String PROPERTY_DESKTOP_API_PATH = "savior.api.path.desktop";
 	public static final String PROPERTY_LOCATION_KEY = "savior.property.path";
-	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "savior-user.properties";
+	private static final String SAVIOR_DEFAULT_USER_PROPERTY_LOCATION = "file:./savior-user.properties";
 	public static final String PROPERTY_REQUIRED_DOMAIN = "savior.domain";
 	public static final String PROPERTY_DEFAULT_PEM = "savior.desktop.defaultPem";
 	public static final String PROPERTY_ALLOW_INSECURE_SSL = "savior.desktop.allowInsecureSsl";
@@ -41,38 +45,59 @@ public class PropertyManager {
 	public static final String PROPERTY_CLIPBOARD_JAR_PATH = "savior.desktop.clipboard.jar";
 	public static final String PROPERTY_ALERT_PERSIST_TIME = "savior.desktop.alerts.persistMillis";
 	private Properties props;
-	private boolean warnOnMissingFile = false;
-
-	public PropertyManager(String... filePaths) {
-		this(false, stringsToFiles(filePaths));
-	}
 
 	public PropertyManager(File... files) {
-		this(false, files);
+		this(filesToStreams(files));
 	}
 
-	public PropertyManager(boolean debugOutput, File... files) {
-		warnOnMissingFile = debugOutput;
-		File file;
+	public PropertyManager(List<InputStream> iss) {
+		InputStream is;
 		props = new Properties();
-		for (int i = files.length - 1; i >= 0; i--) {
-			file = files[i];
-			if (file != null && file.exists() && !file.isDirectory()) {
-				try {
-					props.load(new FileInputStream(file));
-				} catch (IOException e) {
-					logger.warn("Error loading file at " + file.getAbsolutePath());
-				}
-			} else {
-				if (warnOnMissingFile) {
-					logger.warn("Could not find property file " + file.getAbsolutePath());
-				}
+		for (int i = iss.size() - 1; i >= 0; i--) {
+			is = iss.get(i);
+			try {
+				props.load(is);
+			} catch (IOException e) {
+				logger.warn("Error loading properties.");
 			}
 		}
 	}
 
-	public PropertyManager(boolean debugOutput, String... filePaths) {
-		this(debugOutput, stringsToFiles(filePaths));
+	public PropertyManager(String... resourcePaths) {
+		this(resourcePathsToStreams(resourcePaths));
+	}
+
+	private static List<InputStream> filesToStreams(File[] files) {
+		ArrayList<InputStream> list = new ArrayList<InputStream>();
+		for (File file : files) {
+			if (file != null && file.exists() && file.isFile()) {
+				try {
+					list.add(new FileInputStream(file));
+				} catch (FileNotFoundException e) {
+					logger.warn("Error opening file at " + file);
+				}
+			} else {
+				logger.warn("Unable to open file at " + file);
+			}
+		}
+		return list;
+	}
+
+	private static List<InputStream> resourcePathsToStreams(String[] resourcePaths) {
+		PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
+		List<InputStream> list = new ArrayList<InputStream>();
+		for (String path : resourcePaths) {
+			try {
+				if (path != null) {
+					Resource resource = resourceResolver.getResource(path);
+					InputStream is = resource.getInputStream();
+					list.add(is);
+				}
+			} catch (IOException e) {
+				logger.warn("Unable to open resource at " + path);
+			}
+		}
+		return list;
 	}
 
 	public String getString(String property, String defaultValue) {
@@ -94,29 +119,11 @@ public class PropertyManager {
 		return val;
 	}
 
-	private static File[] stringsToFiles(String[] filePaths) {
-		ArrayList<File> files = new ArrayList<File>();
-		for (String filePath : filePaths) {
-			if (filePath != null) {
-				File file = new File(filePath);
-				files.add(file);
-			}
-		}
-		return files.toArray(new File[0]);
-	}
-
-	public void setWarnOnMissingFile(boolean warnOnMissingFile) {
-		this.warnOnMissingFile = warnOnMissingFile;
-	}
-
 	public static PropertyManager defaultPropertyLocations(boolean debugOutput) {
 		String defaultsPath = null;
-		try {
-			defaultsPath = PropertyManager.class.getClassLoader().getResource(DEFAULT_PROPERTIES_PATH).toURI()
-					.getPath();
-		} catch (URISyntaxException e) {
-			logger.warn("Error attempting to find default.properties", e);
-		}
+
+		defaultsPath = DEFAULT_PROPERTIES_PATH;
+
 		String systemLocation = System.getProperty(PROPERTY_LOCATION_KEY);
 		String envLocation = System.getenv(PROPERTY_LOCATION_KEY);
 		String extraPropsLocation = null;
@@ -128,8 +135,8 @@ public class PropertyManager {
 		String defaultPropsLocation = SAVIOR_DEFAULT_PROPERTY_LOCATION;
 		String defaultUserLocation = SAVIOR_DEFAULT_USER_PROPERTY_LOCATION;
 		;
-		PropertyManager props = new PropertyManager(debugOutput, extraPropsLocation, defaultUserLocation,
-				defaultPropsLocation, defaultsPath);
+		PropertyManager props = new PropertyManager(extraPropsLocation, defaultUserLocation, defaultPropsLocation,
+				defaultsPath);
 		return props;
 	}
 

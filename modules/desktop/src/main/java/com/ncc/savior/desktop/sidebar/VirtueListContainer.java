@@ -31,11 +31,14 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class VirtueListContainer extends AbstractVirtueContainer implements Comparable<VirtueListContainer> {
 
+	private VirtueList vl;
+
 	public VirtueListContainer(DesktopVirtue virtue, VirtueService virtueService, Color headerColor,
-			JScrollPane sp, JTextField textField, GhostText ghostText) {
+			JScrollPane sp, JTextField textField, GhostText ghostText, VirtueList vl) {
 		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = false;
 
+		this.vl = vl;
 		this.container = new JPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 

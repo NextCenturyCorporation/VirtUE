@@ -308,21 +308,31 @@ public class XenHostManager {
 		// get XenVmManager for id
 		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(id);
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>();
+
 		if (vmo.isPresent()) {
 			VirtualMachine xenVm = vmo.get();
 			XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 			// tell XenManager to delete its vms
-			guestManager.deleteGuests(linuxVms, linuxFuture);
 			linuxFuture.thenRun(() -> {
 				vms.add(xenVm);
 				ec2Wrapper.deleteVirtualMachines(vms);
 				CompletableFuture<VirtualMachine> xenFuture2 = new CompletableFuture<>();
+				logger.debug("adding to delete pipeline now!");
 				addToDeletePipeline(xenVm, xenFuture2);
 				xenFuture2.thenAccept((vm) -> {
+
 					xenVmDao.deleteVm(vm);
+					Optional<VirtueInstance> virtue = xenVmDao.getVirtueInstance(id);
+					if (virtue.isPresent()) {
+						xenVmDao.deleteVirtue(virtue.get());
+					}
+					for (VirtualMachine guestVm : linuxVms) {
+						xenVmDao.deleteVm(guestVm);
+					}
 					finalXenFuture.complete(vm);
 				});
 			});
+			guestManager.deleteGuests(linuxVms, linuxFuture);
 		} else {
 			SaviorException e = new SaviorException(SaviorErrorCode.VM_NOT_FOUND,
 					"Unable to find Xen VM with id=" + id);
@@ -421,7 +431,9 @@ public class XenHostManager {
 
 	private void addToDeletePipeline(VirtualMachine xenVm, CompletableFuture<VirtualMachine> xenFuture) {
 		Void v = null;
-		CompletableFuture<VirtualMachine> cf = serviceProvider.getTestUpDown().startFutures(xenVm, false);
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(xenVm, VmState.DELETING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getTestUpDown().chainFutures(cf, false);
 		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
 		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
@@ -464,7 +476,7 @@ public class XenHostManager {
 			this.serverUser = serverUser;
 		}
 	}
-	
+
 	public XenGuestManager getGuestManager(String virtueId) {
 		Optional<VirtualMachine> vmo = xenVmDao.getXenVm(virtueId);
 		VirtualMachine xenVm = vmo.get();
