@@ -1,6 +1,7 @@
 .gradle
 /bin/
 /build/
+/logs/
 !gradle/wrapper/gradle-wrapper.jar
 
 ### STS ###
