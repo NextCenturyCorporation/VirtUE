@@ -8,15 +8,12 @@ import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ncc.savior.util.JavaUtil;
 
 import javafx.scene.shape.Rectangle;
 
@@ -79,29 +76,6 @@ public class ToastUserAlertService implements IUserAlertService {
 				}
 			}
 		};
-	}
-
-	/**
-	 * Used for testing that will repeatedly add alerts of varying size at varying
-	 * intervals.
-	 */
-	private void startTestAdder() {
-		new Thread(() -> {
-			Random rng = new Random();
-			JavaUtil.sleepAndLogInterruption(3000);
-			int i = 0;
-			while (true) {
-				i++;
-				String msg = "";
-				for (int x = 0; x < rng.nextInt(300) + 2; x++) {
-					msg += "message ";
-				}
-				BaseAlertMessage alertMessage = new PlainAlertMessage("Title", msg + "#" + i);
-				displayAlert(alertMessage);
-				long interval = 500 + rng.nextInt(300);
-				JavaUtil.sleepAndLogInterruption(interval);
-			}
-		}).start();
 	}
 
 	@Override
