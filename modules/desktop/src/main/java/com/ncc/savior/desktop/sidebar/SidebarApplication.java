@@ -50,8 +50,8 @@ public class SidebarApplication {
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
-		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl,
-				logoutUrl);
+		long alertPersistTimeMillis = props.getLong(PropertyManager.PROPERTY_ALERT_PERSIST_TIME, 3000);
+		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl, logoutUrl);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
 		IApplicationManagerFactory appManager;
 		appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
@@ -65,7 +65,7 @@ public class SidebarApplication {
 		} else {
 			rdpClient = new WindowsRdp();
 		}
-		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService());
+		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
 		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
