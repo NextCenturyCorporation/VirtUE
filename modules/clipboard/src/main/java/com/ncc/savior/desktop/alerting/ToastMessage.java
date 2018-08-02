@@ -14,6 +14,11 @@ import javax.swing.border.LineBorder;
 
 import javafx.scene.shape.Rectangle;
 
+/**
+ * The display window for a single toast message.
+ * 
+ *
+ */
 public class ToastMessage extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -46,6 +51,15 @@ public class ToastMessage extends JFrame {
 		addMouseListener(listener);
 	}
 
+	/**
+	 * Sets the location of the alert by specifying where the bottom should be. The
+	 * alert will appear based on that location and the rest will be computed. This
+	 * is useful because we want to layer later alerts on top of existing alerts so
+	 * the input is usually the top of the last alert.
+	 * 
+	 * @param bottom
+	 * @return
+	 */
 	public Rectangle setLocation(int bottom) {
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		// int y = dim.height / 2 - getSize().height / 2;
@@ -61,16 +75,21 @@ public class ToastMessage extends JFrame {
 		return r;
 	}
 
-	public JPanel getPanel() {
-		return panel;
-	}
-
+	/**
+	 * The alert should be highlighted. In this function we want to alter the look
+	 * to be highlighted. This is usually due to the cursor being over the alert.
+	 * This can be undone with {@link #unhighlight()}
+	 */
 	public void highlight() {
 		panel.setBackground(Color.WHITE);
 		panel.setBorder(new LineBorder(Color.DARK_GRAY, 2));
 		toastLabel.setForeground(Color.BLACK);
 	}
 
+	/**
+	 * Return the alert to its non-highlighted state. This is usually done when a
+	 * cursor exits the alert and we want to undo the {@link #highlight()}
+	 */
 	public void unhighlight() {
 		panel.setBackground(Color.GRAY);
 		panel.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
