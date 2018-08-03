@@ -7,6 +7,8 @@ import java.net.URL;
 import javax.swing.JFrame;
 
 import com.ncc.savior.configuration.PropertyManager;
+import com.ncc.savior.desktop.alerting.ToastUserAlertService;
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
@@ -54,6 +56,8 @@ public class SidebarApplication {
 		long dataGuardAskStickyTimeoutMillis = props.getLong(PropertyManager.PROPERTY_CLIPBOARD_ASK_TIMEOUT_MILLIS,
 				1000 * 60 * 15);
 
+		long alertPersistTimeMillis = props.getLong(PropertyManager.PROPERTY_ALERT_PERSIST_TIME, 3000);
+
 		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
 				logoutUrl.toString());
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl);
@@ -72,6 +76,7 @@ public class SidebarApplication {
 
 		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis);
 		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
+		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
 		IIconService iconService = new IconResourceService(drs);
