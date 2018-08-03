@@ -43,6 +43,7 @@ public class PropertyManager {
 	public static final String PROPERTY_BASE_API_PATH = "savior.api.path.base";
 	public static final String PROPERTY_FREERDP_PATH = "savior.desktop.freerdp.path";
 	public static final String PROPERTY_CLIPBOARD_JAR_PATH = "savior.desktop.clipboard.jar";
+	public static final String PROPERTY_ALERT_PERSIST_TIME = "savior.desktop.alerts.persistMillis";
 	private Properties props;
 
 	public PropertyManager(File... files) {
@@ -149,6 +150,17 @@ public class PropertyManager {
 			value = Boolean.valueOf(strVal);
 		} catch (RuntimeException e) {
 			value = defaultValue;
+		}
+		return value;
+	}
+
+	public long getLong(String property, long defaultValue) {
+		String strVal = getProperty(property, null);
+		long value = defaultValue;
+		try {
+			value = Long.valueOf(strVal);
+		} catch (RuntimeException e) {
+			logger.warn("Error reading property=" + property, e);
 		}
 		return value;
 	}
