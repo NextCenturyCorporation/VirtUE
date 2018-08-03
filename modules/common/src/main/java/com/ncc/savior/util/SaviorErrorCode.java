@@ -21,7 +21,7 @@ public enum SaviorErrorCode {
 	USER_NOT_FOUND(24, "User not found", 400), 
 	APPLICATION_ID_NOT_FOUND(25, "Application not found", 400),
 	PERMISSION_NOT_FOUND(26, "Permission not found", 400),
-	ID_MISMATCH(26, "Object IDs do not match"),
+	ID_MISMATCH(27, "Object IDs do not match"),
 	//bad data?
 	INVALID_INPUT(50, "Invalid input"),
 	//Configuration errors
