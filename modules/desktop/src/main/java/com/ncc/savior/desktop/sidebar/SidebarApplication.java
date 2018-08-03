@@ -12,7 +12,8 @@ import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
-import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.ICrossGroupDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.RestDataGuard;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
@@ -51,9 +52,13 @@ public class SidebarApplication {
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
+
+		long dataGuardAskStickyTimeoutMillis = props.getLong(PropertyManager.PROPERTY_CLIPBOARD_ASK_TIMEOUT_MILLIS,
+				1000 * 60 * 15);
+
 		long alertPersistTimeMillis = props.getLong(PropertyManager.PROPERTY_ALERT_PERSIST_TIME, 3000);
 
-    AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
+		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
 				logoutUrl.toString());
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl);
 		IApplicationManagerFactory appManager;
@@ -68,8 +73,10 @@ public class SidebarApplication {
 		} else {
 			rdpClient = new WindowsRdp();
 		}
+
+		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis);
+		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
 		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
-		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
 		IIconService iconService = new IconResourceService(drs);

@@ -23,6 +23,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,8 @@ import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.ClipboardPermission;
+import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -50,6 +54,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
+import com.ncc.savior.virtueadmin.service.PermissionService;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -78,6 +83,9 @@ public class DataResource {
 
 	@Autowired
 	private ImportExportService importExportService;
+
+	@Autowired
+	private PermissionService permissionService;
 	private PathMatchingResourcePatternResolver resolver;
 
 	public DataResource() {
@@ -647,6 +655,116 @@ public class DataResource {
 		clearTemplatesDatabase();
 		userManager.clear(true);
 		return "database cleared.";
+	}
+
+	@GET
+	@Path("permissions/raw")
+	@Produces("application/json")
+	public Iterable<ClipboardPermission> getAllRawPermissions() {
+		Iterable<ClipboardPermission> p = permissionService.getAllRawPermissions();
+		return p;
+	}
+
+	@GET
+	@Path("permissions/computed")
+	@Produces("application/json")
+	public Map<Pair<String, String>, ClipboardPermissionOption> getAllComputedPermissions() {
+		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
+		Collection<String> sourceIds = new ArrayList<String>();
+		for (VirtueTemplate t : templates) {
+			sourceIds.add(t.getId());
+		}
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
+		return permissionService.getAllPermissionsForSourcesAsMap(sourceIds);
+	}
+
+	@GET
+	@Path("permission/{sourceId}/{destId}/{option}")
+	public String setPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
+			@PathParam("option") String optionStr) {
+		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
+		permissionService.setClipboardPermission(sourceId, destId, option);
+		return "Success, go back and refresh";
+	}
+
+	@GET
+	@Path("permission/default/{option}")
+	public String setServiceDefaultPermission(@PathParam("option") String optionStr) {
+		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
+		permissionService.setDefaultClipboardPermission(option);
+		return "Success, go back and refresh";
+	}
+
+	/**
+	 * Returns a very simple HTML view of the permission set. This (along with this
+	 * entire class) is intended only to be used for testing and debugging and not
+	 * intended to be used in a production system.
+	 * 
+	 * It is purely functional and ugly.
+	 * 
+	 * @return
+	 */
+	@GET
+	@Path("permissions/html")
+	public Response getAllPermissionsHtmlView() {
+		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
+		Collection<String> destIds = new ArrayList<String>();
+		ArrayList<String> sourceIds = new ArrayList<String>();
+		Map<String, String> idToName = new HashMap<String, String>();
+		for (VirtueTemplate t : templates) {
+			sourceIds.add(t.getId());
+			destIds.add(t.getId());
+			idToName.put(t.getId(), t.getName());
+		}
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
+		destIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
+		destIds.add(ClipboardPermission.DEFAULT_DESTINATION);
+		Map<Pair<String, String>, ClipboardPermissionOption> activePermissions = permissionService
+				.getAllPermissionsForSourcesAsMap(destIds);
+		StringBuilder sb = new StringBuilder();
+		sb.append("<html><body><table border='2'>").append("\n");
+
+		sb.append("  <tr><th>src\\dest</th>").append("\n");
+		for (String destId : destIds) {
+			sb.append("    <td>").append(destId);
+			sb.append("<br><b>").append(idToName.get(destId));
+			sb.append("</b></td>").append("\n");
+		}
+		sb.append("  </tr>").append("\n");
+		for (String sourceId : sourceIds) {
+			sb.append("  <tr>").append("\n");
+			sb.append("    <td>").append(sourceId);
+			sb.append("<br><b>").append(idToName.get(sourceId));
+			sb.append("</b></td>");
+			for (String destId : destIds) {
+				ImmutablePair<String, String> key = new ImmutablePair<String, String>(sourceId, destId);
+				ClipboardPermissionOption permission = activePermissions.get(key);
+				sb.append("    <td>");
+				if (!destId.equals(sourceId)) {
+					sb.append(permission);
+					sb.append("<br>");
+					for (ClipboardPermissionOption v : ClipboardPermissionOption.values()) {
+						sb.append("<a href='../permission/").append(sourceId).append("/").append(destId).append("/")
+								.append(v).append("'>");
+						sb.append(v).append("</a><br>");
+					}
+				} else {
+
+				}
+				sb.append("</td>").append("\n");
+			}
+			sb.append("  </tr>").append("\n");
+		}
+		sb.append("</table>");
+		sb.append("<br><br>");
+		sb.append("Service Default:").append(permissionService.getDefaultClipboardPermission());
+		sb.append("<br>");
+		for (ClipboardPermissionOption v : ClipboardPermissionOption.values()) {
+			sb.append("<a href='../permission/default/").append(v).append("'>");
+			sb.append(v).append("</a><br>");
+		}
+		sb.append("</body></html>");
+		return Response.status(200).entity(sb.toString()).build();
 	}
 
 }

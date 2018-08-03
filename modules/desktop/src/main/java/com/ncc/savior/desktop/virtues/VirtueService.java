@@ -96,7 +96,7 @@ public class VirtueService {
 				String key = app.getPrivateKey();
 				SshConnectionParameters params = getConnectionParams(app, key);
 				// For now user
-				clipboardId = clipboardManager.connectClipboard(params, virtue.getId());
+				clipboardId = clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
 			} catch (IOException e) {
 				logger.error("Failed to connect clipboard", e);
 			}
@@ -136,7 +136,7 @@ public class VirtueService {
 				try {
 					connectionManager.createXpraServerAndAddDisplayToParams(params);
 					logger.debug("connecting clipboard");
-					clipboardManager.connectClipboard(params, virtue.getId());
+					clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.error("clipboard manager connection failed!", e);

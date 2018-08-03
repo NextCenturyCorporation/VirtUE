@@ -20,7 +20,8 @@ public enum SaviorErrorCode {
 	VM_NOT_FOUND(23, "Virtual Machine not found", 400), 
 	USER_NOT_FOUND(24, "User not found", 400), 
 	APPLICATION_ID_NOT_FOUND(25, "Application not found", 400),
-	ID_MISMATCH(26, "Object IDs do not match"),
+	PERMISSION_NOT_FOUND(26, "Permission not found", 400),
+	ID_MISMATCH(27, "Object IDs do not match"),
 	//bad data?
 	INVALID_INPUT(50, "Invalid input"),
 	//Configuration errors
@@ -37,7 +38,7 @@ public enum SaviorErrorCode {
 	NOT_IMPLEMENTED(254, "function not implemented", 501), 
 	UNKNOWN_ERROR(255, "unknown error"), 
 	//Errors we shouldn't see because its older code
-	VIRTUAL_BOX_ERROR(1001, "Error with virtual box") ;
+	VIRTUAL_BOX_ERROR(1001, "Error with virtual box");
 	//@formatter:on
 	private final int errorCode;
 	private final String readableString;

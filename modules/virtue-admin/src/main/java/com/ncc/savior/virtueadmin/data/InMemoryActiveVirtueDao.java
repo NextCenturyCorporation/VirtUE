@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -131,17 +129,20 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 
 	@Override
 	public void updateVms(Collection<VirtualMachine> vms) {
-		throw new NotImplementedException();
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
+				"update vm not implemented for " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public void deleteVirtue(VirtueInstance vi) {
-		throw new NotImplementedException();
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
+				"delete virtue not implemented for " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public void updateVirtue(VirtueInstance virtue) {
-		throw new NotImplementedException();
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
+				"update virtue not implemented for " + this.getClass().getSimpleName());
 	}
 
 	@Override

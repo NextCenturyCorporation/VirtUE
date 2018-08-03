@@ -33,6 +33,7 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 
 /**
  * Central hub point for the shared clipboard data. All messages should be sent
@@ -58,8 +59,10 @@ public class ClipboardHub {
 	private ICrossGroupDataGuard dataGuard;
 	private Set<ClipboardFormat> currentFormats;
 	private DisconnectListener disconnectListener;
+	private HashMap<String, String> groupIdToDisplayName;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
+		groupIdToDisplayName = new HashMap<String, String>();
 		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
 		currentFormats = new HashSet<ClipboardFormat>();
 		validFormats = new TreeSet<ClipboardFormat>();
@@ -67,6 +70,7 @@ public class ClipboardHub {
 		validFormats.add(ClipboardFormat.UNICODE);
 		validFormats.add(ClipboardFormat.FILES);
 		this.dataGuard = dataGuard;
+		dataGuard.setGroupIdToDisplayNameMap(groupIdToDisplayName);
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -88,8 +92,9 @@ public class ClipboardHub {
 				Socket socket = serverSocket.accept();
 				IConnectionWrapper connection = new SocketConnection(socket);
 				IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
-				String defaultGroup = "default";
-				hub.addClient(defaultGroup, serializer);
+				String defaultGroup = ClipboardPermission.DESKTOP_CLIENT_GROUP_ID;
+				String desktopClientName = "Local Desktop";
+				hub.addClient(defaultGroup, serializer, desktopClientName);
 			}
 		} finally {
 			JavaUtil.closeIgnoreErrors(serverSocket);
@@ -114,8 +119,8 @@ public class ClipboardHub {
 	 * @param serializer
 	 * @return id of client. Useful for handling errors to reconnect.
 	 */
-	public String addClient(String groupId, IMessageSerializer serializer) {
-		return addClient(groupId, serializer, null);
+	public String addClient(String groupId, IMessageSerializer serializer, String displayName) {
+		return addClient(groupId, serializer, displayName, null);
 	}
 
 	/**
@@ -128,7 +133,8 @@ public class ClipboardHub {
 	 *            -client id if existed before, otherwise should be null
 	 * @return id of client. Useful for handling errors to reconnect.
 	 */
-	public String addClient(String groupId, IMessageSerializer serializer, String clientId) {
+	public String addClient(String groupId, IMessageSerializer serializer, String displayName, String clientId) {
+		groupIdToDisplayName.put(groupId, displayName);
 		String newId;
 		if (clientId == null) {
 			newId = getNextId();
@@ -172,6 +178,7 @@ public class ClipboardHub {
 	}
 
 	public void disconnectClient(String clientId) throws IOException {
+		groupIdToDisplayName.remove(clientId);
 		IClipboardMessageSenderReceiver trans = transmitters.get(clientId);
 		if (trans != null) {
 			transmitters.remove(clientId);
@@ -308,6 +315,7 @@ public class ClipboardHub {
 
 	protected void onMessageError(String clientId, String description, IOException e) {
 		logger.error("message error clientId=" + clientId + " : " + description, e);
+		groupIdToDisplayName.remove(clientId);
 		transmitters.remove(clientId);
 		if (disconnectListener != null) {
 			disconnectListener.onDisconnect(clientId, e);
