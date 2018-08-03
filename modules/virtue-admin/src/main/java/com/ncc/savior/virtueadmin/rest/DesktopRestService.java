@@ -130,4 +130,10 @@ public class DesktopRestService {
 		ClipboardPermissionOption option = permissionService.getDefaultClipboardPermission();
 		return option;
 	}
+
+	@GET
+	@Path("virtue/{virtueId}/terminate")
+	public DesktopVirtue terminateVirtue(@PathParam("virtueId") String virtueId) {
+		return desktopService.terminateVirtue(virtueId);
+	}
 }

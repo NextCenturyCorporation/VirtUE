@@ -68,6 +68,7 @@ public class ClipboardHub {
 		validFormats = new TreeSet<ClipboardFormat>();
 		validFormats.add(ClipboardFormat.TEXT);
 		validFormats.add(ClipboardFormat.UNICODE);
+		validFormats.add(ClipboardFormat.FILES);
 		this.dataGuard = dataGuard;
 		dataGuard.setGroupIdToDisplayNameMap(groupIdToDisplayName);
 	}

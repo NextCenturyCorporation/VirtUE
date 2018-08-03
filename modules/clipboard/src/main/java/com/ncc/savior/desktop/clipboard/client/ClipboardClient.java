@@ -39,7 +39,7 @@ public class ClipboardClient implements Closeable {
 	private IClipboardMessageSenderReceiver transmitter;
 	private IClipboardWrapper clipboard;
 	private String myId;
-	private long timeoutMillis = 3000;
+	private long timeoutMillis = 20000;
 	private Map<String, Thread> requestToThread;
 	private Map<String, ClipboardData> requestToData;
 	protected IClipboardErrorListener clipboardErrorListener;

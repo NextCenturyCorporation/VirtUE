@@ -97,7 +97,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	// }
 
 	@Override
-	public void deleteVirtue(VirtueUser user, String instanceId) {
+	public VirtueInstance deleteVirtue(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
 			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
@@ -115,6 +115,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 					"User=" + user.getUsername() + " does not own virtue with id=" + instanceId
 							+ " and is not admin.  Therefore, " + user.getUsername() + " cannot delete that virtue");
 		}
+		
+		return vi;
 	}
 
 	@Override
@@ -141,7 +143,14 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	@Override
 	public VirtueInstance getActiveVirtue(String virtueId) {
 		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(virtueId);
-		return opt.isPresent() ? opt.get() : null;
+		if (opt.isPresent()) {
+			return opt.get();
+		} else {
+			// We throw an exception here mainly because nulls are handled strangely by
+			// Jersey (They return a 204 which means success with no content). Throwing an
+			// exception allows our exception handling system deal with the error better.
+			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with id=" + virtueId);
+		}
 	}
 
 	@Override
