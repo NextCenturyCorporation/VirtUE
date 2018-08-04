@@ -7,26 +7,65 @@
  * user guide available at http://gradle.org/docs/2.5/userguide/tutorial_java_projects.html
  */
 
+buildscript {
+	ext {
+		springBootVersion = '2.0.4.RELEASE'
+		springVersion = '5.0.8.RELEASE'
+		springSecurityVersion = '5.0.7.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.0.4.RELEASE'
+}
+
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
+apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" } // for patched spring security kerberos
+}
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+bootJar {
+	baseName = "cifs-proxy-server"
+	version = "0.0.1"
+	mainClassName = "com.nextcentury.savior.cifsproxy.CifsProxy"
 }
 
 mainClassName = "cifsproxy.GssCache"
 
-
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.1'
+	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'
 /*
-    // The production code uses the SLF4J logging API at compile time
-    compile 'org.slf4j:slf4j-api:1.7.12'
+	compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
@@ -34,4 +73,19 @@ dependencies {
     // 'test.useTestNG()' to your build script.
     testCompile 'junit:junit:4.12'
 */
+
+	compile group: 'org.springframework.security', name: 'spring-security-core', version: springSecurityVersion
+	compile group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion
+	compile group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion
+	compile group: 'org.springframework.security', name: 'spring-security-ldap', version: springSecurityVersion
+    compile 'io.github.chrislong:spring-security-kerberos-client:1.0.4.BUILD-SNAPSHOT'
+    compile 'io.github.chrislong:spring-security-kerberos-web:1.0.4.BUILD-SNAPSHOT'
+    
+	compile group: 'org.springframework', name: 'spring-aspects', version: "${springVersion}"
+	compile("org.springframework.boot:spring-boot-starter:${springBootVersion}")
+	compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+	//compile("org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}")
+	//compile('org.springframework.boot:spring-boot-starter-security')
+    	
+	//testCompile('org.springframework.boot:spring-boot-starter-test')
 }

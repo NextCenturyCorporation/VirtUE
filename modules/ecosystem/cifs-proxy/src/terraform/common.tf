@@ -15,6 +15,10 @@ provider "null" {
   version = "~> 1.0"
 }
 
+provider "local" {
+  version = "~> 1.1"
+}
+
 data "external" "local_user" {
   program = ["python", "-c", "import os; print '{ \"user\": \"%s\" }' % os.environ['USER']"]
 }
@@ -22,6 +26,10 @@ data "external" "local_user" {
 variable "user_private_key_file" {
   # the private key to use to ssh into a machine we create (as a normal user)
   default = "vrtu.pem"
+}
+
+variable "bob_password" {
+  default = "Test1234."
 }
 
 variable "admin_password" {

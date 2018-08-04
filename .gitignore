@@ -34,3 +34,8 @@ docker/server-images/virtue-admin/virtue-admin-0.0.1-SNAPSHOT.war
 docker/server-images/virtue-admin/virtue-admin-0.0.1-SNAPSHOT.zip
 docker/server-images/workbench/admin.tar.gz
 /modules/ecosystem/cifs-proxy/src/terraform/vrtu.pem
+/modules/ecosystem/cifs-proxy/.classpath
+/modules/ecosystem/cifs-proxy/.cproject
+/modules/ecosystem/cifs-proxy/.project
+modules/ecosystem/cifs-proxy/.settings
+modules/ecosystem/cifs-proxy/build
