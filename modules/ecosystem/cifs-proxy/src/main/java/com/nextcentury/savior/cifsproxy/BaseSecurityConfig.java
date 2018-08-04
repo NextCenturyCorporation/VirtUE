@@ -86,6 +86,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		};
 		http.authorizeRequests()
 			.antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
+			.antMatchers("/hello").permitAll()
 			.antMatchers("/data/**").permitAll()
 			.anyRequest().authenticated().and().formLogin()
 				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login")
