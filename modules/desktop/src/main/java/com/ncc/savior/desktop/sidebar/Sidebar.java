@@ -319,24 +319,37 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					for (DesktopVirtue virtue : virtues) {
-						Color headerColor = getNextColor();
-						VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor,
-								getNextColor(), sp, textField, ghostText);
+		if (loading) {
+			loading = false;
+			setInitialViewPort();
+		}
 
-						VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp,
-								textField, ghostText);
+		for (DesktopVirtue virtue : virtues) {
+			Color headerColor = getNextColor();
+			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
+					textField, ghostText);
+			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField,
+					ghostText);
 
-						virtueIdToVtc.put(virtue.getTemplateId(), vtc);
-						virtueIdToVlc.put(virtue.getTemplateId(), vlc);
+			virtueIdToVtc.put(virtue.getTemplateId(), vtc);
+			virtueIdToVlc.put(virtue.getTemplateId(), vlc);
 
-						for (ApplicationDefinition ad : virtue.getApps().values()) {
-							vt.addVirtueToRow(virtue, vtc, vtc.getRow());
-							vl.addVirtueToRow(virtue, vlc, vlc.getRow());
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					vt.addVirtueToRow(virtue, vtc, vtc.getRow());
+					vl.addVirtueToRow(virtue, vlc, vlc.getRow());
+				}
+
+			});
+
+			for (ApplicationDefinition ad : virtue.getApps().values()) {
+
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						try {
 							boolean isFavorited = favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false);
 							ApplicationDom dom = new ApplicationDom(ad, isFavorited);
 
@@ -404,18 +417,14 @@ public class Sidebar implements VirtueChangeHandler {
 									break;
 								}
 							}
+						} catch (Exception e) {
+							logger.debug("Error with adding virtues");
 						}
 					}
-					if (loading) {
-						loading = false;
-						setInitialViewPort();
-					}
-				} catch (Exception e) {
-							logger.debug("Error with adding virtues");
-				}
-			}
-		});
+				});
 
+			}
+		}
 
 		String keyword = textField.getText();
 		if (ghostText.getIsVisible()) {
