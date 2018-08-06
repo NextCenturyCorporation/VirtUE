@@ -3,6 +3,7 @@ package com.nextcentury.savior.cifsproxy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 import javax.servlet.ServletException;
@@ -43,8 +44,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		@Override
 		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-			// TODO Auto-generated method stub
-			return new User(username, null, null);
+			return new User(username, "", Collections.emptySet());
 		}
 
 	}
