@@ -2,6 +2,7 @@ package com.ncc.savior.desktop.alerting;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -14,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.scene.shape.Rectangle;
 
 /**
  * Service that manager {@link BaseAlertMessage}s via an Android like toast
