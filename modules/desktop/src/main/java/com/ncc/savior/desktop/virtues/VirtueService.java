@@ -96,7 +96,7 @@ public class VirtueService {
 				String key = app.getPrivateKey();
 				SshConnectionParameters params = getConnectionParams(app, key);
 				// For now user
-				clipboardId = clipboardManager.connectClipboard(params, virtue.getId());
+				clipboardId = clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
 			} catch (IOException e) {
 				logger.error("Failed to connect clipboard", e);
 			}
@@ -136,13 +136,13 @@ public class VirtueService {
 				try {
 					connectionManager.createXpraServerAndAddDisplayToParams(params);
 					logger.debug("connecting clipboard");
-					clipboardManager.connectClipboard(params, virtue.getId());
+					clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.error("clipboard manager connection failed!", e);
 					// TODO alert user? allow user to try again?
 				}
-				client = connectionManager.createClient(params, color);
+				client = connectionManager.createClient(params, color, virtue);
 			}
 		} finally {
 			if (file != null && file.exists()) {
@@ -261,7 +261,6 @@ public class VirtueService {
 	public void startVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (startableVirtueStates.contains(virtue.getVirtueState())) {
 			desktopResourceService.startVirtue(virtue.getId());
-			virtue.setVirtueState(VirtueState.RUNNING);
 		}
 	}
 
@@ -269,6 +268,12 @@ public class VirtueService {
 	public void stopVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (stopableVirtueStates.contains(virtue.getVirtueState())) {
 			desktopResourceService.stopVirtue(virtue.getId());
+		}
+	}
+
+	public void terminateVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
+		if (virtue.getVirtueState() != VirtueState.UNPROVISIONED) {
+			desktopResourceService.terminateVirtue(virtue.getId());
 		}
 	}
 }

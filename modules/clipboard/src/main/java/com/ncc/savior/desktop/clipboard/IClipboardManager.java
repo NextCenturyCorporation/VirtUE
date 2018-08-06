@@ -17,10 +17,11 @@ public interface IClipboardManager {
 	 * 
 	 * @param params
 	 * @param groupId
+	 * @param groupId
 	 * @return
 	 * @throws IOException
 	 */
-	String connectClipboard(SshConnectionParameters params, String groupId) throws IOException;
+	String connectClipboard(SshConnectionParameters params, String displayName, String groupId) throws IOException;
 
 	/**
 	 * Closes the clipboard connection for the given clipboard Id
