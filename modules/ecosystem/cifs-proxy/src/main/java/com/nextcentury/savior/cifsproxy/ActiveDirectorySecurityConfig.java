@@ -62,10 +62,10 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	@Value("${savior.security.ldap}")
 	private String ldapURL;
 
-	@Value("${savior.virtueadmin.principal}")
+	@Value("${savior.cifsproxy.principal}")
 	private String servicePrincipal;
 
-	@Value("${savior.virtueadmin.keytab}")
+	@Value("${savior.cifsproxy.keytab}")
 	private File keytabLocation;
 
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
