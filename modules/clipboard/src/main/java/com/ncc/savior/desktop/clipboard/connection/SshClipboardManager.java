@@ -266,16 +266,16 @@ public class SshClipboardManager implements IClipboardManager {
 	}
 	
 	public String sha2hex(byte[] bytesOfMessage) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException { 
-        MessageDigest md = MessageDigest.getInstance("SHA-256"); 
-        byte[] thedigest = md.digest(bytesOfMessage); 
-        BigInteger bigInt = new BigInteger(1, thedigest); 
-        String hashtext = bigInt.toString(16); 
+		MessageDigest md = MessageDigest.getInstance("SHA-256"); 
+		byte[] thedigest = md.digest(bytesOfMessage); 
+		BigInteger bigInt = new BigInteger(1, thedigest); 
+		String hashtext = bigInt.toString(16); 
 
-        while (hashtext.length() < 32) { 
-            hashtext = "0" + hashtext; 
-        }
+		while (hashtext.length() < 32) { 
+			hashtext = "0" + hashtext; 
+		}
         
-        return hashtext; 
+		return hashtext; 
     } 
 
 	private void copyClipboardClientIfNeeded(Session session)
