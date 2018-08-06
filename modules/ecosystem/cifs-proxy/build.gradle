@@ -54,6 +54,25 @@ eclipse {
     }
 }
 
+//configurations.create('gsscacheJar')
+configurations {
+    gsscacheJar.extendsFrom(runtimeClasspath)
+}
+
+task gsscacheJar(type: org.springframework.boot.gradle.tasks.bundling.BootJar, description: "Build the app jar for GssCache") {
+    baseName 'gsscache'
+    mainClassName = 'cifsproxy.GssCache'
+    bootInf {
+        from(sourceSets.main.output) {
+            into 'classes'
+        }
+        from(configurations.gsscacheJar) {
+            include '**/*.jar'
+            into 'lib'
+        }
+    }
+}
+
 bootJar {
 	baseName = "cifs-proxy-server"
 	version = "0.0.1"
@@ -107,8 +126,6 @@ task bootServer(dependsOn: bootDeploy) {
     }
 }
 
-mainClassName = "cifsproxy.GssCache"
-
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.1'
@@ -138,4 +155,7 @@ dependencies {
 	//compile('org.springframework.boot:spring-boot-starter-security')
     	
 	//testCompile('org.springframework.boot:spring-boot-starter-test')
-}
+
+    gsscacheJar group: 'net.java.dev.jna', name: 'jna', version: '4.5.1'
+} 
+
