@@ -1,4 +1,4 @@
-package cifsproxy;
+package com.nextcentury.savior.cifsproxy;
 
 import java.util.HashMap;
 import java.util.List;

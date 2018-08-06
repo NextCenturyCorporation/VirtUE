@@ -7,21 +7,22 @@ import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
+import com.nextcentury.savior.cifsproxy.GssApi;
+import com.nextcentury.savior.cifsproxy.GssApi.GssCredentialUsage;
+import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_desc;
+import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_set_desc;
+import com.nextcentury.savior.cifsproxy.GssApi.gss_buffer_desc;
+import com.nextcentury.savior.cifsproxy.GssApi.gss_cred_id_t;
+import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_element;
+import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_set;
+import com.nextcentury.savior.cifsproxy.GssApi.gss_name_t;
+import com.nextcentury.savior.cifsproxy.JnaUtils;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
-
-import cifsproxy.GssApi.GssCredentialUsage;
-import cifsproxy.GssApi.gss_OID_desc;
-import cifsproxy.GssApi.gss_OID_set_desc;
-import cifsproxy.GssApi.gss_buffer_desc;
-import cifsproxy.GssApi.gss_cred_id_t;
-import cifsproxy.GssApi.gss_key_value_element;
-import cifsproxy.GssApi.gss_key_value_set;
-import cifsproxy.GssApi.gss_name_t;
 
 public class GssCache {
 
