@@ -19,11 +19,13 @@ buildscript {
 		maven { url "https://repo.spring.io/milestone" }
 	}
 	dependencies {
+	    classpath 'org.hidetake:gradle-ssh-plugin:2.9.0'
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 	}
 }
 
 plugins {
+	// note: can't use a variable for the version here :(
 	id 'org.springframework.boot' version '2.0.4.RELEASE'
 }
 
@@ -33,6 +35,7 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'org.hidetake.ssh'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -55,6 +58,53 @@ bootJar {
 	baseName = "cifs-proxy-server"
 	version = "0.0.1"
 	mainClassName = "com.nextcentury.savior.cifsproxy.CifsProxy"
+}
+
+ext.webhost = null
+def getWebhost() {
+    if (ext.webhost == null) {
+        new ByteArrayOutputStream().withStream { output ->
+            def result = exec {
+                workingDir 'src/terraform'
+                commandLine 'terraform', 'state', 'show', 'aws_instance.user_facing_server'
+                standardOutput = output
+            }
+            def stringOutput = output.toString()
+            def hostMatch = stringOutput =~ /public_dns *= (.*)/
+            ext.webhost = hostMatch[0][1]
+        }
+    }
+    return ext.webhost
+}
+
+remotes {
+	webserver {
+	    host = project.getWebhost()
+		user = 'ec2-user'
+        // root of git tree
+        identity = file('../../../vrtu.pem')
+	}
+}
+
+task bootDeploy(dependsOn: bootJar) {
+    doFirst {
+        ssh.run {
+            session(remotes.webserver) {
+                put from: bootJar.archivePath, into: '.'
+                put from: 'src/main/resources/cifs-proxy-security.properties', into: '.'
+            }
+        }
+    }
+}
+
+task bootServer(dependsOn: bootDeploy) {
+    doFirst {
+        ssh.run {
+            session(remotes.webserver) {
+                execute "java -jar ${bootJar.archiveName}"
+            }
+        }
+    }
 }
 
 mainClassName = "cifsproxy.GssCache"
