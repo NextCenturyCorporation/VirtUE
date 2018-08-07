@@ -7,6 +7,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
+import com.ncc.savior.desktop.alerting.VirtueAlertMessage;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.application.XpraApplicationManager;
 import com.ncc.savior.desktop.xpra.connection.BaseConnectionFactory;
@@ -18,6 +20,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory.TcpConnectionParameters;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class XpraConnectionManager {
 	@SuppressWarnings("unused")
@@ -68,15 +71,20 @@ public class XpraConnectionManager {
 	 *
 	 * @param params
 	 * @param color
+	 * @param virtue
 	 * @return
 	 * @throws IOException
 	 */
-	public XpraClient createClient(IConnectionParameters params, RgbColor color) throws IOException {
+	public XpraClient createClient(IConnectionParameters params, RgbColor color, DesktopVirtue virtue)
+			throws IOException {
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.setErrorCallback((msg, e) -> {
 			applicationManager.closeAllWindows();
+			VirtueAlertMessage pam = new VirtueAlertMessage("Virtue connection failed", virtue.getId(),
+					virtue.getName(), "Connection to virtue closed unexpectedly.  " + msg + e.getLocalizedMessage());
+			UserAlertingServiceHolder.sendAlert(pam);
 		});
 		client.connect(factory, params);
 		client.setDisplay(params.getDisplay());

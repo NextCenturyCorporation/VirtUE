@@ -88,7 +88,7 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		if (future == null) {
 			super.onFailure(null, cf);
 		} else {
-			future.cancel(false);
+			future.cancel(true);
 			super.onSuccess(result, cf);
 		}
 	}

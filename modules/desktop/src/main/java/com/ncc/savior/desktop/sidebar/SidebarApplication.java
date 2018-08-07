@@ -2,14 +2,18 @@ package com.ncc.savior.desktop.sidebar;
 
 import java.awt.HeadlessException;
 import java.io.File;
+import java.net.URL;
 
 import javax.swing.JFrame;
 
 import com.ncc.savior.configuration.PropertyManager;
+import com.ncc.savior.desktop.alerting.ToastUserAlertService;
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
-import com.ncc.savior.desktop.clipboard.guard.ConstantDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.ICrossGroupDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.RestDataGuard;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
@@ -38,19 +42,25 @@ public class SidebarApplication {
 
 		// Plumbing and dependency injection
 		PropertyManager props = PropertyManager.defaultPropertyLocations(true);
-		String baseUrl = props.getString(PropertyManager.PROPERTY_BASE_API_PATH);
-		String desktopUrl = baseUrl + props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH);
-		String loginUrl = baseUrl + props.getString(PropertyManager.PROPERTY_LOGIN_API_PATH);
-		String logoutUrl = baseUrl + props.getString(PropertyManager.PROPERTY_LOGOUT_API_PATH);
+		URL baseUrl = new URL(props.getString(PropertyManager.PROPERTY_BASE_API_PATH));
+		URL desktopUrl = new URL(baseUrl, props.getString(PropertyManager.PROPERTY_DESKTOP_API_PATH));
+		URL loginUrl = new URL(baseUrl, props.getString(PropertyManager.PROPERTY_LOGIN_API_PATH));
+		URL logoutUrl = new URL(baseUrl, props.getString(PropertyManager.PROPERTY_LOGOUT_API_PATH));
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
 		String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
-		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl,
-				logoutUrl);
-		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl, allowInsecureSsl);
+
+		long dataGuardAskStickyTimeoutMillis = props.getLong(PropertyManager.PROPERTY_CLIPBOARD_ASK_TIMEOUT_MILLIS,
+				1000 * 60 * 15);
+
+		long alertPersistTimeMillis = props.getLong(PropertyManager.PROPERTY_ALERT_PERSIST_TIME, 3000);
+
+		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
+				logoutUrl.toString());
+		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl);
 		IApplicationManagerFactory appManager;
 		appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
 		File freerdpExe = null;
@@ -64,7 +74,9 @@ public class SidebarApplication {
 			rdpClient = new WindowsRdp();
 		}
 
-		ClipboardHub clipboardHub = new ClipboardHub(new ConstantDataGuard(true));
+		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis);
+		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
+		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
 		IIconService iconService = new IconResourceService(drs);

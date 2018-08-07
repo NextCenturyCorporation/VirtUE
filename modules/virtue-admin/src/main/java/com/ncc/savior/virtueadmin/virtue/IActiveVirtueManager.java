@@ -55,7 +55,7 @@ public interface IActiveVirtueManager {
 	 */
 	VirtueInstance provisionTemplate(VirtueUser user, VirtueTemplate template);
 
-	void deleteVirtue(VirtueUser user, String instanceId);
+	VirtueInstance deleteVirtue(VirtueUser user, String instanceId);
 
 	Iterable<VirtueInstance> getAllActiveVirtues();
 

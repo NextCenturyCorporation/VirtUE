@@ -337,11 +337,11 @@ public class Sidebar implements VirtueChangeHandler {
 		for (DesktopVirtue virtue : virtues) {
 			Color headerColor = getNextColor();
 			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
-					textField, ghostText);
+					textField, ghostText, vt);
 			vt.addVirtueToRow(virtue, vtc, vtc.getRow());
 
 			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField,
-					ghostText);
+					ghostText, vl);
 			vl.addVirtueToRow(virtue, vlc, vlc.getRow());
 
 			virtueIdToVtc.put(virtue.getTemplateId(), vtc);
@@ -358,37 +358,37 @@ public class Sidebar implements VirtueChangeHandler {
 
 							VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
 									virtue, fv, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb,
-									sortAppsByStatus, ghostText);
+									sortAppsByStatus, ghostText, headerColor, DesktopView.APPS_TILE);
 							appsTileVa.tileSetup();
 							appsTileVa.registerListener(dom.getChangeListener());
 							at.addApplication(ad, appsTileVa);
 
-							VirtueApplicationItem vtcAppsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
+							VirtueApplicationItem virtueTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
 									virtue, fv, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb,
-									sortAppsByStatus, ghostText);
-							vtcAppsTileVa.tileSetup();
-							vtcAppsTileVa.registerListener(dom.getChangeListener());
+									sortAppsByStatus, ghostText, headerColor, DesktopView.VIRTUE_TILE);
+							virtueTileVa.tileSetup();
+							virtueTileVa.registerListener(dom.getChangeListener());
 
-							VirtueApplicationItem vlcAppsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
+							VirtueApplicationItem virtueListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
 									virtue, fv, dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb,
-									sortAppsByStatus, ghostText);
-							vlcAppsListVa.listSetup();
-							vlcAppsListVa.registerListener(dom.getChangeListener());
+									sortAppsByStatus, ghostText, headerColor, DesktopView.VIRTUE_LIST);
+							virtueListVa.listSetup();
+							virtueListVa.registerListener(dom.getChangeListener());
 
 							VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue,
 									fv, dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb,
-									sortAppsByStatus, ghostText);
+									sortAppsByStatus, ghostText, headerColor, DesktopView.APPS_LIST);
 							appsListVa.listSetup();
 							appsListVa.registerListener(dom.getChangeListener());
 
 							al.addApplication(ad, appsListVa);
-							vtc.addApplication(ad, vtcAppsTileVa);
-							vlc.addApplication(ad, vlcAppsListVa);
+							vtc.addApplication(ad, virtueTileVa);
+							vlc.addApplication(ad, virtueListVa);
 
 							Consumer<Image> consumer = i -> {
 								appsTileVa.setTileImage(i);
-								vtcAppsTileVa.setTileImage(i);
-								vlcAppsListVa.setListImage(i);
+								virtueTileVa.setTileImage(i);
+								virtueListVa.setListImage(i);
 								appsListVa.setListImage(i);
 								fv.setTileImage(ad, virtue, i);
 							};
@@ -397,8 +397,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 							dom.addListener(appsTileVa.getChangeListener());
 							dom.addListener(appsListVa.getChangeListener());
-							dom.addListener(vtcAppsTileVa.getChangeListener());
-							dom.addListener(vlcAppsListVa.getChangeListener());
+							dom.addListener(virtueTileVa.getChangeListener());
+							dom.addListener(virtueListVa.getChangeListener());
 
 							if (isFavorited) {
 								String selected = (String) cb.getSelectedItem();
@@ -407,14 +407,14 @@ public class Sidebar implements VirtueChangeHandler {
 								case "Alphabetical":
 									favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
 											dom.getChangeListener(), saviorTile, true, frame, textField, cb, null,
-											ghostText);
+											ghostText, headerColor, DesktopView.APPS_TILE);
 									favoritedVa.tileSetup();
 									fv.addFavorite(ad, virtue, favoritedVa, textField, null, ghostText);
 									break;
 								case "Status":
 									favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
 											dom.getChangeListener(), saviorTile, true, frame, textField, cb, null,
-											ghostText);
+											ghostText, headerColor, DesktopView.APPS_TILE);
 									favoritedVa.tileSetup();
 									fv.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus, ghostText);
 									break;

@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -479,17 +478,19 @@ public class AwsManager implements ICloudManager {
 
 	@Override
 	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
-		throw new NotImplementedException();
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
+				"start virtue not implemented for " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public VirtueInstance stopVirtue(VirtueInstance virtueInstance) {
-		throw new NotImplementedException();
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
+				"stop virtue not implemented for " + this.getClass().getSimpleName());
 	}
 
 	@Override
 	public void rebootVm(VirtualMachine vm, String virtue) {
-		// TODO Auto-generated method stub
-		
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
+				"reboot virtue not implemented for " + this.getClass().getSimpleName());
 	}
 }
