@@ -37,6 +37,7 @@ export class UserComponent implements OnInit {
 
   allVirtues = [];
   // allVirtues: DictList<Virtue>;
+
   allApps = [];
   adUserCtrl: FormControl;
 
@@ -159,8 +160,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.usersService.getUser(this.baseUrl, username).subscribe(uData => {
       this.userData = uData;
       this.user = new User(uData);
-      // this.user.roles = uData.authorities;
-      // this.user.enabled = uData.enabled;
       this.updateVirtueList(uData.virtueTemplateIds);
     });
   }
@@ -201,7 +200,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     let i: number = 0;
     appList = appsString.split(',');
     for (let id of appList) {
-      // console.log("here")
       i++;
       appInfo = this.allApps.filter(data => data.id === id)
         .map(app => app.name);
@@ -262,7 +260,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-    // dialogRef.afterClosed().subscribe();
   }
 
   updateThisUser(roleUser: boolean, roleAdmin: boolean) {
@@ -284,7 +281,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       'virtueTemplateIds': this.user.childIDs,
       'enabled': this.user.enabled
     };
-    // console.log(body);
+
     this.usersService.updateUser(this.baseUrl, this.user.username, JSON.stringify(body)).subscribe(
       error => {
         console.log(error);

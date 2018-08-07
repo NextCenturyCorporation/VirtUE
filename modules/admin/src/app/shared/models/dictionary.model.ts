@@ -29,6 +29,6 @@ export class DictList<T> {
   }
 }
 
-export class Dict<T> {
+class Dict<T> {
     [key: string]: T;
 }

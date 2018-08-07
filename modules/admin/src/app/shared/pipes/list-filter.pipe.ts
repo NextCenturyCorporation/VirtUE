@@ -6,7 +6,7 @@ This filter can be used with virtue, virtual machine list pages
   name: 'listFilter'
 })
 export class ListFilterPipe implements PipeTransform {
-  transform(list, sortColumn: string, filterColumn: string, filterValue: any, sortDirection: string, dontFilter: boolean) {
+  transform(list, sortColumn: string, filterColumn: string, filterValue: any, sortDirection: string, dontFilter: boolean): any[] {
     if (list.length < 2) {
       return list;
     }
@@ -17,14 +17,14 @@ export class ListFilterPipe implements PipeTransform {
     return this.sortList(list, sortColumn, sortDirection);
   }
 
-  //items with value 'status' =
-  filterList(list, filterColumn: string, filterValue: string) {
+    //only lets values through which match the filterValue.
+  filterList(list, filterColumn: string, filterValue: string): any[] {
     let filteredList = list.filter(element => (element[filterColumn] === filterValue));
 
     return filteredList;
   }
 
-  sortList(list, propertyName: string, sortDirection: string) {
+  sortList(list, propertyName: string, sortDirection: string): any[] {
 
     if (sortDirection === 'desc') {
       // console.log('sorting list by desc order');

@@ -9,7 +9,7 @@ import 'rxjs/add/observable/of';
 import { DialogsComponent } from '../dialogs/dialogs.component';
 
 import { Column } from '../shared/models/column.model';
-import { DictList, Dict } from '../shared/models/dictionary.model';
+import { DictList } from '../shared/models/dictionary.model';
 
 import { User } from '../shared/models/user.model';
 import { Virtue } from '../shared/models/virtue.model';
@@ -38,11 +38,12 @@ export class GeneralListComponent implements OnInit {
   itemName: string;
   pluralItem: string;
 
+  //this list is what gets displayed in the table.
   items: Item[];
 
   colData: Column[];
 
-  domain: string; // like /users, /virtues, etc.
+  domain: string; // like '/users', '/virtues', etc.
 
   //will cause error if not instantialized before page loads; the pull functions
   //don't initialize these immediately
@@ -59,7 +60,7 @@ export class GeneralListComponent implements OnInit {
     function finishes, it calls the next one in the supplied list (updateQueue).
   Must be set in derived classes.
   Declaration not fully specific, because it must hold function signatures
-    which take as a parameter an array of this type.
+    which take as a parameter an array of this type. Recursive.
   */
   updateFuncQueue: ((scope, updateQueue: any[], completedUpdates: any[])=> void)[];
 
@@ -118,21 +119,22 @@ export class GeneralListComponent implements OnInit {
     this.resetRouter();
   }
 
+  //I don't know what this does, copied from original file before refactor (users.component.ts)
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req);
   }
 
-  setBaseUrl(url: string) {
+  setBaseUrl(url: string): void {
     this.baseUrl = url;
   }
 
-  resetRouter() {
+  resetRouter(): void {
     setTimeout(() => {
       this.router.navigated = false;
     }, 1000);
   }
 
-  refreshData() {
+  refreshData(): void {
     setTimeout(() => {
       this.pullData();
     }, 300);
@@ -153,11 +155,12 @@ export class GeneralListComponent implements OnInit {
   //     return scope.datePipe.transform(item.lastModification, 'short');
   // }
 
-  filterList(filterValue: string) {
+  filterList(filterValue: string): void {
     this.filterValue = filterValue;
   }
 
-  setColumnSortDirection(sortColumn: Column, sortDirection: string) {
+  setColumnSortDirection(sortColumn: Column, sortDirection: string): void {
+    //If the user clicked the currently-active column
     if (this.sortColumn === sortColumn) {
       this.reverseSorting();
     } else {
@@ -165,7 +168,7 @@ export class GeneralListComponent implements OnInit {
     }
   }
 
-  reverseSorting() {
+  reverseSorting(): void {
     if (this.sortDirection === 'asc') {
       this.sortDirection = 'desc';
     } else {
@@ -178,12 +181,27 @@ export class GeneralListComponent implements OnInit {
     // refers to the updateQueue list.
     let updateQueue = Object.assign([], this.updateFuncQueue);
     let completedUpdates = [];
+
+    /*
+    We need to call a series of functions in order, where each function can
+    only start once the service the previous one started has come back; that is,
+    once the previous function has completely finished setting up the data it
+    is told to.
+    UpdateQueue holds a list of the functions to be called, in order. Once each
+    finishes processing their data, they add their name to the "completedUpdates"
+    list, remove their name from updateQueue, and then call the next function in
+    updateQueue. Once updateQueue is empty, the chain returns. Note that the chain
+    of functions are within a spawned sub-process, and so control in the rest of
+    the program doesn't wait on them. Once they finish, the page automatically
+    updates to show the newly-acquired data.
+
+    Ideally, the four pull functions could be merged into one. Since they all do
+    close to the same thing.
+    */
     updateQueue[0](this, updateQueue, completedUpdates);
   }
 
-  //updateQueue is a list of function signatures, where each
   pullApps(scope, updateQueue: any[], completedUpdates: any[]): void {
-    console.log("pulling apps");
     scope.appsService.getAppsList(scope.baseUrl).subscribe( apps => {
       scope.allApps.clear();
       scope.allApps = new DictList<Application>();
@@ -198,7 +216,6 @@ export class GeneralListComponent implements OnInit {
       () => {
         completedUpdates.push(updateQueue[0]);
         updateQueue.shift();
-        // console.log(updateQueue, scope.allApps);
         if (updateQueue.length !== 0) {
           updateQueue[0](scope, updateQueue, completedUpdates);
         }
@@ -209,7 +226,6 @@ export class GeneralListComponent implements OnInit {
   }
 
   pullVms(scope, updateQueue: any[], completedUpdates: any[]): void {
-    console.log("pulling vms");
     scope.vmService.getVmList(scope.baseUrl).subscribe( vms => {
       scope.allVms.clear();
       scope.allVms = new DictList<VirtualMachine>();
@@ -218,7 +234,9 @@ export class GeneralListComponent implements OnInit {
         v['modDate'] = scope.datePipe.transform(v.lastModification, 'short');
         vm = new VirtualMachine(v);
         scope.allVms.add(vm.id, vm);
-        //if pullApps has completed and so allApps is populated
+        //if pullApps has completed, and so allApps is populated
+        //will always happen under current config, but may not if vms are ever
+        //pulled without apps being pulled first.
         if (completedUpdates.some(x=> x===scope.pullApps)) {
           vm.formatChildNames(scope.allApps);
         }
@@ -229,7 +247,6 @@ export class GeneralListComponent implements OnInit {
     () => {
       completedUpdates.push(updateQueue[0]);
       updateQueue.shift();
-      // console.log(updateQueue, scope.allVms);
       if (updateQueue.length !== 0) {
         updateQueue[0](scope, updateQueue, completedUpdates);
       }
@@ -240,7 +257,6 @@ export class GeneralListComponent implements OnInit {
   }
 
   pullVirtues(scope, updateQueue: any[], completedUpdates: any[]): void {
-    console.log("pulling Virtues");
     scope.virtuesService.getVirtues(scope.baseUrl).subscribe( virtues => {
       scope.allVirtues.clear(); // not sure if this is needed
       scope.allVirtues = new DictList<Virtue>();
@@ -254,8 +270,10 @@ export class GeneralListComponent implements OnInit {
         if (completedUpdates.some(x=> x===scope.pullVms)) {
           virt.formatChildNames(scope.allVms);
 
+          //generate the html for the apps available for each virtue, on the
+          //virtue list page.
           if (completedUpdates.some(x=> x===scope.pullApps)) {
-            virt.formatAppListHtml(scope.allVms, scope.allApps);
+            virt.generateAppListHtml(scope.allVms, scope.allApps);
           }
         }
       }
@@ -266,7 +284,6 @@ export class GeneralListComponent implements OnInit {
     () => {
       completedUpdates.push(updateQueue[0]);
       updateQueue.shift();
-      // console.log(updateQueue, scope.allVirtues);
       if (updateQueue.length !== 0) {
         updateQueue[0](scope, updateQueue, completedUpdates);
       }
@@ -278,7 +295,6 @@ export class GeneralListComponent implements OnInit {
 
   // hopefully these will all be refactored into one function later.
   pullUsers(scope, updateQueue: any[], completedUpdates: any[]): void {
-    console.log("pulling users");
     scope.usersService.getUsers(scope.baseUrl).subscribe(users => {
       scope.allUsers.clear(); // not sure if this is needed
       scope.allUsers = new DictList<User>();
@@ -329,20 +345,17 @@ export class GeneralListComponent implements OnInit {
 
   // openDialog(id: string, type: string, category: string, description: string): void {
   openDialog(action: string, target: Item): void {
-
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {
           actionType: action,
           targetObject: target
-          // targetId: target.getID(),
-          // targetName: target.getName()
         }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    //control goes here after either "Ok" or "Cancel" are clicked on the dialog
+    // control goes here after either "Ok" or "Cancel" are clicked on the dialog
     const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
 
       if (targetObject !== 0 ) {
@@ -356,7 +369,6 @@ export class GeneralListComponent implements OnInit {
       }
     });
   }
-
 
   deleteItem(i: Item) {}
 

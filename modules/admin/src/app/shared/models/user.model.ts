@@ -42,6 +42,7 @@ export class User extends Item {
     this.username = s;
   }
 
+  //Overrides Item
   getName(): string {
     return this.username;
   }

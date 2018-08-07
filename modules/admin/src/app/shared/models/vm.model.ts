@@ -4,7 +4,7 @@ import { Application } from './application.model';
 
 
 export class VirtualMachine extends Item {
-  
+
   apps: Application[];
   os: string;
   templatePath: string;
@@ -30,13 +30,5 @@ export class VirtualMachine extends Item {
       super('', '');
     }
     this.apps = [];
-  }
-
-  setName(s: string) {
-    this.name = s;
-  }
-
-  getName(): string {
-    return this.name;
   }
 }

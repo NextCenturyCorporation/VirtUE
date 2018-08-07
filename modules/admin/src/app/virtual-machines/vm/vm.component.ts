@@ -79,7 +79,6 @@ export class VmComponent implements OnInit {
   // ought to be in.
   // Create new virtue: 'c', Edit virtue: 'e', Duplicate virtue: 'd'
   setMode() {
-    // console.log(this.router.routerState.snapshot.url);
     let url = this.router.routerState.snapshot.url;
     if (url[0] === '/') {
       url = url.substr(1);
@@ -128,7 +127,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // console.log(req);
     return next.handle(req);
   }
 
@@ -157,7 +155,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
         this.updateAppsList(data.applicationIds);
         this.vm.securityTag = data.securityTag;
         this.vm.enabled = data.enabled;
-        console.log(this.vm.securityTag);
       }
     );
   }
@@ -166,7 +163,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     // loop through the selected VM list
     this.vm.apps = new Array<Application>();
     this.vm.childIDs = newAppsList;
-    // console.log('vm's app list @ updatevm.apps(): ' + this.vm.appIds);
     for (let appID of newAppsList) {
       this.appsService.getApp(this.baseUrl, appID).subscribe(
         appData => {
@@ -229,6 +225,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       'applicationIds': this.vm.childIDs,
       'securityTag': this.vm.securityTag
     };
+    //TODO put reload and navigation inside subscription
     this.vmService.updateVM(this.baseUrl, this.vm.id, JSON.stringify(body));
     this.resetRouter();
     this.router.navigate([this.parentDomain]);
@@ -243,7 +240,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       'applicationIds': this.vm.childIDs,
       'securityTag': this.vm.securityTag
     };
-    // console.log(body);
+    //TODO put reload and navigation inside subscription
     this.vmService.createVM(this.baseUrl, JSON.stringify(body));
     this.resetRouter();
     this.router.navigate([this.parentDomain]);

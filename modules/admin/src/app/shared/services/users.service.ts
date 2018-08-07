@@ -23,34 +23,6 @@ export class UsersService {
     let awsServer = baseUrl + this.configUrl;
     return this.httpClient.get<User[]>(awsServer);
   }
-  // pullUserData( baseUrl: string ): Observable<any> {
-  //
-  //   let awsServer = baseUrl + this.configUrl;
-  //   return this.httpClient.get<User[]>(awsServer);
-  // }
-  // getUsers(baseUrl: string): Observable<DictList<User>> {
-  //   let usersDict = new DictList<User>();
-  //   this.pullUserData(baseUrl).subscribe(users => {
-  //     console.log(users.length);
-  //     let user: User = null;
-  //     for (let u of users) {
-  //       user = new User(u);
-  //       usersDict.add(user.getID(), user);
-  //     }
-  //     user = null;
-  //     users = null;
-  //     // console.log(usersDict);
-  //     let temp = Observable.of(usersDict);
-  //     console.log("leaving second", usersDict.length, temp);
-  //     return temp;
-  //   },
-  //   error => {},
-  //   () => {});
-  //
-  //
-  //   console.log("leaving once");
-  //   return Observable.of(usersDict);
-  // }
 
   getUser(baseUrl: string, id: string): Observable<any> {
     let url = baseUrl + this.configUrl + id;
@@ -71,15 +43,7 @@ export class UsersService {
     }
   }
 
-  /*
-  public update(user: User): Observable<any> {
-    return this.http.put<User>(`${this.jsondata}/${user.id}`,user);
-  }*/
-
   assignVirtues(baseUrl: string, username: string, virtue: string) {
-    // console.log('assignVirtues => ');
-    // console.log(username);
-    // console.log(virtue);
 
     let userRecord = baseUrl + this.configUrl + username + '/assign/' + virtue;
     // console.log(userRecord);
@@ -105,7 +69,7 @@ export class UsersService {
   public setUserStatus(baseUrl: string, username: string, newStatus: string): Observable<any> {
     let url = baseUrl + this.configUrl + username + '/enable';
     // console.log("setUserStatus");
-    console.log(url);
+    // console.log(url);
     return this.httpClient.post(url, newStatus);
   }
 

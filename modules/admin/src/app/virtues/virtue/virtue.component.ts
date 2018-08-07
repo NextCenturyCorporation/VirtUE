@@ -52,7 +52,7 @@ export class VirtueComponent implements OnInit {
 
   parentDomain: string;
 
-  //data on existing virtue (obv. for edit, but holds base virtues values when
+  //data on existing virtue (obv. purpose on edit-page, but holds base virtues values when
   //duplicating, and is empty when creating)
   virtueData = {};
 
@@ -70,7 +70,6 @@ export class VirtueComponent implements OnInit {
     private location: Location,
     public dialog: MatDialog
   ) {
-    console.log("constructor");
     this.parentDomain = '/virtues'
     this.setMode();
     //set up empty, will get filled in ngOnInit if not mode is not 'create'
@@ -96,7 +95,6 @@ export class VirtueComponent implements OnInit {
   // ought to be in.
   // Create new virtue: 'c', Edit virtue: 'e', Duplicate virtue: 'd'
   setMode() {
-    // console.log(this.router.routerState.snapshot.url);
     let url = this.router.routerState.snapshot.url;
     if (url[0] === '/') {
       url = url.substr(1);
@@ -159,8 +157,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       this.getAppsList();
     });
 
-
-    console.log("end of init: ", this.virtue.vmIDs);
     this.resetRouter();
   }
 
@@ -171,7 +167,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   refreshData() {
-    console.log("refreshData");
+    // console.log("refreshData");
     setTimeout(() => {
       this.pullVirtueData(this.virtue.id);
     }, 1000);
@@ -186,12 +182,10 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   updateVmList( newvmIDs : any[] ) {
-    // console.log("updateVmList");
     // loop through the selected VM list
     this.virtue.vms = [];
-    this.virtue.vmIDs = newvmIDs;
-    const virtuevmIDs = newvmIDs;
-    for (let vmID of virtuevmIDs) {
+    this.virtue.childIDs = newvmIDs;
+    for (let vmID of newvmIDs) {
       this.vmService.getVM(this.baseUrl, vmID).subscribe(
         vm => {
           this.virtue.vms.push(vm);
@@ -208,15 +202,12 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       if (! vData.color) {
         vData.color = vData.enabled ? "#BB00AA" : "#00DD33"
       }
-      console.log(vData);
-      if (! vData.vmIDs) {
-        vData.vmIDs = [];
+      if (! vData.virtualMachineTemplateIds) {
+        vData.virtualMachineTemplateIds = [];
       }
       if (! vData.version) {
         vData.version = '1.0';
       }
-      // console.log("###", id);
-      // console.log(vData.virtualMachineTemplateIds);
       this.virtueData = vData;
       this.virtue.name = vData.name;
       this.virtue.id = vData.id;
@@ -246,7 +237,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.virtue.vms = this.virtue.vms.filter(data => {
       return data.id !== id;
     });
-    this.virtue.vmIDs.splice(index, 1);
+    this.virtue.childIDs.splice(index, 1);
   }
 
 
@@ -255,7 +246,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     let dialogRef = this.dialog.open(VmModalComponent, {
       width: '750px',
       data: {
-        selectedVms: this.virtue.vmIDs
+        selectedVms: this.virtue.childIDs
       }
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
@@ -281,30 +272,25 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
-  updateThisVirtue() {
+  updateThisVirtue(): void {
     let body = {
       'name': this.virtue.name,
       'version': this.virtue.version,
       'enabled': this.virtue.enabled,
       'color' : this.settingsPane.getColor(),
-      'virtualMachineTemplateIds': this.virtue.vmIDs
+      'virtualMachineTemplateIds': this.virtue.childIDs
     };
-    // console.log("saving: ", this.virtue.name, "|", this.virtue.name, "|", this.virtue.version, "|", this.virtue.vmIDs);
     this.virtuesService.updateVirtue(this.baseUrl, this.virtue.id, JSON.stringify(body)).subscribe(
       data => {
-        // console.log('Updating ' + data.name + '(' + data.id + ')');
-        return true;
+        this.refreshData();
+        this.router.navigate([this.parentDomain]);
       },
       error => {
         console.log(error);
       });
-    this.refreshData();
-    this.router.navigate([this.parentDomain]);
   }
 
   createVirtue() {
-    // console.log(virtueName);
-    // console.log(this.virtue.vmIDs);
     if (! this.virtue.version) {
       this.virtue.version = '1.0';
     }
@@ -314,21 +300,18 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       'version': this.virtue.version,
       'enabled': this.virtue.enabled,
       'color' : this.settingsPane.getColor(),
-      'virtualMachineTemplateIds': this.virtue.vmIDs
+      'virtualMachineTemplateIds': this.virtue.childIDs
     };
-    // console.log('New Virtue: ');
-    // console.log(body);
 
     this.virtuesService.createVirtue(this.baseUrl, JSON.stringify(body)).subscribe(
       data => {
-        return data;
+        this.resetRouter();
+        this.router.navigate([this.parentDomain]);
       },
       error => {
         console.log(error.message);
       });
 
-    this.resetRouter();
-    this.router.navigate([this.parentDomain]);
   }
 
   toggleVirtueStatus() {

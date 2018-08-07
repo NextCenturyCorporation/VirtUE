@@ -7,7 +7,6 @@ import { DictList } from './dictionary.model';
 
 export class Virtue extends Item {
 
-  vmIDs: any[];
   vms: VirtualMachine[];
   version: string;
   lastEditor: string;
@@ -38,15 +37,11 @@ export class Virtue extends Item {
     this.appsListHTML = "";
   }
 
-  formatAppListHtml(allVms: DictList<VirtualMachine>, allApps: DictList<Application>): void {
+  generateAppListHtml(allVms: DictList<VirtualMachine>, allApps: DictList<Application>): void {
     let allChildApps: string[] = [];
     for (let vmID of this.childIDs) {
       allChildApps = allChildApps.concat(allVms.get(vmID).childIDs)
     }
     this.appsListHTML = this.getSpecifiedItemsHTML(allChildApps, allApps);
-  }
-
-  getName() {
-    return this.name;
   }
 }

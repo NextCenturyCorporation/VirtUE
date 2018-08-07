@@ -6,7 +6,7 @@ import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { Column } from '../../shared/models/column.model';
-import { DictList, Dict } from '../../shared/models/dictionary.model';
+import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';

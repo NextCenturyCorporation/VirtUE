@@ -29,8 +29,4 @@ export class Application extends Item{
     this.enabled = true;
     this.status = 'enabled';
   }
-
-  getName() {
-    return this.name;
-  }
 }

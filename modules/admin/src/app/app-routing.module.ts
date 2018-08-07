@@ -102,15 +102,15 @@ const routes: Routes = [
   }, {
     path: 'virtues',
     component: VirtuesWrapperComponent,
+    data: {
+      breadcrumbs: [
+        new Breadcrumb('Virtues', '/virtues')
+      ]
+    },
     children: [
       {
         path: '',
-        component: VirtueListComponent,
-        data: {
-          breadcrumbs: [
-            new Breadcrumb('Virtues', '/virtues')
-          ]
-        }
+        component: VirtueListComponent
       }, {
         path: 'create',
         component: VirtueComponent,

@@ -6,7 +6,7 @@ import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Column } from '../../shared/models/column.model';
-import { DictList, Dict } from '../../shared/models/dictionary.model';
+import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
@@ -64,10 +64,7 @@ export class VmListComponent extends GeneralListComponent {
 
   // Overrides parent
   toggleItemStatus(vm: VirtualMachine) {
-    console.log(vm);
-
     this.vmService.toggleVmStatus(this.baseUrl, vm.getID()).subscribe();
-
     this.refreshData();
   }
 

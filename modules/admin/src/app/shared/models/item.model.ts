@@ -3,6 +3,8 @@ import { DictList } from './dictionary.model';
 export abstract class Item {
   id: string;
   name: string;
+  //status as a string as well as a bool makes filtering much easier - since 3 possible
+  //values need to be matched against it ('enabled', 'disabled', and '*').
   status: string;
   enabled: boolean;
   childIDs: string[];
@@ -24,11 +26,11 @@ export abstract class Item {
     this.childNamesHtml = "";
   }
 
-  formatChildNames(allChildren: DictList<Item>) {
+  formatChildNames(allChildren: DictList<Item>): void {
     this.childNamesHtml = this.getSpecifiedItemsHTML(this.childIDs, allChildren);
   }
 
-  getSpecifiedItemsHTML(desiredIDs: string[], allItems: DictList<Item>) {
+  getSpecifiedItemsHTML(desiredIDs: string[], allItems: DictList<Item>): string {
     if (desiredIDs.length < 1 || allItems.length < 1) {
       return "";
     }
@@ -68,7 +70,7 @@ export abstract class Item {
     return listString;
   }
 
-  setName(s: string) {
+  setName(s: string): void {
     this.name = s;
   }
 
