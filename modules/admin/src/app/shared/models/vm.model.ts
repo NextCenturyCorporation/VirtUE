@@ -4,12 +4,8 @@ import { Application } from './application.model';
 
 
 export class VirtualMachine extends Item {
-  // id: string;
-  name: string;
-  // enabled: boolean;
-  appIDs: any[];
+  
   apps: Application[];
-
   os: string;
   templatePath: string;
   loginUser: string;
@@ -17,15 +13,23 @@ export class VirtualMachine extends Item {
   lastEditor: string;
   securityTag: string;
 
-  constructor(userObj) {
-    if (userObj) {
-      super('', userObj.username);
-      this.enabled = userObj.enabled;
-      this.status = userObj.enabled ? 'enabled' : 'disabled';
+  //convert from whatever form the vm object is in the database.
+  constructor(vmObj) {
+    if (vmObj) {
+      super(vmObj.id, vmObj.name);
+      this.enabled = vmObj.enabled;
+      this.childIDs = vmObj.applicationIds;
+      this.lastEditor = vmObj.lastEditor;
+      this.lastModification = vmObj.lastModification;
+      this.modDate = vmObj.modDate;
+      this.securityTag = vmObj.securityTag;
+      this.os = vmObj.os;
+      this.status = vmObj.enabled ? 'enabled' : 'disabled';
     }
     else {
       super('', '');
     }
+    this.apps = [];
   }
 
   setName(s: string) {

@@ -1,19 +1,12 @@
-.account-filter {
-  padding: 0 0 0.75rem;
-}
-
-.account-options {
-  display: block;
-  font-family: 'Raleway-medium', Arial, sans-serif;
-  font-size: 0.88rem;
-  clear: both;
-}
-.account-message {
-  display: block;
-  border-top: 1px solid #b2b2b2;
-  border-bottom: 1px solid #b2b2b2;
-}
 
 .transparent {
   background-color: rgba(0, 0, 0, 0);
+}
+
+
+#content ul{
+    margin: 0; padding: 0;
+}
+#content li {
+    margin: 0; padding: 0;
 }

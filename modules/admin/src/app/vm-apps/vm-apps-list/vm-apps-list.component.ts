@@ -1,84 +1,68 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-
-import { AddVmAppComponent } from '../add-vm-app/add-vm-app.component';
+import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { Router } from '@angular/router';
 
-import { ApplicationsService } from '../../shared/services/applications.service';
+import { Item } from '../../shared/models/item.model';
+import { User } from '../../shared/models/user.model';
+import { Virtue } from '../../shared/models/virtue.model';
+import { Column } from '../../shared/models/column.model';
+import { DictList, Dict } from '../../shared/models/dictionary.model';
+
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { UsersService } from '../../shared/services/users.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
+import { VirtualMachineService } from '../../shared/services/vm.service';
+import { ApplicationsService } from '../../shared/services/applications.service';
 
 import { Application } from '../../shared/models/application.model';
+import { AddVmAppComponent } from '../add-vm-app/add-vm-app.component';
+
+import { GeneralListComponent } from '../../gen-list/gen-list.component';
 
 @Component({
   selector: 'app-vm-apps-list',
-  providers: [ ApplicationsService, BaseUrlService ],
-  templateUrl: './vm-apps-list.component.html'
+  templateUrl: '../../gen-list/gen-list.component.html',
+  styleUrls: ['../../gen-list/gen-list.component.css'],
+  providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
-export class VmAppsListComponent implements OnInit {
-
-  baseUrl: string;
-  title = 'Applications';
-  filterValue = '*';
-  apps: Application[];
-
-  sortColumn: string = 'name';
-  sortType: string = 'enabled';
-  sortValue: any = '*';
-  sortBy: string = 'asc';
-  // appsfilter: string;
+export class VmAppsListComponent extends GeneralListComponent {
 
   file: string;
   url: string;
 
   constructor(
-    private route: ActivatedRoute,
-    private appsService: ApplicationsService,
-    private baseUrlService: BaseUrlService,
-    public dialog: MatDialog
+    router: Router,
+    baseUrlService: BaseUrlService,
+    usersService: UsersService,
+    virtuesService: VirtuesService,
+    vmService: VirtualMachineService,
+    appsService: ApplicationsService,
+    dialog: MatDialog
   ) {
-    this.apps = new Array<Application>()
-  }
+    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
 
-  ngOnInit() {
-    this.baseUrlService.getBaseUrl().subscribe(res => {
-      let awsServer = res[0].aws_server;
-      this.setBaseUrl(awsServer);
-      this.getApplications();
-    });
-  }
+    //Note: colWidths of all columns must add to exactly 12.
+    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    this.colData = [
+      {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
+      {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
+      {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
+    ];
 
-  setBaseUrl(url: string) {
-    this.baseUrl = url;
-  }
+    this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
 
-  getApplications() {
-    this.appsService.getAppsList(this.baseUrl)
-    .subscribe( appsList => {
-      this.apps = appsList;
-    });
-  }
+    this.prettyTitle = "Available Applications";
+    this.itemName = "Application";
+    this.pluralItem = "Applications";
+    this.noDataMessage = "No apps appear to be available at this time. To add an application, click on the button \"Add "
+                          + this.itemName +  "\" above.";
+    this.domain = '/applications';
 
-  listFilter(status: any) {
-    console.log('filterValue = ' + status);
-    this.filterValue = status;
-  }
-
-  openDialogPrompt(id, type, text): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          dialogText: text,
-          dialogType: type
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-    });
+    this.updateFuncQueue = [this.pullApps];
   }
 
   openAppsDialog(): void {
@@ -90,27 +74,5 @@ export class VmAppsListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
     });
-  }
-
-  sortAppColumns(sortColumn: string, sortBy: string) {
-    if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
-    } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'os') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      }
-    }
-  }
-
-  sortListBy(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.sortBy = 'desc';
-    } else {
-      this.sortBy = 'asc';
-    }
   }
 }

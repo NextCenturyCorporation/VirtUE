@@ -2,16 +2,32 @@
 import { Item } from './item.model';
 
 export class Application extends Item{
-  // id: string;
-  name: string;
 
   version: string;
   os: string;
   launchCommand: string;
+  iconKey: string;
 
-  constructor(id: string) {
-    super(id, '');
-    // this.enabled = undefined; //probably unnecessary. Apps can't be disabled.
+  //convert from whatever form the application object is in the database.
+  constructor(appObj) {
+    if (appObj) {
+      super(appObj.id, appObj.name);
+      this.os = appObj.os;
+      this.version = appObj.version;
+      this.launchCommand = appObj.launchCommand;
+      this.iconKey = appObj.iconKey;
+    }
+    else {
+      super('', '');
+      this.os = '';
+      this.launchCommand = '';
+      this.iconKey = '';
+    }
+
+    //Apps can't be disabled.
+    //this value is used in getSpecifiedItemsHTML().
+    this.enabled = true;
+    this.status = 'enabled';
   }
 
   getName() {

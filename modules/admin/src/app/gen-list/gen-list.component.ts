@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
@@ -26,15 +27,18 @@ import { ApplicationsService } from '../shared/services/applications.service';
 @Component({
   selector: 'app-gen-list',
   templateUrl: './gen-list.component.html',
-  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
+  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService, DatePipe ]
 })
 
 export class GeneralListComponent implements OnInit {
 
+  private datePipe: DatePipe;
+
   prettyTitle: string;
   itemName: string;
+  pluralItem: string;
 
-  items = [];
+  items: Item[];
 
   colData: Column[];
 
@@ -49,16 +53,30 @@ export class GeneralListComponent implements OnInit {
 
   noDataMessage: string;
 
+
+  /**
+  This holds functions, to be called in turn to load/reload data. When each
+    function finishes, it calls the next one in the supplied list (updateQueue).
+  Must be set in derived classes.
+  Declaration not fully specific, because it must hold function signatures
+    which take as a parameter an array of this type.
+  */
+  updateFuncQueue: ((scope, updateQueue: any[], completedUpdates: any[])=> void)[];
+
+  //Ideally the four pulling functions below could combined into one, where the
+  //parents and children are generically defined. Virtues makes this tricky
+  //though, since they need vms and apps, in addition to virtues. And it doesn't
+  //seem efficient to build the appsListHTML on the fly. I believe that's the
+  //only trade-off though.
   // allParents: Dict<Item>;
   // allChildren: Dict<Item>;
 
   baseUrl: string;
+
   // these are the default properties the list sorts by
   sortColumn: Column;
   filterValue: string = '*';
   sortDirection: string = 'asc';
-
-  os: Observable<Array<VirtuesService>>;
 
 
   constructor(
@@ -79,11 +97,15 @@ export class GeneralListComponent implements OnInit {
     this.allVirtues = new DictList<Virtue>();
     this.allVms = new DictList<VirtualMachine>();
     this.allApps = new DictList<Application>();
+
+    this.datePipe = new DatePipe('en-US');
+
+    this.updateFuncQueue = [];
+    this.items = [];
   }
 
   ngOnInit() {
     this.sortColumn = this.colData[0];
-
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
       this.setBaseUrl(awsServer);
@@ -91,14 +113,10 @@ export class GeneralListComponent implements OnInit {
       this.pullData();
     });
 
-    this.refreshData();
+    //do we need this?
+    // this.refreshData();
     this.resetRouter();
   }
-
-
-  //must be overriden
-  pullData() {}
-
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req);
@@ -120,6 +138,21 @@ export class GeneralListComponent implements OnInit {
     }, 300);
   }
 
+  formatStatus( item: Item ): string {
+    return item.enabled ? 'Enabled' : 'Disabled';
+  }
+
+  getChildrenListHTMLstring(item: Item): string {
+    return item.childNamesHtml;
+  }
+
+  // Can't use this until I find a way to access the {x}-list component from
+  // within a format function. Passing in the scope to all format functions
+  // seems like a hack, and it'd only be needed for this one function.
+  // formatDate( item: Item): string {
+  //     return scope.datePipe.transform(item.lastModification, 'short');
+  // }
+
   filterList(filterValue: string) {
     this.filterValue = filterValue;
   }
@@ -140,154 +173,143 @@ export class GeneralListComponent implements OnInit {
     }
   }
 
-  getChildrenListHTMLstring(item: Item): string {
-    return item.childrenListHTMLstring;
+  pullData(): void {
+    // Pass in 'this' as scope, because 'this' within the called functions
+    // refers to the updateQueue list.
+    let updateQueue = Object.assign([], this.updateFuncQueue);
+    let completedUpdates = [];
+    updateQueue[0](this, updateQueue, completedUpdates);
   }
 
-  pullApplications(isChildType: boolean) {
-    // console.log("pulling apps");
-    this.appsService.getAppsList(this.baseUrl).subscribe( apps => {
-      this.allApps.clear()
-      this.allApps = new DictList<Application>();
+  //updateQueue is a list of function signatures, where each
+  pullApps(scope, updateQueue: any[], completedUpdates: any[]): void {
+    console.log("pulling apps");
+    scope.appsService.getAppsList(scope.baseUrl).subscribe( apps => {
+      scope.allApps.clear();
+      scope.allApps = new DictList<Application>();
+      let app = null
       for (let a of apps) {
-        this.allApps.add(a.id, a);
+        app = new Application(a);
+        scope.allApps.add(a.id, app);
       }
       apps = null;
-    });
+    },
+      error => {},
+      () => {
+        completedUpdates.push(updateQueue[0]);
+        updateQueue.shift();
+        // console.log(updateQueue, scope.allApps);
+        if (updateQueue.length !== 0) {
+          updateQueue[0](scope, updateQueue, completedUpdates);
+        }
+        else {
+          scope.items = scope.allApps.getL();
+        }
+      });
   }
 
-  pullVms(isChildType: boolean) {
-    // console.log("pulling vms");
-    this.vmService.getVmList(this.baseUrl).subscribe( vms => {
-      this.allVms.clear()
-      this.allVms = new DictList<VirtualMachine>();
+  pullVms(scope, updateQueue: any[], completedUpdates: any[]): void {
+    console.log("pulling vms");
+    scope.vmService.getVmList(scope.baseUrl).subscribe( vms => {
+      scope.allVms.clear();
+      scope.allVms = new DictList<VirtualMachine>();
+      let vm = null;
       for (let v of vms) {
-        // v['childIDs'] = v.applicationIds;
-        v.status = v.enabled ? 'enabled' : 'disabled';
-        this.allVms.add(v.id, v);
+        v['modDate'] = scope.datePipe.transform(v.lastModification, 'short');
+        vm = new VirtualMachine(v);
+        scope.allVms.add(vm.id, vm);
+        //if pullApps has completed and so allApps is populated
+        if (completedUpdates.some(x=> x===scope.pullApps)) {
+          vm.formatChildNames(scope.allApps);
+        }
       }
       vms = null;
     },
     error => {},
     () => {
-      if (!isChildType) {
-        this.items = this.allVms.getL();
-        for (let v of this.allVms.getL()) {
-          v.formatChildrenList(this.allApps);
-        }
+      completedUpdates.push(updateQueue[0]);
+      updateQueue.shift();
+      // console.log(updateQueue, scope.allVms);
+      if (updateQueue.length !== 0) {
+        updateQueue[0](scope, updateQueue, completedUpdates);
+      }
+      else {
+        scope.items = scope.allVms.getL();
       }
     });
   }
 
-  pullVirtues(isChildType: boolean) {
-
-    // console.log("pulling virtues");
-    this.virtuesService.getVirtues(this.baseUrl).subscribe( virtues => {
-      this.allVirtues.clear() // not sure if this is needed
-      this.allVirtues = new DictList<Virtue>();
+  pullVirtues(scope, updateQueue: any[], completedUpdates: any[]): void {
+    console.log("pulling Virtues");
+    scope.virtuesService.getVirtues(scope.baseUrl).subscribe( virtues => {
+      scope.allVirtues.clear(); // not sure if this is needed
+      scope.allVirtues = new DictList<Virtue>();
       let virt = null;
       for (let v of virtues) {
+        v['modDate'] = scope.datePipe.transform(v.lastModification, 'short');
         virt = new Virtue(v);
-        // virt.childIDs = v.virtualMachineTemplateIds;
-        // virt.formatChildrenList(this.allVms);
-        this.allVirtues.add(v.id, virt);
+        scope.allVirtues.add(v.id, virt);
+        //if pullVms has completed and so allVms has been populated
+        //just checking if allVms isn't empty wouldn't guarentee it's up-to-date
+        if (completedUpdates.some(x=> x===scope.pullVms)) {
+          virt.formatChildNames(scope.allVms);
+
+          if (completedUpdates.some(x=> x===scope.pullApps)) {
+            virt.formatAppListHtml(scope.allVms, scope.allApps);
+          }
+        }
       }
       virt = null;
       virtues = null;
     },
     error => {},
     () => {
-      if (!isChildType) {
-        this.items = this.allVirtues.getL();
-        for (let v of this.allVirtues.getL()) {
-          v.formatChildrenList(this.allVms);
-        }
+      completedUpdates.push(updateQueue[0]);
+      updateQueue.shift();
+      // console.log(updateQueue, scope.allVirtues);
+      if (updateQueue.length !== 0) {
+        updateQueue[0](scope, updateQueue, completedUpdates);
+      }
+      else {
+        scope.items = scope.allVirtues.getL();
       }
     });
   }
 
-  //note isChildType is never used, bc Users can't be something else' child, but
   // hopefully these will all be refactored into one function later.
-  pullUsers(isChildType: boolean) {
-    this.usersService.getUsers(this.baseUrl).subscribe(users => {
-      // console.log("start users", this.allVirtues.length);
-    // console.log("**", users[0]);
-      this.allUsers.clear(); // not sure if this is needed
-      this.allUsers = new DictList<User>();
+  pullUsers(scope, updateQueue: any[], completedUpdates: any[]): void {
+    console.log("pulling users");
+    scope.usersService.getUsers(scope.baseUrl).subscribe(users => {
+      scope.allUsers.clear(); // not sure if this is needed
+      scope.allUsers = new DictList<User>();
       let user = null;
       for (let u of users) {
         user = new User(u);
-        this.allUsers.add(user.getName(), user);
+        scope.allUsers.add(user.getName(), user);
+        //if pullVirtues has completed and so allVirtues is populated
+        if (completedUpdates.some(x=> x===scope.pullVirtues)) {
+          user.formatChildNames(scope.allVirtues);
+        }
       }
       user = null;
       users = null;
-      // console.log(this.allUsers);
     },
     error => {},
     () => {
-      if (!isChildType) {
-        console.log(this.allVirtues.length);
-        this.items = this.allUsers.getL();
-        for (let u of this.allUsers.getL()) {
-          u.formatChildrenList(this.allVirtues);
-        }
+      completedUpdates.push(updateQueue[0]);
+      updateQueue.shift();
+      //currently, pullUser is only going to need to be the last one pulled, so
+      //the following lines won't be needed/used unless something changes and
+      //something gets put in the queue after pullUser
+      // console.log(updateQueue, scope.allUsers);
+      if (updateQueue.length !== 0) {
+        updateQueue[0](scope, updateQueue, completedUpdates);
+      }
+      else {
+        scope.items = scope.allUsers.getL();
       }
     });
-    // console.log("pulling users");
-    // this.usersService.getUsers(this.baseUrl).subscribe(userDict => {
-    //     console.log(userDict);
-    //     this.allUsers = userDict;
-    //     this.items = this.allUsers.getL();
-    //     for (let u of this.allUsers.getL()) {
-    //       u.formatChildrenList(this.allVirtues);
-    //     }
-    //     console.log("back here", this.allVirtues.length, this.allUsers.length);
-    // });
-    //
-    // let usersDict = new DictList<User>();
-    // this.pullUserData(baseUrl).subscribe(users => {
-    //   console.log(users.length);
-    //   let user: User = null;
-    //   for (let u of users) {
-    //     user = new User(u);
-    //     usersDict.add(user.getID(), user);
-    //   }
-    //   user = null;
-    //   users = null;
-    //   // console.log(usersDict);
-    //   let temp = Observable.of(usersDict);
-    //   console.log("leaving second", usersDict.length, temp);
-    //   return temp;
-    // },
-    // error => {},
-    // () => {});
-    //
-    //
-    //
-    // console.log("end2", this.allVirtues.length, this.allUsers.length);
   }
-  // this.usersService.getUsers(this.baseUrl).subscribe(users => {
-  //   // console.log("start users", this.allVirtues.length);
-  // // console.log("**", users[0]);
-  //   this.allUsers.clear() // not sure if this is needed
-  //   this.allUsers = new DictList<User>();
-  //   let user = null;
-  //   for (let u of users) {
-  //     user = new User(u);
-  //     this.allUsers.add(u.username, user);
-  //   }
-  //   user = null;
-  //   users = null;
-  //   // console.log(this.allUsers);
-  // },
-  // error => {},
-  // () => {
-  //   this.items = this.allUsers.getL();
-  //   for (let u of this.allUsers.getL()) {
-  //     u.formatChildrenList(this.allVirtues);
-  //   }
-  // }
-  // );
 
   getName(dl: DictList<Item>, id: string) {
     return dl.get(id).getName();
@@ -305,33 +327,38 @@ export class GeneralListComponent implements OnInit {
     return this.allVirtues.get(id).name;
   }
 
-  // deleteVirtue(id: string) {
-  //   // console.log('deleting ' + id);
-  //   this.virtuesService.deleteVirtue(this.baseUrl, id);
-  //   this.refreshData();
-  // }
+  // openDialog(id: string, type: string, category: string, description: string): void {
+  openDialog(action: string, target: Item): void {
 
-  //overridden
-  // toggleItemStatus(item: Item) {
-  // }
-
-  openDialog(verb: string, directObject: string): void {
-    const dialogRef = this.dialog.open( DialogsComponent, {
+    let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
       data:  {
-          dialogType: verb,
-          dialogDescription: directObject
+          actionType: action,
+          targetObject: target
+          // targetId: target.getID(),
+          // targetName: target.getName()
         }
     });
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    // console.log(dialogRef);
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog to ' + verb + ' ' + directObject + ' was closed');
-      console.log(result);
-      console.log(dialogRef);
-    });
+    //control goes here after either "Ok" or "Cancel" are clicked on the dialog
+    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
 
+      if (targetObject !== 0 ) {
+        // console.log('Dialog Emitter: ' + targetObject.getID());
+        if ( action === 'delete') {
+          this.deleteItem(targetObject);
+        }
+        if (action === 'disable') {
+          this.disableItem(targetObject);
+        }
+      }
+    });
   }
+
+
+  deleteItem(i: Item) {}
+
+  disableItem(i: Item) {}
 }

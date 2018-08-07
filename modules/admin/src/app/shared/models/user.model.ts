@@ -3,15 +3,12 @@ import { Item } from './item.model';
 import { Virtue } from './virtue.model';
 
 export class User extends Item {
-  // id: string;
   username: string;
-  // enabled: boolean;
-  // virtueIDs: any[];
   virtues: Virtue[];
   roles: string[];
 
 
-  //whatever form the user object is in the database.
+  //convert from whatever form the user object is in the database.
   constructor(userObj) {
     if (userObj) {
       super('', userObj.username);
@@ -20,7 +17,6 @@ export class User extends Item {
       }
       else {
         this.roles = userObj.authorities;
-        // console.log(this.roles);
       }
 
       if (!userObj.virtueTemplateIds) {

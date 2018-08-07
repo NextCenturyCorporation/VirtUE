@@ -38,8 +38,9 @@ export class UserListComponent extends GeneralListComponent {
   ) {
     super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
 
-    this.prettyTitle = "Users";
-
+    //Note: colWidths of all columns must add to exactly 12.
+    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
     this.colData = [
       {name: 'username', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
       {name: 'roles', prettyName: 'Authorized Roles', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.formatRoles},
@@ -47,91 +48,34 @@ export class UserListComponent extends GeneralListComponent {
       {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}
     ];
 
+    this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
+
     this.prettyTitle = "Users";
     this.itemName = "User";
-    this.noDataMessage = "No users have been added at this time. To add a user, click on the button \"Add User\" above.";
+    this.pluralItem = "Users";
+    this.noDataMessage = "No users have been added at this time. To add a user, click on the button \"Add " + this.itemName +  "\" above.";
     this.domain = '/users';
-    // this.showAllMessage = "All User Accounts";
-    // this.showEnabledMessage = "Enabled Accounts";
-    // this.showDisabledMessage = "Disabled Accounts";
-
-
-  }
-
-  // Overrides parent
-  pullData() {
-    // console.log("starting pull");
-    // this.virtuesService.getVirtues(this.baseUrl).subscribe( virtues => {
-    //     console.log("start virts");
-    //     this.allVirtues.clear() // not sure if this is needed
-    //     this.allVirtues = new DictList<Virtue>();
-    //     let virt = null;
-    //     for (let v of virtues) {
-    //       virt = new Virtue(v);
-    //       this.allVirtues.add(v.id, virt);
-    //     }
-    //     virt = null;
-    //     virtues = null;
-    //     console.log("done virts", this.allVirtues.length);
-    //   },
-    //   error => {},
-    //   () => this.pullUsers()
-    // );
-
-    //this doesn't necessarily guarantee that users will be loaded afer the virtues
-    //are.
-    //It seems to always work though.
-    //Could use a settimeout of 0 and call pullUsers on the completion though.
-
-    this.pullVirtues(true);
-    this.pullUsers(false);
-
   }
 
   formatRoles( user: User ): string {
-
     if (!user.roles) {
       return '';
     }
     return user.roles.sort().toString();
   }
 
-  formatStatus( user: User ): string {
-    return user.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  getChildrenListHTMLstring( user: User ): string {
-    return user.childrenListHTMLstring;
-  }
-
   // Overrides parent
   toggleItemStatus(u: User) {
     console.log(u);
     let newStatus = u.enabled ? 'disable': 'enable';
-    // console.log("here");
     if (u.getName().toUpperCase() === "ADMIN") {
+      this.openDialog('disable', u);
       //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
-      // this.openDialog('disable', username + " and lock everyone out of the system?");
-      if (!confirm("Are you sure to disable "+ u.getName() + " and lock everyone out of the system, including you?")) {
-        console.log("Leaving " + u.getName() + " intact.");
-        return;
-      }
-      console.log("Request to disable " + u.getName() + " ignored.");
-      //we're not disabling that
       return;
     }
-    //I don't know what 'data' is here, but it isn't a list of users.
-    this.usersService.setUserStatus(this.baseUrl, u.getName(), newStatus).subscribe();//data => {
-    //   this.users = data;
-    //   // console.log(data);
-    // });
+    console.log("trying to", newStatus, u.getName());
+    this.usersService.setUserStatus(this.baseUrl, u.getID(), newStatus).subscribe();
 
-    this.refreshData();
-  }
-
-  deleteUser(username: string) {
-    // console.log(username);
-    this.usersService.deleteUser(this.baseUrl, username);
     this.refreshData();
   }
 

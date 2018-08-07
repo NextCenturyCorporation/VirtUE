@@ -52,8 +52,6 @@ export class UserComponent implements OnInit {
     this.setMode();
     this.user = new User(undefined);
 
-    console.log(this.user);
-
      //maybe? originally this was only called in addUser's constructor, but in Virtues it was called in create, edit, and duplicate.
      //I don't know what it does, but it wouldn't persist once you leave the creation screen anyway. So let's make it every time.
     this.adUserCtrl = new FormControl();
@@ -124,7 +122,7 @@ export class UserComponent implements OnInit {
         urlValid = false;
     }
     if (!urlValid) {
-      if (this.router.routerState.snapshot.url === "/users") {
+      if (this.router.routerState.snapshot.url === this.parentDomain) {
         // apparently any time an error happens on this page, the system
         // quits and returns to /virtues, and then for some reason re-calls the
         // constructor for CreateEditVirtueComponent. Which leads here and then
@@ -135,7 +133,7 @@ export class UserComponent implements OnInit {
 the routing system has changed. Returning to virtues page.\n       Expects something like \
 /users/create, /users/duplicate/username, or /users/edit/username,\
  but got: \n       " + this.router.routerState.snapshot.url);
-      this.router.navigate(['/users']);
+      this.router.navigate([this.parentDomain]);
       return false;
     }
     return true;
@@ -213,7 +211,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   updateVirtueList(newVirtueIDs: any) {
-    console.log("asdkjfhbasdkjgdfglasgf");
     this.user.childIDs = newVirtueIDs;
     // this.user.children = new DictList<Virtue>();
     this.user.virtues = new Array<Virtue>();
@@ -293,7 +290,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
         console.log(error);
       });
     this.resetRouter();
-    this.router.navigate(['/users']);
+    this.router.navigate([this.parentDomain]);
   }
 
   toggleUserStatus() {

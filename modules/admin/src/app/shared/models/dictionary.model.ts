@@ -19,7 +19,7 @@ export class DictList<T> {
     return this.d[key];
   }
 
-  getL() {
+  getL(): T[] {
     return this.l;
   }
 

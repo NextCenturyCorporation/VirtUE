@@ -7,7 +7,7 @@
   <div id="content-main">
     <div id="content">
       <div class="mui-container-fluid">
-        <!-- if there are no virtues, show this message -->
+        <!-- if there are no items, show this message -->
         <div *ngIf="items.length < 1" class="mui-row margin-top-10">
           <div class="mui-col-md-12 padding-left-0">
             <p class="no-data-message">
@@ -16,34 +16,30 @@
           </div>
         </div>
       </div>
-      <!-- if there are users, show this list -->
+      <!-- if there are items, show this list -->
       <div *ngIf="items.length > 0" class="mui-container-fluid">
-        <div class="mui-row users-filters"> <!-- users-filters?  TODO -->
+        <div class="mui-row">
+          <!-- Note: angular mui table requires 12 column-widths of space.
+               Changing below value doesn't appear to have an effect. -->
           <div class="mui-col-md-12 padding-left-0 filters">
-            <span *ngIf="filterValue === '*'">{{itemName}}</span>
-            <a *ngIf="filterValue !== '*'"  (click)="filterList('*')">All {{itemName}}</a> |
-            <span *ngIf="filterValue === 'enabled'">Enabled {{itemName}}</span>
-            <a *ngIf="filterValue !== 'enabled'" (click)="filterList('enabled')">Enabled {{itemName}}</a> |
-            <span *ngIf="filterValue === 'disabled'">Disabled {{itemName}}</span>
-            <a *ngIf="filterValue !== 'disabled'" (click)="filterList('disabled')">Disabled {{itemName}}</a>
-            <!-- <span *ngIf="filterValue === '*'">{{showAllMessage}}</span>
-            <a *ngIf="filterValue !== '*'"  (click)="filterList('*')">All User Accounts</a> |
-            <span *ngIf="filterValue === 'enabled'">Enabled Accounts</span>
-            <a *ngIf="filterValue !== 'enabled'" (click)="filterList('enabled')">Enabled Accounts</a> |
-            <span *ngIf="filterValue === 'disabled'">Disabled Accounts</span>
-            <a *ngIf="filterValue !== 'disabled'" (click)="filterList('disabled')">Disabled Accounts</a> -->
+            <span *ngIf="filterValue === '*'">All {{pluralItem}}</span>
+            <a *ngIf="filterValue !== '*'"  (click)="filterList('*')">All {{pluralItem}}</a> |
+            <span *ngIf="filterValue === 'enabled'">Enabled {{pluralItem}}</span>
+            <a *ngIf="filterValue !== 'enabled'" (click)="filterList('enabled')">Enabled {{pluralItem}}</a> |
+            <span *ngIf="filterValue === 'disabled'">Disabled {{pluralItem}}</span>
+            <a *ngIf="filterValue !== 'disabled'" (click)="filterList('disabled')">Disabled {{pluralItem}}</a>
           </div>
         </div>
       </div>
 
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
-          <div *ngFor="let c of colData" class="table-header mui-col-md-{{c.colWidth}}">
-            <div *ngIf="c.isList" >{{c.prettyName}}</div>
-            <a *ngIf="!c.isList" (click)="setColumnSortDirection(c,sortBy)">{{c.prettyName}}</a>
-            <span class="list-sorter" *ngIf="!c.isList" >
-              <span *ngIf="sortColumn === c.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
-              <span *ngIf="sortColumn === c.name && sortBy === 'desc'" class="fa fa-sort-down"></span>
+          <div *ngFor="let column of colData" class="table-header mui-col-md-{{column.colWidth}}">
+            <div *ngIf="column.isList" >{{column.prettyName}}</div>
+            <a *ngIf="!column.isList" (click)="setColumnSortDirection(column, sortBy)">{{column.prettyName}}</a>
+            <span class="list-sorter" *ngIf="!column.isList" >
+              <span *ngIf="sortColumn.name === column.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
+              <span *ngIf="sortColumn.name === column.name && sortBy === 'desc'" class="fa fa-sort-down"></span>
               <span class="fa fa-sort font-color-gray"></span>
             </span>
           </div>
@@ -56,28 +52,28 @@
               [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }"
               appActiveClass>
 
-          <div *ngFor="let c of colData; let idx=index"
-              class="table-data mui-col-md-{{c.colWidth}} transparent">
+          <div *ngFor="let column of colData; let idx=index"
+              class="table-data mui-col-md-{{column.colWidth}} transparent">
 
             <div *ngIf="idx === 0" class="mini-menu">
-              <a class="edit" routerLink="{{domain}}/edit/{{i[c.name]}}">{{ i[c.name] }}</a>
+              <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[column.name] }}</a>
               <span class="menu-options">
                 <a *ngIf="i.enabled === false" (click)="toggleItemStatus(i)">Enable</a>
                 <a *ngIf="i.enabled === false"> | </a>
                 <a *ngIf="i.enabled === true"  (click)="toggleItemStatus(i)">Disable</a>
                 <a *ngIf="i.enabled === true"> | </a>
-                <a class="edit" routerLink="{{domain}}/edit/{{i[c.name]}}">Edit</a>
+                <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">Edit</a>
                 <a> | </a>
-                <a class="edit" routerLink="{{domain}}/duplicate/{{i[c.name]}}">Duplicate</a>
+                <a class="edit" routerLink="{{domain}}/duplicate/{{i.getID()}}">Duplicate</a>
                 <a> | </a>
-                <a (click)="openDialog(i[c.name], 'delete', 'delete', i[c.name])">Delete</a>
+                <a (click)="openDialog('delete', i)">Delete</a>
               </span>
             </div>
-            <div *ngIf="c.isList && idx !== 0 ">
-              <ul [innerHTML]="i.childrenListHTMLstring"></ul>
+            <div *ngIf="column.isList && idx !== 0 ">
+              <ul [innerHTML]="column.formatValue(i)"></ul>
             </div>
-            <div *ngIf="!c.isList && idx !== 0 ">
-              {{ c.formatValue(i) }}
+            <div *ngIf="!column.isList && idx !== 0 ">
+              {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
             </div>
           </div>
 
@@ -88,7 +84,7 @@
         <div class="page-number mui-col-md-4">Page # of #</div>
         <div class="page-controls mui-col-md-4">
           << First | < Previous | Next> | Last >></div>
-        <div class="page-item-total mui-col-md-4">{{ totalUsers }} User Accounts</div>
+        <div class="page-item-total mui-col-md-4">{{ items.length }} {{prettyTitle}}</div>
         <div class="clearfix"></div>
       </div>
     </div>

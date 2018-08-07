@@ -98,10 +98,14 @@ export class UsersService {
     return this.httpClient.put(url, userData, httpOptions);
   }
 
+  //doesn't appear that enabling users works.
+  //see backend files at:
+  //  src/main/java/com/ncc/savior/virtueadmin/service/AdminService.java:325
+  //  src/main/java/com/ncc/savior/virtueadmin/data/jpa/SpringJpaUserManager.java:71
   public setUserStatus(baseUrl: string, username: string, newStatus: string): Observable<any> {
     let url = baseUrl + this.configUrl + username + '/enable';
     // console.log("setUserStatus");
-    // console.log(url);
+    console.log(url);
     return this.httpClient.post(url, newStatus);
   }
 

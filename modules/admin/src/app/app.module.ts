@@ -4,8 +4,10 @@ import {
   FormsModule,
   ReactiveFormsModule
 } from '@angular/forms';
+
 import { BrowserModule } from '@angular/platform-browser';
 
+import { DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -116,13 +118,9 @@ import { VirtuesService } from './shared/services/virtues.service';
     CountFilterPipe,
     PageNotFoundComponent,
 
-    // VirtualMachinesComponent,
     VmsWrapperComponent,
     VmListComponent,
     VmComponent,
-    // VmBuildComponent,
-    // VmEditComponent,
-    // VmDuplicateComponent,
 
     ActiveClassDirective,
 
@@ -156,7 +154,8 @@ import { VirtuesService } from './shared/services/virtues.service';
     OverlayContainer,
     BaseUrlService,
     MessageService,
-    VirtuesService
+    VirtuesService,
+    DatePipe
   ],
   bootstrap: [AppComponent],
   entryComponents: [

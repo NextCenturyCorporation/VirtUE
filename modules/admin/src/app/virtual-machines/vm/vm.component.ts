@@ -165,10 +165,9 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   updateAppsList(newAppsList) {
     // loop through the selected VM list
     this.vm.apps = new Array<Application>();
-    this.vm.appIDs = newAppsList;
+    this.vm.childIDs = newAppsList;
     // console.log('vm's app list @ updatevm.apps(): ' + this.vm.appIds);
-    const vmAppIDs = newAppsList;
-    for (let appID of vmAppIDs) {
+    for (let appID of newAppsList) {
       this.appsService.getApp(this.baseUrl, appID).subscribe(
         appData => {
           this.vm.apps.push(appData);
@@ -188,14 +187,14 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.vm.apps = this.vm.apps.filter(data => {
       return data.id !== id;
     });
-    this.vm.appIDs.splice(index, 1);
+    this.vm.childIDs.splice(index, 1);
   }
 
   activateModal(): void {
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
       width: '750px',
       data: {
-        selectedApps: this.vm.appIDs
+        selectedApps: this.vm.childIDs
       }
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
@@ -227,7 +226,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       'os': this.vm.os,
       'loginUser': 'system',
       'enabled': this.vm.enabled,
-      'applicationIds': this.vm.appIDs,
+      'applicationIds': this.vm.childIDs,
       'securityTag': this.vm.securityTag
     };
     this.vmService.updateVM(this.baseUrl, this.vm.id, JSON.stringify(body));
@@ -241,7 +240,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       'os': this.vm.os,
       'loginUser': 'system',
       'enabled': this.vm.enabled,
-      'applicationIds': this.vm.appIDs,
+      'applicationIds': this.vm.childIDs,
       'securityTag': this.vm.securityTag
     };
     // console.log(body);
