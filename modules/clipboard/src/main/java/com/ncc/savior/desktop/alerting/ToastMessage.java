@@ -2,15 +2,22 @@ package com.ncc.savior.desktop.alerting;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
 /**
@@ -19,33 +26,71 @@ import javax.swing.border.LineBorder;
  *
  */
 public class ToastMessage extends JFrame {
+	
+	private ImageIcon closeIcon = (new ImageIcon(ToastMessage.class.getResource("/images/red-close-button.png")));
 
 	private static final long serialVersionUID = 1L;
-	private JPanel panel;
+	private JPanel container;
+	private JPanel footer;
+	private JPanel header;
 	private JLabel toastLabel;
+	private JLabel closeLabel;
 
 	public ToastMessage(String toastTitle, String toastString, MouseListener listener) {
 		setUndecorated(true);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
-		panel = new JPanel();
+		closeLabel = new JLabel();
+		Image closeImage = closeIcon.getImage();
+		Image newCloseImage = closeImage.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+		ImageIcon closeButtonIcon = new ImageIcon(newCloseImage);
+		closeLabel.setIcon(closeButtonIcon);
+		closeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+	
+		header = new JPanel();
+		header.setBackground(Color.GRAY);
+		header.setLayout(new BorderLayout(0, 0));
+		footer = new JPanel();
+		footer.setBackground(Color.GRAY);
+		
+		container = new JPanel();
+		container.setLayout(new BorderLayout());
 		// panel.setBackground(Color.GRAY);
 		// panel.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
-		getContentPane().add(panel, BorderLayout.CENTER);
+		getContentPane().add(container, BorderLayout.CENTER);
 
-		toastLabel = new JLabel("");
-		int width = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 3);
-		toastLabel.setText("<HTML><body style='width: " + width + "px'>" + toastString);
-		toastLabel.setFont(new Font("Dialog", Font.BOLD, 12));
+		toastLabel = new JLabel(toastString);
+		toastLabel.setFont(new Font("Dialog", Font.BOLD, 17));
+		toastLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
 		// toastLabel.setForeground(Color.WHITE);
+		toastLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		//toastLabel.setVerticalAlignment(SwingConstants.TOP);
 		unhighlight();
 
-		setBounds(100, 100, toastLabel.getPreferredSize().width + 20, toastLabel.getPreferredSize().height + 20);
+		// setBounds(100, 100, toastLabel.getPreferredSize().width + 20, toastLabel.getPreferredSize().height + 20);
+		setSize(600, 50);
 		setFocusable(false);
 		setFocusableWindowState(false);
 		setAutoRequestFocus(false);
 		setAlwaysOnTop(true);
-		panel.add(toastLabel);
+		container.add(toastLabel, BorderLayout.CENTER);
+		container.add(header, BorderLayout.NORTH);
+		header.add(closeLabel, BorderLayout.EAST);
+		container.add(footer, BorderLayout.SOUTH);
+		
+		closeLabel.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				dispose();
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				highlight();
+			}
+			
+		});
 
 		addMouseListener(listener);
 	}
@@ -80,8 +125,10 @@ public class ToastMessage extends JFrame {
 	 * This can be undone with {@link #unhighlight()}
 	 */
 	public void highlight() {
-		panel.setBackground(Color.WHITE);
-		panel.setBorder(new LineBorder(Color.DARK_GRAY, 2));
+		container.setBackground(Color.WHITE);
+		footer.setBackground(Color.WHITE);
+		header.setBackground(Color.WHITE);
+		container.setBorder(new LineBorder(Color.DARK_GRAY, 2));
 		toastLabel.setForeground(Color.BLACK);
 	}
 
@@ -90,8 +137,10 @@ public class ToastMessage extends JFrame {
 	 * cursor exits the alert and we want to undo the {@link #highlight()}
 	 */
 	public void unhighlight() {
-		panel.setBackground(Color.GRAY);
-		panel.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
+		container.setBackground(Color.GRAY);
+		footer.setBackground(Color.GRAY);
+		header.setBackground(Color.GRAY);
+		container.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
 		toastLabel.setForeground(Color.WHITE);
 	}
 }
