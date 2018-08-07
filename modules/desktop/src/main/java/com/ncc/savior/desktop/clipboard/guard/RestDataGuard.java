@@ -5,14 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.swing.JOptionPane;
-
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.clipboard.guard.CopyPasteDialog.IDialogListener;
 import com.ncc.savior.desktop.virtues.DesktopResourceService;
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
@@ -35,6 +34,8 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 
 	private HashMap<String, String> groupIdToDisplayName;
 
+	private IDataGuardDialog dialog;
+
 	/**
 	 *
 	 * @param resource
@@ -43,10 +44,11 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	 *            only Ask once and then that option sticks for a period of time
 	 *            equal to this parameter.
 	 */
-	public RestDataGuard(DesktopResourceService resource, long askStickyTimeoutMillis) {
+	public RestDataGuard(DesktopResourceService resource, long askStickyTimeoutMillis, IDataGuardDialog dialog) {
 		this.resource = resource;
 		this.tempCache = new PassiveExpiringMap<Pair<String, String>, ClipboardPermissionOption>(
 				askStickyTimeoutMillis);
+		this.dialog = dialog;
 	}
 
 	@Override
@@ -65,6 +67,8 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 		cache = map;
 	}
 
+	static int i = 1;
+
 	@Override
 	public boolean allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId) {
 		ImmutablePair<String, String> pair = new ImmutablePair<String, String>(dataSourceGroupId,
@@ -81,17 +85,29 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 			}
 		}
 		ClipboardPermissionOption po = getPermissionOptionIncludingTemporary(pair);
+		if (i == 1) {
+			po = ClipboardPermissionOption.ASK;
+		}
 		switch (po) {
 		case ALLOW:
 			return true;
 		case ASK:
-			int dialogButton = JOptionPane.YES_NO_OPTION;
-			int dialogResult = JOptionPane.showConfirmDialog(null, "Would you like allow copy/pasting 15 minutes from '"
-					+ getName(pair.left) + "' to '" + getName(pair.right) + "'?", "Warning", dialogButton);
-			ClipboardPermissionOption tempOption = (dialogResult == JOptionPane.YES_OPTION
-					? ClipboardPermissionOption.ALLOW
-					: ClipboardPermissionOption.DENY);
-			addToTemporary(pair, tempOption);
+			System.out.println("wow");
+			dialog.setLoginEventListener(new IDialogListener() {
+
+				@Override
+				public void onYes() {
+					addToTemporary(pair, ClipboardPermissionOption.ALLOW);
+				}
+
+				@Override
+				public void onNo() {
+					addToTemporary(pair, ClipboardPermissionOption.DENY);
+				}
+
+			});
+			dialog.show(getName(pair.left), getName(pair.right));
+			i++;
 			return false;
 		case DENY:
 			return false;
@@ -110,6 +126,7 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	}
 
 	private void addToTemporary(ImmutablePair<String, String> pair, ClipboardPermissionOption tempOption) {
+		System.out.println("adding to cache!");
 		tempCache.put(pair, tempOption);
 	}
 
