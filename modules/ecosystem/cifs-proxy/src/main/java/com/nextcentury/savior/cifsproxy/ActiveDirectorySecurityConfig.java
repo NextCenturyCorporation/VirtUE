@@ -80,7 +80,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		logger.entry();
-		AuthenticationManager authenticationManagerBean = new CachingAuthenticationManager(super.authenticationManagerBean());
+		AuthenticationManager authenticationManagerBean = new CachingAuthenticationManager(super.authenticationManagerBean(), "ccache");
 		logger.exit(authenticationManagerBean);
 		return authenticationManagerBean;
 	}

@@ -110,7 +110,7 @@ public class GssCache {
 	private static Pointer importName(GssApi gssapi, IntByReference minorStatus) throws GSSException {
 		Pointer gssTargetName;
 		gss_buffer_desc targetName = new gss_buffer_desc();
-		String target = "cifs@WS9.HQ.NEXTCENTURY.COM\000";
+		String target = "http@webserver.test.savior\000";
 		Memory targetNameBuffer = JnaUtils.newMemory(target.getBytes());
 		targetName.value = targetNameBuffer;
 		targetName.length = new NativeLong(target.length() + 1);

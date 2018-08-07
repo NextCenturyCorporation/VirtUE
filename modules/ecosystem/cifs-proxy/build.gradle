@@ -109,6 +109,7 @@ task bootDeploy(dependsOn: bootJar) {
     doFirst {
         ssh.run {
             session(remotes.webserver) {
+                put from: gsscacheJar.archivePath, into: '.'
                 put from: bootJar.archivePath, into: '.'
                 put from: 'src/main/resources/cifs-proxy-security.properties', into: '.'
             }
