@@ -1,6 +1,7 @@
 // factor out raw text to make any future refactoring/reuse easier
 
 locals {
+  fsname = "fileserver"
   rolePolicy = <<EOF
 {
     "Version": "2012-10-17",
@@ -108,7 +109,7 @@ resource "aws_instance" "file_server" {
   subnet_id = "${data.aws_subnet.public_subnet.id}"
 
   tags {
-	Name = "Windows File Server"
+	Name = "${local.fsname}"
 	Owner = "${data.external.local_user.result.user}"
 	class = "cifs"
 	automated = "terraform"
@@ -128,17 +129,22 @@ resource "aws_instance" "file_server" {
 	timeout = "10m"
   }
 
-  # TODO: enable sharing some files; use Grant-SMBShareAccess to give access
   user_data = <<EOF
 <powershell>
   Start-Transcript -Path "c:\user_data.log" -append -force 
   echo Setting password
   net user Administrator "${var.admin_password}"
+  echo Creating user
+  net user bob /add /domain
   echo Sharing files
   Get-WindowsFeature -Name FS-FileServer
   New-FileShare -Name TestShare -SourceVolume (Get-Volume -DriveLetter C) -FileServerFriendlyName $env:COMPUTERNAME
-  Get-FileShare -Name TestShare | Grant-FileShareAccess -AccountName Administrator -AccessRight Full
-  echo Setup done
+  Get-FileShare -Name TestShare | Grant-FileShareAccess -AccountName bob -AccessRight Full
+  echo Setting up delegation
+  Add-WindowsFeature RSAT-AD-PowerShell
+  Import-Module ActiveDirectory
+  
+  echo Setup done  
 </powershell>
 EOF
 
