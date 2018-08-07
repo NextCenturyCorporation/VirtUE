@@ -67,8 +67,6 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 		cache = map;
 	}
 
-	static int i = 1;
-
 	@Override
 	public boolean allowDataTransfer(String dataSourceGroupId, String dataDestinationGroupId) {
 		ImmutablePair<String, String> pair = new ImmutablePair<String, String>(dataSourceGroupId,
@@ -85,9 +83,6 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 			}
 		}
 		ClipboardPermissionOption po = getPermissionOptionIncludingTemporary(pair);
-		if (i == 1) {
-			po = ClipboardPermissionOption.ASK;
-		}
 		switch (po) {
 		case ALLOW:
 			return true;
@@ -107,7 +102,6 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 
 			});
 			dialog.show(getName(pair.left), getName(pair.right));
-			i++;
 			return false;
 		case DENY:
 			return false;
