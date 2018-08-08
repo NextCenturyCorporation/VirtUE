@@ -31,7 +31,6 @@ public class ToastMessage extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel container;
-	private JPanel footer;
 	private JPanel header;
 	private JLabel toastLabel;
 	private JLabel closeLabel;
@@ -50,8 +49,6 @@ public class ToastMessage extends JFrame {
 		header = new JPanel();
 		header.setBackground(Color.GRAY);
 		header.setLayout(new BorderLayout(0, 0));
-		footer = new JPanel();
-		footer.setBackground(Color.GRAY);
 		
 		container = new JPanel();
 		container.setLayout(new BorderLayout());
@@ -61,14 +58,14 @@ public class ToastMessage extends JFrame {
 
 		toastLabel = new JLabel(toastString);
 		toastLabel.setFont(new Font("Dialog", Font.BOLD, 17));
-		toastLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 6, 0));
+		//toastLabel.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 		// toastLabel.setForeground(Color.WHITE);
 		toastLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		//toastLabel.setVerticalAlignment(SwingConstants.TOP);
+		toastLabel.setVerticalAlignment(SwingConstants.TOP);
 		unhighlight();
 
 		// setBounds(100, 100, toastLabel.getPreferredSize().width + 20, toastLabel.getPreferredSize().height + 20);
-		setSize(600, 50);
+		setSize(600, 65);
 		setFocusable(false);
 		setFocusableWindowState(false);
 		setAutoRequestFocus(false);
@@ -76,7 +73,6 @@ public class ToastMessage extends JFrame {
 		container.add(toastLabel, BorderLayout.CENTER);
 		container.add(header, BorderLayout.NORTH);
 		header.add(closeLabel, BorderLayout.EAST);
-		container.add(footer, BorderLayout.SOUTH);
 		
 		closeLabel.addMouseListener(new MouseAdapter() {
 			
@@ -126,7 +122,6 @@ public class ToastMessage extends JFrame {
 	 */
 	public void highlight() {
 		container.setBackground(Color.WHITE);
-		footer.setBackground(Color.WHITE);
 		header.setBackground(Color.WHITE);
 		container.setBorder(new LineBorder(Color.DARK_GRAY, 2));
 		toastLabel.setForeground(Color.BLACK);
@@ -138,7 +133,6 @@ public class ToastMessage extends JFrame {
 	 */
 	public void unhighlight() {
 		container.setBackground(Color.GRAY);
-		footer.setBackground(Color.GRAY);
 		header.setBackground(Color.GRAY);
 		container.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
 		toastLabel.setForeground(Color.WHITE);
