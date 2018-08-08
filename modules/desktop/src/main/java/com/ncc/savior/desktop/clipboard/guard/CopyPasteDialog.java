@@ -66,7 +66,6 @@ public class CopyPasteDialog implements IDataGuardDialog {
 		dialog.setModal(true);
 		dialog.setSize(new Dimension(650, 125));
 		dialog.setLocationRelativeTo(null);
-		dialog.setVisible(true);
 		dialog.setIconImage(saviorIcon.getImage());
 
 		yesButton.addActionListener(new ActionListener() {
