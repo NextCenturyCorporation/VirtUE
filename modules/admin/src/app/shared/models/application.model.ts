@@ -1,6 +1,11 @@
 
 import { Item } from './item.model';
 
+/**
+ * Represents a Application.
+ * Children are null.
+ * At time of writing, launchCommand and iconKey are not used.
+ */
 export class Application extends Item{
 
   version: string;
@@ -28,5 +33,15 @@ export class Application extends Item{
     //this value is used in getSpecifiedItemsHTML().
     this.enabled = true;
     this.status = 'enabled';
+  }
+
+  getRepresentation(): {} {
+    return {
+      // 'name': this.name,
+      // 'version': this.version,
+      // 'enabled': this.enabled,
+      // 'color' : this.color,
+      // 'virtualMachineTemplateIds': this.childIDs
+    };
   }
 }

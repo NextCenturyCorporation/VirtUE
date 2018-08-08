@@ -43,7 +43,9 @@ import { FileShareComponent } from './config/resource-modal/file-share/file-shar
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
-import { GeneralListComponent } from './gen-list/gen-list.component';
+import { GeneralListComponent } from './shared/abstracts/gen-list/gen-list.component';
+import { GenericFormComponent } from './shared/abstracts/gen-form/gen-form.component';
+import { GenericPageComponent } from './shared/abstracts/gen-page/gen-page.component';
 
 import { UsersWrapperComponent } from './users/users.wrapper.component';
 import { UserListComponent } from './users/user-list/user-list.component';

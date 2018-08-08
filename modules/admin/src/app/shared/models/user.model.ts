@@ -2,7 +2,15 @@
 import { Item } from './item.model';
 import { Virtue } from './virtue.model';
 
+import { DictList } from './dictionary.model';
+/**
+ * Represents a User.
+ * Children are Virtue objects.
+ *
+ *
+ */
 export class User extends Item {
+
   username: string;
   virtues: Virtue[];
   roles: string[];
@@ -35,6 +43,7 @@ export class User extends Item {
       this.roles = [];
     }
 
+    this.children = new DictList<Virtue>();
     this.virtues = [];
   }
 
@@ -50,5 +59,15 @@ export class User extends Item {
   //Overrides Item
   getID(): string {
     return this.username;
+  }
+
+  getRepresentation(): {} {
+    return {
+      // 'name': this.name,
+      // 'version': this.version,
+      // 'enabled': this.enabled,
+      // 'color' : this.color,
+      // 'virtualMachineTemplateIds': this.childIDs
+    };
   }
 }

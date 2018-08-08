@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h1 class="titlebar-title">{{actionName}} Virtue</h1>
-    <button (click)="toggleVirtueStatus()" class="titlebar-button">{{ virtue.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button>
+    <button (click)="toggleItemStatus()" class="titlebar-button">{{ item.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button>
   </div>
   <div id="content-main">
       <div id="content" class="border-top virtue-content">
@@ -16,9 +16,9 @@
 
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
-                <input type="text" [(ngModel)]="virtue.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
+                <input type="text" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
                 <br />
-                <span *ngIf="mode!=='c'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ virtue.id }}</span>
+                <span *ngIf="mode!=='c'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.id }}</span>
               </div>
             </div>
             <div class="mui-row form-item margin-top-15">
@@ -26,13 +26,13 @@
                 <label>Version: </label>
               </div>
               <div class="mui-col-md-2">
-                <input type="text" [(ngModel)]="virtue.version" placeholder="1.0" matInput />
+                <input type="text" [(ngModel)]="item.version" placeholder="1.0" matInput />
               </div>
             </div>
             <div class="mui-row titlebar">
               <div class="mui-col-md-12">
                 <h2 class="titlebar-title">Virtual Machines</h2>
-                <button mat-button class="titlebar-button" (click)="activateModal(virtue.id)">Add VM</button>
+                <button mat-button class="titlebar-button" (click)="activateModal(item.id)">Add VM</button>
               </div>
             </div>
             <!-- if there are virtual machines, show this list -->
@@ -44,28 +44,26 @@
                 <div class="table-header mui-col-md-1">Enabled</div>
               </div>
               <!-- if there are no virtue, show this message -->
-              <div *ngIf="virtue.vms.length < 1" class="mui-row margin-top-10">
+              <div *ngIf="item.children.length < 1" class="mui-row margin-top-10">
                 <div class="mui-col-md-12">
                   <p class="no-data-message">
                     No virtual machines are attached this virtue. To add VM(s), click on the button "Add VM".
                   </p>
                 </div>
               </div>
-              <div class="mui-row table-row" *ngFor="let vm of virtue.vms" appActiveClass>
+              <div class="mui-row table-row" *ngFor="let vm of item.children.getL()" appActiveClass>
                 <div class="table-data mui-col-md-4">
                   <a mat-button (click)="activateModal(vm)">{{ vm.name }}</a>
                   <span class="menu-options" *ngIf="vm.enabled">
-                    <button>Disable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
+                    <button>Disable</button> | <button mat-button (click)="item.removeChild(vm.id, i)">Remove</button>
                   </span>
                   <span class="menu-options" *ngIf="vm.enabled===false">
-                    <button>Enable</button> | <button mat-button (click)="removeVm(vm.id, i)">Remove</button>
+                    <button>Enable</button> | <button mat-button (click)="item.removeChild(vm.id, i)">Remove</button>
                   </span>
                 </div>
                 <div class="table-data mui-col-md-2">{{ vm.os }}</div>
                 <div class="table-data mui-col-md-5">
-                  <ul class="padding-left-5">
-                    <li *ngFor="let id of vm.applicationIds">{{ getAppName(id) }}</li>
-                  </ul>
+                  <ul [innerHTML]="getChildrenListHTMLstring(item)"></ul>
                 </div>
                 <div class="table-data mui-col-md-1">{{ vm.enabled ? 'Enabled':'Disabled' }} </div>
                 <div class="clearfix"></div>
@@ -76,7 +74,7 @@
                 <div class="mui-col-md-4 page-number padding-left-0">&nbsp;</div>
                 <div class="mui-col-md-4 page-controls">&nbsp;</div>
                 <div class="mui-col-md-4 page-item-total padding-right-3">
-                  {{virtue.vms.length}} Virtual Machine{{(virtue.vms.length === 1) ? '': 's'}}
+                  {{item.children.length}} Virtual Machine{{(item.children.length === 1) ? '': 's'}}
                 </div>
                 <div class="clearfix"></div>
               </div>

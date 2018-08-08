@@ -17,13 +17,13 @@ import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { GeneralListComponent } from '../../gen-list/gen-list.component';
+import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 
 @Component({
   selector: 'app-virtue-list',
-  templateUrl: '../../gen-list/gen-list.component.html',
-  styleUrls: ['../../gen-list/gen-list.component.css'],
+  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
 
@@ -39,6 +39,7 @@ export class VirtueListComponent extends GeneralListComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+
     //Note: colWidths of all columns must add to exactly 12.
     //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     //See note next to a line containing "mui-col-md-12" in gen-list.component.html

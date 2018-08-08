@@ -46,7 +46,7 @@ export class VirtuesService {
     return this.httpClient.get<Virtue>(url);
   }
 
-  public createVirtue(baseUrl: string, virtueData: any): Observable<any> {
+  public createVirtue(baseUrl: string, virtueData: string): Observable<any> {
     // console.log('createVirtue() => ' + baseUrl);
     let url = baseUrl + this.configUrl;
     // console.log('createVirtue() => ');
@@ -69,7 +69,7 @@ export class VirtuesService {
     });
   }
 
-  public updateVirtue(baseUrl: string, id: string, virtueData: any) {
+  public updateVirtue(baseUrl: string, id: string, virtueData: string) {
     let url = baseUrl + this.configUrl + id;
     // console.log("updateVirtue");
     // console.log(url);

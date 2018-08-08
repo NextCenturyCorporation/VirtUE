@@ -23,12 +23,24 @@ export class DictList<T> {
     return this.l;
   }
 
+  remove(key: string) {
+    if (!(key in this.d)) {
+      return;
+    }
+    var index: number = this.l.indexOf(this.d[key], 0);
+    if (index > -1) {
+       this.l.splice(index, 1);
+    }
+    this.length -= 1;
+    delete this.d[key];
+  }
+
   clear() {
     this.d = null;
     this.l = null;
   }
 }
 
-class Dict<T> {
+export class Dict<T> {
     [key: string]: T;
 }

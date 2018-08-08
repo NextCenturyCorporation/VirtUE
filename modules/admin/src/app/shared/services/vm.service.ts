@@ -38,29 +38,31 @@ export class VirtualMachineService {
     return this.httpClient.get<VirtualMachine>(src);
   }
 
-  public createVM(baseUrl: string, vmData: any) {
+  public createVM(baseUrl: string, vmData: string): Observable<any>  {
     let url = baseUrl + this.configUrl;
     // console.log('createVM() => ');
     // console.log(url);
     // console.log(vmData);
-    return this.httpClient.post(url, vmData, httpOptions)
-           .toPromise().then(data => {
-             return data;
-           }, error => {
-             console.log(error);
-           });
+    // return this.httpClient.post(url, vmData, httpOptions)
+    //        .toPromise().then(data => {
+    //          return data;
+    //        }, error => {
+    //          console.log(error);
+    //        });
+    return this.httpClient.post(url, vmData, httpOptions);
  }
 
-  public updateVM(baseUrl: string, id: string, vmData: any) {
+  public updateVM(baseUrl: string, id: string, vmData: string): Observable<any>  {
     let url = baseUrl + this.configUrl + id;
     // console.log('updateVM() => ');
     // console.log(url);
-    return this.httpClient.put(url, vmData, httpOptions)
-           .toPromise().then(data => {
-             return data;
-           }, error => {
-             console.log(error);
-           });
+    // return this.httpClient.put(url, vmData, httpOptions)
+    //        .toPromise().then(data => {
+    //          return data;
+    //        }, error => {
+    //          console.log(error);
+    //        });
+    return this.httpClient.put(url, vmData, httpOptions);
   }
 
   public toggleVmStatus(baseUrl: string, id: string): Observable<any> {

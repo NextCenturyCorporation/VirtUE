@@ -1,11 +1,18 @@
 
+import { DatePipe } from '@angular/common';
+
 import { Item } from './item.model';
 import { Application } from './application.model';
 
+import { DictList } from './dictionary.model';
 
+/**
+ * Represents a VirtualMachine.
+ * Children are Application objects.
+ *
+ */
 export class VirtualMachine extends Item {
 
-  apps: Application[];
   os: string;
   templatePath: string;
   loginUser: string;
@@ -21,7 +28,7 @@ export class VirtualMachine extends Item {
       this.childIDs = vmObj.applicationIds;
       this.lastEditor = vmObj.lastEditor;
       this.lastModification = vmObj.lastModification;
-      this.modDate = vmObj.modDate;
+      this.modDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
       this.securityTag = vmObj.securityTag;
       this.os = vmObj.os;
       this.status = vmObj.enabled ? 'enabled' : 'disabled';
@@ -29,6 +36,18 @@ export class VirtualMachine extends Item {
     else {
       super('', '');
     }
-    this.apps = [];
+
+    this.children = new DictList<Application>();
+  }
+
+  getRepresentation(): {} {
+    return {
+      'name': this.name,
+      'os': this.os,
+      'loginUser': 'system',
+      'enabled': this.enabled,
+      'applicationIds': this.childIDs,
+      'securityTag': this.securityTag
+    };
   }
 }

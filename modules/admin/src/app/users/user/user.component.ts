@@ -27,7 +27,7 @@ export class UserComponent implements OnInit {
   submitBtn: any;
   fullImagePath: string;
 
-  user: User;
+  item: User;
   userData: string;
 
   mode: string;
@@ -51,7 +51,7 @@ export class UserComponent implements OnInit {
     public dialog: MatDialog
   ) {
     this.setMode();
-    this.user = new User(undefined);
+    this.item = new User(undefined);
 
      //maybe? originally this was only called in addUser's constructor, but in Virtues it was called in create, edit, and duplicate.
      //I don't know what it does, but it wouldn't persist once you leave the creation screen anyway. So let's make it every time.
@@ -68,7 +68,7 @@ export class UserComponent implements OnInit {
 
   ngOnInit() {
     if (this.mode === "e" || this.mode === "d") {//if "d" or "e"
-      this.user.username = this.activatedRoute.snapshot.params['id'];
+      this.item.username = this.activatedRoute.snapshot.params['id'];
     }
 
     this.baseUrlService.getBaseUrl().subscribe(data => {
@@ -78,7 +78,7 @@ export class UserComponent implements OnInit {
       this.getAllApps();
     });
 
-    if (this.mode === "e" || this.mode === "d") {//if "d" or "e"
+    if (this.mode === "e" || this.mode === "d") {
       this.refreshData();
     }
   }
@@ -148,7 +148,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   refreshData() {
     setTimeout(() => {
-      this.getUserData(this.user.username);
+      this.getUserData(this.item.username);
     }, 200);
   }
 
@@ -159,14 +159,14 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   getUserData(username: string) {
     this.usersService.getUser(this.baseUrl, username).subscribe(uData => {
       this.userData = uData;
-      this.user = new User(uData);
+      this.item = new User(uData);
       this.updateVirtueList(uData.virtueTemplateIds);
     });
   }
 
   selectedRole(role: string) {
-    if (this.user.roles.length > 0) {
-      for (let sel of this.user.roles) {
+    if (this.item.roles.length > 0) {
+      for (let sel of this.item.roles) {
         if (sel === role) {
           return true;
         }
@@ -209,14 +209,14 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   updateVirtueList(newVirtueIDs: any) {
-    this.user.childIDs = newVirtueIDs;
-    // this.user.children = new DictList<Virtue>();
-    this.user.virtues = new Array<Virtue>();
+    this.item.childIDs = newVirtueIDs;
+    // this.item.children = new DictList<Virtue>();
+    this.item.virtues = new Array<Virtue>();
       for (let vID of newVirtueIDs) {
-        // this.user.children.add(vID, this.allVirtues.get(vID));
+        // this.item.children.add(vID, this.allVirtues.get(vID));
         for (let virtue of this.allVirtues) {
           if (vID === virtue.id) {
-            this.user.virtues.push(virtue);
+            this.item.virtues.push(virtue);
             break;
           }
         }
@@ -224,10 +224,10 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   removeVirtue(id: string, index: number): void {
-    this.user.virtues = this.user.virtues.filter(virt => {
+    this.item.virtues = this.item.virtues.filter(virt => {
       return virt.id !== id;
     });
-    this.user.childIDs.splice(index, 1);
+    this.item.childIDs.splice(index, 1);
   }
 
   activateModal(mode: string): void {
@@ -245,11 +245,11 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       height: dialogHeight + 'px',
       width: dialogWidth + 'px',
       data: {
-        id: this.user.username,
+        id: this.item.username,
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath,
-        userVirtueIDs: this.user.childIDs
+        userVirtueIDs: this.item.childIDs
       },
       panelClass: 'virtue-modal-overlay'
     });
@@ -271,18 +271,18 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       roles.push('ROLE_ADMIN');
     }
 
-    if (!this.user.username) {
+    if (!this.item.username) {
       return confirm("You need to enter a username.");
     }
 
     let body = {
-      'username': this.user.username,
+      'username': this.item.username,
       'authorities': roles,
-      'virtueTemplateIds': this.user.childIDs,
-      'enabled': this.user.enabled
+      'virtueTemplateIds': this.item.childIDs,
+      'enabled': this.item.enabled
     };
 
-    this.usersService.updateUser(this.baseUrl, this.user.username, JSON.stringify(body)).subscribe(
+    this.usersService.updateUser(this.baseUrl, this.item.username, JSON.stringify(body)).subscribe(
       error => {
         console.log(error);
       });
@@ -291,6 +291,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   toggleUserStatus() {
-    this.user.enabled = !this.user.enabled;
+    this.item.enabled = !this.item.enabled;
   }
 }

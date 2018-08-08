@@ -14,12 +14,12 @@ import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { GeneralListComponent } from '../../gen-list/gen-list.component';
+import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 @Component({
   selector: 'app-vm-list',
-  templateUrl: '../../gen-list/gen-list.component.html',
-  styleUrls: ['../../gen-list/gen-list.component.css'],
+  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService ]
 })
 export class VmListComponent extends GeneralListComponent {
@@ -33,6 +33,7 @@ export class VmListComponent extends GeneralListComponent {
     appsService: ApplicationsService,
     dialog: MatDialog
   ) {
+    console.log(baseUrlService);
     super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
 
     //Note: colWidths of all columns must add to exactly 12.

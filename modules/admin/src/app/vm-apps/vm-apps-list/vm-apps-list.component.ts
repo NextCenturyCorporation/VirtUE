@@ -20,12 +20,12 @@ import { ApplicationsService } from '../../shared/services/applications.service'
 import { Application } from '../../shared/models/application.model';
 import { AddVmAppComponent } from '../add-vm-app/add-vm-app.component';
 
-import { GeneralListComponent } from '../../gen-list/gen-list.component';
+import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 @Component({
   selector: 'app-vm-apps-list',
-  templateUrl: '../../gen-list/gen-list.component.html',
-  styleUrls: ['../../gen-list/gen-list.component.css'],
+  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
 export class VmAppsListComponent extends GeneralListComponent {

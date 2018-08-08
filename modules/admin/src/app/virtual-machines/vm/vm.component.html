@@ -1,8 +1,8 @@
-<div id="content-container">
+item.<div id="content-container">
   <div id="content-header" class="titlebar">
     <h2 class="titlebar-title">{{actionName}} Virtual Machine</h2>
-    <button (click)="toggleVmStatus()" class="titlebar-button">{{ vm.enabled ? 'VM Enabled' : 'VM Disabled' }}</button>
-    <!-- <button (click)="toggleVmStatus()" class="titlebar-button">{{ vm.enabled ? 'Disable VM' : 'Enable VM' }}</button> -->
+    <button (click)="toggleVmStatus()" class="titlebar-button">{{ item.enabled ? 'VM Enabled' : 'VM Disabled' }}</button>
+    <!-- <button (click)="toggleVmStatus()" class="titlebar-button">{{ item.enabled ? 'Disable VM' : 'Enable VM' }}</button> -->
   </div>
 
   <div id="content-main" class="border-top">
@@ -11,7 +11,7 @@
         <div class="mui-row">
           <div class="mui-col-md-6">
             <mat-form-field>
-              <input matInput [(ngModel)]="vm.name" placeholder="Virtual Machine Template Name"   />
+              <input matInput [(ngModel)]="item.name" placeholder="Virtual Machine Template Name"   />
             </mat-form-field>
           </div>
         </div>
@@ -21,7 +21,7 @@
           </div>
           <div class="mui-col-md-4">
             <mat-form-field class="form-field">
-              <mat-select [(ngModel)]="vm.os" [ngModelOptions]="{standalone: true}" placeholder="Select One" disableRipple>
+              <mat-select [(ngModel)]="item.os" [ngModelOptions]="{standalone: true}" placeholder="Select One" disableRipple>
                 <mat-option *ngFor="let item of osList" [value]="item.os">{{ item.name }} </mat-option>
               </mat-select>
             </mat-form-field>
@@ -33,7 +33,7 @@
           </div>
           <div class="mui-col-md-4">
             <mat-form-field class="form-field">
-              <mat-select [(ngModel)]="vm.securityTag" [ngModelOptions]="{standalone: true}" placeholder="Select One" disableRipple>
+              <mat-select [(ngModel)]="item.securityTag" [ngModelOptions]="{standalone: true}" placeholder="Select One" disableRipple>
                 <mat-option *ngFor="let item of securityOptions" [value]="item.level">{{ item.name }} </mat-option>
               </mat-select>
             </mat-form-field>
@@ -48,7 +48,7 @@
         <!-- if there are no apps, show this message -->
         <div class="mui-row">
           <div class="mui-col-md-6">
-            <div *ngIf="vm.apps.length < 1" class="mui-row margin-top-10">
+            <div *ngIf="item.children.length < 1" class="mui-row margin-top-10">
               <div class="mui-col-md-12">
                 <p class="no-data-message">
                   No applications are attached to this VM. To add application(s), click on the button "Add/Remove Application Packages".
@@ -59,17 +59,17 @@
         </div>
         <div class="mui-row">
           <div class="mui-col-md-6">
-            <div *ngIf="vm.apps.length > 0" class="mui-container-fluid data-list">
+            <div *ngIf="item.children.length > 0" class="mui-container-fluid data-list">
             <div class="mui-row table-header-group">
               <div class="table-header mui-col-md-6">Application</div>
               <div class="table-header mui-col-md-3">Version</div>
               <div class="table-header mui-col-md-3">OS</div>
             </div>
-            <div *ngFor="let app of vm.apps; let i = index" class="mui-row table-row" appActiveClass>
+            <div *ngFor="let app of item.children.getL(); let i = index" class="mui-row table-row" appActiveClass>
               <div class="table-data mui-col-md-6">
                 <a class="edit" (click)="activateModal(app.id)">{{ app.name }}</a>
                 <span class="menu-options">
-                  <button mat-button (click)="removeApp(app.id, i)">Remove</button>
+                  <button mat-button (click)="item.removeChild(app.id, i)">Remove</button>
                 </span>
               </div>
               <div class="table-data mui-col-md-3">{{ app.version }}</div>

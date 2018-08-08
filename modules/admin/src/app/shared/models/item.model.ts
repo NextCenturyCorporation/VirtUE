@@ -26,6 +26,7 @@ export abstract class Item {
     this.childNamesHtml = "";
   }
 
+  //this builds a string of the item's childrens' names, as an html list.
   formatChildNames(allChildren: DictList<Item>): void {
     this.childNamesHtml = this.getSpecifiedItemsHTML(this.childIDs, allChildren);
   }
@@ -82,5 +83,12 @@ export abstract class Item {
   //Overriden by User
   getID(): string {
     return this.id;
+  }
+
+  abstract getRepresentation(): {};
+
+  removeChild(id: string, index: number): void {
+    this.children.remove(id);
+    this.childIDs.splice(index, 1);
   }
 }

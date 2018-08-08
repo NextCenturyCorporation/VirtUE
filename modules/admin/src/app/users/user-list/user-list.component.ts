@@ -17,12 +17,12 @@ import { ApplicationsService } from '../../shared/services/applications.service'
 import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { GeneralListComponent } from '../../gen-list/gen-list.component';
+import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 @Component({
   selector: 'app-user-list',
-  templateUrl: '../../gen-list/gen-list.component.html',
-  styleUrls: ['../../gen-list/gen-list.component.css'],
+  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
 export class UserListComponent extends GeneralListComponent {

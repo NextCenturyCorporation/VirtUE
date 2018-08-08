@@ -1,38 +1,33 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { Location } from '@angular/common';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { Application } from '../../shared/models/application.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
-
-import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ApplicationsService } from '../../shared/services/applications.service';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
+import { UsersService } from '../../shared/services/users.service';
 
 import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
+
+import { Item } from '../../shared/models/item.model';
+import { Application } from '../../shared/models/application.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
+import { DictList } from '../../shared/models/dictionary.model';
+
+import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.component';
+
 
 @Component({
   selector: 'app-vm',
   templateUrl: './vm.component.html',
-  providers: [ ApplicationsService, BaseUrlService, VirtualMachineService ]
+  providers: [ BaseUrlService, ApplicationsService, VirtualMachineService, VirtuesService, UsersService ]
 })
-export class VmComponent implements OnInit {
-
-  vm: VirtualMachine;
-  vmData: string;
-
-  form: FormControl;
-
-  baseUrl: string;
-
-  mode : string; //"c" if creating new virtue, "e" for editing existing, "d" for creating a duplicate.
-  actionName: string; //for the html - 'Create', 'Edit', or 'Duplicate'
-
-  parentDomain: string;
-
+export class VmComponent extends GenericFormComponent {
 
   osList = [
     { 'name': 'Debian', 'os': 'LINUX' },
@@ -46,157 +41,82 @@ export class VmComponent implements OnInit {
   ];
 
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private appsService: ApplicationsService,
-    private baseUrlService: BaseUrlService,
-    private router: Router,
-    private vmService: VirtualMachineService,
-    public dialog: MatDialog
+    activatedRoute: ActivatedRoute,
+    router: Router,
+    baseUrlService: BaseUrlService,
+    usersService: UsersService,
+    virtuesService: VirtuesService,
+    vmService: VirtualMachineService,
+    appsService: ApplicationsService,
+    dialog: MatDialog
   ) {
-    this.parentDomain = "/vm-templates";
-    this.setMode();
+    super('/vm-templates', activatedRoute, router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
 
-    this.vm = new VirtualMachine(undefined);
+    this.item = new VirtualMachine(undefined);
 
-    this.form = new FormControl();
+    this.updateFuncQueue = [this.pullApps, this.pullVms];
+
+    this.serviceCreateFunc = this.vmService.createVM;
+    this.serviceUpdateFunc = this.vmService.updateVM;
   }
 
-  ngOnInit() {
-    if (this.mode == 'd' || this.mode == 'e') {
-      this.vm.id = this.activatedRoute.snapshot.params['id'];
+  // pullData(id: string) {
+  //
+  //   this.vmService.getVM(this.baseUrl, id).subscribe(
+  //     data => {
+  //       this.itemData = data;
+  //       this.item.os = data.os;
+  //       this.item.name = data.name;
+  //       this.updateChildren(data.applicationIds);
+  //       this.item.securityTag = data.securityTag;
+  //       this.item.enabled = data.enabled;
+  //     }
+  //   );
+  // }
+
+  pullItemData(id: string) {
+    this.item = this.allVms.get(id);
+    this.updateChildList();
+    this.resetRouter();
+    console.log(this.item.children);
+  }
+
+    //if nothing is passed in, we just want to populate item.children
+  updateChildList( newVmIDs? : string[] ) {
+    this.item.children = new DictList<Application>();
+
+    if (newVmIDs instanceof Array) {
+      this.item.childIDs = newVmIDs;
     }
-    this.baseUrlService.getBaseUrl().subscribe(res => {
-      let awsServer = res[0].aws_server;
-      this.setBaseUrl(awsServer);
-      if (this.mode == 'd' || this.mode == 'e') {
-        this.pullVmData(this.vm.id);
-      }
-    });
-  }
 
-  //This checks the current routing info (the end of the current url)
-  //and uses that to set what mode (create/edit/duplicate) the page
-  // ought to be in.
-  // Create new virtue: 'c', Edit virtue: 'e', Duplicate virtue: 'd'
-  setMode() {
-    let url = this.router.routerState.snapshot.url;
-    if (url[0] === '/') {
-      url = url.substr(1);
+    for (let aID of this.item.childIDs) {
+      this.item.children.add(aID, this.allApps.get(aID));
     }
-    // a default, to let things exit smoothlly if anything goes wrong.
-    this.mode = 'c';
-
-    //Parse url, making sure it's set up the expected way.
-    let urlValid = true;
-
-    let route = url.split('/');
-    if (route[0] !== this.parentDomain.substr(1)) { //substr to ignore the leading '/'
-      //something about the routing system has changed.
-      urlValid = false;
-    }
-    if (route[1] === 'create') {
-        this.mode = 'c';
-        this.actionName = "Create";
-    } else if (route[1] === 'edit') {
-        this.mode = 'e';
-        this.actionName = "Edit";
-    } else if (route[1] === 'duplicate') {
-        this.mode = 'd';
-        this.actionName = "Duplicate";
-    } else {
-        //something about the routing system has changed.
-        urlValid = false;
-    }
-    if (!urlValid) {
-      if (this.router.routerState.snapshot.url === this.parentDomain) {
-        // apparently any time an error happens on this page, the system
-        // quits and returns to /virtues, and then for some reason re-calls the
-        // constructor for CreateEditVirtueComponent. Which leads here and then
-        // breaks because the URL is wrong. Strange.
-        return false;
-      }
-      console.log("ERROR: Can't decipher URL; Something about \
-the routing system has changed. Returning to virtues page.\n       Expects something like \
-/virtues/create, /virtues/duplicate/long-machine-key-value, or /virtues/edit/long-machine-key-value,\
- but got: \n       " + this.router.routerState.snapshot.url);
-      // if this gets broken later, it could changed to use this.activatedRoute.routeConfig.path instead
-      this.router.navigate([this.parentDomain]);
-      return false;
-    }
-    return true;
-  }
-
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req);
-  }
-
-  resetRouter() {
-    setTimeout(() => {
-      this.router.navigated = false;
-    }, 1000);
-  }
-
-  refreshData() {
-    setTimeout(() => {
-      this.pullVmData(this.vm.id);
-    }, 300);
-  }
-
-  setBaseUrl(url: string) {
-    this.baseUrl = url;
-  }
-
-  pullVmData(id: string) {
-    this.vmService.getVM(this.baseUrl, id).subscribe(
-      data => {
-        this.vmData = data;
-        this.vm.os = data.os;
-        this.vm.name = data.name;
-        this.updateAppsList(data.applicationIds);
-        this.vm.securityTag = data.securityTag;
-        this.vm.enabled = data.enabled;
-      }
-    );
-  }
-
-  updateAppsList(newAppsList) {
-    // loop through the selected VM list
-    this.vm.apps = new Array<Application>();
-    this.vm.childIDs = newAppsList;
-    for (let appID of newAppsList) {
-      this.appsService.getApp(this.baseUrl, appID).subscribe(
-        appData => {
-          this.vm.apps.push(appData);
-        },
-        error => {
-          console.log(error.message);
-        }
-      );
-    }
-  }
-
-  toggleVmStatus() {
-    this.vm.enabled = !this.vm.enabled;
-  }
-
-  removeApp(id: string, index: number): void {
-    this.vm.apps = this.vm.apps.filter(data => {
-      return data.id !== id;
-    });
-    this.vm.childIDs.splice(index, 1);
+    // this.item.apps = new Array<Application>();
+    // this.item.childIDs = newAppsList;
+    // for (let appID of newAppsList) {
+    //   this.appsService.getApp(this.baseUrl, appID).subscribe(
+    //     appData => {
+    //       this.item.apps.push(appData);
+    //     },
+    //     error => {
+    //       console.log(error.message);
+    //     }
+    //   );
+    // }
   }
 
   activateModal(): void {
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
       width: '750px',
       data: {
-        selectedApps: this.vm.childIDs
+        selectedApps: this.item.childIDs
       }
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
     const apps = dialogRef.componentInstance.addApps.subscribe((dialogAppsList) => {
-      this.updateAppsList(dialogAppsList);
+      this.updateChildList(dialogAppsList);
     });
 
     dialogRef.afterClosed().subscribe(() => {
@@ -204,50 +124,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     });
   }
 
-  createOrUpdate() {
-    if (this.mode === 'd' || this.mode === 'c') {
-      this.buildVM();
-    }
-    else if ( this.mode === 'e') {
-      this.updateThisVM();
-    }
-    else {
-      console.log("Could not save or update - mode not valid. Mode set to: ", this.mode);
-    }
-  }
-
-  updateThisVM() {
-    let body = {
-      'name': this.vm.name,
-      'os': this.vm.os,
-      'loginUser': 'system',
-      'enabled': this.vm.enabled,
-      'applicationIds': this.vm.childIDs,
-      'securityTag': this.vm.securityTag
-    };
-    //TODO put reload and navigation inside subscription
-    this.vmService.updateVM(this.baseUrl, this.vm.id, JSON.stringify(body));
-    this.resetRouter();
-    this.router.navigate([this.parentDomain]);
-  }
-
-  buildVM() {
-    let body = {
-      'name': this.vm.name,
-      'os': this.vm.os,
-      'loginUser': 'system',
-      'enabled': this.vm.enabled,
-      'applicationIds': this.vm.childIDs,
-      'securityTag': this.vm.securityTag
-    };
-    //TODO put reload and navigation inside subscription
-    this.vmService.createVM(this.baseUrl, JSON.stringify(body));
-    this.resetRouter();
-    this.router.navigate([this.parentDomain]);
-  }
-
-  cancel() {
-    this.router.navigate([this.parentDomain]);
-  }
-
+  //Doesn't need to do anything
+  finalizeItem() {}
 }
