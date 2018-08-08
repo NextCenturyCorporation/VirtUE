@@ -87,8 +87,7 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 		case ALLOW:
 			return true;
 		case ASK:
-			System.out.println("wow");
-			dialog.setLoginEventListener(new IDialogListener() {
+			dialog.setDialogListener(new IDialogListener() {
 
 				@Override
 				public void onYes() {
@@ -120,7 +119,6 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	}
 
 	private void addToTemporary(ImmutablePair<String, String> pair, ClipboardPermissionOption tempOption) {
-		System.out.println("adding to cache!");
 		tempCache.put(pair, tempOption);
 	}
 

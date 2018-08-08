@@ -6,6 +6,6 @@ public interface IDataGuardDialog {
 
 	public void show(String source, String destination);
 
-	public void setLoginEventListener(IDialogListener listener);
+	public void setDialogListener(IDialogListener listener);
 
 }

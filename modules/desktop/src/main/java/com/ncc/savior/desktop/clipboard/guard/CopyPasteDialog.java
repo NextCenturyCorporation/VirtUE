@@ -74,9 +74,7 @@ public class CopyPasteDialog implements IDataGuardDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				triggerYesListener();
-				dialog.setVisible(false);
 				dialog.dispose();
-				System.out.println("yes!");
 			}
 
 		});
@@ -86,9 +84,7 @@ public class CopyPasteDialog implements IDataGuardDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				triggerNoListener();
-				dialog.setVisible(false);
 				dialog.dispose();
-				System.out.println("no!");
 			}
 
 		});
@@ -96,15 +92,13 @@ public class CopyPasteDialog implements IDataGuardDialog {
 
 	@Override
 	public void show(String source, String destination) {
-		System.out.println("Showing!");
 		prompt.setText(
 				"Would you like allow copy/pasting for 15 minutes from '" + source + "' to '" + destination + "'?");
 		dialog.setVisible(true);
-		// System.out.println("Showing!");
 	}
 
 	@Override
-	public void setLoginEventListener(IDialogListener listener) {
+	public void setDialogListener(IDialogListener listener) {
 		this.listener = listener;
 	}
 
