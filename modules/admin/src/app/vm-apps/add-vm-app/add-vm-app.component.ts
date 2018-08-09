@@ -1,8 +1,11 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';//'@angular/material';
+
+import { Application } from '../../shared/models/application.model';
+
 
 @Component({
-  selector: 'app-add-vm-app',
+  selector: 'add-vm-app',
   templateUrl: './add-vm-app.component.html'
 })
 export class AddVmAppComponent implements OnInit {

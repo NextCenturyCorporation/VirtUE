@@ -90,11 +90,11 @@ const routes: Routes = [
         path: '',
         component: VmAppsListComponent
       }, {
-        path: 'add',
+        path: 'create',
         component: AddVmAppComponent,
         data: {
           breadcrumbs: [
-            new Breadcrumb('Install New App', '/add')
+            new Breadcrumb('Install New App', '/create')
           ]
         }
       }

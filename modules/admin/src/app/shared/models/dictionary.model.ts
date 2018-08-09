@@ -1,43 +1,39 @@
 export class DictList<T> {
-  private d: Dict<T> = {};
-  private l: T[] = [];
-
-  length: number = 0;
+  private dict: Dict<T> = {};
+  private list: T[] = [];
 
   add(key: string, e: T) {
-    if (key in this.d) {
+    if (key in this.dict) {
       console.log("Key ", key + ": ", e, " already in dict.");
       return;
     }
-    this.d[key] = e;
-    this.l.push(e);
-    this.length += 1;
+    this.dict[key] = e;
+    this.list.push(e);
   }
 
 
   get(key: string) {
-    return this.d[key];
+    return this.dict[key];
   }
 
-  getL(): T[] {
-    return this.l;
+  asList(): T[] {
+    return this.list;
   }
 
   remove(key: string) {
-    if (!(key in this.d)) {
+    if (!(key in this.dict)) {
       return;
     }
-    var index: number = this.l.indexOf(this.d[key], 0);
+    var index: number = this.list.indexOf(this.dict[key], 0);
     if (index > -1) {
-       this.l.splice(index, 1);
+       this.list.splice(index, 1);
     }
-    this.length -= 1;
-    delete this.d[key];
+    delete this.dict[key];
   }
 
   clear() {
-    this.d = null;
-    this.l = null;
+    this.dict = null;
+    this.list = null;
   }
 }
 

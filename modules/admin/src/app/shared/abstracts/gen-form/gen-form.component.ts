@@ -19,6 +19,8 @@ import { Virtue } from '../../models/virtue.model';
 import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
+import { DictList } from '../../models/dictionary.model';
+import { Mode } from '../../enums/mode.enum';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
@@ -28,9 +30,12 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 })
 export abstract class GenericFormComponent extends GenericPageComponent {
 
+  // I have no idea what this does, but it was called "adUserCtrl" in the
+  // original user file, before refactor.
   itemForm: FormControl;
-  activeClass: string;
-  errorMsg: any;
+
+  // activeClass: string;
+  // errorMsg: any;
 
   serviceCreateFunc: (baseUrl: string, jsonBody: string)=> Observable<any>;
   serviceUpdateFunc: (baseUrl: string, id: string, jsonBody: string)=> Observable<any>;
@@ -42,21 +47,28 @@ export abstract class GenericFormComponent extends GenericPageComponent {
   //  New IDs for creation and duplication are generated server-side.
   item: Item;
 
-  mode : string; //"c" if creating new virtue, "e" for editing existing, "d" for creating a duplicate.
+  mode : Mode; //"c" if creating new virtue, "e" for editing existing, "d" for creating a duplicate.
   actionName: string; //for the html - 'Create', 'Edit', or 'Duplicate'
 
   //data on existing virtue (obv. purpose on edit-page, but holds base virtues values when
-  //duplicating, and is empty when creating)
+  //duplicating, and is empty when creating).
+  //Not used any more, might be helpful to hold onto though.
   itemData = {};
 
-  // The set of all apps available across the Savior/VirtUE system.
-  // Not what's installed on any particular vm.
-  appsList = [];
+  //holds the name of the relevant dataset for the class;
+  //  i.e., in virtue.component, it should be set to 'allVms'
+  //Must be set in constructor of derived class.
+  //Can't hold direct link because that reference won't be updated when
+  //the dataset is pulled or re-pulled
+  datasetName: string;
+  childDatasetName: string;
 
-  //not used, for use later in Inter-virtue sttings I think.
-  users: User[];
-  virtues: Virtue[];
+  //holds the class of the item being edited/created.
+  //Must be set in constructor of derived class.
+  classType: any;
 
+  //This was declared in virtues, vms, and apps, but not used anywhere
+  //that I could tell.
   // protected location: Location;
   constructor(
     protected parentDomain: string,
@@ -75,6 +87,8 @@ export abstract class GenericFormComponent extends GenericPageComponent {
 
     this.itemData = {};
 
+   //originally this was only called in addUser's constructor, but in Virtues it was called in create, edit, and duplicate.
+   //I don't know what it does, but it wouldn't persist once you leave the creation screen anyway. So let's make it every time.
     this.itemForm = new FormControl();
 
     // override the route reuse strategy
@@ -93,7 +107,7 @@ export abstract class GenericFormComponent extends GenericPageComponent {
     if (url[0] === '/') {
       url = url.substr(1);
     }
-    this.mode = 'c';
+    this.mode = Mode.CREATE;
 
     //Parse url, making sure it's set up the expected way.
     let urlValid = true;
@@ -104,13 +118,13 @@ export abstract class GenericFormComponent extends GenericPageComponent {
       urlValid = false;
     }
     if (route[1] === 'create') {
-        this.mode = 'c';
+        this.mode = Mode.CREATE;
         this.actionName = "Create";
     } else if (route[1] === 'edit') {
-        this.mode = 'e';
+        this.mode = Mode.EDIT;
         this.actionName = "Edit";
     } else if (route[1] === 'duplicate') {
-        this.mode = 'd';
+        this.mode = Mode.DUPLICATE;
         this.actionName = "Duplicate";
     } else {
         //something about the routing system has changed.
@@ -135,7 +149,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   ngOnInit() {
-    if (this.mode === "e" || this.mode === "d") {//if "d" or "e"
+    if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
       this.item.id = this.activatedRoute.snapshot.params['id'];
     }
     this.baseUrlService.getBaseUrl().subscribe(res => {
@@ -150,30 +164,91 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.resetRouter();
   }
 
-  //This should only be pulled the first time it loads.
-  //perhaps we could update the datasets more often (when? every x seconds?)
-  //but we certainly don't want to update the item, i.e. re-pulling the
-  //original data and overwriting the edits we're trying to make.
-  //wait 500ms before setting item, to give pullDatasets time to get back.
-  //TODO that does not sound safe.
-  //Indeed, I had it set to 300ms and occasionally (rarely), it'd fail.
+  //Data should only be pulled the first time the page loads.
+  //If some sort of refresh button is added, implement the commented out function
+  //and uncomment it.
   pullData() {
-      this.pullDatasets();
-      //do we want to update the duplicate? I don't think so.
-      //But if I change it here I'll need to load the duplicate separately the first time
-      if (this.mode !== "c") {//if "d" or "e"
-        setTimeout(() => {
-          this.pullItemData(this.item.id);
-          console.log(this.item)
-        }, 500);
+    // this.emptyDatasets(); //should empty the datasets built via updateFuncQueue
+    this.pullDatasets();
+
+    if (this.mode !== Mode.CREATE) {//if "d" or "e"
+      this.buildData();
+    }
+  }
+
+  buildData() {
+    //try every 50ms for 3s or until the item is found.
+    //This is called immediately after the request to pull datasets is sent,
+    //and so the item's data won't be available for a short period, usually ~200ms.
+    this.getItem(this.item.id, 50, 0, 3000);
+  }
+
+
+  //call a recursive function which will attempt to load the item repeatedly
+  //for the specified number of milliseconds, waiting brifly between each attempt.
+  //If the timeout is reached,
+  getItem(id: string, delay: number, waited:number, timeout: number) {
+    //try to get item
+    let tempItem = this[this.datasetName].get(id);
+
+    if (tempItem === undefined && timeout > 0) {
+      //wait a bit and try again
+      setTimeout(() => {
+        waited += delay;
+        this.getItem(this.item.id, delay, waited, timeout-delay);
+      }, delay);
+      return;
+    }
+    else if (timeout <= 0) {
+      console.log("Waited:", waited + "ms.");
+      tempItem = this[this.datasetName].get(id);
+      this.setUpItem(tempItem, id);
+      return;
+    }
+
+    console.log("Waited:", waited+ "ms.");
+    this.setUpItem(tempItem);
+  }
+
+  setUpItem(tempItem, id?:string) {
+    if (tempItem){
+      this.item = tempItem;
+      this.updateUnconnectedFields();
+      this.updateChildList();
+      this.resetRouter();
+    }
+    else {
+      console.log("Unable to load data on item with ID:", id);
+      //TODO do something, let the user know it didn't load
+      this.cancel();
+    }
+  }
+
+  //if nothing is passed in, we just want to populate item.children
+  updateChildList( newVmIDs? : string[] ) {
+    this.item.children = new DictList<Item>(); //TODO
+
+    if (newVmIDs instanceof Array) {
+      this.item.childIDs = newVmIDs;
+    }
+
+    for (let childID of this.item.childIDs) {
+      let child: Item = this[this.childDatasetName].get(childID);
+      if (child) {
+        this.item.children.add(childID, child);
       }
+      else {
+        console.log("child ID in item not found in dataset. I.e., if this is for a user, \
+it has a virtue ID attached to it which doesn't exist in the backend data.")
+      }
+    }
   }
 
   createOrUpdate() {
-    if (this.mode === 'd' || this.mode === 'c') {
+    if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
       this.createItem();
     }
-    else if ( this.mode === 'e') {
+    else if ( this.mode === Mode.EDIT) {
       this.updateItem();
     }
     else {
@@ -195,12 +270,12 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
     let body = this.item.getRepresentation();
 
-    console.log("**", body);
+    // console.log("**", body);
     this.virtuesService.updateVirtue(this.baseUrl, this.item.id, JSON.stringify(body)).subscribe(
       data => {
         this.resetRouter();
-        this.refreshData();
-        // this.router.navigate([this.parentDomain]);
+        // this.refreshData();
+        this.router.navigate([this.parentDomain]);
       },
       error => {
         console.log(error);
@@ -235,9 +310,14 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   //   });
   // }
 
-  //this does any last updating before the item being worked on is saved to the backend.
-  //like for virtues, the color needs to be taken from the virtue-settings panel and saved to the item.
-  abstract finalizeItem();
+  //this does class-specific actions, saving or checking various fields
+  //before the item is saved to the backend
+  //like for virtues, the color needs to be taken from the virtue-settings
+  //panel and saved to the item.
+  //returns true iff the item is valid and can be saved.
+  abstract finalizeItem(): boolean;
 
-  abstract pullItemData(id: string);
+  //can be overridden, if anything needs to be done manually upon item load.
+  //currently overridden in virtue
+  updateUnconnectedFields(): void {};
 }

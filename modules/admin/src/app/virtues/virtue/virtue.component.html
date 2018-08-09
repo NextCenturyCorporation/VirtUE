@@ -51,7 +51,7 @@
                   </p>
                 </div>
               </div>
-              <div class="mui-row table-row" *ngFor="let vm of item.children.getL()" appActiveClass>
+              <div class="mui-row table-row" *ngFor="let vm of item.children.asList()" appActiveClass>
                 <div class="table-data mui-col-md-4">
                   <a mat-button (click)="activateModal(vm)">{{ vm.name }}</a>
                   <span class="menu-options" *ngIf="vm.enabled">

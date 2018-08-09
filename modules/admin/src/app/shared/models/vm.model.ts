@@ -13,17 +13,20 @@ import { DictList } from './dictionary.model';
  */
 export class VirtualMachine extends Item {
 
+  id: string;
   os: string;
   templatePath: string;
   loginUser: string;
-  lastModification: string;
+  lastModification: string | Date;
   lastEditor: string;
   securityTag: string;
 
   //convert from whatever form the vm object is in the database.
   constructor(vmObj) {
+    super();
     if (vmObj) {
-      super(vmObj.id, vmObj.name);
+      this.id = vmObj.id;
+      this.name = vmObj.name;
       this.enabled = vmObj.enabled;
       this.childIDs = vmObj.applicationIds;
       this.lastEditor = vmObj.lastEditor;
@@ -32,9 +35,6 @@ export class VirtualMachine extends Item {
       this.securityTag = vmObj.securityTag;
       this.os = vmObj.os;
       this.status = vmObj.enabled ? 'enabled' : 'disabled';
-    }
-    else {
-      super('', '');
     }
 
     this.children = new DictList<Application>();

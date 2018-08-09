@@ -17,9 +17,10 @@ import { DictList } from './dictionary.model';
  */
 export class Virtue extends Item {
 
+  id: string;
   version: string;
   lastEditor: string;
-  lastModification: any;
+  lastModification: string | Date;
   awsTemplateName: string;
   color: string;
 
@@ -27,8 +28,10 @@ export class Virtue extends Item {
 
   //convert from whatever form the virtue object is in the database.
   constructor(virtueObj) {
+    super();
     if (virtueObj) {
-      super(virtueObj.id, virtueObj.name);
+      this.id = virtueObj.id;
+      this.name = virtueObj.name;
       this.childIDs = virtueObj.virtualMachineTemplateIds;
       this.enabled = virtueObj.enabled;
       this.version = virtueObj.version;
@@ -37,9 +40,6 @@ export class Virtue extends Item {
       this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
       this.color = virtueObj.color;
       this.status = virtueObj.enabled ? 'enabled' : 'disabled';
-    }
-    else {
-      super('', '');
     }
 
     if (! this.color) {

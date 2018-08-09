@@ -60,7 +60,7 @@ export abstract class GenericPageComponent {
     this.allVms = new DictList<VirtualMachine>();
     this.allApps = new DictList<Application>();
 
-    //apparently we want to overwrite this on all pages
+    //TODO what is this?
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
@@ -111,6 +111,12 @@ export abstract class GenericPageComponent {
     let updateQueue = Object.assign([], this.updateFuncQueue);
     let completedUpdates = [];
 
+    //Every page should need to request some sort of data.
+    if (updateQueue.length === 0 || !(updateQueue[0] instanceof Function)) {
+      console.log("No datasets requested in updateQueue.");
+      return;
+    }
+
     // Pass in 'this' as scope, because 'this' within the called functions
     // refers to the updateQueue list.
     updateQueue[0](this, updateQueue, completedUpdates);
@@ -136,7 +142,7 @@ export abstract class GenericPageComponent {
           updateQueue[0](scope, updateQueue, completedUpdates);
         }
         else {
-          scope.items = scope.allApps.getL();
+          scope.items = scope.allApps.asList();
         }
       });
   }
@@ -166,7 +172,7 @@ export abstract class GenericPageComponent {
         updateQueue[0](scope, updateQueue, completedUpdates);
       }
       else {
-        scope.items = scope.allVms.getL();
+        scope.items = scope.allVms.asList();
       }
     });
   }
@@ -202,7 +208,7 @@ export abstract class GenericPageComponent {
         updateQueue[0](scope, updateQueue, completedUpdates);
       }
       else {
-        scope.items = scope.allVirtues.getL();
+        scope.items = scope.allVirtues.asList();
       }
     });
   }
@@ -236,7 +242,7 @@ export abstract class GenericPageComponent {
         updateQueue[0](scope, updateQueue, completedUpdates);
       }
       else {
-        scope.items = scope.allUsers.getL();
+        scope.items = scope.allUsers.asList();
       }
     });
   }
@@ -262,13 +268,12 @@ export abstract class GenericPageComponent {
   }
 
   getChildrenListHTMLstring(item: Item): string {
-    // console.log("here", item.childNamesHtml);
     return item.childNamesHtml;
   }
 
   //I don't know what this does, but it was in almost every file before the refactor.
   //Doesn't seem to break anything when removed though
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req);
-  }
+  // intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  //   return next.handle(req);
+  // }
 }

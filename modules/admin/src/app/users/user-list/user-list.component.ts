@@ -42,7 +42,7 @@ export class UserListComponent extends GeneralListComponent {
     //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     //See note next to a line containing "mui-col-md-12" in gen-list.component.html
     this.colData = [
-      {name: 'username', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'name', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
       {name: 'roles', prettyName: 'Authorized Roles', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.formatRoles},
       {name: 'virtues', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildrenListHTMLstring},
       {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}

@@ -13,15 +13,11 @@ export abstract class Item {
   modDate: string;
 
 
-  constructor(id: string, name: string) {
-    this.id = id;
-    this.setName(name);
+  constructor() {
     this.status = "enabled";
     this.enabled = true;
     this.childIDs = [];
     this.modDate = ''
-    // TODO
-    // this.children = new DictList<Item>();
 
     this.childNamesHtml = "";
   }
@@ -32,7 +28,7 @@ export abstract class Item {
   }
 
   getSpecifiedItemsHTML(desiredIDs: string[], allItems: DictList<Item>): string {
-    if (desiredIDs.length < 1 || allItems.length < 1) {
+    if (desiredIDs.length < 1 || allItems.asList().length < 1) {
       return "";
     }
     let names: string[] = [];
@@ -43,6 +39,7 @@ export abstract class Item {
 
       //NOTE if enabled is undefined, !...enabled evaluates to true, while
       //...enabled === false evaluates to false. We need the latter.
+      //enabled should never be undefined though
       if ( allItems.get(id).enabled === false ) {
         line += "  (disabled)";
       }
@@ -71,10 +68,6 @@ export abstract class Item {
     return listString;
   }
 
-  setName(s: string): void {
-    this.name = s;
-  }
-
   //Overriden by User
   getName(): string {
     return this.name;
@@ -90,5 +83,9 @@ export abstract class Item {
   removeChild(id: string, index: number): void {
     this.children.remove(id);
     this.childIDs.splice(index, 1);
+  }
+
+  toString() {
+    return "what?";
   }
 }

@@ -1,233 +1,64 @@
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
-
 import { Observable } from 'rxjs/Observable';
 
-import { User } from '../../shared/models/user.model';
-import { Virtue } from '../../shared/models/virtue.model';
 import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
+import { VirtualMachineService } from '../../shared/services/vm.service';
+import { UsersService } from '../../shared/services/users.service';
 
-import { MatDialog } from '@angular/material';
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
+
+import { Item } from '../../shared/models/item.model';
+import { User } from '../../shared/models/user.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
+import { Virtue } from '../../shared/models/virtue.model';
+import { DictList } from '../../shared/models/dictionary.model';
+
+import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.component';
+
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
-  providers: [ ApplicationsService, BaseUrlService, UsersService, VirtuesService ]
+  providers: [ BaseUrlService, ApplicationsService, VirtualMachineService, VirtuesService, UsersService ]
 })
 
-export class UserComponent implements OnInit {
+export class UserComponent extends GenericFormComponent {
 
-  baseUrl: string;
+  roleUser: boolean;
+  roleAdmin: boolean;
+
   submitBtn: any;
   fullImagePath: string;
 
-  item: User;
-  userData: string;
-
-  mode: string;
-  actionName: string;
-
-  parentDomain: string;
-
-  allVirtues = [];
-  // allVirtues: DictList<Virtue>;
-
-  allApps = [];
-  adUserCtrl: FormControl;
-
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private router: Router,
-    private appsService: ApplicationsService,
-    private baseUrlService: BaseUrlService,
-    private usersService: UsersService,
-    private virtuesService: VirtuesService,
-    public dialog: MatDialog
+    activatedRoute: ActivatedRoute,
+    router: Router,
+    baseUrlService: BaseUrlService,
+    usersService: UsersService,
+    virtuesService: VirtuesService,
+    vmService: VirtualMachineService,
+    appsService: ApplicationsService,
+    dialog: MatDialog
   ) {
-    this.setMode();
+    super('/users', activatedRoute, router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+
     this.item = new User(undefined);
 
-     //maybe? originally this was only called in addUser's constructor, but in Virtues it was called in create, edit, and duplicate.
-     //I don't know what it does, but it wouldn't persist once you leave the creation screen anyway. So let's make it every time.
-    this.adUserCtrl = new FormControl();
+    this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
 
-    this.parentDomain = "/users";
-    // override the route reuse strategy
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+    this.serviceCreateFunc = this.usersService.createUser;
+    this.serviceUpdateFunc = this.usersService.updateUser;
 
-    // this.allVirtues = new DictList<Virtue>();
-  }
+    this.datasetName = 'allUsers';
+    this.childDatasetName = 'allVirtues';
 
-  ngOnInit() {
-    if (this.mode === "e" || this.mode === "d") {//if "d" or "e"
-      this.item.username = this.activatedRoute.snapshot.params['id'];
-    }
-
-    this.baseUrlService.getBaseUrl().subscribe(data => {
-      let url = data[0].aws_server;
-      this.setBaseUrl(url);
-      this.getAllVirtues();
-      this.getAllApps();
-    });
-
-    if (this.mode === "e" || this.mode === "d") {
-      this.refreshData();
-    }
-  }
-
-  //I'm not sure this gets used anywhere.
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    console.log(req);
-    return next.handle(req);
-  }
-
-  //This checks the current routing info (the end of the current url)
-  //and uses that to set what mode (create/edit/duplicate) the page
-  // ought to be in.
-  // Create new user: 'c', Edit user: 'e', Duplicate user: 'd'
-  setMode() {
-    // console.log(this.router.routerState.snapshot.url);
-    let url = this.router.routerState.snapshot.url;
-    if (url[0] === '/') {
-      url = url.substr(1);
-    }
-    this.mode = 'c';
-
-    //Parse url, making sure it's set up the expected way.
-    let urlValid = true;
-
-    let route = url.split('/');
-    if (route[0] !== 'users') {
-      //something about the routing system has changed.
-      urlValid = false;
-    }
-    if (route[1] === 'create') {
-        this.mode = 'c';
-        this.actionName = "Create";
-    } else if (route[1] === 'edit') {
-        this.mode = 'e';
-        this.actionName = "Edit";
-    } else if (route[1] === 'duplicate') {
-        this.mode = 'd';
-        this.actionName = "Duplicate";
-    } else {
-        //something about the routing system has changed.
-        urlValid = false;
-    }
-    if (!urlValid) {
-      if (this.router.routerState.snapshot.url === this.parentDomain) {
-        // apparently any time an error happens on this page, the system
-        // quits and returns to /virtues, and then for some reason re-calls the
-        // constructor for CreateEditVirtueComponent. Which leads here and then
-        // breaks because the URL is wrong. Strange.
-        return false;
-      }
-      console.log("ERROR: Can't decipher URL; Something about \
-the routing system has changed. Returning to virtues page.\n       Expects something like \
-/users/create, /users/duplicate/username, or /users/edit/username,\
- but got: \n       " + this.router.routerState.snapshot.url);
-      this.router.navigate([this.parentDomain]);
-      return false;
-    }
-    return true;
-  }
-
-  resetRouter() {
-    setTimeout(() => {
-      this.router.navigated = false;
-    }, 1000);
-  }
-
-  refreshData() {
-    setTimeout(() => {
-      this.getUserData(this.item.username);
-    }, 200);
-  }
-
-  setBaseUrl( url: string ) {
-    this.baseUrl = url;
-  }
-
-  getUserData(username: string) {
-    this.usersService.getUser(this.baseUrl, username).subscribe(uData => {
-      this.userData = uData;
-      this.item = new User(uData);
-      this.updateVirtueList(uData.virtueTemplateIds);
-    });
-  }
-
-  selectedRole(role: string) {
-    if (this.item.roles.length > 0) {
-      for (let sel of this.item.roles) {
-        if (sel === role) {
-          return true;
-        }
-      }
-    } else {
-      return false;
-    }
-  }
-
-  getAllVirtues() {
-    if (this.baseUrl !== null) {
-      this.virtuesService.getVirtues(this.baseUrl).subscribe(virts => {
-        this.allVirtues = virts;
-      });
-    }
-  }
-
-  getAllApps() {
-    if (this.baseUrl !== null) {
-      this.appsService.getAppsList(this.baseUrl).subscribe(apps => {
-        this.allApps = apps;
-      });
-    }
-  }
-
-  generateAppsListHTML(virtue: any) {
-    let appsString = virtue.applicationIds.toString();
-    let appList: any;
-    let appInfo: any;
-    let appNames: string = '';
-    let i: number = 0;
-    appList = appsString.split(',');
-    for (let id of appList) {
-      i++;
-      appInfo = this.allApps.filter(data => data.id === id)
-        .map(app => app.name);
-      appNames = appNames + `<li>${appInfo.toString()}</li>`;
-    }
-    return appNames;
-  }
-
-  updateVirtueList(newVirtueIDs: any) {
-    this.item.childIDs = newVirtueIDs;
-    // this.item.children = new DictList<Virtue>();
-    this.item.virtues = new Array<Virtue>();
-      for (let vID of newVirtueIDs) {
-        // this.item.children.add(vID, this.allVirtues.get(vID));
-        for (let virtue of this.allVirtues) {
-          if (vID === virtue.id) {
-            this.item.virtues.push(virtue);
-            break;
-          }
-        }
-      }
-  }
-
-  removeVirtue(id: string, index: number): void {
-    this.item.virtues = this.item.virtues.filter(virt => {
-      return virt.id !== id;
-    });
-    this.item.childIDs.splice(index, 1);
   }
 
   activateModal(mode: string): void {
@@ -245,7 +76,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       height: dialogHeight + 'px',
       width: dialogWidth + 'px',
       data: {
-        id: this.item.username,
+        id: this.item.getName(),
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath,
@@ -255,42 +86,25 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     });
 
     let virtueList = dialogRef.componentInstance.addVirtues.subscribe((selectedVirtues) => {
-      this.updateVirtueList(selectedVirtues);
+      this.updateChildList(selectedVirtues);
     });
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
   }
 
-  updateThisUser(roleUser: boolean, roleAdmin: boolean) {
-    let roles = [];
-    if (roleUser) {
-      roles.push('ROLE_USER');
+  //Doesn't need to do anything
+  finalizeItem():boolean {
+    this.item['roles'] = [];
+    if (this.roleUser) {
+      this.item['roles'].push('ROLE_USER');
     }
-    if (roleAdmin) {
-      roles.push('ROLE_ADMIN');
+    if (this.roleAdmin) {
+      this.item['roles'].push('ROLE_ADMIN');
     }
 
-    if (!this.item.username) {
+    if (!this.item['username']) {
       return confirm("You need to enter a username.");
     }
-
-    let body = {
-      'username': this.item.username,
-      'authorities': roles,
-      'virtueTemplateIds': this.item.childIDs,
-      'enabled': this.item.enabled
-    };
-
-    this.usersService.updateUser(this.baseUrl, this.item.username, JSON.stringify(body)).subscribe(
-      error => {
-        console.log(error);
-      });
-    this.resetRouter();
-    this.router.navigate([this.parentDomain]);
-  }
-
-  toggleUserStatus() {
-    this.item.enabled = !this.item.enabled;
   }
 }

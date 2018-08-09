@@ -33,7 +33,6 @@ export class VmListComponent extends GeneralListComponent {
     appsService: ApplicationsService,
     dialog: MatDialog
   ) {
-    console.log(baseUrlService);
     super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
 
     //Note: colWidths of all columns must add to exactly 12.

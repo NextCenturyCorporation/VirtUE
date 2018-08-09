@@ -6,31 +6,38 @@
 
   <div id="content-main">
     <div id="content">
-      <div class="mui-container-fluid">
+
+      <div *ngIf="showSortingAndEditOptions" >
+
         <!-- if there are no items, show this message -->
-        <div *ngIf="items.length < 1" class="mui-row margin-top-10">
-          <div class="mui-col-md-12 padding-left-0">
-            <p class="no-data-message">
-              {{noDataMessage}}
-            </p>
+        <div *ngIf="items.length < 1" class="mui-container-fluid">
+          <div class="mui-row margin-top-10">
+            <div class="mui-col-md-12 padding-left-0">
+              <p class="no-data-message">
+                {{noDataMessage}}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- if there are items, show this list -->
-      <div *ngIf="items.length > 0" class="mui-container-fluid">
-        <div class="mui-row">
-          <!-- Note: angular mui table requires 12 column-widths of space.
-               Changing below value doesn't appear to have an effect. -->
-          <div class="mui-col-md-12 padding-left-0 filters">
-            <span *ngIf="filterValue === '*'">All {{pluralItem}}</span>
-            <a *ngIf="filterValue !== '*'"  (click)="filterList('*')">All {{pluralItem}}</a> |
-            <span *ngIf="filterValue === 'enabled'">Enabled {{pluralItem}}</span>
-            <a *ngIf="filterValue !== 'enabled'" (click)="filterList('enabled')">Enabled {{pluralItem}}</a> |
-            <span *ngIf="filterValue === 'disabled'">Disabled {{pluralItem}}</span>
-            <a *ngIf="filterValue !== 'disabled'" (click)="filterList('disabled')">Disabled {{pluralItem}}</a>
+
+        <!-- if there are items, show this list -->
+        <div *ngIf="items.length > 0" class="mui-container-fluid">
+          <div class="mui-row">
+            <!-- Note: angular mui table requires 12 column-widths of space.
+            Changing below value doesn't appear to have an effect. -->
+            <div class="mui-col-md-12 padding-left-0 filters">
+              <span *ngIf="filterValue === '*'">All {{pluralItem}}</span>
+              <a *ngIf="filterValue !== '*'"  (click)="filterList('*')">All {{pluralItem}}</a> |
+              <span *ngIf="filterValue === 'enabled'">Enabled {{pluralItem}}</span>
+              <a *ngIf="filterValue !== 'enabled'" (click)="filterList('enabled')">Enabled {{pluralItem}}</a> |
+              <span *ngIf="filterValue === 'disabled'">Disabled {{pluralItem}}</span>
+              <a *ngIf="filterValue !== 'disabled'" (click)="filterList('disabled')">Disabled {{pluralItem}}</a>
+            </div>
           </div>
         </div>
+
       </div>
+
 
       <div class="mui-container-fluid data-list">
         <div class="mui-row table-header-group">
@@ -54,10 +61,9 @@
 
           <div *ngFor="let column of colData; let idx=index"
               class="table-data mui-col-md-{{column.colWidth}} transparent">
-
             <div *ngIf="idx === 0" class="mini-menu">
               <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[column.name] }}</a>
-              <span class="menu-options">
+              <span *ngIf="showSortingAndEditOptions" class="menu-options">
                 <a *ngIf="i.enabled === false" (click)="toggleItemStatus(i)">Enable</a>
                 <a *ngIf="i.enabled === false"> | </a>
                 <a *ngIf="i.enabled === true"  (click)="toggleItemStatus(i)">Disable</a>
@@ -68,8 +74,15 @@
                 <a> | </a>
                 <a (click)="openDialog('delete', i)">Delete</a>
               </span>
+              <span *ngIf="!showSortingAndEditOptions" class="menu-options">
+                <a (click)="openDialog('remove', i)">Remove</a>
+              </span>
             </div>
             <div *ngIf="column.isList && idx !== 0 ">
+              <!-- The returned html is a bunch of <li>s inside a <ul>,
+                  so there there end up being two layers of <ul>.
+                  This makes the bullets empty, which looks a little better
+                  than filled in. -->
               <ul [innerHTML]="column.formatValue(i)"></ul>
             </div>
             <div *ngIf="!column.isList && idx !== 0 ">

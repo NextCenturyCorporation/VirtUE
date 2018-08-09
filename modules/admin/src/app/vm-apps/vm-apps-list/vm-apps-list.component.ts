@@ -63,6 +63,8 @@ export class VmAppsListComponent extends GeneralListComponent {
     this.domain = '/applications';
 
     this.updateFuncQueue = [this.pullApps];
+
+    this.showSortingAndEditOptions = false;
   }
 
   openAppsDialog(): void {

@@ -11,15 +11,14 @@ import { DictList } from './dictionary.model';
  */
 export class User extends Item {
 
-  username: string;
-  virtues: Virtue[];
   roles: string[];
 
 
   //convert from whatever form the user object is in the database.
   constructor(userObj) {
+    super();
     if (userObj) {
-      super('', userObj.username);
+      this.name = userObj.username;
       if (!userObj.authorities) {
         this.roles = [];
       }
@@ -38,36 +37,24 @@ export class User extends Item {
       this.status = userObj.enabled ? 'enabled' : 'disabled';
     }
     else {
-      super('', '');
-      this.childIDs = [];
       this.roles = [];
     }
 
     this.children = new DictList<Virtue>();
-    this.virtues = [];
   }
 
-  setName(s: string) {
-    this.username = s;
-  }
-
-  //Overrides Item
-  getName(): string {
-    return this.username;
-  }
 
   //Overrides Item
   getID(): string {
-    return this.username;
+    return this.name;
   }
 
   getRepresentation(): {} {
     return {
-      // 'name': this.name,
-      // 'version': this.version,
-      // 'enabled': this.enabled,
-      // 'color' : this.color,
-      // 'virtualMachineTemplateIds': this.childIDs
+      'username': this.name,
+      'authorities': this.roles,
+      'virtueTemplateIds': this.childIDs,
+      'enabled': this.enabled
     };
   }
 }

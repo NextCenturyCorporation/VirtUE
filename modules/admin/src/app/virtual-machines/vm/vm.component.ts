@@ -58,53 +58,11 @@ export class VmComponent extends GenericFormComponent {
 
     this.serviceCreateFunc = this.vmService.createVM;
     this.serviceUpdateFunc = this.vmService.updateVM;
+
+    this.datasetName = 'allVms';
+    this.childDatasetName = 'allApps';
   }
 
-  // pullData(id: string) {
-  //
-  //   this.vmService.getVM(this.baseUrl, id).subscribe(
-  //     data => {
-  //       this.itemData = data;
-  //       this.item.os = data.os;
-  //       this.item.name = data.name;
-  //       this.updateChildren(data.applicationIds);
-  //       this.item.securityTag = data.securityTag;
-  //       this.item.enabled = data.enabled;
-  //     }
-  //   );
-  // }
-
-  pullItemData(id: string) {
-    this.item = this.allVms.get(id);
-    this.updateChildList();
-    this.resetRouter();
-    console.log(this.item.children);
-  }
-
-    //if nothing is passed in, we just want to populate item.children
-  updateChildList( newVmIDs? : string[] ) {
-    this.item.children = new DictList<Application>();
-
-    if (newVmIDs instanceof Array) {
-      this.item.childIDs = newVmIDs;
-    }
-
-    for (let aID of this.item.childIDs) {
-      this.item.children.add(aID, this.allApps.get(aID));
-    }
-    // this.item.apps = new Array<Application>();
-    // this.item.childIDs = newAppsList;
-    // for (let appID of newAppsList) {
-    //   this.appsService.getApp(this.baseUrl, appID).subscribe(
-    //     appData => {
-    //       this.item.apps.push(appData);
-    //     },
-    //     error => {
-    //       console.log(error.message);
-    //     }
-    //   );
-    // }
-  }
 
   activateModal(): void {
     let dialogRef = this.dialog.open(VmAppsModalComponent, {
@@ -124,6 +82,8 @@ export class VmComponent extends GenericFormComponent {
     });
   }
 
-  //Doesn't need to do anything
-  finalizeItem() {}
+  //Nothing needs to be done atm. Should check that a name has been entered though.
+  finalizeItem(): boolean {
+    return true;
+  }
 }

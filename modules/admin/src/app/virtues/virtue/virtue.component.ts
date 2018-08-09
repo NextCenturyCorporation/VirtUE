@@ -19,6 +19,7 @@ import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { DictList } from '../../shared/models/dictionary.model';
+import { Mode } from '../../shared/enums/mode.enum';
 
 import { VirtueSettingsComponent } from '../virtue-settings/virtue-settings.component';
 
@@ -34,8 +35,6 @@ import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.c
 
 export class VirtueComponent extends GenericFormComponent {
   @ViewChild(VirtueSettingsComponent) settingsPane: VirtueSettingsComponent;
-
-  errorMsg: any;
 
   constructor(
     activatedRoute: ActivatedRoute,
@@ -57,62 +56,20 @@ export class VirtueComponent extends GenericFormComponent {
 
     this.serviceCreateFunc = this.virtuesService.createVirtue;
     this.serviceUpdateFunc = this.virtuesService.updateVirtue;
+
+    this.datasetName = 'allVirtues';
+    this.childDatasetName = 'allVms';
   }
 
   //This should only stay until the data loads, if the data has a color.
   defaultColor() {
-    return this.mode === "c" ? "#cccccc": "#ffffff"
+    return this.mode === Mode.CREATE ? "#cccccc": "#ffffff"
   }
 
-  //if nothing is passed in, we just want to populate item.children
-  updateChildList( newVmIDs? : string[] ) {
-    this.item.children = new DictList<Virtue>();
-
-    if (newVmIDs instanceof Array) {
-      this.item.childIDs = newVmIDs;
-    }
-
-    for (let vmID of this.item.childIDs) {
-      this.item.children.add(vmID, this.allVms.get(vmID));
-    }
-  }
-
-  pullItemData(id: string) {
-    this.item = this.allVirtues.get(id);
-    this.updateChildList();
-    //I don't like this cast but I can't find a better place to set the color
+  //there's probably a better way to do this
+  updateUnconnectedFields() {
     this.settingsPane.setColor((this.item as Virtue).color);
-    this.resetRouter();
-    // this.virtuesService.getVirtue(this.baseUrl, id).subscribe(vData => {
-    //   if (! vData.color) {
-    //     vData.color = vData.enabled ? "#BB00AA" : "#00DD33"
-    //   }
-    //   if (! vData.virtualMachineTemplateIds) {
-    //     vData.virtualMachineTemplateIds = [];
-    //   }
-    //   if (! vData.version) {
-    //     vData.version = '1.0';
-    //   }
-    //   this.itemData = vData;
-    //   this.item = new Virtue(vData);
-    //   this.settingsPane.setColor(vData.color);
-    //   this.updateChildList(vData.virtualMachineTemplateIds);
-    // });
   }
-
-  getAppsList() {
-    this.appsService.getAppsList(this.baseUrl).subscribe(data => {
-      this.appsList = data;
-    });
-  }
-
-  getAppName(id: string) {
-    const app = this.appsList.filter(data =>  id === data.id);
-    if (id !== null) {
-      return app[0].name;
-    }
-  }
-
 
   activateModal(): void {
 
@@ -133,8 +90,10 @@ export class VirtueComponent extends GenericFormComponent {
     // });
   }
 
-  finalizeItem() {
+
+  finalizeItem(): boolean {
     this.item['color'] = this.settingsPane.getColor();
+    return true;
   }
 
   // deleteVirtue(id): void {

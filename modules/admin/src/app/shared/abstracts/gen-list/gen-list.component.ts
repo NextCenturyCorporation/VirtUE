@@ -26,7 +26,7 @@ import { VirtualMachineService } from '../../services/vm.service';
 import { ApplicationsService } from '../../services/applications.service';
 
 @Component({
-  selector: 'app-gen-list',
+  selector: 'gen-list',
   templateUrl: './gen-list.component.html',
   providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
 })
@@ -51,6 +51,8 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
   sortColumn: Column;
   filterValue: string = '*';
   sortDirection: string = 'asc';
+
+  showSortingAndEditOptions:boolean = true;
 
   // protected router: Router;
   // protected baseUrlService: BaseUrlService;
