@@ -67,14 +67,12 @@ export class UserListComponent extends GeneralListComponent {
   // Overrides parent
   toggleItemStatus(u: User) {
     console.log(u);
-    let newStatus = u.enabled ? 'disable': 'enable';
     if (u.getName().toUpperCase() === "ADMIN") {
       this.openDialog('disable', u);
       //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
       return;
     }
-    console.log("trying to", newStatus, u.getName());
-    this.usersService.setUserStatus(this.baseUrl, u.getID(), newStatus).subscribe();
+    this.usersService.setUserStatus(this.baseUrl, u.getID(), !u.enabled).subscribe();
 
     this.refreshData();
   }
