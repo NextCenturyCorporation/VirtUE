@@ -2,11 +2,10 @@ package com.ncc.savior.virtueadmin;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Before;
@@ -20,7 +19,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
-
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -41,17 +39,40 @@ public class PermissionsIT {
 	}
 	
 	@Test
-	public void permissionsEndpointTest() {
+	public void permissionsEndpointTest() {	
+		// get all computed permissions
+		List<ClipboardPermission> computedPermissions = given().port(randomServerPort).when().get("/admin/permissions").then().extract()
+				.jsonPath().getList("", ClipboardPermission.class);
+		assertThat(computedPermissions).isNotNull();
+		
+		ClipboardPermission permission = computedPermissions.get(0);
+		String sourceId = permission.getSourceGroupId();
+		String destinationId = permission.getDestinationGroupId();
+		
+		// set permission
+		String setPermission = given().port(randomServerPort).when().body("ALLOW")
+				.post("/admin/permission/" + sourceId + "/" + destinationId).then().extract().asString();
+		assertThat(setPermission).isNotNull();
 		
 		// get all raw permissions
-		List<ClipboardPermission> rawPermissions = given().port(randomServerPort).when().get("/data/permissions/raw").then().extract()
+		List<ClipboardPermission> rawPermissions = given().port(randomServerPort).when().get("/admin/permissions?raw=true").then().extract()
 				.jsonPath().getList("", ClipboardPermission.class);
 		assertThat(rawPermissions).isNotNull();
 		
-		// get all computed permissions
-		Map<Pair, ClipboardPermissionOption> computedPermissions = given().port(randomServerPort).when().get("/data/permissions/computed").then().extract()
-				.jsonPath().getMap("", Pair.class, ClipboardPermissionOption.class);
-		assertThat(computedPermissions).isNotNull();
+		// check set permission
+		ClipboardPermission perm = given().port(randomServerPort).when().get("/admin/permission/" + sourceId + "/" + destinationId).then().extract()
+				.as(ClipboardPermission.class);
+		assertThat(perm).isNotNull();
+		assertTrue(perm.getPermission() == ClipboardPermissionOption.ALLOW);
+		
+		// delete
+		given().port(randomServerPort).when().delete("/admin/permission/" + sourceId + "/" + destinationId);
+		
+		// check deleted permission
+		ClipboardPermission deletedPermission = given().port(randomServerPort).when().get("/admin/permission/" + sourceId + "/" + destinationId).then().extract()
+				.as(ClipboardPermission.class);
+		assertThat(deletedPermission).isNotNull();
+		assertTrue(deletedPermission.getPermission() == ClipboardPermissionOption.DENY);
 	}
 	
 }
