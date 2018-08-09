@@ -91,12 +91,12 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 
 				@Override
 				public void onYes() {
-					addToTemporary(pair, ClipboardPermissionOption.ALLOW);
+					addToTemporaryCache(pair, ClipboardPermissionOption.ALLOW);
 				}
 
 				@Override
 				public void onNo() {
-					addToTemporary(pair, ClipboardPermissionOption.DENY);
+					addToTemporaryCache(pair, ClipboardPermissionOption.DENY);
 				}
 
 			});
@@ -118,7 +118,7 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 		return displayName;
 	}
 
-	private void addToTemporary(ImmutablePair<String, String> pair, ClipboardPermissionOption tempOption) {
+	private void addToTemporaryCache(ImmutablePair<String, String> pair, ClipboardPermissionOption tempOption) {
 		tempCache.put(pair, tempOption);
 	}
 

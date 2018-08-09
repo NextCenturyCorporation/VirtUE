@@ -92,7 +92,7 @@ public class CopyPasteDialog implements IDataGuardDialog {
 	@Override
 	public void show(String source, String destination) {
 		prompt.setText(
-				"Would you like allow copy/pasting for 15 minutes from '" + source + "' to '" + destination + "'?");
+				"Would you like to allow copy/pasting for 15 minutes from '" + source + "' to '" + destination + "'?");
 		dialog.setVisible(true);
 	}
 
