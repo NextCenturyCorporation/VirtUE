@@ -43,6 +43,9 @@ public class LoginPage {
 	private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
 
 	private JPanel container;
+	private JTextField usernameField;
+	private JPasswordField passwordField;
+	private JLabel errorMessage;
 	private AuthorizationService authService;
 	private Set<ILoginEventListener> loginListeners;
 
@@ -114,7 +117,7 @@ public class LoginPage {
 		gbc_usernameLabel.gridy = 0;
 		usernameContainer.add(usernameLabel, gbc_usernameLabel);
 
-		JTextField usernameField = new JTextField();
+		usernameField = new JTextField();
 		usernameField.setHorizontalAlignment(SwingConstants.CENTER);
 		usernameField.setFont(new Font("Arial", Font.PLAIN, 18));
 		GridBagConstraints gbc_usernameField = new GridBagConstraints();
@@ -125,7 +128,7 @@ public class LoginPage {
 		usernameField.setPreferredSize(new Dimension(160, 30));
 		usernameField.setMinimumSize(new Dimension(160, 30));
 
-		JLabel errorMessage = new JLabel("Please enter a valid username");
+		errorMessage = new JLabel("Please enter a valid username");
 		errorMessage.setFont(new Font("Roboto", Font.PLAIN, 15));
 		errorMessage.setForeground(Color.DARK_GRAY);
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -152,7 +155,7 @@ public class LoginPage {
 		gbc_passwordLabel.gridy = 0;
 		passwordContainer.add(passwordLabel, gbc_passwordLabel);
 
-		JPasswordField passwordField = new JPasswordField();
+		passwordField = new JPasswordField();
 		passwordField.setHorizontalAlignment(SwingConstants.CENTER);
 		passwordField.setColumns(12);
 		passwordField.setPreferredSize(new Dimension(160, 30));
@@ -203,20 +206,7 @@ public class LoginPage {
 		loginContainer.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				String username = usernameField.getText();
-				String password1 = new String(passwordField.getPassword());
-
-				if (username.equals("")) {
-					errorMessage.setForeground(Color.RED);
-					container.validate();
-					container.repaint();
-				} else {
-					try {
-						doLogin(domain, username, password1);
-					} catch (IOException e) {
-						logger.error("Login error");
-					}
-				}
+				login(domain);
 			}
 		});
 
@@ -224,20 +214,7 @@ public class LoginPage {
 			@Override
 			public void keyReleased(KeyEvent event) {
 				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-					String username = usernameField.getText();
-					String password1 = new String(passwordField.getPassword());
-
-					if (username.equals("")) {
-						errorMessage.setForeground(Color.RED);
-						container.validate();
-						container.repaint();
-					} else {
-						try {
-							doLogin(domain, username, password1);
-						} catch (IOException e) {
-							logger.error("Login error");
-						}
-					}
+					login(domain);
 				}
 			}
 		});
@@ -246,23 +223,27 @@ public class LoginPage {
 			@Override
 			public void keyReleased(KeyEvent event) {
 				if (event.getKeyCode() == KeyEvent.VK_ENTER) {
-					String username = usernameField.getText();
-					String password1 = new String(passwordField.getPassword());
-
-					if (username.equals("")) {
-						errorMessage.setForeground(Color.RED);
-						container.validate();
-						container.repaint();
-					} else {
-						try {
-							doLogin(domain, username, password1);
-						} catch (IOException e) {
-							logger.error("Login error");
-						}
-					}
+					login(domain);
 				}
 			}
 		});
+	}
+
+	public void login(String domain) {
+		String username = usernameField.getText();
+		String password = new String(passwordField.getPassword());
+
+		if (username.equals("")) {
+			errorMessage.setForeground(Color.RED);
+			container.validate();
+			container.repaint();
+		} else {
+			try {
+				doLogin(domain, username, password);
+			} catch (IOException e) {
+				logger.error("Login error");
+			}
+		}
 	}
 
 	private void doLogin(String domain, String username, String password) throws IOException {
