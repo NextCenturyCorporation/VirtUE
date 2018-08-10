@@ -17,8 +17,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,11 +29,9 @@ import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -54,10 +50,12 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
+import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
@@ -152,6 +150,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private JPanel loadingContainer;
 
+	private AboutDialog aboutDialog;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			boolean useColors, String style) {
 		this.authService = authService;
@@ -175,57 +175,28 @@ public class Sidebar implements VirtueChangeHandler {
 
 		colorList = loadColors();
 		colorItr = colorList.iterator();
+		this.aboutDialog = new AboutDialog();
 		setupComparators();
 		setupLoadingGif();
-	}
-
-	private void setupLoadingGif() {
-		this.loadingContainer = new JPanel();
-		loadingContainer.setLayout(new BorderLayout());
-		JLabel gifLabel = new JLabel();
-		gifLabel.setIcon(loadingIcon);
-		gifLabel.setVerticalAlignment(SwingConstants.CENTER);
-		gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		loadingContainer.add(gifLabel, BorderLayout.CENTER);
-	}
-
-	private ArrayList<Color> loadColors() {
-		ArrayList<Color> colors = new ArrayList<Color>();
-		colors.add(new Color(189, 0, 38));
-		colors.add(new Color(227, 26, 28));
-
-		colors.add(new Color(34, 94, 168));
-		colors.add(new Color(29, 145, 192));
-
-		colors.add(new Color(35, 132, 67));
-		colors.add(new Color(65, 171, 93));
-
-		colors.add(new Color(204, 76, 2));
-		colors.add(new Color(236, 112, 20));
 
 
-		colors.add(new Color(136, 65, 157));
-		colors.add(new Color(140, 107, 177));
+		AbstractVirtueView.addUpdateListener(new IUpdateListener() {
 
-		colors.add(new Color(206, 18, 86));
-		colors.add(new Color(231, 41, 138));
+			@Override
+			public void onUpdate() {
+				sortWithKeyword();
+			}
 
-		colors.add(new Color(106, 81, 163));
-		colors.add(new Color(128, 125, 186));
+		});
 
-		colors.add(new Color(203, 24, 29));
-		colors.add(new Color(239, 59, 44));
+		AbstractAppsView.addUpdateListener(new IUpdateListener() {
 
-		colors.add(new Color(191, 129, 45));
-		colors.add(new Color(223, 194, 125));
+			@Override
+			public void onUpdate() {
+				sortWithKeyword();
+			}
 
-		colors.add(new Color(53, 151, 143));
-		colors.add(new Color(128, 205, 193));
-
-		colors.add(new Color(127, 188, 65));
-		colors.add(new Color(184, 225, 134));
-
-		return colors;
+		});
 	}
 
 	public void start(JFrame frame, List<DesktopVirtue> initialVirtues) throws Exception {
@@ -242,17 +213,6 @@ public class Sidebar implements VirtueChangeHandler {
 		} else {
 			startLogin();
 		}
-
-		// DesktopUser user = authService.getUser();
-
-		// String reqDomain = authService.getRequiredDomain();
-		// if (user != null && user.getImage() != null) {
-		// userImageView.setImage(user.getImage());
-		// }
-		// if (user == null || (reqDomain != null &&
-		// !reqDomain.equals(user.getDomain()))) {
-		// initiateLoginScreen();
-		// }
 	}
 
 	public void startLogin() throws IOException {
@@ -307,13 +267,7 @@ public class Sidebar implements VirtueChangeHandler {
 	public void changeVirtue(DesktopVirtue virtue) {
 		VirtueTileContainer vtc = virtueIdToVtc.get(virtue.getTemplateId());
 		VirtueListContainer vlc = virtueIdToVlc.get(virtue.getTemplateId());
-		// if (vmi == null) {
-		// vmi = virtueIdToVc.get(virtue.getTemplateId());
-		// if (virtue.getId() != null) {
-		// virtueIdToVc.remove(virtue.getTemplateId());
-		// virtueIdToVc.put(virtue.getId(), vmi);
-		// }
-		// }
+
 		vtc.updateVirtue(virtue);
 		vlc.updateVirtue(virtue);
 
@@ -326,10 +280,13 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 	}
 
+	private DesktopVirtue v;
+
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
 		if (loading) {
+			this.v = virtues.get(5);
 			loading = false;
 			setInitialViewPort();
 		}
@@ -436,6 +393,12 @@ public class Sidebar implements VirtueChangeHandler {
 		sortByOption(keyword);
 
 		sp.getViewport().validate();
+
+		new Thread(() -> {
+			JavaUtil.sleepAndLogInterruption(5000);
+			System.out.println(v.getName());
+			removeVirtue(v);
+		}).start();
 	}
 
 	@Override
@@ -446,21 +409,16 @@ public class Sidebar implements VirtueChangeHandler {
 		// vmi = virtueIdToVc.remove(virtue.getTemplateId());
 		// }
 		if (vtc != null) {
-			for (ApplicationDefinition ad : virtue.getApps().values()) {
-				at.removeApplication(ad, virtue);
-			}
+			// for (ApplicationDefinition ad : virtue.getApps().values()) {
+			// at.removeApplication(ad, virtue);
+			// }
 
+			at.removeVirtue(virtue);
 			al.removeVirtue(virtue);
+			fv.removeVirtue(virtue);
 			vt.removeVirtue(virtue);
 			vl.removeVirtue(virtue);
 		}
-	}
-
-	private Color getNextColor() {
-		if (!colorItr.hasNext()) {
-			colorItr = colorList.iterator();
-		}
-		return colorItr.next();
 	}
 
 	// This will setup the main display after login
@@ -725,6 +683,162 @@ public class Sidebar implements VirtueChangeHandler {
 		addEventListeners();
 	}
 
+	public void sortWithKeyword() {
+		String keyword;
+		if (ghostText.getIsVisible()) {
+			keyword = "";
+		} else {
+			keyword = textField.getText();
+		}
+		sortByOption(keyword);
+	}
+
+	public void sortByOption(String keyword) {
+		String selected = (String) cb.getSelectedItem();
+		switch (selected) {
+		case "Alphabetical":
+			al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			vt.search(keyword, null, null);
+			vl.search(keyword, null, null);
+			break;
+		case "Status":
+			al.search(keyword, sortAppsByStatus,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			at.search(keyword, sortAppsByStatus,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			fv.search(keyword, sortAppsByStatus,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			vt.search(keyword, sortVtByStatus, null);
+			vl.search(keyword, sortVlByStatus, null);
+			break;
+		}
+	}
+
+	public void renderFavoritesView() {
+		lastView.put("view", "fv");
+		desktopView = DesktopView.FAVORITES;
+		applicationsOpen = true;
+		favoritesView.setVisible(true);
+		virtuesSelected.setBackground(new Color(239, 239, 239));
+		applicationsSelected.setBackground(new Color(153, 51, 204));
+		favoritesLabel.setIcon(activeFavoriteIcon);
+		tileLabel.setIcon(inactiveTileIcon);
+		listLabel.setIcon(inactiveListIcon);
+		if (!loading) {
+			sp.setViewportView(fv.getContainer());
+		}
+	}
+
+	public void renderAppsListView() {
+		lastView.put("view", "al");
+		desktopView = DesktopView.APPS_LIST;
+		applicationsOpen = true;
+		favoritesView.setVisible(true);
+		virtuesSelected.setBackground(new Color(239, 239, 239));
+		applicationsSelected.setBackground(new Color(153, 51, 204));
+		favoritesLabel.setIcon(inactiveFavoriteIcon);
+		tileLabel.setIcon(inactiveTileIcon);
+		listLabel.setIcon(activeListIcon);
+		if (!loading) {
+			sp.setViewportView(al.getContainer());
+		}
+	}
+
+	public void renderAppsTileView() {
+		lastView.put("view", "at");
+		desktopView = DesktopView.APPS_TILE;
+		applicationsOpen = true;
+		favoritesView.setVisible(true);
+		virtuesSelected.setBackground(new Color(239, 239, 239));
+		applicationsSelected.setBackground(new Color(153, 51, 204));
+		favoritesLabel.setIcon(inactiveFavoriteIcon);
+		tileLabel.setIcon(activeTileIcon);
+		listLabel.setIcon(inactiveListIcon);
+		if (!loading) {
+			sp.setViewportView(at.getContainer());
+		}
+	}
+
+	public void renderVirtueTileView() {
+		lastView.put("view", "vt");
+		desktopView = DesktopView.VIRTUE_TILE;
+		applicationsOpen = false;
+		tileLabel.setIcon(activeTileIcon);
+		listLabel.setIcon(inactiveListIcon);
+		favoritesView.setVisible(false);
+		applicationsSelected.setBackground(new Color(239, 239, 239));
+		virtuesSelected.setBackground(new Color(153, 51, 204));
+		if (!loading) {
+			sp.setViewportView(vt.getContainer());
+		}
+	}
+
+	public void renderVirtueListView() {
+		lastView.put("view", "vl");
+		desktopView = DesktopView.VIRTUE_LIST;
+		applicationsOpen = false;
+		tileLabel.setIcon(inactiveTileIcon);
+		listLabel.setIcon(activeListIcon);
+		favoritesView.setVisible(false);
+		applicationsSelected.setBackground(new Color(239, 239, 239));
+		virtuesSelected.setBackground(new Color(153, 51, 204));
+		if (!loading) {
+			sp.setViewportView(vl.getContainer());
+		}
+	}
+
+	public void resetViews() {
+		searchMode = false;
+		searchLabel.setIcon(searchIcon);
+		textField.setText("");
+		String selected = (String) cb.getSelectedItem();
+		switch (selected) {
+		case "Alphabetical":
+			al.search(null, null, null);
+			at.search(null, null, null);
+			fv.search(null, null, null);
+			vt.search(null, null, null);
+			vl.search(null, null, null);
+			break;
+		case "Status":
+			al.search(null, sortAppsByStatus, null);
+			at.search(null, sortAppsByStatus, null);
+			fv.search(null, sortAppsByStatus, null);
+			vt.search(null, sortVtByStatus, null);
+			vl.search(null, sortVlByStatus, null);
+			break;
+		}
+		sp.setViewportView(sp.getViewport().getView());
+	}
+
+	public void setInitialViewPort() {
+		String view = lastView.get("view", null);
+		if (view == null) {
+			lastView.put("view", "at");
+			view = "at";
+		}
+
+		switch (view) {
+		case "at":
+			renderAppsTileView();
+			break;
+		case "al":
+			renderAppsListView();
+			break;
+		case "fv":
+			renderFavoritesView();
+			break;
+		case "vt":
+			renderVirtueTileView();
+			break;
+		case "vl":
+			renderVirtueListView();
+			break;
+		}
+	}
+
 	public void addEventListeners() {
 		tileView.addMouseListener(new MouseAdapter() {
 			@Override
@@ -879,129 +993,54 @@ public class Sidebar implements VirtueChangeHandler {
 		about.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				setupDialog();
+				aboutDialog.show(frame);
 			}
 		});
 	}
 
-	public void sortByOption(String keyword) {
-		String selected = (String) cb.getSelectedItem();
-		switch (selected) {
-		case "Alphabetical":
-			al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			vt.search(keyword, null, null);
-			vl.search(keyword, null, null);
-			break;
-		case "Status":
-			al.search(keyword, sortAppsByStatus,
-					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			at.search(keyword, sortAppsByStatus,
-					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			fv.search(keyword, sortAppsByStatus,
-					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			vt.search(keyword, sortVtByStatus, null);
-			vl.search(keyword, sortVlByStatus, null);
-			break;
-		}
+	private ArrayList<Color> loadColors() {
+		ArrayList<Color> colors = new ArrayList<Color>();
+		colors.add(new Color(189, 0, 38));
+		colors.add(new Color(227, 26, 28));
+
+		colors.add(new Color(34, 94, 168));
+		colors.add(new Color(29, 145, 192));
+
+		colors.add(new Color(35, 132, 67));
+		colors.add(new Color(65, 171, 93));
+
+		colors.add(new Color(204, 76, 2));
+		colors.add(new Color(236, 112, 20));
+
+		colors.add(new Color(136, 65, 157));
+		colors.add(new Color(140, 107, 177));
+
+		colors.add(new Color(206, 18, 86));
+		colors.add(new Color(231, 41, 138));
+
+		colors.add(new Color(106, 81, 163));
+		colors.add(new Color(128, 125, 186));
+
+		colors.add(new Color(203, 24, 29));
+		colors.add(new Color(239, 59, 44));
+
+		colors.add(new Color(191, 129, 45));
+		colors.add(new Color(223, 194, 125));
+
+		colors.add(new Color(53, 151, 143));
+		colors.add(new Color(128, 205, 193));
+
+		colors.add(new Color(127, 188, 65));
+		colors.add(new Color(184, 225, 134));
+
+		return colors;
 	}
 
-	public void renderFavoritesView() {
-		lastView.put("view", "fv");
-		desktopView = DesktopView.FAVORITES;
-		applicationsOpen = true;
-		favoritesView.setVisible(true);
-		virtuesSelected.setBackground(new Color(239, 239, 239));
-		applicationsSelected.setBackground(new Color(153, 51, 204));
-		favoritesLabel.setIcon(activeFavoriteIcon);
-		tileLabel.setIcon(inactiveTileIcon);
-		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
-			sp.setViewportView(fv.getContainer());
+	private Color getNextColor() {
+		if (!colorItr.hasNext()) {
+			colorItr = colorList.iterator();
 		}
-	}
-
-	public void renderAppsListView() {
-		lastView.put("view", "al");
-		desktopView = DesktopView.APPS_LIST;
-		applicationsOpen = true;
-		favoritesView.setVisible(true);
-		virtuesSelected.setBackground(new Color(239, 239, 239));
-		applicationsSelected.setBackground(new Color(153, 51, 204));
-		favoritesLabel.setIcon(inactiveFavoriteIcon);
-		tileLabel.setIcon(inactiveTileIcon);
-		listLabel.setIcon(activeListIcon);
-		if (!loading) {
-			sp.setViewportView(al.getContainer());
-		}
-	}
-
-	public void renderAppsTileView() {
-		lastView.put("view", "at");
-		desktopView = DesktopView.APPS_TILE;
-		applicationsOpen = true;
-		favoritesView.setVisible(true);
-		virtuesSelected.setBackground(new Color(239, 239, 239));
-		applicationsSelected.setBackground(new Color(153, 51, 204));
-		favoritesLabel.setIcon(inactiveFavoriteIcon);
-		tileLabel.setIcon(activeTileIcon);
-		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
-			sp.setViewportView(at.getContainer());
-		}
-	}
-
-	public void renderVirtueTileView() {
-		lastView.put("view", "vt");
-		desktopView = DesktopView.VIRTUE_TILE;
-		applicationsOpen = false;
-		tileLabel.setIcon(activeTileIcon);
-		listLabel.setIcon(inactiveListIcon);
-		favoritesView.setVisible(false);
-		applicationsSelected.setBackground(new Color(239, 239, 239));
-		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
-			sp.setViewportView(vt.getContainer());
-		}
-	}
-
-	public void renderVirtueListView() {
-		lastView.put("view", "vl");
-		desktopView = DesktopView.VIRTUE_LIST;
-		applicationsOpen = false;
-		tileLabel.setIcon(inactiveTileIcon);
-		listLabel.setIcon(activeListIcon);
-		favoritesView.setVisible(false);
-		applicationsSelected.setBackground(new Color(239, 239, 239));
-		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
-			sp.setViewportView(vl.getContainer());
-		}
-	}
-
-	public void resetViews() {
-		searchMode = false;
-		searchLabel.setIcon(searchIcon);
-		textField.setText("");
-		String selected = (String) cb.getSelectedItem();
-		switch (selected) {
-		case "Alphabetical":
-			al.search(null, null, null);
-			at.search(null, null, null);
-			fv.search(null, null, null);
-			vt.search(null, null, null);
-			vl.search(null, null, null);
-			break;
-		case "Status":
-			al.search(null, sortAppsByStatus, null);
-			at.search(null, sortAppsByStatus, null);
-			fv.search(null, sortAppsByStatus, null);
-			vt.search(null, sortVtByStatus, null);
-			vl.search(null, sortVlByStatus, null);
-			break;
-		}
-		sp.setViewportView(sp.getViewport().getView());
+		return colorItr.next();
 	}
 
 	public void setupComparators() {
@@ -1060,163 +1099,13 @@ public class Sidebar implements VirtueChangeHandler {
 		};
 	}
 
-	public void setInitialViewPort() {
-		String view = lastView.get("view", null);
-		if (view == null) {
-			lastView.put("view", "at");
-			view = "at";
-		}
-
-		switch (view) {
-		case "at":
-			renderAppsTileView();
-			break;
-		case "al":
-			renderAppsListView();
-			break;
-		case "fv":
-			renderFavoritesView();
-			break;
-		case "vt":
-			renderVirtueTileView();
-			break;
-		case "vl":
-			renderVirtueListView();
-			break;
-		}
-	}
-
-	public JPanel getContainer() {
-		return desktopContainer;
-	}
-
-	public void setupDialog() {
-		JDialog dialog = new JDialog();
-
-		String registeredSymbol = "\u00ae";
-		String trademarkSymbol = "\u2122";
-		String copyrightSymbol = "\u00a9";
-
-		dialog.setIconImage(saviorIcon.getImage());
-
-		JPanel container = new JPanel();
-		container.setBackground(Color.WHITE);
-		container.setLayout(new BorderLayout(0, 0));
-
-		JLabel title = new JLabel("Savior VirtUE Desktop");
-		title.setFont(new Font("Arial", Font.BOLD, 18));
-		title.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 30));
-
-		ImageIcon imageIcon = new ImageIcon(Sidebar.class.getResource("/images/saviorLogo.png"));
-		Image image = imageIcon.getImage(); // transform it
-		Image newimg = image.getScaledInstance(27, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		imageIcon = new ImageIcon(newimg); // transform it back
-		title.setIcon(imageIcon);
-
-		title.setHorizontalAlignment(SwingConstants.CENTER);
-
-		container.add(title, BorderLayout.NORTH);
-
-		JPanel footer = new JPanel();
-		footer.setBackground(Color.WHITE);
-		container.add(footer, BorderLayout.SOUTH);
-
-		JLabel copyright = new JLabel(copyrightSymbol + " 2018-2019 Next Century Corporation. All rights reserved");
-		footer.add(copyright);
-
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-		container.add(scrollPane, BorderLayout.CENTER);
-
-		JPanel textContainer = new JPanel();
-		textContainer.setBackground(Color.WHITE);
-		textContainer.setLayout(new BoxLayout(textContainer, BoxLayout.Y_AXIS));
-
-		JLabel disclaimerHeader = new JLabel("<html><center> Disclaimer Third Parties <br><br></center></html>",
-				SwingConstants.CENTER);
-		JLabel disclaimers = new JLabel(
-				"<html><center> All product and company names are trademarks" + trademarkSymbol + " or <br> registered"
-						+ registeredSymbol
-						+ " trademarks of their respective holders. Use of <br> them does not imply any affiliation with or endorsement by them.<br><br>"
-						+ "All specifications are subject to change without notice.<br><br>"
-						+ "Chrome and Chromium are trademarks owned by Google LLC.<br><br>"
-						+ "Firefox and the Firefox logos are trademarks of the <br> Mozilla Foundation.<br><br>"
-						+ "LibreOffice and LibreOffice logos are trademarks of The <br> Document Foundation.<br><br>"
-						+ "Microsoft, Microsoft Office, Microsoft Excel, Microsoft PowerPoint <br> and Microsoft Word are registered trademarks of Microsoft <br> Corporation in the United States and/or other countries.<br><br></center></html>",
-				SwingConstants.CENTER);
-		JLabel credits = new JLabel("<html><center> Software Team Credits: <br><br></center></html>",
-				SwingConstants.CENTER);
-		JLabel nextCentury = new JLabel("<html><center> Next Century Corporation<br><br></center></html>",
-				SwingConstants.CENTER);
-
-		JLabel twoSix = new JLabel("<html><center> Two Six Labs<br><br></center></html>", SwingConstants.CENTER);
-
-		JLabel vt = new JLabel("<html><center> Virginia Tech<br><br></center></html>", SwingConstants.CENTER);
-
-		disclaimerHeader.setFont(new Font("Tahoma", Font.BOLD, 15));
-		credits.setFont(new Font("Tahoma", Font.BOLD, 15));
-		nextCentury.setFont(new Font("Tahoma", Font.BOLD, 13));
-		twoSix.setFont(new Font("Tahoma", Font.BOLD, 13));
-		vt.setFont(new Font("Tahoma", Font.BOLD, 13));
-
-		textContainer.add(disclaimerHeader);
-		textContainer.add(disclaimers);
-		textContainer.add(credits);
-		textContainer.add(nextCentury);
-		textContainer.add(twoSix);
-		textContainer.add(vt);
-
-		scrollPane.setViewportView(textContainer);
-
-		dialog.addWindowListener(new WindowListener() {
-
-			@Override
-			public void windowActivated(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-				dialog.setVisible(false);
-				dialog.dispose();
-				desktopContainer.validate();
-				desktopContainer.repaint();
-			}
-
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-				// do nothing
-
-			}
-
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// do nothing
-			}
-
-		});
-
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		dialog.add(container);
-		dialog.setLocationRelativeTo(container);
-		dialog.pack();
-		dialog.setSize(new Dimension(415, 350));
-		dialog.setLocationRelativeTo(frame);
-		dialog.setVisible(true);
+	private void setupLoadingGif() {
+		this.loadingContainer = new JPanel();
+		loadingContainer.setLayout(new BorderLayout());
+		JLabel gifLabel = new JLabel();
+		gifLabel.setIcon(loadingIcon);
+		gifLabel.setVerticalAlignment(SwingConstants.CENTER);
+		gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		loadingContainer.add(gifLabel, BorderLayout.CENTER);
 	}
 }

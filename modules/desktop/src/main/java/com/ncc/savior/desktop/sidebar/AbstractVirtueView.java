@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -16,6 +18,8 @@ public abstract class AbstractVirtueView {
 	protected JPanel footer = new JPanel();
 
 	protected JScrollPane sp;
+
+	private static Set<IUpdateListener> updateListeners = new HashSet<IUpdateListener>();
 
 	public AbstractVirtueView(JScrollPane sp) {
 		this.sp = sp;
@@ -43,6 +47,24 @@ public abstract class AbstractVirtueView {
 
 	public JPanel getContainer() {
 		return container;
+	}
+
+	protected void triggerUpdateListener() {
+		for (IUpdateListener listener : updateListeners) {
+			listener.onUpdate();
+		}
+	}
+
+	public static void addUpdateListener(IUpdateListener listener) {
+		updateListeners.add(listener);
+	}
+
+	public static void removeUpdateListener(IUpdateListener listener) {
+		updateListeners.remove(listener);
+	}
+
+	public static interface IUpdateListener {
+		public void onUpdate();
 	}
 
 }

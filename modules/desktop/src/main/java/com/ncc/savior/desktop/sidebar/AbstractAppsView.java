@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -14,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IUpdateListener;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -33,6 +36,8 @@ public abstract class AbstractAppsView {
 	protected JScrollPane sp;
 
 	protected ArrayList<String> appsInView;
+
+	private static Set<IUpdateListener> updateListeners = new HashSet<IUpdateListener>();
 
 	public AbstractAppsView(VirtueService virtueService, JScrollPane sp) {
 		this.virtueService = virtueService;
@@ -60,6 +65,14 @@ public abstract class AbstractAppsView {
 		tiles.remove(ad.getId() + virtue.getTemplateId());
 		container.validate();
 		container.repaint();
+	}
+
+	public void removeVirtue(DesktopVirtue virtue) {
+		for (ApplicationDefinition ad : virtue.getApps().values()) {
+			tiles.remove(ad.getId() + virtue.getTemplateId());
+		}
+
+		triggerUpdateListener();
 	}
 
 	public void search(String keyword, Comparator<VirtueApplicationItem> comp,
@@ -104,8 +117,22 @@ public abstract class AbstractAppsView {
 	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
 		VirtueApplicationItem va = tiles.get(ad.getId() + virtue.getTemplateId());
 		if (va != null) {
-			va.update(virtue);
+			va.update();
 		}
+	}
+
+	protected void triggerUpdateListener() {
+		for (IUpdateListener listener : updateListeners) {
+			listener.onUpdate();
+		}
+	}
+
+	public static void addUpdateListener(IUpdateListener listener) {
+		updateListeners.add(listener);
+	}
+
+	public static void removeUpdateListener(IUpdateListener listener) {
+		updateListeners.remove(listener);
 	}
 
 	public abstract void addTile(VirtueApplicationItem va);
