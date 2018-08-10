@@ -63,7 +63,7 @@ export class VirtuesService {
 
   public updateVirtue(baseUrl: string, id: string, virtueData: any) {
     let url = baseUrl + this.configUrl + id;
-    console.log(url);
+    // console.log(url);
     return this.httpClient.put(url, virtueData, httpOptions)
             .catch(this.errorHandler);
   }

@@ -10,7 +10,8 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 @Component({
   selector: 'app-vm-list',
   providers: [ BaseUrlService, VirtualMachineService, ApplicationsService ],
-  templateUrl: './vm-list.component.html'
+  templateUrl: './vm-list.component.html',
+  styleUrls: ['./vm-list.component.css']
 })
 export class VmListComponent implements OnInit {
 
@@ -44,8 +45,8 @@ export class VmListComponent implements OnInit {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
       this.getBaseUrl(awsServer);
-      this.getVmList(awsServer);
       this.getAppsList(awsServer);
+      this.getVmList(awsServer);
     });
     this.resetRouter();
   }
@@ -64,61 +65,84 @@ export class VmListComponent implements OnInit {
   getVmList(baseUrl: string) {
     this.vmService.getVmList(baseUrl).subscribe(vmlist => {
       this.vms = vmlist;
+      // console.log("*****");
+      // console.log(this.vms[0]);
+      for (var vm of this.vms) {
+        vm.status = vm.enabled ? 'enabled' : 'disabled';
+      }
+      // console.log(this.vms[0]);
       this.totalVms = vmlist.length;
-      this.sortVms(vmlist);
+      // this.sortVms(vmlist); //what? This should be expecting a sortDirection, no?
+      // this.sortVms('dsc');
+      // oh and changing or even commenting this line out entirely doesn't seem to
+      // affect the order, initial or otherwise, of the shown data.
+      // the called function is commented out below as well.
     });
   }
 
-  sortVms(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.vms.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return -1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return 1;
-        }
-        return 0;
-      });
-    } else {
-      this.vms.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return 1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return -1;
-        }
-        return 0;
-      });
-    }
-  }
+  // Appears to be unnecessary. See comment in getVmList()
+  // sortVms(sortDirection: string) {
+  //   console.log("sortVms");
+  //   if (sortDirection === 'asc') {
+  //     this.vms.sort((leftSide, rightSide): number => {
+  //       console.log("asc");
+  //       // console.log(JSON.stringify(leftSide));
+  //       if (leftSide['name'] < rightSide['name']) {
+  //         return -1;
+  //       }
+  //       if (leftSide['name'] > rightSide['name']) {
+  //         return 1;
+  //       }
+  //       return 0;
+  //     });
+  //   } else {
+  //     this.vms.sort((leftSide, rightSide): number => {
+  //       console.log("dsc");
+  //       // console.log(JSON.stringify(leftSide));
+  //       if (leftSide['name'] < rightSide['name']) {
+  //         return 1;
+  //       }
+  //       if (leftSide['name'] > rightSide['name']) {
+  //         return -1;
+  //       }
+  //       return 0;
+  //     });
+  //   }
+  // }
 
   enabledVmList(sortType: string, enabledValue: any, sortBy) {
-    console.log('enabledVirtueList() => ' + enabledValue);
+    console.log('enabledVmList() => ' + enabledValue);
     if (this.sortValue !== enabledValue) {
       this.sortBy = 'asc';
     } else {
-      this.sortListBy(sortBy);
+      this.reverseSortDirection(sortBy);
     }
     this.sortValue = enabledValue;
     this.sortType = sortType;
   }
 
-  sortVmColumns(sortColumn: string, sortBy: string) {
+  setColumnSort(sortColumn: string, sortBy: string) {
+    console.log("sortVmColumns");
+    console.log(this.vms[0]["name"]);
     if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
+      this.reverseSortDirection(sortBy);
     } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'date') {
-        this.sortColumn = sortColumn;
-        this.sortBy = 'desc';
+      switch( sortColumn ) {
+        case 'name' :
+        case 'os':
+        case 'lastEditor':
+        case 'securityTag':
+          this.sortBy = 'asc';
+	  break;
+        case 'date':
+          this.sortBy = 'desc';
+	  break;
       }
+      this.sortColumn = sortColumn;
     }
   }
 
-  sortListBy(sortDirection: string) {
+  reverseSortDirection(sortDirection: string) {
     if (sortDirection === 'asc') {
       this.sortBy = 'desc';
     } else {
@@ -148,7 +172,7 @@ export class VmListComponent implements OnInit {
       this.vm = data;
     });
     this.resetRouter();
-    this.router.navigate(['/vm']);
+    this.router.navigate(['/virtual-machines']);
   }
 
   deleteVM(id: string) {

@@ -65,6 +65,13 @@ export class UsersService {
     return this.httpClient.put(url, userData, httpOptions);
   }
 
+  public setUserStatus(baseUrl: string, username: string, newStatus: string): Observable<any> {
+    let url = baseUrl + this.configUrl + username + '/enable';
+    // console.log(url);
+    return this.httpClient.post(url, newStatus);
+  }
+
+
   deleteUser(baseUrl: string, username: string) {
     let awsServer = baseUrl + this.configUrl;
     return this.httpClient.delete(awsServer + username).subscribe(

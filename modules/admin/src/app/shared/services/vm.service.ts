@@ -58,6 +58,7 @@ export class VirtualMachineService {
 
   public toggleVmStatus(baseUrl: string, id: string): Observable<any> {
     let url = baseUrl + this.configUrl + id + '/toggle';
+    
     return this.httpClient.get(url);
   }
 

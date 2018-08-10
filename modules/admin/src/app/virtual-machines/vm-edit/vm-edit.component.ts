@@ -174,11 +174,11 @@ export class VmEditComponent implements OnInit {
     };
     this.vmService.updateVM(this.baseUrl, id, JSON.stringify(body));
     this.resetRouter();
-    this.router.navigate(['/vm']);
+    this.router.navigate(['/virtual-machines']);
   }
 
   cancel() {
-    this.router.navigate(['/vm']);
+    this.router.navigate(['/virtual-machines']);
   }
 
 }

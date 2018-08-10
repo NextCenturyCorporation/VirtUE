@@ -21,6 +21,12 @@ export class UserListComponent implements OnInit {
   users = [];
   virtues = [];
 
+  sortColumn: string = 'username';
+  sortType: string = 'enabled';
+  sortValue: any = '*';
+  sortBy: string = 'asc';
+  totalUsers: number = 0;
+
   constructor(
     private router: Router,
     private location: Location,
@@ -57,9 +63,23 @@ export class UserListComponent implements OnInit {
   }
 
   getUsers( baseUrl: string ): void {
-    this.usersService.getUsers(baseUrl).subscribe(data => {
-      this.users = data;
+    this.usersService.getUsers(baseUrl).subscribe(userList => {
+      this.users = userList;
+      this.totalUsers = userList.length;
+      for (var user of this.users) {
+        user.status = user.enabled ? 'enabled' : 'disabled';
+      }
     });
+  }
+
+  userStatus(username: string, newStatus: string) {
+    console.log("here");
+
+    this.usersService.setUserStatus(this.baseUrl, username, newStatus).subscribe(userList => {
+      this.users = userList;
+    });
+    this.refreshData();
+    this.router.navigate(['/users']);
   }
 
   deleteUser(username: string) {
@@ -97,5 +117,42 @@ export class UserListComponent implements OnInit {
       console.log('The dialog to delete {{data.dialogText}} was closed');
     });
   }
+
+    enabledUserList(sortType: string, enabledValue: any, sortBy) {
+      console.log('enabledUserList() => ' + enabledValue);
+      if (this.sortValue !== enabledValue) {
+        this.sortBy = 'asc';
+      } else {
+        this.reverseSortDirection(sortBy);
+      }
+      this.sortValue = enabledValue;
+      //this.sortType = sortType;
+    }
+
+    setColumnSort(sortColumn: string, sortBy: string) {
+      if (this.sortColumn === sortColumn) {
+        this.reverseSortDirection(sortBy);
+      } else {
+        switch( sortColumn ) {
+          case 'username' :
+          case 'authorities':
+            this.sortBy = 'asc';
+ 	    break;
+          case 'status':
+            this.sortBy = 'desc';
+	    break;
+        }
+        this.sortColumn = sortColumn;
+      }
+    }
+
+    reverseSortDirection(sortDirection: string) {
+      if (sortDirection === 'asc') {
+        this.sortBy = 'desc';
+      } else {
+        this.sortBy = 'asc';
+      }
+    }
+
 
 }
