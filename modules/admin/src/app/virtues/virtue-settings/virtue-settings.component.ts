@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, OnInit, Injectable } from '@angular/core';
 
 @Component({
   selector: 'app-virtue-settings',
@@ -7,9 +7,27 @@ import { Component, OnInit } from '@angular/core';
 })
 export class VirtueSettingsComponent implements OnInit {
 
-  constructor() { }
+  @Input('virtue-color') virtueColor;
+
+  constructor() {
+  }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit() {
+  }
+
+
+  setColor(temp : any) {
+    // console.log("Color was ", this.virtueColor);
+    this.virtueColor = String(temp);
+    // console.log("Color now ", this.virtueColor);
+  }
+
+  getColor() {
+    // console.log("Color is ", this.virtueColor);
+    return this.virtueColor;
   }
 
 }

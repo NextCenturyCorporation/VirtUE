@@ -4,205 +4,75 @@ import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { Item } from '../../shared/models/item.model';
+import { Application } from '../../shared/models/application.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
+import { Virtue } from '../../shared/models/virtue.model';
+import { Column } from '../../shared/models/column.model';
+import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
 import { ApplicationsService } from '../../shared/services/applications.service';
+import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+
 
 @Component({
   selector: 'app-virtue-list',
-  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ],
-  templateUrl: './virtue-list.component.html',
-  styleUrls: ['./virtue-list.component.css']
+  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
+  providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
 
-export class VirtueListComponent implements OnInit {
-  virtue: any;
-  title = 'Virtues';
-  virtues = [];
-  vmList = [];
-  appsList = [];
-  baseUrl: string;
-  // these are the default properties the list sorts by
-  sortColumn: string = 'name';
-  sortType: string = 'enabled';
-  sortValue: any = '*';
-  sortBy: string = 'asc';
-  // virtueTotal: number;
-  os: Observable<Array<VirtuesService>>;
+export class VirtueListComponent extends GeneralListComponent {
 
   constructor(
-    private router: Router,
-    private appsService: ApplicationsService,
-    private baseUrlService: BaseUrlService,
-    private virtuesService: VirtuesService,
-    private vmService: VirtualMachineService,
-    public dialog: MatDialog
+    router: Router,
+    baseUrlService: BaseUrlService,
+    usersService: UsersService,
+    virtuesService: VirtuesService,
+    vmService: VirtualMachineService,
+    appsService: ApplicationsService,
+    dialog: MatDialog
   ) {
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+
+    //Note: colWidths of all columns must add to exactly 12.
+    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    this.colData = [
+      {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'vms', prettyName: 'Virtual Machines', isList: true, sortDefault: undefined, colWidth:2, formatValue: this.getChildrenListHTMLstring},
+      {name: 'apps', prettyName: 'Applications', isList: true, sortDefault: undefined, colWidth:2, formatValue: this.getAppsListHTMLstring},
+      {name: 'lastEditor', prettyName: 'Last Editor', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:1, formatValue: undefined},
+      {name: 'modDate', prettyName: 'Modification Date', isList: false, sortDefault: 'desc', colWidth:2, formatValue: undefined},
+      {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+    ];
+
+    this.updateFuncQueue = [this.pullApps, this.pullVms, this.pullVirtues];
+
+    this.prettyTitle = "Virtue Templates";
+    this.itemName = "Virtue Template";
+    this.pluralItem = "Virtues";
+    this.noDataMessage = "No virtues have been added at this time. To add a virtue, click on the button \"Add " + this.itemName +  "\" above.";
+    this.domain = '/virtues'
   }
 
-  ngOnInit() {
-    this.baseUrlService.getBaseUrl().subscribe( res => {
-      let awsServer = res[0].aws_server;
-      this.getBaseUrl(awsServer);
-      this.getVirtues(awsServer);
-      this.getApplications(awsServer);
-      this.getVmList(awsServer);
-    });
+  getAppsListHTMLstring(v: Virtue) {
+    return v.appsListHTML;
+  }
+
+  toggleItemStatus(v: Virtue) {
+    this.virtuesService.toggleVirtueStatus(this.baseUrl, v.getID()).subscribe();
     this.refreshData();
   }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req);
-  }
-
-  resetRouter() {
-    setTimeout(() => {
-      this.router.navigated = false;
-    }, 1000);
-  }
-
-  getBaseUrl(url: string) {
-    this.baseUrl = url;
-  }
-
-  refreshData() {
-    setTimeout(() => {
-      this.router.navigated = false;
-      this.getVirtues(this.baseUrl);
-    }, 1000);
-  }
-
-  getVirtues(baseUrl: string) {
-    this.virtuesService.getVirtues(baseUrl).subscribe( data => {
-      this.virtues = data;
-    });
-    this.sortVirtues(this.sortBy);
-  }
-
-  sortVirtues(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.virtues.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return -1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return 1;
-        }
-        return 0;
-      });
-    } else {
-      this.virtues.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return 1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return -1;
-        }
-        return 0;
-      });
-    }
-  }
-
-  enabledVirtueList(sortType: string, enabledValue: any, sortBy) {
-    console.log('enabledVirtueList() => ' + enabledValue);
-    if (this.sortValue !== enabledValue) {
-      this.sortBy = 'asc';
-    } else {
-      this.sortListBy(sortBy);
-    }
-    this.sortValue = enabledValue;
-    this.sortType = sortType;
-  }
-
-  sortVirtueColumns(sortColumn: string, sortBy: string) {
-    if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
-    } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'date') {
-        this.sortColumn = sortColumn;
-        this.sortBy = 'desc';
-      }
-    }
-  }
-
-  sortListBy(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.sortBy = 'desc';
-    } else {
-      this.sortBy = 'asc';
-    }
-  }
-
-  getApplications(baseUrl: string) {
-    this.appsService.getAppsList(baseUrl).subscribe( apps => {
-      this.appsList = apps;
-      // this.getAppsList(data);
-    });
-  }
-
-  getVmList(baseUrl: string) {
-    this.vmService.getVmList(baseUrl).subscribe( vms => {
-      this.vmList = vms;
-    });
-  }
-
-  getAppName(id: string) {
-    for (let app of this.appsList) {
-      if (id === app.id) {
-        return app.name;
-      }
-    }
-  }
-
-  getVmName(id: string): void {
-    for (let vm of this.vmList) {
-      if (id === vm.id) {
-        return vm.name;
-      }
-    }
-  }
-
-  virtueStatus(id: string) {
-    this.virtuesService.toggleVirtueStatus(this.baseUrl, id).subscribe(data => {
-      this.virtue = data;
-    });
-    this.resetRouter();
-    this.router.navigate(['/virtues']);
-  }
-
-  deleteVirtue(id: string) {
-    // console.log('deleting ' + id);
-    this.virtuesService.deleteVirtue(this.baseUrl, id);
+  deleteItem(i: Item) {
+    this.virtuesService.deleteVirtue(this.baseUrl, i.getID());
     this.refreshData();
-  }
-
-  openDialog(id: string, type: string, category: string, description: string): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          dialogType: type,
-          dialogCategory: category,
-          dialogId: id,
-          dialogDescription: description
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe(data => {
-      console.log('Dialog Emitter: ' + data);
-      if (type === 'delete') {
-        this.deleteVirtue(data);
-      }
-    });
   }
 }

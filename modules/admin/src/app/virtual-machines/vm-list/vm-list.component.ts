@@ -2,178 +2,70 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 
-import { ApplicationsService } from '../../shared/services/applications.service';
+import { Item } from '../../shared/models/item.model';
+import { Application } from '../../shared/models/application.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
+import { Column } from '../../shared/models/column.model';
+import { DictList } from '../../shared/models/dictionary.model';
+
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { UsersService } from '../../shared/services/users.service';
+import { VirtuesService } from '../../shared/services/virtues.service';
 import { VirtualMachineService } from '../../shared/services/vm.service';
+import { ApplicationsService } from '../../shared/services/applications.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 @Component({
   selector: 'app-vm-list',
-  providers: [ BaseUrlService, VirtualMachineService, ApplicationsService ],
-  templateUrl: './vm-list.component.html'
+  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
+  providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService ]
 })
-export class VmListComponent implements OnInit {
-
-  vms = [];
-  apps = [];
-  // noListData = false;
-
-  baseUrl: string;
-  vm: any;
-  // these are the default properties the list sorts by
-  sortColumn: string = 'name';
-  sortType: string = 'enabled';
-  sortValue: any = '*';
-  sortBy: string = 'asc';
-  totalVms: number = 0;
+export class VmListComponent extends GeneralListComponent {
 
   constructor(
-    private vmService: VirtualMachineService,
-    private appsService: ApplicationsService,
-    private baseUrlService: BaseUrlService,
-    private router: Router,
-    public dialog: MatDialog
+    router: Router,
+    baseUrlService: BaseUrlService,
+    usersService: UsersService,
+    virtuesService: VirtuesService,
+    vmService: VirtualMachineService,
+    appsService: ApplicationsService,
+    dialog: MatDialog
   ) {
-    // override the route reuse strategy
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+
+    //Note: colWidths of all columns must add to exactly 12.
+    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    this.colData = [
+      {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'os', prettyName: 'OS', isList: false, sortDefault: 'asc', colWidth:1, formatValue: undefined},
+      {name: 'apps', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:3, formatValue: this.getChildrenListHTMLstring},
+      {name: 'lastEditor', prettyName: 'Last Modified By', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'securityTag', prettyName: 'Security', isList: false, sortDefault: 'asc', colWidth:1, formatValue: undefined},
+      {name: 'modDate', prettyName: 'Modified Date', isList: false, sortDefault: 'desc', colWidth:2, formatValue: undefined},
+      {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+    ];
+
+    this.updateFuncQueue = [this.pullApps, this.pullVms];
+
+    this.prettyTitle = "Virtual Machine Templates";
+    this.itemName = "Vm Template";
+    this.pluralItem = "VMs";
+    this.noDataMessage = "No vms have been added at this time. To add a vm, click on the button \"Add " + this.itemName +  "\" above.";
+    this.domain = '/vm-templates';
   }
 
-  ngOnInit() {
-    this.baseUrlService.getBaseUrl().subscribe(res => {
-      let awsServer = res[0].aws_server;
-      this.getBaseUrl(awsServer);
-      this.getVmList(awsServer);
-      this.getAppsList(awsServer);
-    });
-    this.resetRouter();
+  deleteItem(i: Item) {
+    this.vmService.deleteVM(this.baseUrl, i.getID());
+    this.refreshData();
   }
 
-  getBaseUrl(url: string) {
-    this.baseUrl = url;
+  // Overrides parent
+  toggleItemStatus(vm: VirtualMachine) {
+    this.vmService.toggleVmStatus(this.baseUrl, vm.getID()).subscribe();
+    this.refreshData();
   }
 
-  resetRouter() {
-    setTimeout(() => {
-      this.router.navigated = false;
-      this.getVmList(this.baseUrl);
-    }, 1000);
-  }
-
-  getVmList(baseUrl: string) {
-    this.vmService.getVmList(baseUrl).subscribe(vmlist => {
-      this.vms = vmlist;
-      this.totalVms = vmlist.length;
-      this.sortVms(vmlist);
-    });
-  }
-
-  sortVms(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.vms.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return -1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return 1;
-        }
-        return 0;
-      });
-    } else {
-      this.vms.sort((leftSide, rightSide): number => {
-        if (leftSide['name'] < rightSide['name']) {
-          return 1;
-        }
-        if (leftSide['name'] > rightSide['name']) {
-          return -1;
-        }
-        return 0;
-      });
-    }
-  }
-
-  enabledVmList(sortType: string, enabledValue: any, sortBy) {
-    console.log('enabledVirtueList() => ' + enabledValue);
-    if (this.sortValue !== enabledValue) {
-      this.sortBy = 'asc';
-    } else {
-      this.sortListBy(sortBy);
-    }
-    this.sortValue = enabledValue;
-    this.sortType = sortType;
-  }
-
-  sortVmColumns(sortColumn: string, sortBy: string) {
-    if (this.sortColumn === sortColumn) {
-      this.sortListBy(sortBy);
-    } else {
-      if (sortColumn === 'name') {
-        this.sortBy = 'asc';
-        this.sortColumn = sortColumn;
-      } else if (sortColumn === 'date') {
-        this.sortColumn = sortColumn;
-        this.sortBy = 'desc';
-      }
-    }
-  }
-
-  sortListBy(sortDirection: string) {
-    if (sortDirection === 'asc') {
-      this.sortBy = 'desc';
-    } else {
-      this.sortBy = 'asc';
-    }
-  }
-
-  getAppsList(baseUrl: string) {
-    this.appsService.getAppsList(baseUrl)
-    .subscribe(appList => {
-      this.apps = appList;
-    });
-  }
-
-  getAppName(id: string) {
-    if (id) {
-      let selApp = this.apps.filter(app => id === app.id)
-        .map(appName => {
-          return appName.name;
-        });
-      return selApp;
-    }
-  }
-
-  vmStatus(id: string) {
-    this.vmService.toggleVmStatus(this.baseUrl, id).subscribe(data => {
-      this.vm = data;
-    });
-    this.resetRouter();
-    this.router.navigate(['/vm']);
-  }
-
-  deleteVM(id: string) {
-    this.vmService.deleteVM(this.baseUrl, id);
-    this.resetRouter();
-  }
-
-  openDialog(id: string, type: string, category: string, description: string): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          dialogType: type,
-          dialogCategory: category,
-          dialogId: id,
-          dialogDescription: description
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((data) => {
-      // console.log('Dialog Emitter: ' + data);
-      if (type === 'delete') {
-        this.deleteVM(data);
-      }
-    });
-  }
 }

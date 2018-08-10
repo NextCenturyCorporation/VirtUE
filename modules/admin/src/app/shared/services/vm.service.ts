@@ -26,48 +26,62 @@ export class VirtualMachineService {
 
   public getVmList(baseUrl: string): Observable<any> {
     let src = baseUrl + this.configUrl;
+    // console.log('getVmList() => ');
+    // console.log(src);
     return this.httpClient.get<any>(src);
   }
 
   public getVM(baseUrl: string, id: string): Observable<any> {
     let src = baseUrl + this.configUrl + id;
+    // console.log('getVM() => ');
+    // console.log(src);
     return this.httpClient.get<VirtualMachine>(src);
   }
 
-  public createVM(baseUrl: string, vmData: any) {
+  public createVM(baseUrl: string, vmData: string): Observable<any>  {
     let url = baseUrl + this.configUrl;
     // console.log('createVM() => ');
-    //     // console.log(vmData);
-    return this.httpClient.post(url, vmData, httpOptions)
-           .toPromise().then(data => {
-             return data;
-           }, error => {
-             console.log(error);
-           });
+    // console.log(url);
+    // console.log(vmData);
+    // return this.httpClient.post(url, vmData, httpOptions)
+    //        .toPromise().then(data => {
+    //          return data;
+    //        }, error => {
+    //          console.log(error);
+    //        });
+    return this.httpClient.post(url, vmData, httpOptions);
  }
 
-  public updateVM(baseUrl: string, id: string, vmData: any) {
+  public updateVM(baseUrl: string, id: string, vmData: string): Observable<any>  {
     let url = baseUrl + this.configUrl + id;
-    return this.httpClient.put(url, vmData, httpOptions)
-           .toPromise().then(data => {
-             return data;
-           }, error => {
-             console.log(error);
-           });
+    // console.log('updateVM() => ');
+    // console.log(url);
+    // return this.httpClient.put(url, vmData, httpOptions)
+    //        .toPromise().then(data => {
+    //          return data;
+    //        }, error => {
+    //          console.log(error);
+    //        });
+    return this.httpClient.put(url, vmData, httpOptions);
   }
 
   public toggleVmStatus(baseUrl: string, id: string): Observable<any> {
     let url = baseUrl + this.configUrl + id + '/toggle';
+    console.log('toggleVmStatus() => ');
+    console.log(url);
     return this.httpClient.get(url);
   }
 
   public updateVmStatus(baseUrl: string, id: string): Observable<any> {
     let url = baseUrl + this.configUrl + id;
+    console.log('updateVmStatus() => ');
+    console.log(url);
     return this.httpClient.get(url);
   }
 
   public deleteVM(baseUrl: string, id: string) {
     let url = baseUrl + this.configUrl + id;
+    console.log('deleteVM() => ');
     return this.httpClient.delete(url)
     .toPromise().then(data => {
        return data;

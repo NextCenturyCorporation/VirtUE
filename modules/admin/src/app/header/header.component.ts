@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgModule } from '@angular/core';
 
 @Component({
   selector: 'app-header',
@@ -12,10 +12,10 @@ export class HeaderComponent implements OnInit {
     {value: 'Settings', link: '/settings'},
     {value: 'Users', link: '/users'},
     {value: 'Applications', link: '/applications'},
-    {value: 'Virtual Machines', link: '/virtual-machines'},
-    {value: 'Virtues', link: '/virtues'}
+    {value: 'Virtual Machine Templates', link: '/vm-templates'},
+    {value: 'Virtue Templates', link: '/virtues'}
   ];
 
-  ngOnInit() {}
-
+  ngOnInit() {
+  }
 }

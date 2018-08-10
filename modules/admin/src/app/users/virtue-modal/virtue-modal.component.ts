@@ -25,8 +25,7 @@ export class VirtueModalComponent implements OnInit {
   addVirtues = new EventEmitter();
   appsList = [];
   virtues = [];
-  selVirtues = [];
-  storedVirtues = [];
+  userVirtueIDs = [];
 
   constructor(
     private appService: ApplicationsService,
@@ -36,56 +35,60 @@ export class VirtueModalComponent implements OnInit {
     public dialogRef: MatDialogRef<VirtueModalComponent>,
     @Inject( MAT_DIALOG_DATA ) public data: any
    ) {
-    this.storedVirtues = data['storedVirtues'];
+    this.userVirtueIDs = data['userVirtueIDs'];
   }
 
   ngOnInit() {
     this.baseUrlService.getBaseUrl().subscribe(res => {
       let awsServer = res[0].aws_server;
-      this.getBaseUrl(awsServer);
-      this.getVirtues(awsServer);
-      this.getApps(awsServer);
+      this.setBaseUrl(awsServer);
+      this.getVirtues();
+      this.getApps();
     });
-    if (this.storedVirtues.length > 0) {
-      this.selVirtues = this.storedVirtues;
+    if (this.userVirtueIDs.length > 0) {
+      this.userVirtueIDs = this.userVirtueIDs;
     }
   }
 
-  getBaseUrl(url: string) {
+  setBaseUrl(url: string) {
     this.baseUrl = url;
   }
 
-  getVirtues(baseUrl: string) {
-    this.virtuesService.getVirtues(baseUrl)
+  getVirtues() {
+    this.virtuesService.getVirtues(this.baseUrl)
       .subscribe(virtues => {
         this.virtues = virtues;
       });
   }
 
-  getApps(baseUrl: string) {
-    this.appService.getAppsList(baseUrl).subscribe(data => this.appsList = data);
+  getApps() {
+    this.appService.getAppsList(this.baseUrl).subscribe(apps => this.appsList = apps);
   }
 
   getAppName(id: string) {
-    let app = this.appsList.filter(data => data.id === id);
+    if (this.appsList.length == 0) {
+      return;
+    }
+
+    let app = this.appsList.filter(app => app.id === id);
+
+    // console.log(id);
+
     return app[0].name;
   }
 
   selectedVirtues(id: string) {
-    if (this.storedVirtues.length > 0) {
-      for (let sel of this.storedVirtues) {
-        if (sel === id) {
-          return true;
-        }
+    for (let sel of this.userVirtueIDs) {
+      if (sel === id) {
+        return true;
       }
-    } else {
-      return false;
     }
+    return false;
   }
 
   cbVirtueList(event, id: string) {
     if (event === true) {
-      this.selVirtues.push(id);
+      this.userVirtueIDs.push(id);
       console.log('Added ' + id);
     } else {
       this.removeVm(id);
@@ -94,18 +97,18 @@ export class VirtueModalComponent implements OnInit {
   }
 
   removeVm(id: string) {
-    this.selVirtues.splice(this.selVirtues.indexOf(id), 1);
+    this.userVirtueIDs.splice(this.userVirtueIDs.indexOf(id), 1);
   }
 
   clearList() {
-    this.selVirtues = [];
-    this.storedVirtues = [];
+    this.userVirtueIDs = [];
+    this.userVirtueIDs = [];
   }
 
   onAddVirtues(): void {
-    this.addVirtues.emit(this.selVirtues);
-    // console.log('Selected Virtues: ');
-    // console.log(this.selVirtues);
+    console.log('Selected Virtues: ');
+    console.log(this.userVirtueIDs);
+    this.addVirtues.emit(this.userVirtueIDs);
     this.clearList();
     this.dialogRef.close();
   }

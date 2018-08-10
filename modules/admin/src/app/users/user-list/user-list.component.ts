@@ -2,100 +2,79 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
-// import { User } from '../../shared/models/user.model';
+import { Item } from '../../shared/models/item.model';
+import { User } from '../../shared/models/user.model';
+import { Virtue } from '../../shared/models/virtue.model';
+import { Column } from '../../shared/models/column.model';
+import { DictList } from '../../shared/models/dictionary.model';
+
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { UsersService } from '../../shared/services/users.service';
 import { VirtuesService } from '../../shared/services/virtues.service';
+import { VirtualMachineService } from '../../shared/services/vm.service';
+import { ApplicationsService } from '../../shared/services/applications.service';
 
 import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
+import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+
 @Component({
   selector: 'app-user-list',
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css'],
-  providers: [ BaseUrlService, UsersService ]
+  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
+  providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
-export class UserListComponent implements OnInit {
-  baseUrl: string;
-  users = [];
-  virtues = [];
+export class UserListComponent extends GeneralListComponent {
 
   constructor(
-    private router: Router,
-    private location: Location,
-    private baseUrlService: BaseUrlService,
-    private usersService: UsersService,
-    private virtuesService: VirtuesService,
-    public dialog: MatDialog
+    router: Router,
+    baseUrlService: BaseUrlService,
+    usersService: UsersService,
+    virtuesService: VirtuesService,
+    vmService: VirtualMachineService,
+    appsService: ApplicationsService,
+    dialog: MatDialog
   ) {
-    // override the route reuse strategy
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+
+    //Note: colWidths of all columns must add to exactly 12.
+    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    this.colData = [
+      {name: 'name', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'roles', prettyName: 'Authorized Roles', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.formatRoles},
+      {name: 'virtues', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildrenListHTMLstring},
+      {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}
+    ];
+
+    this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
+
+    this.prettyTitle = "Users";
+    this.itemName = "User";
+    this.pluralItem = "Users";
+    this.noDataMessage = "No users have been added at this time. To add a user, click on the button \"Add " + this.itemName +  "\" above.";
+    this.domain = '/users';
   }
 
-  ngOnInit() {
-    this.baseUrlService.getBaseUrl().subscribe( _url => {
-      let awsServer = _url[0].aws_server;
-      this.getBaseUrl(awsServer);
-      this.getUsers(awsServer);
-      this.getVirtues(awsServer);
-    });
-    this.refreshData();
-  }
-
-  getBaseUrl( url: string ) {
-    this.baseUrl = url;
-  }
-
-  refreshData() {
-    setTimeout(() => {
-      this.router.navigated = false;
-      this.getUsers(this.baseUrl);
-    }, 1000);
-  }
-
-  getUsers( baseUrl: string ): void {
-    this.usersService.getUsers(baseUrl).subscribe(data => {
-      this.users = data;
-    });
-  }
-
-  deleteUser(username: string) {
-    // console.log(username);
-    this.usersService.deleteUser(this.baseUrl, username);
-    this.refreshData();
-  }
-
-  getVirtues(baseUrl: string) {
-    this.virtuesService.getVirtues(baseUrl).subscribe( virtues => {
-      this.virtues = virtues;
-    });
-  }
-
-  getVirtueName(id: string) {
-    for (let virtue of this.virtues) {
-      if (id === virtue.id) {
-        return virtue.name;
-      }
+  formatRoles( user: User ): string {
+    if (!user.roles) {
+      return '';
     }
+    return user.roles.sort().toString();
   }
 
-  openDialog(id, type, text): void {
-    const dialogRef = this.dialog.open( DialogsComponent, {
-      width: '450px',
-      data:  {
-          dialogText: text,
-          dialogType: type
-        }
-    });
+  // Overrides parent
+  toggleItemStatus(u: User) {
+    console.log(u);
+    if (u.getName().toUpperCase() === "ADMIN") {
+      this.openDialog('disable', u);
+      //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
+      return;
+    }
+    this.usersService.setUserStatus(this.baseUrl, u.getID(), !u.enabled).subscribe();
 
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog to delete {{data.dialogText}} was closed');
-    });
+    this.refreshData();
   }
 
 }
