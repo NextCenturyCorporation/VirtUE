@@ -66,7 +66,7 @@ export class UsersService {
   //see backend files at:
   //  src/main/java/com/ncc/savior/virtueadmin/service/AdminService.java:325
   //  src/main/java/com/ncc/savior/virtueadmin/data/jpa/SpringJpaUserManager.java:71
-  public setUserStatus(baseUrl: string, username: string, newStatus: string): Observable<any> {
+  public setUserStatus(baseUrl: string, username: string, newStatus: boolean): Observable<any> {
     let url = baseUrl + this.configUrl + username + '/enable';
     // console.log("setUserStatus");
     // console.log(url);

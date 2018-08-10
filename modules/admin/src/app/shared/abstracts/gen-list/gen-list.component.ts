@@ -21,7 +21,6 @@ import { Item } from '../../models/item.model';
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { UsersService } from '../../services/users.service';
 import { VirtuesService } from '../../services/virtues.service';
-import { ItemService } from '../../services/item.service';
 import { VirtualMachineService } from '../../services/vm.service';
 import { ApplicationsService } from '../../services/applications.service';
 
