@@ -125,7 +125,7 @@ resource "aws_instance" "file_server" {
 	password = "${var.admin_password}"
 	https    = true
 	
-	# set from default of 5m to 10m to avoid winrm timeout5
+	# set from default of 5m to 10m to avoid winrm timeout
 	timeout = "10m"
   }
 
@@ -136,12 +136,6 @@ resource "aws_instance" "file_server" {
   net user Administrator "${var.admin_password}"
   Clear-ADAccountExpiration -Identity Admin
   Clear-ADAccountExpiration -Identity Administrator
-  echo Creating normal user
-  echo Sharing files
-  Get-WindowsFeature -Name FS-FileServer
-  New-FileShare -Name TestShare -SourceVolume (Get-Volume -DriveLetter C) -FileServerFriendlyName $env:COMPUTERNAME
-  echo Hello > \shares\TestShare\hello.txt
-  Get-FileShare -Name TestShare | Grant-FileShareAccess -AccountName bob -AccessRight Full
   echo Setting up delegation
   Add-WindowsFeature RSAT-AD-PowerShell
   Import-Module ActiveDirectory
@@ -150,5 +144,6 @@ resource "aws_instance" "file_server" {
 </powershell>
 EOF
 
-  depends_on = [ "null_resource.user_creation" ]
+  # can't join the domain until the AD server is up
+  depends_on = [ "aws_directory_service_directory.active_directory" ]
 }

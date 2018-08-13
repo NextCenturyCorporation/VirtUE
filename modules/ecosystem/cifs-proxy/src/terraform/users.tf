@@ -20,6 +20,4 @@ resource "null_resource" "user_creation" {
 	  "net user bob ${var.bob_password} /add /domain"
 	]
   }
-
-  depends_on = [ "aws_directory_service_directory.active_directory" ]
 }
