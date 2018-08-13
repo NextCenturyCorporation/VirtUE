@@ -1,10 +1,7 @@
 package com.nextcentury.savior.cifsproxy;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,8 +18,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.User;
@@ -33,14 +28,18 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import com.nextcentury.savior.cifsproxy.BaseSecurityConfig.SimpleUserDetailsService;
-
 /**
  * Base security configuration for Savior Server. All other security
  * configurations should extend this one.
  */
 public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
-	public class SimpleUserDetailsService implements UserDetailsService {
+	/**
+	 * The cifs proxy doesn't need any user info, so fake it.
+	 * 
+	 * @author clong
+	 *
+	 */
+	protected class FakeUserDetailsService implements UserDetailsService {
 
 		@Override
 		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -75,8 +74,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().write("Login failure: " + exception.getMessage());
 			}
 		};
-		AuthenticationSuccessHandler successHandler=new AuthenticationSuccessHandler() {
-			
+		AuthenticationSuccessHandler successHandler = new AuthenticationSuccessHandler() {
+
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
@@ -84,13 +83,10 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().println("Login success");
 			}
 		};
-		http.authorizeRequests()
-			.antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
-			.antMatchers("/hello").permitAll()
-			.antMatchers("/data/**").permitAll()
-			.anyRequest().authenticated().and().formLogin()
-				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login")
-				.permitAll().and().logout().permitAll();
+		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
+				.antMatchers("/hello").permitAll().antMatchers("/data/**").permitAll().anyRequest().authenticated()
+				.and().formLogin().failureHandler(authenticationFailureHandler).successHandler(successHandler)
+				.loginPage("/login").permitAll().and().logout().permitAll();
 
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
@@ -130,7 +126,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	@Bean
 	public UserDetailsService userDetailsService() {
-		return new SimpleUserDetailsService();
+		return new FakeUserDetailsService();
 	}
 
 	@Bean

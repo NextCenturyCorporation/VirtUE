@@ -2,6 +2,12 @@ package com.nextcentury.savior.cifsproxy;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider;
 import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
@@ -30,6 +37,7 @@ import org.springframework.security.kerberos.web.authentication.SpnegoAuthentica
 import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
@@ -45,6 +53,8 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 
 	private static final XLogger logger = XLoggerFactory.getXLogger(ActiveDirectorySecurityConfig.class);
 
+	public static final String USERNAME_ATTRIBUTE = "USERNAME";
+
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
@@ -56,17 +66,16 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	@Value("${savior.security.ad.url:ERROR}")
 	private String adUrl;
 
-	@Value("${savior.security.https.force:false}")
-	private boolean forceHttps;
-
 	@Value("${savior.security.ldap}")
 	private String ldapURL;
 
 	@Value("${savior.cifsproxy.principal}")
 	private String servicePrincipal;
 
-	@Value("${savior.cifsproxy.keytab}")
+	@Value("${savior.cifsproxy.keytab:/etc/krb5.keytab}")
 	private File keytabLocation;
+
+	private Path serviceTicketFile;
 
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
@@ -80,7 +89,14 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		logger.entry();
-		AuthenticationManager authenticationManagerBean = new CachingAuthenticationManager(super.authenticationManagerBean(), "ccache");
+
+		// we don't want anyone but us reading our ticket file
+		Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+		FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
+		serviceTicketFile = Files.createTempFile("cifsproxy", "", attr);
+
+		AuthenticationManager authenticationManagerBean = new CachingAuthenticationManager(
+				super.authenticationManagerBean(), serviceTicketFile);
 		logger.exit(authenticationManagerBean);
 		return authenticationManagerBean;
 	}
@@ -121,6 +137,15 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		logger.entry(authenticationManager);
 		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
 		filter.setAuthenticationManager(authenticationManager);
+		filter.setSuccessHandler(new AuthenticationSuccessHandler() {
+			
+			@Override
+			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+					Authentication authentication) throws IOException, ServletException {
+				request.getSession().setAttribute(USERNAME_ATTRIBUTE, authentication.getName());
+			}
+		});
+		
 		filter.setFailureHandler(new AuthenticationFailureHandler() {
 
 			@Override
