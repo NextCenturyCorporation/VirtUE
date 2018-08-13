@@ -11,8 +11,8 @@ resource "null_resource" "user_creation" {
 	user = "Admin" # domain admin
 	password = "${var.admin_password}"
 	host = "${aws_instance.file_server.public_ip}"
-	type = "${aws_instance.file_server.connection.type}"
-	https = "${aws_instance.file_server.connection.https}"
+	type = "winrm"
+	https = "true"
   }
 
   provisioner "remote-exec" {
@@ -20,4 +20,6 @@ resource "null_resource" "user_creation" {
 	  "net user bob ${var.bob_password} /add /domain"
 	]
   }
+
+  depends_on = [ "aws_directory_service_directory.active_directory" ]
 }

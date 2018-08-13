@@ -134,11 +134,13 @@ resource "aws_instance" "file_server" {
   Start-Transcript -Path "c:\user_data.log" -append -force 
   echo Setting password
   net user Administrator "${var.admin_password}"
-  echo Creating user
-  net user bob /add /domain
+  Clear-ADAccountExpiration -Identity Admin
+  Clear-ADAccountExpiration -Identity Administrator
+  echo Creating normal user
   echo Sharing files
   Get-WindowsFeature -Name FS-FileServer
   New-FileShare -Name TestShare -SourceVolume (Get-Volume -DriveLetter C) -FileServerFriendlyName $env:COMPUTERNAME
+  echo Hello > \shares\TestShare\hello.txt
   Get-FileShare -Name TestShare | Grant-FileShareAccess -AccountName bob -AccessRight Full
   echo Setting up delegation
   Add-WindowsFeature RSAT-AD-PowerShell
@@ -148,5 +150,5 @@ resource "aws_instance" "file_server" {
 </powershell>
 EOF
 
-  depends_on = [ "aws_directory_service_directory.active_directory" ]
+  depends_on = [ "null_resource.user_creation" ]
 }
