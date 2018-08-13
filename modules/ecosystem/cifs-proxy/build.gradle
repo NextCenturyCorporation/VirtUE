@@ -90,7 +90,12 @@ def getWebhost() {
             }
             def stringOutput = output.toString()
             def hostMatch = stringOutput =~ /public_dns *= (.*)/
-            ext.webhost = hostMatch[0][1]
+            if (hostMatch.matches()) {
+                ext.webhost = hostMatch[0][1]
+            }
+            else {
+                println "warning: terraform did not return host information for the user-facing server. Will not be able to deploy"
+            }
         }
     }
     return ext.webhost
