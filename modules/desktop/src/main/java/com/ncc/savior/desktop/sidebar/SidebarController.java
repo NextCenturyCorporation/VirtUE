@@ -31,7 +31,7 @@ public class SidebarController {
 	private VirtueService virtueService;
 	private Sidebar sidebar;
 	private Thread virtuePollThread;
-	private Boolean terminatePollThread = false;
+	private boolean terminatePollThread = false;
 	protected Map<String, DesktopVirtue> currentVirtues;
 	private long pollPeriodMillis = 2500;
 	private VirtueChangeHandler changeHandler;
