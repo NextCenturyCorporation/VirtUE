@@ -5,12 +5,17 @@ import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -259,12 +264,43 @@ public class SshClipboardManager implements IClipboardManager {
 		props.groupId = groupId;
 		return props;
 	}
+	
+	public String sha2hex(byte[] bytesOfMessage) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException { 
+		MessageDigest md = MessageDigest.getInstance("SHA-256"); 
+		byte[] thedigest = md.digest(bytesOfMessage); 
+		BigInteger bigInt = new BigInteger(1, thedigest); 
+		String hashtext = bigInt.toString(16); 
+
+		while (hashtext.length() < 32) { 
+			hashtext = "0" + hashtext; 
+		}
+        
+		return hashtext; 
+    } 
 
 	private void copyClipboardClientIfNeeded(Session session)
-			throws FileNotFoundException, SftpException, JSchException {
+			throws SftpException, JSchException, IOException {
 		FileInputStream fis = new FileInputStream(new File(sourceJarPath));
-		SshUtil.sftpFile(session, fis, destinationFilePath);
-
+		List<String> files = SshUtil.sendCommandFromSession(session, "ls");
+		
+		if (files.contains(destinationFilePath)) {
+			List<String> sha256Output = SshUtil.sendCommandFromSession(session, "sha256sum " + destinationFilePath);
+			String remoteHash = sha256Output.get(0);
+			
+			String localHash = null;
+			try {
+				localHash = sha2hex(IOUtils.toByteArray(fis));
+			} catch (NoSuchAlgorithmException e) {
+				logger.error("error with hashing", e);
+			}
+			
+			if (localHash == null || !remoteHash.contains(localHash)) {
+				SshUtil.sftpFile(session, fis, destinationFilePath);
+			}
+			
+		} else {
+			SshUtil.sftpFile(session, fis, destinationFilePath);
+		}
 	}
 
 	private static class ClipboardClientConnectionProperties {
