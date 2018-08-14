@@ -19,15 +19,12 @@ import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
-import { UsersService } from '../../services/users.service';
-import { VirtuesService } from '../../services/virtues.service';
-import { VirtualMachineService } from '../../services/vm.service';
-import { ApplicationsService } from '../../services/applications.service';
+import { ItemService } from '../../services/item.service';
 
 @Component({
   selector: 'gen-list',
   templateUrl: './gen-list.component.html',
-  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
+  providers: [ BaseUrlService, ItemService  ]
 })
 export class GeneralListComponent extends GenericPageComponent implements OnInit {
 
@@ -38,55 +35,46 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
   //this list is what gets displayed in the table.
   items: Item[];
 
+  //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+  // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
   colData: Column[];
 
   domain: string; // like '/users', '/virtues', etc.
 
   noDataMessage: string;
 
-  baseUrl: string;
-
   // these are the default properties the list sorts by
   sortColumn: Column;
   filterValue: string = '*';
   sortDirection: string = 'asc';
 
+  //show on all pages except apps-list
   showSortingAndEditOptions:boolean = true;
-
-  // protected router: Router;
-  // protected baseUrlService: BaseUrlService;
-  // protected usersService: UsersService;
-  // protected virtuesService: VirtuesService;
-  // protected vmService: VirtualMachineService;
-  // protected appsService: ApplicationsService;
-  // public dialog: MatDialog;
 
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    usersService: UsersService,
-    virtuesService: VirtuesService,
-    vmService: VirtualMachineService,
-    appsService: ApplicationsService,
+    itemService: ItemService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+    super(router, baseUrlService, itemService, dialog);
+    // super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
 
     this.updateFuncQueue = [];
     this.items = [];
+
   }
 
   ngOnInit() {
     this.sortColumn = this.colData[0];
     this.baseUrlService.getBaseUrl().subscribe( res => {
       let awsServer = res[0].aws_server;
-      this.setBaseUrl(awsServer);
+      this.itemService.setBaseUrl(awsServer);
 
+      //no onComplete() is needed
       this.pullDatasets();
     });
 
-    //do we need this?
-    // this.refreshData();
     this.resetRouter();
   }
 
@@ -122,10 +110,10 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
     }
   }
 
-  //all the list pages need a full dataset on some set of item types; they don't
-  //need to do any extra winnowing.
+  //nothing to be done but pull the data, and then set 'this.items' in onComplete
   pullData(): void {
     this.pullDatasets();
+    // this.pullDatasets2(this.onComplete);
   }
 
   openDialog(action: string, target: Item): void {
@@ -148,13 +136,26 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
           this.deleteItem(targetObject);
         }
         if (action === 'disable') {
-          this.disableItem(targetObject);
+          this.setItemStatus(targetObject, false);
         }
       }
     });
   }
 
-  deleteItem(i: Item) {}
+  deleteItem(i: Item) {
+    this.itemService.deleteItem(this.serviceConfigUrl, i.getID());
+    this.refreshData();
+  }
 
-  disableItem(i: Item) {}
+  //overriden by user-list, to perform function of setItemStatus method.
+  //TODO Change backend so everything works the same way.
+  //Probably just make every work via a setStatus method, and remove the toggle.
+  toggleItemStatus(i: Item) {
+    this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe();
+  }
+
+  setItemStatus(i: Item, newStatus: boolean) {
+    this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe();
+    this.refreshData();
+  }
 }

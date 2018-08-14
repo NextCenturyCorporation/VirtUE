@@ -7,7 +7,6 @@ import { DictList } from './dictionary.model';
  * Represents a User.
  * Children are Virtue objects.
  *
- *
  */
 export class User extends Item {
 
@@ -39,22 +38,11 @@ export class User extends Item {
     else {
       this.roles = [];
     }
-
-    this.children = new DictList<Virtue>();
   }
 
 
   //Overrides Item
   getID(): string {
     return this.name;
-  }
-
-  getRepresentation(): {} {
-    return {
-      'username': this.name,
-      'authorities': this.roles,
-      'virtueTemplateIds': this.childIDs,
-      'enabled': this.enabled
-    };
   }
 }

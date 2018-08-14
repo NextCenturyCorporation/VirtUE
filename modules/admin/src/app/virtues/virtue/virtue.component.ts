@@ -6,11 +6,8 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { VirtuesService } from '../../shared/services/virtues.service';
-import { VirtualMachineService } from '../../shared/services/vm.service';
-import { UsersService } from '../../shared/services/users.service';
+import { ItemService } from '../../shared/services/item.service';
 
 import { VmModalComponent } from '../vm-modal/vm-modal.component';
 
@@ -19,7 +16,8 @@ import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { DictList } from '../../shared/models/dictionary.model';
-import { Mode } from '../../shared/enums/mode.enum';
+
+import { Mode, ConfigUrlEnum } from '../../shared/enums/enums';
 
 import { VirtueSettingsComponent } from '../virtue-settings/virtue-settings.component';
 
@@ -30,7 +28,7 @@ import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.c
   selector: 'app-virtue',
   templateUrl: './virtue.component.html',
   // styleUrls: ['./edit-virtue.component.css'],
-  providers: [ BaseUrlService, ApplicationsService, VirtualMachineService, VirtuesService, UsersService ]
+  providers: [ BaseUrlService, ItemService ]
 })
 
 export class VirtueComponent extends GenericFormComponent {
@@ -40,22 +38,19 @@ export class VirtueComponent extends GenericFormComponent {
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    usersService: UsersService,
-    virtuesService: VirtuesService,
-    vmService: VirtualMachineService,
-    appsService: ApplicationsService,
+    itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/virtues', activatedRoute, router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+    super('/virtues', activatedRoute, router, baseUrlService, itemService, dialog);
+
+    this.serviceConfigUrl = ConfigUrlEnum.VIRTUES;
 
     this.updateFuncQueue = [this.pullApps, this.pullVms, this.pullVirtues];
+    this.neededDatasets = ["apps", "vms", "virtues"];
 
     //set up empty (except for a default color), will get filled in ngOnInit if
     //mode is not 'create'
     this.item = new Virtue({color: this.defaultColor()});
-
-    this.serviceCreateFunc = this.virtuesService.createVirtue;
-    this.serviceUpdateFunc = this.virtuesService.updateVirtue;
 
     this.datasetName = 'allVirtues';
     this.childDatasetName = 'allVms';
@@ -66,7 +61,7 @@ export class VirtueComponent extends GenericFormComponent {
     return this.mode === Mode.CREATE ? "#cccccc": "#ffffff"
   }
 
-  //there's probably a better way to do this
+  //TODO decide if this is sufficent, or if it could be designed better
   updateUnconnectedFields() {
     this.settingsPane.setColor((this.item as Virtue).color);
   }
@@ -85,14 +80,42 @@ export class VirtueComponent extends GenericFormComponent {
       this.updateChildList(dialogvmIDs);
     });
 
+    //TODO look at unsubscriptions, everywhere things are subscribed to.
+    //Apparently angular has a bug where subscriptions aren't always automatically
+    //destroyed when their containing component is destroyed.
+    //May be the cause of the possible memory-leak like thing in firefox.
     // dialogRef.afterClosed().subscribe(() => {
     //   vms.unsubscribe();
     // });
   }
 
 
+  //create and fill the fields the backend expects to see, record any
+  //uncollected inputs, and check that the item is valid to be saved
   finalizeItem(): boolean {
+
+    //TODO perform checks here, so none of the below changes happen if the item
+    //isn't valid
+
     this.item['color'] = this.settingsPane.getColor();
+    console.log("color:", this.item['color']);
+    if (! this.item['version']) {
+      this.item['version'] = '1.0';
+    }
+    console.log("version:", this.item['version'], "(see what it looks like to type html code here - injection vector?)");
+
+    //The following are required:
+    // this.item.name,     can't be empty
+    // this.item.version,  will be valid
+    // this.item.enabled,  should either be true or false
+    // this.item.color,    should be ok? make sure it has a default in the settings pane
+    this.item['virtualMachineTemplateIds'] = this.item.childIDs;
+
+    //TODO update the update date. Maybe? That might be done on the backend
+    // this.item['lastModification'] = new Date().something
+
+    this.item.children = undefined;
+    this.item.childIDs = undefined;
     return true;
   }
 

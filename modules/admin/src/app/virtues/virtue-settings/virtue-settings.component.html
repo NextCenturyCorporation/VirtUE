@@ -8,12 +8,13 @@
   <div class="tab-pane-content">
     <h4>General Settings</h4>
     <div class="mui-row form-item">
-      <div class="mui-col-md-4 padding-left-0"><label>Select Virtue Color</label></div>
+      <div class="mui-col-md-1"></div>
+      <div class="mui-col-md-4 padding-left-0"><label>Select Virtue Color:</label></div>
       <div class="mui-col-md-6 float-right">
-        <input id="virtue-color" type="color" [(ngModel)]="virtueColor" />
+        <mat-card id="virtue-color" rowHeight="1:1" [ngStyle]="{'background-color': virtueColor, 'border':'1px solid black'}" (click)="activateModal()"></mat-card>
       </div>
     </div>
-    <div class="mui-row form-item">
+    <!-- <div class="mui-row form-item">
       <div class="mui-col-md-4 padding-left-0"><label>Customize Icon</label></div>
       <div class="mui-col-md-8 icon-upload">
         <mat-form-field>
@@ -21,7 +22,7 @@
           <button mat-button class="upload-button">upload</button>
         </mat-form-field>
       </div>
-    </div>
+    </div> -->
     <div class="mui-row form-item">
       <h5>Inter-Virtue Settings</h5>
       <div class="mui-col-md-12">

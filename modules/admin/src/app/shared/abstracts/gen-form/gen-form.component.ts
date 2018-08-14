@@ -6,11 +6,12 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { ApplicationsService } from '../../services/applications.service';
 import { BaseUrlService } from '../../services/baseUrl.service';
-import { VirtuesService } from '../../services/virtues.service';
-import { VirtualMachineService } from '../../services/vm.service';
-import { UsersService } from '../../services/users.service';
+import { ItemService } from '../../services/item.service';
+// import { ApplicationsService } from '../../services/applications.service';
+// import { VirtuesService } from '../../services/virtues.service';
+// import { VirtualMachineService } from '../../services/vm.service';
+// import { UsersService } from '../../services/users.service';
 
 // import { VmModalComponent } from '../vm-modal/vm-modal.component';
 
@@ -20,25 +21,22 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
 import { DictList } from '../../models/dictionary.model';
-import { Mode } from '../../enums/mode.enum';
+import { Mode } from '../../enums/enums';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 
 @Component({
-  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService, UsersService ]
+  providers: [ BaseUrlService, ItemService ]
 })
 export abstract class GenericFormComponent extends GenericPageComponent {
 
   // I have no idea what this does, but it was called "adUserCtrl" in the
-  // original user file, before refactor.
+  // original user file, before refactor. TODO
   itemForm: FormControl;
 
   // activeClass: string;
   // errorMsg: any;
-
-  serviceCreateFunc: (baseUrl: string, jsonBody: string)=> Observable<any>;
-  serviceUpdateFunc: (baseUrl: string, id: string, jsonBody: string)=> Observable<any>;
 
   //Note:
   //  when creating, virtue id is empty.
@@ -75,13 +73,15 @@ export abstract class GenericFormComponent extends GenericPageComponent {
     protected activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    usersService: UsersService,
-    virtuesService: VirtuesService,
-    vmService: VirtualMachineService,
-    appsService: ApplicationsService,
+    itemService: ItemService,
+    // protected usersService: UsersService,
+    // protected virtuesService: VirtuesService,
+    // protected vmService: VirtualMachineService,
+    // protected appsService: ApplicationsService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+    super(router, baseUrlService, itemService, dialog);
+    // super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
     this.setMode();
     //set up empty, will get filled in ngOnInit if not mode is not 'create'
 
@@ -133,8 +133,8 @@ export abstract class GenericFormComponent extends GenericPageComponent {
     if (!urlValid) {
       if (this.router.routerState.snapshot.url === this.parentDomain) {
         // apparently any time an error happens on this page, the system
-        // quits and returns to /virtues, and then for some reason re-calls the
-        // constructor for CreateEditVirtueComponent. Which leads here and then
+        // quits and returns to /{parentDomain}, and then for some reason re-calls the
+        // constructor for the form component it just left. Which leads here and
         // breaks because the URL is wrong. Strange.
         return false;
       }
@@ -153,10 +153,9 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       this.item.id = this.activatedRoute.snapshot.params['id'];
     }
     this.baseUrlService.getBaseUrl().subscribe(res => {
-      //remember the stuff inside this block has to wait for a response before
-      //getting run.
-      let awsServer = res[0].aws_server;
-      this.setBaseUrl(awsServer);
+      // set up the data-loading-service, and then pull all necessary data
+      // remember this is a subprocess call
+      this.itemService.setBaseUrl(res[0].aws_server);
 
       this.pullData();
     });
@@ -165,13 +164,16 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   //Data should only be pulled the first time the page loads.
-  //If some sort of refresh button is added, implement the commented out function
-  //and uncomment it.
+  //If some sort of refresh button is added, implement an 'emptyDatasets()'
+  //  function, and call it within pullDatasets.
+  //Don't refresh the item being edited though - that'd just throw away whatever
+  //  changes the user had made. Do refresh the item's children though, based on
+  //  its current childIDs list.
   pullData() {
-    // this.emptyDatasets(); //should empty the datasets built via updateFuncQueue
     this.pullDatasets();
+    // this.pullDatasets2(this.buildItem);
 
-    if (this.mode !== Mode.CREATE) {//if "d" or "e"
+    if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
       this.buildData();
     }
   }
@@ -210,6 +212,21 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.setUpItem(tempItem);
   }
 
+  buildItem(id:string) {
+  let tempItem = this[this.datasetName].get(id);
+    if (tempItem){
+      this.item = tempItem;
+      this.updateUnconnectedFields();
+      this.updateChildList();
+      this.resetRouter();
+    }
+    else {
+      console.log("No item with ID", id, "found in dataset", this.datasetName + ".");
+      //TODO let the user know it didn't load
+      this.cancel();
+    }
+  }
+
   setUpItem(tempItem, id?:string) {
     if (tempItem){
       this.item = tempItem;
@@ -219,32 +236,27 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
     else {
       console.log("Unable to load data on item with ID:", id);
-      //TODO do something, let the user know it didn't load
+      //TODO let the user know it didn't load
       this.cancel();
     }
   }
 
   //if nothing is passed in, we just want to populate item.children
   updateChildList( newVmIDs? : string[] ) {
-    this.item.children = new DictList<Item>(); //TODO
 
     if (newVmIDs instanceof Array) {
       this.item.childIDs = newVmIDs;
     }
 
-    for (let childID of this.item.childIDs) {
-      let child: Item = this[this.childDatasetName].get(childID);
-      if (child) {
-        this.item.children.add(childID, child);
-      }
-      else {
-        console.log("child ID in item not found in dataset. I.e., if this is for a user, \
-it has a virtue ID attached to it which doesn't exist in the backend data.")
-      }
-    }
+    this.item.buildChildren(this[this.childDatasetName]);
   }
 
   createOrUpdate() {
+    //collects/updates data for and in the item, in preparation for saving.
+    if ( ! this.finalizeItem()) {
+      console.log("Item not valid."); //TODO give useful error message
+    }
+
     if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
       this.createItem();
     }
@@ -266,15 +278,9 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
 
   //saves your edits to the backend
   updateItem(): void {
-    this.finalizeItem();
-
-    let body = this.item.getRepresentation();
-
-    // console.log("**", body);
-    this.virtuesService.updateVirtue(this.baseUrl, this.item.id, JSON.stringify(body)).subscribe(
+    this.itemService.updateItem(this.serviceConfigUrl, this.item.id, JSON.stringify(this.item)).subscribe(
       data => {
         this.resetRouter();
-        // this.refreshData();
         this.router.navigate([this.parentDomain]);
       },
       error => {
@@ -284,11 +290,7 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
 
   //saves the selected settings as a new item
   createItem() {
-    this.finalizeItem();
-
-    let body = this.item.getRepresentation();
-
-    this.serviceCreateFunc(this.baseUrl, JSON.stringify(body)).subscribe(
+    this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
       data => {
         this.resetRouter();
         this.router.navigate([this.parentDomain]);
@@ -310,11 +312,9 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
   //   });
   // }
 
-  //this does class-specific actions, saving or checking various fields
-  //before the item is saved to the backend
-  //like for virtues, the color needs to be taken from the virtue-settings
-  //panel and saved to the item.
-  //returns true iff the item is valid and can be saved.
+
+  //create and fill the fields the backend expects to see, record any
+  //uncollected inputs, and check that the item is valid to be saved
   abstract finalizeItem(): boolean;
 
   //can be overridden, if anything needs to be done manually upon item load.

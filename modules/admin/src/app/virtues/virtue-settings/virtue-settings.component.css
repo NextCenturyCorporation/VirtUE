@@ -84,3 +84,8 @@ a .fa {
   margin-left: 0;
   margin-right: 0;
 }
+
+mat-card {
+  width: 1%;
+  height: 35%;
+}

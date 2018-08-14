@@ -6,11 +6,8 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { ApplicationsService } from '../../shared/services/applications.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { VirtuesService } from '../../shared/services/virtues.service';
-import { VirtualMachineService } from '../../shared/services/vm.service';
-import { UsersService } from '../../shared/services/users.service';
+import { ItemService } from '../../shared/services/item.service';
 
 import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
 
@@ -20,13 +17,15 @@ import { VirtualMachine } from '../../shared/models/vm.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
+import { ConfigUrlEnum } from '../../shared/enums/enums';
+
 import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.component';
 
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
-  providers: [ BaseUrlService, ApplicationsService, VirtualMachineService, VirtuesService, UsersService ]
+  providers: [ BaseUrlService, ItemService ]
 })
 
 export class UserComponent extends GenericFormComponent {
@@ -41,20 +40,18 @@ export class UserComponent extends GenericFormComponent {
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    usersService: UsersService,
-    virtuesService: VirtuesService,
-    vmService: VirtualMachineService,
-    appsService: ApplicationsService,
+    itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/users', activatedRoute, router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+    super('/users', activatedRoute, router, baseUrlService, itemService, dialog);
 
+    //gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User(undefined);
 
     this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
+    this.neededDatasets = ["virtues", "users"];
 
-    this.serviceCreateFunc = this.usersService.createUser;
-    this.serviceUpdateFunc = this.usersService.updateUser;
+    this.serviceConfigUrl = ConfigUrlEnum.USERS;
 
     this.datasetName = 'allUsers';
     this.childDatasetName = 'allVirtues';
@@ -64,7 +61,6 @@ export class UserComponent extends GenericFormComponent {
   activateModal(mode: string): void {
     let dialogHeight = 600;
     let dialogWidth = 800;
-    // let fullImagePath = './assets/images/app-icon-white.png';
 
     if (mode === 'add') {
       this.submitBtn = 'Add Virtues';
@@ -93,8 +89,15 @@ export class UserComponent extends GenericFormComponent {
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
   }
 
-  //Doesn't need to do anything
+  //create and fill the fields the backend expects to see, record any
+  //uncollected inputs, and check that the item is valid to be saved
   finalizeItem():boolean {
+
+    //TODO perform checks here, so none of the below changes happen if the item
+    //isn't valid
+
+    // remember check enabled
+
     this.item['roles'] = [];
     if (this.roleUser) {
       this.item['roles'].push('ROLE_USER');
@@ -106,5 +109,15 @@ export class UserComponent extends GenericFormComponent {
     if (!this.item['username']) {
       return confirm("You need to enter a username.");
     }
+
+    this.item['username'] = this.item.name,
+    this.item['authorities'] = this.item['roles'], //since this is technically an item
+    this.item['virtueTemplateIds'] = this.item.childIDs
+
+    //so we're not trying to stringify a bunch of extra fields and data
+    this.item.children = undefined;
+    this.item.childIDs = undefined;
+    this.item['roles'] = undefined;
+    return true;
   }
 }

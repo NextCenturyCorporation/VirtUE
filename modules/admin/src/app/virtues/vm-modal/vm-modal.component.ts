@@ -97,9 +97,6 @@ export class VmModalComponent implements OnInit {
   }
 
   onAddVms(): void {
-    // if (this.pageVmList.length > 0) {
-    //   this.selVmsList = this.pageVmList;
-    // }
     this.addVms.emit(this.selVmsList);
     this.clearVmList();
     this.dialogRef.close();

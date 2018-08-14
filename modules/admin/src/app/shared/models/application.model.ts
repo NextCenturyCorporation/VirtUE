@@ -2,9 +2,9 @@
 import { Item } from './item.model';
 
 /**
- * Represents a Application.
+ * Represents an Application.
  * Children are null.
- * At time of writing, launchCommand and iconKey are not used.
+ * At time of writing (early Aug 2018), launchCommand and iconKey are not used.
  */
 export class Application extends Item{
 
@@ -31,15 +31,6 @@ export class Application extends Item{
       this.iconKey = '';
     }
 
-  }
-
-  getRepresentation(): {} {
-    return {
-      // 'name': this.name,
-      // 'version': this.version,
-      // 'enabled': this.enabled,
-      // 'color' : this.color,
-      // 'virtualMachineTemplateIds': this.childIDs
-    };
+    this.children = undefined;
   }
 }

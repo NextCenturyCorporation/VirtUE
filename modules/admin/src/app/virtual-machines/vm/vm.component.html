@@ -22,19 +22,7 @@
           <div class="mui-col-md-4">
             <mat-form-field class="form-field">
               <mat-select [(ngModel)]="item.os" [ngModelOptions]="{standalone: true}" placeholder="Select One" disableRipple>
-                <mat-option *ngFor="let o of osList" [value]="o.os">{{ o.name }} </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="mui-row">
-          <div class="mui-col-md-2">
-            <label>Permissions:</label>
-          </div>
-          <div class="mui-col-md-4">
-            <mat-form-field class="form-field">
-              <mat-select [(ngModel)]="item.securityTag" [ngModelOptions]="{standalone: true}" placeholder="Select One" disableRipple>
-                <mat-option *ngFor="let s of securityOptions" [value]="s.level">{{ s.name }} </mat-option>
+                <mat-option *ngFor="let o of osOptions.getList()" [value]="o.os">{{ o.prettyName }} </mat-option>
               </mat-select>
             </mat-form-field>
           </div>

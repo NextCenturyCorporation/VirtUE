@@ -12,21 +12,20 @@ import { Column } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { UsersService } from '../../shared/services/users.service';
-import { VirtuesService } from '../../shared/services/virtues.service';
-import { VirtualMachineService } from '../../shared/services/vm.service';
-import { ApplicationsService } from '../../shared/services/applications.service';
+import { ItemService } from '../../shared/services/item.service';
 
 import { Application } from '../../shared/models/application.model';
 import { AddVmAppComponent } from '../add-vm-app/add-vm-app.component';
 
 import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
+import { ConfigUrlEnum } from '../../shared/enums/enums';
+
 @Component({
   selector: 'app-vm-apps-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
+  providers: [ BaseUrlService, ItemService  ]
 })
 export class VmAppsListComponent extends GeneralListComponent {
 
@@ -36,14 +35,14 @@ export class VmAppsListComponent extends GeneralListComponent {
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    usersService: UsersService,
-    virtuesService: VirtuesService,
-    vmService: VirtualMachineService,
-    appsService: ApplicationsService,
+    itemService: ItemService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+    super(router, baseUrlService, itemService, dialog);
 
+    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+    //
     //Note: colWidths of all columns must add to exactly 12.
     //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     //See note next to a line containing "mui-col-md-12" in gen-list.component.html
@@ -52,6 +51,8 @@ export class VmAppsListComponent extends GeneralListComponent {
       {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
       {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
     ];
+
+    this.serviceConfigUrl = ConfigUrlEnum.APPS;
 
     this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
 
@@ -63,8 +64,14 @@ export class VmAppsListComponent extends GeneralListComponent {
     this.domain = '/applications';
 
     this.updateFuncQueue = [this.pullApps];
+    this.neededDatasets = ["apps"];
 
     this.showSortingAndEditOptions = false;
+  }
+
+  //called after all the datasets have loaded
+  onComplete(scope): void {
+    this.items = scope.allApps.asList();
   }
 
   openAppsDialog(): void {

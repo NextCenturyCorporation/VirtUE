@@ -3,8 +3,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { User } from '../models/user.model';
-import { Item } from '../models/item.model';
-import { DictList } from '../models/dictionary.model';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -43,6 +41,20 @@ export class UsersService {
     }
   }
 
+  deleteUser(baseUrl: string, username: string) {
+    let url = baseUrl + this.configUrl;
+    // console.log("deleteUser");
+    // console.log(url);
+    return this.httpClient.delete(url + username).subscribe(
+    data => {
+      console.log(data);
+      return true;
+    },
+    error => {
+      console.error('Error');
+    });
+  }
+
   assignVirtues(baseUrl: string, username: string, virtue: string) {
 
     let userRecord = baseUrl + this.configUrl + username + '/assign/' + virtue;
@@ -62,10 +74,6 @@ export class UsersService {
     return this.httpClient.put(url, userData, httpOptions);
   }
 
-  //doesn't appear that enabling users works.
-  //see backend files at:
-  //  src/main/java/com/ncc/savior/virtueadmin/service/AdminService.java:325
-  //  src/main/java/com/ncc/savior/virtueadmin/data/jpa/SpringJpaUserManager.java:71
   public setUserStatus(baseUrl: string, username: string, newStatus: boolean): Observable<any> {
     let url = baseUrl + this.configUrl + username + '/enable';
     // console.log("setUserStatus");
@@ -74,18 +82,5 @@ export class UsersService {
   }
 
 
-  deleteUser(baseUrl: string, username: string) {
-    let url = baseUrl + this.configUrl;
-    // console.log("deleteUser");
-    // console.log(url);
-    return this.httpClient.delete(url + username).subscribe(
-    data => {
-      console.log(data);
-      return true;
-    },
-    error => {
-      console.error('Error');
-    });
-  }
 
 }

@@ -55,37 +55,35 @@
         <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
         It is passed the preceeding list, followed by the values between colons -->
         <div class="mui-row table-row"
-              *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
-              [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }"
-              appActiveClass>
-
-          <div *ngFor="let column of colData; let idx=index"
+          *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
+          [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }"
+          appActiveClass>
+          <div class="mini-menu">
+            <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[colData[0].name] }}</a>
+            <span *ngIf="showSortingAndEditOptions" class="menu-options">
+              <a *ngIf="i.enabled === false" (click)="toggleItemStatus(i)">Enable</a>
+              <a *ngIf="i.enabled === false"> | </a>
+              <a *ngIf="i.enabled === true"  (click)="toggleItemStatus(i)">Disable</a>
+              <a *ngIf="i.enabled === true"> | </a>
+              <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">Edit</a>
+              <a> | </a>
+              <a class="edit" routerLink="{{domain}}/duplicate/{{i.getID()}}">Duplicate</a>
+              <a> | </a>
+              <a (click)="openDialog('delete', i)">Delete</a>
+            </span>
+            <span *ngIf="!showSortingAndEditOptions" class="menu-options">
+              <a (click)="openDialog('remove', i)">Remove</a>
+            </span>
+          </div>
+          <!-- Iterate over all columns after the first one (the name), which was displayed above -->
+          <div *ngFor="let column of colData | slice:1; let idx=index"
               class="table-data mui-col-md-{{column.colWidth}} transparent">
-            <div *ngIf="idx === 0" class="mini-menu">
-              <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[column.name] }}</a>
-              <span *ngIf="showSortingAndEditOptions" class="menu-options">
-                <a *ngIf="i.enabled === false" (click)="toggleItemStatus(i)">Enable</a>
-                <a *ngIf="i.enabled === false"> | </a>
-                <a *ngIf="i.enabled === true"  (click)="toggleItemStatus(i)">Disable</a>
-                <a *ngIf="i.enabled === true"> | </a>
-                <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">Edit</a>
-                <a> | </a>
-                <a class="edit" routerLink="{{domain}}/duplicate/{{i.getID()}}">Duplicate</a>
-                <a> | </a>
-                <a (click)="openDialog('delete', i)">Delete</a>
-              </span>
-              <span *ngIf="!showSortingAndEditOptions" class="menu-options">
-                <a (click)="openDialog('remove', i)">Remove</a>
-              </span>
+            <div *ngIf="column.isList">
+              <ul>
+                  <ul [innerHTML]="column.formatValue(i)"></ul>
+              </ul>
             </div>
-            <div *ngIf="column.isList && idx !== 0 ">
-              <!-- The returned html is a bunch of <li>s inside a <ul>,
-                  so there there end up being two layers of <ul>.
-                  This makes the bullets empty, which looks a little better
-                  than filled in. -->
-              <ul [innerHTML]="column.formatValue(i)"></ul>
-            </div>
-            <div *ngIf="!column.isList && idx !== 0 ">
+            <div *ngIf="!column.isList">
               {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
             </div>
           </div>

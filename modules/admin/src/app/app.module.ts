@@ -26,6 +26,9 @@ import {
   MatToolbarModule,
 } from '@angular/material';
 
+import { MatCardModule } from '@angular/material/card';
+import { MatGridListModule } from '@angular/material/grid-list';
+
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
 
 import { AppComponent } from './app.component';
@@ -56,6 +59,7 @@ import { VirtuesWrapperComponent } from './virtues/virtues.wrapper.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { VirtueComponent} from './virtues/virtue/virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
+import { ColorModal } from './shared/modals/color-picker.modal';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
 import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-modal.component';
@@ -111,6 +115,7 @@ import { VirtuesService } from './shared/services/virtues.service';
     DialogsComponent,
     VirtueModalComponent,
     VmModalComponent,
+    ColorModal,
     ResourceModalComponent,
     FileShareComponent,
     PrintersComponent,
@@ -140,7 +145,9 @@ import { VirtuesService } from './shared/services/virtues.service';
     MatAutocompleteModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatCardModule,
     MatCheckboxModule,
+    MatGridListModule,
     MatInputModule,
     MatRadioModule,
     MatSelectModule,
@@ -165,7 +172,8 @@ import { VirtuesService } from './shared/services/virtues.service';
     ResourceModalComponent,
     VmAppsModalComponent,
     VmModalComponent,
-    VirtueModalComponent
+    VirtueModalComponent,
+    ColorModal
   ]
 })
 export class AppModule { }

@@ -19,7 +19,6 @@ export class VirtualMachine extends Item {
   loginUser: string;
   lastModification: string | Date;
   lastEditor: string;
-  securityTag: string;
 
   //convert from whatever form the vm object is in the database.
   constructor(vmObj) {
@@ -32,22 +31,9 @@ export class VirtualMachine extends Item {
       this.lastEditor = vmObj.lastEditor;
       this.lastModification = vmObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
-      this.securityTag = vmObj.securityTag;
       this.os = vmObj.os;
       this.status = vmObj.enabled ? 'enabled' : 'disabled';
     }
 
-    this.children = new DictList<Application>();
-  }
-
-  getRepresentation(): {} {
-    return {
-      'name': this.name,
-      'os': this.os,
-      'loginUser': 'system',
-      'enabled': this.enabled,
-      'applicationIds': this.childIDs,
-      'securityTag': this.securityTag
-    };
   }
 }
