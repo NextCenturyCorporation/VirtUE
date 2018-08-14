@@ -40,3 +40,4 @@ docker/server-images/workbench/admin.tar.gz
 modules/ecosystem/cifs-proxy/.settings
 modules/ecosystem/cifs-proxy/build
 /vrtu.pem
+/modules/ecosystem/cifs-proxy/src/terraform/file_server.rdp

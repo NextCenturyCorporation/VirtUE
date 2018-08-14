@@ -19,6 +19,10 @@ provider "local" {
   version = "~> 1.1"
 }
 
+provider "template" {
+  version = "~> 1.0"
+}
+
 data "external" "local_user" {
   program = ["python", "-c", "import os; print '{ \"user\": \"%s\" }' % os.environ['USER']"]
 }
@@ -42,7 +46,7 @@ variable "instance_type" {
 }
 
 variable "security_group_names" {
-  default = [ "default_sg_ad", "rdp_sg_ad", "open_private_dev_sg_ad" ]
+  default = [ "default_sg_ad", "rdp_sg_ad", "open_private_dev_sg_ad", "winrm_sg_ad" ]
 }
 
 variable "subnet_name" {

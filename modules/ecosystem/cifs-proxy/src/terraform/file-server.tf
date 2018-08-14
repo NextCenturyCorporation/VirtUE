@@ -123,7 +123,8 @@ resource "aws_instance" "file_server" {
 	type     = "winrm"
 	user     = "Administrator"
 	password = "${var.admin_password}"
-	https    = true
+	https    = false
+	use_ntlm = false
 	
 	# set from default of 5m to 10m to avoid winrm timeout
 	timeout = "10m"
@@ -132,14 +133,20 @@ resource "aws_instance" "file_server" {
   user_data = <<EOF
 <powershell>
   Start-Transcript -Path "c:\user_data.log" -append -force 
+  netsh advfirewall firewall add rule name="WinRM in" protocol=TCP dir=in profile=any localport=5985 remoteip=any localip=any action=allow
+  winrm set winrm/config/service/Auth '@{Basic="true"}'
+  winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+  winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="1024"}'
   echo Setting password
   net user Administrator "${var.admin_password}"
-  Clear-ADAccountExpiration -Identity Admin
-  Clear-ADAccountExpiration -Identity Administrator
-  echo Setting up delegation
-  Add-WindowsFeature RSAT-AD-PowerShell
-  Import-Module ActiveDirectory
-  
+  echo "Installing RSAT"
+  Install-WindowsFeature -Name RSAT-AD-PowerShell
+  echo "Renaming"
+  Rename-Computer -NewName "fileserver"
+  echo "Joining domain and rebooting"
+  $password = ConvertTo-SecureString -AsPlainText -Force "${var.admin_password}"
+  $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist Admin, $password
+  Add-Computer -DomainName "${var.domain}" -Credential $cred -Restart
   echo Setup done  
 </powershell>
 EOF
