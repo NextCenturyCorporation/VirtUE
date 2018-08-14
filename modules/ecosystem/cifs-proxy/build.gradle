@@ -90,7 +90,7 @@ def getWebhost() {
             }
             def stringOutput = output.toString()
             def hostMatch = stringOutput =~ /public_dns *= (.*)/
-            if (hostMatch.matches()) {
+            if (hostMatch.find()) {
                 ext.webhost = hostMatch[0][1]
             }
             else {
@@ -111,6 +111,8 @@ remotes {
 }
 
 task bootDeploy(dependsOn: bootJar) {
+    group 'Webserver'
+    description 'Copies the web server and gsscache jars to the server'
     doFirst {
         ssh.run {
             session(remotes.webserver) {
@@ -123,6 +125,8 @@ task bootDeploy(dependsOn: bootJar) {
 }
 
 task bootServer(dependsOn: bootDeploy) {
+    group 'Webserver'
+    description 'Copies the web server jar to the server and runs it'
     doFirst {
         ssh.run {
             session(remotes.webserver) {
