@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ncc.savior.util.JavaUtil;
 
 /**
  * Service that manager {@link BaseAlertMessage}s via an Android like toast
@@ -41,6 +44,8 @@ public class ToastUserAlertService implements IUserAlertService {
 	private MouseAdapter mouseListener;
 	protected boolean hover;
 	private long toastDelay;
+	
+	private AlertHistoryWriter writer;
 
 	public ToastUserAlertService(long toastDelay) {
 		this.hover = false;
@@ -49,6 +54,11 @@ public class ToastUserAlertService implements IUserAlertService {
 		this.executor = Executors.newSingleThreadScheduledExecutor();
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		this.startY = dim.height - 200;
+		try {
+			this.writer = new AlertHistoryWriter();
+		} catch (IOException e) {
+			logger.error("Error setting up alert history", e);
+		}
 		// pixels between alert messages. If not 0, users could try to hover over toasts
 		// to keep them around, but change toast could cause the cursor to momentarily
 		// be between alerts and then expired messages will disappear. This still may be
@@ -75,6 +85,61 @@ public class ToastUserAlertService implements IUserAlertService {
 				}
 			}
 		};
+		
+		new Thread(() -> {
+				JavaUtil.sleepAndLogInterruption(2000);
+				PlainAlertMessage alertMessage = new PlainAlertMessage("title", "You clicked the wrong button");
+				try {
+					UserAlertingServiceHolder.sendAlert(alertMessage);
+				} catch (IOException e2) {
+					logger.error("Error sending alert", e2);
+				}
+			
+		}).start();
+		
+		new Thread(() -> {
+			JavaUtil.sleepAndLogInterruption(3000);
+			PlainAlertMessage alertMessage = new PlainAlertMessage("title", "Don't copy from that virtue");
+			try {
+				UserAlertingServiceHolder.sendAlert(alertMessage);
+			} catch (IOException e2) {
+				logger.error("Error sending alert", e2);
+			}
+		
+		}).start();
+		
+		new Thread(() -> {
+			JavaUtil.sleepAndLogInterruption(5000);
+			PlainAlertMessage alertMessage = new PlainAlertMessage("title", "This is an alert");
+			try {
+				UserAlertingServiceHolder.sendAlert(alertMessage);
+			} catch (IOException e2) {
+				logger.error("Error sending alert", e2);
+			}
+		
+		}).start();
+		
+		new Thread(() -> {
+			JavaUtil.sleepAndLogInterruption(4000);
+			PlainAlertMessage alertMessage = new PlainAlertMessage("title", "This is another alert");
+			try {
+				UserAlertingServiceHolder.sendAlert(alertMessage);
+			} catch (IOException e2) {
+				logger.error("Error sending alert", e2);
+			}
+		
+		}).start();
+		
+		new Thread(() -> {
+			JavaUtil.sleepAndLogInterruption(10000);
+			PlainAlertMessage alertMessage = new PlainAlertMessage("title", "Don't do that");
+			try {
+				UserAlertingServiceHolder.sendAlert(alertMessage);
+			} catch (IOException e2) {
+				logger.error("Error sending alert", e2);
+			}
+		
+		}).start();
 	}
 
 	@Override
