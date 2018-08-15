@@ -7,6 +7,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -54,6 +56,8 @@ public abstract class AbstractVirtueContainer {
 
 	protected JScrollPane sp;
 	protected JTextField textField;
+
+	private static Set<IUpdateListener> updateListeners = new HashSet<IUpdateListener>();
 
 	public AbstractVirtueContainer(DesktopVirtue virtue, VirtueService virtueService, JScrollPane sp,
 			JTextField textField, GhostText ghostText) {
@@ -174,5 +178,25 @@ public abstract class AbstractVirtueContainer {
 	}
 
 	public abstract void updateVirtue(DesktopVirtue virtue);
+
+	protected void triggerUpdateListener() {
+		for (IUpdateListener listener : updateListeners) {
+			listener.onUpdate();
+		}
+	}
+
+	public static void addUpdateListener(IUpdateListener listener) {
+		updateListeners.add(listener);
+	}
+
+	public static void removeUpdateListener(IUpdateListener listener) {
+		updateListeners.remove(listener);
+	}
+
+	public static interface IUpdateListener {
+
+		public void onUpdate();
+
+	}
 
 }
