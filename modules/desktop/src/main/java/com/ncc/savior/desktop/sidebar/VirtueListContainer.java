@@ -112,7 +112,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 						keyword = "";
 					}
 					dropDownSearch(keyword);
-					container.validate();
+					container.revalidate();
 					container.repaint();
 					sp.validate();
 					sp.getViewport().revalidate();
@@ -120,7 +120,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 					dropDown = false;
 					container.removeAll();
 					container.add(header);
-					container.validate();
+					container.revalidate();
 					container.repaint();
 					sp.validate();
 					sp.getViewport().revalidate();

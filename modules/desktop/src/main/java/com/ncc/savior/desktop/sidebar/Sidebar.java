@@ -71,11 +71,11 @@ public class Sidebar implements VirtueChangeHandler {
 			Sidebar.class.getResource("/images/favorite-inactive.png")));
 	private ImageIcon activeFavoriteIcon = (new ImageIcon(Sidebar.class.getResource("/images/favorite-active.png")));
 
-	private ImageIcon inactiveTileIcon = (new ImageIcon(Sidebar.class.getResource("/images/tile-inactive2.png")));
-	private ImageIcon activeTileIcon = (new ImageIcon(Sidebar.class.getResource("/images/tile-active2.png")));
+	private ImageIcon inactiveTileIcon = (new ImageIcon(Sidebar.class.getResource("/images/tile-inactive.png")));
+	private ImageIcon activeTileIcon = (new ImageIcon(Sidebar.class.getResource("/images/tile-active.png")));
 
-	private ImageIcon inactiveListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-inactive2.png")));
-	private ImageIcon activeListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-active2.png")));
+	private ImageIcon inactiveListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-inactive.png")));
+	private ImageIcon activeListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-active.png")));
 
 	private static ImageIcon saviorIcon = new ImageIcon(AppsTile.class.getResource("/images/saviorLogo.png"));
 
@@ -481,7 +481,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 		JLabel logoutLabel = new JLabel();
 
-		ImageIcon imageIcon = new ImageIcon(Sidebar.class.getResource("/images/u73.png"));
+		ImageIcon imageIcon = new ImageIcon(Sidebar.class.getResource("/images/logout.png"));
 		Image image = imageIcon.getImage(); // transform it
 		Image newimg = image.getScaledInstance(27, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
 		imageIcon = new ImageIcon(newimg); // transform it back
