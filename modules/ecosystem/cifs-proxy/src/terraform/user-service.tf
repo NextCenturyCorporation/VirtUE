@@ -44,8 +44,9 @@ echo ${var.admin_password} | realm join --user Admin ${var.domain}
 (
 echo security = ads
 echo realm = ${var.domain}
-echo workgroup = test
-) >> /etc/samba/smb.conf
+echo workgroup = "${element(split(".", "${var.domain}"),0)}"
+echo kerberos method = secrets and keytab
+) | sed -i '/^\[global\]$/r /dev/stdin' /etc/samba/smb.conf
 echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 systemctl restart sshd.service
 systemctl start sssd.service
