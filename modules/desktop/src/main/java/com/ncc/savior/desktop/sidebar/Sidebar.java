@@ -286,13 +286,10 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 	}
 
-	private DesktopVirtue v;
-
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
 		if (loading) {
-			this.v = virtues.get(5);
 			loading = false;
 			setInitialViewPort();
 		}
@@ -406,12 +403,6 @@ public class Sidebar implements VirtueChangeHandler {
 		sortByOption(keyword);
 
 		scrollPane.getViewport().validate();
-
-		// new Thread(() -> {
-		// JavaUtil.sleepAndLogInterruption(5000);
-		// System.out.println(v.getName());
-		// removeVirtue(v);
-		// }).start();
 	}
 
 	@Override
