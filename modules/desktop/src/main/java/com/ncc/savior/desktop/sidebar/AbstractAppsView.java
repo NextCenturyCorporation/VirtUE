@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
+import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -37,7 +37,7 @@ public abstract class AbstractAppsView {
 
 	protected ArrayList<String> appsInView;
 
-	private static Set<IUpdateListener> updateListeners = new HashSet<IUpdateListener>();
+	private static Set<IRemoveVirtueListener> removeVirtueListeners = new HashSet<IRemoveVirtueListener>();
 
 	public AbstractAppsView(VirtueService virtueService, JScrollPane sp) {
 		this.virtueService = virtueService;
@@ -72,7 +72,7 @@ public abstract class AbstractAppsView {
 			tiles.remove(ad.getId() + virtue.getTemplateId());
 		}
 
-		triggerUpdateListener();
+		triggerRemoveVirtueListener();
 	}
 
 	public void search(String keyword, Comparator<VirtueApplicationItem> comp,
@@ -121,18 +121,18 @@ public abstract class AbstractAppsView {
 		}
 	}
 
-	protected void triggerUpdateListener() {
-		for (IUpdateListener listener : updateListeners) {
-			listener.onUpdate();
+	protected void triggerRemoveVirtueListener() {
+		for (IRemoveVirtueListener listener : removeVirtueListeners) {
+			listener.onRemove();
 		}
 	}
 
-	public static void addUpdateListener(IUpdateListener listener) {
-		updateListeners.add(listener);
+	public static void addRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.add(listener);
 	}
 
-	public static void removeUpdateListener(IUpdateListener listener) {
-		updateListeners.remove(listener);
+	public static void deleteRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.remove(listener);
 	}
 
 	public abstract void addTile(VirtueApplicationItem va);

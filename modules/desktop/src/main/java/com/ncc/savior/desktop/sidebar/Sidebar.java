@@ -51,11 +51,11 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
+import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
-import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
@@ -180,19 +180,19 @@ public class Sidebar implements VirtueChangeHandler {
 		setupLoadingGif();
 
 
-		AbstractVirtueView.addUpdateListener(new IUpdateListener() {
+		AbstractVirtueView.addRemoveVirtueListener(new IRemoveVirtueListener() {
 
 			@Override
-			public void onUpdate() {
+			public void onRemove() {
 				sortWithKeyword();
 			}
 
 		});
 
-		AbstractAppsView.addUpdateListener(new IUpdateListener() {
+		AbstractAppsView.addRemoveVirtueListener(new IRemoveVirtueListener() {
 
 			@Override
-			public void onUpdate() {
+			public void onRemove() {
 				sortWithKeyword();
 			}
 
@@ -407,11 +407,11 @@ public class Sidebar implements VirtueChangeHandler {
 
 		scrollPane.getViewport().validate();
 
-		new Thread(() -> {
-			JavaUtil.sleepAndLogInterruption(5000);
-			System.out.println(v.getName());
-			removeVirtue(v);
-		}).start();
+		// new Thread(() -> {
+		// JavaUtil.sleepAndLogInterruption(5000);
+		// System.out.println(v.getName());
+		// removeVirtue(v);
+		// }).start();
 	}
 
 	@Override

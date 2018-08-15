@@ -10,8 +10,6 @@ import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
-
 public abstract class AbstractVirtueView {
 	protected JPanel container;
 	protected ArrayList<String> virtuesInView;
@@ -21,7 +19,7 @@ public abstract class AbstractVirtueView {
 
 	protected JScrollPane sp;
 
-	private static Set<IUpdateListener> updateListeners = new HashSet<IUpdateListener>();
+	private static Set<IRemoveVirtueListener> removeVirtueListeners = new HashSet<IRemoveVirtueListener>();
 
 	public AbstractVirtueView(JScrollPane sp) {
 		this.sp = sp;
@@ -51,18 +49,24 @@ public abstract class AbstractVirtueView {
 		return container;
 	}
 
-	protected void triggerUpdateListener() {
-		for (IUpdateListener listener : updateListeners) {
-			listener.onUpdate();
+	protected void triggerRemoveVirtueListener() {
+		for (IRemoveVirtueListener listener : removeVirtueListeners) {
+			listener.onRemove();
 		}
 	}
 
-	public static void addUpdateListener(IUpdateListener listener) {
-		updateListeners.add(listener);
+	public static void addRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.add(listener);
 	}
 
-	public static void removeUpdateListener(IUpdateListener listener) {
-		updateListeners.remove(listener);
+	public static void deleteRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.remove(listener);
+	}
+
+	public static interface IRemoveVirtueListener {
+
+		public void onRemove();
+
 	}
 
 }

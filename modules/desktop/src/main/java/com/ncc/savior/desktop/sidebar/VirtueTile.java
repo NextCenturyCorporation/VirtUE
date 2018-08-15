@@ -34,7 +34,7 @@ public class VirtueTile extends AbstractVirtueView {
 	public void removeVirtue(DesktopVirtue virtue) {
 		virtues.remove(virtue.getTemplateId());
 
-		triggerUpdateListener();
+		triggerRemoveVirtueListener();
 	}
 
 	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
