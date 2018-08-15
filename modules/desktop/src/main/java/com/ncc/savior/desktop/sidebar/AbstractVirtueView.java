@@ -3,7 +3,6 @@ package com.ncc.savior.desktop.sidebar;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +11,6 @@ import javax.swing.JScrollPane;
 
 public abstract class AbstractVirtueView {
 	protected JPanel container;
-	protected ArrayList<String> virtuesInView;
 
 	protected static int row = 0;
 	protected JPanel footer = new JPanel();
@@ -24,7 +22,6 @@ public abstract class AbstractVirtueView {
 	public AbstractVirtueView(JScrollPane sp) {
 		this.sp = sp;
 		this.container = new JPanel();
-		this.virtuesInView = new ArrayList<String>();
 
 		GridBagLayout gbl = new GridBagLayout();
 		// gbl.columnWidths = new int[] { 455, 0 };

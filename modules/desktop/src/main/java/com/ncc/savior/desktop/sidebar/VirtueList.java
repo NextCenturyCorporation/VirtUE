@@ -58,7 +58,6 @@ public class VirtueList extends AbstractVirtueView {
 		container.remove(footer);
 		container.add(vlc.getContainer(), gbc);
 		moveFooter(row + 1);
-		virtuesInView.add(virtue.getTemplateId());
 
 		virtues.put(virtue.getTemplateId(), vlc);
 	}
@@ -70,7 +69,6 @@ public class VirtueList extends AbstractVirtueView {
 			public void run() {
 				row = 0;
 				container.removeAll();
-				virtuesInView.clear();
 				Collection<VirtueListContainer> vlcs = virtues.values();
 				List<VirtueListContainer> matchedVlcs;
 

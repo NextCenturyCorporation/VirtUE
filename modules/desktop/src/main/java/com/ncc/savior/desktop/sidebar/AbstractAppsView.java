@@ -1,7 +1,6 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,8 +34,6 @@ public abstract class AbstractAppsView {
 	protected ConcurrentHashMap<String, VirtueApplicationItem> tiles;
 	protected JScrollPane sp;
 
-	protected ArrayList<String> appsInView;
-
 	private static Set<IRemoveVirtueListener> removeVirtueListeners = new HashSet<IRemoveVirtueListener>();
 
 	public AbstractAppsView(VirtueService virtueService, JScrollPane sp) {
@@ -44,25 +41,12 @@ public abstract class AbstractAppsView {
 		this.sp = sp;
 		this.container = new JPanel();
 		this.tiles = new ConcurrentHashMap<String, VirtueApplicationItem>();
-		this.appsInView = new ArrayList<String>();
 	}
 
 	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) throws IOException {
 		tiles.put(ad.getId() + va.getVirtue().getTemplateId(), va);
-		appsInView.add(ad.getId() + va.getVirtue().getTemplateId());
 		container.add(va.getContainer());
 
-		container.validate();
-		container.repaint();
-	}
-
-	public void removeApplication(ApplicationDefinition ad, DesktopVirtue virtue) {
-		if (appsInView.contains(ad.getId() + virtue.getTemplateId())) {
-			container.remove(tiles.get(ad.getId() + virtue.getTemplateId()).getContainer());
-			container.validate();
-			container.repaint();
-		}
-		tiles.remove(ad.getId() + virtue.getTemplateId());
 		container.validate();
 		container.repaint();
 	}
@@ -81,7 +65,6 @@ public abstract class AbstractAppsView {
 			@Override
 			public void run() {
 				container.removeAll();
-				appsInView.clear();
 				Collection<VirtueApplicationItem> vas = tiles.values();
 				List<VirtueApplicationItem> matchedVas;
 

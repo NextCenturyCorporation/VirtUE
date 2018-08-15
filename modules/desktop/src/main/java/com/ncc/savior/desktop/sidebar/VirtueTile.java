@@ -50,7 +50,6 @@ public class VirtueTile extends AbstractVirtueView {
 			public void run() {
 				row = 0;
 				container.removeAll();
-				virtuesInView.clear();
 				Collection<VirtueTileContainer> vcs = virtues.values();
 				List<VirtueTileContainer> matchedVcs;
 
@@ -100,7 +99,6 @@ public class VirtueTile extends AbstractVirtueView {
 		container.remove(footer);
 		container.add(vc.getContainer(), gbc);
 		moveFooter(row + 1);
-		virtuesInView.add(virtue.getTemplateId());
 
 		virtues.put(virtue.getTemplateId(), vc);
 	}
