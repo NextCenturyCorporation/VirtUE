@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
-import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IUpdateListener;
+import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.virtues.IIconService;
@@ -97,7 +97,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private Iterator<Color> colorItr;
 	private ArrayList<Color> colorList;
 	private JFrame frame;
-	private LoginPage lp;
+	private LoginPage loginPageView;
 
 	private GhostText ghostText;
 
@@ -121,7 +121,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private JPanel bottomBorder;
 
-	private JComboBox<String> cb;
+	private JComboBox<String> dropDownBox;
 
 	private JPanel desktopContainer;
 	private boolean applicationsOpen = true;
@@ -130,12 +130,12 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private boolean searchMode = false;
 
-	private JScrollPane sp;
-	private AppsTile at;
-	private AppsList al;
-	private VirtueTile vt;
-	private VirtueList vl;
-	private FavoritesView fv;
+	private JScrollPane scrollPane;
+	private AppsTile appsTileView;
+	private AppsList appsListView;
+	private VirtueTile virtueTileView;
+	private VirtueList virtueListView;
+	private FavoritesView favoritesTileView;
 
 	private Preferences favorites;
 	private Preferences lastView;
@@ -197,6 +197,15 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 
 		});
+
+		AbstractVirtueContainer.addUpdateListener(new IUpdateListener() {
+
+			@Override
+			public void onUpdate() {
+				sortWithKeyword();
+			}
+
+		});
 	}
 
 	public void start(JFrame frame, List<DesktopVirtue> initialVirtues) throws Exception {
@@ -216,15 +225,15 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void startLogin() throws IOException {
-		this.lp = new LoginPage(authService);
+		this.loginPageView = new LoginPage(authService);
 		frame.getContentPane().removeAll();
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
-		this.frame.getContentPane().add(lp.getContainer());
+		this.frame.getContentPane().add(loginPageView.getContainer());
 		frame.getContentPane().validate();
 		frame.getContentPane().repaint();
 		this.frame.setVisible(true);
-		initiateLoginScreen(lp);
+		initiateLoginScreen(loginPageView);
 	}
 
 	private void initiateLoginScreen(LoginPage lp) throws IOException {
@@ -239,15 +248,10 @@ public class Sidebar implements VirtueChangeHandler {
 			public void onLoginFailure(String username, String domain, RuntimeException e) {
 				logger.warn("Login failure for domain=" + domain + " username=" + username, e);
 			}
-
-			@Override
-			public void onCancel() {
-				// do nothing, handled elsewhere
-			}
 		});
 	}
 
-	protected void onLogin(DesktopUser user) throws IOException {
+	private void onLogin(DesktopUser user) throws IOException {
 		favorites = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/favorites");
 		lastView = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/lastView");
 		lastSort = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername() + "/lastSort");
@@ -259,7 +263,9 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.getContentPane().add(desktopContainer);
 		frame.setSize(491, 600);
 		setInitialViewPort();
-		sp.setViewportView(loadingContainer);
+		if (loading) {
+			scrollPane.setViewportView(loadingContainer);
+		}
 		frame.setVisible(true);
 	}
 
@@ -272,11 +278,11 @@ public class Sidebar implements VirtueChangeHandler {
 		vlc.updateVirtue(virtue);
 
 		for (ApplicationDefinition ad : virtue.getApps().values()) {
-			al.updateApp(ad, virtue);
-			at.updateApp(ad, virtue);
-			fv.updateApp(ad, virtue);
-			vl.updateApp(ad, virtue);
-			vt.updateApp(ad, virtue);
+			appsListView.updateApp(ad, virtue);
+			appsTileView.updateApp(ad, virtue);
+			favoritesTileView.updateApp(ad, virtue);
+			virtueListView.updateApp(ad, virtue);
+			virtueTileView.updateApp(ad, virtue);
 		}
 	}
 
@@ -293,16 +299,23 @@ public class Sidebar implements VirtueChangeHandler {
 
 		for (DesktopVirtue virtue : virtues) {
 			Color headerColor = getNextColor();
-			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), sp,
-					textField, ghostText, vt);
-			vt.addVirtueToRow(virtue, vtc, vtc.getRow());
-
-			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, sp, textField,
-					ghostText, vl);
-			vl.addVirtueToRow(virtue, vlc, vlc.getRow());
+			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(), scrollPane,
+					textField, ghostText);
+			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, scrollPane, textField,
+					ghostText);
 
 			virtueIdToVtc.put(virtue.getTemplateId(), vtc);
 			virtueIdToVlc.put(virtue.getTemplateId(), vlc);
+
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					virtueTileView.addVirtueToRow(virtue, vtc, vtc.getRow());
+					virtueListView.addVirtueToRow(virtue, vlc, vlc.getRow());
+				}
+
+			});
 
 			for (ApplicationDefinition ad : virtue.getApps().values()) {
 
@@ -313,32 +326,32 @@ public class Sidebar implements VirtueChangeHandler {
 							boolean isFavorited = favorites.getBoolean(ad.getId() + virtue.getTemplateId(), false);
 							ApplicationDom dom = new ApplicationDom(ad, isFavorited);
 
-							VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
-									virtue, fv, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb,
+							VirtueApplicationItem appsTileVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc,
+									virtue, favoritesTileView, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, dropDownBox,
 									sortAppsByStatus, ghostText, headerColor, DesktopView.APPS_TILE);
 							appsTileVa.tileSetup();
 							appsTileVa.registerListener(dom.getChangeListener());
-							at.addApplication(ad, appsTileVa);
+							appsTileView.addApplication(ad, appsTileVa);
 
-							VirtueApplicationItem virtueTileVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
-									virtue, fv, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, cb,
+							VirtueApplicationItem virtueTileVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc,
+									virtue, favoritesTileView, dom.getChangeListener(), saviorTile, isFavorited, frame, textField, dropDownBox,
 									sortAppsByStatus, ghostText, headerColor, DesktopView.VIRTUE_TILE);
 							virtueTileVa.tileSetup();
 							virtueTileVa.registerListener(dom.getChangeListener());
 
-							VirtueApplicationItem virtueListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc,
-									virtue, fv, dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb,
+							VirtueApplicationItem virtueListVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc,
+									virtue, favoritesTileView, dom.getChangeListener(), saviorList, isFavorited, frame, textField, dropDownBox,
 									sortAppsByStatus, ghostText, headerColor, DesktopView.VIRTUE_LIST);
 							virtueListVa.listSetup();
 							virtueListVa.registerListener(dom.getChangeListener());
 
-							VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue,
-									fv, dom.getChangeListener(), saviorList, isFavorited, frame, textField, cb,
+							VirtueApplicationItem appsListVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue,
+									favoritesTileView, dom.getChangeListener(), saviorList, isFavorited, frame, textField, dropDownBox,
 									sortAppsByStatus, ghostText, headerColor, DesktopView.APPS_LIST);
 							appsListVa.listSetup();
 							appsListVa.registerListener(dom.getChangeListener());
 
-							al.addApplication(ad, appsListVa);
+							appsListView.addApplication(ad, appsListVa);
 							vtc.addApplication(ad, virtueTileVa);
 							vlc.addApplication(ad, virtueListVa);
 
@@ -347,7 +360,7 @@ public class Sidebar implements VirtueChangeHandler {
 								virtueTileVa.setTileImage(i);
 								virtueListVa.setListImage(i);
 								appsListVa.setListImage(i);
-								fv.setTileImage(ad, virtue, i);
+								favoritesTileView.setTileImage(ad, virtue, i);
 							};
 
 							iconService.getImage(ad.getIconKey(), consumer);
@@ -358,22 +371,22 @@ public class Sidebar implements VirtueChangeHandler {
 							dom.addListener(virtueListVa.getChangeListener());
 
 							if (isFavorited) {
-								String selected = (String) cb.getSelectedItem();
+								String selected = (String) dropDownBox.getSelectedItem();
 								VirtueApplicationItem favoritedVa;
 								switch (selected) {
 								case "Alphabetical":
-									favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-											dom.getChangeListener(), saviorTile, true, frame, textField, cb, null,
+									favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue, favoritesTileView,
+											dom.getChangeListener(), saviorTile, true, frame, textField, dropDownBox, null,
 											ghostText, headerColor, DesktopView.APPS_TILE);
 									favoritedVa.tileSetup();
-									fv.addFavorite(ad, virtue, favoritedVa, textField, null, ghostText);
+									favoritesTileView.addFavorite(ad, virtue, favoritedVa, textField, null, ghostText);
 									break;
 								case "Status":
-									favoritedVa = new VirtueApplicationItem(ad, virtueService, sp, vtc, virtue, fv,
-											dom.getChangeListener(), saviorTile, true, frame, textField, cb, null,
+									favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue, favoritesTileView,
+											dom.getChangeListener(), saviorTile, true, frame, textField, dropDownBox, null,
 											ghostText, headerColor, DesktopView.APPS_TILE);
 									favoritedVa.tileSetup();
-									fv.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus, ghostText);
+									favoritesTileView.addFavorite(ad, virtue, favoritedVa, textField, sortAppsByStatus, ghostText);
 									break;
 								}
 							}
@@ -392,7 +405,7 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 		sortByOption(keyword);
 
-		sp.getViewport().validate();
+		scrollPane.getViewport().validate();
 
 		new Thread(() -> {
 			JavaUtil.sleepAndLogInterruption(5000);
@@ -405,19 +418,13 @@ public class Sidebar implements VirtueChangeHandler {
 	public void removeVirtue(DesktopVirtue virtue) {
 		VirtueTileContainer vtc = virtueIdToVtc.remove(virtue.getTemplateId());
 		virtueIdToVlc.remove(virtue.getTemplateId());
-		// if (vmi == null) {
-		// vmi = virtueIdToVc.remove(virtue.getTemplateId());
-		// }
-		if (vtc != null) {
-			// for (ApplicationDefinition ad : virtue.getApps().values()) {
-			// at.removeApplication(ad, virtue);
-			// }
 
-			at.removeVirtue(virtue);
-			al.removeVirtue(virtue);
-			fv.removeVirtue(virtue);
-			vt.removeVirtue(virtue);
-			vl.removeVirtue(virtue);
+		if (vtc != null) {
+			appsTileView.removeVirtue(virtue);
+			appsListView.removeVirtue(virtue);
+			favoritesTileView.removeVirtue(virtue);
+			virtueTileView.removeVirtue(virtue);
+			virtueListView.removeVirtue(virtue);
 		}
 	}
 
@@ -433,12 +440,12 @@ public class Sidebar implements VirtueChangeHandler {
 
 		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
-		this.sp = new JScrollPane();
-		this.at = new AppsTile(virtueService, sp);
-		this.al = new AppsList(virtueService, sp);
-		this.vt = new VirtueTile(sp);
-		this.vl = new VirtueList(sp);
-		this.fv = new FavoritesView(virtueService, sp, favorites);
+		this.scrollPane = new JScrollPane();
+		this.appsTileView = new AppsTile(virtueService, scrollPane);
+		this.appsListView = new AppsList(virtueService, scrollPane);
+		this.virtueTileView = new VirtueTile(scrollPane);
+		this.virtueListView = new VirtueList(scrollPane);
+		this.favoritesTileView = new FavoritesView(virtueService, scrollPane, favorites);
 		desktopContainer.setLayout(new BorderLayout(0, 0));
 
 		applicationsOpen = true;
@@ -617,12 +624,12 @@ public class Sidebar implements VirtueChangeHandler {
 		sortByLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
 		sortByLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0));
 		String[] sortingOptions = { "Alphabetical", "Status" };
-		this.cb = new JComboBox<String>(sortingOptions);
-		cb.setSelectedItem(lastSort.get("sort", "Alphabetical"));
-		cb.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
-		cb.setBackground(new Color(248, 248, 255));
-		Color bgColor = cb.getBackground();
-		cb.setRenderer(new DefaultListCellRenderer() {
+		this.dropDownBox = new JComboBox<String>(sortingOptions);
+		dropDownBox.setSelectedItem(lastSort.get("sort", "Alphabetical"));
+		dropDownBox.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
+		dropDownBox.setBackground(new Color(248, 248, 255));
+		Color bgColor = dropDownBox.getBackground();
+		dropDownBox.setRenderer(new DefaultListCellRenderer() {
 			@Override
 			public void paint(Graphics g) {
 				setBackground(bgColor);
@@ -630,9 +637,9 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		});
 
-		cb.setVisible(true);
+		dropDownBox.setVisible(true);
 		sortBy.add(sortByLabel);
-		sortBy.add(cb);
+		sortBy.add(dropDownBox);
 
 		this.listLabel = new JLabel(inactiveListIcon);
 		listLabel.setBackground(new Color(248, 248, 255));
@@ -661,10 +668,10 @@ public class Sidebar implements VirtueChangeHandler {
 		icons.add(tileView);
 		tileView.setToolTipText("Tile view");
 
-		sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		sp.setSize(300, 800);
-		sp.setPreferredSize(new Dimension(0, 800));
-		sp.getVerticalScrollBar().setUnitIncrement(16);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setSize(300, 800);
+		scrollPane.setPreferredSize(new Dimension(0, 800));
+		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		c.fill = GridBagConstraints.BOTH;
 		c.ipady = 0;
 		c.weighty = 1.0; // request any extra vertical space
@@ -672,11 +679,11 @@ public class Sidebar implements VirtueChangeHandler {
 		c.gridx = 0;
 		c.gridwidth = 3; // 3 columns wide
 		c.gridy = 2; // third row
-		center.add(sp, c);
+		center.add(scrollPane, c);
 
-		sp.getViewport().revalidate();
-		sp.validate();
-		sp.repaint();
+		scrollPane.getViewport().revalidate();
+		scrollPane.validate();
+		scrollPane.repaint();
 
 		frame.pack();
 
@@ -694,24 +701,27 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void sortByOption(String keyword) {
-		String selected = (String) cb.getSelectedItem();
+		String selected = (String) dropDownBox.getSelectedItem();
 		switch (selected) {
 		case "Alphabetical":
-			al.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			at.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			fv.search(keyword, null, va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			vt.search(keyword, null, null);
-			vl.search(keyword, null, null);
+			appsListView.search(keyword, null,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			appsTileView.search(keyword, null,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			favoritesTileView.search(keyword, null,
+					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
+			virtueTileView.search(keyword, null, null);
+			virtueListView.search(keyword, null, null);
 			break;
 		case "Status":
-			al.search(keyword, sortAppsByStatus,
+			appsListView.search(keyword, sortAppsByStatus,
 					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			at.search(keyword, sortAppsByStatus,
+			appsTileView.search(keyword, sortAppsByStatus,
 					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			fv.search(keyword, sortAppsByStatus,
+			favoritesTileView.search(keyword, sortAppsByStatus,
 					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
-			vt.search(keyword, sortVtByStatus, null);
-			vl.search(keyword, sortVlByStatus, null);
+			virtueTileView.search(keyword, sortVtByStatus, null);
+			virtueListView.search(keyword, sortVlByStatus, null);
 			break;
 		}
 	}
@@ -727,7 +737,7 @@ public class Sidebar implements VirtueChangeHandler {
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(inactiveListIcon);
 		if (!loading) {
-			sp.setViewportView(fv.getContainer());
+			scrollPane.setViewportView(favoritesTileView.getContainer());
 		}
 	}
 
@@ -742,7 +752,7 @@ public class Sidebar implements VirtueChangeHandler {
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(activeListIcon);
 		if (!loading) {
-			sp.setViewportView(al.getContainer());
+			scrollPane.setViewportView(appsListView.getContainer());
 		}
 	}
 
@@ -757,7 +767,7 @@ public class Sidebar implements VirtueChangeHandler {
 		tileLabel.setIcon(activeTileIcon);
 		listLabel.setIcon(inactiveListIcon);
 		if (!loading) {
-			sp.setViewportView(at.getContainer());
+			scrollPane.setViewportView(appsTileView.getContainer());
 		}
 	}
 
@@ -771,7 +781,7 @@ public class Sidebar implements VirtueChangeHandler {
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
 		if (!loading) {
-			sp.setViewportView(vt.getContainer());
+			scrollPane.setViewportView(virtueTileView.getContainer());
 		}
 	}
 
@@ -785,7 +795,7 @@ public class Sidebar implements VirtueChangeHandler {
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
 		if (!loading) {
-			sp.setViewportView(vl.getContainer());
+			scrollPane.setViewportView(virtueListView.getContainer());
 		}
 	}
 
@@ -793,24 +803,24 @@ public class Sidebar implements VirtueChangeHandler {
 		searchMode = false;
 		searchLabel.setIcon(searchIcon);
 		textField.setText("");
-		String selected = (String) cb.getSelectedItem();
+		String selected = (String) dropDownBox.getSelectedItem();
 		switch (selected) {
 		case "Alphabetical":
-			al.search(null, null, null);
-			at.search(null, null, null);
-			fv.search(null, null, null);
-			vt.search(null, null, null);
-			vl.search(null, null, null);
+			appsListView.search(null, null, null);
+			appsTileView.search(null, null, null);
+			favoritesTileView.search(null, null, null);
+			virtueTileView.search(null, null, null);
+			virtueListView.search(null, null, null);
 			break;
 		case "Status":
-			al.search(null, sortAppsByStatus, null);
-			at.search(null, sortAppsByStatus, null);
-			fv.search(null, sortAppsByStatus, null);
-			vt.search(null, sortVtByStatus, null);
-			vl.search(null, sortVlByStatus, null);
+			appsListView.search(null, sortAppsByStatus, null);
+			appsTileView.search(null, sortAppsByStatus, null);
+			favoritesTileView.search(null, sortAppsByStatus, null);
+			virtueTileView.search(null, sortVtByStatus, null);
+			virtueListView.search(null, sortVlByStatus, null);
 			break;
 		}
-		sp.setViewportView(sp.getViewport().getView());
+		scrollPane.setViewportView(scrollPane.getViewport().getView());
 	}
 
 	public void setInitialViewPort() {
@@ -924,12 +934,8 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void insertUpdate(DocumentEvent e) {
 				searchMode = true;
-				String keyword = textField.getText();
-				if (ghostText.getIsVisible()) {
-					keyword = "";
-				}
-				sortByOption(keyword);
-				sp.setViewportView(sp.getViewport().getView());
+				sortWithKeyword();
+				scrollPane.setViewportView(scrollPane.getViewport().getView());
 				searchLabel.setIcon(closeIcon);
 			}
 
@@ -941,11 +947,8 @@ public class Sidebar implements VirtueChangeHandler {
 			public void removeUpdate(DocumentEvent e) {
 				searchMode = true;
 				String keyword = textField.getText();
-				if (ghostText.getIsVisible()) {
-					keyword = "";
-				}
-				sortByOption(keyword);
-				sp.setViewportView(sp.getViewport().getView());
+				sortWithKeyword();
+				scrollPane.setViewportView(scrollPane.getViewport().getView());
 				if (keyword.equals("")) {
 					searchLabel.setIcon(searchIcon);
 				} else {
@@ -963,29 +966,21 @@ public class Sidebar implements VirtueChangeHandler {
 						resetViews();
 					} else {
 						searchMode = true;
-						String keyword = textField.getText();
-						if (ghostText.getIsVisible()) {
-							keyword = "";
-						}
-						sortByOption(keyword);
-						sp.setViewportView(sp.getViewport().getView());
+						sortWithKeyword();
+						scrollPane.setViewportView(scrollPane.getViewport().getView());
 						searchLabel.setIcon(closeIcon);
 					}
 				}
 			}
 		});
 
-		cb.addActionListener(new ActionListener() {
+		dropDownBox.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				String selected = (String) cb.getSelectedItem();
+				String selected = (String) dropDownBox.getSelectedItem();
 				lastSort.put("sort", selected);
-				String keyword = textField.getText();
-				if (ghostText.getIsVisible()) {
-					keyword = "";
-				}
-				sortByOption(keyword);
+				sortWithKeyword();
 			}
 
 		});

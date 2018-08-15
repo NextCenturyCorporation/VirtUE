@@ -1,5 +1,8 @@
 package com.ncc.savior.desktop.authorization;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.ws.rs.client.Invocation.Builder;
 
 import org.slf4j.Logger;
@@ -17,6 +20,8 @@ public class AuthorizationService {
 	private String loginUrl;
 	private String logoutUrl;
 
+	private Set<ILoginListener> loginListeners;
+
 	public AuthorizationService(String requiredDomain, String loginUrl, String logoutUrl) {
 		this.requiredDomain = requiredDomain;
 		if (this.requiredDomain != null && this.requiredDomain.equals("")) {
@@ -25,6 +30,7 @@ public class AuthorizationService {
 		this.os = JavaUtil.getOs();
 		this.loginUrl = loginUrl;
 		this.logoutUrl = logoutUrl;
+		this.loginListeners = new HashSet<ILoginListener>();
 		createAuthProviderChain();
 	}
 
@@ -63,6 +69,7 @@ public class AuthorizationService {
 				|| !requiredDomain.toUpperCase().equals(user.getDomain().toUpperCase())) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 		}
+		triggerOnLogin();
 	}
 
 	public DesktopUser getUser() throws InvalidUserLoginException {
@@ -75,6 +82,7 @@ public class AuthorizationService {
 	}
 
 	public DesktopUser login(String domain, String username, String password) throws InvalidUserLoginException {
+		triggerOnLogin();
 		if (!(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 			// if (requiredDomain == null || requiredDomain.equals(domain)) {
@@ -90,6 +98,7 @@ public class AuthorizationService {
 	}
 
 	public void logout() {
+		triggerOnLogout();
 		authProvider.logout();
 	}
 
@@ -99,6 +108,32 @@ public class AuthorizationService {
 
 	public void addAuthorizationTicket(Builder builder, String targetHost) throws InvalidUserLoginException {
 		authProvider.addAuthorizationTicket(builder, targetHost);
+	}
+
+	public void addLoginListener(ILoginListener listener) {
+		loginListeners.add(listener);
+	}
+
+	public void removeLoginListener(ILoginListener listener) {
+		loginListeners.remove(listener);
+	}
+
+	protected void triggerOnLogin() {
+		for (ILoginListener listener : loginListeners) {
+			listener.onLogin();
+		}
+	}
+
+	protected void triggerOnLogout() {
+		for (ILoginListener listener : loginListeners) {
+			listener.onLogout();
+		}
+	}
+
+	public static interface ILoginListener {
+		public void onLogin();
+
+		public void onLogout();
 	}
 
 }

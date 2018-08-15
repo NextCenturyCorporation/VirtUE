@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
+
 public abstract class AbstractVirtueView {
 	protected JPanel container;
 	protected ArrayList<String> virtuesInView;
@@ -61,10 +63,6 @@ public abstract class AbstractVirtueView {
 
 	public static void removeUpdateListener(IUpdateListener listener) {
 		updateListeners.remove(listener);
-	}
-
-	public static interface IUpdateListener {
-		public void onUpdate();
 	}
 
 }
