@@ -5,8 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -100,42 +100,12 @@ public class AboutDialog {
 
 		scrollPane.setViewportView(textContainer);
 
-		dialog.addWindowListener(new WindowListener() {
-
-			@Override
-			public void windowActivated(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// do nothing
-			}
+		dialog.addWindowListener(new WindowAdapter() {
 
 			@Override
 			public void windowDeactivated(WindowEvent arg0) {
 				dialog.setVisible(false);
 				dialog.dispose();
-			}
-
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// do nothing
 			}
 
 		});
