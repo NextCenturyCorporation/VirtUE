@@ -15,10 +15,24 @@ import com.sun.jna.ptr.PointerByReference;
 
 /**
  * Subset of types and methods from the GSS API (usually found in
- * /usr/include/gss/{gssapi.h,gssapi_ext.h}).
+ * <code>/usr/include/gss/{gssapi.h,gssapi_ext.h}</code>).
  * 
- * For full descriptions of the types and functions, see
- * <a href="https://tools.ietf.org/html/rfc2744">RFC 2744</a>.
+ * For full descriptions of the types and functions, see one or more of
+ * <ul>
+ * <li><a href="https://tools.ietf.org/html/rfc2744">RFC 2744</a>
+ * <li><a href=
+ * "http://web.mit.edu/kerberos/krb5-current/doc/appdev/gssapi.html">Developing
+ * with GSSAPI</a> (part of the official Kerberos documentation)
+ * <li><a href=
+ * "https://docs.oracle.com/cd/E19683-01/816-1331/index.html">GSS-API
+ * Programming Guide</a>
+ * </ul>
+ * 
+ * (This class was motived by the lack of ability of Java to export credentials
+ * in a way other existing processes could use (<code>mount.cifs</code>, in
+ * particular).
+ * {@link #gss_store_cred_into(IntByReference, Pointer, int, gss_OID_desc, int, int, gss_key_value_set, PointerByReference, IntByReference)}
+ * is the missing feature.)
  * 
  * @author clong
  * @see org.ietf.jgss
@@ -162,6 +176,14 @@ public interface GssApi extends Library {
 		}
 
 		public static class ByReference extends gss_OID_desc implements Structure.ByReference {
+
+			public ByReference() {
+				super();
+			}
+
+			public ByReference(int length, Pointer elements) {
+				super(length, elements);
+			}
 		}
 
 		public static class ByValue extends gss_OID_desc implements Structure.ByValue {
@@ -221,7 +243,7 @@ public interface GssApi extends Library {
 		public gss_name_t() {
 		}
 
-		gss_name_t(Pointer p) {
+		public gss_name_t(Pointer p) {
 			super();
 			peer = Pointer.nativeValue(p);
 		}
@@ -347,6 +369,15 @@ public interface GssApi extends Library {
 	int gss_import_sec_context(IntByReference minorStatus, /* minor_status */
 			gss_buffer_desc buffer, /* interprocess_token */
 			gss_ctx_id_t context); /* context_handle */
+
+	/**
+	 * Free storage for a buffer. It must have been allocated by a GSS-API function.
+	 * @param minorStatus
+	 * @param buffer
+	 * @return
+	 */
+	int gss_release_buffer(IntByReference minorStatus, /* minor_status */
+			gss_buffer_desc buffer /* buffer */);
 
 	// from gssapi_ext.h
 
