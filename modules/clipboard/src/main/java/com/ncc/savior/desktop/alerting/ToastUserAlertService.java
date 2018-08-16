@@ -17,8 +17,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.util.JavaUtil;
-
 /**
  * Service that manager {@link BaseAlertMessage}s via an Android like toast
  * mechanism. This manager will cause a {@link ToastMessage} to appear on the
@@ -78,7 +76,6 @@ public class ToastUserAlertService implements IUserAlertService {
 				}
 			}
 		};
-		
 	}
 
 	@Override
