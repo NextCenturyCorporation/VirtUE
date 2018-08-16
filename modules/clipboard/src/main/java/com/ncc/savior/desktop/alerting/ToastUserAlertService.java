@@ -79,27 +79,6 @@ public class ToastUserAlertService implements IUserAlertService {
 			}
 		};
 		
-		new Thread(() -> {
-				JavaUtil.sleepAndLogInterruption(2000);
-				PlainAlertMessage alertMessage = new PlainAlertMessage("title", "Alert");
-				try {
-					UserAlertingServiceHolder.sendAlert(alertMessage);
-				} catch (IOException e2) {
-					logger.error("Error sending alert", e2);
-				}
-			
-		}).start();
-		
-		new Thread(() -> {
-			JavaUtil.sleepAndLogInterruption(12000);
-			PlainAlertMessage alertMessage = new PlainAlertMessage("title", "Alert 4");
-			try {
-				UserAlertingServiceHolder.sendAlert(alertMessage);
-			} catch (IOException e2) {
-				logger.error("Error sending alert", e2);
-			}
-		
-		}).start();
 	}
 
 	@Override

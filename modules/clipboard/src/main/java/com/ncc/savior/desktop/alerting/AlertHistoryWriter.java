@@ -95,7 +95,6 @@ public class AlertHistoryWriter implements IAlertHistoryManager {
 	@Override
 	public void storeAlert(BaseAlertMessage alertMessage) {
 		try {
-			
 			Date date = new Date(alertMessage.getTime());
 			String formattedDate = formatter.format(date);
 			csvPrinter.printRecord(alertMessage.getPlainTextMessage(), formattedDate);
