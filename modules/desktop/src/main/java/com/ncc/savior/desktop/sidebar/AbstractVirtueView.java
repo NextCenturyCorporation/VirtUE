@@ -3,24 +3,25 @@ package com.ncc.savior.desktop.sidebar;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 public abstract class AbstractVirtueView {
 	protected JPanel container;
-	protected ArrayList<String> virtuesInView;
 
 	protected static int row = 0;
 	protected JPanel footer = new JPanel();
 
 	protected JScrollPane sp;
 
+	private static Set<IRemoveVirtueListener> removeVirtueListeners = new HashSet<IRemoveVirtueListener>();
+
 	public AbstractVirtueView(JScrollPane sp) {
 		this.sp = sp;
 		this.container = new JPanel();
-		this.virtuesInView = new ArrayList<String>();
 
 		GridBagLayout gbl = new GridBagLayout();
 		// gbl.columnWidths = new int[] { 455, 0 };
@@ -43,6 +44,26 @@ public abstract class AbstractVirtueView {
 
 	public JPanel getContainer() {
 		return container;
+	}
+
+	protected void triggerRemoveVirtueListener() {
+		for (IRemoveVirtueListener listener : removeVirtueListeners) {
+			listener.onRemove();
+		}
+	}
+
+	public static void addRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.add(listener);
+	}
+
+	public static void deleteRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.remove(listener);
+	}
+
+	public static interface IRemoveVirtueListener {
+
+		public void onRemove();
+
 	}
 
 }
