@@ -49,6 +49,7 @@ public class AlertHistoryWriter implements IAlertHistoryManager {
 	 
         csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
         csvPrinter.printRecord("Message", "Time");
+        csvPrinter.flush();
     }
     
     public void setupDialog() {

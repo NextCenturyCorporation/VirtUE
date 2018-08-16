@@ -274,7 +274,6 @@ public class Sidebar implements VirtueChangeHandler {
 			public void onLoginSuccess(DesktopUser user) throws IOException {
 				onLogin(user);
 				ghostText.reset();
-				UserAlertingServiceHolder.resetHistoryManager();
 			}
 
 			@Override
@@ -299,6 +298,8 @@ public class Sidebar implements VirtueChangeHandler {
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
 		}
+
+		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
 	}
 
