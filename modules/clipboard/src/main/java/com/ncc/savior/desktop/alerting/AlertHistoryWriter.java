@@ -36,62 +36,62 @@ public class AlertHistoryWriter implements IAlertHistoryManager {
 	private JDialog dialog;
 	    
 	public AlertHistoryWriter() throws IOException {
-    	setupDialog();
+		setupDialog();
        
-    	if (isFileOpen()) {
-        	displayDialog();
-        	while (isFileOpen()) {
-        	}
-        	dialog.dispose();
-        }
+		if (isFileOpen()) {
+			displayDialog();
+			while (isFileOpen()) {
+			}
+			dialog.dispose();
+		}
 
-    	writer = new BufferedWriter(new FileWriter(CSV_FILE_PATH, false));
+		writer = new BufferedWriter(new FileWriter(CSV_FILE_PATH, false));
 	 
-    	csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-    	csvPrinter.printRecord("Message", "Time");
-    	csvPrinter.flush();
+		csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+		csvPrinter.printRecord("Message", "Time");
+		csvPrinter.flush();
     }
     
-    public void setupDialog() {
-    	dialog = new JDialog();
-    	JPanel container = new JPanel(new BorderLayout());
-    	container.setBackground(Color.WHITE);
+	public void setupDialog() {
+		dialog = new JDialog();
+		JPanel container = new JPanel(new BorderLayout());
+		container.setBackground(Color.WHITE);
         		
-    	JLabel prompt = new JLabel("Cannot write alerts to file. Please close the alerts.csv file.", JLabel.CENTER);
-    	prompt.setVerticalAlignment(SwingConstants.CENTER);
-    	container.add(prompt, BorderLayout.CENTER);
-    	dialog.add(container);
+		JLabel prompt = new JLabel("Cannot write alerts to file. Please close the alerts.csv file.", JLabel.CENTER);
+		prompt.setVerticalAlignment(SwingConstants.CENTER);
+		container.add(prompt, BorderLayout.CENTER);
+		dialog.add(container);
         
-    	dialog.addWindowListener(new WindowAdapter() {
-    		@Override
-    		public void windowClosed(WindowEvent e) {
-    			if (isFileOpen()) {
-    				displayDialog();
-    			}
-    		}
-    	});
+		dialog.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				if (isFileOpen()) {
+					displayDialog();
+					}
+				}
+			});
         	        		
-    	container.setBorder(new LineBorder(Color.BLACK, 2));
+		container.setBorder(new LineBorder(Color.BLACK, 2));
         
-    	dialog.setIconImage(saviorIcon.getImage());
-    	dialog.setAlwaysOnTop(true);
-    	dialog.setSize(new Dimension(400, 100));
-    	dialog.setLocationRelativeTo(null);
-    	dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-    }
+		dialog.setIconImage(saviorIcon.getImage());
+		dialog.setAlwaysOnTop(true);
+		dialog.setSize(new Dimension(400, 100));
+		dialog.setLocationRelativeTo(null);
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+	}
     
-    public void displayDialog() {
-    	dialog.setVisible(true);
-    }
+	public void displayDialog() {
+		dialog.setVisible(true);
+	}
     
-    public boolean isFileOpen() {
-    	try {
-    		Files.newBufferedWriter(Paths.get(CSV_FILE_PATH));
-    		return false;
-    	} catch (Exception e) {
-    		return true;
-    	}
-    }
+	public boolean isFileOpen() {
+		try {
+			Files.newBufferedWriter(Paths.get(CSV_FILE_PATH));
+			return false;
+		} catch (Exception e) {
+			return true;
+		}
+	}
 
 	@Override
 	public void storeAlert(BaseAlertMessage alertMessage) {
