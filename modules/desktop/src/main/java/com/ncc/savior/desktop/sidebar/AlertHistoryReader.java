@@ -3,8 +3,8 @@ package com.ncc.savior.desktop.sidebar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -27,7 +27,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 public class AlertHistoryReader {
-	private static final String SAMPLE_CSV_FILE_PATH = "./alerts.csv";
+	private static final String CSV_FILE_PATH = "./alerts.csv";
 	private static ImageIcon saviorIcon = new ImageIcon(AlertHistoryReader.class.getResource("/images/saviorLogo.png"));
 
 	public static void displayAlerts(JFrame frame) throws IOException {
@@ -38,7 +38,7 @@ public class AlertHistoryReader {
 		sp.getVerticalScrollBar().setUnitIncrement(16);
 		JPanel container = new JPanel();
 
-		try (Reader reader = Files.newBufferedReader(Paths.get(SAMPLE_CSV_FILE_PATH));
+		try (Reader reader = Files.newBufferedReader(Paths.get(CSV_FILE_PATH));
 				CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader()
 	                    .withIgnoreHeaderCase()
 						.withTrim());) {
@@ -61,11 +61,11 @@ public class AlertHistoryReader {
 					String date = csvRecord.get(1);
 
 					JPanel errorPanel = new JPanel(new BorderLayout());
-					errorPanel.setMinimumSize(new Dimension(1, 100));
-					errorPanel.setPreferredSize(new Dimension(1, 100));
+					errorPanel.setMinimumSize(new Dimension(1, 80));
+					errorPanel.setPreferredSize(new Dimension(1, 80));
 					errorPanel.setBackground(Color.WHITE);
 					errorPanel.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
-					JLabel messageLabel = new JLabel("<html>" + message + "</html>", JLabel.CENTER);
+					JLabel messageLabel = new JLabel("<html><center>" + message + "</center></html>", JLabel.CENTER);
 					JLabel dateLabel = new JLabel(date);
 					messageLabel.setVerticalAlignment(SwingConstants.CENTER);
 					dateLabel.setVerticalAlignment(SwingConstants.CENTER);
@@ -80,52 +80,19 @@ public class AlertHistoryReader {
 		sp.setViewportView(container);
 		dialog.add(sp);
 		addListener(dialog);
-		dialog.setSize(new Dimension(400, 400));
+		dialog.setSize(new Dimension(400, 250));
 		dialog.setLocationRelativeTo(frame);
 		dialog.setVisible(true);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	}
 
 	private static void addListener(JDialog dialog) {
-		dialog.addWindowListener(new WindowListener() {
-
-			@Override
-			public void windowActivated(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// do nothing
-			}
-
+		dialog.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowDeactivated(WindowEvent arg0) {
 				dialog.setVisible(false);
 				dialog.dispose();
 			}
-
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// do nothing
-			}
-
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-				// do nothing
-
-			}
-
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// do nothing
-			}
-
 		});
 	}
 }

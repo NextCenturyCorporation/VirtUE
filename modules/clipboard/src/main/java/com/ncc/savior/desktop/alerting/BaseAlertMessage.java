@@ -11,22 +11,14 @@ import java.util.Date;
 public abstract class BaseAlertMessage {
 	protected long timeMillis;
 	protected String title;
-	protected String date;
 
 	protected BaseAlertMessage(String title) {
 		this.title = title;
 		this.timeMillis = System.currentTimeMillis();
-		Date date = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-		this.date = formatter.format(date);
 	}
 
 	public long getTime() {
 		return timeMillis;
-	}
-	
-	public String getDate() {
-		return date;
 	}
 
 	public String getTitle() {

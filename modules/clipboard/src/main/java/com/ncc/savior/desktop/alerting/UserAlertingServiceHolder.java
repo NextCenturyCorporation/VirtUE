@@ -25,8 +25,10 @@ public class UserAlertingServiceHolder {
 		
 		if (alertHistoryManager == null) {
 			alertHistoryManager = new AlertHistoryWriter();
+			System.out.println("WRITER CREATED");
 		}
 		
+		System.out.println("DISPLAYING");
 		alertService.displayAlert(alertMessage);
 		
 		alertHistoryManager.storeAlert(alertMessage);
