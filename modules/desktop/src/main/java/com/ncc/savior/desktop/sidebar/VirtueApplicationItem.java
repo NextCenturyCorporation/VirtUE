@@ -308,6 +308,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
+				dialog.dispose();
 				try {
 					virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
 					// virtue.setVirtueState(VirtueState.LAUNCHING);
@@ -324,6 +325,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
+				dialog.dispose();
 			}
 		});
 
@@ -363,6 +365,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			@Override
 			public void windowDeactivated(WindowEvent arg0) {
 				dialog.setVisible(false);
+				dialog.dispose();
 				if (hasFullBorder()) {
 					container.setBorder(new LineBorder(Color.GRAY, 1));
 				} else {
@@ -392,6 +395,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent arg0) {
 				dialog.setVisible(false);
+				dialog.dispose();
 			}
 
 		});
@@ -481,7 +485,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		}
 	}
 
-	public void update(DesktopVirtue virtue) {
+	public void update() {
 		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
 				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
 	}

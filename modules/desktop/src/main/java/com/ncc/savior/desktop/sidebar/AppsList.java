@@ -10,7 +10,6 @@ import javax.swing.JScrollPane;
 
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
-import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
  * This is the application list component that can be set as the view to the
@@ -60,13 +59,6 @@ public class AppsList extends AbstractAppsView {
 		gbc.gridx = 0;
 		gbc.gridy = row;
 		container.add(footer, gbc);
-	}
-
-	public void removeVirtue(DesktopVirtue virtue) {
-		for (ApplicationDefinition ad : virtue.getApps().values()) {
-			tiles.remove(ad.getId() + virtue.getTemplateId());
-		}
-		search(null, null, null);
 	}
 
 	@Override

@@ -31,14 +31,11 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class VirtueListContainer extends AbstractVirtueContainer implements Comparable<VirtueListContainer> {
 
-	private VirtueList vl;
-
 	public VirtueListContainer(DesktopVirtue virtue, VirtueService virtueService, Color headerColor,
-			JScrollPane sp, JTextField textField, GhostText ghostText, VirtueList vl) {
+			JScrollPane sp, JTextField textField, GhostText ghostText) {
 		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = false;
 
-		this.vl = vl;
 		this.container = new JPanel();
 		container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
@@ -115,7 +112,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 						keyword = "";
 					}
 					dropDownSearch(keyword);
-					container.validate();
+					container.revalidate();
 					container.repaint();
 					sp.validate();
 					sp.getViewport().revalidate();
@@ -123,7 +120,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 					dropDown = false;
 					container.removeAll();
 					container.add(header);
-					container.validate();
+					container.revalidate();
 					container.repaint();
 					sp.validate();
 					sp.getViewport().revalidate();
@@ -170,6 +167,7 @@ public class VirtueListContainer extends AbstractVirtueContainer implements Comp
 	public void updateVirtue(DesktopVirtue virtue) {
 		this.virtue = virtue;
 		this.statusLabel.setText(virtue.getVirtueState().toString());
+		triggerUpdateListener();
 	}
 
 	@Override

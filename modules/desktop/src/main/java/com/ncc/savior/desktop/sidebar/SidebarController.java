@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.authorization.AuthorizationService;
+import com.ncc.savior.desktop.authorization.AuthorizationService.ILoginListener;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -41,7 +42,25 @@ public class SidebarController {
 		this.changeHandler = sidebar;
 		this.virtueService = virtueService;
 		this.authService = authService;
+		registerAsListener();
+
 		this.currentVirtues = new TreeMap<String, DesktopVirtue>();
+	}
+
+	public void registerAsListener() {
+		authService.addLoginListener(new ILoginListener() {
+
+			@Override
+			public void onLogin() {
+				startVirtuePoll();
+			}
+
+			@Override
+			public void onLogout() {
+				stopVirtuePoll();
+			}
+
+		});
 	}
 
 	public void init(JFrame primaryFrame) throws Exception {
@@ -77,11 +96,13 @@ public class SidebarController {
 
 	// ****************
 	public void startVirtuePoll() {
+		terminatePollThread = false;
+		currentVirtues.clear();
+
 		Runnable runnable = new Runnable() {
 
 			@Override
 			public void run() {
-				String previousUser = null;
 				while (!terminatePollThread) {
 					try {
 						DesktopUser currentUser = authService.getUser();
@@ -95,12 +116,8 @@ public class SidebarController {
 								// TODO do something with connection errors.
 								virtues = new ArrayList<DesktopVirtue>(0);
 							}
-							if (!currentUser.getUsername().equals(previousUser)) {
-								currentVirtues.clear();
-								previousUser = currentUser.getUsername();
-							}
-							updateVirtues(virtues);
 
+							updateVirtues(virtues);
 						}
 
 						Thread.sleep(pollPeriodMillis);
@@ -113,6 +130,10 @@ public class SidebarController {
 		virtuePollThread = new Thread(runnable, "VirtuePollThread");
 		virtuePollThread.setDaemon(true);
 		virtuePollThread.start();
+	}
+
+	public void stopVirtuePoll() {
+		terminatePollThread = true;
 	}
 
 	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {

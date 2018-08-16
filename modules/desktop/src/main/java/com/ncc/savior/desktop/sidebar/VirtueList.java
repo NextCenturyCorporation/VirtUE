@@ -34,34 +34,15 @@ public class VirtueList extends AbstractVirtueView {
 	}
 
 	public void removeVirtue(DesktopVirtue virtue) {
-		row--;
-		container.remove(footer);
-		moveFooter(row);
-
-		VirtueListContainer removedVc = virtues.get(virtue.getTemplateId());
-
-		int removedRow = removedVc.getRow();
 		virtues.remove(virtue.getTemplateId());
 
-		if (virtuesInView.contains(virtue.getTemplateId())) {
-			container.remove(removedVc.getContainer());
-
-			for (VirtueListContainer vc : virtues.values()) {
-				if (vc.getRow() > removedRow) {
-					container.remove(vc.getContainer());
-					vc.setRow(vc.getRow() - 1);
-					addVirtueToRow(vc.getVirtue(), vc, vc.getRow());
-					container.validate();
-					container.repaint();
-				}
-			}
-		}
+		triggerRemoveVirtueListener();
 	}
 
 	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
 		VirtueApplicationItem va = virtues.get(virtue.getTemplateId()).tiles.get(ad.getId() + virtue.getTemplateId());
 		if (va != null) {
-			va.update(virtue);
+			va.update();
 		}
 	}
 
@@ -77,7 +58,6 @@ public class VirtueList extends AbstractVirtueView {
 		container.remove(footer);
 		container.add(vlc.getContainer(), gbc);
 		moveFooter(row + 1);
-		virtuesInView.add(virtue.getTemplateId());
 
 		virtues.put(virtue.getTemplateId(), vlc);
 	}
@@ -89,7 +69,6 @@ public class VirtueList extends AbstractVirtueView {
 			public void run() {
 				row = 0;
 				container.removeAll();
-				virtuesInView.clear();
 				Collection<VirtueListContainer> vlcs = virtues.values();
 				List<VirtueListContainer> matchedVlcs;
 

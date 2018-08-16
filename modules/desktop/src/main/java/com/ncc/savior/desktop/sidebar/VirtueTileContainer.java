@@ -45,11 +45,8 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 	private JPanel tileContainer;
 	private Color bodyColor;
 
-	private VirtueTile vt;
-
 	public VirtueTileContainer(DesktopVirtue virtue, VirtueService virtueService,
-			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField, GhostText ghostText,
-			VirtueTile vt)
+			Color headerColor, Color bodyColor, JScrollPane sp, JTextField textField, GhostText ghostText)
 			throws IOException {
 		super(virtue, virtueService, sp, textField, ghostText);
 		dropDown = true;
@@ -57,7 +54,6 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		container = new JPanel();
 		container.setLayout(new BorderLayout(0, 0));
 
-		this.vt = vt;
 		this.bodyColor = bodyColor;
 
 		createContainer(virtue, headerColor, Color.LIGHT_GRAY, numRows);
@@ -132,14 +128,13 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 						keyword = "";
 					}
 					dropDownSearch(keyword);
-					tileContainer.validate();
+					tileContainer.revalidate();
 					tileContainer.repaint();
 					sp.validate();
 					sp.getViewport().revalidate();
-
 				} else {
 					tileContainer.removeAll();
-					tileContainer.validate();
+					tileContainer.revalidate();
 					tileContainer.repaint();
 					dropDown = false;
 					sp.validate();
@@ -197,7 +192,7 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 		} else {
 			tileContainer.setBackground(Color.LIGHT_GRAY);
 		}
-		search(null, null);
+		triggerUpdateListener();
 	}
 
 	@Override
