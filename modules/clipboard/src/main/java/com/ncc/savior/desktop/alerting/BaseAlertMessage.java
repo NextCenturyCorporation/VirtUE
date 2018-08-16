@@ -1,8 +1,5 @@
 package com.ncc.savior.desktop.alerting;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * Base class for alert messages that handles some common functionality such as
  * storing the time the alert was created.

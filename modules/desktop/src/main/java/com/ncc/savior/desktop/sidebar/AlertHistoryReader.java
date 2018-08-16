@@ -44,7 +44,6 @@ public class AlertHistoryReader {
 						.withTrim());) {
 
 			List<CSVRecord> records = csvParser.getRecords();
-			Collections.reverse(records);
 
 			if (records.size() == 0) {
 				container.setLayout(new BorderLayout());
@@ -54,6 +53,8 @@ public class AlertHistoryReader {
 				prompt.setVerticalAlignment(SwingConstants.CENTER);
 				container.add(prompt, BorderLayout.CENTER);
 			} else {
+				Collections.reverse(records);
+
 				container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 
 				for (CSVRecord csvRecord : records) {

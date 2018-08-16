@@ -37,4 +37,8 @@ public class UserAlertingServiceHolder {
 	public static void setAlertService(IUserAlertService alertService) {
 		UserAlertingServiceHolder.alertService = alertService;
 	}
+	
+	public static void resetHistoryManager() throws IOException {
+		alertHistoryManager = new AlertHistoryWriter();
+	}
 }

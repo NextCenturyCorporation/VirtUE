@@ -52,6 +52,7 @@ import javax.swing.event.DocumentListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
@@ -273,6 +274,7 @@ public class Sidebar implements VirtueChangeHandler {
 			public void onLoginSuccess(DesktopUser user) throws IOException {
 				onLogin(user);
 				ghostText.reset();
+				UserAlertingServiceHolder.resetHistoryManager();
 			}
 
 			@Override

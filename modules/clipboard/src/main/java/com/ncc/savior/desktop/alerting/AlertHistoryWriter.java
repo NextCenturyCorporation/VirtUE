@@ -45,10 +45,10 @@ public class AlertHistoryWriter implements IAlertHistoryManager {
         	dialog.dispose();
         }
 
-    	writer = Files.newBufferedWriter(Paths.get(CSV_FILE_PATH));
+    	writer = new BufferedWriter(new FileWriter(CSV_FILE_PATH, false));
 	 
-        csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
-                 .withHeader("Message", "Time"));
+        csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+        csvPrinter.printRecord("Message", "Time");
     }
     
     public void setupDialog() {
