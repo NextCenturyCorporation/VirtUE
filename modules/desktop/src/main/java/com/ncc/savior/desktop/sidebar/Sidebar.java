@@ -80,13 +80,13 @@ public class Sidebar implements VirtueChangeHandler {
 	private ImageIcon inactiveListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-inactive2.png")));
 	private ImageIcon activeListIcon = (new ImageIcon(Sidebar.class.getResource("/images/list-active2.png")));
 
-	private static ImageIcon saviorIcon = new ImageIcon(AppsTile.class.getResource("/images/saviorLogo.png"));
+	private static ImageIcon saviorIcon = new ImageIcon(Sidebar.class.getResource("/images/saviorLogo.png"));
 
 	private static Image defaultImage = saviorIcon.getImage();
 	private static Image saviorTile = defaultImage.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
 	private static Image saviorList = defaultImage.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
 
-	private static ImageIcon loadingIcon = new ImageIcon(AppsTile.class.getResource("/images/loading.gif"));
+	private static ImageIcon loadingIcon = new ImageIcon(Sidebar.class.getResource("/images/loading.gif"));
 
 	private ImageIcon searchIcon;
 	private ImageIcon closeIcon = new ImageIcon(Sidebar.class.getResource("/images/close-button.png"));
