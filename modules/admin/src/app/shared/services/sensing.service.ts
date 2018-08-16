@@ -12,8 +12,9 @@ const httpHeader = {
 };
 
 @Injectable()
-
 export class SensingService {
+
+  baseUrl: string;
 
   constructor(
     private httpClient: HttpClient
@@ -22,9 +23,12 @@ export class SensingService {
   private jsonfile = './assets/json/sensing.json';
   private configUrl = 'admin/sensing';
 
-  public getSensingLog(baseUrl: string): Observable<any> {
-    let src = baseUrl + this.configUrl;
-    return this.httpClient.get<any>(src);
+  public setBaseUrl( url: string ) {
+    this.baseUrl = url;
+  }
+
+  public getSensingLog(): Observable<any> {
+    return this.httpClient.get<any>(this.baseUrl + this.configUrl);
   }
 
   public getStaticList(): Observable<any> {

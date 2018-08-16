@@ -4,14 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 
 @Component({
-  selector: 'app-vm-apps',
-  templateUrl: './vm-apps.component.html',
+  selector: 'app-apps',
+  templateUrl: './apps.component.html',
   providers: [
     Location,
     { provide: LocationStrategy, useClass: HashLocationStrategy }
   ]
 })
-export class VmAppsComponent implements OnInit {
+export class AppsComponent implements OnInit {
 
   location: Location;
 

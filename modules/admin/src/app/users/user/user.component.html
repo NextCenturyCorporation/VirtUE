@@ -17,7 +17,6 @@
               <div class="mui-col-md-12 form-item">
                 <div class="mui-col-md-6 table-data">
                   <label>Select Role(s)</label><br />
-                  <!-- #roleUser value="ROLE_USER" -->
                   <mat-checkbox [(ngModel)]="roleUser" [checked]="roleUser"> User</mat-checkbox>
                   <br />
                   <mat-checkbox [(ngModel)]="roleAdmin" [checked]="roleAdmin"> Administrator</mat-checkbox>
@@ -60,7 +59,7 @@
                         <span class="menu-options"><a (click)="item.removeChild(v.id, i)">Remove</a></span>
                     </div>
                     <div class="table-data mui-col-md-8">
-                      <ul [innerHTML]="getChildrenListHTMLstring(v)">
+                      <ul [innerHTML]="getGrandchildrenHtmlList(v)">
                       </ul>
                     </div>
                     <div class="clearfix"></div>

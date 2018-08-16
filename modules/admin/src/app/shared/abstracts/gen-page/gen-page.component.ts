@@ -7,10 +7,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 //
 import { BaseUrlService } from '../../services/baseUrl.service';
-// import { ApplicationsService } from '../../services/applications.service';
-// import { VirtuesService } from '../../services/virtues.service';
-// import { VirtualMachineService } from '../../services/vm.service';
-// import { UsersService } from '../../services/users.service';
 import { ItemService } from '../../services/item.service';
 
 import { Column } from '../../models/column.model';
@@ -22,23 +18,25 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
 
+import { ColorSet } from '../../sets/color.set';
+
 import { ConfigUrlEnum } from '../../enums/enums';
 
-//TODO
-type datasetType = {serviceUrl: string, class: any, name: string, depends: string};
+type datasetType = {serviceUrl: string, class: any, datasetName: string, depends: string};
 
 @Component({
 providers: [ BaseUrlService, ItemService  ]
-// providers: [ BaseUrlService, UsersService, VirtuesService, VirtualMachineService, ApplicationsService  ]
 })
 export abstract class GenericPageComponent {
 
+  //the base aws url. Usually not needed, but save anyway
+  baseUrl: string;
+
   //tells the service and backend where to make changes - specific to each type
-  //of item. Must be set in construcotr of derived class.
+  //of item. Must be set in constructor of derived class.
   serviceConfigUrl: ConfigUrlEnum;
 
-  //will cause error if not instantialized before page loads; the pull functions
-  //don't initialize these immediately.
+  //these are filled as needed by the page extending this class, based on neededDatasets
   allUsers: DictList<User>;
   allVirtues: DictList<Virtue>;
   allVms: DictList<VirtualMachine>;
@@ -49,33 +47,14 @@ export abstract class GenericPageComponent {
 
   //string, holds the data types whose datasets must be loaded on page load or
   //refresh. Must be in order, from lowest child to highest parent - like ["apps, vms", "virtues"]
-  //The last one is
   neededDatasets: string[];
-
-  service: ItemService;
-
-  /**
-  This holds functions, to be called in turn to load/reload data. When each
-    function finishes, it calls the next one in the supplied list (updateQueue).
-  Must be set in derived classes.
-  Declaration not fully specific, because it holds function signatures
-    which take as a parameter an array of this type. So the type is recursive.
-    Sorry.
-  */
-  updateFuncQueue: ((scope, updateQueue: any[], completedUpdates: any[])=> void)[];
-
 
   constructor(
     protected router: Router,
     protected baseUrlService: BaseUrlService,
     protected itemService: ItemService,
-    // protected usersService: UsersService,
-    // protected virtuesService: VirtuesService,
-    // protected vmService: VirtualMachineService,
-    // protected appsService: ApplicationsService,
     protected dialog: MatDialog
   ) {
-    //see comment by declaration
     this.allUsers = new DictList<User>();
     this.allVirtues = new DictList<Virtue>();
     this.allVms = new DictList<VirtualMachine>();
@@ -89,8 +68,6 @@ export abstract class GenericPageComponent {
     this.buildDatasetMeta();
 
   }
-
-  abstract pullData();
 
   resetRouter(): void {
     setTimeout(() => {
@@ -116,134 +93,232 @@ export abstract class GenericPageComponent {
   }
 
   buildDatasetMeta() {
-    //{()=>Observable<any>;}
     this.datasetMeta = new Dict<datasetType>();
     this.datasetMeta['apps'] = {
           serviceUrl: ConfigUrlEnum.APPS,
           class: Application,
-          name: 'allApps',
+          datasetName: 'allApps',
           depends: undefined
         };
     this.datasetMeta['vms'] = {
           serviceUrl: ConfigUrlEnum.VMS,
           class: VirtualMachine,
-          name: 'allVms',
+          datasetName: 'allVms',
           depends: 'allApps'
         };
     this.datasetMeta['virtues'] = {
           serviceUrl: ConfigUrlEnum.VIRTUES,
           class: Virtue,
-          name: 'allVirtues',
+          datasetName: 'allVirtues',
           depends: 'allVms'
         };
     this.datasetMeta['users'] = {
           serviceUrl: ConfigUrlEnum.USERS,
           class: User,
-          name: 'allUsers',
+          datasetName: 'allUsers',
           depends: 'allVirtues'
         };
   }
 
-  /*
-  TODO check this given below update
-  We need to call a series of functions in order, where each function can
-  only start once the service the previous one started has come back; that is,
-  once the previous function has completely finished setting up the data it
-  is told to.
-  UpdateQueue holds a list of the functions to be called, in order. Once each
-  finishes processing their data, they add their name to the "completedUpdates"
-  list, remove their name from updateQueue, and then call the next function in
-  updateQueue. Once updateQueue is empty, the chain returns. Note that the chain
-  of functions are within a spawned sub-process, and so control in the rest of
-  the program doesn't wait on them. Once they finish, the page automatically
-  updates to show the newly-acquired data.
+  cmnComponentSetup() {
+    this.baseUrlService.getBaseUrl().subscribe( res => {
+      this.baseUrl = res[0].aws_server;
 
+      this.itemService.setBaseUrl(this.baseUrl);
 
-  Ideally now, there should be a central collection that defines what the values
-  should be for all the inputs, so you can just say "I want apps, vms, and virtues",
-  and not have to type in what they each depend on.
-  */
-  pullDatasets(): void {
-    let updateQueue = Object.assign([], this.updateFuncQueue);
-    let completedUpdates = [];
+      this.pullData();
+    }, error => {console.log("Error retrieving base url.")}); //TODO
 
-    //Every page should need to request some sort of data.
-    if (updateQueue.length === 0 || !(updateQueue[0] instanceof Function)) {
-      console.log("No datasets requested in updateQueue.");
-      return;
-    }
-
-    // Pass in 'this' as scope, because 'this' within the called functions
-    // refers to the updateQueue list.
-    updateQueue[0](this, updateQueue, completedUpdates);
-
+    this.resetRouter();
   }
 
   /*
-   * Calls
-   *
-   * onComplete is an optional function, which would be called after all requests
-   * in the updateQueue have completed.
+  We need to make an ordered set of calls to load and process data from the
+  backend, where each call (or more specifically, each processing section) can
+  only start once the previous dataset has completely finished setting up the
+  data it was told to.
+  neededDatasets holds an ordered list of the data types that are needed
+  (as strings), and must be set in every derived class's constructor.
+  updateQueue is built based on those specified data types.
+
+  neededDatasets must hold the names (as strings) of the datasets to be loaded:
+  i.e. ['allApps', 'allVms']
+  Must be in the order in which they should be loaded.
+
+  If a refresh button is added, make sure that gen-form doesn't overwrite the
+  item being edited - that'd just throw away whatever changes the user  had made
+  so far. Do refresh the item's children though, based on its current childIDs list.
+  May need to repackage this: rename this function pullDatasets, make it take an
+  onComplete() function, create a pullData() in gen-list and gen-form, where
+  gen-list's just calls pullDatasets(onPullComplete), and gen-form calls
+  pullDatasets(onPullComplete) if "item" hasn't already filled, but
+  pullDatasets(()=>{})) if it has, or if the mode is CREATE.
+  Don't check the attributes of item, just make a flag - the user could have
+  intentionally removed all of item's attributes.
   */
-  pullDatasets2(onComplete?: {(any): void}): void {
-    //neededDatasets must hold the names (as strings) of the datasets to be loaded:
-    //i.e. ['allApps', 'allVms']
-    //Must be in the order in which they should be loaded.
+  pullData(): void {
     let updateQueue: any[] = [];
 
     for (let dName of this.neededDatasets) {
       if ( !(dName in this.datasetMeta)) {
         //throw error TODO
+        console.log("Data \"" + dName + "\" requested in this.neededDatasets is not valid.\n\
+Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
       }
-      updateQueue.push(this.datasetMeta[dName]);
+      else {
+        updateQueue.push(this.datasetMeta[dName]);
+      }
+    }
+    if (updateQueue.length > 0) {
+      // this.recursivePullData(updateQueue, []);
+      this.fakeRecursivePull(updateQueue, []);
+    }
+    else {
+      console.log("No valid datasets specified in this.neededDatasets");
     }
 
-    //TODO check that updateQueue isn't empty here
+  }
 
-    this.recursivePullData(this, updateQueue, [], onComplete);
+
+
+  fakeRecursivePull(
+    updateQueue: datasetType[],
+    pulledDatasetNames: string[]
+  ): void {
+    console.log("Could not load data, using test data!");
+    this[updateQueue[0].datasetName] = new DictList<Item>();
+
+    let numDataPoints = 16;
+    if (updateQueue[0].datasetName === "allApps") {
+      console.log("---------Pulling apps");
+      let item: Item;
+      for (let i = 1; i <= numDataPoints; i++) {
+        item = new (updateQueue[0].class)({id: ("app_" + String(i)), name: ("App_" + String(i)),
+                                          version: ("V_" + String(i)), os: ("OS_" + String(i))});
+        this[updateQueue[0].datasetName].add(item.getID(), item);
+      }
+    }
+    else if (updateQueue[0].datasetName === "allVms") {
+      console.log("---------Pulling vms");
+      let item: Item;
+      for (let i = 1; i <= numDataPoints; i++) {
+        let children = [];
+        for (let i2 = 1; i2 < i; i2++) {
+          if (i % i2 === 0) {
+            children.push("app_" + String(i2));
+          }
+        }
+        item = new (updateQueue[0].class)({id: ("vm_" + String(i)), name: ("Vm_" + String(i)), os: ("OS_" + String(i)),
+                                          enabled: (i % 3 === 0), lastEditor: "sys", lastModification:"1/1/2000",
+                                          applicationIds: children});
+        this[updateQueue[0].datasetName].add(item.getID(), item);
+        if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
+          item.buildChildren(this[updateQueue[0].depends]);
+        }
+      }
+    }
+    else if (updateQueue[0].datasetName === "allVirtues") {
+      console.log("---------Pulling virtues");
+      let colors = new ColorSet().getList();
+      let item: Item;
+      for (let i = 1; i <= numDataPoints; i++) {
+        let children = [];
+        for (let i2 = 1; i2 < i; i2++) {
+          if (i % i2 === 0) {
+            children.push("vm_" + String(i2));
+          }
+        }
+        item = new (updateQueue[0].class)({id: ("vrtu_" + String(i)), name: ("Vrt_" + String(i)), color: colors[i % colors.length].hex,
+                                          enabled: (i % 4 === 0), lastEditor: "sys", lastModification:"2/2/2002",
+                                          version: ("V_" + String(i)), virtualMachineTemplateIds: children});
+        this[updateQueue[0].datasetName].add(item.getID(), item);
+        if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
+          item.buildChildren(this[updateQueue[0].depends]);
+        }
+      }
+    }
+    else if (updateQueue[0].datasetName === "allUsers") {
+      console.log("---------Pulling users");
+      let item: Item;
+      for (let i = 1; i <= numDataPoints; i++) {
+        let children = [];
+        for (let i2 = 1; i2 < i; i2++) {
+          if (i % i2 === 0) {
+            children.push("vrtu_" + String(i2));
+          }
+        }
+        item = new (updateQueue[0].class)({username: ("U_" + String(i)),
+                                          enabled: (i % 2 === 0 || i % 3 === 0),
+                                          virtueTemplateIds: children});
+        this[updateQueue[0].datasetName].add(item.getID(), item);
+        if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
+          item.buildChildren(this[updateQueue[0].depends]);
+        }
+      }
+    }
+
+    //mark this set as pulled
+    pulledDatasetNames.push(updateQueue[0].datasetName);
+
+    //remove front element
+    updateQueue.shift();
+
+    if (updateQueue.length !== 0) {
+      //if there are more datasets to pull
+      this.fakeRecursivePull(updateQueue, pulledDatasetNames);
+    }
+    else {
+      this.onPullComplete();
+    }
+    return;
   }
 
   /**
-  TODO
-  So what'll be passed in is a list of service functions to call, a list of
-  types to save the results from each call as, a list of the datasets that need
-  to be populated, and an empty list to hold the names of the datasets that have
-  been successfully pulled.
-  We need to pass in scope, because 'this' within the callback doesn't refer to
-  the GenericPageComponent, but to //TODO
+  See comment above pullDatasets for overview on inputs
+
+  This function pulls the datasets specified in updateQueue -
+  as a queue, only the first element (call it E) is worked with. This function:
+    pulls data from the backend, based on the specifications in E
+    processes that data, and saves it into the object specified by E (one of allVms,
+        allVirtues, allApps, or allUsers)
+    Once that processing is done, E's name is added to the pulledDatasets list,
+        to store the fact that that dataset has been built.
+    E is then removed from the queue, and if updateQueue isn't empty, this
+        function is recursively called again, with the shorted queue.
+  Once updateQueue is empty, this.onPullComplete is called, and the chain
+  returns. Note that the chain of functions is a chain of sub-processes, and so
+  control in the rest of the program doesn't wait on them. Once they finish,
+  The page will automatically update, so long as onPullComplete() changes some
+  attribute that Angular is watching, like items in gen-list, or item.children in gen-form)
+
   ******************************************************************************
-  i.e., informally:
+  informal usage:
     pass in:
-      scope: this
       updateQueue:[
                       {
-                        serviceUrl: appsService.getAppsList(...),
+                        serviceUrl: ConfigUrlEnum.APPS,
                         class: Application,
-                        name: 'allApps',
+                        datasetName: 'allApps',
                         depends: undefined
                       }, {
-                        service: vmService.getVmList(...),
+                        serviceUrl: ConfigUrlEnum.VMS,
                         class: VirtualMachine,
-                        name: 'allVms',
+                        datasetName: 'allVms',
                         depends: 'allApps'
                       }, {
-                        service: virtuesService.getVirtueList(...),
+                        serviceUrl: ConfigUrlEnum.VIRTUES,
                         class: Virtue,
-                        name: 'allVirtues',
+                        datasetName: 'allVirtues',
                         depends: 'allVms'
                       }
                   ],
-      pulledDatasets: [],
-      onComplete(): {this.pullItemData(this.item.id)}
+      pulledDatasets: []
 
     at end:
       {
         updateQueue = []
         pulledDatasets  = ['allApps', 'allVms', 'allVirtues']
       }
-
-  ******************************************************************************
-  So with the above example input, pullData would first call getAppsList
 
   ******************************************************************************
   this isn't the prettiest function, but it eliminates code-reuse and ensures
@@ -254,196 +329,61 @@ export abstract class GenericPageComponent {
   ******************************************************************************
   */
   recursivePullData(
-    scope,
     updateQueue: datasetType[],
-    pulledDatasetNames: string[],
-    onComplete: {(GenericPageComponent, string[]): void} //see call below
+    pulledDatasetNames: string[]
   ): void {
-    scope.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
-      scope[updateQueue[0].name].clear(); // not sure if this is needed
-      scope[updateQueue[0].name] = new DictList<Item>();//does it not need '(updateQueue[0].class)'?
+
+    this.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
+
+      this[updateQueue[0].datasetName].clear(); //slightly paranoic attempt to prevent memory leaks
+      this[updateQueue[0].datasetName] = new DictList<Item>();
       let item = null;
       for (let e of rawDataList) {
         item = new (updateQueue[0].class)(e);
-        scope[updateQueue[0].name].add(item.id, item);
+        this[updateQueue[0].datasetName].add(item.getID(), item);
 
         // If the call to build the collection for this item's child-type has
         //   been recorded as completed, build this item's 'children' list.
         // Could just check if the Child-type's collection (allVms, allApps, etc)
         //   isn't empty, but that doesn't guarentee it's up-to-date.
         if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
-          item.buildChildren(scope[updateQueue[0].depends]);
+          item.buildChildren(this[updateQueue[0].depends]);
         }
 
       }
       item = null;
       rawDataList = null;
     },
-    error => { //TODO },
+    error => {
+      console.log();
+      console.log("Error in pulling dataset \'", updateQueue[0].datasetName, "\'")
+      //TODO notify user
+    },
     () => { //once the dataset has been pulled and fully processed above
-
       //mark this set as pulled
-      pulledDatasetNames.push(updateQueue[0].name);
+      pulledDatasetNames.push(updateQueue[0].datasetName);
 
-      //remove first element
+      //remove front element
       updateQueue.shift();
-
-      //TODO check if scope is different from 'this'
-      //I think 'this' will refer to 'window' actually
 
       if (updateQueue.length !== 0) {
         //if there are more datasets to pull
-        scope.recursivePullData(scope, updateQueue, pulledDatasetNames, onComplete);
+        this.recursivePullData(updateQueue, pulledDatasetNames);
       }
       else {
-        if (onComplete) {
-          //TODO check what "this" is in onComplete.
-          onComplete(scope);
-        }
+        this.onPullComplete();
       }
       return;
     });
   }
 
-
-  pullApps(scope, updateQueue: any[], completedUpdates: any[]): void {
-    // scope.appsService.getAppsList(scope.baseUrl).subscribe( apps => {
-    scope.itemService.getItems(scope.serviceConfigUrl).subscribe( apps => {
-      scope.allApps.clear();
-      scope.allApps = new DictList<Application>();
-      let app = null
-      for (let a of apps) {
-        app = new Application(a);
-        scope.allApps.add(a.id, app);
-      }
-      apps = null;
-    },
-      error => {},
-      () => {
-        completedUpdates.push(updateQueue[0]);
-        updateQueue.shift();
-        if (updateQueue.length !== 0) {
-          updateQueue[0](scope, updateQueue, completedUpdates);
-        }
-        else {
-          scope.items = scope.allApps.asList();
-        }
-      });
-  }
-
-  pullVms(scope, updateQueue: any[], completedUpdates: any[]): void {
-    scope.itemService.getItems(scope.serviceConfigUrl).subscribe( vms => {
-      scope.allVms.clear();
-      scope.allVms = new DictList<VirtualMachine>();
-      let vm = null;
-      for (let v of vms) {
-        vm = new VirtualMachine(v);
-        scope.allVms.add(vm.id, vm);
-        //if pullApps has completed, and so allApps is populated
-        //will always happen under current config, but may not if vms are ever
-        //pulled without apps being pulled first.
-        if (completedUpdates.some(x=> x===scope.pullApps)) {
-          vm.formatChildNames(scope.allApps);
-        }
-      }
-      vms = null;
-    },
-    error => {},
-    () => {
-      completedUpdates.push(updateQueue[0]);
-      updateQueue.shift();
-      if (updateQueue.length !== 0) {
-        updateQueue[0](scope, updateQueue, completedUpdates);
-      }
-      else {
-        scope.items = scope.allVms.asList();
-      }
-    });
-  }
-
-  pullVirtues(scope, updateQueue: any[], completedUpdates: any[]): void {
-    scope.itemService.getItems(scope.serviceConfigUrl).subscribe( virtues => {
-      scope.allVirtues.clear(); // not sure if this is needed
-      scope.allVirtues = new DictList<Virtue>();
-      let virt = null;
-      for (let v of virtues) {
-        virt = new Virtue(v);
-        scope.allVirtues.add(v.id, virt);
-        //if pullVms has completed and so allVms has been populated
-        //just checking if allVms isn't empty wouldn't guarentee it's up-to-date
-        if (completedUpdates.some(x=> x===scope.pullVms)) {
-          virt.formatChildNames(scope.allVms);
-
-          //generate the html for the apps available for each virtue, used on the
-          //virtue list page.
-          if (completedUpdates.some(x=> x===scope.pullApps)) {
-            virt.generateAppListHtml(scope.allVms, scope.allApps);
-          }
-        }
-      }
-      virt = null;
-      virtues = null;
-    },
-    error => {},
-    () => {
-      completedUpdates.push(updateQueue[0]);
-      updateQueue.shift();
-      if (updateQueue.length !== 0) {
-        updateQueue[0](scope, updateQueue, completedUpdates);
-      }
-      else {
-        scope.items = scope.allVirtues.asList();
-      }
-    });
-  }
-
-  pullUsers(scope, updateQueue: any[], completedUpdates: any[]): void {
-    scope.itemService.getItems(scope.serviceConfigUrl).subscribe(users => {
-      scope.allUsers.clear(); // not sure if this is needed
-      scope.allUsers = new DictList<User>();
-      let user = null;
-      for (let u of users) {
-        user = new User(u);
-        scope.allUsers.add(user.getName(), user);
-        //if pullVirtues has completed and so allVirtues is populated
-        if (completedUpdates.some(x=> x===scope.pullVirtues)) {
-          user.formatChildNames(scope.allVirtues);
-        }
-      }
-      user = null;
-      users = null;
-    },
-    error => {},
-    () => {
-      completedUpdates.push(updateQueue[0]);
-      updateQueue.shift();
-      //currently, pullUser is only going to need to be the last one pulled, so
-      //the following lines won't be needed/used unless something changes and
-      //something gets put in the queue after pullUser
-      // console.log(updateQueue, scope.allUsers);
-      if (updateQueue.length !== 0) {
-        updateQueue[0](scope, updateQueue, completedUpdates);
-      }
-      else {
-        scope.items = scope.allUsers.asList();
-      }
-    });
-  }
-
-  //
-  // getName(dl: DictList<Item>, id: string) {
-  //   return dl.get(id).getName();
-  // }
-
-  // getChildrenListHTMLstring(item: Item): string {
-  //   return item.childNamesAsHtmlList;
-  // }
+  abstract onPullComplete();
 
   // try making these on the fly. Might not be that slow.
   getGrandchildrenHtmlList(i: Item): string {
     let grandchildrenHTMLList: string = "";
     for (let c of i.children.asList()) {
-      grandchildrenHTMLList += c.childNamesAsHtmlList;
+      grandchildrenHTMLList += c.childNamesHTML;
     }
     return grandchildrenHTMLList;
   }

@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { VmAppsModalComponent } from '../vm-apps-modal/vm-apps-modal.component';
+import { AppsModalComponent } from '../../modals/apps-modal/apps-modal.component';
 
 import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
@@ -25,6 +25,7 @@ import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.c
 @Component({
   selector: 'app-vm',
   templateUrl: './vm.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService, OSSet ]
 })
 export class VmComponent extends GenericFormComponent {
@@ -42,7 +43,6 @@ export class VmComponent extends GenericFormComponent {
 
     this.item = new VirtualMachine(undefined);
 
-    this.updateFuncQueue = [this.pullApps, this.pullVms];
     this.neededDatasets = ["apps", "vms"];
 
     this.serviceConfigUrl = ConfigUrlEnum.VMS;
@@ -53,15 +53,15 @@ export class VmComponent extends GenericFormComponent {
 
 
   activateModal(): void {
-    let dialogRef = this.dialog.open(VmAppsModalComponent, {
+    let dialogRef = this.dialog.open(AppsModalComponent, {
       width: '750px',
       data: {
-        selectedApps: this.item.childIDs
+        selectedIDs: this.item.childIDs
       }
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    const apps = dialogRef.componentInstance.addApps.subscribe((dialogAppsList) => {
+    const apps = dialogRef.componentInstance.getSelections.subscribe((dialogAppsList) => {
       this.updateChildList(dialogAppsList);
     });
 

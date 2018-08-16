@@ -14,17 +14,17 @@ import { ItemService } from '../../shared/services/item.service';
 import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 @Component({
-  selector: 'app-user-list',
+  selector: 'user-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class UserListComponent extends GeneralListComponent {
+export class UserListComponent extends GenericListComponent {
 
   constructor(
     router: Router,
@@ -43,13 +43,12 @@ export class UserListComponent extends GeneralListComponent {
     this.colData = [
       {name: 'name', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
       {name: 'roles', prettyName: 'Authorized Roles', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.formatRoles},
-      {name: 'childNamesAsHtmlList', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: undefined},
+      {name: 'childNamesHTML', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
       {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}
     ];
 
     this.serviceConfigUrl = ConfigUrlEnum.USERS;
 
-    this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
     this.neededDatasets = ["virtues", "users"];
 
     this.prettyTitle = "Users";
@@ -80,10 +79,8 @@ export class UserListComponent extends GeneralListComponent {
   }
 
   //called after all the datasets have loaded
-  //scope is what you'd expect "this" to be. 'this' refers to the TODO here though.
-  //TODO put above message on other onComplete definitions
-  onComplete(scope): void {
-    scope.items = scope.allUsers.asList();
+  onPullComplete(): void {
+    this.items = this.allUsers.asList();
   }
 
 }

@@ -13,14 +13,15 @@ import {VirtueListComponent} from './virtues/virtue-list/virtue-list.component';
 import {VirtueComponent} from './virtues/virtue/virtue.component';
 import {VirtueSettingsComponent} from './virtues/virtue-settings/virtue-settings.component';
 
-import {VmsWrapperComponent} from './virtual-machines/vms.wrapper.component';
-import {VmListComponent} from './virtual-machines/vm-list/vm-list.component';
-import {VmComponent} from './virtual-machines/vm/vm.component';
+import {VmsWrapperComponent} from './vms/vms.wrapper.component';
+import {VmListComponent} from './vms/vm-list/vm-list.component';
+import {VmComponent} from './vms/vm/vm.component';
+
+import {AppsComponent} from './apps/apps.component';
+import {AppsListComponent} from './apps/apps-list/apps-list.component';
+import {AddAppComponent} from './apps/add-app/add-app.component';
 
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
-import {VmAppsComponent} from './vm-apps/vm-apps.component';
-import {VmAppsListComponent} from './vm-apps/vm-apps-list/vm-apps-list.component';
-import {AddVmAppComponent} from './vm-apps/add-vm-app/add-vm-app.component';
 
 const routes: Routes = [
   {
@@ -79,7 +80,7 @@ const routes: Routes = [
     ]
   }, {
     path: 'applications',
-    component: VmAppsComponent,
+    component: AppsComponent,
     data: {
       breadcrumbs: [
         new Breadcrumb('Applications', '/apps')
@@ -88,10 +89,10 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: VmAppsListComponent
+        component: AppsListComponent
       }, {
         path: 'create',
-        component: AddVmAppComponent,
+        component: AddAppComponent,
         data: {
           breadcrumbs: [
             new Breadcrumb('Install New App', '/create')

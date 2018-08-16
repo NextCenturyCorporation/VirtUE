@@ -10,24 +10,25 @@ import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { Column } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
+import { RowOptions } from "../../shared/models/rowOptions.model"
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
 import { Application } from '../../shared/models/application.model';
-import { AddVmAppComponent } from '../add-vm-app/add-vm-app.component';
+import { AddAppComponent } from '../add-app/add-app.component';
 
-import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 @Component({
-  selector: 'app-vm-apps-list',
+  selector: 'apps-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class VmAppsListComponent extends GeneralListComponent {
+export class AppsListComponent extends GenericListComponent {
 
   file: string;
   url: string;
@@ -52,9 +53,9 @@ export class VmAppsListComponent extends GeneralListComponent {
       {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
     ];
 
-    this.serviceConfigUrl = ConfigUrlEnum.APPS;
+    // let optionsList = new RowOptions();
 
-    this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
+    this.serviceConfigUrl = ConfigUrlEnum.APPS;
 
     this.prettyTitle = "Available Applications";
     this.itemName = "Application";
@@ -63,19 +64,26 @@ export class VmAppsListComponent extends GeneralListComponent {
                           + this.itemName +  "\" above.";
     this.domain = '/applications';
 
-    this.updateFuncQueue = [this.pullApps];
     this.neededDatasets = ["apps"];
 
     this.showSortingAndEditOptions = false;
   }
 
+
+  //overrides parent
+  getOptionsList() {
+    return [
+      new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))
+  ];
+  }
+
   //called after all the datasets have loaded
-  onComplete(scope): void {
-    this.items = scope.allApps.asList();
+  onPullComplete(): void {
+    this.items = this.allApps.asList();
   }
 
   openAppsDialog(): void {
-    let dialogRef = this.dialog.open(AddVmAppComponent, {
+    let dialogRef = this.dialog.open(AddAppComponent, {
       width: '480px',
       data: { file: this.file, url: this.url }
     });

@@ -1,7 +1,7 @@
 import { Component, Input, ViewChild, ElementRef, OnInit, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 
-import { ColorModal } from "../../shared/modals/color-picker.modal";
+import { ColorModal } from "../../modals/color-picker/color-picker.modal";
 
 @Component({
   selector: 'app-virtue-settings',

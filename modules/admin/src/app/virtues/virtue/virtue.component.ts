@@ -2,14 +2,14 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatSlideToggleModule } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { VmModalComponent } from '../vm-modal/vm-modal.component';
+import { VmModalComponent } from '../../modals/vm-modal/vm-modal.component';
 
 import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
@@ -27,7 +27,7 @@ import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.c
 @Component({
   selector: 'app-virtue',
   templateUrl: './virtue.component.html',
-  // styleUrls: ['./edit-virtue.component.css'],
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
 
@@ -45,7 +45,6 @@ export class VirtueComponent extends GenericFormComponent {
 
     this.serviceConfigUrl = ConfigUrlEnum.VIRTUES;
 
-    this.updateFuncQueue = [this.pullApps, this.pullVms, this.pullVirtues];
     this.neededDatasets = ["apps", "vms", "virtues"];
 
     //set up empty (except for a default color), will get filled in ngOnInit if
@@ -71,12 +70,12 @@ export class VirtueComponent extends GenericFormComponent {
     let dialogRef = this.dialog.open(VmModalComponent, {
       width: '750px',
       data: {
-        selectedVms: this.item.childIDs
+        selectedIDs: this.item.childIDs
       }
     });
     dialogRef.updatePosition({ top: '5%', left: '20%' });
 
-    const vms = dialogRef.componentInstance.addVms.subscribe((dialogvmIDs) => {
+    const vms = dialogRef.componentInstance.getSelections.subscribe((dialogvmIDs) => {
       this.updateChildList(dialogvmIDs);
     });
 
@@ -114,6 +113,10 @@ export class VirtueComponent extends GenericFormComponent {
     //TODO update the update date. Maybe? That might be done on the backend
     // this.item['lastModification'] = new Date().something
 
+    //note that children is set to undefined for a brief instant before the
+    //page navigates away, during which time an exception would occur on the
+    //table - that chunk of html has now been wrapped in a check, to not check
+    //children's list size if children is undefined
     this.item.children = undefined;
     this.item.childIDs = undefined;
     return true;

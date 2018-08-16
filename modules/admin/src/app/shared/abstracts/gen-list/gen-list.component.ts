@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
+
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
@@ -8,25 +10,24 @@ import 'rxjs/add/observable/of';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Column } from '../../models/column.model';
+import { RowOptions } from '../../models/rowOptions.model';
 import { DictList } from '../../models/dictionary.model';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
+import { GenericTable } from '../gen-table/gen-table.component';
 
-import { User } from '../../models/user.model';
-import { Virtue } from '../../models/virtue.model';
-import { VirtualMachine } from '../../models/vm.model';
-import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
+
 
 @Component({
   selector: 'gen-list',
   templateUrl: './gen-list.component.html',
   providers: [ BaseUrlService, ItemService  ]
 })
-export class GeneralListComponent extends GenericPageComponent implements OnInit {
+export class GenericListComponent extends GenericPageComponent implements OnInit {
 
   prettyTitle: string;
   itemName: string;
@@ -38,6 +39,12 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
   //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
   // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
   colData: Column[];
+
+  //The table itself
+  //must be set in derived classes.
+  genTable: GenericTable;
+
+  optionsList: RowOptions[];
 
   domain: string; // like '/users', '/virtues', etc.
 
@@ -58,37 +65,52 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-    // super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
 
-    this.updateFuncQueue = [];
     this.items = [];
 
+    //default, overwritten by app-list
+    this.optionsList = this.getOptionsList();
+
+  }
+
+  //overridden by app-list
+  getOptionsList() {
+    return [
+      new RowOptions("Enable", (i:Item) => !i.enabled, (i:Item) => this.toggleItemStatus(i)),
+      new RowOptions("Disable", (i:Item) => i.enabled, (i:Item) => this.toggleItemStatus(i)),
+      new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)),
+      new RowOptions("Duplicate", () => true, (i:Item) => this.dupItem(i)),
+      new RowOptions("Delete", () => true, (i:Item) => this.openDialog('delete', i))
+  ];
   }
 
   ngOnInit() {
     this.sortColumn = this.colData[0];
-    this.baseUrlService.getBaseUrl().subscribe( res => {
-      let awsServer = res[0].aws_server;
-      this.itemService.setBaseUrl(awsServer);
-
-      //no onComplete() is needed
-      this.pullDatasets();
-    });
-
-    this.resetRouter();
+    this.cmnComponentSetup();
   }
 
+  callback(action: {(i:Item): any}, item:Item) {
+    action(item);
+  }
+
+  //overridden by virtues
+  hasColoredLabels() {
+    return false;
+  }
+
+  //used by many children to display their status
   formatStatus( item: Item ): string {
     return item.enabled ? 'Enabled' : 'Disabled';
   }
 
-  // Can't use this until I find a way to access the {x}-list component from
-  // within a format function. Passing in the scope to all format functions
-  // seems like a hack, and it'd only be needed for this one function.
-  // formatDate( item: Item): string {
-  //     return scope.datePipe.transform(item.lastModification, 'short');
-  // }
+  //see comment by Item.childNamesHTML
+  getChildNamesHtml( item: Item) {
+    return item.childNamesHTML;
+  }
 
+  //sets the watched attribute filterValue, causing angular to refresh the page
+  //and run the filter/sorter again - which is called via the pipe '|' character
+  // in gen-list.html
   filterList(filterValue: string): void {
     this.filterValue = filterValue;
   }
@@ -110,12 +132,6 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
     }
   }
 
-  //nothing to be done but pull the data, and then set 'this.items' in onComplete
-  pullData(): void {
-    this.pullDatasets();
-    // this.pullDatasets2(this.onComplete);
-  }
-
   openDialog(action: string, target: Item): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
       width: '450px',
@@ -131,7 +147,7 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
     const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
 
       if (targetObject !== 0 ) {
-        // console.log('Dialog Emitter: ' + targetObject.getID());
+
         if ( action === 'delete') {
           this.deleteItem(targetObject);
         }
@@ -140,6 +156,16 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
         }
       }
     });
+  }
+
+  editItem(i: Item) {
+    console.log("here");
+    this.router.navigate([this.domain +"/edit/" + i.getID()]);
+  }
+
+  dupItem(i: Item) {
+    console.log("here");
+    this.router.navigate([this.domain +"/duplicate/" + i.getID()]);
   }
 
   deleteItem(i: Item) {
@@ -158,4 +184,7 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
     this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe();
     this.refreshData();
   }
+
+  //overridden by children
+  onPullComplete(): void {}
 }

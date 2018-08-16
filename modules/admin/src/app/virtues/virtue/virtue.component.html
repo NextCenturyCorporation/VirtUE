@@ -1,7 +1,8 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h1 class="titlebar-title">{{actionName}} Virtue</h1>
-    <button (click)="toggleItemStatus()" class="titlebar-button">{{ item.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button>
+    <h1 class="titlebar-title">{{actionName}} Virtue Template: {{item.name}}</h1>
+    <!-- <button (click)="toggleItemStatus()" class="titlebar-button">
+    {{ item.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button> -->
   </div>
   <div id="content-main">
       <div id="content" class="border-top virtue-content">
@@ -17,8 +18,18 @@
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
                 <input type="text" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
-                <br />
-                <span *ngIf="mode!=='c'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.id }}</span>
+                <br/>
+                <span *ngIf="mode!=='Create'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.id }}</span>
+              </div>
+            </div>
+            <div class="mui-row form-item margin-top-15">
+              <div class="mui-col-md-1">
+                <label>Status: </label>
+              </div>
+              <div class="mui-col-md-2">
+                <!-- <button (click)="toggleItemStatus()" class="titlebar-button">{{ item.enabled ? 'Enabled' : 'Disabled' }}</button> -->
+                <!-- <mat-slide-toggle #statusToggle></mat-slide-toggle> -->
+                <mat-slide-toggle [(ngModel)]="item.enabled">{{ item.enabled ? 'Enabled' : 'Disabled' }}</mat-slide-toggle>
               </div>
             </div>
             <div class="mui-row form-item margin-top-15">
@@ -35,50 +46,55 @@
                 <button mat-button class="titlebar-button" (click)="activateModal(item.id)">Add VM</button>
               </div>
             </div>
-            <!-- if there are virtual machines, show this list -->
+            <!-- table section  -->
             <div class="mui-container-fluid data-list">
               <div class="mui-row table-header-group">
                 <div class="table-header mui-col-md-4">VM</div>
                 <div class="table-header mui-col-md-2">OS</div>
                 <div class="table-header mui-col-md-4">Applications</div>
-                <div class="table-header mui-col-md-2">Enabled</div>
+                <div class="table-header mui-col-md-2">Status</div>
               </div>
-              <!-- if there are no virtue, show this message -->
-              <div *ngIf="item.children.length < 1" class="mui-row margin-top-10">
+              <!-- if there are no virtues, show this message -->
+              <div *ngIf="!item.children || item.children.asList().length < 1" class="mui-row margin-top-10">
                 <div class="mui-col-md-12">
                   <p class="no-data-message">
                     No virtual machines are attached this virtue. To add VM(s), click on the button "Add VM".
                   </p>
                 </div>
               </div>
-              <div class="mui-row table-row" *ngFor="let vm of item.children.asList()" appActiveClass>
-                <div class="table-data mui-col-md-4">
-                  <a mat-button (click)="activateModal(vm)">{{ vm.name }}</a>
-                  <span class="menu-options" *ngIf="vm.enabled">
-                    <button>Disable</button> | <button mat-button (click)="item.removeChild(vm.id, i)">Remove</button>
-                  </span>
-                  <span class="menu-options" *ngIf="vm.enabled===false">
-                    <button>Enable</button> | <button mat-button (click)="item.removeChild(vm.id, i)">Remove</button>
-                  </span>
+              <!-- if there are attached vms, show this list -->
+              <div *ngIf="item.children !== undefined">
+                <div class="mui-row table-row" *ngFor="let vm of item.children.asList()"
+                      [ngStyle]="{'background-color':vm.enabled ? '#ffffff' : '#e7e7e7' }" appActiveClass>
+                  <div class="table-data mui-col-md-4 transparent">
+                    <a mat-button (click)="activateModal(vm)">{{ vm.name }}</a>
+                    <span class="menu-options" *ngIf="vm.enabled">
+                      <button>Disable</button> | <button mat-button (click)="item.removeChild(vm.id, i)">Remove</button>
+                    </span>
+                    <span class="menu-options" *ngIf="vm.enabled===false">
+                      <button>Enable</button> | <button mat-button (click)="item.removeChild(vm.id, i)">Remove</button>
+                    </span>
+                  </div>
+                  <div class="table-data mui-col-md-2 transparent">{{ vm.os }}</div>
+                  <div class="table-data mui-col-md-4 transparent">
+                    <ul [innerHTML]="getChildrenListHTMLstring(vm)"></ul>
+                  </div>
+                  <div class="table-data mui-col-md-2 transparent">{{ vm.enabled ? 'Enabled':'Disabled' }} </div>
+                  <div class="clearfix"></div>
                 </div>
-                <div class="table-data mui-col-md-2">{{ vm.os }}</div>
-                <div class="table-data mui-col-md-5">
-                  <ul [innerHTML]="getChildrenListHTMLstring(item)"></ul>
+                <div class="mui-container-fluid">
+                  <div class="mui-row paging">
+                    <div class="mui-col-md-4 page-number padding-left-0">&nbsp;</div>
+                    <div class="mui-col-md-4 page-controls">&nbsp;</div>
+                    <div class="mui-col-md-4 page-item-total padding-right-3">
+                      {{item.children.length}} Virtual Machine{{(item.children.length === 1) ? '': 's'}}
+                    </div>
+                    <div class="clearfix"></div>
+                  </div>
                 </div>
-                <div class="table-data mui-col-md-1">{{ vm.enabled ? 'Enabled':'Disabled' }} </div>
-                <div class="clearfix"></div>
               </div>
             </div>
-            <div class="mui-container-fluid">
-              <div class="mui-row paging">
-                <div class="mui-col-md-4 page-number padding-left-0">&nbsp;</div>
-                <div class="mui-col-md-4 page-controls">&nbsp;</div>
-                <div class="mui-col-md-4 page-item-total padding-right-3">
-                  {{item.children.length}} Virtual Machine{{(item.children.length === 1) ? '': 's'}}
-                </div>
-                <div class="clearfix"></div>
-              </div>
-            </div>
+            <!-- /table section  (ends on line above)  -->
           </div>
 
           <div class="split-pane-content-secondary">

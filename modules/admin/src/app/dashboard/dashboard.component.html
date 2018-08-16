@@ -27,9 +27,9 @@
               <div *ngIf="sensorData.length > 0" class="table-container">
                 <div class="mui-row" *ngFor="let d of sensorData">
                   <div class="mui-col-md-3 table-data">{{ d.sensor_id }}</div>
-                  <div class="mui-col-md-3 table-data">{{ getSensorInfo(d.virtue_id, 'virtue_id') }}</div>
+                  <div class="mui-col-md-3 table-data">{{ this.allVirtues.get(d.virtue_id) }}</div>
                   <div class="mui-col-md-3 table-data">{{ d.kafka_topic }}</div>
-                  <div class="mui-col-md-1 table-data border-bottom">{{ getSensorInfo(d.has_certificates, 'certs') }}</div>
+                  <div class="mui-col-md-1 table-data border-bottom">{{ hasCertificates(d) }}</div>
                   <div class="mui-col-md-2 table-data">{{d.updated_at|date:"MM/dd/yyyy, h:mm a"}}</div>
                 </div>
               </div>

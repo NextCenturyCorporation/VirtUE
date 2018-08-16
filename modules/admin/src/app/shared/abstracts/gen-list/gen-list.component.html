@@ -54,41 +54,35 @@
 
         <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
         It is passed the preceeding list, followed by the values between colons -->
-        <div class="mui-row table-row"
-          *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
-          [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }"
-          appActiveClass>
-          <div class="mini-menu">
-            <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[colData[0].name] }}</a>
-            <span *ngIf="showSortingAndEditOptions" class="menu-options">
-              <a *ngIf="i.enabled === false" (click)="toggleItemStatus(i)">Enable</a>
-              <a *ngIf="i.enabled === false"> | </a>
-              <a *ngIf="i.enabled === true"  (click)="toggleItemStatus(i)">Disable</a>
-              <a *ngIf="i.enabled === true"> | </a>
-              <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">Edit</a>
-              <a> | </a>
-              <a class="edit" routerLink="{{domain}}/duplicate/{{i.getID()}}">Duplicate</a>
-              <a> | </a>
-              <a (click)="openDialog('delete', i)">Delete</a>
+        <div *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
+          appActiveClass [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }" fxLayout="row" class="mui-row table-row" >
+          <div *ngIf="hasColoredLabels()" class="float-left" fxFlex="1%"
+                    [ngStyle]="{ 'background-color': i.color, 'left':'0px' }"></div>
+          <div fxFlex="auto">
+            <span class="mini-menu table-data mui-col-md-{{colData[0].colWidth}} transparent">
+                <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[colData[0].name] }}</a>
+                <a class="menu-options">
+                  <a *ngFor="let o of optionsList; let idx = index" (click)="callback(o.action, i)">
+                    <ng-container *ngIf="o.shouldAppear(i)" >{{o.text}}</ng-container>
+                    <ng-container *ngIf="o.shouldAppear(i) && idx < optionsList.length-1"> | </ng-container>
+                  </a>
+                </a>
             </span>
-            <span *ngIf="!showSortingAndEditOptions" class="menu-options">
-              <a (click)="openDialog('remove', i)">Remove</a>
-            </span>
-          </div>
-          <!-- Iterate over all columns after the first one (the name), which was displayed above -->
-          <div *ngFor="let column of colData | slice:1; let idx=index"
-              class="table-data mui-col-md-{{column.colWidth}} transparent">
-            <div *ngIf="column.isList">
-              <ul>
-                  <ul [innerHTML]="column.formatValue(i)"></ul>
-              </ul>
+            <!-- Iterate over all columns after the first one (the name), which was displayed above -->
+            <div *ngFor="let column of colData | slice:1; let idx=index"
+                class="table-data mui-col-md-{{column.colWidth}} transparent">
+              <div *ngIf="column.isList">
+                <ul>
+                    <ul [innerHTML]="column.formatValue(i)"></ul>
+                </ul>
+              </div>
+              <div *ngIf="!column.isList">
+                {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
+              </div>
             </div>
-            <div *ngIf="!column.isList">
-              {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
-            </div>
-          </div>
 
-          <div class="clearfix"></div>
+            <div class="clearfix"></div>
+          </div>
         </div>
       </div>
       <div class="paging">

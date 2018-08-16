@@ -12,17 +12,17 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { GeneralListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 @Component({
-  selector: 'app-vm-list',
+  selector: 'vm-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class VmListComponent extends GeneralListComponent {
+export class VmListComponent extends GenericListComponent {
 
   constructor(
     router: Router,
@@ -39,9 +39,9 @@ export class VmListComponent extends GeneralListComponent {
     //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     //See note next to a line containing "mui-col-md-12" in gen-list.component.html
     this.colData = [
-      {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
+      {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
       {name: 'os', prettyName: 'OS', isList: false, sortDefault: 'asc', colWidth:1, formatValue: undefined},
-      {name: 'childNamesAsHtmlList', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: undefined},
+      {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
       {name: 'lastEditor', prettyName: 'Last Modified By', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
       {name: 'modDate', prettyName: 'Modified Date', isList: false, sortDefault: 'desc', colWidth:2, formatValue: undefined},
       {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
@@ -49,7 +49,6 @@ export class VmListComponent extends GeneralListComponent {
 
     this.serviceConfigUrl = ConfigUrlEnum.VMS;
 
-    this.updateFuncQueue = [this.pullApps, this.pullVms];
     this.neededDatasets = ["apps", "vms"];
 
     this.prettyTitle = "Virtual Machine Templates";
@@ -60,8 +59,8 @@ export class VmListComponent extends GeneralListComponent {
   }
 
   //called after all the datasets have loaded
-  onComplete(scope): void {
-    this.items = scope.allVms.asList();
+  onPullComplete(): void {
+    this.items = this.allVms.asList();
   }
 
 }

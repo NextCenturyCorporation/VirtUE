@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { VirtueModalComponent } from '../virtue-modal/virtue-modal.component';
+import { VirtueModalComponent } from '../../modals/virtue-modal/virtue-modal.component';
 
 import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
@@ -25,6 +25,7 @@ import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.c
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
 
@@ -48,8 +49,7 @@ export class UserComponent extends GenericFormComponent {
     //gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User(undefined);
 
-    this.updateFuncQueue = [this.pullVirtues, this.pullUsers];
-    this.neededDatasets = ["virtues", "users"];
+    this.neededDatasets = ["apps", "vms", "virtues", "users"];
 
     this.serviceConfigUrl = ConfigUrlEnum.USERS;
 
@@ -76,12 +76,12 @@ export class UserComponent extends GenericFormComponent {
         dialogMode: mode,
         dialogButton: this.submitBtn,
         appIcon: this.fullImagePath,
-        userVirtueIDs: this.item.childIDs
+        selectedIDs: this.item.childIDs
       },
       panelClass: 'virtue-modal-overlay'
     });
 
-    let virtueList = dialogRef.componentInstance.addVirtues.subscribe((selectedVirtues) => {
+    let virtueList = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.updateChildList(selectedVirtues);
     });
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
@@ -92,7 +92,6 @@ export class UserComponent extends GenericFormComponent {
   //create and fill the fields the backend expects to see, record any
   //uncollected inputs, and check that the item is valid to be saved
   finalizeItem():boolean {
-
     //TODO perform checks here, so none of the below changes happen if the item
     //isn't valid
 

@@ -5,10 +5,10 @@ import { Application } from '../../shared/models/application.model';
 
 
 @Component({
-  selector: 'add-vm-app',
-  templateUrl: './add-vm-app.component.html'
+  selector: 'add-app',
+  templateUrl: './add-app.component.html'
 })
-export class AddVmAppComponent implements OnInit {
+export class AddAppComponent implements OnInit {
 
   osList = ['LINUX', 'Windows'];
   distroList = ['Debian'];
@@ -16,7 +16,7 @@ export class AddVmAppComponent implements OnInit {
   selectedDist: string;
 
   constructor(
-    public dialogRef: MatDialogRef<AddVmAppComponent>,
+    public dialogRef: MatDialogRef<AddAppComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
 

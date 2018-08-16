@@ -9,9 +9,15 @@ export abstract class Item {
   enabled: boolean;
   childIDs: string[];
   children: DictList<Item>;
-  childNamesAsHtmlList: string; //updated when data is pulled
+  //this holds the children's names as an html list, and is updated whenever
+  //data is pulled. The places where children are displayed (both list and form
+  //pages) need to be able to treat the "children" column of that table the same
+  //way they treat the name column - it has to be entirely contained in either
+  //an attribute, or a function. If it weren't built beforehand and saved, it'd
+  //get re-calculated everytime angular updated the page (which happens on mouse
+  //movement).
+  childNamesHTML: string;
   modDate: string;
-
 
   constructor() {
     this.status = "enabled";
@@ -19,14 +25,13 @@ export abstract class Item {
     this.childIDs = [];
     this.modDate = ''
 
-    this.childNamesAsHtmlList = "";
+    this.childNamesHTML = "";
 
     this.children = new DictList<Item>();
   }
 
   buildChildren(childDataset: DictList<Item>) {
     this.children = new DictList<Item>();
-
     for (let childID of this.childIDs) {
       let child: Item = childDataset.get(childID);
       if (child) {
@@ -38,7 +43,7 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
       }
     }
 
-    this.childNamesAsHtmlList = this.buildChildNamesHtmlList(childDataset);
+    this.childNamesHTML = this.buildChildNamesHtmlList(childDataset);
   }
 
   //this builds a string of the item's childrens' names, as an html list.
@@ -89,9 +94,5 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
   removeChild(id: string, index: number): void {
     this.children.remove(id);
     this.childIDs.splice(index, 1);
-  }
-
-  toString() {
-    return "what?";
   }
 }
