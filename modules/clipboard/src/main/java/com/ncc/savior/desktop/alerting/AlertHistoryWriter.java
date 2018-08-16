@@ -57,7 +57,7 @@ public class AlertHistoryWriter implements IAlertHistoryManager {
         JPanel container = new JPanel(new BorderLayout());
         container.setBackground(Color.WHITE);
         		
-        JLabel prompt = new JLabel("Please close the alerts.csv file", JLabel.CENTER);
+        JLabel prompt = new JLabel("Cannot write alerts to file. Please close the alerts.csv file.", JLabel.CENTER);
         prompt.setVerticalAlignment(SwingConstants.CENTER);
         container.add(prompt, BorderLayout.CENTER);
         dialog.add(container);
@@ -75,7 +75,7 @@ public class AlertHistoryWriter implements IAlertHistoryManager {
         
         dialog.setIconImage(saviorIcon.getImage());
        	dialog.setAlwaysOnTop(true);
-       	dialog.setSize(new Dimension(300, 100));
+       	dialog.setSize(new Dimension(400, 100));
        	dialog.setLocationRelativeTo(null);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     }
