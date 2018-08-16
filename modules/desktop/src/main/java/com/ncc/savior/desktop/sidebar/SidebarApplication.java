@@ -12,7 +12,9 @@ import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.clipboard.connection.SshClipboardManager;
+import com.ncc.savior.desktop.clipboard.guard.CopyPasteDialog;
 import com.ncc.savior.desktop.clipboard.guard.ICrossGroupDataGuard;
+import com.ncc.savior.desktop.clipboard.guard.IDataGuardDialog;
 import com.ncc.savior.desktop.clipboard.guard.RestDataGuard;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.rdp.FreeRdpClient;
@@ -74,7 +76,8 @@ public class SidebarApplication {
 			rdpClient = new WindowsRdp();
 		}
 
-		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis);
+		IDataGuardDialog dialog = new CopyPasteDialog();
+		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis, dialog);
 		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
 		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
