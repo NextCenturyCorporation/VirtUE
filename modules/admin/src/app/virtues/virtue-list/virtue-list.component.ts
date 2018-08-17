@@ -37,22 +37,6 @@ export class VirtueListComponent extends GenericListComponent {
   ) {
     super(router, baseUrlService, itemService, dialog);
 
-    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
-    //
-    //Note: colWidths of all columns must add to exactly 12.
-    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
-    this.colData = [
-      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
-      {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:2, formatValue: this.getChildNamesHtml},
-      {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:2, formatValue: this.getGrandchildrenHtmlList},
-      {name: 'lastEditor',      prettyName: 'Last Editor',        isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
-      {name: 'version',         prettyName: 'Version',            isList: false,  sortDefault: 'asc', colWidth:1, formatValue: undefined},
-      {name: 'modDate',         prettyName: 'Modification Date',  isList: false,  sortDefault: 'desc', colWidth:2, formatValue: undefined},
-      {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
-    ];
-
     this.serviceConfigUrl = ConfigUrlEnum.VIRTUES;
 
     this.neededDatasets = ["apps", "vms", "virtues"];
@@ -65,9 +49,26 @@ virtue, click on the button \"Add " + this.itemName +  "\" above.";
     this.domain = '/virtues'
   }
 
+  getColumns(): Column[] {
+    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+    //
+    //Note: colWidths of all columns must add to exactly 12.
+    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    return [
+      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined, link:(i:Item) => this.editItem(i)},
+      {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:2, formatValue: this.getChildNamesHtml},
+      {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:2, formatValue: this.getGrandchildrenHtmlList},
+      {name: 'lastEditor',      prettyName: 'Last Editor',        isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'version',         prettyName: 'Version',            isList: false,  sortDefault: 'asc', colWidth:1, formatValue: undefined},
+      {name: 'modDate',         prettyName: 'Modification Date',  isList: false,  sortDefault: 'desc', colWidth:2, formatValue: undefined},
+      {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+    ];
+  }
   //called after all the datasets have loaded
   onPullComplete(): void {
-    this.items = this.allVirtues.asList();
+    this.setItems(this.allVirtues.asList());
   }
 
   //overrides parent

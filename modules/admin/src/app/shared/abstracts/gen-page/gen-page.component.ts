@@ -188,7 +188,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     console.log("Could not load data, using test data!");
     this[updateQueue[0].datasetName] = new DictList<Item>();
 
-    let numDataPoints = 16;
+    let numDataPoints = 4;
     if (updateQueue[0].datasetName === "allApps") {
       console.log("---------Pulling apps");
       let item: Item;

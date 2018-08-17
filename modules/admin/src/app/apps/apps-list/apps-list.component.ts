@@ -41,19 +41,6 @@ export class AppsListComponent extends GenericListComponent {
   ) {
     super(router, baseUrlService, itemService, dialog);
 
-    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
-    //
-    //Note: colWidths of all columns must add to exactly 12.
-    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
-    this.colData = [
-      {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
-      {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-      {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
-    ];
-
-    // let optionsList = new RowOptions();
 
     this.serviceConfigUrl = ConfigUrlEnum.APPS;
 
@@ -69,9 +56,22 @@ export class AppsListComponent extends GenericListComponent {
     this.showSortingAndEditOptions = false;
   }
 
+  getColumns(): Column[] {
+    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+    //
+    //Note: colWidths of all columns must add to exactly 12.
+    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    return [
+    {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
+    {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
+    {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
+    ];
+  }
 
   //overrides parent
-  getOptionsList() {
+  getOptionsList(): RowOptions[] {
     return [
       new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))
   ];
@@ -79,7 +79,7 @@ export class AppsListComponent extends GenericListComponent {
 
   //called after all the datasets have loaded
   onPullComplete(): void {
-    this.items = this.allApps.asList();
+    setItems(this.allApps.asList());
   }
 
   openAppsDialog(): void {

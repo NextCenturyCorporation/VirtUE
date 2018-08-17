@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
@@ -17,6 +17,7 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 import { GenericTable } from '../gen-table/gen-table.component';
 
 import { Item } from '../../models/item.model';
+import { User } from '../../models/user.model';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
@@ -25,7 +26,7 @@ import { ItemService } from '../../services/item.service';
 @Component({
   selector: 'gen-list',
   templateUrl: './gen-list.component.html',
-  providers: [ BaseUrlService, ItemService  ]
+  providers: [ BaseUrlService, ItemService, GenericTable ]
 })
 export class GenericListComponent extends GenericPageComponent implements OnInit {
 
@@ -42,9 +43,9 @@ export class GenericListComponent extends GenericPageComponent implements OnInit
 
   //The table itself
   //must be set in derived classes.
-  genTable: GenericTable;
+  @ViewChild(GenericTable) table: GenericTable;
 
-  optionsList: RowOptions[];
+  rowOptions: RowOptions[];
 
   domain: string; // like '/users', '/virtues', etc.
 
@@ -68,13 +69,47 @@ export class GenericListComponent extends GenericPageComponent implements OnInit
 
     this.items = [];
 
+    this.colData = this.getColumns();
     //default, overwritten by app-list
-    this.optionsList = this.getOptionsList();
+    this.rowOptions = this.getOptionsList();
 
   }
 
+  ngOnInit() {
+    this.sortColumn = this.colData[0];
+    this.cmnComponentSetup();
+
+    this.fillTable();
+  }
+
+  fillTable(): void {
+    if (this.table === undefined) {
+      return;
+    }
+    this.table.colData = this.getColumns();
+    this.table.rowOptions = this.getOptionsList();
+    this.table.hasColoredLabels = this.hasColoredLabels();
+    this.table.noDataMessage = this.noDataMessage;
+    this.table.filterOptions = [
+      {value:'*', text:'All ' + this.pluralItem},
+      {value:'enabled', text:'Enabled ' + this.pluralItem},
+      {value:'disabled', text:'Disabled ' + this.pluralItem}];
+
+    // this.table.setUp(stuff)
+  }
+
+  setItems(newItems: Item[]) {
+    this.items = newItems;
+    this.table.items = newItems;
+  }
+
+  //overridden by all children
+  getColumns(): Column[] {
+    return [];
+  }
+
   //overridden by app-list
-  getOptionsList() {
+  getOptionsList(): RowOptions[] {
     return [
       new RowOptions("Enable", (i:Item) => !i.enabled, (i:Item) => this.toggleItemStatus(i)),
       new RowOptions("Disable", (i:Item) => i.enabled, (i:Item) => this.toggleItemStatus(i)),
@@ -84,12 +119,8 @@ export class GenericListComponent extends GenericPageComponent implements OnInit
   ];
   }
 
-  ngOnInit() {
-    this.sortColumn = this.colData[0];
-    this.cmnComponentSetup();
-  }
-
   callback(action: {(i:Item): any}, item:Item) {
+    console.log("here");
     action(item);
   }
 

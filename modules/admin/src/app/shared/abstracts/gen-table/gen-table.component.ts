@@ -21,15 +21,27 @@ import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
 
 @Component({
-  selector: 'gen-list',
+  selector: 'item-table',
   templateUrl: './gen-table.component.html',
+  styleUrls: ['../gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
 export class GenericTable {
 
+  //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+  // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+  colData: Column[];
+
+  //this is a list of the links/options that show up under the element in the
+  //first column of each row in the table
+  rowOptions: RowOptions[];
 
   //this list is what gets displayed in the table.
   items: Item[];
+
+  hasColoredLabels: boolean;
+
+  filterOptions: {text:string, value:string}[];
 
   noDataMessage: string;
 
@@ -38,24 +50,18 @@ export class GenericTable {
   filterValue: string = '*';
   sortDirection: string = 'asc';
 
-  constructor(
-    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
-    protected colData: Column[],
-    //this is a list of the links/options that show up under the element in the
-    //first column of each row in the table
-    protected rowOptions: RowOptions[]
-  ) {
-
+  constructor( ){
+    //prevent error, until createTable() is called by
+    this.sortColumn = new Column();
+    this.filterOptions = [];
     this.items = [];
+    this.rowOptions = [];
 
-    this.sortColumn = this.colData[0];
   }
 
 
-  //overridden by virtues
-  hasColoredLabels() {
-    return false;
+  callback(action: {(i:Item): any}, item:Item) {
+    action(item);
   }
 
   //sets the watched attribute filterValue, causing angular to refresh the page
