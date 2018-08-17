@@ -1,11 +1,12 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -32,34 +34,29 @@ public abstract class AbstractAppsView {
 	protected ConcurrentHashMap<String, VirtueApplicationItem> tiles;
 	protected JScrollPane sp;
 
-	protected ArrayList<String> appsInView;
+	private static Set<IRemoveVirtueListener> removeVirtueListeners = new HashSet<IRemoveVirtueListener>();
 
 	public AbstractAppsView(VirtueService virtueService, JScrollPane sp) {
 		this.virtueService = virtueService;
 		this.sp = sp;
 		this.container = new JPanel();
 		this.tiles = new ConcurrentHashMap<String, VirtueApplicationItem>();
-		this.appsInView = new ArrayList<String>();
 	}
 
 	public void addApplication(ApplicationDefinition ad, VirtueApplicationItem va) throws IOException {
 		tiles.put(ad.getId() + va.getVirtue().getTemplateId(), va);
-		appsInView.add(ad.getId() + va.getVirtue().getTemplateId());
 		container.add(va.getContainer());
 
 		container.validate();
 		container.repaint();
 	}
 
-	public void removeApplication(ApplicationDefinition ad, DesktopVirtue virtue) {
-		if (appsInView.contains(ad.getId() + virtue.getTemplateId())) {
-			container.remove(tiles.get(ad.getId() + virtue.getTemplateId()).getContainer());
-			container.validate();
-			container.repaint();
+	public void removeVirtue(DesktopVirtue virtue) {
+		for (ApplicationDefinition ad : virtue.getApps().values()) {
+			tiles.remove(ad.getId() + virtue.getTemplateId());
 		}
-		tiles.remove(ad.getId() + virtue.getTemplateId());
-		container.validate();
-		container.repaint();
+
+		triggerRemoveVirtueListener();
 	}
 
 	public void search(String keyword, Comparator<VirtueApplicationItem> comp,
@@ -68,7 +65,6 @@ public abstract class AbstractAppsView {
 			@Override
 			public void run() {
 				container.removeAll();
-				appsInView.clear();
 				Collection<VirtueApplicationItem> vas = tiles.values();
 				List<VirtueApplicationItem> matchedVas;
 
@@ -104,8 +100,22 @@ public abstract class AbstractAppsView {
 	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
 		VirtueApplicationItem va = tiles.get(ad.getId() + virtue.getTemplateId());
 		if (va != null) {
-			va.update(virtue);
+			va.update();
 		}
+	}
+
+	protected void triggerRemoveVirtueListener() {
+		for (IRemoveVirtueListener listener : removeVirtueListeners) {
+			listener.onRemove();
+		}
+	}
+
+	public static void addRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.add(listener);
+	}
+
+	public static void deleteRemoveVirtueListener(IRemoveVirtueListener listener) {
+		removeVirtueListeners.remove(listener);
 	}
 
 	public abstract void addTile(VirtueApplicationItem va);

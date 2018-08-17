@@ -56,8 +56,8 @@ public class ToastMessage extends JFrame {
 		// panel.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
 		getContentPane().add(container, BorderLayout.CENTER);
 
-		toastLabel = new JLabel(toastString);
-		toastLabel.setFont(new Font("Dialog", Font.BOLD, 17));
+		toastLabel = new JLabel("<html><center>" + toastString + "</center></html>");
+		toastLabel.setFont(new Font("Dialog", Font.BOLD, 13));
 		//toastLabel.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 		// toastLabel.setForeground(Color.WHITE);
 		toastLabel.setHorizontalAlignment(SwingConstants.CENTER);

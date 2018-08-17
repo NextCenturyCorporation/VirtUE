@@ -128,13 +128,13 @@ public class VirtueTileContainer extends AbstractVirtueContainer implements Comp
 						keyword = "";
 					}
 					dropDownSearch(keyword);
-					tileContainer.validate();
+					tileContainer.revalidate();
 					tileContainer.repaint();
 					sp.validate();
 					sp.getViewport().revalidate();
 				} else {
 					tileContainer.removeAll();
-					tileContainer.validate();
+					tileContainer.revalidate();
 					tileContainer.repaint();
 					dropDown = false;
 					sp.validate();
