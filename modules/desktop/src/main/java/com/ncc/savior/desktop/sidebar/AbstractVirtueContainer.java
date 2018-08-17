@@ -107,7 +107,9 @@ public abstract class AbstractVirtueContainer {
 				JMenuItem mi1 = new JMenuItem("Stop");
 				JMenuItem mi2 = new JMenuItem("Start");
 				JMenuItem mi3 = new JMenuItem("Terminate");
+				mi3.setToolTipText("Terminates the virtue state. (Cannot be undone)");
 				JMenuItem mi4 = new JMenuItem("Reconnect");
+				mi4.setToolTipText("Establishes a new connection for the virtue");
 
 				mi1.addActionListener(new ActionListener() {
 					@Override
