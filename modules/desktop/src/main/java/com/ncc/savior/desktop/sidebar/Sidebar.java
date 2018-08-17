@@ -48,6 +48,7 @@ import javax.swing.event.DocumentListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
@@ -108,6 +109,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private JLabel searchLabel;
 	private JLabel about;
+	private JLabel alert;
 
 	private JPanel virtues;
 	private JPanel applications;
@@ -266,6 +268,8 @@ public class Sidebar implements VirtueChangeHandler {
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
 		}
+
+		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
 	}
 
@@ -462,6 +466,19 @@ public class Sidebar implements VirtueChangeHandler {
 		about.setIcon(aboutIcon);
 		about.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
 		topBorder.add(about, BorderLayout.EAST);
+
+		ImageIcon alertIcon = new ImageIcon(Sidebar.class.getResource("/images/alert.png"));
+		Image alertImage = alertIcon.getImage();
+		Image newAlertImg = alertImage.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+		alertIcon = new ImageIcon(newAlertImg);
+		this.alert = new JLabel();
+		alert.setHorizontalAlignment(SwingConstants.RIGHT);
+		alert.setIcon(alertIcon);
+		alert.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
+		JPanel alertContainer = new JPanel(new BorderLayout());
+		alertContainer.add(alert, BorderLayout.EAST);
+		alertContainer.setBackground(Color.DARK_GRAY);
+		topBorder.add(alertContainer, BorderLayout.CENTER);
 
 		this.bottomBorder = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) bottomBorder.getLayout();
@@ -980,6 +997,17 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				aboutDialog.show(frame);
+			}
+		});
+
+		alert.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				try {
+					AlertHistoryReader.displayAlerts(frame);
+				} catch (IOException e) {
+					logger.error("error displaying alerts", e);
+				}
 			}
 		});
 	}
