@@ -61,6 +61,15 @@ public interface GssApi extends Library {
 			.newMemory(new byte[] { 0x2a, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xf7, 0x12, 0x01, 0x02, 0x01, 0x04 }));
 	// "\0x2a\0x86\0x48\0x86\0xf7\0x12\0x01\0x02\0x01\0x04"));
 
+	/*
+	 * This name form shall be represented by the Object Identifier {iso(1)
+	 * member-body(2) United States(840) mit(113554) infosys(1) gssapi(2) krb5(2)
+	 * krb5_name(1)}. The recommended symbolic name for this type is
+	 * "GSS_KRB5_NT_PRINCIPAL_NAME".
+	 */
+	final gss_OID_desc GSS_KRB5_NT_PRINCIPAL_NAME = new gss_OID_desc(10, JnaUtils
+			.newMemory(new byte[] { 0x2a, (byte) 0x86, 0x48, (byte) 0x86, (byte) 0xf7, 0x12, 0x01, 0x02, 0x02, 0x01 }));
+
 	/**
 	 * An OID that specifies to use the Kerberos 5 mechanism.
 	 * 
@@ -357,6 +366,35 @@ public interface GssApi extends Library {
 			IntByReference retTime); /* time_rec */
 
 	/**
+	 * Adds a credential-element to a credential. (from RFC 2744)
+	 * 
+	 * @param minorStatus
+	 * @param inputCredHandle
+	 * @param desiredName
+	 * @param desiredMech
+	 * @param credUsage
+	 * @param initiatorTimeRequest
+	 * @param acceptorTimeRequest
+	 * @param outputCredHandle
+	 * @param actualMechs
+	 * @param initiatorTimeRec
+	 * @param acceptorTimeRec
+	 * @return
+	 */
+	int gss_add_cred(IntByReference minorStatus, /* minor_status */
+			gss_cred_id_t inputCredHandle, /* input_cred_handle */
+			gss_name_t desiredName, /* desired_name */
+			gss_OID_desc desiredMech, /* desired_mech */
+			GssCredentialUsage credUsage, /* cred_usage */
+			int initiatorTimeRequest, /* initiator_time_req */
+			int acceptorTimeRequest, /* acceptor_time_req */
+			gss_cred_id_t outputCredHandle, /* output_cred_handle */
+			PointerByReference actualMechs, /* actual_mechs */
+			int initiatorTimeRec, /* initiator_time_rec */
+			IntByReference acceptorTimeRec /* acceptor_time_rec */
+	);
+
+	/**
 	 * Allows a process to import a security context established by another process.
 	 * A given interprocess token may be imported only once. (from RFC 2744) Of
 	 * limited use with Java because Java does not export a context.
@@ -372,6 +410,7 @@ public interface GssApi extends Library {
 
 	/**
 	 * Free storage for a buffer. It must have been allocated by a GSS-API function.
+	 * 
 	 * @param minorStatus
 	 * @param buffer
 	 * @return
