@@ -286,10 +286,16 @@ public interface GssApi extends Library {
 	/**
 	 * Converts a string name to internal form.
 	 * 
+	 * Note: the returned <code>gss_name</code> should be freed with
+	 * {@link GssApi#gss_release_name(IntByReference, gss_name_t)}.
+	 * 
 	 * @param minorStatus
 	 * @param targetName
 	 * @param nameType
 	 * @param gss_name
+	 *                        Note: should be freed with
+	 *                        {@link GssApi#gss_release_name(IntByReference, gss_name_t)}.
+	 * 
 	 * @return
 	 */
 	int gss_import_name(IntByReference minorStatus, /* minor_status */
@@ -298,12 +304,27 @@ public interface GssApi extends Library {
 			PointerByReference gss_name); /* output_name */
 
 	/**
+	 * Free GSSAPI-allocated storage associated with an internal-form name. (from
+	 * RFC 2744)
+	 * 
+	 * @param minor_status
+	 * @param name
+	 * @return
+	 * 
+	 * @see #gss_import_name(IntByReference, gss_buffer_desc, gss_OID_desc,
+	 *      PointerByReference)
+	 */
+	int gss_release_name(IntByReference minor_status, gss_name_t name);
+
+	/**
 	 * Initiates a secure connection between this computer and another (usually a
 	 * server). To be portable, an app should call this in a loop.
 	 * 
 	 * @param minorStatus
 	 * @param credHandle
 	 * @param contextHandle
+	 *                                    Note: should be freed with
+	 *                                    {@link #gss_delete_sec_context(IntByReference, gss_ctx_id_t, gss_buffer_desc)}
 	 * @param gssTargetName
 	 * @param mechType
 	 * @param flags
@@ -312,6 +333,8 @@ public interface GssApi extends Library {
 	 * @param inputToken
 	 * @param actualMechType
 	 * @param outputToken
+	 *                                    Note: should be freed with
+	 *                                    {@link #gss_release_buffer(IntByReference, gss_buffer_desc)}
 	 * @param retFlags
 	 * @param retTime
 	 * @return
@@ -330,6 +353,29 @@ public interface GssApi extends Library {
 			IntByReference retFlags, /* ret_flags */
 			IntByReference retTime); /* time_rec */
 
+	/**
+	 * Accept a security context initiated by a peer application. (from RFC 2744)
+	 * 
+	 * @param minorStatus
+	 * @param contextHandle
+	 *                                 Note: should be freed with
+	 *                                 {@link #gss_delete_sec_context(IntByReference, gss_ctx_id_t, gss_buffer_desc)}
+	 * 
+	 * @param credHandle
+	 * @param inputToken
+	 * @param inputChannelBindings
+	 * @param sourceName
+	 *                                 Note: should be freed with
+	 *                                 {@link #gss_release_name(IntByReference, gss_name_t)}
+	 * @param mechType
+	 * @param outputToken
+	 *                                 Note: should be freed with
+	 *                                 {@link #gss_release_buffer(IntByReference, gss_buffer_desc)}
+	 * @param retFlags
+	 * @param timeRec
+	 * @param delegatedCredHandle
+	 * @return
+	 */
 	int gss_accept_sec_context(IntByReference minorStatus, /* minor_status */
 			PointerByReference contextHandle, /* context_handle */
 			gss_cred_id_t credHandle, /* acceptor_cred_handle */
@@ -343,6 +389,16 @@ public interface GssApi extends Library {
 			PointerByReference delegatedCredHandle); /* delegated_cred_handle (gss_cred_id_t*) */
 
 	/**
+	 * Delete a security context. (from RFC 2744)
+	 * 
+	 * @param minor_status
+	 * @param context_handle
+	 * @param output_token
+	 * @return
+	 */
+	int gss_delete_sec_context(IntByReference minor_status, gss_ctx_id_t context_handle, gss_buffer_desc output_token);
+
+	/**
 	 * Assume a global identity; Obtain a GSS-API credential handle for pre-existing
 	 * credentials. (from RFC 2744)
 	 * 
@@ -353,6 +409,8 @@ public interface GssApi extends Library {
 	 * @param credUsage
 	 * @param outputCredHandle
 	 * @param actualMechs
+	 *                             Note: should be freed with
+	 *                             {@link #gss_release_oid_set(IntByReference, gss_OID_set_desc)}
 	 * @param retTime
 	 * @return
 	 */
@@ -366,6 +424,16 @@ public interface GssApi extends Library {
 			IntByReference retTime); /* time_rec */
 
 	/**
+	 * Free storage associated with a GSSAPI-generated gss_OID_set object. (from RFC
+	 * 2744)
+	 * 
+	 * @param minor_status
+	 * @param set
+	 * @return
+	 */
+	int gss_release_oid_set(IntByReference minor_status, gss_OID_set_desc set);
+
+	/**
 	 * Adds a credential-element to a credential. (from RFC 2744)
 	 * 
 	 * @param minorStatus
@@ -377,6 +445,8 @@ public interface GssApi extends Library {
 	 * @param acceptorTimeRequest
 	 * @param outputCredHandle
 	 * @param actualMechs
+	 *                                 Note: should be freed with
+	 *                                 {@link #gss_release_oid_set(IntByReference, gss_OID_set_desc)}
 	 * @param initiatorTimeRec
 	 * @param acceptorTimeRec
 	 * @return

@@ -59,6 +59,9 @@ configurations {
     gsscacheJar.extendsFrom(runtimeClasspath)
 }
 
+// this is to make the build target happy
+mainClassName = 'cifsproxy.GssCache'
+
 task gsscacheJar(type: org.springframework.boot.gradle.tasks.bundling.BootJar, description: "Build the app jar for GssCache") {
     baseName 'gsscache'
     mainClassName = 'cifsproxy.GssCache'
