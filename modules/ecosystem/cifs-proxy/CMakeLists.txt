@@ -22,3 +22,9 @@ add_executable(gsscache
   )
 target_include_directories(gsscache INTERFACE ${KRB5_INCLUDE_DIRS})
 target_link_libraries(gsscache ${KRB5_LIBRARIES})
+
+add_executable(both
+  src/cpp/both.cpp
+  )
+target_include_directories(both INTERFACE ${KRB5_INCLUDE_DIRS})
+target_link_libraries(both ${KRB5_LIBRARIES})
