@@ -34,9 +34,11 @@ public class GssCache {
 		Pointer gssTargetName = importName(gssapi, minorStatus);
 
 		gss_cred_id_t initCred = GssApi.GSS_C_NO_CREDENTIAL;
+		System.out.println("Look, no init!");
 		gss_buffer_desc outputToken = initSecContext(gssapi, minorStatus, gssTargetName, initCred);
 
-		acceptSecContext(gssapi, outputToken);
+		System.out.println("Look, no accept!");
+		// acceptSecContext(gssapi, outputToken);
 
 		Pointer acquiredCred = acquireCred(gssapi, minorStatus);
 		storeCredInto(gssapi, minorStatus, acquiredCred);
@@ -71,13 +73,12 @@ public class GssCache {
 		// makes it challenging
 		desiredMechs.elements.length = GssApi.MECH_KRB5.length;
 		desiredMechs.elements.elements = GssApi.MECH_KRB5.elements;
-		GssCredentialUsage credUsage = GssCredentialUsage.GSS_C_INITIATE;
 		PointerByReference acquiredCredHandle = new PointerByReference();
 		Pointer actualMechsPtr = new Pointer(0);
 		PointerByReference actualMechsHandle = new PointerByReference(actualMechsPtr);
 		IntByReference retTime = new IntByReference();
-		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs, credUsage.getValue(),
-				acquiredCredHandle, actualMechsHandle, retTime);
+		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs,
+				GssCredentialUsage.GSS_C_INITIATE.getValue(), acquiredCredHandle, null, null);
 		if (retval != 0) {
 			System.err.println("error acquiring credential: " + retval + "." + minorStatus.getValue());
 			throw new GSSException(retval, minorStatus.getValue(), "acquiring credential");
@@ -117,7 +118,7 @@ public class GssCache {
 		PointerByReference tempPtr = new PointerByReference();
 		System.out.println("global OID: " + GssApi.GSS_C_NT_HOSTBASED_SERVICE);
 
-		int retval = gssapi.gss_import_name(minorStatus, targetName, GssApi.GSS_C_NT_HOSTBASED_SERVICE, tempPtr);
+		int retval = gssapi.gss_import_name(minorStatus, targetName, GssApi.GSS_KRB5_NT_PRINCIPAL_NAME, tempPtr);
 		if (retval != 0) {
 			throw new GSSException(retval, minorStatus.getValue(), "importing name");
 		}
