@@ -346,7 +346,7 @@ public class XenGuestManager {
 		String line = null;
 		while ((line = ch.readLine()) != null) {
 			// System.out.println((line));
-			if (line.contains("My IP address:")) {
+			if (line.contains("virtue-ip")) {
 				virtue_ip = findIP(line);
 				return virtue_ip;
 			}
@@ -405,9 +405,20 @@ public class XenGuestManager {
 			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+//			cf.exceptionally((ex) -> {
+//				logger.error("EXCEPTION", ex);
+//				linuxFuture.completeExceptionally(ex);
+//				vm.setState(VmState.ERROR);
+//				return xenVm;
+//			});
 			fc.addFuture(cf);
 		}
 		fc.combineFutures(linuxFuture);
+		linuxFuture.exceptionally((ex) -> {
+			logger.error("lf", ex);
+			// vm.setState(VmState.ERROR);
+			return null;
+		});
 	}
 
 	public void stopGuests(Collection<VirtualMachine> linuxVms,
