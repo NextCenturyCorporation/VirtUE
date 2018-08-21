@@ -48,19 +48,21 @@ public class SidebarController {
 	}
 
 	public void registerAsListener() {
-		authService.addLoginListener(new ILoginListener() {
+		if (authService != null) {
+			authService.addLoginListener(new ILoginListener() {
 
-			@Override
-			public void onLogin() {
-				startVirtuePoll();
-			}
+				@Override
+				public void onLogin() {
+					startVirtuePoll();
+				}
 
-			@Override
-			public void onLogout() {
-				stopVirtuePoll();
-			}
+				@Override
+				public void onLogout() {
+					stopVirtuePoll();
+				}
 
-		});
+			});
+		}
 	}
 
 	public void init(JFrame primaryFrame) throws Exception {
