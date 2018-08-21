@@ -20,7 +20,7 @@ import com.nextcentury.savior.cifsproxy.ActiveDirectorySecurityConfig;
 
 @RestController
 public class MountController {
-	
+
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(MountController.class);
 
 	/** path to the mount command */
@@ -56,7 +56,8 @@ public class MountController {
 			LOGGER.trace("making directory: " + MOUNT_ROOT);
 			mountRoot.mkdirs();
 			if (!mountRoot.exists()) {
-				WebServiceException exception = new WebServiceException("could not create mount directory: " + MOUNT_ROOT);
+				WebServiceException exception = new WebServiceException(
+						"could not create mount directory: " + MOUNT_ROOT);
 				LOGGER.throwing(exception);
 				throw exception;
 			}
@@ -73,20 +74,26 @@ public class MountController {
 				options };
 		LOGGER.debug("mount command: " + Arrays.toString(args));
 		ProcessBuilder processBuilder = new ProcessBuilder(args);
+		LOGGER.debug("setting kerberos cache file to: " + ActiveDirectorySecurityConfig.serviceTicketFile);
+		processBuilder.environment().put("KRB5CCNAME", ActiveDirectorySecurityConfig.serviceTicketFile.toString());
 		Process process;
 		int retval;
 		try {
 			LOGGER.trace("starting mount command");
+			long mountStartTime = System.currentTimeMillis();
 			process = processBuilder.start();
+			LOGGER.trace("waiting for mount command...");
 			if (!process.waitFor(MOUNT_TIMEOUT, TimeUnit.SECONDS)) {
 				process.destroy();
 				doUnMount(mountPath, false);
-				WebServiceException exception = new WebServiceException("mount took longer than " + MOUNT_TIMEOUT + " seconds");
+				WebServiceException exception = new WebServiceException(
+						"mount took longer than " + MOUNT_TIMEOUT + " seconds");
 				LOGGER.throwing(exception);
 				throw exception;
 			}
 			retval = process.exitValue();
-			LOGGER.trace("mount exited: " + retval);
+			long mountEndTime = System.currentTimeMillis();
+			LOGGER.trace("mount exited: " + retval + "(after " + (mountEndTime - mountStartTime) + " ms)");
 		} catch (IOException | InterruptedException e) {
 			WebServiceException exception = new WebServiceException("error running mount process", e);
 			LOGGER.throwing(exception);
@@ -97,13 +104,13 @@ public class MountController {
 			LOGGER.throwing(exception);
 			throw exception;
 		}
-		
+
 		LOGGER.exit("ok");
 		return "ok";
 	}
 
 	private void doUnMount(String mountPath, boolean wait) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

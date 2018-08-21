@@ -75,8 +75,10 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	@Value("${savior.cifsproxy.keytab:/etc/krb5.keytab}")
 	private File keytabLocation;
 
-	private Path serviceTicketFile;
+	static public Path serviceTicketFile;
 
+	private static final String TARGET_SERVICE_NAME = "cifs@fileserver.test.savior";
+	
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
@@ -95,8 +97,8 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
 		serviceTicketFile = Files.createTempFile("cifsproxy", "", attr);
 
-		AuthenticationManager authenticationManagerBean = new CachingAuthenticationManager(
-				super.authenticationManagerBean(), serviceTicketFile);
+		AuthenticationManager authenticationManagerBean = new DelegatingAuthenticationManager(
+				super.authenticationManagerBean(), TARGET_SERVICE_NAME, serviceTicketFile);
 		logger.exit(authenticationManagerBean);
 		return authenticationManagerBean;
 	}
