@@ -22,7 +22,7 @@ import { ConfigUrlEnum } from '../../shared/enums/enums';
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class VmListComponent extends GenericListComponent {
+export class VmListComponent extends GenericListComponent implements OnInit  {
 
   constructor(
     router: Router,
@@ -31,16 +31,11 @@ export class VmListComponent extends GenericListComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
+  }
 
-    this.serviceConfigUrl = ConfigUrlEnum.VMS;
-
-    this.neededDatasets = ["apps", "vms"];
-
-    this.prettyTitle = "Virtual Machine Templates";
-    this.itemName = "Vm Template";
-    this.pluralItem = "VMs";
-    this.noDataMessage = "No vms have been added at this time. To add a vm, click on the button \"Add " + this.itemName +  "\" above.";
-    this.domain = '/vm-templates';
+  //called after all the datasets have loaded
+  onPullComplete(): void {
+    this.setItems(this.allVms.asList());
   }
 
   getColumns(): Column[] {
@@ -59,9 +54,32 @@ export class VmListComponent extends GenericListComponent {
     {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
     ];
   }
-  //called after all the datasets have loaded
-  onPullComplete(): void {
-    setItems(this.allVms.asList());
+
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.VMS,
+      neededDatasets: ["apps", "vms"]
+    };
   }
+
+  getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string} {
+    return {
+      prettyTitle: "Virtual Machine Templates",
+      itemName: "Vm Template",
+      pluralItem: "VMs",
+      domain: '/vm-templates'
+    };
+  }
+
+  getNoDataMsg(): string {
+    return  "No vms have been added at this time. To add a vm, click on the button \"Add Vm Template\" above.";
+  }
+
 
 }

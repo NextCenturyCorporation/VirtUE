@@ -8,22 +8,20 @@ import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
-// import { ApplicationsService } from '../../services/applications.service';
-// import { VirtuesService } from '../../services/virtues.service';
-// import { VirtualMachineService } from '../../services/vm.service';
-// import { UsersService } from '../../services/users.service';
 
-// import { VmModalComponent } from '../vm-modal/vm-modal.component';
+import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
-import { User } from '../../models/user.model';
-import { Virtue } from '../../models/virtue.model';
-import { VirtualMachine } from '../../models/vm.model';
-import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
 import { DictList } from '../../models/dictionary.model';
+import { RowOptions } from '../../models/rowOptions.model';
+import { Column } from '../../models/column.model';
 import { Mode } from '../../enums/enums';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
+import { GenericTable } from '../gen-table/gen-table.component';
+import { GenericModal } from '../../../modals/generic-modal/generic.modal';
+import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
+import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 
 @Component({
@@ -31,8 +29,7 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 })
 export abstract class GenericFormComponent extends GenericPageComponent {
 
-  // TODO I have no idea what this does, but it was called "adUserCtrl" in the
-  // original user file, before refactor.
+  // TODO currently not used, but could/should be eventually, time-permitting.
   itemForm: FormControl;
 
   //Note:
@@ -42,13 +39,17 @@ export abstract class GenericFormComponent extends GenericPageComponent {
   //  New IDs for creation and duplication are generated server-side.
   item: Item;
 
-  mode : Mode; //"c" if creating new virtue, "e" for editing existing, "d" for creating a duplicate.
-  actionName: string; //for the html - 'Create', 'Edit', or 'Duplicate'
+  noDataMessage: string;
 
-  //data on existing virtue (obv. purpose on edit-page, but holds base virtues values when
-  //duplicating, and is empty when creating).
-  //Not used any more, might be helpful to hold onto though.
-  itemData = {};
+  //what the user is doing to the item: {CREATE, EDIT, DUPLICATE}
+  //Holds the strings 'Create', 'Edit', or 'Duplicate' resp., for display to the user
+  mode : Mode;
+
+  //The table showing what children have been added to this item
+  @ViewChild(GenericTable) table: GenericTable;
+
+  //top-domain for child type. So for user.component, this would be '/virtues'
+  childDomain: string;
 
   //holds the name of the relevant dataset for the class;
   //  i.e., in virtue.component, it should be set to 'allVms'
@@ -75,10 +76,7 @@ export abstract class GenericFormComponent extends GenericPageComponent {
     this.setMode();
     //set up empty, will get filled in ngOnInit if not mode is not 'create'
 
-    this.itemData = {};
-
-   //originally this was only called in addUser's constructor, but in Virtues it was called in create, edit, and duplicate.
-   //I don't know what it does, but it wouldn't persist once you leave the creation screen anyway. So let's make it every time.
+    // see note by declaration
     this.itemForm = new FormControl();
 
     // override the route reuse strategy
@@ -109,13 +107,10 @@ export abstract class GenericFormComponent extends GenericPageComponent {
     }
     if (route[1] === 'create') {
         this.mode = Mode.CREATE;
-        this.actionName = "Create";
     } else if (route[1] === 'edit') {
         this.mode = Mode.EDIT;
-        this.actionName = "Edit";
     } else if (route[1] === 'duplicate') {
         this.mode = Mode.DUPLICATE;
-        this.actionName = "Duplicate";
     } else {
         //something about the routing system has changed.
         urlValid = false;
@@ -144,6 +139,23 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
 
     this.cmnComponentSetup();
+    this.fillTable();
+  }
+
+  fillTable(): void {
+    if (this.table === undefined) {
+      return;
+    }
+
+    this.table.setUp({
+      cols: this.getColumns(),
+      opts: this.getOptionsList(),
+      coloredLabels: this.hasColoredLabels(),
+      filters: [], //none ?
+      tableWidth: this.getTableWidth(),
+      noDataMsg: this.getNoDataMsg(),
+      hasCB: false
+    });
   }
 
   getChildrenListHTMLstring(item: Item) {
@@ -155,13 +167,17 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
       this.buildItem();
     }
+    this.table.items = this.item.children.asList();
+    this.setUpFormValues();
   }
 
+  // does nothing by default, overridden by user form
+  setUpFormValues(): void {}
 
   buildItem() {
-  let tempItem = this[this.datasetName].get(this.item.id);
-    if (tempItem){
-      this.item = tempItem;
+  let _item = this[this.datasetName].get(this.item.id);
+    if (_item){
+      this.item = _item;
       this.updateUnconnectedFields();
       this.updateChildList();
       this.resetRouter();
@@ -181,6 +197,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
 
     this.item.buildChildren(this[this.childDatasetName]);
+    this.table.items = this.item.children.asList();
   }
 
   createOrUpdate() {
@@ -210,7 +227,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   //saves your edits to the backend
   updateItem(): void {
-    this.itemService.updateItem(this.serviceConfigUrl, this.item.id, JSON.stringify(this.item)).subscribe(
+    this.itemService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
       data => {
         this.resetRouter();
         this.router.navigate([this.parentDomain]);
@@ -232,18 +249,115 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       });
   }
 
-  // deleteVirtue(id): void {
-  //   let dialogRef = this.dialog.open(DialogsComponent, {
-  //     width: '450px'
-  //   });
-  //
-  //   dialogRef.updatePosition({ top: '15%', left: '36%' });
-  //
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     // console.log('This dialog was closed');
-  //   });
-  // }
+  /**
+   copied from gen-list, could merge that together at some point if had extra time.
+   this is a checker, if the user clicks 'remove' on one of the item's children.
+   Could be improved/made more clear/distinguished from all the childrens' "activateModal" method.
+  */
+  openDialog(action: string, target: Item): void {
+    let dialogRef = this.dialog.open(DialogsComponent, {
+      width: '450px',
+      data:  {
+          actionType: action,
+          targetObject: target
+        }
+    });
 
+    dialogRef.updatePosition({ top: '15%', left: '36%' });
+
+    // control goes here after either "Ok" or "Cancel" are clicked on the dialog
+    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
+
+      if (targetObject !== 0 ) {
+        if (action === 'delete') {
+          // this.setItemStatus(targetObject, false);
+          console.log(targetObject);
+          this.item.removeChild(targetObject.getID());
+
+          //remove from childIDs and children
+        }
+      }
+    });
+  }
+
+  /*this needs to be set in the children, because I can't find how to have each
+  child hold a class as an attribute, to be passed into the dialog.open method.
+  So right now the children take care of the dialog.open method, and pass the
+  MatDialogRef back. I can't type this as returning a MatDialogRef though
+  without having to specify what modal class the dialog refers to (putting us
+  back at the original issue), so this will have to be 'any' for now.
+  */
+  abstract getModal(
+    params:{width:string, height:string, data:{id:string, selectedIDs:string[] }}
+  ): any;
+
+  //this brings up the modal to add/remove children
+  activateModal(mode: string): void {
+    let dialogHeight = 600;
+    let dialogWidth = 800;
+
+    let modalParams = {
+      height: dialogHeight + 'px',
+      width: dialogWidth + 'px',
+      data: {
+        id: this.item.getName(),
+        selectedIDs: this.item.childIDs
+      }
+    };
+
+    let dialogRef = this.getModal(modalParams);
+
+    let virtueList = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
+      this.updateChildList(selectedVirtues);
+    });
+    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
+
+    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
+
+
+    //TODO look at unsubscriptions, everywhere things are subscribed to.
+    //Apparently angular has a bug where subscriptions aren't always automatically
+    //destroyed when their containing component is destroyed.
+    //May be the cause of the possible memory-leak like thing in firefox.
+    // dialogRef.afterClosed().subscribe(() => {
+    //   vms.unsubscribe();
+    // });
+  }
+
+  //overrides parent
+  getOptionsList(): RowOptions[] {
+    return [
+      // new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)), //TODO look into this.
+      //User will lose all work on form if they navigate away to other form
+      //It'd be nice to let them do that though.
+      //also look at columns in user.comp and virtue.comp - they call same function.
+      new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))
+    ];
+  }
+
+  //overridden by virtue component
+  getTableWidth(): number {
+    return 9;
+  }
+
+  //used by many children to display their status
+  formatStatus( item: Item ): string {
+    return item.enabled ? 'Enabled' : 'Disabled';
+  }
+
+  getChildNamesHtml( item: Item) {
+    return item.childNamesHTML;
+  }
+
+  editItem(i: Item) {
+    if (this.childDomain) {
+      this.router.navigate([this.childDomain +"/edit/" + i.getID()]);
+    }
+  }
+
+  hasColoredLabels(): boolean {
+    return false;
+  }
 
   //create and fill the fields the backend expects to see, record any
   //uncollected inputs, and check that the item is valid to be saved
@@ -252,4 +366,15 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   //can be overridden, if anything needs to be done manually upon item load.
   //currently overridden in virtue
   updateUnconnectedFields(): void {};
+
+  abstract getColumns(): Column[];
+
+  abstract getNoDataMsg(): string;
+
+  //probably could imlement this at some point
+  // abstract getListOptions(): {
+  //     prettyTitle: string,
+  //     itemName: string,
+  //     pluralItem: string,
+  //     domain: string};
 }

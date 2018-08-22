@@ -67,6 +67,9 @@ export abstract class GenericPageComponent {
 
     this.buildDatasetMeta();
 
+    let params = this.getPageOptions();
+    this.serviceConfigUrl = params.serviceConfigUrl;
+    this.neededDatasets = params.neededDatasets;
   }
 
   resetRouter(): void {
@@ -170,8 +173,8 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
       }
     }
     if (updateQueue.length > 0) {
-      // this.recursivePullData(updateQueue, []);
-      this.fakeRecursivePull(updateQueue, []);
+      this.recursivePullData(updateQueue, []);
+      // this.fakeRecursivePull(updateQueue, []);
     }
     else {
       console.log("No valid datasets specified in this.neededDatasets");
@@ -188,7 +191,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     console.log("Could not load data, using test data!");
     this[updateQueue[0].datasetName] = new DictList<Item>();
 
-    let numDataPoints = 4;
+    let numDataPoints = 20;
     if (updateQueue[0].datasetName === "allApps") {
       console.log("---------Pulling apps");
       let item: Item;
@@ -387,4 +390,10 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     }
     return grandchildrenHTMLList;
   }
+
+
+  abstract getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]};
+
 }

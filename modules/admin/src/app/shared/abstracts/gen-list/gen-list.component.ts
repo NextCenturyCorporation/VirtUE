@@ -28,36 +28,15 @@ import { ItemService } from '../../services/item.service';
   templateUrl: './gen-list.component.html',
   providers: [ BaseUrlService, ItemService, GenericTable ]
 })
-export class GenericListComponent extends GenericPageComponent implements OnInit {
+export abstract class GenericListComponent extends GenericPageComponent {
+
+  //The table itself
+  @ViewChild(GenericTable) table: GenericTable;
 
   prettyTitle: string;
   itemName: string;
   pluralItem: string;
-
-  //this list is what gets displayed in the table.
-  items: Item[];
-
-  //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-  // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
-  colData: Column[];
-
-  //The table itself
-  //must be set in derived classes.
-  @ViewChild(GenericTable) table: GenericTable;
-
-  rowOptions: RowOptions[];
-
   domain: string; // like '/users', '/virtues', etc.
-
-  noDataMessage: string;
-
-  // these are the default properties the list sorts by
-  sortColumn: Column;
-  filterValue: string = '*';
-  sortDirection: string = 'asc';
-
-  //show on all pages except apps-list
-  showSortingAndEditOptions:boolean = true;
 
   constructor(
     router: Router,
@@ -67,48 +46,73 @@ export class GenericListComponent extends GenericPageComponent implements OnInit
   ) {
     super(router, baseUrlService, itemService, dialog);
 
-    this.items = [];
+    let params = this.getListOptions();
 
-    this.colData = this.getColumns();
-    //default, overwritten by app-list
-    this.rowOptions = this.getOptionsList();
-
+    this.prettyTitle = params.prettyTitle;
+    this.itemName = params.itemName;
+    this.pluralItem = params.pluralItem;
+    this.domain = params.domain;
   }
+
 
   ngOnInit() {
-    this.sortColumn = this.colData[0];
     this.cmnComponentSetup();
-
     this.fillTable();
   }
+
 
   fillTable(): void {
     if (this.table === undefined) {
       return;
     }
-    this.table.colData = this.getColumns();
-    this.table.rowOptions = this.getOptionsList();
-    this.table.hasColoredLabels = this.hasColoredLabels();
-    this.table.noDataMessage = this.noDataMessage;
-    this.table.filterOptions = [
-      {value:'*', text:'All ' + this.pluralItem},
-      {value:'enabled', text:'Enabled ' + this.pluralItem},
-      {value:'disabled', text:'Disabled ' + this.pluralItem}];
-
-    // this.table.setUp(stuff)
+    this.table.setUp({
+      cols: this.getColumns(),
+      opts: this.getOptionsList(),
+      coloredLabels: this.hasColoredLabels(),
+      filters: this.getTableFilters(),
+      tableWidth: 12,
+      noDataMsg: this.getNoDataMsg(),
+      hasCB: this.hasCheckbox(),
+      selectedIDs: this.getSelectedIDs()
+    });
   }
 
-  setItems(newItems: Item[]) {
-    this.items = newItems;
-    this.table.items = newItems;
-  }
-
-  //overridden by all children
-  getColumns(): Column[] {
+  // most lists don't allow selection
+  getSelectedIDs() {
     return [];
   }
 
-  //overridden by app-list
+  //overridden by everything that lists virtues
+  hasCheckbox() {
+    return false;
+  }
+
+  //abstracts away table from subclasses
+  setItems(newItems: Item[]) {
+    this.table.items = newItems;
+  }
+
+  //not used by all subclasses - some don't have reason to filter
+  getTableFilters(): {text:string, value:string}[] {
+    return [{value:'*', text:'All ' + this.pluralItem},
+            {value:'enabled', text:'Enabled ' + this.pluralItem},
+            {value:'disabled', text:'Disabled ' + this.pluralItem}];
+  }
+
+  abstract onPullComplete(): void;
+
+  abstract getColumns(): Column[];
+
+  abstract getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string};
+
+  //must be here so subclasses of list, which use table, can set table values.
+  abstract getNoDataMsg(): string;
+
+  //overridden by app-list and modals
   getOptionsList(): RowOptions[] {
     return [
       new RowOptions("Enable", (i:Item) => !i.enabled, (i:Item) => this.toggleItemStatus(i)),
@@ -116,12 +120,7 @@ export class GenericListComponent extends GenericPageComponent implements OnInit
       new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)),
       new RowOptions("Duplicate", () => true, (i:Item) => this.dupItem(i)),
       new RowOptions("Delete", () => true, (i:Item) => this.openDialog('delete', i))
-  ];
-  }
-
-  callback(action: {(i:Item): any}, item:Item) {
-    console.log("here");
-    action(item);
+    ];
   }
 
   //overridden by virtues
@@ -139,29 +138,34 @@ export class GenericListComponent extends GenericPageComponent implements OnInit
     return item.childNamesHTML;
   }
 
-  //sets the watched attribute filterValue, causing angular to refresh the page
-  //and run the filter/sorter again - which is called via the pipe '|' character
-  // in gen-list.html
-  filterList(filterValue: string): void {
-    this.filterValue = filterValue;
+
+  editItem(i: Item) {
+    this.router.navigate([this.domain +"/edit/" + i.getID()]);
   }
 
-  setColumnSortDirection(sortColumn: Column, sortDirection: string): void {
-    //If the user clicked the currently-active column
-    if (this.sortColumn === sortColumn) {
-      this.reverseSorting();
-    } else {
-      this.sortColumn = sortColumn;
-    }
+  dupItem(i: Item) {
+    this.router.navigate([this.domain +"/duplicate/" + i.getID()]);
   }
 
-  reverseSorting(): void {
-    if (this.sortDirection === 'asc') {
-      this.sortDirection = 'desc';
-    } else {
-      this.sortDirection = 'asc';
-    }
+  deleteItem(i: Item) {
+    this.itemService.deleteItem(this.serviceConfigUrl, i.getID());
+    this.refreshData();
   }
+
+  //overriden by user-list, to perform function of setItemStatus method.
+  //TODO Change backend so everything works the same way.
+  //Probably just make every work via a setStatus method, and remove the toggle.
+  toggleItemStatus(i: Item) {
+    this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe();
+    this.refreshData();
+  }
+
+  setItemStatus(i: Item, newStatus: boolean) {
+    this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe();
+    this.refreshData();
+  }
+
+
 
   openDialog(action: string, target: Item): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
@@ -188,34 +192,4 @@ export class GenericListComponent extends GenericPageComponent implements OnInit
       }
     });
   }
-
-  editItem(i: Item) {
-    console.log("here");
-    this.router.navigate([this.domain +"/edit/" + i.getID()]);
-  }
-
-  dupItem(i: Item) {
-    console.log("here");
-    this.router.navigate([this.domain +"/duplicate/" + i.getID()]);
-  }
-
-  deleteItem(i: Item) {
-    this.itemService.deleteItem(this.serviceConfigUrl, i.getID());
-    this.refreshData();
-  }
-
-  //overriden by user-list, to perform function of setItemStatus method.
-  //TODO Change backend so everything works the same way.
-  //Probably just make every work via a setStatus method, and remove the toggle.
-  toggleItemStatus(i: Item) {
-    this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe();
-  }
-
-  setItemStatus(i: Item, newStatus: boolean) {
-    this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe();
-    this.refreshData();
-  }
-
-  //overridden by children
-  onPullComplete(): void {}
 }

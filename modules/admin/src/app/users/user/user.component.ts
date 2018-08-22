@@ -16,11 +16,14 @@ import { User } from '../../shared/models/user.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { DictList } from '../../shared/models/dictionary.model';
+import { Column } from '../../shared/models/column.model';
+import { Mode } from '../../shared/enums/enums';
+import { RowOptions } from '../../shared/models/rowOptions.model';
+
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.component';
-
 
 @Component({
   selector: 'app-user',
@@ -34,7 +37,6 @@ export class UserComponent extends GenericFormComponent {
   roleUser: boolean;
   roleAdmin: boolean;
 
-  submitBtn: any;
   fullImagePath: string;
 
   constructor(
@@ -49,44 +51,40 @@ export class UserComponent extends GenericFormComponent {
     //gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User(undefined);
 
-    this.neededDatasets = ["apps", "vms", "virtues", "users"];
-
-    this.serviceConfigUrl = ConfigUrlEnum.USERS;
-
     this.datasetName = 'allUsers';
     this.childDatasetName = 'allVirtues';
 
+    this.childDomain = "/virtues";
   }
 
-  activateModal(mode: string): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
+  setUpFormValues(): void {
+    this.roleUser = this.item['roles'].includes("ROLE_USER");
+    this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
+  }
 
-    if (mode === 'add') {
-      this.submitBtn = 'Add Virtues';
-    } else {
-      this.submitBtn = 'Update List';
-    }
+  getColumns(): Column[] {
+    return [
+      //See note in gen-form getOptionsList
+      // {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined, link:(i:Item) => this.editItem(i)},
+      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined},
+      {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getChildNamesHtml},
+      {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getGrandchildrenHtmlList},
+      {name: 'version',         prettyName: 'Version',            isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+    ];
+  }
 
-    let dialogRef = this.dialog.open( VirtueModalComponent, {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        id: this.item.getName(),
-        dialogMode: mode,
-        dialogButton: this.submitBtn,
-        appIcon: this.fullImagePath,
-        selectedIDs: this.item.childIDs
-      },
-      panelClass: 'virtue-modal-overlay'
-    });
+  getNoDataMsg(): string {
+    return "No users have been created yet. To add a user, click on the button \"Add User\" above.";
+  }
 
-    let virtueList = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.updateChildList(selectedVirtues);
-    });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
-
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.USERS,
+      neededDatasets: ["apps", "vms", "virtues", "users"]
+    };
   }
 
   //create and fill the fields the backend expects to see, record any
@@ -95,7 +93,10 @@ export class UserComponent extends GenericFormComponent {
     //TODO perform checks here, so none of the below changes happen if the item
     //isn't valid
 
-    // remember check enabled
+    //remember these aren't security checks, merely checks to prevent the user
+    //from accidentally putting in bad data
+
+    // remember to check enabled
 
     this.item['roles'] = [];
     if (this.roleUser) {
@@ -105,9 +106,11 @@ export class UserComponent extends GenericFormComponent {
       this.item['roles'].push('ROLE_ADMIN');
     }
 
-    if (!this.item['username']) {
+    if (this.mode === Mode.CREATE && !this.item['username']) {
       return confirm("You need to enter a username.");
     }
+
+    //if not editing, make sure username isn't taken
 
     this.item['username'] = this.item.name,
     this.item['authorities'] = this.item['roles'], //since this is technically an item
@@ -118,5 +121,17 @@ export class UserComponent extends GenericFormComponent {
     this.item.childIDs = undefined;
     this.item['roles'] = undefined;
     return true;
+  }
+
+  //overrides parent
+  //remember this is for the table, holding the user's virtues
+  hasColoredLabels() {
+    return true;
+  }
+
+  getModal(
+    params:{width:string, height:string, data:{id:string, selectedIDs:string[] }}
+  ): any {
+    return this.dialog.open( VirtueModalComponent, params);
   }
 }

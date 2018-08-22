@@ -50,11 +50,10 @@ import { FileShareComponent } from './config/resource-modal/file-share/file-shar
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
-import { GenericListComponent } from './shared/abstracts/gen-list/gen-list.component';
 import { GenericTable } from './shared/abstracts/gen-table/gen-table.component';
-import { GenericFormComponent } from './shared/abstracts/gen-form/gen-form.component';
-import { GenericPageComponent } from './shared/abstracts/gen-page/gen-page.component';
-import { GenericModal } from './modals/generic-modal/generic.modal';
+// import { GenericFormComponent } from './shared/abstracts/gen-form/gen-form.component';
+// import { GenericPageComponent } from './shared/abstracts/gen-page/gen-page.component';
+// import { GenericModal } from './modals/generic-modal/generic.modal';
 
 import { UsersWrapperComponent } from './users/users.wrapper.component';
 import { UserListComponent } from './users/user-list/user-list.component';
@@ -105,9 +104,8 @@ import { MessageService } from './shared/services/message.service';
     HeaderComponent,
     DashboardComponent,
 
-    GenericListComponent,
     GenericTable,
-    GenericModal,
+    // GenericModal,
 
     UsersWrapperComponent,
     UserListComponent,
@@ -180,7 +178,6 @@ import { MessageService } from './shared/services/message.service';
     AppsModalComponent,
     VmModalComponent,
     VirtueModalComponent,
-    GenericModal,
     ColorModal
   ]
 })

@@ -28,7 +28,7 @@ export class ColorSet {
     {prettyName:"Silver",       hex:"#C0C0C0",  htmlName:"silver"},
     {prettyName:"Gray",         hex:"#808080",  htmlName:"gray"},
     {prettyName:"Black",        hex:"#000000",  htmlName:"black"},
-    {prettyName:"None",        hex:"#FFFFFF",  htmlName:"white"}
+    {prettyName:"None",         hex:"transparent",  htmlName:"white"}
   ]
   getList() {
     return this.list;

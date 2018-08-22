@@ -7,6 +7,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { Column } from '../../shared/models/column.model';
 import { GenericModal } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
@@ -28,21 +29,50 @@ export class VirtueModalComponent extends GenericModal {
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
-
-    //must add up to 11 here, to leave space for checkbox
-    this.colData = [
-      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
-      {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getChildNamesHtml},
-      {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getGrandchildrenHtmlList},
-      // {name: 'lastEditor',      prettyName: 'Last Editor',        isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
-      // {name: 'version',         prettyName: 'Version',            isList: false,  sortDefault: 'asc', colWidth:1, formatValue: undefined},
-      {name: 'modDate',         prettyName: 'Modification Date',  isList: false,  sortDefault: 'desc', colWidth:2, formatValue: undefined},
-      {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
-    ];
     this.neededDatasets = ["apps", "vms", "virtues"];
   }
 
+  getColumns(): Column[] {
+    return [
+      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined},
+      {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getChildNamesHtml},
+      {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getGrandchildrenHtmlList},
+      {name: 'modDate',         prettyName: 'Modification Date',  isList: false,  sortDefault: 'desc', colWidth:2, formatValue: undefined},
+      {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+    ];
+  }
+
+  hasColoredLabels() {
+    return true;
+  }
+
   onPullComplete() {
-    this.items = this.allVirtues.asList();
+    this.setItems(this.allVirtues.asList());
+  }
+
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
+      neededDatasets: ["apps", "vms", "virtues"]
+    };
+  }
+
+  getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string} {
+    return {
+      prettyTitle: "Virtue Templates",
+      itemName: "Virtue Template",
+      pluralItem: "Virtues",
+      domain: '/virtues'
+    };
+  }
+
+  getNoDataMsg(): string {
+    return "No virtues have been added at this time. To add a virtue, click on the button \"Add Virtue Template\" above.";
   }
 }

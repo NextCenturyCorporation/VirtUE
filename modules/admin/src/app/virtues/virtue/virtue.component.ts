@@ -16,6 +16,8 @@ import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { DictList } from '../../shared/models/dictionary.model';
+import { Column } from '../../shared/models/column.model';
+import { RowOptions } from '../../shared/models/rowOptions.model';
 
 import { Mode, ConfigUrlEnum } from '../../shared/enums/enums';
 
@@ -43,9 +45,6 @@ export class VirtueComponent extends GenericFormComponent {
   ) {
     super('/virtues', activatedRoute, router, baseUrlService, itemService, dialog);
 
-    this.serviceConfigUrl = ConfigUrlEnum.VIRTUES;
-
-    this.neededDatasets = ["apps", "vms", "virtues"];
 
     //set up empty (except for a default color), will get filled in ngOnInit if
     //mode is not 'create'
@@ -53,11 +52,13 @@ export class VirtueComponent extends GenericFormComponent {
 
     this.datasetName = 'allVirtues';
     this.childDatasetName = 'allVms';
+
+    this.childDomain = "/vm-templates";
   }
 
   //This should only stay until the data loads, if the data has a color.
   defaultColor() {
-    return this.mode === Mode.CREATE ? "#cccccc": "#ffffff"
+    return this.mode === Mode.CREATE ? "#cccccc": "transparent"
   }
 
   //TODO decide if this is sufficent, or if it could be designed better
@@ -65,29 +66,42 @@ export class VirtueComponent extends GenericFormComponent {
     this.settingsPane.setColor((this.item as Virtue).color);
   }
 
-  activateModal(): void {
 
-    let dialogRef = this.dialog.open(VmModalComponent, {
-      width: '750px',
-      data: {
-        selectedIDs: this.item.childIDs
-      }
-    });
-    dialogRef.updatePosition({ top: '5%', left: '20%' });
-
-    const vms = dialogRef.componentInstance.getSelections.subscribe((dialogvmIDs) => {
-      this.updateChildList(dialogvmIDs);
-    });
-
-    //TODO look at unsubscriptions, everywhere things are subscribed to.
-    //Apparently angular has a bug where subscriptions aren't always automatically
-    //destroyed when their containing component is destroyed.
-    //May be the cause of the possible memory-leak like thing in firefox.
-    // dialogRef.afterClosed().subscribe(() => {
-    //   vms.unsubscribe();
-    // });
+  getColumns(): Column[] {
+    return [
+      //See note in gen-form getOptionsList
+      // {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:4, formatValue: undefined, link:(i:Item) => this.editItem(i)},
+      {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:4, formatValue: undefined},
+      {name: 'os', prettyName: 'OS', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+      {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
+      {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:2, formatValue: this.formatStatus}
+    ];
   }
 
+  getNoDataMsg(): string {
+    return "No virtue templates have been created yet. To add a template, click on the button \"Add Virtue\" above.";
+  }
+
+  getPageOptions(): {
+    serviceConfigUrl: ConfigUrlEnum,
+    neededDatasets: string[]} {
+      return {
+        serviceConfigUrl: ConfigUrlEnum.VIRTUES,
+        neededDatasets: ["apps", "vms", "virtues"]
+      };
+    }
+
+  //overrides default
+  //ensure it takes the full width of its half-page area
+  getTableWidth(): number {
+    return 12;
+  }
+
+  getModal(
+    params:{width:string, height:string, data:{id:string, selectedIDs:string[] }}
+  ): any {
+    return this.dialog.open( VmModalComponent, params);
+  }
 
   //create and fill the fields the backend expects to see, record any
   //uncollected inputs, and check that the item is valid to be saved
@@ -122,15 +136,4 @@ export class VirtueComponent extends GenericFormComponent {
     return true;
   }
 
-  // deleteVirtue(id): void {
-  //   let dialogRef = this.dialog.open(DialogsComponent, {
-  //     width: '450px'
-  //   });
-  //
-  //   dialogRef.updatePosition({ top: '15%', left: '36%' });
-  //
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     // console.log('This dialog was closed');
-  //   });
-  // }
 }

@@ -28,7 +28,7 @@ import { ConfigUrlEnum } from '../../shared/enums/enums';
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class AppsListComponent extends GenericListComponent {
+export class AppsListComponent extends GenericListComponent implements OnInit  {
 
   file: string;
   url: string;
@@ -40,21 +40,8 @@ export class AppsListComponent extends GenericListComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-
-
-    this.serviceConfigUrl = ConfigUrlEnum.APPS;
-
-    this.prettyTitle = "Available Applications";
-    this.itemName = "Application";
-    this.pluralItem = "Applications";
-    this.noDataMessage = "No apps appear to be available at this time. To add an application, click on the button \"Add "
-                          + this.itemName +  "\" above.";
-    this.domain = '/applications';
-
-    this.neededDatasets = ["apps"];
-
-    this.showSortingAndEditOptions = false;
   }
+
 
   getColumns(): Column[] {
     //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
@@ -70,16 +57,44 @@ export class AppsListComponent extends GenericListComponent {
     ];
   }
 
-  //overrides parent
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.APPS,
+      neededDatasets: ["apps"]
+    };
+  }
+
+  getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string} {
+    return {
+      prettyTitle: "Available Applications",
+      itemName: "Application",
+      pluralItem: "Applications",
+      domain: '/applications'
+    };
+  }
+
+  getNoDataMsg(): string {
+    return "No apps appear to be available at this time. To add an application, click on the button \"Add Application\" above.";
+  }
+
+  //Apps can't be disabled, so nothing to filter
+  getTableFilters(): {text:string, value:string}[] {
+    return [];
+  }
+
   getOptionsList(): RowOptions[] {
-    return [
-      new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))
-  ];
+    return [new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))];
   }
 
   //called after all the datasets have loaded
   onPullComplete(): void {
-    setItems(this.allApps.asList());
+    this.setItems(this.allApps.asList());
   }
 
   openAppsDialog(): void {

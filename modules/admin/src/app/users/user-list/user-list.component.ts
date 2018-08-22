@@ -24,7 +24,7 @@ import { ConfigUrlEnum } from '../../shared/enums/enums';
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class UserListComponent extends GenericListComponent {
+export class UserListComponent extends GenericListComponent implements OnInit  {
 
   constructor(
     router: Router,
@@ -34,15 +34,12 @@ export class UserListComponent extends GenericListComponent {
   ) {
     super(router, baseUrlService, itemService, dialog);
 
-    this.serviceConfigUrl = ConfigUrlEnum.USERS;
 
-    this.neededDatasets = ["virtues", "users"];
+  }
 
-    this.prettyTitle = "Users";
-    this.itemName = "User";
-    this.pluralItem = "Users";
-    this.noDataMessage = "No users have been added at this time. To add a user, click on the button \"Add " + this.itemName +  "\" above.";
-    this.domain = '/users';
+  //called after all the datasets have loaded
+  onPullComplete(): void {
+    this.setItems(this.allUsers.asList());
   }
 
   getColumns(): Column[] {
@@ -58,6 +55,34 @@ export class UserListComponent extends GenericListComponent {
       {name: 'childNamesHTML', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
       {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}
     ];
+  }
+
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.USERS,
+      neededDatasets: ["virtues", "users"]
+    };
+
+  }
+
+  getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string} {
+    return {
+      prettyTitle: "Users",
+      itemName: "User",
+      pluralItem: "Users",
+      domain: '/users'
+    };
+
+  }
+
+  getNoDataMsg(): string {
+    return "No users have been added at this time. To add a user, click on the button \"Add User\" above.";
   }
 
   formatRoles( user: User ): string {
@@ -78,11 +103,6 @@ export class UserListComponent extends GenericListComponent {
 
     this.itemService.setItemStatus(this.serviceConfigUrl, u.getID(), !u.enabled).subscribe();
     this.refreshData();
-  }
-
-  //called after all the datasets have loaded
-  onPullComplete(): void {
-    this.setItems(this.allUsers.asList());
   }
 
 }

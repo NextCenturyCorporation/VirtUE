@@ -15,6 +15,8 @@ import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { DictList } from '../../shared/models/dictionary.model';
+import { Column } from '../../shared/models/column.model';
+import { RowOptions } from '../../shared/models/rowOptions.model';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 import { OSSet } from '../../shared/sets/os.set';
@@ -43,31 +45,38 @@ export class VmComponent extends GenericFormComponent {
 
     this.item = new VirtualMachine(undefined);
 
-    this.neededDatasets = ["apps", "vms"];
-
-    this.serviceConfigUrl = ConfigUrlEnum.VMS;
-
     this.datasetName = 'allVms';
     this.childDatasetName = 'allApps';
+
+    //No place to navigate to, since apps don't currently each have their own page
+    this.childDomain = undefined;
   }
 
+  getNoDataMsg(): string {
+    return "No virtual machine templates have been created yet. To add a template, click on the button \"Add VM Template\" above.";
+  }
 
-  activateModal(): void {
-    let dialogRef = this.dialog.open(AppsModalComponent, {
-      width: '750px',
-      data: {
-        selectedIDs: this.item.childIDs
-      }
-    });
-    dialogRef.updatePosition({ top: '5%', left: '20%' });
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.VMS,
+      neededDatasets: ["apps", "vms"]
+    };
+  }
 
-    const apps = dialogRef.componentInstance.getSelections.subscribe((dialogAppsList) => {
-      this.updateChildList(dialogAppsList);
-    });
+  getColumns(): Column[] {
+    return [
+      {name: 'name', prettyName: 'Application Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
+      {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
+      {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
+    ];
+  }
 
-    dialogRef.afterClosed().subscribe(() => {
-      apps.unsubscribe();
-    });
+  getModal(
+    params:{width:string, height:string, data:{id:string, selectedIDs:string[] }}
+  ): any {
+    return this.dialog.open( AppsModalComponent, params);
   }
 
   //create and fill the fields the backend expects to see, record any
@@ -88,10 +97,6 @@ export class VmComponent extends GenericFormComponent {
 
     // 'enabled'      must be either true or false
     this.item['applicationIds'] = this.item.childIDs;  //may be empty
-
-
-    //TODO update the update date. Maybe? That might be done on the backend
-    // this.item['lastModification'] = new Date().something
 
     this.item.children = undefined;
     this.item.childIDs = undefined;

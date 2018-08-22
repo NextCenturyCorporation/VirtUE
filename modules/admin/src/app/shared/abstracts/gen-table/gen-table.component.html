@@ -1,16 +1,4 @@
 <div *ngIf="filterOptions.length > 0" >
-
-  <!-- if there are no items, show this message -->
-  <div *ngIf="items.length < 1" class="mui-container-fluid">
-    <div class="mui-row margin-top-10">
-      <div class="mui-col-md-12 padding-left-0">
-        <p class="no-data-message">
-          {{noDataMessage}}
-        </p>
-      </div>
-    </div>
-  </div>
-
   <!-- if there are items, show this list -->
   <div *ngIf="items.length > 0" class="mui-container-fluid">
     <div class="mui-row">
@@ -27,16 +15,36 @@
   </div>
 </div>
 
+
 <div class="mui-container-fluid data-list">
-  <div class="mui-row table-header-group">
-    <div *ngFor="let column of colData" class="table-header mui-col-md-{{column.colWidth}}">
-      <div *ngIf="column.isList" >{{column.prettyName}}</div>
-      <a *ngIf="!column.isList" (click)="setColumnSortDirection(column, sortBy)">{{column.prettyName}}</a>
-      <span class="list-sorter" *ngIf="!column.isList" >
-        <span *ngIf="sortColumn.name === column.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
-        <span *ngIf="sortColumn.name === column.name && sortBy === 'desc'" class="fa fa-sort-down"></span>
-        <span class="fa fa-sort font-color-gray"></span>
-      </span>
+  <div class="mui-row table-header-group" fxLayout="row">
+
+    <span *ngIf="hasCheckbox" fxFlex="10%" class="table-header float-left" fxLayoutAlign="center center">
+      <mat-checkbox
+        name="selectAll"
+        (change)="selectAll($event.checked)"></mat-checkbox>
+    </span>
+    <div class="table-header" fxFlex="auto">
+      <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.colWidth}}">
+        <div *ngIf="column.isList" >{{column.prettyName}}</div>
+        <a *ngIf="!column.isList" (click)="setColumnSortDirection(column, sortBy)">{{column.prettyName}}</a>
+        <span class="list-sorter" *ngIf="!column.isList" >
+          <span *ngIf="sortColumn.name === column.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
+          <span *ngIf="sortColumn.name === column.name && sortBy === 'desc'" class="fa fa-sort-down"></span>
+          <span class="fa fa-sort font-color-gray"></span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- if there are no items, show this message -->
+  <div *ngIf="items.length < 1" class="mui-container-fluid">
+    <div class="mui-row margin-top-10">
+      <div class="mui-col-md-12 padding-left-0">
+        <p class="no-data-message">
+          {{noDataMessage}}
+        </p>
+      </div>
     </div>
   </div>
 
@@ -45,12 +53,23 @@
   <div *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
     appActiveClass [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }" fxLayout="row" class="mui-row table-row" >
     <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
-              [ngStyle]="{ 'background-color': i.color, 'left':'0px' }"></div>
+              [ngStyle]="{ 'background-color': i.color, 'left':'0px' }">
+    </div>
+    <span *ngIf="hasCheckbox === true" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
+      <mat-checkbox
+        name="cbVm"
+        [checked]="isSelected(i.getID())"
+        (change)="checkItem($event.checked, i.getID())"
+        value="{{i.getID()}}" ></mat-checkbox>
+    </span>
     <div fxFlex="auto">
       <span class="mini-menu table-data mui-col-md-{{colData[0].colWidth}} transparent">
-        <a class="edit" *ngIf="colData[0].link" (click)="callback(colData[0].link, i)">
+        <a class="edit" *ngIf="colData[0].link !== undefined" (click)="callback(colData[0].link, i)">
           {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
         </a>
+        <div class="edit" *ngIf="colData[0].link === undefined">
+          {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
+        </div>
         <!-- change those 'a's to 'div's to make them not be blue and look like links. -->
         <!-- <a class="edit" (click)="editItem(i)">{{ i[colData[0].name] }}</a> -->
         <!-- <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[colData[0].name] }}</a> -->
@@ -83,10 +102,10 @@
     </div>
   </div>
 </div>
-<!-- <div class="paging">
+<div class="paging">
   <div class="page-number mui-col-md-4">Page # of #</div>
   <div class="page-controls mui-col-md-4">
     << First | < Previous | Next> | Last >></div>
   <div class="page-item-total mui-col-md-4">{{ items.length }} {{prettyTitle}}</div>
   <div class="clearfix"></div>
-</div> -->
+</div>

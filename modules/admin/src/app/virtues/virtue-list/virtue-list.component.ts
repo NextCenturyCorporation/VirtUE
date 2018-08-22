@@ -27,7 +27,7 @@ import { ConfigUrlEnum } from '../../shared/enums/enums';
   providers: [ BaseUrlService, ItemService  ]
 })
 
-export class VirtueListComponent extends GenericListComponent {
+export class VirtueListComponent extends GenericListComponent implements OnInit   {
 
   constructor(
     router: Router,
@@ -36,17 +36,11 @@ export class VirtueListComponent extends GenericListComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
+  }
 
-    this.serviceConfigUrl = ConfigUrlEnum.VIRTUES;
-
-    this.neededDatasets = ["apps", "vms", "virtues"];
-
-    this.prettyTitle = "Virtue Templates";
-    this.itemName = "Virtue Template";
-    this.pluralItem = "Virtues";
-    this.noDataMessage = "No virtues have been added at this time. To add a \
-virtue, click on the button \"Add " + this.itemName +  "\" above.";
-    this.domain = '/virtues'
+  //called after all the datasets have loaded
+  onPullComplete(): void {
+    this.setItems(this.allVirtues.asList());
   }
 
   getColumns(): Column[] {
@@ -66,13 +60,36 @@ virtue, click on the button \"Add " + this.itemName +  "\" above.";
       {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
     ];
   }
-  //called after all the datasets have loaded
-  onPullComplete(): void {
-    this.setItems(this.allVirtues.asList());
-  }
 
   //overrides parent
   hasColoredLabels() {
     return true;
   }
+
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
+      neededDatasets: ["apps", "vms", "virtues"]
+    };
+  }
+
+  getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string} {
+    return {
+      prettyTitle: "Virtue Templates",
+      itemName: "Virtue Template",
+      pluralItem: "Virtues",
+      domain: '/virtues'
+    };
+  }
+
+  getNoDataMsg(): string {
+    return "No virtues have been added at this time. To add a virtue, click on the button \"Add Virtue Template\" above.";
+  }
+
 }

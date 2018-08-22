@@ -7,6 +7,6 @@ export enum Mode {
 export enum ConfigUrlEnum {
   APPS = "admin/application/",
   VMS = "admin/virtualMachine/template/",
-  VIRTUES = "admin/virtues/template/",
+  VIRTUES = "admin/virtue/template/",
   USERS = "admin/user/"
 }

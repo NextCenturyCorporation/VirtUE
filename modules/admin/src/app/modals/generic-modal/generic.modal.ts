@@ -7,6 +7,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 import { Item } from '../../shared/models/item.model';
 import { Column } from '../../shared/models/column.model';
+import { RowOptions } from '../../shared/models/rowOptions.model';
 
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
@@ -21,15 +22,18 @@ can on the list page.
 @Component({
   selector: 'generic-modal',
   templateUrl: './generic.modal.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [BaseUrlService, ItemService]
 })
-export class GenericModal extends GenericListComponent {
+export abstract class GenericModal extends GenericListComponent {
 
-  form: FormGroup;
+  // form: FormGroup;
 
   getSelections = new EventEmitter();
 
-  selectedIDs: string[] = [];
+  //only holds the initial input selections, just passed to table once
+  //table loads
+  initialSelections: string[] = [];
 
   constructor(
       router: Router,
@@ -40,60 +44,57 @@ export class GenericModal extends GenericListComponent {
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
       super(router, baseUrlService, itemService, dialog);
-      // console.log(data);
       if (data && data['selectedIDs']) {
-        this.selectedIDs = data['selectedIDs'];
+        this.initialSelections = data['selectedIDs'];
       }
       else {
         console.log("No field 'selectedIDs' in data input to modal")
-        this.selectedIDs = [];
+        this.initialSelections = [];
       }
-      console.log(this.selectedIDs);
-    }
 
-  onPullComplete() {
-    //overridden by children
   }
 
-  isSelected(id: string) {
-    return id in this.selectedIDs;
+  //remember this component is abstract and so can't fit the onInit interface
+  //but all concrete children inherit this function.
+  ngOnInit() {
+    this.cmnComponentSetup();
+    this.fillTable();
+
+    //TODO should we not allow addition of disabled?
+    // if so, see note in notes - select-all button will not act how user expects.
+    //Could be changed to only add/remove enabled items, but still then the user couldn't
+    //remove disabled ones through that menu.
+    // this.table.filterList("enabled");
   }
 
-  //TODO look at the html in all modals for check-boxes and selection.
-  //Please.
-
-  selectAll(event) {
-    console.log(event);
-    if (event) {
-      for (let i of this.items) {
-        this.selectedIDs.push(i.id);
-      }
-    } else {
-      this.clearItemList();
-    }
+  // this gives the childIDs the item was loaded with, and is only used to build
+  // the table - any changes will be made to this.table.selectedIDs.
+  getSelectedIDs() {
+    console.log("initialSelections", this.initialSelections);
+    return this.initialSelections;
   }
 
-  //called upon check/uncheck
-  cbVmList(checked: boolean, id: string) {
-    if (checked === true) {
-      this.selectedIDs.push(id);
-    } else {
-      this.selectedIDs.splice(this.selectedIDs.indexOf(id), 1);
-    }
+  getTableFilters(): {text:string, value:string}[] {
+    return [];
   }
 
-  clearItemList() {
-    this.selectedIDs = [];
+  hasCheckbox() {
+    return true;
   }
+
+  getOptionsList(): RowOptions[] {
+    return [];
+  }
+
 
   submit(): void {
-    this.getSelections.emit(this.selectedIDs);
-    this.clearItemList();
+    this.getSelections.emit(this.table.selectedIDs);
+    this.table.clearSelections();
     this.dialogRef.close();
   }
 
   cancel() {
-    this.clearItemList();
+    this.table.clearSelections();
     this.dialogRef.close();
   }
 

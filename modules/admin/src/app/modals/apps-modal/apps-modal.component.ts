@@ -7,6 +7,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { Column } from '../../shared/models/column.model';
 import { GenericModal } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -28,18 +29,43 @@ export class AppsModalComponent extends GenericModal {
     @Inject(MAT_DIALOG_DATA) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
+  }
 
-    //must add up to 11 here, to leave space for checkbox
-    this.colData = [
-      {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:4, formatValue: undefined},
+  getColumns(): Column[] {
+    return [
+      {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
       {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
       {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
     ];
-    this.neededDatasets = ["apps"];
   }
+
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.APPS,
+      neededDatasets: ["apps"]
+    };
+  }
+
+  getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string} {
+    return {
+      prettyTitle: "Available Applications",
+      itemName: "Application",
+      pluralItem: "Applications",
+      domain: '/applications'
+    };
+  }
+
+  getNoDataMsg(): string {
+    return "No apps appear to be available at this time.";
+  };
 
   onPullComplete() {
-    this.items = this.allApps.asList();
+    this.setItems(this.allApps.asList());
   }
-
 }

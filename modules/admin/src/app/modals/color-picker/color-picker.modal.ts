@@ -27,7 +27,7 @@ export class ColorModal implements OnInit {
       this.selectedColor = this.colorSet.getList().find(c => c.hex === data.color);
       console.log(this.selectedColor);
       if (!this.selectedColor) {
-        this.selectedColor = this.colorSet.getList().find(c => c.htmlName === "white");
+        this.selectedColor = this.colorSet.getList().find(c => c.prettyName === "None");
       }
       console.log(this.selectedColor);
 

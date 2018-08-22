@@ -1,7 +1,7 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
-    <h2 class="titlebar-title">{{actionName}} Virtual Machine</h2>
-    <button (click)="toggleVmStatus()" class="titlebar-button">{{ item.enabled ? 'VM Enabled' : 'VM Disabled' }}</button>
+    <h2 class="titlebar-title">{{mode}} Virtual Machine</h2>
+    <!-- <button (click)="toggleVmStatus()" class="titlebar-button">{{ item.enabled ? 'VM Enabled' : 'VM Disabled' }}</button> -->
     <!-- <button (click)="toggleVmStatus()" class="titlebar-button">{{ item.enabled ? 'Disable VM' : 'Enable VM' }}</button> -->
   </div>
 
@@ -15,6 +15,17 @@
             </mat-form-field>
           </div>
         </div>
+        <div class="mui-row form-item margin-top-15">
+          <div class="mui-col-md-1">
+            <label>Status: </label>
+          </div>
+          <div class="mui-col-md-2">
+            <!-- <button (click)="toggleItemStatus()" class="titlebar-button">{{ item.enabled ? 'Enabled' : 'Disabled' }}</button> -->
+            <!-- <mat-slide-toggle #statusToggle></mat-slide-toggle> -->
+            <mat-slide-toggle [(ngModel)]="item.enabled">{{ item.enabled ? 'Enabled' : 'Disabled' }}</mat-slide-toggle>
+          </div>
+        </div>
+        <br>
         <div class="mui-row">
           <div class="mui-col-md-2">
             <label>Select Operating System:</label>
@@ -27,46 +38,17 @@
             </mat-form-field>
           </div>
         </div>
+
+
         <div class="mui-row titlebar">
           <div class="mui-col-md-6">
             <h3 class="titlebar-title">Application Packages</h3>
             <button mat-button class="titlebar-button" (click)="activateModal()">Add/Remove Application Packages</button>
           </div>
         </div>
-        <!-- if there are no apps, show this message -->
-        <div class="mui-row">
-          <div class="mui-col-md-6">
-            <div *ngIf="item.children.asList().length < 1" class="mui-row margin-top-10">
-              <div class="mui-col-md-12">
-                <p class="no-data-message">
-                  No applications are attached to this VM. To add application(s), click on the button "Add/Remove Application Packages".
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="mui-row">
-          <div class="mui-col-md-9">
-            <div *ngIf="item.children.asList().length > 0" class="mui-container-fluid data-list">
-              <div class="mui-row table-header-group">
-                <div class="table-header mui-col-md-6">Application</div>
-                <div class="table-header mui-col-md-3">Version</div>
-                <div class="table-header mui-col-md-3">OS</div>
-              </div>
-              <div *ngFor="let app of item?.children.asList(); let i = index" class="mui-row table-row" appActiveClass>
-                <div class="table-data mui-col-md-6">
-                  <a class="edit" (click)="activateModal(app.id)">{{ app.name }}</a>
-                  <span class="menu-options">
-                    <button mat-button (click)="item.removeChild(app.id, i)">Remove</button>
-                  </span>
-                </div>
-                <div class="table-data mui-col-md-3">{{ app.version }}</div>
-                <div class="table-data mui-col-md-3">{{ app.os }}</div>
-                <div class="clearfix"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+
+        <item-table #table></item-table>
+
       </div>
       <hr />
       <div class="mui-row">

@@ -30,6 +30,7 @@ export abstract class Item {
     this.children = new DictList<Item>();
   }
 
+//Note that childDataset refers to the child of the items being built
   buildChildren(childDataset: DictList<Item>) {
     this.children = new DictList<Item>();
     for (let childID of this.childIDs) {
@@ -58,7 +59,7 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
     }
     let names: string[] = [];
     for (let id of desiredIDs) {
-      let line = allItems.get(id).name;
+      let line = allItems.get(id).getName();
 
       //NOTE if enabled is undefined, !{..}.enabled evaluates to true, while
       // {..}.enabled === false evaluates to false. We need the latter.
@@ -91,8 +92,14 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
     return this.id;
   }
 
-  removeChild(id: string, index: number): void {
+  removeChild(id: string, index?: number): void {
     this.children.remove(id);
-    this.childIDs.splice(index, 1);
+    if (index) {
+      this.childIDs.splice(index, 1);
+    }
+    else {
+      this.childIDs.splice(this.childIDs.indexOf(id), 1);
+    }
+
   }
 }
