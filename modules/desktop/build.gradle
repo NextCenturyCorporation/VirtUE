@@ -24,6 +24,7 @@ dependencies {
 	compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.26'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.2'
 	compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.2'
+	compile "org.apache.commons:commons-csv:1.5"
 	compile group: 'com.github.dblock.waffle', name: 'waffle-jna', version: '1.8.1'
 	//waffle 1.8.1 brings in JNA 4.2.1 which doesn't work with the clipboard
 	// JNA's latest (as of 6/4) is 4.5.1
