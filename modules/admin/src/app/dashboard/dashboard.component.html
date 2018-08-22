@@ -5,39 +5,7 @@
 
   <div id="content-main">
     <div id="content">
-      <div class="mui-container-fluid">
-        <!-- if there are no virtues, show this message -->
-        <div class="mui-row margin-top-10">
-          <div class="mui-col-md-12 padding-left-0">
-            <div class="mui-container-fluid">
-              <div class="mui-row">
-                <div class="mui-col-md-3 table-header">Sensor</div>
-                <div class="mui-col-md-3 table-header">Virtue</div>
-                <div class="mui-col-md-3 table-header">Kafka Topic</div>
-                <div class="mui-col-md-1 table-header">Certificate</div>
-                <div class="mui-col-md-2 table-header">Last Update</div>
-              </div>
-              <div *ngIf="sensorData.length < 1" class="table-container">
-                <div class="mui-row">
-                  <div class="mui-col-md-12 table-data">
-                    <p>No sensor information is available at this time.</p>
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="sensorData.length > 0" class="table-container">
-                <div class="mui-row" *ngFor="let d of sensorData">
-                  <div class="mui-col-md-3 table-data">{{ d.sensor_id }}</div>
-                  <div class="mui-col-md-3 table-data">{{ this.allVirtues.get(d.virtue_id) }}</div>
-                  <div class="mui-col-md-3 table-data">{{ d.kafka_topic }}</div>
-                  <div class="mui-col-md-1 table-data border-bottom">{{ hasCertificates(d) }}</div>
-                  <div class="mui-col-md-2 table-data">{{d.updated_at|date:"MM/dd/yyyy, h:mm a"}}</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
+      <item-table #table></item-table>
     </div>
   </div>
 </div>

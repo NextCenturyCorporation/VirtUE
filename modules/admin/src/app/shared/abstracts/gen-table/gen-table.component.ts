@@ -27,14 +27,15 @@ Using this table needs three things:
           <item-table #table></item-table>
         and in the parent .ts
           @ViewChild(GenericTable) table: GenericTable;
-    -remember doing it this way means the table gets instantiated when the parent's
-     ngInit runs, not during the parent's constructor.
+    --remember doing it this way means the table gets instantiated when the
+      containing component's ngOnInit runs, not during the component's constructor.
 
-  2. call setUp(), once the necessary data is available
-      (generally by the same time of ngInit)
+  2. call table.setUp(), once the necessary data is available
+      (generally is by the time of ngOnInit)
 
-  3. set 'items' to an Item[], once the item data has come back. It's expected
-      that this won't be done instantaneously.
+  3. set 'items' to an Item[], once the desired item list is available. It's expected
+      that the data won't be there instantaneously, but angular should update the table
+      whenever it arrives.
 
 
 ********************************************/
@@ -60,7 +61,7 @@ export class GenericTable {
   //used to put a colored bar for everywhere virtues show up
   hasColoredLabels: boolean;
 
-  //used to put a checkbox on modals
+  //used to put checkboxes on the table and allow selection, within modals
   hasCheckbox: boolean;
 
   filterOptions: {text:string, value:string}[];
@@ -91,9 +92,9 @@ export class GenericTable {
   }
 
   //must be called by containing object, passing in all attributes the table
-  //needs, except for items, which usually isn't available when the table is built
-  //Passes an object so the callee has to see what element they're setting to what,
-  //and because all elements are necessary.
+  //needs. items isn't passed in, because it usually isn't available when the table is built.
+  //parameter is a single object so the callee has to see what element they're setting to what,
+  //and because most elements are necessary.
   setUp(params:{
     cols: Column[];
     opts: RowOptions[];
@@ -134,7 +135,7 @@ export class GenericTable {
   }
 
   //called upon check/uncheck
-  checkItem(checked: boolean, id: string) {
+  checkClicked(checked: boolean, id: string) {
     if (checked === true) {
       this.selectedIDs.push(id);
     } else {

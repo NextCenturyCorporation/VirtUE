@@ -2,8 +2,7 @@
   <!-- if there are items, show this list -->
   <div *ngIf="items.length > 0" class="mui-container-fluid">
     <div class="mui-row">
-      <!-- Note: angular mui table requires 12 column-widths of space.
-      Changing below value doesn't appear to have an effect. -->
+      <!-- Note: angular mui table always has 12 total column-widths of space. available -->
       <div class="mui-col-md-12 padding-left-0 filters">
         <ng-container *ngFor="let f of filterOptions; let idx = index">
           <span *ngIf="filterValue === f.value"> {{f.text}} {{pluralItem}} </span>
@@ -59,7 +58,7 @@
       <mat-checkbox
         name="cbVm"
         [checked]="isSelected(i.getID())"
-        (change)="checkItem($event.checked, i.getID())"
+        (change)="checkClicked($event.checked, i.getID())"
         value="{{i.getID()}}" ></mat-checkbox>
     </span>
     <div fxFlex="auto">
@@ -71,8 +70,8 @@
           {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
         </div>
         <!-- change those 'a's to 'div's to make them not be blue and look like links. -->
+        <!-- TODO change this to move to the form page, but only in 'view' mode -->
         <!-- <a class="edit" (click)="editItem(i)">{{ i[colData[0].name] }}</a> -->
-        <!-- <a class="edit" routerLink="{{domain}}/edit/{{i.getID()}}">{{ i[colData[0].name] }}</a> -->
         <div class="menu-options" >
           <a *ngFor="let o of rowOptions; let idx = index" (click)="callback(o.action, i)">
             <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
@@ -102,6 +101,8 @@
     </div>
   </div>
 </div>
+
+<!-- TODO paging not implemented -->
 <div class="paging">
   <div class="page-number mui-col-md-4">Page # of #</div>
   <div class="page-controls mui-col-md-4">

@@ -24,8 +24,6 @@ export class Virtue extends Item {
   awsTemplateName: string;
   color: string;
 
-  // appsListHTML: string;
-
   //convert from whatever form the virtue object is in the database.
   constructor(virtueObj) {
     super();

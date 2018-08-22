@@ -30,7 +30,7 @@ import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 export abstract class GenericFormComponent extends GenericPageComponent {
 
   // TODO currently not used, but could/should be eventually, time-permitting.
-  itemForm: FormControl;
+  // itemForm: FormControl;
 
   //Note:
   //  when creating, item.id is empty.
@@ -59,10 +59,6 @@ export abstract class GenericFormComponent extends GenericPageComponent {
   datasetName: string;
   childDatasetName: string;
 
-  //holds the class of the item being edited/created.
-  //Must be set in constructor of derived class.
-  classType: any;
-
   constructor(
     protected parentDomain: string,
     protected activatedRoute: ActivatedRoute,
@@ -72,13 +68,12 @@ export abstract class GenericFormComponent extends GenericPageComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-    // super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
     this.setMode();
-    //set up empty, will get filled in ngOnInit if not mode is not 'create'
 
     // see note by declaration
-    this.itemForm = new FormControl();
+    // this.itemForm = new FormControl();
 
+    //TODO look at this while fixing breadcrumbs
     // override the route reuse strategy
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
@@ -89,7 +84,6 @@ export abstract class GenericFormComponent extends GenericPageComponent {
   //This checks the current routing info (the end of the current url)
   //and uses that to set what mode (create/edit/duplicate) the page
   // ought to be in.
-  // Create new virtue: 'c', Edit virtue: 'e', Duplicate virtue: 'd'
   setMode() {
     let url = this.router.routerState.snapshot.url;
     if (url[0] === '/') {
@@ -151,7 +145,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       cols: this.getColumns(),
       opts: this.getOptionsList(),
       coloredLabels: this.hasColoredLabels(),
-      filters: [], //none ?
+      filters: [], //don't allow filtering on the form's child table. ?
       tableWidth: this.getTableWidth(),
       noDataMsg: this.getNoDataMsg(),
       hasCB: false
@@ -171,6 +165,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.setUpFormValues();
   }
 
+  // set up child form-pages' unique properties
   // does nothing by default, overridden by user form
   setUpFormValues(): void {}
 
@@ -280,8 +275,8 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     });
   }
 
-  /*this needs to be set in the children, because I can't find how to have each
-  child hold a class as an attribute, to be passed into the dialog.open method.
+  /*this needs to be defined in each child, instead of here, because I can't find how to have each
+  child hold a class as an attribute, to be used in a dialog.open method in a parent's function.
   So right now the children take care of the dialog.open method, and pass the
   MatDialogRef back. I can't type this as returning a MatDialogRef though
   without having to specify what modal class the dialog refers to (putting us
@@ -319,6 +314,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     //Apparently angular has a bug where subscriptions aren't always automatically
     //destroyed when their containing component is destroyed.
     //May be the cause of the possible memory-leak like thing in firefox.
+    //I don't think the below is the correct way of doing it.
     // dialogRef.afterClosed().subscribe(() => {
     //   vms.unsubscribe();
     // });
@@ -327,10 +323,12 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   //overrides parent
   getOptionsList(): RowOptions[] {
     return [
-      // new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)), //TODO look into this.
+      // new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)),
+      //TODO look into this, perhaps we could have two modes on the form pages -
+      //one for editing, one for viewing. So you could navigate away only when
+      //you weren't in edit mode, and you'd never lose changes accidentally.
       //User will lose all work on form if they navigate away to other form
       //It'd be nice to let them do that though.
-      //also look at columns in user.comp and virtue.comp - they call same function.
       new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))
     ];
   }
@@ -371,10 +369,4 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   abstract getNoDataMsg(): string;
 
-  //probably could imlement this at some point
-  // abstract getListOptions(): {
-  //     prettyTitle: string,
-  //     itemName: string,
-  //     pluralItem: string,
-  //     domain: string};
 }

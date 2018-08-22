@@ -27,8 +27,6 @@ can on the list page.
 })
 export abstract class GenericModal extends GenericListComponent {
 
-  // form: FormGroup;
-
   getSelections = new EventEmitter();
 
   //only holds the initial input selections, just passed to table once
@@ -60,7 +58,7 @@ export abstract class GenericModal extends GenericListComponent {
     this.cmnComponentSetup();
     this.fillTable();
 
-    //TODO should we not allow addition of disabled?
+    //TODO should we not allow addition of disabled items?
     // if so, see note in notes - select-all button will not act how user expects.
     //Could be changed to only add/remove enabled items, but still then the user couldn't
     //remove disabled ones through that menu.

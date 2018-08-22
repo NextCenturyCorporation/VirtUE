@@ -29,7 +29,7 @@ providers: [ BaseUrlService, ItemService  ]
 })
 export abstract class GenericPageComponent {
 
-  //the base aws url. Usually not needed, but save anyway
+  //the base aws url. Currently only used within dashboard.
   baseUrl: string;
 
   //tells the service and backend where to make changes - specific to each type
@@ -174,106 +174,11 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     }
     if (updateQueue.length > 0) {
       this.recursivePullData(updateQueue, []);
-      // this.fakeRecursivePull(updateQueue, []);
     }
     else {
       console.log("No valid datasets specified in this.neededDatasets");
     }
 
-  }
-
-
-
-  fakeRecursivePull(
-    updateQueue: datasetType[],
-    pulledDatasetNames: string[]
-  ): void {
-    console.log("Could not load data, using test data!");
-    this[updateQueue[0].datasetName] = new DictList<Item>();
-
-    let numDataPoints = 20;
-    if (updateQueue[0].datasetName === "allApps") {
-      console.log("---------Pulling apps");
-      let item: Item;
-      for (let i = 1; i <= numDataPoints; i++) {
-        item = new (updateQueue[0].class)({id: ("app_" + String(i)), name: ("App_" + String(i)),
-                                          version: ("V_" + String(i)), os: ("OS_" + String(i))});
-        this[updateQueue[0].datasetName].add(item.getID(), item);
-      }
-    }
-    else if (updateQueue[0].datasetName === "allVms") {
-      console.log("---------Pulling vms");
-      let item: Item;
-      for (let i = 1; i <= numDataPoints; i++) {
-        let children = [];
-        for (let i2 = 1; i2 < i; i2++) {
-          if (i % i2 === 0) {
-            children.push("app_" + String(i2));
-          }
-        }
-        item = new (updateQueue[0].class)({id: ("vm_" + String(i)), name: ("Vm_" + String(i)), os: ("OS_" + String(i)),
-                                          enabled: (i % 3 === 0), lastEditor: "sys", lastModification:"1/1/2000",
-                                          applicationIds: children});
-        this[updateQueue[0].datasetName].add(item.getID(), item);
-        if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
-          item.buildChildren(this[updateQueue[0].depends]);
-        }
-      }
-    }
-    else if (updateQueue[0].datasetName === "allVirtues") {
-      console.log("---------Pulling virtues");
-      let colors = new ColorSet().getList();
-      let item: Item;
-      for (let i = 1; i <= numDataPoints; i++) {
-        let children = [];
-        for (let i2 = 1; i2 < i; i2++) {
-          if (i % i2 === 0) {
-            children.push("vm_" + String(i2));
-          }
-        }
-        item = new (updateQueue[0].class)({id: ("vrtu_" + String(i)), name: ("Vrt_" + String(i)), color: colors[i % colors.length].hex,
-                                          enabled: (i % 4 === 0), lastEditor: "sys", lastModification:"2/2/2002",
-                                          version: ("V_" + String(i)), virtualMachineTemplateIds: children});
-        this[updateQueue[0].datasetName].add(item.getID(), item);
-        if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
-          item.buildChildren(this[updateQueue[0].depends]);
-        }
-      }
-    }
-    else if (updateQueue[0].datasetName === "allUsers") {
-      console.log("---------Pulling users");
-      let item: Item;
-      for (let i = 1; i <= numDataPoints; i++) {
-        let children = [];
-        for (let i2 = 1; i2 < i; i2++) {
-          if (i % i2 === 0) {
-            children.push("vrtu_" + String(i2));
-          }
-        }
-        item = new (updateQueue[0].class)({username: ("U_" + String(i)),
-                                          enabled: (i % 2 === 0 || i % 3 === 0),
-                                          virtueTemplateIds: children});
-        this[updateQueue[0].datasetName].add(item.getID(), item);
-        if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
-          item.buildChildren(this[updateQueue[0].depends]);
-        }
-      }
-    }
-
-    //mark this set as pulled
-    pulledDatasetNames.push(updateQueue[0].datasetName);
-
-    //remove front element
-    updateQueue.shift();
-
-    if (updateQueue.length !== 0) {
-      //if there are more datasets to pull
-      this.fakeRecursivePull(updateQueue, pulledDatasetNames);
-    }
-    else {
-      this.onPullComplete();
-    }
-    return;
   }
 
   /**

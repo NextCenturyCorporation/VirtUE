@@ -51,9 +51,6 @@ import { PrintersComponent } from './config/resource-modal/printers/printers.com
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
 import { GenericTable } from './shared/abstracts/gen-table/gen-table.component';
-// import { GenericFormComponent } from './shared/abstracts/gen-form/gen-form.component';
-// import { GenericPageComponent } from './shared/abstracts/gen-page/gen-page.component';
-// import { GenericModal } from './modals/generic-modal/generic.modal';
 
 import { UsersWrapperComponent } from './users/users.wrapper.component';
 import { UserListComponent } from './users/user-list/user-list.component';
@@ -105,7 +102,6 @@ import { MessageService } from './shared/services/message.service';
     DashboardComponent,
 
     GenericTable,
-    // GenericModal,
 
     UsersWrapperComponent,
     UserListComponent,

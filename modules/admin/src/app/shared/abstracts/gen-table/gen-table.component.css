@@ -11,14 +11,3 @@ ul{
 li {
     margin: 0; padding: 0;
 }
-
-.xCenterChildren {
-  /* display: table;
-  margin: 0 auto; */
-  text-align: center;
-}
-
-.yCenterChildren {
-  display: table;
-  vertical-align: middle;
-}

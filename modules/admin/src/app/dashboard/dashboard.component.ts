@@ -1,5 +1,5 @@
+import { Component, OnInit, Inject, ViewChild } from '@angular/core';
 import { HashLocationStrategy, Location, LocationStrategy } from '@angular/common';
-import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
@@ -24,10 +24,10 @@ import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.comp
 
 export class DashboardComponent extends GenericListComponent {
 
-  //also not used, but proboably should be
+  //not used, but probably should be
   form: FormGroup;
 
-  //also not used
+  //not used, but might need the info when setting this up later
   // columns = [
   //   {value: '', viewValue: 'Select Column'},
   //   {value: 'timestamp', viewValue: 'Timestamp'},
@@ -37,10 +37,7 @@ export class DashboardComponent extends GenericListComponent {
   //   {value: 'level', viewValue: 'level'}
   // ];
 
-  //not used
-  // sensorValue: string;
-
-  //not used
+  //also not used
   // sensors = [
   //   {value: '', viewValue: 'Select One'},
   //   {value: ' 0000 ', viewValue: 'DEFAULT'},
@@ -64,10 +61,6 @@ export class DashboardComponent extends GenericListComponent {
   ) {
     super(router, baseUrlService, itemService, dialog);
 
-  }
-
-  ngOnInit() {
-    this.cmnComponentSetup();
   }
 
   getPageOptions(): {
@@ -108,12 +101,6 @@ export class DashboardComponent extends GenericListComponent {
       {name: 'kafka_topic', prettyName: 'Kafka Topic', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
       {name: 'has cert.',   prettyName: 'Certificate', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.hasCertificates},
       {name: 'updated_at',  prettyName: 'Last Update', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined}
-      // {value: '', viewValue: 'Select Column'},
-      // {value: 'timestamp', viewValue: 'Timestamp'},
-      // {value: 'sensor_id', viewValue: 'ID'},
-      // {value: 'sensor', viewValue: 'Sensor Name'},
-      // {value: 'message', viewValue: 'Message'},
-      // {value: 'level', viewValue: 'level'}
     ];
   }
 
@@ -148,7 +135,7 @@ export class DashboardComponent extends GenericListComponent {
     });
   }
 
-  //what's this?
+  //what's this? TODO once we have data to display and know how it should be displayed.
   sensorlog(log) {
     // console.log('sensorlog ... ' + this.sensorData.error);
     this.sensorData = log;

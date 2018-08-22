@@ -1,7 +1,6 @@
 <div id="content-container">
   <div id="content-header" class="titlebar">
     <h2 class="titlebar-title">{{mode}} Virtual Machine</h2>
-    <!-- <button (click)="toggleVmStatus()" class="titlebar-button">{{ item.enabled ? 'VM Enabled' : 'VM Disabled' }}</button> -->
     <!-- <button (click)="toggleVmStatus()" class="titlebar-button">{{ item.enabled ? 'Disable VM' : 'Enable VM' }}</button> -->
   </div>
 
@@ -20,8 +19,6 @@
             <label>Status: </label>
           </div>
           <div class="mui-col-md-2">
-            <!-- <button (click)="toggleItemStatus()" class="titlebar-button">{{ item.enabled ? 'Enabled' : 'Disabled' }}</button> -->
-            <!-- <mat-slide-toggle #statusToggle></mat-slide-toggle> -->
             <mat-slide-toggle [(ngModel)]="item.enabled">{{ item.enabled ? 'Enabled' : 'Disabled' }}</mat-slide-toggle>
           </div>
         </div>

@@ -20,9 +20,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class VmModalComponent extends GenericModal {
 
-  // form: FormGroup;
   checked = false;
-  addVms = new EventEmitter();
 
   selectedIDs: string[] = [];
 

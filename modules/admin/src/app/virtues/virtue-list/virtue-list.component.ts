@@ -49,7 +49,6 @@ export class VirtueListComponent extends GenericListComponent implements OnInit 
     //
     //Note: colWidths of all columns must add to exactly 12.
     //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
       {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined, link:(i:Item) => this.editItem(i)},
       {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:2, formatValue: this.getChildNamesHtml},

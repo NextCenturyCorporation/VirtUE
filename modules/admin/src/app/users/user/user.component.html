@@ -19,8 +19,6 @@
                   <label>User Status: </label>
                 </div>
                 <div class="mui-col-md-4">
-                  <!-- <button (click)="toggleItemStatus()" class="titlebar-button">{{ item.enabled ? 'Enabled' : 'Disabled' }}</button> -->
-                  <!-- <mat-slide-toggle #statusToggle></mat-slide-toggle> -->
                   <mat-slide-toggle [(ngModel)]="item.enabled" [color]="'primary'">{{ item.enabled ? 'Enabled' : 'Disabled' }}</mat-slide-toggle>
                 </div>
               </div>
