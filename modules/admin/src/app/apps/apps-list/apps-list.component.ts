@@ -10,7 +10,7 @@ import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { Column } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
-import { RowOptions } from "../../shared/models/rowOptions.model"
+import { RowOptions } from "../../shared/models/rowOptions.model";
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
@@ -23,12 +23,12 @@ import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.c
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 @Component({
-  selector: 'apps-list',
+  selector: 'app-apps-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class AppsListComponent extends GenericListComponent implements OnInit  {
+export class AppsListComponent extends GenericListComponent {
 
   file: string;
   url: string;
@@ -44,16 +44,15 @@ export class AppsListComponent extends GenericListComponent implements OnInit  {
 
 
   getColumns(): Column[] {
-    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
-    //
-    //Note: colWidths of all columns must add to exactly 12.
-    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    // This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+    //  to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+    // Note: colWidths of all columns must add to exactly 12.
+    // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
-    {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
-    {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-    {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
+      new Column('name',    'Application Name', false, 'asc', 5),
+      new Column('version', 'Version',          false, 'asc', 3),
+      new Column('os',      'Operating System', false, 'desc', 4)
     ];
   }
 
@@ -83,16 +82,16 @@ export class AppsListComponent extends GenericListComponent implements OnInit  {
     return "No apps appear to be available at this time. To add an application, click on the button \"Add Application\" above.";
   }
 
-  //Apps can't be disabled, so nothing to filter
-  getTableFilters(): {text:string, value:string}[] {
+  // Apps can't be disabled, so nothing to filter
+  getTableFilters(): {text: string, value: string}[] {
     return [];
   }
 
   getOptionsList(): RowOptions[] {
-    return [new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))];
+    return [new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))];
   }
 
-  //called after all the datasets have loaded
+  // called after all the datasets have loaded
   onPullComplete(): void {
     this.setItems(this.allApps.asList());
   }
@@ -107,7 +106,7 @@ export class AppsListComponent extends GenericListComponent implements OnInit  {
       console.log('The dialog was closed');
     },
     () => {},
-    () => {//when finished
+    () => { // when finished
       this.refreshData();
       sub.unsubscribe();
     });

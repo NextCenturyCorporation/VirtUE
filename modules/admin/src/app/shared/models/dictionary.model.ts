@@ -24,7 +24,7 @@ export class DictList<T> {
     if (!(key in this.dict)) {
       return;
     }
-    var index: number = this.list.indexOf(this.dict[key], 0);
+    let index: number = this.list.indexOf(this.dict[key], 0);
     if (index > -1) {
        this.list.splice(index, 1);
     }

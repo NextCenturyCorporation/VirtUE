@@ -21,13 +21,13 @@ import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 
 @Component({
-  selector: 'virtue-list',
+  selector: 'app-virtue-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
 
-export class VirtueListComponent extends GenericListComponent implements OnInit   {
+export class VirtueListComponent extends GenericListComponent {
 
   constructor(
     router: Router,
@@ -38,29 +38,29 @@ export class VirtueListComponent extends GenericListComponent implements OnInit 
     super(router, baseUrlService, itemService, dialog);
   }
 
-  //called after all the datasets have loaded
+  // called after all the datasets have loaded
   onPullComplete(): void {
     this.setItems(this.allVirtues.asList());
   }
 
   getColumns(): Column[] {
-    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+    // This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+    //  to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
     //
-    //Note: colWidths of all columns must add to exactly 12.
-    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    // Note: colWidths of all columns must add to exactly 12.
+    // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     return [
-      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-      {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:2, formatValue: this.getChildNamesHtml},
-      {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:2, formatValue: this.getGrandchildrenHtmlList},
-      {name: 'lastEditor',      prettyName: 'Last Editor',        isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
-      {name: 'version',         prettyName: 'Version',            isList: false,  sortDefault: 'asc', colWidth:1, formatValue: undefined},
-      {name: 'modDate',         prettyName: 'Modification Date',  isList: false,  sortDefault: 'desc', colWidth:2, formatValue: undefined},
-      {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+    new Column('name',            'Template Name',      false, 'asc',     2, undefined, (i: Item) => this.editItem(i)),
+    new Column('childNamesHTML',  'Virtual Machines',   true, undefined,  2, this.getChildNamesHtml),
+    new Column('apps',            'Applications',       true, undefined,  2,  this.getGrandchildrenHtmlList),
+    new Column('lastEditor',      'Last Editor',        false, 'asc',     2),
+    new Column('version',         'Version',            false, 'asc',     1),
+    new Column('modDate',         'Modification Date',  false, 'desc',    2),
+    new Column('status',          'Status',             false, 'asc',     1, this.formatStatus)
     ];
   }
 
-  //overrides parent
+  // overrides parent
   hasColoredLabels() {
     return true;
   }

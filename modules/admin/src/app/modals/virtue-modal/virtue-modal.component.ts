@@ -8,7 +8,7 @@ import { ItemService } from '../../shared/services/item.service';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
-import { GenericModal } from '../generic-modal/generic.modal';
+import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 
@@ -18,7 +18,7 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
   styleUrls: ['../generic-modal/generic.modal.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-export class VirtueModalComponent extends GenericModal {
+export class VirtueModalComponent extends GenericModalComponent {
 
   constructor(
       router: Router,
@@ -34,11 +34,12 @@ export class VirtueModalComponent extends GenericModal {
 
   getColumns(): Column[] {
     return [
-      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined},
-      {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getChildNamesHtml},
-      {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getGrandchildrenHtmlList},
-      {name: 'modDate',         prettyName: 'Modification Date',  isList: false,  sortDefault: 'desc', colWidth:2, formatValue: undefined},
-      {name: 'status',          prettyName: 'Status',             isList: false,  sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+      new Column('name',            'Template Name',      false, 'asc',     3),
+      new Column('childNamesHTML',  'Virtual Machines',   true, undefined,  3, this.getChildNamesHtml),
+      new Column('apps',            'Applications',       true, undefined,  3,  this.getGrandchildrenHtmlList),
+      // new Column('version',         'Version',            false, 'asc',     1), // could this be useful?
+      new Column('modDate',         'Modification Date',  false, 'desc',    2),
+      new Column('status',          'Status',             false, 'asc',     1, this.formatStatus)
     ];
   }
 

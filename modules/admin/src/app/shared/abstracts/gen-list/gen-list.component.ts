@@ -14,7 +14,7 @@ import { RowOptions } from '../../models/rowOptions.model';
 import { DictList } from '../../models/dictionary.model';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
-import { GenericTable } from '../gen-table/gen-table.component';
+import { GenericTableComponent } from '../gen-table/gen-table.component';
 
 import { Item } from '../../models/item.model';
 import { User } from '../../models/user.model';
@@ -24,14 +24,13 @@ import { ItemService } from '../../services/item.service';
 
 
 @Component({
-  selector: 'gen-list',
   templateUrl: './gen-list.component.html',
-  providers: [ BaseUrlService, ItemService, GenericTable ]
+  providers: [ BaseUrlService, ItemService, GenericTableComponent ]
 })
-export abstract class GenericListComponent extends GenericPageComponent {
+export abstract class GenericListComponent extends GenericPageComponent implements OnInit {
 
-  //The table itself
-  @ViewChild(GenericTable) table: GenericTable;
+  // The table itself
+  @ViewChild(GenericTableComponent) table: GenericTableComponent;
 
   prettyTitle: string;
   itemName: string;
@@ -52,7 +51,6 @@ export abstract class GenericListComponent extends GenericPageComponent {
     this.pluralItem = params.pluralItem;
     this.domain = params.domain;
   }
-
 
   ngOnInit() {
     this.cmnComponentSetup();
@@ -81,21 +79,21 @@ export abstract class GenericListComponent extends GenericPageComponent {
     return [];
   }
 
-  //overridden by everything that lists virtues
+  // overridden by everything that lists virtues
   hasCheckbox() {
     return false;
   }
 
-  //abstracts away table from subclasses
+  // abstracts away table from subclasses
   setItems(newItems: Item[]) {
     this.table.items = newItems;
   }
 
-  //not used by all subclasses - some don't have reason to filter
-  getTableFilters(): {text:string, value:string}[] {
-    return [{value:'*', text:'All ' + this.pluralItem},
-            {value:'enabled', text:'Enabled ' + this.pluralItem},
-            {value:'disabled', text:'Disabled ' + this.pluralItem}];
+  // not used by all subclasses - some don't have reason to filter
+  getTableFilters(): {text: string, value: string}[] {
+    return [{value: '*', text: 'All ' + this.pluralItem},
+            {value: 'enabled', text: 'Enabled ' + this.pluralItem},
+            {value: 'disabled', text: 'Disabled ' + this.pluralItem}];
   }
 
   abstract onPullComplete(): void;
@@ -108,42 +106,42 @@ export abstract class GenericListComponent extends GenericPageComponent {
       pluralItem: string,
       domain: string};
 
-  //must be here so subclasses of list, which use table, can set table values.
+  // must be here so subclasses of list, which use table, can set table values.
   abstract getNoDataMsg(): string;
 
-  //overridden by app-list and modals
+  // overridden by app-list and modals
   getOptionsList(): RowOptions[] {
     return [
-      new RowOptions("Enable", (i:Item) => !i.enabled, (i:Item) => this.toggleItemStatus(i)),
-      new RowOptions("Disable", (i:Item) => i.enabled, (i:Item) => this.toggleItemStatus(i)),
-      new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)),
-      new RowOptions("Duplicate", () => true, (i:Item) => this.dupItem(i)),
-      new RowOptions("Delete", () => true, (i:Item) => this.openDialog('delete', i))
+      new RowOptions("Enable", (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new RowOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new RowOptions("Edit", () => true, (i: Item) => this.editItem(i)),
+      new RowOptions("Duplicate", () => true, (i: Item) => this.dupItem(i)),
+      new RowOptions("Delete", () => true, (i: Item) => this.openDialog('delete', i))
     ];
   }
 
-  //overridden by virtues
+  // overridden by virtues
   hasColoredLabels() {
     return false;
   }
 
-  //used by many children to display their status
+  // used by many children to display their status
   formatStatus( item: Item ): string {
     return item.enabled ? 'Enabled' : 'Disabled';
   }
 
-  //see comment by Item.childNamesHTML
+  // see comment by Item.childNamesHTML
   getChildNamesHtml( item: Item) {
     return item.childNamesHTML;
   }
 
 
   editItem(i: Item) {
-    this.router.navigate([this.domain +"/edit/" + i.getID()]);
+    this.router.navigate([this.domain + "/edit/" + i.getID()]);
   }
 
   dupItem(i: Item) {
-    this.router.navigate([this.domain +"/duplicate/" + i.getID()]);
+    this.router.navigate([this.domain + "/duplicate/" + i.getID()]);
   }
 
   deleteItem(i: Item) {
@@ -151,9 +149,9 @@ export abstract class GenericListComponent extends GenericPageComponent {
     this.refreshData(true);
   }
 
-  //overriden by user-list, to perform function of setItemStatus method.
-  //TODO Change backend so everything works the same way.
-  //Probably just make every work via a setStatus method, and remove the toggle.
+  // overriden by user-list, to perform function of setItemStatus method.
+  // TODO Change backend so everything works the same way.
+  // Probably just make every work via a setStatus method, and remove the toggle.
   toggleItemStatus(i: Item) {
     let sub = this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe(() => {
       this.refreshData();
@@ -191,7 +189,7 @@ export abstract class GenericListComponent extends GenericPageComponent {
 
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    // control goes here after either "Ok" or "Cancel" are clicked on the dialog
+    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
     let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
 
       if (targetObject !== 0 ) {

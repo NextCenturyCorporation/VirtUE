@@ -6,7 +6,7 @@ import { Item } from './item.model';
  * Children are null.
  * At time of writing (early Aug 2018), launchCommand and iconKey are not used.
  */
-export class Application extends Item{
+export class Application extends Item {
 
   id: string;
   version: string;
@@ -14,7 +14,7 @@ export class Application extends Item{
   launchCommand: string;
   iconKey: string;
 
-  //convert from whatever form the application object is in the database.
+  // convert from whatever form the application object is in the database.
   constructor(appObj) {
     super();
     if (appObj) {

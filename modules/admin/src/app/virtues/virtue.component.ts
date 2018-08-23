@@ -46,8 +46,8 @@ export class VirtueComponent extends GenericFormComponent {
     super('/virtues', activatedRoute, router, baseUrlService, itemService, dialog);
 
 
-    //set up empty (except for a default color), will get filled in ngOnInit if
-    //mode is not 'create'
+    // set up empty (except for a default color), will get filled in ngOnInit if
+    // mode is not 'create'
     this.item = new Virtue({color: this.defaultColor()});
 
     this.datasetName = 'allVirtues';
@@ -56,12 +56,12 @@ export class VirtueComponent extends GenericFormComponent {
     this.childDomain = "/vm-templates";
   }
 
-  //This should only stay until the data loads, if the data has a color.
+  // This should only stay until the data loads, if the data has a color.
   defaultColor() {
-    return this.mode === Mode.CREATE ? "#cccccc": "transparent"
+    return this.mode === Mode.CREATE ? "#cccccc" : "transparent";
   }
 
-  //TODO decide if this is sufficent, or if it could be designed better
+  // TODO decide if this is sufficent, or if it could be designed better
   updateUnconnectedFields() {
     this.settingsPane.setColor((this.item as Virtue).color);
   }
@@ -69,12 +69,11 @@ export class VirtueComponent extends GenericFormComponent {
 
   getColumns(): Column[] {
     return [
-      //See note in gen-form getOptionsList
-      {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:4, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-      // {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:4, formatValue: undefined},
-      {name: 'os', prettyName: 'OS', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
-      {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
-      {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:2, formatValue: this.formatStatus}
+      new Column('name',            'Template Name',        false, 'asc',     4, undefined, (i: Item) => this.editItem(i)),
+      // new Column('name',            'Template Name',        false, 'asc',     4),
+      new Column('os',              'OS',                   false, 'asc',     2),
+      new Column('childNamesHTML',  'Assigned Applications', true, undefined, 4, this.getChildNamesHtml),
+      new Column('status',          'Status',               false, 'asc',     2, this.formatStatus)
     ];
   }
 
@@ -91,24 +90,24 @@ export class VirtueComponent extends GenericFormComponent {
       };
     }
 
-  //overrides default
-  //ensure it takes the full width of its half-page area
+  // overrides default
+  // ensure it takes the full width of its half-page area
   getTableWidth(): number {
     return 12;
   }
 
   getModal(
-    params:{width:string, height:string, data:{id:string, selectedIDs:string[] }}
+    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
   ): any {
     return this.dialog.open( VmModalComponent, params);
   }
 
-  //create and fill the fields the backend expects to see, record any
-  //uncollected inputs, and check that the item is valid to be saved
+  // create and fill the fields the backend expects to see, record any
+  // uncollected inputs, and check that the item is valid to be saved
   finalizeItem(): boolean {
 
-    //TODO perform checks here, so none of the below changes happen if the item
-    //isn't valid
+    // TODO perform checks here, so none of the below changes happen if the item
+    // isn't valid
 
     this.item['color'] = this.settingsPane.getColor();
     console.log("color:", this.item['color']);
@@ -117,20 +116,20 @@ export class VirtueComponent extends GenericFormComponent {
     }
     console.log("version:", this.item['version'], "(see what it looks like to type html code here - injection vector?)");
 
-    //The following are required:
-    // this.item.name,     can't be empty
-    // this.item.version,  will be valid
-    // this.item.enabled,  should either be true or false
-    // this.item.color,    should be ok? make sure it has a default in the settings pane
+    // The following are required:
+    //  this.item.name,     can't be empty
+    //  this.item.version,  will be valid
+    //  this.item.enabled,  should either be true or false
+    //  this.item.color,    should be ok? make sure it has a default in the settings pane
     this.item['virtualMachineTemplateIds'] = this.item.childIDs;
 
-    //TODO update the update date. Maybe? That might be done on the backend
-    // this.item['lastModification'] = new Date().something
+    // TODO update the update date. Maybe? That might be done on the backend
+    //  this.item['lastModification'] = new Date().something
 
-    //note that children is set to undefined for a brief instant before the
-    //page navigates away, during which time an exception would occur on the
-    //table - that chunk of html has now been wrapped in a check, to not check
-    //children's list size if children is undefined
+    // note that children is set to undefined for a brief instant before the
+    // page navigates away, during which time an exception would occur on the
+    // table - that chunk of html has now been wrapped in a check, to not check
+    // children's list size if children is undefined
     this.item.children = undefined;
     this.item.childIDs = undefined;
     return true;

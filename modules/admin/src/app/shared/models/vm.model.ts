@@ -20,7 +20,7 @@ export class VirtualMachine extends Item {
   lastModification: string | Date;
   lastEditor: string;
 
-  //convert from whatever form the vm object is in the database.
+  // convert from whatever form the vm object is in the database.
   constructor(vmObj) {
     super();
     if (vmObj) {

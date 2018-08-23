@@ -17,12 +17,12 @@ import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.c
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 @Component({
-  selector: 'vm-list',
+  selector: 'app-vm-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class VmListComponent extends GenericListComponent implements OnInit  {
+export class VmListComponent extends GenericListComponent {
 
   constructor(
     router: Router,
@@ -33,25 +33,26 @@ export class VmListComponent extends GenericListComponent implements OnInit  {
     super(router, baseUrlService, itemService, dialog);
   }
 
-  //called after all the datasets have loaded
+  // called after all the datasets have loaded
   onPullComplete(): void {
     this.setItems(this.allVms.asList());
   }
 
   getColumns(): Column[] {
-    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+    // This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+    //  to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
     //
-    //Note: colWidths of all columns must add to exactly 12.
-    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
+    // Note: colWidths of all columns must add to exactly 12.
+    // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+    // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
-    {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-    {name: 'os', prettyName: 'OS', isList: false, sortDefault: 'asc', colWidth:1, formatValue: undefined},
-    {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
-    {name: 'lastEditor', prettyName: 'Last Modified By', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
-    {name: 'modDate', prettyName: 'Modified Date', isList: false, sortDefault: 'desc', colWidth:2, formatValue: undefined},
-    {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
+      // {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
+      new Column('name',            'Template Name',        false, 'asc',     2, undefined, (i: Item) => this.editItem(i)),
+      new Column('os',              'OS',                   false, 'asc',     1),
+      new Column('childNamesHTML',  'Assigned Applications', true, undefined, 4, this.getChildNamesHtml),
+      new Column('lastEditor',      'Last Modified By',     false, 'asc',     2, undefined),
+      new Column('modDate',         'Modified Date',        false, 'desc',    2, undefined),
+      new Column('status',          'Status',               false, 'asc',     1, this.formatStatus)
     ];
   }
 
