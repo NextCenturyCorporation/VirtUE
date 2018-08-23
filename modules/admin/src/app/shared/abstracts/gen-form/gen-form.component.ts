@@ -222,25 +222,31 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   //saves your edits to the backend
   updateItem(): void {
-    this.itemService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
+    let sub = this.itemService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
       data => {
         this.resetRouter();
         this.router.navigate([this.parentDomain]);
       },
       error => {
         console.log(error);
+      },
+      () => {//when finished
+        sub.unsubscribe();
       });
   }
 
   //saves the selected settings as a new item
   createItem() {
-    this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
+    let sub = this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
       data => {
         this.resetRouter();
         this.router.navigate([this.parentDomain]);
       },
       error => {
         console.log(error.message);
+      },
+      () => {//when finished
+        sub.unsubscribe();
       });
   }
 
@@ -261,7 +267,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
     // control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
+    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
 
       if (targetObject !== 0 ) {
         if (action === 'delete') {
@@ -272,6 +278,10 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
           //remove from childIDs and children
         }
       }
+    },
+    () => {},
+    () => {//when finished
+      sub.unsubscribe();
     });
   }
 
@@ -302,22 +312,17 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
     let dialogRef = this.getModal(modalParams);
 
-    let virtueList = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.updateChildList(selectedVirtues);
+    },
+    () => {},
+    () => {//when finished
+      sub.unsubscribe();
     });
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
     dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
 
-
-    //TODO look at unsubscriptions, everywhere things are subscribed to.
-    //Apparently angular has a bug where subscriptions aren't always automatically
-    //destroyed when their containing component is destroyed.
-    //May be the cause of the possible memory-leak like thing in firefox.
-    //I don't think the below is the correct way of doing it.
-    // dialogRef.afterClosed().subscribe(() => {
-    //   vms.unsubscribe();
-    // });
   }
 
   //overrides parent

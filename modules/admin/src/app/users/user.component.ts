@@ -6,29 +6,29 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { BaseUrlService } from '../shared/services/baseUrl.service';
+import { ItemService } from '../shared/services/item.service';
 
-import { VirtueModalComponent } from '../../modals/virtue-modal/virtue-modal.component';
+import { VirtueModalComponent } from '../modals/virtue-modal/virtue-modal.component';
 
-import { Item } from '../../shared/models/item.model';
-import { User } from '../../shared/models/user.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
-import { Virtue } from '../../shared/models/virtue.model';
-import { DictList } from '../../shared/models/dictionary.model';
-import { Column } from '../../shared/models/column.model';
-import { Mode } from '../../shared/enums/enums';
-import { RowOptions } from '../../shared/models/rowOptions.model';
+import { Item } from '../shared/models/item.model';
+import { User } from '../shared/models/user.model';
+import { VirtualMachine } from '../shared/models/vm.model';
+import { Virtue } from '../shared/models/virtue.model';
+import { DictList } from '../shared/models/dictionary.model';
+import { Column } from '../shared/models/column.model';
+import { Mode } from '../shared/enums/enums';
+import { RowOptions } from '../shared/models/rowOptions.model';
 
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrlEnum } from '../shared/enums/enums';
 
-import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.component';
+import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
+  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
 
@@ -65,8 +65,8 @@ export class UserComponent extends GenericFormComponent {
   getColumns(): Column[] {
     return [
       //See note in gen-form getOptionsList
-      // {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined},
+      {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined, link:(i:Item) => this.editItem(i)},
+      // {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined},
       {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getChildNamesHtml},
       {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getGrandchildrenHtmlList},
       {name: 'version',         prettyName: 'Version',            isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},

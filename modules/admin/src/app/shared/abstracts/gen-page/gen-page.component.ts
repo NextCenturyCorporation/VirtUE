@@ -61,9 +61,9 @@ export abstract class GenericPageComponent {
     this.allApps = new DictList<Application>();
 
     //TODO what is this?
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+    // this.router.routeReuseStrategy.shouldReuseRoute = function() {
+    //   return false;
+    // };
 
     this.buildDatasetMeta();
 
@@ -78,10 +78,15 @@ export abstract class GenericPageComponent {
     }, 1000);
   }
 
-  refreshData(): void {
-    setTimeout(() => {
-      this.pullData();
-    }, 300);
+  refreshData(wait?:boolean): void {
+    if (wait) {
+      setTimeout(() => {
+        this.pullData();
+      }, 300);
+      return;
+    }
+    //else
+    this.pullData();
   }
 
   //returns true if s is a subset of l
@@ -124,13 +129,17 @@ export abstract class GenericPageComponent {
   }
 
   cmnComponentSetup() {
-    this.baseUrlService.getBaseUrl().subscribe( res => {
+    let sub = this.baseUrlService.getBaseUrl().subscribe( res => {
       this.baseUrl = res[0].aws_server;
 
       this.itemService.setBaseUrl(this.baseUrl);
 
       this.pullData();
-    }, error => {console.log("Error retrieving base url.")}); //TODO
+    }, error => {
+      console.log("Error retrieving base url.") //TODO tell user something?
+    }, () => {
+      sub.unsubscribe();
+    });
 
     this.resetRouter();
   }
@@ -240,8 +249,9 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     updateQueue: datasetType[],
     pulledDatasetNames: string[]
   ): void {
-
-    this.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
+    let sub = this.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
+    //The correct way would be to use a promise or something, since we're only making one call
+    //and don't want a stream. But I don't think there's a harm in doing it this way.
 
       this[updateQueue[0].datasetName].clear(); //slightly paranoic attempt to prevent memory leaks
       this[updateQueue[0].datasetName] = new DictList<Item>();
@@ -263,8 +273,8 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
       rawDataList = null;
     },
     error => {
-      console.log();
-      console.log("Error in pulling dataset \'", updateQueue[0].datasetName, "\'")
+      console.log("Error in pulling dataset \'", updateQueue[0].datasetName, "\'");
+      sub.unsubscribe();
       //TODO notify user
     },
     () => { //once the dataset has been pulled and fully processed above
@@ -281,6 +291,10 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
       else {
         this.onPullComplete();
       }
+
+      //can only close subscription once it's done everything it needed to.
+      //So a new sub variable will be created
+      sub.unsubscribe();
       return;
     });
   }

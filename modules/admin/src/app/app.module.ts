@@ -52,24 +52,20 @@ import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.c
 
 import { GenericTable } from './shared/abstracts/gen-table/gen-table.component';
 
-import { UsersWrapperComponent } from './users/users.wrapper.component';
 import { UserListComponent } from './users/user-list/user-list.component';
-import { UserComponent} from './users/user/user.component';
+import { UserComponent} from './users/user.component';
 import { VirtueModalComponent } from './modals/virtue-modal/virtue-modal.component';
 
-import { VirtuesWrapperComponent } from './virtues/virtues.wrapper.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
-import { VirtueComponent } from './virtues/virtue/virtue.component';
+import { VirtueComponent } from './virtues/virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { ColorModal } from './modals/color-picker/color-picker.modal';
 import { VmModalComponent } from './modals/vm-modal/vm-modal.component';
 
-import { VmsWrapperComponent } from './vms/vms.wrapper.component';
 import { VmListComponent } from './vms/vm-list/vm-list.component';
-import { VmComponent} from './vms/vm/vm.component';
+import { VmComponent} from './vms/vm.component';
 import { AppsModalComponent } from './modals/apps-modal/apps-modal.component';
 
-import { AppsComponent } from './apps/apps.component';
 import { AppsListComponent } from './apps/apps-list/apps-list.component';
 import { AddAppComponent } from './apps/add-app/add-app.component';
 
@@ -103,11 +99,9 @@ import { MessageService } from './shared/services/message.service';
 
     GenericTable,
 
-    UsersWrapperComponent,
     UserListComponent,
     UserComponent,
 
-    VirtuesWrapperComponent,
     VirtueListComponent,
     VirtueSettingsComponent,
     VirtueComponent,
@@ -125,13 +119,11 @@ import { MessageService } from './shared/services/message.service';
     CountFilterPipe,
     PageNotFoundComponent,
 
-    VmsWrapperComponent,
     VmListComponent,
     VmComponent,
 
     ActiveClassDirective,
 
-    AppsComponent,
     AppsListComponent,
     AddAppComponent,
     AppsModalComponent,
