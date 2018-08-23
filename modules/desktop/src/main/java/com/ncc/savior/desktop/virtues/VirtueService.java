@@ -72,16 +72,19 @@ public class VirtueService {
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
-		Collection<DesktopVirtueApplication> apps = desktopResourceService.getReconnectionApps(virtue.getId());
-		RgbColor color = colors.get(virtue.getId());
-		apps.parallelStream().forEach((app) -> {
-			try {
-				ensureConnection(app, virtue, color);
-			} catch (IOException e) {
-				logger.error("Error creating connection to app=" + app + " virtue=" + virtue);
-			}
-		});
-
+		Runnable runnable = () -> {
+			Collection<DesktopVirtueApplication> apps = desktopResourceService.getReconnectionApps(virtue.getId());
+			RgbColor color = colors.get(virtue.getId());
+			apps.parallelStream().forEach((app) -> {
+				try {
+					ensureConnection(app, virtue, color);
+				} catch (IOException e) {
+					logger.error("Error creating connection to app=" + app + " virtue=" + virtue);
+				}
+			});
+		};
+		Thread t = new Thread(runnable, "Temp-reconnect-thread");
+		t.start();
 	}
 
 	/**

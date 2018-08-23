@@ -160,5 +160,11 @@ public abstract class BaseCompletableFutureService<P, R, X> {
 			this.future = future;
 			this.startTimeMillis = System.currentTimeMillis();
 		}
+
+		@Override
+		public String toString() {
+			return "Wrapper [param=" + param + ", extra=" + extra + ", future=" + future + ", result=" + result
+					+ ", startTimeMillis=" + startTimeMillis + "]";
+		}
 	}
 }
