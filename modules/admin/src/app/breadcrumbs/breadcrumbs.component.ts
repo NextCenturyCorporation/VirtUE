@@ -25,14 +25,11 @@ export class BreadcrumbsComponent implements OnInit {
     let tempCrumbs: Breadcrumb[] = [];
     this.routerSub = this.router.events.subscribe(
       e => {
-      console.log(e);
       if (e instanceof ActivationEnd) {
-        console.log("\t++", e.snapshot.data.breadcrumb);
         if (e.snapshot.data.breadcrumb) {
           tempCrumbs.unshift(e.snapshot.data.breadcrumb);
         }
         this.breadcrumbs = tempCrumbs;
-        console.log("\t..", this.breadcrumbs);
       }
 
       // ugly

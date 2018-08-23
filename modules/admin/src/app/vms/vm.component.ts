@@ -53,7 +53,7 @@ export class VmComponent extends GenericFormComponent {
   }
 
   getNoDataMsg(): string {
-    return "No virtual machine templates have been created yet. To add a template, click on the button \"Add VM Template\" above.";
+    return 'No virtual machine templates have been created yet. To add a template, click on the button "Add VM Template" above.';
   }
 
   getPageOptions(): {
@@ -61,7 +61,7 @@ export class VmComponent extends GenericFormComponent {
       neededDatasets: string[]} {
     return {
       serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ["apps", "vms"]
+      neededDatasets: ['apps', 'vms']
     };
   }
 
