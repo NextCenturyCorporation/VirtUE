@@ -101,7 +101,7 @@ resource "aws_ssm_association" "file_server" {
 
 resource "aws_instance" "file_server" {
   ami           = "${data.aws_ami.windows_server2016.image_id}"
-  instance_type = "${var.instance_type}"
+  instance_type = "${var.windows_instance_type}"
   key_name      = "vrtu"
   iam_instance_profile = "${aws_iam_instance_profile.instance_profile_file_server.name}"
 
@@ -151,6 +151,13 @@ resource "aws_instance" "file_server" {
 </powershell>
 EOF
 
+  # For some reason the rename doesn't take effect unless you reboot again.
+  provisioner "remote-exec" {
+	inline = [
+	  "shutdown /r /t 0"
+	]
+  }
+  
   # can't join the domain until the AD server is up
   depends_on = [ "aws_directory_service_directory.active_directory" ]
 }

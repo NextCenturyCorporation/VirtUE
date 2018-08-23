@@ -113,6 +113,20 @@ remotes {
 	}
 }
 
+task nativeDeploy() {
+    group 'Native'
+    description 'Copies native executables to the server'
+    doFirst {
+        ssh.run {
+            session(remotes.webserver) {
+                put from: 'both', into: '.'
+                put from: 'gsscache', into: '.'
+            }
+        }
+        println "copied native executables to " + remotes.webserver
+    }
+}
+
 task bootDeploy(dependsOn: bootJar) {
     group 'Webserver'
     description 'Copies the web server and gsscache jars to the server'

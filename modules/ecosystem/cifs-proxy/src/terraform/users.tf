@@ -11,6 +11,14 @@ data "template_file" "users_script" {
   }
 }
 
+data "template_file" "remove_users_script" {
+  template = "${file("users-remove.ps1")}"
+
+  vars {
+	admin_password = "${var.admin_password}"
+  }
+}
+
 resource "null_resource" "user_creation" {
   triggers {
 	ad_id = "${aws_directory_service_directory.active_directory.id}"
@@ -33,6 +41,19 @@ resource "null_resource" "user_creation" {
   provisioner "remote-exec" {
 	inline = [
 	  "powershell \\temp\\users.ps1"
+	]
+  }
+
+  provisioner "file" {
+	when = "destroy"
+	content = "${data.template_file.remove_users_script.rendered}"
+	destination = "\\temp\\users-remove.ps1"
+  }
+  
+  provisioner "remote-exec" {
+	when = "destroy"
+	inline = [
+	  "powershell \\temp\\users-remove.ps1"
 	]
   }
 }

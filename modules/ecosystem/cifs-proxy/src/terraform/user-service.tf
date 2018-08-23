@@ -26,7 +26,6 @@ resource "aws_instance" "user_facing_server" {
 	#    ignore_changes = ["user_data"]
   }
 
-  # TODO: enable sharing some files
   user_data = <<EOF
 #!/bin/bash
 set -x
@@ -46,7 +45,9 @@ echo security = ads
 echo realm = ${var.domain}
 echo workgroup = "${element(split(".", "${var.domain}"),0)}"
 echo kerberos method = secrets and keytab
-) | sed -i '/^\[global\]$/r /dev/stdin' /etc/samba/smb.conf
+) | sed -i -e '/^\[global\]$/r /dev/stdin' \
+    -e '/ *\(security\|realm\|workgroup\|kerberos method\) *=/d' \
+    /etc/samba/smb.conf
 echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 systemctl restart sshd.service
 systemctl start sssd.service
@@ -54,5 +55,52 @@ echo '${var.admin_password}' | sudo net -k ads keytab add HTTP -U Admin
 date
 EOF
 
-  depends_on = [ "aws_directory_service_directory.active_directory" ]
+  depends_on = [ "aws_directory_service_directory.active_directory", "aws_instance.file_server" ]
+}
+
+
+# The stuff below sets the userPrincipalName (upn) of the user
+# service.  Without this, kinit doesn't work for the http principal,
+# whose keytab entry gets created by the net command above. It seems
+# like kinit should work even w/o this, but it doesn't.
+
+data "template_file" "fix_user_service_upn_script" {
+  template = "${file("user-service.ps1")}"
+
+  vars {
+	password = "${var.admin_password}"
+	hostname = "${local.myname}"
+    domain = "${var.domain}"
+  }
+}
+
+resource "null_resource" "fix_user_service_upn" {
+  triggers {
+	ad_id = "${aws_instance.user_facing_server.id}"
+  }
+
+  # Note: this runs on the file server because there doesn't appear to
+  # be a way to do set a UPN from Linux.
+
+  connection {
+	type     = "winrm"
+	user     = "Administrator"
+	host     = "${aws_instance.file_server.public_dns}"
+	password = "${var.admin_password}"
+	https    = false
+	use_ntlm = false
+  }
+
+  provisioner "file" {
+	content = "${data.template_file.fix_user_service_upn_script.rendered}"
+	destination = "\\temp\\user-service.ps1"
+  }
+
+  provisioner "remote-exec" {
+	inline = [
+	  "powershell \\temp\\user-service.ps1"
+	]
+  }
+  
+  depends_on = [ "aws_instance.file_server", "aws_instance.user_facing_server" ]
 }

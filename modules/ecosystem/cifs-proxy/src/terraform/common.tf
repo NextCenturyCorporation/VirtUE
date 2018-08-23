@@ -40,7 +40,7 @@ variable "admin_password" {
   # Define this in a .auto.tfvars file that's not checked into git
 }
 
-variable "instance_type" {
+variable "windows_instance_type" {
   # t2.micro is free, but maybe too small for Windows 2016 Server to run well
   default = "t2.medium"
 }
