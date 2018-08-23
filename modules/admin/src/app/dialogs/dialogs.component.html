@@ -1,16 +1,16 @@
 <form>
-<h2 mat-dialog-title>{{data.dialogType}} {{data.dialogCategory}}</h2>
+<h2 mat-dialog-title>{{actionType}} {{targetName}}</h2>
 <div mat-dialog-content>
 
-  <p>Are you sure you want to {{data.dialogType}} <strong>{{data.dialogDescription}}</strong>?</p>
+  <p>Are you sure you want to {{actionType}} <strong>{{targetName}}</strong>?</p>
 
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button type="submit" (click)="confirmSelection();">
-  Yes
+  <button mat-button type="submit" (click)="submit();" mat-dialog-close>
+    Yes
   </button>
-  <button mat-button type="button" mat-dialog-close>
+  <button mat-button type="button" (click)="cancel();" mat-dialog-close>
     No
   </button>
 </div>

@@ -12,7 +12,7 @@ mat-toolbar.mat-primary {
   padding: 0 16px;
 }
 .mat-toolbar span.navbar-brand {
-  color: rgb(255,255,255);
+  color: rgb(255,255,255); /* title color */
   display: inline-block;
   padding: 0 2.4rem 0 1.5rem;
 }
@@ -30,10 +30,9 @@ mat-toolbar.mat-primary {
   background-color: #540D6E
 }
 .mat-toolbar li a {
-  color: rgb(255,255,255);
+  color: rgb(255,255,255); /* tab color */
   display: block;
   margin: 0;
-  /* padding: 0.47rem 2.4rem 0.47rem; */
   padding: 0 2.4rem;
 }
 .mat-toolbar span.navbar-brand {

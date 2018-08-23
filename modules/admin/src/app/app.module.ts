@@ -4,8 +4,10 @@ import {
   FormsModule,
   ReactiveFormsModule
 } from '@angular/forms';
+
 import { BrowserModule } from '@angular/platform-browser';
 
+import { DatePipe } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -41,27 +43,26 @@ import { FileShareComponent } from './config/resource-modal/file-share/file-shar
 import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
-import { UsersComponent } from './users/users.component';
+import { GeneralListComponent } from './shared/abstracts/gen-list/gen-list.component';
+import { GenericFormComponent } from './shared/abstracts/gen-form/gen-form.component';
+import { GenericPageComponent } from './shared/abstracts/gen-page/gen-page.component';
+
+import { UsersWrapperComponent } from './users/users.wrapper.component';
 import { UserListComponent } from './users/user-list/user-list.component';
-import { AddUserComponent } from './users/add-user/add-user.component';
-import { EditUserComponent } from './users/edit-user/edit-user.component';
+import { UserComponent} from './users/user/user.component';
 import { VirtueModalComponent } from './users/virtue-modal/virtue-modal.component';
 
-import { VirtuesComponent } from './virtues/virtues.component';
+import { VirtuesWrapperComponent } from './virtues/virtues.wrapper.component';
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
-import { CreateVirtueComponent } from './virtues/create-virtue/create-virtue.component';
-import { EditVirtueComponent } from './virtues/edit-virtue/edit-virtue.component';
-import { DuplicateVirtueComponent } from './virtues/duplicate-virtue/duplicate-virtue.component';
+import { VirtueComponent} from './virtues/virtue/virtue.component';
 import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
 import { VmModalComponent } from './virtues/vm-modal/vm-modal.component';
 
 import { VmAppsModalComponent } from './virtual-machines/vm-apps-modal/vm-apps-modal.component';
 
-import { VirtualMachinesComponent } from './virtual-machines/virtual-machines.component';
+import {VmsWrapperComponent} from './virtual-machines/vms.wrapper.component';
 import { VmListComponent } from './virtual-machines/vm-list/vm-list.component';
-import { VmBuildComponent } from './virtual-machines/vm-build/vm-build.component';
-import { VmEditComponent } from './virtual-machines/vm-edit/vm-edit.component';
-import { VmDuplicateComponent } from './virtual-machines/vm-duplicate/vm-duplicate.component';
+import { VmComponent} from './virtual-machines/vm/vm.component';
 
 import { VmAppsComponent } from './vm-apps/vm-apps.component';
 import { VmAppsListComponent } from './vm-apps/vm-apps-list/vm-apps-list.component';
@@ -83,7 +84,6 @@ import { BreadcrumbProvider } from './shared/providers/breadcrumb';
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
 import { VirtuesService } from './shared/services/virtues.service';
-import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.component';
 
 @NgModule({
   declarations: [
@@ -96,17 +96,18 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
-    VirtuesComponent,
-    UsersComponent,
+
+    GeneralListComponent,
+
+    UsersWrapperComponent,
     UserListComponent,
-    AddUserComponent,
-    EditUserComponent,
-    VirtuesComponent,
+    UserComponent,
+
+    VirtuesWrapperComponent,
     VirtueListComponent,
     VirtueSettingsComponent,
-    CreateVirtueComponent,
-    EditVirtueComponent,
-    DuplicateVirtueComponent,
+    VirtueComponent,
+
     DialogsComponent,
     VirtueModalComponent,
     VmModalComponent,
@@ -118,18 +119,17 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
     JsonFilterPipe,
     CountFilterPipe,
     PageNotFoundComponent,
-    VirtualMachinesComponent,
+
+    VmsWrapperComponent,
     VmListComponent,
-    VmBuildComponent,
-    VmEditComponent,
-    VmDuplicateComponent,
+    VmComponent,
+
     ActiveClassDirective,
-    DialogsComponent,
+
     VmAppsComponent,
     VmAppsListComponent,
     AddVmAppComponent,
     VmAppsModalComponent,
-    DuplicateUserComponent,
   ],
   imports: [
     AppRoutingModule,
@@ -156,7 +156,8 @@ import { DuplicateUserComponent } from './users/duplicate-user/duplicate-user.co
     OverlayContainer,
     BaseUrlService,
     MessageService,
-    VirtuesService
+    VirtuesService,
+    DatePipe
   ],
   bootstrap: [AppComponent],
   entryComponents: [

@@ -22,11 +22,11 @@
 
   <p *ngIf="selectedOs === 'Windows'">
     <label for="file">Upload Package:</label><br />
-    <input type="file" id="file" (change)="handleFIleInput($event.target.files)" />
+    <input type="file" id="file" (change)="handleFileInput($event.target.files)" />
   </p>
   <p *ngIf="selectedOs === 'LINUX' && selectedDist != null">
     <label for="url">Package Name:</label>
-    <input type="text" id="url" (change)="handleFIleInput($event.target.files)" />
+    <input type="text" id="url" (change)="handleFileInput($event.target.files)" />
   </p>
   <hr />
   <div class="mui-row border-top">
@@ -35,8 +35,8 @@
     </div>
     <div class="mui-col-md-4 form-item text-align-center">
       <!-- <span class="margin-right-10"><input name="create-another" type="checkbox" value="1" /> Install Another Application</span> -->
-      <button class="button-submit" type="submit">Install</button>
-      <button (click)="onCancel()" class="button-cancel" type="cancel">Cancel</button>
+      <button class="button-submit" type="submit" (click)="onInstall()">Install</button>
+      <button class="button-cancel" type="cancel" (click)="onCancel()">Cancel</button>
     </div>
     <div class="mui-col-md-4"></div>
   </div>

@@ -1,0 +1,13 @@
+
+.transparent {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+
+/*  These center the lists (e.g. list of virtues under each user) within their column  */
+#content ul{
+    margin: 0; padding: 0;
+}
+#content li {
+    margin: 0; padding: 0;
+}
