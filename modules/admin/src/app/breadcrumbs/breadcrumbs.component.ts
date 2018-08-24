@@ -32,10 +32,10 @@ export class BreadcrumbsComponent implements OnInit {
         this.breadcrumbs = tempCrumbs;
       }
 
-      //ugly
-      //Navigation end appears to be one of the last events in the chain that get
-      //get fired off when you navigate to a new link. So when you see that, reset
-      //tempCrumbs, so the next navigation starts with a clean slate.
+      // ugly
+      // Navigation end appears to be one of the last events in the chain that get
+      // get fired off when you navigate to a new link. So when you see that, reset
+      // tempCrumbs, so the next navigation starts with a clean slate.
       if (e instanceof NavigationEnd) {
         tempCrumbs = [];
       }
