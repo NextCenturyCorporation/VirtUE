@@ -3,19 +3,19 @@ import { DictList } from './dictionary.model';
 export abstract class Item {
   id: string;
   name: string;
-  //status as a string as well as a bool makes filtering much easier - since 3 possible
-  //values need to be matched against it ('enabled', 'disabled', and '*').
+  // status as a string as well as a bool makes filtering much easier - since 3 possible
+  // values need to be matched against it ('enabled', 'disabled', and '*').
   status: string;
   enabled: boolean;
   childIDs: string[];
   children: DictList<Item>;
-  //this holds the children's names as an html list, and is updated whenever
-  //data is pulled. The places where children are displayed (both list and form
-  //pages) need to be able to treat the "children" column of that table the same
-  //way they treat the name column - it has to be entirely contained in either
-  //an attribute, or a function. If it weren't built beforehand and saved, it'd
-  //get re-calculated everytime angular updated the page (which happens on mouse
-  //movement).
+  // this holds the children's names as an html list, and is updated whenever
+  // data is pulled. The places where children are displayed (both list and form
+  // pages) need to be able to treat the "children" column of that table the same
+  // way they treat the name column - it has to be entirely contained in either
+  // an attribute, or a function. If it weren't built beforehand and saved, it'd
+  // get re-calculated everytime angular updated the page (which happens on mouse
+  // movement).
   childNamesHTML: string;
   modDate: string;
 
@@ -23,31 +23,30 @@ export abstract class Item {
     this.status = "enabled";
     this.enabled = true;
     this.childIDs = [];
-    this.modDate = ''
+    this.modDate = '';
 
     this.childNamesHTML = "";
 
     this.children = new DictList<Item>();
   }
 
-//Note that childDataset refers to the child of the items being built
+// Note that childDataset refers to the child of the items being built
   buildChildren(childDataset: DictList<Item>) {
     this.children = new DictList<Item>();
     for (let childID of this.childIDs) {
       let child: Item = childDataset.get(childID);
       if (child) {
         this.children.add(childID, child);
-      }
-      else {
+      } else {
         console.log("child ID in item not found in dataset. I.e., if this is for a user, \
-it has a virtue ID attached to it which doesn't exist in the backend data.")
+it has a virtue ID attached to it which doesn't exist in the backend data.");
       }
     }
 
     this.childNamesHTML = this.buildChildNamesHtmlList(childDataset);
   }
 
-  //this builds a string of the item's childrens' names, as an html list.
+  // this builds a string of the item's childrens' names, as an html list.
   buildChildNamesHtmlList(allChildren: DictList<Item>): string {
     let names: string[] = this.getChildNames(this.childIDs, allChildren);
     return this.formatListToHtml(names);
@@ -61,7 +60,7 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
     for (let id of desiredIDs) {
       let line = allItems.get(id).getName();
 
-      //NOTE if enabled is undefined, !{..}.enabled evaluates to true, while
+      // NOTE if enabled is undefined, !{..}.enabled evaluates to true, while
       // {..}.enabled === false evaluates to false. We need the latter.
       // enabled should never be undefined though.
       if ( allItems.get(id).enabled === false ) {
@@ -82,12 +81,12 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
     return listString;
   }
 
-  //Overriden by User
+  // Overriden by User
   getName(): string {
     return this.name;
   }
 
-  //Overriden by User
+  // Overriden by User
   getID(): string {
     return this.id;
   }
@@ -96,8 +95,7 @@ it has a virtue ID attached to it which doesn't exist in the backend data.")
     this.children.remove(id);
     if (index) {
       this.childIDs.splice(index, 1);
-    }
-    else {
+    } else {
       this.childIDs.splice(this.childIDs.indexOf(id), 1);
     }
 

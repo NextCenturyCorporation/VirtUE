@@ -5,7 +5,7 @@ import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-//
+
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
 
@@ -29,24 +29,24 @@ providers: [ BaseUrlService, ItemService  ]
 })
 export abstract class GenericPageComponent {
 
-  //the base aws url. Currently only used within dashboard.
+  // the base aws url. Currently only used within dashboard.
   baseUrl: string;
 
-  //tells the service and backend where to make changes - specific to each type
-  //of item. Must be set in constructor of derived class.
+  // tells the service and backend where to make changes - specific to each type
+  // of item. Must be set in constructor of derived class.
   serviceConfigUrl: ConfigUrlEnum;
 
-  //these are filled as needed by the page extending this class, based on neededDatasets
+  // these are filled as needed by the page extending this class, based on neededDatasets
   allUsers: DictList<User>;
   allVirtues: DictList<Virtue>;
   allVms: DictList<VirtualMachine>;
   allApps: DictList<Application>;
 
-  //holds the names and data types of each of the four datasets.
+  // holds the names and data types of each of the four datasets.
   datasetMeta: Dict<datasetType>;
 
-  //string, holds the data types whose datasets must be loaded on page load or
-  //refresh. Must be in order, from lowest child to highest parent - like ["apps, vms", "virtues"]
+  // string, holds the data types whose datasets must be loaded on page load or
+  // refresh. Must be in order, from lowest child to highest parent - like ["apps, vms", "virtues"]
   neededDatasets: string[];
 
   constructor(
@@ -60,10 +60,10 @@ export abstract class GenericPageComponent {
     this.allVms = new DictList<VirtualMachine>();
     this.allApps = new DictList<Application>();
 
-    //TODO what is this?
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+    // TODO what is this?
+    // this.router.routeReuseStrategy.shouldReuseRoute = function() {
+    //   return false;
+    // };
 
     this.buildDatasetMeta();
 
@@ -78,17 +78,22 @@ export abstract class GenericPageComponent {
     }, 1000);
   }
 
-  refreshData(): void {
-    setTimeout(() => {
-      this.pullData();
-    }, 300);
+  refreshData(wait?: boolean): void {
+    if (wait) {
+      setTimeout(() => {
+        this.pullData();
+      }, 300);
+      return;
+    }
+    // else
+    this.pullData();
   }
 
-  //returns true if s is a subset of l
-  isSubset(s:any[], l:any[]): boolean {
+  // returns true if s is a subset of l
+  isSubset(s: any[], l: any[]): boolean {
     for (let e of s) {
       console.log(e);
-      if( ! l.some(x=> x===e) ) {
+      if ( ! l.some(x => x === e) ) {
         return false;
       }
     }
@@ -124,13 +129,17 @@ export abstract class GenericPageComponent {
   }
 
   cmnComponentSetup() {
-    this.baseUrlService.getBaseUrl().subscribe( res => {
+    let sub = this.baseUrlService.getBaseUrl().subscribe( res => {
       this.baseUrl = res[0].aws_server;
 
       this.itemService.setBaseUrl(this.baseUrl);
 
       this.pullData();
-    }, error => {console.log("Error retrieving base url.")}); //TODO
+    }, error => {
+      console.log("Error retrieving base url."); // TODO tell user something?
+    }, () => {
+      sub.unsubscribe();
+    });
 
     this.resetRouter();
   }
@@ -164,7 +173,7 @@ export abstract class GenericPageComponent {
 
     for (let dName of this.neededDatasets) {
       if ( !(dName in this.datasetMeta)) {
-        //throw error TODO
+        // throw error TODO
         console.log("Data \"" + dName + "\" requested in this.neededDatasets is not valid.\n\
 Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
       }
@@ -240,10 +249,11 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     updateQueue: datasetType[],
     pulledDatasetNames: string[]
   ): void {
+    let sub = this.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
+    // The correct way would be to use a promise or something, since we're only making one call
+    // and don't want a stream. But I don't think there's a harm in doing it this way.
 
-    this.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
-
-      this[updateQueue[0].datasetName].clear(); //slightly paranoic attempt to prevent memory leaks
+      this[updateQueue[0].datasetName].clear(); // slightly paranoic attempt to prevent memory leaks
       this[updateQueue[0].datasetName] = new DictList<Item>();
       let item = null;
       for (let e of rawDataList) {
@@ -254,7 +264,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
         //   been recorded as completed, build this item's 'children' list.
         // Could just check if the Child-type's collection (allVms, allApps, etc)
         //   isn't empty, but that doesn't guarentee it's up-to-date.
-        if (pulledDatasetNames.some(x=> x===updateQueue[0].depends)) {
+        if (pulledDatasetNames.some(x => x === updateQueue[0].depends)) {
           item.buildChildren(this[updateQueue[0].depends]);
         }
 
@@ -263,24 +273,28 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
       rawDataList = null;
     },
     error => {
-      console.log();
-      console.log("Error in pulling dataset \'", updateQueue[0].datasetName, "\'")
-      //TODO notify user
+      console.log("Error in pulling dataset \'", updateQueue[0].datasetName, "\'");
+      sub.unsubscribe();
+      // TODO notify user
     },
-    () => { //once the dataset has been pulled and fully processed above
-      //mark this set as pulled
+    () => { // once the dataset has been pulled and fully processed above
+      // mark this set as pulled
       pulledDatasetNames.push(updateQueue[0].datasetName);
 
-      //remove front element
+      // remove front element
       updateQueue.shift();
 
       if (updateQueue.length !== 0) {
-        //if there are more datasets to pull
+        // if there are more datasets to pull
         this.recursivePullData(updateQueue, pulledDatasetNames);
       }
       else {
         this.onPullComplete();
       }
+
+      // can only close subscription once it's done everything it needed to.
+      // So a new sub variable will be created
+      sub.unsubscribe();
       return;
     });
   }

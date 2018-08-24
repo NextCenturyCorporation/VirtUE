@@ -24,30 +24,30 @@ import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.comp
 
 export class DashboardComponent extends GenericListComponent {
 
-  //not used, but probably should be
+  // not used, but probably should be
   form: FormGroup;
 
-  //not used, but might need the info when setting this up later
-  // columns = [
-  //   {value: '', viewValue: 'Select Column'},
-  //   {value: 'timestamp', viewValue: 'Timestamp'},
-  //   {value: 'sensor_id', viewValue: 'ID'},
-  //   {value: 'sensor', viewValue: 'Sensor Name'},
-  //   {value: 'message', viewValue: 'Message'},
-  //   {value: 'level', viewValue: 'level'}
-  // ];
+  // not used, but might need the info when setting this up later
+  //  columns = [
+  //    {value: '', viewValue: 'Select Column'},
+  //    {value: 'timestamp', viewValue: 'Timestamp'},
+  //    {value: 'sensor_id', viewValue: 'ID'},
+  //    {value: 'sensor', viewValue: 'Sensor Name'},
+  //    {value: 'message', viewValue: 'Message'},
+  //    {value: 'level', viewValue: 'level'}
+  //  ];
 
-  //also not used
-  // sensors = [
-  //   {value: '', viewValue: 'Select One'},
-  //   {value: ' 0000 ', viewValue: 'DEFAULT'},
-  //   {value: 'chr', viewValue: 'CHR'},
-  //   {value: 'dir', viewValue: 'DIR'},
-  //   {value: 'fifo', viewValue: 'FIFO'},
-  //   {value: 'ipv4', viewValue: 'IPv4'},
-  //   {value: 'reg', viewValue: 'REG'},
-  //   {value: 'unix', viewValue: 'Unix'},
-  // ];
+  // also not used
+  //  sensors = [
+  //    {value: '', viewValue: 'Select One'},
+  //    {value: ' 0000 ', viewValue: 'DEFAULT'},
+  //    {value: 'chr', viewValue: 'CHR'},
+  //    {value: 'dir', viewValue: 'DIR'},
+  //    {value: 'fifo', viewValue: 'FIFO'},
+  //    {value: 'ipv4', viewValue: 'IPv4'},
+  //    {value: 'reg', viewValue: 'REG'},
+  //    {value: 'unix', viewValue: 'Unix'},
+  //  ];
 
   jsonResult: string;
   sensorData = [];
@@ -90,17 +90,17 @@ export class DashboardComponent extends GenericListComponent {
 
   }
 
-  getTableFilters(): {text:string, value:string}[] {
+  getTableFilters(): {text: string, value: string}[] {
     return [];
   }
 
   getColumns(): Column[] {
     return [
-      {name: 'sensor_id',   prettyName: 'Sensor', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-      {name: 'virtue name', prettyName: 'Virtue', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.getVirtName},
-      {name: 'kafka_topic', prettyName: 'Kafka Topic', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-      {name: 'has cert.',   prettyName: 'Certificate', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.hasCertificates},
-      {name: 'updated_at',  prettyName: 'Last Update', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined}
+      {name: 'sensor_id',   prettyName: 'Sensor', isList: false, sortDefault: 'asc', colWidth: 3, formatValue: undefined},
+      {name: 'virtue name', prettyName: 'Virtue', isList: false, sortDefault: 'asc', colWidth: 3, formatValue: this.getVirtName},
+      {name: 'kafka_topic', prettyName: 'Kafka Topic', isList: false, sortDefault: 'asc', colWidth: 3, formatValue: undefined},
+      {name: 'has cert.',   prettyName: 'Certificate', isList: false, sortDefault: 'asc', colWidth: 1, formatValue: this.hasCertificates},
+      {name: 'updated_at',  prettyName: 'Last Update', isList: false, sortDefault: 'asc', colWidth: 2, formatValue: undefined}
     ];
   }
 
@@ -121,23 +121,23 @@ export class DashboardComponent extends GenericListComponent {
 
   getSensingData() {
     this.sensingService.setBaseUrl(this.baseUrl);
-    this.sensingService.getSensingLog().subscribe(data => {
-      if (data.length > 0) {
-        this.sensorData = data[0].sensors;
+    this.sensingService.getSensingLog().subscribe(sData => {
+      if (sData.length > 0) {
+        this.sensorData = sData[0].sensors;
         console.log(this.sensorData);
-        //TODO add formatted date here, of form:   d.updated_at|date:"MM/dd/yyyy, h:mm a"
+        // TODO add formatted date here, of form:   d.updated_at|date:"MM/dd/yyyy, h:mm a"
       } else {
-        //get static data
-        this.sensingService.getStaticList().subscribe(data => {
-          this.sensorData = data[0].sensors;
+        // get static data
+        this.sensingService.getStaticList().subscribe(staticData => {
+          this.sensorData = staticData[0].sensors;
         });
       }
     });
   }
 
-  //what's this? TODO once we have data to display and know how it should be displayed.
+  // what's this? TODO once we have data to display and know how it should be displayed.
   sensorlog(log) {
-    // console.log('sensorlog ... ' + this.sensorData.error);
+    //  console.log('sensorlog ... ' + this.sensorData.error);
     this.sensorData = log;
   }
 

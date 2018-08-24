@@ -17,7 +17,7 @@ export class ListFilterPipe implements PipeTransform {
     return this.sortList(list, sortColumn, sortDirection);
   }
 
-    //only lets values through which match the filterValue.
+  // only lets values through which match the filterValue.
   filterList(list, filterColumn: string, filterValue: string): any[] {
     let filteredList = list.filter(element => (element[filterColumn] === filterValue));
 
@@ -27,14 +27,14 @@ export class ListFilterPipe implements PipeTransform {
   sortList(list, propertyName: string, sortDirection: string): any[] {
 
     if (sortDirection === 'desc') {
-      // console.log('sorting list by desc order');
+      //  console.log('sorting list by desc order');
       list.sort((leftSide, rightSide): number => {
         let left = leftSide[propertyName];
         let right = rightSide[propertyName];
-        if (typeof left ==='string') {
+        if (typeof left === 'string') {
           left = left.toUpperCase();
         }
-        if (typeof right ==='string') {
+        if (typeof right === 'string') {
           right = right.toUpperCase();
         }
         if (left < right) {
@@ -50,10 +50,10 @@ export class ListFilterPipe implements PipeTransform {
       list.sort((leftSide, rightSide): number => {
         let left = leftSide[propertyName];
         let right = rightSide[propertyName];
-        if (typeof left ==='string') {
+        if (typeof left === 'string') {
           left = left.toUpperCase();
         }
-        if (typeof right ==='string') {
+        if (typeof right === 'string') {
           right = right.toUpperCase();
         }
         if (left < right) {

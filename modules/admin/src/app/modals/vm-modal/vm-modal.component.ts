@@ -8,7 +8,8 @@ import { ItemService } from '../../shared/services/item.service';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
-import { GenericModal } from '../generic-modal/generic.modal';
+import { Item } from '../../shared/models/item.model';
+import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
@@ -18,7 +19,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   styleUrls: ['../generic-modal/generic.modal.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-export class VmModalComponent extends GenericModal {
+export class VmModalComponent extends GenericModalComponent implements OnInit {
 
   checked = false;
 
@@ -29,7 +30,7 @@ export class VmModalComponent extends GenericModal {
       baseUrlService: BaseUrlService,
       itemService: ItemService,
       dialog: MatDialog,
-      dialogRef: MatDialogRef<GenericModal>,
+      dialogRef: MatDialogRef<VmModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
       super(router, baseUrlService, itemService, dialog, dialogRef, data);
@@ -39,10 +40,11 @@ export class VmModalComponent extends GenericModal {
 
   getColumns(): Column[] {
     return [
-          {name: 'name', prettyName: 'App Name', isList: false, sortDefault: undefined, colWidth:5, formatValue: undefined},
-          {name: 'os', prettyName: 'Version', isList: false, sortDefault: undefined, colWidth:3, formatValue: undefined},
-          {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml}
-        ];
+      // {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
+      new Column('name',            'Template Name',        false, 'asc',     5, undefined, (i: Item) => this.editItem(i)),
+      new Column('os',              'OS',                   false, 'asc',     3),
+      new Column('childNamesHTML',  'Assigned Applications', true, undefined, 4, this.getChildNamesHtml),
+    ];
   }
   getPageOptions(): {
       serviceConfigUrl: ConfigUrlEnum,

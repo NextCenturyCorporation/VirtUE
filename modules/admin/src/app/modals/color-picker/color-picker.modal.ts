@@ -8,11 +8,11 @@ import { ColorSet, Color } from '../../shared/sets/color.set';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 @Component({
-  selector: 'color-picker-modal',
+  selector: 'app-color-picker-modal',
   templateUrl: './color-picker.modal.html',
   styleUrls: ['./color-picker.modal.css']
 })
-export class ColorModal implements OnInit {
+export class ColorModalComponent implements OnInit {
 
   selectColor = new EventEmitter();
 
@@ -21,7 +21,7 @@ export class ColorModal implements OnInit {
   selectedColor: Color;
 
   constructor(
-    private dialogRef: MatDialogRef<ColorModal>,
+    private dialogRef: MatDialogRef<ColorModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {color: string}
   ) {
       this.selectedColor = this.colorSet.getList().find(c => c.hex === data.color);

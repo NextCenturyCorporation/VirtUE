@@ -20,17 +20,17 @@ can on the list page.
  */
 
 @Component({
-  selector: 'generic-modal',
+  selector: 'app-generic-modal',
   templateUrl: './generic.modal.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [BaseUrlService, ItemService]
 })
-export abstract class GenericModal extends GenericListComponent {
+export abstract class GenericModalComponent extends GenericListComponent implements OnInit {
 
   getSelections = new EventEmitter();
 
-  //only holds the initial input selections, just passed to table once
-  //table loads
+  // only holds the initial input selections, just passed to table once
+  // table loads
   initialSelections: string[] = [];
 
   constructor(
@@ -38,7 +38,7 @@ export abstract class GenericModal extends GenericListComponent {
       baseUrlService: BaseUrlService,
       itemService: ItemService,
       dialog: MatDialog,
-      public dialogRef: MatDialogRef<GenericModal>,
+      public dialogRef: MatDialogRef<GenericModalComponent>,
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
       super(router, baseUrlService, itemService, dialog);
@@ -46,23 +46,20 @@ export abstract class GenericModal extends GenericListComponent {
         this.initialSelections = data['selectedIDs'];
       }
       else {
-        console.log("No field 'selectedIDs' in data input to modal")
+        console.log("No field 'selectedIDs' in data input to modal");
         this.initialSelections = [];
       }
 
   }
 
-  //remember this component is abstract and so can't fit the onInit interface
-  //but all concrete children inherit this function.
   ngOnInit() {
     this.cmnComponentSetup();
     this.fillTable();
 
-    //TODO should we not allow addition of disabled items?
-    // if so, see note in notes - select-all button will not act how user expects.
-    //Could be changed to only add/remove enabled items, but still then the user couldn't
-    //remove disabled ones through that menu.
-    // this.table.filterList("enabled");
+    // TODO should we not allow addition of disabled items?
+    // if so, note that select-all button will not act how user expects.
+    // Could be changed to only add/remove enabled items, but still then the user couldn't
+    // remove disabled ones through that menu.
   }
 
   // this gives the childIDs the item was loaded with, and is only used to build
@@ -72,7 +69,7 @@ export abstract class GenericModal extends GenericListComponent {
     return this.initialSelections;
   }
 
-  getTableFilters(): {text:string, value:string}[] {
+  getTableFilters(): {text: string, value: string}[] {
     return [];
   }
 
