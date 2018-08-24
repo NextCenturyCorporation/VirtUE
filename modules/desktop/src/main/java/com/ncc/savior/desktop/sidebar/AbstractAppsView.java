@@ -100,7 +100,7 @@ public abstract class AbstractAppsView {
 	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
 		VirtueApplicationItem va = tiles.get(ad.getId() + virtue.getTemplateId());
 		if (va != null) {
-			va.update();
+			va.update(virtue);
 		}
 	}
 
