@@ -33,6 +33,9 @@ export class VirtualMachine extends Item {
       this.modDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
       this.os = vmObj.os;
       this.status = vmObj.enabled ? 'enabled' : 'disabled';
+
+      // change 'edit' to 'view' once we have a view page set up.
+      this.domain = '/vm-templates/edit/' + this.id;
     }
 
   }

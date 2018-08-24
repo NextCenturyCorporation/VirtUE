@@ -3,6 +3,7 @@ import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
@@ -23,6 +24,7 @@ import { GenericModalComponent } from '../../../modals/generic-modal/generic.mod
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
+// type SettingElement: {label: string, attributeName: string, type: string, editable?: boolean};
 
 @Component({
   providers: [ BaseUrlService, ItemService ]
@@ -45,8 +47,15 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   // Holds the strings 'Create', 'Edit', or 'Duplicate' resp., for display to the user
   mode: Mode;
 
-  // The table showing what children have been added to this item
-  @ViewChild(GenericTableComponent) table: GenericTableComponent;
+  // table showing what children have been added to this item
+  @ViewChild('childrenTable') childrenTable: GenericTableComponent;
+
+  // table showing what parents this item has been added to
+  @ViewChild('parentTable') parentTable: GenericTableComponent;
+
+  // A list of the running instances which have been built through some version
+  // of this item.
+  // @ViewChild('instanceTable') instanceTable: GenericTableComponent;
 
   // top-domain for child type. So for user.component, this would be '/virtues'
   childDomain: string;
@@ -59,6 +68,8 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   datasetName: string;
   childDatasetName: string;
 
+  test: string;
+
   constructor(
     protected parentDomain: string,
     protected activatedRoute: ActivatedRoute,
@@ -69,7 +80,7 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   ) {
     super(router, baseUrlService, itemService, dialog);
     this.setMode();
-
+    this.test = "enabled";
     //  see note by declaration
     //  this.itemForm = new FormControl();
 
@@ -132,27 +143,29 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   ngOnInit() {
-    if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
+    if (this.mode !== Mode.CREATE) {
       this.item.id = this.activatedRoute.snapshot.params['id'];
+      this.buildParentTable();
+      // this.buildInstanceTable();
     }
 
     this.cmnComponentSetup();
-    this.fillTable();
+    this.buildChildTable();
   }
 
-  fillTable(): void {
-    if (this.table === undefined) {
+  buildChildTable(): void {
+    if (this.childrenTable === undefined) {
       return;
     }
 
-    this.table.setUp({
-      cols: this.getColumns(),
+    this.childrenTable.setUp({
+      cols: this.getChildColumns(),
       opts: this.getOptionsList(),
       coloredLabels: this.hasColoredLabels(),
       filters: [], // don't allow filtering on the form's child table. ?
       tableWidth: this.getTableWidth(),
       noDataMsg: this.getNoDataMsg(),
-      hasCB: false
+      hasCheckBoxes: false
     });
   }
 
@@ -162,12 +175,30 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   // overrides parent
   onPullComplete() {
-    if (this.mode !== Mode.CREATE) {//  no data to load if creating a new one.
+    if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
       this.buildItem();
+
+      this.populateParentTable();
     }
-    this.table.items = this.item.children.asList();
+    this.childrenTable.items = this.item.children.asList();
     this.setUpFormValues();
   }
+
+  // set up the parent table.
+  abstract buildParentTable(): void;
+
+  // This fills parentTable with items that the item being viewed/edited has
+  //  been assigned to.
+  // Like, if this.item is a virtue, it will find all the users that have been
+  //  given that virtue, and put those users into parentTable.
+  abstract populateParentTable(): void;
+  
+
+  // set up the table of running instances.
+  abstract buildInstanceTable(): void;
+
+
+  abstract populateInstanceTable(): void;
 
   //  set up child form-pages' unique properties
   //  does nothing by default, overridden by user form
@@ -196,7 +227,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
 
     this.item.buildChildren(this[this.childDatasetName]);
-    this.table.items = this.item.children.asList();
+    this.childrenTable.items = this.item.children.asList();
   }
 
   createOrUpdate() {
@@ -332,7 +363,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   // overrides parent
   getOptionsList(): RowOptions[] {
     return [
-      //  new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)),
+      //  new RowOptions("Edit", () => true, (i:Item) => this.viewItem(i)),
       // TODO look into this, perhaps we could have two modes on the form pages -
       // one for editing, one for viewing. So you could navigate away only when
       // you weren't in edit mode, and you'd never lose changes accidentally.
@@ -356,9 +387,9 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     return item.childNamesHTML;
   }
 
-  editItem(i: Item) {
-    if (this.childDomain) {
-      this.router.navigate([this.childDomain + "/edit/" + i.getID()]);
+  viewItem(i: Item) {
+    if (i.getDomain()) {
+      this.router.navigate([i.getDomain()]);
     }
   }
 
@@ -374,7 +405,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   // currently overridden in virtue
   updateUnconnectedFields(): void {}
 
-  abstract getColumns(): Column[];
+  abstract getChildColumns(): Column[];
 
   abstract getNoDataMsg(): string;
 

@@ -31,6 +31,7 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { FlexLayoutModule } from "@angular/flex-layout";
 
 import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatGridListModule } from '@angular/material/grid-list';
 
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
@@ -145,6 +146,7 @@ import { MessageService } from './shared/services/message.service';
     MatRadioModule,
     MatSlideToggleModule,
     MatSelectModule,
+    MatTabsModule,
     MatToolbarModule,
     ReactiveFormsModule,
     SplitPaneModule

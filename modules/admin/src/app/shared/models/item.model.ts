@@ -3,12 +3,14 @@ import { DictList } from './dictionary.model';
 export abstract class Item {
   id: string;
   name: string;
-  // status as a string as well as a bool makes filtering much easier - since 3 possible
+
+  // status as a string, in addition to the bool, makes filtering much easier - 3 possible
   // values need to be matched against it ('enabled', 'disabled', and '*').
   status: string;
   enabled: boolean;
   childIDs: string[];
   children: DictList<Item>;
+
   // this holds the children's names as an html list, and is updated whenever
   // data is pulled. The places where children are displayed (both list and form
   // pages) need to be able to treat the "children" column of that table the same
@@ -19,11 +21,16 @@ export abstract class Item {
   childNamesHTML: string;
   modDate: string;
 
+  // a link to where the item can be viewed. Something like "users/view/Phillip"
+  domain: string;
+
   constructor() {
     this.status = "enabled";
     this.enabled = true;
     this.childIDs = [];
     this.modDate = '';
+
+    this.domain = "NA";
 
     this.childNamesHTML = "";
 
@@ -84,6 +91,10 @@ it has a virtue ID attached to it which doesn't exist in the backend data.");
   // Overriden by User
   getName(): string {
     return this.name;
+  }
+
+  getDomain(): string {
+    return this.domain;
   }
 
   // Overriden by User

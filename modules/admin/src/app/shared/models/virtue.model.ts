@@ -27,25 +27,31 @@ export class Virtue extends Item {
   // convert from whatever form the virtue object is in the database.
   constructor(virtueObj) {
     super();
-    console.log("Received virtue object from backend: \n", virtueObj);
-    console.log("\n");
     if (virtueObj) {
       this.id = virtueObj.id;
       this.name = virtueObj.name;
       this.childIDs = virtueObj.virtualMachineTemplateIds;
       this.enabled = virtueObj.enabled;
+
       this.version = virtueObj.version;
+      if (! this.version) {
+        this.version = '1';
+      }
+
       this.lastEditor = virtueObj.lastEditor;
       this.lastModification = virtueObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
       this.color = virtueObj.color;
       this.status = virtueObj.enabled ? 'enabled' : 'disabled';
+
+      // change 'edit' to 'view' once we have a view page set up.
+      this.domain = '/virtues/edit/' + this.id;
     }
 
     if (! this.color) {
       // TODO - is it better to have everything default to no color, or to something
       // like silver (#C0C0C0), to let the user know that colors are available?
-      this.color = "transparent";
+      this.color = 'transparent';
     }
   }
 

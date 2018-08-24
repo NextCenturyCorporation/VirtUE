@@ -3,6 +3,7 @@ import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
@@ -62,10 +63,10 @@ export class UserComponent extends GenericFormComponent {
     this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
   }
 
-  getColumns(): Column[] {
+  getChildColumns(): Column[] {
     return [
       // See note in gen-form getOptionsList
-      new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.editItem(i)),
+      new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.viewItem(i)),
       // new Column('name',            'Template Name',      false, 'asc',     2),
       new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
       new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
@@ -86,6 +87,15 @@ export class UserComponent extends GenericFormComponent {
       neededDatasets: ["apps", "vms", "virtues", "users"]
     };
   }
+
+  // Does nothing, because Users are the top level.
+  buildParentTable() {}
+  populateParentTable() {}
+
+
+  // do nothing - could show currently logged-in users though
+  buildInstanceTable(): void {}
+  populateInstanceTable(): void {}
 
   // create and fill the fields the backend expects to see, record any
   // uncollected inputs, and check that the item is valid to be saved

@@ -69,7 +69,7 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
       filters: this.getTableFilters(),
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg(),
-      hasCB: this.hasCheckbox(),
+      hasCheckBoxes: this.hasCheckbox(),
       selectedIDs: this.getSelectedIDs()
     });
   }

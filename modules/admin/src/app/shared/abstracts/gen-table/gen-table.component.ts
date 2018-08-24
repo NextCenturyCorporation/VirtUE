@@ -102,7 +102,7 @@ export class GenericTableComponent {
     filters: {value: string, text: string}[];
     tableWidth: number,
     noDataMsg: string,
-    hasCB: boolean,
+    hasCheckBoxes: boolean,
     selectedIDs?: string[]}
   ) {
     this.colData = params.cols;
@@ -111,7 +111,7 @@ export class GenericTableComponent {
     this.filterOptions = params.filters;
     this.noDataMessage = params.noDataMsg;
     this.tableWidth = params.tableWidth;
-    this.hasCheckbox = params.hasCB;
+    this.hasCheckbox = params.hasCheckBoxes;
 
     if (params.selectedIDs) {
       this.selectedIDs = params.selectedIDs;

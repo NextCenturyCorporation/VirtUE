@@ -28,7 +28,8 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
 
 @Component({
   selector: 'app-virtue',
-  templateUrl: './virtue.component.html',
+  // templateUrl: './virtue.component.html',
+  templateUrl: '../shared/abstracts/gen-form/gen-form.component.html',
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
@@ -53,12 +54,12 @@ export class VirtueComponent extends GenericFormComponent {
     this.datasetName = 'allVirtues';
     this.childDatasetName = 'allVms';
 
-    this.childDomain = "/vm-templates";
+    this.childDomain = '/vm-templates';
   }
 
   // This should only stay until the data loads, if the data has a color.
   defaultColor() {
-    return this.mode === Mode.CREATE ? "#cccccc" : "transparent";
+    return this.mode === Mode.CREATE ? '#cccccc' : 'transparent';
   }
 
   // TODO decide if this is sufficent, or if it could be designed better
@@ -66,19 +67,53 @@ export class VirtueComponent extends GenericFormComponent {
     this.settingsPane.setColor((this.item as Virtue).color);
   }
 
-
-  getColumns(): Column[] {
+  getChildColumns(): Column[] {
     return [
-      new Column('name',            'Template Name',        false, 'asc',     4, undefined, (i: Item) => this.editItem(i)),
-      // new Column('name',            'Template Name',        false, 'asc',     4),
+      new Column('name',            'Template Name',        false, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
       new Column('os',              'OS',                   false, 'asc',     2),
       new Column('childNamesHTML',  'Assigned Applications', true, undefined, 4, this.getChildNamesHtml),
       new Column('status',          'Status',               false, 'asc',     2, this.formatStatus)
     ];
   }
 
+  getParentColumns(): Column[] {
+    return [
+      new Column('name',            'Username',           false, 'asc',    3, undefined, (i: Item) => this.viewItem(i)),
+      // new Column('roles',           'Authorized Roles',   false, 'asc',    3, this.formatRoles),
+      new Column('childNamesHTML',  'Attached Virtues',  true, undefined, 5, this.getChildNamesHtml),
+      new Column('status',          'Account Status',     false, 'desc',   4, this.formatStatus)
+    ];
+  }
+
+  buildParentTable(): void {
+    this.parentTable.setUp({
+      cols: this.getParentColumns(),
+      opts: [],
+      coloredLabels: false,
+      filters: [],
+      tableWidth: 8,
+      noDataMsg: "No user has been assigned this Virtue at the moment.",
+      hasCheckBoxes: false
+    });
+  }
+
+  // This fills parentTable with users to which this virtue has been assigned.
+  populateParentTable() {
+    this.parentTable.items = new Array<Item>();
+    for (let u of this.allUsers.asList()) {
+
+      if ( u.children.has(this.item.getID()) ) {
+        this.parentTable.items.push(u);
+      }
+    }
+  }
+
+  // functionality not implemented
+  buildInstanceTable(): void {}
+  populateInstanceTable(): void {}
+
   getNoDataMsg(): string {
-    return "No virtue templates have been created yet. To add a template, click on the button \"Add Virtue\" above.";
+    return 'No virtue templates have been created yet. To add a template, click on the button "Add Virtue" above.';
   }
 
   getPageOptions(): {
@@ -86,7 +121,7 @@ export class VirtueComponent extends GenericFormComponent {
     neededDatasets: string[]} {
       return {
         serviceConfigUrl: ConfigUrlEnum.VIRTUES,
-        neededDatasets: ["apps", "vms", "virtues"]
+        neededDatasets: ['apps', 'vms', 'virtues', 'users']
       };
     }
 
@@ -110,11 +145,13 @@ export class VirtueComponent extends GenericFormComponent {
     // isn't valid
 
     this.item['color'] = this.settingsPane.getColor();
-    console.log("color:", this.item['color']);
-    if (! this.item['version']) {
-      this.item['version'] = '1.0';
-    }
-    console.log("version:", this.item['version'], "(see what it looks like to type html code here - injection vector?)");
+    console.log('color:', this.item['color']);
+
+    // add check in case the version's been corrupted and can't convert to a number
+    this.item['version'] = String(Number(this.item['version']) + 1);
+
+
+    console.log('version:', this.item['version'], '(see what it looks like to type html code here - injection vector?)');
 
     // The following are required:
     //  this.item.name,     can't be empty

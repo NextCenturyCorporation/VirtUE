@@ -61,17 +61,51 @@ export class VmComponent extends GenericFormComponent {
       neededDatasets: string[]} {
     return {
       serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ['apps', 'vms']
+      neededDatasets: ['apps', 'vms', 'virtues']
     };
   }
 
-  getColumns(): Column[] {
+  getChildColumns(): Column[] {
     return [
       new Column('name',    'Application Name', false, 'asc', 5),
       new Column('version', 'Version',          false, 'asc', 3),
       new Column('os',      'Operating System', false, 'desc', 4)
     ];
   }
+
+  getParentColumns(): Column[] {
+    return [
+      new Column('name',            'Template Name',    false, 'asc',     6, undefined, (i: Item) => this.viewItem(i)),
+      new Column('version',         'Version',          false, 'asc',     3),
+      new Column('status',          'Status',           false, 'asc',     3, this.formatStatus)
+    ];
+  }
+
+  buildParentTable(): void {
+    this.parentTable.setUp({
+      cols: this.getParentColumns(),
+      opts: [],
+      coloredLabels: false,
+      filters: [],
+      tableWidth: 12,
+      noDataMsg: "No user has been assigned this Virtue at the moment.",
+      hasCheckBoxes: false
+    });
+  }
+
+  populateParentTable() {
+    this.parentTable.items = new Array<Item>();
+    for (let u of this.allUsers.asList()) {
+
+      if ( u.children.has(this.item.getID()) ) {
+        this.parentTable.items.push(u);
+      }
+    }
+  }
+
+  // functionality not implemented
+  buildInstanceTable(): void {}
+  populateInstanceTable(): void {}
 
   getModal(
     params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
