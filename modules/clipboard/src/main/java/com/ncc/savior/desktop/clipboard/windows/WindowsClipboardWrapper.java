@@ -24,9 +24,12 @@ import com.ncc.savior.desktop.clipboard.data.UnknownClipboardData;
 import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.GDI32;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.platform.win32.WinDef.HBITMAP;
+import com.sun.jna.platform.win32.WinGDI.BITMAP;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
@@ -72,6 +75,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 
 	static IWindowsClipboardUser32 user32 = IWindowsClipboardUser32.INSTANCE;
 	static IWindowsClipboardShell32 shell32 = IWindowsClipboardShell32.INSTANCE;
+	static GDI32 gdi32 = GDI32.INSTANCE;
 	static Kernel32 kernel32 = Kernel32.INSTANCE;
 
 	WindowProc callback = new WindowProc() {
@@ -238,8 +242,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		Pointer p = null;
 		try {
 			openClipboardWhenFree();
-			p = user32.GetClipboardData(format.getWindows());
-			return clipboardPointerToData(format, p);
+			try {
+				p = user32.GetClipboardData(format.getWindows());
+				return clipboardPointerToData(format, p);
+			} catch (Throwable t) {
+				logger.error("Error converting clipboard pointer to clipboard data", t);
+				return new UnknownClipboardData(format);
+			}
 		} finally {
 			// Moved return inside try/finally so we don't close clipboard until we are done
 			// with the data.
@@ -503,6 +512,18 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				}
 			}
 			return new FileClipboardData(files);
+		case IWindowsClipboardUser32.CF_BITMAT:
+			HBITMAP hbitmap = new HBITMAP(p);
+//			logger.debug(hbitmap.getPointer().dump(0, 1));
+			BITMAP gdiBitMap = new BITMAP();
+			gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
+			gdiBitMap.autoRead();
+			logger.debug(gdiBitMap.toString());
+			Pointer bits = gdiBitMap.bmBits;
+			logger.debug(bits.dump(0, 64));
+			// if (!GetObject(hBmp, sizeof(BITMAP), (LPSTR)&bmp))
+			// errhandler("GetObject", hwnd);
+
 		default:
 			return new UnknownClipboardData(format);
 		}

@@ -41,4 +41,9 @@ public class UnknownClipboardData extends ClipboardData {
 	public long getWindowsDataLengthBytes() {
 		return 0;
 	}
+
+	@Override
+	public String toString() {
+		return "UnknownClipboardData [getFormat()=" + getFormat() + ", isCacheable()=" + isCacheable() + "]";
+	}
 }
