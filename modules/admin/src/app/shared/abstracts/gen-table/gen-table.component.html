@@ -57,6 +57,16 @@
     <span *ngIf="hasCheckbox === true" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
       <mat-checkbox
         name="cbVm"
+        *ngIf="i.enabled"
+        [checked]="isSelected(i.getID())"
+        (change)="checkClicked($event.checked, i.getID())"
+        value="{{i.getID()}}" ></mat-checkbox>
+      <!-- show a disabled checkbox if the item is disabled.  -->
+      <mat-checkbox
+        name="cbVm"
+        *ngIf="i.enabled === false"
+        disabled=true
+        color="#333333"
         [checked]="isSelected(i.getID())"
         (change)="checkClicked($event.checked, i.getID())"
         value="{{i.getID()}}" ></mat-checkbox>
