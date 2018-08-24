@@ -27,6 +27,8 @@ export class Virtue extends Item {
   // convert from whatever form the virtue object is in the database.
   constructor(virtueObj) {
     super();
+    console.log("Received virtue object from backend: \n", virtueObj);
+    console.log("\n");
     if (virtueObj) {
       this.id = virtueObj.id;
       this.name = virtueObj.name;

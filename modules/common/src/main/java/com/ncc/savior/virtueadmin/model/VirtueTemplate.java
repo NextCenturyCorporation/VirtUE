@@ -59,7 +59,7 @@ public class VirtueTemplate {
 		this.name = template.getName();
 		this.version = template.getVersion();
 		this.vmTemplates = template.getVmTemplates();
-		this.color = template.color();
+		this.color = template.getColor();
 		this.enabled = template.isEnabled();
 		this.lastModification = template.getLastModification();
 		this.lastEditor = template.getLastEditor();
@@ -81,19 +81,19 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 	}
 
-	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
-			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.version = version;
-		this.vmTemplates = vmTemplates;
-		this.color = "transparent";
-		this.enabled = enabled;
-		this.lastModification = lastModification;
-		this.lastEditor = lastEditor;
-		this.awsTemplateName = awsTemplateName;
-	}
+	// public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
+	// 		String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
+	// 	super();
+	// 	this.id = id;
+	// 	this.name = name;
+	// 	this.version = version;
+	// 	this.vmTemplates = vmTemplates;
+	// 	this.color = "transparent";
+	// 	this.enabled = enabled;
+	// 	this.lastModification = lastModification;
+	// 	this.lastEditor = lastEditor;
+	// 	this.awsTemplateName = awsTemplateName;
+	// }
 
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
 			String awsTemplateName, String color, boolean enabled, Date lastModification, String lastEditor) {
@@ -188,8 +188,8 @@ public class VirtueTemplate {
 	}
 
 	@Override
-	public String toString() {
-		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
+	public String toString() { // TODO
+		return "VirtueTemplate [id=" + id + ", name=" + name + ", verGGsion=" + version + ", vmTemplates=" + vmTemplates
 				+ ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
 				+ ", awsTemplateName=" + awsTemplateName + "]";
 	}
@@ -202,7 +202,7 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 	}
 
-	public boolean color() {
+	public String  getColor() {
 		return color;
 	}
 

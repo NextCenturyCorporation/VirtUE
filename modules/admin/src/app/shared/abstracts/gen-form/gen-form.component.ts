@@ -73,8 +73,11 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
     //  see note by declaration
     //  this.itemForm = new FormControl();
 
-    // TODO look at this while fixing breadcrumbs
-    //  override the route reuse strategy
+    // override the route reuse strategy
+    // Tell angular to load a new component every time a URL that needs this component loads,
+    // even if the user has been on this page before.
+    // TODO May want to look into changing this for these form pages, so a user who leaves
+    // a page mid-edit could return back and finish.
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
@@ -111,10 +114,11 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
     }
     if (!urlValid) {
       if (this.router.routerState.snapshot.url === this.parentDomain) {
-        //  apparently any time an error happens on this page, the system
-        //  quits and returns to /{parentDomain}, and then for some reason re-calls the
-        //  constructor for the form component it just left. Which leads here and
-        //  breaks because the URL is wrong. Strange.
+        // apparently any time an error happens on this page, the system
+        // quits and returns to /{parentDomain}, and then for some reason re-calls the
+        // constructor for the form component it just left. Which leads here and
+        // breaks because the URL is wrong. Strange. So don't print out the below
+        // error on those cases.
         return false;
       }
       console.log("ERROR: Can't decipher URL; Something about \

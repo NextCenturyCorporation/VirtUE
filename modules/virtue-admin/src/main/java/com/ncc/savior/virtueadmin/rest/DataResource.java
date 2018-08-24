@@ -95,7 +95,7 @@ public class DataResource {
 
 	/**
 	 * Imports all data in the import folder on the classpath.
-	 * 
+	 *
 	 * @return
 	 */
 	@GET
@@ -298,56 +298,56 @@ public class DataResource {
 		// vmtsSingleAll.add(windowsVm);
 		String allTemplate = "default-template";
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Test Virtue", "1.0",
-				vmtsSingleAll, allTemplate, true, now, systemName, "System", new Date());
+				vmtsSingleAll, allTemplate, "#66CDAA", true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsLinuxAndWinBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsLinuxAndWinBrowsers.add(vmBrowser);
 		vmtsLinuxAndWinBrowsers.add(windowsBrowserVm);
 		VirtueTemplate virtueBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Web Virtue (Both OS)", "1.0",
-				vmtsLinuxAndWinBrowsers, allTemplate, true, now, systemName, "System", new Date());
+				vmtsLinuxAndWinBrowsers, allTemplate, "#87CEEB", true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsLibre = new HashSet<VirtualMachineTemplate>();
 		vmtsLibre.add(vmLibreOffice);
 		VirtueTemplate virtueLibre = new VirtueTemplate(UUID.randomUUID().toString(), "Office Virtue", "1.0", vmtsLibre,
-				allTemplate, true, now, systemName, "System", new Date());
+				allTemplate, "#87CEEB", true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsWindows = new HashSet<VirtualMachineTemplate>();
 		vmtsWindows.add(windowsBrowserVm);
 		VirtueTemplate virtueWindows = new VirtueTemplate(UUID.randomUUID().toString(), "Windows Virtue", "1.0",
-				vmtsWindows, allTemplate, true, now, systemName, "System", new Date());
+				vmtsWindows, allTemplate, "#87CEEB", true, now, systemName, "System", new Date());
 
 		Set<VirtualMachineTemplate> vmtsMath = new HashSet<VirtualMachineTemplate>();
 		vmtsMath.add(vmMath);
 		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Math Virtue", "1.0", vmtsMath,
-				allTemplate, true, now, systemName, "System", new Date());
+				allTemplate, "#87CEEB", true, now, systemName, "System", new Date());
 
 		VirtueTemplate virtueDocumentEditor = new VirtueTemplate(UUID.randomUUID().toString(), "Document Editor", "1.0",
-				allTemplate, true, now, systemName, vmDocEditor);
+				allTemplate, "#4B0082", true, now, systemName, vmDocEditor);
 		virtueDocumentEditor.setUserCreatedBy("System");
 		virtueDocumentEditor.setTimeCreatedAt(new Date());
 
 		VirtueTemplate virtueWinCorpEmail = new VirtueTemplate(UUID.randomUUID().toString(),
-				"Windows Corporate Email User", "1.0", allTemplate, true, now, systemName, vmWinCorpEmail);
+				"Windows Corporate Email User", "1.0", allTemplate, "#87CEEB", true, now, systemName, vmWinCorpEmail);
 		virtueWinCorpEmail.setUserCreatedBy("System");
 		virtueWinCorpEmail.setTimeCreatedAt(new Date());
 
 		VirtueTemplate virtueRouterAdmin = new VirtueTemplate(UUID.randomUUID().toString(), "Router Admin", "1.0",
-				allTemplate, true, now, systemName, vmRouterAdmin);
+				allTemplate, "#6A5ACD", true, now, systemName, vmRouterAdmin);
 		virtueRouterAdmin.setUserCreatedBy("System");
 		virtueRouterAdmin.setTimeCreatedAt(new Date());
 
 		VirtueTemplate virtueLinuxCorporateEmailUser = new VirtueTemplate(UUID.randomUUID().toString(),
-				"Linux Corporate Email User", "1.0", allTemplate, true, now, systemName, vmLinuxCorpEmail);
+				"Linux Corporate Email User", "1.0", allTemplate, "#6A5ACD", true, now, systemName, vmLinuxCorpEmail);
 		virtueLinuxCorporateEmailUser.setUserCreatedBy("System");
 		virtueLinuxCorporateEmailUser.setTimeCreatedAt(new Date());
 
 		VirtueTemplate virtueExternalInternet = new VirtueTemplate(UUID.randomUUID().toString(),
-				"External Internet Consumer", "1.0", allTemplate, true, now, systemName, vmExternalInternet);
+				"External Internet Consumer", "1.0", allTemplate, "#708090", true, now, systemName, vmExternalInternet);
 		virtueExternalInternet.setUserCreatedBy("System");
 		virtueExternalInternet.setTimeCreatedAt(new Date());
 
 		VirtueTemplate virtuePowerUser = new VirtueTemplate(UUID.randomUUID().toString(),
-				"Windows and Linux Power User", "1.0", allTemplate, true, now, systemName, vmPowerUserWin,
+				"Windows and Linux Power User", "1.0", allTemplate, "#6A5ACD", true, now, systemName, vmPowerUserWin,
 				vmPowerUserLinux);
 		virtuePowerUser.setUserCreatedBy("System");
 		virtuePowerUser.setTimeCreatedAt(new Date());
@@ -699,9 +699,9 @@ public class DataResource {
 	 * Returns a very simple HTML view of the permission set. This (along with this
 	 * entire class) is intended only to be used for testing and debugging and not
 	 * intended to be used in a production system.
-	 * 
+	 *
 	 * It is purely functional and ugly.
-	 * 
+	 *
 	 * @return
 	 */
 	@GET
