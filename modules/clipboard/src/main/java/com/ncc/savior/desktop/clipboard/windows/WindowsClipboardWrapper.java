@@ -25,9 +25,11 @@ import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.GDI32;
+import com.sun.jna.platform.win32.GDI32Util;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinDef.HBITMAP;
 import com.sun.jna.platform.win32.WinGDI.BITMAP;
 import com.sun.jna.platform.win32.WinDef.HWND;
@@ -515,14 +517,24 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		case IWindowsClipboardUser32.CF_BITMAT:
 			HBITMAP hbitmap = new HBITMAP(p);
 //			logger.debug(hbitmap.getPointer().dump(0, 1));
+			
 			BITMAP gdiBitMap = new BITMAP();
-			gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
+			int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
+			numBytes=gdi32.GetObject(hbitmap, 0, Pointer.NULL);
 			gdiBitMap.autoRead();
 			logger.debug(gdiBitMap.toString());
+			Memory newMem = new Memory(gdiBitMap.size()+numBytes);
+			BITMAP nbm = new BITMAP();
+//			nbm.bmBits=newMem;
+//			int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
 			Pointer bits = gdiBitMap.bmBits;
-			logger.debug(bits.dump(0, 64));
+//			logger.debug(bits.dump(0, 64));
 			// if (!GetObject(hBmp, sizeof(BITMAP), (LPSTR)&bmp))
 			// errhandler("GetObject", hwnd);
+			
+			//GetDIBits get the bits in device independent 
+			
+			//try this https://www.codeguru.com/cpp/g-m/bitmap/article.php/c1765/Converting-DDB-to-DIB.htm
 
 		default:
 			return new UnknownClipboardData(format);
