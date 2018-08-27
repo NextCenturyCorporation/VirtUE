@@ -4,6 +4,13 @@
   </div>
   <div id="content-main">
     <div id="content" class="content">
+
+      <div *ngFor="let tab of tabs">
+        <mat-tab label="General Info">
+          <app-tab></app-tab>
+        </mat-tab>
+      </div>
+
       <div class="mui-container-fluid">
         <div class="mui-row">
           <div class="mui-col-md-9">
@@ -37,7 +44,7 @@
               </div>
             </div>
 
-            <app-item-table #table></app-item-table>
+            <app-item-table #childrenTable></app-item-table>
 
             <div class="mui-row">
               <hr>
@@ -53,7 +60,7 @@
       </div>
       <div class="mui-col-md-3">&nbsp;</div>
 
-      <router-outlet></router-outlet>
+      <!-- <router-outlet></router-outlet> -->
 
     </div>
   </div>

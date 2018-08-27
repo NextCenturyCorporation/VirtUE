@@ -1,0 +1,47 @@
+<div class="mui-container-fluid">
+  <div class="mui-row">
+    <div class="mui-col-md-9">
+      <div class="mui-row">
+        <div class="mui-col-md-12 form-item">
+          <mat-form-field *ngIf="mode !== 'Edit'">
+            <input type="text" [(ngModel)]="item.name" placeholder="Username" matInput>
+          </mat-form-field>
+        </div>
+        <div class="mui-row form-item margin-top-15">
+          <div class="mui-col-md-4">
+            <label>User Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <mat-slide-toggle [(ngModel)]="item.enabled" [color]="'primary'">{{ item.enabled ? 'Enabled' : 'Disabled' }}</mat-slide-toggle>
+          </div>
+        </div>
+        <div class="mui-col-md-12 form-item">
+          <div class="mui-col-md-6 table-data">
+            <label>Select Role(s)</label><br />
+            <mat-checkbox [(ngModel)]="roleUser" [checked]="roleUser"> User</mat-checkbox>
+            <br />
+            <mat-checkbox [(ngModel)]="roleAdmin" [checked]="roleAdmin"> Administrator</mat-checkbox>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div class="mui-row">
+        <div class="titlebar margin-top-20">
+          <br />
+          <h3 class="titlebar-title">Virtue Templates</h3>
+          <button class="titlebar-button" mat-button (click)="activateModal('add')">Add Template</button>
+        </div>
+      </div>
+
+      <app-item-table #table></app-item-table>
+
+      <div class="mui-row">
+        <hr>
+        <div class="mui-col-md-4">&nbsp;</div>
+        <div class="mui-col-md-4 form-item text-align-center">
+          <button class="button-submit" (click)="createOrUpdate();" >Save</button>
+          <button class="button-cancel" (click)="cancel()">Cancel</button>
+        </div>
+        <div class="mui-col-md-4"></div>
+      </div>
+    </div>
+  </div>
+</div>

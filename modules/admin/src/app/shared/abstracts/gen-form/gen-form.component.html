@@ -5,15 +5,20 @@
     {{ item.enabled ? 'Disable Virtue' : 'Enable Virtue' }}</button> -->
   </div>
   <div id="content-main">
-      <div id="content" class="border-top virtue-content">
+      <div id="content" class="border-top">
         <mat-tab-group dynamicHeight=true>
 
           <!-- ********************* -->
+          <div *ngFor="let tab of tabs">
+            <mat-tab label="General Info">
+              <app-tab></app-tab>
+            </mat-tab>
+          </div>
           <mat-tab label="General Info">
             <br>
             <div class="mui-row form-item margin-top-15">
               <div class="mui-col-md-12">
-                Name: <input type="text" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
+                Name: <input type="text" [(ngModel)]="item.name" aria-label="Name" placeholder="{{itemName}} Name" matInput />
                 <br/>
                 <span *ngIf="mode!=='Create'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.id }}</span>
               </div>
@@ -31,7 +36,6 @@
                 <label>Version: </label>
               </div>
               <div class="mui-col-md-2">
-                <!-- <input type="text" [(ngModel)]="item.version" placeholder="1" matInput /> -->
                 {{item.version}}
               </div>
             </div>

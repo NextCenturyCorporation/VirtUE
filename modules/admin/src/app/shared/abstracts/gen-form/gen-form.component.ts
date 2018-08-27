@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -19,6 +19,7 @@ import { Column } from '../../models/column.model';
 import { Mode } from '../../enums/enums';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
+import { GenericFormTab } from '../gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../gen-table/gen-table.component';
 import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
@@ -34,6 +35,8 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   //  TODO currently not used, but could/should be eventually, time-permitting.
   //  itemForm: FormControl;
 
+  itemName: string;
+
   // Note:
   //   when creating, item.id is empty.
   //   When editing, item.id holds the id of the virtue being edited.
@@ -46,6 +49,9 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   // what the user is doing to the item: {CREATE, EDIT, DUPLICATE}
   // Holds the strings 'Create', 'Edit', or 'Duplicate' resp., for display to the user
   mode: Mode;
+
+
+  @ViewChildren(GenericFormTab) tabs: QueryList<GenericFormTab>
 
   // table showing what children have been added to this item
   @ViewChild('childrenTable') childrenTable: GenericTableComponent;
@@ -169,10 +175,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     });
   }
 
-  getChildrenListHTMLstring(item: Item) {
-    return item.childNamesHTML;
-  }
-
   // overrides parent
   onPullComplete() {
     if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
@@ -192,7 +194,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   // Like, if this.item is a virtue, it will find all the users that have been
   //  given that virtue, and put those users into parentTable.
   abstract populateParentTable(): void;
-  
+
 
   // set up the table of running instances.
   abstract buildInstanceTable(): void;

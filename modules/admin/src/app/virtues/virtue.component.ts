@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, QueryList } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -24,6 +24,7 @@ import { Mode, ConfigUrlEnum } from '../shared/enums/enums';
 import { VirtueSettingsComponent } from './virtue-settings/virtue-settings.component';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+import { GenericFormTab } from '../shared/abstracts/gen-tab/gen-tab.component';
 
 
 @Component({
@@ -46,7 +47,6 @@ export class VirtueComponent extends GenericFormComponent {
   ) {
     super('/virtues', activatedRoute, router, baseUrlService, itemService, dialog);
 
-
     // set up empty (except for a default color), will get filled in ngOnInit if
     // mode is not 'create'
     this.item = new Virtue({color: this.defaultColor()});
@@ -55,6 +55,8 @@ export class VirtueComponent extends GenericFormComponent {
     this.childDatasetName = 'allVms';
 
     this.childDomain = '/vm-templates';
+
+    this.itemName = "Virtue";
   }
 
   // This should only stay until the data loads, if the data has a color.
@@ -62,8 +64,10 @@ export class VirtueComponent extends GenericFormComponent {
     return this.mode === Mode.CREATE ? '#cccccc' : 'transparent';
   }
 
-  // TODO decide if this is sufficent, or if it could be designed better
   updateUnconnectedFields() {
+    // add check in case the version's been corrupted and can't convert to a number
+    this.item['version'] = String(Number(this.item['version']) + 1);
+
     this.settingsPane.setColor((this.item as Virtue).color);
   }
 
@@ -147,11 +151,8 @@ export class VirtueComponent extends GenericFormComponent {
     this.item['color'] = this.settingsPane.getColor();
     console.log('color:', this.item['color']);
 
-    // add check in case the version's been corrupted and can't convert to a number
-    this.item['version'] = String(Number(this.item['version']) + 1);
 
-
-    console.log('version:', this.item['version'], '(see what it looks like to type html code here - injection vector?)');
+    console.log('name:', this.item.getName(), '(see what it looks like to type html code here - injection vector?)');
 
     // The following are required:
     //  this.item.name,     can't be empty

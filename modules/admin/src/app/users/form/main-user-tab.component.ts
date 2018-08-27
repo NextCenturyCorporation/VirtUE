@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, QueryList } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -7,68 +7,63 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { ItemService } from '../shared/services/item.service';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { ItemService } from '../../shared/services/item.service';
 
-import { VirtueModalComponent } from '../modals/virtue-modal/virtue-modal.component';
+import { VirtueModalComponent } from '../../modals/virtue-modal/virtue-modal.component';
 
-import { Item } from '../shared/models/item.model';
-import { User } from '../shared/models/user.model';
-import { VirtualMachine } from '../shared/models/vm.model';
-import { Virtue } from '../shared/models/virtue.model';
-import { DictList } from '../shared/models/dictionary.model';
-import { Column } from '../shared/models/column.model';
-import { Mode } from '../shared/enums/enums';
-import { RowOptions } from '../shared/models/rowOptions.model';
+import { Item } from '../../shared/models/item.model';
+import { User } from '../../shared/models/user.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
+import { Virtue } from '../../shared/models/virtue.model';
+import { DictList } from '../../shared/models/dictionary.model';
+import { Column } from '../../shared/models/column.model';
+import { Mode, ConfigUrlEnum } from '../../shared/enums/enums';
+import { RowOptions } from '../../shared/models/rowOptions.model';
 
-import { UserMainTabComponent } from './form/main-user-tab.component';
-
-import { ConfigUrlEnum } from '../shared/enums/enums';
-
-import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
-import { GenericFormTab } from '../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
+import { GenericFormTab } from '../../shared/abstracts/gen-tab/gen-tab.component';
+// import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 
 @Component({
-  selector: 'app-user',
-  templateUrl: './user.component.html',
-  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService ]
+  selector: 'app-main-user-tab',
+  templateUrl: './main-user-tab.component.html',
+  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css']
 })
 
-export class UserComponent extends GenericFormComponent {
+export class UserMainTabComponent extends GenericFormTab implements OnInit {
+
+  @ViewChild('parentTable') parentTable: GenericTableComponent;
 
   roleUser: boolean;
   roleAdmin: boolean;
 
   fullImagePath: string;
 
-  constructor(
-    activatedRoute: ActivatedRoute,
-    router: Router,
-    baseUrlService: BaseUrlService,
-    itemService: ItemService,
-    dialog: MatDialog
-  ) {
-    super('/users', activatedRoute, router, baseUrlService, itemService, dialog);
 
-    this.tabs = new QueryList<GenericFormTab>();
-    // this.tabs.push(new UserMainTabComponent(router, dialog, "General Info", this.mode));
 
-    // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
-    this.item = new User(undefined);
+  constructor( router: Router, dialog: MatDialog, tabName: string, mode: Mode) {
+    super(router, dialog, tabName, mode);
 
-    this.datasetName = 'allUsers';
-    this.childDatasetName = 'allVirtues';
+    // this.datasetName = 'allUsers';
+    // this.childDatasetName = 'allVirtues';
 
-    this.childDomain = "/virtues";
   }
 
-  setUpFormValues(): void {
+
+  setUp(param: {item: Item, otherData: any}): void {
+
+    this.item = param.item;
+
     this.roleUser = this.item['roles'].includes("ROLE_USER");
     this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
   }
 
-  getChildColumns(): Column[] {
+  tearDown(): any {
+
+  }
+
+  getColumns(): Column[] {
     return [
       // See note in gen-form getOptionsList
       new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.viewItem(i)),
@@ -80,9 +75,14 @@ export class UserComponent extends GenericFormComponent {
     ];
   }
 
+  viewItem(i: Item) {
+    if (i.getDomain()) {
+      this.router.navigate([i.getDomain()]);
+    }
+  }
+
   getNoDataMsg(): string {
-    console.log(this.tabs);
-    return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
+    return "No users have been created yet. To add a user, click on the button \"Add User\" above.";
   }
 
   getPageOptions(): {
