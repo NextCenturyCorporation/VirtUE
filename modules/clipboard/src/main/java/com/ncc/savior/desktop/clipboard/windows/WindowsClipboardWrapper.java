@@ -1,6 +1,10 @@
 package com.ncc.savior.desktop.clipboard.windows;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,11 +14,14 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.imageio.ImageIO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.data.BitMapClipboardData;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
 import com.ncc.savior.desktop.clipboard.data.FileClipboardData;
@@ -25,17 +32,19 @@ import com.ncc.savior.util.JavaUtil;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.GDI32;
-import com.sun.jna.platform.win32.GDI32Util;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinBase;
-import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinDef.HBITMAP;
-import com.sun.jna.platform.win32.WinGDI.BITMAP;
+import com.sun.jna.platform.win32.WinDef.HDC;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
+import com.sun.jna.platform.win32.WinGDI;
+import com.sun.jna.platform.win32.WinGDI.BITMAP;
+import com.sun.jna.platform.win32.WinGDI.BITMAPINFO;
+import com.sun.jna.platform.win32.WinGDI.BITMAPINFOHEADER;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.sun.jna.platform.win32.WinUser.WNDCLASSEX;
@@ -482,6 +491,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		if (p == null) {
 			return new EmptyClipboardData(format);
 		}
+
 		switch (format.getWindows()) {
 		case IWindowsClipboardUser32.CF_TEXT:
 			return new PlainTextClipboardData(p.getString(0));
@@ -515,29 +525,159 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			}
 			return new FileClipboardData(files);
 		case IWindowsClipboardUser32.CF_BITMAT:
-			HBITMAP hbitmap = new HBITMAP(p);
-//			logger.debug(hbitmap.getPointer().dump(0, 1));
-			
-			BITMAP gdiBitMap = new BITMAP();
-			int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
-			numBytes=gdi32.GetObject(hbitmap, 0, Pointer.NULL);
-			gdiBitMap.autoRead();
-			logger.debug(gdiBitMap.toString());
-			Memory newMem = new Memory(gdiBitMap.size()+numBytes);
-			BITMAP nbm = new BITMAP();
-//			nbm.bmBits=newMem;
-//			int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
-			Pointer bits = gdiBitMap.bmBits;
-//			logger.debug(bits.dump(0, 64));
-			// if (!GetObject(hBmp, sizeof(BITMAP), (LPSTR)&bmp))
-			// errhandler("GetObject", hwnd);
-			
-			//GetDIBits get the bits in device independent 
-			
-			//try this https://www.codeguru.com/cpp/g-m/bitmap/article.php/c1765/Converting-DDB-to-DIB.htm
-
+			// convertPngToPngData(p);
+			return convertBitmapPngData(p);
 		default:
 			return new UnknownClipboardData(format);
 		}
+	}
+
+	private BitMapClipboardData convertPngToPngData(Pointer p) {
+		HBITMAP hbitmap = new HBITMAP(p);
+
+		BITMAP gdiBitMap = new BITMAP();
+		int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
+		gdiBitMap.autoRead();
+		BITMAPINFO info = new BITMAPINFO();
+		info.bmiHeader.biSize = info.size();
+		info.bmiHeader.biWidth = gdiBitMap.bmWidth.intValue();
+		info.bmiHeader.biHeight = gdiBitMap.bmHeight.intValue();
+		info.bmiHeader.biPlanes = 1;
+		info.bmiHeader.biBitCount = 0;
+
+		info.bmiHeader.biCompression = WinGDI.BI_PNG;
+		info.bmiHeader.autoWrite();
+		info.autoWrite();
+		HDC hDC = user32.GetDC(windowHandle);
+		int sizeBytes = info.bmiHeader.biWidth * info.bmiHeader.biHeight * 4;
+		info.bmiHeader.biSizeImage = sizeBytes;
+		info.autoWrite();
+		Pointer lpvBits = new Memory(sizeBytes);
+		int bytesNeeded = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(), lpvBits, info,
+				WinGDI.DIB_RGB_COLORS);
+		WindowsError er = getLastError();
+
+		logger.debug("status=" + bytesNeeded);
+		logger.debug("dump: " + lpvBits.dump(0, 256));
+		byte[] bb = lpvBits.getByteArray(0, bytesNeeded);
+		try {
+
+			FileOutputStream writer = new FileOutputStream("./tmp-dir.png");
+			writer.write(bb);
+			writer.close();
+		} catch (Exception e) {
+			logger.debug("error!", e);
+		}
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		boolean ret;
+		try {
+			ByteArrayInputStream in = new ByteArrayInputStream(bb);
+			BufferedImage image = ImageIO.read(in);
+			File f2 = new File("./tmp2.png");
+			logger.debug(f2.getAbsolutePath());
+
+			ret = ImageIO.write(image, "PNG", f2);
+			ImageIO.write(image, "PNG", output);
+			logger.debug("ret =" + ret);
+		} catch (IOException e) {
+			logger.debug("error!", e);
+		}
+		// return null;
+		return new BitMapClipboardData(output.toByteArray());
+	}
+
+	private BitMapClipboardData convertBitmapPngData(Pointer p) {
+		HBITMAP hbitmap = new HBITMAP(p);
+
+		BITMAP gdiBitMap = new BITMAP();
+		gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
+		gdiBitMap.autoRead();
+		BITMAPINFO info = new BITMAPINFO();
+		info.bmiHeader.biSize = info.size();
+		info.bmiHeader.biWidth = gdiBitMap.bmWidth.intValue();
+		info.bmiHeader.biHeight = gdiBitMap.bmHeight.intValue();
+		info.bmiHeader.biPlanes = 1;
+		info.bmiHeader.biBitCount = 32;
+		info.bmiHeader.biCompression = WinGDI.BI_RGB;
+		info.autoWrite();
+		HDC hDC = user32.GetDC(windowHandle);
+		int sizeBytes = info.bmiHeader.biWidth * info.bmiHeader.biHeight * 4;
+		Pointer lpvBits = new Memory(sizeBytes);
+		int numBitsWritten = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(), lpvBits, info,
+				WinGDI.DIB_RGB_COLORS);
+		BufferedImage image = new BufferedImage(info.bmiHeader.biWidth, info.bmiHeader.biHeight,
+				BufferedImage.TYPE_INT_ARGB);
+		int i = 0;
+		for (int y = image.getHeight() - 1; y >= 0; y--) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				int rgb = 0;
+				int r = lpvBits.getByte(i + 2);
+				int g = lpvBits.getByte(i + 1);
+				int b = lpvBits.getByte(i);
+				int a = lpvBits.getByte(i + 3);
+				rgb = (a << 24) + (r << 16) + (g << 8) + (b << 0);
+				image.setRGB(x, y, rgb);
+				i += 4;
+			}
+		}
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		try {
+			ImageIO.write(image, "PNG", output);
+		} catch (IOException e) {
+			logger.debug("error writing image into PNG format!", e);
+		}
+		return new BitMapClipboardData(output.toByteArray());
+	}
+
+	private void convertBitmap1(Pointer p) {
+		HBITMAP hbitmap = new HBITMAP(p);
+		// logger.debug(hbitmap.getPointer().dump(0, 1));
+
+		BITMAP gdiBitMap = new BITMAP();
+		int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
+		// numBytes=gdi32.GetObject(hbitmap, 0, Pointer.NULL);
+		gdiBitMap.autoRead();
+		logger.debug(gdiBitMap.toString());
+		HDC hDC = user32.GetDC(windowHandle);
+		BITMAPINFOHEADER bih = new BITMAPINFOHEADER();
+		bih.biSize = bih.size();
+		bih.biWidth = gdiBitMap.bmWidth.intValue();
+		bih.biHeight = gdiBitMap.bmHeight.intValue();
+		bih.biPlanes = 1;
+		bih.biBitCount = (short) (gdiBitMap.bmPlanes * gdiBitMap.bmBitsPixel);
+		bih.biCompression = WinGDI.BI_PNG;
+		bih.biSizeImage = 0;
+		bih.biXPelsPerMeter = 0;
+		bih.biYPelsPerMeter = 0;
+		bih.biClrUsed = 0;
+		bih.biClrImportant = 0;
+		bih.autoWrite();
+		int iUsage;
+		PointerByReference ppvBits;
+		BITMAPINFO bi = new BITMAPINFO();
+		bi.bmiHeader = bih;
+		WinGDI.RGBQUAD[] rgbQuad = new WinGDI.RGBQUAD[1];
+		// TODO set RGBQUAD Properly!
+		bi.bmiColors = rgbQuad;
+		bi.autoWrite();
+		// gdi32.CreateDIBSection(hDC, bi, iUsage, ppvBits, null, 0);
+
+		// gdi32.BitBlt(hDC, 0, 0, gdiBitMap.bmWidth, gdiBitMap.bmHeight, hdcSrc, nXSrc,
+		// nYSrc, dwRop)
+
+		Memory newMem = new Memory(gdiBitMap.size() + numBytes);
+		BITMAP nbm = new BITMAP();
+		// nbm.bmBits=newMem;
+		// int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(),
+		// gdiBitMap.getPointer());
+		Pointer bits = gdiBitMap.bmBits;
+		// logger.debug(bits.dump(0, 64));
+		// if (!GetObject(hBmp, sizeof(BITMAP), (LPSTR)&bmp))
+		// errhandler("GetObject", hwnd);
+
+		// GetDIBits get the bits in device independent
+
+		// try this
+		// https://www.codeguru.com/cpp/g-m/bitmap/article.php/c1765/Converting-DDB-to-DIB.htm
 	}
 }
