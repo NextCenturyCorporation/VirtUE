@@ -48,6 +48,10 @@ public class FutureCombiner<T> {
 			CompletableFuture<Void> cf2 = f.thenAccept(action);
 			current = current.thenAcceptBoth(cf2, (v1, v2) -> {
 			});
+			f.exceptionally((th) -> {
+				future.completeExceptionally(th);
+				return null;
+			});
 		}
 
 		current.thenAccept((Void) -> {
