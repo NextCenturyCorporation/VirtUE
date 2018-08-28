@@ -71,7 +71,6 @@ export class VirtueComponent extends GenericFormComponent {
     return [
       //See note in gen-form getOptionsList
       {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:4, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-      // {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:4, formatValue: undefined},
       {name: 'os', prettyName: 'OS', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
       {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
       {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:2, formatValue: this.formatStatus}

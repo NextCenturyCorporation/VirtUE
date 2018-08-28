@@ -66,7 +66,6 @@ export class UserComponent extends GenericFormComponent {
     return [
       //See note in gen-form getOptionsList
       {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-      // {name: 'name',            prettyName: 'Template Name',      isList: false,  sortDefault: 'asc', colWidth:3, formatValue: undefined},
       {name: 'childNamesHTML',  prettyName: 'Virtual Machines',   isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getChildNamesHtml},
       {name: 'apps',            prettyName: 'Applications',       isList: true,   sortDefault: undefined, colWidth:3, formatValue: this.getGrandchildrenHtmlList},
       {name: 'version',         prettyName: 'Version',            isList: false,  sortDefault: 'asc', colWidth:2, formatValue: undefined},
