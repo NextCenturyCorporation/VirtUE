@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, QueryList } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -26,16 +26,42 @@ import { UserMainTabComponent } from './form/main-user-tab.component';
 import { ConfigUrlEnum } from '../shared/enums/enums';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
-import { GenericFormTab } from '../shared/abstracts/gen-tab/gen-tab.component';
 
 @Component({
   selector: 'app-user',
-  templateUrl: './user.component.html',
+  // templateUrl: './user.component.html',
+  template: `
+  <div id="content-container">
+    <div id="content-header">
+        <h1 class="titlebar-title">{{mode}} User Account: &nbsp;&nbsp;{{item.name}}</h1>
+    </div>
+    <div id="content-main">
+      <div id="content" class="content">
+        <mat-tab-group dynamicHeight=true>
+          <mat-tab label='General Info'>
+            <app-main-user-tab #mainTab></app-main-user-tab>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+      <div class="mui-row">
+        <hr>
+        <div class="mui-col-md-4">&nbsp;</div>
+        <div class="mui-col-md-4 form-item text-align-center">
+          <button class="button-submit" (click)="createOrUpdate();" >Save</button>
+          <button class="button-cancel" (click)="cancel()">Cancel</button>
+        </div>
+        <div class="mui-col-md-4"></div>
+      </div>
+    </div>
+  </div>
+    `,
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
 
 export class UserComponent extends GenericFormComponent {
+
+  @ViewChild('mainTab') mainTab: UserMainTabComponent;
 
   roleUser: boolean;
   roleAdmin: boolean;
@@ -51,9 +77,6 @@ export class UserComponent extends GenericFormComponent {
   ) {
     super('/users', activatedRoute, router, baseUrlService, itemService, dialog);
 
-    this.tabs = new QueryList<GenericFormTab>();
-    // this.tabs.push(new UserMainTabComponent(router, dialog, "General Info", this.mode));
-
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User(undefined);
 
@@ -63,9 +86,27 @@ export class UserComponent extends GenericFormComponent {
     this.childDomain = "/virtues";
   }
 
-  setUpFormValues(): void {
-    this.roleUser = this.item['roles'].includes("ROLE_USER");
-    this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
+  setUpForm(): void {
+    this.mainTab.setUp(this.mode, this.item);
+
+    // A table showing what virtues rae running, what's been instantiated, when they've logged-on
+    // and logged off, all that sort of thing. Probably could do it in one table, but I'd want to add
+    // some sort of custom filter.
+    // this.activityTab.setUp(this.mode, this.item);
+    // this.usageTab.populateActivityTable(); // at least one of these.
+    // this.usageTab.populateInstanceTable(); // ?
+  }
+
+  buildChildren() {
+    this.item.buildChildren(this[this.childDatasetName]);
+    this.mainTab.childrenTable.items = this.item.children.asList();
+  }
+
+  buildTabs() {
+
+    this.mainTab.buildChildTable();
+    // this.usageTab.buildParentTable();
+    // this.usageTab.buildInstanceTable();
   }
 
   getChildColumns(): Column[] {
@@ -81,7 +122,6 @@ export class UserComponent extends GenericFormComponent {
   }
 
   getNoDataMsg(): string {
-    console.log(this.tabs);
     return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
   }
 
@@ -139,15 +179,4 @@ export class UserComponent extends GenericFormComponent {
     return true;
   }
 
-  // overrides parent
-  // remember this is for the table, holding the user's virtues
-  hasColoredLabels() {
-    return true;
-  }
-
-  getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any {
-    return this.dialog.open( VirtueModalComponent, params);
-  }
 }

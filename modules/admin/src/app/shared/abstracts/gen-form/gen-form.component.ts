@@ -151,39 +151,23 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   ngOnInit() {
     if (this.mode !== Mode.CREATE) {
       this.item.id = this.activatedRoute.snapshot.params['id'];
-      this.buildParentTable();
       // this.buildInstanceTable();
     }
 
     this.cmnComponentSetup();
-    this.buildChildTable();
+    this.buildTabs();
   }
 
-  buildChildTable(): void {
-    if (this.childrenTable === undefined) {
-      return;
-    }
-
-    this.childrenTable.setUp({
-      cols: this.getChildColumns(),
-      opts: this.getOptionsList(),
-      coloredLabels: this.hasColoredLabels(),
-      filters: [], // don't allow filtering on the form's child table. ?
-      tableWidth: this.getTableWidth(),
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
-  }
+  // TODO make this abstract
+  buildTabs(): void {}
 
   // overrides parent
   onPullComplete() {
     if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
       this.buildItem();
 
-      this.populateParentTable();
     }
-    this.childrenTable.items = this.item.children.asList();
-    this.setUpFormValues();
+    this.setUpForm();
   }
 
   // set up the parent table.
@@ -204,14 +188,14 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   //  set up child form-pages' unique properties
   //  does nothing by default, overridden by user form
-  setUpFormValues(): void {}
+  //TODO make this abstract
+   setUpForm(): void {}
 
   buildItem() {
   let _item = this[this.datasetName].get(this.item.id);
     if (_item) {
       this.item = _item;
-      this.updateUnconnectedFields();
-      this.updateChildList();
+      this.buildChildren();
       this.resetRouter();
     }
     else {
@@ -221,16 +205,8 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
-  // if nothing is passed in, we just want to populate item.children
-  updateChildList( newVmIDs?: string[] ) {
-
-    if (newVmIDs instanceof Array) {
-      this.item.childIDs = newVmIDs;
-    }
-
-    this.item.buildChildren(this[this.childDatasetName]);
-    this.childrenTable.items = this.item.children.asList();
-  }
+  //TODO
+   buildChildren(): void {}
 
   createOrUpdate() {
     // collects/updates data for and in the item, in preparation for saving.
@@ -287,93 +263,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       });
   }
 
-  /**
-   copied from gen-list, could merge that together at some point if had extra time.
-   this is a checker, if the user clicks 'remove' on one of the item's children.
-   Could be improved/made more clear/distinguished from all the childrens' "activateModal" method.
-  */
-  openDialog(action: string, target: Item): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          actionType: action,
-          targetObject: target
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
-
-      if (targetObject !== 0 ) {
-        if (action === 'delete') {
-          //  this.setItemStatus(targetObject, false);
-          console.log(targetObject);
-          this.item.removeChild(targetObject.getID());
-
-          // remove from childIDs and children
-        }
-      }
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
-  }
-
-  /*this needs to be defined in each child, instead of here, because I can't find how to have each
-  child hold a class as an attribute, to be used in a dialog.open method in a parent's function.
-  So right now the children take care of the dialog.open method, and pass the
-  MatDialogRef back. I can't type this as returning a MatDialogRef though
-  without having to specify what modal class the dialog refers to (putting us
-  back at the original issue), so this will have to be 'any' for now.
-  */
-  abstract getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any;
-
-  // this brings up the modal to add/remove children
-  activateModal(mode: string): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
-
-    let modalParams = {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        id: this.item.getName(),
-        selectedIDs: this.item.childIDs
-      }
-    };
-
-    let dialogRef = this.getModal(modalParams);
-
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.updateChildList(selectedVirtues);
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
-
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-
-  }
-
-  // overrides parent
-  getOptionsList(): RowOptions[] {
-    return [
-      //  new RowOptions("Edit", () => true, (i:Item) => this.viewItem(i)),
-      // TODO look into this, perhaps we could have two modes on the form pages -
-      // one for editing, one for viewing. So you could navigate away only when
-      // you weren't in edit mode, and you'd never lose changes accidentally.
-      // User will lose all work on form if they navigate away to other form
-      // It'd be nice to let them do that though.
-      new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-    ];
-  }
 
   // overridden by virtue component
   getTableWidth(): number {

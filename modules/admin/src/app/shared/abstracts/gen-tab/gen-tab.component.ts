@@ -7,8 +7,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-// import { BaseUrlService } from '../shared/services/baseUrl.service';
-// import { ItemService } from '../shared/services/item.service';
+import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 
@@ -39,13 +38,10 @@ export class GenericFormTab implements OnInit {
 
   item: Item;
 
-  constructor( protected router: Router, protected dialog: MatDialog, tabName: string, mode: Mode) {
+  constructor( protected router: Router, protected dialog: MatDialog) {
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new VirtualMachine(undefined);
 
-    this.mode = mode;
-
-    this.tabName = tabName;
   }
 
   ngOnInit() {}
@@ -74,11 +70,13 @@ export class GenericFormTab implements OnInit {
     return item.enabled ? 'Enabled' : 'Disabled';
   }
 
-  // in here, at least pass in item, mode, and tabName.
-  setUp(param: {tabName: String, item: Item, mode: Mode, otherData: any}) {}
+  setUp(mode: Mode, item: Item): void {}
 
   //this should ensure that the previously-passed in item has been updated however
   //it needed to be based on any changes within that tab. Called when the item is
   //saved, not when a different tab is clicked.
   tearDown(): any {}
+
+
+
 }

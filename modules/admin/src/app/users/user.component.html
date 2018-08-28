@@ -5,11 +5,12 @@
   <div id="content-main">
     <div id="content" class="content">
 
-      <div *ngFor="let tab of tabs">
+      <!-- <mat-tab-group dynamicHeight=true>
         <mat-tab label="General Info">
-          <app-tab></app-tab>
+          <app-main-user-tab #mainTab></app-main-user-tab>
         </mat-tab>
-      </div>
+      </mat-tab-group> -->
+
 
       <div class="mui-container-fluid">
         <div class="mui-row">
@@ -51,7 +52,7 @@
               <div class="mui-col-md-4">&nbsp;</div>
               <div class="mui-col-md-4 form-item text-align-center">
                 <button class="button-submit" (click)="createOrUpdate();" >Save</button>
-                <button class="button-cancel" (click)="cancel()">Cancel</button>
+                <button class="button-cancel" (click)="carncel()">Cancel</button>
               </div>
               <div class="mui-col-md-4"></div>
             </div>
