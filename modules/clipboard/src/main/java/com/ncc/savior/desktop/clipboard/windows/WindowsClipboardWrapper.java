@@ -1,10 +1,8 @@
 package com.ncc.savior.desktop.clipboard.windows;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +41,6 @@ import com.sun.jna.platform.win32.WinDef.WPARAM;
 import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinGDI.BITMAP;
 import com.sun.jna.platform.win32.WinGDI.BITMAPINFO;
-import com.sun.jna.platform.win32.WinGDI.BITMAPINFOHEADER;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.sun.jna.platform.win32.WinUser.WNDCLASSEX;
@@ -536,60 +533,18 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		}
 	}
 
-	private BitMapClipboardData convertPngToPngData(Pointer p) {
-		HBITMAP hbitmap = new HBITMAP(p);
-
-		BITMAP gdiBitMap = new BITMAP();
-		int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
-		gdiBitMap.autoRead();
-		BITMAPINFO info = new BITMAPINFO();
-		info.bmiHeader.biSize = info.size();
-		info.bmiHeader.biWidth = gdiBitMap.bmWidth.intValue();
-		info.bmiHeader.biHeight = gdiBitMap.bmHeight.intValue();
-		info.bmiHeader.biPlanes = 1;
-		info.bmiHeader.biBitCount = 0;
-
-		info.bmiHeader.biCompression = WinGDI.BI_PNG;
-		info.bmiHeader.autoWrite();
-		info.autoWrite();
-		HDC hDC = user32.GetDC(windowHandle);
-		int sizeBytes = info.bmiHeader.biWidth * info.bmiHeader.biHeight * 4;
-		info.bmiHeader.biSizeImage = sizeBytes;
-		info.autoWrite();
-		Pointer lpvBits = new Memory(sizeBytes);
-		int bytesNeeded = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(), lpvBits, info,
-				WinGDI.DIB_RGB_COLORS);
-		WindowsError er = getLastError();
-
-		logger.debug("status=" + bytesNeeded);
-		logger.debug("dump: " + lpvBits.dump(0, 256));
-		byte[] bb = lpvBits.getByteArray(0, bytesNeeded);
-		try {
-
-			FileOutputStream writer = new FileOutputStream("./tmp-dir.png");
-			writer.write(bb);
-			writer.close();
-		} catch (Exception e) {
-			logger.debug("error!", e);
-		}
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		boolean ret;
-		try {
-			ByteArrayInputStream in = new ByteArrayInputStream(bb);
-			BufferedImage image = ImageIO.read(in);
-			File f2 = new File("./tmp2.png");
-			logger.debug(f2.getAbsolutePath());
-
-			ret = ImageIO.write(image, "PNG", f2);
-			ImageIO.write(image, "PNG", output);
-			logger.debug("ret =" + ret);
-		} catch (IOException e) {
-			logger.debug("error!", e);
-		}
-		// return null;
-		return new BitMapClipboardData(output.toByteArray());
-	}
-
+	/**
+	 * Notes about Microsofts quirks:
+	 * <ol>
+	 * <li>PNG Option - Although BITMAPINFOHEADER has an option for compression as
+	 * BI_PNG, that isn't really a valid format for the clipboard or windows itself.
+	 * It is intended for sending images to printers which have hardware support for
+	 * png.
+	 * <li>Transparency - Windows clipboard bitmap does not support transparency.
+	 * 
+	 * @param p
+	 * @return
+	 */
 	private BitMapClipboardData convertBitmapPngData(Pointer p) {
 		HBITMAP hbitmap = new HBITMAP(p);
 
@@ -600,8 +555,12 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		HDC hDC = user32.GetDC(windowHandle);
 		int sizeBytes = info.bmiHeader.biWidth * info.bmiHeader.biHeight * 4;
 		Pointer lpvBits = new Memory(sizeBytes);
-		int status = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(), lpvBits, info,
+		int scanLines = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(), lpvBits, info,
 				WinGDI.DIB_RGB_COLORS);
+		if (scanLines != gdiBitMap.bmHeight.intValue()) {
+			logger.warn("Warning! Windows bitmap conversion did not read the correct amount of lines.  linesRead="
+					+ scanLines + " ExpectedImageHeight=" + gdiBitMap.bmHeight.intValue());
+		}
 		BufferedImage image = new BufferedImage(info.bmiHeader.biWidth, info.bmiHeader.biHeight,
 				BufferedImage.TYPE_INT_ARGB);
 		int i = 0;
@@ -612,12 +571,12 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				int r = lpvBits.getByte(i + 2);
 				int g = lpvBits.getByte(i + 1);
 				int b = lpvBits.getByte(i);
-				int a = lpvBits.getByte(i + 3);
-				a &= 0xFF;
+				// int a = lpvBits.getByte(i + 3);
+				// a &= 0xFF;
 				r &= 0xFF;
 				g &= 0xFF;
 				b &= 0xFF;
-				a |= 0xFF;
+				int a = 0xFF;
 				rgb = (a << 24) | (r << 16) | (g << 8) | (b << 0);
 				// logger.debug("RGH hex=" + Integer.toHexString(rgb) + " r=" +
 				// Integer.toHexString(r) + " g="
@@ -647,58 +606,6 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		info.bmiHeader.biCompression = WinGDI.BI_RGB;
 		info.autoWrite();
 		return info;
-	}
-
-	private void convertBitmap1(Pointer p) {
-		HBITMAP hbitmap = new HBITMAP(p);
-		// logger.debug(hbitmap.getPointer().dump(0, 1));
-
-		BITMAP gdiBitMap = new BITMAP();
-		int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
-		// numBytes=gdi32.GetObject(hbitmap, 0, Pointer.NULL);
-		gdiBitMap.autoRead();
-		logger.debug(gdiBitMap.toString());
-		HDC hDC = user32.GetDC(windowHandle);
-		BITMAPINFOHEADER bih = new BITMAPINFOHEADER();
-		bih.biSize = bih.size();
-		bih.biWidth = gdiBitMap.bmWidth.intValue();
-		bih.biHeight = gdiBitMap.bmHeight.intValue();
-		bih.biPlanes = 1;
-		bih.biBitCount = (short) (gdiBitMap.bmPlanes * gdiBitMap.bmBitsPixel);
-		bih.biCompression = WinGDI.BI_PNG;
-		bih.biSizeImage = 0;
-		bih.biXPelsPerMeter = 0;
-		bih.biYPelsPerMeter = 0;
-		bih.biClrUsed = 0;
-		bih.biClrImportant = 0;
-		bih.autoWrite();
-		int iUsage;
-		PointerByReference ppvBits;
-		BITMAPINFO bi = new BITMAPINFO();
-		bi.bmiHeader = bih;
-		WinGDI.RGBQUAD[] rgbQuad = new WinGDI.RGBQUAD[1];
-		// TODO set RGBQUAD Properly!
-		bi.bmiColors = rgbQuad;
-		bi.autoWrite();
-		// gdi32.CreateDIBSection(hDC, bi, iUsage, ppvBits, null, 0);
-
-		// gdi32.BitBlt(hDC, 0, 0, gdiBitMap.bmWidth, gdiBitMap.bmHeight, hdcSrc, nXSrc,
-		// nYSrc, dwRop)
-
-		Memory newMem = new Memory(gdiBitMap.size() + numBytes);
-		BITMAP nbm = new BITMAP();
-		// nbm.bmBits=newMem;
-		// int numBytes = gdi32.GetObject(hbitmap, gdiBitMap.size(),
-		// gdiBitMap.getPointer());
-		Pointer bits = gdiBitMap.bmBits;
-		// logger.debug(bits.dump(0, 64));
-		// if (!GetObject(hBmp, sizeof(BITMAP), (LPSTR)&bmp))
-		// errhandler("GetObject", hwnd);
-
-		// GetDIBits get the bits in device independent
-
-		// try this
-		// https://www.codeguru.com/cpp/g-m/bitmap/article.php/c1765/Converting-DDB-to-DIB.htm
 	}
 
 	public IWindowsClipboardUser32 getUser32() {

@@ -36,7 +36,6 @@ import com.ncc.savior.desktop.clipboard.serialization.LocalSerializationProvider
 import com.ncc.savior.desktop.clipboard.serialization.LocalSerializationProvider.SerializerContainer;
 import com.ncc.savior.desktop.xpra.connection.ssh.JschUtils;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
-import com.ncc.savior.util.DebugTimer;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
@@ -297,24 +296,18 @@ public class SshClipboardManager implements IClipboardManager {
 		// if (files.contains(destinationFilePath) || true) {
 		boolean skipHash = true;
 		if (!skipHash) {
-			DebugTimer timer = new DebugTimer("hashs");
-			timer.interval("start");
 			List<String> sha256Output = SshUtil.sendCommandFromSession(session, "sha256sum " + destinationFilePath);
 			String remoteHash = sha256Output.get(0);
-
 			String localHash = null;
 			try {
 				localHash = sha2hex(IOUtils.toByteArray(fis));
 			} catch (NoSuchAlgorithmException e) {
 				logger.error("error with hashing", e);
 			}
-			timer.interval("remote");
 			logger.debug("local hash=" + localHash);
 			if (localHash == null || !remoteHash.contains(localHash)) {
 				SshUtil.sftpFile(session, fis, destinationFilePath);
 			}
-			timer.interval("local");
-			timer.stop();
 		} else {
 			SshUtil.sftpFile(session, fis, destinationFilePath);
 		}

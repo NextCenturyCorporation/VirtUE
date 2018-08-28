@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef.HBITMAP;
@@ -21,11 +23,19 @@ import com.sun.jna.platform.win32.WinGDI;
 import com.sun.jna.platform.win32.WinGDI.BITMAPINFO;
 
 /**
- * Clipboard Data container used for copying files between virtues. This class
- * transports the files as a byte array and therefore shouldn't be used for
- * large data.
+ * Clipboard Data container used for copying images between virtues. This class
+ * takes a byte array of an image in PNG format. The image must be converted
+ * prior to this class.
  * 
- *
+ * Windows Quirks:
+ * <ol>
+ * <li>PNG Option - Although BITMAPINFOHEADER has an option for compression as
+ * BI_PNG, that isn't really a valid format for the clipboard or windows itself.
+ * It is intended for sending images to printers which have hardware support for
+ * png. Therefore, windows returns a RGB bitmap which java converts to a PNG for
+ * transport.
+ * <li>Transparency - Windows clipboard bitmap does not support transparency.
+ * 
  */
 public class BitMapClipboardData extends ClipboardData implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -36,51 +46,6 @@ public class BitMapClipboardData extends ClipboardData implements Serializable {
 		super(ClipboardFormat.BITMAP);
 		this.bitMapData = data;
 	}
-
-	// private BitMapClipboardData convertBitmapPngData(Pointer p) {
-	// HBITMAP hbitmap = new HBITMAP(p);
-	//
-	// BITMAP gdiBitMap = new BITMAP();
-	// gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
-	// gdiBitMap.autoRead();
-	// BITMAPINFO info = new BITMAPINFO();
-	// info.bmiHeader.biSize = info.size();
-	// info.bmiHeader.biWidth = gdiBitMap.bmWidth.intValue();
-	// info.bmiHeader.biHeight = gdiBitMap.bmHeight.intValue();
-	// info.bmiHeader.biPlanes = 1;
-	// info.bmiHeader.biBitCount = 32;
-	// info.bmiHeader.biCompression = WinGDI.BI_RGB;
-	// info.autoWrite();
-	// HDC hDC = user32.GetDC(windowHandle);
-	// int sizeBytes = info.bmiHeader.biWidth * info.bmiHeader.biHeight * 4;
-	// Pointer lpvBits = new Memory(sizeBytes);
-	// int status = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(),
-	// lpvBits, info,
-	// WinGDI.DIB_RGB_COLORS);
-	// BufferedImage image = new BufferedImage(info.bmiHeader.biWidth,
-	// info.bmiHeader.biHeight,
-	// BufferedImage.TYPE_INT_ARGB);
-	// int i = 0;
-	// for (int y = image.getHeight() - 1; y >= 0; y--) {
-	// for (int x = 0; x < image.getWidth(); x++) {
-	// int rgb = 0;
-	// int r = lpvBits.getByte(i + 2);
-	// int g = lpvBits.getByte(i + 1);
-	// int b = lpvBits.getByte(i);
-	// int a = lpvBits.getByte(i + 3);
-	// rgb = (a << 24) + (r << 16) + (g << 8) + (b << 0);
-	// image.setRGB(x, y, rgb);
-	// i += 4;
-	// }
-	// }
-	// ByteArrayOutputStream output = new ByteArrayOutputStream();
-	// try {
-	// ImageIO.write(image, "PNG", output);
-	// } catch (IOException e) {
-	// logger.debug("error writing image into PNG format!", e);
-	// }
-	// return new BitMapClipboardData(output.toByteArray());
-	// }
 
 	@Override
 	public Pointer createWindowsData(WindowsClipboardWrapper wrapper) {
@@ -113,12 +78,13 @@ public class BitMapClipboardData extends ClipboardData implements Serializable {
 					int r = (rgb) & 0xFF;
 					int g = (rgb >> 8) & 0xFF;
 					int b = (rgb >> 16) & 0xFF;
-					int a = (rgb >> 24) & 0xFF;
+					// windows doesn't store transparency on bitmap clipboard
+					// int a = (rgb >> 24) & 0xFF;
 					// logger.debug("RGH hex=" + Integer.toHexString(rgb) + " r=" +
 					// Integer.toHexString(r) + " g="
 					// + Integer.toHexString(g) + " b=" + Integer.toHexString(b) + " a="
 					// + Integer.toHexString(a));
-					a |= 0xFF;
+					int a = 0xFF;
 					lpvBits.setByte(i, (byte) r);
 					lpvBits.setByte(i + 1, (byte) g);
 					lpvBits.setByte(i + 2, (byte) b);
@@ -126,9 +92,13 @@ public class BitMapClipboardData extends ClipboardData implements Serializable {
 					i += bytesPerPixel;
 				}
 			}
-			logger.debug("buffer=" + lpvBits.dump(0, 32));
 			int scanLinesWritten = wrapper.getGdi32().SetDIBits(hDC, hbitmap, 0, height, lpvBits, lpbi,
 					WinGDI.DIB_RGB_COLORS);
+			if (scanLinesWritten != height) {
+				logger.warn(
+						"Warning! Windows bitmap conversion did not write the expected amount of lines.  linesWritten="
+								+ scanLinesWritten + " ExpectedImageHeight=" + height);
+			}
 
 			return hbitmap.getPointer();
 		} catch (IOException e) {
@@ -160,7 +130,9 @@ public class BitMapClipboardData extends ClipboardData implements Serializable {
 
 	@Override
 	public long getWindowsDataLengthBytes() {
-		return bitMapData.length;
+		throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR,
+				"Windows data length for " + this.getClass().getSimpleName()
+						+ " is determined when data is created.  This function shouldn't ever be called.");
 	}
 
 	@Override
