@@ -558,7 +558,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		int scanLines = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(), lpvBits, info,
 				WinGDI.DIB_RGB_COLORS);
 		if (scanLines != gdiBitMap.bmHeight.intValue()) {
-			logger.warn("Warning! Windows bitmap conversion did not read the correct amount of lines.  linesRead="
+			logger.warn("Warning! Windows bitmap conversion did not read the expected amount of lines.  linesRead="
 					+ scanLines + " ExpectedImageHeight=" + gdiBitMap.bmHeight.intValue());
 		}
 		BufferedImage image = new BufferedImage(info.bmiHeader.biWidth, info.bmiHeader.biHeight,
