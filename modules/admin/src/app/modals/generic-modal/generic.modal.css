@@ -1,13 +1,23 @@
-
 .transparent {
   background-color: rgba(0, 0, 0, 0);
 }
 
+.center {
+  width: 75%;
+  margin: 10px auto;
+}
+
+.table-row{
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 /*  These center the lists (e.g. list of virtues under each user) within their column  */
-ul{
+#content ul{
     margin: 0; padding: 0;
 }
-li {
+#content li {
     margin: 0; padding: 0;
 }

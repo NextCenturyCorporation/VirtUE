@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
+
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
@@ -8,126 +10,162 @@ import 'rxjs/add/observable/of';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Column } from '../../models/column.model';
+import { RowOptions } from '../../models/rowOptions.model';
 import { DictList } from '../../models/dictionary.model';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
+import { GenericTable } from '../gen-table/gen-table.component';
 
-import { User } from '../../models/user.model';
-import { Virtue } from '../../models/virtue.model';
-import { VirtualMachine } from '../../models/vm.model';
-import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
+import { User } from '../../models/user.model';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
-import { UsersService } from '../../services/users.service';
-import { VirtuesService } from '../../services/virtues.service';
 import { ItemService } from '../../services/item.service';
-import { VirtualMachineService } from '../../services/vm.service';
-import { ApplicationsService } from '../../services/applications.service';
+
 
 @Component({
   selector: 'gen-list',
   templateUrl: './gen-list.component.html',
-  providers: [ ApplicationsService, BaseUrlService, VirtuesService, VirtualMachineService ]
+  providers: [ BaseUrlService, ItemService, GenericTable ]
 })
-export class GeneralListComponent extends GenericPageComponent implements OnInit {
+export abstract class GenericListComponent extends GenericPageComponent {
+
+  //The table itself
+  @ViewChild(GenericTable) table: GenericTable;
 
   prettyTitle: string;
   itemName: string;
   pluralItem: string;
-
-  //this list is what gets displayed in the table.
-  items: Item[];
-
-  colData: Column[];
-
   domain: string; // like '/users', '/virtues', etc.
-
-  noDataMessage: string;
-
-  baseUrl: string;
-
-  // these are the default properties the list sorts by
-  sortColumn: Column;
-  filterValue: string = '*';
-  sortDirection: string = 'asc';
-
-  showSortingAndEditOptions:boolean = true;
-
-  // protected router: Router;
-  // protected baseUrlService: BaseUrlService;
-  // protected usersService: UsersService;
-  // protected virtuesService: VirtuesService;
-  // protected vmService: VirtualMachineService;
-  // protected appsService: ApplicationsService;
-  // public dialog: MatDialog;
 
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    usersService: UsersService,
-    virtuesService: VirtuesService,
-    vmService: VirtualMachineService,
-    appsService: ApplicationsService,
+    itemService: ItemService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, usersService, virtuesService, vmService, appsService, dialog);
+    super(router, baseUrlService, itemService, dialog);
 
-    this.updateFuncQueue = [];
-    this.items = [];
+    let params = this.getListOptions();
+
+    this.prettyTitle = params.prettyTitle;
+    this.itemName = params.itemName;
+    this.pluralItem = params.pluralItem;
+    this.domain = params.domain;
   }
+
 
   ngOnInit() {
-    this.sortColumn = this.colData[0];
-    this.baseUrlService.getBaseUrl().subscribe( res => {
-      let awsServer = res[0].aws_server;
-      this.setBaseUrl(awsServer);
-
-      this.pullDatasets();
-    });
-
-    //do we need this?
-    // this.refreshData();
-    this.resetRouter();
+    this.cmnComponentSetup();
+    this.fillTable();
   }
 
+
+  fillTable(): void {
+    if (this.table === undefined) {
+      return;
+    }
+    this.table.setUp({
+      cols: this.getColumns(),
+      opts: this.getOptionsList(),
+      coloredLabels: this.hasColoredLabels(),
+      filters: this.getTableFilters(),
+      tableWidth: 12,
+      noDataMsg: this.getNoDataMsg(),
+      hasCB: this.hasCheckbox(),
+      selectedIDs: this.getSelectedIDs()
+    });
+  }
+
+  // most lists don't allow selection
+  getSelectedIDs() {
+    return [];
+  }
+
+  //overridden by everything that lists virtues
+  hasCheckbox() {
+    return false;
+  }
+
+  //abstracts away table from subclasses
+  setItems(newItems: Item[]) {
+    this.table.items = newItems;
+  }
+
+  //not used by all subclasses - some don't have reason to filter
+  getTableFilters(): {text:string, value:string}[] {
+    return [{value:'*', text:'All ' + this.pluralItem},
+            {value:'enabled', text:'Enabled ' + this.pluralItem},
+            {value:'disabled', text:'Disabled ' + this.pluralItem}];
+  }
+
+  abstract onPullComplete(): void;
+
+  abstract getColumns(): Column[];
+
+  abstract getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string,
+      domain: string};
+
+  //must be here so subclasses of list, which use table, can set table values.
+  abstract getNoDataMsg(): string;
+
+  //overridden by app-list and modals
+  getOptionsList(): RowOptions[] {
+    return [
+      new RowOptions("Enable", (i:Item) => !i.enabled, (i:Item) => this.toggleItemStatus(i)),
+      new RowOptions("Disable", (i:Item) => i.enabled, (i:Item) => this.toggleItemStatus(i)),
+      new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)),
+      new RowOptions("Duplicate", () => true, (i:Item) => this.dupItem(i)),
+      new RowOptions("Delete", () => true, (i:Item) => this.openDialog('delete', i))
+    ];
+  }
+
+  //overridden by virtues
+  hasColoredLabels() {
+    return false;
+  }
+
+  //used by many children to display their status
   formatStatus( item: Item ): string {
     return item.enabled ? 'Enabled' : 'Disabled';
   }
 
-  // Can't use this until I find a way to access the {x}-list component from
-  // within a format function. Passing in the scope to all format functions
-  // seems like a hack, and it'd only be needed for this one function.
-  // formatDate( item: Item): string {
-  //     return scope.datePipe.transform(item.lastModification, 'short');
-  // }
-
-  filterList(filterValue: string): void {
-    this.filterValue = filterValue;
+  //see comment by Item.childNamesHTML
+  getChildNamesHtml( item: Item) {
+    return item.childNamesHTML;
   }
 
-  setColumnSortDirection(sortColumn: Column, sortDirection: string): void {
-    //If the user clicked the currently-active column
-    if (this.sortColumn === sortColumn) {
-      this.reverseSorting();
-    } else {
-      this.sortColumn = sortColumn;
-    }
+
+  editItem(i: Item) {
+    this.router.navigate([this.domain +"/edit/" + i.getID()]);
   }
 
-  reverseSorting(): void {
-    if (this.sortDirection === 'asc') {
-      this.sortDirection = 'desc';
-    } else {
-      this.sortDirection = 'asc';
-    }
+  dupItem(i: Item) {
+    this.router.navigate([this.domain +"/duplicate/" + i.getID()]);
   }
 
-  //all the list pages need a full dataset on some set of item types; they don't
-  //need to do any extra winnowing.
-  pullData(): void {
-    this.pullDatasets();
+  deleteItem(i: Item) {
+    this.itemService.deleteItem(this.serviceConfigUrl, i.getID());
+    this.refreshData();
   }
+
+  //overriden by user-list, to perform function of setItemStatus method.
+  //TODO Change backend so everything works the same way.
+  //Probably just make every work via a setStatus method, and remove the toggle.
+  toggleItemStatus(i: Item) {
+    this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe();
+    this.refreshData();
+  }
+
+  setItemStatus(i: Item, newStatus: boolean) {
+    this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe();
+    this.refreshData();
+  }
+
+
 
   openDialog(action: string, target: Item): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
@@ -144,18 +182,14 @@ export class GeneralListComponent extends GenericPageComponent implements OnInit
     const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
 
       if (targetObject !== 0 ) {
-        // console.log('Dialog Emitter: ' + targetObject.getID());
+
         if ( action === 'delete') {
           this.deleteItem(targetObject);
         }
         if (action === 'disable') {
-          this.disableItem(targetObject);
+          this.setItemStatus(targetObject, false);
         }
       }
     });
   }
-
-  deleteItem(i: Item) {}
-
-  disableItem(i: Item) {}
 }

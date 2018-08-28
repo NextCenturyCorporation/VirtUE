@@ -11,9 +11,9 @@ export class HeaderComponent implements OnInit {
     {value: 'Dashboard', link: '/dashboard'},
     {value: 'Settings', link: '/settings'},
     {value: 'Users', link: '/users'},
-    {value: 'Applications', link: '/applications'},
+    {value: 'Virtue Templates', link: '/virtues'},
     {value: 'Virtual Machine Templates', link: '/vm-templates'},
-    {value: 'Virtue Templates', link: '/virtues'}
+    {value: 'Applications', link: '/applications'}
   ];
 
   ngOnInit() {

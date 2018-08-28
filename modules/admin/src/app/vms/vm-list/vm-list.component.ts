@@ -1,30 +1,28 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-import { Location } from '@angular/common';
 
 import { Item } from '../../shared/models/item.model';
-import { User } from '../../shared/models/user.model';
-import { Virtue } from '../../shared/models/virtue.model';
+import { Application } from '../../shared/models/application.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
 import { Column } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 @Component({
-  selector: 'user-list',
+  selector: 'vm-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class UserListComponent extends GenericListComponent implements OnInit  {
+export class VmListComponent extends GenericListComponent implements OnInit  {
 
   constructor(
     router: Router,
@@ -33,13 +31,11 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-
-
   }
 
   //called after all the datasets have loaded
   onPullComplete(): void {
-    this.setItems(this.allUsers.asList());
+    this.setItems(this.allVms.asList());
   }
 
   getColumns(): Column[] {
@@ -50,10 +46,12 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
     //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     //See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
-      {name: 'name', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-      {name: 'roles', prettyName: 'Authorized Roles', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.formatRoles},
-      {name: 'childNamesHTML', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
-      {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}
+    {name: 'name', prettyName: 'Template Name', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined, link:(i:Item) => this.editItem(i)},
+    {name: 'os', prettyName: 'OS', isList: false, sortDefault: 'asc', colWidth:1, formatValue: undefined},
+    {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
+    {name: 'lastEditor', prettyName: 'Last Modified By', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined},
+    {name: 'modDate', prettyName: 'Modified Date', isList: false, sortDefault: 'desc', colWidth:2, formatValue: undefined},
+    {name: 'status', prettyName: 'Status', isList: false, sortDefault: 'asc', colWidth:1, formatValue: this.formatStatus}
     ];
   }
 
@@ -61,10 +59,9 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
       serviceConfigUrl: ConfigUrlEnum,
       neededDatasets: string[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.USERS,
-      neededDatasets: ["virtues", "users"]
+      serviceConfigUrl: ConfigUrlEnum.VMS,
+      neededDatasets: ["apps", "vms"]
     };
-
   }
 
   getListOptions(): {
@@ -73,36 +70,16 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
       pluralItem: string,
       domain: string} {
     return {
-      prettyTitle: "Users",
-      itemName: "User",
-      pluralItem: "Users",
-      domain: '/users'
+      prettyTitle: "Virtual Machine Templates",
+      itemName: "Vm Template",
+      pluralItem: "VMs",
+      domain: '/vm-templates'
     };
-
   }
 
   getNoDataMsg(): string {
-    return "No users have been added at this time. To add a user, click on the button \"Add User\" above.";
+    return  "No vms have been added at this time. To add a vm, click on the button \"Add Vm Template\" above.";
   }
 
-  formatRoles( user: User ): string {
-    if (!user.roles) {
-      return '';
-    }
-    return user.roles.sort().toString();
-  }
-
-  // Overrides parent
-  toggleItemStatus(u: User) {
-    console.log(u);
-    if (u.getName().toUpperCase() === "ADMIN") {
-      this.openDialog('disable', u);
-      //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
-      return;
-    }
-
-    this.itemService.setItemStatus(this.serviceConfigUrl, u.getID(), !u.enabled).subscribe();
-    this.refreshData();
-  }
 
 }

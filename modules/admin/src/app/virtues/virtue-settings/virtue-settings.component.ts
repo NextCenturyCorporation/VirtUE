@@ -1,4 +1,7 @@
 import { Component, Input, ViewChild, ElementRef, OnInit, Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material';
+
+import { ColorModal } from "../../modals/color-picker/color-picker.modal";
 
 @Component({
   selector: 'app-virtue-settings',
@@ -7,9 +10,9 @@ import { Component, Input, ViewChild, ElementRef, OnInit, Injectable } from '@an
 })
 export class VirtueSettingsComponent implements OnInit {
 
-  @Input('virtue-color') virtueColor;
+  @Input('virtue-color') virtueColor: string;
 
-  constructor() {
+  constructor(protected dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -20,14 +23,27 @@ export class VirtueSettingsComponent implements OnInit {
 
 
   setColor(temp : any) {
-    // console.log("Color was ", this.virtueColor);
     this.virtueColor = String(temp);
-    // console.log("Color now ", this.virtueColor);
   }
 
   getColor() {
-    // console.log("Color is ", this.virtueColor);
     return this.virtueColor;
   }
 
+  activateModal(): void {
+    let wPercentageOfScreen = 40;
+
+    let dialogRef = this.dialog.open(ColorModal, {
+      width: wPercentageOfScreen + '%',
+      data: {
+        color: this.virtueColor
+      }
+    });
+    dialogRef.updatePosition({ top: '5%', left: String(Math.floor(50 - wPercentageOfScreen/2)) + '%' });
+
+    const vms = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
+      console.log("$$", newColor);
+      this.setColor(newColor);
+    });
+  }
 }

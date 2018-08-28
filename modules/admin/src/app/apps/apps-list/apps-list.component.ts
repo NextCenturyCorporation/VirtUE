@@ -1,30 +1,37 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs/Observable';
+import { MatDialog } from '@angular/material';
+import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { Router } from '@angular/router';
-import { Location } from '@angular/common';
 
 import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { Column } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
+import { RowOptions } from "../../shared/models/rowOptions.model"
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { MatDialog } from '@angular/material';
-import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { Application } from '../../shared/models/application.model';
+import { AddAppComponent } from '../add-app/add-app.component';
 
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 
 @Component({
-  selector: 'user-list',
+  selector: 'apps-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class UserListComponent extends GenericListComponent implements OnInit  {
+export class AppsListComponent extends GenericListComponent implements OnInit  {
+
+  file: string;
+  url: string;
 
   constructor(
     router: Router,
@@ -33,14 +40,8 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-
-
   }
 
-  //called after all the datasets have loaded
-  onPullComplete(): void {
-    this.setItems(this.allUsers.asList());
-  }
 
   getColumns(): Column[] {
     //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
@@ -50,10 +51,9 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
     //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     //See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
-      {name: 'name', prettyName: 'Username', isList: false, sortDefault: 'asc', colWidth:2, formatValue: undefined, link:(i:Item) => this.editItem(i)},
-      {name: 'roles', prettyName: 'Authorized Roles', isList: false, sortDefault: 'asc', colWidth:3, formatValue: this.formatRoles},
-      {name: 'childNamesHTML', prettyName: 'Available Virtues', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml},
-      {name: 'status', prettyName: 'Account Status', isList: false, sortDefault: 'desc', colWidth:3, formatValue: this.formatStatus}
+    {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
+    {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
+    {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
     ];
   }
 
@@ -61,10 +61,9 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
       serviceConfigUrl: ConfigUrlEnum,
       neededDatasets: string[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.USERS,
-      neededDatasets: ["virtues", "users"]
+      serviceConfigUrl: ConfigUrlEnum.APPS,
+      neededDatasets: ["apps"]
     };
-
   }
 
   getListOptions(): {
@@ -73,36 +72,39 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
       pluralItem: string,
       domain: string} {
     return {
-      prettyTitle: "Users",
-      itemName: "User",
-      pluralItem: "Users",
-      domain: '/users'
+      prettyTitle: "Available Applications",
+      itemName: "Application",
+      pluralItem: "Applications",
+      domain: '/applications'
     };
-
   }
 
   getNoDataMsg(): string {
-    return "No users have been added at this time. To add a user, click on the button \"Add User\" above.";
+    return "No apps appear to be available at this time. To add an application, click on the button \"Add Application\" above.";
   }
 
-  formatRoles( user: User ): string {
-    if (!user.roles) {
-      return '';
-    }
-    return user.roles.sort().toString();
+  //Apps can't be disabled, so nothing to filter
+  getTableFilters(): {text:string, value:string}[] {
+    return [];
   }
 
-  // Overrides parent
-  toggleItemStatus(u: User) {
-    console.log(u);
-    if (u.getName().toUpperCase() === "ADMIN") {
-      this.openDialog('disable', u);
-      //// TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
-      return;
-    }
-
-    this.itemService.setItemStatus(this.serviceConfigUrl, u.getID(), !u.enabled).subscribe();
-    this.refreshData();
+  getOptionsList(): RowOptions[] {
+    return [new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))];
   }
 
+  //called after all the datasets have loaded
+  onPullComplete(): void {
+    this.setItems(this.allApps.asList());
+  }
+
+  openAppsDialog(): void {
+    let dialogRef = this.dialog.open(AddAppComponent, {
+      width: '480px',
+      data: { file: this.file, url: this.url }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
+  }
 }

@@ -24,8 +24,6 @@ export class Virtue extends Item {
   awsTemplateName: string;
   color: string;
 
-  appsListHTML: string;
-
   //convert from whatever form the virtue object is in the database.
   constructor(virtueObj) {
     super();
@@ -43,32 +41,10 @@ export class Virtue extends Item {
     }
 
     if (! this.color) {
-      this.color = "#B2B2B2";
+      //TODO - is it better to have everything default to no color, or to something
+      //like silver (#C0C0C0), to let the user know that colors are available?
+      this.color = "transparent";
     }
-
-    this.children = new DictList<VirtualMachine>();
-    this.appsListHTML = "";
   }
 
-  generateAppListHtml(allVms: DictList<VirtualMachine>, allApps: DictList<Application>): void {
-    let allChildApps: string[] = [];
-    for (let vmID of this.childIDs) {
-      allChildApps = allChildApps.concat(allVms.get(vmID).childIDs)
-    }
-    this.appsListHTML = this.getSpecifiedItemsHTML(allChildApps, allApps);
-  }
-
-  getRepresentation(): {} {
-    if (! this.version) {
-      this.version = '1.0';
-    }
-
-    return {
-      'name': this.name,
-      'version': this.version,
-      'enabled': this.enabled,
-      'color' : this.color,
-      'virtualMachineTemplateIds': this.childIDs
-    };
-  }
 }
