@@ -80,9 +80,9 @@ it has a virtue ID attached to it which doesn't exist in the backend data.");
   }
 
 
-  formatListToHtml(l: string[]): string {
+  formatListToHtml(list: string[]): string {
     let listString: string = "";
-    for (let line of l) {
+    for (let line of list) {
       listString += "<li> " + line + " </li>";
     }
     return listString;
