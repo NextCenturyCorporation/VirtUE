@@ -485,7 +485,8 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		}
 	}
 
-	public void update() {
+	public void update(DesktopVirtue virtue) {
+		this.virtue = virtue;
 		container.setToolTipText("<html>" + "Virtue: " + virtue.getName() + "<br>" + "OS: " + ad.getOs() + "<br>"
 				+ "Status: " + virtue.getVirtueState() + "<br>" + "</html>");
 	}

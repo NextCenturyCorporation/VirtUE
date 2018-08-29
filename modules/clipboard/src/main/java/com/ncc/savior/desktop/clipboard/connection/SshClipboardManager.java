@@ -87,7 +87,8 @@ public class SshClipboardManager implements IClipboardManager {
 		this.sourceJarPath = sourceJarPath;
 		this.destinationFilePath = "clipboard.jar";
 		this.clipboardMainClass = StandardInOutClipboardClient.class.getCanonicalName();
-		this.command = "java -cp " + destinationFilePath + " " + clipboardMainClass;
+		String logConfig = "-Dlogback.configurationFile=logback-remote.xml";
+		this.command = "java -cp " + destinationFilePath + " " + logConfig + " " + clipboardMainClass;
 		if (testParam != null) {
 			command += " " + testParam;
 		}

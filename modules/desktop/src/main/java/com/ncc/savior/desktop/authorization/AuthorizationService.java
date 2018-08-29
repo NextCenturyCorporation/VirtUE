@@ -69,20 +69,14 @@ public class AuthorizationService {
 				|| !requiredDomain.toUpperCase().equals(user.getDomain().toUpperCase())) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 		}
-		triggerOnLogin();
 	}
 
 	public DesktopUser getUser() throws InvalidUserLoginException {
-		try {
-			DesktopUser user = authProvider.getCurrentUser();
-			return user;
-		} catch (InvalidUserLoginException e) {
-			return null;
-		}
+		DesktopUser user = authProvider.getCurrentUser();
+		return user;
 	}
 
 	public DesktopUser login(String domain, String username, String password) throws InvalidUserLoginException {
-		triggerOnLogin();
 		if (!(authProvider instanceof UsernamePasswordKerberosAuthorizationService)) {
 			authProvider = new UsernamePasswordKerberosAuthorizationService(loginUrl, logoutUrl);
 			// if (requiredDomain == null || requiredDomain.equals(domain)) {
@@ -94,7 +88,17 @@ public class AuthorizationService {
 			// throw new RuntimeException(msg);
 			// }
 		}
-		return authProvider.login(domain, username, password);
+		DesktopUser user = authProvider.login(domain, username, password);
+		if (user != null) {
+			triggerOnLogin();
+		}
+		return user;
+	}
+
+	public DesktopUser loginWithCachedCredentials() throws InvalidUserLoginException {
+		DesktopUser user = getUser();
+		triggerOnLogin();
+		return user;
 	}
 
 	public void logout() {
@@ -118,7 +122,7 @@ public class AuthorizationService {
 		loginListeners.remove(listener);
 	}
 
-	protected void triggerOnLogin() {
+	public void triggerOnLogin() {
 		for (ILoginListener listener : loginListeners) {
 			listener.onLogin();
 		}

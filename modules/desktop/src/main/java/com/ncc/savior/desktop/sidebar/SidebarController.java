@@ -75,7 +75,7 @@ public class SidebarController {
 		currentVirtues = getCurrentVirtueMap(initialVirtues);
 
 		sidebar.start(primaryFrame, initialVirtues);
-		startVirtuePoll();
+		// startVirtuePoll();
 		// sidebar.setStartState();
 	}
 
@@ -136,6 +136,11 @@ public class SidebarController {
 
 	public void stopVirtuePoll() {
 		terminatePollThread = true;
+		try {
+			virtuePollThread.join(5000);
+		} catch (InterruptedException e) {
+			logger.warn("failed to join virtue poll thread");
+		}
 	}
 
 	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {

@@ -40,7 +40,7 @@ public class VirtueTile extends AbstractVirtueView {
 	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
 		VirtueApplicationItem va = virtues.get(virtue.getTemplateId()).tiles.get(ad.getId() + virtue.getTemplateId());
 		if (va != null) {
-			va.update();
+			va.update(virtue);
 		}
 	}
 
