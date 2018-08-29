@@ -275,11 +275,9 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
       if (targetObject !== 0 ) {
         if (action === 'delete') {
-          //  this.setItemStatus(targetObject, false);
-          console.log(targetObject);
+
           this.item.removeChild(targetObject.getID());
 
-          // remove from childIDs and children
         }
       }
     },

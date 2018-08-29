@@ -60,10 +60,10 @@ export abstract class GenericPageComponent {
     this.allVms = new DictList<VirtualMachine>();
     this.allApps = new DictList<Application>();
 
-    // TODO what is this?
-    // this.router.routeReuseStrategy.shouldReuseRoute = function() {
-    //   return false;
-    // };
+
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
 
     this.buildDatasetMeta();
 
@@ -87,17 +87,6 @@ export abstract class GenericPageComponent {
     }
     // else
     this.pullData();
-  }
-
-  // returns true if s is a subset of l
-  isSubset(s: any[], l: any[]): boolean {
-    for (let e of s) {
-      console.log(e);
-      if ( ! l.some(x => x === e) ) {
-        return false;
-      }
-    }
-    return true;
   }
 
   buildDatasetMeta() {
@@ -253,7 +242,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     // The correct way would be to use a promise or something, since we're only making one call
     // and don't want a stream. But I don't think there's a harm in doing it this way.
 
-      this[updateQueue[0].datasetName].clear(); // slightly paranoic attempt to prevent memory leaks
+      this[updateQueue[0].datasetName].clear(); //slightly paranoic attempt to preclude memory leaks
       this[updateQueue[0].datasetName] = new DictList<Item>();
       let item = null;
       for (let e of rawDataList) {
