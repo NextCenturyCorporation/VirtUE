@@ -22,7 +22,12 @@ import { ColorSet } from '../../sets/color.set';
 
 import { ConfigUrlEnum } from '../../enums/enums';
 
-type datasetType = {serviceUrl: string, class: any, datasetName: string, depends: string};
+interface DatasetType {
+  serviceUrl: string;
+  class: any;
+  datasetName: string;
+  depends: string;
+}
 
 @Component({
 providers: [ BaseUrlService, ItemService  ]
@@ -43,7 +48,7 @@ export abstract class GenericPageComponent {
   allApps: DictList<Application>;
 
   // holds the names and data types of each of the four datasets.
-  datasetMeta: Dict<datasetType>;
+  datasetMeta: Dict<DatasetType>;
 
   // string, holds the data types whose datasets must be loaded on page load or
   // refresh. Must be in order, from lowest child to highest parent - like ["apps, vms", "virtues"]
@@ -90,7 +95,7 @@ export abstract class GenericPageComponent {
   }
 
   buildDatasetMeta() {
-    this.datasetMeta = new Dict<datasetType>();
+    this.datasetMeta = new Dict<DatasetType>();
     this.datasetMeta['apps'] = {
           serviceUrl: ConfigUrlEnum.APPS,
           class: Application,
@@ -235,7 +240,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
   ******************************************************************************
   */
   recursivePullData(
-    updateQueue: datasetType[],
+    updateQueue: DatasetType[],
     pulledDatasetNames: string[]
   ): void {
     let sub = this.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
