@@ -242,7 +242,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     // The correct way would be to use a promise or something, since we're only making one call
     // and don't want a stream. But I don't think there's a harm in doing it this way.
 
-      this[updateQueue[0].datasetName].clear(); //slightly paranoic attempt to preclude memory leaks
+      this[updateQueue[0].datasetName].clear(); // slightly paranoic attempt to preclude memory leaks
       this[updateQueue[0].datasetName] = new DictList<Item>();
       let item = null;
       for (let e of rawDataList) {

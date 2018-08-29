@@ -24,7 +24,7 @@ export class DialogsComponent implements OnInit {
     public dialogRef: MatDialogRef<DialogsComponent>,
     @Inject( MAT_DIALOG_DATA ) public data: {actionType: string, targetObject: Item}
   ) {
-    // The folllowing are only used on the dialog html page.
+    // The following are only used on the dialog html page.
 
     // actionType is what's being done: e.g. 'delete', 'disable'
     this.actionType = this.data.actionType;
