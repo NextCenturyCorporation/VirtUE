@@ -65,7 +65,6 @@ export abstract class GenericPageComponent {
     this.allVms = new DictList<VirtualMachine>();
     this.allApps = new DictList<Application>();
 
-
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
