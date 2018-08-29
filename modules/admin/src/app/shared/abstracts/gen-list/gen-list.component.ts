@@ -45,7 +45,6 @@ export abstract class GenericListComponent extends GenericPageComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-
     let params = this.getListOptions();
 
     this.prettyTitle = params.prettyTitle;
@@ -149,20 +148,34 @@ export abstract class GenericListComponent extends GenericPageComponent {
 
   deleteItem(i: Item) {
     this.itemService.deleteItem(this.serviceConfigUrl, i.getID());
-    this.refreshData();
+    this.refreshData(true);
   }
 
   //overriden by user-list, to perform function of setItemStatus method.
   //TODO Change backend so everything works the same way.
   //Probably just make every work via a setStatus method, and remove the toggle.
   toggleItemStatus(i: Item) {
-    this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe();
-    this.refreshData();
+    let sub = this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe(() => {
+      this.refreshData();
+    },
+    error => {
+
+    },
+    () => {
+      sub.unsubscribe();
+    });
   }
 
   setItemStatus(i: Item, newStatus: boolean) {
-    this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe();
-    this.refreshData();
+    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe(() => {
+      this.refreshData();
+    },
+    error => {
+
+    },
+    () => {
+      sub.unsubscribe();
+    });
   }
 
 
@@ -179,7 +192,7 @@ export abstract class GenericListComponent extends GenericPageComponent {
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
     // control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    const dialogResults = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
+    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
 
       if (targetObject !== 0 ) {
 
@@ -190,6 +203,10 @@ export abstract class GenericListComponent extends GenericPageComponent {
           this.setItemStatus(targetObject, false);
         }
       }
+    },
+    () => {},
+    () => {
+      sub.unsubscribe();
     });
   }
 }

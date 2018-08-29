@@ -101,8 +101,15 @@ export class UserListComponent extends GenericListComponent implements OnInit  {
       return;
     }
 
-    this.itemService.setItemStatus(this.serviceConfigUrl, u.getID(), !u.enabled).subscribe();
-    this.refreshData();
+    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, u.getID(), !u.enabled).subscribe( () => {
+
+    },
+    () => {},
+    () => {//when finished
+      this.refreshData();
+      sub.unsubscribe();
+    });
+
   }
 
 }

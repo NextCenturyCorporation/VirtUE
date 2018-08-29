@@ -103,8 +103,13 @@ export class AppsListComponent extends GenericListComponent implements OnInit  {
       data: { file: this.file, url: this.url }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    let sub = dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
+    },
+    () => {},
+    () => {//when finished
+      this.refreshData();
+      sub.unsubscribe();
     });
   }
 }

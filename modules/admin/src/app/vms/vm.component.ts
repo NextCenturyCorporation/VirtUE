@@ -6,28 +6,28 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { BaseUrlService } from '../shared/services/baseUrl.service';
+import { ItemService } from '../shared/services/item.service';
 
-import { AppsModalComponent } from '../../modals/apps-modal/apps-modal.component';
+import { AppsModalComponent } from '../modals/apps-modal/apps-modal.component';
 
-import { Item } from '../../shared/models/item.model';
-import { Application } from '../../shared/models/application.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
-import { DictList } from '../../shared/models/dictionary.model';
-import { Column } from '../../shared/models/column.model';
-import { RowOptions } from '../../shared/models/rowOptions.model';
+import { Item } from '../shared/models/item.model';
+import { Application } from '../shared/models/application.model';
+import { VirtualMachine } from '../shared/models/vm.model';
+import { DictList } from '../shared/models/dictionary.model';
+import { Column } from '../shared/models/column.model';
+import { RowOptions } from '../shared/models/rowOptions.model';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
-import { OSSet } from '../../shared/sets/os.set';
+import { ConfigUrlEnum } from '../shared/enums/enums';
+import { OSSet } from '../shared/sets/os.set';
 
-import { GenericFormComponent } from '../../shared/abstracts/gen-form/gen-form.component';
+import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
 
 @Component({
   selector: 'app-vm',
   templateUrl: './vm.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
+  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService, OSSet ]
 })
 export class VmComponent extends GenericFormComponent {
