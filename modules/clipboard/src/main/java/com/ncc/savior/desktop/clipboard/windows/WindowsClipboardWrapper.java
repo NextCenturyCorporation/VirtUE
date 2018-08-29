@@ -527,7 +527,12 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			return new FileClipboardData(files);
 		case IWindowsClipboardUser32.CF_BITMAT:
 			// convertPngToPngData(p);
-			return convertBitmapPngData(p);
+			try {
+				return convertBitmapPngData(p);
+			} catch (IOException e) {
+				logger.debug("error writing image into PNG format!", e);
+				return new EmptyClipboardData(format);
+			}
 		default:
 			return new UnknownClipboardData(format);
 		}
@@ -544,8 +549,9 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	 * 
 	 * @param p
 	 * @return
+	 * @throws IOException
 	 */
-	private BitMapClipboardData convertBitmapPngData(Pointer p) {
+	private BitMapClipboardData convertBitmapPngData(Pointer p) throws IOException {
 		HBITMAP hbitmap = new HBITMAP(p);
 
 		BITMAP gdiBitMap = new BITMAP();
@@ -587,12 +593,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 			}
 		}
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(image, "PNG", new File("fromWindows.png"));
-			ImageIO.write(image, "PNG", output);
-		} catch (IOException e) {
-			logger.debug("error writing image into PNG format!", e);
-		}
+		ImageIO.write(image, "PNG", output);
 		return new BitMapClipboardData(output.toByteArray());
 	}
 

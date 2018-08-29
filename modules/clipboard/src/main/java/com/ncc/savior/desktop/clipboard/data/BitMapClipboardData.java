@@ -2,7 +2,6 @@ package com.ncc.savior.desktop.clipboard.data;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -70,7 +69,6 @@ public class BitMapClipboardData extends ClipboardData implements Serializable {
 			int numBytesForBuffer = width * height * bytesPerPixel;
 			int i = 0;
 
-			ImageIO.write(image, "png", new File("toWindows.png"));
 			Pointer lpvBits = new Memory(numBytesForBuffer);
 			for (int y = image.getHeight() - 1; y >= 0; y--) {
 				for (int x = 0; x < image.getWidth(); x++) {
