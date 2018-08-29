@@ -22,7 +22,12 @@ import { ColorSet } from '../../sets/color.set';
 
 import { ConfigUrlEnum } from '../../enums/enums';
 
-type datasetType = {serviceUrl: string, class: any, datasetName: string, depends: string};
+interface DatasetType {
+  serviceUrl: string;
+  class: any;
+  datasetName: string;
+  depends: string;
+}
 
 @Component({
 providers: [ BaseUrlService, ItemService  ]
@@ -43,7 +48,7 @@ export abstract class GenericPageComponent {
   allApps: DictList<Application>;
 
   // holds the names and data types of each of the four datasets.
-  datasetMeta: Dict<datasetType>;
+  datasetMeta: Dict<DatasetType>;
 
   // string, holds the data types whose datasets must be loaded on page load or
   // refresh. Must be in order, from lowest child to highest parent - like ["apps, vms", "virtues"]
@@ -60,7 +65,10 @@ export abstract class GenericPageComponent {
     this.allVms = new DictList<VirtualMachine>();
     this.allApps = new DictList<Application>();
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 417ea599cdb31690c33e6399b24310cc06040663
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
@@ -90,7 +98,7 @@ export abstract class GenericPageComponent {
   }
 
   buildDatasetMeta() {
-    this.datasetMeta = new Dict<datasetType>();
+    this.datasetMeta = new Dict<DatasetType>();
     this.datasetMeta['apps'] = {
           serviceUrl: ConfigUrlEnum.APPS,
           class: Application,
@@ -235,14 +243,14 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
   ******************************************************************************
   */
   recursivePullData(
-    updateQueue: datasetType[],
+    updateQueue: DatasetType[],
     pulledDatasetNames: string[]
   ): void {
     let sub = this.itemService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
     // The correct way would be to use a promise or something, since we're only making one call
     // and don't want a stream. But I don't think there's a harm in doing it this way.
 
-      this[updateQueue[0].datasetName].clear(); //slightly paranoic attempt to preclude memory leaks
+      this[updateQueue[0].datasetName].clear(); // slightly paranoic attempt to preclude memory leaks
       this[updateQueue[0].datasetName] = new DictList<Item>();
       let item = null;
       for (let e of rawDataList) {

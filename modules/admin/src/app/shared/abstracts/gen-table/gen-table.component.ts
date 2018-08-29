@@ -147,10 +147,6 @@ export class GenericTableComponent {
     this.selectedIDs = [];
   }
 
-  callback(action: {(i: Item): any}, item: Item) {
-    action(item);
-  }
-
   // sets the watched attribute filterValue, causing angular to refresh the page
   //  and run the filter/sorter again - which is called via the pipe '|' character
   //  in gen-list.html

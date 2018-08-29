@@ -96,11 +96,11 @@ export class DashboardComponent extends GenericListComponent {
 
   getColumns(): Column[] {
     return [
-      {name: 'sensor_id',   prettyName: 'Sensor', isList: false, sortDefault: 'asc', colWidth: 3, formatValue: undefined},
-      {name: 'virtue name', prettyName: 'Virtue', isList: false, sortDefault: 'asc', colWidth: 3, formatValue: this.getVirtName},
-      {name: 'kafka_topic', prettyName: 'Kafka Topic', isList: false, sortDefault: 'asc', colWidth: 3, formatValue: undefined},
-      {name: 'has cert.',   prettyName: 'Certificate', isList: false, sortDefault: 'asc', colWidth: 1, formatValue: this.hasCertificates},
-      {name: 'updated_at',  prettyName: 'Last Update', isList: false, sortDefault: 'asc', colWidth: 2, formatValue: undefined}
+    new Column('sensor_id',   'Sensor', false, 'asc', 3),
+    new Column('virtue name', 'Virtue', false, 'asc', 3, this.getVirtName),
+    new Column('kafka_topic', 'Kafka Topic', false, 'asc', 3),
+    new Column('has cert',    'Certificate', false, 'asc', 1, this.hasCertificates),
+    new Column('updated_at',  'Last Update', false, 'asc', 2)
     ];
   }
 
