@@ -28,10 +28,10 @@ import { RowOptions } from '../../models/rowOptions.model';
   // providers: [ BaseUrlService, ItemService ]
 })
 
-export class GenericFormTab implements OnInit {
+export abstract class GenericFormTab implements OnInit {
 
-  // what the user is doing to the item: {CREATE, EDIT, DUPLICATE}
-  // Holds the strings 'Create', 'Edit', or 'Duplicate' resp., for display to the user
+  // what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
+  // Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
   mode: Mode;
 
   tabName: string;
@@ -39,7 +39,7 @@ export class GenericFormTab implements OnInit {
   item: Item;
 
   constructor( protected router: Router, protected dialog: MatDialog) {
-    // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
+    // gets overwritten once the datasets load, if mode is not CREATE
     this.item = new VirtualMachine(undefined);
 
   }
@@ -70,12 +70,15 @@ export class GenericFormTab implements OnInit {
     return item.enabled ? 'Enabled' : 'Disabled';
   }
 
-  setUp(mode: Mode, item: Item): void {}
+  // called by parent's constructor
+  abstract setUp(mode: Mode, item: Item): void;
 
-  //this should ensure that the previously-passed in item has been updated however
-  //it needed to be based on any changes within that tab. Called when the item is
-  //saved, not when a different tab is clicked.
-  tearDown(): any {}
+  abstract init(): void;
+
+  abstract update(newData?: any): void;
+
+  // called when item is being saved, to set any disconnected fields as necessary
+  abstract collectData(): void;
 
 
 

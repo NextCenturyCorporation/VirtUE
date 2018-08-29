@@ -1,7 +1,8 @@
 export enum Mode {
   CREATE = "Create",
   EDIT = "Edit",
-  DUPLICATE = "Duplicate"
+  DUPLICATE = "Duplicate",
+  VIEW = "View"
 }
 
 export enum ConfigUrlEnum {

@@ -125,6 +125,8 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
         this.mode = Mode.EDIT;
     } else if (route[1] === 'duplicate') {
         this.mode = Mode.DUPLICATE;
+    } else if (route[1] === 'view') {
+        this.mode = Mode.VIEW;
     } else {
         // something about the routing system has changed.
         urlValid = false;
@@ -155,47 +157,41 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
 
     this.cmnComponentSetup();
-    this.buildTabs();
+    this.initializeTabs();
   }
-
-  // TODO make this abstract
-  buildTabs(): void {}
 
   // overrides parent
   onPullComplete() {
     if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
       this.buildItem();
-
     }
-    this.setUpForm();
+    this.setUpTabs();
+    this.updateTabs();
   }
 
-  // set up the parent table.
-  abstract buildParentTable(): void;
+  // TODO make this abstract
+  // called in parent's ngOnInit
+  initializeTabs(): void {}
 
-  // This fills parentTable with items that the item being viewed/edited has
-  //  been assigned to.
-  // Like, if this.item is a virtue, it will find all the users that have been
-  //  given that virtue, and put those users into parentTable.
-  abstract populateParentTable(): void;
+  // TODO make this abstract
+  // called in parent's onPullComplete
+  setUpTabs(): void {}
 
+  // TODO make this abstract
+  // called whenever item's child list is set or changes
+  updateTabs(): void {}
 
-  // set up the table of running instances.
-  abstract buildInstanceTable(): void;
+  // TODO
+  // abstracts away what needs to happen when the page loads
+  // Most pages will at least build item.children
+  updatePage(): void {}
 
-
-  abstract populateInstanceTable(): void;
-
-  //  set up child form-pages' unique properties
-  //  does nothing by default, overridden by user form
-  //TODO make this abstract
-   setUpForm(): void {}
 
   buildItem() {
-  let _item = this[this.datasetName].get(this.item.id);
+    let _item = this[this.datasetName].get(this.item.id);
     if (_item) {
       this.item = _item;
-      this.buildChildren();
+      this.updatePage();
       this.resetRouter();
     }
     else {
@@ -205,13 +201,12 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
-  //TODO
-   buildChildren(): void {}
 
   createOrUpdate() {
     // collects/updates data for and in the item, in preparation for saving.
     if ( ! this.finalizeItem()) {
       console.log("Item not valid."); // TODO give useful error message
+      return;
     }
     console.log(this.item);
     if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
@@ -296,8 +291,5 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   // currently overridden in virtue
   updateUnconnectedFields(): void {}
 
-  abstract getChildColumns(): Column[];
-
-  abstract getNoDataMsg(): string;
 
 }

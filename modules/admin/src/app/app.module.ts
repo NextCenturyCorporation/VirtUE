@@ -52,16 +52,18 @@ import { PrintersComponent } from './config/resource-modal/printers/printers.com
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTab } from './shared/abstracts/gen-tab/gen-tab.component';
 
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent} from './users/user.component';
-import { UserMainTabComponent} from './users/form/main-user-tab.component';
+import { UserMainTabComponent} from './users/form/main-tab/main-user-tab.component';
 import { VirtueModalComponent } from './modals/virtue-modal/virtue-modal.component';
 
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { VirtueComponent } from './virtues/virtue.component';
-import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
+import { VirtueMainTabComponent } from './virtues/form/main-tab/virtue-main-tab.component';
+import { VirtueSettingsTabComponent } from './virtues/form/settings-tab/virtue-settings.component';
+import { VirtueUsageTabComponent } from './virtues/form/usage-tab/virtue-usage-tab.component';
+// import { VirtueHistoryTabComponent } from './virtues/form/history-tab/virtue-history-tab.component';
 import { ColorModalComponent } from './modals/color-picker/color-picker.modal';
 import { VmModalComponent } from './modals/vm-modal/vm-modal.component';
 
@@ -101,14 +103,16 @@ import { MessageService } from './shared/services/message.service';
     DashboardComponent,
 
     GenericTableComponent,
-    GenericFormTab,
 
     UserListComponent,
     UserComponent,
     UserMainTabComponent,
 
     VirtueListComponent,
-    VirtueSettingsComponent,
+    VirtueMainTabComponent,
+    VirtueSettingsTabComponent,
+    VirtueUsageTabComponent,
+    // VirtueHistoryTabComponent,
     VirtueComponent,
 
     DialogsComponent,

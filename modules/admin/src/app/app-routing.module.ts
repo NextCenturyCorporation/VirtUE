@@ -9,7 +9,6 @@ import {UserComponent} from './users/user.component';
 
 import {VirtueListComponent} from './virtues/virtue-list/virtue-list.component';
 import {VirtueComponent} from './virtues/virtue.component';
-import {VirtueSettingsComponent} from './virtues/virtue-settings/virtue-settings.component';
 
 import {VmListComponent} from './vms/vm-list/vm-list.component';
 import {VmComponent} from './vms/vm.component';
@@ -55,6 +54,12 @@ const routes: Routes = [
         breadcrumb: new Breadcrumb('Add User Account', '/create')
       }
       }, {
+        path: 'view/:id',
+        component: UserComponent,
+        data: {
+          breadcrumb: new Breadcrumb('View User Account', '/view')
+        }
+      }, {
         path: 'edit/:id',
         component: UserComponent,
         data: {
@@ -86,6 +91,12 @@ const routes: Routes = [
         data: {
           breadcrumb: new Breadcrumb('Install New App', '/create')
         }
+      // }, {
+      //   path: 'view/:id',
+      //   component: AppComponent,
+      //   data: {
+      //     breadcrumb: new Breadcrumb('View Application',  '/view')
+      //   }
       }
     ]
   }, {
@@ -107,6 +118,12 @@ const routes: Routes = [
           breadcrumb: new Breadcrumb('Create Virtue', '/create')
         }
       }, {
+        path: 'view/:id',
+        component: VirtueComponent,
+        data: {
+          breadcrumb: new Breadcrumb('View Virtue', '/view')
+        }
+      }, {
       path: 'edit/:id',
         component: VirtueComponent,
         data: {
@@ -118,9 +135,6 @@ const routes: Routes = [
         data: {
           breadcrumb: new Breadcrumb('Duplicate Virtue', '/duplicate')
         }
-      }, {
-      path: 'virtue-settings',
-        component: VirtueSettingsComponent
       }
     ]
   }, {
@@ -140,6 +154,12 @@ const routes: Routes = [
         component: VmComponent,
         data: {
           breadcrumb: new Breadcrumb('Build Virtual Machine', '/create')
+        }
+      }, {
+        path: 'view/:id',
+        component: VmComponent,
+        data: {
+          breadcrumb: new Breadcrumb('View Virtual Machine', '/view')
         }
       }, {
         path: 'edit/:id',

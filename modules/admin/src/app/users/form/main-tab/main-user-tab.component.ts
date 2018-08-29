@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -7,35 +7,37 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { BaseUrlService } from '../../../shared/services/baseUrl.service';
+import { ItemService } from '../../../shared/services/item.service';
 
-import { DialogsComponent } from '../../dialogs/dialogs.component';
+import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
-import { VirtueModalComponent } from '../../modals/virtue-modal/virtue-modal.component';
+import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 
-import { Item } from '../../shared/models/item.model';
-import { User } from '../../shared/models/user.model';
-import { VirtualMachine } from '../../shared/models/vm.model';
-import { Virtue } from '../../shared/models/virtue.model';
-import { DictList } from '../../shared/models/dictionary.model';
-import { Column } from '../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../shared/enums/enums';
-import { RowOptions } from '../../shared/models/rowOptions.model';
+import { Item } from '../../../shared/models/item.model';
+import { User } from '../../../shared/models/user.model';
+import { VirtualMachine } from '../../../shared/models/vm.model';
+import { Virtue } from '../../../shared/models/virtue.model';
+import { DictList } from '../../../shared/models/dictionary.model';
+import { Column } from '../../../shared/models/column.model';
+import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
+import { RowOptions } from '../../../shared/models/rowOptions.model';
 
-import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTab } from '../../shared/abstracts/gen-tab/gen-tab.component';
-// import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
+import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
+import { GenericFormTab } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 
 @Component({
   selector: 'app-main-user-tab',
   templateUrl: './main-user-tab.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
 })
 
 export class UserMainTabComponent extends GenericFormTab implements OnInit {
 
   @ViewChild('childrenTable') childrenTable: GenericTableComponent;
+
+  // emits a list of childID strings.
+  @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   roleUser: boolean;
   roleAdmin: boolean;
@@ -48,47 +50,6 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
     super(router, dialog);
     this.tabName = "General Info";
 
-    this.childDatasetName = 'allVirtues';
-  }
-
-
-  setUp(mode: Mode, item: Item): void {
-
-    this.mode = mode;
-    this.item = item;
-    this.childrenTable.items = this.item.children.asList();
-
-
-
-
-    this.roleUser = this.item['roles'].includes("ROLE_USER");
-    this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
-  }
-
-  tearDown(): any {
-
-  }
-
-  getColumns(): Column[] {
-    return [
-      // See note in gen-form getOptionsList
-      new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.viewItem(i)),
-      // new Column('name',            'Template Name',      false, 'asc',     2),
-      new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
-      new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
-      new Column('version',         'Version',          false, 'asc',     2),
-      new Column('status',          'Status',           false, 'asc',     1, this.formatStatus)
-    ];
-  }
-
-  viewItem(i: Item) {
-    if (i.getDomain()) {
-      this.router.navigate([i.getDomain()]);
-    }
-  }
-
-  getNoDataMsg(): string {
-    return "No users have been created yet. To add a user, click on the button \"Add User\" above.";
   }
 
   getPageOptions(): {
@@ -99,18 +60,24 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
       neededDatasets: ["apps", "vms", "virtues", "users"]
     };
   }
+  init() {
+    this.setUpChildTable();
+  }
 
-  // create and fill the fields the backend expects to see, record any
-  // uncollected inputs, and check that the item is valid to be saved
-  finalizeItem(): boolean {
-    // TODO perform checks here, so none of the below changes happen if the item
-    // isn't valid
+  update() {
+    this.childrenTable.items = this.item.children.asList();
+  }
 
-    // remember these aren't security checks, merely checks to prevent the user
-    // from accidentally putting in bad data
+  setUp(mode: Mode, item: Item): void {
+    this.mode = mode;
+    this.item = item;
+    // this.item.children.asList();
 
-    //  remember to check enabled
+    this.roleUser = this.item['roles'].includes("ROLE_USER");
+    this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
+  }
 
+  collectData() {
     this.item['roles'] = [];
     if (this.roleUser) {
       this.item['roles'].push('ROLE_USER');
@@ -118,32 +85,31 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
     if (this.roleAdmin) {
       this.item['roles'].push('ROLE_ADMIN');
     }
-
-    if (this.mode === Mode.CREATE && !this.item['username']) {
-      return confirm("You need to enter a username.");
-    }
-
-    // if not editing, make sure username isn't taken
-
-    this.item['username'] = this.item.name,
-    this.item['authorities'] = this.item['roles'], // since this is technically an item
-    this.item['virtueTemplateIds'] = this.item.childIDs;
-
-    // so we're not trying to stringify a bunch of extra fields and data
-    this.item.children = undefined;
-    this.item.childIDs = undefined;
-    this.item['roles'] = undefined;
-    return true;
   }
 
-  // overrides parent
-  // remember this is for the table, holding the user's virtues
-  hasColoredLabels() {
-    return true;
+  getColumns(): Column[] {
+    return [
+      // See note in gen-form getOptionsList
+      new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.viewItem(i)),
+      new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
+      new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
+      new Column('version',         'Version',          false, 'asc',     2),
+      new Column('status',          'Status',           false, 'asc',     1, this.formatStatus)
+    ];
   }
 
+  getOptionsList(): RowOptions[] {
+    return [
+       new RowOptions("Edit", () => true, (i:Item) => this.viewItem(i)),
+       new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
+    ];
+  }
 
-  buildChildTable(): void {
+  getNoDataMsg(): string {
+    return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
+  }
+
+  setUpChildTable(): void {
     if (this.childrenTable === undefined) {
       return;
     }
@@ -151,7 +117,7 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
     this.childrenTable.setUp({
       cols: this.getColumns(),
       opts: this.getOptionsList(),
-      coloredLabels: this.hasColoredLabels(),
+      coloredLabels: true,
       filters: [], // don't allow filtering on the form's child table. ?
       tableWidth: 9,
       noDataMsg: this.getNoDataMsg(),
@@ -160,19 +126,9 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
   }
 
 
-  // overrides parent
-  getOptionsList(): RowOptions[] {
-    return [
-       new RowOptions("Edit", () => true, (i:Item) => this.viewItem(i)),
-       new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-    ];
-  }
-
-
   /**
-   copied from gen-list, could merge that together at some point if had extra time.
    this is a checker, if the user clicks 'remove' on one of the item's children.
-   Could be improved/made more clear/distinguished from all the childrens' "activateModal" method.
+   Could be improved/made more clear/distinguished from the "activateModal" method.
   */
   openDialog(action: string, target: Item): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
@@ -190,11 +146,7 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
 
       if (targetObject !== 0 ) {
         if (action === 'delete') {
-          //  this.setItemStatus(targetObject, false);
-          console.log(targetObject);
           this.item.removeChild(targetObject.getID());
-
-          // remove from childIDs and children
         }
       }
     },
@@ -223,20 +175,9 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
   }
 
 
-  // if nothing is passed in, we just want to populate item.children
-  updateChildList( newVmIDs?: string[] ) {
-  //TODO TODO
-  // this doesn't know about databases though. Can it pass the new children to the parent?
-    if (newVmIDs instanceof Array) {
-      this.item.childIDs = newVmIDs;
-    }
-
-    // item was passed as a reference so this should update the other tabs as well.
-    this.item.buildChildren(this[this.childDatasetName]);
-    this.childrenTable.items = this.item.children.asList();
-  }
-
   // this brings up the modal to add/remove children
+  // this could be refactored into a "MainTab" class, which is the same for all
+  // forms, but I'm not sure that'd be necessary.
   activateModal(mode: string): void {
     let dialogHeight = 600;
     let dialogWidth = 800;
@@ -253,7 +194,7 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
     let dialogRef = this.getModal(modalParams);
 
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.updateChildList(selectedVirtues);
+      this.onChildrenChange.emit(selectedVirtues);
     },
     () => {},
     () => {// when finished

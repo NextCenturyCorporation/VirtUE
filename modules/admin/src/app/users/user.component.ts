@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -21,7 +21,7 @@ import { Column } from '../shared/models/column.model';
 import { Mode } from '../shared/enums/enums';
 import { RowOptions } from '../shared/models/rowOptions.model';
 
-import { UserMainTabComponent } from './form/main-user-tab.component';
+import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
 import { ConfigUrlEnum } from '../shared/enums/enums';
 
@@ -38,7 +38,7 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
     <div id="content-main">
       <div id="content" class="content">
         <mat-tab-group dynamicHeight=true>
-          <mat-tab label='General Info'>
+          <mat-tab label= {{mainTab.tabName}}>
             <app-main-user-tab #mainTab></app-main-user-tab>
           </mat-tab>
         </mat-tab-group>
@@ -86,43 +86,69 @@ export class UserComponent extends GenericFormComponent {
     this.childDomain = "/virtues";
   }
 
-  setUpForm(): void {
+  // called on parent's ngInit
+  initializeTabs() {
+    this.mainTab.init();
+    // this.activityTab.buildParentTable();
+    // this.historyTab.buildInstanceTable();
+
+    // Must unsubscribe from all these when the UserComponent is destroyed
+
+    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
+      this.buildItemChildren(newChildIDs);
+      this.updateTabs();
+    });
+
+    // Can anything be done/changed from the activity tab?
+    // this.activityTab.onSomethingChange.subscribe((data) => {
+    //   // do something
+    // });
+
+    // Probably add a button to the history page to let the admin revert settings
+    // back to a particular snapshot. Those settings should be pased in here,
+    // and used to update everything. Doesn't roll back history to that point,
+    // just adds a new edit, where all settings are changed to what they were in
+    // that snapshot.
+    // this.historyTab.onSomethingChange.subscribe((newData) => {
+    //   // do something
+    // });
+  }
+
+  // called in parent's onPullComplete
+  setUpTabs() {
+    // Note that within each form, the item itself can't change, though its
+    // attributes can.
     this.mainTab.setUp(this.mode, this.item);
 
-    // A table showing what virtues rae running, what's been instantiated, when they've logged-on
+    // A table showing what virtues are running, what's been instantiated, when they've logged-on
     // and logged off, all that sort of thing. Probably could do it in one table, but I'd want to add
     // some sort of custom filter.
+    // at least one of these.
     // this.activityTab.setUp(this.mode, this.item);
-    // this.usageTab.populateActivityTable(); // at least one of these.
-    // this.usageTab.populateInstanceTable(); // ?
+
+    // show the times that this user's permissions/settings have been changed by
+    // the admin, with a snapshot of what they were at each point.
+    // Note that some children may not exist any more, or may have been updated.
+    // this.historyTab.setUp();
   }
 
-  buildChildren() {
+  // called whenever item's child list is set or changes
+  updateTabs(): void {
+    this.mainTab.update();
+  }
+
+  // only called on initial page load at the moment.
+  updatePage() {
+    this.buildItemChildren();
+  }
+
+  // if nothing is passed in, we just want to populate item.children
+  buildItemChildren( newChildIDs?: string[] ) {
+    if (newChildIDs instanceof Array) {
+      this.item.childIDs = newChildIDs;
+    }
+
     this.item.buildChildren(this[this.childDatasetName]);
-    this.mainTab.childrenTable.items = this.item.children.asList();
-  }
-
-  buildTabs() {
-
-    this.mainTab.buildChildTable();
-    // this.usageTab.buildParentTable();
-    // this.usageTab.buildInstanceTable();
-  }
-
-  getChildColumns(): Column[] {
-    return [
-      // See note in gen-form getOptionsList
-      new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.viewItem(i)),
-      // new Column('name',            'Template Name',      false, 'asc',     2),
-      new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
-      new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
-      new Column('version',         'Version',          false, 'asc',     2),
-      new Column('status',          'Status',           false, 'asc',     1, this.formatStatus)
-    ];
-  }
-
-  getNoDataMsg(): string {
-    return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
   }
 
   getPageOptions(): {
@@ -134,36 +160,27 @@ export class UserComponent extends GenericFormComponent {
     };
   }
 
-  // Does nothing, because Users are the top level.
-  buildParentTable() {}
-  populateParentTable() {}
-
-
-  // do nothing - could show currently logged-in users though
-  buildInstanceTable(): void {}
-  populateInstanceTable(): void {}
-
   // create and fill the fields the backend expects to see, record any
   // uncollected inputs, and check that the item is valid to be saved
   finalizeItem(): boolean {
+    // Note
+    this.mainTab.collectData();
+
+
     // TODO perform checks here, so none of the below changes happen if the item
     // isn't valid
+    // note that the above has to happen in order to collect
 
     // remember these aren't security checks, merely checks to prevent the user
     // from accidentally putting in bad data
 
     //  remember to check enabled
 
-    this.item['roles'] = [];
-    if (this.roleUser) {
-      this.item['roles'].push('ROLE_USER');
-    }
-    if (this.roleAdmin) {
-      this.item['roles'].push('ROLE_ADMIN');
-    }
 
-    if (this.mode === Mode.CREATE && !this.item['username']) {
-      return confirm("You need to enter a username.");
+
+    if (this.mode === Mode.CREATE && !this.item.name) {
+      confirm("You need to enter a username.");
+      return false;
     }
 
     // if not editing, make sure username isn't taken
@@ -179,4 +196,7 @@ export class UserComponent extends GenericFormComponent {
     return true;
   }
 
+  ngOnDestroy() {
+    this.mainTab.onChildrenChange.unsubscribe();
+  }
 }

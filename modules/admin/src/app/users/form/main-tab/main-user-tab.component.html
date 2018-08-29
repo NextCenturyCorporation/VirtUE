@@ -2,8 +2,8 @@
   <div class="mui-row">
     <div class="mui-col-md-10">
       <div class="form-item">
-      <br />
-        <mat-form-field *ngIf="mode !== 'Edit'">
+        <br />
+        <mat-form-field *ngIf="mode !== 'Edit' && mode !== 'View'">
           <input type="text" [(ngModel)]="item.name" placeholder="Username" matInput>
         </mat-form-field>
       <!-- <div class="mui-col-md-4 form-item margin-top-15"> -->
@@ -23,15 +23,17 @@
         </div>
       </div>
       <hr />
-      <div class="mui-row">
-        <div class="titlebar margin-top-20">
+      <div class="mui-row titlebar">
+        <div class="mui-col-md-12">
           <br />
           <h3 class="titlebar-title">Virtue Templates</h3>
           <button class="titlebar-button" mat-button (click)="activateModal('add')">Add Template</button>
         </div>
       </div>
 
-      <app-item-table #childrenTable></app-item-table>
+      <div class="mui-row">
+        <app-item-table #childrenTable></app-item-table>
+      </div>
 
     </div>
   </div>
