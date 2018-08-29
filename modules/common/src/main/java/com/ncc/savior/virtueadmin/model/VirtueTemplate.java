@@ -81,20 +81,6 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 	}
 
-	// public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
-	// 		String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
-	// 	super();
-	// 	this.id = id;
-	// 	this.name = name;
-	// 	this.version = version;
-	// 	this.vmTemplates = vmTemplates;
-	// 	this.color = "transparent";
-	// 	this.enabled = enabled;
-	// 	this.lastModification = lastModification;
-	// 	this.lastEditor = lastEditor;
-	// 	this.awsTemplateName = awsTemplateName;
-	// }
-
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
 			String awsTemplateName, String color, boolean enabled, Date lastModification, String lastEditor) {
 		super();
