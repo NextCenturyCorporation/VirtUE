@@ -73,7 +73,7 @@
     </span>
     <div fxFlex="auto">
       <span class="mini-menu table-data mui-col-md-{{colData[0].colWidth}} transparent">
-        <a class="edit" *ngIf="colData[0].link !== undefined" (click)="callback(colData[0].link, i)">
+        <a class="edit" *ngIf="colData[0].link !== undefined" (click)="colData[0].link(i)">
           {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
         </a>
         <div class="edit" *ngIf="colData[0].link === undefined">

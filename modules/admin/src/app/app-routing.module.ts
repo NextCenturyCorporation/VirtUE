@@ -92,31 +92,31 @@ const routes: Routes = [
     path: 'virtues',
     component: VirtueListComponent,
     data: {
-      breadcrumb: new Breadcrumb('Virtues', '/virtues')
+      breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
     }
   }, {
     path: 'virtues',
     data: {
-      breadcrumb: new Breadcrumb('Virtues', '/virtues')
+      breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
     },
     children: [
       {
         path: 'create',
         component: VirtueComponent,
         data: {
-          breadcrumb: new Breadcrumb('Create Virtue', '/create')
+          breadcrumb: new Breadcrumb('Create Virtue Template', '/create')
         }
       }, {
       path: 'edit/:id',
         component: VirtueComponent,
         data: {
-          breadcrumb: new Breadcrumb('Edit Virtue', '/edit')
+          breadcrumb: new Breadcrumb('Edit Virtue Template', '/edit')
         }
       }, {
         path: 'duplicate/:id',
         component: VirtueComponent,
         data: {
-          breadcrumb: new Breadcrumb('Duplicate Virtue', '/duplicate')
+          breadcrumb: new Breadcrumb('Duplicate Virtue Template', '/duplicate')
         }
       }, {
       path: 'virtue-settings',
@@ -127,12 +127,12 @@ const routes: Routes = [
     path: 'vm-templates',
     component: VmListComponent,
     data: {
-      breadcrumb: new Breadcrumb('VM Templates', '/vm-templates')
+      breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
     }
   }, {
     path: 'vm-templates',
     data: {
-      breadcrumb: new Breadcrumb('VM Templates', '/vm-templates')
+      breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
     },
     children: [
       {
