@@ -258,7 +258,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       });
   }
 
-
   // overridden by virtue component
   getTableWidth(): number {
     return 9;

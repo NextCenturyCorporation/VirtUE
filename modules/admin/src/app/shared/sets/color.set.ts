@@ -1,4 +1,8 @@
-export type Color = {prettyName: string, hex: string,  htmlName: string};
+export interface Color {
+  prettyName: string;
+  hex: string;
+  htmlName: string;
+}
 
 export class ColorSet {
   readonly list: Color[] = [
