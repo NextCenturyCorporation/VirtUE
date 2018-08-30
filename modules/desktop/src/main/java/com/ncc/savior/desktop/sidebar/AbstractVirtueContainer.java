@@ -154,7 +154,7 @@ public abstract class AbstractVirtueContainer {
 				mi4.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
-						logger.debug("Reconnect not implemented yet");
+						virtueService.ensureConnectionForVirtue(virtue);
 					}
 				});
 

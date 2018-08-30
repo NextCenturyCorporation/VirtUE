@@ -67,6 +67,20 @@ public class DesktopRestService {
 	}
 
 	/**
+	 * Returns a list of "applications" to enable the desktop to reconnect to a virtue.
+	 * 
+	 * @param virtueId
+	 * @return
+	 */
+	@GET
+	@Produces("application/json")
+	@Path("virtue/{virtueId}/reconnect")
+	public Collection<DesktopVirtueApplication> startApplication(@PathParam("virtueId") String virtueId) {
+		return desktopService.getReconnectApps(virtueId);
+	}
+
+
+	/**
 	 * Starts the given application after provisioning a new virtue from the given
 	 * template.
 	 * 
