@@ -18,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.services.ec2.model.AttachVolumeRequest;
+import com.amazonaws.services.ec2.model.AttachVolumeResult;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -35,6 +37,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -52,6 +55,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  */
 public class XenHostManager {
 	private static final String VM_PREFIX = "VRTU-XG-";
+	public static final String PERSISTENT_VOLUME_DEVICE_NAME = "/dev/sdb";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private VirtualMachineTemplate xenVmTemplate;
 	private AwsEc2Wrapper ec2Wrapper;
@@ -64,12 +68,14 @@ public class XenHostManager {
 	private String subnetId;
 	private Collection<String> securityGroupIds;
 	private CompletableFutureServiceProvider serviceProvider;
+	private PersistentStorageManager persistentStorageManager;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
-			Collection<String> securityGroupsNames, String vpcName, String subnetName, String xenAmi,
-			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns) {
+			PersistentStorageManager psm, Collection<String> securityGroupsNames, String vpcName, String subnetName,
+			String xenAmi, String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns) {
 		this.xenVmDao = vmDao;
+		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
 		this.ec2Wrapper = ec2Wrapper;
 		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
@@ -87,11 +93,11 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
-			String securityGroupsCommaSeparated, String vpcName, String subnetName, String xenAmi, String xenUser,
-			String xenKeyName, String xenInstanceType, boolean usePublicDns) {
-		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, splitOnComma(securityGroupsCommaSeparated),
-				vpcName, subnetName, xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType),
-				usePublicDns);
+			PersistentStorageManager psm, String securityGroupsCommaSeparated, String vpcName, String subnetName,
+			String xenAmi, String xenUser, String xenKeyName, String xenInstanceType, boolean usePublicDns) {
+		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm,
+				splitOnComma(securityGroupsCommaSeparated), vpcName, subnetName, xenAmi, xenUser, xenKeyName,
+				InstanceType.fromValue(xenInstanceType), usePublicDns);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -123,6 +129,8 @@ public class XenHostManager {
 		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
 		String virtueName = virtue.getName();
 		virtueName = virtueName.replace(" ", "-");
+		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(),
+				virtue.getTemplateId());
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
 				xenInstanceType, subnetId);
@@ -174,6 +182,7 @@ public class XenHostManager {
 					session = getSession(xen, session, privateKeyFile, 5);
 
 					copySshKey(session, privateKeyFile);
+					attachPersistentVolume(xen.getInfrastructureId(), virtue.getUsername(), virtue.getTemplateId());
 					waitUntilXlListIsReady(session);
 					// JavaUtil.sleepAndLogInterruption(20000);
 					SshUtil.sendCommandFromSessionWithTimeout(session,
@@ -232,6 +241,16 @@ public class XenHostManager {
 		// xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
+	}
+
+	protected void attachPersistentVolume(String instanceId, String username, String templateId) {
+		String volumeId = persistentStorageManager.getOrCreatePersistentStorageForVirtue(username, templateId);
+		if (volumeId != null) {
+			AttachVolumeRequest avr = new AttachVolumeRequest(volumeId, instanceId, PERSISTENT_VOLUME_DEVICE_NAME);
+			AttachVolumeResult avrResult = ec2Wrapper.getEc2().attachVolume(avr);
+			String state = avrResult.getAttachment().getState();
+			logger.debug("Attaching volume state=" + state);
+		}
 	}
 
 	private void handleError(VirtueInstance virtue, CompletableFuture<?> future, VirtualMachine xenVm, Throwable ex) {

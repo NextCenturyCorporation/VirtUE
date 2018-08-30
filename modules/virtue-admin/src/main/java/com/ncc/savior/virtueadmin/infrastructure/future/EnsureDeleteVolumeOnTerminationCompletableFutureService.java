@@ -17,6 +17,7 @@ import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMappingSpecification;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
+import com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
@@ -62,11 +63,13 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 			return false;
 		}
 		for (InstanceBlockDeviceMapping mapping : mappings) {
-			Boolean delOnTerm = mapping.getEbs().getDeleteOnTermination();
-			if (!delOnTerm) {
+			boolean delOnTerm = mapping.getEbs().getDeleteOnTermination();
+			boolean shouldBeDeletedOnTerm = !(XenHostManager.PERSISTENT_VOLUME_DEVICE_NAME
+					.equals(mapping.getDeviceName()));
+			if (delOnTerm != shouldBeDeletedOnTerm) {
 				InstanceBlockDeviceMappingSpecification mapspec = new InstanceBlockDeviceMappingSpecification();
 				EbsInstanceBlockDeviceSpecification ebs = new EbsInstanceBlockDeviceSpecification();
-				ebs.setDeleteOnTermination(true);
+				ebs.setDeleteOnTermination(shouldBeDeletedOnTerm);
 				ebs.setVolumeId(mapping.getEbs().getVolumeId());
 				mapspec.setEbs(ebs);
 				mapspec.setDeviceName(mapping.getDeviceName());
