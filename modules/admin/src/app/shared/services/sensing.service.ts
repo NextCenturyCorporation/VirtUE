@@ -21,7 +21,7 @@ export class SensingService {
   ) { }
 
   private jsonfile = './assets/json/sensing.json';
-  private configUrl = 'admin/sensing';
+  private configUrl = 'sensing';
 
   public setBaseUrl( url: string ) {
     this.baseUrl = url;
