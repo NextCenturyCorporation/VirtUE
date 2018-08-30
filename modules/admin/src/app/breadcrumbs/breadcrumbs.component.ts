@@ -19,7 +19,7 @@ export class BreadcrumbsComponent implements OnInit {
     private router: Router,
     private breadcrumbProvider: BreadcrumbProvider,
     private activatedRoute: ActivatedRoute
-  ) {  }
+  ) { }
 
   ngOnInit() {
     let tempCrumbs: Breadcrumb[] = [];

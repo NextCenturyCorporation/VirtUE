@@ -48,7 +48,7 @@ import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
  * Rest resource that handles endpoints specifically for an administrator
- * 
+ *
  */
 
 @Path("/admin")
@@ -202,9 +202,9 @@ public class AdminResource {
 
 	/**
 	 * Gets all {@link VirtueTemplate}s in the system
-	 * 
+	 *
 	 * @return
-	 * 
+	 *
 	 */
 	@GET
 	@Produces("application/json")
@@ -253,7 +253,7 @@ public class AdminResource {
 	/**
 	 * Starts the given application after provisioning a new virtue from the given
 	 * template.
-	 * 
+	 *
 	 * @param templateId
 	 * @param applicationId
 	 * @return
@@ -452,7 +452,7 @@ public class AdminResource {
 	@Produces("application/json")
 	public Response getSensing() throws IOException {
 		try {
-			String response = adminService.getSensingReponse();
+			String response = adminService.getSensingResponse();
 			return Response.ok(response).build();
 		} catch (Exception e) {
 			throw WebServiceUtil.createWebserviceException(e);
@@ -499,7 +499,7 @@ public class AdminResource {
 	 * returnable computed permissions are returned. This typically is a permission
 	 * for every possible pair of virtue template ID to every other virtue template
 	 * ID in both directions and every virtue template ID to the default setting.
-	 * 
+	 *
 	 * @param raw
 	 * @return
 	 */
@@ -519,7 +519,7 @@ public class AdminResource {
 	/**
 	 * Set a new value for a permission. The value should be sent as the body of the
 	 * POST.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param destId
 	 * @param optionStr
@@ -539,7 +539,7 @@ public class AdminResource {
 	 * computed taking into account any defaults when a more specific setting cannot
 	 * be found. To get just the raw permission that is stored in the data, set the
 	 * query parameter 'raw' to true.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param destId
 	 * @param raw
@@ -567,7 +567,7 @@ public class AdminResource {
 	 * Get list of permissions for a given source ID. If the query parameter 'raw'
 	 * is set to true, only permissions stored in the database are returned.
 	 * Otherwise, all returnable computed permissions are returned.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param raw
 	 * @return
@@ -591,7 +591,7 @@ public class AdminResource {
 	 * Clear a permission from the system if it exists. Once this operation occurs,
 	 * the computed permission should return a default value either from the source
 	 * ID or the system.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param destId
 	 */
@@ -603,7 +603,7 @@ public class AdminResource {
 
 	/**
 	 * Returns the system default {@link ClipboardPermissionOption}.
-	 * 
+	 *
 	 * @param optionStr
 	 */
 	@GET

@@ -83,7 +83,7 @@ export class ItemService {
     // console.log(url);
     return this.httpClient.post(url, newStatus).catch(this.errorHandler);
   }
-  //TODO Is this set up correctly, how does it work, and do we need it?
+  // TODO Is this set up correctly, how does it work, and do we need it?
   // If yes then, should '.catch(this.errorHandler);' be appended to all requests?
   /**
    * Handle Http operation that failed.

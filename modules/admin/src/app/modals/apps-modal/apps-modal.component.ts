@@ -8,7 +8,7 @@ import { ItemService } from '../../shared/services/item.service';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
-import { GenericModal } from '../generic-modal/generic.modal';
+import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
@@ -18,14 +18,14 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   styleUrls: ['../generic-modal/generic.modal.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-export class AppsModalComponent extends GenericModal {
+export class AppsModalComponent extends GenericModalComponent {
 
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
       itemService: ItemService,
       dialog: MatDialog,
-      dialogRef: MatDialogRef<GenericModal>,
+      dialogRef: MatDialogRef<AppsModalComponent>,
     @Inject(MAT_DIALOG_DATA) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
@@ -33,9 +33,9 @@ export class AppsModalComponent extends GenericModal {
 
   getColumns(): Column[] {
     return [
-      {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
-      {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-      {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
+      new Column('name',    'Application Name', false, 'asc', 5),
+      new Column('version', 'Version',          false, 'asc', 3),
+      new Column('os',      'Operating System', false, 'desc', 4)
     ];
   }
 
@@ -63,7 +63,7 @@ export class AppsModalComponent extends GenericModal {
 
   getNoDataMsg(): string {
     return "No apps appear to be available at this time.";
-  };
+  }
 
   onPullComplete() {
     this.setItems(this.allApps.asList());

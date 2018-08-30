@@ -24,7 +24,7 @@ import { ItemService } from '../../services/item.service';
 /********************************************
 Using this table needs three things:
   1. Have a table object. Include it in the html file via:
-          <item-table #table></item-table>
+          <app-item-table #table></app-item-table>
         and in the parent .ts
           @ViewChild(GenericTable) table: GenericTable;
     --remember doing it this way means the table gets instantiated when the
@@ -40,31 +40,31 @@ Using this table needs three things:
 
 ********************************************/
 @Component({
-  selector: 'item-table',
+  selector: 'app-item-table',
   templateUrl: './gen-table.component.html',
   styleUrls: ['./gen-table.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class GenericTable {
+export class GenericTableComponent {
 
-  //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-  // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+  // This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+  //  to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
   colData: Column[];
 
-  //this is a list of the links/options that show up under the element in the
-  //first column of each row in the table
+  // this is a list of the links/options that show up under the element in the
+  // first column of each row in the table
   rowOptions: RowOptions[];
 
-  //this list is what gets displayed in the table.
+  // this list is what gets displayed in the table.
   items: Item[];
 
-  //used to put a colored bar for everywhere virtues show up
+  // used to put a colored bar for everywhere virtues show up
   hasColoredLabels: boolean;
 
-  //used to put checkboxes on the table and allow selection, within modals
+  // used to put checkboxes on the table and allow selection, within modals
   hasCheckbox: boolean;
 
-  filterOptions: {text:string, value:string}[];
+  filterOptions: {text: string, value: string}[];
 
   noDataMessage: string;
 
@@ -75,33 +75,33 @@ export class GenericTable {
   filterValue: string = '*';
   sortDirection: string = 'asc';
 
-  //For modals and other possible components which allow the user to select
-  //things from the list
+  // For modals and other possible components which allow the user to select
+  // things from the list
   selectedIDs: string[];
 
-  constructor( ){
-    //prevent error, until createTable() is called by ngOnInit
-    this.sortColumn = new Column();
+  constructor() {
+    // prevent error, until createTable() is called by ngOnInit
+    this.sortColumn = new Column("", "", false, "", 0);
     this.colData = [this.sortColumn];
     this.filterOptions = [];
     this.items = [];
     this.rowOptions = [];
-    this.tableWidth = 12; //default to take up full space in container
+    this.tableWidth = 12; // default to take up full space in container
     this.hasCheckbox = false;
     this.selectedIDs = [];
   }
 
-  //must be called by containing object, passing in all attributes the table
-  //needs. items isn't passed in, because it usually isn't available when the table is built.
-  //parameter is a single object so the callee has to see what element they're setting to what,
-  //and because most elements are necessary.
-  setUp(params:{
+  // must be called by containing object, passing in all attributes the table
+  // needs. items isn't passed in, because it usually isn't available when the table is built.
+  // parameter is a single object so the callee has to see what element they're setting to what,
+  // and because most elements are necessary.
+  setUp(params: {
     cols: Column[];
     opts: RowOptions[];
     coloredLabels: boolean;
-    filters: {value:string, text:string}[];
+    filters: {value: string, text: string}[];
     tableWidth: number,
-    noDataMsg:string,
+    noDataMsg: string,
     hasCB: boolean,
     selectedIDs?: string[]}
   ) {
@@ -134,7 +134,7 @@ export class GenericTable {
     }
   }
 
-  //called upon check/uncheck
+  // called upon check/uncheck
   checkClicked(checked: boolean, id: string) {
     if (checked === true) {
       this.selectedIDs.push(id);
@@ -147,19 +147,15 @@ export class GenericTable {
     this.selectedIDs = [];
   }
 
-  callback(action: {(i:Item): any}, item:Item) {
-    action(item);
-  }
-
-  //sets the watched attribute filterValue, causing angular to refresh the page
-  //and run the filter/sorter again - which is called via the pipe '|' character
-  // in gen-list.html
+  // sets the watched attribute filterValue, causing angular to refresh the page
+  //  and run the filter/sorter again - which is called via the pipe '|' character
+  //  in gen-list.html
   filterList(filterValue: string): void {
     this.filterValue = filterValue;
   }
 
   setColumnSortDirection(sortColumn: Column, sortDirection: string): void {
-    //If the user clicked the currently-active column
+    // If the user clicked the currently-active column
     if (this.sortColumn === sortColumn) {
       this.reverseSorting();
     } else {

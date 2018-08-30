@@ -24,7 +24,7 @@ export class Virtue extends Item {
   awsTemplateName: string;
   color: string;
 
-  //convert from whatever form the virtue object is in the database.
+  // convert from whatever form the virtue object is in the database.
   constructor(virtueObj) {
     super();
     if (virtueObj) {
@@ -41,8 +41,8 @@ export class Virtue extends Item {
     }
 
     if (! this.color) {
-      //TODO - is it better to have everything default to no color, or to something
-      //like silver (#C0C0C0), to let the user know that colors are available?
+      // TODO - is it better to have everything default to no color, or to something
+      // like silver (#C0C0C0), to let the user know that colors are available?
       this.color = "transparent";
     }
   }

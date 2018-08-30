@@ -13,7 +13,7 @@ export class User extends Item {
   roles: string[];
 
 
-  //convert from whatever form the user object is in the database.
+  // convert from whatever form the user object is in the database.
   constructor(userObj) {
     super();
     if (userObj) {
@@ -41,7 +41,7 @@ export class User extends Item {
   }
 
 
-  //Overrides Item
+  // Overrides Item
   getID(): string {
     return this.name;
   }

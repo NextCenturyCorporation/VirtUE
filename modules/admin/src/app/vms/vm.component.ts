@@ -48,12 +48,12 @@ export class VmComponent extends GenericFormComponent {
     this.datasetName = 'allVms';
     this.childDatasetName = 'allApps';
 
-    //No place to navigate to, since apps don't currently each have their own page
+    // No place to navigate to, since apps don't currently each have their own page
     this.childDomain = undefined;
   }
 
   getNoDataMsg(): string {
-    return "No virtual machine templates have been created yet. To add a template, click on the button \"Add VM Template\" above.";
+    return 'No virtual machine templates have been created yet. To add a template, click on the button "Add VM Template" above.';
   }
 
   getPageOptions(): {
@@ -61,42 +61,42 @@ export class VmComponent extends GenericFormComponent {
       neededDatasets: string[]} {
     return {
       serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ["apps", "vms"]
+      neededDatasets: ['apps', 'vms']
     };
   }
 
   getColumns(): Column[] {
     return [
-      {name: 'name', prettyName: 'Application Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
-      {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-      {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
+      new Column('name',    'Application Name', false, 'asc', 5),
+      new Column('version', 'Version',          false, 'asc', 3),
+      new Column('os',      'Operating System', false, 'desc', 4)
     ];
   }
 
   getModal(
-    params:{width:string, height:string, data:{id:string, selectedIDs:string[] }}
+    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
   ): any {
     return this.dialog.open( AppsModalComponent, params);
   }
 
-  //create and fill the fields the backend expects to see, record any
-  //uncollected inputs, and check that the item is valid to be saved
+  // create and fill the fields the backend expects to see, record any
+  // uncollected inputs, and check that the item is valid to be saved
   finalizeItem(): boolean {
 
-    //TODO perform checks here, so none of the below changes happen if the item
-    //isn't valid
+    // TODO perform checks here, so none of the below changes happen if the item
+    // isn't valid
 
-    //The following are required:
-    // 'id'           should be ok as-is. May be empty if creating new.
-    // 'name'         can't be empty
-    // 'os'           must be set
-    this.item['loginUser'] = 'system'; //TODO does this still exist on the backend?
+    // The following are required:
+    //  'id'           should be ok as-is. May be empty if creating new.
+    //  'name'         can't be empty
+    //  'os'           must be set
+    this.item['loginUser'] = 'system'; // TODO does this still exist on the backend?
 
-    //TODO check if necessary, and what the string should be (admin vs administrator)
-    // this.item['lastEditor'] = 'administrator';
+    // TODO check if necessary, and what the string should be (admin vs administrator)
+    //  this.item['lastEditor'] = 'administrator';
 
-    // 'enabled'      must be either true or false
-    this.item['applicationIds'] = this.item.childIDs;  //may be empty
+    //  'enabled'      must be either true or false
+    this.item['applicationIds'] = this.item.childIDs;  // may be empty
 
     this.item.children = undefined;
     this.item.childIDs = undefined;
