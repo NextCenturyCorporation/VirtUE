@@ -1,9 +1,9 @@
-/* 
+/*
 *  Virtue.java
-*  
+*
 *  VirtUE - Savior Project
 *  Created by Wole OMitowoju 11/16/2017
-*  
+*
 *  Copyright (c) 2017 Next Century Corporation. All rights reserved.
 */
 
@@ -26,8 +26,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Virtue class models a virtual unit with the user, applications etc.
- * 
- * 
+ *
+ *
  */
 @Entity
 public class VirtueInstance {
@@ -36,6 +36,7 @@ public class VirtueInstance {
 	private String name;
 	private String username;
 	private String templateId;
+	private String color;
 	@OneToMany
 	private Collection<VirtualMachine> vms;
 	// private Set<String> transducers;
@@ -48,13 +49,14 @@ public class VirtueInstance {
 	@Transient
 	private Collection<String> applicationIds;
 
-	public VirtueInstance(String id, String name, String username, String templateId,
+	public VirtueInstance(String id, String name, String username, String templateId, String color,
 			Collection<ApplicationDefinition> apps, Collection<VirtualMachine> vms) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.username = username;
 		this.templateId = templateId;
+		this.color = color;
 		this.applications = apps;
 		this.vms = vms;
 		state = getVirtueStateFrom(vms);
@@ -68,12 +70,12 @@ public class VirtueInstance {
 	}
 
 	public VirtueInstance(VirtueTemplate template, String username) {
-		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
+		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(), template.getColor(),
 				getApplicationsFromTemplate(template), new HashSet<VirtualMachine>());
 	}
 
 	public VirtueInstance(VirtueTemplate template, String username, Collection<VirtualMachine> vms) {
-		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(),
+		this(UUID.randomUUID().toString(), template.getName(), username, template.getId(), template.getColor(),
 				getApplicationsFromTemplate(template), vms);
 
 	}
@@ -111,7 +113,7 @@ public class VirtueInstance {
 	@Override
 	public String toString() {
 		return "VirtueInstance [id=" + id + ", name=" + name + ", username=" + username + ", templateid=" + templateId
-				+ ", vms=" + vms + ", state=" + getState() + "]";
+				+ ", color=" + color + ", vms=" + vms + ", state=" + getState() + "]";
 	}
 
 	protected void setState(VirtueState state) {
@@ -120,6 +122,10 @@ public class VirtueInstance {
 
 	public String getTemplateId() {
 		return templateId;
+	}
+
+	public String getColor() {
+		return color;
 	}
 
 	@JsonIgnore
@@ -142,6 +148,10 @@ public class VirtueInstance {
 
 	protected void setTemplateid(String templateid) {
 		this.templateId = templateid;
+	}
+
+	protected void setColor(String color) {
+		this.color = color;
 	}
 
 	protected void setVms(Collection<VirtualMachine> vms) {

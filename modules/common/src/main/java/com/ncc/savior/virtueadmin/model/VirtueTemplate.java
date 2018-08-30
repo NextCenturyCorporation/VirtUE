@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  * Data Transfer Object (DTO) for templates.
- * 
+ *
  *
  */
 @Entity
@@ -34,11 +34,13 @@ public class VirtueTemplate {
 	private boolean enabled;
 	private Date lastModification;
 	private String lastEditor;
-	
+
 	private String userCreatedBy;
 	private Date timeCreatedAt;
 
 	private String awsTemplateName;
+
+	private String color;
 
 	@Transient
 	private Collection<String> virtualMachineTemplateIds;
@@ -47,7 +49,7 @@ public class VirtueTemplate {
 
 	/**
 	 * Used for jackson deserialization
-	 * 
+	 *
 	 * @param template
 	 * @param templateId
 	 */
@@ -57,19 +59,22 @@ public class VirtueTemplate {
 		this.name = template.getName();
 		this.version = template.getVersion();
 		this.vmTemplates = template.getVmTemplates();
+		this.color = template.getColor();
 		this.enabled = template.isEnabled();
 		this.lastModification = template.getLastModification();
 		this.lastEditor = template.getLastEditor();
 		this.awsTemplateName = template.getAwsTemplateName();
+		this.awsTemplateName = template.getAwsTemplateName();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
-			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
+			String awsTemplateName, String color, boolean enabled, Date lastModification, String lastEditor) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.vmTemplates = vmTemplates;
+		this.color = color;
 		this.enabled = enabled;
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
@@ -77,20 +82,21 @@ public class VirtueTemplate {
 	}
 
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
-			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor) {
+			String awsTemplateName, String color, boolean enabled, Date lastModification, String lastEditor) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.vmTemplates = new ArrayList<VirtualMachineTemplate>();
 		vmTemplates.add(vmTemplate);
+		this.color = color;
 		this.enabled = enabled;
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 	}
 
-	public VirtueTemplate(String id, String name, String version, String awsTemplateName, boolean enabled,
+	public VirtueTemplate(String id, String name, String version, String awsTemplateName, String color, boolean enabled,
 			Date lastModification, String lastEditor, VirtualMachineTemplate... vmTemplates) {
 		super();
 		this.id = id;
@@ -100,19 +106,21 @@ public class VirtueTemplate {
 		for (VirtualMachineTemplate vmTemplate : vmTemplates) {
 			this.vmTemplates.add(vmTemplate);
 		}
+		this.color = color;
 		this.enabled = enabled;
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 	}
-	
+
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
-			String awsTemplateName, boolean enabled, Date lastModification, String lastEditor, String userCreatedBy, Date timeCreatedAt) {
+			String awsTemplateName, String color, boolean enabled, Date lastModification, String lastEditor, String userCreatedBy, Date timeCreatedAt) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.vmTemplates = vmTemplates;
+		this.color = color;
 		this.enabled = enabled;
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
@@ -168,7 +176,7 @@ public class VirtueTemplate {
 	@Override
 	public String toString() {
 		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
-				+ ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
+				+ ", color=" + color + ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
 				+ ", awsTemplateName=" + awsTemplateName + "]";
 	}
 
@@ -178,6 +186,10 @@ public class VirtueTemplate {
 
 	public void setAwsTemplateName(String awsTemplateName) {
 		this.awsTemplateName = awsTemplateName;
+	}
+
+	public String  getColor() {
+		return color;
 	}
 
 	public boolean isEnabled() {
