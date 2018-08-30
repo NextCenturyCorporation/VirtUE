@@ -174,9 +174,9 @@ public class VirtueTemplate {
 	}
 
 	@Override
-	public String toString() { // TODO
-		return "VirtueTemplate [id=" + id + ", name=" + name + ", verGGsion=" + version + ", vmTemplates=" + vmTemplates
-				+ ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
+	public String toString() {
+		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
+				+ ", color=" + color + ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
 				+ ", awsTemplateName=" + awsTemplateName + "]";
 	}
 
