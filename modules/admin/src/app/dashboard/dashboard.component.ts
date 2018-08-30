@@ -121,10 +121,10 @@ export class DashboardComponent extends GenericListComponent {
 
   getSensingData() {
     this.sensingService.setBaseUrl(this.baseUrl);
-    this.sensingService.getSensingLog().subscribe(sData => {
-      if (sData.length > 0) {
-        this.sensorData = sData[0].sensors;
-        console.log(this.sensorData);
+    this.sensingService.getSensingLog().subscribe(sensorLog => {
+      if (sensorLog.length > 0) {
+        this.sensorData = sensorLog[0].sensors;
+        console.log(this.sensorLog);
         // TODO add formatted date here, of form:   d.updated_at|date:"MM/dd/yyyy, h:mm a"
       } else {
         // get static data
