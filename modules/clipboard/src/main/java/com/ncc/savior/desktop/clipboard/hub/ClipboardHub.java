@@ -69,6 +69,7 @@ public class ClipboardHub {
 		validFormats.add(ClipboardFormat.TEXT);
 		validFormats.add(ClipboardFormat.UNICODE);
 		validFormats.add(ClipboardFormat.FILES);
+		validFormats.add(ClipboardFormat.BITMAP);
 		this.dataGuard = dataGuard;
 		dataGuard.setGroupIdToDisplayNameMap(groupIdToDisplayName);
 	}

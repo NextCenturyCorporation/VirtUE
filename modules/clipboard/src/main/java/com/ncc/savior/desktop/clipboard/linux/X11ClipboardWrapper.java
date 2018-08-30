@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.data.BitMapClipboardData;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
 import com.ncc.savior.desktop.clipboard.data.FileClipboardData;
@@ -133,6 +134,7 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				delayedFormats.add(ClipboardFormat.TEXT);
 				delayedFormats.add(ClipboardFormat.UNICODE);
 				delayedFormats.add(ClipboardFormat.FILES);
+				delayedFormats.add(ClipboardFormat.BITMAP);
 				// clear?
 				getWindowProperty();
 				if (takeClipboard) {
@@ -560,6 +562,15 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 				return data;
 			}
 			return new UnknownClipboardData(cf);
+		case BITMAP:
+			if (property != null) {
+				int length = (int) myprop.numItems * myprop.formatBytes / 8;
+				byte[] data = new byte[length];
+				property.read(0, data, 0, length);
+				logger.debug("created new bitmap clipboard data with prop=" + myprop);
+				return new BitMapClipboardData(data);
+			}
+			return new UnknownClipboardData(cf);
 		default:
 			return new UnknownClipboardData(cf);
 		}
@@ -597,6 +608,10 @@ public class X11ClipboardWrapper implements IClipboardWrapper {
 			this.numItems = numItems;
 		}
 
+		@Override
+		public String toString() {
+			return "WindowProperty [property=" + property + ", type=" + type + ", formatBytes=" + formatBytes
+					+ ", numItems=" + numItems + "]";
+		}
 	}
-
 }
