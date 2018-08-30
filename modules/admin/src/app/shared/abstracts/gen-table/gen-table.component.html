@@ -79,9 +79,6 @@
         <div class="edit" *ngIf="colData[0].link === undefined">
           {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
         </div>
-        <!-- change those 'a's to 'div's to make them not be blue and look like links. -->
-        <!-- TODO change this to move to the form page, but only in 'view' mode -->
-        <!-- <a class="edit" (click)="editItem(i)">{{ i[colData[0].name] }}</a> -->
         <div class="menu-options" >
           <a *ngFor="let o of rowOptions; let idx = index" (click)="o.action(i)">
             <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>

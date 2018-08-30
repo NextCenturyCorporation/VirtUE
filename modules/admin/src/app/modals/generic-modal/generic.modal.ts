@@ -65,7 +65,6 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
   // this gives the childIDs the item was loaded with, and is only used to build
   // the table - any changes will be made to this.table.selectedIDs.
   getSelectedIDs() {
-    console.log("initialSelections", this.initialSelections);
     return this.initialSelections;
   }
 
