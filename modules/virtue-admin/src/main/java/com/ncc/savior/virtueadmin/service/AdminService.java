@@ -466,7 +466,7 @@ public class AdminService {
 		return user;
 	}
 
-	public String getSensingReponse() throws IOException {
+	public String getSensingResponse() throws IOException {
 		if (JavaUtil.isNotEmpty(sensingUri)) {
 			Client client = ClientBuilder.newClient();
 			Response response = client.target(sensingUri).request(MediaType.APPLICATION_JSON_TYPE).get();

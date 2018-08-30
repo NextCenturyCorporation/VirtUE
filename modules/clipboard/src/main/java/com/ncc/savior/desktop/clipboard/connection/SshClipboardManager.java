@@ -138,7 +138,8 @@ public class SshClipboardManager implements IClipboardManager {
 			IMessageSerializer localHubSerializer = pair.serializerA;
 			IClipboardWrapper clipboardWrapper = ClipboardClient.getClipboardWrapperForOperatingSystem(false);
 			IMessageSerializer localClientSerializer = pair.serializerB;
-			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID, localHubSerializer, "Local Desktop");
+			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID, localHubSerializer,
+					"Local Desktop");
 			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
 		} catch (Exception e) {
 			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
@@ -273,40 +274,40 @@ public class SshClipboardManager implements IClipboardManager {
 		props.groupId = groupId;
 		return props;
 	}
-	
-	public String sha2hex(byte[] bytesOfMessage) throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException { 
-		MessageDigest md = MessageDigest.getInstance("SHA-256"); 
-		byte[] thedigest = md.digest(bytesOfMessage); 
-		BigInteger bigInt = new BigInteger(1, thedigest); 
-		String hashtext = bigInt.toString(16); 
 
-		while (hashtext.length() < 32) { 
-			hashtext = "0" + hashtext; 
+	public String sha2hex(byte[] bytesOfMessage)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, IOException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		byte[] thedigest = md.digest(bytesOfMessage);
+		BigInteger bigInt = new BigInteger(1, thedigest);
+		String hashtext = bigInt.toString(16);
+
+		while (hashtext.length() < 32) {
+			hashtext = "0" + hashtext;
 		}
-        
-		return hashtext; 
-    } 
 
-	private void copyClipboardClientIfNeeded(Session session)
-			throws SftpException, JSchException, IOException {
+		return hashtext;
+	}
+
+	private void copyClipboardClientIfNeeded(Session session) throws SftpException, JSchException, IOException {
 		FileInputStream fis = new FileInputStream(new File(sourceJarPath));
-		List<String> files = SshUtil.sendCommandFromSession(session, "ls");
-		
-		if (files.contains(destinationFilePath)) {
+		// List<String> files = SshUtil.sendCommandFromSession(session, "ls");
+
+		// if (files.contains(destinationFilePath) || true) {
+		boolean skipHash = true;
+		if (!skipHash) {
 			List<String> sha256Output = SshUtil.sendCommandFromSession(session, "sha256sum " + destinationFilePath);
 			String remoteHash = sha256Output.get(0);
-			
 			String localHash = null;
 			try {
 				localHash = sha2hex(IOUtils.toByteArray(fis));
 			} catch (NoSuchAlgorithmException e) {
 				logger.error("error with hashing", e);
 			}
-			
+			logger.debug("local hash=" + localHash);
 			if (localHash == null || !remoteHash.contains(localHash)) {
 				SshUtil.sftpFile(session, fis, destinationFilePath);
 			}
-			
 		} else {
 			SshUtil.sftpFile(session, fis, destinationFilePath);
 		}

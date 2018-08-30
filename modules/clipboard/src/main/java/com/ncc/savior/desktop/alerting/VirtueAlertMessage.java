@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.alerting;
 
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 /**
  * Alert message specific to a virtue. We may want to have additional ways to
@@ -12,6 +13,11 @@ public class VirtueAlertMessage extends BaseAlertMessage {
 	private String message;
 
 	public VirtueAlertMessage(String title, VirtueInstance virtue, String message) {
+		this(title, virtue.getId(), virtue.getName(), message);
+
+	}
+
+	public VirtueAlertMessage(String title, DesktopVirtue virtue, String message) {
 		this(title, virtue.getId(), virtue.getName(), message);
 
 	}

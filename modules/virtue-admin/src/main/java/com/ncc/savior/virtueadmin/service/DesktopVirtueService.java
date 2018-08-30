@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -128,6 +129,24 @@ public class DesktopVirtueService {
 		return app;
 	}
 
+	public Collection<DesktopVirtueApplication> getReconnectApps(String virtueId) {
+		verifyAndReturnUser();
+		VirtueInstance virtue = activeVirtueManager.getActiveVirtue(virtueId);
+		ApplicationDefinition winApp = new ApplicationDefinition("reconnect", "reconnect", "1.0", OS.WINDOWS,
+				"default");
+		ApplicationDefinition linuxApp = new ApplicationDefinition("reconnect", "reconnect", "1.0", OS.LINUX,
+				"default");
+		Collection<DesktopVirtueApplication> col = new ArrayList<DesktopVirtueApplication>();
+		for (VirtualMachine vm : virtue.getVms()) {
+			String hostname = vm.getHostname();
+			ApplicationDefinition application = (OS.LINUX.equals(vm.getOs()) ? linuxApp : winApp);
+			DesktopVirtueApplication dva = new DesktopVirtueApplication(application, hostname, vm.getSshPort(),
+					vm.getUserName(), vm.getPrivateKey());
+			col.add(dva);
+		}
+		return col;
+	}
+
 	public void stopApplication(String virtueId, String applicationId) {
 		verifyAndReturnUser();
 		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Stop application is not yet implemented.");
@@ -213,7 +232,7 @@ public class DesktopVirtueService {
 
 	public DesktopVirtue terminateVirtue(String id) {
 		VirtueUser user = verifyAndReturnUser();
-		VirtueInstance instance =  activeVirtueManager.deleteVirtue(user, id);
+		VirtueInstance instance = activeVirtueManager.deleteVirtue(user, id);
 		return convertVirtueInstanceToDesktopVirtue(instance);
 	}
 }

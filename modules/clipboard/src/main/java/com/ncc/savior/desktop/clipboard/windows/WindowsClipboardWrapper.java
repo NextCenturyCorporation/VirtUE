@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.clipboard.windows;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,11 +12,14 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.imageio.ImageIO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
+import com.ncc.savior.desktop.clipboard.data.BitMapClipboardData;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.data.EmptyClipboardData;
 import com.ncc.savior.desktop.clipboard.data.FileClipboardData;
@@ -27,10 +32,15 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.platform.win32.WinDef.HBITMAP;
+import com.sun.jna.platform.win32.WinDef.HDC;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.LPARAM;
 import com.sun.jna.platform.win32.WinDef.LRESULT;
 import com.sun.jna.platform.win32.WinDef.WPARAM;
+import com.sun.jna.platform.win32.WinGDI;
+import com.sun.jna.platform.win32.WinGDI.BITMAP;
+import com.sun.jna.platform.win32.WinGDI.BITMAPINFO;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.sun.jna.platform.win32.WinUser.WNDCLASSEX;
@@ -70,8 +80,14 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	// appropriate.
 	protected static final int WM_RENDERALLFORMATS = 0x0306;
 
+	// If changing from 32, be aware that windwos seems to expect that scanlines
+	// always start at 4 byte boundaries. No code attempts to handle this since we
+	// assume each pixel is 4 bytes anyway.
+	public static final short BITS_PER_PIXEL = 32;
+
 	static IWindowsClipboardUser32 user32 = IWindowsClipboardUser32.INSTANCE;
 	static IWindowsClipboardShell32 shell32 = IWindowsClipboardShell32.INSTANCE;
+	static IWindowsClipboardGdi32 gdi32 = IWindowsClipboardGdi32.INSTANCE;
 	static Kernel32 kernel32 = Kernel32.INSTANCE;
 
 	WindowProc callback = new WindowProc() {
@@ -207,7 +223,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 	@Override
 	public void setDelayedRenderData(ClipboardData clipboardData) {
 		// retain data to avoid cleanup until we rewrite
-		data = clipboardData.createWindowsData();
+		data = clipboardData.createWindowsData(this);
 		user32.SetClipboardData(clipboardData.getFormat().getWindows(), data);
 		// System owns the data and application should not handle data after the
 		// SetClipboardData call. This is explicitly called out in microsoft documents.
@@ -238,8 +254,13 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		Pointer p = null;
 		try {
 			openClipboardWhenFree();
-			p = user32.GetClipboardData(format.getWindows());
-			return clipboardPointerToData(format, p);
+			try {
+				p = user32.GetClipboardData(format.getWindows());
+				return clipboardPointerToData(format, p);
+			} catch (Throwable t) {
+				logger.error("Error converting clipboard pointer to clipboard data", t);
+				return new UnknownClipboardData(format);
+			}
 		} finally {
 			// Moved return inside try/finally so we don't close clipboard until we are done
 			// with the data.
@@ -471,6 +492,7 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 		if (p == null) {
 			return new EmptyClipboardData(format);
 		}
+
 		switch (format.getWindows()) {
 		case IWindowsClipboardUser32.CF_TEXT:
 			return new PlainTextClipboardData(p.getString(0));
@@ -503,8 +525,99 @@ public class WindowsClipboardWrapper implements IClipboardWrapper {
 				}
 			}
 			return new FileClipboardData(files);
+		case IWindowsClipboardUser32.CF_BITMAT:
+			// convertPngToPngData(p);
+			try {
+				return convertBitmapPngData(p);
+			} catch (IOException e) {
+				logger.debug("error writing image into PNG format!", e);
+				return new EmptyClipboardData(format);
+			}
 		default:
 			return new UnknownClipboardData(format);
 		}
+	}
+
+	/**
+	 * Notes about Microsofts quirks:
+	 * <ol>
+	 * <li>PNG Option - Although BITMAPINFOHEADER has an option for compression as
+	 * BI_PNG, that isn't really a valid format for the clipboard or windows itself.
+	 * It is intended for sending images to printers which have hardware support for
+	 * png.
+	 * <li>Transparency - Windows clipboard bitmap does not support transparency.
+	 * 
+	 * @param p
+	 * @return
+	 * @throws IOException
+	 */
+	private BitMapClipboardData convertBitmapPngData(Pointer p) throws IOException {
+		HBITMAP hbitmap = new HBITMAP(p);
+
+		BITMAP gdiBitMap = new BITMAP();
+		gdi32.GetObject(hbitmap, gdiBitMap.size(), gdiBitMap.getPointer());
+		gdiBitMap.autoRead();
+		BITMAPINFO info = getBitmapInfo(gdiBitMap.bmWidth.intValue(), gdiBitMap.bmHeight.intValue(), BITS_PER_PIXEL);
+		HDC hDC = user32.GetDC(windowHandle);
+		int sizeBytes = info.bmiHeader.biWidth * info.bmiHeader.biHeight * 4;
+		Pointer lpvBits = new Memory(sizeBytes);
+		int scanLines = gdi32.GetDIBits(hDC, hbitmap, 0, gdiBitMap.bmHeight.intValue(), lpvBits, info,
+				WinGDI.DIB_RGB_COLORS);
+		if (scanLines != gdiBitMap.bmHeight.intValue()) {
+			logger.warn("Warning! Windows bitmap conversion did not read the expected amount of lines.  linesRead="
+					+ scanLines + " ExpectedImageHeight=" + gdiBitMap.bmHeight.intValue());
+		}
+		BufferedImage image = new BufferedImage(info.bmiHeader.biWidth, info.bmiHeader.biHeight,
+				BufferedImage.TYPE_INT_ARGB);
+		int i = 0;
+		int bytesPerPixel = BITS_PER_PIXEL / 8;
+		for (int y = image.getHeight() - 1; y >= 0; y--) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				int rgb = 0;
+				int r = lpvBits.getByte(i + 2);
+				int g = lpvBits.getByte(i + 1);
+				int b = lpvBits.getByte(i);
+				// int a = lpvBits.getByte(i + 3);
+				// a &= 0xFF;
+				r &= 0xFF;
+				g &= 0xFF;
+				b &= 0xFF;
+				int a = 0xFF;
+				rgb = (a << 24) | (r << 16) | (g << 8) | (b << 0);
+				// logger.debug("RGH hex=" + Integer.toHexString(rgb) + " r=" +
+				// Integer.toHexString(r) + " g="
+				// + Integer.toHexString(g) + " b=" + Integer.toHexString(b) + " a=" +
+				// Integer.toHexString(a));
+				image.setRGB(x, y, rgb);
+				i += bytesPerPixel;
+			}
+		}
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		ImageIO.write(image, "PNG", output);
+		return new BitMapClipboardData(output.toByteArray());
+	}
+
+	public static BITMAPINFO getBitmapInfo(int width, int height, short bitsPerPixel) {
+		BITMAPINFO info = new BITMAPINFO();
+		info.bmiHeader.biSize = info.size();
+		info.bmiHeader.biWidth = width;
+		info.bmiHeader.biHeight = height;
+		info.bmiHeader.biPlanes = 1;
+		info.bmiHeader.biBitCount = bitsPerPixel;
+		info.bmiHeader.biCompression = WinGDI.BI_RGB;
+		info.autoWrite();
+		return info;
+	}
+
+	public IWindowsClipboardUser32 getUser32() {
+		return user32;
+	}
+
+	public HWND getWindowHandle() {
+		return windowHandle;
+	}
+
+	public IWindowsClipboardGdi32 getGdi32() {
+		return gdi32;
 	}
 }

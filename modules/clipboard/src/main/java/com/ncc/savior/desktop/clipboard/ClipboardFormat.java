@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ClipboardFormat {
-	TEXT(1, "STRING"), UNICODE(13, "UTF8_STRING"), FILES(15, "x-special/gnome-copied-files");
+	TEXT(1, "STRING"), UNICODE(13, "UTF8_STRING"), FILES(15, "x-special/gnome-copied-files"), BITMAP(2, "image/png");
 
 	private static Map<Integer, ClipboardFormat> windowsToLinux;
 	private static Map<String, ClipboardFormat> linuxToWindows;
