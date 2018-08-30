@@ -124,14 +124,17 @@ export class DashboardComponent extends GenericListComponent {
     this.sensingService.getSensingLog().subscribe(sensorLog => {
       if (sensorLog.length > 0) {
         this.sensorData = sensorLog[0].sensors;
-        console.log(this.sensorLog);
+        console.log(this.sensorData);
         // TODO add formatted date here, of form:   d.updated_at|date:"MM/dd/yyyy, h:mm a"
       } else {
-        // get static data
-        this.sensingService.getStaticList().subscribe(staticData => {
-          this.sensorData = staticData[0].sensors;
-        });
+        console.log("Response received, but no data included.")
       }
+    },
+    error => {
+      // get static data
+      this.sensingService.getStaticList().subscribe(staticData => {
+        this.sensorData = staticData[0].sensors;
+      });
     });
   }
 
