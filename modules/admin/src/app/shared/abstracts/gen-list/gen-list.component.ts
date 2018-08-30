@@ -112,17 +112,22 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
   // overridden by app-list and modals
   getOptionsList(): RowOptions[] {
     return [
-      new RowOptions("Enable", (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new RowOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
       new RowOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
-      new RowOptions("Edit", () => true, (i: Item) => this.editItem(i)),
-      new RowOptions("Duplicate", () => true, (i: Item) => this.dupItem(i)),
-      new RowOptions("Delete", () => true, (i: Item) => this.openDialog('delete', i))
+      new RowOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
+      new RowOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
+      new RowOptions("Delete",  () => true,             (i: Item) => this.openDialog('delete', i))
     ];
   }
 
   // overridden by virtues
   hasColoredLabels() {
     return false;
+  }
+
+  // used by many children to display their status
+  formatName( item: Item ): string {
+    return item.getName();
   }
 
   // used by many children to display their status

@@ -21,19 +21,22 @@ import { Column } from '../../../shared/models/column.model';
 import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
-import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
+import { OSSet } from '../../../shared/sets/os.set';
+
+import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 // import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 
 @Component({
-  selector: 'app-virtue-main-tab',
-  templateUrl: './virtue-main-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
+  selector: 'app-vm-main-tab',
+  templateUrl: './vm-main-tab.component.html',
+  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css'],
+  providers: [ OSSet ]
 })
 
-export class VirtueMainTabComponent extends GenericFormTabComponent implements OnInit {
+export class VmMainTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('childrenTable') childrenTable: GenericTableComponent;
 
@@ -42,10 +45,11 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
 
   newVersion: number;
 
-  constructor(router: Router, dialog: MatDialog) {
+  constructor(
+      protected osOptions: OSSet,
+      router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "General Info";
-
   }
 
   update() {
@@ -65,10 +69,9 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
 
   getColumns(): Column[] {
     return [
-      new Column('name',        'VM Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
-      new Column('os',          'OS',                   undefined, 'asc',     2),
-      new Column('childNames',  'Assigned Applications', this.getChildren, undefined, 4, this.formatName, (i: Item) => this.viewItem(i)),
-      new Column('status',      'Status',               undefined, 'asc',     2, this.formatStatus)
+      new Column('name',    'Application Name', undefined, 'asc', 5),
+      new Column('version', 'Version',          undefined, 'asc', 3),
+      new Column('os',      'Operating System', undefined, 'desc', 4)
     ];
   }
 
@@ -80,7 +83,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
   }
 
   getNoDataMsg(): string {
-    return "No virtual machine templates have been added yet. To add a virtual machine template, click on the button \"Add VM\" above.";
+    return 'No virtual machine templates have been created yet. To add a template, click on the button "Add VM Template" above.';
   }
 
   init() {
@@ -95,7 +98,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
     this.childrenTable.setUp({
       cols: this.getColumns(),
       opts: this.getOptionsList(),
-      coloredLabels: true,
+      coloredLabels: false,
       filters: [], // don't allow filtering on the form's child table. ?
       tableWidth: 9,
       noDataMsg: this.getNoDataMsg(),
@@ -152,7 +155,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
   getModal(
     params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
   ): any {
-    return this.dialog.open( VmModalComponent, params);
+    return this.dialog.open( AppsModalComponent, params);
   }
 
 

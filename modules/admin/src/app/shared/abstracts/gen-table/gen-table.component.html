@@ -1,3 +1,4 @@
+
 <div class="mui-col-md-{{tableWidth}}">
   <div *ngIf="filterOptions.length > 0" >
     <!-- if there are items, show this list -->
@@ -16,7 +17,7 @@
   </div>
 
 
-  <div class="mui-container-fluid data-list">
+  <div class="mui-container-fluid data-list table">
     <div class="mui-row table-header-group" fxLayout="row">
 
       <span *ngIf="hasCheckbox" fxFlex="10%" class="table-header float-left" fxLayoutAlign="center center">
@@ -74,7 +75,7 @@
       </span>
       <div fxFlex="auto">
         <span class="mini-menu table-data mui-col-md-{{colData[0].colWidth}} transparent">
-          <a class="edit" *ngIf="colData[0].link !== undefined" (click)="callback(colData[0].link, i)">
+          <a class="edit" *ngIf="colData[0].link !== undefined" (click)="colData[0].link(i)">
             {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
           </a>
           <div class="edit" *ngIf="colData[0].link === undefined">
@@ -84,7 +85,7 @@
           <!-- TODO change this to move to the form page, but only in 'view' mode -->
           <!-- <a class="edit" (click)="editItem(i)">{{ i[colData[0].name] }}</a> -->
           <div class="menu-options" >
-            <a *ngFor="let o of rowOptions; let idx = index" (click)="callback(o.action, i)">
+            <a *ngFor="let o of rowOptions; let idx = index" (click)="o.action(i)">
               <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
               <ng-container *ngIf="o.shouldAppear(i) && idx < rowOptions.length-1">|</ng-container>
             </a>
@@ -93,13 +94,24 @@
         <!-- Iterate over all columns after the first one (the name), which was displayed above -->
         <div *ngFor="let column of colData | slice:1; let idx=index"
             class="table-data mui-col-md-{{column.colWidth}} transparent">
-          <div *ngIf="column.isList">
-            <ul>
-                <ul [innerHTML]="column.formatValue(i)"></ul>
-            </ul>
+          <div *ngIf="column.list !== undefined">
+            <ng-container *ngFor="let child of column.list(i)">
+              <ul>
+                <!-- <ul [innerHTML]="column.formatValue(i)"></ul> -->
+                <!-- formatValue for lists returns the list to be displayed -->
+                <ul>
+                  <a *ngIf="column.link" (click)="column.link(child)">
+                    {{ column.formatValue ? column.formatValue(child) : child.getName() }}
+                  </a>
+                  <div *ngIf="column.link === undefined">
+                    {{ column.formatValue ? column.formatValue(child) : child.getName() }}
+                  </div>
+                </ul>
+              </ul>
+            </ng-container>
           </div>
-          <div *ngIf="!column.isList">
-            <div *ngIf="column.link" (click)="callback(link, i)">
+          <div *ngIf="column.list === undefined">
+            <div *ngIf="column.link" (click)="column.link(i)">
               {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
             </div>
             <div *ngIf="column.link === undefined">

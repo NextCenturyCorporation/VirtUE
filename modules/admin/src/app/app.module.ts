@@ -68,6 +68,8 @@ import { ColorModalComponent } from './modals/color-picker/color-picker.modal';
 import { VmModalComponent } from './modals/vm-modal/vm-modal.component';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
+import { VmMainTabComponent } from './vms/form/vm-main-tab/vm-main-tab.component';
+import { VmUsageTabComponent } from './vms/form/vm-usage-tab/vm-usage-tab.component';
 import { VmComponent} from './vms/vm.component';
 import { AppsModalComponent } from './modals/apps-modal/apps-modal.component';
 
@@ -130,6 +132,8 @@ import { MessageService } from './shared/services/message.service';
 
     VmListComponent,
     VmComponent,
+    VmMainTabComponent,
+    VmUsageTabComponent,
 
     ActiveClassDirective,
 

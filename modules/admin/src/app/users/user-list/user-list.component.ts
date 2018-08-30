@@ -50,10 +50,10 @@ export class UserListComponent extends GenericListComponent {
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
-      new Column('name',            'Username',           false, 'asc',    2, undefined, (i: Item) => this.editItem(i)),
-      new Column('roles',           'Authorized Roles',   false, 'asc',    3, this.formatRoles),
-      new Column('childNamesHTML',  'Available Virtues',  true, undefined, 4, this.getChildNamesHtml),
-      new Column('status',          'Account Status',     false, 'desc',   3, this.formatStatus)
+      new Column('name',        'Username',           undefined,        'asc',    2, undefined, (i: Item) => this.editItem(i)),
+      new Column('roles',       'Authorized Roles',   undefined,        'asc',    3, this.formatRoles),
+      new Column('childNames',  'Available Virtues',  this.getChildren, undefined, 4, this.formatName),
+      new Column('status',      'Account Status',     undefined,        'desc',   3, this.formatStatus)
     ];
   }
 

@@ -12,14 +12,14 @@ import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
-import { GenericFormTab } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 
 @Component({
   selector: 'app-virtue-settings-tab',
   templateUrl: './virtue-settings.component.html',
   styleUrls: ['./virtue-settings.component.css']
 })
-export class VirtueSettingsTabComponent extends GenericFormTab implements OnInit {
+export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
 
   @Input() virtueColor: string;
 
@@ -68,7 +68,7 @@ export class VirtueSettingsTabComponent extends GenericFormTab implements OnInit
     return this.virtueColor;
   }
 
-  activateModal(): void {
+  activateColorModal(): void {
     let wPercentageOfScreen = 40;
 
     let dialogRef = this.dialog.open(ColorModalComponent, {

@@ -21,35 +21,37 @@ import { Column } from '../../../shared/models/column.model';
 import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
-import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
-
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
-// import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 
 @Component({
-  selector: 'app-virtue-usage-tab',
-  templateUrl: './virtue-usage-tab.component.html',
+  selector: 'app-vm-usage-tab',
+  templateUrl: './vm-usage-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
 })
 
-export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
+export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('parentTable') parentTable: GenericTableComponent;
 
+  // This may be unnecessary. It'd be a lot. Like if each user has an average of
+  // 3, and you have 30 users, that's almost a hundred to scroll through.
+  // Tables need filters.
+  @ViewChild('usageTable') usageTable: GenericTableComponent;
+
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.tabName = "Virtue Usage";
+    this.tabName = "Virtual Machine Usage";
 
   }
 
   update(newData?: any) {
     if (newData) {
-      if (newData.allUsers) {
-        let allUsers: DictList<Item> = newData.allUsers;
+      if (newData.allVirtues) {
+        let allVirtues: DictList<Item> = newData.allVirtues;
         this.parentTable.items = [];
 
-        for (let u of allUsers.asList()) {
+        for (let u of allVirtues.asList()) {
           if (u.children.has(this.item.getID())) {
             this.parentTable.items.push(u);
           }
@@ -75,10 +77,11 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
 
   getParentColumns(): Column[] {
     return [
-      new Column('name',        'Username',         undefined,        'asc',      3, undefined, (i: Item) => this.viewItem(i)),
-      // new Column('childNamesHTML',  'Attached Virtues',  true, undefined, 5, this.getChildNamesHtml),
-      new Column('childNames',  'Attached Virtues', this.getChildren, undefined,  5, this.formatName, (i: Item) => this.viewItem(i)),
-      new Column('status',      'Account Status',   undefined,        'desc',     4, this.formatStatus)
+      new Column('name',        'Template Name',    undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
+      // new Column('childNamesHTML',  'Attached VMs',     true, undefined,  3, this.getChildNamesHtml),
+      new Column('childNames',  'Attached VMs', this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
+      new Column('version',     'Version',          undefined, 'asc',     2),
+      new Column('status',      'Status',           undefined, 'asc',     3, this.formatStatus)
     ];
   }
 
@@ -91,11 +94,11 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   setUpParentTable(): void {
     this.parentTable.setUp({
       cols: this.getParentColumns(),
-      opts: [],
-      coloredLabels: false,
+      opts: this.getParentOptionsList(),
+      coloredLabels: true,
       filters: [],
       tableWidth: 8,
-      noDataMsg: "No users have been assigned this Virtue at the moment.",
+      noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
       hasCheckBoxes: false
     });
   }

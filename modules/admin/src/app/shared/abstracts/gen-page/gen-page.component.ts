@@ -303,9 +303,29 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     return grandchildrenHTMLList;
   }
 
+  // try making these on the fly. Might not be that slow.
+  getGrandchildren(i: Item): Item[] {
+    let grandchildren: Item[] = [];
+    for (let c of i.children.asList()) {
+      grandchildren = grandchildren.concat(c.children.asList());
+    }
+    return grandchildren;
+  }
+
+  // try making these on the fly. Might not be that slow.
+  getChildren(i: Item): Item[] {
+    return i.children.asList();
+  }
+
 
   abstract getPageOptions(): {
       serviceConfigUrl: ConfigUrlEnum,
       neededDatasets: string[]};
 
+
+  viewItem(i: Item) {
+    if (i.getDomain()) {
+      this.router.navigate([i.getDomain()]);
+    }
+  }
 }

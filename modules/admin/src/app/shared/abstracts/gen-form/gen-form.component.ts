@@ -19,7 +19,7 @@ import { Column } from '../../models/column.model';
 import { Mode } from '../../enums/enums';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
-import { GenericFormTab } from '../gen-tab/gen-tab.component';
+import { GenericFormTabComponent } from '../gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../gen-table/gen-table.component';
 import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
@@ -51,7 +51,7 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   mode: Mode;
 
 
-  @ViewChildren(GenericFormTab) tabs: QueryList<GenericFormTab>
+  @ViewChildren(GenericFormTabComponent) tabs: QueryList<GenericFormTabComponent>;
 
   // table showing what children have been added to this item
   @ViewChild('childrenTable') childrenTable: GenericTableComponent;
@@ -169,22 +169,18 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.updateTabs();
   }
 
-  // TODO make this abstract
   // called in parent's ngOnInit
-  initializeTabs(): void {}
+  abstract initializeTabs(): void;
 
-  // TODO make this abstract
   // called in parent's onPullComplete
-  setUpTabs(): void {}
+  abstract setUpTabs(): void;
 
-  // TODO make this abstract
   // called whenever item's child list is set or changes
-  updateTabs(): void {}
+  abstract updateTabs(): void;
 
-  // TODO
   // abstracts away what needs to happen when the page loads
   // Most pages will at least build item.children
-  updatePage(): void {}
+  abstract updatePage(): void;
 
 
   buildItem() {
@@ -270,12 +266,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
 
   getChildNamesHtml( item: Item) {
     return item.childNamesHTML;
-  }
-
-  viewItem(i: Item) {
-    if (i.getDomain()) {
-      this.router.navigate([i.getDomain()]);
-    }
   }
 
   hasColoredLabels(): boolean {

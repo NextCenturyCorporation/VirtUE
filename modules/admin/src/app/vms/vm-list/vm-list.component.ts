@@ -47,12 +47,12 @@ export class VmListComponent extends GenericListComponent {
     // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
       // {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
-      new Column('name',            'Template Name',        false, 'asc',     2, undefined, (i: Item) => this.editItem(i)),
-      new Column('os',              'OS',                   false, 'asc',     1),
-      new Column('childNamesHTML',  'Assigned Applications', true, undefined, 4, this.getChildNamesHtml),
-      new Column('lastEditor',      'Last Modified By',     false, 'asc',     2, undefined),
-      new Column('modDate',         'Modified Date',        false, 'desc',    2, undefined),
-      new Column('status',          'Status',               false, 'asc',     1, this.formatStatus)
+      new Column('name',        'Template Name',        undefined, 'asc',     2, undefined, (i: Item) => this.editItem(i)),
+      new Column('os',          'OS',                   undefined, 'asc',     1),
+      new Column('childNames',  'Assigned Applications', this.getChildren, undefined, 4, this.formatName),
+      new Column('lastEditor',  'Last Modified By',     undefined, 'asc',     2, undefined),
+      new Column('modDate',     'Modified Date',        undefined, 'desc',    2, undefined),
+      new Column('status',      'Status',               undefined, 'asc',     1, this.formatStatus)
     ];
   }
 

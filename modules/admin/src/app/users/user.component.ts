@@ -59,7 +59,7 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
   providers: [ BaseUrlService, ItemService ]
 })
 
-export class UserComponent extends GenericFormComponent {
+export class UserComponent extends GenericFormComponent implements OnDestroy {
 
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
 

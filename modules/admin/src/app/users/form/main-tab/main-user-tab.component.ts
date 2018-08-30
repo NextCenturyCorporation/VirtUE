@@ -24,7 +24,7 @@ import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTab } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 
 @Component({
   selector: 'app-main-user-tab',
@@ -32,7 +32,7 @@ import { GenericFormTab } from '../../../shared/abstracts/gen-tab/gen-tab.compon
   styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
 })
 
-export class UserMainTabComponent extends GenericFormTab implements OnInit {
+export class UserMainTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('childrenTable') childrenTable: GenericTableComponent;
 
@@ -90,17 +90,19 @@ export class UserMainTabComponent extends GenericFormTab implements OnInit {
   getColumns(): Column[] {
     return [
       // See note in gen-form getOptionsList
-      new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.viewItem(i)),
-      new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
-      new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
-      new Column('version',         'Version',          false, 'asc',     2),
-      new Column('status',          'Status',           false, 'asc',     1, this.formatStatus)
+      new Column('name',    'Virtue Template Name',    undefined,       'asc',     3, undefined, (i: Item) => this.viewItem(i)),
+      // new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
+      // new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
+      new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
+      new Column('apps',    'Assigned Applications',  this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
+      new Column('version', 'Version',                undefined,        'asc',     2),
+      new Column('status',  'Status',                 undefined,        'asc',     1, this.formatStatus)
     ];
   }
 
   getOptionsList(): RowOptions[] {
     return [
-       new RowOptions("Edit", () => true, (i:Item) => this.viewItem(i)),
+       new RowOptions("Edit", () => true, (i: Item) => this.viewItem(i)),
        new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
     ];
   }

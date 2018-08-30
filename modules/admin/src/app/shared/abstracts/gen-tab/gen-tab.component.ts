@@ -28,7 +28,7 @@ import { RowOptions } from '../../models/rowOptions.model';
   // providers: [ BaseUrlService, ItemService ]
 })
 
-export abstract class GenericFormTab implements OnInit {
+export abstract class GenericFormTabComponent implements OnInit {
 
   // what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
   // Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
@@ -65,9 +65,28 @@ export abstract class GenericFormTab implements OnInit {
     return grandchildrenHTMLList;
   }
 
+  // try making these on the fly. Might not be that slow.
+  getGrandchildren(i: Item): Item[] {
+    let grandchildren: Item[] = [];
+    for (let c of i.children.asList()) {
+      grandchildren.push(c);
+    }
+    return grandchildren;
+  }
+
+  // try making these on the fly. Might not be that slow.
+  getChildren(i: Item): Item[] {
+    return i.children.asList();
+  }
+
   // used by many children to display their status
   formatStatus( item: Item ): string {
     return item.enabled ? 'Enabled' : 'Disabled';
+  }
+
+  // used by many children to display their status
+  formatName( item: Item ): string {
+    return item.getName();
   }
 
   // called by parent's constructor

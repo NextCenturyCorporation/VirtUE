@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, QueryList } from '@angular/core';
+import { Component, OnInit, ViewChild, QueryList, OnDestroy } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -24,7 +24,6 @@ import { VirtueSettingsTabComponent } from './form/settings-tab/virtue-settings.
 import { VirtueUsageTabComponent } from './form/usage-tab/virtue-usage-tab.component';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
-import { GenericFormTab } from '../shared/abstracts/gen-tab/gen-tab.component';
 
 
 @Component({
@@ -66,11 +65,11 @@ import { GenericFormTab } from '../shared/abstracts/gen-tab/gen-tab.component';
   providers: [ BaseUrlService, ItemService ]
 })
 
-export class VirtueComponent extends GenericFormComponent {
-  @ViewChild('settingsTab') settingsTab: VirtueSettingsTabComponent;
+export class VirtueComponent extends GenericFormComponent implements OnDestroy {
+
   @ViewChild('mainTab') mainTab: VirtueMainTabComponent;
   @ViewChild('usageTab') usageTab: VirtueUsageTabComponent;
-
+  @ViewChild('settingsTab') settingsTab: VirtueSettingsTabComponent;
 
   constructor(
     activatedRoute: ActivatedRoute,
@@ -96,17 +95,6 @@ export class VirtueComponent extends GenericFormComponent {
     return 'transparent';
   }
 
-  // This fills parentTable with users to which this virtue has been assigned.
-  populateParentTable() {
-    this.parentTable.items = new Array<Item>();
-    for (let u of this.allUsers.asList()) {
-
-      if ( u.children.has(this.item.getID()) ) {
-        this.parentTable.items.push(u);
-      }
-    }
-  }
-
   // called on parent's ngInit
   initializeTabs() {
     this.mainTab.init();
@@ -114,7 +102,7 @@ export class VirtueComponent extends GenericFormComponent {
     this.usageTab.init();
     // this.historyTab.init();
 
-    // Must unsubscribe from all these when the UserComponent is destroyed
+    // Must unsubscribe from all these when the VirtueComponent is destroyed
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
       this.buildItemChildren(newChildIDs);
@@ -183,13 +171,13 @@ export class VirtueComponent extends GenericFormComponent {
   }
 
   getPageOptions(): {
-    serviceConfigUrl: ConfigUrlEnum,
-    neededDatasets: string[]} {
-      return {
-        serviceConfigUrl: ConfigUrlEnum.VIRTUES,
-        neededDatasets: ['apps', 'vms', 'virtues', 'users']
-      };
-    }
+      serviceConfigUrl: ConfigUrlEnum,
+      neededDatasets: string[]} {
+    return {
+      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
+      neededDatasets: ['apps', 'vms', 'virtues', 'users']
+    };
+  }
 
   // create and fill the fields the backend expects to see, record any
   // uncollected inputs, and check that the item is valid to be saved
@@ -218,4 +206,7 @@ export class VirtueComponent extends GenericFormComponent {
     return true;
   }
 
+  ngOnDestroy() {
+    this.mainTab.onChildrenChange.unsubscribe();
+  }
 }

@@ -50,9 +50,9 @@ export class AppsListComponent extends GenericListComponent {
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
-      new Column('name',    'Application Name', false, 'asc', 5),
-      new Column('version', 'Version',          false, 'asc', 3),
-      new Column('os',      'Operating System', false, 'desc', 4)
+      new Column('name',    'Application Name', undefined, 'asc', 5),
+      new Column('version', 'Version',          undefined, 'asc', 3),
+      new Column('os',      'Operating System', undefined, 'desc', 4)
     ];
   }
 
