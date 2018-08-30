@@ -127,7 +127,7 @@ export class DashboardComponent extends GenericListComponent {
         console.log(this.sensorData);
         // TODO add formatted date here, of form:   d.updated_at|date:"MM/dd/yyyy, h:mm a"
       } else {
-        console.log("Response received, but no data included.")
+        console.log("Response received, but no data included.");
       }
     },
     error => {
