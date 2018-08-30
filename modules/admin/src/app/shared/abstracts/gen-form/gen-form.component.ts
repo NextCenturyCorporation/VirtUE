@@ -259,15 +259,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     return 9;
   }
 
-  // used by many children to display their status
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  getChildNamesHtml( item: Item) {
-    return item.childNamesHTML;
-  }
-
   hasColoredLabels(): boolean {
     return false;
   }

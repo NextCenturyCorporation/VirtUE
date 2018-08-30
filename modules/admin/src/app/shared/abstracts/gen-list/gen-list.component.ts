@@ -125,22 +125,6 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
     return false;
   }
 
-  // used by many children to display their status
-  formatName( item: Item ): string {
-    return item.getName();
-  }
-
-  // used by many children to display their status
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  // see comment by Item.childNamesHTML
-  getChildNamesHtml( item: Item) {
-    return item.childNamesHTML;
-  }
-
-
   editItem(i: Item) {
     this.router.navigate([this.domain + "/edit/" + i.getID()]);
   }

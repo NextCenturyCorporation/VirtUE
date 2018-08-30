@@ -7,38 +7,26 @@
 </ul>
 <div class="mui-tabs__pane mui--is-active" id="general">
   <div class="tab-pane-content">
-    <h4>General Settings</h4>
     <div class="mui-row form-item">
-      <div class="mui-col-md-1"></div>
-      <div class="mui-col-md-4 padding-left-0"><label>Select Virtue Color:</label></div>
-      <div class="mui-col-md-6 float-right">
-        <mat-card id="virtue-color" rowHeight="1:1" [ngStyle]="{'background-color': virtueColor, 'border':'1px solid black'}"
-              (click)="activateColorModal()"></mat-card>
+      <div class="mui-col-md-11">
+        <h4>General Settings</h4>
       </div>
-    </div>
+      <div class="mui-col-md-2 float-right">
+        Unprovisioned
+        <mat-checkbox [(ngModel)]="unprovisioned">
+        </mat-checkbox>
+      </div>
+    <br>
     <div class="mui-row form-item">
-      <h5>Inter-Virtue Settings</h5>
-      <div class="mui-col-md-12">
-        <div class="mui-row table-header-group">
-          <div class="table-header mui-col-md-6"><span>Virtue</span></div>
-          <div class="table-header mui-col-md-2 text-align-center"><span>Read</span></div>
-          <div class="table-header mui-col-md-2 text-align-center"><span>Write</span></div>
-          <div class="table-header mui-col-md-2 text-align-center"><span>Open Browser</span></div>
-        </div>
-        <div class="mui-row">
-          <div class="table-data mui-col-md-6">Virtue Name</div>
-          <div class="table-data mui-col-md-2 text-align-center">
-            <mat-checkbox name="read-[id]"></mat-checkbox>
-          </div>
-          <div class="table-data mui-col-md-2 text-align-center">
-            <mat-checkbox name="read-[id]"></mat-checkbox>
-          </div>
-          <div class="table-data mui-col-md-2 text-align-center">
-            <mat-checkbox name="read-[id]"></mat-checkbox>
-          </div>
+      <div class="mui-col-md-4 float-left">
+        <label>Select Virtue Color:</label>
+        <div class="mui-col-md-6 float-right">
+          <mat-card id="virtue-color" rowHeight="1:1" [ngStyle]="{'background-color': virtueColor, 'border':'1px solid black'}"
+          (click)="activatePastableVirtueModal()"></mat-card>
         </div>
       </div>
     </div>
+    <app-item-table #pasteableVirtues></app-item-table>
   </div>
 </div>
 <div class="mui-tabs__pane" id="network">

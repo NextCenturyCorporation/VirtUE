@@ -35,7 +35,9 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 
 export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
-  @ViewChild('parentTable') parentTable: GenericTableComponent;
+  @ViewChild('parentTable') private parentTable: GenericTableComponent;
+
+  protected item: Virtue;
 
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
@@ -66,7 +68,12 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
 
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
-    this.item = item;
+    if ( !(item instanceof Virtue) ) {
+      // TODO throw error
+      console.log("item passed to virtue-usage-tab which was not a Virtue: ", item);
+      return;
+    }
+    this.item = item as Virtue;
   }
 
   init() {

@@ -35,12 +35,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 
 export class VirtueMainTabComponent extends GenericFormTabComponent implements OnInit {
 
-  @ViewChild('childrenTable') childrenTable: GenericTableComponent;
+  @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
 
   // emits a list of childID strings.
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
-  newVersion: number;
+  private newVersion: number;
+
+  protected item: Virtue;
 
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
@@ -54,8 +56,13 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
 
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
-    this.item = item;
-    this.newVersion = Number(this.item['version']);
+    if ( !(item instanceof Virtue) ) {
+      // TODO throw error
+      console.log("item passed to virtue-main-tab which was not a Virtue: ", item);
+      return;
+    }
+    this.item = item as Virtue;
+    this.newVersion = Number(this.item.version);
 
     if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
       this.newVersion++;
@@ -80,7 +87,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
   }
 
   getNoDataMsg(): string {
-    return "No virtual machine templates have been added yet. To add a virtual machine template, click on the button \"Add VM\" above.";
+    return "No virtual machine templates have been given to this Virtue yet. To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
   init() {
@@ -104,7 +111,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
   }
 
   collectData() {
-    this.item['version'] = this.newVersion;
+    this.item.version = String(this.newVersion);
   }
 
   /**

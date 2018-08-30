@@ -13,8 +13,9 @@ import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.
 
 import { Item } from '../../models/item.model';
 import { User } from '../../models/user.model';
-import { VirtualMachine } from '../../models/vm.model';
 import { Virtue } from '../../models/virtue.model';
+import { VirtualMachine } from '../../models/vm.model';
+import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
 import { Mode, ConfigUrlEnum } from '../../enums/enums';
@@ -36,11 +37,16 @@ export abstract class GenericFormTabComponent implements OnInit {
 
   tabName: string;
 
-  item: Item;
+  // this gets overriden by children tabs
+  protected item: Item;
 
   constructor( protected router: Router, protected dialog: MatDialog) {
     // gets overwritten once the datasets load, if mode is not CREATE
-    this.item = new VirtualMachine(undefined);
+    // Application chosen arbitrarily for this un-used value, because it doesn't
+    // have as many attributes.
+    this.item = new Virtue(undefined);
+    // this doesn't appear to be used anywhere. So redefining it in each subclass,
+    // with the most correct type.
 
   }
 
@@ -52,24 +58,13 @@ export abstract class GenericFormTabComponent implements OnInit {
     }
   }
 
-  getChildNamesHtml( item: Item) {
-    return item.childNamesHTML;
-  }
-
-  // try making these on the fly. Might not be that slow.
-  getGrandchildrenHtmlList(i: Item): string {
-    let grandchildrenHTMLList: string = "";
-    for (let c of i.children.asList()) {
-      grandchildrenHTMLList += c.childNamesHTML;
-    }
-    return grandchildrenHTMLList;
-  }
-
-  // try making these on the fly. Might not be that slow.
+  // this is now just done on the fly. Seems like a waste to regenerate the same
+  // list in html every mouse movement, but was necessary to let children and
+  // grandchildren be click-able.
   getGrandchildren(i: Item): Item[] {
     let grandchildren: Item[] = [];
     for (let c of i.children.asList()) {
-      grandchildren.push(c);
+      grandchildren = grandchildren.concat(c.children.asList());
     }
     return grandchildren;
   }

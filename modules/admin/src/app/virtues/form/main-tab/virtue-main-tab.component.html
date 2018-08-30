@@ -8,7 +8,7 @@
             <input type="text" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
           </mat-form-field>
         </div>
-        <span *ngIf="mode!=='Create'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.id }}</span>
+        <span *ngIf="mode!=='Create'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.getID() }}</span>
         <div class="form-item margin-top-15">
           <div class="form-item margin-top-15">
             <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -23,7 +23,7 @@
         <div class="mui-row titlebar">
           <div class="mui-col-md-12">
             <h3 class="titlebar-title">Virtual Machines</h3>
-            <button *ngIf="mode !== 'View'" mat-button class="titlebar-button" (click)="activateModal(item.id)">Add VM</button>
+            <button *ngIf="mode !== 'View'" mat-button class="titlebar-button" (click)="activateModal(item.getID())">Add VM</button>
           </div>
         </div>
       </div>

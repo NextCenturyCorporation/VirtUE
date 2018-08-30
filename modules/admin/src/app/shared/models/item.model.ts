@@ -111,4 +111,8 @@ it has a virtue ID attached to it which doesn't exist in the backend data.");
     }
 
   }
+
+  toString() {
+    return this.getName();
+  }
 }

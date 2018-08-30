@@ -32,12 +32,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 
 export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
-  @ViewChild('parentTable') parentTable: GenericTableComponent;
+  @ViewChild('parentTable') private parentTable: GenericTableComponent;
 
   // This may be unnecessary. It'd be a lot. Like if each user has an average of
   // 3, and you have 30 users, that's almost a hundred to scroll through.
   // Tables need filters.
-  @ViewChild('usageTable') usageTable: GenericTableComponent;
+  @ViewChild('usageTable') private usageTable: GenericTableComponent;
+
+  protected item: VirtualMachine;
 
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
@@ -68,7 +70,12 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
 
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
-    this.item = item;
+    if ( !(item instanceof VirtualMachine) ) {
+      // TODO throw error
+      console.log("item passed to vm-usage-tab which was not a VirtualMachine: ", item);
+      return;
+    }
+    this.item = item as VirtualMachine;
   }
 
   init() {

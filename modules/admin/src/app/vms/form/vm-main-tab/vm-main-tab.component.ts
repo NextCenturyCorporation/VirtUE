@@ -38,12 +38,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 
 export class VmMainTabComponent extends GenericFormTabComponent implements OnInit {
 
-  @ViewChild('childrenTable') childrenTable: GenericTableComponent;
+  @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
 
   // emits a list of childID strings.
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
-  newVersion: number;
+  private newVersion: number;
+
+  protected item: VirtualMachine;
 
   constructor(
       protected osOptions: OSSet,
@@ -58,8 +60,14 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
 
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
-    this.item = item;
-    this.newVersion = Number(this.item['version']);
+    if ( !(item instanceof VirtualMachine) ) {
+      // TODO throw error
+      console.log("item passed to vm-main-tab which was not a VirtualMachine: ", item);
+      return;
+    }
+    this.item = item as VirtualMachine;
+
+    this.newVersion = Number(this.item.version);
 
     if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
       this.newVersion++;
@@ -107,7 +115,7 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
   }
 
   collectData() {
-    this.item['version'] = this.newVersion;
+    this.item.version = String(this.newVersion);
   }
 
   /**

@@ -95,16 +95,16 @@
         <div *ngFor="let column of colData | slice:1; let idx=index"
             class="table-data mui-col-md-{{column.colWidth}} transparent">
           <div *ngIf="column.list !== undefined">
-            <ng-container *ngFor="let child of column.list(i)">
+            <ng-container *ngFor="let element of column.list(i)">
               <ul>
                 <!-- <ul [innerHTML]="column.formatValue(i)"></ul> -->
                 <!-- formatValue for lists returns the list to be displayed -->
                 <ul>
-                  <a *ngIf="column.link" (click)="column.link(child)">
-                    {{ column.formatValue ? column.formatValue(child) : child.getName() }}
+                  <a *ngIf="column.link" (click)="column.link(element)">
+                    {{ column.formatValue ? column.formatValue(element) : element.toString() }}
                   </a>
                   <div *ngIf="column.link === undefined">
-                    {{ column.formatValue ? column.formatValue(child) : child.getName() }}
+                    {{ column.formatValue ? column.formatValue(element) : element.toString() }}
                   </div>
                 </ul>
               </ul>

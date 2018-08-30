@@ -34,17 +34,20 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 
 export class UserMainTabComponent extends GenericFormTabComponent implements OnInit {
 
-  @ViewChild('childrenTable') childrenTable: GenericTableComponent;
+  @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
 
   // emits a list of childID strings.
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
-  roleUser: boolean;
-  roleAdmin: boolean;
+  private roleUser: boolean;
+  private roleAdmin: boolean;
 
-  fullImagePath: string;
+  private fullImagePath: string;
 
-  childDatasetName: string;
+  private childDatasetName: string;
+
+  // calling it 'item' for consistency with the rest of the code
+  protected item: User;
 
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
@@ -70,20 +73,23 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
 
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
-    this.item = item;
-    // this.item.children.asList();
+    if ( !(item instanceof User) ) {
+      // TODO throw error
+      console.log("item passed to main-user-tab which was not a User: ", item);
+    }
+    this.item = item as User;
 
-    this.roleUser = this.item['roles'].includes("ROLE_USER");
-    this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
+    this.roleUser = this.item.roles.includes("ROLE_USER");
+    this.roleAdmin = this.item.roles.includes("ROLE_ADMIN");
   }
 
   collectData() {
-    this.item['roles'] = [];
+    this.item.roles = [];
     if (this.roleUser) {
-      this.item['roles'].push('ROLE_USER');
+      this.item.roles.push('ROLE_USER');
     }
     if (this.roleAdmin) {
-      this.item['roles'].push('ROLE_ADMIN');
+      this.item.roles.push('ROLE_ADMIN');
     }
   }
 
@@ -94,7 +100,7 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
       // new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
       // new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
       new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
-      new Column('apps',    'Assigned Applications',  this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
+      new Column('apps',    'Assigned Applications',  this.getGrandchildren, undefined, 3, this.formatName),
       new Column('version', 'Version',                undefined,        'asc',     2),
       new Column('status',  'Status',                 undefined,        'asc',     1, this.formatStatus)
     ];
