@@ -38,8 +38,8 @@ export class VirtueModalComponent extends GenericModalComponent {
       new Column('name',    'Template Name',      undefined, 'asc',     3),
       // new Column('childNamesHTML',  'Virtual Machines',   true, undefined,  3, this.getChildNamesHtml),
       // new Column('apps',            'Applications',       true, undefined,  3,  this.getGrandchildrenHtmlList),
-      new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
-      new Column('apps',    'Assigned Applications',  this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
+      new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName),
+      new Column('apps',    'Assigned Applications',  this.getChildren, undefined, 3, this.formatName),
       // new Column('version',         'Version',            false, 'asc',     1), // could this be useful?
       new Column('modDate', 'Modification Date',  undefined, 'desc',    2),
       new Column('status',  'Status',             undefined, 'asc',     1, this.formatStatus)
