@@ -37,6 +37,7 @@ import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -611,6 +612,36 @@ public class AdminResource {
 	public void setServiceDefaultPermission(@PathParam("option") String optionStr) {
 		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
 		permissionService.setDefaultClipboardPermission(option);
+	}
+
+	@GET
+	@Path("storage/")
+	@Produces("application/json")
+	public Iterable<VirtuePersistentStorage> getAllStorage() {
+		return adminService.getAllPersistentStorage();
+	}
+
+	@GET
+	@Path("storage/{user}/")
+	@Produces("application/json")
+	public Iterable<VirtuePersistentStorage> getPersistentStorageForUser(@PathParam("user") String username) {
+		return adminService.getPersistentStorageForUser(username);
+	}
+
+	@GET
+	@Path("storage/{user}/{virtueTemplateId}")
+	@Produces("application/json")
+	public VirtuePersistentStorage getPersistentStorage(@PathParam("user") String username,
+			@PathParam("virtueTemplateId") String virtueTemplateId) {
+		return adminService.getPersistentStorage(username, virtueTemplateId);
+	}
+
+	@DELETE
+	@Path("storage/{user}/{virtueTemplateId}")
+	@Produces("application/json")
+	public void deletePersistentStorage(@PathParam("user") String username,
+			@PathParam("virtueTemplateId") String virtueTemplateId) {
+		adminService.deletePersistentStorage(username, virtueTemplateId);
 	}
 
 	private Collection<String> getAllSourceIds() {

@@ -129,8 +129,8 @@ public class XenHostManager {
 		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
 		String virtueName = virtue.getName();
 		virtueName = virtueName.replace(" ", "-");
-		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(),
-				virtue.getTemplateId());
+		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(), virtue.getTemplateId(),
+				virtue.getName());
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
 				xenInstanceType, subnetId);
@@ -182,12 +182,16 @@ public class XenHostManager {
 					session = getSession(xen, session, privateKeyFile, 5);
 
 					copySshKey(session, privateKeyFile);
-					attachPersistentVolume(xen.getInfrastructureId(), virtue.getUsername(), virtue.getTemplateId());
+					attachPersistentVolume(xen.getInfrastructureId(), virtue.getUsername(), virtue.getTemplateId(),
+							virtue.getName());
 					waitUntilXlListIsReady(session);
 					// JavaUtil.sleepAndLogInterruption(20000);
 					SshUtil.sendCommandFromSessionWithTimeout(session,
 							"nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1", 300);
 					SshUtil.sendCommandFromSession(session, "sudo xl list");
+					List<String> persistOutput = SshUtil.sendCommandFromSession(session,
+							"sudo mkdir -p /persist;sudo mount /dev/nvme1n1 /persist/");
+					logger.debug("mounted persistent volume" + persistOutput);
 					logger.trace("Xen Host configure complete");
 					finalXenFuture.complete(xen);
 				} catch (JSchException e) {
@@ -243,8 +247,9 @@ public class XenHostManager {
 		// t.start();
 	}
 
-	protected void attachPersistentVolume(String instanceId, String username, String templateId) {
-		String volumeId = persistentStorageManager.getOrCreatePersistentStorageForVirtue(username, templateId);
+	protected void attachPersistentVolume(String instanceId, String username, String templateId, String templateName) {
+		String volumeId = persistentStorageManager.getOrCreatePersistentStorageForVirtue(username, templateId,
+				templateName);
 		if (volumeId != null) {
 			AttachVolumeRequest avr = new AttachVolumeRequest(volumeId, instanceId, PERSISTENT_VOLUME_DEVICE_NAME);
 			AttachVolumeResult avrResult = ec2Wrapper.getEc2().attachVolume(avr);

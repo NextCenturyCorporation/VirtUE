@@ -52,6 +52,7 @@
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="userManager" />
+		<constructor-arg ref="persistentStorageManager" />
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
