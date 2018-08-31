@@ -83,7 +83,7 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
     this.roleAdmin = this.item.roles.includes("ROLE_ADMIN");
   }
 
-  collectData() {
+  collectData(): boolean {
     this.item.roles = [];
     if (this.roleUser) {
       this.item.roles.push('ROLE_USER');
@@ -91,6 +91,7 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
     if (this.roleAdmin) {
       this.item.roles.push('ROLE_ADMIN');
     }
+    return true;
   }
 
   getColumns(): Column[] {

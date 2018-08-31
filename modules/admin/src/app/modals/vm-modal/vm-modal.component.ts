@@ -63,7 +63,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     return {
       prettyTitle: "Virtual Machine Templates",
       itemName: "Vm Template",
-      pluralItem: "VMs",
+      pluralItem: "VM Templates",
       domain: '/vm-templates'
     };
   }

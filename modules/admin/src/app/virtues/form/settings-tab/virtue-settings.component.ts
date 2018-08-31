@@ -1,5 +1,13 @@
-import { Component, Input, ViewChild, ElementRef, OnInit, Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter } from '@angular/core';
+import { HttpClientModule } from "@angular/common/http";
+import {
+          MatButtonModule,
+          MatDialog,
+          MatIconModule,
+          MatIconRegistry
+
+} from '@angular/material';
+
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Item } from '../../../shared/models/item.model';
@@ -17,7 +25,7 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 
 // not used anywhere else, so just defined here
-interface NetworkConnection {
+class NetworkPermission {
   host: string;
   protocol: string; //should be an enum
   localPort: number;
@@ -30,6 +38,7 @@ interface NetworkConnection {
   styleUrls: ['./virtue-settings.component.css']
 })
 export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
+
   @ViewChild('pasteableVirtues') private pasteableVirtuesTable: GenericTableComponent;
 
   private unprovisioned: boolean;
@@ -45,9 +54,16 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   // re-classing item, to make it easier and less error-prone to work with.
   protected item: Virtue;
 
+  // local reference to the virtue-form's allUsers variable.
+  private allVirtues: DictList<Virtue>;
 
-  private networkWhiteList: NetworkConnection[];
+  private networkWhiteList: NetworkPermission[];
 
+  private applyNewNetworkPermission: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  private newNetwork: NetworkPermission;
+
+  browsers: string[];
 
 
   // this appears to have a number of tables
@@ -57,17 +73,33 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   // - Allowed Printers
   // - And then probably something with the sensors.
 
-  constructor(router: Router, dialog: MatDialog) {
+  constructor( private matIconRegistry: MatIconRegistry, router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.tabName = "Settings";
+
+    this.matIconRegistry.addSvgIcon(
+          `plus`,
+          `../../../../assets/images/baseline-add-24px.svg`
+        );
+
+    this.tabName = 'Settings';
     this.pasteableVirtues = [];
+
+    this.newNetwork = new NetworkPermission();
+    // Is this list suppsoed to be hard coded? User-defined? Automatically generated
+    // by perhaps tagging loaded browser applications as "browsers", and looking
+    // through all the applications this virtue has access to, and showing that list?
+    // The latter seems the most useful, but relies on the admin correctly tagging things when they load them.
+    // And labelling them well. Apps need versions, but they can't default to anything, and it must be made clear
+    // that "version" on that modal means "the actual application's version", and not "Version" like this is the 4th
+    // change I've made to this Chrome application item.
+    this.browsers = ['Chrome', 'Firefox', 'This is not workable', 'FIXME', 'TODO'];
   }
 
   ngOnInit() {
   }
 
   init() {
-    // this.setUpConnectedVirtuesTable();
+    this.setUpPasteableVirtuesTable();
     // this.setUpPrintersTable();
   }
 
@@ -84,13 +116,110 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.setColor(this.item.color);
   }
 
-  update() {
+  update(newData?: any) {
+    if (newData) {
+      if (newData.allVirtues) {
+        this.allVirtues = newData.allVirtues;
 
+        this.populatePasteableVirtuesTable();
+      }
+
+      // other conditionals
+    }
+    else {
+      // TODO show error
+      console.log();
+    }
   }
 
-  collectData() {
+  collectData(): boolean {
     this.item.color = this.getColor();
 
+    if (this.newNetwork !== undefined) {
+      // TODO tell the user
+      alert("please hit apply or remove on your new network permission");
+      return false;
+    }
+    return true;
+  }
+
+  addNewNetworkPermission(): void {
+    this.newNetwork = new NetworkPermission();
+    console.log("here", this.newNetwork);
+    // this.applyNewNetworkPermission.subscribe( () => {},
+    //   () => {},
+    //   () => {
+    //     this.networkWhiteList.push(this.newNetwork);
+    //     this.newNetwork = undefined;
+    //     this.applyNewNetworkPermission.unsubscribe();
+    // });
+  }
+
+  saveNewNetwork(): void {
+    // TODO first check it
+    this.applyNewNetworkPermission.emit(true);
+  }
+
+  setUpPasteableVirtuesTable(): void {
+    if (this.pasteableVirtuesTable === undefined) {
+      return;
+    }
+
+    this.pasteableVirtuesTable.setUp({
+      cols: this.getPasteColumns(),
+      opts: this.getPasteOptionsList(),
+      coloredLabels: true,
+      filters: [], // don't allow filtering on the form's child table. ?
+      tableWidth: 10,
+      noDataMsg: 'Click "Add Virtue" to give this virtue permission to paste data into that one',
+      hasCheckBoxes: false
+    });
+  }
+
+  populatePasteableVirtuesTable(): void {
+    if ( !(this.allVirtues) ) {
+      return;
+    }
+
+    this.pasteableVirtuesTable.items = [];
+    for (let vID of this.pasteableVirtues) {
+      if (this.allVirtues.has(vID)) {
+        this.pasteableVirtuesTable.items.push(this.allVirtues.get(vID));
+      }
+    }
+  }
+
+  getPasteColumns(): Column[] {
+    return [
+      // new Column('name',    'Virtue Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
+      new Column('name',    'Virtue Template Name',    undefined,             'asc',     4, undefined),
+      // new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
+      // new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
+      new Column('apps',    'Assigned Applications',  this.getGrandchildren,  undefined, 4, this.formatName),
+      new Column('version', 'Version',                undefined,              undefined, 2),
+      new Column('status',  'Status',                 undefined,              'asc',     1, this.formatStatus)
+    ];
+  }
+
+  getNetworkColumns(): Column[] {
+    return [
+      new Column('host',        'Host',         undefined, undefined, 5),
+      new Column('protocol',    'Protocol',     undefined, undefined, 3),
+      new Column('localPort',   'Local Port',   undefined, undefined, 2),
+      new Column('remotePort',  'Remote Port',  undefined, undefined, 2)
+    ];
+  }
+
+  getPasteOptionsList(): RowOptions[] {
+    return [
+       new RowOptions("Remove", () => true, (i: Item) => {
+         var index = this.pasteableVirtues.indexOf(i.getID(), 0);
+         if (index > -1) {
+            this.pasteableVirtues.splice(index, 1);
+         }
+         this.populatePasteableVirtuesTable();
+       }
+     )];
   }
 
   setColor(temp: any) {
@@ -138,6 +267,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.pasteableVirtues = selectedVirtues;
+      this.populatePasteableVirtuesTable();
+      // this.pasteableVirtuesTable.items = [];
+      // for (let vID of this.pasteableVirtues) {
+      //   this.pasteableVirtuesTable.items.
+      // }
     },
     () => {},
     () => {// when finished

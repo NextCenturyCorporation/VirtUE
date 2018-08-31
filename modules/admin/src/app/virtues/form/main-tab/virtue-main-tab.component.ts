@@ -74,7 +74,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
     return [
       new Column('name',        'VM Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
       new Column('os',          'OS',                   undefined, 'asc',     2),
-      new Column('childNames',  'Assigned Applications', this.getChildren, undefined, 4, this.formatName, (i: Item) => this.viewItem(i)),
+      new Column('childNames',  'Assigned Applications', this.getChildren, undefined, 4, this.formatName),
       new Column('status',      'Status',               undefined, 'asc',     2, this.formatStatus)
     ];
   }
@@ -110,8 +110,9 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
     });
   }
 
-  collectData() {
+  collectData(): boolean {
     this.item.version = String(this.newVersion);
+    return true;
   }
 
   /**

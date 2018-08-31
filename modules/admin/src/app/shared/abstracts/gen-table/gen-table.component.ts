@@ -42,7 +42,7 @@ Using this table needs three things:
 @Component({
   selector: 'app-item-table',
   templateUrl: './gen-table.component.html',
-  styleUrls: ['./gen-table.component.css'],
+  styleUrls: ['../gen-page/gen-page.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
 export class GenericTableComponent {
@@ -81,7 +81,7 @@ export class GenericTableComponent {
 
   constructor() {
     // create meaningless empty column to prevent error until createTable() is called by ngOnInit
-    this.sortColumn = new Column("", "", undefined, "", 0);
+    this.sortColumn = new Column("", "", undefined, undefined, 0);
     this.colData = [this.sortColumn];
     this.filterOptions = [];
     this.items = [];
@@ -127,7 +127,7 @@ export class GenericTableComponent {
   selectAll(checked) {
     if (checked) {
       for (let i of this.items) {
-        this.selectedIDs.push(i.id);
+        this.selectedIDs.push(i.getID());
       }
     } else {
       this.clearSelections();

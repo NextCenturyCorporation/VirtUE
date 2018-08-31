@@ -21,6 +21,8 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 })
 export class VirtueModalComponent extends GenericModalComponent {
 
+
+
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
@@ -71,7 +73,7 @@ export class VirtueModalComponent extends GenericModalComponent {
     return {
       prettyTitle: "Virtue Templates",
       itemName: "Virtue Template",
-      pluralItem: "Virtues",
+      pluralItem: "Virtue Templates",
       domain: '/virtues'
     };
   }

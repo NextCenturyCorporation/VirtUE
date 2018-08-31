@@ -6,7 +6,7 @@
   <li><a data-mui-toggle="tab" data-mui-controls="sensors">Sensors</a></li>
 </ul>
 <div class="mui-tabs__pane mui--is-active" id="general">
-  <div class="tab-pane-content">
+  <div class="tab-pane-content no-overflow">
     <div class="mui-row form-item">
       <div class="mui-col-md-11">
         <h4>General Settings</h4>
@@ -16,23 +16,84 @@
         <mat-checkbox [(ngModel)]="unprovisioned">
         </mat-checkbox>
       </div>
+    </div>
     <br>
     <div class="mui-row form-item">
       <div class="mui-col-md-4 float-left">
         <label>Select Virtue Color:</label>
         <div class="mui-col-md-6 float-right">
           <mat-card id="virtue-color" rowHeight="1:1" [ngStyle]="{'background-color': virtueColor, 'border':'1px solid black'}"
-          (click)="activatePastableVirtueModal()"></mat-card>
+          (click)="activateColorModal()"></mat-card>
         </div>
       </div>
     </div>
-    <app-item-table #pasteableVirtues></app-item-table>
+    <mat-form-field>
+      <mat-select placeholder="Default Browser">
+        <mat-option *ngFor="let browser of browsers" [value]="browser">
+          {{browser}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div class="mui-row form-item">
+      <app-item-table #pasteableVirtues></app-item-table>
+
+      <div class="mui-col-md-2 float-right" *ngIf="mode !== 'View'" >
+        <br>
+        <label>Add Virtue &nbsp;&nbsp;</label>
+        <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()">
+          <!-- <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()" color="primary"> -->
+          <!-- <mat-icon aria-label="Add new item to list of virtues into which this virtue is allowed to paste data.">add</mat-icon> -->
+          <mat-icon aria-label="Add new item to list of virtues into which this virtue is allowed to paste data.">+</mat-icon>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 <div class="mui-tabs__pane" id="network">
-  <div class="tab-pane-content">
-    <h4>Network Settings </h4>
-    <div class="mui-row form-item">
+  <div class="tab-pane-content no-overflow">
+    <div class="mui-row ">
+      <div class="mui-col-md-9">
+        <div class="mui-row">
+          <h4>Network Permissions: </h4>
+          <div class="mui-col-md-10">
+            <br>
+            <b>White List</b>
+          </div>
+          <div class="mui-col-md-2">
+            <small><br>Add new &nbsp;&nbsp;</small>
+            <button mat-mini-fab mat-button class="fab-button" (click)="addNewNetworkPermission()">+</button>
+          </div>
+        </div>
+        <br>
+        <div class="mui-row">
+          <ng-container *ngFor="let column of getNetworkColumns()" >
+            <div class="table-header mui-col-md-{{column.colWidth}}">
+              <label>{{column.prettyName}}</label>
+            </div>
+          </ng-container>
+        </div>
+        <div *ngFor="let networkPermission of networkWhiteList" class="mui-row">
+          <ng-container *ngFor="let column of getNetworkColumns()" >
+            <div class="mui-col-md-{{column.colWidth}}">
+              <label>{{networkPermission[column.name]}}</label>
+            </div>
+          </ng-container>
+        </div>
+        <ng-container *ngIf="newNetwork !== undefined">
+          <ng-container *ngFor="let column of getNetworkColumns()" >
+            <div class="mui-col-md-{{column.colWidth}}">
+              <mat-form-field>
+                <input matInput type="text" [(ngModel)]="newNetwork[column.name]" />
+              </mat-form-field>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
       <span class="mui-col-md-5 label">Remote IP Settings:</span>
       <span class="mui-col-md-7 text-align-right">
          <mat-form-field>
@@ -84,9 +145,9 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 <div class="mui-tabs__pane" id="resources">
-  <div class="tab-pane-content">
+  <div class="tab-pane-content no-overflow">
     <h4>Resources</h4>
     <p><mat-checkbox name="resources-global"> Use Global Settings</mat-checkbox></p>
     <div class="mui-row form-item">
@@ -139,7 +200,7 @@
   </div>
 </div>
 <div class="mui-tabs__pane" id="sensors">
-  <div class="tab-pane-content">
+  <div class="tab-pane-content no-overflow">
     <h4>Sensor Settings</h4>
     <p><mat-checkbox name="resources-global"> Use Global Settings</mat-checkbox></p>
     <div class="mui-row form-item">

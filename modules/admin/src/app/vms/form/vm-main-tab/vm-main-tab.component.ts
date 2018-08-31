@@ -114,8 +114,9 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
     });
   }
 
-  collectData() {
+  collectData(): boolean {
     this.item.version = String(this.newVersion);
+    return true;
   }
 
   /**

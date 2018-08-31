@@ -92,7 +92,8 @@ export abstract class GenericFormTabComponent implements OnInit {
   abstract update(newData?: any): void;
 
   // called when item is being saved, to set any disconnected fields as necessary
-  abstract collectData(): void;
+  // return false if the data that needs to be collected isn't available/valid/finished/applied
+  abstract collectData(): boolean;
 
 
 

@@ -107,9 +107,10 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     });
   }
 
-  collectData() {
+  collectData(): boolean {
     // do nothing at the moment - nothing about item can be changed from this
     // page, so no changes to collect.
+    return true;
   }
 
 }

@@ -139,6 +139,7 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.
     // Note that some children may not exist any more, or may have been updated.
+    // Remember to make this sortable by version.
     // this.historyTab.setUp();
   }
 
@@ -150,7 +151,7 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
     // This may need updating whenever the list of printers or whatever gets reset.
     // If I know printers, a refresh button for that list in particular will be greatly appreciated.
-    this.settingsTab.update();
+    this.settingsTab.update({allVirtues: this.allVirtues});
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
@@ -182,8 +183,12 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
   // create and fill the fields the backend expects to see, record any
   // uncollected inputs, and check that the item is valid to be saved
   finalizeItem(): boolean {
-    this.mainTab.collectData();
-    this.settingsTab.collectData();
+    if ( !this.mainTab.collectData() ) {
+      return false;
+    }
+    if ( !this.settingsTab.collectData() ) {
+      return false;
+    }
     // TODO perform checks here, so none of the below changes happen if the item
     // isn't valid
 
