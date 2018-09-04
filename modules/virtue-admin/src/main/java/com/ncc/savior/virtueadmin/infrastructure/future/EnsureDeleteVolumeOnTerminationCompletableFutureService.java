@@ -29,11 +29,13 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 	private static final Logger logger = LoggerFactory
 			.getLogger(EnsureDeleteVolumeOnTerminationCompletableFutureService.class);
 	private AmazonEC2 ec2;
+	private String persistentDeviceName;
 
 	public EnsureDeleteVolumeOnTerminationCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2,
-			int timeoutMillis) {
+			int timeoutMillis, String persistentDeviceName) {
 		super(executor, true, 10, 1000, timeoutMillis);
 		this.ec2 = ec2;
+		this.persistentDeviceName = persistentDeviceName;
 	}
 
 	@Override
@@ -62,11 +64,12 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 			return false;
 		}
 		for (InstanceBlockDeviceMapping mapping : mappings) {
-			Boolean delOnTerm = mapping.getEbs().getDeleteOnTermination();
-			if (!delOnTerm) {
+			boolean delOnTerm = mapping.getEbs().getDeleteOnTermination();
+			boolean shouldBeDeletedOnTerm = !(persistentDeviceName.equals(mapping.getDeviceName()));
+			if (delOnTerm != shouldBeDeletedOnTerm) {
 				InstanceBlockDeviceMappingSpecification mapspec = new InstanceBlockDeviceMappingSpecification();
 				EbsInstanceBlockDeviceSpecification ebs = new EbsInstanceBlockDeviceSpecification();
-				ebs.setDeleteOnTermination(true);
+				ebs.setDeleteOnTermination(shouldBeDeletedOnTerm);
 				ebs.setVolumeId(mapping.getEbs().getVolumeId());
 				mapspec.setEbs(ebs);
 				mapspec.setDeviceName(mapping.getDeviceName());

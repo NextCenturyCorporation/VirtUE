@@ -41,6 +41,8 @@ import com.ncc.savior.virtueadmin.model.VmState;
 public class AwsEc2Wrapper {
 	private static final Logger logger = LoggerFactory.getLogger(AwsEc2Wrapper.class);
 	private static final int SSH_PORT = 22;
+	public static final String AWS_NOT_FOUND_ERROR_CODE = "InvalidVolume.NotFound";
+	public static final String AWS_VOLUME_IN_USE_ERROR_CODE = "VolumeInUse";
 
 	private AmazonEC2 ec2;
 
