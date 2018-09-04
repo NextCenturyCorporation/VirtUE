@@ -31,6 +31,9 @@ public class RoleIT {
 		public Date lastModification;
 		public String name;
 		public String version;
+		public String color;
+		public String userCreatedBy;
+		public Date timeCreatedAt;
 		public List<String> virtualMachineTemplateIds;
 	}
 
