@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.AttachVolumeResult;
@@ -54,9 +55,11 @@ import com.ncc.savior.virtueadmin.model.VmState;
  *
  */
 public class XenHostManager {
-	private static final String VM_PREFIX = "VRTU-XG-";
-	public static final String PERSISTENT_VOLUME_DEVICE_NAME = "/dev/sdb";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
+	private static final String VM_PREFIX = "VRTU-XG-";
+
+	@Value("${virtue.aws.persistentStorage.deviceName}")
+	private String persistentVolumeDeviceName;
 	private VirtualMachineTemplate xenVmTemplate;
 	private AwsEc2Wrapper ec2Wrapper;
 	private String xenKeyName;
@@ -251,7 +254,7 @@ public class XenHostManager {
 		String volumeId = persistentStorageManager.getOrCreatePersistentStorageForVirtue(username, templateId,
 				templateName);
 		if (volumeId != null) {
-			AttachVolumeRequest avr = new AttachVolumeRequest(volumeId, instanceId, PERSISTENT_VOLUME_DEVICE_NAME);
+			AttachVolumeRequest avr = new AttachVolumeRequest(volumeId, instanceId, persistentVolumeDeviceName);
 			AttachVolumeResult avrResult = ec2Wrapper.getEc2().attachVolume(avr);
 			String state = avrResult.getAttachment().getState();
 			logger.debug("Attaching volume state=" + state);

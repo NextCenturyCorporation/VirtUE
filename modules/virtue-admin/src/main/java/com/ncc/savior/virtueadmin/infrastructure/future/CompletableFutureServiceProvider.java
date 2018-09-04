@@ -53,6 +53,8 @@ public class CompletableFutureServiceProvider {
 	private int awsStatusTimeoutMillis;
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
+	@Value("${virtue.aws.persistentStorage.deviceName}")
+	private String persistentVolumeDeviceName;
 	private boolean usePublicDns;
 	private VirtueAwsEc2Provider ec2Provider;
 	private IKeyManager keyManager;
@@ -86,7 +88,7 @@ public class CompletableFutureServiceProvider {
 		awsRenamingService = new AwsRenamingCompletableFutureService(executor, ec2, renameTimeoutMillis);
 		awsNetworkingUpdateService = new AwsNetworkingUpdateService(executor, ec2, usePublicDns, networkTimeoutMillis);
 		ensureDeleteVolumeOnTermination = new EnsureDeleteVolumeOnTerminationCompletableFutureService(executor, ec2,
-				ensureDeleteTimeoutMillis);
+				ensureDeleteTimeoutMillis, persistentVolumeDeviceName);
 		testUpDown = new TestReachabilityCompletableFuture(executor, keyManager, upDownTimeoutMillis);
 		addRsa = new AddRsaKeyCompletableFutureService(executor, keyManager, rsaTimeoutMillis);
 		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2, awsStatusTimeoutMillis);

@@ -17,7 +17,6 @@ import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMappingSpecification;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
-import com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
 /**
@@ -30,11 +29,13 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 	private static final Logger logger = LoggerFactory
 			.getLogger(EnsureDeleteVolumeOnTerminationCompletableFutureService.class);
 	private AmazonEC2 ec2;
+	private String persistentDeviceName;
 
 	public EnsureDeleteVolumeOnTerminationCompletableFutureService(ScheduledExecutorService executor, AmazonEC2 ec2,
-			int timeoutMillis) {
+			int timeoutMillis, String persistentDeviceName) {
 		super(executor, true, 10, 1000, timeoutMillis);
 		this.ec2 = ec2;
+		this.persistentDeviceName = persistentDeviceName;
 	}
 
 	@Override
@@ -64,8 +65,7 @@ public class EnsureDeleteVolumeOnTerminationCompletableFutureService
 		}
 		for (InstanceBlockDeviceMapping mapping : mappings) {
 			boolean delOnTerm = mapping.getEbs().getDeleteOnTermination();
-			boolean shouldBeDeletedOnTerm = !(XenHostManager.PERSISTENT_VOLUME_DEVICE_NAME
-					.equals(mapping.getDeviceName()));
+			boolean shouldBeDeletedOnTerm = !(persistentDeviceName.equals(mapping.getDeviceName()));
 			if (delOnTerm != shouldBeDeletedOnTerm) {
 				InstanceBlockDeviceMappingSpecification mapspec = new InstanceBlockDeviceMappingSpecification();
 				EbsInstanceBlockDeviceSpecification ebs = new EbsInstanceBlockDeviceSpecification();
