@@ -18,6 +18,7 @@ import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
 import com.amazonaws.services.ec2.model.Volume;
+import com.amazonaws.services.ec2.model.VolumeType;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IPersistentStorageDao;
@@ -119,6 +120,7 @@ public class PersistentStorageManager {
 		CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest();
 		createVolumeRequest.setSnapshotId(snapshotIdForNewPersistentStorageDrive);
 		createVolumeRequest.setAvailabilityZone(availabilityZone);
+		createVolumeRequest.setVolumeType(VolumeType.Gp2);
 		TagSpecification ts = new TagSpecification();
 		Collection<Tag> tags = new ArrayList<Tag>();
 		tags.add(new Tag("Name", name));
