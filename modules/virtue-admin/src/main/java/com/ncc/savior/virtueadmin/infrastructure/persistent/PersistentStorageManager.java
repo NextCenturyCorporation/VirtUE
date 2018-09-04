@@ -2,9 +2,9 @@ package com.ncc.savior.virtueadmin.infrastructure.persistent;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,11 +168,11 @@ public class PersistentStorageManager {
 	}
 
 	/**
-	 * Attempts to delete all persistent storage.  
+	 * Attempts to delete all persistent storage.
 	 */
 	public void deleteAllPersistentStorage() {
 		Iterable<VirtuePersistentStorage> aps = getAllPersistentStorage();
-		Map<VirtuePersistentStorage, SaviorException> failedDeletes = new TreeMap<VirtuePersistentStorage, SaviorException>();
+		Map<VirtuePersistentStorage, SaviorException> failedDeletes = new HashMap<VirtuePersistentStorage, SaviorException>();
 		for (VirtuePersistentStorage ps : aps) {
 			try {
 				deletePersistentStorage(ps);
@@ -184,7 +184,7 @@ public class PersistentStorageManager {
 			if (failedDeletes.size() == 1) {
 				VirtuePersistentStorage ps = failedDeletes.keySet().iterator().next();
 				SaviorException e = failedDeletes.get(ps);
-				throw new SaviorException(e.getErrorCode(), e.getLocalizedMessage(), e);
+				throw new SaviorException(e.getErrorCode(), e.getLocalizedMessage() + " for " + ps, e);
 			} else {
 				throw new SaviorException(SaviorErrorCode.MULTIPLE_STORAGE_ERROR, "Failed to delete "
 						+ failedDeletes.size() + " persistent storage volumes.  Volumes=" + failedDeletes);

@@ -189,9 +189,9 @@ public class XenHostManager {
 					SshUtil.sendCommandFromSessionWithTimeout(session,
 							"nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1", 300);
 					SshUtil.sendCommandFromSession(session, "sudo xl list");
-					List<String> persistOutput = SshUtil.sendCommandFromSession(session,
-							"sudo mkdir -p /persist;sudo mount /dev/nvme1n1 /persist/");
-					logger.debug("mounted persistent volume" + persistOutput);
+					// List<String> persistOutput = SshUtil.sendCommandFromSession(session,
+					// "sudo mkdir -p /persist;sudo mount /dev/nvme1n1 /persist/");
+					// logger.debug("mounted persistent volume" + persistOutput);
 					logger.trace("Xen Host configure complete");
 					finalXenFuture.complete(xen);
 				} catch (JSchException e) {
