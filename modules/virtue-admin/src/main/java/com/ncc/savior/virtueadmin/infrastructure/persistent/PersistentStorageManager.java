@@ -3,6 +3,8 @@ package com.ncc.savior.virtueadmin.infrastructure.persistent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,10 @@ import com.ncc.savior.virtueadmin.data.IPersistentStorageDao;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 
+/**
+ * Manages creating, deleting etc persistent storage and keeping the database
+ * and AWS in sync.
+ */
 public class PersistentStorageManager {
 	private static final Logger logger = LoggerFactory.getLogger(PersistentStorageManager.class);
 	private AwsEc2Wrapper ec2Wrapper;
@@ -41,6 +47,16 @@ public class PersistentStorageManager {
 		this.availabilityZone = availabilityZone;
 	}
 
+	/**
+	 * Returns the volume ID for the persistent storage for a given user and
+	 * template ID. The template name should also be provided in order to properly
+	 * tag the volume. If no volume exists, a new one will be created.
+	 * 
+	 * @param username
+	 * @param virtueTemplateId
+	 * @param virtueTemplateName
+	 * @return
+	 */
 	public String getOrCreatePersistentStorageForVirtue(String username, String virtueTemplateId,
 			String virtueTemplateName) {
 		VirtuePersistentStorage ps = persistentStorageDao.getPersistentStorage(username, virtueTemplateId);
@@ -81,6 +97,13 @@ public class PersistentStorageManager {
 		return volumeId;
 	}
 
+	/**
+	 * Deletes persistent storage if found. Throws a {@link SaviorException} if not
+	 * found.
+	 * 
+	 * @param username
+	 * @param virtueTemplateId
+	 */
 	public void deletePersistentStorage(String username, String virtueTemplateId) {
 		VirtuePersistentStorage ps = persistentStorageDao.getPersistentStorage(username, virtueTemplateId);
 		if (ps == null) {
@@ -91,6 +114,13 @@ public class PersistentStorageManager {
 		deletePersistentStorage(ps);
 	}
 
+	/**
+	 * Deletes persistent storage. If found in database, but not in AWS, the
+	 * database entry will be deleted with no error. If the volume is in use, a
+	 * {@link SaviorException} will be thrown.
+	 * 
+	 * @param ps
+	 */
 	public void deletePersistentStorage(VirtuePersistentStorage ps) {
 		DeleteVolumeRequest deleteVolumeRequest = new DeleteVolumeRequest(ps.getInfrastructureId());
 		try {
@@ -137,10 +167,28 @@ public class PersistentStorageManager {
 		return id;
 	}
 
+	/**
+	 * Attempts to delete all persistent storage.  
+	 */
 	public void deleteAllPersistentStorage() {
 		Iterable<VirtuePersistentStorage> aps = getAllPersistentStorage();
+		Map<VirtuePersistentStorage, SaviorException> failedDeletes = new TreeMap<VirtuePersistentStorage, SaviorException>();
 		for (VirtuePersistentStorage ps : aps) {
-			deletePersistentStorage(ps);
+			try {
+				deletePersistentStorage(ps);
+			} catch (SaviorException e) {
+				failedDeletes.put(ps, e);
+			}
+		}
+		if (!failedDeletes.isEmpty()) {
+			if (failedDeletes.size() == 1) {
+				VirtuePersistentStorage ps = failedDeletes.keySet().iterator().next();
+				SaviorException e = failedDeletes.get(ps);
+				throw new SaviorException(e.getErrorCode(), e.getLocalizedMessage(), e);
+			} else {
+				throw new SaviorException(SaviorErrorCode.MULTIPLE_STORAGE_ERROR, "Failed to delete "
+						+ failedDeletes.size() + " persistent storage volumes.  Volumes=" + failedDeletes);
+			}
 		}
 	}
 

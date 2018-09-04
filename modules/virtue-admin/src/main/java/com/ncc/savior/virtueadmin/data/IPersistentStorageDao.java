@@ -24,6 +24,12 @@ public interface IPersistentStorageDao {
 
 	void savePersistentStorage(VirtuePersistentStorage newPs);
 
+	/**
+	 * Return all {@link VirtuePersistentStorage} for the user.
+	 * 
+	 * @param username
+	 * @return
+	 */
 	Iterable<VirtuePersistentStorage> getPersistentStorageForUser(String username);
 
 }

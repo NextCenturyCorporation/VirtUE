@@ -8,6 +8,10 @@ import javax.persistence.IdClass;
 
 import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage.VirtuePersistentStorageId;
 
+/**
+ * POJO and JPA entity for persistent storage.
+ *
+ */
 @Entity
 @IdClass(VirtuePersistentStorageId.class)
 public class VirtuePersistentStorage implements Serializable {

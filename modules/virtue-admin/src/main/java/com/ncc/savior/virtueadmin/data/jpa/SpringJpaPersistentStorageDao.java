@@ -8,6 +8,10 @@ import com.ncc.savior.virtueadmin.data.IPersistentStorageDao;
 import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage.VirtuePersistentStorageId;
 
+/**
+ * Implementation of {@link IPermissionDao} that uses spring JPA. This handles
+ * the database storage for {@link VirtuePersistentStorage}.
+ */
 public class SpringJpaPersistentStorageDao implements IPersistentStorageDao {
 	@Autowired
 	private PersistentStorageRepository persistentStorageRepository;
@@ -17,6 +21,9 @@ public class SpringJpaPersistentStorageDao implements IPersistentStorageDao {
 		return persistentStorageRepository.findAll();
 	}
 
+	/**
+	 * Get {@link VirtuePersistentStorage} and return null if not found.
+	 */
 	@Override
 	public VirtuePersistentStorage getPersistentStorage(String username, String virtueTemplateId) {
 		// VirtuePersistentStorage s =
@@ -39,6 +46,9 @@ public class SpringJpaPersistentStorageDao implements IPersistentStorageDao {
 		persistentStorageRepository.save(newPs);
 	}
 
+	/**
+	 * Get all persistent storage for the given user.
+	 */
 	@Override
 	public Iterable<VirtuePersistentStorage> getPersistentStorageForUser(String username) {
 		return persistentStorageRepository.findByUsername(username);
