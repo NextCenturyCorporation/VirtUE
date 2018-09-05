@@ -13,6 +13,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceNetworkInterfaceSpecification;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
@@ -68,7 +69,7 @@ public class AwsEc2Wrapper {
 	}
 
 	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String name, Collection<String> securityGroupIds,
-			String serverKeyName, InstanceType instanceType, String subnetIds) {
+			String serverKeyName, InstanceType instanceType, String subnetIds, String iamRoleName) {
 
 		VirtualMachine vm = null;
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -88,6 +89,11 @@ public class AwsEc2Wrapper {
 			runInstancesRequest.withSubnetId(subnetIds).withSecurityGroupIds(securityGroupIds);
 		}
 
+		if (iamRoleName != null) {
+			IamInstanceProfileSpecification iamInstanceProfile = new IamInstanceProfileSpecification();
+			iamInstanceProfile.setName(iamRoleName);
+			runInstancesRequest.withIamInstanceProfile(iamInstanceProfile);
+		}
 		// .withSecurityGroups(securityGroups);
 		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
