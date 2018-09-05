@@ -3,11 +3,15 @@
  */
 package com.nextcentury.savior.cifsproxy;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 
 import org.ietf.jgss.GSSException;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
+import org.springframework.cglib.proxy.UndeclaredThrowableException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -42,14 +46,39 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	private Path cacheFile;
 	private String serviceName;
 
+	private GssApi gssapi = GssApi.INSTANCE;
+
+	private String myhostname;
+
 	public DelegatingAuthenticationManager(AuthenticationManager amDelegate, String serviceName, Path cacheFile) {
 		LOGGER.entry(amDelegate, serviceName, cacheFile);
 		this.amDelegate = amDelegate;
 		this.serviceName = serviceName;
 		this.cacheFile = cacheFile;
+		initHostname();
 		// maybe disable this for production
 		Native.setProtected(true);
 		LOGGER.exit();
+	}
+
+	private void initHostname() {
+		UnknownHostException exception = null;
+		try {
+			myhostname = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			exception = e;
+		}
+		if (exception != null) {
+			// try another strategy
+			if (System.getProperty("os.name").contains("windows")) {
+				myhostname = System.getenv("COMPUTERNAME");
+			} else {
+				myhostname = System.getenv("HOSTNAME");
+			}
+		}
+		if (myhostname == null || myhostname.isEmpty()) {
+			throw new UndeclaredThrowableException(exception);
+		}
 	}
 
 	/**
@@ -72,21 +101,28 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		}
 		KerberosServiceRequestToken kerberosToken = (KerberosServiceRequestToken) authentication;
 		byte[] serviceTicket = kerberosToken.getToken();
-		gss_cred_id_t acceptorCredential;
+		LOGGER.debug("serviceTicket: " + new String(serviceTicket));
+		gss_cred_id_t acceptorCredential = null;
+		gss_cred_id_t proxyCred = null;
+		gss_cred_id_t targetCred = null;
 		try {
 			acceptorCredential = createAcceptorCred();
-			gss_cred_id_t proxyCred = getProxyCredential(serviceTicket, acceptorCredential);
-			gss_cred_id_t targetCred = getTargetCredential(proxyCred);
-			IntByReference minorStatus = new IntByReference();
-			storeCredInto(GssApi.INSTANCE, minorStatus, targetCred, cacheFile);
+			proxyCred = getProxyCredential(serviceTicket, acceptorCredential);
+			targetCred = getTargetCredential(proxyCred);
+			storeCredInto(targetCred, cacheFile);
 		} catch (GSSException e) {
-			org.springframework.ldap.AuthenticationException exception = new org.springframework.ldap.AuthenticationException();
+			LOGGER.debug("got exception: " + e);
+			AuthenticationException exception = new AuthenticationCredentialsNotFoundException(
+					"error obtaining credentials for '" + authentication.getName() + "'");
 			exception.initCause(e);
 			LOGGER.throwing(exception);
 			throw exception;
+		} finally {
+			if (acceptorCredential != null) {
+				// TODO
+			}
+			// TODO clean up other creds
 		}
-		// TODO
-		// cacheCredential(delegatedCredHandle);
 		Authentication newAuth = amDelegate.authenticate(authentication);
 		LOGGER.exit(newAuth);
 		return newAuth;
@@ -94,35 +130,39 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 
 	private gss_cred_id_t createAcceptorCred() throws GSSException {
 		LOGGER.entry();
-		GssApi gssapi = GssApi.INSTANCE;
 		IntByReference minorStatus = new IntByReference();
 		int retval;
 
-		// it appears to be impossible to use gss_acquire_cred with any name except
-		// GSS_C_NO_NAME
-		// gss_name_t gssServiceName = new gss_name_t();
-		// gss_OID_desc nameType = GssApi.GSS_C_NT_HOSTBASED_SERVICE;
-		// gss_buffer_desc serviceNameBuffer = new
-		// gss_buffer_desc(serviceName.getBytes());
-		// retval = gssapi.gss_import_name(minorStatus, serviceNameBuffer, nameType,
-		// new PointerByReference(gssServiceName));
-		// if (retval != 0) {
-		// GSSException exception = new GSSException(retval, minorStatus.getValue(),
-		// "importing name '" + serviceName + "'");
-		// LOGGER.throwing(exception);
-		// throw exception;
-		// }
+		gss_OID_desc nameType = GssApi.GSS_C_NT_HOSTBASED_SERVICE;
+		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, "HTTP@" + myhostname, nameType);
 		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
 		desiredMechs.count = new NativeLong(1);
 		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);
-		int credUsage = GssCredentialUsage.GSS_C_BOTH.getValue();
 		PointerByReference outputCredHandle = new PointerByReference();
-		retval = gssapi.gss_acquire_cred(minorStatus, GssApi.GSS_C_NO_NAME, 0, desiredMechs, credUsage,
-				outputCredHandle, null, null);
+		System.out.println(">>>about to call acquire_cred");
+		// retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0,
+		// desiredMechs,
+		retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0, GssApi.GSS_C_NO_OID_SET,
+				GssCredentialUsage.GSS_C_BOTH.getValue(), outputCredHandle, null, null);
+		System.out.println("<<<back from acquire_cred");
+		GSSException exception = null;
+		try {
+			GssUtils.releaseName(gssapi, gssWebServiceName);
+		} catch (GSSException e) {
+			exception = e;
+		}
 		if (retval != 0) {
+			/*
+			 * this exception is more important than one from release_name (if any), so
+			 * clobber it
+			 */
+			if (exception != null) {
+				LOGGER.warn("ignoring exception from GssUtils.releaseName: " + exception);
+			}
+			exception = new GSSException(retval, minorStatus.getValue(), "acquiring credential (for S4U2Proxy)");
 			LOGGER.warn("error from gss_acquire_cred: " + retval + "." + minorStatus.getValue());
-			GSSException exception = new GSSException(retval, minorStatus.getValue(),
-					"acquiring credential (for S4U2Proxy)");
+		}
+		if (exception != null) {
 			LOGGER.throwing(exception);
 			throw exception;
 		}
@@ -142,18 +182,25 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
 		gss_buffer_desc inputToken = new gss_buffer_desc(serviceTicket);
 		PointerByReference delegatedCredHandle = new PointerByReference();
+		System.out.println(">>>about to call accept_sec_context");
+		PointerByReference sourceName = new PointerByReference(GssApi.GSS_C_NO_NAME);
 		int retval = gssapi.gss_accept_sec_context(minorStatus, contextHandle, acceptorCredential, inputToken,
-				GssApi.GSS_C_NO_CHANNEL_BINDINGS, null, null, outputToken, retFlags, null, delegatedCredHandle);
+				GssApi.GSS_C_NO_CHANNEL_BINDINGS, sourceName, null, outputToken, retFlags, null, delegatedCredHandle);
+		gss_name_t plainSourceName = new gss_name_t(sourceName.getValue());
+		System.out.println("<<back from accept_sec_context: " + retval + "." + minorStatus.getValue() + "\tname='"
+				+ GssUtils.getStringName(gssapi, plainSourceName) + "'");
 		/*
 		 * In theory you have to do this in a loop. In practice that doesn't seem to
-		 * happen. But just in case, check and bail out.
+		 * happen. But just in case, check and warn.
 		 */
 		if (outputToken.length.longValue() != 0) {
-			GSSException exception = new GSSException(retval, minorStatus.getValue(),
-					"unsupported protocol (only single init/accept context packet is supported)");
-			gssapi.gss_release_buffer(minorStatus, outputToken);
-			LOGGER.throwing(exception);
-			throw exception;
+			// GSSException exception = new GSSException(retval, minorStatus.getValue(),
+			// "unsupported protocol (only single init/accept context packet is
+			// supported)");
+			// gssapi.gss_release_buffer(minorStatus, outputToken);
+			// LOGGER.throwing(exception);
+			// throw exception;
+			LOGGER.warn("unsupported protocol (only single init/accept context packet is supported)");
 		}
 		if (retval != 0) {
 			GSSException exception = new GSSException(retval, minorStatus.getValue(),
@@ -168,77 +215,46 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	private gss_cred_id_t getTargetCredential(gss_cred_id_t proxyCred) throws GSSException {
 		LOGGER.entry(proxyCred);
 		GssApi gssapi = GssApi.INSTANCE;
+		int retval;
 		IntByReference minorStatus = new IntByReference();
 		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
+
 		gss_buffer_desc inputToken = new gss_buffer_desc();
-		gss_name_t importedTargetName = GssUtils.importName(gssapi, serviceName,
-				GssApi.GSS_C_NT_HOSTBASED_SERVICE);
-		int retval = gssapi.gss_init_sec_context(minorStatus, proxyCred, contextHandle, importedTargetName,
-				GssApi.MECH_KRB5, 0, 0, GssApi.GSS_C_NO_CHANNEL_BINDINGS, inputToken, null, null, null, null);
+		gss_name_t gssServiceName = GssUtils.importName(gssapi, serviceName, GssApi.GSS_C_NT_HOSTBASED_SERVICE);
+		gss_buffer_desc outputToken = new gss_buffer_desc();
+		// flags from t_s4u2proxy_krb5.c
+		int flags = GssApi.GssContextFlag.GSS_C_REPLAY_FLAG.getValue()
+				| GssApi.GssContextFlag.GSS_C_SEQUENCE_FLAG.getValue();
+		System.out.println(">>>about to call init_sec_context (service=" + serviceName + ")");
+		retval = gssapi.gss_init_sec_context(minorStatus, proxyCred, contextHandle, gssServiceName, GssApi.GSS_C_NO_OID,
+				flags, 0, GssApi.GSS_C_NO_CHANNEL_BINDINGS, GssApi.GSS_C_NO_BUFFER, null, outputToken, null, null);
+		// GssApi.MECH_KRB5, 0, 0, GssApi.GSS_C_NO_CHANNEL_BINDINGS, inputToken, null,
+		// null, null, null);
+		System.out.println("<<<back from init_sec_context:" + retval + "." + minorStatus.getValue());
 		if (retval != 0) {
-			GSSException exception = new GSSException(retval, minorStatus.getValue(), "initializing context");
+			GSSException exception = new GSSException(retval, minorStatus.getValue(),
+					"initializing context (" + retval + "." + minorStatus.getValue() + ")");
 			LOGGER.throwing(exception);
 			throw exception;
 		}
 
-		gss_cred_id_t targetCredHandle = new gss_cred_id_t(0);
-		gssapi.gss_add_cred(minorStatus, GssApi.GSS_C_NO_CREDENTIAL, importedTargetName, GssApi.MECH_KRB5,
-				GssCredentialUsage.GSS_C_INITIATE, 0, 0, targetCredHandle, null, 0, null);
+		PointerByReference targetCredHandle = new PointerByReference(); // TODO this might need to be a PointerByReference
+		System.out.println(">>>about to call add_cred");
+		retval = gssapi.gss_add_cred(minorStatus, GssApi.GSS_C_NO_CREDENTIAL, gssServiceName, GssApi.MECH_KRB5,
+				GssCredentialUsage.GSS_C_INITIATE.getValue(), 0, 0, targetCredHandle, null, 0, null);
+		System.out.println("<<<back from add_cred:" + retval + "." + minorStatus.getValue());
+		if (retval != 0) {
+			GSSException exception = new GSSException(retval, minorStatus.getValue(),
+					"adding credentials (" + retval + "." + minorStatus.getValue() + ")");
+			LOGGER.throwing(exception);
+			throw exception;
+		}
 		LOGGER.exit(targetCredHandle);
-		return targetCredHandle;
+		return new gss_cred_id_t(targetCredHandle.getValue());
 	}
 
-	private void cacheServiceTicket(byte[] serviceTicket) throws GSSException {
-		GssApi gssapi = GssApi.INSTANCE;
-
+	private void storeCredInto(Pointer acquiredCred, Path file) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
-		gss_buffer_desc gssToken = new gss_buffer_desc(serviceTicket);
-		acceptSecContext(gssapi, gssToken);
-
-		Pointer acquiredCred = acquireCred(gssapi, minorStatus);
-		storeCredInto(gssapi, minorStatus, acquiredCred, cacheFile);
-	}
-
-	private static void acceptSecContext(GssApi gssapi, gss_buffer_desc clientToken) throws GSSException {
-		IntByReference minorStatus = new IntByReference();
-		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
-		PointerByReference srcName = new PointerByReference(GssApi.GSS_C_NO_NAME);
-		PointerByReference mechType = new PointerByReference(GssApi.MECH_KRB5.getPointer());
-		gss_buffer_desc outputToken = new gss_buffer_desc();
-		IntByReference retFlags = new IntByReference();
-		IntByReference timeRec = new IntByReference();
-		PointerByReference delegatedCredHandle = new PointerByReference(new Pointer(0));
-		int retval = gssapi.gss_accept_sec_context(minorStatus, contextHandle, GssApi.GSS_C_NO_CREDENTIAL, clientToken,
-				GssApi.GSS_C_NO_CHANNEL_BINDINGS, srcName, mechType, outputToken, retFlags, timeRec,
-				delegatedCredHandle);
-		if (retval != 0) {
-			throw new GSSException(retval, minorStatus.getValue(),
-					"accepting context (" + retval + "." + minorStatus.getValue() + ")");
-		}
-	}
-
-	private static Pointer acquireCred(GssApi gssapi, IntByReference minorStatus) throws GSSException {
-		gss_name_t desiredName = GssApi.GSS_C_NO_NAME;
-		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
-		desiredMechs.count = new NativeLong(1);
-		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);
-		GssCredentialUsage credUsage = GssCredentialUsage.GSS_C_INITIATE;
-		PointerByReference acquiredCredHandle = new PointerByReference();
-		Pointer actualMechsPtr = new Pointer(0);
-		PointerByReference actualMechsHandle = new PointerByReference(actualMechsPtr);
-		IntByReference retTime = new IntByReference();
-		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs, credUsage.getValue(),
-				acquiredCredHandle, actualMechsHandle, retTime);
-		if (retval != 0) {
-			System.err.println("error acquiring credential: " + retval + "." + minorStatus.getValue());
-			throw new GSSException(retval, minorStatus.getValue(), "acquiring credential");
-		}
-		System.out.println("credential acquired");
-		return acquiredCredHandle.getValue();
-	}
-
-	private static void storeCredInto(GssApi gssapi, IntByReference minorStatus, Pointer acquiredCred, Path file)
-			throws GSSException {
 		int overwriteCred = 1;
 		int defaultCred = 0;
 		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:" + file);
@@ -249,8 +265,10 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		PointerByReference oidsStoredHandle = new PointerByReference(oidsStored);
 		IntByReference credStored = new IntByReference();
 
+		System.out.println(">>>about to call store_cred_into");
 		int retval = gssapi.gss_store_cred_into(minorStatus, acquiredCred, GssCredentialUsage.GSS_C_INITIATE.getValue(),
 				GssApi.GSS_C_NO_OID, overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
+		System.out.println("<<<back from store_cred_into:" + retval + "." + minorStatus.getValue());
 		if (retval != 0) {
 			throw new GSSException(retval, minorStatus.getValue(),
 					"storing credential: " + retval + "." + minorStatus.getValue());

@@ -78,7 +78,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	static public Path serviceTicketFile;
 
 	private static final String TARGET_SERVICE_NAME = "cifs@fileserver.test.savior";
-	
+
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
@@ -140,14 +140,14 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
 		filter.setAuthenticationManager(authenticationManager);
 		filter.setSuccessHandler(new AuthenticationSuccessHandler() {
-			
+
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				request.getSession().setAttribute(USERNAME_ATTRIBUTE, authentication.getName());
 			}
 		});
-		
+
 		filter.setFailureHandler(new AuthenticationFailureHandler() {
 
 			@Override

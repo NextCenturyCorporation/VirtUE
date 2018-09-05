@@ -8,6 +8,7 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 import com.nextcentury.savior.cifsproxy.GssApi;
+import com.nextcentury.savior.cifsproxy.GssUtils;
 import com.nextcentury.savior.cifsproxy.GssApi.GssCredentialUsage;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_desc;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_set_desc;
@@ -111,7 +112,7 @@ public class GssCache {
 	private static Pointer importName(GssApi gssapi, IntByReference minorStatus) throws GSSException {
 		Pointer gssTargetName;
 		gss_buffer_desc targetName = new gss_buffer_desc();
-		String target = "http@webserver.test.savior\000";
+		String target = "http@webserver.test.savior";
 		Memory targetNameBuffer = JnaUtils.newMemory(target.getBytes());
 		targetName.value = targetNameBuffer;
 		targetName.length = new NativeLong(target.length() + 1);
@@ -124,6 +125,7 @@ public class GssCache {
 		}
 		gssTargetName = tempPtr.getValue();
 		System.out.println("imported name (" + target + ", " + gssTargetName + ", " + tempPtr + ")");
+		System.out.println("internal name is '" + GssUtils.getStringName(gssapi, new gss_name_t(gssTargetName)) + "'");
 		return gssTargetName;
 
 	}

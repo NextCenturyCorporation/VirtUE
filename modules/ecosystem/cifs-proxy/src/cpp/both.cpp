@@ -5,6 +5,8 @@
  *      Author: clong
  */
 
+// an incantation that works on webserver:
+// env KRB5_CLIENT_KTNAME=/etc/krb5.keytab KRB5_TRACE=/dev/stdout ./both http@webserver.test.savior
 #include <iostream>
 #include <cstring>
 #include <cstdio>
@@ -29,7 +31,7 @@ void printErrors(OM_uint32 majorStatus, OM_uint32 minorStatus) {
 
 	do {
 		majorStatusOut = gss_display_status(&minorStatus, majorStatus,
-				GSS_C_GSS_CODE, GSS_C_NO_OID, &message_context, &status_string);
+		GSS_C_GSS_CODE, GSS_C_NO_OID, &message_context, &status_string);
 
 		fprintf(stderr, "%.*s\n", (int) status_string.length,
 				(char *) status_string.value);
@@ -39,37 +41,14 @@ void printErrors(OM_uint32 majorStatus, OM_uint32 minorStatus) {
 	} while (message_context != 0);
 }
 
-int main(int argc, char* argv[]) {
+gss_name_t importName(const char* name, gss_OID nameType =
+		GSS_C_NT_HOSTBASED_SERVICE) {
 	unsigned int majorStatus;
 	unsigned int minorStatus;
-	const gss_name_t acceptor_name = GSS_C_NO_NAME;
-	gss_cred_id_t initCredHandle = GSS_C_NO_CREDENTIAL;
-	gss_ctx_id_t contextHandle = GSS_C_NO_CONTEXT;
-	gss_buffer_desc targetName;
-	gss_name_t gssTargetName;
-	gss_OID kerbMechanism = &mech_krb5;
-	OM_uint32 reqFlags = 0; // GSS_C_DELEG_FLAG
-	OM_uint32 timeReq = 0;
-	gss_OID actualMechType = 0;
-	gss_buffer_desc inputToken;
-	gss_buffer_desc outputToken = { 0, 0 };
-	unsigned int retFlags;
-	unsigned int timeRec;
+	gss_buffer_desc targetName = { strlen(name), const_cast<char*>(name) };
+	gss_name_t result;
 
-    if (argc > 1) {
-        targetName.value = (void*) argv[1];
-    }
-    else {
-        //	targetName.value = (void*) "cifs@ws9.hq.nextcentury.com";
-        //targetName.value = (void*) "cifs@pc-5000-cl.hq.nextcentury.com";
-        targetName.value = (void*) "PC-5000-CL$@HQ.NEXTCENTURY.COM";
-        std::cout << "using target: " << targetName.value << std::endl;
-    }
-    
-	targetName.length = strlen((char*) targetName.value);
-	majorStatus = gss_import_name(&minorStatus, &targetName,
-                                  //		GSS_KRB5_NT_PRINCIPAL_NAME, &gssTargetName);
-    			GSS_C_NT_HOSTBASED_SERVICE, &gssTargetName);
+	majorStatus = gss_import_name(&minorStatus, &targetName, nameType, &result);
 	if (GSS_ERROR(majorStatus)) {
 		std::cerr << "error on import_name: "
 				<< majorStatus
@@ -77,11 +56,52 @@ int main(int argc, char* argv[]) {
 				<< minorStatus
 				<< std::endl;
 		printErrors(majorStatus, minorStatus);
+		result = 0;
+	}
+	return result;
+}
+
+int main(int argc, char* argv[]) {
+	unsigned int majorStatus;
+	unsigned int minorStatus;
+	const gss_name_t acceptor_name = GSS_C_NO_NAME;
+	gss_cred_id_t initCredHandle = GSS_C_NO_CREDENTIAL;
+	const char* principalName;
+	const char* serviceName;
+	gss_name_t gssPrincipalName;
+	gss_name_t gssServiceName;
+	gss_OID kerbMechanism = &mech_krb5;
+	OM_uint32 reqFlags = 0; // GSS_C_DELEG_FLAG
+	OM_uint32 timeReq = 0;
+	gss_OID actualMechType = 0;
+	unsigned int retFlags;
+	unsigned int timeRec;
+
+	if (argc > 1) {
+		principalName = argv[1];
+	} else {
+		//	principalName.value = (void*) "cifs@ws9.hq.nextcentury.com";
+		//targetName.value = (void*) "cifs@pc-5000-cl.hq.nextcentury.com";
+		principalName = "PC-5000-CL$@HQ.NEXTCENTURY.COM";
+		std::cout << "using principal: " << principalName << std::endl;
 	}
 
-    gss_cred_id_t service1_cred;
-	majorStatus = gss_acquire_cred(&minorStatus, gssTargetName, 0, &mechset_krb5,
-			GSS_C_INITIATE, &service1_cred, 0, 0);
+	if (argc > 2) {
+		serviceName = argv[2];
+	} else {
+		serviceName = "cifs@ws9.hq.nextcentury.com";
+		std::cout << "using service: " << serviceName << std::endl;
+	}
+
+	gssPrincipalName = importName(principalName);
+	gssServiceName = importName(serviceName);
+
+	gss_cred_id_t serviceCred;
+	std::cout << ">>about to call acquire_cred" << std::endl;
+	majorStatus = gss_acquire_cred(&minorStatus, gssPrincipalName, 0,
+			&mechset_krb5,
+			GSS_C_BOTH, &serviceCred, 0, 0);
+	std::cout << "<<back from acquire_cred" << std::endl;
 	if (GSS_ERROR(majorStatus)) {
 		std::cerr << "error on acquire_cred: "
 				<< majorStatus
@@ -91,6 +111,44 @@ int main(int argc, char* argv[]) {
 		printErrors(majorStatus, minorStatus);
 		return 1;
 	}
+
+#define INIT_NEEDED
+#ifdef INIT_NEEDED
+	gss_buffer_desc inputToken;
+	gss_buffer_desc outputToken = { 0, 0 };
+	gss_ctx_id_t contextHandle = GSS_C_NO_CONTEXT;
+
+	inputToken.length = 0;
+	std::cout << ">>about to call init_sec_context" << std::endl;
+	majorStatus = gss_init_sec_context(&minorStatus, GSS_C_NO_CREDENTIAL,
+			&contextHandle, gssServiceName, kerbMechanism, reqFlags, timeReq,
+			GSS_C_NO_CHANNEL_BINDINGS, &inputToken, &actualMechType,
+			&outputToken, &retFlags, &timeRec);
+	std::cout << "<<back from init_sec_context" << std::endl;
+	if (GSS_ERROR(majorStatus)) {
+		std::cerr << "error on init_sec_context: "
+				<< majorStatus
+				<< "."
+				<< minorStatus
+				<< std::endl;
+		printErrors(majorStatus, minorStatus);
+		return 1;
+	}
+
+	majorStatus = gss_delete_sec_context(&minorStatus, &contextHandle,
+			GSS_C_NO_BUFFER);
+	if (GSS_ERROR(majorStatus)) {
+		std::cerr << "error on delete_sec_context: "
+				<< majorStatus
+				<< "."
+				<< minorStatus
+				<< std::endl;
+		printErrors(majorStatus, minorStatus);
+		return 1;
+	}
+
+	std::cout << "context initialized" << std::endl;
+#endif
 
 	OM_uint32 overwriteCred = 1;
 	OM_uint32 defaultCred = 0;
@@ -103,11 +161,11 @@ int main(int argc, char* argv[]) {
 
 	gss_OID_set elementsStored;
 	gss_cred_usage_t credUsageStored;
-	majorStatus = gss_store_cred_into(&minorStatus,
-                                      service1_cred,
-	GSS_C_BOTH,
-	GSS_C_NULL_OID, overwriteCred, defaultCred, &credStore, &elementsStored,
-			&credUsageStored);
+	std::cout << ">>about to call store_cred_into" << std::endl;
+	majorStatus = gss_store_cred_into(&minorStatus, serviceCred, GSS_C_BOTH,
+			GSS_C_NULL_OID, overwriteCred, defaultCred, &credStore,
+			&elementsStored, &credUsageStored);
+	std::cout << "<<back from store_cred_into" << std::endl;
 	if (GSS_ERROR(majorStatus)) {
 		std::cerr << "error on store_cred_into: "
 				<< majorStatus

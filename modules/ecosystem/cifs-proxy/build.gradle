@@ -113,7 +113,7 @@ remotes {
 	}
 }
 
-task nativeDeploy() {
+task nativeDeploy(dependsOn: bootJar) {
     group 'Native'
     description 'Copies native executables to the server'
     doFirst {
@@ -155,7 +155,7 @@ task bootServer(dependsOn: bootDeploy) {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.1'
+    compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.2'
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'
 /*

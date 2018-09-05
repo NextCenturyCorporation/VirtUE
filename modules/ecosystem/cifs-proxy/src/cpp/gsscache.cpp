@@ -54,8 +54,8 @@ int main(int argc, char** argv) {
 	unsigned int timeRec;
 	OM_uint32 majorStatus;
 
-	//targetName.value = (void*) "cifs@ws9.hq.nextcentury.com";
-	targetName.value = (void*) "cifs@pc-5000-cl.hq.nextcentury.com";
+	targetName.value = (void*) "cifs@ws9.hq.nextcentury.com";
+	//targetName.value = (void*) "cifs@pc-5000-cl.hq.nextcentury.com";
 	targetName.length = strlen((char*) targetName.value) + 1;
 	majorStatus = gss_import_name(&minorStatus, &targetName,
 			GSS_C_NT_HOSTBASED_SERVICE, &gssTargetName);
@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
 		printErrors(majorStatus);
 	}
 
-    //#define INIT_NEEDED
+#define INIT_NEEDED
 #ifdef INIT_NEEDED
 	inputToken.length = 0;
 	majorStatus = gss_init_sec_context(&minorStatus, initCredHandle,
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 	std::cout << "context initialized" << std::endl;
 #endif
     
-#define ACCEPT_NEEDED
+    //#define ACCEPT_NEEDED
 #ifdef ACCEPT_NEEDED
 	gss_ctx_id_t acceptContext = GSS_C_NO_CONTEXT;
 	gss_name_t srcName = GSS_C_NO_NAME;
@@ -141,13 +141,13 @@ int main(int argc, char** argv) {
 	}
 	std::cout << "credential(s) added" << std::endl;
 
-#define ACQUIRE_NEEDED 
+    //#define ACQUIRE_NEEDED 
 #ifdef ACQUIRE_NEEDED 
 	gss_OID_set_desc desiredMechs = { 1, kerbMechanism };
 	gss_cred_id_t acquiredCredHandle = 0;
 	gss_OID_set actualMechs;
 	majorStatus = gss_acquire_cred(&minorStatus, desiredName, timeReq,
-			GSS_C_NULL_OID_SET, GSS_C_ACCEPT, &acquiredCredHandle, &actualMechs,
+			GSS_C_NULL_OID_SET, GSS_C_INITIATE, &acquiredCredHandle, &actualMechs,
 			&timeRec);
 	if (GSS_ERROR(majorStatus)) {
 		std::cerr << "error on acquire_cred: "

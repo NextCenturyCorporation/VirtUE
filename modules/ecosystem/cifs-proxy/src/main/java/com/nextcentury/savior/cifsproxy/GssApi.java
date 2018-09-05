@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.util.ClassUtil.Ctor;
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -83,18 +84,34 @@ public interface GssApi extends Library {
 	final gss_OID_desc MECH_KRB5 = new gss_OID_desc(9,
 			JnaUtils.newMemory(new byte[] { 052, (byte) 0206, 0110, (byte) 0206, (byte) 0367, 022, 001, 002, 002, 0 }));
 
+	enum GssContextFlag {
+		GSS_C_DELEG_FLAG(1), GSS_C_MUTUAL_FLAG(2), GSS_C_REPLAY_FLAG(4), GSS_C_SEQUENCE_FLAG(8), GSS_C_CONF_FLAG(
+				16), GSS_C_INTEG_FLAG(32), GSS_C_ANON_FLAG(
+						64), GSS_C_PROT_READY_FLAG(128), GSS_C_TRANS_FLAG(256), GSS_C_DELEG_POLICY_FLAG(32768);
+
+		private int value;
+
+		private GssContextFlag(int value) {
+			this.value = value;
+		}
+		
+		public int getValue() {
+			return value;
+		}
+	}
+
 	/**
 	 * How a credential will be used
 	 * 
 	 * @see gss_cred_id_t
 	 */
-	public enum GssCredentialUsage {
-				/** Initiate or accept a connection. Note: this must be used for S2U4Proxy. */
-				GSS_C_BOTH(0),
-				/** Initiate a connection (e.g., a client) */
-				GSS_C_INITIATE(1),
-				/** Accept a connection (e.g, a server) */
-				GSS_C_ACCEPT(2);
+	enum GssCredentialUsage {
+		/** Initiate or accept a connection. Note: this must be used for S2U4Proxy. */
+		GSS_C_BOTH(0),
+		/** Initiate a connection (e.g., a client) */
+		GSS_C_INITIATE(1),
+		/** Accept a connection (e.g, a server) */
+		GSS_C_ACCEPT(2);
 		private final int value;
 		static Map<Integer, GssCredentialUsage> valueMap = new HashMap<>();
 		static {
@@ -117,6 +134,9 @@ public interface GssApi extends Library {
 	}
 
 	final gss_OID_desc GSS_C_NO_OID = null;
+	final gss_OID_set_desc GSS_C_NO_OID_SET = null;
+
+	final gss_buffer_desc GSS_C_NO_BUFFER = null;
 
 	/**
 	 * A list of values. The type of value depends on usage.
@@ -135,6 +155,8 @@ public interface GssApi extends Library {
 		public Pointer value;
 
 		public gss_buffer_desc() {
+			this.length = new NativeLong(0);
+			this.value = null;
 		}
 
 		/**
@@ -146,6 +168,10 @@ public interface GssApi extends Library {
 			length = new NativeLong(value.length);
 			this.value = new Memory(value.length);
 			this.value.write(0, value, 0, value.length);
+		}
+
+		public gss_buffer_desc(Pointer pointer) {
+			super(pointer);
 		}
 
 		@Override
@@ -247,14 +273,10 @@ public interface GssApi extends Library {
 	 * @author clong
 	 *
 	 */
-	class gss_name_t extends Memory {
-
-		public gss_name_t() {
-		}
+	class gss_name_t extends Pointer {
 
 		public gss_name_t(Pointer p) {
-			super();
-			peer = Pointer.nativeValue(p);
+			super(Pointer.nativeValue(p));
 		}
 	}
 
@@ -315,6 +337,10 @@ public interface GssApi extends Library {
 	 *      PointerByReference)
 	 */
 	int gss_release_name(IntByReference minor_status, gss_name_t name);
+
+	int gss_display_name(IntByReference minorStatus /* minor_status */, gss_name_t inputName /* input_name */,
+			gss_buffer_desc outputNameBuffer /* output_name_buffer */,
+			PointerByReference outputNameType /* output_name_type */);
 
 	/**
 	 * Initiates a secure connection between this computer and another (usually a
@@ -424,6 +450,15 @@ public interface GssApi extends Library {
 			IntByReference retTime); /* time_rec */
 
 	/**
+	 * 
+	 * @param minorStatus
+	 * @param oid
+	 * @return
+	 */
+	int gss_release_oid(IntByReference minorStatus, /* minor_status */
+			gss_OID_desc oid); /* oid */
+
+	/**
 	 * Free storage associated with a GSSAPI-generated gss_OID_set object. (from RFC
 	 * 2744)
 	 * 
@@ -455,10 +490,10 @@ public interface GssApi extends Library {
 			gss_cred_id_t inputCredHandle, /* input_cred_handle */
 			gss_name_t desiredName, /* desired_name */
 			gss_OID_desc desiredMech, /* desired_mech */
-			GssCredentialUsage credUsage, /* cred_usage */
+			int credUsage, /* cred_usage */
 			int initiatorTimeRequest, /* initiator_time_req */
 			int acceptorTimeRequest, /* acceptor_time_req */
-			gss_cred_id_t outputCredHandle, /* output_cred_handle */
+			PointerByReference outputCredHandle, /* output_cred_handle */
 			PointerByReference actualMechs, /* actual_mechs */
 			int initiatorTimeRec, /* initiator_time_rec */
 			IntByReference acceptorTimeRec /* acceptor_time_rec */
