@@ -13,7 +13,7 @@
       </div>
       <div class="mui-col-md-2 float-right">
         Unprovisioned
-        <mat-checkbox [(ngModel)]="unprovisioned">
+        <mat-checkbox [(ngModel)]="item.unprovisioned">
         </mat-checkbox>
       </div>
     </div>
@@ -22,28 +22,27 @@
       <div class="mui-col-md-4 float-left">
         <label>Select Virtue Color:</label>
         <div class="mui-col-md-6 float-right">
-          <mat-card id="virtue-color" rowHeight="1:1" [ngStyle]="{'background-color': virtueColor, 'border':'1px solid black'}"
+          <mat-card id="virtue-color" rowHeight="1:1" [ngStyle]="{'background-color': item.color, 'border':'1px solid black'}"
           (click)="activateColorModal()"></mat-card>
         </div>
       </div>
     </div>
+    <br>
     <mat-form-field>
-      <mat-select placeholder="Default Browser">
+      <mat-select placeholder="Default Browser" [(ngModel)]="item.defaultBrowser">
         <mat-option *ngFor="let browser of browsers" [value]="browser">
           {{browser}}
         </mat-option>
       </mat-select>
     </mat-form-field>
     <div class="mui-row form-item">
-      <app-item-table #pasteableVirtues></app-item-table>
+      <app-item-table #allowedPasteTargetsTable></app-item-table>
 
       <div class="mui-col-md-2 float-right" *ngIf="mode !== 'View'" >
         <br>
         <label>Add Virtue &nbsp;&nbsp;</label>
         <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()">
-          <!-- <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()" color="primary"> -->
-          <!-- <mat-icon aria-label="Add new item to list of virtues into which this virtue is allowed to paste data.">add</mat-icon> -->
-          <mat-icon aria-label="Add new item to list of virtues into which this virtue is allowed to paste data.">+</mat-icon>
+          <mat-icon class="plus" svgIcon="plus" aria-label="Add new item to list of virtues into which this virtue is allowed to paste data."></mat-icon>
         </button>
       </div>
     </div>
@@ -60,11 +59,13 @@
             <b>White List</b>
           </div>
           <div class="mui-col-md-2">
-            <small><br>Add new &nbsp;&nbsp;</small>
-            <button mat-mini-fab mat-button class="fab-button" (click)="addNewNetworkPermission()">+</button>
+            <br>
+            <label>Add new &nbsp;&nbsp;</label>
+            <button mat-mini-fab mat-button class="fab-button" (click)="addNewNetworkPermission()" style="">
+              <mat-icon class="plus" svgIcon="plus" aria-label="Add new network permission."></mat-icon>
+            </button>
           </div>
         </div>
-        <br>
         <div class="mui-row">
           <ng-container *ngFor="let column of getNetworkColumns()" >
             <div class="table-header mui-col-md-{{column.colWidth}}">
@@ -72,126 +73,135 @@
             </div>
           </ng-container>
         </div>
-        <div *ngFor="let networkPermission of networkWhiteList" class="mui-row">
-          <ng-container *ngFor="let column of getNetworkColumns()" >
-            <div class="mui-col-md-{{column.colWidth}}">
-              <label>{{networkPermission[column.name]}}</label>
-            </div>
-          </ng-container>
+        <br>
+        <div *ngFor="let networkPermission of item.networkWhiteList" class="mui-row">
+        <!-- <div *ngFor="let col of getFileSysColumns(); let index = index; trackBy: indexTracker"> -->
+          <div  class="mui-col-md-{{getNetworkColumns()[0].colWidth}}">
+            <mat-form-field floatLabel="never">
+              <input matInput type="text" placeholder="{{getNetworkColumns()[0].name}}"
+                      [(ngModel)]="networkPermission[getNetworkColumns()[0].name]" required/>
+            </mat-form-field>
+          </div>
+          <div class="mui-col-md-{{getNetworkColumns()[1].colWidth}}">
+            <mat-form-field floatLabel="never">
+              <mat-select placeholder="{{getNetworkColumns()[1].name}}"
+                       [(ngModel)]="networkPermission.protocol" required >
+                <mat-option *ngFor="let p of keys(protocols)" value="{{p}}" >
+                  {{p}}
+                </mat-option>
+              </mat-select>
+
+            </mat-form-field>
+          </div>
+          <div class="mui-col-md-{{getNetworkColumns()[2].colWidth}}">
+            <mat-form-field floatLabel="never">
+              <input matInput type="number" placeholder="{{getNetworkColumns()[2].name}}"
+                      [(ngModel)]="networkPermission[getNetworkColumns()[2].name]" required/>
+            </mat-form-field>
+          </div>
+          <div class="mui-col-md-{{getNetworkColumns()[3].colWidth}}">
+            <mat-form-field floatLabel="never">
+              <!-- {{networkPermission[getNetworkColumns()[3].name]}} -->
+              <input matInput type="number" placeholder="{{getNetworkColumns()[3].name}}"
+                      [(ngModel)]="networkPermission[getNetworkColumns()[3].name]" required/>
+            </mat-form-field>
+          </div>
         </div>
-        <ng-container *ngIf="newNetwork !== undefined">
-          <ng-container *ngFor="let column of getNetworkColumns()" >
-            <div class="mui-col-md-{{column.colWidth}}">
-              <mat-form-field>
-                <input matInput type="text" [(ngModel)]="newNetwork[column.name]" />
-              </mat-form-field>
-            </div>
-          </ng-container>
-        </ng-container>
       </div>
     </div>
   </div>
 </div>
 
-<!--
-      <span class="mui-col-md-5 label">Remote IP Settings:</span>
-      <span class="mui-col-md-7 text-align-right">
-         <mat-form-field>
-           <input matInput type="text" name="remote_ip_settings" value="" />
-         </mat-form-field>
-       </span>
-    </div>
-    <div class="mui-row form-item">
-      <span class="mui-col-md-5 label">Protocol:</span>
-      <span class="mui-col-md-7 text-align-right">
-         <mat-form-field>
-           <input matInput type="text" name="remote_protocol" value="" />
-         </mat-form-field>
-       </span>
-    </div>
-    <div class="mui-row form-item">
-      <span class="mui-col-md-5 label">Local Protocol:</span>
-      <span class="mui-col-md-7 text-align-right">
-         <mat-form-field>
-           <input matInput type="text" name="local_protocol" value="" />
-         </mat-form-field>
-       </span>
-    </div>
-    <hr />
-    <div class="mui-row">
-      <div class="mui-col-md-8"><h5 class="virtue-title">Access Control List</h5></div>
-      <div class="mui-col-md-4 text-align-right"><button mat-button class="virtue-button">Add</button></div>
-    </div>
-    <div class="mui-container-fluid">
-      <div class="mui-row">
-        <div class="mui-col-md-12">
-          <div class="mui-row table-header-group">
-            <div class="mui-col-md-1 table-header"><span>#</span></div>
-            <div class="mui-col-md-7 table-header">Address</div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Enable</span></div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Options</span></div>
-          </div>
-          <div class="mui-row table-row">
-            <div class="mui-col-md-1 table-data">[id]</div>
-            <div class="mui-col-md-7 table-data">[address]</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-checkbox name="access-enable-[id]"></mat-checkbox>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <a href="#"><span class="fa fa-trash" aria-hidden="true"></span></a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div> -->
 <div class="mui-tabs__pane" id="resources">
   <div class="tab-pane-content no-overflow">
     <h4>Resources</h4>
-    <p><mat-checkbox name="resources-global"> Use Global Settings</mat-checkbox></p>
-    <div class="mui-row form-item">
+    <br>
+    <div class="mui-row">
+      <div class="mui-col-md-8">
+        <div> <!-- File system permissions table -->
+          <h5>File System Permissions</h5>
 
-      <div class="mui-row form-item">
-        <h5>File System Permissions</h5>
-        <div class="mui-col-md-12">
           <div class="mui-row table-header-group">
-            <div class="mui-col-md-4 table-header">Description</div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Read</span></div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Write</span></div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Execute</span></div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Enable</span></div>
+            <ng-container *ngFor="let col of getFileSysColumns()">
+              <div class="mui-col-md-{{col.colWidth}} table-header">
+                <label>{{col.prettyName}}</label>
+              </div>
+            </ng-container>
           </div>
-          <div class="mui-row">
-            <div class="mui-col-md-4 table-data">[description]</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-checkbox name="filesys-read-[id]"></mat-checkbox>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-checkbox name="filesys-write-[id]"></mat-checkbox>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-checkbox name="filesys-execute-[id]"></mat-checkbox>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-checkbox name="filesys-enable-[id]"></mat-checkbox>
-            </div>
+          <div *ngFor="let perm of item.fileSysPerms" class="mui-row table-data-group">
+            <!-- see note by indexTracker() -->
+            <ng-container *ngFor="let col of getFileSysColumns(); let index = index; trackBy: indexTracker">
+              <div class="mui-col-md-{{col.colWidth}} table-data">
+                <ng-container *ngIf="index === 0">
+                  <label>{{perm[col.name]}}</label>
+                </ng-container>
+                <ng-container *ngIf="index !== 0">
+                  <div *ngIf="perm.enabled || col.name === 'enabled'">
+                    <mat-checkbox
+                      name="cb"
+                      [checked]="perm[col.name]"
+                      [(ngModel)]="perm[col.name]"
+                      >
+                    </mat-checkbox>
+                  </div>
+
+                  <!-- show a disabled checkbox if the item is disabled.  -->
+                  <div *ngIf="perm.enabled === false && col.name !== 'enabled'">
+                    <mat-checkbox
+                      name="cb"
+                      disabled=true
+                      [checked]="perm[col.name]"
+                      [(ngModel)]="perm[col.name]"
+                      color="#333333">
+                    </mat-checkbox>
+                    <!-- [(ngModel)]="perm[col.name]" -->
+                  </div>
+                </ng-container>
+              </div>
+            </ng-container>
           </div>
         </div>
-      </div>
-      <div class="mui-row form-item">
-        <h5>Printers</h5>
-        <div class="mui-col-md-12">
-          <div class="mui-row table-header-group">
-            <div class="mui-col-md-8 table-header">Description</div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Status</span></div>
-            <div class="mui-col-md-2 table-header text-align-center"><span>Enable</span></div>
-          </div>
+        <br>
+        <br>
+
+        <div >
           <div class="mui-row">
-            <div class="mui-col-md-8 table-data">[printer info]</div>
-            <div class="mui-col-md-2 table-data text-align-center">[status]]</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-checkbox name="printer-enable-[id]"></mat-checkbox>
+            <div class="mui-col-md-10">
+              <br>
+              <h5>Printers</h5>
+            </div>
+            <div class="mui-col-md-2">
+              <br>
+              <label>&nbsp;&nbsp;&nbsp;&nbsp;Add new &nbsp;&nbsp;</label>
+              <button mat-mini-fab mat-button class="fab-button" (click)="addNewPrinter()" style="">
+                <mat-icon class="plus" svgIcon="plus" aria-label="Add new printer."></mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="mui-row table-header-group">
+            <!-- <ng-container *ngFor="let col of getFileSysColumns()">
+              <div class="mui-col-md-{{col.colWidth}} table-header">
+                <label>{{col.prettyName}}</label>
+              </div>
+            </ng-container> -->
+            <div class="mui-col-md-8 table-header">
+              <label>Printer Info</label>
+            </div>
+            <div class="mui-col-md-2 table-header">
+              <label>Status</label>
+            </div>
+            <div class="mui-col-md-2 table-header">
+            </div>
+          </div>
+          <div *ngFor="let printer of item.allowedPrinters; let index = index" class="mui-row table-data-group">
+            <div class="mui-col-md-8 table-data">
+              <label>{{printer.info}}</label>
+            </div>
+            <div class="mui-col-md-2 table-data">
+              <label>{{printer.status}}</label>
+            </div>
+            <div class="mui-col-md-2 table-data">
+              <mat-icon class="delete" svgIcon="delete" (click)="removePrinter(index)" aria-label="Revoke access to this printer"></mat-icon>
             </div>
           </div>
         </div>
@@ -202,128 +212,6 @@
 <div class="mui-tabs__pane" id="sensors">
   <div class="tab-pane-content no-overflow">
     <h4>Sensor Settings</h4>
-    <p><mat-checkbox name="resources-global"> Use Global Settings</mat-checkbox></p>
-    <div class="mui-row form-item">
-      <h5>Network Tools</h5>
-      <div class="mui-col-md-12">
-        <div class="mui-row table-header-group">
-          <div class="mui-col-md-4 table-header">Sensor Control</div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>Default</span></div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>Low</span></div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>High</span></div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>Highest</span></div>
-        </div>
-        <div class="mui-row">
-          <mat-radio-group>
-            <div class="mui-col-md-4 table-data">[network-controller]</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="network-controller-[id]" value="default"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="network-controller-[id]" value="low"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="network-controller-[id]" value="high"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="network-controller-[id]" value="adversarial"></mat-radio-button>
-            </div>
-          </mat-radio-group>
-        </div>
-      </div>
-    </div>
-    <div class="mui-row form-item">
-      <h5>Virtue Sensor Settings</h5>
-      <div class="mui-col-md-12">
-        <div class="mui-row table-header-group">
-          <div class="mui-col-md-4 table-header">Sensor Context</div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>Default</span></div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>Low</span></div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>High</span></div>
-          <div class="mui-col-md-2 table-header text-align-center"><span>Highest</span></div>
-        </div>
-        <div class="mui-row">
-          <mat-radio-group>
-            <div class="mui-col-md-4 table-data">In-Resource (Unikernel)</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="unikernel-[id]" value="default"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="unikernel-[id]" value="low"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="unikernel-[id]" value="high"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="unikernel-[id]" value="adversarial"></mat-radio-button>
-            </div>
-          </mat-radio-group>
-        </div>
-        <div class="mui-row">
-          <mat-radio-group>
-            <div class="mui-col-md-4 table-data">In-Virtue Controller</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="in-virtue-controller-[id]" value="default"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="in-virtue-controller-[id]" value="low"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="in-virtue-controller-[id]" value="high"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="in-virtue-controller-[id]" value="adversarial"></mat-radio-button>
-            </div>
-          </mat-radio-group>
-        </div>
-      </div>
-    </div>
-    <div class="mui-row form-item">
-      <h5>Logging</h5>
-      <div class="mui-col-md-12">
-        <div class="mui-row table-header-group">
-          <div class="mui-col-md-4 table-header">Sensor Context</div>
-          <div class="mui-col-md-2 table-header text-align-center">Default</div>
-          <div class="mui-col-md-2 table-header text-align-center">Low</div>
-          <div class="mui-col-md-2 table-header text-align-center">High</div>
-          <div class="mui-col-md-2 table-header text-align-center">Highest</div>
-        </div>
-        <div class="mui-row">
-          <mat-radio-group>
-            <div class="mui-col-md-4 table-data">Aggregator</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="aggregator-[id]" value="default"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="aggregator-[id]" value="low"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="aggregator-[id]" value="high"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="aggregator-[id]" value="adversarial"></mat-radio-button>
-            </div>
-          </mat-radio-group>
-        </div>
-        <div class="mui-row">
-          <mat-radio-group>
-            <div class="mui-col-md-4 table-data">Archive</div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="archive-[id]" value="default"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="archive-[id]" value="low"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="archive-[id]" value="high"></mat-radio-button>
-            </div>
-            <div class="mui-col-md-2 table-data text-align-center">
-              <mat-radio-button name="archive-[id]" value="adversarial"></mat-radio-button>
-            </div>
-          </mat-radio-group>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 

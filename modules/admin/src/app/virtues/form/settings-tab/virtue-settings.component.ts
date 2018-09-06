@@ -8,6 +8,8 @@ import {
 
 } from '@angular/material';
 
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Item } from '../../../shared/models/item.model';
@@ -16,21 +18,15 @@ import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
+import { NetworkPermission } from '../../../shared/models/networkPerm.model';
+import { Printer } from '../../../shared/models/printer.model';
+import { Mode, ConfigUrlEnum, Protocols } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-
-// not used anywhere else, so just defined here
-class NetworkPermission {
-  host: string;
-  protocol: string; //should be an enum
-  localPort: number;
-  remotePort: number;
-}
 
 @Component({
   selector: 'app-virtue-settings-tab',
@@ -39,17 +35,7 @@ class NetworkPermission {
 })
 export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
 
-  @ViewChild('pasteableVirtues') private pasteableVirtuesTable: GenericTableComponent;
-
-  private unprovisioned: boolean;
-
-  @Input() private virtueColor: string;
-
-  private defaultBrowser: string; // are these options hard-coded?
-
-  // the IDs of the virtues into which this.item is allowed to paste things
-  private pasteableVirtues: string[];
-
+  @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent;
 
   // re-classing item, to make it easier and less error-prone to work with.
   protected item: Virtue;
@@ -57,42 +43,29 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   // local reference to the virtue-form's allUsers variable.
   private allVirtues: DictList<Virtue>;
 
-  private networkWhiteList: NetworkPermission[];
-
-  private applyNewNetworkPermission: EventEmitter<boolean> = new EventEmitter<boolean>();
-
-  private newNetwork: NetworkPermission;
-
   browsers: string[];
 
-
-  // this appears to have a number of tables
-  // - virtues into which this.item can paste
-  // - white list of network connections
-  // - File system permissions (might need custom table)
-  // - Allowed Printers
-  // - And then probably something with the sensors.
+  private keys = Object.keys;
+  private protocols = Protocols;
 
   constructor( private matIconRegistry: MatIconRegistry, router: Router, dialog: MatDialog) {
     super(router, dialog);
 
-    this.matIconRegistry.addSvgIcon(
-          `plus`,
-          `../../../../assets/images/baseline-add-24px.svg`
-        );
+    // this.matIconRegistry.addSvgIcon(
+    //       `plus`,
+    //       `../../../../assets/images/baseline-add-24px.svg`
+    //     );
 
     this.tabName = 'Settings';
-    this.pasteableVirtues = [];
 
-    this.newNetwork = new NetworkPermission();
+    // TODO browser list is hard-coded and not directly linkable to any particular application.
     // Is this list suppsoed to be hard coded? User-defined? Automatically generated
     // by perhaps tagging loaded browser applications as "browsers", and looking
     // through all the applications this virtue has access to, and showing that list?
-    // The latter seems the most useful, but relies on the admin correctly tagging things when they load them.
-    // And labelling them well. Apps need versions, but they can't default to anything, and it must be made clear
-    // that "version" on that modal means "the actual application's version", and not "Version" like this is the 4th
-    // change I've made to this Chrome application item.
+    // The latter seems the most useful, but relies on the admin correctly tagging
+    // things when they load them. Or just guess via the name, which seems very unsafe.
     this.browsers = ['Chrome', 'Firefox', 'This is not workable', 'FIXME', 'TODO'];
+
   }
 
   ngOnInit() {
@@ -105,6 +78,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
 
   setUp(mode: Mode, item: Item): void {
+    console.log("setUp");
     this.mode = mode;
     if ( !(item instanceof Virtue) ) {
       // TODO throw error
@@ -112,40 +86,87 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       return;
     }
     this.item = item as Virtue;
-
-    this.setColor(this.item.color);
   }
 
-  update(newData?: any) {
-    if (newData) {
-      if (newData.allVirtues) {
-        this.allVirtues = newData.allVirtues;
+  update(changes: any) {
+    if (changes.allVirtues) {
+      this.allVirtues = changes.allVirtues;
 
-        this.populatePasteableVirtuesTable();
-      }
-
-      // other conditionals
+      this.populatePasteableVirtuesTable();
     }
-    else {
-      // TODO show error
-      console.log();
+
+    if (changes.mode) {
+      this.mode = changes.mode;
     }
   }
 
   collectData(): boolean {
-    this.item.color = this.getColor();
+    console.log("collectData");
 
-    if (this.newNetwork !== undefined) {
-      // TODO tell the user
-      alert("please hit apply or remove on your new network permission");
+    console.log(this.item.networkWhiteList);
+    // TODO check all entries for validity before allowing save
+    if (!this.checkNetworkPerms()) {
+    //   // TODO tell the user
+    //   alert("please hit apply or remove on your new network permission");
       return false;
     }
     return true;
   }
 
+  checkNetworkPerms(): boolean {
+    for (let networkPermission of this.item.networkWhiteList) {
+      if ( !this.checkEnteredPermValid(networkPermission) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  checkEnteredPermValid(netPerm: NetworkPermission): boolean {
+
+    // first make sure that the ports aren't 0, because checking !port will be true
+    // if port === 0. Which would make the wrong error message appear.
+    if (netPerm.localPort === 0 || netPerm.remotePort === 0) {
+      console.log("Ports on network permissions must be greater than zero.");
+      return false;
+    }
+
+    if ( !netPerm.host      || !netPerm.protocol
+      || !netPerm.localPort || !netPerm.remotePort ) {
+        console.log("Network permission fields cannot be blank");
+        return false;
+    }
+
+    if (netPerm.localPort < 0 || netPerm.remotePort < 0) {
+      console.log("Ports on network permissions must be greater than zero.");
+      return false;
+    }
+    return true;
+  }
+
+  // See https://github.com/angular/angular/issues/10423 and/or https://stackoverflow.com/questions/40314732
+  // and, less helpfully, https://angular.io/guide/template-syntax#ngfor-with-trackby
+  // Essentially, Angular's ngFor sometimes tracks the elements it iterates over by their value, as opposed
+  // to their index, and so if you put a ngModel on (apparently) any part of such an element, it loses track (?) of that item and
+  // hangs - as in, Angular hangs. And the tab needs to be killed either through the browser's tab manager, or the browser needs to
+  // be killed at the system level (xkill, system process manager, kill, killall, etc.).
+  // Unless you manually tell it track things by index, as below (and adding "; trackBy: indexTracker" to the ngFor statement.)
+  // WTH.
+  indexTracker(index: number, value: any) {
+    return index;
+  }
+
+  addNewPrinter(): void {
+    this.item.allowedPrinters.push(new Printer("And another printer"));
+  }
+
+  removePrinter(index: number): void {
+    this.item.allowedPrinters.splice(index, 1);
+  }
+
   addNewNetworkPermission(): void {
-    this.newNetwork = new NetworkPermission();
-    console.log("here", this.newNetwork);
+    this.item.networkWhiteList.push(new NetworkPermission());
+    // this.newNetwork = new NetworkPermission();
     // this.applyNewNetworkPermission.subscribe( () => {},
     //   () => {},
     //   () => {
@@ -157,15 +178,15 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
   saveNewNetwork(): void {
     // TODO first check it
-    this.applyNewNetworkPermission.emit(true);
+    // this.applyNewNetworkPermission.emit(true);
   }
 
   setUpPasteableVirtuesTable(): void {
-    if (this.pasteableVirtuesTable === undefined) {
+    if (this.allowedPasteTargetsTable === undefined) {
       return;
     }
 
-    this.pasteableVirtuesTable.setUp({
+    this.allowedPasteTargetsTable.setUp({
       cols: this.getPasteColumns(),
       opts: this.getPasteOptionsList(),
       coloredLabels: true,
@@ -177,14 +198,15 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   populatePasteableVirtuesTable(): void {
+
     if ( !(this.allVirtues) ) {
       return;
     }
 
-    this.pasteableVirtuesTable.items = [];
-    for (let vID of this.pasteableVirtues) {
+    this.allowedPasteTargetsTable.items = [];
+    for (let vID of this.item.allowedPasteTargets) {
       if (this.allVirtues.has(vID)) {
-        this.pasteableVirtuesTable.items.push(this.allVirtues.get(vID));
+        this.allowedPasteTargetsTable.items.push(this.allVirtues.get(vID));
       }
     }
   }
@@ -210,24 +232,26 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     ];
   }
 
+  getFileSysColumns(): Column[] {
+    return [
+      new Column('location', 'Server & Drive',   undefined, undefined, 6),
+      new Column('enabled',  'Enabled',   undefined, undefined, 3),
+      new Column('read',     'Read',      undefined, undefined, 1),
+      new Column('write',    'Write',     undefined, undefined, 1),
+      new Column('execute',  'Execute',   undefined, undefined, 1)
+    ];
+  }
+
   getPasteOptionsList(): RowOptions[] {
     return [
        new RowOptions("Remove", () => true, (i: Item) => {
-         var index = this.pasteableVirtues.indexOf(i.getID(), 0);
+         let index = this.item.allowedPasteTargets.indexOf(i.getID(), 0);
          if (index > -1) {
-            this.pasteableVirtues.splice(index, 1);
+            this.item.allowedPasteTargets.splice(index, 1);
          }
          this.populatePasteableVirtuesTable();
        }
      )];
-  }
-
-  setColor(temp: any) {
-    this.virtueColor = String(temp);
-  }
-
-  getColor() {
-    return this.virtueColor;
   }
 
   activateColorModal(): void {
@@ -236,13 +260,13 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     let dialogRef = this.dialog.open(ColorModalComponent, {
       width: wPercentageOfScreen + '%',
       data: {
-        color: this.virtueColor
+        color: this.item.color
       }
     });
     dialogRef.updatePosition({ top: '5%', left: String(Math.floor(50 - wPercentageOfScreen / 2)) + '%' });
 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
-      this.setColor(newColor);
+      this.item.color = newColor;
     },
     () => {},
     () => {
@@ -261,16 +285,16 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       height: dialogHeight + 'px',
       width: dialogWidth + 'px',
       data: {
-        selectedIDs: this.pasteableVirtues
+        selectedIDs: this.item.allowedPasteTargets
       }
     });
 
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.pasteableVirtues = selectedVirtues;
+      this.item.allowedPasteTargets = selectedVirtues;
       this.populatePasteableVirtuesTable();
-      // this.pasteableVirtuesTable.items = [];
-      // for (let vID of this.pasteableVirtues) {
-      //   this.pasteableVirtuesTable.items.
+      // this.allowedPasteTargetsTable.items = [];
+      // for (let vID of this.allowedPasteTargets) {
+      //   this.allowedPasteTargetsTable.items.
       // }
     },
     () => {},

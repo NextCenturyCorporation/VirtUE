@@ -45,25 +45,23 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
 
   }
 
-  update(newData?: any) {
-    if (newData) {
-      if (newData.allUsers) {
-        let allUsers: DictList<Item> = newData.allUsers;
-        this.parentTable.items = [];
+  update(changes: any) {
 
-        for (let u of allUsers.asList()) {
-          if (u.children.has(this.item.getID())) {
-            this.parentTable.items.push(u);
-          }
+    if (changes.mode) {
+      this.mode = changes.mode;
+    }
+
+    if (changes.allUsers) {
+      let allUsers: DictList<Item> = changes.allUsers;
+      this.parentTable.items = [];
+
+      for (let u of allUsers.asList()) {
+        if (u.children.has(this.item.getID())) {
+          this.parentTable.items.push(u);
         }
       }
+    }
 
-      // other conditionals
-    }
-    else {
-      // TODO show error
-      console.log();
-    }
   }
 
   setUp(mode: Mode, item: Item): void {

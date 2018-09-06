@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Input } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -33,18 +33,20 @@ export abstract class GenericFormTabComponent implements OnInit {
 
   // what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
   // Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
-  mode: Mode;
+  protected mode: Mode
 
-  tabName: string;
+  public tabName: string;
 
   // this gets overriden by children tabs
   protected item: Item;
 
-  constructor( protected router: Router, protected dialog: MatDialog) {
+  constructor(
+    protected router: Router,
+    protected dialog: MatDialog) {
     // gets overwritten once the datasets load, if mode is not CREATE
     // Application chosen arbitrarily for this un-used value, because it doesn't
     // have as many attributes.
-    this.item = new Virtue(undefined);
+    this.item = new User(undefined);
     // this doesn't appear to be used anywhere. So redefining it in each subclass,
     // with the most correct type.
 
@@ -89,7 +91,7 @@ export abstract class GenericFormTabComponent implements OnInit {
 
   abstract init(): void;
 
-  abstract update(newData?: any): void;
+  abstract update(changes: any): void;
 
   // called when item is being saved, to set any disconnected fields as necessary
   // return false if the data that needs to be collected isn't available/valid/finished/applied

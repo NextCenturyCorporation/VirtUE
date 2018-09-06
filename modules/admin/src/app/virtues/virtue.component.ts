@@ -52,8 +52,9 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <button  *ngIf="mode !== 'View'"class="button-submit" (click)="createOrUpdate();" >Save</button>
-          <button  *ngIf="mode === 'View'"class="button-submit" (click)="edit();" >Save</button>
+          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
+          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+          <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Save</button>
           <button class="button-cancel" (click)="cancel()">Cancel</button>
         </div>
         <div class="mui-col-md-4"></div>
@@ -145,17 +146,17 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
   // called whenever item's child list is set or changes
   updateTabs(): void {
-    this.mainTab.update();
+    this.mainTab.update({mode:this.mode});
 
     // These won't need to be updated when child list changes, but would other times:
 
     // This may need updating whenever the list of printers or whatever gets reset.
     // If I know printers, a refresh button for that list in particular will be greatly appreciated.
-    this.settingsTab.update({allVirtues: this.allVirtues});
+    this.settingsTab.update({allVirtues: this.allVirtues, mode:this.mode});
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allUsers: this.allUsers});
+    this.usageTab.update({allUsers: this.allUsers, mode:this.mode});
   }
 
   // only called on initial page load at the moment.

@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
-import { FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -32,8 +32,15 @@ import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 })
 export abstract class GenericFormComponent extends GenericPageComponent implements OnInit {
 
-  //  TODO currently not used, but could/should be eventually, time-permitting.
-  //  itemForm: FormControl;
+  // It appears that we can't really use the Angular Form tool/paradigm without extensive refactoring.
+  // As is, we have variables for all the different attributes one could set, as well as for all the data
+  // we wish to show the user, and can hopefully just make some of it editable/static depending on what mode
+  // the form page is in (view/create/edit etc). With forms, the variables are attributes of the form item, and
+  // accessed/updated/retrieved (apparently) only within the form construct. The html files would change entirely,
+  // and you'd need either both a bunch of attributes and a form (for viewing/editing respectively), or only a form
+  // which just isn't really a form when you're in view mode.
+  // Having gotten this far, it seems most prudent to continue updating/collecting/describing the various fields manually.
+  // itemForm: FormGroup;
 
   itemName: string;
 
@@ -87,8 +94,6 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
     super(router, baseUrlService, itemService, dialog);
     this.setMode();
     this.test = "enabled";
-    //  see note by declaration
-    //  this.itemForm = new FormControl();
 
     // override the route reuse strategy
     // Tell angular to load a new component every time a URL that needs this component loads,
@@ -197,8 +202,36 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
+  setModeEdit() {
+    this.mode = Mode.EDIT;
+    this.updateTabs();
+  }
 
-  createOrUpdate() {
+  setModeView() {
+    this.mode = Mode.VIEW;
+    this.updateTabs();
+  }
+
+  /**
+   * Save changes to backend and return to list page. Or should it be to previous domain?
+   */
+  save() {
+    this.createOrUpdate(true);
+  }
+
+  /**
+   * save changes to backend, without returning to the parent's list page.
+   */
+  apply() {
+    this.createOrUpdate(false);
+    // Needs to be refreshed somehow.
+    // this.updatePage();
+    // this.cmnComponentSetup();
+    // this.initializeTabs();
+    this.setModeView();
+  }
+
+  private createOrUpdate(redirect: boolean) {
     // collects/updates data for and in the item, in preparation for saving.
     if ( ! this.finalizeItem()) {
       console.log("Item not valid."); // TODO give useful error message
@@ -206,10 +239,10 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
     console.log(this.item);
     if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
-      this.createItem();
+      this.createItem(redirect);
     }
     else if ( this.mode === Mode.EDIT) {
-      this.updateItem();
+      this.updateItem(redirect);
     }
     else {
       console.log("Could not save or update - mode not valid. Mode set to: ", this.mode);
@@ -225,11 +258,13 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   // saves your edits to the backend
-  updateItem(): void {
+  updateItem(redirect: boolean): void {
     let sub = this.itemService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
       data => {
-        this.resetRouter();
-        this.router.navigate([this.parentDomain]);
+        if (redirect) {
+          this.resetRouter();
+          this.router.navigate([this.parentDomain]);
+        }
       },
       error => {
         console.log(error);
@@ -240,11 +275,13 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   // saves the selected settings as a new item
-  createItem() {
+  createItem(redirect: boolean) {
     let sub = this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
       data => {
-        this.resetRouter();
-        this.router.navigate([this.parentDomain]);
+        if (redirect) {
+          this.resetRouter();
+          this.router.navigate([this.parentDomain]);
+        }
       },
       error => {
         console.log(error.message);

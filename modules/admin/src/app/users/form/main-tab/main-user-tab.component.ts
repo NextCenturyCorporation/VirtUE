@@ -46,7 +46,7 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
 
   private childDatasetName: string;
 
-  // calling it 'item' for consistency with the rest of the code
+  // re-classing parent's object
   protected item: User;
 
   constructor(router: Router, dialog: MatDialog) {
@@ -67,8 +67,12 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
     this.setUpChildTable();
   }
 
-  update() {
+  update(changes: any) {
     this.childrenTable.items = this.item.children.asList();
+
+    if (changes.mode) {
+      this.mode = changes.mode;
+    }
   }
 
   setUp(mode: Mode, item: Item): void {
@@ -76,6 +80,7 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
     if ( !(item instanceof User) ) {
       // TODO throw error
       console.log("item passed to main-user-tab which was not a User: ", item);
+      return;
     }
     this.item = item as User;
 

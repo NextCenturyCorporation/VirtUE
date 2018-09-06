@@ -50,8 +50,14 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
 
   }
 
-  update() {
+  update(changes: any) {
     this.childrenTable.items = this.item.children.asList();
+
+    if (changes.mode) {
+      this.mode = changes.mode;
+      this.childrenTable.colData = this.getColumns();
+      this.childrenTable.rowOptions = this.getOptionsList();
+    }
   }
 
   setUp(mode: Mode, item: Item): void {
@@ -70,24 +76,39 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
 
   }
 
+  // TODO start implementing view page from this.
   getColumns(): Column[] {
-    return [
-      new Column('name',        'VM Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
+    let cols: Column[] = [
       new Column('os',          'OS',                   undefined, 'asc',     2),
       new Column('childNames',  'Assigned Applications', this.getChildren, undefined, 4, this.formatName),
       new Column('status',      'Status',               undefined, 'asc',     2, this.formatStatus)
     ];
+    if (this.mode === Mode.VIEW) {
+      cols.unshift(new Column('name',        'VM Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)));
+    }
+    else {
+      cols.unshift(new Column('name',        'VM Template Name',     undefined, 'asc',     4));
+    }
+
+    return cols;
   }
 
   getOptionsList(): RowOptions[] {
-    return [
-       new RowOptions("Edit", () => true, (i: Item) => this.viewItem(i)),
-       new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-    ];
+    if (this.mode === Mode.VIEW) {
+      return [
+         new RowOptions("View", () => true, (i: Item) => this.viewItem(i))
+      ];
+    }
+    else {
+      return [
+         new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
+      ];
+    }
   }
 
   getNoDataMsg(): string {
-    return "No virtual machine templates have been given to this Virtue yet. To add a virtual machine template, click on the button \"Add VM\" above.";
+    return "No virtual machine templates have been given to this Virtue yet. \
+To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
   init() {
@@ -114,6 +135,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
     this.item.version = String(this.newVersion);
     return true;
   }
+
 
   /**
    this is a checker, if the user clicks 'remove' on one of the item's children.

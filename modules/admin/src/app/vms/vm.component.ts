@@ -112,12 +112,12 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
 
   // called whenever item's child list is set or changes
   updateTabs(): void {
-    this.mainTab.update();
+    this.mainTab.update({mode:this.mode});
 
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allVirtues: this.allVirtues});
+    this.usageTab.update({allVirtues: this.allVirtues, mode:this.mode});
   }
 
   // only called on initial page load at the moment.

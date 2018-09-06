@@ -11,3 +11,9 @@ export enum ConfigUrlEnum {
   VIRTUES = "admin/virtue/template/",
   USERS = "admin/user/"
 }
+
+export enum Protocols {
+  TCPIP = "TCP/IP",
+  UDP = "UDP",
+  ICMP = "ICMP"
+}

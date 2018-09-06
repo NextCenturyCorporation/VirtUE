@@ -47,7 +47,7 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <button class="button-submit" (click)="createOrUpdate();" >Save</button>
+          <button class="button-submit" (click)="createOrUpdate(true);" >Save</button>
           <button class="button-cancel" (click)="cancel()">Cancel</button>
         </div>
         <div class="mui-col-md-4"></div>
@@ -134,7 +134,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
   // called whenever item's child list is set or changes
   updateTabs(): void {
-    this.mainTab.update();
+    this.mainTab.update({mode:this.mode});
   }
 
   // only called on initial page load at the moment.

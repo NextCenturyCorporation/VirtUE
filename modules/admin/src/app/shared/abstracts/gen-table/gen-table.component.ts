@@ -80,7 +80,7 @@ export class GenericTableComponent {
   selectedIDs: string[];
 
   constructor() {
-    // create meaningless empty column to prevent error until createTable() is called by ngOnInit
+    // create meaningless empty column to prevent exceptions before createTable() is called by ngOnInit
     this.sortColumn = new Column("", "", undefined, undefined, 0);
     this.colData = [this.sortColumn];
     this.filterOptions = [];

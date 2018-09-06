@@ -47,24 +47,20 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
 
   }
 
-  update(newData?: any) {
-    if (newData) {
-      if (newData.allVirtues) {
-        let allVirtues: DictList<Item> = newData.allVirtues;
-        this.parentTable.items = [];
+  update(changes: any) {
+    if (changes.allVirtues) {
+      let allVirtues: DictList<Item> = changes.allVirtues;
+      this.parentTable.items = [];
 
-        for (let u of allVirtues.asList()) {
-          if (u.children.has(this.item.getID())) {
-            this.parentTable.items.push(u);
-          }
+      for (let u of allVirtues.asList()) {
+        if (u.children.has(this.item.getID())) {
+          this.parentTable.items.push(u);
         }
       }
-
-      // other conditionals
     }
-    else {
-      // TODO show error
-      console.log();
+
+    if (changes.mode) {
+      this.mode = changes.mode;
     }
   }
 

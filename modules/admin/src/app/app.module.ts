@@ -12,6 +12,8 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+import {DomSanitizer} from '@angular/platform-browser';
+
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { OverlayModule } from '@angular/cdk/overlay';
 
@@ -24,6 +26,7 @@ import {
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
+  MatIconRegistry,
   MatInputModule,
   MatRadioModule,
   MatSelectModule,
@@ -186,4 +189,8 @@ import { MessageService } from './shared/services/message.service';
     ColorModalComponent
   ]
 })
-export class AppModule { }
+export class AppModule {
+  constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer){
+    matIconRegistry.addSvgIconSet(domSanitizer.bypassSecurityTrustResourceUrl('/assets/mdi.svg'));
+  }
+}

@@ -54,8 +54,12 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
     this.tabName = "General Info";
   }
 
-  update() {
+  update(changes: any) {
     this.childrenTable.items = this.item.children.asList();
+
+    if (changes.mode) {
+      this.mode = changes.mode;
+    }
   }
 
   setUp(mode: Mode, item: Item): void {
