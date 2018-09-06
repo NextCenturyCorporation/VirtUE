@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -192,9 +193,22 @@ public class XenHostManager {
 					Session finalSession = session;
 					Runnable copyS3Data = () -> {
 						try {
+							Collection<String> templateSet = new HashSet<String>();
+							for (VirtualMachineTemplate vmt : linuxVmts) {
+								String template = vmt.getTemplatePath();
+								templateSet.add(template);
+							}
 							List<String> lines = SshUtil.sendCommandFromSession(finalSession,
-									"sudo rm -rf /home/ec2-user/app-domains/master/* ; sudo aws s3 cp s3://persistent-storage-test/ /home/ec2-user/app-domains/master/ --recursive");
-							logger.debug("s3 copy output: " + lines.get(lines.size() - 1));
+									"sudo rm -rf /home/ec2-user/app-domains/master/* ");
+
+							copyFolderFromS3(finalSession, "standard");
+							for (String templatePath : templateSet) {
+								copyFolderFromS3(finalSession, templatePath);
+								lines = SshUtil.sendCommandFromSession(finalSession,
+										"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
+												+ templatePath + "/");
+								logger.debug("Copy standard files output: " + lines);
+							}
 						} catch (JSchException e) {
 							logger.error("Error attempting to copy s3 data", e);
 						} catch (IOException e) {
@@ -234,6 +248,16 @@ public class XenHostManager {
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				logger.debug("starting to provision guests");
 				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverUser);
+			}
+
+			private void copyFolderFromS3(Session finalSession, String templatePath) throws JSchException, IOException {
+				List<String> lines;
+				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
+						+ "; sudo aws s3 cp s3://persistent-storage-test/" + templatePath
+						+ " /home/ec2-user/app-domains/" + templatePath + "/ --recursive";
+				logger.debug("Running command: " + cmd);
+				lines = SshUtil.sendCommandFromSession(finalSession, cmd);
+				logger.debug("s3 copy output: " + lines.get(lines.size() - 1));
 			}
 
 			private Session getSession(VirtualMachine xen, Session session, File privateKeyFile, int maxAttempts) {

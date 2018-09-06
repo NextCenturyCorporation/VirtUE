@@ -1,7 +1,7 @@
 {
     "name": "Router Admin VM",
     "os": "LINUX",
-    "templatePath": "ami-2b500951",
+    "templatePath": "test",
     "loginUser": "user",
     "enabled": true,
     "applicationIds": [
