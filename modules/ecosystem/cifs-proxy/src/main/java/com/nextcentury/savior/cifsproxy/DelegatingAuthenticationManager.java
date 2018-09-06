@@ -107,7 +107,9 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		gss_cred_id_t targetCred = null;
 		try {
 			acceptorCredential = createAcceptorCred();
+			System.out.println("acceptorCred: " + GssUtils.getCredInfo(gssapi, acceptorCredential));
 			proxyCred = getProxyCredential(serviceTicket, acceptorCredential);
+			System.out.println("proxyCred: " + GssUtils.getCredInfo(gssapi, proxyCred));
 			targetCred = getTargetCredential(proxyCred);
 			storeCredInto(targetCred, cacheFile);
 		} catch (GSSException e) {
@@ -217,10 +219,9 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		GssApi gssapi = GssApi.INSTANCE;
 		int retval;
 		IntByReference minorStatus = new IntByReference();
-		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
-
-		gss_buffer_desc inputToken = new gss_buffer_desc();
 		gss_name_t gssServiceName = GssUtils.importName(gssapi, serviceName, GssApi.GSS_C_NT_HOSTBASED_SERVICE);
+
+		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
 		gss_buffer_desc outputToken = new gss_buffer_desc();
 		// flags from t_s4u2proxy_krb5.c
 		int flags = GssApi.GssContextFlag.GSS_C_REPLAY_FLAG.getValue()
@@ -238,9 +239,9 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 			throw exception;
 		}
 
-		PointerByReference targetCredHandle = new PointerByReference(); // TODO this might need to be a PointerByReference
+		PointerByReference targetCredHandle = new PointerByReference();
 		System.out.println(">>>about to call add_cred");
-		retval = gssapi.gss_add_cred(minorStatus, GssApi.GSS_C_NO_CREDENTIAL, gssServiceName, GssApi.MECH_KRB5,
+		retval = gssapi.gss_add_cred(minorStatus, proxyCred, gssServiceName, GssApi.GSS_C_NO_OID,
 				GssCredentialUsage.GSS_C_INITIATE.getValue(), 0, 0, targetCredHandle, null, 0, null);
 		System.out.println("<<<back from add_cred:" + retval + "." + minorStatus.getValue());
 		if (retval != 0) {
