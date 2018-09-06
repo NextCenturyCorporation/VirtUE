@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.util.ClassUtil.Ctor;
 import com.sun.jna.Library;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -50,6 +49,44 @@ public interface GssApi extends Library {
 	final Pointer GSS_C_NO_CONTEXT = Pointer.NULL;
 	final gss_name_t GSS_C_NO_NAME = new gss_name_t(Pointer.NULL);
 
+	// Error codes
+	final int GSS_S_COMPLETE = 0;
+
+	final int GSS_C_CALLING_ERROR_OFFSET = 24;
+	final int GSS_C_ROUTINE_ERROR_OFFSET = 16;
+	final int GSS_C_SUPPLEMENTARY_OFFSET = 0;
+	final int GSS_C_CALLING_ERROR_MASK = 0377;
+	final int GSS_C_ROUTINE_ERROR_MASK = 0377;
+	final int GSS_C_SUPPLEMENTARY_MASK = 0177777;
+
+	// See GssUtils for functions to help parse error codes
+
+	// Calling errors
+	final int GSS_S_CALL_INACCESSIBLE_READ = 1 << GSS_C_CALLING_ERROR_OFFSET;
+	final int GSS_S_CALL_INACCESSIBLE_WRITE = 2 << GSS_C_CALLING_ERROR_OFFSET;
+	final int GSS_S_CALL_BAD_STRUCTURE = 3 << GSS_C_CALLING_ERROR_OFFSET;
+
+	// Routine errors
+	final int GSS_S_BAD_MECH = 1 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_NAME = 2 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_NAMETYPE = 3 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_BINDINGS = 4 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_STATUS = 5 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_SIG = 6 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_MIC = GSS_S_BAD_SIG;
+	final int GSS_S_NO_CRED = 7 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_NO_CONTEXT = 8 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_DEFECTIVE_CREDENTIAL = 10 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_CREDENTIALS_EXPIRED = 11 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_CONTEXT_EXPIRED = 12 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_FAILURE = 13 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_QOP = 14 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_UNAUTHORIZED = 15 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_UNAVAILABLE = 16 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_DUPLICATE_ELEMENT = 17 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_NAME_NOT_MN = 18 << GSS_C_ROUTINE_ERROR_OFFSET;
+	final int GSS_S_BAD_MECH_ATTR = 19 << GSS_C_ROUTINE_ERROR_OFFSET;
+
 	/**
 	 * An OID that specifies a name as a host-based service (e.g.,
 	 * "http@webserver").
@@ -94,7 +131,7 @@ public interface GssApi extends Library {
 		private GssContextFlag(int value) {
 			this.value = value;
 		}
-		
+
 		public int getValue() {
 			return value;
 		}
@@ -172,6 +209,7 @@ public interface GssApi extends Library {
 
 		public gss_buffer_desc(Pointer pointer) {
 			super(pointer);
+			read();
 		}
 
 		@Override
@@ -203,6 +241,11 @@ public interface GssApi extends Library {
 		public gss_OID_desc(int length, Pointer elements) {
 			this.length = length;
 			this.elements = elements;
+		}
+
+		public gss_OID_desc(Pointer p) {
+			super(p);
+			read();
 		}
 
 		@Override
@@ -240,6 +283,15 @@ public interface GssApi extends Library {
 		 * @see https://www.eshayne.com/jnaex/index.html?example=15
 		 */
 		public gss_OID_desc.ByReference elements; // gss_OID_desc[]
+
+		public gss_OID_set_desc(Pointer p) {
+			super(p);
+			read();
+		}
+
+		public gss_OID_set_desc() {
+			// TODO Auto-generated constructor stub
+		}
 
 		@Override
 		protected List<String> getFieldOrder() {
@@ -341,6 +393,10 @@ public interface GssApi extends Library {
 	int gss_display_name(IntByReference minorStatus /* minor_status */, gss_name_t inputName /* input_name */,
 			gss_buffer_desc outputNameBuffer /* output_name_buffer */,
 			PointerByReference outputNameType /* output_name_type */);
+
+	int gss_oid_to_str(IntByReference minorStatus, /* minor_status */
+			gss_OID_desc oid, /* oid */
+			gss_buffer_desc outBuffer); /* oid_str */
 
 	/**
 	 * Initiates a secure connection between this computer and another (usually a
@@ -498,6 +554,28 @@ public interface GssApi extends Library {
 			int initiatorTimeRec, /* initiator_time_rec */
 			IntByReference acceptorTimeRec /* acceptor_time_rec */
 	);
+
+	/**
+	 * Obtains information about a credential.
+	 * 
+	 * @param minorStatus
+	 * @param credHandle
+	 * @param credNameOutput
+	 *                              Note: should be freed with
+	 *                              {@link #gss_release_name(IntByReference, gss_name_t)}
+	 * @param lifetimeRemaining
+	 * @param credUsage
+	 * @param mechanismsOidSet
+	 *                              Note: should be freed with
+	 *                              {@link #gss_release_oid_set(IntByReference, gss_OID_set_desc)}
+	 * @return
+	 */
+	int gss_inquire_cred(IntByReference minorStatus, /* minor_status */
+			gss_cred_id_t credHandle, /* cred_handle */
+			PointerByReference credNameOutput, /* name */
+			IntByReference lifetimeRemaining, /* lifetime */
+			IntByReference credUsage, /* cred_usage */
+			PointerByReference mechanismsOidSet); /* mechanisms */
 
 	/**
 	 * Allows a process to import a security context established by another process.
