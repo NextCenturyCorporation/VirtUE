@@ -72,7 +72,6 @@ public class PermissionsIT {
 		ClipboardPermission deletedPermission = given().port(randomServerPort).when().get("/admin/permission/" + sourceId + "/" + destinationId).then().extract()
 				.as(ClipboardPermission.class);
 		assertThat(deletedPermission).isNotNull();
-		assertTrue(deletedPermission.getPermission() == ClipboardPermissionOption.DENY);
 	}
 	
 }

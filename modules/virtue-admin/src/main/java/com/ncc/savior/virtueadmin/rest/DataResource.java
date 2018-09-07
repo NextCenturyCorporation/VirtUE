@@ -42,6 +42,7 @@ import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
+import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
@@ -49,6 +50,7 @@ import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
@@ -83,6 +85,9 @@ public class DataResource {
 
 	@Autowired
 	private ImportExportService importExportService;
+
+	@Autowired
+	private PersistentStorageManager persistentStorageManager;
 
 	@Autowired
 	private PermissionService permissionService;
@@ -645,6 +650,20 @@ public class DataResource {
 	public String clearUsers() {
 		userManager.clear(false);
 		return "Users cleared.";
+	}
+
+	@GET
+	@Path("storage/")
+	@Produces("application/json")
+	public Iterable<VirtuePersistentStorage> getAllStorage() {
+		return persistentStorageManager.getAllPersistentStorage();
+	}
+
+	@GET
+	@Path("storage/clear/")
+	public String clearStorage() {
+		persistentStorageManager.deleteAllPersistentStorage();
+		return "storage cleared";
 	}
 
 	@GET
