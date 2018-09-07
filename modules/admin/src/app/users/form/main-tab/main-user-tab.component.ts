@@ -12,8 +12,6 @@ import { ItemService } from '../../../shared/services/item.service';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
-import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
-
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
@@ -23,8 +21,10 @@ import { Column } from '../../../shared/models/column.model';
 import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
+import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
+
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
 @Component({
   selector: 'app-main-user-tab',
@@ -32,19 +32,12 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
   styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
 })
 
-export class UserMainTabComponent extends GenericFormTabComponent implements OnInit {
-
-  @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
-
-  // to notify user.component that a new set of childIDs have been selected
-  @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
+export class UserMainTabComponent extends GenericMainTabComponent implements OnInit {
 
   private roleUser: boolean;
   private roleAdmin: boolean;
 
   private fullImagePath: string;
-
-  private childDatasetName: string;
 
   // re-classing parent's object
   protected item: User;
@@ -52,7 +45,6 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "General Info";
-
   }
 
   getPageOptions(): {
@@ -63,6 +55,7 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
       neededDatasets: ["apps", "vms", "virtues", "users"]
     };
   }
+
   init() {
     this.setUpChildTable();
   }
@@ -102,9 +95,7 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
   getColumns(): Column[] {
     return [
       // See note in gen-form getOptionsList
-      new Column('name',    'Virtue Template Name',    undefined,       'asc',     3, undefined, (i: Item) => this.viewItem(i)),
-      // new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
-      // new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
+      new Column('name',    'Virtue Template Name',   undefined,       'asc',     3, undefined, (i: Item) => this.viewItem(i)),
       new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
       new Column('apps',    'Assigned Applications',  this.getGrandchildren, undefined, 3, this.formatName),
       new Column('version', 'Version',                undefined,        'asc',     2),
@@ -132,71 +123,14 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
       cols: this.getColumns(),
       opts: this.getOptionsList(),
       coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table. ?
+      filters: [], // don't allow filtering on the form's child table.
       tableWidth: 9,
       noDataMsg: this.getNoDataMsg(),
       hasCheckBoxes: false
     });
   }
 
-
-  /**
-   this is a checker, if the user clicks 'remove' on one of the item's children.
-   Could be improved/made more clear/distinguished from the "activateModal" method.
-  */
-  openDialog(action: string, target: Item): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          actionType: action,
-          targetObject: target
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
-
-      if (targetObject !== 0 ) {
-        if (action === 'delete') {
-          this.item.removeChild(targetObject.getID());
-        }
-      }
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
+  getDialogRef(params: {height: string, width: string, data: any}) {
+    return this.dialog.open( VirtueModalComponent, params);
   }
-
-  // this brings up the modal to add/remove children
-  // this could be refactored into a "MainTab" class, which is the same for all
-  // forms, but I'm not sure that'd be necessary.
-  activateModal(mode: string): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
-
-    let dialogRef = this.dialog.open( VirtueModalComponent, {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        id: this.item.getName(),
-        selectedIDs: this.item.childIDs
-      }
-    });
-
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.onChildrenChange.emit(selectedVirtues);
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
-
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-
-  }
-
 }

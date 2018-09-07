@@ -55,19 +55,6 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   // Holds the strings 'Create', 'Edit', or 'Duplicate' resp., for display to the user
   mode: Mode;
 
-
-  // @ViewChildren(GenericFormTabComponent) tabs: QueryList<GenericFormTabComponent>;
-
-  // table showing what children have been added to this item
-  @ViewChild('childrenTable') childrenTable: GenericTableComponent;
-
-  // table showing what parents this item has been added to
-  @ViewChild('parentTable') parentTable: GenericTableComponent;
-
-  // A list of the running instances which have been built through some version
-  // of this item.
-  // @ViewChild('instanceTable') instanceTable: GenericTableComponent;
-
   // top-domain for child type. So for user.component, this would be '/virtues'
   childDomain: string;
 
@@ -79,8 +66,6 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   datasetName: string;
   childDatasetName: string;
 
-  tabs: GenericFormTabComponent[];
-
   constructor(
     protected parentDomain: string,
     protected activatedRoute: ActivatedRoute,
@@ -91,8 +76,6 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   ) {
     super(router, baseUrlService, itemService, dialog);
     this.setMode();
-
-    this.tabs = [];
 
     // override the route reuse strategy
     // Tell angular to load a new component every time a URL that needs this component loads,

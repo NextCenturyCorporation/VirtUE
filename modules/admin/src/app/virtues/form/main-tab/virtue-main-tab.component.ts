@@ -24,8 +24,8 @@ import { RowOptions } from '../../../shared/models/rowOptions.model';
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
-// import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
+import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
+
 
 @Component({
   selector: 'app-virtue-main-tab',
@@ -33,12 +33,7 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
   styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
 })
 
-export class VirtueMainTabComponent extends GenericFormTabComponent implements OnInit {
-
-  @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
-
-  // to notify virtue.component that a new set of childIDs have been selected
-  @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
+export class VirtueMainTabComponent extends GenericMainTabComponent implements OnInit {
 
   private newVersion: number;
 
@@ -47,7 +42,6 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "General Info";
-
   }
 
   update(changes: any) {
@@ -142,64 +136,7 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
     return true;
   }
 
-
-  /**
-   this is a checker, if the user clicks 'remove' on one of the item's children.
-   Could be improved/made more clear/distinguished from the "activateModal" method.
-  */
-  openDialog(action: string, target: Item): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          actionType: action,
-          targetObject: target
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
-
-      if (targetObject !== 0 ) {
-        if (action === 'delete') {
-          this.item.removeChild(targetObject.getID());
-        }
-      }
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
+  getDialogRef(params: {height: string, width: string, data: any}) {
+    return this.dialog.open( VmModalComponent, params);
   }
-
-  // this brings up the modal to add/remove children
-  // this could be refactored into a "MainTab" class, which is the same for all
-  // forms, but I'm not sure that'd be necessary.
-  activateModal(mode: string): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
-
-    let dialogRef = this.dialog.open( VmModalComponent, {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        id: this.item.getName(),
-        selectedIDs: this.item.childIDs
-      }
-    });
-
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.onChildrenChange.emit(selectedVirtues);
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
-
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-
-  }
-
 }

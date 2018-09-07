@@ -26,8 +26,7 @@ import { OSSet } from '../../../shared/sets/os.set';
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
-// import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
+import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
 @Component({
   selector: 'app-vm-main-tab',
@@ -36,12 +35,7 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
   providers: [ OSSet ]
 })
 
-export class VmMainTabComponent extends GenericFormTabComponent implements OnInit {
-
-  @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
-
-  // to notify vm.component that a new set of childIDs have been selected
-  @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
+export class VmMainTabComponent extends GenericMainTabComponent implements OnInit {
 
   private newVersion: number;
 
@@ -96,7 +90,7 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
   }
 
   getNoDataMsg(): string {
-    return 'No virtual machine templates have been created yet. To add a template, click on the button "Add VM Template" above.';
+    return 'No applications have been added yet. To add a template, click on the button "Add/Remove Application Packages" above.';
   }
 
   init() {
@@ -124,63 +118,7 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
     return true;
   }
 
-  /**
-   this is a checker, if the user clicks 'remove' on one of the item's children.
-   Could be improved/made more clear/distinguished from the "activateModal" method.
-  */
-  openDialog(action: string, target: Item): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          actionType: action,
-          targetObject: target
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
-
-      if (targetObject !== 0 ) {
-        if (action === 'delete') {
-          this.item.removeChild(targetObject.getID());
-        }
-      }
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
+  getDialogRef(params: {height: string, width: string, data: any}) {
+    return this.dialog.open( AppsModalComponent, params);
   }
-
-  // this brings up the modal to add/remove children
-  // this could be refactored into a "MainTab" class, which is the same for all
-  // forms, but I'm not sure that'd be the best use of time.
-  activateModal(mode: string): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
-
-    let dialogRef = this.dialog.open( AppsModalComponent, {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        id: this.item.getName(),
-        selectedIDs: this.item.childIDs
-      }
-    });
-
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.onChildrenChange.emit(selectedVirtues);
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
-
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-
-  }
-
 }

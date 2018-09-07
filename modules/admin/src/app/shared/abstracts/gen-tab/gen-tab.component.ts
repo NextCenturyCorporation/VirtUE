@@ -63,7 +63,7 @@ export abstract class GenericFormTabComponent implements OnInit {
   // grandchildren be click-able.
   getGrandchildren(i: Item): Item[] {
     // if the item has been saved to the backend
-    if (!this.item || !this.item.children) {
+    if (!i || !i.children) {
       return [];
     }
     let grandchildren: Item[] = [];
@@ -76,7 +76,7 @@ export abstract class GenericFormTabComponent implements OnInit {
   // try making these on the fly. Might not be that slow.
   getChildren(i: Item): Item[] {
     // if the item has been saved to the backend
-    if (!this.item || !this.item.children) {
+    if (!i || !i.children) {
       return [];
     }
     return i.children.asList();

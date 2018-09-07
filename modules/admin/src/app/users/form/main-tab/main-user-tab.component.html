@@ -6,14 +6,11 @@
         <mat-form-field *ngIf="mode !== 'Edit' && mode !== 'View'">
           <input type="text" [(ngModel)]="item.name" placeholder="Username" matInput>
         </mat-form-field>
-      <!-- <div class="mui-col-md-4 form-item margin-top-15"> -->
         <div class="form-item margin-top-15">
           <label>User Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
           <mat-slide-toggle [(ngModel)]="item.enabled" [color]="'primary'">{{ item.enabled ? 'Enabled' : 'Disabled' }}</mat-slide-toggle>
         </div>
-      <!-- </div> -->
         <div>
-        <!-- <div class="mui-col-md-12 "> -->
           <div class="table-data">
             <label>Select Role(s)</label><br />
             <mat-checkbox [(ngModel)]="roleUser" [checked]="roleUser"> User</mat-checkbox>

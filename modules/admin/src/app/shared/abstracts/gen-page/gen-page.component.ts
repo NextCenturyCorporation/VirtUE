@@ -333,6 +333,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     }
     return grandchildren;
   }
+
   getChildren(i: Item): Item[] {
     return i.children.asList();
   }
