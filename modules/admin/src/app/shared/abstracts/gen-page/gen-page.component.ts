@@ -20,7 +20,7 @@ import { Item } from '../../models/item.model';
 
 import { ColorSet } from '../../sets/color.set';
 
-import { ConfigUrlEnum } from '../../enums/enums';
+import { Mode, ConfigUrlEnum } from '../../enums/enums';
 
 interface DatasetType {
   serviceUrl: string;
@@ -337,10 +337,7 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
     return i.children.asList();
   }
 
-
   viewItem(i: Item) {
-    if (i.getDomain()) {
-      this.router.navigate([i.getDomain()]);
-    }
+    this.router.navigate([i.getPageRoute(Mode.VIEW)]);
   }
 }

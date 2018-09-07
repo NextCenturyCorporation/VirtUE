@@ -80,15 +80,14 @@
       </span>
       <div fxFlex="auto">
         <span class="mini-menu table-data mui-col-md-{{colData[0].colWidth}} transparent">
+          <!-- 'a's look like links, 'div's don't. -->
           <a class="edit" *ngIf="colData[0].link !== undefined" (click)="colData[0].link(i)">
             {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
           </a>
           <div class="edit" *ngIf="colData[0].link === undefined">
             {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
           </div>
-          <!-- change those 'a's to 'div's to make them not be blue and look like links. -->
-          <!-- TODO change this to move to the form page, but only in 'view' mode -->
-          <!-- <a class="edit" (click)="editItem(i)">{{ i[colData[0].name] }}</a> -->
+
           <div class="menu-options" >
             <a *ngFor="let o of rowOptions; let idx = index" (click)="o.action(i)">
               <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
@@ -102,8 +101,6 @@
           <div *ngIf="column.list !== undefined">
             <ng-container *ngFor="let element of column.list(i)">
               <ul>
-                <!-- <ul [innerHTML]="column.formatValue(i)"></ul> -->
-                <!-- formatValue for lists returns the list to be displayed -->
                 <ul>
                   <a *ngIf="column.link" (click)="column.link(element)">
                     {{ column.formatValue ? column.formatValue(element) : element.toString() }}

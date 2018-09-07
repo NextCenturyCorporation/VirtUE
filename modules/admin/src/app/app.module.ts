@@ -189,8 +189,9 @@ import { MessageService } from './shared/services/message.service';
     ColorModalComponent
   ]
 })
+
 export class AppModule {
-  constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer){
+  constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
     matIconRegistry.addSvgIconSet(domSanitizer.bypassSecurityTrustResourceUrl('/assets/mdi.svg'));
   }
 }

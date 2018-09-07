@@ -122,9 +122,19 @@
           <h5>File System Permissions</h5>
 
           <div class="mui-row table-header-group">
-            <ng-container *ngFor="let col of getFileSysColumns()">
-              <div class="mui-col-md-{{col.colWidth}} table-header">
-                <label>{{col.prettyName}}</label>
+            <ng-container *ngFor="let col of getFileSysColumns(); let index = index; trackBy: indexTracker">
+              <div class="mui-col-md-{{col.colWidth}} table-header flex-vert-center">
+                <label>{{col.prettyName}}
+                  <br>
+                  <ng-container *ngIf="index !== 0">
+                    <mat-checkbox
+                      name="cb"
+                      [checked]="allChecked(col.name)"
+                      (change)="checkAll($event, col.name)"
+                      >
+                    </mat-checkbox>
+                  </ng-container>
+                </label>
               </div>
             </ng-container>
           </div>
@@ -154,7 +164,6 @@
                       [(ngModel)]="perm[col.name]"
                       color="#333333">
                     </mat-checkbox>
-                    <!-- [(ngModel)]="perm[col.name]" -->
                   </div>
                 </ng-container>
               </div>

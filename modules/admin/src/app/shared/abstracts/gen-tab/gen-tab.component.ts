@@ -33,7 +33,7 @@ export abstract class GenericFormTabComponent implements OnInit {
 
   // what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
   // Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
-  protected mode: Mode
+  protected mode: Mode;
 
   public tabName: string;
 
@@ -55,9 +55,7 @@ export abstract class GenericFormTabComponent implements OnInit {
   ngOnInit() {}
 
   viewItem(i: Item) {
-    if (i.getDomain()) {
-      this.router.navigate([i.getDomain()]);
-    }
+    this.router.navigate([i.getPageRoute(Mode.VIEW)]);
   }
 
   // this is now just done on the fly. Seems like a waste to regenerate the same

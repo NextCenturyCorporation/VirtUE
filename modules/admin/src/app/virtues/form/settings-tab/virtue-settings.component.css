@@ -117,3 +117,8 @@ mat-card {
 .mat-button.mat-small {
     min-width: 1%;
 }
+
+.flex-vert-center {
+  display: flex;
+  align-items: center;
+}

@@ -1,4 +1,6 @@
 import { DictList } from './dictionary.model';
+import { Mode } from '../enums/enums';
+
 
 export abstract class Item {
   id: string;
@@ -21,8 +23,8 @@ export abstract class Item {
   childNamesHTML: string;
   modDate: string;
 
-  // a link to where the item can be viewed. Something like "users/view/Phillip"
-  domain: string;
+  // a link to the parent domain for this item - '/users', '/virtues', etc.
+  parentDomain: string;
 
   constructor() {
     this.status = "enabled";
@@ -30,7 +32,7 @@ export abstract class Item {
     this.childIDs = [];
     this.modDate = '';
 
-    this.domain = "NA";
+    this.parentDomain = "NA";
 
     this.childNamesHTML = "";
 
@@ -93,8 +95,14 @@ it has a virtue ID attached to it which doesn't exist in the backend data.");
     return this.name;
   }
 
-  getDomain(): string {
-    return this.domain;
+  // eturns a link to where the item can be viewed/edited/duplicated.
+  // Something like "users/{view/edit/etc}/Phillip"
+  getPageRoute(mode: Mode): string {
+    if (mode === Mode.CREATE) {
+      console.log("Invalid request for item page route - can't open an existing page in 'Create' mode.");
+      return this.parentDomain;
+    }
+    return this.parentDomain + '/' + mode.toLowerCase() + '/' + this.getID();
   }
 
   // Overriden by User

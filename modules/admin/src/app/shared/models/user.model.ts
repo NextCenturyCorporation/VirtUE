@@ -36,7 +36,7 @@ export class User extends Item {
       this.status = userObj.enabled ? 'enabled' : 'disabled';
 
       // change 'edit' to 'view' once we have a view page set up.
-      this.domain = '/users/edit/' + this.getID();
+      this.parentDomain = '/users';
     }
     else {
       this.roles = [];

@@ -22,6 +22,7 @@ import { User } from '../../models/user.model';
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
 
+import { Mode } from '../../enums/enums';
 
 @Component({
   templateUrl: './gen-list.component.html',
@@ -126,11 +127,11 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
   }
 
   editItem(i: Item) {
-    this.router.navigate([this.domain + "/edit/" + i.getID()]);
+    this.router.navigate([i.getPageRoute(Mode.EDIT)]);
   }
 
   dupItem(i: Item) {
-    this.router.navigate([this.domain + "/duplicate/" + i.getID()]);
+    this.router.navigate([i.getPageRoute(Mode.DUPLICATE)]);
   }
 
   deleteItem(i: Item) {

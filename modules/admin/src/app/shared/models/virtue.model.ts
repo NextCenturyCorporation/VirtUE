@@ -63,8 +63,8 @@ export class Virtue extends Item {
       this.status = virtueObj.enabled ? 'enabled' : 'disabled';
 
       // change 'edit' to 'view' once we have a view page set up.
-      this.domain = '/virtues/edit/' + this.id;
 
+      this.parentDomain = '/virtues';
 
 
       // TODO set this.{all below} to the corresponding value in virtObj, once implemented on backend.
@@ -83,8 +83,7 @@ export class Virtue extends Item {
       if (! this.allowedPasteTargets) {
         this.allowedPasteTargets = [];
       }
-      // TODO
-      // How are these defined/found? Are they going to be dynamic?
+      // TODO  How are these filesystems defined/found? Are they going to be dynamic?
       if (! this.fileSysPerms) {
         this.fileSysPerms = [
           new FileSysPermission("File Server\\Media "),
@@ -93,9 +92,7 @@ export class Virtue extends Item {
           new FileSysPermission("File Server\\F Drive ")
         ];
       }
-      // TODO
-      // How are printers set, discovered, and used?
-      // Pretty sure the network won't take "that big grey one in the break room" as a valid address.
+      // TODO  Placeholder printers.
       if (! this.allowedPrinters) {
         this.allowedPrinters = [
           new Printer("Printer 1"),

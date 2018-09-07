@@ -40,7 +40,7 @@ export class VirtualMachine extends Item {
       this.status = vmObj.enabled ? 'enabled' : 'disabled';
 
       // change 'edit' to 'view' once we have a view page set up.
-      this.domain = '/vm-templates/edit/' + this.id;
+      this.parentDomain = '/vm-templates';
     }
 
   }

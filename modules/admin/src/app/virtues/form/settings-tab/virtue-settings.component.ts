@@ -51,6 +51,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   constructor( private matIconRegistry: MatIconRegistry, router: Router, dialog: MatDialog) {
     super(router, dialog);
 
+    this.item = new Virtue({});
+
     // this.matIconRegistry.addSvgIcon(
     //       `plus`,
     //       `../../../../assets/images/baseline-add-24px.svg`
@@ -64,7 +66,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     // through all the applications this virtue has access to, and showing that list?
     // The latter seems the most useful, but relies on the admin correctly tagging
     // things when they load them. Or just guess via the name, which seems very unsafe.
-    this.browsers = ['Chrome', 'Firefox', 'This is not workable', 'FIXME', 'TODO'];
+    this.browsers = ['Chrome', 'Firefox', 'This is a placeholder', 'TODO'];
 
   }
 
@@ -156,6 +158,21 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return index;
   }
 
+  allChecked(colName: string): boolean {
+    for (let perm of this.item.fileSysPerms) {
+      if (perm[colName] === false) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  checkAll(event: any, colName: string): void {
+    for (let perm of this.item.fileSysPerms) {
+      perm[colName] = event.checked;
+    }
+  }
+
   addNewPrinter(): void {
     this.item.allowedPrinters.push(new Printer("And another printer"));
   }
@@ -166,19 +183,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
   addNewNetworkPermission(): void {
     this.item.networkWhiteList.push(new NetworkPermission());
-    // this.newNetwork = new NetworkPermission();
-    // this.applyNewNetworkPermission.subscribe( () => {},
-    //   () => {},
-    //   () => {
-    //     this.networkWhiteList.push(this.newNetwork);
-    //     this.newNetwork = undefined;
-    //     this.applyNewNetworkPermission.unsubscribe();
-    // });
-  }
-
-  saveNewNetwork(): void {
-    // TODO first check it
-    // this.applyNewNetworkPermission.emit(true);
   }
 
   setUpPasteableVirtuesTable(): void {

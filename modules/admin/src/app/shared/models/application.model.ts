@@ -25,7 +25,7 @@ export class Application extends Item {
       this.launchCommand = appObj.launchCommand;
       this.iconKey = appObj.iconKey;
 
-      this.domain = '/apps/view/' + this.id;
+      this.parentDomain = '/apps';
     }
     else {
       this.os = '';

@@ -134,7 +134,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
   // called whenever item's child list is set or changes
   updateTabs(): void {
-    this.mainTab.update({mode:this.mode});
+    this.mainTab.update({mode: this.mode});
   }
 
   // only called on initial page load at the moment.

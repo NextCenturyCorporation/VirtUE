@@ -98,8 +98,6 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
     // override the route reuse strategy
     // Tell angular to load a new component every time a URL that needs this component loads,
     // even if the user has been on this page before.
-    // TODO May want to look into changing this for these form pages, so a user who leaves
-    // a page mid-edit could return back and finish.
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
@@ -224,11 +222,9 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
    */
   apply() {
     this.createOrUpdate(false);
-    // Needs to be refreshed somehow.
-    // this.updatePage();
-    // this.cmnComponentSetup();
-    // this.initializeTabs();
-    this.setModeView();
+    // TODO: Can this be changed to just reset something? As opposed to loading
+    // the whole page again?
+    this.router.navigate([this.item.getPageRoute(Mode.VIEW)]);
   }
 
   private createOrUpdate(redirect: boolean) {
