@@ -1,29 +1,13 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
-import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
-import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-
-import { BaseUrlService } from '../../../services/baseUrl.service';
-import { ItemService } from '../../../services/item.service';
 
 import { DialogsComponent } from '../../../../dialogs/dialogs.component';
 
 import { Item } from '../../../models/item.model';
-import { User } from '../../../models/user.model';
-import { VirtualMachine } from '../../../models/vm.model';
-import { Virtue } from '../../../models/virtue.model';
-import { DictList } from '../../../models/dictionary.model';
-import { Column } from '../../../models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../enums/enums';
-import { RowOptions } from '../../../models/rowOptions.model';
 
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
-import { VirtueModalComponent } from '../../../../modals/virtue-modal/virtue-modal.component';
 
 
 export abstract class GenericMainTabComponent extends GenericFormTabComponent implements OnInit {

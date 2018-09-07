@@ -62,8 +62,6 @@ export class Virtue extends Item {
       this.color = virtueObj.color;
       this.status = virtueObj.enabled ? 'enabled' : 'disabled';
 
-      // change 'edit' to 'view' once we have a view page set up.
-
       this.parentDomain = '/virtues';
 
 

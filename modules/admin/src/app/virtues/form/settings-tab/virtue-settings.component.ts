@@ -1,18 +1,13 @@
 import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter } from '@angular/core';
-import { HttpClientModule } from "@angular/common/http";
 import {  MatButtonModule,
           MatDialog,
           MatIconModule,
           MatIconRegistry
 } from '@angular/material';
 
-import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
-
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Item } from '../../../shared/models/item.model';
-import { User } from '../../../shared/models/user.model';
-import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';

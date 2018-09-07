@@ -3,9 +3,8 @@ import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
-import { MatTabsModule } from '@angular/material/tabs';
+// import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../../../shared/services/baseUrl.service';
 import { ItemService } from '../../../shared/services/item.service';
@@ -13,8 +12,6 @@ import { ItemService } from '../../../shared/services/item.service';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../../shared/models/item.model';
-import { User } from '../../../shared/models/user.model';
-import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
