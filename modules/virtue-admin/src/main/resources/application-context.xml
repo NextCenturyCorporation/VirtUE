@@ -177,10 +177,16 @@
 		<constructor-arg ref="templateManager" />
 	</bean>
 
+	<bean name="xenGuestImageProvider"
+		class="com.ncc.savior.virtueadmin.infrastructure.images.S3ImageManager">
+		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+	</bean>
+
 	<bean name="importExportService"
 		class="com.ncc.savior.virtueadmin.service.ImportExportService">
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="userManager" />
+		<constructor-arg ref="xenGuestImageProvider" />
 	</bean>
 
 	<bean name="securityService"
