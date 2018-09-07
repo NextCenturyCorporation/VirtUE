@@ -107,11 +107,11 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		gss_cred_id_t targetCred = null;
 		try {
 			acceptorCredential = createAcceptorCred();
-			System.out.println("acceptorCred: " + GssUtils.getCredInfo(gssapi, acceptorCredential));
+			//System.out.println("acceptorCred: " + GssUtils.getCredInfo(gssapi, acceptorCredential));
 			proxyCred = getProxyCredential(serviceTicket, acceptorCredential);
-			System.out.println("proxyCred: " + GssUtils.getCredInfo(gssapi, proxyCred));
-			targetCred = getTargetCredential(proxyCred);
-			storeCredInto(targetCred, cacheFile);
+			//System.out.println("proxyCred: " + GssUtils.getCredInfo(gssapi, proxyCred));
+			//targetCred = getTargetCredential(proxyCred);
+			storeCredInto(proxyCred, cacheFile);
 		} catch (GSSException e) {
 			LOGGER.debug("got exception: " + e);
 			AuthenticationException exception = new AuthenticationCredentialsNotFoundException(
@@ -136,7 +136,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		int retval;
 
 		gss_OID_desc nameType = GssApi.GSS_C_NT_HOSTBASED_SERVICE;
-		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, "HTTP@" + myhostname, nameType);
+		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, "http@" + myhostname, nameType);
 		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
 		desiredMechs.count = new NativeLong(1);
 		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);

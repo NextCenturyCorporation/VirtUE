@@ -28,3 +28,9 @@ add_executable(both
   )
 target_include_directories(both INTERFACE ${KRB5_INCLUDE_DIRS})
 target_link_libraries(both ${KRB5_LIBRARIES})
+
+add_executable(importcreds
+  src/cpp/importcreds.cpp
+  )
+target_include_directories(importcreds INTERFACE ${KRB5_INCLUDE_DIRS})
+target_link_libraries(importcreds ${KRB5_LIBRARIES})

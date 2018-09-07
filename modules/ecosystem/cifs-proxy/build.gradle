@@ -121,6 +121,7 @@ task nativeDeploy(dependsOn: bootJar) {
             session(remotes.webserver) {
                 put from: 'both', into: '.'
                 put from: 'gsscache', into: '.'
+                put from: 'importcreds', into: '.'
             }
         }
         println "copied native executables to " + remotes.webserver
