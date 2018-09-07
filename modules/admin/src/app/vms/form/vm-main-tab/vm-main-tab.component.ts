@@ -89,7 +89,7 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
 
   getOptionsList(): RowOptions[] {
     return [
-       new RowOptions("Edit", () => true, (i: Item) => this.viewItem(i)),
+       // new RowOptions("Edit", () => true, (i: Item) => this.viewItem(i)),
        new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
     ];
   }

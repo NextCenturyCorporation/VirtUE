@@ -47,8 +47,10 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <button class="button-submit" (click)="createOrUpdate(true);" >Save</button>
-          <button class="button-cancel" (click)="cancel()">Cancel</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+        <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
+        <button class="button-cancel" (click)="cancel()">Cancel</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
@@ -88,9 +90,10 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
   // called on parent's ngInit
   initializeTabs() {
+
     this.mainTab.init();
-    // this.activityTab.buildParentTable();
-    // this.historyTab.buildInstanceTable();
+    // this.activityTab.init();
+    // this.historyTab.init();
 
     // Must unsubscribe from all these when the UserComponent is destroyed
 

@@ -33,7 +33,7 @@ const routes: Routes = [
     path: 'settings',
     component: ConfigComponent,
     data: {
-      breadcrumb: new Breadcrumb('Settings', '/settings')
+      breadcrumb: new Breadcrumb('Global Settings', '/settings')
     }
   }, {
     path: 'users',

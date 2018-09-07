@@ -38,8 +38,6 @@ export class VirtueModalComponent extends GenericModalComponent {
   getColumns(): Column[] {
     return [
       new Column('name',    'Template Name',      undefined, 'asc',     3),
-      // new Column('childNamesHTML',  'Virtual Machines',   true, undefined,  3, this.getChildNamesHtml),
-      // new Column('apps',            'Applications',       true, undefined,  3,  this.getGrandchildrenHtmlList),
       new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName),
       new Column('apps',    'Assigned Applications',  this.getGrandchildren, undefined, 3, this.formatName),
       // new Column('version',         'Version',            false, 'asc',     1), // could this be useful?

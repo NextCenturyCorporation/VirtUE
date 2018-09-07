@@ -25,8 +25,6 @@ import { GenericModalComponent } from '../../../modals/generic-modal/generic.mod
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
-// type SettingElement: {label: string, attributeName: string, type: string, editable?: boolean};
-
 @Component({
   providers: [ BaseUrlService, ItemService ]
 })
@@ -58,7 +56,7 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   mode: Mode;
 
 
-  @ViewChildren(GenericFormTabComponent) tabs: QueryList<GenericFormTabComponent>;
+  // @ViewChildren(GenericFormTabComponent) tabs: QueryList<GenericFormTabComponent>;
 
   // table showing what children have been added to this item
   @ViewChild('childrenTable') childrenTable: GenericTableComponent;
@@ -81,7 +79,7 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   datasetName: string;
   childDatasetName: string;
 
-  test: string;
+  tabs: GenericFormTabComponent[];
 
   constructor(
     protected parentDomain: string,
@@ -93,7 +91,8 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   ) {
     super(router, baseUrlService, itemService, dialog);
     this.setMode();
-    this.test = "enabled";
+
+    this.tabs = [];
 
     // override the route reuse strategy
     // Tell angular to load a new component every time a URL that needs this component loads,
@@ -156,7 +155,6 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   ngOnInit() {
     if (this.mode !== Mode.CREATE) {
       this.item.id = this.activatedRoute.snapshot.params['id'];
-      // this.buildInstanceTable();
     }
 
     this.cmnComponentSetup();
@@ -218,7 +216,7 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   /**
-   * save changes to backend, without returning to the parent's list page.
+   * save changes to backend, staying on current page (but switching to view mode)
    */
   apply() {
     this.createOrUpdate(false);

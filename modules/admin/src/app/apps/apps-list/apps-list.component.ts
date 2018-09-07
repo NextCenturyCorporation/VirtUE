@@ -41,7 +41,7 @@ export class AppsListComponent extends GenericListComponent {
   ) {
     super(router, baseUrlService, itemService, dialog);
 
-    // TODO
+    // TODO fix app versioning - maybe make automatic?
     // Apps need versions, but they can't default to anything, and it must be made clear
     // that "version" on that modal means "the actual application's version", and not
     // "version" as in "this is the 4th change I've made to this Chrome application item".

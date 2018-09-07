@@ -48,9 +48,10 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <button  *ngIf="mode !== 'View'"class="button-submit" (click)="createOrUpdate();" >Save Template</button>
-          <button  *ngIf="mode === 'View'"class="button-submit" (click)="edit();" >Edit</button>
-          <button class="button-cancel" (click)="cancel()">Cancel</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+        <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
+        <button class="button-cancel" (click)="cancel()">Cancel</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
