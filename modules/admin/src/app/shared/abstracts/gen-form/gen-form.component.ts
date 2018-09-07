@@ -235,7 +235,11 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
       this.createItem(redirect);
     }
-    else if ( this.mode === Mode.EDIT) {
+    // See note in virtue.component, near end of template definition - need to be able to save even while in view mode.
+    // else if ( this.mode === Mode.EDIT) {
+    //   this.updateItem(redirect);
+    // }
+    else if ( this.mode === Mode.EDIT || this.mode === Mode.VIEW) {
       this.updateItem(redirect);
     }
     else {

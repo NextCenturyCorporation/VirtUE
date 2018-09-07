@@ -45,7 +45,7 @@ export class ItemService {
   public createItem(configUrl: string, itemData: string): Observable<any> {
     let url = this.baseUrl + configUrl;
 
-    console.log(itemData);
+    // console.log(itemData);
 
     return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
   }

@@ -34,8 +34,8 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
 
   @ViewChild('parentTable') private parentTable: GenericTableComponent;
 
-  // This may be unnecessary. It'd be a lot. Like if each user has an average of
-  // 3, and you have 30 users, that's almost a hundred to scroll through.
+  // usageTable would show the running virtues that have been built from this template.
+  // This may be unnecessary/unteneble. It could be a lot.
   // Tables need filters.
   @ViewChild('usageTable') private usageTable: GenericTableComponent;
 
@@ -81,7 +81,6 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   getParentColumns(): Column[] {
     return [
       new Column('name',        'Template Name',    undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
-      // new Column('childNamesHTML',  'Attached VMs',     true, undefined,  3, this.getChildNamesHtml),
       new Column('childNames',  'Attached VMs', this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
       new Column('version',     'Version',          undefined, 'asc',     2),
       new Column('status',      'Status',           undefined, 'asc',     3, this.formatStatus)
@@ -107,8 +106,8 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   }
 
   collectData(): boolean {
-    // do nothing at the moment - nothing about item can be changed from this
-    // page, so no changes to collect.
+    // nothing about item can be changed from this
+    // page at the moment, so no changes to collect.
     return true;
   }
 

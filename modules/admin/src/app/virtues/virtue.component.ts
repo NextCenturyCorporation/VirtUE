@@ -28,7 +28,6 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
 
 @Component({
   selector: 'app-virtue',
-  // templateUrl: '../shared/abstracts/gen-form/gen-form.component.html',
   template: `
   <div id="content-container">
     <div id="content-header">
@@ -54,8 +53,12 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <div class="mui-col-md-4 form-item text-align-center">
           <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
           <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+          <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="cancel()">Cancel</button>
+
           <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
-          <button class="button-cancel" (click)="cancel()">Cancel</button>
+          <!-- I don't like this. Return should call cancel, not save. But otherwise there's no
+          way to save a change to the status without going into edit mode, which increases the version counter. FIXME-->
+          <button  *ngIf="mode === 'View'" class="button-cancel" (click)="save();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
@@ -110,18 +113,21 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
       this.updateTabs();
     });
 
-    // Can anything be done/changed from the activity tab?
-    // this.activityTab.onSomethingChange.subscribe((data) => {
+    // TODO build activity table showing running instances of this virtue template,
+    // put on usageTab.
+    // If anything can be changed from the usageTab, listen for it below.
+    // this.usageTab.onSomethingChange.subscribe((data) => {
     //   // do something
     // });
 
     // Probably add a button to the history page to let the admin revert settings
-    // back to a particular snapshot. Those settings should be pased in here,
+    // back to a particular snapshot. Those settings should be passed in here,
     // and used to update everything. Doesn't roll back history to that point,
     // just adds a new edit, where all settings are changed to what they were in
     // that snapshot.
     // this.historyTab.onSomethingChange.subscribe((newData) => {
-    //   // do something
+    //   // save current version to history
+    //   // change all settings to the supplied ones (except version and history)
     // });
   }
 
@@ -165,6 +171,7 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
   }
 
   // if nothing is passed in, we just want to populate item.children
+  // from the current childIDs array
   buildItemChildren( newChildIDs?: string[] ) {
     if (newChildIDs instanceof Array) {
       this.item.childIDs = newChildIDs;

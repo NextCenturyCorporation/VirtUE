@@ -53,8 +53,6 @@ export class VirtueListComponent extends GenericListComponent {
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     return [
     new Column('name',        'Template Name',      undefined,              'asc',     2, this.formatName, (i: Item) => this.viewItem(i)),
-    // new Column('childNamesHTML',  'Virtual Machines',   true, undefined,  2, this.getChildNamesHtml),
-    // new Column('apps',            'Applications',       true, undefined,  2,  this.getGrandchildrenHtmlList),
     new Column('vms',         'Virtual Machines',   this.getChildren,       undefined, 2, this.formatName, (i: Item) => this.viewItem(i)),
     new Column('apps',        'Applications',       this.getGrandchildren,  undefined, 2, this.formatName),
     new Column('lastEditor',  'Last Editor',        undefined,              'asc',     2),

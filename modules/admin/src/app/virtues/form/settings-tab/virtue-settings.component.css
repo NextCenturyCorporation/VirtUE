@@ -52,10 +52,6 @@ input[type='color'] {
   width: 100%;
 }
 
-/* mat-form-field input {
-  display: inline !important;
-} */
-
 .upload-file-input {
   display: block;
   float: left;
@@ -116,9 +112,4 @@ mat-card {
 
 .mat-button.mat-small {
     min-width: 1%;
-}
-
-.flex-vert-center {
-  display: flex;
-  align-items: center;
 }

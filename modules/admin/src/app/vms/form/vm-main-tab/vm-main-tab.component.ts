@@ -40,7 +40,7 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
 
   @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
 
-  // emits a list of childID strings.
+  // to notify vm.component that a new set of childIDs have been selected
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   private newVersion: number;
@@ -89,8 +89,9 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
 
   getOptionsList(): RowOptions[] {
     return [
-       // new RowOptions("Edit", () => true, (i: Item) => this.viewItem(i)),
-       new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
+      // add the below once (or if) apps are given their own form page
+      // new RowOptions("View", () => true, (i: Item) => this.viewItem(i)),
+      new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
     ];
   }
 
@@ -111,7 +112,7 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
       cols: this.getColumns(),
       opts: this.getOptionsList(),
       coloredLabels: false,
-      filters: [], // don't allow filtering on the form's child table. ?
+      filters: [], // don't allow filtering on the form's child table.
       tableWidth: 9,
       noDataMsg: this.getNoDataMsg(),
       hasCheckBoxes: false
@@ -153,42 +154,21 @@ export class VmMainTabComponent extends GenericFormTabComponent implements OnIni
     });
   }
 
-
-  /*this needs to be defined in each child, instead of here, because I can't find how to have each
-  child hold a class as an attribute, to be used in a dialog.open method in a parent's function.
-  So right now the children take care of the dialog.open method, and pass the
-  MatDialogRef back. I can't type this as returning a MatDialogRef though
-  without having to specify what modal class the dialog refers to (putting us
-  back at the original issue), so this will have to be 'any' for now.
-  */
-  // getModal(
-  //   params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  // ): any {}
-
-  getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any {
-    return this.dialog.open( AppsModalComponent, params);
-  }
-
-
   // this brings up the modal to add/remove children
   // this could be refactored into a "MainTab" class, which is the same for all
-  // forms, but I'm not sure that'd be necessary.
+  // forms, but I'm not sure that'd be the best use of time.
   activateModal(mode: string): void {
     let dialogHeight = 600;
     let dialogWidth = 800;
 
-    let modalParams = {
+    let dialogRef = this.dialog.open( AppsModalComponent, {
       height: dialogHeight + 'px',
       width: dialogWidth + 'px',
       data: {
         id: this.item.getName(),
         selectedIDs: this.item.childIDs
       }
-    };
-
-    let dialogRef = this.getModal(modalParams);
+    });
 
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.onChildrenChange.emit(selectedVirtues);

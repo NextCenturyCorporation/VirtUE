@@ -29,7 +29,6 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
 
 @Component({
   selector: 'app-user',
-  // templateUrl: './user.component.html',
   template: `
   <div id="content-container">
     <div id="content-header">

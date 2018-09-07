@@ -27,7 +27,6 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
 
 @Component({
   selector: 'app-vm',
-  // templateUrl: './vm.component.html',
   template: `
   <div id="content-container">
     <div id="content-header">
@@ -84,7 +83,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     this.childDomain = undefined;
   }
 
-  // called on parent's ngInit
+  // called in parent's ngInit
   initializeTabs() {
     this.mainTab.init();
     this.usageTab.init();
@@ -99,7 +98,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
 
   // called in parent's onPullComplete
   setUpTabs() {
-    // Note that within each form, the item can't be reassigned; it's attribute
+    // Note that within each form, the item can't be reassigned; its attribute
     // can change though.
     this.mainTab.setUp(this.mode, this.item);
 

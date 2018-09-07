@@ -44,7 +44,6 @@ export class VmListComponent extends GenericListComponent {
     //
     // Note: colWidths of all columns must add to exactly 12.
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
       // {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
       new Column('name',        'Template Name',        undefined, 'asc',     2, undefined, (i: Item) => this.editItem(i)),

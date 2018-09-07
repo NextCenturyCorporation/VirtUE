@@ -12,7 +12,9 @@
         <div class="form-item margin-top-15">
           <div class="form-item margin-top-15">
             <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
-            <mat-slide-toggle [(ngModel)]="item.enabled" [color]="'primary'">{{ item.enabled ? 'Enabled' : 'Disabled' }}</mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="item.enabled" [color]="'primary'">
+            </mat-slide-toggle>
+            {{ item.enabled ? 'Enabled' : 'Disabled' }}
           </div>
         </div>
         <div class="mui-row form-item margin-top-15">

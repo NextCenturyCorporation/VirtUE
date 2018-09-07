@@ -29,14 +29,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 @Component({
   selector: 'app-main-user-tab',
   templateUrl: './main-user-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
 })
 
 export class UserMainTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
 
-  // emits a list of childID strings.
+  // to notify user.component that a new set of childIDs have been selected
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   private roleUser: boolean;
@@ -170,25 +170,6 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
     });
   }
 
-
-  /*this needs to be defined in each child, instead of here, because I can't find how to have each
-  child hold a class as an attribute, to be used in a dialog.open method in a parent's function.
-  So right now the children take care of the dialog.open method, and pass the
-  MatDialogRef back. I can't type this as returning a MatDialogRef though
-  without having to specify what modal class the dialog refers to (putting us
-  back at the original issue), so this will have to be 'any' for now.
-  */
-  // getModal(
-  //   params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  // ): any {}
-
-  getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any {
-    return this.dialog.open( VirtueModalComponent, params);
-  }
-
-
   // this brings up the modal to add/remove children
   // this could be refactored into a "MainTab" class, which is the same for all
   // forms, but I'm not sure that'd be necessary.
@@ -196,16 +177,14 @@ export class UserMainTabComponent extends GenericFormTabComponent implements OnI
     let dialogHeight = 600;
     let dialogWidth = 800;
 
-    let modalParams = {
+    let dialogRef = this.dialog.open( VirtueModalComponent, {
       height: dialogHeight + 'px',
       width: dialogWidth + 'px',
       data: {
         id: this.item.getName(),
         selectedIDs: this.item.childIDs
       }
-    };
-
-    let dialogRef = this.getModal(modalParams);
+    });
 
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.onChildrenChange.emit(selectedVirtues);

@@ -25,7 +25,6 @@ import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
-// import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 
 @Component({
   selector: 'app-virtue-usage-tab',
@@ -81,7 +80,6 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   getParentColumns(): Column[] {
     return [
       new Column('name',        'Username',         undefined,        'asc',      3, undefined, (i: Item) => this.viewItem(i)),
-      // new Column('childNamesHTML',  'Attached Virtues',  true, undefined, 5, this.getChildNamesHtml),
       new Column('childNames',  'Attached Virtues', this.getChildren, undefined,  5, this.formatName, (i: Item) => this.viewItem(i)),
       new Column('status',      'Account Status',   undefined,        'desc',     4, this.formatStatus)
     ];
@@ -107,7 +105,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
 
   collectData(): boolean {
     // do nothing at the moment - nothing about item can be changed from this
-    // page, so no changes to collect.
+    // page at the moment, so no changes to collect.
     return true;
   }
 

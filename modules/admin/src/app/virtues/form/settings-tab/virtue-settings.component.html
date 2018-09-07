@@ -123,7 +123,7 @@
 
           <div class="mui-row table-header-group">
             <ng-container *ngFor="let col of getFileSysColumns(); let index = index; trackBy: indexTracker">
-              <div class="mui-col-md-{{col.colWidth}} table-header flex-vert-center">
+              <div class="mui-col-md-{{col.colWidth}} table-header">
                 <label>{{col.prettyName}}
                   <br>
                   <ng-container *ngIf="index !== 0">
@@ -224,7 +224,7 @@
   </div>
 </div>
 
-
+<!-- This seems useful, but I don't think it's used at the moment. -->
 <script>
   var paneIds = ['general', 'network', 'resources', 'sensors'],
     currPos = 0;

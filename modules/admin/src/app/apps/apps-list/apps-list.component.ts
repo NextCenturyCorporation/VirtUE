@@ -53,7 +53,6 @@ export class AppsListComponent extends GenericListComponent {
     //  to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
     // Note: colWidths of all columns must add to exactly 12.
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
       new Column('name',    'Application Name', undefined, 'asc', 5),
       new Column('version', 'Version',          undefined, 'asc', 3),

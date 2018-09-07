@@ -1,11 +1,9 @@
 import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter } from '@angular/core';
 import { HttpClientModule } from "@angular/common/http";
-import {
-          MatButtonModule,
+import {  MatButtonModule,
           MatDialog,
           MatIconModule,
           MatIconRegistry
-
 } from '@angular/material';
 
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -40,7 +38,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   // re-classing item, to make it easier and less error-prone to work with.
   protected item: Virtue;
 
-  // local reference to the virtue-form's allUsers variable.
+  // local reference to the virtue-form's allVirtues variable.
   private allVirtues: DictList<Virtue>;
 
   browsers: string[];
@@ -53,19 +51,14 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.item = new Virtue({});
 
-    // this.matIconRegistry.addSvgIcon(
-    //       `plus`,
-    //       `../../../../assets/images/baseline-add-24px.svg`
-    //     );
-
     this.tabName = 'Settings';
 
-    // TODO browser list is hard-coded and not directly linkable to any particular application.
-    // Is this list suppsoed to be hard coded? User-defined? Automatically generated
+    // TODO browser list is a placeholder
+    // Is this list supposed to be hard coded? User-defined? Automatically generated
     // by perhaps tagging loaded browser applications as "browsers", and looking
     // through all the applications this virtue has access to, and showing that list?
     // The latter seems the most useful, but relies on the admin correctly tagging
-    // things when they load them. Or just guess via the name, which seems very unsafe.
+    // things when they load them.
     this.browsers = ['Chrome', 'Firefox', 'This is a placeholder', 'TODO'];
 
   }
@@ -75,7 +68,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
   init() {
     this.setUpPasteableVirtuesTable();
-    // this.setUpPrintersTable();
+    // until GenericTable is made more generic (like for any input object, as opposed to only Items),
+    // the other tables have to be defined individually in the html.
+    // GenericTable would need to allow arbitrary objects/html in any column - so one could just as
+    // easily display a line of text in one column, and checkboxes in the next three.
   }
 
 
@@ -105,11 +101,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   collectData(): boolean {
     console.log("collectData");
 
-    console.log(this.item.networkWhiteList);
     // TODO check all entries for validity before allowing save
+
     if (!this.checkNetworkPerms()) {
-    //   // TODO tell the user
-    //   alert("please hit apply or remove on your new network permission");
+      // TODO tell the user
       return false;
     }
     return true;
@@ -126,6 +121,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
   checkEnteredPermValid(netPerm: NetworkPermission): boolean {
 
+    // instead of checking  '<=='
     // first make sure that the ports aren't 0, because checking !port will be true
     // if port === 0. Which would make the wrong error message appear.
     if (netPerm.localPort === 0 || netPerm.remotePort === 0) {
@@ -150,10 +146,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   // and, less helpfully, https://angular.io/guide/template-syntax#ngfor-with-trackby
   // Essentially, Angular's ngFor sometimes tracks the elements it iterates over by their value, as opposed
   // to their index, and so if you put a ngModel on (apparently) any part of such an element, it loses track (?) of that item and
-  // hangs - as in, Angular hangs. And the tab needs to be killed either through the browser's tab manager, or the browser needs to
-  // be killed at the system level (xkill, system process manager, kill, killall, etc.).
-  // Unless you manually tell it track things by index, as below (and adding "; trackBy: indexTracker" to the ngFor statement.)
-  // WTH.
+  // hangs - as in, Angular hangs. And the containing tab needs to be killed either through the browser's tab manager,
+  // or the browser needs to be killed at the system level (xkill, system process manager, kill, killall, etc.).
+  // This is prevented by manually telling it track things by index, as below (and adding "; trackBy: indexTracker" to the ngFor statement.)
+  // ...
   indexTracker(index: number, value: any) {
     return index;
   }
@@ -194,7 +190,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       cols: this.getPasteColumns(),
       opts: this.getPasteOptionsList(),
       coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table. ?
+      filters: [], // don't allow filtering on the form's child table.
       tableWidth: 10,
       noDataMsg: 'Click "Add Virtue" to give this virtue permission to paste data into that one',
       hasCheckBoxes: false
@@ -217,10 +213,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
   getPasteColumns(): Column[] {
     return [
+      // the following commented line should show up when in view mode, and the corresponding
+      //  uncommented line in edit/dup/create mode.
       // new Column('name',    'Virtue Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
       new Column('name',    'Virtue Template Name',    undefined,             'asc',     4, undefined),
-      // new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
-      // new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
       new Column('apps',    'Assigned Applications',  this.getGrandchildren,  undefined, 4, this.formatName),
       new Column('version', 'Version',                undefined,              undefined, 2),
       new Column('status',  'Status',                 undefined,              'asc',     1, this.formatStatus)
@@ -296,13 +292,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.item.allowedPasteTargets = selectedVirtues;
       this.populatePasteableVirtuesTable();
-      // this.allowedPasteTargetsTable.items = [];
-      // for (let vID of this.allowedPasteTargets) {
-      //   this.allowedPasteTargetsTable.items.
-      // }
     },
     () => {},
-    () => {// when finished
+    () => { // when finished
       sub.unsubscribe();
     });
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;

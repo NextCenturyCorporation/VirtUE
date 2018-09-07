@@ -30,14 +30,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 @Component({
   selector: 'app-virtue-main-tab',
   templateUrl: './virtue-main-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
 })
 
 export class VirtueMainTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('childrenTable') private childrenTable: GenericTableComponent;
 
-  // emits a list of childID strings.
+  // to notify virtue.component that a new set of childIDs have been selected
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   private newVersion: number;
@@ -54,7 +54,7 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
     this.childrenTable.items = this.item.children.asList();
 
     if (changes.mode) {
-      this.mode = changes.mode;
+      this.setMode(changes.mode);
       this.childrenTable.colData = this.getColumns();
       this.childrenTable.rowOptions = this.getOptionsList();
     }
@@ -68,12 +68,18 @@ export class VirtueMainTabComponent extends GenericFormTabComponent implements O
       return;
     }
     this.item = item as Virtue;
+
+    this.setMode(mode);
+  }
+
+  setMode(newMode: Mode) {
+    this.mode = newMode;
+
     this.newVersion = Number(this.item.version);
 
     if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
       this.newVersion++;
     }
-
   }
 
   // TODO start implementing view page from this.
@@ -167,25 +173,6 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
     });
   }
 
-
-  /*this needs to be defined in each child, instead of here, because I can't find how to have each
-  child hold a class as an attribute, to be used in a dialog.open method in a parent's function.
-  So right now the children take care of the dialog.open method, and pass the
-  MatDialogRef back. I can't type this as returning a MatDialogRef though
-  without having to specify what modal class the dialog refers to (putting us
-  back at the original issue), so this will have to be 'any' for now.
-  */
-  // getModal(
-  //   params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  // ): any {}
-
-  getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any {
-    return this.dialog.open( VmModalComponent, params);
-  }
-
-
   // this brings up the modal to add/remove children
   // this could be refactored into a "MainTab" class, which is the same for all
   // forms, but I'm not sure that'd be necessary.
@@ -193,16 +180,14 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
     let dialogHeight = 600;
     let dialogWidth = 800;
 
-    let modalParams = {
+    let dialogRef = this.dialog.open( VmModalComponent, {
       height: dialogHeight + 'px',
       width: dialogWidth + 'px',
       data: {
         id: this.item.getName(),
         selectedIDs: this.item.childIDs
       }
-    };
-
-    let dialogRef = this.getModal(modalParams);
+    });
 
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.onChildrenChange.emit(selectedVirtues);

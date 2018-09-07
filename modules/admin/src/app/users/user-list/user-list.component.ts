@@ -48,7 +48,6 @@ export class UserListComponent extends GenericListComponent {
     //
     // Note: colWidths of all columns must add to exactly 12.
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
       new Column('name',        'Username',           undefined,        'asc',    2, undefined, (i: Item) => this.editItem(i)),
       new Column('roles',       'Authorized Roles',   undefined,        'asc',    3, this.formatRoles),
@@ -97,7 +96,7 @@ export class UserListComponent extends GenericListComponent {
     console.log(u);
     if (u.getName().toUpperCase() === "ADMIN") {
       this.openDialog('disable', u);
-      // //  TODO: Remove this message when this no longer happens. When we stop funneling all requests through admin.
+      // TODO: Remove this message when/if this is no longer applicable.
       return;
     }
 
@@ -105,7 +104,7 @@ export class UserListComponent extends GenericListComponent {
 
     },
     () => {},
-    () => {// when finished
+    () => { // when finished
       this.refreshData();
       sub.unsubscribe();
     });
