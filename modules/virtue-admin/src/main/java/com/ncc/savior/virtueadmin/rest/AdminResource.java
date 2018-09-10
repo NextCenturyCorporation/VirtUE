@@ -488,8 +488,17 @@ public class AdminResource {
 	@POST
 	@Path("import")
 	@Produces("application/json")
+	@Consumes("application/json")
 	public void importSystem(InputStream stream) {
 		importExportService.importSystemDatabaseWithoutImages(stream);
+	}
+
+	@POST
+	@Path("import")
+	@Produces("application/json")
+	@Consumes({ "application/zip", "application/octet-stream" })
+	public void importZip(InputStream stream) {
+		importExportService.importZip(stream);
 	}
 
 	@GET

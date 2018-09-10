@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
@@ -80,7 +81,7 @@ public class ImportExportService {
 	private SecurityUserService securityService;
 
 	private String virtueTemplateZipRoot = "virtues/";
-	private String ApplicationDefnZipRoot = "applications/";
+	private String applicationDefnZipRoot = "applications/";
 	private String virtualMachineTemplateZipRoot = "vms/";
 	private String virtualMachineTemplateImageZipRoot = "images/";
 	private String userZipRoot = "user/";
@@ -165,6 +166,76 @@ public class ImportExportService {
 		}
 	}
 
+	public void importZip(InputStream stream) {
+		ZipEntry entry;
+		try (ZipInputStream zipStream = new ZipInputStream(stream)) {
+			// need to store the entrys to ensure they are added in the right order. They
+			// are relatively small so this shouldn't be a memory issue.
+			ArrayList<ApplicationDefinition> apps = new ArrayList<ApplicationDefinition>();
+			ArrayList<VirtualMachineTemplate> vms = new ArrayList<VirtualMachineTemplate>();
+			ArrayList<VirtueTemplate> vts = new ArrayList<VirtueTemplate>();
+			ArrayList<VirtueUser> users = new ArrayList<VirtueUser>();
+			while ((entry = zipStream.getNextEntry()) != null) {
+				String name = entry.getName();
+				InputStream uncloseableStream = new InputStream() {
+
+					@Override
+					public int read() throws IOException {
+						return zipStream.read();
+					}
+
+					@Override
+					public void close() {
+						// do nothing so jsonMapper doesn't close the stream. We have to be careful to
+						// close the other stream ourselves.
+					}
+				};
+				if (entry.isDirectory()) {
+					// skip
+				} else if (name.contains(applicationDefnZipRoot)) {
+					ApplicationDefinition app = jsonMapper.readValue(uncloseableStream, ApplicationDefinition.class);
+					apps.add(app);
+				} else if (name.contains(virtualMachineTemplateZipRoot)) {
+					VirtualMachineTemplate vm = jsonMapper.readValue(uncloseableStream, VirtualMachineTemplate.class);
+					vms.add(vm);
+				} else if (name.contains(virtueTemplateZipRoot)) {
+					VirtueTemplate virtue = jsonMapper.readValue(uncloseableStream, VirtueTemplate.class);
+					vts.add(virtue);
+				} else if (name.contains(userZipRoot)) {
+					VirtueUser user = jsonMapper.readValue(uncloseableStream, VirtueUser.class);
+					users.add(user);
+				} else if (name.contains(virtualMachineTemplateImageZipRoot)) {
+
+					String path = name.substring(virtualMachineTemplateImageZipRoot.length());
+					String extension = "";
+					int dotIndex = path.lastIndexOf(".");
+					if (dotIndex > -1) {
+						extension = path.substring(dotIndex + 1);
+						path = path.substring(0, dotIndex);
+					}
+					logger.debug("importing image to " + path + " of type " + extension);
+					imageManager.storeStreamAsImage(path, extension, uncloseableStream);
+				}
+				logger.debug("Entry: " + entry.getName() + " " + entry.isDirectory() + " " + entry.getSize());
+			}
+			for (ApplicationDefinition app : apps) {
+				templateManager.addApplicationDefinition(app);
+			}
+			for (VirtualMachineTemplate vm : vms) {
+				importVirtualMachineTemplateFromObject(vm);
+			}
+			for (VirtueTemplate vt : vts) {
+				importVirtueTemplateFromObject(vt);
+			}
+			for (VirtueUser user : users) {
+				importUserFromObject(user);
+			}
+		} catch (Throwable e) {
+			logger.error("Error importing", e);
+		}
+
+	}
+
 	private void addUserToZipStream(VirtueUser user, HashSet<String> includedEntries, ZipOutputStream zipOut)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		String entryName = userZipRoot + user.getUsername() + ".json";
@@ -245,7 +316,7 @@ public class ImportExportService {
 			ZipOutputStream zipOut) throws IOException, JsonGenerationException, JsonMappingException {
 		String entryName;
 		ByteArrayOutputStream baos;
-		entryName = ApplicationDefnZipRoot + app.getId() + ".json";
+		entryName = applicationDefnZipRoot + app.getId() + ".json";
 		if (!includedEntries.contains(entryName)) {
 			baos = new ByteArrayOutputStream();
 			zipOut.putNextEntry(new ZipEntry(entryName));
@@ -307,58 +378,70 @@ public class ImportExportService {
 		try {
 			VirtualMachineTemplate vmt = jsonMapper.treeToValue(vmtNode, VirtualMachineTemplate.class);
 			// convert app Ids to Apps
-			Collection<String> appIds = vmt.getApplicationIds();
-			Iterable<ApplicationDefinition> apps = templateManager.getApplications(appIds);
-			Iterator<ApplicationDefinition> ai = apps.iterator();
-			ArrayList<ApplicationDefinition> myApps = new ArrayList<ApplicationDefinition>();
-			while (ai.hasNext()) {
-				myApps.add(ai.next());
-			}
-			vmt.setApplications(myApps);
-
-			templateManager.addVmTemplate(vmt);
+			importVirtualMachineTemplateFromObject(vmt);
 		} catch (JsonProcessingException e) {
 			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
 					"Error attempting to convert json node into virtual machine template.  JSON=" + vmtNode, e);
 		}
 	}
 
+	private void importVirtualMachineTemplateFromObject(VirtualMachineTemplate vmt) {
+		Collection<String> appIds = vmt.getApplicationIds();
+		Iterable<ApplicationDefinition> apps = templateManager.getApplications(appIds);
+		Iterator<ApplicationDefinition> ai = apps.iterator();
+		ArrayList<ApplicationDefinition> myApps = new ArrayList<ApplicationDefinition>();
+		while (ai.hasNext()) {
+			myApps.add(ai.next());
+		}
+		vmt.setApplications(myApps);
+
+		templateManager.addVmTemplate(vmt);
+	}
+
 	private void importVirtueTemplateFromNode(JsonNode vtNode) {
 		try {
 			VirtueTemplate vt = jsonMapper.treeToValue(vtNode, VirtueTemplate.class);
 			// convert vmt Ids to vmt
-			Collection<String> vmtIds = vt.getVirtualMachineTemplateIds();
-			Iterable<VirtualMachineTemplate> vmts = templateManager.getVmTemplates(vmtIds);
-			Iterator<VirtualMachineTemplate> vmtItr = vmts.iterator();
-			Set<VirtualMachineTemplate> myVmts = new HashSet<VirtualMachineTemplate>();
-			while (vmtItr.hasNext()) {
-				myVmts.add(vmtItr.next());
-			}
-			vt.setVmTemplates(myVmts);
-			templateManager.addVirtueTemplate(vt);
+			importVirtueTemplateFromObject(vt);
 		} catch (JsonProcessingException e) {
 			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
 					"Error attempting to convert json node into virtue template.  JSON=" + vtNode, e);
 		}
 	}
 
+	private void importVirtueTemplateFromObject(VirtueTemplate vt) {
+		Collection<String> vmtIds = vt.getVirtualMachineTemplateIds();
+		Iterable<VirtualMachineTemplate> vmts = templateManager.getVmTemplates(vmtIds);
+		Iterator<VirtualMachineTemplate> vmtItr = vmts.iterator();
+		Set<VirtualMachineTemplate> myVmts = new HashSet<VirtualMachineTemplate>();
+		while (vmtItr.hasNext()) {
+			myVmts.add(vmtItr.next());
+		}
+		vt.setVmTemplates(myVmts);
+		templateManager.addVirtueTemplate(vt);
+	}
+
 	private void importUserFromNode(JsonNode userNode) {
 		try {
 			VirtueUser user = jsonMapper.treeToValue(userNode, VirtueUser.class);
-			// convert vmt Ids to vmt
-			Collection<String> vtIds = user.getVirtueTemplateIds();
-			Iterable<VirtueTemplate> vts = templateManager.getVirtueTemplates(vtIds);
-			Iterator<VirtueTemplate> vtItr = vts.iterator();
-			Set<VirtueTemplate> myVts = new HashSet<VirtueTemplate>();
-			while (vtItr.hasNext()) {
-				myVts.add(vtItr.next());
-			}
-			user.setVirtueTemplates(myVts);
-			userManager.addUser(user);
+			importUserFromObject(user);
 		} catch (JsonProcessingException e) {
 			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
 					"Error attempting to convert json node into user.  JSON=" + userNode, e);
 		}
+	}
+
+	private void importUserFromObject(VirtueUser user) {
+		// convert vmt Ids to vmt
+		Collection<String> vtIds = user.getVirtueTemplateIds();
+		Iterable<VirtueTemplate> vts = templateManager.getVirtueTemplates(vtIds);
+		Iterator<VirtueTemplate> vtItr = vts.iterator();
+		Set<VirtueTemplate> myVts = new HashSet<VirtueTemplate>();
+		while (vtItr.hasNext()) {
+			myVts.add(vtItr.next());
+		}
+		user.setVirtueTemplates(myVts);
+		userManager.addUser(user);
 	}
 
 	/**
