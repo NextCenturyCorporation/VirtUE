@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
@@ -82,8 +81,6 @@ public class S3ImageManager implements IXenGuestImageManager {
 	@Override
 	public void storeStreamAsImage(String path, String type, InputStream uncloseableStream) {
 		String key = path + "/disk." + type;
-		ObjectMetadata om = new ObjectMetadata();
-		// om.setContentType("application/x-www-form-urlencoded; charset=utf-8");
 		File tmp = null;
 		try {
 			tmp = File.createTempFile("aws-img", ".dat");
