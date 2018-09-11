@@ -76,23 +76,31 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 		private final String host;
 		private final String user;
 		private final String password;
-		private final File pem;
+		private final String pemString;
+		private final File pemFile;
 		private int display;
 
-		public SshConnectionParameters(String host, int port, String user, String password) {
+		protected SshConnectionParameters(String host, int port, String user, String password, String pem,
+				File pemFile) {
 			this.host = host;
 			this.port = port;
 			this.user = user;
 			this.password = password;
-			this.pem = null;
+			this.pemString = pem;
+			this.pemFile = pemFile;
 		}
 
-		public SshConnectionParameters(String host, int port, String user, File pem) {
-			this.host = host;
-			this.port = port;
-			this.pem = pem;
-			this.user = user;
-			this.password = null;
+		// statics created only because its much easier documenation
+		public static SshConnectionParameters withPassword(String host, int port, String user, String password) {
+			return new SshConnectionParameters(host, port, user, password, null, null);
+		}
+
+		public static SshConnectionParameters withPemString(String host, int port, String user, String pem) {
+			return new SshConnectionParameters(host, port, user, null, pem, null);
+		}
+
+		public static SshConnectionParameters withExistingPemFile(String host, int port, String user, File pem) {
+			return new SshConnectionParameters(host, port, user, null, null, pem);
 		}
 
 		public int getPort() {
@@ -111,14 +119,20 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			return password;
 		}
 
-		public File getPem() {
-			return pem;
+		public String getPemString() {
+			return pemString;
+		}
+
+		public File getPemFile() {
+			return pemFile;
 		}
 
 		@Override
 		public String toString() {
 			return "SshConnectionParameters [port=" + port + ", host=" + host + ", user=" + user + ", password="
-					+ password + ", pem=" + pem + "]";
+					+ (password == null ? null : "[protected]") + ", pemString="
+					+ (pemString == null ? null : "[protected]") + ", pemFile=" + pemFile + ", display=" + display
+					+ "]";
 		}
 
 		@Override
@@ -127,7 +141,8 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			int result = 1;
 			result = prime * result + ((host == null) ? 0 : host.hashCode());
 			result = prime * result + ((password == null) ? 0 : password.hashCode());
-			result = prime * result + ((pem == null) ? 0 : pem.hashCode());
+			result = prime * result + ((pemFile == null) ? 0 : pemFile.hashCode());
+			result = prime * result + ((pemString == null) ? 0 : pemString.hashCode());
 			result = prime * result + port;
 			result = prime * result + ((user == null) ? 0 : user.hashCode());
 			return result;
@@ -152,10 +167,15 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 					return false;
 			} else if (!password.equals(other.password))
 				return false;
-			if (pem == null) {
-				if (other.pem != null)
+			if (pemFile == null) {
+				if (other.pemFile != null)
 					return false;
-			} else if (!pem.equals(other.pem))
+			} else if (!pemFile.equals(other.pemFile))
+				return false;
+			if (pemString == null) {
+				if (other.pemString != null)
+					return false;
+			} else if (!pemString.equals(other.pemString))
 				return false;
 			if (port != other.port)
 				return false;
@@ -172,6 +192,7 @@ public class SshConnectionFactory extends BaseConnectionFactory {
 			return host + "-" + port + "-" + user;
 		}
 
+		@Override
 		public int getDisplay() {
 			return display;
 		}
