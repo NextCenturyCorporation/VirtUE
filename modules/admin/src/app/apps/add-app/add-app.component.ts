@@ -1,14 +1,18 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, Inject, OnInit, EventEmitter } from '@angular/core';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { Application } from '../../shared/models/application.model';
-
 
 @Component({
   selector: 'app-add-app', // thanks linter, this looks lovely.
   templateUrl: './add-app.component.html'
 })
+/**
+ * Note: this page is essentially unimplemented.
+ * #TODO
+ */
 export class AddAppComponent implements OnInit {
+
 
   osList = ['LINUX', 'Windows'];
   distroList = ['Debian'];
@@ -17,26 +21,55 @@ export class AddAppComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<AddAppComponent>,
+    /**
+     * Data is expected to hold _______
+     */
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) { }
+  ) {
 
+  }
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   ngOnInit() {
   }
 
-  onCancel(): void {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  onCancel() {
     this.dialogRef.close();
-    this.selectedOs = null;
-    this.selectedDist = null;
+    return "bob";
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   handleFileInput(inputFile: any) {
-    console.log("User selected ", inputFile, " for input. Nothing happens with it yet. #TODO");
+    console.log("User selected ", inputFile, " for input. Nothing happens with it yet.");
   }
 
-  onInstall(): void {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  onInstall() {
     console.log("Install is not implemented.");
 
 
-    // this.dialogRef.close();
+    this.dialogRef.close();
+    return "test";
   }
 }

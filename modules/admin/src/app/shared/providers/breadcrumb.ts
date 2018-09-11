@@ -5,6 +5,10 @@ import { Subject } from 'rxjs';
 
 import { Breadcrumb } from '../models/breadcrumb.model';
 
+/**
+ * #uncommented
+ * @class
+ */
 @Injectable()
 export class BreadcrumbProvider {
 

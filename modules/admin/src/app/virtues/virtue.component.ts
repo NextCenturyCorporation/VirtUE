@@ -17,7 +17,7 @@ import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 import { RowOptions } from '../shared/models/rowOptions.model';
 
-import { Mode, ConfigUrlEnum } from '../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets } from '../shared/enums/enums';
 
 import { VirtueMainTabComponent } from './form/main-tab/virtue-main-tab.component';
 import { VirtueSettingsTabComponent } from './form/settings-tab/virtue-settings.component';
@@ -26,6 +26,11 @@ import { VirtueUsageTabComponent } from './form/usage-tab/virtue-usage-tab.compo
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-virtue',
   template: `
@@ -68,7 +73,6 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-
 export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
   @ViewChild('mainTab') mainTab: VirtueMainTabComponent;
@@ -180,11 +184,11 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
   }
 
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
-      neededDatasets: ['apps', 'vms', 'virtues', 'users']
+      serviceConfigUrl: ConfigUrls.VIRTUES,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
     };
   }
 

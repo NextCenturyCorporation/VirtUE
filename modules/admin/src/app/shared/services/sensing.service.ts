@@ -11,6 +11,11 @@ const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Injectable()
 export class SensingService {
 

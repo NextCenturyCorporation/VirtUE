@@ -3,6 +3,11 @@ import { MatDialog, MatDialogRef } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { ResourceModalComponent } from '../resource-modal/resource-modal.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-config-resources',
   templateUrl: './config-resources.component.html',

@@ -1,5 +1,9 @@
 
-
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 export class FileSysPermission {
   location: string;
   enabled: boolean = false;

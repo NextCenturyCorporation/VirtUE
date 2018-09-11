@@ -10,22 +10,26 @@ import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { SensingService } from '../shared/services/sensing.service';
 import { ItemService } from '../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../shared/enums/enums';
 import { Column } from '../shared/models/column.model';
 import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.component';
 
-
+/**
+ * Note: this class will be significantly overhauled soon, to actually implement connection to the sensors
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
   providers: [ BaseUrlService, SensingService, ItemService ]
 })
-
 export class DashboardComponent extends GenericListComponent {
 
   // not used, but probably should be
-  form: FormGroup;
+  // form: FormGroup;
 
   // not used, but might need the info when setting this up later
   //  columns = [
@@ -49,65 +53,110 @@ export class DashboardComponent extends GenericListComponent {
   //    {value: 'unix', viewValue: 'Unix'},
   //  ];
 
+  /**
+   * #uncommented
+   */
   jsonResult: string;
+
+  /**
+   * #uncommented
+   */
   sensorData = [];
 
+  /**
+   * see parent
+   */
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog,
+    /**
+     * #uncommented
+     */
     private sensingService: SensingService,
   ) {
     super(router, baseUrlService, itemService, dialog);
 
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
-      neededDatasets: ["apps", "vms", "virtues"]
+      serviceConfigUrl: ConfigUrls.VIRTUES,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
     };
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
-      prettyTitle: "Virtue Templates",
-      itemName: "Virtue Template",
-      pluralItem: "Virtues",
-      domain: '/virtues'
+      prettyTitle: "Sensor Information",
+      itemName: "Sensor",
+      pluralItem: "Sensors"
     };
   }
 
+  /**
+   * @return a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   */
   getNoDataMsg(): string {
     return "No sensor information is available at this time";
 
   }
 
+  /**
+   * @return an empty list; Apps can't be disabled, so nothing to filter
+   */
   getTableFilters(): {text: string, value: string}[] {
     return [];
   }
 
+  /**
+   * @return a list of the columns to show up in the table. See details in parent.
+   */
   getColumns(): Column[] {
     return [
-    new Column('sensor_id',   'Sensor', undefined, 'asc', 3),
-    new Column('virtue name', 'Virtue', undefined, 'asc', 3, this.getVirtName),
-    new Column('kafka_topic', 'Kafka Topic', undefined, 'asc', 3),
-    new Column('has cert',    'Certificate', undefined, 'asc', 1, this.hasCertificates),
-    new Column('updated_at',  'Last Update', undefined, 'asc', 2)
+    new Column('sensor_id',   'Sensor',  3, 'asc'),
+    new Column('virtue name', 'Virtue',  3, 'asc', this.getVirtName),
+    new Column('kafka_topic', 'Kafka Topic', 3, 'asc'),
+    new Column('has cert',    'Certificate', 1, 'asc', this.hasCertificates),
+    new Column('updated_at',  'Last Update', 2, 'asc')
     ];
   }
 
-  getVirtName(d: any) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  getVirtName(d: any): string {
     return this.allVirtues.get(d.virtue_id).getName();
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   hasCertificates(d) {
     if (d.has_certificates) {
       return 'Yes';
@@ -115,10 +164,22 @@ export class DashboardComponent extends GenericListComponent {
     return 'No';
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   onPullComplete() {
     this.getSensingData();
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getSensingData() {
     this.sensingService.setBaseUrl(this.baseUrl);
     this.sensingService.getSensingLog().subscribe(sensorLog => {
@@ -138,7 +199,13 @@ export class DashboardComponent extends GenericListComponent {
     });
   }
 
-  // what's this? TODO once we have data to display and know how it should be displayed.
+  /**
+   * #uncommented
+   * what's this? TODO once we have data to display and know how it should be displayed.
+   * @param
+   *
+   * @return
+   */
   sensorlog(log) {
     //  console.log('sensorlog ... ' + this.sensorData.error);
     this.sensorData = log;

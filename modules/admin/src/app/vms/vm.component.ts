@@ -18,13 +18,18 @@ import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 import { RowOptions } from '../shared/models/rowOptions.model';
 
-import { ConfigUrlEnum } from '../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../shared/enums/enums';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
 import { VmMainTabComponent } from './form/vm-main-tab/vm-main-tab.component';
 import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-vm',
   template: `
@@ -134,11 +139,11 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
   }
 
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ['apps', 'vms', 'virtues']
+      serviceConfigUrl: ConfigUrls.VMS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
     };
   }
 

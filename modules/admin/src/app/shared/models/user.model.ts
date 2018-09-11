@@ -3,10 +3,14 @@ import { Item } from './item.model';
 import { Virtue } from './virtue.model';
 
 import { DictList } from './dictionary.model';
+
 /**
+ * #uncommented
+ * @class
+ * @extends
+ *
  * Represents a User.
  * Children are Virtue objects.
- *
  */
 export class User extends Item {
 

@@ -1,5 +1,5 @@
-import { NgModule } from '@angular/core';
-import {AppRoutingModule } from './app-routing.module';
+import { NgModule, SecurityContext } from '@angular/core';
+import { AppRoutingModule } from './app-routing.module';
 import {
   FormsModule,
   ReactiveFormsModule
@@ -190,7 +190,22 @@ import { MessageService } from './shared/services/message.service';
   ]
 })
 
+/**
+ * This is the main entry point for this angular application.
+ * If you want to import an outside class into any file, or if you want angular to load any class automatically,
+ * it must be imported here as well, and added to one of the above lists.
+ * Any component defined within this project, to be displayed on/as a page, must be imported and added to the 'declarations' list.
+ * Any class (generally a service) which you want to use as a Provider, must be added to the 'providers' list.
+ * Any class from outside this project you wish to use somewhere, must be imported and added to the 'imports' list.
+ *
+ * @class AppModule
+ */
 export class AppModule {
+
+  /**
+   * This is only needed to allow the use of Angular Material Icons in this app. All icons are defined in the below svg file.
+   * This (bypassing the sanitizer) is apparently the recommended way to load (an) icon(s).
+   */
   constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
     matIconRegistry.addSvgIconSet(domSanitizer.bypassSecurityTrustResourceUrl('/assets/mdi.svg'));
   }

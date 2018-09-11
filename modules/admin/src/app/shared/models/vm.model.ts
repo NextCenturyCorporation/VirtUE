@@ -7,6 +7,10 @@ import { Application } from './application.model';
 import { DictList } from './dictionary.model';
 
 /**
+ * #uncommented
+ * @class
+ * @extends
+ * 
  * Represents a VirtualMachine.
  * Children are Application objects.
  *

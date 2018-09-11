@@ -16,8 +16,12 @@ const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Injectable()
-
 export class ItemService {
 
   private baseUrl: string;
@@ -48,16 +52,18 @@ export class ItemService {
     return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
   }
 
+  /**
+   * This works correctly, using promises. Everything else should be changed eventually to use them,
+   * instead of subscriptions we only use once.
+   * See https://codecraft.tv/courses/angular/http/http-with-promises/
+   */
   public deleteItem(configUrl: string, id: string) {
 
     let url = this.baseUrl + configUrl + id;
 
     console.log('Deleting item at:', url);
 
-    return this.httpClient.delete(url).toPromise().then(
-      data => {
-        return true;
-      }).catch(this.errorHandler);
+    return this.httpClient.delete(url).toPromise().catch(this.errorHandler);
   }
 
   public updateItem(configUrl: string, id: string, itemData: string) {

@@ -8,8 +8,12 @@ const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Injectable()
-
 export class DashboardService {
 
   private jsonfile = './assets/json/sensing.json';

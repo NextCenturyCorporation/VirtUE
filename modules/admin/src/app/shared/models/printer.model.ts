@@ -1,5 +1,9 @@
 
-
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 export class Printer {
   // location: string;
   // address: string;

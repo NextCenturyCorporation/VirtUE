@@ -1,3 +1,7 @@
+/**
+ * #uncommented
+ * @class
+ */
 export class SensingModel {
   timestamp: string;
   sensors: [

@@ -26,3 +26,9 @@ Before running the tests make sure you are serving the app via `ng serve`.
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+## Generating documentation
+
+This project now uses TypeDoc. See https://github.com/TypeStrong/typedoc.
+Generate documentation via `./node_modules/typedoc/bin/typedoc --options ./typedoc.json`, from the top-level `admin` directory.
+Source code will be created in `admin/doc/`, and currently can only be viewed by opening one of the html files directly in a browser.

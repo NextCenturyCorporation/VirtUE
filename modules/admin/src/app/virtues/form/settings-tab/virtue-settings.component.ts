@@ -13,7 +13,7 @@ import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
 import { Printer } from '../../../shared/models/printer.model';
-import { Mode, ConfigUrlEnum, Protocols } from '../../../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets, Protocols } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
@@ -21,6 +21,11 @@ import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-virtue-settings-tab',
   templateUrl: './virtue-settings.component.html',
@@ -207,33 +212,38 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   getPasteColumns(): Column[] {
-    return [
-      // the following commented line should show up when in view mode, and the corresponding
-      //  uncommented line in edit/dup/create mode.
-      // new Column('name',    'Virtue Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
-      new Column('name',    'Virtue Template Name',    undefined,             'asc',     4, undefined),
-      new Column('apps',    'Assigned Applications',  this.getGrandchildren,  undefined, 4, this.formatName),
-      new Column('version', 'Version',                undefined,              undefined, 2),
-      new Column('status',  'Status',                 undefined,              'asc',     1, this.formatStatus)
+    let cols: Column[] = [
+      new Column('apps',    'Assigned Applications',  4, undefined,  this.formatName, this.getGrandchildren),
+      new Column('version', 'Version',                2, 'desc'),
+      new Column('status',  'Status',                 1, 'asc',       this.formatStatus)
     ];
+
+    if (this.mode === Mode.VIEW) {
+      cols.unshift(new Column('name', 'Virtue Template Name', 4, 'asc', undefined, undefined, (i: Item) => this.viewItem(i)));
+    }
+    else {
+      cols.unshift(new Column('name', 'Virtue Template Name', 4, 'asc'));
+    }
+
+    return cols;
   }
 
   getNetworkColumns(): Column[] {
     return [
-      new Column('host',        'Host',         undefined, undefined, 5),
-      new Column('protocol',    'Protocol',     undefined, undefined, 3),
-      new Column('localPort',   'Local Port',   undefined, undefined, 2),
-      new Column('remotePort',  'Remote Port',  undefined, undefined, 2)
+      new Column('host',        'Host',         5, 'asc'),
+      new Column('protocol',    'Protocol',     3, 'asc'),
+      new Column('localPort',   'Local Port',   2, 'asc'),
+      new Column('remotePort',  'Remote Port',  2, 'asc')
     ];
   }
 
   getFileSysColumns(): Column[] {
     return [
-      new Column('location', 'Server & Drive',   undefined, undefined, 6),
-      new Column('enabled',  'Enabled',   undefined, undefined, 3),
-      new Column('read',     'Read',      undefined, undefined, 1),
-      new Column('write',    'Write',     undefined, undefined, 1),
-      new Column('execute',  'Execute',   undefined, undefined, 1)
+      new Column('location', 'Server & Drive',  6, 'asc'),
+      new Column('enabled',  'Enabled',         3),
+      new Column('read',     'Read',            1),
+      new Column('write',    'Write',           1),
+      new Column('execute',  'Execute',         1)
     ];
   }
 

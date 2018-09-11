@@ -29,7 +29,7 @@
         <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.colWidth}}">
           <div *ngIf="column.sortDefault === undefined" >{{column.prettyName}}</div>
           <ng-container *ngIf="column.sortDefault !== undefined" >
-            <a (click)="setColumnSortDirection(column, sortBy)">{{column.prettyName}}</a>
+            <a (click)="setColumnSortDirection(column)">{{column.prettyName}}</a>
             <span class="list-sorter" >
               <span *ngIf="sortColumn.name === column.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn.name === column.name && sortBy === 'desc'" class="fa fa-sort-down"></span>

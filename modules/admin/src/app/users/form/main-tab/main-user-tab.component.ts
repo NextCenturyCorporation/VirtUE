@@ -5,19 +5,23 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 
 import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-main-user-tab',
   templateUrl: './main-user-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
 })
-
 export class UserMainTabComponent extends GenericMainTabComponent implements OnInit {
 
   private roleUser: boolean;
@@ -28,24 +32,44 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   // re-classing parent's object
   protected item: User;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "General Info";
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.USERS,
-      neededDatasets: ["apps", "vms", "virtues", "users"]
+      serviceConfigUrl: ConfigUrls.USERS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
     };
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   init() {
     this.setUpChildTable();
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   update(changes: any) {
     this.childrenTable.items = this.item.children.asList();
 
@@ -54,6 +78,11 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     }
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
     if ( !(item instanceof User) ) {
@@ -67,6 +96,11 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     this.roleAdmin = this.item.roles.includes("ROLE_ADMIN");
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   collectData(): boolean {
     this.item.roles = [];
     if (this.roleUser) {
@@ -78,28 +112,47 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     return true;
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getColumns(): Column[] {
     return [
-      // See note in gen-form getOptionsList
-      new Column('name',    'Virtue Template Name',   undefined,       'asc',     3, undefined, (i: Item) => this.viewItem(i)),
-      new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
-      new Column('apps',    'Assigned Applications',  this.getGrandchildren, undefined, 3, this.formatName),
-      new Column('version', 'Version',                undefined,        'asc',     2),
-      new Column('status',  'Status',                 undefined,        'asc',     1, this.formatStatus)
+      new Column('name',    'Virtue Template Name',   3, 'asc',     undefined,       undefined,           (i: Item) => this.viewItem(i)),
+      new Column('vms',     'Virtual Machines',       3, undefined, this.formatName, this.getChildren,    (i: Item) => this.viewItem(i)),
+      new Column('apps',    'Assigned Applications',  3, undefined, this.formatName, this.getGrandchildren),
+      new Column('version', 'Version',                2, 'asc'),
+      new Column('status',  'Status',                 1, 'asc', this.formatStatus)
     ];
   }
 
-  getOptionsList(): RowOptions[] {
+  /**
+   * @param
+   *
+   * @return
+   */
+  getSubMenu(): RowOptions[] {
     return [
        new RowOptions("Edit", () => true, (i: Item) => this.viewItem(i)),
        new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
     ];
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getNoDataMsg(): string {
     return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   setUpChildTable(): void {
     if (this.childrenTable === undefined) {
       return;
@@ -107,7 +160,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
 
     this.childrenTable.setUp({
       cols: this.getColumns(),
-      opts: this.getOptionsList(),
+      opts: this.getSubMenu(),
       coloredLabels: true,
       filters: [], // don't allow filtering on the form's child table.
       tableWidth: 9,
@@ -116,6 +169,11 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     });
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getDialogRef(params: {height: string, width: string, data: any}) {
     return this.dialog.open( VirtueModalComponent, params);
   }

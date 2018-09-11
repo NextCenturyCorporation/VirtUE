@@ -18,15 +18,20 @@ import { VirtualMachine } from '../shared/models/vm.model';
 import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
-import { Mode } from '../shared/enums/enums';
+import { Mode, Datasets } from '../shared/enums/enums';
 import { RowOptions } from '../shared/models/rowOptions.model';
 
 import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
-import { ConfigUrlEnum } from '../shared/enums/enums';
+import { ConfigUrls } from '../shared/enums/enums';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-user',
   template: `
@@ -59,7 +64,6 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-
 export class UserComponent extends GenericFormComponent implements OnDestroy {
 
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
@@ -154,11 +158,11 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
   }
 
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.USERS,
-      neededDatasets: ["apps", "vms", "virtues", "users"]
+      serviceConfigUrl: ConfigUrls.USERS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
     };
   }
 

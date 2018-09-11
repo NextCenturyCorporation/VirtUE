@@ -7,6 +7,11 @@ import { ColorSet, Color } from '../../shared/sets/color.set';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-color-picker-modal',
   templateUrl: './color-picker.modal.html',

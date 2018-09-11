@@ -2,6 +2,10 @@
 import { Item } from './item.model';
 
 /**
+ * #uncommented
+ * @class
+ * @extends
+ * 
  * Represents an Application.
  * Children are null.
  * At time of writing (early Aug 2018), launchCommand and iconKey are not used.

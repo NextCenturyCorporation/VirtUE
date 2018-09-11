@@ -6,13 +6,18 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
 import { Item } from '../../shared/models/item.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-virtue-modal',
   templateUrl: '../generic-modal/generic.modal.html',
@@ -21,8 +26,9 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 })
 export class VirtueModalComponent extends GenericModalComponent {
 
-
-
+  /**
+   * see parent
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
@@ -32,20 +38,29 @@ export class VirtueModalComponent extends GenericModalComponent {
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
-    this.neededDatasets = ["apps", "vms", "virtues"];
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Template Name',      undefined, 'asc',     3),
-      new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName),
-      new Column('apps',    'Assigned Applications',  this.getGrandchildren, undefined, 3, this.formatName),
-      // new Column('version',         'Version',            false, 'asc',     1), // could this be useful?
-      new Column('modDate', 'Modification Date',  undefined, 'desc',    2),
-      new Column('status',  'Status',             undefined, 'asc',     1, this.formatStatus)
+      new Column('name',    'Template Name',         3, 'asc'),
+      new Column('vms',     'Virtual Machines',      3, undefined, this.formatName, this.getChildren),
+      new Column('apps',    'Assigned Applications', 3, undefined, this.formatName,  this.getGrandchildren),
+      // new Column('version', 'Version',               1, 'asc'), // could this be useful?
+      new Column('modDate', 'Modification Date',     2, 'desc'),
+      new Column('status',  'Status',                1, 'asc', this.formatStatus)
     ];
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   hasColoredLabels() {
     return true;
   }
@@ -54,28 +69,42 @@ export class VirtueModalComponent extends GenericModalComponent {
     this.setItems(this.allVirtues.asList());
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
-      neededDatasets: ["apps", "vms", "virtues"]
+      serviceConfigUrl: ConfigUrls.VIRTUES,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
     };
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
       prettyTitle: "Virtue Templates",
       itemName: "Virtue Template",
-      pluralItem: "Virtue Templates",
-      domain: '/virtues'
+      pluralItem: "Virtue Templates"
     };
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   getNoDataMsg(): string {
     return "No virtues have been added at this time. To add a virtue, click on the button \"Add Virtue Template\" above.";
   }

@@ -18,15 +18,18 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
-import { Mode, ConfigUrlEnum } from '../../enums/enums';
+import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
 import { RowOptions } from '../../models/rowOptions.model';
 
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-tab',
-  template: './gen-tab.component.html',
-  // styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css']//,
-  // providers: [ BaseUrlService, ItemService ]
+  template: './gen-tab.component.html'
 })
 
 export abstract class GenericFormTabComponent implements OnInit {
@@ -40,6 +43,11 @@ export abstract class GenericFormTabComponent implements OnInit {
   // this gets overriden by children tabs
   protected item: Item;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   constructor(
     protected router: Router,
     protected dialog: MatDialog) {
@@ -52,12 +60,27 @@ export abstract class GenericFormTabComponent implements OnInit {
 
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   ngOnInit() {}
 
+  /**
+   * @param
+   *
+   * @return
+   */
   viewItem(i: Item) {
     this.router.navigate([i.getPageRoute(Mode.VIEW)]);
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // this is now just done on the fly. Seems like a waste to regenerate the same
   // list in html every mouse movement, but was necessary to let children and
   // grandchildren be click-able.
@@ -73,6 +96,11 @@ export abstract class GenericFormTabComponent implements OnInit {
     return grandchildren;
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // try making these on the fly. Might not be that slow.
   getChildren(i: Item): Item[] {
     // if the item has been saved to the backend
@@ -82,23 +110,53 @@ export abstract class GenericFormTabComponent implements OnInit {
     return i.children.asList();
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // used by many children to display their status
   formatStatus( item: Item ): string {
     return item.enabled ? 'Enabled' : 'Disabled';
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // used by many children to display their status
   formatName( item: Item ): string {
     return item.getName();
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // called by parent's constructor
   abstract setUp(mode: Mode, item: Item): void;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   abstract init(): void;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   abstract update(changes: any): void;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // called when item is being saved, to set any disconnected fields as necessary
   // return false if the data that needs to be collected isn't available/valid/finished/applied
   abstract collectData(): boolean;

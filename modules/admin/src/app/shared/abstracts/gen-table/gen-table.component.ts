@@ -22,23 +22,28 @@ import { ItemService } from '../../services/item.service';
 
 
 /********************************************
-Using this table needs three things:
-  1. Have a table object. Include it in the html file via:
-          <app-item-table #table></app-item-table>
-        and in the parent .ts
-          @ViewChild(GenericTable) table: GenericTable;
-    --remember doing it this way means the table gets instantiated when the
-      containing component's ngOnInit runs, not during the component's constructor.
-
-  2. call table.setUp(), once the necessary data is available
-      (generally is by the time of ngOnInit)
-
-  3. set 'items' to an Item[], once the desired item list is available. It's expected
-      that the data won't be there instantaneously, but angular should update the table
-      whenever it arrives.
-
-
-********************************************/
+ *
+ * #uncommented
+ * @class
+ * @extends
+ * 
+ * Using this table needs three things:
+ *   1. Have a table object. Include it in the html file via:
+ *           <app-item-table #table></app-item-table>
+ *         and in the parent .ts
+ *           @ViewChild(GenericTable) table: GenericTable;
+ *     --remember doing it this way means the table gets instantiated when the
+ *       containing component's ngOnInit runs, not during the component's constructor.
+ *
+ *   2. call table.setUp(), once the necessary data is available
+ *       (generally is by the time of ngOnInit)
+ *
+ *   3. set 'items' to an Item[], once the desired item list is available. It's expected
+ *       that the data won't be there instantaneously, but angular should update the table
+ *       whenever it arrives.
+ *
+ *
+ * ********************************************/
 @Component({
   selector: 'app-item-table',
   templateUrl: './gen-table.component.html',
@@ -79,9 +84,12 @@ export class GenericTableComponent {
   // things from the list
   selectedIDs: string[];
 
+  /**
+   *
+   */
   constructor() {
     // create meaningless empty column to prevent exceptions before createTable() is called by ngOnInit
-    this.sortColumn = new Column("", "", undefined, undefined, 0);
+    this.sortColumn = new Column("", "", 0);
     this.colData = [this.sortColumn];
     this.filterOptions = [];
     this.items = [];
@@ -91,10 +99,14 @@ export class GenericTableComponent {
     this.selectedIDs = [];
   }
 
-  // must be called by containing object, passing in all attributes the table
-  // needs. items isn't passed in, because it usually isn't available when the table is built.
-  // parameter is a single object so the callee has to see what element they're setting to what,
-  // and because most elements are necessary.
+  /**
+   * Must be called by the object holding this table, passing in the parameters the table
+   * needs. 'items' isn't passed in, because it usually isn't available when the table is built.
+   *
+   * @param params is a single object so the callee can (has to) see what element they're setting to what,
+   * and because most elements are necessary.
+   *
+   */
   setUp(params: {
     cols: Column[];
     opts: RowOptions[];
@@ -104,7 +116,7 @@ export class GenericTableComponent {
     noDataMsg: string,
     hasCheckBoxes: boolean,
     selectedIDs?: string[]}
-  ) {
+  ): void {
     this.colData = params.cols;
     this.rowOptions = params.opts;
     this.hasColoredLabels = params.coloredLabels;
@@ -120,11 +132,22 @@ export class GenericTableComponent {
     this.sortColumn = this.colData[0];
   }
 
+  /**
+   * @param id the id of the Item that we want to know is selected or not
+   *
+   * @return true iff the Item is currently selected
+   */
   isSelected(id: string) {
     return this.selectedIDs.includes(id);
   }
 
-  selectAll(checked) {
+  /**
+   * Called whenever the user checks or unchecks the "master" checkbox in the table's header.
+   * Either adds all items to selectedIDs, or removes them all, as appropriate.
+   *
+   * @param checked true if the user just checked the box, false if the user unchecked it.
+   */
+  selectAll(checked): void {
     if (checked) {
       for (let i of this.items) {
         this.selectedIDs.push(i.getID());
@@ -134,8 +157,14 @@ export class GenericTableComponent {
     }
   }
 
-  // called upon check/uncheck
-  checkClicked(checked: boolean, id: string) {
+  /**
+   * Called whenever the user checks or unchecks the checkbox for a particular item.
+   * Adds or removes the Item with the given id from this.selectedIDs
+   *
+   * @param checked true if the user just checked the box, false if the user unchecked it.
+   * @param id the id of the Item whose checkbox was just clicked
+   */
+  checkClicked(checked: boolean, id: string): void {
     if (checked === true) {
       this.selectedIDs.push(id);
     } else {
@@ -143,18 +172,33 @@ export class GenericTableComponent {
     }
   }
 
+  /**
+   * Empties this.selectedIDs
+   */
   clearSelections() {
     this.selectedIDs = [];
   }
 
-  // sets the watched attribute filterValue, causing angular to refresh the page
-  //  and run the filter/sorter again - which is called via the pipe '|' character
-  //  in gen-list.html
+  /**
+   * sets the watched attribute filterValue, causing angular to refresh the page
+   * and run the filter/sorter again - which is called via the pipe '|' character
+   * in gen-table.html
+   *
+   * @param filterValue the new value to filter the list by. Only matching items are kept, unless value is '*'.
+   */
   filterList(filterValue: string): void {
     this.filterValue = filterValue;
   }
 
-  setColumnSortDirection(sortColumn: Column, sortDirection: string): void {
+  /**
+   * Called when the user clicks a sortable (non-list, with default sort specified) column's header label.
+   * Sets sort direction to column default if the column is different from the current column being sorted on,
+   * and reverses the sort direction if it's the same.
+   *
+   * @param sortColumn the column to sort the table by
+   *
+   */
+  setColumnSortDirection(sortColumn: Column): void {
     // If the user clicked the currently-active column
     if (this.sortColumn === sortColumn) {
       this.reverseSorting();
@@ -163,6 +207,9 @@ export class GenericTableComponent {
     }
   }
 
+  /**
+   * Toggles sortDirection between 'asc' and 'desc'. Could benefit from being made into enums.
+   */
   reverseSorting(): void {
     if (this.sortDirection === 'asc') {
       this.sortDirection = 'desc';

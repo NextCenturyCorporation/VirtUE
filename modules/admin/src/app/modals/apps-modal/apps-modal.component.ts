@@ -6,12 +6,17 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-modal',
   templateUrl: '../generic-modal/generic.modal.html',
@@ -33,18 +38,18 @@ export class AppsModalComponent extends GenericModalComponent {
 
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', undefined, 'asc', 5),
-      new Column('version', 'Version',          undefined, 'asc', 3),
-      new Column('os',      'Operating System', undefined, 'desc', 4)
+      new Column('name',    'Application Name', 5, 'asc'),
+      new Column('version', 'Version',          3, 'asc'),
+      new Column('os',      'Operating System', 4, 'desc')
     ];
   }
 
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.APPS,
-      neededDatasets: ["apps"]
+      serviceConfigUrl: ConfigUrls.APPS,
+      neededDatasets: [Datasets.APPS]
     };
   }
 
@@ -52,12 +57,11 @@ export class AppsModalComponent extends GenericModalComponent {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
       prettyTitle: "Available Applications",
       itemName: "Application",
-      pluralItem: "Applications",
-      domain: '/applications'
+      pluralItem: "Applications"
     };
   }
 

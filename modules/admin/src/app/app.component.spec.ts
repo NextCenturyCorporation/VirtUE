@@ -1,5 +1,12 @@
 import { TestBed, async } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+
+/**
+ * This looks auto-generated.
+ * Either shape it to actually test our project, or take note of the way to do tests and
+ * delete this file - we'd want to separate our tests into many files anyway.
+ */
+
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({

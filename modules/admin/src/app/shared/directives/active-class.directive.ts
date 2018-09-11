@@ -1,9 +1,12 @@
 import { Directive, ElementRef, HostListener, OnInit, Renderer2 } from '@angular/core';
 
+/**
+ * #uncommented
+ * @class
+ */
 @Directive({
   selector: '[appActiveClass]'
 })
-
 export class ActiveClassDirective implements OnInit {
 
   constructor(

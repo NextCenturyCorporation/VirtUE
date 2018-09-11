@@ -1,5 +1,9 @@
 import { Component, OnInit, NgModule } from '@angular/core';
 
+/**
+ * #uncommented
+ * @class
+ */
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',

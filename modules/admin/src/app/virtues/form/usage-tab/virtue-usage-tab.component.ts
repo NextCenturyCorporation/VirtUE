@@ -15,7 +15,7 @@ import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
@@ -23,12 +23,16 @@ import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-virtue-usage-tab',
   templateUrl: './virtue-usage-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
 })
-
 export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('parentTable') private parentTable: GenericTableComponent;
@@ -76,9 +80,9 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
 
   getParentColumns(): Column[] {
     return [
-      new Column('name',        'Username',         undefined,        'asc',      3, undefined, (i: Item) => this.viewItem(i)),
-      new Column('childNames',  'Attached Virtues', this.getChildren, undefined,  5, this.formatName, (i: Item) => this.viewItem(i)),
-      new Column('status',      'Account Status',   undefined,        'desc',     4, this.formatStatus)
+      new Column('name',        'Username',         3, 'asc',     undefined,       undefined, (i: Item) => this.viewItem(i)),
+      new Column('childNames',  'Attached Virtues', 5, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
+      new Column('status',      'Account Status',   4, 'desc',    this.formatStatus)
     ];
   }
 

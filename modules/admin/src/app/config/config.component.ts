@@ -1,6 +1,11 @@
 import { HashLocationStrategy, Location, LocationStrategy } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-config',
   templateUrl: './config.component.html',

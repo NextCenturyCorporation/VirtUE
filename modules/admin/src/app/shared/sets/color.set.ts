@@ -1,9 +1,19 @@
+
+/**
+ * #uncommented
+ * @interface
+ */
 export interface Color {
   prettyName: string;
   hex: string;
   htmlName: string;
 }
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 export class ColorSet {
   readonly list: Color[] = [
     {prettyName: "Maroon",       hex: "#800000",  htmlName: "maroon"},

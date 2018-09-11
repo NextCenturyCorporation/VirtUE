@@ -8,8 +8,12 @@ const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Injectable()
-
 export class BaseUrlService {
 
   private jsonfile = './assets/json/baseUrl.json';

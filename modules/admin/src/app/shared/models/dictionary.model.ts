@@ -1,4 +1,10 @@
-export class DictList<T> {
+
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
+ export class DictList<T> {
   private dict: Dict<T> = {};
   private list: T[] = [];
 
@@ -43,6 +49,10 @@ export class DictList<T> {
   }
 }
 
+/**
+ * #uncommented
+ * @class
+ */
 export class Dict<T> {
     [key: string]: T;
 }

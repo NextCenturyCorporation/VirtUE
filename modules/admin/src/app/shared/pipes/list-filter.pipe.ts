@@ -1,6 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
-/***
-This filter can be used with virtue, virtual machine list pages
+
+/**
+ * #uncommented
+ * @class
+ * @extends
+ * This filter can be used with virtue, virtual machine list pages
  */
 @Pipe({
   name: 'listFilter'

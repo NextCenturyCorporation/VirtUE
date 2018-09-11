@@ -18,6 +18,15 @@ import {AddAppComponent} from './apps/add-app/add-app.component';
 
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 
+/**
+ * This defines all the navigable URLs, what components should be loaded at each, and what data should be passed in.
+ * The paths build up in the nested objects.
+ *
+ * Note that nested objects are children of a near-copy of the parent page but without a defined component - if the
+ *  parent and the child have a component defined, it seems like both components get loaded/rendered. Or at least the parent's
+ *  component does, because that's all you see.
+ *
+ */
 const routes: Routes = [
   {
     path: '',
@@ -179,6 +188,10 @@ const routes: Routes = [
   {path: '**', component: PageNotFoundComponent}
 ];
 
+/**
+ * #uncommented
+ * @class
+ */
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   // imports: [RouterModule.forRoot(routes, {

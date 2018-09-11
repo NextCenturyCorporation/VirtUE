@@ -18,18 +18,22 @@ import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-vm-usage-tab',
   templateUrl: './vm-usage-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
 })
-
 export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('parentTable') private parentTable: GenericTableComponent;
@@ -80,10 +84,10 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
 
   getParentColumns(): Column[] {
     return [
-      new Column('name',        'Template Name',    undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)),
-      new Column('childNames',  'Attached VMs', this.getChildren, undefined, 3, this.formatName, (i: Item) => this.viewItem(i)),
-      new Column('version',     'Version',          undefined, 'asc',     2),
-      new Column('status',      'Status',           undefined, 'asc',     3, this.formatStatus)
+      new Column('name',        'Template Name', 4, 'asc',    undefined, undefined, (i: Item) => this.viewItem(i)),
+      new Column('childNames',  'Attached VMs',  3, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
+      new Column('version',     'Version',       2, 'asc'),
+      new Column('status',      'Status',        3, 'asc',    this.formatStatus)
     ];
   }
 

@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from '../../../shared/models/item.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
 import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
@@ -14,13 +14,17 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 
 import { OSSet } from '../../../shared/sets/os.set';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-vm-main-tab',
   templateUrl: './vm-main-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ OSSet ]
 })
-
 export class VmMainTabComponent extends GenericMainTabComponent implements OnInit {
 
   private newVersion: number;
@@ -61,13 +65,13 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
 
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', undefined, 'asc', 5),
-      new Column('version', 'Version',          undefined, 'asc', 3),
-      new Column('os',      'Operating System', undefined, 'desc', 4)
+      new Column('name',    'Application Name', 5, 'asc'),
+      new Column('version', 'Version',          3, 'asc'),
+      new Column('os',      'Operating System', 4, 'desc')
     ];
   }
 
-  getOptionsList(): RowOptions[] {
+  getSubMenu(): RowOptions[] {
     return [
       // add the below once (or if) apps are given their own form page
       // new RowOptions("View", () => true, (i: Item) => this.viewItem(i)),
@@ -90,7 +94,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
 
     this.childrenTable.setUp({
       cols: this.getColumns(),
-      opts: this.getOptionsList(),
+      opts: this.getSubMenu(),
       coloredLabels: false,
       filters: [], // don't allow filtering on the form's child table.
       tableWidth: 9,

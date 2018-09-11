@@ -16,7 +16,7 @@ import { Item } from '../../models/item.model';
 import { DictList } from '../../models/dictionary.model';
 import { RowOptions } from '../../models/rowOptions.model';
 import { Column } from '../../models/column.model';
-import { Mode } from '../../enums/enums';
+import { Mode, Datasets } from '../../enums/enums';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 import { GenericFormTabComponent } from '../gen-tab/gen-tab.component';
@@ -25,6 +25,11 @@ import { GenericModalComponent } from '../../../modals/generic-modal/generic.mod
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   providers: [ BaseUrlService, ItemService ]
 })
@@ -66,6 +71,11 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   datasetName: string;
   childDatasetName: string;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   constructor(
     protected parentDomain: string,
     protected activatedRoute: ActivatedRoute,
@@ -77,28 +87,25 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
     super(router, baseUrlService, itemService, dialog);
     this.setMode();
 
-    // override the route reuse strategy
-    // Tell angular to load a new component every time a URL that needs this component loads,
-    // even if the user has been on this page before.
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
-
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // This checks the current routing info (the end of the current url)
   // and uses that to set what mode (create/edit/duplicate) the page
   //  ought to be in.
   setMode() {
+    this.mode = Mode.CREATE;
+    let urlValid = true;
+    // Parse url, making sure it's set up the expected way.
+
     let url = this.router.routerState.snapshot.url;
     if (url[0] === '/') {
       url = url.substr(1);
     }
-    this.mode = Mode.CREATE;
-
-    // Parse url, making sure it's set up the expected way.
-    let urlValid = true;
-
     let route = url.split('/');
     if (route[0] !== this.parentDomain.substr(1)) {
       // something about the routing system has changed.
@@ -135,6 +142,11 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     return true;
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   ngOnInit() {
     if (this.mode !== Mode.CREATE) {
       this.item.id = this.activatedRoute.snapshot.params['id'];
@@ -144,6 +156,11 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.initializeTabs();
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // overrides parent
   onPullComplete() {
     if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
@@ -153,26 +170,50 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.updateTabs();
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // called in parent's ngOnInit
   abstract initializeTabs(): void;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // called in parent's onPullComplete
   abstract setUpTabs(): void;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // called whenever item's child list is set or changes
   abstract updateTabs(): void;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // abstracts away what needs to happen when the page loads
   // Most pages will at least build item.children
   abstract updatePage(): void;
 
 
+  /**
+   * @param
+   *
+   * @return
+   */
   buildItem() {
     let _item = this[this.datasetName].get(this.item.id);
     if (_item) {
       this.item = _item;
       this.updatePage();
-      this.resetRouter();
     }
     else {
       console.log("No item with ID", this.item.id, "found in dataset", this.datasetName + ".");
@@ -181,17 +222,31 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   setModeEdit() {
     this.mode = Mode.EDIT;
     this.updateTabs();
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   setModeView() {
     this.mode = Mode.VIEW;
     this.updateTabs();
   }
 
   /**
+   * @param
+   *
+   * @return
+   *
    * Save changes to backend and return to list page. Or should it be to previous domain?
    */
   save() {
@@ -199,6 +254,10 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   /**
+   * @param
+   *
+   * @return
+   *
    * save changes to backend, staying on current page (but switching to view mode)
    */
   apply() {
@@ -208,6 +267,11 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     this.router.navigate([this.item.getPageRoute(Mode.VIEW)]);
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   private createOrUpdate(redirect: boolean) {
     // collects/updates data for and in the item, in preparation for saving.
     if ( ! this.finalizeItem()) {
@@ -230,20 +294,34 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   toggleItemStatus() {
     this.item.enabled = !this.item.enabled;
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   cancel() {
     this.router.navigate([this.parentDomain]);
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // saves your edits to the backend
   updateItem(redirect: boolean): void {
     let sub = this.itemService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
       data => {
         if (redirect) {
-          this.resetRouter();
           this.router.navigate([this.parentDomain]);
         }
       },
@@ -255,12 +333,16 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       });
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // saves the selected settings as a new item
   createItem(redirect: boolean) {
     let sub = this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
       data => {
         if (redirect) {
-          this.resetRouter();
           this.router.navigate([this.parentDomain]);
         }
       },
@@ -272,19 +354,39 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       });
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // overridden by virtue component
   getTableWidth(): number {
     return 9;
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   hasColoredLabels(): boolean {
     return false;
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // create and fill the fields the backend expects to see, record any
   // uncollected inputs, and check that the item is valid to be saved
   abstract finalizeItem(): boolean;
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // can be overridden, if anything needs to be done manually upon item load.
   // currently overridden in virtue
   updateUnconnectedFields(): void {}

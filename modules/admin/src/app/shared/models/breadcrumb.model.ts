@@ -1,3 +1,8 @@
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 export class Breadcrumb {
   label: string;
   href: string;

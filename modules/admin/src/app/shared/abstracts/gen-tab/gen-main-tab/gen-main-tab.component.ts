@@ -10,6 +10,11 @@ import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
 
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 export abstract class GenericMainTabComponent extends GenericFormTabComponent implements OnInit {
 
   @ViewChild('childrenTable') protected childrenTable: GenericTableComponent;
@@ -17,11 +22,20 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   // to notify user.component that a new set of childIDs have been selected
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
+  /**
+   * @param
+   *
+   * @return
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
   }
 
   /**
+   * @param
+   *
+   * @return
+   *
    this is a checker, if the user clicks 'remove' on one of the item's children.
    Could be improved/made more clear/distinguished from the "activateModal" method.
   */
@@ -37,11 +51,11 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
     //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
+    let sub = dialogRef.componentInstance.getResponse.subscribe((shouldProceed) => {
 
-      if (targetObject !== 0 ) {
+      if (shouldProceed) {
         if (action === 'delete') {
-          this.item.removeChild(targetObject.getID());
+          this.item.removeChild(target.getID());
         }
       }
     },
@@ -51,6 +65,11 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     });
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // this brings up the modal to add/remove children
   // this could be refactored into a "MainTab" class, which is the same for all
   // forms, but I'm not sure that'd be necessary.
@@ -82,6 +101,11 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
 
   }
 
+  /**
+   * @param
+   *
+   * @return
+   */
   // is class-specific, which modal is called is determined by main-tab subclass.
   abstract getDialogRef(params: {height: string, width: string, data: any});
 

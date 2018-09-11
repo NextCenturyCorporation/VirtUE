@@ -12,6 +12,10 @@ import { FileSysPermission } from './fileSysPermission.model';
 import { Printer } from './printer.model';
 
 /**
+ * #uncommented
+ * @class
+ * @extends
+ * 
  * Represents a Virtue.
  * Children are VirtualMachine objects.
  *

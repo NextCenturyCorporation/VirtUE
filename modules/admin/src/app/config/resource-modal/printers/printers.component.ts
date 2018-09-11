@@ -2,6 +2,11 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-printers',
   templateUrl: './printers.component.html',

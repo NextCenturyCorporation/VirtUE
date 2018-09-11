@@ -1,7 +1,10 @@
 import { DictList } from './dictionary.model';
-import { Mode } from '../enums/enums';
+import { Mode, Datasets } from '../enums/enums';
 
-
+/**
+ * #uncommented
+ * @class
+ */
 export abstract class Item {
   id: string;
   name: string;

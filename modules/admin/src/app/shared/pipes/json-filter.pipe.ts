@@ -1,5 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Pipe({
   name: 'filter'
 })
