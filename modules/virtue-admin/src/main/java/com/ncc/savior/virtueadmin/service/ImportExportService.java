@@ -205,16 +205,7 @@ public class ImportExportService {
 					VirtueUser user = jsonMapper.readValue(uncloseableStream, VirtueUser.class);
 					users.add(user);
 				} else if (name.contains(virtualMachineTemplateImageZipRoot)) {
-
-					String path = name.substring(virtualMachineTemplateImageZipRoot.length());
-					String extension = "";
-					int dotIndex = path.lastIndexOf(".");
-					if (dotIndex > -1) {
-						extension = path.substring(dotIndex + 1);
-						path = path.substring(0, dotIndex);
-					}
-					logger.debug("importing image to " + path + " of type " + extension);
-					imageManager.storeStreamAsImage(path, extension, uncloseableStream);
+					importImage(entry, uncloseableStream);
 				}
 				logger.debug("Entry: " + entry.getName() + " " + entry.isDirectory() + " " + entry.getSize());
 			}
@@ -234,6 +225,19 @@ public class ImportExportService {
 			logger.error("Error importing", e);
 		}
 
+	}
+
+	private void importImage(ZipEntry entry, InputStream uncloseableStream) {
+		String name = entry.getName();
+		String path = name.substring(virtualMachineTemplateImageZipRoot.length());
+		String extension = "";
+		int dotIndex = path.lastIndexOf(".");
+		if (dotIndex > -1) {
+			extension = path.substring(dotIndex + 1);
+			path = path.substring(0, dotIndex);
+		}
+		logger.debug("importing image to " + path + " of type " + extension + " " + entry.getSize());
+		imageManager.storeStreamAsImage(path, extension, uncloseableStream);
 	}
 
 	private void addUserToZipStream(VirtueUser user, HashSet<String> includedEntries, ZipOutputStream zipOut)
