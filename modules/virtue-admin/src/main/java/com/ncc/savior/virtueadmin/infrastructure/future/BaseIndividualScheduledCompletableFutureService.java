@@ -67,6 +67,9 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		Runnable command = getRunnable(wrapper, id);
 		ScheduledFuture<?> future = schedule(command);
 		futureMap.put(id, future);
+		if (future == null) {
+			logger.warn("Scheduled service without future");
+		}
 	}
 
 	protected abstract String getId(BaseCompletableFutureService<P, R, X>.Wrapper wrapper);

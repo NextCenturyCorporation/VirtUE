@@ -17,7 +17,7 @@ public class SwingKeyMap implements IKeyMap {
 		add(KeyEvent.VK_SHIFT, -1, "Shift_L");
 		add(KeyEvent.VK_CONTROL, -1, "Control_L");
 		add(KeyEvent.VK_META, -1, "Meta_L");
-		add(KeyEvent.VK_ALT, -1, "Alt_L");
+		add(KeyEvent.VK_ALT, 18, "Alt_L");
 		add(KeyEvent.VK_SPACE, 32, 32, "space", " ");
 		add(KeyEvent.VK_ALT_GRAPH, -1, "Alt_R");
 		// No meta right
