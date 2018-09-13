@@ -15,7 +15,7 @@ import { Printer } from './printer.model';
  * #uncommented
  * @class
  * @extends
- * 
+ *
  * Represents a Virtue.
  * Children are VirtualMachine objects.
  *
@@ -25,27 +25,50 @@ import { Printer } from './printer.model';
  */
 export class Virtue extends Item {
 
+  /** #uncommented */
   id: string;
+
+  /** #uncommented */
   version: string;
+
+  /** #uncommented */
   lastEditor: string;
+
+  /** #uncommented */
   lastModification: string | Date;
+
+  /** #uncommented */
   awsTemplateName: string;
+
+  /** #uncommented */
   color: string;
 
+  /** #uncommented */
   unprovisioned: boolean;
 
+  /** #uncommented */
   defaultBrowser: string;
 
+  /** #uncommented */
   networkWhiteList: NetworkPermission[];
 
+  /** #uncommented */
   // this holds the IDs of the virtues that this virtue is allowed to paste data into.
   allowedPasteTargets: string[];
 
+  /** #uncommented */
   // this virtue's r/w/e permissions for the different parts of the filesystem
   fileSysPerms: FileSysPermission[];
 
+  /** #uncommented */
   allowedPrinters: Printer[];
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   // convert from whatever form the virtue object is in the database.
   constructor(virtueObj) {
     super();

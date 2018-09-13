@@ -13,7 +13,7 @@ import { Column } from '../../models/column.model';
 import { RowOptions } from '../../models/rowOptions.model';
 import { DictList } from '../../models/dictionary.model';
 
-import { GenericPageComponent } from '../gen-page/gen-page.component';
+import { GenericDataPageComponent } from '../gen-data-page/gen-data-page.component';
 import { GenericTableComponent } from '../gen-table/gen-table.component';
 
 import { Item } from '../../models/item.model';
@@ -25,26 +25,31 @@ import { ItemService } from '../../services/item.service';
 import { Mode } from '../../enums/enums';
 
 /**
- * #uncommented
- * @class
- * @extends
+* @class
+ * This class represents a collection of items in a table, to be viewed and interacted with.
+ * It holds a GenericTableComponent, and allows for sorting, filtering, and selection.
+ * The data displayed in each column for each item is defined by the subclass, and can be text, a list, or a
+ * link.
+ *
+ * @extends GenericDataPageComponent because the derivative list pages need to load a known type of data from the backend.
  */
 @Component({
   templateUrl: './gen-list.component.html',
   providers: [ BaseUrlService, ItemService, GenericTableComponent ]
 })
-export abstract class GenericListComponent extends GenericPageComponent implements OnInit {
+export abstract class GenericListComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */
   @ViewChild(GenericTableComponent) table: GenericTableComponent;
 
-  /** #uncommented */
+
+  /** a string to appear as the list's title - preferably a full description */
   prettyTitle: string;
 
-  /** #uncommented */
+  /** used in a button label to create a new item: "Add {{itemName}}". It shouldn't be long. */
   itemName: string;
 
-  /** #uncommented */
+  /** used to reference collections of this type of Item in the filter option labels. Should be short. #TODO*/
   pluralItem: string;
 
   /**
@@ -53,12 +58,13 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
    *  '/virtues'
    *  '/vm-templates'
    *  '/applications'
+   * Parsed out of url path
    * Only used in the list html page though, in the create-new-item button
    */
   domain: string;
 
   /**
-   * see parent
+   * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
     router: Router,
@@ -67,31 +73,32 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
+
     let params = this.getListOptions();
 
     this.prettyTitle = params.prettyTitle;
     this.itemName = params.itemName;
     this.pluralItem = params.pluralItem;
 
-
+    // pull the domain, e.g. '/users', '/virtues', etc., out of the url.
+    // Used only when to navigate to the create page for this type of item, via the 'Add new {{itemName}}' button.
     let url = this.router.routerState.snapshot.url;
     if (url[0] === '/') {
       url = url.substr(1);
     }
     this.domain = '/' + url.split('/')[0];
-    console.log
   }
 
   /**
    * Called automatically on page render.
    */
   ngOnInit(): void {
-    this.cmnComponentSetup();
+    this.cmnDataComponentSetup();
     this.fillTable();
   }
 
   /**
-   * #uncommented
+   * Sets up the table, according to parameters defined in this class' child classes.
    */
   fillTable(): void {
     if (this.table === undefined) {
@@ -105,13 +112,23 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg(),
       hasCheckBoxes: this.hasCheckbox(),
-      selectedIDs: []
+      selectedIDs: this.getSelectedIDs()
     });
+  }
+
+  /**
+   * Most lists don't allow selection
+   *
+   * @return a list of item IDs that should be initialized as 'selected' when the table builds.
+   */
+  getSelectedIDs(): string[] {
+    return [];
   }
 
   /**
    * @return whether or not the table needs checkboxes. False is default.
    * Override to change.
+   * Currently overridden only by modals.
    */
   hasCheckbox(): boolean {
     return false;
@@ -119,7 +136,8 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
 
 
   /**
-   * abstracts away table from subclasses
+   * Populates the table with the input list of items.
+   * Abstracts away table from subclasses
    *
    * @param newItems the list of items to be displayed in the table.
    */
@@ -132,13 +150,13 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
    * Currently filtering can only be applied based on the "status" column, but eventually
    * being able to apply (perhaps arbitrary) filters to any column would be useful.
    *
-   * When a filter label is clicked, its value (as specified below) is passed to ListPipe within the table
+   * When a filter label is clicked, its value (as specified below) is passed to [[ListFilterPipe]] within the table
    * object, which will filter out any Item with a different status, unless the value is '*', in which case nothing
    * is filtered out, and the list is merely sorted.
    *
-   * While this function may seem unnecessary given that the possible filter values are hardcoded in listPipe,
-   * there are some pages which need no status filters (apps-list), and override this function to return an empty list.
-   * Eventually this should be fixed to allow arbitrary filters on any column, with ListPipe changed accordingly.
+   * While this function may seem unnecessary given that acceptable filter values are hardcoded in [[ListFilterPipe]],
+   * there are some pages which need no status filters ([[AppsListComponent]]), and override this function to return an empty list.
+   * Eventually this should be fixed to allow arbitrary filters on any column, with ListFilterPipe changed accordingly.
    *
    * @return a list of filter options to be displayed at the top of the list page.
    */
@@ -169,7 +187,7 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
       prettyTitle: string,
       /** used in a label on a button to create a new item: "Add {{itemName}}". It shouldn't be long. */
       itemName: string,
-      /** used to reference collections of this type of item, in a shortened form, in the filter labels #TODO filters*/
+      /** used to reference collections of this type of Item, in a shortened form, in the filter labels #TODO*/
       pluralItem: string};
 
   /**
@@ -203,44 +221,8 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
   }
 
   /**
-   * overriden by user-list, to perform function of setItemStatus method.
-   * TODO Change backend so everything works the same way.
-   * Probably just make every work via a setStatus method, and remove the toggle.
+   * This opens a dialog to confirm irreversible or dangerous user actions before carrying them out.
    *
-   * @param i the item we're toggling the status of.
-   */
-  toggleItemStatus(i: Item): void {
-    let sub = this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe(() => {
-      this.refreshData();
-    },
-    error => {
-
-    },
-    () => {
-      sub.unsubscribe();
-    });
-  }
-
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
-  setItemStatus(i: Item, newStatus: boolean): void {
-    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe(() => {
-      this.refreshData();
-    },
-    error => {
-
-    },
-    () => {
-      sub.unsubscribe();
-    });
-  }
-
-  /**
-   * #uncommented
    * @param action what's being done: e.g. 'delete', 'disable'
    * @param target the item upon which the stated action would be performed.
    */

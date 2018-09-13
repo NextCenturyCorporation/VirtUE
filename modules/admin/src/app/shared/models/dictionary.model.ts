@@ -5,10 +5,20 @@
  * @extends
  */
  export class DictList<T> {
+
+  /** #uncommented */
   private dict: Dict<T> = {};
+
+  /** #uncommented */
   private list: T[] = [];
 
-  add(key: string, e: T) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  add(key: string, e: T): void {
     if (key in this.dict) {
       console.log("Key ", key + ": ", e, " already in dict.");
       return;
@@ -17,6 +27,12 @@
     this.list.push(e);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   has(key: string): boolean {
     if (key in this.dict) {
       return true;
@@ -24,15 +40,33 @@
     return false;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   get(key: string): T {
     return this.dict[key];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   asList(): T[] {
     return this.list;
   }
 
-  remove(key: string) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  remove(key: string): void {
     if (!(key in this.dict)) {
       return;
     }
@@ -43,7 +77,13 @@
     delete this.dict[key];
   }
 
-  clear() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  clear(): void {
     this.dict = null;
     this.list = null;
   }

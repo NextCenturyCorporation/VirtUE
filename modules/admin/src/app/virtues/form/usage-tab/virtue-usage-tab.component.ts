@@ -35,18 +35,31 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 })
 export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** #uncommented */
   @ViewChild('parentTable') private parentTable: GenericTableComponent;
 
+  /** #uncommented */
   protected item: Virtue;
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "Virtue Usage";
 
   }
 
-  update(changes: any) {
-
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  update(changes: any): void {
     if (changes.mode) {
       this.mode = changes.mode;
     }
@@ -64,6 +77,12 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
 
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
     if ( !(item instanceof Virtue) ) {
@@ -74,10 +93,22 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     this.item = item as Virtue;
   }
 
-  init() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  init(): void {
     this.setUpParentTable();
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getParentColumns(): Column[] {
     return [
       new Column('name',        'Username',         3, 'asc',     undefined,       undefined, (i: Item) => this.viewItem(i)),
@@ -86,12 +117,24 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     ];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getParentOptionsList(): RowOptions[] {
     return [
        new RowOptions("View", () => true, (i: Item) => this.viewItem(i))
     ];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   setUpParentTable(): void {
     this.parentTable.setUp({
       cols: this.getParentColumns(),
@@ -104,6 +147,12 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     });
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   collectData(): boolean {
     // do nothing at the moment - nothing about item can be changed from this
     // page at the moment, so no changes to collect.

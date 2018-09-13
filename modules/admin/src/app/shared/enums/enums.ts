@@ -1,6 +1,6 @@
 /**
  * @enum
- * #uncommented
+ * The mode a form page can be in. See [[GenericFormComponent]].
  */
 export enum Mode {
   CREATE = "Create",
@@ -11,7 +11,7 @@ export enum Mode {
 
 /**
  * @enum
- * #uncommented
+ * The paths on the backend which must be queried for each of those datasets
  */
 export enum ConfigUrls {
   APPS = "admin/application/",
@@ -22,7 +22,8 @@ export enum ConfigUrls {
 
 /**
  * @enum
- * #uncommented
+ * The available protocols which a virtue can be permitted to use with a given [[NetworkPermission]]
+ * in  [[VirtueSettingsTabComponent]]
  */
 export enum Protocols {
   TCPIP = "TCP/IP",
@@ -31,7 +32,8 @@ export enum Protocols {
 }
 
 /**
- * #uncommented
+ * the names of the main four datasets, to provide an encapsulated interface for
+ * pages requesting the population of datasets.
  */
 export enum Datasets {
   APPS = "allApps",

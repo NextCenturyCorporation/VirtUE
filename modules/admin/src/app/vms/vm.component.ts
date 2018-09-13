@@ -18,7 +18,7 @@ import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 import { RowOptions } from '../shared/models/rowOptions.model';
 
-import { ConfigUrls, Datasets } from '../shared/enums/enums';
+import { ConfigUrls, Datasets, Mode } from '../shared/enums/enums';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
@@ -26,9 +26,24 @@ import { VmMainTabComponent } from './form/vm-main-tab/vm-main-tab.component';
 import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a detailed view of a Virtual Machine Template.
+ * See comment on [[GenericFormComponent]] for generic info.
+ *
+ * This form has:
+ *  - a main tab showing the Vm's version, OS, and name (which can be changed), as well as the Apps that would
+ *    be installed on an instance of this VM,. The version automatically increases on every edit.
+ *  - A 'usage' tab, showing what users have been granted access to this template.
+ *    The activity tab described below could be merged with this tab, if the tables tend to be small, since
+ *    'Who has access' and 'who's currently running it' will probably want to be known at the same time.
+ *
+ * It also will in the future #TODO have:
+ *  - a tab for activity (tables of what instances of this template are running, and what Applications
+ *    are running on them.)
+ *  - a tab for version history, linked/correlateable somehow with a list of when any attached Apps
+ *    were deleted.
+ *    Add somehow/somewhere a simple log of all changes made to this VM's settings.
+ *
  */
 @Component({
   selector: 'app-vm',
@@ -54,8 +69,10 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
         <div class="mui-col-md-4 form-item text-align-center">
         <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
         <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
-        <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
-        <button class="button-cancel" (click)="cancel()">Cancel</button>
+        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
+
+        <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
+        <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
@@ -67,9 +84,18 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
 })
 export class VmComponent extends GenericFormComponent implements OnDestroy {
 
+  /** A tab for displaying and/or editing the VM template's name, status, version, and assigned applications */
   @ViewChild('mainTab') mainTab: VmMainTabComponent;
+
+  /**
+   * A tab for displaying what Virtues have access to this template, and what instances of this template are
+   * currently running.
+   */
   @ViewChild('usageTab') usageTab: VmUsageTabComponent;
 
+  /**
+   * see [[GenericFormComponent.constructor]] for notes on parameters
+   */
   constructor(
     activatedRoute: ActivatedRoute,
     router: Router,
@@ -81,28 +107,39 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
 
     this.item = new VirtualMachine(undefined);
 
-    this.datasetName = 'allVms';
-    this.childDatasetName = 'allApps';
+    this.datasetName = Datasets.VMS;
+    this.childDatasetName = Datasets.APPS;
 
-    // No place to navigate to, since apps don't currently each have their own page
-    this.childDomain = undefined;
   }
 
-  // called in parent's ngInit
-  initializeTabs() {
+  /**
+   * calls an init() method in each of the form's tabs, to pass in any data needed/available at render time to that tab from the parent
+   * called in [[ngOnInit]]
+   */
+  initializeTabs(): void {
     this.mainTab.init();
     this.usageTab.init();
     // this.historyTab.init();
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.buildItemChildren(newChildIDs);
-      this.updateTabs();
+      this.setItemChildIDs(newChildIDs);
+      this.updatePage();
+    });
+
+    this.mainTab.onStatusChange.subscribe((newStatus) => {
+      if( this.mode === Mode.VIEW ) {
+        this.toggleItemStatus(this.item);
+      }
     });
 
   }
 
-  // called in parent's onPullComplete
-  setUpTabs() {
+  /**
+   * Calls a setUp() method for each of the form's tabs, to perform any actions that needed to wait for
+   * data requested from the backend.
+   * Called in [[onPullComplete]]
+   */
+  setUpTabs(): void {
     // Note that within each form, the item can't be reassigned; its attribute
     // can change though.
     this.mainTab.setUp(this.mode, this.item);
@@ -115,7 +152,10 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     // this.historyTab.setUp();
   }
 
-  // called whenever item's child list is set or changes
+  /**
+   * Updates data on a form's tabs. Used generally when one tab makes a change to the item's data.
+   * called whenever item's child list is set or changes
+   */
   updateTabs(): void {
     this.mainTab.update({mode: this.mode});
 
@@ -125,19 +165,11 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     this.usageTab.update({allVirtues: this.allVirtues, mode: this.mode});
   }
 
-  // only called on initial page load at the moment.
-  updatePage() {
-    this.buildItemChildren();
-  }
-
-  // if nothing is passed in, we just want to populate item.children
-  buildItemChildren( newChildIDs?: string[] ) {
-    if (newChildIDs instanceof Array) {
-      this.item.childIDs = newChildIDs;
-    }
-    this.item.buildChildren(this[this.childDatasetName]);
-  }
-
+  /**
+   * This page needs all datasets to load: This VM, the Virtues granted this VM template, and the Apps this VM has
+   * been given.
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -147,8 +179,12 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     };
   }
 
-  // create and fill the fields the backend expects to see, record any
-  // uncollected inputs, and check that the item is valid to be saved
+  /**
+   * create and fill the fields the backend expects to see, pull in/record any
+   * uncollected inputs, and check that the item is valid to be saved
+   *
+   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   */
   finalizeItem(): boolean {
     this.mainTab.collectData();
 
@@ -172,7 +208,11 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     return true;
   }
 
-  ngOnDestroy() {
+  /**
+   * unsubscribe all watched EventEmitters
+   */
+  ngOnDestroy(): void {
     this.mainTab.onChildrenChange.unsubscribe();
+    this.mainTab.onStatusChange.unsubscribe();
   }
 }

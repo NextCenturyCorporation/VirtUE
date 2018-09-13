@@ -21,116 +21,60 @@ import { Column } from '../../models/column.model';
 import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
 import { RowOptions } from '../../models/rowOptions.model';
 
+import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a tab in a [[GenericFormComponent]].
+ * Each tab should have a different, unified, focus, be organized so as to require
+ * a minimal amount of scrolling, and
+ *
+ * @extends [[GenericPageComponent]] to make use of its formatting and navigation functions
+ *
  */
 @Component({
   selector: 'app-tab',
   template: './gen-tab.component.html'
 })
 
-export abstract class GenericFormTabComponent implements OnInit {
+export abstract class GenericFormTabComponent extends GenericPageComponent implements OnInit {
 
+  /** #uncommented */
   // what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
   // Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
   protected mode: Mode;
 
+  /** #uncommented */
   public tabName: string;
 
+  /** #uncommented */
   // this gets overriden by children tabs
   protected item: Item;
 
   /**
+   * #uncommented
    * @param
    *
    * @return
    */
   constructor(
-    protected router: Router,
+    router: Router,
     protected dialog: MatDialog) {
-    // gets overwritten once the datasets load, if mode is not CREATE
-    // Application chosen arbitrarily for this un-used value, because it doesn't
-    // have as many attributes.
-    this.item = new User(undefined);
-    // this doesn't appear to be used anywhere. So redefining it in each subclass,
-    // with the most correct type.
-
+      super(router);
+      // gets overwritten by the parent form's 'item' once the datasets load, even if
+      // it's in create mode.
+      // User chosen arbitrarily for this un-used value, because it doesn't
+      // have as many attributes.
+      this.item = new User(undefined);
   }
 
   /**
-   * @param
-   *
-   * @return
+   * Do nothing in particular on render.
    */
-  ngOnInit() {}
+  ngOnInit(): void {}
 
   /**
-   * @param
-   *
-   * @return
-   */
-  viewItem(i: Item) {
-    this.router.navigate([i.getPageRoute(Mode.VIEW)]);
-  }
-
-  /**
-   * @param
-   *
-   * @return
-   */
-  // this is now just done on the fly. Seems like a waste to regenerate the same
-  // list in html every mouse movement, but was necessary to let children and
-  // grandchildren be click-able.
-  getGrandchildren(i: Item): Item[] {
-    // if the item has been saved to the backend
-    if (!i || !i.children) {
-      return [];
-    }
-    let grandchildren: Item[] = [];
-    for (let c of i.children.asList()) {
-      grandchildren = grandchildren.concat(c.children.asList());
-    }
-    return grandchildren;
-  }
-
-  /**
-   * @param
-   *
-   * @return
-   */
-  // try making these on the fly. Might not be that slow.
-  getChildren(i: Item): Item[] {
-    // if the item has been saved to the backend
-    if (!i || !i.children) {
-      return [];
-    }
-    return i.children.asList();
-  }
-
-  /**
-   * @param
-   *
-   * @return
-   */
-  // used by many children to display their status
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  /**
-   * @param
-   *
-   * @return
-   */
-  // used by many children to display their status
-  formatName( item: Item ): string {
-    return item.getName();
-  }
-
-  /**
+   * #uncommented
    * @param
    *
    * @return
@@ -139,6 +83,7 @@ export abstract class GenericFormTabComponent implements OnInit {
   abstract setUp(mode: Mode, item: Item): void;
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -146,6 +91,7 @@ export abstract class GenericFormTabComponent implements OnInit {
   abstract init(): void;
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -153,6 +99,7 @@ export abstract class GenericFormTabComponent implements OnInit {
   abstract update(changes: any): void;
 
   /**
+   * #uncommented
    * @param
    *
    * @return

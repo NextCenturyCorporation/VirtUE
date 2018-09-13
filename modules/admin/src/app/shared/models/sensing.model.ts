@@ -3,7 +3,11 @@
  * @class
  */
 export class SensingModel {
+
+  /** #uncommented */
   timestamp: string;
+
+  /** #uncommented */
   sensors: [
     {
       virtue_id: string,
@@ -22,5 +26,7 @@ export class SensingModel {
       address: string
     }
   ];
+
+  /** #uncommented */
   error: boolean;
 }

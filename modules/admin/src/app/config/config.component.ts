@@ -17,13 +17,26 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigComponent implements OnInit {
 
+  /** #uncommented */
   location: Location;
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor( location: Location ) {
     this.location = location;
   }
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  ngOnInit(): void {
   }
 
 }

@@ -18,9 +18,14 @@ import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a table of Virtual Machines, which can be viewed, edited, duplicated, enabled/disabled, or deleted.
+ * Also allows the creation of new Virtual Machines.
+ *
+ * Currently, all the applications available to each VM are listed, but apps don't have a view page yet so their names are
+ * only displayed as text, instead of links.
+ *
+ * @extends GenericListComponent
  */
 @Component({
   selector: 'app-vm-list',
@@ -31,7 +36,7 @@ import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 export class VmListComponent extends GenericListComponent {
 
   /**
-   * see parent
+   * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
     router: Router,
@@ -50,7 +55,7 @@ export class VmListComponent extends GenericListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent.
+   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
@@ -64,7 +69,7 @@ export class VmListComponent extends GenericListComponent {
   }
 
   /**
-   * See parent
+   * See [[GenericPageComponent.getPageOptions]]
    * @return child-specific information needed by the generic page functions when loading data.
    */
   getPageOptions(): {
@@ -78,7 +83,7 @@ export class VmListComponent extends GenericListComponent {
 
 
   /**
-   * See parent for details
+   * See [[GenericListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {

@@ -24,11 +24,14 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 })
 export class VirtueMainTabComponent extends GenericMainTabComponent implements OnInit {
 
+  /** #uncommented */
   private newVersion: number;
 
+  /** #uncommented */
   protected item: Virtue;
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -38,22 +41,9 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     this.tabName = "General Info";
   }
 
-  /**
-   * @param
-   *
-   * @return
-   */
-  update(changes: any) {
-    this.childrenTable.items = this.item.children.asList();
-
-    if (changes.mode) {
-      this.setMode(changes.mode);
-      this.childrenTable.colData = this.getColumns();
-      this.childrenTable.rowOptions = this.getSubMenu();
-    }
-  }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -71,11 +61,11 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
   }
 
   /**
-   * @param
+   * Overrides parent, [[GenericMainTabComponent.setMode]]
+   * @param newMode the Mode to set the page as.
    *
-   * @return
    */
-  setMode(newMode: Mode) {
+  setMode(newMode: Mode): void {
     this.mode = newMode;
 
     this.newVersion = Number(this.item.version);
@@ -86,6 +76,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -107,25 +98,9 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     return cols;
   }
 
-  /**
-   * @param
-   *
-   * @return
-   */
-  getSubMenu(): RowOptions[] {
-    if (this.mode === Mode.VIEW) {
-      return [
-         new RowOptions("View", () => true, (i: Item) => this.viewItem(i))
-      ];
-    }
-    else {
-      return [
-         new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-      ];
-    }
-  }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -136,36 +111,7 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
   /**
-   * @param
-   *
-   * @return
-   */
-  init() {
-    this.setUpChildTable();
-  }
-
-  /**
-   * @param
-   *
-   * @return
-   */
-  setUpChildTable(): void {
-    if (this.childrenTable === undefined) {
-      return;
-    }
-
-    this.childrenTable.setUp({
-      cols: this.getColumns(),
-      opts: this.getSubMenu(),
-      coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table. ?
-      tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
-  }
-
-  /**
+   * #uncommented
    * @param
    *
    * @return
@@ -176,6 +122,7 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return

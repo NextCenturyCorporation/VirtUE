@@ -12,9 +12,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigActiveDirComponent implements OnInit {
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor() { }
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  ngOnInit(): void {
   }
 
 }

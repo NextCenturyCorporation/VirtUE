@@ -10,21 +10,40 @@ import { DictList } from './dictionary.model';
  * #uncommented
  * @class
  * @extends
- * 
+ *
  * Represents a VirtualMachine.
  * Children are Application objects.
  *
  */
 export class VirtualMachine extends Item {
 
+  /** #uncommented */
   id: string;
+
+  /** #uncommented */
   os: string;
+
+  /** #uncommented */
   version: string;
+
+  /** #uncommented */
   templatePath: string;
+
+  /** #uncommented */
   loginUser: string;
+
+  /** #uncommented */
   lastModification: string | Date;
+
+  /** #uncommented */
   lastEditor: string;
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   // convert from whatever form the vm object is in the database.
   constructor(vmObj) {
     super();

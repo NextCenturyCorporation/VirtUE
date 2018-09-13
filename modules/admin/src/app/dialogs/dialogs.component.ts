@@ -7,28 +7,30 @@ import { Item } from '../shared/models/item.model';
 /**
  * @class This serves to check some irreversable user actions, to lessen the chance of them being made in error.
  * @example
- openDialog(action: string, target: Item): void {
-   let dialogRef = this.dialog.open(DialogsComponent, {
-     width: '450px',
-     data:  {
-         some: data
-       }
-   });
-
-   dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-   //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-   let sub = dialogRef.componentInstance.getResponse.subscribe((shouldProceed) => {
-     console.log(shouldProceed);
-     if (shouldProceed) {
-       performSomeAction();
-     }
-   },
-   ()=>{},
-   ()=>{
-     sub.unsubscribe();
-   });
- }
+ * usage:
+ *
+ *      openDialog(action: string, target: Item): void {
+ *        let dialogRef = this.dialog.open(DialogsComponent, {
+ *          width: '450px',
+ *          data:  {
+ *            some: data
+ *          }
+ *        });
+ *
+ *      //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
+ *      let sub = dialogRef.componentInstance.getResponse.subscribe((shouldProceed) => {
+ *        console.log(shouldProceed);
+ *        if (shouldProceed) {
+ *          performSomeAction();
+ *        }
+ *      },
+ *      ()=>{
+ *        sub.unsubscribe();
+ *      },// on error
+ *      ()=>{  // on non-error
+ *        sub.unsubscribe(); // stop listening for a response; it only comes once.
+ *      });
+ *    }
  */
 @Component({
   selector: 'app-dialogs',
@@ -38,8 +40,10 @@ export class DialogsComponent {
 
   /** what's being done: e.g. 'delete', 'disable' */
   actionType: string;
+
   /** the name of the item the user wants to do something to */
   targetName: string;
+
   /** What the component that created this dialog watches, to know what the user clicked. true for submit, false for cancel*/
   @Output() getResponse: EventEmitter<boolean> = new EventEmitter();
 
@@ -52,7 +56,7 @@ export class DialogsComponent {
     public dialogRef: MatDialogRef<DialogsComponent>,
     /** input from the calling component */
     @Inject( MAT_DIALOG_DATA ) public data: {
-      /** the action that's being checked - see comment on DialogsComponent.actionType */
+      /** the action that's being checked - see comment on [[DialogsComponent.actionType]] */
       actionType: string,
       /** What to call the object to which the action would be applied */
       targetName: string

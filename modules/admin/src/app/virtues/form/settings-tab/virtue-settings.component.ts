@@ -33,19 +33,32 @@ import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-t
 })
 export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** #uncommented */
   @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent;
 
+  /** #uncommented */
   // re-classing item, to make it easier and less error-prone to work with.
   protected item: Virtue;
 
+  /** #uncommented */
   // local reference to the virtue-form's allVirtues variable.
   private allVirtues: DictList<Virtue>;
 
+  /** #uncommented */
   browsers: string[];
 
+  /** #uncommented */
   private keys = Object.keys;
+
+  /** #uncommented */
   private protocols = Protocols;
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor( private matIconRegistry: MatIconRegistry, router: Router, dialog: MatDialog) {
     super(router, dialog);
 
@@ -63,10 +76,22 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
   }
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  ngOnInit(): void {
   }
 
-  init() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  init(): void {
     this.setUpPasteableVirtuesTable();
     // until GenericTable is made more generic (like for any input object, as opposed to only Items),
     // the other tables have to be defined individually in the html.
@@ -75,8 +100,13 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   setUp(mode: Mode, item: Item): void {
-    console.log("setUp");
     this.mode = mode;
     if ( !(item instanceof Virtue) ) {
       // TODO throw error
@@ -86,7 +116,13 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.item = item as Virtue;
   }
 
-  update(changes: any) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  update(changes: any): void {
     if (changes.allVirtues) {
       this.allVirtues = changes.allVirtues;
 
@@ -98,6 +134,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     }
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   collectData(): boolean {
     console.log("collectData");
 
@@ -110,6 +152,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return true;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   checkNetworkPerms(): boolean {
     for (let networkPermission of this.item.networkWhiteList) {
       if ( !this.checkEnteredPermValid(networkPermission) ) {
@@ -119,6 +167,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return true;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   checkEnteredPermValid(netPerm: NetworkPermission): boolean {
 
     // instead of checking  '<=='
@@ -142,6 +196,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return true;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   // See https://github.com/angular/angular/issues/10423 and/or https://stackoverflow.com/questions/40314732
   // and, less helpfully, https://angular.io/guide/template-syntax#ngfor-with-trackby
   // Essentially, Angular's ngFor sometimes tracks the elements it iterates over by their value, as opposed
@@ -150,10 +210,16 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   // or the browser needs to be killed at the system level (xkill, system process manager, kill, killall, etc.).
   // This is prevented by manually telling it track things by index, as below (and adding "; trackBy: indexTracker" to the ngFor statement.)
   // ...
-  indexTracker(index: number, value: any) {
+  indexTracker(index: number, value: any): number {
     return index;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   allChecked(colName: string): boolean {
     for (let perm of this.item.fileSysPerms) {
       if (perm[colName] === false) {
@@ -163,24 +229,54 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return true;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   checkAll(event: any, colName: string): void {
     for (let perm of this.item.fileSysPerms) {
       perm[colName] = event.checked;
     }
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   addNewPrinter(): void {
     this.item.allowedPrinters.push(new Printer("And another printer"));
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   removePrinter(index: number): void {
     this.item.allowedPrinters.splice(index, 1);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   addNewNetworkPermission(): void {
     this.item.networkWhiteList.push(new NetworkPermission());
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   setUpPasteableVirtuesTable(): void {
     if (this.allowedPasteTargetsTable === undefined) {
       return;
@@ -197,6 +293,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     });
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   populatePasteableVirtuesTable(): void {
 
     if ( !(this.allVirtues) ) {
@@ -211,6 +313,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     }
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getPasteColumns(): Column[] {
     let cols: Column[] = [
       new Column('apps',    'Assigned Applications',  4, undefined,  this.formatName, this.getGrandchildren),
@@ -228,6 +336,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return cols;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getNetworkColumns(): Column[] {
     return [
       new Column('host',        'Host',         5, 'asc'),
@@ -237,6 +351,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     ];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getFileSysColumns(): Column[] {
     return [
       new Column('location', 'Server & Drive',  6, 'asc'),
@@ -247,6 +367,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     ];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getPasteOptionsList(): RowOptions[] {
     return [
        new RowOptions("Remove", () => true, (i: Item) => {
@@ -259,6 +385,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
      )];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   activateColorModal(): void {
     let wPercentageOfScreen = 40;
 
@@ -271,7 +403,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     dialogRef.updatePosition({ top: '5%', left: String(Math.floor(50 - wPercentageOfScreen / 2)) + '%' });
 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
-      this.item.color = newColor;
+      if(newColor !== "") {
+        this.item.color = newColor;
+      }
     },
     () => {},
     () => {
@@ -279,6 +413,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     });
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   // this brings up the modal to add/remove children
   // this could be refactored into a "MainTab" class, which is the same for all
   // forms, but I'm not sure that'd be necessary.

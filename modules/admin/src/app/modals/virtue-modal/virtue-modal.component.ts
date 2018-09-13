@@ -27,7 +27,7 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 export class VirtueModalComponent extends GenericModalComponent {
 
   /**
-   * see parent
+   * see [[GenericModalComponent.constructor]] for notes on parameters
    */
   constructor(
       router: Router,
@@ -41,6 +41,7 @@ export class VirtueModalComponent extends GenericModalComponent {
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -57,19 +58,27 @@ export class VirtueModalComponent extends GenericModalComponent {
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
    */
-  hasColoredLabels() {
+  hasColoredLabels(): boolean {
     return true;
   }
 
-  onPullComplete() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  onPullComplete(): void {
     this.setItems(this.allVirtues.asList());
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -84,6 +93,7 @@ export class VirtueModalComponent extends GenericModalComponent {
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -101,6 +111,7 @@ export class VirtueModalComponent extends GenericModalComponent {
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return

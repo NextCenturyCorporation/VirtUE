@@ -6,11 +6,19 @@
  * @extends
  */
 export class OSSet {
+  /** #uncommented */
   readonly list: {prettyName: string, os: string}[] = [
     { prettyName: 'Debian', os: 'LINUX' },
     { prettyName: 'Windows', os: 'WINDOWS' }
   ];
-  getList() {
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  getList(): {prettyName: string, os: string}[] {
     return this.list;
   }
 }

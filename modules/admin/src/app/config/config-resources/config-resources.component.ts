@@ -15,13 +15,30 @@ import { ResourceModalComponent } from '../resource-modal/resource-modal.compone
 })
 export class ConfigResourcesComponent implements OnInit {
 
+  /** #uncommented */
   screenWidth: any;
+
+  /** #uncommented */
   leftPosition: any;
+
+  /** #uncommented */
   dialogWidth: any;
 
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(public dialog: MatDialog) {}
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   openDialog(id, type, text): void {
 
     this.dialogWidth = 450;
@@ -41,6 +58,12 @@ export class ConfigResourcesComponent implements OnInit {
     dialogRef.updatePosition({ top: '15%', left: this.leftPosition + 'px' });
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   activateModal(): void {
 
     this.dialogWidth = 600;
@@ -55,6 +78,9 @@ export class ConfigResourcesComponent implements OnInit {
 
   }
 
-  ngOnInit() {}
+  /**
+   * #uncommented
+   */
+  ngOnInit(): void {}
 
 }

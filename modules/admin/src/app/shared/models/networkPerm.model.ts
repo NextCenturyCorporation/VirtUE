@@ -7,8 +7,16 @@ import { Protocols } from '../enums/enums';
  * @extends
  */
 export class NetworkPermission {
+
+  /** #uncommented */
   host: string = "";
+
+  /** #uncommented */
   protocol: Protocols;
+
+  /** #uncommented */
   localPort: number;
+
+  /** #uncommented */
   remotePort: number;
 }

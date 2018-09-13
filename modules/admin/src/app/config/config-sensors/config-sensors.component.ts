@@ -13,9 +13,21 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 })
 export class ConfigSensorsComponent implements OnInit {
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor() { }
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  ngOnInit(): void {
   }
 
 }

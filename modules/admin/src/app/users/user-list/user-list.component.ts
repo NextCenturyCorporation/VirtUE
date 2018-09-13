@@ -19,9 +19,13 @@ import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.c
 import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a table of users, which can be viewed, edited, duplicated, enabled/disabled, or deleted.
+ * Links to the view pages for each user's assigned virtues are listed.
+ *
+ * Also allows the creation of new Users.
+ *
+ * @extends GenericListComponent
  */
 @Component({
   selector: 'app-user-list',
@@ -32,7 +36,7 @@ import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 export class UserListComponent extends GenericListComponent {
 
   /**
-   * see parent
+   * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
     router: Router,
@@ -41,8 +45,6 @@ export class UserListComponent extends GenericListComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-
-
   }
 
   /**
@@ -53,19 +55,19 @@ export class UserListComponent extends GenericListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent.
+   * @return a list of the columns to show up in the table. See details in [[GenericListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
-      new Column('name',        'Username',           2, 'asc',     undefined, undefined, (i: Item) => this.editItem(i)),
+      new Column('name',        'Username',           2, 'asc',     undefined, undefined, (i: Item) => this.viewItem(i)),
       new Column('roles',       'Authorized Roles',   3, 'asc',     this.formatRoles),
-      new Column('childNames',  'Available Virtues',  4, undefined, this.formatName, this.getChildren),
+      new Column('childNames',  'Available Virtues',  4, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
       new Column('status',      'Account Status',     3, 'desc',    this.formatStatus)
     ];
   }
 
   /**
-   * See parent
+   * See [[GenericPageComponent.getPageOptions]]
    * @return child-specific information needed by the generic page functions when loading data.
    */
   getPageOptions(): {
@@ -78,9 +80,8 @@ export class UserListComponent extends GenericListComponent {
 
   }
 
-
   /**
-   * See parent for details
+   * See [[GenericListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {
@@ -119,7 +120,7 @@ export class UserListComponent extends GenericListComponent {
   }
 
   /**
-   * Overrides parent. On the backend, vms/virtues/apps all only have a toggle function,
+   * Overrides parent, [[GenericPageComponent.toggleItemStatus]]. On the backend, vms/virtues/apps all only have a toggle function,
    * but users only have a setStatus function. So our itemService has both, and we have to call the right
    * one based on what type of item we're trying to toggle the status of.
    * That should be fixed, but is not critical.
@@ -128,7 +129,7 @@ export class UserListComponent extends GenericListComponent {
    */
   toggleItemStatus(user: User): void {
     console.log(user);
-    if (user.getName().toUpperCase() === "ADMIN") {
+    if (user.getName().toUpperCase() === "ADMIN" && user.enabled) {
       this.openDialog('disable', user);
       // TODO: Remove this message when/if this is no longer applicable.
       return;
@@ -137,7 +138,9 @@ export class UserListComponent extends GenericListComponent {
     let sub = this.itemService.setItemStatus(this.serviceConfigUrl, user.getID(), !user.enabled).subscribe( () => {
 
     },
-    () => {},
+    () => { // on error
+      sub.unsubscribe();
+    },
     () => { // when finished
       this.refreshData();
       sub.unsubscribe();

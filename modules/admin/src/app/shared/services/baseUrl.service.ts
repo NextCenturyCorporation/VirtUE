@@ -16,11 +16,24 @@ const httpHeader = {
 @Injectable()
 export class BaseUrlService {
 
+  /** #uncommented */
   private jsonfile = './assets/json/baseUrl.json';
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor( private httpClient: HttpClient ) { }
 
-  getBaseUrl() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  getBaseUrl(): Observable<any> {
     return this.httpClient.get(this.jsonfile);
   }
 

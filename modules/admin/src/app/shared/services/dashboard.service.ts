@@ -16,10 +16,23 @@ const httpHeader = {
 @Injectable()
 export class DashboardService {
 
+  /** #uncommented */
   private jsonfile = './assets/json/sensing.json';
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor( private httpClient: HttpClient ) { }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getList(): Observable<any> {
     return this.httpClient.get<any>(this.jsonfile);
   }

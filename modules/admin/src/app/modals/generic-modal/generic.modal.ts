@@ -14,13 +14,13 @@ import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.c
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 /**
- * This inherits from GeneralListComponent, so that it can display the available
- * items in the same way, with the same filtering/sorting capabilities as the user
- * can on the list page.
-
- * #uncommented
  * @class
- * @extends
+ * This class represents a pop-up window, holding a table of selectable items. The user can select
+ * or unselect items, and when they click 'Submit', their selections are passed back to whatever component
+ * spawned this object.
+ *
+ * @extends [[GenericListComponent]] so that it can display the available items in the same way,
+ * with the same filtering/sorting capabilities available to the user on any of the list pages.
  */
 @Component({
   selector: 'app-generic-modal',
@@ -29,9 +29,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   providers: [BaseUrlService, ItemService]
 })
 export abstract class GenericModalComponent extends GenericListComponent implements OnInit {
-  /**
-   * What the containing component watches, to get the user's selections back out of this modal.
-   */
+
+  /** What the containing component watches, to get the user's selections back out of this modal. */
   getSelections = new EventEmitter();
 
   /**
@@ -40,11 +39,10 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
    */
   initialSelections: string[] = [];
 
+
   /**
-   * @param router injected, see parent
-   * @param baseUrlService injected, see parent
-   * @param itemService injected, see parent
-   * @param dialog injected, see parent
+   * see [[GenericPageComponent.constructor]] for notes on inherited parameters
+   *
    * @param dialogRef injected, is a reference to the modal dialog box itself.
    * @param data is defined in calling component, holds the initial selections
    */
@@ -74,6 +72,16 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
       // if so, note that select-all button will not act how user expects.
       // Could be changed to only add/remove enabled items, but still then the user couldn't
       // remove disabled ones through that menu.
+  }
+
+  /**
+   * this gives the childIDs the item was loaded with, and is only used to build
+   * the table - any changes will be made to this.table.selectedIDs.
+   * 
+   * @return a list of item IDs that should be initialized as 'selected' when the table builds.
+   */
+  getSelectedIDs(): string[] {
+    return this.initialSelections;
   }
 
   /**

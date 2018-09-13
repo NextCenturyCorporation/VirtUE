@@ -14,21 +14,44 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 })
 export class ResourceModalComponent implements OnInit {
 
+  /** #uncommented */
   form: FormGroup;
+
+  /** #uncommented */
   resourceValue: string;
+
+  /** #uncommented */
   resources = [
     {value: 'File Share', viewValue: 'File Share'},
     {value: 'Printers', viewValue: 'Printers'}
   ];
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor( public dialogRef: MatDialogRef<ResourceModalComponent> ) {  }
 
 
-  saveResource() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  saveResource(): void {
     this.dialogRef.close();
   }
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  ngOnInit(): void {
   }
 
 }

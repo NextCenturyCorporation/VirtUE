@@ -5,6 +5,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DialogsComponent } from '../../../../dialogs/dialogs.component';
 
 import { Item } from '../../../models/item.model';
+import { Column } from '../../../models/column.model';
+import { RowOptions } from '../../../models/rowOptions.model';
+import { Mode } from '../../../enums/enums';
 
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
@@ -17,25 +20,68 @@ import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
  */
 export abstract class GenericMainTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** #uncommented */
   @ViewChild('childrenTable') protected childrenTable: GenericTableComponent;
 
+  /** #uncommented */
   // to notify user.component that a new set of childIDs have been selected
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
+  /** #uncommented */
+  @Output() onStatusChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+
   /**
-   * @param
-   *
-   * @return
+   * #uncommented
    */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
   }
 
+  statusChange(): void {
+    this.onStatusChange.emit(this.item.enabled);
+  }
+
+
   /**
+   * #uncommented
    * @param
    *
    * @return
+   */
+  init(): void {
+    this.setUpChildTable();
+  }
+
+  /**
+   * #uncommented
+   * @param
    *
+   * @return
+   */
+  update(changes: any): void {
+    this.childrenTable.items = this.item.children.asList();
+    if (changes.mode) {
+      this.setMode(changes.mode);
+      this.childrenTable.colData = this.getColumns();
+      this.childrenTable.rowOptions = this.getSubMenu();
+    }
+  }
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  setMode(newMode: Mode): void {
+    this.mode = newMode;
+  }
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
    this is a checker, if the user clicks 'remove' on one of the item's children.
    Could be improved/made more clear/distinguished from the "activateModal" method.
   */
@@ -59,13 +105,16 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
         }
       }
     },
-    () => {},
+    () => {// on error
+      sub.unsubscribe();
+    },
     () => {// when finished
       sub.unsubscribe();
     });
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -91,8 +140,10 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedItems) => {
       this.onChildrenChange.emit(selectedItems);
     },
-    () => {},
-    () => {// when finished
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
       sub.unsubscribe();
     });
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
@@ -102,6 +153,75 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   }
 
   /**
+   * Sets up the table of children, using sub-class-defined-functions.
+   * See [[GenericTable.setUp]]()
+   */
+  setUpChildTable(): void {
+    if (this.childrenTable === undefined) {
+      return;
+    }
+
+    this.childrenTable.setUp({
+      cols: this.getColumns(),
+      opts: this.getSubMenu(),
+      coloredLabels: true,
+      filters: [], // don't allow filtering on the form's child table.
+      tableWidth: 9,
+      noDataMsg: this.getNoDataMsg(),
+      hasCheckBoxes: false
+    });
+  }
+
+  /**
+   *
+   */
+  abstract getColumns(): Column[];
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  getSubMenu(): RowOptions[] {
+    if (this.mode === Mode.VIEW) {
+      return [
+         new RowOptions("View", () => true, (i: Item) => this.viewItem(i))
+      ];
+    }
+    else {
+      return [
+         new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
+      ];
+    }
+  }
+
+  /**
+   * #uncommented
+   */
+  abstract getNoDataMsg(): string;
+
+  /**
+   * Define the default table width, as a # of twefths-of-the-parent-space.
+   * The tables don't need to take up the full screen width, they're usually pretty sparse.
+   * Can be overridden if necessary though.
+   */
+  getTableWidth(): number {
+    return 9;
+  }
+
+  /**
+   * Whether or not the Items in the child table have colored labels they should be displayed with.
+   * Most main tabs won't have colored labels, so just return false.
+   * Overridden by [[UserMainTabComponent.hasColoredLabels]]().
+   * See [[GenericTable.setUp]]()
+   */
+  hasColoredLabels(): boolean {
+    return false;
+  }
+
+  /**
+   * #uncommented
    * @param
    *
    * @return

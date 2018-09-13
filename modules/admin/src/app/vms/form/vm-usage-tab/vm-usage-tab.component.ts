@@ -36,29 +36,44 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 })
 export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** #uncommented */
   @ViewChild('parentTable') private parentTable: GenericTableComponent;
 
+  /** #uncommented */
   // usageTable would show the running virtues that have been built from this template.
   // This may be unnecessary/unteneble. It could be a lot.
   // Tables need filters.
   @ViewChild('usageTable') private usageTable: GenericTableComponent;
 
+  /** #uncommented */
   protected item: VirtualMachine;
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "Virtual Machine Usage";
 
   }
 
-  update(changes: any) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  update(changes: any): void {
     if (changes.allVirtues) {
       let allVirtues: DictList<Item> = changes.allVirtues;
       this.parentTable.items = [];
 
-      for (let u of allVirtues.asList()) {
-        if (u.children.has(this.item.getID())) {
-          this.parentTable.items.push(u);
+      for (let v of allVirtues.asList()) {
+        if (v.children.has(this.item.getID())) {
+          this.parentTable.items.push(v);
         }
       }
     }
@@ -68,6 +83,12 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     }
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
     if ( !(item instanceof VirtualMachine) ) {
@@ -78,10 +99,22 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     this.item = item as VirtualMachine;
   }
 
-  init() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  init(): void {
     this.setUpParentTable();
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getParentColumns(): Column[] {
     return [
       new Column('name',        'Template Name', 4, 'asc',    undefined, undefined, (i: Item) => this.viewItem(i)),
@@ -91,12 +124,24 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     ];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getParentOptionsList(): RowOptions[] {
     return [
        new RowOptions("View", () => true, (i: Item) => this.viewItem(i))
     ];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   setUpParentTable(): void {
     this.parentTable.setUp({
       cols: this.getParentColumns(),
@@ -109,6 +154,12 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     });
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   collectData(): boolean {
     // nothing about item can be changed from this
     // page at the moment, so no changes to collect.

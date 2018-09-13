@@ -23,9 +23,13 @@ import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.c
 import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a table of Applications, which can be viewed, edited, duplicated, enabled/disabled, or deleted.
+ *
+ * Currently, very little of use is implemented with regard to applications. Only temporary boiler-plate exists for
+ * uploading(?) an application, and essentially no data exists to be displayed in the table.
+ *
+ * @extends GenericListComponent
  */
 @Component({
   selector: 'app-apps-list',
@@ -36,7 +40,7 @@ import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 export class AppsListComponent extends GenericListComponent {
 
   /**
-   * see parent
+   * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
     router: Router,
@@ -60,7 +64,7 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent.
+   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
@@ -71,7 +75,7 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
-   * See parent
+   * See [[GenericPageComponent.getPageOptions]]
    * @return child-specific information needed by the generic page functions when loading data.
    */
   getPageOptions(): {
@@ -84,7 +88,7 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
-   * See parent for details
+   * See [[GenericListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {
@@ -106,6 +110,7 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
+   * overrides parent, [[GenericListComponent.getTableFilters]]
    * @return an empty list; Apps can't be disabled, so nothing to filter
    */
   getTableFilters(): {text: string, value: string}[] {
@@ -113,6 +118,7 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
+   * overrides parent, [[GenericListComponent.getSubMenu]]
    * @return a submenu just with a "remove" option, to delete the Item from the backend
    */
   getSubMenu(): RowOptions[] {
@@ -120,7 +126,8 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
-   * Open a form in which the user can upload a
+   * Open a form in which the user can 'upload' an application. Currently just boiler-plate, and will probably change
+   * substantially in the future. May not remain a dialog.
    */
   openAppsDialog(): void {
     let dialogRef = this.dialog.open(AddAppComponent, {
@@ -134,7 +141,9 @@ export class AppsListComponent extends GenericListComponent {
     // let sub = dialogRef.afterClosed().subscribe(result => {
     //   console.log('The dialog was closed');
     // },
-    // () => {},
+    // () => { // on error
+    //   sub.unsubscribe();
+    // },
     // () => { // when finished
     //   this.refreshData();
     //   sub.unsubscribe();

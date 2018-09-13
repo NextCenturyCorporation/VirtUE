@@ -1,8 +1,16 @@
 import { Component, OnInit, NgModule } from '@angular/core';
 
 /**
- * #uncommented
  * @class
+ * This class represents the header which is displayed on every page, allowing
+ * the navigation between the main pages of the application.
+ *
+ * Eventually changing this around somehow would be good - perhaps a "virtual machine" and "virtue" dropdown, each with links to
+ * the Templates and the Instances.
+ *
+ * A tab for records of administrator actions would also be useful.
+ *
+ * The dashboard is currently the webapp's landing page.
  */
 @Component({
   selector: 'app-header',
@@ -11,7 +19,8 @@ import { Component, OnInit, NgModule } from '@angular/core';
 })
 export class HeaderComponent implements OnInit {
 
-  navigation = [
+  /** The list of items to appear in the header, with their urls. */
+  private navigation = [
     {value: 'Dashboard', link: '/dashboard'},
     {value: 'Settings', link: '/settings'},
     {value: 'Users', link: '/users'},
@@ -20,6 +29,9 @@ export class HeaderComponent implements OnInit {
     {value: 'Applications', link: '/applications'}
   ];
 
+  /**
+   * Do nothing extra on render at the moment.
+   */
   ngOnInit() {
   }
 }

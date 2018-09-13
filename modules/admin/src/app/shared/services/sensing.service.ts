@@ -19,23 +19,49 @@ const httpHeader = {
 @Injectable()
 export class SensingService {
 
+  /** #uncommented */
   baseUrl: string;
+  /** #uncommented */
+  private jsonfile = './assets/json/sensing.json';
+  /** #uncommented */
+  private configUrl = 'sensing';
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(
     private httpClient: HttpClient
   ) { }
 
-  private jsonfile = './assets/json/sensing.json';
-  private configUrl = 'sensing';
-
-  public setBaseUrl( url: string ) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  public setBaseUrl( url: string ): void {
     this.baseUrl = url;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public getSensingLog(): Observable<any> {
     return this.httpClient.get<any>(this.baseUrl + this.configUrl);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public getStaticList(): Observable<any> {
     // console.log('using static data');
     return this.httpClient.get<any>(this.jsonfile);

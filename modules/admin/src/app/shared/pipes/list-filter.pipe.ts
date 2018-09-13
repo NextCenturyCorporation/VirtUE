@@ -10,6 +10,13 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'listFilter'
 })
 export class ListFilterPipe implements PipeTransform {
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   transform(list, sortColumn: string, filterColumn: string, filterValue: any, sortDirection: string, dontFilter: boolean): any[] {
     if (list.length < 2) {
       return list;
@@ -21,6 +28,12 @@ export class ListFilterPipe implements PipeTransform {
     return this.sortList(list, sortColumn, sortDirection);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   // only lets values through which match the filterValue.
   filterList(list, filterColumn: string, filterValue: string): any[] {
     let filteredList = list.filter(element => (element[filterColumn] === filterValue));
@@ -28,6 +41,12 @@ export class ListFilterPipe implements PipeTransform {
     return filteredList;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   sortList(list, propertyName: string, sortDirection: string): any[] {
 
     if (sortDirection === 'desc') {

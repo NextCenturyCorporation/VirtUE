@@ -24,15 +24,20 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 })
 export class UserMainTabComponent extends GenericMainTabComponent implements OnInit {
 
+  /** #uncommented */
   private roleUser: boolean;
+
+  /** #uncommented */
   private roleAdmin: boolean;
 
+  /** #uncommented */
   private fullImagePath: string;
 
   // re-classing parent's object
   protected item: User;
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -43,6 +48,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -57,28 +63,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
-   * @param
-   *
-   * @return
-   */
-  init() {
-    this.setUpChildTable();
-  }
-
-  /**
-   * @param
-   *
-   * @return
-   */
-  update(changes: any) {
-    this.childrenTable.items = this.item.children.asList();
-
-    if (changes.mode) {
-      this.mode = changes.mode;
-    }
-  }
-
-  /**
+   * #uncommented
    * @param
    *
    * @return
@@ -97,6 +82,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -113,6 +99,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
+   * #uncommented
    * @param
    *
    * @return
@@ -128,18 +115,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
-   * @param
-   *
-   * @return
-   */
-  getSubMenu(): RowOptions[] {
-    return [
-       new RowOptions("Edit", () => true, (i: Item) => this.viewItem(i)),
-       new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-    ];
-  }
-
-  /**
+   * #uncommented
    * @param
    *
    * @return
@@ -149,30 +125,17 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
-   * @param
    *
-   * @return
    */
-  setUpChildTable(): void {
-    if (this.childrenTable === undefined) {
-      return;
-    }
-
-    this.childrenTable.setUp({
-      cols: this.getColumns(),
-      opts: this.getSubMenu(),
-      coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table.
-      tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
+  hasColoredLabels(): boolean {
+    return true;
   }
 
   /**
+   * #uncommented
    * @param
    *
-   * @return
+   * @return any :(
    */
   getDialogRef(params: {height: string, width: string, data: any}) {
     return this.dialog.open( VirtueModalComponent, params);

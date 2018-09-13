@@ -7,13 +7,27 @@ import { Injectable } from '@angular/core';
  */
 @Injectable()
 export class MessageService {
+  
+  /** #uncommented */
   messages: string[] = [];
 
-  add(message: string) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  add(message: string): void {
     this.messages.push(message);
   }
 
-  clear() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  clear(): void {
     this.messages = [];
   }
 }

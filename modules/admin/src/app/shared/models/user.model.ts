@@ -14,9 +14,16 @@ import { DictList } from './dictionary.model';
  */
 export class User extends Item {
 
+  /** #uncommented */
   roles: string[];
 
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   // convert from whatever form the user object is in the database.
   constructor(userObj) {
     super();
@@ -46,7 +53,12 @@ export class User extends Item {
     }
   }
 
-
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   // Overrides Item
   getID(): string {
     return this.name;

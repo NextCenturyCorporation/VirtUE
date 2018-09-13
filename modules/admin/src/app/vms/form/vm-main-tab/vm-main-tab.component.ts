@@ -27,10 +27,18 @@ import { OSSet } from '../../../shared/sets/os.set';
 })
 export class VmMainTabComponent extends GenericMainTabComponent implements OnInit {
 
+  /** #uncommented */
   private newVersion: number;
 
+  /** #uncommented */
   protected item: VirtualMachine;
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(
       protected osOptions: OSSet,
       router: Router, dialog: MatDialog) {
@@ -38,14 +46,12 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     this.tabName = "General Info";
   }
 
-  update(changes: any) {
-    this.childrenTable.items = this.item.children.asList();
-
-    if (changes.mode) {
-      this.mode = changes.mode;
-    }
-  }
-
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   setUp(mode: Mode, item: Item): void {
     this.mode = mode;
     if ( !(item instanceof VirtualMachine) ) {
@@ -63,6 +69,12 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
 
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getColumns(): Column[] {
     return [
       new Column('name',    'Application Name', 5, 'asc'),
@@ -71,43 +83,34 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     ];
   }
 
-  getSubMenu(): RowOptions[] {
-    return [
-      // add the below once (or if) apps are given their own form page
-      // new RowOptions("View", () => true, (i: Item) => this.viewItem(i)),
-      new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-    ];
-  }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getNoDataMsg(): string {
     return 'No applications have been added yet. To add a template, click on the button "Add/Remove Application Packages" above.';
   }
 
-  init() {
-    this.setUpChildTable();
-  }
-
-  setUpChildTable(): void {
-    if (this.childrenTable === undefined) {
-      return;
-    }
-
-    this.childrenTable.setUp({
-      cols: this.getColumns(),
-      opts: this.getSubMenu(),
-      coloredLabels: false,
-      filters: [], // don't allow filtering on the form's child table.
-      tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
-  }
-
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   collectData(): boolean {
     this.item.version = String(this.newVersion);
     return true;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getDialogRef(params: {height: string, width: string, data: any}) {
     return this.dialog.open( AppsModalComponent, params);
   }

@@ -12,6 +12,9 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Item } from '../models/item.model';
 import { MessageService } from './message.service';
 
+/**
+ * #uncommented
+ */
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
@@ -24,28 +27,59 @@ const httpOptions = {
 @Injectable()
 export class ItemService {
 
+  /** #uncommented */
   private baseUrl: string;
   // private restApi = './assets/json/virtue_list.json';
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(
     private httpClient: HttpClient,
     private messageService: MessageService,
   ) {}
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public setBaseUrl(url: string): void {
     this.baseUrl = url;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public getItems(configUrl: string): Observable<Item[]> {
     let src = this.baseUrl + configUrl;
     return this.httpClient.get<Item[]>(src).catch(this.errorHandler);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public getItem(configUrl: string, id: string): Observable<any> {
     let url = this.baseUrl + configUrl + id;
     return this.httpClient.get<Item>(url).catch(this.errorHandler);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public createItem(configUrl: string, itemData: string): Observable<any> {
     let url = this.baseUrl + configUrl;
 
@@ -53,11 +87,17 @@ export class ItemService {
   }
 
   /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  /**
    * This works correctly, using promises. Everything else should be changed eventually to use them,
    * instead of subscriptions we only use once.
    * See https://codecraft.tv/courses/angular/http/http-with-promises/
    */
-  public deleteItem(configUrl: string, id: string) {
+  public deleteItem(configUrl: string, id: string): Promise<any> {
 
     let url = this.baseUrl + configUrl + id;
 
@@ -66,7 +106,13 @@ export class ItemService {
     return this.httpClient.delete(url).toPromise().catch(this.errorHandler);
   }
 
-  public updateItem(configUrl: string, id: string, itemData: string) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  public updateItem(configUrl: string, id: string, itemData: string): Observable<any> {
     let url = this.baseUrl + configUrl + id;
     // console.log("updateItem");
 
@@ -74,32 +120,55 @@ export class ItemService {
 
   }
 
-  public toggleItemStatus(configUrl: string, id: string) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  public toggleItemStatus(configUrl: string, id: string): Observable<any> {
     let url = this.baseUrl + configUrl + id + '/toggle';
     // console.log("toggleItemStatus");
     // console.log(url);
     return this.httpClient.get(url).catch(this.errorHandler);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public setItemStatus(configUrl: string, id: string, newStatus: boolean): Observable<any> {
     let url = this.baseUrl + configUrl + id + '/enable';
     // console.log("setUserStatus");
     // console.log(url);
     return this.httpClient.post(url, newStatus).catch(this.errorHandler);
   }
-  // TODO Is this set up correctly, how does it work, and do we need it?
-  // If yes then, should '.catch(this.errorHandler);' be appended to all requests?
+
   /**
+   * #uncommented
+   // TODO Is this set up correctly, how does it work, and do we need it?
+   // If yes then, should '.catch(this.errorHandler);' be appended to all requests?
+   // Did so anyway.
+   * @return ?
+   *
    * Handle Http operation that failed.
    * Let the app continue.
-   * @ param operation - name of the operation that failed
-   * @ param result - optional value to return as the observable result
+   * @param operation - name of the operation that failed
+   * @param result - optional value to return as the observable result
    */
-   errorHandler(error: HttpErrorResponse) {
+   errorHandler(error: HttpErrorResponse): Observable<any> {
      return Observable.throw(error.message || 'Server Error');
    }
 
-  private handleError<T>(operation = 'operation', result?: T) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  private handleError<T>(operation = 'operation', result?: T): any {
     return (error: any): Observable<T> => {
 
       // send the error to remote logging infrastructure
@@ -112,8 +181,15 @@ export class ItemService {
       return of(result as T);
     };
   }
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   /** Log a message with the MessageService */
-  private log (message: string) {
+  private log (message: string): void {
     this.messageService.add('ItemService: ' + message);
   }
 }

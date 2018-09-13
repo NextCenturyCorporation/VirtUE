@@ -13,6 +13,11 @@ import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-vm-modal',
   templateUrl: '../generic-modal/generic.modal.html',
@@ -21,10 +26,18 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class VmModalComponent extends GenericModalComponent implements OnInit {
 
+  /** #uncommented */
   checked = false;
 
+  /** #uncommented */
   selectedIDs: string[] = [];
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
@@ -36,6 +49,12 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       super(router, baseUrlService, itemService, dialog, dialogRef, data);
     }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getColumns(): Column[] {
     return [
       new Column('name',  'Template Name',          5, 'asc'),
@@ -43,6 +62,13 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       new Column('apps',  'Assigned Applications',  3, undefined, this.formatName, this.getChildren),
     ];
   }
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -52,6 +78,12 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     };
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -64,10 +96,22 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     };
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getNoDataMsg(): string {
     return  "No vms have been added at this time. To add a vm, click on the button \"Add Vm Template\" above.";
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   onPullComplete() {
     this.setItems(this.allVms.asList());
   }

@@ -25,6 +25,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class AppsModalComponent extends GenericModalComponent {
 
+  /**
+   * see [[GenericModalComponent.constructor]] for notes on parameters
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
@@ -36,6 +39,12 @@ export class AppsModalComponent extends GenericModalComponent {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getColumns(): Column[] {
     return [
       new Column('name',    'Application Name', 5, 'asc'),
@@ -44,6 +53,12 @@ export class AppsModalComponent extends GenericModalComponent {
     ];
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -53,6 +68,12 @@ export class AppsModalComponent extends GenericModalComponent {
     };
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -65,11 +86,23 @@ export class AppsModalComponent extends GenericModalComponent {
     };
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getNoDataMsg(): string {
     return "No apps appear to be available at this time.";
   }
 
-  onPullComplete() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  onPullComplete(): void {
     this.setItems(this.allApps.asList());
   }
 }

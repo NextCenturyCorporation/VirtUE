@@ -14,15 +14,30 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 })
 export class FileShareComponent implements OnInit {
 
+  /** #uncommented */
   fsValue: string;
+
+  /** #uncommented */
   fileShareTypes = [
     {value: 'NFS', viewValue: 'NFS'},
     {value: 'CIFS', viewValue: 'Windows (CIFS)'},
   ];
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor() { }
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  ngOnInit(): void {
   }
 
 }

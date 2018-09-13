@@ -64,7 +64,7 @@ export class DashboardComponent extends GenericListComponent {
   sensorData = [];
 
   /**
-   * see parent
+   * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
     router: Router,
@@ -157,7 +157,7 @@ export class DashboardComponent extends GenericListComponent {
    *
    * @return
    */
-  hasCertificates(d) {
+  hasCertificates(d): string {
     if (d.has_certificates) {
       return 'Yes';
     }
@@ -170,7 +170,7 @@ export class DashboardComponent extends GenericListComponent {
    *
    * @return
    */
-  onPullComplete() {
+  onPullComplete(): void {
     this.getSensingData();
   }
 
@@ -180,9 +180,9 @@ export class DashboardComponent extends GenericListComponent {
    *
    * @return
    */
-  getSensingData() {
+  getSensingData(): void {
     this.sensingService.setBaseUrl(this.baseUrl);
-    this.sensingService.getSensingLog().subscribe(sensorLog => {
+    let sub = this.sensingService.getSensingLog().subscribe(sensorLog => {
       if (sensorLog.length > 0) {
         this.sensorData = sensorLog[0].sensors;
         console.log(this.sensorData);
@@ -193,9 +193,19 @@ export class DashboardComponent extends GenericListComponent {
     },
     error => {
       // get static data
-      this.sensingService.getStaticList().subscribe(staticData => {
+      let staticSub = this.sensingService.getStaticList().subscribe(staticData => {
         this.sensorData = staticData[0].sensors;
+      },
+      () => { //on error
+        staticSub.unsubscribe();
+      },
+      () => {// on complete
+        staticSub.unsubscribe();
       });
+      sub.unsubscribe();
+    },
+    () => {
+      sub.unsubscribe();
     });
   }
 

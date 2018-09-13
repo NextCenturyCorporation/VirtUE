@@ -15,6 +15,7 @@ export interface Color {
  * @extends
  */
 export class ColorSet {
+  /** #uncommented */
   readonly list: Color[] = [
     {prettyName: "Maroon",       hex: "#800000",  htmlName: "maroon"},
     {prettyName: "Crimson",      hex: "#DC143C",  htmlName: "crimson"},
@@ -44,7 +45,14 @@ export class ColorSet {
     {prettyName: "Black",        hex: "#000000",  htmlName: "black"},
     {prettyName: "None",         hex: "transparent",  htmlName: "white"}
   ];
-  getList() {
+
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  getList(): Color[] {
     return this.list;
   }
 }
