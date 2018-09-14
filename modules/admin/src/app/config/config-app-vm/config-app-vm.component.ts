@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 
 /**
  * #uncommented
+ * 
+ * #Delete
+ *
  * @class
  * @extends
  */

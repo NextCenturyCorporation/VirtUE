@@ -119,10 +119,13 @@ export class AppsListComponent extends GenericListComponent {
 
   /**
    * overrides parent, [[GenericListComponent.getSubMenu]]
+   *
+   * see [[GenericPageComponent.openDialog]] for notes on that call.
+   *
    * @return a submenu just with a "remove" option, to delete the Item from the backend
    */
   getSubMenu(): RowOptions[] {
-    return [new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))];
+    return [new RowOptions("Remove", () => true, (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))];
   }
 
   /**

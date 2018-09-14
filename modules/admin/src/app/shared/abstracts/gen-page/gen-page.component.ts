@@ -6,6 +6,8 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
+import { DialogsComponent } from '../../../dialogs/dialogs.component';
+
 import { Column } from '../../models/column.model';
 import { DictList, Dict } from '../../models/dictionary.model';
 
@@ -18,14 +20,21 @@ import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
 
 /**
 * @class
- * This is the generic class which provides a central source for many common functions.
+ * This is the generic class which provides a central source for many common functions, currently:
+ *  - routing
+ *  - dialogs
+ *  - formatting
  */
 export abstract class GenericPageComponent {
 
   /**
    * @param router Handles the navigation to/from different pages. Injected, and so is constant across components.
+   * @param dialog Injected. This is a pop-up for verifying irreversable user actions
    */
-  constructor(  protected router: Router ) {
+  constructor(
+        protected router: Router,
+        protected dialog: MatDialog
+      ) {
     // override the route reuse strategy
     // Tell angular to load a fresh, new, component every time a URL that needs this component loads,
     // even if the user has been on that page before.
@@ -136,5 +145,36 @@ export abstract class GenericPageComponent {
    */
   goToPage(targetPath: string) {
     this.router.navigate([targetPath]);
+  }
+
+
+  /**
+   * This opens a dialog to confirm irreversible or dangerous user actions before carrying them out.
+   *
+   * @param action what's being done: e.g. 'delete', 'disable'
+   * @param target the item upon which the stated action would be performed.
+   */
+  openDialog(actionDescription: string, action: () => void): void {
+    let dialogRef = this.dialog.open(DialogsComponent, {
+      width: '450px',
+      data:  {
+          actionType: actionDescription
+        }
+    });
+
+    // TODO ask why the dialog is deliberately off-centered.
+    dialogRef.updatePosition({ top: '15%', left: '36%' });
+
+    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
+    let sub = dialogRef.componentInstance.getResponse.subscribe((shouldProceed) => {
+      console.log(shouldProceed);
+      if (shouldProceed) {
+        action();
+      }
+    },
+    ()=>{},
+    ()=>{
+      sub.unsubscribe();
+    });
   }
 }

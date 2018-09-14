@@ -13,9 +13,15 @@ import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents the main tab for a Virtue form.
+ *
+ * From here, the user can view/add/remove the [[Virtue]]'s attached virtual machines, view the Virtue's version number,
+ * and enable/disable the Virtue.
+ *
+ * Note that version number increases automatically.
+ *
+ * @extends [[GenericMainTabComponent]]
  */
 @Component({
   selector: 'app-virtue-main-tab',
@@ -24,32 +30,25 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 })
 export class VirtueMainTabComponent extends GenericMainTabComponent implements OnInit {
 
-  /** #uncommented */
+  /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
 
-  /** #uncommented */
+  /** re-classing parent's item object */
   protected item: Virtue;
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * see [[GenericMainTabComponent.constructor]] for parameters
    */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.tabName = "General Info";
   }
 
-
   /**
-   * #uncommented
-   * @param
+   * See [[GenericFormTabComponent.setUp]] for generic info
    *
-   * @return
+   * @param item a reference to the Item being displayed by this tab's parent form.
    */
-  setUp(mode: Mode, item: Item): void {
-    this.mode = mode;
+  setUp(item: Item): void {
     if ( !(item instanceof Virtue) ) {
       // TODO throw error
       console.log("item passed to virtue-main-tab which was not a Virtue: ", item);
@@ -57,31 +56,40 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     }
     this.item = item as Virtue;
 
-    this.setMode(mode);
+    this.updateVersion();
   }
 
   /**
-   * Overrides parent, [[GenericMainTabComponent.setMode]]
-   * @param newMode the Mode to set the page as.
+   * Overrides parent, [[GenericFormTabComponent.setMode]]
    *
+   * @param newMode the Mode to set the page as.
    */
   setMode(newMode: Mode): void {
     this.mode = newMode;
 
+    if (this.item) {
+      this.updateVersion();
+    }
+  }
+
+  /**
+   * Updates what value gets listed as the current version.
+   * In edit mode, the version is what version it'll be saved as; The current version + 1.
+   * Otherwise, it should just show the current version.
+   */
+  updateVersion(): void {
     this.newVersion = Number(this.item.version);
 
-    if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
+    // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
+    if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return what columns should show up in the virtue's VM children table
+   *         The first column, the VM's name, should be clickable if and only if the page is in view mode.
    */
-  // TODO start implementing view page from this.
   getColumns(): Column[] {
     let cols: Column[] = [
       new Column('os',          'OS',                    2, 'asc'),
@@ -98,12 +106,8 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     return cols;
   }
 
-
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return a string to be displayed in the children table, when the table's 'items' array is undefined or empty.
    */
   getNoDataMsg(): string {
     return "No virtual machine templates have been given to this Virtue yet. \
@@ -111,10 +115,11 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
   /**
-   * #uncommented
-   * @param
+   * Pull in whatever [[version]] the item should be saved as.
    *
-   * @return
+   * Eventually, add something to check name? I know names aren't IDs for virtues, but if two virtues
+   * in a list have the same name, how can they be easily distinguished?
+   * @return true always at the moment
    */
   collectData(): boolean {
     this.item.version = String(this.newVersion);
@@ -122,12 +127,17 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * Loads an VmModalComponent
+   * @param parameters to be passed into the modal
    */
-  getDialogRef(params: {height: string, width: string, data: any}) {
+  getDialogRef(params: {
+                          /** the height of the modal, in pixels */
+                          height: string,
+                          /** the width of the modal, in pixels */
+                          width: string,
+                          /** some type of data object to be passed into the modal - a container */
+                          data: any
+                        }) {
     return this.dialog.open( VmModalComponent, params);
   }
 }

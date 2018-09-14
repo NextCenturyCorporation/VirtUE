@@ -59,10 +59,10 @@ export class UserListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',        'Username',           2, 'asc',     undefined, undefined, (i: Item) => this.viewItem(i)),
-      new Column('roles',       'Authorized Roles',   3, 'asc',     this.formatRoles),
+      new Column('name',        'Username',           3, 'asc',     undefined, undefined, (i: Item) => this.viewItem(i)),
       new Column('childNames',  'Available Virtues',  4, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
-      new Column('status',      'Account Status',     3, 'desc',    this.formatStatus)
+      new Column('roles',       'Authorized Roles',   3, 'asc',     this.formatRoles),
+      new Column('status',      'Account Status',     2, 'desc',    this.formatStatus)
     ];
   }
 
@@ -129,8 +129,8 @@ export class UserListComponent extends GenericListComponent {
    */
   toggleItemStatus(user: User): void {
     console.log(user);
-    if (user.getName().toUpperCase() === "ADMIN" && user.enabled) {
-      this.openDialog('disable', user);
+    if (user.getName().toUpperCase() === 'ADMIN' && user.enabled) {
+      this.openDialog('Disable ' + user.getName(), (() => this.setItemStatus(user, false)));
       // TODO: Remove this message when/if this is no longer applicable.
       return;
     }

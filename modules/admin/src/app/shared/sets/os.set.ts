@@ -14,8 +14,7 @@ export class OSSet {
 
   /**
    * #uncommented
-   * @param
-   *
+   * 
    * @return
    */
   getList(): {prettyName: string, os: string}[] {

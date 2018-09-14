@@ -54,14 +54,43 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   }
 
   /**
+  * #uncommented
+  * See [[GenericFormTabComponent.init]] for generic info
+  * @param
+  *
+  * @return
+  */
+  init(mode: Mode): void {
+    this.setMode(mode);
+    this.setUpParentTable();
+  }
+
+  /**
    * #uncommented
+   * See [[GenericFormTabComponent.setUp]] for generic info
    * @param
    *
    * @return
    */
+  setUp(item: Item): void {
+    if ( !(item instanceof Virtue) ) {
+      // TODO throw error
+      console.log("item passed to virtue-usage-tab which was not a Virtue: ", item);
+      return;
+    }
+    this.item = item as Virtue;
+  }
+
+  /**
+  * #uncommented
+   * See [[GenericFormTabComponent.update]] for generic info
+  * @param
+  *
+  * @return
+  */
   update(changes: any): void {
     if (changes.mode) {
-      this.mode = changes.mode;
+      this.setMode(changes.mode);
     }
 
     if (changes.allUsers) {
@@ -75,32 +104,6 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
       }
     }
 
-  }
-
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
-  setUp(mode: Mode, item: Item): void {
-    this.mode = mode;
-    if ( !(item instanceof Virtue) ) {
-      // TODO throw error
-      console.log("item passed to virtue-usage-tab which was not a Virtue: ", item);
-      return;
-    }
-    this.item = item as Virtue;
-  }
-
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
-  init(): void {
-    this.setUpParentTable();
   }
 
   /**

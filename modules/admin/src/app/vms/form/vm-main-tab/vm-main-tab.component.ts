@@ -15,9 +15,14 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 import { OSSet } from '../../../shared/sets/os.set';
 
 /**
- * #uncommented
- * @class
- * @extends
+ * This class represents the main tab for a VirtualMachine template form.
+ *
+ * From here, the user can view/add/remove the [[VirtualMachine]]'s attached applications, view the VM template's version number,
+ * change the template's OS, and enable/disable the template.
+ *
+ * Note that version number increases automatically.
+ *
+ * @extends [[GenericMainTabComponent]]
  */
 @Component({
   selector: 'app-vm-main-tab',
@@ -27,33 +32,29 @@ import { OSSet } from '../../../shared/sets/os.set';
 })
 export class VmMainTabComponent extends GenericMainTabComponent implements OnInit {
 
-  /** #uncommented */
+  /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
 
-  /** #uncommented */
+  /** re-classing parent's item object */
   protected item: VirtualMachine;
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * see [[GenericMainTabComponent.constructor]] for inherited parameters
    */
   constructor(
+      /** the available operating systems that this VM can be set as. */
       protected osOptions: OSSet,
       router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.tabName = "General Info";
   }
 
   /**
-   * #uncommented
+   * See [[GenericFormTabComponent.setUp]] for generic info
    * @param
    *
    * @return
    */
-  setUp(mode: Mode, item: Item): void {
-    this.mode = mode;
+  setUp(item: Item): void {
     if ( !(item instanceof VirtualMachine) ) {
       // TODO throw error
       console.log("item passed to vm-main-tab which was not a VirtualMachine: ", item);
@@ -70,10 +71,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return what columns should show up in the VM's's application children table
    */
   getColumns(): Column[] {
     return [
@@ -83,22 +81,18 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     ];
   }
 
-
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return a string to be displayed in the children table, when the table's 'items' array is undefined or empty.
    */
   getNoDataMsg(): string {
     return 'No applications have been added yet. To add a template, click on the button "Add/Remove Application Packages" above.';
   }
 
   /**
-   * #uncommented
-   * @param
+   * Pull in whatever [[version]] the item should be saved as.
    *
-   * @return
+   * Eventually, add something to check for name uniqueness?
+   * @return true always at the moment
    */
   collectData(): boolean {
     this.item.version = String(this.newVersion);
@@ -106,12 +100,17 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * Loads an AppsModalComponent
+   * @param parameters to be passed into the modal
    */
-  getDialogRef(params: {height: string, width: string, data: any}) {
+  getDialogRef(params: {
+                          /** the height of the modal, in pixels */
+                          height: string,
+                          /** the width of the modal, in pixels */
+                          width: string,
+                          /** some type of data object to be passed into the modal - a container */
+                          data: any
+                        }) {
     return this.dialog.open( AppsModalComponent, params);
   }
 }

@@ -102,7 +102,7 @@
             <ng-container *ngFor="let element of column.list(i)">
               <ul>
                 <ul>
-                  <a *ngIf="column.link" (click)="column.link(element)">
+                  <a class="edit" *ngIf="column.link" (click)="column.link(element)">
                     {{ column.formatValue ? column.formatValue(element) : element.toString() }}
                   </a>
                   <div *ngIf="column.link === undefined">

@@ -140,10 +140,10 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
    * called in [[ngOnInit]]
    */
   initializeTabs(): void {
-    this.mainTab.init();
-    this.settingsTab.init();
-    this.usageTab.init();
-    // this.historyTab.init();
+    this.mainTab.init(this.mode);
+    this.settingsTab.init(this.mode);
+    this.usageTab.init(this.mode);
+    // this.historyTab.init(this.mode);
 
     // Must unsubscribe from all these when the VirtueComponent is destroyed
 
@@ -184,19 +184,19 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
   setUpTabs(): void {
     // Note that within each form, the item itself can't change, though its
     // attributes can.
-    this.mainTab.setUp(this.mode, this.item);
+    this.mainTab.setUp(this.item);
 
     // A table showing what virtues are running
     // Custom filter?
-    this.settingsTab.setUp(this.mode, this.item);
+    this.settingsTab.setUp(this.item);
 
-    this.usageTab.setUp(this.mode, this.item);
+    this.usageTab.setUp(this.item);
 
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.
     // Note that some children may not exist any more, or may have been updated.
     // Remember to make this sortable by version.
-    // this.historyTab.setUp();
+    // this.historyTab.setUp(this.item);
   }
 
   /**

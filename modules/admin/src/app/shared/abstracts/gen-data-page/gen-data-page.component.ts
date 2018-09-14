@@ -126,9 +126,9 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     router: Router,
     protected baseUrlService: BaseUrlService,
     protected itemService: ItemService,
-    protected dialog: MatDialog
+    dialog: MatDialog
   ) {
-    super(router);
+    super(router, dialog);
     // Initialize these empty. These get overwritten if/when their data is pulled from the backend.
     this.allUsers = new DictList<User>();
     this.allVirtues = new DictList<Virtue>();

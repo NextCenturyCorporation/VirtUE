@@ -13,9 +13,17 @@ import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.
 import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents the main tab for a User form.
+ *
+ * From here, the user (as in the system admin using this system, not [[User]] as in the object)
+ * can view/add/remove the [[User]]'s attached virtues, can add/remove the User's roles, and can enabled/disable the User.
+ *
+ * Note that usernames have to be unique. This is currently only enforced on this front-end, which
+ * should be rectified. The backend just takes usernames and makes a new entry if it hasn't seen that name before,
+ * and overwrites the current entry for that name if it has.
+ *
+ * @extends [[GenericMainTabComponent]]
  */
 @Component({
   selector: 'app-main-user-tab',
@@ -24,52 +32,28 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 })
 export class UserMainTabComponent extends GenericMainTabComponent implements OnInit {
 
-  /** #uncommented */
+  /** whether or not this user has 'user' rights - I assume this is a temporary role #TODO */
   private roleUser: boolean;
 
-  /** #uncommented */
+  /** whether or not this user has 'admin' rights over something */
   private roleAdmin: boolean;
 
-  /** #uncommented */
-  private fullImagePath: string;
-
-  // re-classing parent's object
+  /** re-classing parent's item object */
   protected item: User;
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * see [[GenericMainTabComponent.constructor]] for parameters
    */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.tabName = "General Info";
   }
 
   /**
-   * #uncommented
-   * @param
+   * See [[GenericFormTabComponent.setUp]] for generic info
    *
-   * @return
+   * @param item a reference to the Item being displayed by this tab's parent form.
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.USERS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
-    };
-  }
-
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
-  setUp(mode: Mode, item: Item): void {
-    this.mode = mode;
+  setUp(item: Item): void {
     if ( !(item instanceof User) ) {
       // TODO throw error
       console.log("item passed to main-user-tab which was not a User: ", item);
@@ -82,10 +66,11 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
-   * #uncommented
-   * @param
+   * See [[GenericFormTabComponent.collectData]]
+   * records the user's roles.
+   * #TODO add a check for username in create mode, to at least check for uniqueness.
    *
-   * @return
+   * @return true always at the moment
    */
   collectData(): boolean {
     this.item.roles = [];
@@ -99,45 +84,54 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * In view mode, make labels in Virtue and VMs columns clickable.
+   * @return what columns should show up in the user's virtue children table
    */
   getColumns(): Column[] {
-    return [
-      new Column('name',    'Virtue Template Name',   3, 'asc',     undefined,       undefined,           (i: Item) => this.viewItem(i)),
-      new Column('vms',     'Virtual Machines',       3, undefined, this.formatName, this.getChildren,    (i: Item) => this.viewItem(i)),
+    let cols: Column[] = [
       new Column('apps',    'Assigned Applications',  3, undefined, this.formatName, this.getGrandchildren),
       new Column('version', 'Version',                2, 'asc'),
       new Column('status',  'Status',                 1, 'asc', this.formatStatus)
     ];
+
+    if (this.mode === Mode.VIEW) {
+      cols.unshift(new Column('vms', 'Virtual Machines', 3, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)));
+      cols.unshift(new Column('name', 'Virtue Template Name', 3, 'asc', this.formatName, undefined, (i: Item) => this.viewItem(i)));
+    }
+    else {
+      cols.unshift(new Column('vms', 'Virtual Machines', 3, undefined, this.formatName, this.getChildren));
+      cols.unshift(new Column('name', 'Virtue Template Name', 3, 'asc'));
+    }
+
+    return cols;
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return a string to be displayed in the children table, when the table's 'items' array is undefined or empty.
    */
   getNoDataMsg(): string {
     return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
   }
 
   /**
-   *
+   * @return true always, since this table holds virtues.
    */
   hasColoredLabels(): boolean {
     return true;
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return any :(
+   * Loads an VirtueModalComponent
+   * @param parameters to be passed into the modal
    */
-  getDialogRef(params: {height: string, width: string, data: any}) {
+  getDialogRef(params: {
+                          /** the height of the modal, in pixels */
+                          height: string,
+                          /** the width of the modal, in pixels */
+                          width: string,
+                          /** some type of data object to be passed into the modal - a container */
+                          data: any
+                        }) {
     return this.dialog.open( VirtueModalComponent, params);
   }
 }

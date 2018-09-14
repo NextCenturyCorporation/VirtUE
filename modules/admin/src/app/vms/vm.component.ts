@@ -117,9 +117,9 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
    * called in [[ngOnInit]]
    */
   initializeTabs(): void {
-    this.mainTab.init();
-    this.usageTab.init();
-    // this.historyTab.init();
+    this.mainTab.init(this.mode);
+    this.usageTab.init(this.mode);
+    // this.historyTab.init(this.mode);
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
       this.setItemChildIDs(newChildIDs);
@@ -142,9 +142,9 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
   setUpTabs(): void {
     // Note that within each form, the item can't be reassigned; its attribute
     // can change though.
-    this.mainTab.setUp(this.mode, this.item);
+    this.mainTab.setUp(this.item);
 
-    this.usageTab.setUp(this.mode, this.item);
+    this.usageTab.setUp(this.item);
 
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.

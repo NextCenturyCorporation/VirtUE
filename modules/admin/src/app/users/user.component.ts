@@ -109,10 +109,10 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
    */
   initializeTabs() {
 
-    this.mainTab.init();
+    this.mainTab.init(this.mode);
     // These tabs don't exist yet
-    // this.activityTab.init();
-    // this.historyTab.init();
+    // this.activityTab.init(this.mode);
+    // this.historyTab.init(this.mode);
 
     // Must unsubscribe from all these when the UserComponent is destroyed
 
@@ -155,18 +155,18 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
   setUpTabs(): void {
     // Note that within each form, the item itself can't change, though its
     // attributes can.
-    this.mainTab.setUp(this.mode, this.item);
+    this.mainTab.setUp(this.item);
 
     // A table showing what virtues are running, what's been instantiated, when they've logged-on
     // and logged off, all that sort of thing. Probably could do it in one table, but I'd want to add
     // some sort of custom filter.
     // at least one of these.
-    // this.activityTab.setUp(this.mode, this.item);
+    // this.activityTab.setUp(this.item);
 
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.
     // Note that some children may not exist any more, or may have been updated.
-    // this.historyTab.setUp();
+    // this.historyTab.setUp(this.item);
   }
 
   /**

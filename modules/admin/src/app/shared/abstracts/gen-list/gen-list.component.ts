@@ -7,8 +7,6 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 
-import { DialogsComponent } from '../../../dialogs/dialogs.component';
-
 import { Column } from '../../models/column.model';
 import { RowOptions } from '../../models/rowOptions.model';
 import { DictList } from '../../models/dictionary.model';
@@ -198,6 +196,8 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
   /**
    * This defines the submenu that appears under each label in the first column of the table.
    *
+   * see [[GenericPageComponent.openDialog]] for notes on that openDialog call.
+   *
    * Overridden by apps-list and modals
    *
    * @return a set of clickable links which show up on every item in the table.
@@ -208,7 +208,7 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
       new RowOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
       new RowOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
       new RowOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
-      new RowOptions("Delete",  () => true,             (i: Item) => this.openDialog('delete', i))
+      new RowOptions("Delete",  () => true,             (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))
     ];
   }
 
@@ -220,39 +220,4 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
     return false;
   }
 
-  /**
-   * This opens a dialog to confirm irreversible or dangerous user actions before carrying them out.
-   *
-   * @param action what's being done: e.g. 'delete', 'disable'
-   * @param target the item upon which the stated action would be performed.
-   */
-  openDialog(action: string, target: Item): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          actionType: action,
-          targetName: target.getName()
-        }
-    });
-
-    // TODO ask why the dialog is deliberately off-centered.
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.getResponse.subscribe((shouldProceed) => {
-      console.log(shouldProceed);
-      if (shouldProceed) {
-        if ( action === 'delete') {
-          this.deleteItem(target);
-        }
-        if (action === 'disable') {
-          this.setItemStatus(target, false);
-        }
-      }
-    },
-    ()=>{},
-    ()=>{
-      sub.unsubscribe();
-    });
-  }
 }

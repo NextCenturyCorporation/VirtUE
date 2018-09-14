@@ -5,6 +5,9 @@ import { ResourceModalComponent } from '../resource-modal/resource-modal.compone
 
 /**
  * #uncommented
+ * 
+ * #Delete
+ *
  * @class
  * @extends
  */

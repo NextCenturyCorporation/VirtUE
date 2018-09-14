@@ -59,13 +59,41 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     this.tabName = "Virtual Machine Usage";
 
   }
+  /**
+  * #uncommented
+  * See [[GenericFormTabComponent.init]] for generic info
+  * @param
+  *
+  * @return
+  */
+  init(mode: Mode): void {
+    this.setMode(mode);
+    this.setUpParentTable();
+  }
 
   /**
    * #uncommented
+   * See [[GenericFormTabComponent.setUp]] for generic info
    * @param
    *
    * @return
    */
+  setUp(item: Item): void {
+    if ( !(item instanceof VirtualMachine) ) {
+      // TODO throw error
+      console.log("item passed to vm-usage-tab which was not a VirtualMachine: ", item);
+      return;
+    }
+    this.item = item as VirtualMachine;
+  }
+
+  /**
+  * #uncommented
+  * See [[GenericFormTabComponent.update]] for generic info
+  * @param
+  *
+  * @return
+  */
   update(changes: any): void {
     if (changes.allVirtues) {
       let allVirtues: DictList<Item> = changes.allVirtues;
@@ -79,35 +107,10 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     }
 
     if (changes.mode) {
-      this.mode = changes.mode;
+      this.setMode(changes.mode);
     }
   }
 
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
-  setUp(mode: Mode, item: Item): void {
-    this.mode = mode;
-    if ( !(item instanceof VirtualMachine) ) {
-      // TODO throw error
-      console.log("item passed to vm-usage-tab which was not a VirtualMachine: ", item);
-      return;
-    }
-    this.item = item as VirtualMachine;
-  }
-
-  /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
-  init(): void {
-    this.setUpParentTable();
-  }
 
   /**
    * #uncommented
