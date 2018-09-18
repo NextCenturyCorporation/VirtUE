@@ -6,7 +6,6 @@ import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { Column } from '../../../shared/models/column.model';
 import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
-import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
@@ -14,7 +13,7 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 
 /**
  * @class
- * This class represents the main tab for a Virtue form.
+ * This class represents the main tab for a Virtue form - [[VirtueComponent]]
  *
  * From here, the user can view/add/remove the [[Virtue]]'s attached virtual machines, view the Virtue's version number,
  * and enable/disable the Virtue.
@@ -94,7 +93,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     let cols: Column[] = [
       new Column('os',          'OS',                    2, 'asc'),
       new Column('childNames',  'Assigned Applications', 4, undefined,  this.formatName, this.getChildren),
-      new Column('status',      'Status',                2, 'asc',      this.formatStatus)
+      new Column('enabled',      'Status',                2, 'asc',      this.formatStatus)
     ];
     if (this.mode === Mode.VIEW) {
       cols.unshift(new Column('name', 'VM Template Name', 4, 'asc', undefined, undefined, (i: Item) => this.viewItem(i)));

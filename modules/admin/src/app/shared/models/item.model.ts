@@ -2,62 +2,82 @@ import { DictList } from './dictionary.model';
 import { Mode, Datasets } from '../enums/enums';
 
 /**
- * #uncommented
  * @class
+ * This class represents a generic item - a [[User]], [[Virtue]], [[VirtualMachine]], or [[Application]].
+ *
+ * It is one of the main building blocks of this system at the moment - everything is configured to
+ * hold and use Items.
+ *
+ * These are constructed from records retrieved from the backend in [[GenericDataPageComponent.recursivePullData]].
+ *  Those records have the same data as Items, but the names of attributes aren't consistent, and so a conversion
+ *  is done in each Item-subclass' constructor.
+ *
+ * The generic ways of interacting with Items are:
+ *  - Methods:
+ *    - [[getID]]()
+ *    - [[getName]]()
+ *    - [[setID]]()
+ *  - Attributes:
+ *    - [[enabled]]
+ *    - [[children]]
+ *    - [[childIDs]]
  */
 export abstract class Item {
 
-  /** #uncommented */
+  /** a unique identifing string - not used by user */
   id: string;
 
-  /** #uncommented */
+  /** a readable name for the item - is treated as ID for [[User]] */
   name: string;
 
-  /** #uncommented */
-  // status as a string, in addition to the bool, makes filtering much easier - 3 possible
-  // values need to be matched against it ('enabled', 'disabled', and '*').
-  status: string;
-
-  /** #uncommented */
+  /**
+   * The item's status, as a boolean.
+   *  - Users that are disabled should be unable to log in or take any action
+   *  - Virtue templates - being disabled prevents any derived instance from starting/showing up in a user's list,
+   *    and can't be added to any more User objects.
+   *  - VM templates - being disabled prevents their being added to any more Virtue templates, or their applications
+   *    from showing up on a user's list.
+   *  - Applications can't be disabled - should be done at the VM/Virtue level.
+   */
   enabled: boolean;
 
-  /** #uncommented */
+  /** a list of the IDs of this Item's children, saved to and loaded from backend */
   childIDs: string[];
 
-  /** #uncommented */
+  /**
+   * A [[DictList]] of references to this Item's children, as listed in childIDs.
+   * Not saved to backend.
+   */
   children: DictList<Item>;
 
-  /** #uncommented */
+  /**
+   * a shortened form the the last modificaiton date, suitible for display
+   * Note: don't sort anything on this field, sort on a format that progresses like
+   *    year:month:day:hour:minute:second
+   */
   modDate: string;
 
-  /** #uncommented */
-  // a link to the parent domain for this item - '/users', '/virtues', etc.
+  /** a link to the parent domain for this item - '/users', '/virtues', etc. */
   parentDomain: string;
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * Gives default values for necessary attributes.
    */
   constructor() {
-    this.status = "enabled";
     this.enabled = true;
-    this.childIDs = [];
     this.modDate = '';
 
     this.parentDomain = "NA";
 
+    this.childIDs = [];
     this.children = new DictList<Item>();
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * This function uses [[childIDs]] and the input dataset to build a list of references to the Items
+   * identified in childIDs.
+   * @param childDataset the dataset in which to to look for child IDs.
    */
-// Note that childDataset refers to the child of the items being built
   buildChildren(childDataset: DictList<Item>): void {
     this.children = new DictList<Item>();
     if (this.childIDs) {
@@ -98,17 +118,29 @@ export abstract class Item {
 
   /**
    * Overriden by User
-   * @return a unique identifier for this Item.
+   * @return an identifying and unique, but not necessarily readable, string for this Item.
    */
   getID(): string {
     return this.id;
   }
 
   /**
-   * #uncommented
-   * @param
+   * Sets the item's ID
+   * @param id the ID to set this to.
+   * Overridden by [[User.setID]]()
    *
-   * @return
+   * Currently used only when a form loads, to make sure that the same attribute gets initialized with an ID as
+   * would be querried by getID().
+   * See [[GenericFormComponent.ngOnInit]]()
+   */
+  setID(id: string) {
+    this.id = id;
+  }
+
+  /**
+   * This removes the child with the given id and index from childIDs and children.
+   * @param id the id of the Item to be remove
+   * @param index optional, calculated if not given. Just saves on time if it's available and can be passed in directly.
    */
   removeChild(id: string, index?: number): void {
     this.children.remove(id);
@@ -121,10 +153,9 @@ export abstract class Item {
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * Eventually this will be what is used by table to display the item's name - once the table is made to display classes that
+   *  implement a simple interface, consisting of at least toString().
+   * @return a string reperesenting this Item, usable for display to a user or when debugging.
    */
   toString(): string {
     return this.getName();

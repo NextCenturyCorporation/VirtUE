@@ -10,7 +10,7 @@ import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { Column } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
-import { RowOptions } from "../../shared/models/rowOptions.model";
+import { SubMenuOptions } from "../../shared/models/subMenuOptions.model";
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
@@ -124,8 +124,8 @@ export class AppsListComponent extends GenericListComponent {
    *
    * @return a submenu just with a "remove" option, to delete the Item from the backend
    */
-  getSubMenu(): RowOptions[] {
-    return [new RowOptions("Remove", () => true, (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))];
+  getSubMenu(): SubMenuOptions[] {
+    return [new SubMenuOptions("Remove", () => true, (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))];
   }
 
   /**

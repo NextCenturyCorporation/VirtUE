@@ -70,7 +70,7 @@ export class VirtueListComponent extends GenericListComponent {
       new Column('lastEditor',  'Last Editor',        2, 'asc'),
       new Column('version',     'Version',            1, 'asc'),
       new Column('modDate',     'Modification Date',  2, 'desc'),
-      new Column('status',      'Status',             1, 'asc', this.formatStatus)
+      new Column('enabled',      'Status',             1, 'asc', this.formatStatus)
     ];
   }
 

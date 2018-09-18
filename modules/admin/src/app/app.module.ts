@@ -87,8 +87,6 @@ import { DialogsComponent } from './dialogs/dialogs.component';
 
 
 import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
-import { JsonFilterPipe } from './shared/pipes/json-filter.pipe';
-import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
 
 import { BreadcrumbProvider } from './shared/providers/breadcrumb';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
@@ -130,8 +128,6 @@ import { MessageService } from './shared/services/message.service';
     PrintersComponent,
     ConfigSensorsComponent,
     ListFilterPipe,
-    JsonFilterPipe,
-    CountFilterPipe,
     PageNotFoundComponent,
 
     VmListComponent,

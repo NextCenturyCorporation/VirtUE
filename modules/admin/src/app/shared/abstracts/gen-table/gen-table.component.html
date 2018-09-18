@@ -53,10 +53,9 @@
 
     <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
     It is passed the preceeding list, followed by the values between colons -->
-    <!-- can make it pass a conditional that's setto some default in the calling class when setting up a table -->
+    <!-- can make it pass a conditional that's set to some default in the calling class when setting up a table -->
     <!-- May even be able to get rid of the filterValue? And just have the calling class change the condition? -->
-    <!-- <div *ngFor="let i of items | listFilter : sortColumn.name : sortDirection : filterColumn : filterCondition" -->
-    <div *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
+    <div *ngFor="let i of items | listFilterSort : sortColumn.name : sortDirection : filterColumn : filterCondition : update"
       appActiveClass [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }" fxLayout="row" class="mui-row table-row" >
       <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
                 [ngStyle]="{ 'background-color': i.color, 'left':'0px' }">
@@ -89,9 +88,9 @@
           </div>
 
           <div class="menu-options" >
-            <a *ngFor="let o of rowOptions; let idx = index" (click)="o.action(i)">
+            <a *ngFor="let o of subMenuOptions; let idx = index" (click)="o.action(i)">
               <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
-              <ng-container *ngIf="o.shouldAppear(i) && idx < rowOptions.length-1">|</ng-container>
+              <ng-container *ngIf="o.shouldAppear(i) && idx < subMenuOptions.length-1">|</ng-container>
             </a>
           </div>
         </span>

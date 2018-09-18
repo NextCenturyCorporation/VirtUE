@@ -12,9 +12,11 @@ const httpHeader = {
 };
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class will query the backend (or wherever?) for sensor data, and return for processing and display.
+ *
+ * Will likely change drastically.
+ * #uncommented
  */
 @Injectable()
 export class SensingService {

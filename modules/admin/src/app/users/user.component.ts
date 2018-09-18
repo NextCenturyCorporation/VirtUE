@@ -19,7 +19,6 @@ import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 import { Mode, Datasets } from '../shared/enums/enums';
-import { RowOptions } from '../shared/models/rowOptions.model';
 
 import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
@@ -64,8 +63,9 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
+        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
         <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
 
         <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
@@ -88,13 +88,14 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
    * see [[GenericFormComponent.constructor]] for notes on parameters
    */
   constructor(
+    location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/users', activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/users', location, activatedRoute, router, baseUrlService, itemService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User(undefined);
@@ -121,7 +122,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
       this.updatePage();
     });
 
-    // newStatus is just item.status - item is a common reference across tabs and form, so the actual value of the
+    // newStatus is just item.enabled - item is a common reference across tabs and form, so the actual value of the
     // parameter is extraneous. It just needs to emit something to let the form know that the user toggled the status.
     // In any mode but view, nothing extra should happen. The local copy of item will have its status toggled, and that's it.
     // In view mode, this toggling should actually make a change to the backend.
@@ -227,8 +228,8 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
     // so we're not trying to stringify a bunch of extra fields and data
     this.item.children = undefined;
-    this.item.childIDs = undefined;
-    this.item['roles'] = undefined;
+    this.item.childIDs = [];
+    this.item['roles'] = [];
     return true;
   }
 

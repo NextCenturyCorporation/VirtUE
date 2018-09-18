@@ -15,7 +15,6 @@ import { VirtualMachine } from '../shared/models/vm.model';
 import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
-import { RowOptions } from '../shared/models/rowOptions.model';
 
 import { Mode, ConfigUrls, Datasets } from '../shared/enums/enums';
 
@@ -74,8 +73,9 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
-          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
+          <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
           <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
 
           <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
@@ -110,13 +110,14 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
    * see [[GenericFormComponent.constructor]] for notes on parameters
    */
   constructor(
+    location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/virtues', activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/virtues', location, activatedRoute, router, baseUrlService, itemService, dialog);
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
@@ -259,7 +260,7 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     // table - that chunk of html has now been wrapped in a check, to not check
     // children's list size if children is undefined
     this.item.children = undefined;
-    // this.item.childIDs = undefined;
+    this.item.childIDs = [];
     return true;
   }
 

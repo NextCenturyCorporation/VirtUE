@@ -1,8 +1,7 @@
 import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter } from '@angular/core';
 import {  MatButtonModule,
           MatDialog,
-          MatIconModule,
-          MatIconRegistry
+          MatIconModule
 } from '@angular/material';
 
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,7 +13,7 @@ import { Column } from '../../../shared/models/column.model';
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
 import { Printer } from '../../../shared/models/printer.model';
 import { Mode, ConfigUrls, Datasets, Protocols } from '../../../shared/enums/enums';
-import { RowOptions } from '../../../shared/models/rowOptions.model';
+import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
@@ -24,10 +23,27 @@ import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-t
 /**
  * @class
  *
- * This class represents all the settings a virtue can be set to have.
+ * This class represents  a tab in [[VirtueComponent]], describing all the settings a virtue can be set to have.
  *
- * #uncommented
- * #TODO
+ * This has four sub-tabs at the moment:
+ *    - 'General'
+ *      - Color
+ *      - default browser
+ *      - provisioned or not (?) #TODO
+ *      - list of virtues this one can paste data into
+ *    - 'Network'
+ *      - list of permitted connections
+ *    - 'Resources'
+ *      - file system permissions
+ *        - editable list, generated from global settings? #TODO
+ *        - for each file system, R/W/E permissions can be given.
+ *      - Printers
+ *        - editable list, pulled from global settings.
+ *    - 'Sensors'
+ *      - Nothing at the moment #TODO
+ *
+ * At the moment, only 'color' is saved to the backend.
+ *
  * @extends [[GenericFormTabComponent]]
  */
 @Component({
@@ -37,33 +53,30 @@ import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-t
 })
 export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
 
-  /** #uncommented */
+  /** a table to display the Virtues that this Virtue is allowd to paste data into */
   @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent;
 
-  /** #uncommented */
-  // re-classing item, to make it easier and less error-prone to work with.
+  /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
-  /** #uncommented */
-  // local reference to the virtue-form's allVirtues variable.
+  /** local reference to the virtue-form's allVirtues variable. */
   private allVirtues: DictList<Virtue>;
 
-  /** #uncommented */
+  /** a list of available browsers, one of which can be set as default. Currently a placeholder. */
   browsers: string[];
 
-  /** #uncommented */
+  /** used in html page to iterate over the elements of an enum. */
   private keys = Object.keys;
 
-  /** #uncommented */
+  /** local reference, so html can iterate over this enum's elements. */
   private protocols = Protocols;
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * see [[GenericFormTabComponent.constructor]] for inherited parameters
    */
-  constructor( private matIconRegistry: MatIconRegistry, router: Router, dialog: MatDialog) {
+  constructor(
+    router: Router,
+    dialog: MatDialog) {
     super(router, dialog);
 
     this.item = new Virtue({});
@@ -81,18 +94,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
-   */
-  ngOnInit(): void {
-  }
-
-  /**
    * See [[GenericFormTabComponent.init]] for generic info
-   * @param
    *
+   * @param mode the [[Mode]] to set up the page in.
    */
   init(mode: Mode): void {
     this.setMode(mode);
@@ -103,11 +107,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     // easily display a line of text in one column, and checkboxes in the next three.
   }
 
-
   /**
    * See [[GenericFormTabComponent.setUp]] for generic info
-   * @param
    *
+   * @param item a reference to the Item being viewed/edited in the [[VirtueComponent]] parent
    */
   setUp(item: Item): void {
     if ( !(item instanceof Virtue) ) {
@@ -126,7 +129,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * upon mode change.
    *
    * @param changes an object, which should have an attribute `mode: Mode` if
-   *                this tab's mode should be updated. The attribute is optional.
+   *                this tab's mode should be updated, and/or an attribute `allVirtues: DictList<Item>`
+   *                if the paste-permission table is to be updated.
+   *                Either attribute is optional.
    */
   update(changes: any): void {
     if (changes.allVirtues) {
@@ -137,12 +142,13 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     if (changes.mode) {
       this.setMode(changes.mode);
+      this.setUpPasteableVirtuesTable();
     }
   }
 
   /**
-   * Atm there's nothing to pull in, everything gets set directly on the Virtue item. But we will need to add
-   * checks eventually, to ensure everything is valid. #TODO
+   * At the moment there's nothing to pull in, everything gets set directly on the Virtue item.
+   * But we will need to add checks eventually, to ensure everything is valid. #TODO
    *
    * Maybe make that network field be 4 subfields? #TODO
    *
@@ -273,6 +279,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
   /**
    * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+   *
+   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
    */
   setUpPasteableVirtuesTable(): void {
     if (this.allowedPasteTargetsTable === undefined) {
@@ -285,9 +293,22 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       coloredLabels: true,
       filters: [], // don't allow filtering on the form's child table.
       tableWidth: 10,
-      noDataMsg: 'Click "Add Virtue" to give this virtue permission to paste data into that one',
+      noDataMsg: this.getNoDataMsg(),
       hasCheckBoxes: false
     });
+  }
+
+  /**
+   * @return a message telling the user that no paste permissions have been given to this
+   * virtue, in a way that is clear and relevant for the current mode.
+   */
+  getNoDataMsg(): string {
+    if (this.mode === Mode.VIEW) {
+      return "This virtue hasn't been granted access to paste data into any other virtues.";
+    }
+    else {
+      return 'Click "Add Virtue" to give this virtue permission to paste data into that one';
+    }
   }
 
   /**
@@ -313,9 +334,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getPasteColumns(): Column[] {
     let cols: Column[] = [
-      new Column('apps',    'Assigned Applications',  4, undefined,  this.formatName, this.getGrandchildren),
+      new Column('apps',    'Available Applications',  4, undefined,  this.formatName, this.getGrandchildren),
       new Column('version', 'Version',                2, 'desc'),
-      new Column('status',  'Status',                 1, 'asc',       this.formatStatus)
+      new Column('enabled',  'Status',                 1, 'asc',       this.formatStatus)
     ];
 
     if (this.mode === Mode.VIEW) {
@@ -363,9 +384,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    *
    * @return Just a list with one option: to remove the attached Virtue from the list of ones this one can paste data into.
    */
-  getPasteSubMenu(): RowOptions[] {
+  getPasteSubMenu(): SubMenuOptions[] {
     return [
-       new RowOptions("Remove", () => true, (i: Item) => {
+       new SubMenuOptions("Remove", () => true, (i: Item) => {
          let index = this.item.allowedPasteTargets.indexOf(i.getID(), 0);
          if (index > -1) {
             this.item.allowedPasteTargets.splice(index, 1);
@@ -414,6 +435,14 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
         selectedIDs: this.item.allowedPasteTargets
       }
     });
+
+    // This is hacky, and should be fixed eventually. This makes the Virtue being edited not show up in the list of
+    // Virtues which this one can paste data into.
+    dialogRef.componentInstance.table.filterColumn = "id";
+
+    dialogRef.componentInstance.table.filterCondition = (attribute: any) => {
+      return String(attribute) !== this.item.getID();
+    };
 
     let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
       this.item.allowedPasteTargets = selectedVirtues;

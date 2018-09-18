@@ -1,13 +1,19 @@
 /**
- * #uncommented
  * @class
+ * This represents a snapshot of asensor.
+ *
+ * This more than likely will be drastically changed once sensor-querying is implemented
  */
 export class SensingModel {
 
-  /** #uncommented */
+  /** record when these values were queried */
   timestamp: string;
 
-  /** #uncommented */
+  /**
+   * the data that this sensor holds. Almost certainly this will be broken up into different sensor classes,
+   * unless all virtues have the same sensors and all sensors have the same update rates, areas of relevance,
+   * and use cases.
+   */
   sensors: [
     {
       virtue_id: string,
@@ -27,6 +33,6 @@ export class SensingModel {
     }
   ];
 
-  /** #uncommented */
+  /** if the data isn't functioning, for any reason. */
   error: boolean;
 }

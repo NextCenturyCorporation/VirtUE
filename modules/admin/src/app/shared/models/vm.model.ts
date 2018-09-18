@@ -7,7 +7,6 @@ import { Application } from './application.model';
 import { DictList } from './dictionary.model';
 
 /**
- * #uncommented
  * @class
  * @extends
  *
@@ -17,34 +16,28 @@ import { DictList } from './dictionary.model';
  */
 export class VirtualMachine extends Item {
 
-  /** #uncommented */
-  id: string;
-
-  /** #uncommented */
+  /** The operating system this VM should be set up to have */
   os: string;
 
-  /** #uncommented */
+  /** what version of edit this template currently is at */
   version: string;
 
-  /** #uncommented */
-  templatePath: string;
+  // /** #uncommented what is this? */
+  // templatePath: string;
 
-  /** #uncommented */
-  loginUser: string;
+  // /** #uncommented what is this? how should it be set or used? */
+  // loginUser: string;
 
-  /** #uncommented */
-  lastModification: string | Date;
-
-  /** #uncommented */
+  /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
 
+  /** A full Date, of the last time this record was changed on the backend. */
+  lastModification: Date;
+
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * convert from whatever form the vm object is in the database.
+   * @param vmObj a virtual machine record, retrieved from the backend, which we want to convert into a VirtualMachine.
    */
-  // convert from whatever form the vm object is in the database.
   constructor(vmObj) {
     super();
     if (vmObj) {
@@ -60,7 +53,6 @@ export class VirtualMachine extends Item {
       this.lastModification = vmObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
       this.os = vmObj.os;
-      this.status = vmObj.enabled ? 'enabled' : 'disabled';
 
       this.parentDomain = '/vm-templates';
     }

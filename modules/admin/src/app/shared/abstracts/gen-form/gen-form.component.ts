@@ -13,9 +13,6 @@ import { ItemService } from '../../services/item.service';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../models/item.model';
-import { DictList } from '../../models/dictionary.model';
-import { RowOptions } from '../../models/rowOptions.model';
-import { Column } from '../../models/column.model';
 import { Mode, Datasets } from '../../enums/enums';
 
 import { GenericDataPageComponent } from '../gen-data-page/gen-data-page.component';
@@ -119,10 +116,12 @@ export abstract class GenericFormComponent extends GenericDataPageComponent impl
   /**
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    * @param parentDomain Used to check page for errors, and navigate back to the list page for this type of item upon save or cancel
+   * @param location used to change the URL without making a full redirect and reload.
    * @param activatedRoute used to get the path, to parse out the requested item's ID.
    */
   constructor(
     protected parentDomain: string,
+    protected location: Location,
     protected activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
@@ -151,6 +150,7 @@ export abstract class GenericFormComponent extends GenericDataPageComponent impl
     // Parse url, making sure it's set up the expected way.
 
     let url = this.router.routerState.snapshot.url;
+    // console.log(this.location);
     // The url may start with an initial slash; remove it if it does.
     if (url[0] === '/') {
       url = url.substr(1);
@@ -203,7 +203,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    */
   ngOnInit(): void {
     if (this.mode !== Mode.CREATE) {
-      this.item.id = this.activatedRoute.snapshot.params['id'];
+      this.item.setID(this.activatedRoute.snapshot.params['id']);
     }
 
     this.cmnDataComponentSetup();
@@ -281,12 +281,12 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * Note that this doesn't initialize item.children.
    */
   initItem(): void {
-    let _item = this[this.datasetName].get(this.item.id);
+    let _item = this[this.datasetName].get(this.item.getID());
     if (_item) {
       this.item = _item;
     }
     else {
-      console.log("No item with ID", this.item.id, "found in dataset", this.datasetName + ".");
+      console.log("No item with ID", this.item.getID(), "found in dataset", this.datasetName + ".");
       // TODO let the user know it didn't load
 
       // return to parent list page without saving anything.
@@ -302,19 +302,39 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
   }
 
   /**
-   * Re-open this form in edit mode.
+   * Change over to edit mode. Does no saving or processing, just re-renders things
+   * in the new mode. Doesn't
+   * This now just changes the URL, re-sets [[mode]], and asks the tabs
+   * to update.
    */
   toEditMode(): void {
-    this.editItem(this.item);
+    // this.editItem(this.item); // this reloads the whole page
+    this.location.go(this.item.getPageRoute(Mode.EDIT));
+    // this.setMode(); // this uses the router state, which isn't affected by location.*()
+    this.mode = Mode.EDIT;
+    this.updateTabs();
+
   }
 
   /**
-   * Re-open this item in view mode. Does no processing or saving first.
-   * TODO: Can this be changed to just reset something? As opposed to loading
-   * the whole page again?
+   * Change over to view mode.
+   *
+   * Should only be called after saving the previously-entered data.
+   *
+   * This now just changes the URL, re-sets [[mode]], and re-pulls data
+   *
+   * It used to call this.viewItem(this.item), but that reloads the whole page.
+   *
+   * And note that mode has to be set explicitly - even though it looks like you could call
+   * this.setMode() after changing the URL and have the mode be set correctly automatically,
+   * setMode uses the router state and not the URL directly. Apparently the router state isn't
+   * affected by any Location method.
    */
   toViewMode(): void {
-    this.viewItem(this.item);
+    this.location.go(this.item.getPageRoute(Mode.VIEW));
+
+    this.mode = Mode.VIEW;
+    this.cmnDataComponentSetup();
   }
 
   /**
@@ -327,20 +347,15 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
   /**
    * Save changes to backend and return to list page. Or should it be to previous domain?
    */
-  save(): void {
+  saveAndReturn(): void {
     this.createOrUpdate(() => this.toListPage());
   }
 
   /**
    * save changes to backend, staying on current page (but switching to view mode)
    */
-  apply(): void {
+  save(): void {
     this.createOrUpdate(() => this.toViewMode());
-    // TODO: Can this be changed to just reset something? As opposed to loading
-    // the whole page again?
-    // It seems fast enough at the moment, but perhaps that would change with more data and a longer transit time
-    //    (i.e., not a local database)
-
   }
 
   /**

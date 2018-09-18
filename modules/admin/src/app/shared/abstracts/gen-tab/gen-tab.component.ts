@@ -19,7 +19,6 @@ import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
 import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
-import { RowOptions } from '../../models/rowOptions.model';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
@@ -75,11 +74,18 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
   ngOnInit(): void {}
 
   /**
-  * This does whatever setup can be done at render time, before data is available.
-  * Usually, if the tab has a table this is where table.setUp({...}) would be called.
-  *
-  * @param mode the mode to set up this tab as being in. Must be passed in.
-  */
+   * This does whatever setup can be done at render time, before data is available.
+   * Usually, if the tab has a table this is where table.setUp({...}) would be called.
+   *
+   * #TODO itemCopy, a copy of item holding only the things which are to be saved (meaning not children), which can
+   *  be compareed against every field and show an exclaimation mark if changes have been made.
+   * use onChange method? or does that only happen on enter, for text fields?
+   *
+   * Only enable save button if any fields are marked as edited?
+   *
+   * show red exclaimation mark on tab with changed, unsaved data
+   * @param mode the mode to set up this tab as being in. Must be passed in.
+   */
   abstract init(mode: Mode): void;
 
   /**
@@ -108,6 +114,7 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
 
   /**
    * Sets the tab's mode.
+   * Overridden by most tabs that show a table, to re-define it based on whether the page is in view mode.
    *
    * @param newMode the Mode to set the page as.
    */

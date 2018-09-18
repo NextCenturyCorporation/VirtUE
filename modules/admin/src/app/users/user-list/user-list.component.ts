@@ -62,7 +62,7 @@ export class UserListComponent extends GenericListComponent {
       new Column('name',        'Username',           3, 'asc',     undefined, undefined, (i: Item) => this.viewItem(i)),
       new Column('childNames',  'Available Virtues',  4, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
       new Column('roles',       'Authorized Roles',   3, 'asc',     this.formatRoles),
-      new Column('status',      'Account Status',     2, 'desc',    this.formatStatus)
+      new Column('enabled',      'Account Status',     2, 'desc',    this.formatStatus)
     ];
   }
 

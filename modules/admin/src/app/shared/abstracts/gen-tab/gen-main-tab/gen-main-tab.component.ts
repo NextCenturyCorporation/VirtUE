@@ -6,7 +6,7 @@ import { DialogsComponent } from '../../../../dialogs/dialogs.component';
 
 import { Item } from '../../../models/item.model';
 import { Column } from '../../../models/column.model';
-import { RowOptions } from '../../../models/rowOptions.model';
+import { SubMenuOptions } from '../../../models/subMenuOptions.model';
 import { Mode } from '../../../enums/enums';
 
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
@@ -91,7 +91,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
       // But that might be too opaque.
       this.setMode(changes.mode);
       this.childrenTable.colData = this.getColumns();
-      this.childrenTable.rowOptions = this.getSubMenu();
+      this.childrenTable.subMenuOptions = this.getSubMenu();
     }
   }
 
@@ -170,15 +170,16 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    *
    * @return a one-element list of row options; 'View' if mode is view, or 'Remove' otherwise.
    */
-  getSubMenu(): RowOptions[] {
+  getSubMenu(): SubMenuOptions[] {
     if (this.mode === Mode.VIEW) {
       return [
-         new RowOptions("View", () => true, (i: Item) => this.viewItem(i))
+         new SubMenuOptions("View", () => true, (i: Item) => this.viewItem(i)),
+         new SubMenuOptions("Edit", () => true, (i: Item) => this.editItem(i))
       ];
     }
     else {
       return [
-         new RowOptions("Remove",
+         new SubMenuOptions("Remove",
                         () => true,
                         (i: Item) => this.openDialog( 'Delete ' + i.getName(),
                                                       () => this.item.removeChild( i.getID() )

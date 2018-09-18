@@ -1,9 +1,11 @@
 import { Item } from './item.model';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a column in a [[GenericTableComponent]]
+ *
+ * A set of these are defined by each component that contains a table.
+ *
  */
 export class Column {
 
@@ -23,7 +25,7 @@ export class Column {
   colWidth: number;
 
   /**
-   * The defualt sort direction when a new column is sorted on.
+   * The default sort direction when a new column is sorted on.
    * Either 'asc' or 'desc'. Usually 'asc'.
    */
   sortDefault: string;
@@ -60,10 +62,10 @@ export class Column {
    * @param name The attribute within Item to be displayed in this column, if not a list and formatValue is not defined.
    * @param prettyName The label to be displayed for this column in the table header
    * @param colWidth The width this column should be; the sum for all columns must be 12.
-   * @param sortDefault The default direction to sort this column on. Ignored if this column holds lists.
-   * @param list A function which returns a list of Items to be displayed in each entry for this column.
-   * @param formatValue A function that takes an item, and returns a string to be displayed in this column for that item.
-   * @param link A function that is called when this item is clicked.
+   * @param sortDefault The default direction to sort this column on. Ignored if this column holds lists. Optional.
+   * @param list A function which returns a list of Items to be displayed in each entry for this column. Optional.
+   * @param formatValue A function that takes an item, and returns a string to be displayed in this column for that item. Optional.
+   * @param link A function that is called when this item is clicked. Optional.
    *
    */
   constructor(name: string, prettyName: string, colWidth: number, sortDefault?: string,

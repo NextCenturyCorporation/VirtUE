@@ -10,7 +10,7 @@ import 'rxjs/add/observable/of';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Column } from '../../models/column.model';
-import { RowOptions } from '../../models/rowOptions.model';
+import { SubMenuOptions } from '../../models/subMenuOptions.model';
 import { DictList } from '../../models/dictionary.model';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
@@ -62,7 +62,7 @@ export class GenericTableComponent {
    * This is a list of the clickable links/options that show up under the element in the
    * first column of each row in the table
    */
-  rowOptions: RowOptions[];
+  subMenuOptions: SubMenuOptions[];
 
   /**
    * This list is what gets actually displayed in the table.
@@ -87,6 +87,23 @@ export class GenericTableComponent {
    */
   filterOptions: {text: string, value: string}[];
 
+  /**
+   * Currently only the status/enabled column can be filtered on.
+   */
+  filterColumn: string = 'enabled';
+
+  /** The current value the table should be filtered by - only matching items are displayed. */
+  filterValue: string = '*';
+
+  filterCondition = (attribute: any) => {return String(attribute) === this.filterValue || this.filterValue === '*'};
+
+  /**
+   * Call to re-render the table on a change to filterValue.
+   * this just gets toggled, and is passed into the listFIlterSort pipe where it is ignored.
+   * The fact that its value changes though, makes angular re-render the table, filtering it based on the currect criteria.
+   */
+  update: boolean = false;
+
   /** The message that should show up intead of any table data, when [[items]] is undefined or empty. */
   noDataMessage: string;
 
@@ -95,9 +112,6 @@ export class GenericTableComponent {
 
   /** The column which should the table should be sorted by */
   sortColumn: Column;
-
-  /** The current value the table should be filtered by - only matching items are displayed. */
-  filterValue: string = '*';
 
   /**
    * Whether the table should be sorted in an ascending or descending pattern (valid values are 'asc'|'desc')
@@ -120,7 +134,7 @@ export class GenericTableComponent {
     this.colData = [this.sortColumn];
     this.filterOptions = [];
     this.items = [];
-    this.rowOptions = [];
+    this.subMenuOptions = [];
     this.tableWidth = 12; // default to take up full space in container
     this.hasCheckbox = false;
     this.selectedIDs = [];
@@ -138,8 +152,8 @@ export class GenericTableComponent {
     /** see this.[[colData]] */
     cols: Column[];
 
-    /** see this.[[rowOptions]] */
-    opts: RowOptions[];
+    /** see this.[[subMenuOptions]] */
+    opts: SubMenuOptions[];
 
     /** see this.[[hasColoredLabels]] */
     coloredLabels: boolean;
@@ -163,7 +177,7 @@ export class GenericTableComponent {
     selectedIDs?: string[]}
   ): void {
     this.colData = params.cols;
-    this.rowOptions = params.opts;
+    this.subMenuOptions = params.opts;
     this.hasColoredLabels = params.coloredLabels;
     this.filterOptions = params.filters;
     this.noDataMessage = params.noDataMsg;
@@ -172,7 +186,7 @@ export class GenericTableComponent {
     }
 
     this.hasCheckbox = params.hasCheckBoxes;
-    
+
     if (params.selectedIDs) {
       this.selectedIDs = params.selectedIDs;
     }
@@ -221,7 +235,7 @@ export class GenericTableComponent {
   }
 
   /**
-   * Empties this.[[selectedIDs]]
+   * Empties [[selectedIDs]]
    */
   clearSelections(): void {
     this.selectedIDs = [];
@@ -236,6 +250,8 @@ export class GenericTableComponent {
    */
   filterList(filterValue: string): void {
     this.filterValue = filterValue;
+    // The value of [[update]] is irrelevant - merely the fact that its value changes will refresh the table.
+    this.update = !this.update;
   }
 
   /**

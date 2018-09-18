@@ -6,7 +6,6 @@ import { Item } from '../../../shared/models/item.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Column } from '../../../shared/models/column.model';
 import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
-import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
@@ -15,7 +14,7 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 import { OSSet } from '../../../shared/sets/os.set';
 
 /**
- * This class represents the main tab for a VirtualMachine template form.
+ * This class represents the main tab for a VirtualMachine template form - [[VmComponent]]
  *
  * From here, the user can view/add/remove the [[VirtualMachine]]'s attached applications, view the VM template's version number,
  * change the template's OS, and enable/disable the template.

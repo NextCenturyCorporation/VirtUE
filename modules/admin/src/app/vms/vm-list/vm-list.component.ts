@@ -59,12 +59,12 @@ export class VmListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',        'Template Name',         2, 'asc', undefined, undefined, (i: Item) => this.editItem(i)),
+      new Column('name',        'Template Name',         2, 'asc', undefined, undefined, (i: Item) => this.viewItem(i)),
       new Column('os',          'OS',                    1, 'asc'),
       new Column('childNames',  'Assigned Applications', 4, undefined, this.formatName, this.getChildren),
       new Column('lastEditor',  'Last Modified By',      2, 'asc'),
       new Column('modDate',     'Modified Date',         2, 'desc'),
-      new Column('status',      'Status',                1, 'asc', this.formatStatus)
+      new Column('enabled',      'Status',                1, 'asc', this.formatStatus)
     ];
   }
 

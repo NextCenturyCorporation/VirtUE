@@ -13,9 +13,11 @@ import { GenericModalComponent } from '../generic-modal/generic.modal';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a list of applications, which can be selected.
+ *
+ *
+ * @extends [[GenericModalComponent]]
  */
 @Component({
   selector: 'app-modal',
@@ -40,10 +42,7 @@ export class AppsModalComponent extends GenericModalComponent {
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return what columns should show up in the the app selection table
    */
   getColumns(): Column[] {
     return [
@@ -54,10 +53,9 @@ export class AppsModalComponent extends GenericModalComponent {
   }
 
   /**
-   * #uncommented
-   * @param
+   * This page only needs to list all available apps, and doesn't need ot request any other data.
    *
-   * @return
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
@@ -69,10 +67,8 @@ export class AppsModalComponent extends GenericModalComponent {
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {
       prettyTitle: string,
@@ -87,20 +83,14 @@ export class AppsModalComponent extends GenericModalComponent {
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return a string to be displayed in the virtue table, when no apps exit.
    */
   getNoDataMsg(): string {
-    return "No apps appear to be available at this time.";
+    return "There are no applications available to add. Add new applications through the Applications tab.";
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * populates the table once data is available.
    */
   onPullComplete(): void {
     this.setItems(this.allApps.asList());

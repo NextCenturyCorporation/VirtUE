@@ -1,56 +1,87 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 /**
- * #uncommented
  * @class
- * @extends
- * This filter can be used with virtue, virtual machine list pages
+ * This class filters, sorts, and returns a list based on input parameters.
+ * Is generic - sorting and filtering can be done on any column.
+ *
+ * Is designated as a Pipe, so that angular can pass a list of items into it before building an ngFor construct.
+ *
+ * Note that sortColumn and filterColumn are names, while in [[GenericTableComponent]] they are Columns.
+ * Just pass the name in here.
+ *
+ * @example usage:
+ *            <div *ngFor="let i of itemList | listFilterSort : sortColumn : sortDirection : filterColumn : filterCondition : update">
+ *              stuff, {{i.getName()}}, whatever
+ *            </div>
+ *
+ * Note that filtering removes anything that *doesn't*
+ *
  */
 @Pipe({
-  name: 'listFilter'
+  name: 'listFilterSort'
 })
 export class ListFilterPipe implements PipeTransform {
 
   /**
-   * #uncommented
-   * @param
+   * @param list the list to be filtered.
+   * @param sortColumn the name of the attribute in each table element, which the list should be sorted on.
+   * @param sortDirection the direction in which the list should be sorted. Should be either 'asc' or 'desc'
+   * @param filterColumn the name of the attribute in each table element which should be used, when applying the filter.
+   * @param filterCondition a function that returns true if the item, with its given attribute, should remain in the list.
+   *    Defined in the component that defined the GenericTableComponent.
+   *  - #TODO currently it defaults to sorting on the status column (item.enabled), but that should be
+   *    set/defined in gen-list and not gen-table
+   *  - Should look like: (attribute: any) => {return someBooleanConditional;}
+   *
+   * @param update completely ignored, but a chage makes the table being filtered re-render itself.
    *
    * @return
    */
-  transform(list, sortColumn: string, filterColumn: string, filterValue: any, sortDirection: string, dontFilter: boolean): any[] {
+  transform(list: any[],
+            sortColumn: string, sortDirection: string,
+            filterColumn: string, filterCondition: ((attribute) => boolean),
+            update: boolean
+  ): any[] {
     if (list.length < 2) {
       return list;
     }
-    if (!dontFilter) {
-      list = this.filterList(list, filterColumn, filterValue);
-    }
 
-    return this.sortList(list, sortColumn, sortDirection);
+    // this sorts list in-place, and so doesn't need to return anything.
+    this.sortList(list, sortColumn, sortDirection);
+
+    // filterList actually returns a new list, and so its return value must be saved.
+    return this.filterList(list, filterColumn, filterCondition)
   }
 
   /**
-   * #uncommented
-   * @param
+   * Filters the input list.
+   * Only lets values through, for which filterCondition returns true.
    *
-   * @return
+   * @param list the list to be filtered.
+   * @param filterColumn the name of the attribute in each elemen which should be used to filter it in or out.
+   * @param filterCondition a function, defined in the component that defined the GenericTableComponent. See note
+   *    on [[transform]].
+   *
+   * @return the list, filtered
    */
-  // only lets values through which match the filterValue.
-  filterList(list, filterColumn: string, filterValue: string): any[] {
-    let filteredList = list.filter(element => (element[filterColumn] === filterValue));
+  filterList(list: any[], filterColumn: string, filterCondition: ((attribute) => boolean)): any[] {
+
+    let filteredList = list.filter(element => filterCondition(element[filterColumn]));
 
     return filteredList;
   }
 
   /**
-   * #uncommented
-   * @param
+   * Sorts a input list in-place, based on given paramters.
    *
-   * @return
+   * @param list the list to be filtered.
+   * @param sortColumn the name of the attribute in each table element, which the list should be sorted on.
+   * @param sortDirection the direction in which the list should be sorted. Should be either 'asc' or 'desc'
    */
-  sortList(list, propertyName: string, sortDirection: string): any[] {
+  sortList(list: any[], propertyName: string, sortDirection: string): void {
 
     if (sortDirection === 'desc') {
-      //  console.log('sorting list by desc order');
       list.sort((leftSide, rightSide): number => {
         let left = leftSide[propertyName];
         let right = rightSide[propertyName];
@@ -69,7 +100,6 @@ export class ListFilterPipe implements PipeTransform {
         return 0;
       });
     } else {
-      // console.log('sorting list by asc order');
       list.sort((leftSide, rightSide): number => {
         let left = leftSide[propertyName];
         let right = rightSide[propertyName];
@@ -88,6 +118,5 @@ export class ListFilterPipe implements PipeTransform {
         return 0;
       });
     }
-    return list;
   }
 }

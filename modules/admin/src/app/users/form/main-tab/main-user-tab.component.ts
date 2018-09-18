@@ -6,7 +6,6 @@ import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { Column } from '../../../shared/models/column.model';
 import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
-import { RowOptions } from '../../../shared/models/rowOptions.model';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 
@@ -14,7 +13,7 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 
 /**
  * @class
- * This class represents the main tab for a User form.
+ * This class represents the main tab for a User form - [[UserComponent]]
  *
  * From here, the user (as in the system admin using this system, not [[User]] as in the object)
  * can view/add/remove the [[User]]'s attached virtues, can add/remove the User's roles, and can enabled/disable the User.
@@ -91,7 +90,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     let cols: Column[] = [
       new Column('apps',    'Assigned Applications',  3, undefined, this.formatName, this.getGrandchildren),
       new Column('version', 'Version',                2, 'asc'),
-      new Column('status',  'Status',                 1, 'asc', this.formatStatus)
+      new Column('enabled',  'Status',                 1, 'asc', this.formatStatus)
     ];
 
     if (this.mode === Mode.VIEW) {

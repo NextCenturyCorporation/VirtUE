@@ -14,9 +14,10 @@ import { GenericModalComponent } from '../generic-modal/generic.modal';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class represents a list of Virtual machine templates, which can be selected.
+ *
+ * @extends [[GenericModalComponent]]
  */
 @Component({
   selector: 'app-vm-modal',
@@ -26,17 +27,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class VmModalComponent extends GenericModalComponent implements OnInit {
 
-  /** #uncommented */
-  checked = false;
-
-  /** #uncommented */
-  selectedIDs: string[] = [];
-
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * see [[GenericModalComponent.constructor]] for notes on parameters
    */
   constructor(
       router: Router,
@@ -50,10 +42,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return what columns should show up in the the VM selection table
    */
   getColumns(): Column[] {
     return [
@@ -64,10 +53,9 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   }
 
   /**
-   * #uncommented
-   * @param
+   * This page just needs to show all VMs, and the apps assigned to each VM.
    *
-   * @return
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
@@ -79,10 +67,8 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {
       prettyTitle: string,
@@ -97,22 +83,16 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * @return a string to be displayed in the virtue table, when no VM templates exit.
    */
   getNoDataMsg(): string {
-    return  "No vms have been added at this time. To add a vm, click on the button \"Add Vm Template\" above.";
+    return "There are no virtual machine templates available to add. Create new templates through the Virtual Machines tab.";
   }
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * populates the table once data is available.
    */
-  onPullComplete() {
+  onPullComplete(): void {
     this.setItems(this.allVms.asList());
   }
 }

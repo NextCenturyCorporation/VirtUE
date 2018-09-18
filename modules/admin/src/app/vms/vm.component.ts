@@ -16,7 +16,6 @@ import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
-import { RowOptions } from '../shared/models/rowOptions.model';
 
 import { ConfigUrls, Datasets, Mode } from '../shared/enums/enums';
 
@@ -67,8 +66,9 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
+        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
         <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
 
         <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
@@ -97,13 +97,14 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
    * see [[GenericFormComponent.constructor]] for notes on parameters
    */
   constructor(
+    location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/vm-templates', activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/vm-templates', location, activatedRoute, router, baseUrlService, itemService, dialog);
 
     this.item = new VirtualMachine(undefined);
 
@@ -204,7 +205,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     this.item['applicationIds'] = this.item.childIDs;  // may be empty
 
     this.item.children = undefined;
-    this.item.childIDs = undefined;
+    this.item.childIDs = [];
     return true;
   }
 

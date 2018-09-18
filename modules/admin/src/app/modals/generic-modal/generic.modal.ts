@@ -7,7 +7,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 import { Item } from '../../shared/models/item.model';
 import { Column } from '../../shared/models/column.model';
-import { RowOptions } from '../../shared/models/rowOptions.model';
+import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
@@ -77,7 +77,7 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
   /**
    * this gives the childIDs the item was loaded with, and is only used to build
    * the table - any changes will be made to this.table.selectedIDs.
-   * 
+   *
    * @return a list of item IDs that should be initialized as 'selected' when the table builds.
    */
   getSelectedIDs(): string[] {
@@ -101,7 +101,7 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
   /**
    * @return an empty list - no need for a submenu on Items in a modal at the moment
    */
-  getSubMenu(): RowOptions[] {
+  getSubMenu(): SubMenuOptions[] {
     return [];
   }
 

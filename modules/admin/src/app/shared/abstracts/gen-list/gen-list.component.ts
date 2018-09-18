@@ -8,7 +8,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 
 import { Column } from '../../models/column.model';
-import { RowOptions } from '../../models/rowOptions.model';
+import { SubMenuOptions } from '../../models/subMenuOptions.model';
 import { DictList } from '../../models/dictionary.model';
 
 import { GenericDataPageComponent } from '../gen-data-page/gen-data-page.component';
@@ -145,7 +145,7 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
 
   /**
    * This specifies a set of filters for all the list pages, where
-   * Currently filtering can only be applied based on the "status" column, but eventually
+   * Currently filtering can only be applied based on the "enabled" column, but eventually
    * being able to apply (perhaps arbitrary) filters to any column would be useful.
    *
    * When a filter label is clicked, its value (as specified below) is passed to [[ListFilterPipe]] within the table
@@ -158,10 +158,10 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
    *
    * @return a list of filter options to be displayed at the top of the list page.
    */
-  getTableFilters(): {text: string, value: string}[] {
+  getTableFilters(): {value: string, text: string}[] {
     return [{value: '*', text: 'All ' + this.pluralItem},
-            {value: 'enabled', text: 'Enabled ' + this.pluralItem},
-            {value: 'disabled', text: 'Disabled ' + this.pluralItem}];
+            {value: 'true', text: 'Enabled ' + this.pluralItem},
+            {value: 'false', text: 'Disabled ' + this.pluralItem}];
   }
 
   /**
@@ -202,13 +202,13 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
    *
    * @return a set of clickable links which show up on every item in the table.
    */
-  getSubMenu(): RowOptions[] {
+  getSubMenu(): SubMenuOptions[] {
     return [
-      new RowOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
-      new RowOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
-      new RowOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
-      new RowOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
-      new RowOptions("Delete",  () => true,             (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))
+      new SubMenuOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new SubMenuOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new SubMenuOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
+      new SubMenuOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
+      new SubMenuOptions("Delete",  () => true,             (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))
     ];
   }
 
