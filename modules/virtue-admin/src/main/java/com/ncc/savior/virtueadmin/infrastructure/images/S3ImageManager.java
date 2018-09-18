@@ -53,7 +53,7 @@ public class S3ImageManager implements IXenGuestImageManager {
 	}
 
 	@Override
-	public void pushImageToStream(String path, OutputStream out) {
+	public void pushImageToStream(String path, OutputStream out) throws IOException {
 		String key = path + "/" + filename;
 		// This method has some specific limitations that need to be headed! check the
 		// docs
@@ -64,8 +64,6 @@ public class S3ImageManager implements IXenGuestImageManager {
 			stream = obj.getObjectContent();
 			IOUtils.copyLarge(stream, out);
 			logger.debug("Exporting image at " + path + " finished.");
-		} catch (IOException e) {
-			logger.error("unable to close s3 object stream", e);
 		} finally {
 			if (stream != null) {
 				try {
@@ -79,7 +77,7 @@ public class S3ImageManager implements IXenGuestImageManager {
 	}
 
 	@Override
-	public void storeStreamAsImage(String path, String type, InputStream uncloseableStream) {
+	public void storeStreamAsImage(String path, String type, InputStream uncloseableStream) throws IOException {
 		String key = path + "/disk." + type;
 		File tmp = null;
 		try {
@@ -104,10 +102,10 @@ public class S3ImageManager implements IXenGuestImageManager {
 			};
 			runAsync(r);
 		} catch (IOException e) {
-			logger.error("error uploading image file");
 			if (tmp != null && tmp.exists()) {
 				tmp.delete();
 			}
+			throw e;
 		}
 	}
 

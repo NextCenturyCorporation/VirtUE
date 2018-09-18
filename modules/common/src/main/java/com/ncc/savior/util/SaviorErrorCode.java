@@ -29,6 +29,7 @@ public enum SaviorErrorCode {
 	CONFIGURATION_ERROR(100, "Configuration error", 500),
 	//Configuration specific to import
 	IMPORT_NOT_FOUND(120, "Import was not found"),
+	IMAGE_IMPORT_ERROR(121, "Error importing image"),
 	//Runtime like errors
 	SERVICE_TIMEOUT(200, "Service timed out", 500),
 	XPRA_FAILED(201, "Error with XPRA server", 500),

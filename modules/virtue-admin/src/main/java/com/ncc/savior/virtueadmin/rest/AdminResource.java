@@ -422,7 +422,7 @@ public class AdminResource {
 			}
 		};
 		return Response.ok(stream)
-				.header("Content-Disposition", "attachment; filename=\"virtue-" + "users" + ".gzip\"").build();
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + "users" + ".zip\"").build();
 	}
 
 	@GET
@@ -437,7 +437,7 @@ public class AdminResource {
 			}
 		};
 		return Response.ok(stream)
-				.header("Content-Disposition", "attachment; filename=\"virtue-" + username + ".gzip\"").build();
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + username + ".zip\"").build();
 	}
 
 	@GET
@@ -452,7 +452,7 @@ public class AdminResource {
 			}
 		};
 		return Response.ok(stream)
-				.header("Content-Disposition", "attachment; filename=\"virtue-" + templateId + ".gzip\"").build();
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + templateId + ".zip\"").build();
 	}
 
 	@GET
@@ -466,7 +466,7 @@ public class AdminResource {
 				os.flush();
 			}
 		};
-		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"allVirtueTemplates.gzip\"")
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"allVirtueTemplates.zip\"")
 				.build();
 	}
 
@@ -481,7 +481,7 @@ public class AdminResource {
 				os.flush();
 			}
 		};
-		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"vm-" + templateId + ".gzip\"")
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"vm-" + templateId + ".zip\"")
 				.build();
 	}
 

@@ -110,8 +110,7 @@ public class ImportExportService {
 	public void exportZippedAllUsers(OutputStream out) {
 		Iterable<VirtueUser> users = userManager.getAllUsers();
 		HashSet<String> includedImagePaths = new HashSet<String>();
-		ZipOutputStream zipOut = new ZipOutputStream(out);
-		try {
+		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
 			for (VirtueUser user : users) {
 				addUserToZipStream(user, includedImagePaths, zipOut);
 			}
@@ -123,8 +122,7 @@ public class ImportExportService {
 	public void exportZippedUser(String username, OutputStream out) {
 		VirtueUser user = userManager.getUser(username);
 		HashSet<String> includedImagePaths = new HashSet<String>();
-		ZipOutputStream zipOut = new ZipOutputStream(out);
-		try {
+		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
 			addUserToZipStream(user, includedImagePaths, zipOut);
 		} catch (IOException e) {
 			logger.error("Error writing export zip", e);
@@ -134,8 +132,7 @@ public class ImportExportService {
 	public void exportZippedAllTemplates(OutputStream out) {
 		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
 		HashSet<String> includedImagePaths = new HashSet<String>();
-		ZipOutputStream zipOut = new ZipOutputStream(out);
-		try {
+		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
 			for (VirtueTemplate template : templates) {
 				addVirtueToZipStream(template, includedImagePaths, zipOut);
 			}
@@ -147,8 +144,7 @@ public class ImportExportService {
 	public void exportZippedVirtueTemplate(String virtueTemplateId, OutputStream out) {
 		VirtueTemplate template = templateManager.getVirtueTemplate(virtueTemplateId);
 		HashSet<String> includedEntries = new HashSet<String>();
-		ZipOutputStream zipOut = new ZipOutputStream(out);
-		try {
+		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
 			addVirtueToZipStream(template, includedEntries, zipOut);
 		} catch (IOException e) {
 			logger.error("Error writing export zip", e);
@@ -158,8 +154,7 @@ public class ImportExportService {
 	public void exportZippedVirtualMachineTemplate(String virtualMachineTemplateId, OutputStream out) {
 		VirtualMachineTemplate template = templateManager.getVmTemplate(virtualMachineTemplateId);
 		HashSet<String> includedEntries = new HashSet<String>();
-		ZipOutputStream zipOut = new ZipOutputStream(out);
-		try {
+		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
 			addVirtualMachineTemplateToZipStream(template, includedEntries, zipOut);
 		} catch (IOException e) {
 			logger.error("Error writing export zip", e);
@@ -205,7 +200,12 @@ public class ImportExportService {
 					VirtueUser user = jsonMapper.readValue(uncloseableStream, VirtueUser.class);
 					users.add(user);
 				} else if (name.contains(virtualMachineTemplateImageZipRoot)) {
-					importImage(entry, uncloseableStream);
+					try {
+						importImage(entry, uncloseableStream);
+					} catch (IOException e) {
+						throw new SaviorException(SaviorErrorCode.IMAGE_IMPORT_ERROR, "Failed to import image " + entry,
+								e);
+					}
 				}
 				logger.debug("Entry: " + entry.getName() + " " + entry.isDirectory() + " " + entry.getSize());
 			}
@@ -227,7 +227,15 @@ public class ImportExportService {
 
 	}
 
-	private void importImage(ZipEntry entry, InputStream uncloseableStream) {
+	/**
+	 * returns true for success
+	 * 
+	 * @param entry
+	 * @param uncloseableStream
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean importImage(ZipEntry entry, InputStream uncloseableStream) throws IOException {
 		String name = entry.getName();
 		String path = name.substring(virtualMachineTemplateImageZipRoot.length());
 		String extension = "";
@@ -238,6 +246,7 @@ public class ImportExportService {
 		}
 		logger.debug("importing image to " + path + " of type " + extension + " " + entry.getSize());
 		imageManager.storeStreamAsImage(path, extension, uncloseableStream);
+		return true;
 	}
 
 	private void addUserToZipStream(VirtueUser user, HashSet<String> includedEntries, ZipOutputStream zipOut)
