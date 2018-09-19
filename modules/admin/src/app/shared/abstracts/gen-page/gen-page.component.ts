@@ -151,8 +151,8 @@ export abstract class GenericPageComponent {
   /**
    * This opens a dialog to confirm irreversible or dangerous user actions before carrying them out.
    *
-   * @param action what's being done: e.g. 'delete', 'disable'
-   * @param target the item upon which the stated action would be performed.
+   * @param actionDescription a user-readable description of what's being done, to display in the dialog
+   * @param action a function to be called if the user selects 'OK'.
    */
   openDialog(actionDescription: string, action: () => void): void {
     let dialogRef = this.dialog.open(DialogsComponent, {
@@ -165,9 +165,8 @@ export abstract class GenericPageComponent {
     // TODO ask why the dialog is deliberately off-centered.
     dialogRef.updatePosition({ top: '15%', left: '36%' });
 
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
+    // control goes here after either "Ok" or "Cancel" are clicked on the dialog
     let sub = dialogRef.componentInstance.getResponse.subscribe((shouldProceed) => {
-      console.log(shouldProceed);
       if (shouldProceed) {
         action();
       }

@@ -2,12 +2,10 @@ import { HashLocationStrategy, Location, LocationStrategy } from '@angular/commo
 import { Component, OnInit } from '@angular/core';
 
 /**
- * #uncommented
- *
- * #Delete
- * 
  * @class
- * @extends
+ * Convert this to a generic form.
+ *
+ * #uncommented
  */
 @Component({
   selector: 'app-config',
@@ -20,24 +18,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigComponent implements OnInit {
 
-  /** #uncommented */
-  location: Location;
 
   /**
    * #uncommented
-   * @param
-   *
-   * @return
    */
-  constructor( location: Location ) {
-    this.location = location;
-  }
+  constructor(
+    /** #uncommented */
+    protected location: Location
+   ) {}
 
   /**
    * #uncommented
-   * @param
-   *
-   * @return
    */
   ngOnInit(): void {
   }

@@ -189,8 +189,8 @@ const routes: Routes = [
 ];
 
 /**
- * #uncommented
  * @class
+ * This class handles the routing to the main pages of the application.
  */
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

@@ -411,7 +411,8 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    */
   createItem(redirect: () => void): void {
     let sub = this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
-      data => {
+      createdItem => {
+        // note that the returned created item is just ignored.
         redirect();
       },
       error => {

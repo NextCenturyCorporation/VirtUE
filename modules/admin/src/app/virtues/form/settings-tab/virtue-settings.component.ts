@@ -194,8 +194,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       return false;
     }
 
-    if ( !netPerm.host      || !netPerm.protocol
-      || !netPerm.localPort || !netPerm.remotePort ) {
+    if ( !netPerm.destination|| !netPerm.protocol
+      || !netPerm.localPort  || !netPerm.remotePort ) {
         console.log("Network permission fields cannot be blank");
         return false;
     }
@@ -356,7 +356,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getNetworkColumns(): Column[] {
     return [
-      new Column('host',        'Host',         5, 'asc'),
+      new Column('destination',        'Host',         5, 'asc'),
       new Column('protocol',    'Protocol',     3, 'asc'),
       new Column('localPort',   'Local Port',   2, 'asc'),
       new Column('remotePort',  'Remote Port',  2, 'asc')

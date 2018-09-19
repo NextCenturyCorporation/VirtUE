@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
 /**
- * #uncommented
- *
- * #Delete
- * 
  * @class
- * @extends
+ * This is kept because the html has a list of sensor types - in case we need those. Probably don't.
+ *
+ * #delete
+ *
  */
 @Component({
   selector: 'app-config-sensors',
@@ -17,18 +16,12 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 export class ConfigSensorsComponent implements OnInit {
 
   /**
-   * #uncommented
-   * @param
    *
-   * @return
    */
   constructor() { }
 
   /**
-   * #uncommented
-   * @param
    *
-   * @return
    */
   ngOnInit(): void {
   }

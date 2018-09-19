@@ -48,11 +48,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 
 import { ConfigComponent } from './config/config.component';
 import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
-import { ConfigAppVmComponent } from './config/config-app-vm/config-app-vm.component';
-import { ConfigResourcesComponent } from './config/config-resources/config-resources.component';
-import { ResourceModalComponent } from './config/resource-modal/resource-modal.component';
-import { FileShareComponent } from './config/resource-modal/file-share/file-share.component';
-import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
@@ -88,7 +83,6 @@ import { DialogsComponent } from './dialogs/dialogs.component';
 
 import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
 
-import { BreadcrumbProvider } from './shared/providers/breadcrumb';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
 import { BaseUrlService } from './shared/services/baseUrl.service';
@@ -99,9 +93,7 @@ import { MessageService } from './shared/services/message.service';
     AppComponent,
     BreadcrumbsComponent,
     ConfigActiveDirComponent,
-    ConfigAppVmComponent,
     ConfigComponent,
-    ConfigResourcesComponent,
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
@@ -123,9 +115,7 @@ import { MessageService } from './shared/services/message.service';
     VirtueModalComponent,
     VmModalComponent,
     ColorModalComponent,
-    ResourceModalComponent,
-    FileShareComponent,
-    PrintersComponent,
+
     ConfigSensorsComponent,
     ListFilterPipe,
     PageNotFoundComponent,
@@ -169,7 +159,6 @@ import { MessageService } from './shared/services/message.service';
     OverlayModule
   ],
   providers: [
-    BreadcrumbProvider,
     OverlayContainer,
     BaseUrlService,
     MessageService,
@@ -178,7 +167,6 @@ import { MessageService } from './shared/services/message.service';
   bootstrap: [AppComponent],
   entryComponents: [
     DialogsComponent,
-    ResourceModalComponent,
     AppsModalComponent,
     VmModalComponent,
     VirtueModalComponent,

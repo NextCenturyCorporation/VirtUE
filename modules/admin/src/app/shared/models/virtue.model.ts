@@ -52,7 +52,7 @@ export class Virtue extends Item {
   /** A hex string of the color to be shown on this Virtue's label, both on the workbench and the desktop app */
   color: string;
 
-  /** #TODO what is this? #uncommented */
+  /** #TODO what is this? #uncommented (unprovisioned) */
   unprovisioned: boolean;
 
   /**

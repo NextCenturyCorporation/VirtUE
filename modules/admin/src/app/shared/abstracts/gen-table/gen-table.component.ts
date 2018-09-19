@@ -99,7 +99,7 @@ export class GenericTableComponent {
 
   /**
    * Call to re-render the table on a change to filterValue.
-   * this just gets toggled, and is passed into the listFIlterSort pipe where it is ignored.
+   * this just gets toggled, and is passed into the listFilterSort pipe where it is ignored.
    * The fact that its value changes though, makes angular re-render the table, filtering it based on the currect criteria.
    */
   update: boolean = false;
@@ -226,7 +226,7 @@ export class GenericTableComponent {
    * @param checked true if the user just checked the box, false if the user unchecked it.
    * @param id the id of the Item whose checkbox was just clicked
    */
-  checkClicked(checked: boolean, id: string): void {
+  selectionChange(checked: boolean, id: string): void {
     if (checked === true) {
       this.selectedIDs.push(id);
     } else {

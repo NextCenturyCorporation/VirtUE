@@ -22,10 +22,10 @@ export class VirtualMachine extends Item {
   /** what version of edit this template currently is at */
   version: string;
 
-  // /** #uncommented what is this? */
+  // /** #uncommented what is this? (templatePath)*/
   // templatePath: string;
 
-  // /** #uncommented what is this? how should it be set or used? */
+  // /** #uncommented what is this? how should it be set or used? (loginUser)*/
   // loginUser: string;
 
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */

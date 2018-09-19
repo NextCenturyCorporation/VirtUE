@@ -6,6 +6,75 @@ import { Item } from './item.model';
  *
  * A set of these are defined by each component that contains a table.
  *
+ *
+ * Ok. So this needs to be changed to have:
+ *    - prettyName
+ *    - colWidth
+ *    - link (optional)
+ *    - content, an object holding objects which must fit into some category (define this as a type that can be any of the below combos)
+ *      - possible elements:
+ *        - text: string                  [the name of an attribute to be used directly]
+ *        - list: ((elem: TableElement) => TableElement[])
+ *        - formatElement: ((elem: TableElement) => string)
+ *        - toggleableField: string       [the name, as a string, of a boolean attribute in that type of table element]
+ *        - dropdownField: string         [the name, as a string, of an attribute in that type of table element]
+ *        - dropdownList: TableElement[]  [the name, as a string, of a boolean attribute in that type of table element]
+ *        - inputField: string            [the name, as a string, of a string-type attribute in that type of table element]
+ *        - icon: string                  [a path to the icon]
+ *      - possible combinations:
+ *        - //text
+ *        - //text and link
+ *        - formatElement
+ *        - formatElement and link
+ *        - list
+ *        - list and link
+ *        - list, formatValue, and link
+ *        - toggleableField
+ *        - dropdownField, dropdownList, and formatElement
+ *        - inputField
+ *        - icon and link
+ *      - Remove option for directly requesting an attribute. Use formatElement instead - just pass in ((item: Item) => item.whatever;)
+ *  So there'll only have to be one check for each possible type of column component, in the table.
+ *    - classes:
+ *                    Text: {
+ *                      type: string = "text",
+ *                      formatElement: (elem: TableElement) => string,
+ *                      link?: (elem: TableElement) => void,
+ *                      subMenuOpts?: () => SubMenuOptions[]
+*                     } |
+ *                    List: {
+ *                      list: (elem: TableElement) => TableElement[],
+ *                      formatElement?: (elem: TableElement) => string,
+ *                      link?: (elem: TableElement) => void
+ *                    } |
+ *                    Checkbox: {
+ *                      toggleableFieldName: string
+*                     } |
+ *                    Dropdown: {
+ *                      fieldName: string,
+ *                      dropdownList: (elem: TableElement) => TableElement[],
+ *                      formatElement?: (elem: TableElement) => string,
+*                     } |
+ *                    InputField: {
+ *                      inputFieldName: string
+*                     } |
+ *                    Icon: {
+ *                      iconPath: string,
+ *                      link?: (elem: TableElement) => void
+ *                    } |
+ *                    RadioButton: {
+ *                      fieldName: string,
+ *                      // function must set all other related bool fields to false
+ *                      function?: (elem: TableElement) => void
+ *                    }
+ *  This way, if we define
+ *                    column.content = {iconPath = "/something/icon.ico"}
+ *    and a helper method:
+ *                    isIcon(x): boolean {
+ *                      return (x instanceof Icon);
+ *                    }
+ *  Then we can just check whether content is a certain type, without having to check what it isn't, and without
+ *    having to include a bunch of extra 'undefined's in every column constructor.
  */
 export class Column {
 

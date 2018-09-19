@@ -199,7 +199,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    */
   cmnDataComponentSetup(): void {
     let sub = this.baseUrlService.getBaseUrl().subscribe( res => {
-      this.baseUrl = res[0].aws_server;
+      this.baseUrl = res[0].virtue_server;
 
       this.itemService.setBaseUrl(this.baseUrl);
 
@@ -406,7 +406,11 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * @param item the item we're toggling the status of.
    */
   toggleItemStatus(item: Item): void {
-    let sub = this.itemService.toggleItemStatus(this.serviceConfigUrl, item.getID()).subscribe(() => {
+    let sub = this.itemService.toggleItemStatus(this.serviceConfigUrl, item.getID()).subscribe((updatedRecord) => {
+      // note that updatedRecord is ignored - no need to use it.
+      // Perhaps could check that its status is the opposite of item.status, in case maybe the update
+      // didn't go through. Don't know if that's a reasonable check though.
+      // TODO
       this.refreshData();
     },
     error => { // on error

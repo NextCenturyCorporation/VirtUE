@@ -16,6 +16,7 @@ const httpHeader = {
  * This class will query the backend (or wherever?) for sensor data, and return for processing and display.
  *
  * Will likely change drastically.
+ * TODO
  * #uncommented
  */
 @Injectable()

@@ -27,19 +27,19 @@ import { Item } from './item.model';
  */
 export class Application extends Item {
 
-  /** #uncommented #TODO is this the application's version? unlike Virtue.version and vm.version*/
+  /** #uncommented (version) #TODO is this the application's version? unlike Virtue.version and vm.version*/
   version: string;
 
   /** The operating system which this particular application is able to run */
   os: string;
 
-  /** #uncommented #TODO not sure how to change this, but it probably will need to change.
+  /** #uncommented #TODO not sure how to change this, but it probably will need to change. (launchCommand)
    * Are these commands? are they defined here?
    * See notes at top of class
    */
   launchCommand: string;
 
-  /** #uncommented #TODO */
+  /** #uncommented TODO (iconKey) */
   iconKey: string;
 
   /**

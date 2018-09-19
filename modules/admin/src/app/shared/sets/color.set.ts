@@ -1,21 +1,23 @@
 
 /**
- * #uncommented
  * @interface
+ * Represents a color
  */
 export interface Color {
+  /** Text which could be displayed to a user */
   prettyName: string;
+  /** hex string, in the form of  #XXXXXX  */
   hex: string;
+  /** html name fo rthis color, incase you want/need to display it that way. */
   htmlName: string;
 }
 
 /**
- * #uncommented
  * @class
- * @extends
+ * This class holds a set of html colors, for use in create colored labels for virtues.
  */
 export class ColorSet {
-  /** #uncommented */
+  /** a static list of pre-defined colors */
   readonly list: Color[] = [
     {prettyName: "Maroon",       hex: "#800000",  htmlName: "maroon"},
     {prettyName: "Crimson",      hex: "#DC143C",  htmlName: "crimson"},
@@ -47,10 +49,8 @@ export class ColorSet {
   ];
 
   /**
-   * #uncommented
-   * @param
-   *
-   * @return
+   * Get the set of colors
+   * @return the static list of colors
    */
   getList(): Color[] {
     return this.list;

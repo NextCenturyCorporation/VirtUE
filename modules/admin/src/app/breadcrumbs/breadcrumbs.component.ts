@@ -4,7 +4,6 @@ import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { Breadcrumb } from '../shared/models/breadcrumb.model';
-import { BreadcrumbProvider } from '../shared/providers/breadcrumb';
 
 /**
  * @class
@@ -31,7 +30,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
   /** The list of breadcrumbs to be displayed on each page. Most recent page at the end. */
   breadcrumbs: Breadcrumb[] = [];
-  
+
   /**
    * The subscription which persists across the lifetime of the page, collecting navigation events as they occur,
    * and being cut once this component is destroyed.

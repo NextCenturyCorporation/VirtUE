@@ -8,7 +8,7 @@ import { Application } from '../../shared/models/application.model';
   templateUrl: './add-app.component.html'
 })
 /**
- * Note: this page is essentially unimplemented.
+ * #uncommented (Note: this page is essentially unimplemented.)
  * #TODO
  */
 export class AddAppComponent implements OnInit {
