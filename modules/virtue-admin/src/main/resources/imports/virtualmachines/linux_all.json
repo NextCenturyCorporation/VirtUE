@@ -1,7 +1,7 @@
 {
 	"name": "Power User Vm Linux",
 	"os": "LINUX",
-	"templatePath": "ami-2b500951",
+	"templatePath": "master",
 	"loginUser": "user",
 	"enabled": true,
 	"applicationIds": [

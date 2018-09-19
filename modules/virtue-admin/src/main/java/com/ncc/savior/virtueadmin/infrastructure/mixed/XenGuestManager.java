@@ -26,6 +26,8 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
@@ -101,7 +103,7 @@ public class XenGuestManager {
 				vm.setState(VmState.LAUNCHING);
 				serviceProvider.getVmNotifierService().startFutures(vm, null);
 				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
-						vmt.getSecurityTag(), vm, true);
+						vmt.getTemplatePath(), vmt.getSecurityTag(), vm, true);
 				externalSensingPort += numSensingPorts;
 				vm.setApplications(new ArrayList<ApplicationDefinition>(vmt.getApplications()));
 				vm.setPrivateKeyName(xenVm.getPrivateKeyName());
@@ -128,14 +130,14 @@ public class XenGuestManager {
 	}
 
 	private void createStartGuestVm(Session session, int externalSshPort, int externalSensingPort,
-			int startingInternalPort, int numSensingPorts, String role, VirtualMachine vm, boolean create)
-			throws JSchException, IOException, SftpException {
+			int startingInternalPort, int numSensingPorts, String templatePath, String role, VirtualMachine vm,
+			boolean create) throws JSchException, IOException, SftpException {
 
 		String ipAddress = "0.0.0.0";
 		String name = vm.getName();
 		String loginUsername = vm.getUserName();
 		if (create) {
-			createGuestVm(session, name, role);
+			createGuestVm(session, templatePath, name, role);
 		} else {
 			// error:
 			// xencall: error: Could not obtain handle on privileged command interface: No
@@ -244,12 +246,15 @@ public class XenGuestManager {
 		return ipAddress;
 	}
 
-	private void createGuestVm(Session session, String name, String role) throws JSchException, IOException {
-		String command = "cd ./app-domains; sudo ./create.sh " + name;
+	private void createGuestVm(Session session, String templatePath, String name, String role)
+			throws JSchException, IOException {
+		String command = "cd ./app-domains; sudo ./create.sh " + templatePath + " " + name;
 		if (JavaUtil.isNotEmpty(role)) {
 			command += " " + role;
 		}
-		SshUtil.sendCommandFromSession(session, command);
+		logger.debug("provisioning guest with command: " + command);
+		List<String> out = SshUtil.sendCommandFromSession(session, command);
+		logger.debug("provisoin guest output: " + out);
 	}
 
 	private CommandHandler getCommandHandlerFromSession(Session session) throws JSchException, IOException {
@@ -349,6 +354,8 @@ public class XenGuestManager {
 			if (line.contains("virtue-ip") || line.contains("My IP address")) {
 				virtue_ip = findIP(line);
 				return virtue_ip;
+			} else if (line.contains("invalid domain identifier")) {
+				throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Unable to get ip address for domU");
 			}
 		}
 		return virtue_ip;
@@ -378,12 +385,14 @@ public class XenGuestManager {
 				int numSensingPorts = 3;
 				vm.setState(VmState.LAUNCHING);
 				serviceProvider.getVmNotifierService().startFutures(vm, null);
+				// throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Restarting is not
+				// properly implemented!");
 				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
-						null, vm, false);
+						null, null, vm, false);
 			}
 			addToStartPipeline(linuxVms, linuxFuture);
 		} catch (Exception e) {
-			logger.error("Error attempting to start guests " + linuxVms);
+			logger.error("Error attempting to start guests " + linuxVms, e);
 			linuxFuture.completeExceptionally(e);
 		} finally {
 			SshUtil.disconnectLogErrors(session);
@@ -405,12 +414,12 @@ public class XenGuestManager {
 			cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 			cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 			cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
-//			cf.exceptionally((ex) -> {
-//				logger.error("EXCEPTION", ex);
-//				linuxFuture.completeExceptionally(ex);
-//				vm.setState(VmState.ERROR);
-//				return xenVm;
-//			});
+			// cf.exceptionally((ex) -> {
+			// logger.error("EXCEPTION", ex);
+			// linuxFuture.completeExceptionally(ex);
+			// vm.setState(VmState.ERROR);
+			// return xenVm;
+			// });
 			fc.addFuture(cf);
 		}
 		fc.combineFutures(linuxFuture);

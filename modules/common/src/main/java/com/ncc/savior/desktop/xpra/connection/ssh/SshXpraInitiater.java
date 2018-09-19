@@ -211,7 +211,7 @@ public class SshXpraInitiater implements IXpraInitiator {
 	}
 
 	public static final void main(String[] args) throws IOException {
-		SshConnectionParameters p = new SshConnectionParameters("localhost", 22, "user", "password");
+		SshConnectionParameters p = SshConnectionParameters.withPassword("localhost", 22, "user", "password");
 		SshXpraInitiater init = new SshXpraInitiater(p);
 
 		Set<Integer> displays = init.getXpraServersWithRetries();
