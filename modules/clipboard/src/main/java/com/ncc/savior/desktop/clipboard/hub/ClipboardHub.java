@@ -30,6 +30,8 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
+import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage;
+import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.util.JavaUtil;
@@ -172,6 +174,19 @@ public class ClipboardHub {
 		sendMessageHandleError(idMsg, transmitter, newId);
 		transmitters.put(newId, transmitter);
 		logger.debug("client added to hub with id=" + newId);
+
+		Thread testDeleteMe = new Thread(() -> {
+			try {
+				JavaUtil.sleepAndLogInterruption(3000);
+				IClipboardMessage message = new DefaultApplicationMessage("test", DefaultApplicationType.BROWSER,
+						"www.google.com?q=itworked");
+				transmitter.sendMessageToHub(message);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+		testDeleteMe.start();
 
 		// on connection, we want to let clients know they don't own the clipboard and
 		// what formats are on the clipboard.
