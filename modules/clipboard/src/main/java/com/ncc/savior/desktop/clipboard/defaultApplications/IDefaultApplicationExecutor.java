@@ -6,6 +6,6 @@ import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.Defau
 
 public interface IDefaultApplicationExecutor {
 
-	public void runWithDefaultApplication(DefaultApplicationType type, List<Object> arguments);
+	public void runWithDefaultApplication(DefaultApplicationType type, List<String> arguments);
 
 }

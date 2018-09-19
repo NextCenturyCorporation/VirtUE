@@ -10,37 +10,56 @@ import java.util.List;
  */
 public class DefaultApplicationMessage extends BaseClipboardMessage {
 	private static final long serialVersionUID = 1L;
-	private List<Object> arguments;
+	private List<String> arguments;
 	private DefaultApplicationType defaultApplicationType;
 
 	// For Jackson (de)serialization
 	protected DefaultApplicationMessage() {
-		this(null, null, null);
+		this(null, null, (List<String>) null);
 	}
 
-	public DefaultApplicationMessage(String sourceId, DefaultApplicationType defaultApplicationType, Object argument) {
-		this(sourceId, defaultApplicationType, objectToList(argument));
+	public DefaultApplicationMessage(String sourceId, DefaultApplicationType defaultApplicationType, String argument) {
+		this(sourceId, defaultApplicationType, stringToList(argument));
 	}
 
-	private static List<Object> objectToList(Object argument) {
-		List<Object> list = new ArrayList<Object>(1);
+	private static List<String> stringToList(String argument) {
+		List<String> list = new ArrayList<String>(1);
 		list.add(argument);
 		return list;
 	}
 
 	public DefaultApplicationMessage(String sourceId, DefaultApplicationType defaultApplicationType,
-			List<Object> arguments) {
+			List<String> arguments) {
 		super(sourceId);
 		this.defaultApplicationType = defaultApplicationType;
 		this.arguments = arguments;
 	}
 
-	public List<Object> getArguments() {
+	public DefaultApplicationMessage(String sourceId, DefaultApplicationType defaultApplicationType,
+			String[] arguments) {
+		this(sourceId, defaultApplicationType, arrayToList(arguments));
+	}
+
+	private static List<String> arrayToList(String[] args) {
+		List<String> list = new ArrayList<>(args.length);
+		for (String arg : args) {
+			list.add(arg);
+		}
+		return list;
+	}
+
+	public List<String> getArguments() {
 		return arguments;
 	}
 
 	public DefaultApplicationType getDefaultApplicationType() {
 		return defaultApplicationType;
+	}
+
+	@Override
+	public String toString() {
+		return "DefaultApplicationMessage [arguments=" + arguments + ", defaultApplicationType="
+				+ defaultApplicationType + "]";
 	}
 
 	public enum DefaultApplicationType {

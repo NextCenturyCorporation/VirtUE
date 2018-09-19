@@ -12,7 +12,7 @@ public class WindowsDefaultApplicationExecutor implements IDefaultApplicationExe
 	private static final Logger logger = LoggerFactory.getLogger(WindowsDefaultApplicationExecutor.class);
 
 	@Override
-	public void runWithDefaultApplication(DefaultApplicationType type, List<Object> arguments) {
+	public void runWithDefaultApplication(DefaultApplicationType type, List<String> arguments) {
 		String command;
 		switch (type) {
 		case BROWSER:

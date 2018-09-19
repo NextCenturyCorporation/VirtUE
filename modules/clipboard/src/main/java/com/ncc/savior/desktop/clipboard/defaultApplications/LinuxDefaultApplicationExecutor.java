@@ -11,7 +11,7 @@ import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.Defau
 public class LinuxDefaultApplicationExecutor implements IDefaultApplicationExecutor {
 	private static final Logger logger = LoggerFactory.getLogger(LinuxDefaultApplicationExecutor.class);
 	@Override
-	public void runWithDefaultApplication(DefaultApplicationType type, List<Object> arguments) {
+	public void runWithDefaultApplication(DefaultApplicationType type, List<String> arguments) {
 
 		String command;
 		switch (type) {

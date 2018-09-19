@@ -19,6 +19,7 @@ import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
 import com.ncc.savior.desktop.clipboard.defaultApplications.IDefaultApplicationExecutor;
 import com.ncc.savior.desktop.clipboard.defaultApplications.LinuxDefaultApplicationExecutor;
+import com.ncc.savior.desktop.clipboard.defaultApplications.RmiServer;
 import com.ncc.savior.desktop.clipboard.defaultApplications.WindowsDefaultApplicationExecutor;
 import com.ncc.savior.desktop.clipboard.linux.X11ClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
@@ -130,6 +131,7 @@ public class ClipboardClient implements Closeable {
 		};
 		clipboardWrapper.setClipboardListener(listener);
 		transmitter.sendMessageToHub(new ClipboardFormatsRequestMessage(myId));
+		RmiServer.bindServer(myId, transmitter);
 	}
 
 	/**
