@@ -15,7 +15,7 @@ export class VirtualMachine extends Item {
 
   id: string;
   os: string;
-  version: string;
+  version: number;
   templatePath: string;
   loginUser: string;
   lastModification: string | Date;
@@ -31,7 +31,7 @@ export class VirtualMachine extends Item {
       this.childIDs = vmObj.applicationIds;
       this.version = vmObj.version;
       if (! this.version) {
-        this.version = '1';
+        this.version = 1;
       }
       this.lastEditor = vmObj.lastEditor;
       this.lastModification = vmObj.lastModification;

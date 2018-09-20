@@ -54,7 +54,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
   setMode(newMode: Mode) {
     this.mode = newMode;
 
-    this.newVersion = Number(this.item.version);
+    this.newVersion = this.item.version;
 
     if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
       this.newVersion++;
@@ -117,7 +117,7 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
   collectData(): boolean {
-    this.item.version = String(this.newVersion);
+    this.item.version = this.newVersion;
     return true;
   }
 

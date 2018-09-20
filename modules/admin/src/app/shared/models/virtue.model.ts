@@ -22,7 +22,7 @@ import { Printer } from './printer.model';
 export class Virtue extends Item {
 
   id: string;
-  version: string;
+  version: number;
   lastEditor: string;
   lastModification: string | Date;
   awsTemplateName: string;
@@ -53,7 +53,7 @@ export class Virtue extends Item {
 
       this.version = virtueObj.version;
       if (! this.version) {
-        this.version = '1';
+        this.version = 1;
       }
 
       this.lastEditor = virtueObj.lastEditor;

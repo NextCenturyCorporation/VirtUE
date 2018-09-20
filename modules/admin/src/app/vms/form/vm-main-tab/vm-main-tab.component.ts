@@ -51,7 +51,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     }
     this.item = item as VirtualMachine;
 
-    this.newVersion = Number(this.item.version);
+    this.newVersion = this.item.version;
 
     if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
       this.newVersion++;
@@ -100,7 +100,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
   }
 
   collectData(): boolean {
-    this.item.version = String(this.newVersion);
+    this.item.version = this.newVersion;
     return true;
   }
 
