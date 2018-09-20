@@ -4,8 +4,8 @@ import { Component, OnInit } from '@angular/core';
  * @class
  * This component allows the user (an admin) to set up activ directories. For something.
  * TODO ask about active directories
- *
- * #move to a tab on the global settings form
+ * #uncommented, because this is a stub.
+ * also #move to a tab on the global settings form
  */
 @Component({
   selector: 'app-config-active-dir',
@@ -15,7 +15,7 @@ import { Component, OnInit } from '@angular/core';
 export class ConfigActiveDirComponent implements OnInit {
 
   /**
-  /** do nothing extra on render */
+   * do nothing extra on render
    * #uncommented, class not implemented
    */
   constructor() { }

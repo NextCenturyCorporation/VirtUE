@@ -129,7 +129,7 @@ export class DashboardComponent extends GenericListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent.
+   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent]].
    */
   getColumns(): Column[] {
     return [

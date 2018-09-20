@@ -15,9 +15,13 @@ import { Breadcrumb } from '../shared/models/breadcrumb.model';
  *
  *  - Clicking a link in your breadcrumbs should truncate the list to that link though, and using
  *  the back button in the browser shouldn't add a new link. Ideally it should revert the list to the state it was on the last page.
- *  Which may not be trivial. I believe that would at least entail using the route reuse policy thing to reload the previously used
+ *  Which may not be trivial. May at least entail using the route reuse policy thing to reload the previously used
  *  breadcrumb component.
  *  - Perhaps disabling the route resuse thing is why I can't see the previous steps taken by the route in activatedRoute.
+ * Thought of a potentially better way though. Create a BC service that every page sends their breadcrumb to, and have
+ * BreadcrumbsComponent subscribe to it. When a root page's breadcrumb comes in, restart the list with it. If the new breadcrumb
+ * is already in the list, then truncate the list to that entry. Otherwise, just tack on the newest breadcrumb to the end.
+ *
  *
  * @implements OnInit  in order to start this process as soon as the item is rendered
  * @implements OnDestroy   to kill the subscription when this object is destroyed.
@@ -47,7 +51,8 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   /**
    * on render, start a subscription that tracks each router event upon navigation, and chains each stop together into a
    * list of breadcrumbs that can be displayed to the user as links.
-   * Currently, you end up with a list
+   * Currently, you end up with a list of how the app navigated to that page, according to app-router's specifications, not
+   * how the *user* got to that page. Should be changed eventually - see note at top of class.
    */
   ngOnInit() {
     let tempCrumbs: Breadcrumb[] = [];

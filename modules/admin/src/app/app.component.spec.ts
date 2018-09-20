@@ -3,8 +3,7 @@ import { AppComponent } from './app.component';
 
 /**
  * This looks auto-generated.
- * Either shape it to actually test our project, or take note of the way to do tests and
- * delete this file - we'd want to separate our tests into many files anyway.
+ * No test are currently performed, but we could add that. At some point.
  */
 
 describe('AppComponent', () => {

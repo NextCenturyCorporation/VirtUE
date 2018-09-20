@@ -19,7 +19,8 @@ import {AddAppComponent} from './apps/add-app/add-app.component';
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 
 /**
- * This defines all the navigable URLs, what components should be loaded at each, and what data should be passed in.
+ * This defines all the navigable URLs, what components should be loaded at each, and what data should be passed in to that
+ * component.
  * The paths build up in the nested objects.
  *
  * Note that nested objects are children of a near-copy of the parent page but without a defined component - if the
