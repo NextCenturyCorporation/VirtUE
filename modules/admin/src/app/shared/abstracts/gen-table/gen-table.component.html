@@ -57,6 +57,16 @@
     <span *ngIf="hasCheckbox === true" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
       <mat-checkbox
         name="cbVm"
+        *ngIf="i.enabled"
+        [checked]="isSelected(i.getID())"
+        (change)="checkClicked($event.checked, i.getID())"
+        value="{{i.getID()}}" ></mat-checkbox>
+      <!-- show a disabled checkbox if the item is disabled.  -->
+      <mat-checkbox
+        name="cbVm"
+        *ngIf="i.enabled === false"
+        disabled=true
+        color="#333333"
         [checked]="isSelected(i.getID())"
         (change)="checkClicked($event.checked, i.getID())"
         value="{{i.getID()}}" ></mat-checkbox>
@@ -69,11 +79,8 @@
         <div class="edit" *ngIf="colData[0].link === undefined">
           {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
         </div>
-        <!-- change those 'a's to 'div's to make them not be blue and look like links. -->
-        <!-- TODO change this to move to the form page, but only in 'view' mode -->
-        <!-- <a class="edit" (click)="editItem(i)">{{ i[colData[0].name] }}</a> -->
         <div class="menu-options" >
-          <a *ngFor="let o of rowOptions; let idx = index" (click)="callback(o.action, i)">
+          <a *ngFor="let o of rowOptions; let idx = index" (click)="o.action(i)">
             <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
             <ng-container *ngIf="o.shouldAppear(i) && idx < rowOptions.length-1">|</ng-container>
           </a>
@@ -88,9 +95,9 @@
           </ul>
         </div>
         <div *ngIf="!column.isList">
-          <div *ngIf="column.link" (click)="callback(link, i)">
+          <a *ngIf="column.link" (click)="link(i)">
             {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
-          </div>
+          </a>
           <div *ngIf="column.link === undefined">
             {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
           </div>

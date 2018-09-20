@@ -41,7 +41,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   getColumns(): Column[] {
     return [
       // arguments are: {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
-      new Column('name',            'Template Name',        false, 'asc',     5, undefined, (i: Item) => this.editItem(i)),
+      new Column('name',            'Template Name',        false, 'asc',     5),
       new Column('os',              'OS',                   false, 'asc',     3),
       new Column('childNamesHTML',  'Assigned Applications', true, undefined, 4, this.getChildNamesHtml),
     ];
