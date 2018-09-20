@@ -20,6 +20,32 @@ import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 
+/**
+ * @class
+ *
+ * This class represents  a tab in [[VirtueComponent]], describing all the settings a virtue can be set to have.
+ *
+ * This has four sub-tabs at the moment:
+ *    - 'General'
+ *      - Color
+ *      - default browser
+ *      - provisioned or not (?) #TODO
+ *      - list of virtues this one can paste data into
+ *    - 'Network'
+ *      - list of permitted connections
+ *    - 'Resources'
+ *      - file system permissions
+ *        - editable list, generated from global settings? #TODO
+ *        - for each file system, R/W/E permissions can be given.
+ *      - Printers
+ *        - editable list, pulled from global settings.
+ *    - 'Sensors'
+ *      - Nothing at the moment #TODO
+ *
+ * At the moment, only 'color' is saved to the backend.
+ *
+ * @extends [[GenericFormTabComponent]]
+ */
 @Component({
   selector: 'app-virtue-settings-tab',
   templateUrl: './virtue-settings.component.html',
@@ -27,17 +53,22 @@ import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-t
 })
 export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** a table to display the Virtues that this Virtue is allowd to paste data into */
   @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent;
 
-  // re-classing item, to make it easier and less error-prone to work with.
+  /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
-  // local reference to the virtue-form's allVirtues variable.
+  /** local reference to the virtue-form's allVirtues variable. */
   private allVirtues: DictList<Virtue>;
 
+  /** a list of available browsers, one of which can be set as default. Currently a placeholder. */
   browsers: string[];
 
+  /** used in html page to iterate over the elements of an enum. */
   private keys = Object.keys;
+
+  /** local reference, so html can iterate over this enum's elements. */
   private protocols = Protocols;
 
   /**
@@ -115,10 +146,18 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     }
   }
 
+  /**
+   * At the moment there's nothing to pull in, everything gets set directly on the Virtue item.
+   * But we will need to add checks eventually, to ensure everything is valid. #TODO
+   *
+   * Maybe make that network field be 4 subfields? #TODO
+   *
+   * @return true if all network permission fields have been filled out
+   */
   collectData(): boolean {
     console.log("collectData");
 
-    // TODO check all entries for validity before allowing save
+    // check all entries for validity before allowing save
 
     if (!this.checkNetworkPerms()) {
       // TODO tell the user
@@ -127,6 +166,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return true;
   }
 
+  /**
+   * Iterate through and check all the network permissions
+   * @return true if all lines of network permission are fully filled-out (and TODO valid).
+   *         false otherwise
+   */
   checkNetworkPerms(): boolean {
     for (let networkPermission of this.item.networkWhiteList) {
       if ( !this.checkEnteredPermValid(networkPermission) ) {
@@ -136,6 +180,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return true;
   }
 
+  /**
+   * Check a particular network permission - all 4 of its fields should be filled out and valid.
+   * @return true if all fields are valid.
+   */
   checkEnteredPermValid(netPerm: NetworkPermission): boolean {
 
     // instead of checking  '<=='
@@ -178,6 +226,13 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return index;
   }
 
+  /**
+   * Check whether all of a given type of filesystem permissions are enabled for this Virtue
+   * @param colName the name of the column we're checking values on - all column names
+   *                are attributes of the file system type hard-coded in [[Virtue]].
+   *
+   * @return true if all file systems have the given type of permission.
+   */
   allChecked(colName: string): boolean {
     for (let perm of this.item.fileSysPerms) {
       if (perm[colName] === false) {
@@ -187,24 +242,46 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return true;
   }
 
+
+  /**
+   * Grant/revoke a given type of permission on all filesystems .
+   * @param colName the name of the permission we're granting - all column names
+   *                are attributes of the file system type hard-coded in [[Virtue]].
+   * @param event given automatically, lets us know whether to check everything or uncheck everything.
+   */
   checkAll(event: any, colName: string): void {
     for (let perm of this.item.fileSysPerms) {
       perm[colName] = event.checked;
     }
   }
 
+  /**
+   * This adds a new printer object to the Virtue's printer list.
+   * This is very much a temporary measure.
+   */
   addNewPrinter(): void {
     this.item.allowedPrinters.push(new Printer("And another printer"));
   }
 
+  /**
+   * This removes a printer from the Virtue's printer list.
+   */
   removePrinter(index: number): void {
     this.item.allowedPrinters.splice(index, 1);
   }
 
+  /**
+   * Add a new netork permission to the virtue.
+   */
   addNewNetworkPermission(): void {
     this.item.networkWhiteList.push(new NetworkPermission());
   }
 
+  /**
+   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+   *
+   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+   */
   setUpPasteableVirtuesTable(): void {
     if (this.allowedPasteTargetsTable === undefined) {
       return;
@@ -251,6 +328,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     }
   }
 
+  /**
+   * @return what columns should show up in the virtue's paste-permission table
+   *         The first column, the Virtue's name, should be clickable if and only if the page is in view mode.
+   */
   getPasteColumns(): Column[] {
     let cols: Column[] = [
       new Column('apps',    'Available Applications',  4, undefined,  this.formatName, this.getGrandchildren),
@@ -268,6 +349,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return cols;
   }
 
+  /**
+   * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
+   * these things aren't Items. Generalizing the GenericTable further would be useful.
+   * @return what columns should show up in the network permissions table
+   */
   getNetworkColumns(): Column[] {
     return [
       new Column('destination',        'Host',         5, 'asc'),
@@ -277,6 +363,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     ];
   }
 
+  /**
+   * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
+   * these things aren't Items. Generalizing the GenericTable further would be useful.
+   * @return what columns should show up in the network permissions table
+   */
   getFileSysColumns(): Column[] {
     return [
       new Column('location', 'Server & Drive',  6, 'asc'),
@@ -305,6 +396,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
      )];
   }
 
+  /**
+   * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.
+   */
   activateColorModal(): void {
     let wPercentageOfScreen = 40;
 
@@ -327,9 +421,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     });
   }
 
-  // this brings up the modal to add/remove children
-  // this could be refactored into a "MainTab" class, which is the same for all
-  // forms, but I'm not sure that'd be necessary.
+  /**
+   * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
+   */
   activatePastableVirtueModal(): void {
     let dialogHeight = 600;
     let dialogWidth = 800;

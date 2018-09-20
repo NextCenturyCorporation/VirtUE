@@ -23,7 +23,11 @@ import { Mode, Datasets } from '../enums/enums';
  *    - [[childIDs]]
  */
 export abstract class Item {
+
+  /** a unique identifing string - not used by user */
   id: string;
+
+  /** a readable name for the item - is treated as ID for [[User]] */
   name: string;
 
   /**
@@ -36,7 +40,14 @@ export abstract class Item {
    *  - Applications can't be disabled - should be done at the VM/Virtue level.
    */
   enabled: boolean;
+
+  /** a list of the IDs of this Item's children, saved to and loaded from backend */
   childIDs: string[];
+
+  /**
+   * A [[DictList]] of references to this Item's children, as listed in childIDs.
+   * Not saved to backend.
+   */
   children: DictList<Item>;
 
   /**
@@ -46,9 +57,12 @@ export abstract class Item {
    */
   modDate: string;
 
-  // a link to the parent domain for this item - '/users', '/virtues', etc.
+  /** a link to the parent domain for this item - '/users', '/virtues', etc. */
   parentDomain: string;
 
+  /**
+   * Gives default values for necessary attributes.
+   */
   constructor() {
     this.enabled = true;
     this.modDate = '';
@@ -102,7 +116,10 @@ export abstract class Item {
     return this.parentDomain + '/' + mode.toLowerCase() + '/' + this.getID();
   }
 
-  // Overriden by User
+  /**
+   * Overriden by User
+   * @return an identifying and unique, but not necessarily readable, string for this Item.
+   */
   getID(): string {
     return this.id;
   }

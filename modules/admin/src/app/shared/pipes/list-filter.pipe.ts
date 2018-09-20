@@ -1,6 +1,22 @@
 import { Pipe, PipeTransform } from '@angular/core';
-/***
-This filter can be used with virtue, virtual machine list pages
+
+/**
+ * @class
+ * This class filters, sorts, and returns a list based on input parameters.
+ * Is generic - sorting and filtering can be done on any column.
+ *
+ * Is designated as a Pipe, so that angular can pass a list of items into it before building an ngFor construct.
+ *
+ * Note that sortColumn and filterColumn are names, while in [[GenericTableComponent]] they are Columns.
+ * Just pass the name in here.
+ *
+ * @example usage:
+ *            <div *ngFor="let i of itemList | listFilterSort : sortColumn : sortDirection : filterColumn : filterCondition : update">
+ *              stuff, {{i.getName()}}, whatever
+ *            </div>
+ *
+ * Note that filtering removes anything that *doesn't*
+ *
  */
 @Pipe({
   name: 'listFilterSort'

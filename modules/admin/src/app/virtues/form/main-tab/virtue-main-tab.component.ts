@@ -11,18 +11,33 @@ import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
+/**
+ * @class
+ * This class represents the main tab for a Virtue form - [[VirtueComponent]]
+ *
+ * From here, the user can view/add/remove the [[Virtue]]'s attached virtual machines, view the Virtue's version number,
+ * and enable/disable the Virtue.
+ *
+ * Note that version number increases automatically.
+ *
+ * @extends [[GenericMainTabComponent]]
+ */
 @Component({
   selector: 'app-virtue-main-tab',
   templateUrl: './virtue-main-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
 })
-
 export class VirtueMainTabComponent extends GenericMainTabComponent implements OnInit {
 
+  /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
 
+  /** re-classing parent's item object */
   protected item: Virtue;
 
+  /**
+   * see [[GenericMainTabComponent.constructor]] for parameters
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
   }

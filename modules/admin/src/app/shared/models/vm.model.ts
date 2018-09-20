@@ -7,6 +7,9 @@ import { Application } from './application.model';
 import { DictList } from './dictionary.model';
 
 /**
+ * @class
+ * @extends
+ *
  * Represents a VirtualMachine.
  * Children are Application objects.
  *
@@ -15,6 +18,8 @@ export class VirtualMachine extends Item {
 
   /** The operating system this VM should be set up to have */
   os: string;
+
+  /** what version of edit this template currently is at */
   version: number;
 
   // /** #uncommented what is this? (templatePath)*/

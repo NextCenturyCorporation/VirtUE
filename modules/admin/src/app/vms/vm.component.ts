@@ -24,6 +24,26 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
 import { VmMainTabComponent } from './form/vm-main-tab/vm-main-tab.component';
 import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component';
 
+/**
+ * @class
+ * This class represents a detailed view of a Virtual Machine Template.
+ * See comment on [[GenericFormComponent]] for generic info.
+ *
+ * This form has:
+ *  - a main tab showing the Vm's version, OS, and name (which can be changed), as well as the Apps that would
+ *    be installed on an instance of this VM,. The version automatically increases on every edit.
+ *  - A 'usage' tab, showing what users have been granted access to this template.
+ *    The activity tab described below could be merged with this tab, if the tables tend to be small, since
+ *    'Who has access' and 'who's currently running it' will probably want to be known at the same time.
+ *
+ * It also will in the future #TODO have:
+ *  - a tab for activity (tables of what instances of this template are running, and what Applications
+ *    are running on them.)
+ *  - a tab for version history, linked/correlateable somehow with a list of when any attached Apps
+ *    were deleted.
+ *    Add somehow/somewhere a simple log of all changes made to this VM's settings.
+ *
+ */
 @Component({
   selector: 'app-vm',
   template: `
@@ -64,9 +84,18 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
 })
 export class VmComponent extends GenericFormComponent implements OnDestroy {
 
+  /** A tab for displaying and/or editing the VM template's name, status, version, and assigned applications */
   @ViewChild('mainTab') mainTab: VmMainTabComponent;
+
+  /**
+   * A tab for displaying what Virtues have access to this template, and what instances of this template are
+   * currently running.
+   */
   @ViewChild('usageTab') usageTab: VmUsageTabComponent;
 
+  /**
+   * see [[GenericFormComponent.constructor]] for notes on parameters
+   */
   constructor(
     location: Location,
     activatedRoute: ActivatedRoute,
@@ -106,8 +135,12 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
 
   }
 
-  // called in parent's onPullComplete
-  setUpTabs() {
+  /**
+   * Calls a setUp() method for each of the form's tabs, to perform any actions that needed to wait for
+   * data requested from the backend.
+   * Called in [[onPullComplete]]
+   */
+  setUpTabs(): void {
     // Note that within each form, the item can't be reassigned; its attribute
     // can change though.
     this.mainTab.setUp(this.item);
@@ -120,7 +153,10 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     // this.historyTab.setUp();
   }
 
-  // called whenever item's child list is set or changes
+  /**
+   * Updates data on a form's tabs. Used generally when one tab makes a change to the item's data.
+   * called whenever item's child list is set or changes
+   */
   updateTabs(): void {
     this.mainTab.update({mode: this.mode});
 
@@ -144,8 +180,12 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     };
   }
 
-  // create and fill the fields the backend expects to see, record any
-  // uncollected inputs, and check that the item is valid to be saved
+  /**
+   * create and fill the fields the backend expects to see, pull in/record any
+   * uncollected inputs, and check that the item is valid to be saved
+   *
+   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   */
   finalizeItem(): boolean {
     this.mainTab.collectData();
 
@@ -169,7 +209,10 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     return true;
   }
 
-  ngOnDestroy() {
+  /**
+   * unsubscribe all watched EventEmitters
+   */
+  ngOnDestroy(): void {
     this.mainTab.onChildrenChange.unsubscribe();
     this.mainTab.onStatusChange.unsubscribe();
   }

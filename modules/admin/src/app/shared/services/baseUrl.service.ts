@@ -16,6 +16,9 @@ export class BaseUrlService {
   /** the path to the json file holding the base url */
   private baseUrlFilePath = './assets/json/baseUrl.json';
 
+  /**
+   * @param httpClient what makes the local query
+   */
   constructor( private httpClient: HttpClient ) { }
 
   /**

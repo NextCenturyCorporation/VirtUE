@@ -5,16 +5,22 @@ import { Virtue } from './virtue.model';
 import { DictList } from './dictionary.model';
 
 /**
+* @class
  * Represents a User.
  * Children are Virtue objects.
  *
+ * @extends [[Item]]
  */
 export class User extends Item {
 
+  /** What roles this User is granted - currently can be 'User' and/or 'Admin' */
   roles: string[];
 
-
-  // convert from whatever form the user object is in the database.
+  /**
+   * convert from whatever form the user object is in the database.
+   *
+   * @param userObj a user record, retrieved from the backend, which we want to convert into a User.
+   */
   constructor(userObj) {
     super();
     if (userObj) {
@@ -42,8 +48,10 @@ export class User extends Item {
     }
   }
 
-
-  // Overrides Item
+  /**
+   * Overrides [[Item.getID]]
+   * @return the user's username - its ID.
+   */
   getID(): string {
     return this.name;
   }

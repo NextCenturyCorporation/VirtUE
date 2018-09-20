@@ -39,9 +39,9 @@ import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 })
 export class AppsListComponent extends GenericListComponent {
 
-  file: string;
-  url: string;
-
+  /**
+   * see [[GenericPageComponent.constructor]] for notes on parameters
+   */
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,

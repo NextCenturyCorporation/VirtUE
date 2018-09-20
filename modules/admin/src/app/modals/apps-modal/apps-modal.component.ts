@@ -12,6 +12,13 @@ import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * @class
+ * This class represents a list of applications, which can be selected.
+ *
+ *
+ * @extends [[GenericModalComponent]]
+ */
 @Component({
   selector: 'app-modal',
   templateUrl: '../generic-modal/generic.modal.html',
@@ -20,6 +27,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class AppsModalComponent extends GenericModalComponent {
 
+  /**
+   * see [[GenericModalComponent.constructor]] for notes on parameters
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
@@ -31,6 +41,9 @@ export class AppsModalComponent extends GenericModalComponent {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
   }
 
+  /**
+   * @return what columns should show up in the the app selection table
+   */
   getColumns(): Column[] {
     return [
       new Column('name',    'Application Name', 5, 'asc'),
@@ -39,6 +52,11 @@ export class AppsModalComponent extends GenericModalComponent {
     ];
   }
 
+  /**
+   * This page only needs to list all available apps, and doesn't need ot request any other data.
+   *
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -48,6 +66,10 @@ export class AppsModalComponent extends GenericModalComponent {
     };
   }
 
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -60,6 +82,9 @@ export class AppsModalComponent extends GenericModalComponent {
     };
   }
 
+  /**
+   * @return a string to be displayed in the virtue table, when no apps exit.
+   */
   getNoDataMsg(): string {
     return "There are no applications available to add. Add new applications through the Applications tab.";
   }

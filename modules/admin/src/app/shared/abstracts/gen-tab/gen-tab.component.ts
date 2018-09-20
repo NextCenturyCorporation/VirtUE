@@ -38,15 +38,25 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 export abstract class GenericFormTabComponent extends GenericPageComponent implements OnInit {
 
-  // what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
-  // Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
+  /**
+   * what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
+   * Should always be the same as [[GenericFormComponent.mode]]
+   */
   protected mode: Mode;
 
+  /** The label to appear on the tab */
   public tabName: string;
 
-  // this gets overriden by children tabs
+  /**
+   * A reference to the Item being viewed/edited/etc.
+   * Refers to the same object as [[GenericFormComponent.item]]
+   * this gets reclassed by children tabs
+   */
   protected item: Item;
 
+  /**
+   * @param dialog Injected. This is a pop-up for verifying irreversable user actions
+   */
   constructor(
     router: Router,
     dialog: MatDialog) {

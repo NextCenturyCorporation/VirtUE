@@ -11,6 +11,19 @@ import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.
 
 import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
+/**
+ * @class
+ * This class represents the main tab for a User form - [[UserComponent]]
+ *
+ * From here, the user (as in the system admin using this system, not [[User]] as in the object)
+ * can view/add/remove the [[User]]'s attached virtues, can add/remove the User's roles, and can enabled/disable the User.
+ *
+ * Note that usernames have to be unique. This is currently only enforced on this front-end, which
+ * should be rectified. The backend just takes usernames and makes a new entry if it hasn't seen that name before,
+ * and overwrites the current entry for that name if it has.
+ *
+ * @extends [[GenericMainTabComponent]]
+ */
 @Component({
   selector: 'app-main-user-tab',
   templateUrl: './main-user-tab.component.html',
@@ -18,14 +31,18 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 })
 export class UserMainTabComponent extends GenericMainTabComponent implements OnInit {
 
+  /** whether or not this user has 'user' rights - I assume this is a temporary role #TODO */
   private roleUser: boolean;
 
   /** whether or not this user has 'admin' rights over something */
   private roleAdmin: boolean;
 
-  // re-classing parent's object
+  /** re-classing parent's item object */
   protected item: User;
 
+  /**
+   * see [[GenericMainTabComponent.constructor]] for parameters
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
   }
@@ -47,6 +64,13 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     this.roleAdmin = this.item.roles.includes("ROLE_ADMIN");
   }
 
+  /**
+   * See [[GenericFormTabComponent.collectData]]
+   * records the user's roles.
+   * #TODO add a check for username in create mode, to at least check for uniqueness.
+   *
+   * @return true always at the moment
+   */
   collectData(): boolean {
     this.item.roles = [];
     if (this.roleUser) {
@@ -58,6 +82,10 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     return true;
   }
 
+  /**
+   * In view mode, make labels in Virtue and VMs columns clickable.
+   * @return what columns should show up in the user's virtue children table
+   */
   getColumns(): Column[] {
     let cols: Column[] = [
       new Column('apps',    'Assigned Applications',  3, undefined, this.formatName, this.getGrandchildren),
@@ -77,6 +105,9 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     return cols;
   }
 
+  /**
+   * @return a string to be displayed in the children table, when the table's 'items' array is undefined or empty.
+   */
   getNoDataMsg(): string {
     return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
   }

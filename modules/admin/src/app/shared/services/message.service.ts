@@ -1,7 +1,17 @@
 import { Injectable } from '@angular/core';
 
+/**
+ * @class
+ * This class allows for the collection of system messages.
+ *
+ * TODO
+ * Currently errors in most item.service files are logged here, but there's no way or place to access them.
+ * Not clear if this should be used/kept.
+ */
 @Injectable()
 export class MessageService {
+
+  /** a list of system messages */
   messages: string[] = [];
 
   /**

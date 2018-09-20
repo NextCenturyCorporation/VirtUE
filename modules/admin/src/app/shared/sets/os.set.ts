@@ -1,4 +1,10 @@
-// The available OS types a vm can be instantiated with.
+
+
+/**
+ * @class
+ * The available OS types a vm can be instantiated with.
+ *
+ */
 export class OSSet {
   /** a static list of OS's that VM's can be set up to use. */
   readonly list: OS[] = [

@@ -1,6 +1,12 @@
 import { HashLocationStrategy, Location, LocationStrategy } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 
+/**
+ * @class
+ * Convert this to a generic form.
+ *
+ * #uncommented, because it will need to change drastically
+ */
 @Component({
   selector: 'app-config',
   templateUrl: './config.component.html',

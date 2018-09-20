@@ -26,6 +26,24 @@ import { ConfigUrls } from '../shared/enums/enums';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
+/**
+ *
+ * @class
+ * This class represents a detailed view of a User.
+ * See comment on [[GenericFormComponent]] for generic info.
+ *
+ * This form has:
+ *  - a main tab for viewing the Virtues made available to the User
+ *
+ * It also will in the future #TODO have:
+ *  - a tab for User activity (tables of what Virtues/VMs/Applications the User is currently running)
+ *  - a tab for history of changes made to this user account, Possibly some sort of versioning system,
+ *    or possibly just a list of dates/times that certain privileges/settings were given/revoked.
+ *    It'd probably need to be linked/correlated somehow with a list of when any descendant Virtues/Vms/Apps
+ *    have been enabled/disabled/deleted. No one would want to correlate those manually.
+ *    A simple log should defintely be available though.
+ *
+ */
 @Component({
   selector: 'app-user',
   template: `
@@ -61,9 +79,9 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-
 export class UserComponent extends GenericFormComponent implements OnDestroy {
 
+  /** A tab for displaying the User's attached virtues, status, and assigned roles. */
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
 
   /**
@@ -86,7 +104,10 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     this.childDatasetName = Datasets.VIRTUES;
   }
 
-  // called on parent's ngInit
+  /**
+   * calls an init() method in each of the form's tabs, to pass in any data needed/available at render time to that tab from the parent
+   * called in [[ngOnInit]]
+   */
   initializeTabs() {
 
     this.mainTab.init(this.mode);
@@ -121,13 +142,18 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     // and used to update everything. Doesn't roll back history to that point,
     // just adds a new edit, where all settings are changed to what they were in
     // that snapshot.
+    // Only allow in edit, and it just pulls those settings in. The user can tweak or save them as desired.
     // this.historyTab.onSomethingChange.subscribe((newData) => {
     //   // do something
     // });
   }
 
-  // called in parent's onPullComplete
-  setUpTabs() {
+  /**
+   * Calls a setUp() method for each of the form's tabs, to perform any actions that needed to wait for
+   * data requested from the backend.
+   * Called in [[onPullComplete]]
+   */
+  setUpTabs(): void {
     // Note that within each form, the item itself can't change, though its
     // attributes can.
     this.mainTab.setUp(this.item);
@@ -144,12 +170,20 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     // this.historyTab.setUp(this.item);
   }
 
-  // called whenever item's child list is set or changes
+  /**
+   * Updates data on a form's tabs. Used generally when one tab makes a change to the item's data.
+   * called whenever item's child list is set or changes
+   */
   updateTabs(): void {
 
     this.mainTab.update({mode: this.mode});
   }
 
+  /**
+   * This page needs all 4 datasets, because there's a Table of Virtues, and under each Virtue
+   * we want to display all the Apps it has available to it.
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -159,8 +193,12 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     };
   }
 
-  // create and fill the fields the backend expects to see, record any
-  // uncollected inputs, and check that the item is valid to be saved
+  /**
+   * create and fill the fields the backend expects to see, pull in/record any
+   * uncollected inputs, and check that the item is valid to be saved
+   *
+   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   */
   finalizeItem(): boolean {
     // Note
     this.mainTab.collectData();
@@ -195,7 +233,10 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     return true;
   }
 
-  ngOnDestroy() {
+  /**
+   * unsubscribe all watched EventEmitters
+   */
+  ngOnDestroy(): void {
     this.mainTab.onChildrenChange.unsubscribe();
     this.mainTab.onStatusChange.unsubscribe();
   }

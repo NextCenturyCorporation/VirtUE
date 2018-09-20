@@ -13,20 +13,35 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
 
 import { OSSet } from '../../../shared/sets/os.set';
 
+/**
+ * This class represents the main tab for a VirtualMachine template form - [[VmComponent]]
+ *
+ * From here, the user can view/add/remove the [[VirtualMachine]]'s attached applications, view the VM template's version number,
+ * change the template's OS, and enable/disable the template.
+ *
+ * Note that version number increases automatically.
+ *
+ * @extends [[GenericMainTabComponent]]
+ */
 @Component({
   selector: 'app-vm-main-tab',
   templateUrl: './vm-main-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ OSSet ]
 })
-
 export class VmMainTabComponent extends GenericMainTabComponent implements OnInit {
 
+  /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
 
+  /** re-classing parent's item object */
   protected item: VirtualMachine;
 
+  /**
+   * see [[GenericMainTabComponent.constructor]] for inherited parameters
+   */
   constructor(
+      /** the available operating systems that this VM can be set as. */
       protected osOptions: OSSet,
       router: Router, dialog: MatDialog) {
     super(router, dialog);
@@ -75,9 +90,11 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }
-
   }
 
+  /**
+   * @return what columns should show up in the VM's's application children table
+   */
   getColumns(): Column[] {
     return [
       new Column('name',    'Application Name', 5, 'asc'),
@@ -86,6 +103,9 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     ];
   }
 
+  /**
+   * @return a string to be displayed in the children table, when the table's 'items' array is undefined or empty.
+   */
   getNoDataMsg(): string {
     return 'No applications have been added yet. To add a template, click on the button "Add/Remove Application Packages" above.';
   }

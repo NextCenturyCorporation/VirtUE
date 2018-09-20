@@ -39,6 +39,10 @@
     this.list.push(e);
   }
 
+  /**
+   * @param key the key to check for existence of
+   * @return true iff that key is in dict
+   */
   has(key: string): boolean {
     if (key in this.dict) {
       return true;
@@ -46,10 +50,18 @@
     return false;
   }
 
+  /**
+   * @param key
+   *
+   * @return the element saved via that key, if one exists.
+   */
   get(key: string): T {
     return this.dict[key];
   }
 
+  /**
+   * @return the collection as a list. Does no processing.
+   */
   asList(): T[] {
     return this.list;
   }
@@ -69,12 +81,28 @@
     delete this.dict[key];
   }
 
-  clear() {
+  /**
+   * Clears references to the list and dictionary in this object.
+   * Somewhat paranoic attempt to preclude memory leaks.
+   * This guarantees there'll be no references to the dict, but the list could still exist somewhere
+   * after being passed out via [[asList]].
+   */
+  clear(): void {
     this.dict = null;
     this.list = null;
   }
 }
 
+/**
+ * @class
+ * A simple, generic dictionary
+ * The key must be a string.
+ *
+ * @example
+ *      // usage:
+ *      let dict = new Dict<FooObject>();
+ *      dict["key1"] = new FooObject();
+ */
 export class Dict<T> {
     [key: string]: T;
 }

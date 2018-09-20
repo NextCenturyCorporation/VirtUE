@@ -22,6 +22,15 @@ import { ItemService } from '../../services/item.service';
 
 import { Mode } from '../../enums/enums';
 
+/**
+* @class
+ * This class represents a collection of items in a table, to be viewed and interacted with.
+ * It holds a GenericTableComponent, and allows for sorting, filtering, and selection.
+ * The data displayed in each column for each item is defined by the subclass, and can be text, a list, or a
+ * link.
+ *
+ * @extends GenericDataPageComponent because the derivative list pages need to load a known type of data from the backend.
+ */
 @Component({
   templateUrl: './gen-list.component.html',
   providers: [ BaseUrlService, ItemService, GenericTableComponent ]
@@ -31,8 +40,14 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
   /** The table itself */
   @ViewChild(GenericTableComponent) table: GenericTableComponent;
 
+
+  /** a string to appear as the list's title - preferably a full description */
   prettyTitle: string;
+
+  /** used in a button label to create a new item: "Add {{itemName}}". It shouldn't be long. */
   itemName: string;
+
+  /** used to reference collections of this type of Item in the filter option labels. Should be short. #TODO*/
   pluralItem: string;
 
   /**
@@ -80,7 +95,9 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
     this.fillTable();
   }
 
-
+  /**
+   * Sets up the table, according to parameters defined in this class' child classes.
+   */
   fillTable(): void {
     if (this.table === undefined) {
       return;
@@ -106,13 +123,23 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
     return [];
   }
 
-  // overridden by everything that lists virtues
-  hasCheckbox() {
+  /**
+   * @return whether or not the table needs checkboxes. False is default.
+   * Override to change.
+   * Currently overridden only by modals.
+   */
+  hasCheckbox(): boolean {
     return false;
   }
 
-  // abstracts away table from subclasses
-  setItems(newItems: Item[]) {
+
+  /**
+   * Populates the table with the input list of items.
+   * Abstracts away table from subclasses
+   *
+   * @param newItems the list of items to be displayed in the table.
+   */
+  setItems(newItems: Item[]): void {
     this.table.items = newItems;
   }
 
@@ -148,13 +175,22 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
    */
   abstract getColumns(): Column[];
 
+  /**
+   * This must be defined by every child that extends this class.
+   * Allows the definition of child-list-specific information used in the list's html code.
+   * @return object holding three strings
+   */
   abstract getListOptions(): {
+      /** a string to appear as the list's title - preferably a full description */
       prettyTitle: string,
+      /** used in a label on a button to create a new item: "Add {{itemName}}". It shouldn't be long. */
       itemName: string,
       /** used to reference collections of this type of Item, in a shortened form, in the filter labels #TODO*/
       pluralItem: string};
 
-  // must be here so subclasses of list, which use table, can set table values.
+  /**
+   * @returns a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   */
   abstract getNoDataMsg(): string;
 
   /**

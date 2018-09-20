@@ -13,11 +13,24 @@ import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
 
 
+/**
+ * @class
+ * This class represents a 'main' tab for the form page of Users, Virtues, and Vms.
+ *
+ * As a main tab, it is assumed to list:
+ *  - The item's name
+ *  - the item's status
+ *  - the item's children
+ *  - other minor info/settings that relate to *what* this item is, and how this template can be used.
+ * How this item should work/be set up, should go in a 'settings' tab.
+ *
+ */
 export abstract class GenericMainTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** A table for listing the item's children. */
   @ViewChild('childrenTable') protected childrenTable: GenericTableComponent;
 
-  // to notify user.component that a new set of childIDs have been selected
+  /** to notify the parent component that a new set of childIDs have been selected */
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   /**

@@ -35,6 +35,9 @@ import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 })
 export class UserListComponent extends GenericListComponent {
 
+  /**
+   * see [[GenericPageComponent.constructor]] for notes on parameters
+   */
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
@@ -42,21 +45,19 @@ export class UserListComponent extends GenericListComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
-
-
   }
 
-  // called after all the datasets have loaded
+  /**
+   * called after all the datasets have loaded. Pass the user list to the table.
+   */
   onPullComplete(): void {
     this.setItems(this.allUsers.asList());
   }
 
+  /**
+   * @return a list of the columns to show up in the table. See details in [[GenericListComponent.getColumns]].
+   */
   getColumns(): Column[] {
-    // This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    //  to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
-    //
-    // Note: colWidths of all columns must add to exactly 12.
-    // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     return [
       new Column('name',        'Username',           3, 'asc',     undefined, undefined, (i: Item) => this.viewItem(i)),
       new Column('childNames',  'Available Virtues',  4, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
@@ -65,6 +66,10 @@ export class UserListComponent extends GenericListComponent {
     ];
   }
 
+  /**
+   * See [[GenericPageComponent.getPageOptions]]
+   * @return child-specific information needed by the generic page functions when loading data.
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -75,6 +80,10 @@ export class UserListComponent extends GenericListComponent {
 
   }
 
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -87,10 +96,22 @@ export class UserListComponent extends GenericListComponent {
 
   }
 
+  /**
+   * @return a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   */
   getNoDataMsg(): string {
     return "No users have been added at this time. To add a user, click on the button \"Add User\" above.";
   }
 
+  /**
+   * Used in a table column. Needs to be sorted before turned into a string, so that all entries in
+   * that column follow the same order, and therefore sorting that column groups all users with the
+   * same role-set together.
+   *
+   * @param user the user whose roles we want to format
+   *
+   * @return a string made from a sorted list of this user's roles.
+   */
   formatRoles( user: User ): string {
     if (!user.roles) {
       return '';

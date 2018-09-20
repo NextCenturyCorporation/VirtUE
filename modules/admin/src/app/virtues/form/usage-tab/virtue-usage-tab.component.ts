@@ -23,6 +23,16 @@ import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 
+/**
+* @class
+ * This class represents a tab in [[VirtueComponent]], listing places this Virtue template has been used
+ *
+ * It holds two tables:
+ *    - Users that have been granted this template
+ *    - Virtue instances that have been built from this template (currently unimplemented)
+ *
+ * @extends [[GenericFormTabComponent]]
+ */
 @Component({
   selector: 'app-virtue-usage-tab',
   templateUrl: './virtue-usage-tab.component.html',
@@ -30,10 +40,15 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 })
 export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** A table listing what users have been given access to this Virtue template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent;
 
+  /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
+  /**
+   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "Virtue Usage";
@@ -146,9 +161,12 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     });
   }
 
+  /**
+   * Do nothing at the moment - nothing about item can be changed from this tab
+   *
+   * @return true
+   */
   collectData(): boolean {
-    // do nothing at the moment - nothing about item can be changed from this
-    // page at the moment, so no changes to collect.
     return true;
   }
 

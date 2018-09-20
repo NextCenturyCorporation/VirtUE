@@ -24,23 +24,39 @@ import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 
+/**
+* @class
+ * This class represents a tab in [[VMComponent]], listing places this VM template has been used
+ *
+ * It holds two tables:
+ *    - Virtues that have been assigned this template
+ *    - Running VMs that have been built from this template (currently unimplemented)
+ *
+ * @extends [[GenericFormTabComponent]]
+ */
 @Component({
   selector: 'app-vm-usage-tab',
   templateUrl: './vm-usage-tab.component.html',
   styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
 })
-
 export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /** A table listing what virtues have been given access to this VM template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent;
 
-  // usageTable would show the running virtues that have been built from this template.
-  // This may be unnecessary/unteneble. It could be a lot.
-  // Tables need filters.
+  /**
+   * this would show the running virtues that have been built from this template.
+   * This may be unnecessary/unteneble. It could be a lot.
+   * Tables may need filters.
+   */
   @ViewChild('usageTable') private usageTable: GenericTableComponent;
 
+  /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: VirtualMachine;
 
+  /**
+   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "Virtual Machine Usage";
@@ -99,6 +115,10 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     }
   }
 
+  /**
+   * @return what columns should show up in [[parentTable]]
+   *         Links to the parent and the parent's children should only be clickable if not in view mode.
+   */
   getParentColumns(): Column[] {
     let cols = [
       new Column('version',     'Version',       2, 'asc'),
@@ -148,9 +168,12 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     });
   }
 
+  /**
+   * Do nothing at the moment - nothing about item can be changed from this tab
+   *
+   * @return true
+   */
   collectData(): boolean {
-    // nothing about item can be changed from this
-    // page at the moment, so no changes to collect.
     return true;
   }
 

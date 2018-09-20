@@ -24,7 +24,30 @@ import { VirtueUsageTabComponent } from './form/usage-tab/virtue-usage-tab.compo
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
-
+/**
+ *
+ * @class
+ * This class represents a detailed view of a Virtue Template.
+ * See comment on [[GenericFormComponent]] for generic info.
+ *
+ * This form has:
+ *  - a main tab for viewing the Vms made available to the Virtue, its version, and
+ *    its name (which can be changed). The version automatically increases on every edit.
+ *  - A settings tab, where the user can select tailor the Virtue to meet their particular needs.
+ *    See [[VirtueSettingsTabComponent]] for details.
+ *  - A 'usage' tab, showing what users have been granted access to this template.
+ *    The activity tab described below could be merged with this tab, if the tables tend to be small, since
+ *    'Who has access' and 'who's currently running it' will probably want to be known at the same time.
+ *
+ * It also will in the future #TODO have:
+ *  - a tab for activity (tables of what instances of this template are running, and what VMs/Applications
+ *    have been instantiated on them.)
+ *  - a tab for version history.
+ *    It'd probably need to be linked/correlateable somehow with a list of when any descendant Vms/Apps
+ *    were enabled/disabled/deleted. No one would want to correlate those manually.
+ *    A simple log should defintely be available though.
+ *
+ */
 @Component({
   selector: 'app-virtue',
   template: `
@@ -66,9 +89,9 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-
 export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
+  /** A tab for displaying and/or editing the Virtue's name, status, version, and attached vms */
   @ViewChild('mainTab') mainTab: VirtueMainTabComponent;
 
   /**
@@ -96,8 +119,8 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
   ) {
     super('/virtues', location, activatedRoute, router, baseUrlService, itemService, dialog);
 
-    // set up empty (except for a default color), will get replaced in ngOnInit if
-    // mode is not 'create'
+    // set up empty (except for a default color), will get replaced in render (ngOnInit) if
+    // mode is not 'CREATE'
     this.item = new Virtue({color: this.defaultColor()});
 
     this.datasetName = Datasets.VIRTUES;
@@ -177,7 +200,10 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     // this.historyTab.setUp(this.item);
   }
 
-  // called whenever item's child list is set or changes
+  /**
+   * Updates data on a form's tabs. Used generally when one tab makes a change to the item's data.
+   * called whenever item's child list is set or changes
+   */
   updateTabs(): void {
     this.mainTab.update({mode: this.mode});
 
@@ -206,8 +232,12 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     };
   }
 
-  // create and fill the fields the backend expects to see, record any
-  // uncollected inputs, and check that the item is valid to be saved
+  /**
+   * create and fill the fields the backend expects to see, pull in/record any
+   * uncollected inputs, and check that the item is valid to be saved
+   *
+   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   */
   finalizeItem(): boolean {
     if ( !this.mainTab.collectData() ) {
       return false;

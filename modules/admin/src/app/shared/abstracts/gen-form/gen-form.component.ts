@@ -22,6 +22,32 @@ import { GenericModalComponent } from '../../../modals/generic-modal/generic.mod
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
+/**
+ * @class __
+ * This class represents a detailed view of a single [[Item]].
+ *
+ *
+ * It can be in one of several modes ([[Mode]]): view, edit, duplicate, and create.
+ *  - Create doesn't load any previous data.
+ *  - View loads data, but makes the page uneditable.
+ *  - Edit loads data and is editable. Changes overwrite the input item.
+ *  - Duplicate loads data and lets the user edit it, but saves
+ *      it as a new Item, rather than overwriting the input item.
+ *
+ * Each type of form page contains a set of tabs. All forms have the following tabs:
+ *  - General Info ([[GenericMainTabComponent]]), which has the item's name, status, children, and various other information.
+ *  - Usage, which has one or two tables:
+ *    - one showing all the instances of that item which are currently running/logged on
+ *    - all but [[UserMainTabComponent]] have a table showing what higher-level items have been assigned this one. Like a vm's table
+ *      will show what virtues have been assigned that vm.
+ *  - History (currently not implemented), which shows the history of changes made to this Item.
+ *
+ * Other tables are detailed in the comments on each subclass.
+ *
+ * The user can navigate to the view pages for all items linked to this [[item]], but only when the page is in view mode.
+ *
+ * @extends [[GenericPageComponent]] because it needs to load data about an Item and its children, as well as other available children
+ */
 @Component({
   providers: [ BaseUrlService, ItemService ]
 })
@@ -39,17 +65,26 @@ export abstract class GenericFormComponent extends GenericDataPageComponent impl
    */
   // itemForm: FormGroup;
 
-  // Note:
-  //   when creating, item.id is empty.
-  //   When editing, item.id holds the id of the virtue being edited.
-  //   When duplicating, item.id holds the id of the old virtue being duplicated.
-  //   New IDs for creation and duplication are generated server-side.
+  /**
+   * Holds the [[Item]] being viewed/created/edited/duplicated.
+   *
+   * Initialized empty, but given an ID on render ([[ngOnInit]]()). The ID is parsed out of the path,
+   * and once all requested datasets are retrieved ([[onPullComplete]]()), item is overwritten with whatever Item
+   * in [[datasetName]] has that ID.
+   *
+   * Note that in create mode, item.id is empty.
+   *
+   * New IDs for creation and duplication are generated server-side.
+   *
+   * The only difference between item in edit mode and duplicate mode, is whether the backend
+   * generates a new ID for the object when saving it.
+   */
   item: Item;
 
-  noDataMessage: string;
-
-  // what the user is doing to the item: {CREATE, EDIT, DUPLICATE}
-  // Holds the strings 'Create', 'Edit', or 'Duplicate' resp., for display to the user
+  /**
+   * what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
+   * Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
+   */
   mode: Mode;
 
   /** holds the name of the relevant dataset for Item being viewed;
@@ -78,6 +113,12 @@ export abstract class GenericFormComponent extends GenericDataPageComponent impl
    */
   initialPullComplete: boolean = false;
 
+  /**
+   * see [[GenericPageComponent.constructor]] for notes on inherited parameters
+   * @param parentDomain Used to check page for errors, and navigate back to the list page for this type of item upon save or cancel
+   * @param location used to change the URL without making a full redirect and reload.
+   * @param activatedRoute used to get the path, to parse out the requested item's ID.
+   */
   constructor(
     protected parentDomain: string,
     protected location: Location,
@@ -109,6 +150,8 @@ export abstract class GenericFormComponent extends GenericDataPageComponent impl
     // Parse url, making sure it's set up the expected way.
 
     let url = this.router.routerState.snapshot.url;
+    // console.log(this.location);
+    // The url may start with an initial slash; remove it if it does.
     if (url[0] === '/') {
       url = url.substr(1);
     }
@@ -152,7 +195,13 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
     return true;
   }
 
-  ngOnInit() {
+  /**
+   * On render, store the id of the item to be viewed/edited/duplicated from the specified path.
+   * This id is what's used to set [[item]] in [[onPullComplete]]().
+   *
+   * Then call the same functions that get called on render in all [[GenericPageComponent]]s.
+   */
+  ngOnInit(): void {
     if (this.mode !== Mode.CREATE) {
       this.item.setID(this.activatedRoute.snapshot.params['id']);
     }
@@ -212,10 +261,17 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    */
   abstract initializeTabs(): void;
 
-  // called in parent's onPullComplete
+  /**
+   * Calls a setUp() method for each of the form's tabs, to perform any actions that needed to wait for
+   * data requested from the backend.
+   * Called in [[onPullComplete]]
+   */
   abstract setUpTabs(): void;
 
-  // called whenever item's child list is set or changes
+  /**
+   * Updates data on a form's tabs. Used generally when one tab makes a change to the item's data.
+   * called whenever item's child list is set or changes
+   */
   abstract updateTabs(): void;
 
   /**

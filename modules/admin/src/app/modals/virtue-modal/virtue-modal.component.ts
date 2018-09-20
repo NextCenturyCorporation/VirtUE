@@ -13,6 +13,12 @@ import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 
+/**
+ * @class
+ * This class represents a list of Virtue templates, which can be selected.
+ *
+ * @extends [[GenericModalComponent]]
+ */
 @Component({
   selector: 'app-virtue-modal',
   templateUrl: '../generic-modal/generic.modal.html',
@@ -21,8 +27,9 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 })
 export class VirtueModalComponent extends GenericModalComponent {
 
-
-
+  /**
+   * see [[GenericModalComponent.constructor]] for notes on parameters
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
@@ -34,6 +41,9 @@ export class VirtueModalComponent extends GenericModalComponent {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
   }
 
+  /**
+   * @return what columns should show up in the the virtue selection table
+   */
   getColumns(): Column[] {
     return [
       new Column('name',    'Template Name',         3, 'asc'),
@@ -59,6 +69,12 @@ export class VirtueModalComponent extends GenericModalComponent {
     this.setItems(this.allVirtues.asList());
   }
 
+  /**
+   * This page needs all datasets to load except allUsers: it displays all virtues, the VMs assigned to each virtue,
+   * and the apps available to each Virtue through its VMs.
+   *
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -68,6 +84,10 @@ export class VirtueModalComponent extends GenericModalComponent {
     };
   }
 
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -80,6 +100,9 @@ export class VirtueModalComponent extends GenericModalComponent {
     };
   }
 
+  /**
+   * @return a string to be displayed in the virtue table, when no virtue templates exit.
+   */
   getNoDataMsg(): string {
     return "There are no virtue templates available to add. Create new templates through the Virtues tab.";
   }

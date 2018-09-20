@@ -53,20 +53,39 @@ export class DashboardComponent extends GenericListComponent {
   //    {value: 'unix', viewValue: 'Unix'},
   //  ];
 
+  /**
+   * #uncommented
+   */
   jsonResult: string;
+
+  /**
+   * #uncommented
+   */
   sensorData = [];
 
+  /**
+   * see [[GenericPageComponent.constructor]] for notes on parameters
+   */
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog,
+    /**
+     * #uncommented
+     */
     private sensingService: SensingService,
   ) {
     super(router, baseUrlService, itemService, dialog);
 
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -76,6 +95,12 @@ export class DashboardComponent extends GenericListComponent {
     };
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -88,15 +113,24 @@ export class DashboardComponent extends GenericListComponent {
     };
   }
 
+  /**
+   * @return a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   */
   getNoDataMsg(): string {
     return "No sensor information is available at this time";
 
   }
 
+  /**
+   * @return an empty list; Apps can't be disabled, so nothing to filter
+   */
   getTableFilters(): {text: string, value: string}[] {
     return [];
   }
 
+  /**
+   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent]].
+   */
   getColumns(): Column[] {
     return [
     new Column('sensor_id',   'Sensor',  3, 'asc'),
@@ -175,7 +209,13 @@ export class DashboardComponent extends GenericListComponent {
     });
   }
 
-  // what's this? TODO once we have data to display and know how it should be displayed.
+  /**
+   * #uncommented
+   * what's this? TODO once we have data to display and know how it should be displayed.
+   * @param
+   *
+   * @return
+   */
   sensorlog(log) {
     //  console.log('sensorlog ... ' + this.sensorData.error);
     this.sensorData = log;

@@ -13,6 +13,12 @@ import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * @class
+ * This class represents a list of Virtual machine templates, which can be selected.
+ *
+ * @extends [[GenericModalComponent]]
+ */
 @Component({
   selector: 'app-vm-modal',
   templateUrl: '../generic-modal/generic.modal.html',
@@ -35,6 +41,9 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       super(router, baseUrlService, itemService, dialog, dialogRef, data);
     }
 
+  /**
+   * @return what columns should show up in the the VM selection table
+   */
   getColumns(): Column[] {
     return [
       new Column('name',  'Template Name',          5, 'asc'),
@@ -42,6 +51,12 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       new Column('apps',  'Assigned Applications',  3, undefined, this.formatName, this.getChildren),
     ];
   }
+
+  /**
+   * This page just needs to show all VMs, and the apps assigned to each VM.
+   *
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: Datasets[]} {
@@ -51,6 +66,10 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     };
   }
 
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
@@ -63,6 +82,9 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     };
   }
 
+  /**
+   * @return a string to be displayed in the virtue table, when no VM templates exit.
+   */
   getNoDataMsg(): string {
     return "There are no virtual machine templates available to add. Create new templates through the Virtual Machines tab.";
   }
