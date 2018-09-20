@@ -44,6 +44,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       new Column('name',  'Template Name',          undefined,        'asc',     5),
       new Column('os',    'OS',                     undefined,        'asc',     3),
       new Column('apps',  'Assigned Applications',  this.getChildren, undefined, 3, this.formatName),
+
     ];
   }
   getPageOptions(): {

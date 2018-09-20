@@ -219,7 +219,7 @@ public class DataResource {
 
 		Date now = new Date();
 		String systemName = "system";
-		String allLinuxAmi = "ami-2b500951";
+		String allLinuxAmi = "master";
 		// String windowsAmi = "ami-36a65f4b";
 		// ssh, but prior to sensing or additional apps
 		// String windowsAmi = "ami-ca00afb7";
@@ -396,6 +396,7 @@ public class DataResource {
 		adminRoles.add(VirtueUser.ROLE_ADMIN);
 
 		VirtueUser admin = new VirtueUser("admin", adminRoles, true);
+		VirtueUser admin2 = new VirtueUser("admin2", adminRoles, true);
 		VirtueUser presenter = new VirtueUser("presenter", userRoles, true);
 		VirtueUser office = new VirtueUser("office", userRoles, true);
 		VirtueUser math = new VirtueUser("math", userRoles, true);
@@ -404,6 +405,7 @@ public class DataResource {
 		VirtueUser developer = new VirtueUser("developer", userRoles, true);
 
 		userManager.addUser(admin);
+		userManager.addUser(admin2);
 		userManager.addUser(presenter);
 		userManager.addUser(office);
 		userManager.addUser(math);
@@ -423,6 +425,17 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(admin, virtueLinuxCorporateEmailUser.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtueExternalInternet.getId());
 		templateManager.assignVirtueTemplateToUser(admin, virtuePowerUser.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueBrowsers.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueSingleAll.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueWindows.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueLibre.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueMath.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueDocumentEditor.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueWinCorpEmail.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueRouterAdmin.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueLinuxCorporateEmailUser.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtueExternalInternet.getId());
+		templateManager.assignVirtueTemplateToUser(admin2, virtuePowerUser.getId());
 		templateManager.assignVirtueTemplateToUser(presenter, virtueLibre.getId());
 		templateManager.assignVirtueTemplateToUser(presenter, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(office, virtueLibre.getId());
