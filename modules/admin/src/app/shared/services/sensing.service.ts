@@ -15,15 +15,22 @@ const httpHeader = {
 export class SensingService {
 
   baseUrl: string;
+  /** #uncommented */
+  private jsonfile = './assets/json/sensing.json';
+  /** #uncommented */
+  private configUrl = 'sensing';
 
   constructor(
     private httpClient: HttpClient
   ) { }
 
-  private jsonfile = './assets/json/sensing.json';
-  private configUrl = 'sensing';
-
-  public setBaseUrl( url: string ) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  public setBaseUrl( url: string ): void {
     this.baseUrl = url;
   }
 

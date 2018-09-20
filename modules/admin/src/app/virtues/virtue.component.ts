@@ -15,9 +15,8 @@ import { VirtualMachine } from '../shared/models/vm.model';
 import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
-import { RowOptions } from '../shared/models/rowOptions.model';
 
-import { Mode, ConfigUrlEnum } from '../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets } from '../shared/enums/enums';
 
 import { VirtueMainTabComponent } from './form/main-tab/virtue-main-tab.component';
 import { VirtueSettingsTabComponent } from './form/settings-tab/virtue-settings.component';
@@ -51,14 +50,13 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
-          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
-          <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="cancel()">Cancel</button>
+          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
+          <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
+          <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
 
-          <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
-          <!-- I don't like this. Return should call cancel, not save. But otherwise there's no
-          way to save a change to the status without going into edit mode, which increases the version counter. FIXME-->
-          <button  *ngIf="mode === 'View'" class="button-cancel" (click)="save();" >Return</button>
+          <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
+          <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
@@ -72,45 +70,70 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
 export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
   @ViewChild('mainTab') mainTab: VirtueMainTabComponent;
-  @ViewChild('usageTab') usageTab: VirtueUsageTabComponent;
+
+  /**
+   * A tab for displaying and editing the many settings which can be specified within a Virtue.
+   * See [[VirtueSettingsTabComponent]]
+   */
   @ViewChild('settingsTab') settingsTab: VirtueSettingsTabComponent;
 
+  /**
+   * A tab for displaying what Users have access to this template, and what instances of this template are
+   * currently running.
+   */
+  @ViewChild('usageTab') usageTab: VirtueUsageTabComponent;
+
+  /**
+   * see [[GenericFormComponent.constructor]] for notes on parameters
+   */
   constructor(
+    location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/virtues', activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/virtues', location, activatedRoute, router, baseUrlService, itemService, dialog);
 
     // set up empty (except for a default color), will get replaced in ngOnInit if
     // mode is not 'create'
     this.item = new Virtue({color: this.defaultColor()});
 
-    this.datasetName = 'allVirtues';
-    this.childDatasetName = 'allVms';
+    this.datasetName = Datasets.VIRTUES;
+    this.childDatasetName = Datasets.VMS;
 
-    this.itemName = "Virtue";
   }
 
-  // This only stays until the data loads, if the data has a color.
-  defaultColor() {
+  /**
+   * This only stays until the data loads, if the data has a color (or if mode is CREATE).
+   * @return 'transparent'
+   */
+  defaultColor(): string {
     return 'transparent';
   }
 
-  // called on parent's ngInit
-  initializeTabs() {
-    this.mainTab.init();
-    this.settingsTab.init();
-    this.usageTab.init();
-    // this.historyTab.init();
+  /**
+   * calls an init() method in each of the form's tabs, to pass in any data needed/available at render time to that tab from the parent
+   * called in [[ngOnInit]]
+   */
+  initializeTabs(): void {
+    this.mainTab.init(this.mode);
+    this.settingsTab.init(this.mode);
+    this.usageTab.init(this.mode);
+    // this.historyTab.init(this.mode);
 
     // Must unsubscribe from all these when the VirtueComponent is destroyed
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.buildItemChildren(newChildIDs);
-      this.updateTabs();
+      this.setItemChildIDs(newChildIDs);
+      this.updatePage();
+    });
+
+    this.mainTab.onStatusChange.subscribe((newStatus) => {
+      if( this.mode === Mode.VIEW ) {
+        this.toggleItemStatus(this.item);
+      }
     });
 
     // TODO build activity table showing running instances of this virtue template,
@@ -131,23 +154,27 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     // });
   }
 
-  // called in parent's onPullComplete
-  setUpTabs() {
+  /**
+   * Calls a setUp() method for each of the form's tabs, to perform any actions that needed to wait for
+   * data requested from the backend.
+   * Called in [[onPullComplete]]
+   */
+  setUpTabs(): void {
     // Note that within each form, the item itself can't change, though its
     // attributes can.
-    this.mainTab.setUp(this.mode, this.item);
+    this.mainTab.setUp(this.item);
 
     // A table showing what virtues are running
     // Custom filter?
-    this.settingsTab.setUp(this.mode, this.item);
+    this.settingsTab.setUp(this.item);
 
-    this.usageTab.setUp(this.mode, this.item);
+    this.usageTab.setUp(this.item);
 
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.
     // Note that some children may not exist any more, or may have been updated.
     // Remember to make this sortable by version.
-    // this.historyTab.setUp();
+    // this.historyTab.setUp(this.item);
   }
 
   // called whenever item's child list is set or changes
@@ -165,26 +192,17 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     this.usageTab.update({allUsers: this.allUsers, mode: this.mode});
   }
 
-  // only called on initial page load at the moment.
-  updatePage() {
-    this.buildItemChildren();
-  }
-
-  // if nothing is passed in, we just want to populate item.children
-  // from the current childIDs array
-  buildItemChildren( newChildIDs?: string[] ) {
-    if (newChildIDs instanceof Array) {
-      this.item.childIDs = newChildIDs;
-    }
-    this.item.buildChildren(this[this.childDatasetName]);
-  }
-
+  /**
+   * This page needs all 4 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
+   * It also has a table showing the users that have been given access to this Virtue template.
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
-      neededDatasets: ['apps', 'vms', 'virtues', 'users']
+      serviceConfigUrl: ConfigUrls.VIRTUES,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
     };
   }
 
@@ -212,11 +230,15 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     // table - that chunk of html has now been wrapped in a check, to not check
     // children's list size if children is undefined
     this.item.children = undefined;
-    this.item.childIDs = undefined;
+    this.item.childIDs = [];
     return true;
   }
 
-  ngOnDestroy() {
+  /**
+   * unsubscribe all watched EventEmitters
+   */
+  ngOnDestroy(): void {
     this.mainTab.onChildrenChange.unsubscribe();
+    this.mainTab.onStatusChange.unsubscribe();
   }
 }

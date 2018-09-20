@@ -4,20 +4,19 @@ import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { Breadcrumb } from '../shared/models/breadcrumb.model';
-import { BreadcrumbProvider } from '../shared/providers/breadcrumb';
 
 @Component({
   selector: 'app-breadcrumbs',
   templateUrl: './breadcrumbs.component.html'
 })
-export class BreadcrumbsComponent implements OnInit {
+export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
   breadcrumbs: Breadcrumb[] = [];
   routerSub: Subscription;
 
   constructor(
     private router: Router,
-    private breadcrumbProvider: BreadcrumbProvider,
+    /** Injected, records information about the route that may be relevant when we change breadcrumbs to build up. */
     private activatedRoute: ActivatedRoute
   ) { }
 
@@ -42,5 +41,12 @@ export class BreadcrumbsComponent implements OnInit {
         this.breadcrumbs = tempCrumbs;
       }
     });
+  }
+
+  /**
+   * explicitly unsubscribe when this component is destroyed.
+   */
+  ngOnDestroy() {
+    this.routerSub.unsubscribe();
   }
 }

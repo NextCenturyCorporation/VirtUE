@@ -18,12 +18,11 @@ import { VirtualMachine } from '../shared/models/vm.model';
 import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
-import { Mode } from '../shared/enums/enums';
-import { RowOptions } from '../shared/models/rowOptions.model';
+import { Mode, Datasets } from '../shared/enums/enums';
 
 import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
-import { ConfigUrlEnum } from '../shared/enums/enums';
+import { ConfigUrls } from '../shared/enums/enums';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
@@ -46,10 +45,13 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
-        <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
-        <button class="button-cancel" (click)="cancel()">Cancel</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
+        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
+        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
+
+        <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
+        <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
@@ -64,41 +66,49 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
 
-  roleUser: boolean;
-  roleAdmin: boolean;
-
-  fullImagePath: string;
-
+  /**
+   * see [[GenericFormComponent.constructor]] for notes on parameters
+   */
   constructor(
+    location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/users', activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/users', location, activatedRoute, router, baseUrlService, itemService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User(undefined);
 
-    this.datasetName = 'allUsers';
-    this.childDatasetName = 'allVirtues';
-
-    this.childDomain = "/virtues";
+    this.datasetName = Datasets.USERS;
+    this.childDatasetName = Datasets.VIRTUES;
   }
 
   // called on parent's ngInit
   initializeTabs() {
 
-    this.mainTab.init();
-    // this.activityTab.init();
-    // this.historyTab.init();
+    this.mainTab.init(this.mode);
+    // These tabs don't exist yet
+    // this.activityTab.init(this.mode);
+    // this.historyTab.init(this.mode);
 
     // Must unsubscribe from all these when the UserComponent is destroyed
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.buildItemChildren(newChildIDs);
-      this.updateTabs();
+      this.setItemChildIDs(newChildIDs);
+      this.updatePage();
+    });
+
+    // newStatus is just item.enabled - item is a common reference across tabs and form, so the actual value of the
+    // parameter is extraneous. It just needs to emit something to let the form know that the user toggled the status.
+    // In any mode but view, nothing extra should happen. The local copy of item will have its status toggled, and that's it.
+    // In view mode, this toggling should actually make a change to the backend.
+    this.mainTab.onStatusChange.subscribe((newStatus) => {
+      if( this.mode === Mode.VIEW ) {
+        this.toggleItemStatus(this.item);
+      }
     });
 
     // Can anything be done/changed from the activity tab?
@@ -120,45 +130,32 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
   setUpTabs() {
     // Note that within each form, the item itself can't change, though its
     // attributes can.
-    this.mainTab.setUp(this.mode, this.item);
+    this.mainTab.setUp(this.item);
 
     // A table showing what virtues are running, what's been instantiated, when they've logged-on
     // and logged off, all that sort of thing. Probably could do it in one table, but I'd want to add
     // some sort of custom filter.
     // at least one of these.
-    // this.activityTab.setUp(this.mode, this.item);
+    // this.activityTab.setUp(this.item);
 
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.
     // Note that some children may not exist any more, or may have been updated.
-    // this.historyTab.setUp();
+    // this.historyTab.setUp(this.item);
   }
 
   // called whenever item's child list is set or changes
   updateTabs(): void {
+
     this.mainTab.update({mode: this.mode});
   }
 
-  // only called on initial page load at the moment.
-  updatePage() {
-    this.buildItemChildren();
-  }
-
-  // if nothing is passed in, we just want to populate item.children
-  buildItemChildren( newChildIDs?: string[] ) {
-    if (newChildIDs instanceof Array) {
-      this.item.childIDs = newChildIDs;
-    }
-
-    this.item.buildChildren(this[this.childDatasetName]);
-  }
-
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.USERS,
-      neededDatasets: ["apps", "vms", "virtues", "users"]
+      serviceConfigUrl: ConfigUrls.USERS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
     };
   }
 
@@ -193,12 +190,39 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
     // so we're not trying to stringify a bunch of extra fields and data
     this.item.children = undefined;
-    this.item.childIDs = undefined;
-    this.item['roles'] = undefined;
+    this.item.childIDs = [];
+    this.item['roles'] = [];
     return true;
   }
 
   ngOnDestroy() {
     this.mainTab.onChildrenChange.unsubscribe();
+    this.mainTab.onStatusChange.unsubscribe();
+  }
+
+  /**
+   * Overrides parent, [[GenericPageComponent.toggleItemStatus]].
+   * See note at [[UserListComponent.toggleItemStatus]].
+   * Copied from there ^. Should eventually change, at which point this can be removed.
+   *
+   * @param item the user whose status we wish to toggle.
+   */
+  toggleItemStatus(item: Item): void {
+    if (item.getName().toUpperCase() === "ADMIN" && item.enabled) {
+      console.log("Don't allow the toggling of the admin user. We need that. #TODO");
+      item.enabled = true;
+      return;
+    }
+
+    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, item.getID(), !item.enabled).subscribe( () => {
+
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
   }
 }

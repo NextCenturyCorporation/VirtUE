@@ -25,13 +25,12 @@ export class ColorModalComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: {color: string}
   ) {
       this.selectedColor = this.colorSet.getList().find(c => c.hex === data.color);
-      console.log(this.selectedColor);
+
       if (!this.selectedColor) {
         this.selectedColor = this.colorSet.getList().find(c => c.prettyName === "None");
       }
-      console.log(this.selectedColor);
 
-    }
+  }
 
   ngOnInit() {}
 
@@ -45,6 +44,7 @@ export class ColorModalComponent implements OnInit {
   }
 
   cancel() {
+    this.selectColor.emit("");
     this.dialogRef.close();
   }
 

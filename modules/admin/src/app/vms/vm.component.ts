@@ -16,9 +16,8 @@ import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
-import { RowOptions } from '../shared/models/rowOptions.model';
 
-import { ConfigUrlEnum } from '../shared/enums/enums';
+import { ConfigUrls, Datasets, Mode } from '../shared/enums/enums';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
@@ -47,10 +46,13 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
-        <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
-        <button class="button-cancel" (click)="cancel()">Cancel</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
+        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
+        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
+
+        <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
+        <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
@@ -66,32 +68,40 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
   @ViewChild('usageTab') usageTab: VmUsageTabComponent;
 
   constructor(
+    location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
     itemService: ItemService,
     dialog: MatDialog
   ) {
-    super('/vm-templates', activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/vm-templates', location, activatedRoute, router, baseUrlService, itemService, dialog);
 
     this.item = new VirtualMachine(undefined);
 
-    this.datasetName = 'allVms';
-    this.childDatasetName = 'allApps';
+    this.datasetName = Datasets.VMS;
+    this.childDatasetName = Datasets.APPS;
 
-    // No place to navigate to, since apps don't currently each have their own page
-    this.childDomain = undefined;
   }
 
-  // called in parent's ngInit
-  initializeTabs() {
-    this.mainTab.init();
-    this.usageTab.init();
-    // this.historyTab.init();
+  /**
+   * calls an init() method in each of the form's tabs, to pass in any data needed/available at render time to that tab from the parent
+   * called in [[ngOnInit]]
+   */
+  initializeTabs(): void {
+    this.mainTab.init(this.mode);
+    this.usageTab.init(this.mode);
+    // this.historyTab.init(this.mode);
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.buildItemChildren(newChildIDs);
-      this.updateTabs();
+      this.setItemChildIDs(newChildIDs);
+      this.updatePage();
+    });
+
+    this.mainTab.onStatusChange.subscribe((newStatus) => {
+      if( this.mode === Mode.VIEW ) {
+        this.toggleItemStatus(this.item);
+      }
     });
 
   }
@@ -100,9 +110,9 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
   setUpTabs() {
     // Note that within each form, the item can't be reassigned; its attribute
     // can change though.
-    this.mainTab.setUp(this.mode, this.item);
+    this.mainTab.setUp(this.item);
 
-    this.usageTab.setUp(this.mode, this.item);
+    this.usageTab.setUp(this.item);
 
     // show the times that this user's permissions/settings have been changed by
     // the admin, with a snapshot of what they were at each point.
@@ -120,25 +130,17 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     this.usageTab.update({allVirtues: this.allVirtues, mode: this.mode});
   }
 
-  // only called on initial page load at the moment.
-  updatePage() {
-    this.buildItemChildren();
-  }
-
-  // if nothing is passed in, we just want to populate item.children
-  buildItemChildren( newChildIDs?: string[] ) {
-    if (newChildIDs instanceof Array) {
-      this.item.childIDs = newChildIDs;
-    }
-    this.item.buildChildren(this[this.childDatasetName]);
-  }
-
+  /**
+   * This page needs all datasets to load: This VM, the Virtues granted this VM template, and the Apps this VM has
+   * been given.
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ['apps', 'vms', 'virtues']
+      serviceConfigUrl: ConfigUrls.VMS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
     };
   }
 
@@ -163,11 +165,12 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     this.item['applicationIds'] = this.item.childIDs;  // may be empty
 
     this.item.children = undefined;
-    this.item.childIDs = undefined;
+    this.item.childIDs = [];
     return true;
   }
 
   ngOnDestroy() {
     this.mainTab.onChildrenChange.unsubscribe();
+    this.mainTab.onStatusChange.unsubscribe();
   }
 }

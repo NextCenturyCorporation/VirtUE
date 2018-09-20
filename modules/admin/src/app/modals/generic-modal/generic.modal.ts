@@ -7,7 +7,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 import { Item } from '../../shared/models/item.model';
 import { Column } from '../../shared/models/column.model';
-import { RowOptions } from '../../shared/models/rowOptions.model';
+import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
@@ -18,7 +18,6 @@ This inherits from GeneralListComponent, so that it can display the available
 items in the same way, with the same filtering/sorting capabilities as the user
 can on the list page.
  */
-
 @Component({
   selector: 'app-generic-modal',
   templateUrl: './generic.modal.html',
@@ -50,11 +49,6 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
         this.initialSelections = [];
       }
 
-  }
-
-  ngOnInit() {
-    this.cmnComponentSetup();
-    this.fillTable();
 
     // TODO should we not allow addition of disabled items?
     // if so, note that select-all button will not act how user expects.
@@ -62,9 +56,13 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
     // remove disabled ones through that menu.
   }
 
-  // this gives the childIDs the item was loaded with, and is only used to build
-  // the table - any changes will be made to this.table.selectedIDs.
-  getSelectedIDs() {
+  /**
+   * this gives the childIDs the item was loaded with, and is only used to build
+   * the table - any changes will be made to this.table.selectedIDs.
+   *
+   * @return a list of item IDs that should be initialized as 'selected' when the table builds.
+   */
+  getSelectedIDs(): string[] {
     return this.initialSelections;
   }
 
@@ -76,7 +74,10 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
     return true;
   }
 
-  getOptionsList(): RowOptions[] {
+  /**
+   * @return an empty list - no need for a submenu on Items in a modal at the moment
+   */
+  getSubMenu(): SubMenuOptions[] {
     return [];
   }
 

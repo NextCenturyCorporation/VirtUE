@@ -29,7 +29,7 @@
         <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.colWidth}}">
           <div *ngIf="column.sortDefault === undefined" >{{column.prettyName}}</div>
           <ng-container *ngIf="column.sortDefault !== undefined" >
-            <a (click)="setColumnSortDirection(column, sortBy)">{{column.prettyName}}</a>
+            <a (click)="setColumnSortDirection(column)">{{column.prettyName}}</a>
             <span class="list-sorter" >
               <span *ngIf="sortColumn.name === column.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn.name === column.name && sortBy === 'desc'" class="fa fa-sort-down"></span>
@@ -53,29 +53,20 @@
 
     <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
     It is passed the preceeding list, followed by the values between colons -->
-    <!-- can make it pass a conditional that's setto some default in the calling class when setting up a table -->
+    <!-- can make it pass a conditional that's set to some default in the calling class when setting up a table -->
     <!-- May even be able to get rid of the filterValue? And just have the calling class change the condition? -->
-    <!-- <div *ngFor="let i of items | listFilter : sortColumn.name : sortDirection : filterColumn : filterCondition" -->
-    <div *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
+    <div *ngFor="let i of items | listFilterSort : sortColumn.name : sortDirection : filterColumn : filterCondition : update"
       appActiveClass [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }" fxLayout="row" class="mui-row table-row" >
       <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
                 [ngStyle]="{ 'background-color': i.color, 'left':'0px' }">
       </div>
+      <!-- Note that this checkbox is for selection, and is not related to the checkboxes definable in Columns -->
       <span *ngIf="hasCheckbox === true" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
         <mat-checkbox
           name="cbVm"
-          *ngIf="i.enabled"
+          [disabled]="!i.enabled"
           [checked]="isSelected(i.getID())"
-          (change)="checkClicked($event.checked, i.getID())"
-          value="{{i.getID()}}" ></mat-checkbox>
-        <!-- show a disabled checkbox if the item is disabled.  -->
-        <mat-checkbox
-          name="cbVm"
-          *ngIf="i.enabled === false"
-          disabled=true
-          color="#333333"
-          [checked]="isSelected(i.getID())"
-          (change)="checkClicked($event.checked, i.getID())"
+          (change)="selectionChange($event.checked, i.getID())"
           value="{{i.getID()}}" ></mat-checkbox>
       </span>
       <div fxFlex="auto">
@@ -89,9 +80,9 @@
           </div>
 
           <div class="menu-options" >
-            <a *ngFor="let o of rowOptions; let idx = index" (click)="o.action(i)">
+            <a *ngFor="let o of subMenuOptions; let idx = index" (click)="o.action(i)">
               <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
-              <ng-container *ngIf="o.shouldAppear(i) && idx < rowOptions.length-1">|</ng-container>
+              <ng-container *ngIf="o.shouldAppear(i) && idx < subMenuOptions.length-1">|</ng-container>
             </a>
           </div>
         </span>
@@ -102,7 +93,7 @@
             <ng-container *ngFor="let element of column.list(i)">
               <ul>
                 <ul>
-                  <a *ngIf="column.link" (click)="column.link(element)">
+                  <a class="edit" *ngIf="column.link" (click)="column.link(element)">
                     {{ column.formatValue ? column.formatValue(element) : element.toString() }}
                   </a>
                   <div *ngIf="column.link === undefined">

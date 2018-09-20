@@ -34,7 +34,12 @@ export class ColorSet {
     {prettyName: "Black",        hex: "#000000",  htmlName: "black"},
     {prettyName: "None",         hex: "transparent",  htmlName: "white"}
   ];
-  getList() {
+
+  /**
+   * Get the set of colors
+   * @return the static list of colors
+   */
+  getList(): Color[] {
     return this.list;
   }
 }

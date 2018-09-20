@@ -5,8 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from '../../../shared/models/item.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
-import { RowOptions } from '../../../shared/models/rowOptions.model';
+import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
@@ -31,19 +30,15 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
       protected osOptions: OSSet,
       router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.tabName = "General Info";
   }
 
-  update(changes: any) {
-    this.childrenTable.items = this.item.children.asList();
-
-    if (changes.mode) {
-      this.mode = changes.mode;
-    }
-  }
-
-  setUp(mode: Mode, item: Item): void {
-    this.mode = mode;
+  /**
+   * See [[GenericFormTabComponent.setUp]] for generic info
+   * @param
+   *
+   * @return
+   */
+  setUp(item: Item): void {
     if ( !(item instanceof VirtualMachine) ) {
       // TODO throw error
       console.log("item passed to vm-main-tab which was not a VirtualMachine: ", item);
@@ -51,9 +46,33 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     }
     this.item = item as VirtualMachine;
 
+    this.updateVersion();
+  }
+
+
+  /**
+   * Overrides parent, [[GenericFormTabComponent.setMode]]
+   *
+   * @param newMode the Mode to set the page as.
+   */
+  setMode(newMode: Mode): void {
+    this.mode = newMode;
+
+    if (this.item) {
+      this.updateVersion();
+    }
+  }
+
+  /**
+   * Updates what value gets listed as the current version.
+   * In edit mode, the version is what version it'll be saved as; The current version + 1.
+   * Otherwise, it should just show the current version.
+   */
+  updateVersion(): void {
     this.newVersion = this.item.version;
 
-    if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
+    // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
+    if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }
 
@@ -61,17 +80,9 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
 
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', undefined, 'asc', 5),
-      new Column('version', 'Version',          undefined, 'asc', 3),
-      new Column('os',      'Operating System', undefined, 'desc', 4)
-    ];
-  }
-
-  getOptionsList(): RowOptions[] {
-    return [
-      // add the below once (or if) apps are given their own form page
-      // new RowOptions("View", () => true, (i: Item) => this.viewItem(i)),
-      new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
+      new Column('name',    'Application Name', 5, 'asc'),
+      new Column('version', 'Version',          3, 'asc'),
+      new Column('os',      'Operating System', 4, 'desc')
     ];
   }
 
@@ -79,32 +90,29 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     return 'No applications have been added yet. To add a template, click on the button "Add/Remove Application Packages" above.';
   }
 
-  init() {
-    this.setUpChildTable();
-  }
-
-  setUpChildTable(): void {
-    if (this.childrenTable === undefined) {
-      return;
-    }
-
-    this.childrenTable.setUp({
-      cols: this.getColumns(),
-      opts: this.getOptionsList(),
-      coloredLabels: false,
-      filters: [], // don't allow filtering on the form's child table.
-      tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
-  }
-
+  /**
+   * Pull in whatever [[version]] the item should be saved as.
+   *
+   * Eventually, add something to check for name uniqueness?
+   * @return true always at the moment
+   */
   collectData(): boolean {
     this.item.version = this.newVersion;
     return true;
   }
 
-  getDialogRef(params: {height: string, width: string, data: any}) {
+  /**
+   * Loads an AppsModalComponent
+   * @param parameters to be passed into the modal
+   */
+  getDialogRef(params: {
+                          /** the height of the modal, in pixels */
+                          height: string,
+                          /** the width of the modal, in pixels */
+                          width: string,
+                          /** some type of data object to be passed into the modal - a container */
+                          data: any
+                        }) {
     return this.dialog.open( AppsModalComponent, params);
   }
 }

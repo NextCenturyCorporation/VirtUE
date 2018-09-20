@@ -8,7 +8,7 @@ import { Item } from './item.model';
  */
 export class Application extends Item {
 
-  id: string;
+  /** #uncommented (version) #TODO is this the application's version? unlike Virtue.version and vm.version*/
   version: string;
   os: string;
   launchCommand: string;

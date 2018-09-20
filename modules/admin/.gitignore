@@ -31,6 +31,9 @@
 npm-debug.log
 testem.log
 /typings
+/doc
+savior-user.properties
+package-lock.json
 
 # e2e
 /e2e/*.js

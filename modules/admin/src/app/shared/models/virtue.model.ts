@@ -21,11 +21,17 @@ import { Printer } from './printer.model';
  */
 export class Virtue extends Item {
 
-  id: string;
+  /** What iteration of edit this template is on. Automatically increases on edit. */
   version: number;
   lastEditor: string;
-  lastModification: string | Date;
-  awsTemplateName: string;
+
+  /** A full Date, of the last time this record was changed on the backend. */
+  lastModification: Date;
+
+  // /** #TODO what is this? */
+  // awsTemplateName: string;
+
+  /** A hex string of the color to be shown on this Virtue's label, both on the workbench and the desktop app */
   color: string;
 
   unprovisioned: boolean;
@@ -60,7 +66,6 @@ export class Virtue extends Item {
       this.lastModification = virtueObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
       this.color = virtueObj.color;
-      this.status = virtueObj.enabled ? 'enabled' : 'disabled';
 
       this.parentDomain = '/virtues';
 
@@ -81,7 +86,7 @@ export class Virtue extends Item {
       if (! this.allowedPasteTargets) {
         this.allowedPasteTargets = [];
       }
-      // TODO  How are these filesystems defined/found? Are they going to be dynamic?
+      // TODO  Placeholder filesystems/servers - these will be defined in and pulled from the global settings.
       if (! this.fileSysPerms) {
         this.fileSysPerms = [
           new FileSysPermission("File Server\\Media "),

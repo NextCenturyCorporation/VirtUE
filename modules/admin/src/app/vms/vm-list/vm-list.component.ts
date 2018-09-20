@@ -14,7 +14,7 @@ import { ItemService } from '../../shared/services/item.service';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 
 @Component({
   selector: 'app-vm-list',
@@ -45,35 +45,32 @@ export class VmListComponent extends GenericListComponent {
     // Note: colWidths of all columns must add to exactly 12.
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
     return [
-      // {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
-      new Column('name',        'Template Name',        undefined, 'asc',     2, undefined, (i: Item) => this.editItem(i)),
-      new Column('os',          'OS',                   undefined, 'asc',     1),
-      new Column('childNames',  'Assigned Applications', this.getChildren, undefined, 4, this.formatName),
-      new Column('lastEditor',  'Last Modified By',     undefined, 'asc',     2, undefined),
-      new Column('modDate',     'Modified Date',        undefined, 'desc',    2, undefined),
-      new Column('status',      'Status',               undefined, 'asc',     1, this.formatStatus)
+      new Column('name',        'Template Name',         2, 'asc', undefined, undefined, (i: Item) => this.viewItem(i)),
+      new Column('os',          'OS',                    1, 'asc'),
+      new Column('childNames',  'Assigned Applications', 4, undefined, this.formatName, this.getChildren),
+      new Column('lastEditor',  'Last Modified By',      2, 'asc'),
+      new Column('modDate',     'Modified Date',         2, 'desc'),
+      new Column('enabled',      'Status',                1, 'asc', this.formatStatus)
     ];
   }
 
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ["apps", "vms"]
+      serviceConfigUrl: ConfigUrls.VMS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS]
     };
   }
 
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
-      pluralItem: string,
-      domain: string} {
+      pluralItem: string} {
     return {
-      prettyTitle: "Virtual Machine Templates",
-      itemName: "Vm Template",
-      pluralItem: "VMs",
-      domain: '/vm-templates'
+      prettyTitle: 'Virtual Machine Templates',
+      itemName: 'Vm Template',
+      pluralItem: 'VMs'
     };
   }
 

@@ -12,13 +12,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigComponent implements OnInit {
 
-  location: Location;
 
-  constructor( location: Location ) {
-    this.location = location;
-  }
+  /**
+   * #uncommented
+   */
+  constructor(
+    /** #uncommented */
+    protected location: Location
+   ) {}
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   */
+  ngOnInit(): void {
   }
 
 }

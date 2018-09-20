@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
 import { Item } from '../../shared/models/item.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
@@ -21,38 +21,33 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class VmModalComponent extends GenericModalComponent implements OnInit {
 
-  checked = false;
-
-  selectedIDs: string[] = [];
-
+  /**
+   * see [[GenericModalComponent.constructor]] for notes on parameters
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
       itemService: ItemService,
       dialog: MatDialog,
-      dialogRef: MatDialogRef<VmModalComponent>,
+      dialogRef: MatDialogRef<GenericModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
       super(router, baseUrlService, itemService, dialog, dialogRef, data);
-
-      this.neededDatasets = ["apps", "vms"];
     }
 
   getColumns(): Column[] {
     return [
-      // arguments are: {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
-      new Column('name',  'Template Name',          undefined,        'asc',     5),
-      new Column('os',    'OS',                     undefined,        'asc',     3),
-      new Column('apps',  'Assigned Applications',  this.getChildren, undefined, 3, this.formatName),
-
+      new Column('name',  'Template Name',          5, 'asc'),
+      new Column('os',    'OS',                     3, 'asc'),
+      new Column('apps',  'Assigned Applications',  3, undefined, this.formatName, this.getChildren),
     ];
   }
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ["apps", "vms"]
+      serviceConfigUrl: ConfigUrls.VMS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS]
     };
   }
 
@@ -60,20 +55,22 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
       prettyTitle: "Virtual Machine Templates",
       itemName: "Vm Template",
-      pluralItem: "VM Templates",
-      domain: '/vm-templates'
+      pluralItem: "VM Templates"
     };
   }
 
   getNoDataMsg(): string {
-    return  "No vms have been added at this time. To add a vm, click on the button \"Add Vm Template\" above.";
+    return "There are no virtual machine templates available to add. Create new templates through the Virtual Machines tab.";
   }
 
-  onPullComplete() {
+  /**
+   * populates the table once data is available.
+   */
+  onPullComplete(): void {
     this.setItems(this.allVms.asList());
   }
 }

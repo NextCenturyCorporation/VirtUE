@@ -5,8 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrlEnum } from '../../../shared/enums/enums';
-import { RowOptions } from '../../../shared/models/rowOptions.model';
+import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
@@ -26,21 +25,14 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
 
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.tabName = "General Info";
   }
 
-  update(changes: any) {
-    this.childrenTable.items = this.item.children.asList();
-
-    if (changes.mode) {
-      this.setMode(changes.mode);
-      this.childrenTable.colData = this.getColumns();
-      this.childrenTable.rowOptions = this.getOptionsList();
-    }
-  }
-
-  setUp(mode: Mode, item: Item): void {
-    this.mode = mode;
+  /**
+   * See [[GenericFormTabComponent.setUp]] for generic info
+   *
+   * @param item a reference to the Item being displayed by this tab's parent form.
+   */
+  setUp(item: Item): void {
     if ( !(item instanceof Virtue) ) {
       // TODO throw error
       console.log("item passed to virtue-main-tab which was not a Virtue: ", item);
@@ -48,80 +40,88 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     }
     this.item = item as Virtue;
 
-    this.setMode(mode);
+    this.updateVersion();
   }
 
-  setMode(newMode: Mode) {
+  /**
+   * Overrides parent, [[GenericFormTabComponent.setMode]]
+   *
+   * @param newMode the Mode to set the page as.
+   */
+  setMode(newMode: Mode): void {
     this.mode = newMode;
 
+    if (this.item) {
+      this.updateVersion();
+    }
+  }
+
+  /**
+   * Updates what value gets listed as the current version.
+   * In edit mode, the version is what version it'll be saved as; The current version + 1.
+   * Otherwise, it should just show the current version.
+   */
+  updateVersion(): void {
     this.newVersion = this.item.version;
 
-    if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
+    // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
+    if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }
   }
 
-  // TODO start implementing view page from this.
+  /**
+   * @return what columns should show up in the virtue's VM children table
+   *         The first column, the VM's name, should be clickable if and only if the page is in view mode.
+   */
   getColumns(): Column[] {
     let cols: Column[] = [
-      new Column('os',          'OS',                   undefined, 'asc',     2),
-      new Column('childNames',  'Assigned Applications', this.getChildren, undefined, 4, this.formatName),
-      new Column('status',      'Status',               undefined, 'asc',     2, this.formatStatus)
+      new Column('os',          'OS',                    2, 'asc'),
+      new Column('childNames',  'Assigned Applications', 4, undefined,  this.formatName, this.getChildren),
+      new Column('enabled',      'Status',                2, 'asc',      this.formatStatus)
     ];
     if (this.mode === Mode.VIEW) {
-      cols.unshift(new Column('name',        'VM Template Name',     undefined, 'asc',     4, undefined, (i: Item) => this.viewItem(i)));
+      cols.unshift(new Column('name', 'VM Template Name', 4, 'asc', undefined, undefined, (i: Item) => this.viewItem(i)));
     }
     else {
-      cols.unshift(new Column('name',        'VM Template Name',     undefined, 'asc',     4));
+      cols.unshift(new Column('name', 'VM Template Name', 4, 'asc'));
     }
 
     return cols;
   }
 
-  getOptionsList(): RowOptions[] {
-    if (this.mode === Mode.VIEW) {
-      return [
-         new RowOptions("View", () => true, (i: Item) => this.viewItem(i))
-      ];
-    }
-    else {
-      return [
-         new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-      ];
-    }
-  }
-
+  /**
+   * @return a string to be displayed in the children table, when the table's 'items' array is undefined or empty.
+   */
   getNoDataMsg(): string {
     return "No virtual machine templates have been given to this Virtue yet. \
 To add a virtual machine template, click on the button \"Add VM\" above.";
   }
 
-  init() {
-    this.setUpChildTable();
-  }
-
-  setUpChildTable(): void {
-    if (this.childrenTable === undefined) {
-      return;
-    }
-
-    this.childrenTable.setUp({
-      cols: this.getColumns(),
-      opts: this.getOptionsList(),
-      coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table. ?
-      tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
-  }
-
+  /**
+   * Pull in whatever [[version]] the item should be saved as.
+   *
+   * Eventually, add something to check name? I know names aren't IDs for virtues, but if two virtues
+   * in a list have the same name, how can they be easily distinguished?
+   * @return true always at the moment
+   */
   collectData(): boolean {
     this.item.version = this.newVersion;
     return true;
   }
 
-  getDialogRef(params: {height: string, width: string, data: any}) {
+  /**
+   * Loads an VmModalComponent
+   * @param parameters to be passed into the modal
+   */
+  getDialogRef(params: {
+                          /** the height of the modal, in pixels */
+                          height: string,
+                          /** the width of the modal, in pixels */
+                          width: string,
+                          /** some type of data object to be passed into the modal - a container */
+                          data: any
+                        }) {
     return this.dialog.open( VmModalComponent, params);
   }
 }

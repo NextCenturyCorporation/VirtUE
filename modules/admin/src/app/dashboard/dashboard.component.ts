@@ -10,22 +10,26 @@ import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { SensingService } from '../shared/services/sensing.service';
 import { ItemService } from '../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../shared/enums/enums';
 import { Column } from '../shared/models/column.model';
 import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.component';
 
-
+/**
+ * Note: this class will be significantly overhauled soon, to actually implement connection to the sensors
+ * #uncommented
+ * @class
+ * @extends
+ */
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
   providers: [ BaseUrlService, SensingService, ItemService ]
 })
-
 export class DashboardComponent extends GenericListComponent {
 
   // not used, but probably should be
-  form: FormGroup;
+  // form: FormGroup;
 
   // not used, but might need the info when setting this up later
   //  columns = [
@@ -64,11 +68,11 @@ export class DashboardComponent extends GenericListComponent {
   }
 
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VIRTUES,
-      neededDatasets: ["apps", "vms", "virtues"]
+      serviceConfigUrl: ConfigUrls.VIRTUES,
+      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
     };
   }
 
@@ -76,12 +80,11 @@ export class DashboardComponent extends GenericListComponent {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
-      prettyTitle: "Virtue Templates",
-      itemName: "Virtue Template",
-      pluralItem: "Virtues",
-      domain: '/virtues'
+      prettyTitle: "Sensor Information",
+      itemName: "Sensor",
+      pluralItem: "Sensors"
     };
   }
 
@@ -96,32 +99,56 @@ export class DashboardComponent extends GenericListComponent {
 
   getColumns(): Column[] {
     return [
-    new Column('sensor_id',   'Sensor', undefined, 'asc', 3),
-    new Column('virtue name', 'Virtue', undefined, 'asc', 3, this.getVirtName),
-    new Column('kafka_topic', 'Kafka Topic', undefined, 'asc', 3),
-    new Column('has cert',    'Certificate', undefined, 'asc', 1, this.hasCertificates),
-    new Column('updated_at',  'Last Update', undefined, 'asc', 2)
+    new Column('sensor_id',   'Sensor',  3, 'asc'),
+    new Column('virtue name', 'Virtue',  3, 'asc', this.getVirtName),
+    new Column('kafka_topic', 'Kafka Topic', 3, 'asc'),
+    new Column('has cert',    'Certificate', 1, 'asc', this.hasCertificates),
+    new Column('updated_at',  'Last Update', 2, 'asc')
     ];
   }
 
-  getVirtName(d: any) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  getVirtName(d: any): string {
     return this.allVirtues.get(d.virtue_id).getName();
   }
 
-  hasCertificates(d) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  hasCertificates(d): string {
     if (d.has_certificates) {
       return 'Yes';
     }
     return 'No';
   }
 
-  onPullComplete() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  onPullComplete(): void {
     this.getSensingData();
   }
 
-  getSensingData() {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  getSensingData(): void {
     this.sensingService.setBaseUrl(this.baseUrl);
-    this.sensingService.getSensingLog().subscribe(sensorLog => {
+    let sub = this.sensingService.getSensingLog().subscribe(sensorLog => {
       if (sensorLog.length > 0) {
         this.sensorData = sensorLog[0].sensors;
         console.log(this.sensorData);
@@ -132,9 +159,19 @@ export class DashboardComponent extends GenericListComponent {
     },
     error => {
       // get static data
-      this.sensingService.getStaticList().subscribe(staticData => {
+      let staticSub = this.sensingService.getStaticList().subscribe(staticData => {
         this.sensorData = staticData[0].sensors;
+      },
+      () => { //on error
+        staticSub.unsubscribe();
+      },
+      () => {// on complete
+        staticSub.unsubscribe();
       });
+      sub.unsubscribe();
+    },
+    () => {
+      sub.unsubscribe();
     });
   }
 
