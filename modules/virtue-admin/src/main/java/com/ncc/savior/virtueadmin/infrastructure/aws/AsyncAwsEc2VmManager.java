@@ -92,7 +92,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures, String virtue) {
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
+			String virtue) {
 		if (vmFutures == null) {
 			vmFutures = new CompletableFuture<Collection<VirtualMachine>>();
 		}
@@ -103,7 +104,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			virtueName = virtueName.replace(" ", "-");
 			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + virtueName;
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, securityGroupIds, serverKeyName, instanceType,
-					subnetId);
+					subnetId, null);
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
@@ -347,12 +348,12 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		if (vmFuture == null) {
 			vmFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		}
-		
+
 		CompletableFuture<Collection<VirtualMachine>> vmFutureFinal = vmFuture;
 		CompletableFuture<Collection<VirtualMachine>> stopFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		stopVirtualMachine(vm, stopFuture);
 		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
 			startVirtualMachine(vm, vmFutureFinal);
-		});	
+		});
 	}
 }

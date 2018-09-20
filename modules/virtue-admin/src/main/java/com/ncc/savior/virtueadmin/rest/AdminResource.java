@@ -403,18 +403,102 @@ public class AdminResource {
 		StreamingOutput stream = new StreamingOutput() {
 			@Override
 			public void write(OutputStream os) throws IOException, WebApplicationException {
-				importExportService.exportSystem(os);
+				importExportService.exportDatabaseWithoutImages(os);
 				os.flush();
 			}
 		};
 		return Response.ok(stream).build();
 	}
 
+	@GET
+	@Path("export/user")
+	@Produces("application/zip")
+	public Response exportAllUsers() {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedAllUsers(os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream)
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + "users" + ".zip\"").build();
+	}
+
+	@GET
+	@Path("export/user/{username}")
+	@Produces("application/zip")
+	public Response exportUser(@PathParam("username") String username) {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedUser(username, os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream)
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + username + ".zip\"").build();
+	}
+
+	@GET
+	@Path("export/virtue/template/{templateId}")
+	@Produces("application/zip")
+	public Response exportAllVirtueTemplates(@PathParam("templateId") String templateId) {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedVirtueTemplate(templateId, os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream)
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + templateId + ".zip\"").build();
+	}
+
+	@GET
+	@Path("export/virtue/template")
+	@Produces("application/zip")
+	public Response exportSystemZipped() {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedAllTemplates(os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"allVirtueTemplates.zip\"")
+				.build();
+	}
+
+	@GET
+	@Path("export/virtualMachine/template/{templateId}")
+	@Produces("application/zip")
+	public Response exportVirtualMachineZipped(@PathParam("templateId") String templateId) {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedVirtualMachineTemplate(templateId, os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"vm-" + templateId + ".zip\"")
+				.build();
+	}
+
 	@POST
 	@Path("import")
 	@Produces("application/json")
+	@Consumes("application/json")
 	public void importSystem(InputStream stream) {
-		importExportService.importSystem(stream);
+		importExportService.importSystemDatabaseWithoutImages(stream);
+	}
+
+	@POST
+	@Path("import")
+	@Produces("application/json")
+	@Consumes({ "application/zip", "application/octet-stream" })
+	public void importZip(InputStream stream) {
+		importExportService.importZip(stream);
 	}
 
 	@GET
