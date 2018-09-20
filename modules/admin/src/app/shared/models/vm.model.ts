@@ -20,7 +20,7 @@ export class VirtualMachine extends Item {
   os: string;
 
   /** what version of edit this template currently is at */
-  version: string;
+  version: number;
 
   // /** #uncommented what is this? (templatePath)*/
   // templatePath: string;
@@ -47,7 +47,7 @@ export class VirtualMachine extends Item {
       this.childIDs = vmObj.applicationIds;
       this.version = vmObj.version;
       if (! this.version) {
-        this.version = '1';
+        this.version = 1;
       }
       this.lastEditor = vmObj.lastEditor;
       this.lastModification = vmObj.lastModification;

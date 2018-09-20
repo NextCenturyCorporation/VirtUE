@@ -77,7 +77,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
    * Otherwise, it should just show the current version.
    */
   updateVersion(): void {
-    this.newVersion = Number(this.item.version);
+    this.newVersion = this.item.version;
 
     // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
     if (this.mode === Mode.EDIT) {
@@ -121,7 +121,7 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
    * @return true always at the moment
    */
   collectData(): boolean {
-    this.item.version = String(this.newVersion);
+    this.item.version = this.newVersion;
     return true;
   }
 

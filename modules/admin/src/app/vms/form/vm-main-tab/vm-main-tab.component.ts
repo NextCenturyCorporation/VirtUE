@@ -61,12 +61,35 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
     }
     this.item = item as VirtualMachine;
 
-    this.newVersion = Number(this.item.version);
+    this.updateVersion();
+  }
 
-    if (this.mode !== Mode.VIEW && this.mode !== Mode.CREATE) {
+
+  /**
+   * Overrides parent, [[GenericFormTabComponent.setMode]]
+   *
+   * @param newMode the Mode to set the page as.
+   */
+  setMode(newMode: Mode): void {
+    this.mode = newMode;
+
+    if (this.item) {
+      this.updateVersion();
+    }
+  }
+
+  /**
+   * Updates what value gets listed as the current version.
+   * In edit mode, the version is what version it'll be saved as; The current version + 1.
+   * Otherwise, it should just show the current version.
+   */
+  updateVersion(): void {
+    this.newVersion = this.item.version;
+
+    // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
+    if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }
-
   }
 
   /**
@@ -94,7 +117,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
    * @return true always at the moment
    */
   collectData(): boolean {
-    this.item.version = String(this.newVersion);
+    this.item.version = this.newVersion;
     return true;
   }
 

@@ -38,7 +38,7 @@ import { Printer } from './printer.model';
 export class Virtue extends Item {
 
   /** What iteration of edit this template is on. Automatically increases on edit. */
-  version: string;
+  version: number;
 
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
@@ -87,7 +87,7 @@ export class Virtue extends Item {
 
       this.version = virtueObj.version;
       if (! this.version) {
-        this.version = '1';
+        this.version = 1;
       }
 
       this.lastEditor = virtueObj.lastEditor;
