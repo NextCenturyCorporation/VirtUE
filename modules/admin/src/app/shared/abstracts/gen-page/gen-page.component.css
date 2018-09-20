@@ -1,0 +1,18 @@
+
+.transparent {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.no-overflow {
+    overflow-y: visible;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/*  These center the lists (e.g. list of virtues under each user) within their column  */
+ul{
+    margin: 0; padding: 0;
+}
+li {
+    margin: 0; padding: 0;
+}

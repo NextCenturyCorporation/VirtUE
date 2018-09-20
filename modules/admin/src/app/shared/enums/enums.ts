@@ -1,7 +1,8 @@
 export enum Mode {
   CREATE = "Create",
   EDIT = "Edit",
-  DUPLICATE = "Duplicate"
+  DUPLICATE = "Duplicate",
+  VIEW = "View"
 }
 
 export enum ConfigUrlEnum {
@@ -9,4 +10,10 @@ export enum ConfigUrlEnum {
   VMS = "admin/virtualMachine/template/",
   VIRTUES = "admin/virtue/template/",
   USERS = "admin/user/"
+}
+
+export enum Protocols {
+  TCPIP = "TCP/IP",
+  UDP = "UDP",
+  ICMP = "ICMP"
 }

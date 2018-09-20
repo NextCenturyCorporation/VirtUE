@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
-import { FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatDialog } from '@angular/material';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
@@ -18,19 +19,28 @@ import { Column } from '../../models/column.model';
 import { Mode } from '../../enums/enums';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
+import { GenericFormTabComponent } from '../gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../gen-table/gen-table.component';
 import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
-
 
 @Component({
   providers: [ BaseUrlService, ItemService ]
 })
 export abstract class GenericFormComponent extends GenericPageComponent implements OnInit {
 
-  //  TODO currently not used, but could/should be eventually, time-permitting.
-  //  itemForm: FormControl;
+  // It appears that we can't really use the Angular Form tool/paradigm without extensive refactoring.
+  // As is, we have variables for all the different attributes one could set, as well as for all the data
+  // we wish to show the user, and can hopefully just make some of it editable/static depending on what mode
+  // the form page is in (view/create/edit etc). With forms, the variables are attributes of the form item, and
+  // accessed/updated/retrieved (apparently) only within the form construct. The html files would change entirely,
+  // and you'd need either both a bunch of attributes and a form (for viewing/editing respectively), or only a form
+  // which just isn't really a form when you're in view mode.
+  // Having gotten this far, it seems most prudent to continue updating/collecting/describing the various fields manually.
+  // itemForm: FormGroup;
+
+  itemName: string;
 
   // Note:
   //   when creating, item.id is empty.
@@ -44,9 +54,6 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
   // what the user is doing to the item: {CREATE, EDIT, DUPLICATE}
   // Holds the strings 'Create', 'Edit', or 'Duplicate' resp., for display to the user
   mode: Mode;
-
-  // The table showing what children have been added to this item
-  @ViewChild(GenericTableComponent) table: GenericTableComponent;
 
   // top-domain for child type. So for user.component, this would be '/virtues'
   childDomain: string;
@@ -70,14 +77,9 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
     super(router, baseUrlService, itemService, dialog);
     this.setMode();
 
-    //  see note by declaration
-    //  this.itemForm = new FormControl();
-
     // override the route reuse strategy
     // Tell angular to load a new component every time a URL that needs this component loads,
     // even if the user has been on this page before.
-    // TODO May want to look into changing this for these form pages, so a user who leaves
-    // a page mid-edit could return back and finish.
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
@@ -108,6 +110,8 @@ export abstract class GenericFormComponent extends GenericPageComponent implemen
         this.mode = Mode.EDIT;
     } else if (route[1] === 'duplicate') {
         this.mode = Mode.DUPLICATE;
+    } else if (route[1] === 'view') {
+        this.mode = Mode.VIEW;
     } else {
         // something about the routing system has changed.
         urlValid = false;
@@ -132,53 +136,42 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   ngOnInit() {
-    if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
+    if (this.mode !== Mode.CREATE) {
       this.item.id = this.activatedRoute.snapshot.params['id'];
     }
 
     this.cmnComponentSetup();
-    this.fillTable();
-  }
-
-  fillTable(): void {
-    if (this.table === undefined) {
-      return;
-    }
-
-    this.table.setUp({
-      cols: this.getColumns(),
-      opts: this.getOptionsList(),
-      coloredLabels: this.hasColoredLabels(),
-      filters: [], // don't allow filtering on the form's child table. ?
-      tableWidth: this.getTableWidth(),
-      noDataMsg: this.getNoDataMsg(),
-      hasCB: false
-    });
-  }
-
-  getChildrenListHTMLstring(item: Item) {
-    return item.childNamesHTML;
+    this.initializeTabs();
   }
 
   // overrides parent
   onPullComplete() {
-    if (this.mode !== Mode.CREATE) {//  no data to load if creating a new one.
+    if (this.mode !== Mode.CREATE) {// no data to load if creating a new one.
       this.buildItem();
     }
-    this.table.items = this.item.children.asList();
-    this.setUpFormValues();
+    this.setUpTabs();
+    this.updateTabs();
   }
 
-  //  set up child form-pages' unique properties
-  //  does nothing by default, overridden by user form
-  setUpFormValues(): void {}
+  // called in parent's ngOnInit
+  abstract initializeTabs(): void;
+
+  // called in parent's onPullComplete
+  abstract setUpTabs(): void;
+
+  // called whenever item's child list is set or changes
+  abstract updateTabs(): void;
+
+  // abstracts away what needs to happen when the page loads
+  // Most pages will at least build item.children
+  abstract updatePage(): void;
+
 
   buildItem() {
-  let _item = this[this.datasetName].get(this.item.id);
+    let _item = this[this.datasetName].get(this.item.id);
     if (_item) {
       this.item = _item;
-      this.updateUnconnectedFields();
-      this.updateChildList();
+      this.updatePage();
       this.resetRouter();
     }
     else {
@@ -188,28 +181,49 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
     }
   }
 
-  // if nothing is passed in, we just want to populate item.children
-  updateChildList( newVmIDs?: string[] ) {
-
-    if (newVmIDs instanceof Array) {
-      this.item.childIDs = newVmIDs;
-    }
-
-    this.item.buildChildren(this[this.childDatasetName]);
-    this.table.items = this.item.children.asList();
+  setModeEdit() {
+    this.mode = Mode.EDIT;
+    this.updateTabs();
   }
 
-  createOrUpdate() {
+  setModeView() {
+    this.mode = Mode.VIEW;
+    this.updateTabs();
+  }
+
+  /**
+   * Save changes to backend and return to list page. Or should it be to previous domain?
+   */
+  save() {
+    this.createOrUpdate(true);
+  }
+
+  /**
+   * save changes to backend, staying on current page (but switching to view mode)
+   */
+  apply() {
+    this.createOrUpdate(false);
+    // TODO: Can this be changed to just reset something? As opposed to loading
+    // the whole page again?
+    this.router.navigate([this.item.getPageRoute(Mode.VIEW)]);
+  }
+
+  private createOrUpdate(redirect: boolean) {
     // collects/updates data for and in the item, in preparation for saving.
     if ( ! this.finalizeItem()) {
       console.log("Item not valid."); // TODO give useful error message
+      return;
     }
     console.log(this.item);
     if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
-      this.createItem();
+      this.createItem(redirect);
     }
-    else if ( this.mode === Mode.EDIT) {
-      this.updateItem();
+    // See note in virtue.component, near end of template definition - need to be able to save even while in view mode.
+    // else if ( this.mode === Mode.EDIT) {
+    //   this.updateItem(redirect);
+    // }
+    else if ( this.mode === Mode.EDIT || this.mode === Mode.VIEW) {
+      this.updateItem(redirect);
     }
     else {
       console.log("Could not save or update - mode not valid. Mode set to: ", this.mode);
@@ -225,11 +239,13 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   // saves your edits to the backend
-  updateItem(): void {
+  updateItem(redirect: boolean): void {
     let sub = this.itemService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
       data => {
-        this.resetRouter();
-        this.router.navigate([this.parentDomain]);
+        if (redirect) {
+          this.resetRouter();
+          this.router.navigate([this.parentDomain]);
+        }
       },
       error => {
         console.log(error);
@@ -240,11 +256,13 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   }
 
   // saves the selected settings as a new item
-  createItem() {
+  createItem(redirect: boolean) {
     let sub = this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
       data => {
-        this.resetRouter();
-        this.router.navigate([this.parentDomain]);
+        if (redirect) {
+          this.resetRouter();
+          this.router.navigate([this.parentDomain]);
+        }
       },
       error => {
         console.log(error.message);
@@ -254,110 +272,9 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
       });
   }
 
-  /**
-   copied from gen-list, could merge that together at some point if had extra time.
-   this is a checker, if the user clicks 'remove' on one of the item's children.
-   Could be improved/made more clear/distinguished from all the childrens' "activateModal" method.
-  */
-  openDialog(action: string, target: Item): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          actionType: action,
-          targetObject: target
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
-
-      if (targetObject !== 0 ) {
-        if (action === 'delete') {
-
-          this.item.removeChild(targetObject.getID());
-
-        }
-      }
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
-  }
-
-  /*this needs to be defined in each child, instead of here, because I can't find how to have each
-  child hold a class as an attribute, to be used in a dialog.open method in a parent's function.
-  So right now the children take care of the dialog.open method, and pass the
-  MatDialogRef back. I can't type this as returning a MatDialogRef though
-  without having to specify what modal class the dialog refers to (putting us
-  back at the original issue), so this will have to be 'any' for now.
-  */
-  abstract getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any;
-
-  // this brings up the modal to add/remove children
-  activateModal(mode: string): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
-
-    let modalParams = {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        id: this.item.getName(),
-        selectedIDs: this.item.childIDs
-      }
-    };
-
-    let dialogRef = this.getModal(modalParams);
-
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.updateChildList(selectedVirtues);
-    },
-    () => {},
-    () => {// when finished
-      sub.unsubscribe();
-    });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
-
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-
-  }
-
-  // overrides parent
-  getOptionsList(): RowOptions[] {
-    return [
-      //  new RowOptions("Edit", () => true, (i:Item) => this.editItem(i)),
-      // TODO look into this, perhaps we could have two modes on the form pages -
-      // one for editing, one for viewing. So you could navigate away only when
-      // you weren't in edit mode, and you'd never lose changes accidentally.
-      // User will lose all work on form if they navigate away to other form
-      // It'd be nice to let them do that though.
-      new RowOptions("Remove", () => true, (i: Item) => this.openDialog('delete', i))
-    ];
-  }
-
   // overridden by virtue component
   getTableWidth(): number {
     return 9;
-  }
-
-  // used by many children to display their status
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  getChildNamesHtml( item: Item) {
-    return item.childNamesHTML;
-  }
-
-  editItem(i: Item) {
-    if (this.childDomain) {
-      this.router.navigate([this.childDomain + "/edit/" + i.getID()]);
-    }
   }
 
   hasColoredLabels(): boolean {
@@ -372,8 +289,5 @@ the routing system has changed. Returning to virtues page.\n       Expects somet
   // currently overridden in virtue
   updateUnconnectedFields(): void {}
 
-  abstract getColumns(): Column[];
-
-  abstract getNoDataMsg(): string;
 
 }

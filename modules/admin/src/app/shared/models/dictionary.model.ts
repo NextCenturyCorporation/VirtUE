@@ -11,8 +11,14 @@ export class DictList<T> {
     this.list.push(e);
   }
 
+  has(key: string): boolean {
+    if (key in this.dict) {
+      return true;
+    }
+    return false;
+  }
 
-  get(key: string) {
+  get(key: string): T {
     return this.dict[key];
   }
 

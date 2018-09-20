@@ -12,26 +12,31 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+import {DomSanitizer} from '@angular/platform-browser';
+
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { OverlayModule } from '@angular/cdk/overlay';
 
 import {
   MatAutocompleteModule,
+  MatButtonModule,
+  MatCardModule,
   MatCheckboxModule,
   MatDialogModule,
   MatFormFieldModule,
+  MatGridListModule,
+  MatIconModule,
+  MatIconRegistry,
   MatInputModule,
   MatRadioModule,
   MatSelectModule,
+  MatSlideToggleModule,
+  MatTabsModule,
   MatToolbarModule,
 } from '@angular/material';
 
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-
 import { FlexLayoutModule } from "@angular/flex-layout";
 
-import { MatCardModule } from '@angular/material/card';
-import { MatGridListModule } from '@angular/material/grid-list';
 
 import { SplitPaneModule } from 'ng2-split-pane/lib/ng2-split-pane';
 
@@ -54,15 +59,21 @@ import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.co
 
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent} from './users/user.component';
+import { UserMainTabComponent} from './users/form/main-tab/main-user-tab.component';
 import { VirtueModalComponent } from './modals/virtue-modal/virtue-modal.component';
 
 import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
 import { VirtueComponent } from './virtues/virtue.component';
-import { VirtueSettingsComponent } from './virtues/virtue-settings/virtue-settings.component';
+import { VirtueMainTabComponent } from './virtues/form/main-tab/virtue-main-tab.component';
+import { VirtueSettingsTabComponent } from './virtues/form/settings-tab/virtue-settings.component';
+import { VirtueUsageTabComponent } from './virtues/form/usage-tab/virtue-usage-tab.component';
+// import { VirtueHistoryTabComponent } from './virtues/form/history-tab/virtue-history-tab.component';
 import { ColorModalComponent } from './modals/color-picker/color-picker.modal';
 import { VmModalComponent } from './modals/vm-modal/vm-modal.component';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
+import { VmMainTabComponent } from './vms/form/vm-main-tab/vm-main-tab.component';
+import { VmUsageTabComponent } from './vms/form/vm-usage-tab/vm-usage-tab.component';
 import { VmComponent} from './vms/vm.component';
 import { AppsModalComponent } from './modals/apps-modal/apps-modal.component';
 
@@ -101,9 +112,13 @@ import { MessageService } from './shared/services/message.service';
 
     UserListComponent,
     UserComponent,
+    UserMainTabComponent,
 
     VirtueListComponent,
-    VirtueSettingsComponent,
+    VirtueMainTabComponent,
+    VirtueSettingsTabComponent,
+    VirtueUsageTabComponent,
+    // VirtueHistoryTabComponent,
     VirtueComponent,
 
     DialogsComponent,
@@ -121,6 +136,8 @@ import { MessageService } from './shared/services/message.service';
 
     VmListComponent,
     VmComponent,
+    VmMainTabComponent,
+    VmUsageTabComponent,
 
     ActiveClassDirective,
 
@@ -136,15 +153,18 @@ import { MessageService } from './shared/services/message.service';
     FormsModule,
     HttpClientModule,
     MatAutocompleteModule,
-    MatDialogModule,
-    MatFormFieldModule,
+    MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
+    MatDialogModule,
+    MatFormFieldModule,
     MatGridListModule,
+    MatIconModule,
     MatInputModule,
     MatRadioModule,
     MatSlideToggleModule,
     MatSelectModule,
+    MatTabsModule,
     MatToolbarModule,
     ReactiveFormsModule,
     SplitPaneModule
@@ -169,4 +189,9 @@ import { MessageService } from './shared/services/message.service';
     ColorModalComponent
   ]
 })
-export class AppModule { }
+
+export class AppModule {
+  constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
+    matIconRegistry.addSvgIconSet(domSanitizer.bypassSecurityTrustResourceUrl('/assets/mdi.svg'));
+  }
+}

@@ -1,14 +1,18 @@
 import { DictList } from './dictionary.model';
+import { Mode } from '../enums/enums';
+
 
 export abstract class Item {
   id: string;
   name: string;
-  // status as a string as well as a bool makes filtering much easier - since 3 possible
+
+  // status as a string, in addition to the bool, makes filtering much easier - 3 possible
   // values need to be matched against it ('enabled', 'disabled', and '*').
   status: string;
   enabled: boolean;
   childIDs: string[];
   children: DictList<Item>;
+
   // this holds the children's names as an html list, and is updated whenever
   // data is pulled. The places where children are displayed (both list and form
   // pages) need to be able to treat the "children" column of that table the same
@@ -19,11 +23,16 @@ export abstract class Item {
   childNamesHTML: string;
   modDate: string;
 
+  // a link to the parent domain for this item - '/users', '/virtues', etc.
+  parentDomain: string;
+
   constructor() {
     this.status = "enabled";
     this.enabled = true;
     this.childIDs = [];
     this.modDate = '';
+
+    this.parentDomain = "NA";
 
     this.childNamesHTML = "";
 
@@ -86,6 +95,16 @@ it has a virtue ID attached to it which doesn't exist in the backend data.");
     return this.name;
   }
 
+  // eturns a link to where the item can be viewed/edited/duplicated.
+  // Something like "users/{view/edit/etc}/Phillip"
+  getPageRoute(mode: Mode): string {
+    if (mode === Mode.CREATE) {
+      console.log("Invalid request for item page route - can't open an existing page in 'Create' mode.");
+      return this.parentDomain;
+    }
+    return this.parentDomain + '/' + mode.toLowerCase() + '/' + this.getID();
+  }
+
   // Overriden by User
   getID(): string {
     return this.id;
@@ -99,5 +118,9 @@ it has a virtue ID attached to it which doesn't exist in the backend data.");
       this.childIDs.splice(this.childIDs.indexOf(id), 1);
     }
 
+  }
+
+  toString() {
+    return this.getName();
   }
 }

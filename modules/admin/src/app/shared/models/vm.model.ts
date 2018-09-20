@@ -15,6 +15,7 @@ export class VirtualMachine extends Item {
 
   id: string;
   os: string;
+  version: number;
   templatePath: string;
   loginUser: string;
   lastModification: string | Date;
@@ -28,11 +29,17 @@ export class VirtualMachine extends Item {
       this.name = vmObj.name;
       this.enabled = vmObj.enabled;
       this.childIDs = vmObj.applicationIds;
+      this.version = vmObj.version;
+      if (! this.version) {
+        this.version = 1;
+      }
       this.lastEditor = vmObj.lastEditor;
       this.lastModification = vmObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
       this.os = vmObj.os;
       this.status = vmObj.enabled ? 'enabled' : 'disabled';
+
+      this.parentDomain = '/vm-templates';
     }
 
   }

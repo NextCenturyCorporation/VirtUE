@@ -48,9 +48,10 @@
 input[type='color'] {
   width: 20px;
 }
-.icon-upload  mat-form-field {
+.icon-upload {
   width: 100%;
 }
+
 .upload-file-input {
   display: block;
   float: left;
@@ -88,4 +89,27 @@ a .fa {
 mat-card {
   width: 1%;
   height: 35%;
+}
+
+
+.fab-button {
+  background-color: #009700;
+  transform: scale(0.5);
+}
+
+
+.plus {
+  transform: scale(1.8);
+  color: white;
+  fill: white;
+}
+
+.no-overflow {
+    overflow-y: visible;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.mat-button.mat-small {
+    min-width: 1%;
 }

@@ -34,6 +34,8 @@ export class User extends Item {
 
       this.enabled = userObj.enabled;
       this.status = userObj.enabled ? 'enabled' : 'disabled';
+
+      this.parentDomain = '/users';
     }
     else {
       this.roles = [];

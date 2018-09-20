@@ -33,9 +33,9 @@ export class AppsModalComponent extends GenericModalComponent {
 
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', false, 'asc', 5),
-      new Column('version', 'Version',          false, 'asc', 3),
-      new Column('os',      'Operating System', false, 'desc', 4)
+      new Column('name',    'Application Name', undefined, 'asc', 5),
+      new Column('version', 'Version',          undefined, 'asc', 3),
+      new Column('os',      'Operating System', undefined, 'desc', 4)
     ];
   }
 

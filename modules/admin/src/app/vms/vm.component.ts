@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
@@ -19,22 +19,53 @@ import { Column } from '../shared/models/column.model';
 import { RowOptions } from '../shared/models/rowOptions.model';
 
 import { ConfigUrlEnum } from '../shared/enums/enums';
-import { OSSet } from '../shared/sets/os.set';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
+import { VmMainTabComponent } from './form/vm-main-tab/vm-main-tab.component';
+import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component';
 
 @Component({
   selector: 'app-vm',
-  templateUrl: './vm.component.html',
+  template: `
+  <div id="content-container">
+    <div id="content-header">
+        <h1 class="titlebar-title">{{mode}} Virtual Machine: &nbsp;&nbsp;{{item.name}}</h1>
+    </div>
+    <div id="content-main">
+      <div id="content" class="content">
+        <mat-tab-group dynamicHeight=true>
+          <mat-tab label= {{mainTab.tabName}}>
+            <app-vm-main-tab #mainTab></app-vm-main-tab>
+          </mat-tab>
+          <mat-tab label= {{usageTab.tabName}}>
+            <app-vm-usage-tab #usageTab></app-vm-usage-tab>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+      <div class="mui-row">
+        <hr>
+        <div class="mui-col-md-4">&nbsp;</div>
+        <div class="mui-col-md-4 form-item text-align-center">
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+        <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
+        <button class="button-cancel" (click)="cancel()">Cancel</button>
+        </div>
+        <div class="mui-col-md-4"></div>
+      </div>
+    </div>
+  </div>
+    `,
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService, OSSet ]
+  providers: [ BaseUrlService, ItemService ]
 })
-export class VmComponent extends GenericFormComponent {
+export class VmComponent extends GenericFormComponent implements OnDestroy {
 
+  @ViewChild('mainTab') mainTab: VmMainTabComponent;
+  @ViewChild('usageTab') usageTab: VmUsageTabComponent;
 
   constructor(
-    protected osOptions: OSSet,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
@@ -52,8 +83,54 @@ export class VmComponent extends GenericFormComponent {
     this.childDomain = undefined;
   }
 
-  getNoDataMsg(): string {
-    return 'No virtual machine templates have been created yet. To add a template, click on the button "Add VM Template" above.';
+  // called in parent's ngInit
+  initializeTabs() {
+    this.mainTab.init();
+    this.usageTab.init();
+    // this.historyTab.init();
+
+    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
+      this.buildItemChildren(newChildIDs);
+      this.updateTabs();
+    });
+
+  }
+
+  // called in parent's onPullComplete
+  setUpTabs() {
+    // Note that within each form, the item can't be reassigned; its attribute
+    // can change though.
+    this.mainTab.setUp(this.mode, this.item);
+
+    this.usageTab.setUp(this.mode, this.item);
+
+    // show the times that this user's permissions/settings have been changed by
+    // the admin, with a snapshot of what they were at each point.
+    // Note that some children may not exist any more, or may have been updated.
+    // this.historyTab.setUp();
+  }
+
+  // called whenever item's child list is set or changes
+  updateTabs(): void {
+    this.mainTab.update({mode: this.mode});
+
+
+    // needs an initial update to populate the parent table.
+    // this could use periodic updating, to get a somewhat live-feed of what's currently running.
+    this.usageTab.update({allVirtues: this.allVirtues, mode: this.mode});
+  }
+
+  // only called on initial page load at the moment.
+  updatePage() {
+    this.buildItemChildren();
+  }
+
+  // if nothing is passed in, we just want to populate item.children
+  buildItemChildren( newChildIDs?: string[] ) {
+    if (newChildIDs instanceof Array) {
+      this.item.childIDs = newChildIDs;
+    }
+    this.item.buildChildren(this[this.childDatasetName]);
   }
 
   getPageOptions(): {
@@ -61,27 +138,14 @@ export class VmComponent extends GenericFormComponent {
       neededDatasets: string[]} {
     return {
       serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ['apps', 'vms']
+      neededDatasets: ['apps', 'vms', 'virtues']
     };
-  }
-
-  getColumns(): Column[] {
-    return [
-      new Column('name',    'Application Name', false, 'asc', 5),
-      new Column('version', 'Version',          false, 'asc', 3),
-      new Column('os',      'Operating System', false, 'desc', 4)
-    ];
-  }
-
-  getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any {
-    return this.dialog.open( AppsModalComponent, params);
   }
 
   // create and fill the fields the backend expects to see, record any
   // uncollected inputs, and check that the item is valid to be saved
   finalizeItem(): boolean {
+    this.mainTab.collectData();
 
     // TODO perform checks here, so none of the below changes happen if the item
     // isn't valid
@@ -101,5 +165,9 @@ export class VmComponent extends GenericFormComponent {
     this.item.children = undefined;
     this.item.childIDs = undefined;
     return true;
+  }
+
+  ngOnDestroy() {
+    this.mainTab.onChildrenChange.unsubscribe();
   }
 }

@@ -41,9 +41,10 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   getColumns(): Column[] {
     return [
       // arguments are: {name: str, prettyName: str, isList: bool, sortDefault: str, colWidth: num, formatValue?: func, link?: func}
-      new Column('name',            'Template Name',        false, 'asc',     5),
-      new Column('os',              'OS',                   false, 'asc',     3),
-      new Column('childNamesHTML',  'Assigned Applications', true, undefined, 4, this.getChildNamesHtml),
+      new Column('name',  'Template Name',          undefined,        'asc',     5),
+      new Column('os',    'OS',                     undefined,        'asc',     3),
+      new Column('apps',  'Assigned Applications',  this.getChildren, undefined, 3, this.formatName),
+
     ];
   }
   getPageOptions(): {
@@ -63,7 +64,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     return {
       prettyTitle: "Virtual Machine Templates",
       itemName: "Vm Template",
-      pluralItem: "VMs",
+      pluralItem: "VM Templates",
       domain: '/vm-templates'
     };
   }

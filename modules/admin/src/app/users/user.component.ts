@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
@@ -20,6 +21,7 @@ import { Column } from '../shared/models/column.model';
 import { Mode } from '../shared/enums/enums';
 import { RowOptions } from '../shared/models/rowOptions.model';
 
+import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
 import { ConfigUrlEnum } from '../shared/enums/enums';
 
@@ -27,12 +29,40 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
 
 @Component({
   selector: 'app-user',
-  templateUrl: './user.component.html',
+  template: `
+  <div id="content-container">
+    <div id="content-header">
+        <h1 class="titlebar-title">{{mode}} User Account: &nbsp;&nbsp;{{item.name}}</h1>
+    </div>
+    <div id="content-main">
+      <div id="content" class="content">
+        <mat-tab-group dynamicHeight=true>
+          <mat-tab label= {{mainTab.tabName}}>
+            <app-main-user-tab #mainTab></app-main-user-tab>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+      <div class="mui-row">
+        <hr>
+        <div class="mui-col-md-4">&nbsp;</div>
+        <div class="mui-col-md-4 form-item text-align-center">
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save and Return</button>
+        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="apply();" >Apply</button>
+        <button  *ngIf="mode === 'View'" class="button-submit" (click)="setModeEdit();" >Edit</button>
+        <button class="button-cancel" (click)="cancel()">Cancel</button>
+        </div>
+        <div class="mui-col-md-4"></div>
+      </div>
+    </div>
+  </div>
+    `,
   styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService ]
 })
 
-export class UserComponent extends GenericFormComponent {
+export class UserComponent extends GenericFormComponent implements OnDestroy {
+
+  @ViewChild('mainTab') mainTab: UserMainTabComponent;
 
   roleUser: boolean;
   roleAdmin: boolean;
@@ -57,25 +87,70 @@ export class UserComponent extends GenericFormComponent {
     this.childDomain = "/virtues";
   }
 
-  setUpFormValues(): void {
-    this.roleUser = this.item['roles'].includes("ROLE_USER");
-    this.roleAdmin = this.item['roles'].includes("ROLE_ADMIN");
+  // called on parent's ngInit
+  initializeTabs() {
+
+    this.mainTab.init();
+    // this.activityTab.init();
+    // this.historyTab.init();
+
+    // Must unsubscribe from all these when the UserComponent is destroyed
+
+    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
+      this.buildItemChildren(newChildIDs);
+      this.updateTabs();
+    });
+
+    // Can anything be done/changed from the activity tab?
+    // this.activityTab.onSomethingChange.subscribe((data) => {
+    //   // do something
+    // });
+
+    // Probably add a button to the history page to let the admin revert settings
+    // back to a particular snapshot. Those settings should be pased in here,
+    // and used to update everything. Doesn't roll back history to that point,
+    // just adds a new edit, where all settings are changed to what they were in
+    // that snapshot.
+    // this.historyTab.onSomethingChange.subscribe((newData) => {
+    //   // do something
+    // });
   }
 
-  getColumns(): Column[] {
-    return [
-      // See note in gen-form getOptionsList
-      new Column('name',            'Template Name',    false, 'asc',     3, undefined, (i: Item) => this.editItem(i)),
-      // new Column('name',            'Template Name',      false, 'asc',     2),
-      new Column('childNamesHTML',  'Virtual Machines', true, undefined,  3, this.getChildNamesHtml),
-      new Column('apps',            'Applications',     true, undefined,  3, this.getGrandchildrenHtmlList),
-      new Column('version',         'Version',          false, 'asc',     2),
-      new Column('status',          'Status',           false, 'asc',     1, this.formatStatus)
-    ];
+  // called in parent's onPullComplete
+  setUpTabs() {
+    // Note that within each form, the item itself can't change, though its
+    // attributes can.
+    this.mainTab.setUp(this.mode, this.item);
+
+    // A table showing what virtues are running, what's been instantiated, when they've logged-on
+    // and logged off, all that sort of thing. Probably could do it in one table, but I'd want to add
+    // some sort of custom filter.
+    // at least one of these.
+    // this.activityTab.setUp(this.mode, this.item);
+
+    // show the times that this user's permissions/settings have been changed by
+    // the admin, with a snapshot of what they were at each point.
+    // Note that some children may not exist any more, or may have been updated.
+    // this.historyTab.setUp();
   }
 
-  getNoDataMsg(): string {
-    return "No users have been created yet. To add a user, click on the button \"Add User\" above.";
+  // called whenever item's child list is set or changes
+  updateTabs(): void {
+    this.mainTab.update({mode: this.mode});
+  }
+
+  // only called on initial page load at the moment.
+  updatePage() {
+    this.buildItemChildren();
+  }
+
+  // if nothing is passed in, we just want to populate item.children
+  buildItemChildren( newChildIDs?: string[] ) {
+    if (newChildIDs instanceof Array) {
+      this.item.childIDs = newChildIDs;
+    }
+
+    this.item.buildChildren(this[this.childDatasetName]);
   }
 
   getPageOptions(): {
@@ -90,24 +165,24 @@ export class UserComponent extends GenericFormComponent {
   // create and fill the fields the backend expects to see, record any
   // uncollected inputs, and check that the item is valid to be saved
   finalizeItem(): boolean {
+    // Note
+    this.mainTab.collectData();
+
+
     // TODO perform checks here, so none of the below changes happen if the item
     // isn't valid
+    // note that the above has to happen in order to collect
 
     // remember these aren't security checks, merely checks to prevent the user
     // from accidentally putting in bad data
 
     //  remember to check enabled
 
-    this.item['roles'] = [];
-    if (this.roleUser) {
-      this.item['roles'].push('ROLE_USER');
-    }
-    if (this.roleAdmin) {
-      this.item['roles'].push('ROLE_ADMIN');
-    }
 
-    if (this.mode === Mode.CREATE && !this.item['username']) {
-      return confirm("You need to enter a username.");
+
+    if (this.mode === Mode.CREATE && !this.item.name) {
+      confirm("You need to enter a username.");
+      return false;
     }
 
     // if not editing, make sure username isn't taken
@@ -123,15 +198,7 @@ export class UserComponent extends GenericFormComponent {
     return true;
   }
 
-  // overrides parent
-  // remember this is for the table, holding the user's virtues
-  hasColoredLabels() {
-    return true;
-  }
-
-  getModal(
-    params: {width: string, height: string, data: {id: string, selectedIDs: string[] }}
-  ): any {
-    return this.dialog.open( VirtueModalComponent, params);
+  ngOnDestroy() {
+    this.mainTab.onChildrenChange.unsubscribe();
   }
 }

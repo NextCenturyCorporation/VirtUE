@@ -22,6 +22,7 @@ import { User } from '../../models/user.model';
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
 
+import { Mode } from '../../enums/enums';
 
 @Component({
   templateUrl: './gen-list.component.html',
@@ -69,7 +70,7 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
       filters: this.getTableFilters(),
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg(),
-      hasCB: this.hasCheckbox(),
+      hasCheckBoxes: this.hasCheckbox(),
       selectedIDs: this.getSelectedIDs()
     });
   }
@@ -112,11 +113,11 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
   // overridden by app-list and modals
   getOptionsList(): RowOptions[] {
     return [
-      new RowOptions("Enable", (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new RowOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
       new RowOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
-      new RowOptions("Edit", () => true, (i: Item) => this.editItem(i)),
-      new RowOptions("Duplicate", () => true, (i: Item) => this.dupItem(i)),
-      new RowOptions("Delete", () => true, (i: Item) => this.openDialog('delete', i))
+      new RowOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
+      new RowOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
+      new RowOptions("Delete",  () => true,             (i: Item) => this.openDialog('delete', i))
     ];
   }
 
@@ -125,23 +126,12 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
     return false;
   }
 
-  // used by many children to display their status
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  // see comment by Item.childNamesHTML
-  getChildNamesHtml( item: Item) {
-    return item.childNamesHTML;
-  }
-
-
   editItem(i: Item) {
-    this.router.navigate([this.domain + "/edit/" + i.getID()]);
+    this.router.navigate([i.getPageRoute(Mode.EDIT)]);
   }
 
   dupItem(i: Item) {
-    this.router.navigate([this.domain + "/duplicate/" + i.getID()]);
+    this.router.navigate([i.getPageRoute(Mode.DUPLICATE)]);
   }
 
   deleteItem(i: Item) {

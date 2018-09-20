@@ -8,6 +8,7 @@ import { ItemService } from '../../shared/services/item.service';
 
 import { ConfigUrlEnum } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
+import { Item } from '../../shared/models/item.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
@@ -19,6 +20,8 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
   providers: [ BaseUrlService, ItemService ]
 })
 export class VirtueModalComponent extends GenericModalComponent {
+
+
 
   constructor(
       router: Router,
@@ -34,12 +37,12 @@ export class VirtueModalComponent extends GenericModalComponent {
 
   getColumns(): Column[] {
     return [
-      new Column('name',            'Template Name',      false, 'asc',     3),
-      new Column('childNamesHTML',  'Virtual Machines',   true, undefined,  3, this.getChildNamesHtml),
-      new Column('apps',            'Applications',       true, undefined,  3,  this.getGrandchildrenHtmlList),
+      new Column('name',    'Template Name',      undefined, 'asc',     3),
+      new Column('vms',     'Virtual Machines',       this.getChildren, undefined, 3, this.formatName),
+      new Column('apps',    'Assigned Applications',  this.getGrandchildren, undefined, 3, this.formatName),
       // new Column('version',         'Version',            false, 'asc',     1), // could this be useful?
-      new Column('modDate',         'Modification Date',  false, 'desc',    2),
-      new Column('status',          'Status',             false, 'asc',     1, this.formatStatus)
+      new Column('modDate', 'Modification Date',  undefined, 'desc',    2),
+      new Column('status',  'Status',             undefined, 'asc',     1, this.formatStatus)
     ];
   }
 
@@ -68,7 +71,7 @@ export class VirtueModalComponent extends GenericModalComponent {
     return {
       prettyTitle: "Virtue Templates",
       itemName: "Virtue Template",
-      pluralItem: "Virtues",
+      pluralItem: "Virtue Templates",
       domain: '/virtues'
     };
   }

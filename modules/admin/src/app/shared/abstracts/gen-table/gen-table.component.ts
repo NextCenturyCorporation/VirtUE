@@ -42,7 +42,7 @@ Using this table needs three things:
 @Component({
   selector: 'app-item-table',
   templateUrl: './gen-table.component.html',
-  styleUrls: ['./gen-table.component.css'],
+  styleUrls: ['../gen-page/gen-page.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
 export class GenericTableComponent {
@@ -80,8 +80,8 @@ export class GenericTableComponent {
   selectedIDs: string[];
 
   constructor() {
-    // prevent error, until createTable() is called by ngOnInit
-    this.sortColumn = new Column("", "", false, "", 0);
+    // create meaningless empty column to prevent exceptions before createTable() is called by ngOnInit
+    this.sortColumn = new Column("", "", undefined, undefined, 0);
     this.colData = [this.sortColumn];
     this.filterOptions = [];
     this.items = [];
@@ -102,7 +102,7 @@ export class GenericTableComponent {
     filters: {value: string, text: string}[];
     tableWidth: number,
     noDataMsg: string,
-    hasCB: boolean,
+    hasCheckBoxes: boolean,
     selectedIDs?: string[]}
   ) {
     this.colData = params.cols;
@@ -111,7 +111,7 @@ export class GenericTableComponent {
     this.filterOptions = params.filters;
     this.noDataMessage = params.noDataMsg;
     this.tableWidth = params.tableWidth;
-    this.hasCheckbox = params.hasCB;
+    this.hasCheckbox = params.hasCheckBoxes;
 
     if (params.selectedIDs) {
       this.selectedIDs = params.selectedIDs;
@@ -127,7 +127,7 @@ export class GenericTableComponent {
   selectAll(checked) {
     if (checked) {
       for (let i of this.items) {
-        this.selectedIDs.push(i.id);
+        this.selectedIDs.push(i.getID());
       }
     } else {
       this.clearSelections();

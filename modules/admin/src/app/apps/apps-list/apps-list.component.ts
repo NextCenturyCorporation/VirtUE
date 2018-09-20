@@ -40,6 +40,11 @@ export class AppsListComponent extends GenericListComponent {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
+
+    // TODO fix app versioning - maybe make automatic?
+    // Apps need versions, but they can't default to anything, and it must be made clear
+    // that "version" on that modal means "the actual application's version", and not
+    // "version" as in "this is the 4th change I've made to this Chrome application item".
   }
 
 
@@ -48,11 +53,10 @@ export class AppsListComponent extends GenericListComponent {
     //  to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
     // Note: colWidths of all columns must add to exactly 12.
     // Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    // See note next to a line containing "mui-col-md-12" in gen-list.component.html
     return [
-      new Column('name',    'Application Name', false, 'asc', 5),
-      new Column('version', 'Version',          false, 'asc', 3),
-      new Column('os',      'Operating System', false, 'desc', 4)
+      new Column('name',    'Application Name', undefined, 'asc', 5),
+      new Column('version', 'Version',          undefined, 'asc', 3),
+      new Column('os',      'Operating System', undefined, 'desc', 4)
     ];
   }
 

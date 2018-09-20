@@ -20,7 +20,7 @@ import { Item } from '../../models/item.model';
 
 import { ColorSet } from '../../sets/color.set';
 
-import { ConfigUrlEnum } from '../../enums/enums';
+import { Mode, ConfigUrlEnum } from '../../enums/enums';
 
 interface DatasetType {
   serviceUrl: string;
@@ -294,18 +294,51 @@ Expected one of {\"apps\", \"vms\", \"virtues\", and/or \"users\"}");
 
   abstract onPullComplete();
 
-  // try making these on the fly. Might not be that slow.
-  getGrandchildrenHtmlList(i: Item): string {
-    let grandchildrenHTMLList: string = "";
-    for (let c of i.children.asList()) {
-      grandchildrenHTMLList += c.childNamesHTML;
-    }
-    return grandchildrenHTMLList;
-  }
-
-
   abstract getPageOptions(): {
       serviceConfigUrl: ConfigUrlEnum,
       neededDatasets: string[]};
 
+
+
+
+  // used mostly in tables, to display the names of the items listed
+  formatName( item: Item ): string {
+    if (item.enabled) {
+      return item.getName();
+    }
+    else {
+      return item.getName() + " (disabled)";
+    }
+  }
+
+  // Used for the item 'status' field in most tables
+  formatStatus( item: Item ): string {
+    return item.enabled ? 'Enabled' : 'Disabled';
+  }
+
+  /*
+  The following two functions are used in tables to display the items attached
+  to an item (children) and the items attched to each of those (grandchildren).
+  It used to be all generated (as an html string) whenever an item was created
+  or its children updated, but now is doen on the fly. These functions get
+  re-called whenever the mouse enters or leaves a row in the table, so this
+  seems like a bit of a waste, given that an item's children/grandchildren won't
+  change randomly in the background.
+  Doing it this way allows us to make the items within those lists clickable.
+  */
+  getGrandchildren(i: Item): Item[] {
+    let grandchildren: Item[] = [];
+    for (let c of i.children.asList()) {
+      grandchildren = grandchildren.concat(c.children.asList());
+    }
+    return grandchildren;
+  }
+
+  getChildren(i: Item): Item[] {
+    return i.children.asList();
+  }
+
+  viewItem(i: Item) {
+    this.router.navigate([i.getPageRoute(Mode.VIEW)]);
+  }
 }
