@@ -282,4 +282,6 @@ export class GenericTableComponent {
     }
   }
 
+  is
+
 }
