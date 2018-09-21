@@ -3,12 +3,15 @@ package com.ncc.savior.virtueadmin.rest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -28,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.ClipboardPermission;
+import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -38,6 +43,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
+import com.ncc.savior.virtueadmin.service.PermissionService;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
@@ -56,6 +62,9 @@ public class AdminResource {
 
 	@Autowired
 	private ImportExportService importExportService;
+
+	@Autowired
+	private PermissionService permissionService;
 
 	public AdminResource() {
 
@@ -482,5 +491,135 @@ public class AdminResource {
 		} catch (Exception e) {
 			throw WebServiceUtil.createWebserviceException(e);
 		}
+	}
+
+	/**
+	 * Retrieves all the available permissions. If the query parameter 'raw' is set
+	 * to true, only permissions stored in the database are returned. Otherwise, all
+	 * returnable computed permissions are returned. This typically is a permission
+	 * for every possible pair of virtue template ID to every other virtue template
+	 * ID in both directions and every virtue template ID to the default setting.
+	 * 
+	 * @param raw
+	 * @return
+	 */
+	@GET
+	@Path("permissions")
+	@Produces("application/json")
+	public Iterable<ClipboardPermission> getAllPermissions(@DefaultValue("false") @QueryParam("raw") boolean raw) {
+		if (raw) {
+			Iterable<ClipboardPermission> p = permissionService.getAllRawPermissions();
+			return p;
+		} else {
+			Collection<String> sourceIds = getAllSourceIds();
+			return permissionService.getAllPermissionsForSources(sourceIds);
+		}
+	}
+
+	/**
+	 * Set a new value for a permission. The value should be sent as the body of the
+	 * POST.
+	 * 
+	 * @param sourceId
+	 * @param destId
+	 * @param optionStr
+	 * @return
+	 */
+	@POST
+	@Path("permission/{sourceId}/{destId}")
+	public String setPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
+			String optionStr) {
+		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
+		permissionService.setClipboardPermission(sourceId, destId, option);
+		return "Success, go back and refresh";
+	}
+
+	/**
+	 * Retrieves a permission from the system. By default, the permission will be
+	 * computed taking into account any defaults when a more specific setting cannot
+	 * be found. To get just the raw permission that is stored in the data, set the
+	 * query parameter 'raw' to true.
+	 * 
+	 * @param sourceId
+	 * @param destId
+	 * @param raw
+	 * @return
+	 */
+	@GET
+	@Produces("application/json")
+	@Path("permission/{sourceId}/{destId}")
+	public ClipboardPermission getPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
+			@DefaultValue("false") @QueryParam("raw") boolean raw) {
+		ClipboardPermission p;
+		if (raw) {
+			p = permissionService.getRawClipboardPermission(sourceId, destId);
+		} else {
+			p = permissionService.getClipboardPermission(sourceId, destId);
+		}
+		if (p == null) {
+			throw new SaviorException(SaviorErrorCode.PERMISSION_NOT_FOUND, (raw ? "Raw c" : "C")
+					+ "lipboard permission for source=" + sourceId + " and dest=" + destId + " was not found");
+		}
+		return p;
+	}
+
+	/**
+	 * Get list of permissions for a given source ID. If the query parameter 'raw'
+	 * is set to true, only permissions stored in the database are returned.
+	 * Otherwise, all returnable computed permissions are returned.
+	 * 
+	 * @param sourceId
+	 * @param raw
+	 * @return
+	 */
+	@GET
+	@Produces("application/json")
+	@Path("permission/{sourceId}")
+	public List<ClipboardPermission> getPermissionsForSource(@PathParam("sourceId") String sourceId,
+			@DefaultValue("false") @QueryParam("raw") boolean raw) {
+		List<ClipboardPermission> p;
+		if (raw) {
+			p = permissionService.getRawClipboardPermissionForSource(sourceId);
+		} else {
+			Collection<String> sourceIds = getAllSourceIds();
+			p = permissionService.getClipboardPermissionForSource(sourceId, sourceIds);
+		}
+		return p;
+	}
+
+	/**
+	 * Clear a permission from the system if it exists. Once this operation occurs,
+	 * the computed permission should return a default value either from the source
+	 * ID or the system.
+	 * 
+	 * @param sourceId
+	 * @param destId
+	 */
+	@DELETE
+	@Path("permission/{sourceId}/{destId}")
+	public void clearPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId) {
+		permissionService.clearClipboardPermission(sourceId, destId);
+	}
+
+	/**
+	 * Returns the system default {@link ClipboardPermissionOption}.
+	 * 
+	 * @param optionStr
+	 */
+	@GET
+	@Path("permission/default/{option}")
+	public void setServiceDefaultPermission(@PathParam("option") String optionStr) {
+		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
+		permissionService.setDefaultClipboardPermission(option);
+	}
+
+	private Collection<String> getAllSourceIds() {
+		Iterable<VirtueTemplate> templates = adminService.getAllVirtueTemplates();
+		Collection<String> sourceIds = new ArrayList<String>();
+		for (VirtueTemplate t : templates) {
+			sourceIds.add(t.getId());
+		}
+		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
+		return sourceIds;
 	}
 }
