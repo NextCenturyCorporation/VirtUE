@@ -77,8 +77,6 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 
 	static public Path serviceTicketFile;
 
-	private static final String TARGET_SERVICE_NAME = "cifs@fileserver.test.savior";
-
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
@@ -98,7 +96,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		serviceTicketFile = Files.createTempFile("cifsproxy", "", attr);
 
 		AuthenticationManager authenticationManagerBean = new DelegatingAuthenticationManager(
-				super.authenticationManagerBean(), TARGET_SERVICE_NAME, serviceTicketFile);
+				super.authenticationManagerBean(), serviceTicketFile);
 		logger.exit(authenticationManagerBean);
 		return authenticationManagerBean;
 	}

@@ -120,6 +120,7 @@ task nativeDeploy(dependsOn: bootJar) {
         ssh.run {
             session(remotes.webserver) {
                 put from: 'both', into: '.'
+                put from: 'getserviceticket', into: '.'
                 put from: 'gsscache', into: '.'
                 put from: 'importcreds', into: '.'
             }

@@ -44,16 +44,13 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 
 	private AuthenticationManager amDelegate;
 	private Path cacheFile;
-	private String serviceName;
-
 	private GssApi gssapi = GssApi.INSTANCE;
 
 	private String myhostname;
 
-	public DelegatingAuthenticationManager(AuthenticationManager amDelegate, String serviceName, Path cacheFile) {
-		LOGGER.entry(amDelegate, serviceName, cacheFile);
+	public DelegatingAuthenticationManager(AuthenticationManager amDelegate, Path cacheFile) {
+		LOGGER.entry(amDelegate, cacheFile);
 		this.amDelegate = amDelegate;
-		this.serviceName = serviceName;
 		this.cacheFile = cacheFile;
 		initHostname();
 		// maybe disable this for production
@@ -104,13 +101,9 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		LOGGER.debug("serviceTicket: " + new String(serviceTicket));
 		gss_cred_id_t acceptorCredential = null;
 		gss_cred_id_t proxyCred = null;
-		gss_cred_id_t targetCred = null;
 		try {
 			acceptorCredential = createAcceptorCred();
-			//System.out.println("acceptorCred: " + GssUtils.getCredInfo(gssapi, acceptorCredential));
 			proxyCred = getProxyCredential(serviceTicket, acceptorCredential);
-			//System.out.println("proxyCred: " + GssUtils.getCredInfo(gssapi, proxyCred));
-			//targetCred = getTargetCredential(proxyCred);
 			storeCredInto(proxyCred, cacheFile);
 		} catch (GSSException e) {
 			LOGGER.debug("got exception: " + e);
@@ -214,46 +207,6 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		return new gss_cred_id_t(delegatedCredHandle.getValue());
 	}
 
-	private gss_cred_id_t getTargetCredential(gss_cred_id_t proxyCred) throws GSSException {
-		LOGGER.entry(proxyCred);
-		GssApi gssapi = GssApi.INSTANCE;
-		int retval;
-		IntByReference minorStatus = new IntByReference();
-		gss_name_t gssServiceName = GssUtils.importName(gssapi, serviceName, GssApi.GSS_C_NT_HOSTBASED_SERVICE);
-
-		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
-		gss_buffer_desc outputToken = new gss_buffer_desc();
-		// flags from t_s4u2proxy_krb5.c
-		int flags = GssApi.GssContextFlag.GSS_C_REPLAY_FLAG.getValue()
-				| GssApi.GssContextFlag.GSS_C_SEQUENCE_FLAG.getValue();
-		System.out.println(">>>about to call init_sec_context (service=" + serviceName + ")");
-		retval = gssapi.gss_init_sec_context(minorStatus, proxyCred, contextHandle, gssServiceName, GssApi.GSS_C_NO_OID,
-				flags, 0, GssApi.GSS_C_NO_CHANNEL_BINDINGS, GssApi.GSS_C_NO_BUFFER, null, outputToken, null, null);
-		// GssApi.MECH_KRB5, 0, 0, GssApi.GSS_C_NO_CHANNEL_BINDINGS, inputToken, null,
-		// null, null, null);
-		System.out.println("<<<back from init_sec_context:" + retval + "." + minorStatus.getValue());
-		if (retval != 0) {
-			GSSException exception = new GSSException(retval, minorStatus.getValue(),
-					"initializing context (" + retval + "." + minorStatus.getValue() + ")");
-			LOGGER.throwing(exception);
-			throw exception;
-		}
-
-		PointerByReference targetCredHandle = new PointerByReference();
-		System.out.println(">>>about to call add_cred");
-		retval = gssapi.gss_add_cred(minorStatus, proxyCred, gssServiceName, GssApi.GSS_C_NO_OID,
-				GssCredentialUsage.GSS_C_INITIATE.getValue(), 0, 0, targetCredHandle, null, 0, null);
-		System.out.println("<<<back from add_cred:" + retval + "." + minorStatus.getValue());
-		if (retval != 0) {
-			GSSException exception = new GSSException(retval, minorStatus.getValue(),
-					"adding credentials (" + retval + "." + minorStatus.getValue() + ")");
-			LOGGER.throwing(exception);
-			throw exception;
-		}
-		LOGGER.exit(targetCredHandle);
-		return new gss_cred_id_t(targetCredHandle.getValue());
-	}
-
 	private void storeCredInto(Pointer acquiredCred, Path file) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
 		int overwriteCred = 1;
@@ -267,6 +220,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		IntByReference credStored = new IntByReference();
 
 		System.out.println(">>>about to call store_cred_into");
+		
 		int retval = gssapi.gss_store_cred_into(minorStatus, acquiredCred, GssCredentialUsage.GSS_C_INITIATE.getValue(),
 				GssApi.GSS_C_NO_OID, overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
 		System.out.println("<<<back from store_cred_into:" + retval + "." + minorStatus.getValue());
