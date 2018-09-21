@@ -20,7 +20,7 @@ import { User } from '../../models/user.model';
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { ItemService } from '../../services/item.service';
 
-import { Mode } from '../../enums/enums';
+import { Mode } from '../gen-form/mode.enum';
 
 /**
 * @class

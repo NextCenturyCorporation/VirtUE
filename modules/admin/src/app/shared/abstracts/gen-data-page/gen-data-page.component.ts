@@ -18,12 +18,13 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Item } from '../../models/item.model';
 
-import { ColorSet } from '../../sets/color.set';
-
-import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
+import { ConfigUrls } from '../../services/config-urls.enum';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
+import { Mode } from '../gen-form/mode.enum';
+
+import { Datasets } from './datasets.enum';
 
 /**
  * @interface

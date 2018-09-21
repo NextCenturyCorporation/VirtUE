@@ -1,5 +1,5 @@
 
-import { Protocols } from '../enums/enums';
+import { Protocols } from '../../virtues/protocols.enum';
 
 /**
  * @class

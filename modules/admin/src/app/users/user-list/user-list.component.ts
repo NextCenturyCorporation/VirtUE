@@ -16,7 +16,8 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
-import { ConfigUrls, Datasets } from '../../shared/enums/enums';
+import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { ConfigUrls } from '../../shared/services/configUrls.enum';
 
 /**
  * @class

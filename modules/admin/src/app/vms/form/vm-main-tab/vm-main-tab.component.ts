@@ -5,13 +5,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from '../../../shared/models/item.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
+import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../../../shared/services/config-urls.enum';
+import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
 import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
-import { OSSet } from '../../../shared/sets/os.set';
+import { OSSet } from '../../os.set';
 
 /**
  * This class represents the main tab for a VirtualMachine template form - [[VmComponent]]

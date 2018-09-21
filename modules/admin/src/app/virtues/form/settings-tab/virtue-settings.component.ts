@@ -12,13 +12,17 @@ import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
 import { Printer } from '../../../shared/models/printer.model';
-import { Mode, ConfigUrls, Datasets, Protocols } from '../../../shared/enums/enums';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
+import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../../../shared/services/config-urls.enum';
+import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
+
+import { Protocols } from '../../protocols.enum';
 
 /**
  * @class
