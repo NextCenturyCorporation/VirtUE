@@ -9,8 +9,13 @@ import { ItemService } from '../../shared/services/item.service';
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
 
-import { Column } from '../../shared/models/column.model';
-import { Item } from '../../shared/models/item.model';
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../shared/models/column.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -48,9 +53,11 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',  'Template Name',          5, 'asc'),
-      new Column('os',    'OS',                     3, 'asc'),
-      new Column('apps',  'Assigned Applications',  3, undefined, this.formatName, this.getChildren),
+      new TextColumn('Template Name',         4, (v: VirtualMachine) => v.getName(), SORT_DIR.ASC),
+      new ListColumn('Assigned Applications', 3, this.getChildren, this.formatName),
+      new TextColumn('Operating System',      3, (v: VirtualMachine) => v.modDate, SORT_DIR.DESC),
+      new TextColumn('Version',               1, (v: VirtualMachine) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 

@@ -56,9 +56,9 @@ export class Virtue extends Item {
   unprovisioned: boolean;
 
   /**
-   * What browser should any links clicked within this Virtue automatically open in?
+   * What virtue should any links clicked within this Virtue automatically open in?
    */
-  defaultBrowser: string;
+  defaultBrowserVirtue: string;
 
   /** A list of networks this Virtue is permitted to connect to */
   networkWhiteList: NetworkPermission[];
@@ -107,8 +107,8 @@ export class Virtue extends Item {
         this.unprovisioned = true;
       }
 
-      if (! this.defaultBrowser) {
-        this.defaultBrowser = "Bowser";
+      if (! this.defaultBrowserVirtue) {
+        this.defaultBrowserVirtue = "Bowser";
       }
 
       if (! this.allowedPasteTargets) {

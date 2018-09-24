@@ -84,14 +84,14 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    *                this tab's mode should be updated. The attribute is optional.
    */
   update(changes: any): void {
-    this.childrenTable.items = this.item.children.asList();
+    this.childrenTable.populate(this.item.children.asList());
     if (changes.mode) {
       // these three lines could be replaced with
       //    this.init(changes.mode)
       // But that might be too opaque.
       this.setMode(changes.mode);
       this.childrenTable.colData = this.getColumns();
-      this.childrenTable.subMenuOptions = this.getSubMenu();
+      // this.childrenTable.subMenuOptions = this.getSubMenu();
     }
   }
 
@@ -143,12 +143,11 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
 
     this.childrenTable.setUp({
       cols: this.getColumns(),
-      opts: this.getSubMenu(),
+      // opts: this.getSubMenu(),
       coloredLabels: true,
       filters: [], // don't allow filtering on the form's child table.
       tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
+      noDataMsg: this.getNoDataMsg()
     });
   }
 

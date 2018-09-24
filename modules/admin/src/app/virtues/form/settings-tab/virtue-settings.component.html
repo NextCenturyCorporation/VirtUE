@@ -36,7 +36,7 @@
       </mat-select>
     </mat-form-field>
     <div class="mui-row form-item">
-      <app-item-table #allowedPasteTargetsTable></app-item-table>
+      <app-table #allowedPasteTargetsTable></app-table>
 
       <div class="mui-col-md-2 float-right">
         <br>
@@ -66,23 +66,23 @@
             </button>
           </div>
         </div>
-        <div class="mui-row">
+        <app-table #netWorkPermsTable></app-table>
+        <!-- <div class="mui-row">
           <ng-container *ngFor="let column of getNetworkColumns()" >
-            <div class="table-header mui-col-md-{{column.colWidth}}">
+            <div class="table-header mui-col-md-{{column.width}}">
               <label>{{column.prettyName}}</label>
             </div>
           </ng-container>
         </div>
         <br>
         <div *ngFor="let networkPermission of item.networkWhiteList" class="mui-row">
-        <!-- <div *ngFor="let col of getFileSysColumns(); let index = index; trackBy: indexTracker"> -->
-          <div  class="mui-col-md-{{getNetworkColumns()[0].colWidth}}">
+          <div  class="mui-col-md-{{getNetworkColumns()[0].width}}">
             <mat-form-field floatLabel="never">
               <input matInput type="text" placeholder="{{getNetworkColumns()[0].name}}"
                       [(ngModel)]="networkPermission[getNetworkColumns()[0].name]" required/>
             </mat-form-field>
           </div>
-          <div class="mui-col-md-{{getNetworkColumns()[1].colWidth}}">
+          <div class="mui-col-md-{{getNetworkColumns()[1].width}}">
             <mat-form-field floatLabel="never">
               <mat-select placeholder="{{getNetworkColumns()[1].name}}"
                        [(ngModel)]="networkPermission.protocol" required >
@@ -93,20 +93,19 @@
 
             </mat-form-field>
           </div>
-          <div class="mui-col-md-{{getNetworkColumns()[2].colWidth}}">
+          <div class="mui-col-md-{{getNetworkColumns()[2].width}}">
             <mat-form-field floatLabel="never">
               <input matInput type="number" placeholder="{{getNetworkColumns()[2].name}}"
                       [(ngModel)]="networkPermission[getNetworkColumns()[2].name]" required/>
             </mat-form-field>
           </div>
-          <div class="mui-col-md-{{getNetworkColumns()[3].colWidth}}">
+          <div class="mui-col-md-{{getNetworkColumns()[3].width}}">
             <mat-form-field floatLabel="never">
-              <!-- {{networkPermission[getNetworkColumns()[3].name]}} -->
               <input matInput type="number" placeholder="{{getNetworkColumns()[3].name}}"
                       [(ngModel)]="networkPermission[getNetworkColumns()[3].name]" required/>
             </mat-form-field>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -120,10 +119,10 @@
       <div class="mui-col-md-8">
         <div> <!-- File system permissions table -->
           <h5>File System Permissions</h5>
-
-          <div class="mui-row table-header-group">
+          <app-table #fileSysPermsTable></app-table>
+          <!-- <div class="mui-row table-header-group">
             <ng-container *ngFor="let col of getFileSysColumns(); let index = index; trackBy: indexTracker">
-              <div class="mui-col-md-{{col.colWidth}} table-header">
+              <div class="mui-col-md-{{col.width}} table-header">
                 <label>{{col.prettyName}}
                   <br>
                   <ng-container *ngIf="index !== 0">
@@ -131,18 +130,17 @@
                       name="cb"
                       [disabled]="mode === 'View'"
                       [checked]="allChecked(col.name)"
-                      (change)="checkAll($event, col.name)"
-                      >
+                      (change)="checkAll($event, col.name)">
                     </mat-checkbox>
                   </ng-container>
                 </label>
               </div>
             </ng-container>
           </div>
+
           <div *ngFor="let perm of item.fileSysPerms" class="mui-row table-data-group">
-            <!-- see note by indexTracker() -->
             <ng-container *ngFor="let col of getFileSysColumns(); let index = index; trackBy: indexTracker">
-              <div class="mui-col-md-{{col.colWidth}} table-data">
+              <div class="mui-col-md-{{col.width}} table-data">
                 <ng-container *ngIf="index === 0">
                   <label>{{perm[col.name]}}</label>
                 </ng-container>
@@ -157,7 +155,6 @@
                     </mat-checkbox>
                   </div>
 
-                  <!-- show a disabled checkbox if the item is disabled.  -->
                   <div *ngIf="perm.enabled === false && col.name !== 'enabled'">
                     <mat-checkbox
                       name="cb"
@@ -170,7 +167,7 @@
                 </ng-container>
               </div>
             </ng-container>
-          </div>
+          </div> -->
         </div>
         <br>
         <br>
@@ -189,12 +186,9 @@
               </button>
             </div>
           </div>
-          <div class="mui-row table-header-group">
-            <!-- <ng-container *ngFor="let col of getFileSysColumns()">
-              <div class="mui-col-md-{{col.colWidth}} table-header">
-                <label>{{col.prettyName}}</label>
-              </div>
-            </ng-container> -->
+          <app-table #printerTable></app-table>
+
+          <!-- <div class="mui-row table-header-group">
             <div class="mui-col-md-8 table-header">
               <label>Printer Info</label>
             </div>
@@ -214,7 +208,7 @@
             <div class="mui-col-md-2 table-data">
               <mat-icon class="delete" svgIcon="delete" (click)="removePrinter(index)" aria-label="Revoke access to this printer"></mat-icon>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

@@ -5,7 +5,10 @@ import { Router } from '@angular/router';
 import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
-import { Column } from '../../shared/models/column.model';
+import {  Column,
+          TextColumn,
+          ListColumn,
+          SORT_DIR  } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -15,7 +18,7 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
-import { ConfigUrls } from '../../shared/services/configUrls.enum';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
  * @class
@@ -59,12 +62,16 @@ export class VmListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',        'Template Name',         2, 'asc', undefined, undefined, (i: Item) => this.viewItem(i)),
-      new Column('os',          'OS',                    1, 'asc'),
-      new Column('childNames',  'Assigned Applications', 4, undefined, this.formatName, this.getChildren),
-      new Column('lastEditor',  'Last Modified By',      2, 'asc'),
-      new Column('modDate',     'Modified Date',         2, 'desc'),
-      new Column('enabled',      'Status',                1, 'asc', this.formatStatus)
+      new TextColumn('Template Name',     2, (v: VirtualMachine) => v.getName(),  SORT_DIR.ASC,
+                                                                        (i: Item) => this.viewItem(i), () => this.getSubMenu()),
+                                                                        
+      new TextColumn('OS',                1, (v: VirtualMachine) => v.os,         SORT_DIR.ASC),
+      new ListColumn('Assigned Applications',  4, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
+      new TextColumn('Last Editor',       2, (v: VirtualMachine) => v.lastEditor, SORT_DIR.ASC),
+      // new TextColumn('Version',           1, (v: VirtualMachine) => String(v.version),  SORT_DIR.ASC),
+      new TextColumn('Modification Date', 2, (v: VirtualMachine) => v.modDate,    SORT_DIR.DESC),
+      new TextColumn('Status',            1, this.formatStatus,                   SORT_DIR.ASC)
+
     ];
   }
 

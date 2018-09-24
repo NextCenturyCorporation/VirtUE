@@ -104,34 +104,13 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
     }
     this.table.setUp({
       cols: this.getColumns(),
-      opts: this.getSubMenu(),
+      // opts: this.getSubMenu(),
       coloredLabels: this.hasColoredLabels(),
       filters: this.getTableFilters(),
       tableWidth: 12,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: this.hasCheckbox(),
-      selectedIDs: this.getSelectedIDs()
+      noDataMsg: this.getNoDataMsg()
     });
   }
-
-  /**
-   * Most lists don't allow selection
-   *
-   * @return a list of item IDs that should be initialized as 'selected' when the table builds.
-   */
-  getSelectedIDs(): string[] {
-    return [];
-  }
-
-  /**
-   * @return whether or not the table needs checkboxes. False is default.
-   * Override to change.
-   * Currently overridden only by modals.
-   */
-  hasCheckbox(): boolean {
-    return false;
-  }
-
 
   /**
    * Populates the table with the input list of items.
@@ -140,7 +119,7 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
    * @param newItems the list of items to be displayed in the table.
    */
   setItems(newItems: Item[]): void {
-    this.table.items = newItems;
+    this.table.populate(newItems);
   }
 
   /**

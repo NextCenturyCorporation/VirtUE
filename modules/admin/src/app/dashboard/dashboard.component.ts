@@ -134,11 +134,11 @@ export class DashboardComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-    new Column('sensor_id',   'Sensor',  3, 'asc'),
-    new Column('virtue name', 'Virtue',  3, 'asc', this.getVirtName),
-    new Column('kafka_topic', 'Kafka Topic', 3, 'asc'),
-    new Column('has cert',    'Certificate', 1, 'asc', this.hasCertificates),
-    new Column('updated_at',  'Last Update', 2, 'asc')
+    // new Column('sensor_id',   'Sensor',  3, 'asc'),
+    // new Column('virtue name', 'Virtue',  3, 'asc', this.getVirtName),
+    // new Column('kafka_topic', 'Kafka Topic', 3, 'asc'),
+    // new Column('has cert',    'Certificate', 1, 'asc', this.hasCertificates),
+    // new Column('updated_at',  'Last Update', 2, 'asc')
     ];
   }
 

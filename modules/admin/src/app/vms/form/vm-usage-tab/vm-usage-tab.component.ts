@@ -17,7 +17,14 @@ import { User } from '../../../shared/models/user.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
-import { Column } from '../../../shared/models/column.model';
+
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../../shared/models/column.model';
+
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
@@ -102,19 +109,20 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   update(changes: any): void {
     if (changes.allVirtues) {
       let allVirtues: DictList<Item> = changes.allVirtues;
-      this.parentTable.items = [];
+      let items: Item[] = [];
 
       for (let v of allVirtues.asList()) {
         if (v.children.has(this.item.getID())) {
-          this.parentTable.items.push(v);
+         items.push(v);
         }
       }
+      this.parentTable.populate(items);
     }
 
     if (changes.mode) {
       this.setMode(changes.mode);
       this.parentTable.colData = this.getParentColumns();
-      this.parentTable.subMenuOptions = this.getParentSubMenu();
+      // this.parentTable.subMenuOptions = this.getParentSubMenu();
     }
   }
 
@@ -123,17 +131,17 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
    *         Links to the parent and the parent's children should only be clickable if not in view mode.
    */
   getParentColumns(): Column[] {
-    let cols = [
-      new Column('version',     'Version',       2, 'asc'),
-      new Column('enabled',      'Status',        3, 'asc',    this.formatStatus)
+    let cols: Column[] = [
+      new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',                3, this.formatStatus, SORT_DIR.ASC)
     ];
     if (this.mode === Mode.VIEW) {
-      cols.unshift(new Column('childNames',  'Attached VMs',  3, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)));
-      cols.unshift(new Column('name',        'Template Name', 4, 'asc',    undefined, undefined, (i: Item) => this.viewItem(i)));
+      cols.unshift(new ListColumn<Item>('Virtual Machines', 3, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)));
+      cols.unshift(new TextColumn('Template Name',          3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i)));
     }
     else {
-      cols.unshift(new Column('childNames',  'Attached VMs',  3, undefined, this.formatName, this.getChildren));
-      cols.unshift(new Column('name',        'Template Name', 4, 'asc'));
+      cols.unshift(new ListColumn<Item>('Virtual Machines',      3, this.getChildren,      this.formatName,));
+      cols.unshift(new TextColumn('Template Name',         4, (v: Virtue) => v.getName(), SORT_DIR.ASC));
     }
     return cols;
   }
@@ -162,12 +170,11 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   setUpParentTable(): void {
     this.parentTable.setUp({
       cols: this.getParentColumns(),
-      opts: this.getParentSubMenu(),
+      // opts: this.getParentSubMenu(),
       coloredLabels: true,
       filters: [],
       tableWidth: 8,
-      noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
-      hasCheckBoxes: false
+      noDataMsg: "No virtue template has been assigned this virtual machine template at the moment."
     });
   }
 

@@ -4,7 +4,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
-import { Column } from '../../../shared/models/column.model';
+import { VirtualMachine } from '../../../shared/models/vm.model';
+
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../../shared/models/column.model';
+
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
@@ -93,15 +101,17 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
    */
   getColumns(): Column[] {
     let cols: Column[] = [
-      new Column('os',          'OS',                    2, 'asc'),
-      new Column('childNames',  'Assigned Applications', 4, undefined,  this.formatName, this.getChildren),
-      new Column('enabled',      'Status',                2, 'asc',      this.formatStatus)
+      new ListColumn<Item>('Assigned Apps', 4, this.getChildren,  this.formatName),
+      new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
+      new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
+      new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC),
     ];
     if (this.mode === Mode.VIEW) {
-      cols.unshift(new Column('name', 'VM Template Name', 4, 'asc', undefined, undefined, (i: Item) => this.viewItem(i)));
+      cols.unshift(new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC,
+                                  (i: Item) => this.viewItem(i)));
     }
     else {
-      cols.unshift(new Column('name', 'VM Template Name', 4, 'asc'));
+      cols.unshift(new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC));
     }
 
     return cols;

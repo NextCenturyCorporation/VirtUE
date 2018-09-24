@@ -5,7 +5,10 @@ import { Location } from '@angular/common';
 import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
-import { Column } from '../../shared/models/column.model';
+import {  Column,
+          TextColumn,
+          ListColumn,
+          SORT_DIR  } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -17,7 +20,7 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
-import { ConfigUrls } from '../../shared/services/configUrls.enum';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
  * @class
@@ -60,10 +63,10 @@ export class UserListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',        'Username',           3, 'asc',     undefined, undefined, (i: Item) => this.viewItem(i)),
-      new Column('childNames',  'Available Virtues',  4, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
-      new Column('roles',       'Authorized Roles',   3, 'asc',     this.formatRoles),
-      new Column('enabled',      'Account Status',     2, 'desc',    this.formatStatus)
+      new TextColumn('Username',           3, (i: Item) => i.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i), () => this.getSubMenu()),
+      new ListColumn('Available Virtues',  4, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
+      new TextColumn('Authorized Roles',   3, this.formatRoles, SORT_DIR.ASC),
+      new TextColumn('Account Status',     2, this.formatStatus, SORT_DIR.DESC)
     ];
   }
 

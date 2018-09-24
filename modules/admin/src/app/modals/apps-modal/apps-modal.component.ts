@@ -9,7 +9,12 @@ import { ItemService } from '../../shared/services/item.service';
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
 
-import { Column } from '../../shared/models/column.model';
+import {
+  Column,
+  TextColumn,
+  SORT_DIR
+} from '../../shared/models/column.model';
+import { Application } from '../../shared/models/application.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -48,9 +53,9 @@ export class AppsModalComponent extends GenericModalComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', 5, 'asc'),
-      new Column('version', 'Version',          3, 'asc'),
-      new Column('os',      'Operating System', 4, 'desc')
+      new TextColumn('Application Name', 5, (a: Application) => a.getName(), SORT_DIR.ASC),
+      new TextColumn('Version',          3, (a: Application) => String(a.version), SORT_DIR.ASC),
+      new TextColumn('Operating System', 4, (a: Application) => a.os, SORT_DIR.DESC)
     ];
   }
 

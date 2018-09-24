@@ -1,15 +1,15 @@
-import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
-import { Item } from '../../shared/models/item.model';
-import { Column } from '../../shared/models/column.model';
-import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
-import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/gen-data-page.component';
+import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
+import { SELECTION_MODE } from '../../shared/abstracts/gen-table/selectionMode.enum';
+import { Column } from '../../shared/models/column.model';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
@@ -28,7 +28,16 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [BaseUrlService, ItemService]
 })
-export abstract class GenericModalComponent extends GenericListComponent implements OnInit {
+export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
+
+
+  /** The table itself */
+  @ViewChild(GenericTableComponent) table: GenericTableComponent;
+
+
+  /** a string to appear as the list's title - preferably a full description */
+  prettyTitle: string;
+
 
   /** What the containing component watches, to get the user's selections back out of this modal. */
   getSelections = new EventEmitter();
@@ -39,6 +48,10 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
    */
   initialSelections: string[] = [];
 
+  /**
+   * #uncommented
+   */
+  mode: SELECTION_MODE;
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
@@ -67,11 +80,82 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
         this.initialSelections = [];
       }
 
+      this.mode = SELECTION_MODE.MULTI;
 
       // TODO should we not allow addition of disabled items?
       // if so, note that select-all button will not act how user expects.
       // Could be changed to only add/remove enabled items, but still then the user couldn't
       // remove disabled ones through that menu.
+  }
+
+  /**
+   * #uncommented
+   */
+  setMode(mode: SELECTION_MODE) {
+    this.mode = mode;
+  }
+
+  /**
+   * Called automatically on page render.
+   */
+  ngOnInit(): void {
+    this.cmnDataComponentSetup();
+    this.fillTable();
+  }
+
+  /**
+   * Sets up the table, according to parameters defined in this class' child classes.
+   */
+  fillTable(): void {
+    if (this.table === undefined) {
+      return;
+    }
+    this.table.setUp({
+      cols: this.getColumns(),
+      coloredLabels: this.hasColoredLabels(),
+      filters: [],
+      tableWidth: 12,
+      noDataMsg: this.getNoDataMsg(),
+      selectionOptions: {
+        selectionMode: this.mode,
+        getObjectID: (obj: {getID(): string}) => obj.getID(), // just expect something with a getID method
+        selectedIDs: this.getSelectedIDs()
+      }
+    });
+  }
+
+  /**
+   * Populates the table with the input list of items.
+   * Abstracts away table from subclasses
+   *
+   * @param newItems the list of items to be displayed in the table.
+   */
+  setItems(newItems: any[]): void {
+    this.table.populate(newItems);
+  }
+
+  /**
+   * This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+   * to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+   *
+   * Note: colWidths of all columns must add to exactly 12.
+   * Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+   *
+   * @return a list of columns to be displayed within the table of Items.
+   */
+  abstract getColumns(): Column[];
+
+  /**
+   * @returns a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   */
+  abstract getNoDataMsg(): string;
+
+  /**
+   * @return whether or not the items being listed have colored labels. True for, and only for, all tables that list virtues.
+   * overridden by virtue-list, virtues-modal, main-user-tab, vm-usage-tab, and virtue-settings
+   */
+  hasColoredLabels(): boolean {
+    return false;
   }
 
   /**
@@ -85,33 +169,12 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
   }
 
   /**
-   * @return an empty list, because filters won't be very useful here until they can do more than filter on status
-   */
-  getTableFilters(): {text: string, value: string}[] {
-    return [];
-  }
-
-  /**
-   * @return true - all modals at the moment are for selection of a set of Items.
-   */
-  hasCheckbox() {
-    return true;
-  }
-
-  /**
-   * @return an empty list - no need for a submenu on Items in a modal at the moment
-   */
-  getSubMenu(): SubMenuOptions[] {
-    return [];
-  }
-
-  /**
    * Notifies the component which created and is waiting on this modal that selections have been made,
    * then clears and closes the modal.
    */
   submit(): void {
     this.getSelections.emit(this.table.selectedIDs);
-    this.table.clearSelections();
+    this.table.clear();
     this.dialogRef.close();
   }
 
@@ -119,7 +182,7 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
    * Clears and closes the modal.
    */
   cancel() {
-    this.table.clearSelections();
+    this.table.clear();
     this.dialogRef.close();
   }
 

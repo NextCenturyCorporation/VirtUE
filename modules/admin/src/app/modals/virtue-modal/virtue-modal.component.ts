@@ -9,8 +9,13 @@ import { ItemService } from '../../shared/services/item.service';
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
 
-import { Column } from '../../shared/models/column.model';
-import { Item } from '../../shared/models/item.model';
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../shared/models/column.model';
+import { Virtue } from '../../shared/models/virtue.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
@@ -48,12 +53,12 @@ export class VirtueModalComponent extends GenericModalComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Template Name',         3, 'asc'),
-      new Column('vms',     'Virtual Machines',      3, undefined, this.formatName, this.getChildren),
-      new Column('apps',    'Assigned Applications', 3, undefined, this.formatName,  this.getGrandchildren),
-      // new Column('version', 'Version',               1, 'asc'), // could this be useful?
-      new Column('modDate', 'Modification Date',     2, 'desc'),
-      new Column('enabled',  'Status',                1, 'asc', this.formatStatus)
+      new TextColumn('Template Name',         3, (v: Virtue) => v.getName(), SORT_DIR.ASC),
+      new ListColumn('Virtual Machines',      2, this.getChildren,      this.formatName),
+      new ListColumn('Assigned Applications', 3, this.getGrandchildren, this.formatName),
+      new TextColumn('Version',               1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Modification Date',     2, (v: Virtue) => v.modDate, SORT_DIR.DESC),
+      new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 
