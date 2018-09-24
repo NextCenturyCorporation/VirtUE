@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,8 @@ import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.alerting.VirtueAlertMessage;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
+import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
+import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
@@ -50,6 +53,7 @@ public class VirtueService {
 	private Map<String, RgbColor> colors;
 	private IRdpClient rdpClient;
 	private IClipboardManager clipboardManager;
+	private IDefaultApplicationListener defaultApplicationListener;
 
 	static {
 		startableVirtueStates = new ArrayList<VirtueState>();
@@ -68,6 +72,7 @@ public class VirtueService {
 		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());
 		this.rdpClient = rdpClient;
 		this.clipboardManager = clipboardManager;
+		this.defaultApplicationListener = new VirtueServiceDefaultApplicationListener();
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
@@ -226,7 +231,8 @@ public class VirtueService {
 	 * @param color
 	 * @throws IOException
 	 */
-	public void startApplication(DesktopVirtue v, ApplicationDefinition appDefn, RgbColor color) throws IOException {
+	public void startApplication(DesktopVirtue v, ApplicationDefinition appDefn, RgbColor color)
+			throws IOException {
 		// TODO check to see if we have an XPRA connection
 		Thread t = new Thread(() -> {
 			DesktopVirtue virtue = v;
@@ -289,6 +295,48 @@ public class VirtueService {
 	public void terminateVirtue(DesktopVirtue virtue) throws InvalidUserLoginException, IOException {
 		if (virtue.getVirtueState() != VirtueState.UNPROVISIONED) {
 			desktopResourceService.terminateVirtue(virtue.getId());
+		}
+	}
+
+	public IDefaultApplicationListener getDefaultApplicationListener() {
+		return this.defaultApplicationListener;
+	}
+
+	public class VirtueServiceDefaultApplicationListener implements IDefaultApplicationListener {
+
+		@Override
+		public void activateDefaultApp(DefaultApplicationType defaultApplicationType, List<String> arguments) {
+			// TODO probably need to thread this
+			List<DesktopVirtue> possibleApps = desktopResourceService
+					.getApplicationsWithTag(defaultApplicationType.toString());
+			logger.debug("list of apps(" + possibleApps.size() + "): " + possibleApps);
+
+			Pair<DesktopVirtue, ApplicationDefinition> pair = getVirtueIdAndApplicationDefn(defaultApplicationType,
+					possibleApps);
+			logger.debug("Starting application on " + pair);
+			String params = "";
+			for (String arg : arguments) {
+				params += arg + " ";
+			}
+			try {
+				// desktopResourceService.startApplication(pair.getLeft(), pair.getRight(),
+				// params);
+				ApplicationDefinition app = pair.getRight();
+				app.setParameters(params);
+				startApplication(pair.getLeft(), app, null);
+			} catch (IOException e) {
+				logger.error("Error starting application", e);
+			}
+
+		}
+
+		private Pair<DesktopVirtue, ApplicationDefinition> getVirtueIdAndApplicationDefn(
+				DefaultApplicationType defaultApplicationType, List<DesktopVirtue> possibleApps) {
+			// TODO replace with GUI
+			DesktopVirtue dv = possibleApps.get(0);
+			ApplicationDefinition app = dv.getApps().values().iterator().next();
+			Pair<DesktopVirtue, ApplicationDefinition> pair = Pair.of(dv, app);
+			return pair;
 		}
 	}
 }

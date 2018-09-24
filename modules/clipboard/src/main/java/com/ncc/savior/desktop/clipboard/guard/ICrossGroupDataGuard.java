@@ -1,6 +1,6 @@
 package com.ncc.savior.desktop.clipboard.guard;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Determines whether data can flow between groupIds (VirtueId's in our specific
@@ -28,6 +28,6 @@ public interface ICrossGroupDataGuard {
 	 */
 	public void init();
 
-	void setGroupIdToDisplayNameMap(HashMap<String, String> groupIdToDisplayName);
+	void setGroupIdToDisplayNameMap(Map<String, String> groupIdToDisplayName);
 
 }

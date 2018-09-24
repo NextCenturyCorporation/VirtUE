@@ -1,6 +1,5 @@
 package com.ncc.savior.desktop.clipboard.guard;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -32,7 +31,7 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 
 	private PassiveExpiringMap<Pair<String, String>, ClipboardPermissionOption> tempCache;
 
-	private HashMap<String, String> groupIdToDisplayName;
+	private Map<String, String> groupIdToDisplayName;
 
 	private IDataGuardDialog dialog;
 
@@ -140,8 +139,7 @@ public class RestDataGuard implements ICrossGroupDataGuard {
 	}
 
 	@Override
-	public void setGroupIdToDisplayNameMap(HashMap<String, String> groupIdToDisplayName) {
+	public void setGroupIdToDisplayNameMap(Map<String, String> groupIdToDisplayName) {
 		this.groupIdToDisplayName = groupIdToDisplayName;
 	}
-
 }

@@ -3,5 +3,8 @@
     "version": "1.0",
     "os": "WINDOWS",
     "launchCommand": "c:\\windows\\notepad.exe",
-    "iconKey": "ms-edge"
+    "iconKey": "ms-edge",
+    "tags": [
+    	"BROWSER"
+    ]
   }
