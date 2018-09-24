@@ -35,7 +35,7 @@ import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 
-import { Protocols } from '../../protocols.enum';
+import { NetworkProtocols } from '../../protocols.enum';
 
 /**
  * @class
@@ -299,7 +299,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   getNetworkColumns(): Column[] {
     return [
       new InputFieldColumn('Host',        5, 'destination'),
-      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.keys(Protocols), (protocol: Protocols) => protocol),
+      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.keys(NetworkProtocols), (protocol: NetworkProtocols) => protocol),
       new InputFieldColumn('Local Port',  2, 'localPort'),
       new InputFieldColumn('Remote Port', 2, 'remotePort')
     ];
