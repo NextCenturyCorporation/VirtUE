@@ -25,7 +25,7 @@ export enum ConfigUrls {
  * The available protocols which a virtue can be permitted to use with a given [[NetworkPermission]]
  * in  [[VirtueSettingsTabComponent]]
  */
-export enum Protocols {
+export enum NetworkProtocols {
   TCPIP = "TCP/IP",
   UDP = "UDP",
   ICMP = "ICMP"

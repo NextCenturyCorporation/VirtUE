@@ -12,7 +12,7 @@ import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
 import { Printer } from '../../../shared/models/printer.model';
-import { Mode, ConfigUrls, Datasets, Protocols } from '../../../shared/enums/enums';
+import { Mode, ConfigUrls, Datasets, NetworkProtocols } from '../../../shared/enums/enums';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
@@ -69,7 +69,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   private keys = Object.keys;
 
   /** local reference, so html can iterate over this enum's elements. */
-  private protocols = Protocols;
+  private protocols = NetworkProtocols;
 
   /**
    * see [[GenericFormTabComponent.constructor]] for inherited parameters

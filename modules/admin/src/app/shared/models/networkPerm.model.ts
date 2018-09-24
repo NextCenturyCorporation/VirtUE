@@ -1,5 +1,5 @@
 
-import { Protocols } from '../enums/enums';
+import { NetworkProtocols } from '../enums/enums';
 
 /**
  * @class
@@ -12,7 +12,7 @@ export class NetworkPermission {
   destination: string = "";
 
   /** What connection protocol must be used */
-  protocol: Protocols;
+  protocol: NetworkProtocols;
 
   /** What specific local port can make this connection.
    * I thought these were chosen randomly on the connecting machine -
