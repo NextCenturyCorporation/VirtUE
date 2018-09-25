@@ -71,16 +71,16 @@ import { NetworkProtocols } from '../../protocols.enum';
 export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
 
   /** a table to display the Virtues that this Virtue is allowd to paste data into */
-  @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent;
+  @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent<Virtue>;
 
   /** a table to display the network permissions granted to this Virtue */
-  @ViewChild('netWorkPermsTable') private netWorkPermsTable: GenericTableComponent;
+  @ViewChild('netWorkPermsTable') private netWorkPermsTable: GenericTableComponent<NetworkPermission>;
 
   /** a table to display the file system permissions of this Virtue */
-  @ViewChild('fileSysPermsTable') private fileSysPermsTable: GenericTableComponent;
+  @ViewChild('fileSysPermsTable') private fileSysPermsTable: GenericTableComponent<FileSysPermission>;
 
   /** a table to display the printers this Virtue can access */
-  @ViewChild('printerTable') private printerTable: GenericTableComponent;
+  @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
@@ -201,19 +201,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-  * @return a message telling the user that no paste permissions have been given to this
-  * virtue, in a way that is clear and relevant for the current mode.
-  */
-  getNoDataMsg(): string {
-    if (this.mode === Mode.VIEW) {
-      return "This virtue hasn't been granted access to paste data into any other virtues.";
-    }
-    else {
-      return 'Click "Add Virtue" to give this virtue permission to paste data into that one';
-    }
-  }
-
-  /**
    * See https://github.com/angular/angular/issues/10423 and/or https://stackoverflow.com/questions/40314732
    * and, less helpfully, the actual docs: https://angular.io/guide/template-syntax#ngfor-with-trackby
    * Essentially, Angular's ngFor sometimes tracks the elements it iterates over by their value (?), as opposed
@@ -242,8 +229,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Info',    6, (p: Printer) => p.info, SORT_DIR.ASC),
-      new TextColumn('Printer Status',  6, (p: Printer) => p.status, SORT_DIR.ASC)
+      new TextColumn('Printer Info',    5, (p: Printer) => p.info, SORT_DIR.ASC),
+      new TextColumn('Printer Status',  4, (p: Printer) => p.status, SORT_DIR.ASC),
+      new IconColumn('Revoke access',  3, 'delete', (p: Printer) => this.removePrinter(p)
+      )
     ];
   }
 
@@ -259,13 +248,14 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.printerTable.setUp({
       cols: this.getPrinterColumns(),
-      // opts: this.getPasteSubMenu(),
       coloredLabels: true,
       filters: [], // don't allow filtering on the form's child table.
-      tableWidth: 10,
-      noDataMsg: "No printers have been added yet to this Virtue."
+      tableWidth: 12,
+      noDataMsg: "No printers have been added yet to this Virtue.",
+      editingEnabled: () => !this.inViewMode()
     });
   }
+
   updatePrinterTable() {
     this.printerTable.populate(this.item.allowedPrinters);
   }
@@ -280,9 +270,17 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * This removes a printer from the Virtue's printer list.
+   * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
+   * Note that if there are several matching printers, only the first one is removed.
    */
-  removePrinter(index: number): void {
+  removePrinter(toDelete: Printer): void {
+    let index = 0;
+    for (let printer of this.item.allowedPrinters) {
+      if (printer.address === toDelete.address) {
+        break;
+      }
+      index++;
+    }
     this.item.allowedPrinters.splice(index, 1);
     this.updatePrinterTable();
   }
@@ -298,10 +296,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getNetworkColumns(): Column[] {
     return [
-      new InputFieldColumn('Host',        5, 'destination'),
-      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.keys(NetworkProtocols), (protocol: NetworkProtocols) => protocol),
-      new InputFieldColumn('Local Port',  2, 'localPort'),
-      new InputFieldColumn('Remote Port', 2, 'remotePort')
+      new InputFieldColumn('Host',        4, 'destination', (netPerm: NetworkPermission) => netPerm.destination),
+      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.keys(NetworkProtocols),
+                          (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
+      new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
+      new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
+      new IconColumn('Revoke',  1, 'delete', (idx: number) => this.removeNetwork(idx))
     ];
   }
   /**
@@ -316,11 +316,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.netWorkPermsTable.setUp({
       cols: this.getNetworkColumns(),
-      // opts: this.getPasteSubMenu(),
-      coloredLabels: false,
       filters: [], // don't allow filtering on the form's child table.
       tableWidth: 10,
-      noDataMsg: "This Virtue has not been granted permission ot access any network"
+      noDataMsg: "This Virtue has not been granted permission to access any network",
+      editingEnabled: () => !this.inViewMode()
     });
   }
 
@@ -336,6 +335,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   */
   addNewNetworkPermission(): void {
     this.item.networkWhiteList.push(new NetworkPermission());
+    this.updateNetworkPermsTable();
+  }
+
+  removeNetwork(idx: number): void {
+    this.item.networkWhiteList.splice(idx, 1);
     this.updateNetworkPermsTable();
   }
 
@@ -363,15 +367,20 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     // first make sure that the ports aren't 0, because checking !port will be true
     // if port === 0. Which would make the wrong error message appear.
     if (netPerm.localPort === 0 || netPerm.remotePort === 0) {
-    console.log("Ports on network permissions must be greater than zero.");
-    return false;
-  }
+      console.log("Ports on network permissions must be greater than zero.");
+      return false;
+    }
 
-  if ( !netPerm.destination|| !netPerm.protocol
-    || !netPerm.localPort  || !netPerm.remotePort ) {
+    if ( !netPerm.destination|| !netPerm.protocol
+      || !netPerm.localPort  || !netPerm.remotePort ) {
       console.log("Network permission fields cannot be blank");
       return false;
     }
+
+    // if ( !(netPerm.localPort instanceof Number) || !(netPerm.remotePort instanceof Number) ) {
+    //   console.log("Local and Remote ports must be numbers.");
+    //   return false;
+    // }
 
     if (netPerm.localPort < 0 || netPerm.remotePort < 0) {
       console.log("Ports on network permissions must be greater than zero.");
@@ -396,9 +405,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return [
       new TextColumn('Server & Drive',  6, (fs: FileSysPermission) => fs.location, SORT_DIR.ASC),
       new CheckboxColumn('Enabled',     3, 'enabled'),
-      new CheckboxColumn('Read',        1, 'read'),
-      new CheckboxColumn('Write',       1, 'write'),
-      new CheckboxColumn('Execute',     1, 'execute')
+      new CheckboxColumn('Read',        1, 'read', (fs: FileSysPermission) => !fs.enabled),
+      new CheckboxColumn('Write',       1, 'write', (fs: FileSysPermission) => !fs.enabled),
+      new CheckboxColumn('Execute',     1, 'execute', (fs: FileSysPermission) => !fs.enabled)
     ];
   }
 
@@ -413,10 +422,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     }
     this.fileSysPermsTable.setUp({
       cols: this.getFileSysColumns(),
-      coloredLabels: false,
       filters: [],
       tableWidth: 10,
-      noDataMsg: "No file systems have been set up in the global settings"
+      noDataMsg: "No file systems have been set up in the global settings",
+      editingEnabled: () => !this.inViewMode()
     });
   }
 
@@ -447,21 +456,13 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    *         The first column, the Virtue's name, should be clickable if and only if the page is in view mode.
    */
   getPasteColumns(): Column[] {
-    let cols: Column[] = [
+    return [
+      new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                        ()=> this.getPasteSubMenu()),
       new ListColumn<Item>('Available Applications', 4, this.getGrandchildren,  this.formatName),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
-
-    if (this.mode === Mode.VIEW) {
-      // cols.unshift(new ListColumn<Item>('Virtual Machines', 3, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)));
-      cols.unshift(new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC));
-    }
-
-    return cols;
   }
 
   /**
@@ -480,7 +481,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       coloredLabels: true,
       filters: [], // don't allow filtering on the form's child table.
       tableWidth: 10,
-      noDataMsg: this.getNoDataMsg()
+      noDataMsg: this.getNoPasteDataMsg(),
+      editingEnabled: () => !this.inViewMode()
     });
   }
 
@@ -512,6 +514,18 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       });
   }
 
+  /**
+  * @return a message telling the user that no paste permissions have been given to this
+  * virtue, in a way that is clear and relevant for the current mode.
+  */
+  getNoPasteDataMsg(): string {
+    if (this.mode === Mode.VIEW) {
+      return "This virtue hasn't been granted access to paste data into any other virtues.";
+    }
+    else {
+      return 'Click "Add Virtue" to give this virtue permission to paste data into that one';
+    }
+  }
 
 /************************************************************************************/
 

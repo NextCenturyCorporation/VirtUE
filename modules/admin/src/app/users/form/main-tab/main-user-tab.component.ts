@@ -98,22 +98,14 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
    * @return what columns should show up in the user's virtue children table
    */
   getColumns(): Column[] {
-    let cols: Column[] = [
+    return [
+      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i), 
+                                                                                          () => this.getSubMenu()),
+      new ListColumn('Virtual Machines', 3, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
       new ListColumn<Item>('Available Apps', 4, this.getGrandchildren,  this.formatName),
       new TextColumn('Version', 1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
-
-    if (this.mode === Mode.VIEW) {
-      cols.unshift(new ListColumn('Virtual Machines', 3, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)));
-      cols.unshift(new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new ListColumn('Virtual Machines', 3, this.getChildren, this.formatName));
-      cols.unshift(new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC));
-    }
-
-    return cols;
   }
 
   /**

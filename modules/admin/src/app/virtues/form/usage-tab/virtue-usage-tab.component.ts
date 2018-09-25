@@ -12,6 +12,7 @@ import { ItemService } from '../../../shared/services/item.service';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../../shared/models/item.model';
+import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 
@@ -50,7 +51,7 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
   /** A table listing what users have been given access to this Virtue template */
-  @ViewChild('parentTable') private parentTable: GenericTableComponent;
+  @ViewChild('parentTable') private parentTable: GenericTableComponent<User>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
@@ -123,19 +124,13 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
    *         Links to the parent and the parent's children should only be clickable if not in view mode.
    */
   getParentColumns(): Column[] {
-    let cols: Column[] = [
+    return [
+      new TextColumn('Username',  3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                               () => this.getParentSubMenu()),
+      new ListColumn<Item>('Attached Virtues', 5, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Status',  4, this.formatStatus, SORT_DIR.ASC)
     ];
 
-    if (this.mode === Mode.VIEW) {
-      cols.unshift(new ListColumn<Item>('Attached Virtues', 5, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)));
-      cols.unshift(new TextColumn('Username',  3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new ListColumn<Item>('Attached Virtues', 5, this.getChildren,  this.formatName));
-      cols.unshift(new TextColumn('Username',  3, (v: Virtue) => v.getName(), SORT_DIR.ASC));
-    }
-    return cols;
   }
 
   /**
@@ -145,8 +140,8 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   getParentSubMenu(): SubMenuOptions[] {
     if (this.mode === Mode.VIEW) {
       return [
-        new SubMenuOptions("View", () => true, (i: Item) => this.viewItem(i)),
-        new SubMenuOptions("Edit", () => true, (i: Item) => this.editItem(i))
+        new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
+        new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i))
       ];
     }
     else {
@@ -162,11 +157,10 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   setUpParentTable(): void {
     this.parentTable.setUp({
       cols: this.getParentColumns(),
-      // opts: this.getParentSubMenu(),
-      coloredLabels: false,
       filters: [],
       tableWidth: 8,
-      noDataMsg: "No users have been assigned this Virtue at the moment."
+      noDataMsg: "No users have been assigned this Virtue at the moment.",
+      editingEnabled: () => !this.inViewMode()
     });
   }
 

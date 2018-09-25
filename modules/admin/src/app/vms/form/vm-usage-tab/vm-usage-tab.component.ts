@@ -52,14 +52,15 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
   /** A table listing what virtues have been given access to this VM template */
-  @ViewChild('parentTable') private parentTable: GenericTableComponent;
+  @ViewChild('parentTable') private parentTable: GenericTableComponent<Virtue>;
 
   /**
    * this would show the running virtues that have been built from this template.
    * This may be unnecessary/unteneble. It could be a lot.
    * Tables may need filters.
+   * Change any to the correct type (probably "VirtueInstance" or something)
    */
-  @ViewChild('usageTable') private usageTable: GenericTableComponent;
+  @ViewChild('usageTable') private usageTable: GenericTableComponent<any>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: VirtualMachine;
@@ -131,19 +132,13 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
    *         Links to the parent and the parent's children should only be clickable if not in view mode.
    */
   getParentColumns(): Column[] {
-    let cols: Column[] = [
+    return [
+      new TextColumn('Template Name',          3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                            () => this.getParentSubMenu()),
+      new ListColumn<Item>('Virtual Machines', 3, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                3, this.formatStatus, SORT_DIR.ASC)
     ];
-    if (this.mode === Mode.VIEW) {
-      cols.unshift(new ListColumn<Item>('Virtual Machines', 3, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)));
-      cols.unshift(new TextColumn('Template Name',          3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new ListColumn<Item>('Virtual Machines',      3, this.getChildren,      this.formatName,));
-      cols.unshift(new TextColumn('Template Name',         4, (v: Virtue) => v.getName(), SORT_DIR.ASC));
-    }
-    return cols;
   }
 
   /**
@@ -153,8 +148,8 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   getParentSubMenu(): SubMenuOptions[] {
     if (this.mode === Mode.VIEW) {
       return [
-        new SubMenuOptions("View", () => true, (i: Item) => this.viewItem(i)),
-        new SubMenuOptions("Edit", () => true, (i: Item) => this.editItem(i))
+        new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
+        new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i))
       ];
     }
     else {
@@ -174,7 +169,8 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
       coloredLabels: true,
       filters: [],
       tableWidth: 8,
-      noDataMsg: "No virtue template has been assigned this virtual machine template at the moment."
+      noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
+      editingEnabled: () => !this.inViewMode()
     });
   }
 

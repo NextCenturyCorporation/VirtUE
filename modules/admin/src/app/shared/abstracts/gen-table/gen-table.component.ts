@@ -62,7 +62,7 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
   templateUrl: './gen-table.component.html',
   styleUrls: ['../gen-page/gen-page.component.css']
 })
-export class GenericTableComponent {
+export class GenericTableComponent<T> {
 
   /**
    * This defines what columns show up in the table. If supplied, [[GenericPageComponent.formatValue]](i: Item) will be called
@@ -128,24 +128,20 @@ export class GenericTableComponent {
   /** Whether the table should be sorted in an ascending or descending pattern. Valid values are ASC or DESC */
   sortDirection: string = SORT_DIR.ASC;
 
-  /** true iff the elements in the table should be selectable via checkboxes, unassociated with any checkboxes within any columns */
-  elementsAreSelectable: boolean
-
   /**
    * Should the table allow selection, and if so, how many can be selected at a time?
    */
   selectionMode: SELECTION_MODE;
 
   /**
-  * caller-specified function: for the input object, it should return a string which can uniquely identify that object.
+  * compares two objects of the type held by this table's TableElements, and returns true if they are equal. Caller-defined.
   */
-  getObjectID?: (obj: any) => string;
+  equals?: (obj1: T, obj2: T) => boolean;
 
   /**
-   * For components which allow the user to select TableElements from the table, and return those selections as a list.
-   * Currently just modals. This isn't updated, and is only saved to hold the input list of selections until data finishes loading
+   * #uncommented
    */
-  selectedIDs?: string[];
+  editingEnabled: (() => boolean) = () => false;
 
   /**
    * Set all parameters to default parameters for the meantime before the calling class calls [[setUp]]().
@@ -158,8 +154,6 @@ export class GenericTableComponent {
     this.elements = [];
     // this.subMenuOptions = [];
     this.tableWidth = 12; // default to take up full space in container
-    this.elementsAreSelectable = false;
-    this.selectedIDs = [];
     this.selectionMode = SELECTION_MODE.OFF;
   }
 
@@ -178,9 +172,6 @@ export class GenericTableComponent {
     /** see this.[[subMenuOptions]] */
     // opts: SubMenuOptions[];
 
-    /** see this.[[hasColoredLabels]] */
-    coloredLabels: boolean;
-
     /** see this.[[filterOptions]] */
     filters: {value: string, text: string}[];
 
@@ -193,20 +184,30 @@ export class GenericTableComponent {
     /** see this.[[noDataMessage]] */
     noDataMsg: string,
 
+    /** see this.[[hasColoredLabels]] */
+    coloredLabels?: boolean;
+
+    /** see this.[[editingEnabled]] */
+    editingEnabled?: () => boolean
+
     /**  */
     selectionOptions?: {
       /** What mode  */
       selectionMode: SELECTION_MODE,
       /** see this.[[getObjectID]] */
-      getObjectID: (obj: any) => string,
-
-      /** see this.[[selectedIDs]] */
-      selectedIDs: string[]}
+      equals: (obj1: T, obj2: T) => boolean
+      }
     }
   ): void {
     this.colData = params.cols;
-    // this.subMenuOptions = params.opts;
-    this.hasColoredLabels = params.coloredLabels;
+
+    if (params.coloredLabels !== undefined) {
+      this.hasColoredLabels = params.coloredLabels;
+    }
+    else {
+      this.hasColoredLabels = false;
+    }
+
     this.filterOptions = params.filters;
     this.noDataMessage = params.noDataMsg;
 
@@ -214,12 +215,15 @@ export class GenericTableComponent {
       this.tableWidth = params.tableWidth;
     }
 
+    if (params.editingEnabled !== undefined) {
+      this.editingEnabled = params.editingEnabled;
+    }
+
     if (params.selectionOptions) {
       this.selectionMode = params.selectionOptions.selectionMode;
-      this.getObjectID = params.selectionOptions.getObjectID;
-      this.selectedIDs = params.selectionOptions.selectedIDs;
+      this.equals = params.selectionOptions.equals;
     }
-    if (this.colData && this.colData.length > 0) {
+    if (this.colData && this.colData.length > 0 && (this.colData[0] instanceof TextColumn)) {
       this.sortColumn = this.colData[0];
     }
   }
@@ -227,31 +231,43 @@ export class GenericTableComponent {
   /**
    * #uncommented
    */
-  clear() {
-    this.selectedIDs = [];
+  clear(): void {
     this.elements = [];
   }
 
   /**
    * #uncommented
    */
-  populate(dataset: any[]) {
+  populate(dataset: any[]): void {
     this.elements = [];
     for (let d of dataset) {
-      let elem = new TableElement(d);
-      for (let sID of this.selectedIDs) {
-        if (this.getObjectID!== undefined && this.getObjectID(elem.obj) === sID) {
+      this.elements.push(new TableElement(d));
+    }
+  }
+
+  /**
+   * This should be called at least right after populate, if anything should be marked as selected.
+   */
+  setSelections(selected): void {
+    if (this.selectionMode === SELECTION_MODE.OFF) {
+      console.log("selectionMode is OFF - Can't set selections.");
+      return;
+    }
+
+    for (let elem of this.elements) {
+      elem.selected = false;
+      for (let selectedObj of selected) {
+        if (this.equals(elem.obj, selectedObj)) {
           elem.selected = true;
           break;
         }
       }
-      this.elements.push(elem);
     }
   }
 
   /**
    * Called whenever the user checks or unchecks the "master" checkbox in the table's header.
-   * Either adds all elements to this.[[selectedIDs]], or removes them all, as appropriate.
+   * Either marks all elements as selected, or unmarks them, as appropriate.
    *
    * @param checked true if the user just checked the box, false if the user unchecked it.
    */
@@ -267,6 +283,16 @@ export class GenericTableComponent {
     }
   }
 
+  getSelections(): T[] {
+    let selections: T[] = [];
+    for (let elem of this.elements) {
+      if (elem.selected) {
+        selections.push(elem.obj);
+      }
+    }
+    return selections;
+  }
+
   radioSelectionChange(event: any, elem: TableElement): void {
     console.log(event, elem);
   }
@@ -276,16 +302,41 @@ export class GenericTableComponent {
    * @param checkCol the column whose header was checked/unchecked
    * @param checked true if the user just checked the box, false if the user unchecked it.
    */
-  checkAllInColumn(checkCol: CheckboxColumn, checked): void {
-    if (checked) {
-      for (let elem of this.elements) {
+  checkAllInColumn(checkCol: CheckboxColumn, event): void {
+    for (let elem of this.elements) {
+      // If the box was checked, and this current checkbox isn't disabled
+      if (event.checked && !(checkCol.disabled && checkCol.disabled(elem.obj))) {
         elem.obj[checkCol.toggleableFieldName] = true;
       }
-    } else {
-      for (let elem of this.elements) {
+      else {
         elem.obj[checkCol.toggleableFieldName] = false;
       }
     }
+
+  }
+
+  /**
+   * @return true iff all elements in this column are checked.
+   */
+  allCheckedInColumn(checkCol: CheckboxColumn): boolean {
+    let numberEnabled = 0;
+    for (let elem of this.elements) {
+      // if the box itself is enabled
+      if ( ! (checkCol.disabled && checkCol.disabled(elem.obj) ) ) {
+        // add to counter
+        numberEnabled++;
+
+        // if the enabled box is unchecked, return false
+        if (elem.obj[checkCol.toggleableFieldName] === false) {
+          return false;
+        }
+      }
+    }
+    // if we're here, then all boxes are either diabled, or checked.
+    // We don't want to show the master box as being checked if all boxes are just disabled
+    // though, so:
+
+    return numberEnabled !== 0;
   }
 
   /**
@@ -402,6 +453,14 @@ export class GenericTableComponent {
    */
   isRadioButton(obj: any) {
     return obj instanceof RadioButtonColumn;
+  }
+
+  /**
+   * @param obj the [[Column]] content whose type we want to check.
+   * @return true iff obj is a sortable columns - only sortable columns have a "formatElement" field.
+   */
+  isSortable(obj: any) {
+    return 'formatElement' in obj;
   }
 
 }

@@ -8,7 +8,9 @@ import { ItemService } from '../../shared/services/item.service';
 
 import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/gen-data-page.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
+
 import { SELECTION_MODE } from '../../shared/abstracts/gen-table/selectionMode.enum';
+import { Item } from '../../shared/models/item.model';
 import { Column } from '../../shared/models/column.model';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -32,7 +34,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
 
 
   /** The table itself */
-  @ViewChild(GenericTableComponent) table: GenericTableComponent;
+  @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
 
 
   /** a string to appear as the list's title - preferably a full description */
@@ -44,9 +46,9 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
 
   /**
    * Only holds the initial input selections, is not kept up-to-date.
-   * Saved temporarily, and passed to table once table loads
+   * Just used to build a list of initial selections to pass ot the table
    */
-  initialSelections: string[] = [];
+  selectedIDs: string[] = [];
 
   /**
    * #uncommented
@@ -73,11 +75,11 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
     ) {
       super(router, baseUrlService, itemService, dialog);
       if (data && data['selectedIDs']) {
-        this.initialSelections = data['selectedIDs'];
+        this.selectedIDs = data['selectedIDs'];
       }
       else {
         console.log("No field 'selectedIDs' in data input to modal");
-        this.initialSelections = [];
+        this.selectedIDs = [];
       }
 
       this.mode = SELECTION_MODE.MULTI;
@@ -100,13 +102,13 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    */
   ngOnInit(): void {
     this.cmnDataComponentSetup();
-    this.fillTable();
+    this.setUpTable();
   }
 
   /**
    * Sets up the table, according to parameters defined in this class' child classes.
    */
-  fillTable(): void {
+  setUpTable(): void {
     if (this.table === undefined) {
       return;
     }
@@ -118,54 +120,55 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       noDataMsg: this.getNoDataMsg(),
       selectionOptions: {
         selectionMode: this.mode,
-        getObjectID: (obj: {getID(): string}) => obj.getID(), // just expect something with a getID method
-        selectedIDs: this.getSelectedIDs()
+        equals: (obj1: Item, obj2: Item) => {return obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID())}
       }
     });
   }
 
   /**
-   * Populates the table with the input list of items.
+   * Populates the table with the input list of objects.
    * Abstracts away table from subclasses
    *
-   * @param newItems the list of items to be displayed in the table.
+   * To make this whole class truly generic, we need to make this take its list of options from its callers.
+   * Also define the above equals in subclasses, and make this simply take in a list of objects to show, and selections.
+   * Simply pass those selections up to the table.
+   *
+   *
+   * @param newObjects the list of objects to be displayed in the table.
    */
-  setItems(newItems: any[]): void {
-    this.table.populate(newItems);
+  fillTable(newObjects: Item[]): void {
+    this.table.populate(newObjects);
+    let selected = [];
+    for (let ID of this.selectedIDs) {
+      for (let item of newObjects) {
+        if (item.getID() === ID) {
+          selected.push(item);
+        }
+      }
+    }
+
+
+    this.table.setSelections(selected);
   }
 
   /**
-   * This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-   * to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+   * This defines what columns show up in the table. See notes on [[Column]] types.
    *
-   * Note: colWidths of all columns must add to exactly 12.
-   * Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-   *
-   * @return a list of columns to be displayed within the table of Items.
+   * @return a list of columns to be displayed within the table.
    */
   abstract getColumns(): Column[];
 
   /**
-   * @returns a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   * @returns a string to be displayed in the table, when the table's 'elements' array is undefined or empty.
    */
   abstract getNoDataMsg(): string;
 
   /**
-   * @return whether or not the items being listed have colored labels. True for, and only for, all tables that list virtues.
-   * overridden by virtue-list, virtues-modal, main-user-tab, vm-usage-tab, and virtue-settings
+   * @return whether or not the elements being listed have colored labels. True for, and only for, all tables that list virtues.
+   * overridden to that effect by virtue-list, virtues-modal, main-user-tab, vm-usage-tab, and virtue-settings
    */
   hasColoredLabels(): boolean {
     return false;
-  }
-
-  /**
-   * this gives the childIDs the item was loaded with, and is only used to build
-   * the table - any changes will be made to this.table.selectedIDs.
-   *
-   * @return a list of item IDs that should be initialized as 'selected' when the table builds.
-   */
-  getSelectedIDs(): string[] {
-    return this.initialSelections;
   }
 
   /**
@@ -173,7 +176,13 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    * then clears and closes the modal.
    */
   submit(): void {
-    this.getSelections.emit(this.table.selectedIDs);
+    this.selectedIDs = [];
+
+    for (let i of this.table.getSelections()) {
+      this.selectedIDs.push(i.getID());
+    }
+
+    this.getSelections.emit(this.selectedIDs);
     this.table.clear();
     this.dialogRef.close();
   }

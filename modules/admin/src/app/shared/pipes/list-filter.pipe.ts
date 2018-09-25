@@ -51,8 +51,6 @@ export class ListFilterPipe implements PipeTransform {
       return list;
     }
 
-    console.log(list, formatElement)
-
     // this sorts list in-place, and so doesn't need to return anything.
     this.sortList(list, formatElement, sortDirection);
 

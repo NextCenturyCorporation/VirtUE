@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DialogsComponent } from '../../../../dialogs/dialogs.component';
 
 import { Item } from '../../../models/item.model';
+import { User } from '../../../models/user.model';
 import { Column } from '../../../models/column.model';
 import { SubMenuOptions } from '../../../models/subMenuOptions.model';
 import { Mode } from '../../../abstracts/gen-form/mode.enum';
@@ -27,8 +28,15 @@ import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
  */
 export abstract class GenericMainTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /**
+   * A reference to the Item being viewed/edited/etc.
+   * Refers to the same object as [[GenericFormComponent.item]]
+   * this gets reclassed by children tabs
+   */
+  protected item: Item;
+
   /** A table for listing the item's children. */
-  @ViewChild('childrenTable') protected childrenTable: GenericTableComponent;
+  @ViewChild('childrenTable') protected childrenTable: GenericTableComponent<Item>;
 
   /** to notify the parent component that a new set of childIDs have been selected */
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
@@ -47,6 +55,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "General Info";
+    this.item = new User(undefined);
   }
 
   /**
@@ -90,8 +99,6 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
       //    this.init(changes.mode)
       // But that might be too opaque.
       this.setMode(changes.mode);
-      this.childrenTable.colData = this.getColumns();
-      // this.childrenTable.subMenuOptions = this.getSubMenu();
     }
   }
 
@@ -117,8 +124,8 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
 
     let dialogRef = this.getDialogRef(params);
 
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedItems) => {
-      this.onChildrenChange.emit(selectedItems);
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedIDs) => {
+      this.onChildrenChange.emit(selectedIDs);
     },
     () => { // on error
       sub.unsubscribe();
@@ -147,7 +154,8 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
       coloredLabels: true,
       filters: [], // don't allow filtering on the form's child table.
       tableWidth: 9,
-      noDataMsg: this.getNoDataMsg()
+      noDataMsg: this.getNoDataMsg(),
+      editingEnabled: () => !this.inViewMode()
     });
   }
 
@@ -170,22 +178,16 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    * @return a one-element list of row options; 'View' if mode is view, or 'Remove' otherwise.
    */
   getSubMenu(): SubMenuOptions[] {
-    if (this.mode === Mode.VIEW) {
-      return [
-         new SubMenuOptions("View", () => true, (i: Item) => this.viewItem(i)),
-         new SubMenuOptions("Edit", () => true, (i: Item) => this.editItem(i))
-      ];
-    }
-    else {
-      return [
-         new SubMenuOptions("Remove",
-                        () => true,
-                        (i: Item) => this.openDialog( 'Delete ' + i.getName(),
-                                                      () => this.item.removeChild( i.getID() )
-                                                    )
-                        )
-      ];
-    }
+    return [
+       new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
+       new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i)),
+       new SubMenuOptions("Remove",
+                      () => !this.inViewMode(),
+                      (i: Item) => this.openDialog( 'Delete ' + i.getName(),
+                                                    () => {this.item.removeChild( i.getID() ); this.update({})}
+                                                  )
+                      )
+    ];
   }
 
   /**

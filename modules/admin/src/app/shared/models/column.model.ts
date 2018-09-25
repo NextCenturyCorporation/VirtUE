@@ -63,10 +63,23 @@ abstract class LinkableColumn extends Column {
 }
 
 /**
+ * #uncommented
+ *
+ * NOTE: having a sortField field will make this system treat the class as sortable.
+ */
+interface Sortable {
+  /** A function that returns a string representing the given object, which this column should use when sorting the objects. */
+  sortField: (elem: any) => string
+}
+
+/**
  *
  *
  */
-export class TextColumn extends LinkableColumn {
+export class TextColumn extends LinkableColumn implements Sortable {
+  /** A function that returns a string representing the given object, which this column should use when sorting the objects. */
+  public sortField: (elem: any) => string;
+
   constructor(
     /** @param label see [[Column.label]] for details */
     label: string,
@@ -79,10 +92,18 @@ export class TextColumn extends LinkableColumn {
     public sortDefault: SORT_DIR,
     /** see parent [[LinkableColumn]] */
     link?: (elem: any) => void,
-    /**  */
-    public subMenuOpts?: () => SubMenuOptions[]
+    /** #uncommented */
+    public subMenuOpts?: () => SubMenuOptions[],
+    /** see [[sortField]] */
+    sortField?: (elem: any) => string
   ) {
     super(label, width, link);
+    if (sortField) {
+      this.sortField = sortField;
+    }
+    else {
+      this.sortField = this.formatElement;
+    }
   }
 }
 
@@ -102,10 +123,10 @@ export class ListColumn<T> extends LinkableColumn {
      */
     public list: (elem: any) => T[],
     /**
-     * Is used to get a display-able string for each element in list
-     * @return a string that represents the given element. Usually a name.
+     * Is used to get a display-able string for each object in list
+     * @return a string that represents the given object. Usually a name.
      */
-    public formatElement: (elem: T) => string,
+    public formatElements: (elem: T) => string,
     /** see parent [[LinkableColumn]] */
     link?: (elem: T) => void
   ) {
@@ -116,7 +137,7 @@ export class ListColumn<T> extends LinkableColumn {
 /**
  *
  */
-export class DropdownColumn<T> extends Column {
+export class DropdownColumn<T> extends Column implements Sortable {
   constructor(
     /** @param label see [[Column.label]] for details */
     label: string,
@@ -128,13 +149,18 @@ export class DropdownColumn<T> extends Column {
      * fieldName should hold the string 'enabled'.
      */
     public fieldName: string,
-    /**  */
+    /** #uncommented */
     public dropdownList: (elem: any) => T[],
     /**
      * A function that takes a object, and returns a string to be displayed in this column for that element.
      * Parameter is the object held by the TableElement.
      */
-    public formatElement: (elem: T) => string
+    public formatElement: (elem: T) => string,
+
+    /**
+     * A function that returns a string representing the given object, which this column should use when sorting the objects.
+     */
+    public sortField: (elem: any) => string
   ){
     super(label, width);
   }
@@ -144,13 +170,18 @@ export class DropdownColumn<T> extends Column {
 *
 */
 export class CheckboxColumn extends Column {
+  /** #uncommented */
+  // public onClick?: ((obj: any) => void) = ((obj) => {});
+
   constructor(
     /** @param label see [[Column.label]] for details */
     label: string,
     /** @param width see [[Column.width]] for details */
     width: number,
-    /**  */
-    public toggleableFieldName: string
+    /** #uncommented */
+    public toggleableFieldName: string,
+    /** #uncommented */
+    public disabled?: (obj: any) => boolean
   ) {
     super(label, width);
   }
@@ -159,14 +190,19 @@ export class CheckboxColumn extends Column {
 /**
  *
  */
-export class InputFieldColumn extends Column {
+export class InputFieldColumn extends Column implements Sortable {
   constructor(
     /** @param label see [[Column.label]] for details */
     label: string,
     /** @param width see [[Column.width]] for details */
     width: number,
     /**  */
-    public inputFieldName: string
+    public inputFieldName: string,
+
+    /**
+     * A function that returns a string representing the given object, which this column should use when sorting the objects.
+     */
+    public sortField: (elem: any) => string
     ) {
       super(label, width);
     }
@@ -181,16 +217,18 @@ export class IconColumn extends LinkableColumn {
     label: string,
     /** @param width see [[Column.width]] for details */
     width: number,
-    /**  */
-    public iconPath: string,
+    /** #uncommented */
+    public iconName: string,
     /** see parent [[LinkableColumn]] */
-    link?: (elem: TableElement) => void
+    link?: (elem: any) => void
   ) {
     super(label, width, link);
   }
 }
 
 /**
+ *
+ *
  *
  */
 export class RadioButtonColumn extends Column {
@@ -199,13 +237,10 @@ export class RadioButtonColumn extends Column {
     label: string,
     /** @param width see [[Column.width]] for details */
     width: number,
-    /**  */
+    /** #uncommented */
     public fieldName: string,
-    /**
-     * must set all other related boolean radioButton fields to false
-     * Should be the same function for each group of radio buttons
-     */
-    public radioFunction?: (elem: TableElement) => void
+    /** #uncommented */
+    public value: string
     ) {
       super(label, width);
     }

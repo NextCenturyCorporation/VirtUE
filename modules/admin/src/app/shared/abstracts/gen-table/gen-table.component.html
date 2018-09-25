@@ -20,40 +20,44 @@
   <div class="mui-container-fluid data-list no-overflow">
     <div class="mui-row table-header-group" fxLayout="row">
 
-      <span *ngIf="elementsAreSelectable" fxFlex="10%" class="table-header float-left" fxLayoutAlign="center center">
+      <span *ngIf="selectionMode === 'multi'" fxFlex="10%" class="table-header float-left" fxLayoutAlign="center center">
         <mat-checkbox
           name="selectAll"
           (change)="selectAll($event.checked)"></mat-checkbox>
       </span>
+
       <div class="table-header" fxFlex="auto">
         <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.width}}">
 
           <!-- if it's a text column, and therefore sortable -->
           <ng-container *ngIf="isText(column)" >
+
+          </ng-container>
+
+          <!-- if it's a checkbox column -->
+          <ng-container *ngIf="isCheckbox(column)">
+            <label>{{column.label}}
+              <br>
+              <mat-checkbox
+              [disabled]="!editingEnabled()"
+              [checked]="allCheckedInColumn(column)"
+              (change)="checkAllInColumn(column, $event)"
+              ></mat-checkbox>
+            </label>
+          </ng-container>
+
+          <ng-container *ngIf="isSortable(column)">
             <a (click)="setColumnSortDirection(column)">{{column.label}}</a>
-            <span class="list-sorter" >
+            <span class="list-sorter" (click)="setColumnSortDirection(column)">
               <span *ngIf="sortColumn.label === column.label && sortBy === 'asc'" class="fa fa-sort-up"></span>
               <span *ngIf="sortColumn.label === column.label && sortBy === 'desc'" class="fa fa-sort-down"></span>
               <span class="fa fa-sort font-color-gray"></span>
             </span>
           </ng-container>
 
-          <!-- if it's a checkbox column -->
-          <ng-container *ngIf="isCheckbox(column) && selectionMode === 'multi'">
-            <label>{{col.label}}
-              <br>
-              <mat-checkbox
-              name="cb"
-              [disabled]="mode === 'View'"
-              [checked]="allChecked(col.name)"
-              (change)="checkAll($event, col.name)"
-              ></mat-checkbox>
-            </label>
-          </ng-container>
-
           <!-- Else -->
-          <ng-container *ngIf="!isText(column) && !isCheckbox(column)" >
-            <label>{{column.label}}</label>
+          <ng-container *ngIf="!isSortable(column) && !isCheckbox(column)" >
+            <div>{{column.label}}</div>
           </ng-container>
 
 
@@ -91,7 +95,7 @@
         <mat-checkbox
           name="selectionCheckbox"
           [disabled]="!elem.obj.enabled"
-          [checked]="elem.selected"></mat-checkbox>
+          [(ngModel)]="elem.selected"></mat-checkbox>
       </span>
 
       <!-- Note that this checkbox is for selection, and is not related to the checkboxes definable in Columns -->
@@ -125,21 +129,21 @@
         <div *ngFor="let column of colData; let index = index; trackBy: indexTracker"
             class="table-data mui-col-md-{{column.width}} transparent">
 
-
           <!-- If this column should display a single piece of text for each row-->
           <ng-container *ngIf="isText(column)">
             <!-- 'a's look like links, 'div's don't. -->
-            <a class="edit" *ngIf="column.link !== undefined" (click)="column.link(elem.obj)">
+            <a class="edit" *ngIf="column.link !== undefined && !editingEnabled()" (click)="column.link(elem.obj)">
               {{ column.formatElement(elem.obj) }}
             </a>
-            <div class="edit" *ngIf="column.link === undefined">
+            <div class="edit" *ngIf="column.link === undefined || editingEnabled()">
               {{ column.formatElement(elem.obj) }}
             </div>
 
             <div *ngIf="column.subMenuOpts !== undefined" class="menu-options" >
-              <a *ngFor="let o of subMenuOptions; let idx = index" (click)="o.action(elem.obj)">
+              <a *ngFor="let o of column.subMenuOpts(); let idx = index" (click)="o.action(elem.obj)">
+                <ng-container *ngIf="o.shouldAppear(elem.obj)">|</ng-container>
                 <ng-container *ngIf="o.shouldAppear(elem.obj)"> {{o.text}} </ng-container>
-                <ng-container *ngIf="o.shouldAppear(elem.obj) && idx < subMenuOptions.length-1">|</ng-container>
+                <ng-container *ngIf="o.shouldAppear(elem.obj)">|</ng-container>
               </a>
             </div>
           </ng-container>
@@ -150,11 +154,11 @@
             <div *ngFor="let object of column.list(elem.obj)">
               <ul>
                 <ul>
-                  <a class="edit" *ngIf="column.link" (click)="column.link(object)">
-                    {{ column.formatElement(object) }}
+                  <a *ngIf="column.link !== undefined && !editingEnabled()" (click)="column.link(object)">
+                    {{ column.formatElements(object) }}
                   </a>
-                  <div *ngIf="column.link === undefined">
-                    {{ column.formatElement(object) }}
+                  <div *ngIf="column.link === undefined || editingEnabled()">
+                    {{ column.formatElements(object) }}
                   </div>
                 </ul>
               </ul>
@@ -164,9 +168,9 @@
 
           <ng-container *ngIf="isDropdown(column)">
             <mat-form-field floatLabel="never">
-              <mat-select placeholder="{{column.fieldName}}"
-                       [(ngModel)]="networkPermission[column.fieldName]" required >
-                <mat-option *ngFor="let p of column.dropdownList" value="{{column.formatElement(p)}}" >
+              <mat-select placeholder="{{column.fieldName}}" [disabled]="!editingEnabled()"
+                       [(ngModel)]="elem.obj[column.fieldName]" required >
+                <mat-option *ngFor="let p of column.dropdownList(); let idx = index" value="{{column.formatElement(p)}}" >
                   {{p}}
                 </mat-option>
               </mat-select>
@@ -174,24 +178,37 @@
             </mat-form-field>
           </ng-container>
 
-
+          <!-- if it's an input-field column -->
           <ng-container *ngIf="isInputField(column)">
-            <mat-form-field floatLabel="never">
-              <input matInput type="text" placeholder="{{column.name}}"
-                      [(ngModel)]="networkPermission[column.name]" required/>
+            <mat-form-field floatLabel="never" >
+              <input matInput type="text" placeholder="{{column.inputFieldName}}" [disabled]="!editingEnabled()"
+                      [(ngModel)]="elem.obj[column.inputFieldName]" required/>
             </mat-form-field>
           </ng-container>
 
+          <!-- if it's a checkbox column -->
+          <ng-container *ngIf="isCheckbox(column)">
+            <mat-checkbox
+            [disabled]="!editingEnabled() || (column.disabled && column.disabled(elem.obj))"
+            [(ngModel)]="elem.obj[column.toggleableFieldName]">
+            </mat-checkbox>
+          </ng-container>
 
           <ng-container *ngIf="isIcon(column)">
-            <div>
+            <a *ngIf="editingEnabled()">
+              <mat-icon svgIcon="{{column.iconName}}" (click)="column.link(elem.obj)" aria-label="column.label">{{mode}}</mat-icon>
+            </a>
+            <div *ngIf="!editingEnabled()">
+              <mat-icon svgIcon="{{column.iconName}}" aria-label="column.label">{{mode}}</mat-icon>
             </div>
           </ng-container>
 
-
+          <!-- if it's a radioButton column -->
           <ng-container *ngIf="isRadioButton(column)">
-            <mat-radio-button>
-            </mat-radio-button>
+            <mat-radio-group [(ngModel)]="elem.obj[column.fieldName]">
+              <mat-radio-button [value]="column.value" >
+              </mat-radio-button>
+            </mat-radio-group>
           </ng-container>
 
         </div>

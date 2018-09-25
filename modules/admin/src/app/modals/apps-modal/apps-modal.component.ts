@@ -100,6 +100,6 @@ export class AppsModalComponent extends GenericModalComponent {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.setItems(this.allApps.asList());
+    this.fillTable(this.allApps.asList());
   }
 }

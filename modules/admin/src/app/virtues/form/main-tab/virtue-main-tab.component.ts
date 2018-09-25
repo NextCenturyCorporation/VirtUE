@@ -100,21 +100,14 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
    *         The first column, the VM's name, should be clickable if and only if the page is in view mode.
    */
   getColumns(): Column[] {
-    let cols: Column[] = [
+    return [
+      new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                                () => this.getSubMenu()),
       new ListColumn<Item>('Assigned Apps', 4, this.getChildren,  this.formatName),
       new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
-      new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC),
+      new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
-    if (this.mode === Mode.VIEW) {
-      cols.unshift(new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC,
-                                  (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC));
-    }
-
-    return cols;
   }
 
   /**

@@ -102,6 +102,6 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.setItems(this.allVms.asList());
+    this.fillTable(this.allVms.asList());
   }
 }

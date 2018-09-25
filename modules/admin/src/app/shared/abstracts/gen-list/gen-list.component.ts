@@ -38,7 +38,7 @@ import { Mode } from '../gen-form/mode.enum';
 export abstract class GenericListComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */
-  @ViewChild(GenericTableComponent) table: GenericTableComponent;
+  @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
 
 
   /** a string to appear as the list's title - preferably a full description */
