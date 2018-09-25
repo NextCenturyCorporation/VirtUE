@@ -1,4 +1,5 @@
-echo on
+Start-Transcript -Path "c:\user_data.log" -append -force
+
 Get-WindowsFeature -Name FS-FileServer
 New-FileShare -Name TestShare -SourceVolume (Get-Volume -DriveLetter C) -FileServerFriendlyName $env:COMPUTERNAME
 echo Hello > \Shares\TestShare\hello.txt

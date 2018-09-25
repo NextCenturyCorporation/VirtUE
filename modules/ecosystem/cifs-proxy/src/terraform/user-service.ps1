@@ -1,3 +1,5 @@
+Start-Transcript -Path "c:\user_data.log" -append -force
+
 Add-WindowsFeature RSAT-AD-PowerShell
 Import-Module ActiveDirectory
 $password = ConvertTo-SecureString -AsPlainText -Force "${password}"
