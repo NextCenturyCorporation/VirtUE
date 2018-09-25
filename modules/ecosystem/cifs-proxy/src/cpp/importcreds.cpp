@@ -12,13 +12,13 @@
 #include <cstdio>
 #include <iostream>
 
-#define CHECK_ERROR(major,  minor, STRING) \
-	if (GSS_ERROR(major)) { \
-		printErrors(major, STRING); \
-		return -1; \
+#define CHECK_ERROR(major,  minor, STRING)                              \
+	if (GSS_ERROR(major)) {                                             \
+		printErrors(major, minor, STRING);                              \
+		return -1;                                                      \
 	}
 
-void printErrors(OM_uint32 status_code, const char* message) {
+void printErrors(OM_uint32 status_code, OM_uint32 minorStatus, const char* message) {
 	OM_uint32 message_context;
 	OM_uint32 maj_status;
 	OM_uint32 min_status;
@@ -32,7 +32,9 @@ void printErrors(OM_uint32 status_code, const char* message) {
 		GSS_C_GSS_CODE,
 		GSS_C_NO_OID, &message_context, &status_string);
 
-		fprintf(stderr, "%s: %.*s\n", message, (int) status_string.length,
+		fprintf(stderr, "%s (%d.%d): %.*s\n", message,
+                status_code, minorStatus,
+                (int) status_string.length,
 				(char *) status_string.value);
 
 		gss_release_buffer(&min_status, &status_string);
@@ -58,8 +60,10 @@ int main(int argc, char **argv) {
 	GSS_C_BOTH, &credStore, &outputCred, NULL, NULL);
 	CHECK_ERROR(majorStatus, minorStatus, "acquire_cred_from");
 
-#ifdef INIT_NEEDED
-	const char* serviceName = "cifs@fileserver.test.savior";
+#define INIT_NEEDED
+#if defined(ACQUIRE_NEEDED) || defined (INIT_NEEDED)
+	const char* serviceName = "cifs@fileserver";
+	//const char* serviceName = "cifs/fileserver.test.savior@TEST.SAVIOR";
 	gss_name_t gssServiceName;
 	gss_buffer_desc nameBuffer =
 			{ strlen(serviceName) + 1, (void*) serviceName };
@@ -67,7 +71,9 @@ int main(int argc, char **argv) {
 	majorStatus = gss_import_name(&minorStatus, &nameBuffer, GSS_C_NT_HOSTBASED_SERVICE,
 			&gssServiceName);
 	CHECK_ERROR(majorStatus, minorStatus, "import_name");
-
+#endif
+    
+#ifdef INIT_NEEDED
 	gss_buffer_desc outputToken;
 	gss_ctx_id_t context = GSS_C_NO_CONTEXT;
 	majorStatus = gss_init_sec_context(&minorStatus, outputCred, &context, gssServiceName,
