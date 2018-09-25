@@ -52,6 +52,7 @@ import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
+import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
@@ -111,6 +112,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private JLabel searchLabel;
 	private JLabel about;
 	private JLabel alert;
+	private JLabel prefs;
 
 	private JPanel virtues;
 	private JPanel applications;
@@ -155,6 +157,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private AboutDialog aboutDialog;
 
+	private DefaultApplicationLauncher defaulApplicationLauncher;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			boolean useColors, String style) {
 		this.authService = authService;
@@ -181,6 +185,8 @@ public class Sidebar implements VirtueChangeHandler {
 		this.aboutDialog = new AboutDialog();
 		setupComparators();
 		setupLoadingGif();
+
+		this.defaulApplicationLauncher = new DefaultApplicationLauncher(authService, virtueService);
 
 		AbstractVirtueView.addRemoveVirtueListener(new IRemoveVirtueListener() {
 
@@ -463,7 +469,10 @@ public class Sidebar implements VirtueChangeHandler {
 		name.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
 		name.setIcon(null);
 		name.setForeground(Color.WHITE);
-		topBorder.add(name, BorderLayout.WEST);
+		topBorder.add(name, BorderLayout.CENTER);
+		JPanel neIconBar = new JPanel();
+		neIconBar.setOpaque(false);
+		neIconBar.setLayout(new FlowLayout());
 
 		ImageIcon aboutIcon = new ImageIcon(Sidebar.class.getResource("/images/info-icon.png"));
 		Image aboutImage = aboutIcon.getImage();
@@ -472,7 +481,8 @@ public class Sidebar implements VirtueChangeHandler {
 		this.about = new JLabel();
 		about.setIcon(aboutIcon);
 		about.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
-		topBorder.add(about, BorderLayout.EAST);
+		about.setToolTipText("About");
+		topBorder.add(neIconBar, BorderLayout.EAST);
 
 		ImageIcon alertIcon = new ImageIcon(Sidebar.class.getResource("/images/alert.png"));
 		Image alertImage = alertIcon.getImage();
@@ -485,7 +495,26 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel alertContainer = new JPanel(new BorderLayout());
 		alertContainer.add(alert, BorderLayout.EAST);
 		alertContainer.setBackground(Color.DARK_GRAY);
-		topBorder.add(alertContainer, BorderLayout.CENTER);
+		alertContainer.setToolTipText("Alert History");
+		alert.setToolTipText("Alert History");
+
+		ImageIcon prefIcon = new ImageIcon(Sidebar.class.getResource("/images/close-button.png"));
+		Image prefImage = prefIcon.getImage();
+		Image newPrefImg = prefImage.getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH);
+		prefIcon = new ImageIcon(newPrefImg);
+		this.prefs = new JLabel();
+		prefs.setHorizontalAlignment(SwingConstants.RIGHT);
+		prefs.setIcon(prefIcon);
+		prefs.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 10));
+		JPanel prefContainer = new JPanel(new BorderLayout());
+		prefContainer.add(prefs, BorderLayout.EAST);
+		prefContainer.setBackground(Color.DARK_GRAY);
+		prefContainer.setToolTipText("Clear Preferences");
+
+		neIconBar.add(prefContainer);
+		neIconBar.add(alertContainer);
+		neIconBar.add(about);
+
 
 		this.bottomBorder = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) bottomBorder.getLayout();
@@ -1017,6 +1046,13 @@ public class Sidebar implements VirtueChangeHandler {
 				}
 			}
 		});
+
+		prefs.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent event) {
+				defaulApplicationLauncher.clearPrefs();
+			}
+		});
 	}
 
 	private ArrayList<Color> loadColors() {
@@ -1128,5 +1164,9 @@ public class Sidebar implements VirtueChangeHandler {
 		gifLabel.setVerticalAlignment(SwingConstants.CENTER);
 		gifLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		loadingContainer.add(gifLabel, BorderLayout.CENTER);
+	}
+
+	public IDefaultApplicationListener getDefaultApplicationHandler() {
+		return defaulApplicationLauncher;
 	}
 }

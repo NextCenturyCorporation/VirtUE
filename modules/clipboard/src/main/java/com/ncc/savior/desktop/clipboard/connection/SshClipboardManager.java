@@ -122,11 +122,7 @@ public class SshClipboardManager implements IClipboardManager {
 			logger.error("Clipboard reconnect failed for client=" + clientId);
 			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
 					"Clipboard connection unable to reconnect after retries");
-			try {
-				UserAlertingServiceHolder.sendAlert(pam);
-			} catch (IOException e) {
-				logger.error("Error sending alert", e);
-			}
+			UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 		} else {
 			logger.error("Error: Unable to find properties for client=" + clientId + " after disconnected with error.");
 		}
@@ -144,11 +140,7 @@ public class SshClipboardManager implements IClipboardManager {
 		} catch (Exception e) {
 			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
 					"Local clipboard initialization failed.  Local clipboard will not be connected with virtues.");
-			try {
-				UserAlertingServiceHolder.sendAlert(pam);
-			} catch (IOException e2) {
-				logger.error("Error sending alert", e2);
-			}
+			UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 			logger.error("Local clipboard client initialization failed", e);
 		}
 	}
