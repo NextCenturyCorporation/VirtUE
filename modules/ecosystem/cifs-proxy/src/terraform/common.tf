@@ -58,8 +58,8 @@ variable "domain" {
 }
 
 variable "linux_ami" {
-  description = "Amazon Linux 2 LTS Candidate 2 AMI (HVM), SSD Volume Type"
-  default = "ami-afd15ed0"
+  description = "Amazon Linux 2 AMI (HVM), SSD Volume Type"
+  default = "ami-04681a1dbd79675a5"
 }
 
 variable "linux_instance_type" {
