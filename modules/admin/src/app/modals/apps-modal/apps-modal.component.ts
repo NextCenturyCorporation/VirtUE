@@ -6,12 +6,19 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrls, Datasets } from '../../shared/enums/enums';
 import { Column } from '../../shared/models/column.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * @class
+ * This class represents a list of applications, which can be selected.
+ *
+ *
+ * @extends [[GenericModalComponent]]
+ */
 @Component({
   selector: 'app-modal',
   templateUrl: '../generic-modal/generic.modal.html',
@@ -20,6 +27,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export class AppsModalComponent extends GenericModalComponent {
 
+  /**
+   * see [[GenericModalComponent.constructor]] for notes on parameters
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
@@ -31,41 +41,58 @@ export class AppsModalComponent extends GenericModalComponent {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
   }
 
+  /**
+   * @return what columns should show up in the the app selection table
+   */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', undefined, 'asc', 5),
-      new Column('version', 'Version',          undefined, 'asc', 3),
-      new Column('os',      'Operating System', undefined, 'desc', 4)
+      new Column('name',    'Application Name', 5, 'asc'),
+      new Column('version', 'Version',          3, 'asc'),
+      new Column('os',      'Operating System', 4, 'desc')
     ];
   }
 
+  /**
+   * This page only needs to list all available apps, and doesn't need ot request any other data.
+   *
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.APPS,
-      neededDatasets: ["apps"]
+      serviceConfigUrl: ConfigUrls.APPS,
+      neededDatasets: [Datasets.APPS]
     };
   }
 
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
       prettyTitle: "Available Applications",
       itemName: "Application",
-      pluralItem: "Applications",
-      domain: '/applications'
+      pluralItem: "Applications"
     };
   }
 
+  /**
+   * @return a string to be displayed in the virtue table, when no apps exit.
+   */
   getNoDataMsg(): string {
-    return "No apps appear to be available at this time.";
+    return "There are no applications available to add. Add new applications through the Applications tab.";
   }
 
-  onPullComplete() {
+  /**
+   * populates the table once data is available.
+   */
+  onPullComplete(): void {
     this.setItems(this.allApps.asList());
   }
 }

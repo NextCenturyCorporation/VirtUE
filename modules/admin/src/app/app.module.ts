@@ -1,5 +1,5 @@
-import { NgModule } from '@angular/core';
-import {AppRoutingModule } from './app-routing.module';
+import { NgModule, SecurityContext } from '@angular/core';
+import { AppRoutingModule } from './app-routing.module';
 import {
   FormsModule,
   ReactiveFormsModule
@@ -48,11 +48,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 
 import { ConfigComponent } from './config/config.component';
 import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
-import { ConfigAppVmComponent } from './config/config-app-vm/config-app-vm.component';
-import { ConfigResourcesComponent } from './config/config-resources/config-resources.component';
-import { ResourceModalComponent } from './config/resource-modal/resource-modal.component';
-import { FileShareComponent } from './config/resource-modal/file-share/file-share.component';
-import { PrintersComponent } from './config/resource-modal/printers/printers.component';
 import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
@@ -87,10 +82,7 @@ import { DialogsComponent } from './dialogs/dialogs.component';
 
 
 import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
-import { JsonFilterPipe } from './shared/pipes/json-filter.pipe';
-import { CountFilterPipe } from './shared/pipes/count-filter.pipe';
 
-import { BreadcrumbProvider } from './shared/providers/breadcrumb';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
 import { BaseUrlService } from './shared/services/baseUrl.service';
@@ -101,9 +93,7 @@ import { MessageService } from './shared/services/message.service';
     AppComponent,
     BreadcrumbsComponent,
     ConfigActiveDirComponent,
-    ConfigAppVmComponent,
     ConfigComponent,
-    ConfigResourcesComponent,
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
@@ -125,13 +115,9 @@ import { MessageService } from './shared/services/message.service';
     VirtueModalComponent,
     VmModalComponent,
     ColorModalComponent,
-    ResourceModalComponent,
-    FileShareComponent,
-    PrintersComponent,
+
     ConfigSensorsComponent,
     ListFilterPipe,
-    JsonFilterPipe,
-    CountFilterPipe,
     PageNotFoundComponent,
 
     VmListComponent,
@@ -173,7 +159,6 @@ import { MessageService } from './shared/services/message.service';
     OverlayModule
   ],
   providers: [
-    BreadcrumbProvider,
     OverlayContainer,
     BaseUrlService,
     MessageService,
@@ -182,7 +167,6 @@ import { MessageService } from './shared/services/message.service';
   bootstrap: [AppComponent],
   entryComponents: [
     DialogsComponent,
-    ResourceModalComponent,
     AppsModalComponent,
     VmModalComponent,
     VirtueModalComponent,
@@ -190,7 +174,22 @@ import { MessageService } from './shared/services/message.service';
   ]
 })
 
+/**
+ * This is the main entry point for this angular application.
+ * If you want to import an outside class into any file, or if you want angular to load any class automatically,
+ * it must be imported here as well, and added to one of the above lists.
+ * Any component defined within this project, to be displayed on/as a page, must be imported and added to the 'declarations' list.
+ * Any class (generally a service) which you want to use as a Provider, must be added to the 'providers' list.
+ * Any class from outside this project you wish to use somewhere, must be imported and added to the 'imports' list.
+ *
+ * @class AppModule
+ */
 export class AppModule {
+
+  /**
+   * This is only needed to allow the use of Angular Material Icons in this app. All icons are defined in the below svg file.
+   * This (bypassing the sanitizer) is apparently the recommended way to load (an) icon(s).
+   */
   constructor(private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
     matIconRegistry.addSvgIconSet(domSanitizer.bypassSecurityTrustResourceUrl('/assets/mdi.svg'));
   }

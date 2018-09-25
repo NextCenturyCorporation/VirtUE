@@ -18,91 +18,116 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
-import { Mode, ConfigUrlEnum } from '../../enums/enums';
-import { RowOptions } from '../../models/rowOptions.model';
+import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
 
+import { GenericPageComponent } from '../gen-page/gen-page.component';
 
+/**
+ * @class
+ * This class represents a tab in a [[GenericFormComponent]].
+ * Each tab should have a different, unified, focus, be organized so as to require
+ * a minimal amount of scrolling, and
+ *
+ * @extends [[GenericPageComponent]] to make use of its formatting and navigation functions
+ *
+ */
 @Component({
   selector: 'app-tab',
-  template: './gen-tab.component.html',
-  // styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css']//,
-  // providers: [ BaseUrlService, ItemService ]
+  template: './gen-tab.component.html'
 })
 
-export abstract class GenericFormTabComponent implements OnInit {
+export abstract class GenericFormTabComponent extends GenericPageComponent implements OnInit {
 
-  // what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
-  // Holds the strings 'Create', 'Edit', 'Duplicate', or 'View' resp., for display to the user
+  /**
+   * what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
+   * Should always be the same as [[GenericFormComponent.mode]]
+   */
   protected mode: Mode;
 
+  /** The label to appear on the tab */
   public tabName: string;
 
-  // this gets overriden by children tabs
+  /**
+   * A reference to the Item being viewed/edited/etc.
+   * Refers to the same object as [[GenericFormComponent.item]]
+   * this gets reclassed by children tabs
+   */
   protected item: Item;
 
+  /**
+   * @param dialog Injected. This is a pop-up for verifying irreversable user actions
+   */
   constructor(
-    protected router: Router,
-    protected dialog: MatDialog) {
-    // gets overwritten once the datasets load, if mode is not CREATE
-    // Application chosen arbitrarily for this un-used value, because it doesn't
-    // have as many attributes.
-    this.item = new User(undefined);
-    // this doesn't appear to be used anywhere. So redefining it in each subclass,
-    // with the most correct type.
-
+    router: Router,
+    dialog: MatDialog) {
+      super(router, dialog);
+      // gets overwritten by the parent form's 'item' once the datasets load, even if
+      // it's in create mode.
+      // User chosen arbitrarily for this un-used value, because it doesn't
+      // have as many attributes.
+      this.item = new User(undefined);
   }
 
-  ngOnInit() {}
+  /**
+   * Do nothing in particular on render.
+   */
+  ngOnInit(): void {}
 
-  viewItem(i: Item) {
-    this.router.navigate([i.getPageRoute(Mode.VIEW)]);
-  }
+  /**
+   * This does whatever setup can be done at render time, before data is available.
+   * Usually, if the tab has a table this is where table.setUp({...}) would be called.
+   *
+   * #TODO itemCopy, a copy of item holding only the things which are to be saved (meaning not children), which can
+   *  be compareed against every field and show an exclaimation mark if changes have been made.
+   * use onChange method? or does that only happen on enter, for text fields?
+   *
+   * Only enable save button if any fields are marked as edited?
+   *
+   * show red exclaimation mark on tab with changed, unsaved data
+   * @param mode the mode to set up this tab as being in. Must be passed in.
+   */
+  abstract init(mode: Mode): void;
 
-  // this is now just done on the fly. Seems like a waste to regenerate the same
-  // list in html every mouse movement, but was necessary to let children and
-  // grandchildren be click-able.
-  getGrandchildren(i: Item): Item[] {
-    // if the item has been saved to the backend
-    if (!i || !i.children) {
-      return [];
-    }
-    let grandchildren: Item[] = [];
-    for (let c of i.children.asList()) {
-      grandchildren = grandchildren.concat(c.children.asList());
-    }
-    return grandchildren;
-  }
+  /**
+   * This finishes setting up the page, once all data requested by the parent form has returned and
+   * [[item]] has been given a value.
+   *
+   * Called in [[GenericFormComponent.onPullComplete]]
+   *
+   * Ideally this method should be safe to call multiple times with different inputs, idempotent, and sufficient based
+   * on those inputs. Meaning that if someone calls `setUp(input1)`, some misc. other functions, and then calls `setUp(input2)`,
+   *  the page must be in the same state as if they had just initialized this object and called `setUp(input2)`
+   * immediately.
+   *
+   * @param item a reference to [[GenericFormComponent.item]], the thing being viewed/edited/etc.
+   */
+  abstract setUp(item: Item): void;
 
-  // try making these on the fly. Might not be that slow.
-  getChildren(i: Item): Item[] {
-    // if the item has been saved to the backend
-    if (!i || !i.children) {
-      return [];
-    }
-    return i.children.asList();
-  }
-
-  // used by many children to display their status
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  // used by many children to display their status
-  formatName( item: Item ): string {
-    return item.getName();
-  }
-
-  // called by parent's constructor
-  abstract setUp(mode: Mode, item: Item): void;
-
-  abstract init(): void;
-
+  /**
+   * This should be sufficient to update any piece of data on the page.
+   * Generally it's used for changing a tab's mode and updating the entries in tables.
+   *
+   * @param changes an unspecified object which each derived class may need to get different information out of,
+   *                including different numbers of attributes at different times.
+   */
   abstract update(changes: any): void;
 
-  // called when item is being saved, to set any disconnected fields as necessary
-  // return false if the data that needs to be collected isn't available/valid/finished/applied
+  /**
+   * Sets the tab's mode.
+   * Overridden by most tabs that show a table, to re-define it based on whether the page is in view mode.
+   *
+   * @param newMode the Mode to set the page as.
+   */
+  setMode(newMode: Mode): void {
+    this.mode = newMode;
+  }
+
+  /**
+  * Called when item is being saved, to pull in and set any disconnected fields and check the data in its sphere
+  * for validity.
+  *
+  * @return false if the data that needs to be collected isn't available/valid/finished/applied
+  */
   abstract collectData(): boolean;
-
-
 
 }

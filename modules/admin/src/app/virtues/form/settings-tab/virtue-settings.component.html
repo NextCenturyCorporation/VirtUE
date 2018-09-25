@@ -12,8 +12,8 @@
         <h4>General Settings</h4>
       </div>
       <div class="mui-col-md-2 float-right">
-        Unprovisioned
-        <mat-checkbox [(ngModel)]="item.unprovisioned">
+        <mat-checkbox [(ngModel)]="item.unprovisioned" [disabled]="mode === 'View'" >
+          Unprovisioned
         </mat-checkbox>
       </div>
     </div>
@@ -29,7 +29,7 @@
     </div>
     <br>
     <mat-form-field>
-      <mat-select placeholder="Default Browser" [(ngModel)]="item.defaultBrowser">
+      <mat-select placeholder="Default Browser" [disabled]="mode === 'View'" [(ngModel)]="item.defaultBrowser">
         <mat-option *ngFor="let browser of browsers" [value]="browser">
           {{browser}}
         </mat-option>
@@ -38,10 +38,10 @@
     <div class="mui-row form-item">
       <app-item-table #allowedPasteTargetsTable></app-item-table>
 
-      <div class="mui-col-md-2 float-right" *ngIf="mode !== 'View'" >
+      <div class="mui-col-md-2 float-right">
         <br>
         <label>Add Virtue &nbsp;&nbsp;</label>
-        <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()">
+        <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()" [disabled]="mode === 'View'" >
           <mat-icon class="plus" svgIcon="plus" aria-label="Add new item to list of virtues into which this virtue is allowed to paste data."></mat-icon>
         </button>
       </div>
@@ -61,7 +61,7 @@
           <div class="mui-col-md-2">
             <br>
             <label>Add new &nbsp;&nbsp;</label>
-            <button mat-mini-fab mat-button class="fab-button" (click)="addNewNetworkPermission()" style="">
+            <button mat-mini-fab mat-button class="fab-button" [disabled]="mode === 'View'" (click)="addNewNetworkPermission()" style="">
               <mat-icon class="plus" svgIcon="plus" aria-label="Add new network permission."></mat-icon>
             </button>
           </div>
@@ -129,6 +129,7 @@
                   <ng-container *ngIf="index !== 0">
                     <mat-checkbox
                       name="cb"
+                      [disabled]="mode === 'View'"
                       [checked]="allChecked(col.name)"
                       (change)="checkAll($event, col.name)"
                       >
@@ -149,6 +150,7 @@
                   <div *ngIf="perm.enabled || col.name === 'enabled'">
                     <mat-checkbox
                       name="cb"
+                      [disabled]="mode === 'View'"
                       [checked]="perm[col.name]"
                       [(ngModel)]="perm[col.name]"
                       >
@@ -182,7 +184,7 @@
             <div class="mui-col-md-2">
               <br>
               <label>&nbsp;&nbsp;&nbsp;&nbsp;Add new &nbsp;&nbsp;</label>
-              <button mat-mini-fab mat-button class="fab-button" (click)="addNewPrinter()" style="">
+              <button mat-mini-fab mat-button class="fab-button" [disabled]="mode === 'View'" (click)="addNewPrinter()" style="">
                 <mat-icon class="plus" svgIcon="plus" aria-label="Add new printer."></mat-icon>
               </button>
             </div>

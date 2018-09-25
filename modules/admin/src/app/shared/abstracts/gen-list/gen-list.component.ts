@@ -7,13 +7,11 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 
-import { DialogsComponent } from '../../../dialogs/dialogs.component';
-
 import { Column } from '../../models/column.model';
-import { RowOptions } from '../../models/rowOptions.model';
+import { SubMenuOptions } from '../../models/subMenuOptions.model';
 import { DictList } from '../../models/dictionary.model';
 
-import { GenericPageComponent } from '../gen-page/gen-page.component';
+import { GenericDataPageComponent } from '../gen-data-page/gen-data-page.component';
 import { GenericTableComponent } from '../gen-table/gen-table.component';
 
 import { Item } from '../../models/item.model';
@@ -24,20 +22,48 @@ import { ItemService } from '../../services/item.service';
 
 import { Mode } from '../../enums/enums';
 
+/**
+* @class
+ * This class represents a collection of items in a table, to be viewed and interacted with.
+ * It holds a GenericTableComponent, and allows for sorting, filtering, and selection.
+ * The data displayed in each column for each item is defined by the subclass, and can be text, a list, or a
+ * link.
+ *
+ * @extends GenericDataPageComponent because the derivative list pages need to load a known type of data from the backend.
+ */
 @Component({
   templateUrl: './gen-list.component.html',
   providers: [ BaseUrlService, ItemService, GenericTableComponent ]
 })
-export abstract class GenericListComponent extends GenericPageComponent implements OnInit {
+export abstract class GenericListComponent extends GenericDataPageComponent implements OnInit {
 
-  // The table itself
+  /** The table itself */
   @ViewChild(GenericTableComponent) table: GenericTableComponent;
 
-  prettyTitle: string;
-  itemName: string;
-  pluralItem: string;
-  domain: string; // like '/users', '/virtues', etc.
 
+  /** a string to appear as the list's title - preferably a full description */
+  prettyTitle: string;
+
+  /** used in a button label to create a new item: "Add {{itemName}}". It shouldn't be long. */
+  itemName: string;
+
+  /** used to reference collections of this type of Item in the filter option labels. Should be short. #TODO*/
+  pluralItem: string;
+
+  /**
+   * One of:
+   *  '/users'
+   *  '/virtues'
+   *  '/vm-templates'
+   *  '/applications'
+   * Parsed out of url path
+   * Only used in the list html page though, in the create-new-item button
+   */
+  domain: string;
+
+  /**
+   * see [[GenericPageComponent.constructor]] for notes on parameters
+   */
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
@@ -45,27 +71,40 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
+
     let params = this.getListOptions();
 
     this.prettyTitle = params.prettyTitle;
     this.itemName = params.itemName;
     this.pluralItem = params.pluralItem;
-    this.domain = params.domain;
+
+    // pull the domain, e.g. '/users', '/virtues', etc., out of the url.
+    // Used only when to navigate to the create page for this type of item, via the 'Add new {{itemName}}' button.
+    let url = this.router.routerState.snapshot.url;
+    if (url[0] === '/') {
+      url = url.substr(1);
+    }
+    this.domain = '/' + url.split('/')[0];
   }
 
-  ngOnInit() {
-    this.cmnComponentSetup();
+  /**
+   * Called automatically on page render.
+   */
+  ngOnInit(): void {
+    this.cmnDataComponentSetup();
     this.fillTable();
   }
 
-
+  /**
+   * Sets up the table, according to parameters defined in this class' child classes.
+   */
   fillTable(): void {
     if (this.table === undefined) {
       return;
     }
     this.table.setUp({
       cols: this.getColumns(),
-      opts: this.getOptionsList(),
+      opts: this.getSubMenu(),
       coloredLabels: this.hasColoredLabels(),
       filters: this.getTableFilters(),
       tableWidth: 12,
@@ -75,126 +114,110 @@ export abstract class GenericListComponent extends GenericPageComponent implemen
     });
   }
 
-  // most lists don't allow selection
-  getSelectedIDs() {
+  /**
+   * Most lists don't allow selection
+   *
+   * @return a list of item IDs that should be initialized as 'selected' when the table builds.
+   */
+  getSelectedIDs(): string[] {
     return [];
   }
 
-  // overridden by everything that lists virtues
-  hasCheckbox() {
+  /**
+   * @return whether or not the table needs checkboxes. False is default.
+   * Override to change.
+   * Currently overridden only by modals.
+   */
+  hasCheckbox(): boolean {
     return false;
   }
 
-  // abstracts away table from subclasses
-  setItems(newItems: Item[]) {
+
+  /**
+   * Populates the table with the input list of items.
+   * Abstracts away table from subclasses
+   *
+   * @param newItems the list of items to be displayed in the table.
+   */
+  setItems(newItems: Item[]): void {
     this.table.items = newItems;
   }
 
-  // not used by all subclasses - some don't have reason to filter
-  getTableFilters(): {text: string, value: string}[] {
+  /**
+   * This specifies a set of filters for all the list pages, where
+   * Currently filtering can only be applied based on the "enabled" column, but eventually
+   * being able to apply (perhaps arbitrary) filters to any column would be useful.
+   *
+   * When a filter label is clicked, its value (as specified below) is passed to [[ListFilterPipe]] within the table
+   * object, which will filter out any Item with a different status, unless the value is '*', in which case nothing
+   * is filtered out, and the list is merely sorted.
+   *
+   * While this function may seem unnecessary given that acceptable filter values are hardcoded in [[ListFilterPipe]],
+   * there are some pages which need no status filters ([[AppsListComponent]]), and override this function to return an empty list.
+   * Eventually this should be fixed to allow arbitrary filters on any column, with ListFilterPipe changed accordingly.
+   *
+   * @return a list of filter options to be displayed at the top of the list page.
+   */
+  getTableFilters(): {value: string, text: string}[] {
     return [{value: '*', text: 'All ' + this.pluralItem},
-            {value: 'enabled', text: 'Enabled ' + this.pluralItem},
-            {value: 'disabled', text: 'Disabled ' + this.pluralItem}];
+            {value: 'true', text: 'Enabled ' + this.pluralItem},
+            {value: 'false', text: 'Disabled ' + this.pluralItem}];
   }
 
-  abstract onPullComplete(): void;
-
+  /**
+   * This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
+   * to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+   *
+   * Note: colWidths of all columns must add to exactly 12.
+   * Too low will not scale to fit, and too large will cause columns to wrap, within each row.
+   *
+   * @return a list of columns to be displayed within the table of Items.
+   */
   abstract getColumns(): Column[];
 
+  /**
+   * This must be defined by every child that extends this class.
+   * Allows the definition of child-list-specific information used in the list's html code.
+   * @return object holding three strings
+   */
   abstract getListOptions(): {
+      /** a string to appear as the list's title - preferably a full description */
       prettyTitle: string,
+      /** used in a label on a button to create a new item: "Add {{itemName}}". It shouldn't be long. */
       itemName: string,
-      pluralItem: string,
-      domain: string};
+      /** used to reference collections of this type of Item, in a shortened form, in the filter labels #TODO*/
+      pluralItem: string};
 
-  // must be here so subclasses of list, which use table, can set table values.
+  /**
+   * @returns a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   */
   abstract getNoDataMsg(): string;
 
-  // overridden by app-list and modals
-  getOptionsList(): RowOptions[] {
+  /**
+   * This defines the submenu that appears under each label in the first column of the table.
+   *
+   * see [[GenericPageComponent.openDialog]] for notes on that openDialog call.
+   *
+   * Overridden by apps-list and modals
+   *
+   * @return a set of clickable links which show up on every item in the table.
+   */
+  getSubMenu(): SubMenuOptions[] {
     return [
-      new RowOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
-      new RowOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
-      new RowOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
-      new RowOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
-      new RowOptions("Delete",  () => true,             (i: Item) => this.openDialog('delete', i))
+      new SubMenuOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new SubMenuOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new SubMenuOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
+      new SubMenuOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
+      new SubMenuOptions("Delete",  () => true,             (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))
     ];
   }
 
-  // overridden by virtues
-  hasColoredLabels() {
+  /**
+   * @return whether or not the items being listed have colored labels. True for, and only for, all tables that list virtues.
+   * overridden by virtue-list, virtues-modal, main-user-tab, vm-usage-tab, and virtue-settings
+   */
+  hasColoredLabels(): boolean {
     return false;
   }
 
-  editItem(i: Item) {
-    this.router.navigate([i.getPageRoute(Mode.EDIT)]);
-  }
-
-  dupItem(i: Item) {
-    this.router.navigate([i.getPageRoute(Mode.DUPLICATE)]);
-  }
-
-  deleteItem(i: Item) {
-    this.itemService.deleteItem(this.serviceConfigUrl, i.getID());
-    this.refreshData(true);
-  }
-
-  // overriden by user-list, to perform function of setItemStatus method.
-  // TODO Change backend so everything works the same way.
-  // Probably just make every work via a setStatus method, and remove the toggle.
-  toggleItemStatus(i: Item) {
-    let sub = this.itemService.toggleItemStatus(this.serviceConfigUrl, i.getID()).subscribe(() => {
-      this.refreshData();
-    },
-    error => {
-
-    },
-    () => {
-      sub.unsubscribe();
-    });
-  }
-
-  setItemStatus(i: Item, newStatus: boolean) {
-    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, i.getID(), newStatus).subscribe(() => {
-      this.refreshData();
-    },
-    error => {
-
-    },
-    () => {
-      sub.unsubscribe();
-    });
-  }
-
-
-
-  openDialog(action: string, target: Item): void {
-    let dialogRef = this.dialog.open(DialogsComponent, {
-      width: '450px',
-      data:  {
-          actionType: action,
-          targetObject: target
-        }
-    });
-
-    dialogRef.updatePosition({ top: '15%', left: '36%' });
-
-    //  control goes here after either "Ok" or "Cancel" are clicked on the dialog
-    let sub = dialogRef.componentInstance.dialogEmitter.subscribe((targetObject) => {
-
-      if (targetObject !== 0 ) {
-
-        if ( action === 'delete') {
-          this.deleteItem(targetObject);
-        }
-        if (action === 'disable') {
-          this.setItemStatus(targetObject, false);
-        }
-      }
-    },
-    () => {},
-    () => {
-      sub.unsubscribe();
-    });
-  }
 }
