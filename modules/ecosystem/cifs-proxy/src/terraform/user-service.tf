@@ -31,7 +31,7 @@ resource "aws_instance" "user_facing_server" {
 set -x
 exec > /var/log/user_data.log 2>&1
 date
-yum -y update && yum -y install sssd realmd krb5-workstation samba-common-tools java-1.8.0-openjdk
+yum -y install sssd realmd krb5-workstation samba-common-tools java-1.8.0-openjdk
 hostnamectl set-hostname ${local.myname}.${var.domain}
 sed -i 's/\(^127\.0\.0\.1 *\)/\1${local.myname}.${var.domain} ${local.myname} /' /etc/hosts
 (echo supersede domain-name-servers "${aws_directory_service_directory.active_directory.dns_ip_addresses[0]}", "${aws_directory_service_directory.active_directory.dns_ip_addresses[1]}" ';'
