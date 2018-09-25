@@ -22,6 +22,9 @@ data "template_file" "remove_users_script" {
 resource "null_resource" "user_creation" {
   triggers {
 	ad_id = "${aws_directory_service_directory.active_directory.id}"
+	script_sha1 = "${sha1(data.template_file.users_script.template)}"
+	# Not depending on the remove script because it should only change
+	# when the add script does.
   }
 
   connection {
