@@ -21,7 +21,7 @@ import { AddAppComponent } from '../add-app/add-app.component';
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
-import { ConfigUrls } from '../../shared/services/configUrls.enum';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
  * @class
