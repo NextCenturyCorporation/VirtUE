@@ -58,8 +58,8 @@ variable "domain" {
 }
 
 variable "linux_ami" {
-  description = "Amazon Linux 2 AMI (HVM), SSD Volume Type"
-  default = "ami-04681a1dbd79675a5"
+  description = "Ubuntu Server 18.04 LTS (HVM), SSD Volume Type"
+  default = "ami-0ac019f4fcb7cb7e6"
 }
 
 variable "linux_instance_type" {
