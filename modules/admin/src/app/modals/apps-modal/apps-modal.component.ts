@@ -60,7 +60,7 @@ export class AppsModalComponent extends GenericModalComponent {
   }
 
   /**
-   * This page only needs to list all available apps, and doesn't need ot request any other data.
+   * This page only needs to list all available apps, and doesn't need to request any other data.
    *
    * See [[GenericPageComponent.getPageOptions]]() for details on return values
    */

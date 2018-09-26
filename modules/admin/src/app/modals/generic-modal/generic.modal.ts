@@ -44,7 +44,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
 
   /**
    * Only holds the initial input selections, is not kept up-to-date.
-   * Just used to build a list of initial selections to pass ot the table
+   * Just used to build a list of initial selections to pass to the table
    */
   selectedIDs: string[] = [];
 

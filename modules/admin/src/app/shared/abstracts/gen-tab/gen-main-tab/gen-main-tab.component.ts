@@ -175,7 +175,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    *
    * see [[GenericPageComponent.openDialog]] for notes on that openDialog call.
    *
-   * @return a one-element list of row options; 'View' if mode is view, or 'Remove' otherwise.
+   * @return a list of row options; 'View', 'Edit', and 'Remove'.
    */
   getSubMenu(): SubMenuOptions[] {
     return [
