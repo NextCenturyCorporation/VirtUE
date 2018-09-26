@@ -252,7 +252,9 @@ public class XenGuestManager {
 		if (JavaUtil.isNotEmpty(role)) {
 			command += " " + role;
 		}
-		SshUtil.sendCommandFromSession(session, command);
+		logger.debug("provisioning guest with command: " + command);
+		List<String> out = SshUtil.sendCommandFromSession(session, command);
+		logger.debug("provisoin guest output: " + out);
 	}
 
 	private CommandHandler getCommandHandlerFromSession(Session session) throws JSchException, IOException {

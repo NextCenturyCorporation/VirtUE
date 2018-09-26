@@ -1,7 +1,6 @@
 package com.ncc.savior.desktop.virtues;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -174,13 +173,9 @@ public class VirtueService {
 	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) throws IOException {
 		SshConnectionParameters params = null;
 		if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
-			File pem = File.createTempFile(app.getName(), ".pem");
-			FileWriter writer = new FileWriter(pem);
-			writer.write(key);
-			writer.close();
-			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
+			params = SshConnectionParameters.withPemString(app.getHostname(), app.getPort(), app.getUserName(), key);
 		} else {
-			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
+			params = SshConnectionParameters.withPassword(app.getHostname(), app.getPort(), app.getUserName(), key);
 		}
 		return params;
 	}

@@ -8,12 +8,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnectionParameters;
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
-import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 
@@ -36,11 +34,10 @@ public class SimpleApplicationManager implements IApplicationManager {
 	public SimpleApplicationManager() {
 	}
 
-
 	@Override
 	public int startOrGetXpraServer(VirtualMachine vm, File privateKeyFile) throws IOException {
-		SshConnectionParameters params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(),
-				vm.getSshPort(), vm.getUserName(), privateKeyFile);
+		SshConnectionParameters params = SshConnectionParameters.withExistingPemFile(vm.getHostname(), vm.getSshPort(),
+				vm.getUserName(), privateKeyFile);
 		SshXpraInitiater initiator = new SshXpraInitiater(params);
 		Set<Integer> servers = initiator.getXpraServers();
 		if (servers.isEmpty()) {
@@ -57,17 +54,14 @@ public class SimpleApplicationManager implements IApplicationManager {
 
 	@Override
 	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, int maxTries) {
-		File certificate = null;
 		try {
 			SshConnectionParameters params = null;
 			if (vm.getPrivateKey() != null) {
-				certificate = File.createTempFile("test", ".dat");
-				SshUtil.writeKeyToFile(certificate, vm.getPrivateKey());
-				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
-						vm.getUserName(), certificate);
+				params = SshConnectionParameters.withPemString(vm.getHostname(), vm.getSshPort(), vm.getUserName(),
+						vm.getPrivateKey());
 			} else {
-				params = new SshConnectionFactory.SshConnectionParameters(vm.getHostname(), vm.getSshPort(),
-						vm.getUserName(), defaultPassword);
+				params = SshConnectionParameters.withPassword(vm.getHostname(), vm.getSshPort(), vm.getUserName(),
+						defaultPassword);
 			}
 			SshXpraInitiater initiator = new SshXpraInitiater(params);
 			Set<Integer> set = null;
@@ -122,10 +116,6 @@ public class SimpleApplicationManager implements IApplicationManager {
 			String msg = "Error attempting to start application!";
 			logger.error(msg, e);
 			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, msg);
-		} finally {
-			if (certificate != null && certificate.exists()) {
-				certificate.delete();
-			}
 		}
 	}
 
