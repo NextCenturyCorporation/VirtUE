@@ -13,7 +13,7 @@ data "template_file" "setup_file_sharing_script" {
 
 resource "null_resource" "setup_file_sharing" {
   triggers {
-	ad_id = "${aws_directory_service_directory.active_directory.id}"
+	ad_id = "${aws_directory_service_directory.directory_service.id}"
   }
 
   connection {

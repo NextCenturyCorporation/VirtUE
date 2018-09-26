@@ -80,11 +80,11 @@ resource "aws_ssm_document" "file_server_default_doc" {
         "runtimeConfig": {
            "aws:domainJoin": {
                "properties": {
-                  "directoryId": "${aws_directory_service_directory.active_directory.id}",
+                  "directoryId": "${aws_directory_service_directory.directory_service.id}",
                   "directoryName": "${var.domain}",
                   "dnsIpAddresses": [
-                     "${aws_directory_service_directory.active_directory.dns_ip_addresses[0]}",
-                     "${aws_directory_service_directory.active_directory.dns_ip_addresses[1]}"
+                     "${aws_directory_service_directory.directory_service.dns_ip_addresses[0]}",
+                     "${aws_directory_service_directory.directory_service.dns_ip_addresses[1]}"
                   ]
                }
            }
@@ -159,5 +159,5 @@ EOF
   }
   
   # can't join the domain until the AD server is up
-  depends_on = [ "aws_directory_service_directory.active_directory" ]
+  depends_on = [ "aws_directory_service_directory.directory_service" ]
 }

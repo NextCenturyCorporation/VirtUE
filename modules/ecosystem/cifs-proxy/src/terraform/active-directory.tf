@@ -1,14 +1,13 @@
 #
-# Start an Active Directory Domain Server
+# Start a Domain Server
 #
 
 # For AWS managed AD DC, the admin user is "Admin", not "Administrator"
 
-resource "aws_directory_service_directory" "active_directory" {
+resource "aws_directory_service_directory" "directory_service" {
   name = "${var.domain}"
   password = "${var.admin_password}"
-  edition = "Standard"
-  type     = "MicrosoftAD"
+  size = "Small" # samba
 
   vpc_settings {
 	subnet_ids = [ "${data.aws_subnet.private_subnet.id}", "${data.aws_subnet.public_subnet.id}" ]
