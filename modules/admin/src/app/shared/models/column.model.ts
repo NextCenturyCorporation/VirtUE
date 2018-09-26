@@ -273,3 +273,31 @@ export class RadioButtonColumn extends Column {
       super(label, width);
     }
 }
+
+/**
+ * A column that just serves to label other columns. Like an empty column labelled "Security Level:", placed before a set of
+ * RadioButtonColumns.
+ */
+export class LabelColumn extends Column {
+  constructor(
+    /** see [[Column.label]] for details */
+    label: string,
+    /** see [[Column.width]] for details */
+    width: number,
+  ) {
+    super(label, width);
+  }
+}
+
+/**
+ * A blank column, that just exists to put space between other columns.
+ * The label is optional here.
+ */
+export class BlankColumn extends Column {
+  constructor(
+    /** see [[Column.width]] for details */
+    width: number,
+  ) {
+    super("", width);
+  }
+}

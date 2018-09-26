@@ -12,6 +12,7 @@ import { SensingModel } from '../../shared/models/sensing.model';
 import {
   Column,
   TextColumn,
+  LabelColumn,
   RadioButtonColumn,
   SORT_DIR
 } from '../../shared/models/column.model';
@@ -20,6 +21,7 @@ import {
  * Just for testing the radio button column
  */
 class Sensor {
+  public status: string;
   constructor (
     public name: string,
     public level: VigilenceLevel
@@ -97,12 +99,16 @@ export class ConfigSensorsComponent extends GenericPageComponent implements OnIn
   /** */
   getColumns(): Column[] {
     return [
-      new TextColumn("Sensor Context", 6, (s: Sensor) => s.name, SORT_DIR.ASC),
+      new TextColumn("Sensor Context", 3, (s: Sensor) => s.name, SORT_DIR.ASC),
+      // new LabelColumn("Security Levels:", 1),
       new RadioButtonColumn("Off",          1, "level", VigilenceLevel.OFF),
       new RadioButtonColumn("Default",      1, "level", VigilenceLevel.DEFAULT),
       new RadioButtonColumn("Low",          1, "level", VigilenceLevel.LOW),
       new RadioButtonColumn("High",         1, "level", VigilenceLevel.HIGH),
-      new RadioButtonColumn("Adversarial",  1, "level", VigilenceLevel.ADVERSARIAL)
+      new RadioButtonColumn("Adversarial",  2, "level", VigilenceLevel.ADVERSARIAL),
+      // new LabelColumn("Status:", 1),
+      new RadioButtonColumn("On",           1, "status", "ON"),
+      new RadioButtonColumn("Off",          1, "status", "OFF")
     ];
   }
 }
