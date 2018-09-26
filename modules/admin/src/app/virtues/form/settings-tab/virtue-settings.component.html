@@ -36,13 +36,38 @@
       </div>
     </div>
     <br>
-    <mat-form-field>
-      <mat-select placeholder="Default Browser" [disabled]="inViewMode()" [(ngModel)]="item.defaultBrowser">
-        <mat-option *ngFor="let browser of browsers" [value]="browser">
-          {{browser}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <br>
+    <label>Set Default Virtue to open web-links in &nbsp;&nbsp;
+      <button class="button-submit" (click)="activateDefaultBrowserVirtueModal()" [disabled]="inViewMode()" >
+      </button>
+    </label>
+    <br>
+    <!-- <label> Default web-broswer virtue: </label>
+    <div class="mui-row form-item">
+      <ng-container *ngIf="this.item.defaultBrowserVirtue !== undefined">
+        <div class="mui-col-md-4 ">
+          <label>Name: {{allVirtues.get(this.item.defaultBrowserVirtue).getName()}}</label>
+        </div>
+        <div class="mui-col-md-4 ">
+          <label>Default browser: not implemented</label>
+        </div>
+        <div class="mui-col-md-4 ">
+          <label>Available apps:
+            <ul>
+              <ng-container *ngFor="let app of getGrandchildren(allVirtues.get(this.item.defaultBrowserVirtue))">
+                <li>
+                  {{app.getName()}}
+                <li>
+              </ng-container>
+            </ul>
+          </label>
+        </div>
+      </ng-container>
+    </div> -->
+    <br>
+    <br>
+
+    <label> Allowed pastable virtues: </label>
     <div class="mui-row form-item">
       <app-table #allowedPasteTargetsTable></app-table>
 
@@ -50,7 +75,8 @@
         <br>
         <label>Add Virtue &nbsp;&nbsp;</label>
         <button mat-mini-fab mat-button class="fab-button" (click)="activatePastableVirtueModal()" [disabled]="inViewMode()" >
-          <mat-icon class="plus" svgIcon="plus" aria-label="Add new item to list of virtues into which this virtue is allowed to paste data."></mat-icon>
+          <mat-icon class="plus" svgIcon="plus" aria-label="Add new item to list of virtues into which this virtue is allowed to paste data."
+          ></mat-icon>
         </button>
       </div>
     </div>
@@ -75,45 +101,7 @@
           </div>
         </div>
         <app-table #netWorkPermsTable></app-table>
-        <!-- <div class="mui-row">
-          <ng-container *ngFor="let column of getNetworkColumns()" >
-            <div class="table-header mui-col-md-{{column.width}}">
-              <label>{{column.prettyName}}</label>
-            </div>
-          </ng-container>
-        </div>
-        <br>
-        <div *ngFor="let networkPermission of item.networkWhiteList" class="mui-row">
-          <div  class="mui-col-md-{{getNetworkColumns()[0].width}}">
-            <mat-form-field floatLabel="never">
-              <input matInput type="text" placeholder="{{getNetworkColumns()[0].name}}"
-                      [(ngModel)]="networkPermission[getNetworkColumns()[0].name]" required/>
-            </mat-form-field>
-          </div>
-          <div class="mui-col-md-{{getNetworkColumns()[1].width}}">
-            <mat-form-field floatLabel="never">
-              <mat-select placeholder="{{getNetworkColumns()[1].name}}"
-                       [(ngModel)]="networkPermission.protocol" required >
-                <mat-option *ngFor="let p of keys(protocols)" value="{{p}}" >
-                  {{p}}
-                </mat-option>
-              </mat-select>
 
-            </mat-form-field>
-          </div>
-          <div class="mui-col-md-{{getNetworkColumns()[2].width}}">
-            <mat-form-field floatLabel="never">
-              <input matInput type="number" placeholder="{{getNetworkColumns()[2].name}}"
-                      [(ngModel)]="networkPermission[getNetworkColumns()[2].name]" required/>
-            </mat-form-field>
-          </div>
-          <div class="mui-col-md-{{getNetworkColumns()[3].width}}">
-            <mat-form-field floatLabel="never">
-              <input matInput type="number" placeholder="{{getNetworkColumns()[3].name}}"
-                      [(ngModel)]="networkPermission[getNetworkColumns()[3].name]" required/>
-            </mat-form-field>
-          </div>
-        </div> -->
       </div>
     </div>
   </div>

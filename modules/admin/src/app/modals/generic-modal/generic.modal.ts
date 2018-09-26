@@ -9,7 +9,7 @@ import { ItemService } from '../../shared/services/item.service';
 import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/gen-data-page.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
-import { SELECTION_MODE } from '../../shared/abstracts/gen-table/selectionMode.enum';
+import { SelectionMode } from '../../shared/abstracts/gen-table/selectionMode.enum';
 import { Item } from '../../shared/models/item.model';
 import { Column } from '../../shared/models/column.model';
 
@@ -26,8 +26,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  */
 @Component({
   selector: 'app-generic-modal',
-  templateUrl: './generic.modal.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [BaseUrlService, ItemService]
 })
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
@@ -51,9 +49,9 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   selectedIDs: string[] = [];
 
   /**
-   * #uncommented
+   * The standard SelectionMode to set up this modal's table in. Most modals want multiple selection.
    */
-  mode: SELECTION_MODE;
+  defaultSelectionMode: SelectionMode = SelectionMode.MULTI;
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
@@ -70,7 +68,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       /** injected, is a reference to the modal dialog box itself. */
       public dialogRef: MatDialogRef<GenericModalComponent>,
 
-      /** holds the initial selections */
+      /** holds the initial selections, and possibly a SelectionMode */
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
       super(router, baseUrlService, itemService, dialog);
@@ -82,19 +80,14 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
         this.selectedIDs = [];
       }
 
-      this.mode = SELECTION_MODE.MULTI;
+      if (data && data['selectionMode']) {
+        this.defaultSelectionMode = data.selectionMode;
+      }
 
       // TODO should we not allow addition of disabled items?
       // if so, note that select-all button will not act how user expects.
       // Could be changed to only add/remove enabled items, but still then the user couldn't
       // remove disabled ones through that menu.
-  }
-
-  /**
-   * #uncommented
-   */
-  setMode(mode: SELECTION_MODE) {
-    this.mode = mode;
   }
 
   /**
@@ -119,10 +112,19 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg(),
       selectionOptions: {
-        selectionMode: this.mode,
+        selectionMode: this.getSelectionMode(),
         equals: (obj1: Item, obj2: Item) => {return obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID())}
       }
     });
+  }
+
+  /**
+   * Sets the page's selection mode: can be {OFF, SINGLE, MULTI}. Default is MULTI.
+   * Subclasses should override this function, if they need a different mode.
+   * @return the selection mode to set this page in
+   */
+  getSelectionMode() {
+    return this.defaultSelectionMode;
   }
 
   /**

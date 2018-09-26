@@ -49,9 +49,9 @@
           <ng-container *ngIf="isSortable(column)">
             <a (click)="setColumnSortDirection(column)">{{column.label}}</a>
             <span class="list-sorter" (click)="setColumnSortDirection(column)">
-              <span *ngIf="sortColumn.label === column.label && sortBy === 'asc'" class="fa fa-sort-up"></span>
-              <span *ngIf="sortColumn.label === column.label && sortBy === 'desc'" class="fa fa-sort-down"></span>
-              <span class="fa fa-sort font-color-gray"></span>
+              <font color="DarkGray"><span class="fa fa-sort"></span></font>
+              <span *ngIf="sortColumn.label === column.label && sortingAscending()" class="fa fa-sort-up"></span>
+              <span *ngIf="sortColumn.label === column.label && !sortingAscending()" class="fa fa-sort-down"></span>
             </span>
           </ng-container>
 
@@ -100,30 +100,13 @@
 
       <!-- Note that this checkbox is for selection, and is not related to the checkboxes definable in Columns -->
       <span *ngIf="selectionMode === 'single'" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
-        <mat-checkbox
-        name="selectionRadio"
-        [disabled]="!elem.obj.enabled"
-        [checked]="elem.selected"
-        (change)="radioSelectionChange($event.checked, elem)"></mat-checkbox>
+        <mat-radio-group [(ngModel)]="selectedObj">
+          <mat-radio-button [value]="elem.obj" >
+          </mat-radio-button>
+        </mat-radio-group>
       </span>
 
       <div fxFlex="auto">
-
-        <!-- <span class="mini-menu table-data mui-col-md-{{colData[0].width}} transparent">
-          <a class="edit" *ngIf="colData[0].link !== undefined" (click)="colData[0].link(elem.obj)">
-            {{ colData[0].formatElement ? colData[0].formatElement(elem.obj) : i[colData[0].name] }}
-          </a>
-          <div class="edit" *ngIf="colData[0].link === undefined">
-            {{ colData[0].formatElement ? colData[0].formatElement(elem.obj) : i[colData[0].name] }}
-          </div>
-
-          <div class="menu-options" >
-            <a *ngFor="let o of subMenuOptions; let idx = index" (click)="o.action(elem.obj)">
-              <ng-container *ngIf="o.shouldAppear(elem.obj)"> {{o.text}} </ng-container>
-              <ng-container *ngIf="o.shouldAppear(elem.obj) && idx < subMenuOptions.length-1">|</ng-container>
-            </a>
-          </div>
-        </span> -->
 
         <!-- Iterate over all columns -->
         <div *ngFor="let column of colData; let index = index; trackBy: indexTracker"
@@ -138,20 +121,12 @@
             <div class="edit" *ngIf="column.link === undefined || editingEnabled()">
               {{ column.formatElement(elem.obj) }}
             </div>
-
-            <div *ngIf="column.subMenuOpts !== undefined" class="menu-options" >
-              <a *ngFor="let o of column.subMenuOpts(); let idx = index" (click)="o.action(elem.obj)">
-                <ng-container *ngIf="o.shouldAppear(elem.obj)">|</ng-container>
-                <ng-container *ngIf="o.shouldAppear(elem.obj)"> {{o.text}} </ng-container>
-                <ng-container *ngIf="o.shouldAppear(elem.obj)">|</ng-container>
-              </a>
-            </div>
           </ng-container>
 
 
           <!-- If this column displays a list in each row -->
           <ng-container *ngIf="isList(column)">
-            <div *ngFor="let object of column.list(elem.obj)">
+            <div *ngFor="let object of column.getList(elem.obj)">
               <ul>
                 <ul>
                   <a *ngIf="column.link !== undefined && !editingEnabled()" (click)="column.link(object)">
@@ -205,11 +180,24 @@
 
           <!-- if it's a radioButton column -->
           <ng-container *ngIf="isRadioButton(column)">
+            <!-- This is almost magic. Each radio button is put in its own radio-group, but Angular notices that some buttons
+                watch the same object, and groups them together. So all radio buttons in all columns that watch the {{column.fieldName}}
+                field of this particular elem.obj, will be put into the same group. To add more radio button options, just add
+                another radioButtonColumn with the same fieldName. -->
             <mat-radio-group [(ngModel)]="elem.obj[column.fieldName]">
               <mat-radio-button [value]="column.value" >
               </mat-radio-button>
             </mat-radio-group>
           </ng-container>
+
+          <!-- If this column type allows for a list of SubMenuOptions. Currently only TextColumn. -->
+          <div *ngIf="column.subMenuOpts !== undefined" class="menu-options" >
+            <a *ngFor="let o of filterMenuOptions(column.subMenuOpts(), elem.obj); let idx = index" (click)="o.action(elem.obj)">
+              <ng-container> {{o.text}} </ng-container>
+              <ng-container *ngIf="idx < filterMenuOptions(column.subMenuOpts(), elem.obj).length - 1">|</ng-container>
+            </a>
+          </div>
+
 
         </div>
 

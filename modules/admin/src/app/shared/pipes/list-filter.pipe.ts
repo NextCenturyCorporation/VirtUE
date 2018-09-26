@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { Column } from '../models/column.model';
+import { Column, SORT_DIR } from '../models/column.model';
 import { TableElement } from '../models/tableElement.model';
 /**
  * @class
@@ -25,12 +25,12 @@ import { TableElement } from '../models/tableElement.model';
 @Pipe({
   name: 'listFilterSort'
 })
-export class ListFilterPipe implements PipeTransform {
+export class ListFilterPipe<T> implements PipeTransform {
 
   /**
    * @param list the list to be filtered. Holds TableElements.
    * @param formatElement a function to return a string for each element of the list, to be used when sorting.
-   * @param sortDirection the direction in which the list should be sorted. Should be either 'asc' or 'desc'
+   * @param sortDirection the direction in which the list should be sorted. Should be either ASC or DESC
    * @param filterColumn the name of the attribute in each table element which should be used, when applying the filter.
    * @param filterCondition a function that returns true if the item, with its given attribute, should remain in the list.
    *    Defined in the component that defined the GenericTableComponent.
@@ -42,11 +42,11 @@ export class ListFilterPipe implements PipeTransform {
    *
    * @return
    */
-  transform(list: TableElement[],
-            formatElement: (obj: any) => string, sortDirection: string,
+  transform(list: TableElement<T>[],
+            formatElement: (obj: any) => string, sortDirection: SORT_DIR,
             filterColumn: string, filterCondition: ((attribute) => boolean),
             update: boolean
-  ): TableElement[] {
+  ): TableElement<T>[] {
     if (list.length < 2) {
       return list;
     }
@@ -69,7 +69,7 @@ export class ListFilterPipe implements PipeTransform {
    *
    * @return the list, filtered
    */
-  filterList(list: TableElement[], filterColumn: string, filterCondition: ((attribute) => boolean)): TableElement[] {
+  filterList(list: TableElement<T>[], filterColumn: string, filterCondition: ((attribute) => boolean)): TableElement<T>[] {
 
     let filteredList = list.filter(element => filterCondition(element.obj[filterColumn]));
 
@@ -81,11 +81,11 @@ export class ListFilterPipe implements PipeTransform {
    *
    * @param list the list to be filtered.
    * @param formatElement the name of the attribute in each table element, which the list should be sorted on.
-   * @param sortDirection the direction in which the list should be sorted. Should be either 'asc' or 'desc'
+   * @param sortDirection the direction in which the list should be sorted. Should be either ASC or DESC
    */
-  sortList(list: TableElement[], formatElement: (obj: any) => string, sortDirection: string): void {
+  sortList(list: TableElement<T>[], formatElement: (obj: any) => string, sortDirection: SORT_DIR): void {
 
-    if (sortDirection === 'desc') {
+    if (sortDirection === SORT_DIR.DESC) {
       list.sort((leftSide, rightSide): number => {
         let left = formatElement(leftSide.obj);
         let right = formatElement(rightSide.obj);

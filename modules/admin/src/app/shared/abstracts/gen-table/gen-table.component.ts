@@ -21,7 +21,7 @@ import {
         SORT_DIR
       } from '../../models/column.model';
 
-import { SELECTION_MODE } from './selectionMode.enum';
+import { SelectionMode } from './selectionMode.enum';
 
 import { TableElement } from '../../models/tableElement.model';
 
@@ -33,10 +33,22 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 /********************************************
  * @class
- * This class represents a table, displaying a list of Items.
+ * This class represents a generic table, displaying a list of [[TableElements]] all holding the same (generic) type of object.
  *
- * #uncommented switch to TableElement, describe how Columns now work, how the table needs to know how to display columns
- *    (as opposed to columns knowing how to display themselves)
+ * TableElements hold objects, and can be marked as 'selected', if the table's [[selectionMode]] is MULTI or SINGLE.
+ * Selections should be set by passing in a list of the objects to be selected (not IDs or anything, to keep this generic)
+ * after [[populate]] is called, and the corresponding TableElements will be marked as selected by comparing their held
+ * objects with the input objects, using the caller-defined [[equals]] method. For many tables, this equals method just compares ID.
+ *
+ * Because there doesn't seem to be a way to inject chunks of HTML into another HTML file without extreme obscurity or extensive
+ * parent-child interactions, this GenericTable takes responsibility for knowing how to display the different types of Column.
+ * Columns are generic enough for each instance to define its own functionality, but if a new column were to be added, relevant display
+ * code would need to be added to GenericTable.component.html, in the same place and style as the other Column descriptions.
+ * It'd be nice if each column knew how to display itself, but that doesn't appear to be possible.
+ *
+ * In general:
+ *    Columns can be TextColumn, ListColumn, CheckboxColumn, DropdownColumn, InputFieldColumn, IconColumn, RadioButtonColumn
+ *    
  *
  * Using this table needs three things:
  *   1. Have a table object. Include it in the html file via:
@@ -51,11 +63,10 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
  *
  *   3. set 'elements' to an Item[], once the desired item list is available. It's expected
  *       that the data won't be there instantaneously, but angular should update the table
- *       whenever it arrives.
+ *       whenever the data arrives.
  *
- * Ideally, this should be made yet more generic by having it hold something like TableElements,
- * an interface that specifies an html object to be represented by (label, link, checkbox, icon), and some binding method.
- * Note that for selectable tables, table elements will need some sort of ID.
+ *
+ *
  * ********************************************/
 @Component({
   selector: 'app\-table',
@@ -71,17 +82,11 @@ export class GenericTableComponent<T> {
   colData: Column[];
 
   /**
-   * This is a list of the clickable links/options that show up under the element in the
-   * first column of each row in the table
-   */
-  // subMenuOptions: SubMenuOptions[];
-
-  /**
    * This list is what gets actually displayed in the table.
    *
    * Table will automatically update once this is set, and will display an no-data-message in the meantime.
    */
-  elements: TableElement[];
+  elements: TableElement<T>[];
 
   /** used to put a colored bar for everywhere virtues show up */
   hasColoredLabels: boolean;
@@ -129,19 +134,32 @@ export class GenericTableComponent<T> {
   sortDirection: string = SORT_DIR.ASC;
 
   /**
-   * Should the table allow selection, and if so, how many can be selected at a time?
+   * Holds a [[SelectionMode]] describing whether rows in the table can be selected, and if so, how many values can be selected.
+   * Currently, only valid values are {OFF, SINGLE, MULTI}.
+   * Requiring a maximum number of selected rows, or some minimum, should require merging the code that deals with
+   * SINGLE and MULTI, and maybe SelectionMode as well, to just be {OFF or ON}, and making the calling object define how
+   * many rows can be selected in [[setUp]]
    */
-  selectionMode: SELECTION_MODE;
+  selectionMode: SelectionMode;
 
   /**
-  * compares two objects of the type held by this table's TableElements, and returns true if they are equal. Caller-defined.
+  * compares two objects of the type held by this table's TableElements, and returns true if they are equal.
+  * Caller-defined.
   */
   equals?: (obj1: T, obj2: T) => boolean;
 
   /**
-   * #uncommented
+   * A caller-overrideable function for defining whether the interactable columns/things in this table should be disabled, given
+   * some caller-defined table state. Default is a function that returns false - disabling most interactable html objects.
+   * Note that this doesn't disable sorting or filtering, or SubMenuOpts. Sub menus are expected to manage their existence
+   * through their own "shouldAppear" function.
    */
   editingEnabled: (() => boolean) = () => false;
+
+  /**
+   *
+   */
+   selectedObj: T;
 
   /**
    * Set all parameters to default parameters for the meantime before the calling class calls [[setUp]]().
@@ -154,7 +172,7 @@ export class GenericTableComponent<T> {
     this.elements = [];
     // this.subMenuOptions = [];
     this.tableWidth = 12; // default to take up full space in container
-    this.selectionMode = SELECTION_MODE.OFF;
+    this.selectionMode = SelectionMode.OFF;
   }
 
   /**
@@ -190,11 +208,14 @@ export class GenericTableComponent<T> {
     /** see this.[[editingEnabled]] */
     editingEnabled?: () => boolean
 
-    /**  */
+    /** Many tables aren't used for selection, but if selection of rows should be allow, all of the following should be defined. */
     selectionOptions?: {
-      /** What mode  */
-      selectionMode: SELECTION_MODE,
-      /** see this.[[getObjectID]] */
+      /** What selection mode this table should be set up in */
+      selectionMode: SelectionMode,
+      /** see this.[[equals]]
+       * Like pretty much all passed functions in typescript, this should be passed as () => someFunc(), in order to call someFunc
+       * within the calling class, using the calling class' scope, as opposed to the scope of the Column or Table.
+       */
       equals: (obj1: T, obj2: T) => boolean
       }
     }
@@ -229,17 +250,18 @@ export class GenericTableComponent<T> {
   }
 
   /**
-   * #uncommented
+   * remove everything from [[elements]]
    */
   clear(): void {
     this.elements = [];
   }
 
   /**
-   * #uncommented
+   * Populates the table with the input objects. Table is cleared first.
+   * @param dataset the objects to be put into the table.
    */
   populate(dataset: any[]): void {
-    this.elements = [];
+    this.clear();
     for (let d of dataset) {
       this.elements.push(new TableElement(d));
     }
@@ -247,22 +269,37 @@ export class GenericTableComponent<T> {
 
   /**
    * This should be called at least right after populate, if anything should be marked as selected.
+   * @param selected must be a list of objects of the type the table is holding.
    */
-  setSelections(selected): void {
-    if (this.selectionMode === SELECTION_MODE.OFF) {
-      console.log("selectionMode is OFF - Can't set selections.");
+  setSelections(selected: T[]): void {
+    if (!selected) {
+      console.log("Invalid input selections.");
       return;
     }
 
-    for (let elem of this.elements) {
-      elem.selected = false;
-      for (let selectedObj of selected) {
-        if (this.equals(elem.obj, selectedObj)) {
-          elem.selected = true;
-          break;
+    if (this.selectionMode === SelectionMode.MULTI) {
+      for (let elem of this.elements) {
+        elem.selected = false;
+        for (let selectedObj of selected) {
+          if (this.equals(elem.obj, selectedObj)) {
+            elem.selected = true;
+            break;
+          }
         }
       }
     }
+    else if (this.selectionMode === SelectionMode.SINGLE) {
+      if (selected.length !== 1) {
+        console.log("SINGLE selection mode expects an input 'selected' list with exactly one value.");
+        return;
+      }
+      this.selectedObj = selected[0];
+    }
+    else { // selectionMode is OFF
+      console.log("selectionMode is not MULTI or SINGLE - Can't set selections.");
+      return;
+    }
+
   }
 
   /**
@@ -283,18 +320,26 @@ export class GenericTableComponent<T> {
     }
   }
 
+  /**
+   * @return a list holding the currently-selected object(s).
+   */
   getSelections(): T[] {
     let selections: T[] = [];
-    for (let elem of this.elements) {
-      if (elem.selected) {
-        selections.push(elem.obj);
+
+    if (this.selectionMode === SelectionMode.MULTI) {
+      for (let elem of this.elements) {
+        if (elem.selected) {
+          selections.push(elem.obj);
+        }
       }
     }
-    return selections;
-  }
+    else if (this.selectionMode === SelectionMode.SINGLE) {
+      if (this.selectedObj !== undefined) {
+        selections.push(this.selectedObj);
+      }
+    }
 
-  radioSelectionChange(event: any, elem: TableElement): void {
-    console.log(event, elem);
+    return selections;
   }
 
   /**
@@ -400,6 +445,26 @@ export class GenericTableComponent<T> {
   }
 
   /**
+   * Each column in the table can define a list of options to show up on each row, within that column. See [[Column.subMenuOpts]].
+   * The column has a list of options that can show up, but whether any option should show up can depend on the state of the
+   * object in that row.
+   * e.g., you may want a different menu to show up for disabled row-elements, than for enabled ones. We'd like to display
+   * this dynamic list nicely, with one '|' between each option, and it's much easier to filter the list before trying to display it,
+   * than to try to define (in the html) when a '|' should show up, given that any (or all) element(s) of the unfiltered list may be
+   * hidden.
+   */
+  filterMenuOptions(menuOpts: SubMenuOptions[], obj: any): SubMenuOptions[] {
+    let filteredMenu: SubMenuOptions[] = [];
+
+    for (let o of menuOpts) {
+      if (o.shouldAppear(obj)) {
+        filteredMenu.push(o);
+      }
+    }
+    return filteredMenu;
+  }
+
+  /**
    * @param obj the [[Column]] content whose type we want to check.
    * @return true iff obj has the necessary attributes of a TextColumn object.
    */
@@ -409,7 +474,7 @@ export class GenericTableComponent<T> {
 
   /**
    * @param obj the [[Column]] content whose type we want to check.
-   * @return true iff obj has the necessary attributes of a TextColumn object.
+   * @return true iff obj has the necessary attributes of a ListColumn object.
    */
   isList(obj: any) {
     return obj instanceof ListColumn;
@@ -463,4 +528,11 @@ export class GenericTableComponent<T> {
     return 'formatElement' in obj;
   }
 
+  /**
+   * Check what direction the table is currently being sorted.
+   * @return true iff [[sortDirection]] is SORT_DIR.ASC
+   */
+  sortingAscending(): boolean {
+    return this.sortDirection === SORT_DIR.ASC;
+  }
 }

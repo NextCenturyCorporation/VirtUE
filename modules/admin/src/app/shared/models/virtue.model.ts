@@ -107,8 +107,8 @@ export class Virtue extends Item {
         this.unprovisioned = true;
       }
 
-      if (! this.defaultBrowserVirtue) {
-        this.defaultBrowserVirtue = "Bowser";
+      if (virtueObj.defaultBrowserVirtue) {
+        this.defaultBrowserVirtue = virtueObj.defaultBrowserVirtue;
       }
 
       if (! this.allowedPasteTargets) {

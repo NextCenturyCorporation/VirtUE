@@ -34,6 +34,7 @@ import { ColorModalComponent } from "../../../modals/color-picker/color-picker.m
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
+import { SelectionMode } from '../../../shared/abstracts/gen-table/selectionMode.enum';
 
 import { NetworkProtocols } from '../../protocols.enum';
 
@@ -88,9 +89,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   /** local reference to the virtue-form's allVirtues variable. */
   private allVirtues: DictList<Virtue>;
 
-  /** a list of available browsers, one of which can be set as default. Currently a placeholder. */
-  browsers: string[];
-
   /**
    * see [[GenericFormTabComponent.constructor]] for inherited parameters
    */
@@ -102,15 +100,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.item = new Virtue({});
 
     this.tabName = 'Settings';
-
-    // TODO browser list is a placeholder
-    // Is this list supposed to be hard coded? User-defined? Automatically generated
-    // by perhaps tagging loaded browser applications as "browsers", and looking
-    // through all the applications this virtue has access to, and showing that list?
-    // The latter seems the most useful, but relies on the admin correctly tagging
-    // things when they load them.
-    this.browsers = ['Chrome', 'Firefox', 'This is a placeholder', 'TODO'];
-
   }
 
   /**
@@ -532,28 +521,54 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
 
   /**
-   * this brings up a modal #uncommented
+   * this brings up a modal
    * Note that the virtue selection modal will
+   * May want to define a filter so as to only show Virtues with browser applications?
+   * Perhaps they'd want to set a virtue as default that doesn't have a browser at the moment, but they're about to set one on it.
+   * Is it even possible to filter on virtues that have a browser? Unless browser applications can be flagged as a "browser" upon creation,
+   * probably not.
    */
   activateDefaultBrowserVirtueModal(): void {
-    this.activateVirtueSelectionModal( [this.item.defaultBrowserVirtue], (selectedVirtues: string[]) => {
-        this.item.defaultBrowserVirtue = selectedVirtues[0];
-      });
+    this.activateVirtueSelectionModal(
+        [this.item.defaultBrowserVirtue],
+        (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
+        SelectionMode.SINGLE
+    );
+
   }
 
   /**
-   * this brings up a #uncommented
+   * this brings up a modal through which the user can select one or more Virtues, and have those selections be passed to some
+   * caller-defined function when the user hits 'Submit'.
+   *
+   * #uncommented
+   * @param currentSelection
+   * @param onComplete
+   * @param selectionMode
+   *
+   * When implementing filters, the gnericModal should take in arbitray filters (which means this function needs to take them in as well)
+   * which are passed to the table as default filters, which can't be removed or edited. Other filters can be defined in the table, which
+   * stack on top of those defaults.
+   *
    */
-  activateVirtueSelectionModal( currentSelection: string | string[],
-                      onComplete: ((selectedVirtues: string[]) => void)): void {
+  activateVirtueSelectionModal(
+        currentSelection: string[],
+        onComplete: ((selectedVirtues: string[]) => void),
+        selectionMode?: SelectionMode
+  ): void {
     let dialogHeight = 600;
     let dialogWidth = 800;
+
+    if (selectionMode === undefined) {
+      selectionMode = SelectionMode.MULTI;
+    }
 
     let dialogRef = this.dialog.open( VirtueModalComponent,  {
       height: dialogHeight + 'px',
       width: dialogWidth + 'px',
       data: {
-        selectedIDs: currentSelection
+        selectedIDs: currentSelection,
+        selectionMode: selectionMode
       }
     });
 
