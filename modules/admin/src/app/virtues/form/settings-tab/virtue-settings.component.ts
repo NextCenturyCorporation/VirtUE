@@ -22,7 +22,7 @@ import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 
-import { Protocols } from '../../protocols.enum';
+import { NetworkProtocols } from '../../protocols.enum';
 
 /**
  * @class
@@ -73,7 +73,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   private keys = Object.keys;
 
   /** local reference, so html can iterate over this enum's elements. */
-  private protocols = Protocols;
+  private protocols = NetworkProtocols;
 
   /**
    * see [[GenericFormTabComponent.constructor]] for inherited parameters
