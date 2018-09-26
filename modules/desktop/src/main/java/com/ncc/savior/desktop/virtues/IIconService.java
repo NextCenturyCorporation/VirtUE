@@ -14,4 +14,6 @@ public interface IIconService {
 	public void getImage(String iconKey, Consumer<Image> consumer)
 			throws IOException, InterruptedException, ExecutionException;
 
+	public Image getImageNow(String iconKey);
+
 }

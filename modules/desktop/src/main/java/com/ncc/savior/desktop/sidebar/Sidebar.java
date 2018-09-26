@@ -57,6 +57,7 @@ import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
+import com.ncc.savior.desktop.sidebar.virtueapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -186,7 +187,7 @@ public class Sidebar implements VirtueChangeHandler {
 		setupComparators();
 		setupLoadingGif();
 
-		this.defaulApplicationLauncher = new DefaultApplicationLauncher(authService, virtueService);
+		this.defaulApplicationLauncher = new DefaultApplicationLauncher(authService, virtueService, iconService);
 
 		AbstractVirtueView.addRemoveVirtueListener(new IRemoveVirtueListener() {
 
@@ -1137,23 +1138,7 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		};
 
-		this.sortVlByStatus = new Comparator<VirtueListContainer>() {
-
-			@Override
-			public int compare(VirtueListContainer va1, VirtueListContainer va2) {
-
-				Integer va1State = va1.getVirtue().getVirtueState().getValue();
-				Integer va2State = va2.getVirtue().getVirtueState().getValue();
-
-				int valComp = va1State.compareTo(va2State);
-
-				if (valComp != 0) {
-					return valComp;
-				}
-
-				return va1.getName().compareTo(va2.getName());
-			}
-		};
+		this.sortVlByStatus = new VirtueStatusComparator();
 	}
 
 	private void setupLoadingGif() {

@@ -1,10 +1,10 @@
 package com.ncc.savior.desktop.sidebar;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -13,11 +13,8 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -32,6 +29,9 @@ import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
+import com.ncc.savior.desktop.sidebar.virtueapp.StatusFirstVirtueAppComparitor;
+import com.ncc.savior.desktop.sidebar.virtueapp.VirtueAndAppListCellRenderer;
+import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
@@ -42,10 +42,13 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 	private static final String PREF_KEY_APP_ID = "appId";
 	private AuthorizationService authorizationService;
 	private VirtueService virtueService;
+	private IIconService iconService;
 
-	public DefaultApplicationLauncher(AuthorizationService authService, VirtueService virtueService) {
+	public DefaultApplicationLauncher(AuthorizationService authService, VirtueService virtueService,
+			IIconService iconService) {
 		this.authorizationService = authService;
 		this.virtueService = virtueService;
+		this.iconService = iconService;
 	}
 
 	@Override
@@ -155,22 +158,22 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 		sp.getVerticalScrollBar().setUnitIncrement(16);
 		JPanel container = new JPanel();
 
+		List<Pair<DesktopVirtue, ApplicationDefinition>> comboList = new ArrayList<Pair<DesktopVirtue, ApplicationDefinition>>();
 		JComboBox<Pair<DesktopVirtue, ApplicationDefinition>> combo = new JComboBox<Pair<DesktopVirtue, ApplicationDefinition>>();
 		for (DesktopVirtue v : possibleApps) {
 			for (ApplicationDefinition a : v.getApps().values()) {
-				combo.addItem(Pair.of(v, a));
+				comboList.add(Pair.of(v, a));
 			}
 		}
-		combo.setRenderer(new ListCellRenderer<Pair<DesktopVirtue, ApplicationDefinition>>() {
-
-			@Override
-			public Component getListCellRendererComponent(
-					JList<? extends Pair<DesktopVirtue, ApplicationDefinition>> list,
-					Pair<DesktopVirtue, ApplicationDefinition> value, int index, boolean isSelected,
-					boolean cellHasFocus) {
-				return new JLabel(value.getRight().getName() + " - " + value.getLeft().getName());
-			}
-		});
+		logger.debug("Presort: " + comboList);
+		comboList.sort(new StatusFirstVirtueAppComparitor());
+		logger.debug("postsort: " + comboList);
+		for (Pair<DesktopVirtue, ApplicationDefinition> item : comboList) {
+			logger.debug("added item: " + item);
+			combo.addItem(item);
+		}
+		combo.setRenderer(new VirtueAndAppListCellRenderer(iconService));
+		// combo.setRenderer(new SimpleVirtueAndAppListCellRenderer());
 
 		JCheckBox saveCheckbox = new JCheckBox("Save a preference");
 		JButton openButton = new JButton("Open");
@@ -192,8 +195,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 						favorites.put(PREF_KEY_APP_ID, pair.getRight().getId());
 					}
 				} catch (Exception e1) {
-					String msg = "Unable to save default Application for "
-							+ defaultApplicationType.toString();
+					String msg = "Unable to save default Application for " + defaultApplicationType.toString();
 					logAndAlertError(e1, "Error writing preferences ", msg);
 				}
 				startAppWithParam(pair, params);
