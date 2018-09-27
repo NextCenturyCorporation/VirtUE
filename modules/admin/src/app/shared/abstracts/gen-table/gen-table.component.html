@@ -20,7 +20,7 @@
   <div class="mui-container-fluid data-list no-overflow">
     <div class="mui-row table-header-group" fxLayout="row">
 
-      <span *ngIf="selectionMode === 'multi'" fxFlex="10%" class="table-header float-left" fxLayoutAlign="center center">
+      <span *ngIf="selectionMode === 'multi'" fxFlex="8%" class="float-left mui-col-md-1 table-header" fxLayoutAlign="center center">
         <mat-checkbox
           name="selectAll"
           (change)="selectAll($event.checked)"></mat-checkbox>
@@ -28,11 +28,6 @@
 
       <div class="table-header" fxFlex="auto">
         <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.width}}">
-
-          <!-- if it's a text column, and therefore sortable -->
-          <ng-container *ngIf="isText(column)" >
-
-          </ng-container>
 
           <!-- if it's a checkbox column -->
           <ng-container *ngIf="isCheckbox(column)">
@@ -46,6 +41,7 @@
             </label>
           </ng-container>
 
+          <!-- If it's a sortable column -->
           <ng-container *ngIf="isSortable(column)">
             <a (click)="setColumnSortDirection(column)">{{column.label}}</a>
             <span class="list-sorter" (click)="setColumnSortDirection(column)">
@@ -78,15 +74,13 @@
 
     <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
     It is passed the preceeding list, followed by the values between colons -->
-    <!-- can make it pass a conditional that's set to some default in the calling class when setting up a table -->
-    <!-- May even be able to get rid of the filterValue? And just have the calling class change the condition? -->
-    <div *ngFor="let elem of elements | listFilterSort : sortColumn.formatElement : sortDirection : filterColumnName : filterCondition : update;
+    <div *ngFor="let elem of elements | listFilterSort : sortColumn.sortField : sortDirection : filterColumnName : filterCondition : update;
      let index = index; trackBy: indexTracker"
       appActiveClass [ngStyle]="{'background-color': elem.obj.enabled === false ? '#e7e7e7' : '#ffffff' }" fxLayout="row" class="mui-row table-row" >
 
-      <!-- If this table should display colored labels (elem.e., if the table holds Virtues) -->
+      <!-- If this table should display colored labels (i.e., if the table holds Virtues) -->
       <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
-                [ngStyle]="{ 'background-color': elem.color, 'left':'0px' }">
+                [ngStyle]="{ 'background-color': elem.obj.color, 'left':'0px' }">
       </div>
 
 
@@ -184,6 +178,15 @@
                 watch the same object, and groups them together. So all radio buttons in all columns that watch the {{column.fieldName}}
                 field of this particular elem.obj, will be put into the same group. To add more radio button options, just add
                 another radioButtonColumn with the same fieldName. -->
+
+                <!-- To make the radio buttons be able to be grouped completely abitrarily, change RadioButtonColumn to work
+                with the functions below, where getParentOfObjectToWatch(elem: TableElement) defaults to just returning elem.obj,
+                but if desired, could also return this.something, if all objects in a single column should all watch the same attribute of the
+                page that loaded the table.
+                Like perhaps the columns represent roles that exactly one Virtue or something must fill, but a single virtue can fill many roles.
+                So for each column, you'd need to be able to pick one Virtue for the table.-->
+                <!-- <mat-radio-group [(ngModel)]="column.getParentOfObjectToWatch(elem)[column.getWatchedAttributeName()]"> -->
+
             <mat-radio-group [(ngModel)]="elem.obj[column.fieldName]">
               <mat-radio-button [value]="column.value" >
               </mat-radio-button>

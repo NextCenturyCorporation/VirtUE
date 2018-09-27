@@ -48,7 +48,7 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
  *
  * In general:
  *    Columns can be TextColumn, ListColumn, CheckboxColumn, DropdownColumn, InputFieldColumn, IconColumn, RadioButtonColumn
- *    
+ *
  *
  * Using this table needs three things:
  *   1. Have a table object. Include it in the html file via:
@@ -525,7 +525,7 @@ export class GenericTableComponent<T> {
    * @return true iff obj is a sortable columns - only sortable columns have a "formatElement" field.
    */
   isSortable(obj: any) {
-    return 'formatElement' in obj;
+    return 'sortField' in obj;
   }
 
   /**
