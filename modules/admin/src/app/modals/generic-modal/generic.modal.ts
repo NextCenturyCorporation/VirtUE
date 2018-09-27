@@ -30,13 +30,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 })
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
 
-
   /** The table itself */
   @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
-
-
-  /** Appears below the modal's title, if defined */
-  headerMsg: string;
 
   /** Appears in the modals title as: 'Add/Remove {pluralItem}' */
   pluralItem: string;
@@ -172,7 +167,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
 
   /**
    * @return whether or not the elements being listed have colored labels. True for, and only for, all tables that list virtues.
-   * overridden to that effect by virtue-list, virtues-modal, main-user-tab, vm-usage-tab, and virtue-settings
+   * overridden to that effect by virtues-modal
    */
   hasColoredLabels(): boolean {
     return false;
