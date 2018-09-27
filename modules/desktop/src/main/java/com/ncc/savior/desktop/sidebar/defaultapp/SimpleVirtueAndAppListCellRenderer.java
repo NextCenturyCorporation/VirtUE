@@ -1,4 +1,4 @@
-package com.ncc.savior.desktop.sidebar.virtueapp;
+package com.ncc.savior.desktop.sidebar.defaultapp;
 
 import java.awt.Component;
 

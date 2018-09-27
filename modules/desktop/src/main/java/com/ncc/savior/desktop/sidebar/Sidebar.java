@@ -57,7 +57,7 @@ import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
-import com.ncc.savior.desktop.sidebar.virtueapp.VirtueStatusComparator;
+import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
