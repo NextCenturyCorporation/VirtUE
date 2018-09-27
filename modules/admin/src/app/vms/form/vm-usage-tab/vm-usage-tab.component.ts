@@ -18,8 +18,11 @@ import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
+
+import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../../../shared/services/config-urls.enum';
+import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';

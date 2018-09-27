@@ -5,7 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
+
+import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../../../shared/services/config-urls.enum';
+import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 

@@ -13,7 +13,6 @@ import { ItemService } from '../../services/item.service';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../models/item.model';
-import { Mode, Datasets } from '../../enums/enums';
 
 import { GenericDataPageComponent } from '../gen-data-page/gen-data-page.component';
 import { GenericFormTabComponent } from '../gen-tab/gen-tab.component';
@@ -21,6 +20,9 @@ import { GenericTableComponent } from '../gen-table/gen-table.component';
 import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
+
+import { Mode } from './mode.enum';
+import { Datasets } from '../gen-data-page/datasets.enum';
 
 /**
  * @class __

@@ -18,7 +18,9 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
-import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
+import { Mode } from '../../abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../../services/config-urls.enum';
+import { Datasets } from '../../abstracts/gen-data-page/datasets.enum';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 

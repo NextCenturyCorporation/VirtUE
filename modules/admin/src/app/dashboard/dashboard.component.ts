@@ -9,8 +9,9 @@ import { SensingModel } from '../shared/models/sensing.model';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { SensingService } from '../shared/services/sensing.service';
 import { ItemService } from '../shared/services/item.service';
+import { ConfigUrls } from '../shared/services/config-urls.enum';
 
-import { ConfigUrls, Datasets } from '../shared/enums/enums';
+import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
 import { Column } from '../shared/models/column.model';
 import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.component';
 

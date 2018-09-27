@@ -144,7 +144,7 @@ export class GenericTableComponent {
    * Must be called by the object holding this table, passing in the parameters the table
    * needs. 'items' isn't passed in, because it usually isn't available at render time when the table is built.
    *
-   * @param params is bundled into a single object so the callee can (has to) see what element they're setting to what,
+   * @param params is bundled into a single object to make it easier for the callee to see what element they're setting to what,
    * and because most elements are necessary.
    *
    */

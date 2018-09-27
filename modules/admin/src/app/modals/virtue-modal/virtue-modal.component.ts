@@ -6,7 +6,9 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrls, Datasets } from '../../shared/enums/enums';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+
 import { Column } from '../../shared/models/column.model';
 import { Item } from '../../shared/models/item.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';

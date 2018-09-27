@@ -7,7 +7,7 @@ import { DialogsComponent } from '../../../../dialogs/dialogs.component';
 import { Item } from '../../../models/item.model';
 import { Column } from '../../../models/column.model';
 import { SubMenuOptions } from '../../../models/subMenuOptions.model';
-import { Mode } from '../../../enums/enums';
+import { Mode } from '../../../abstracts/gen-form/mode.enum';
 
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';

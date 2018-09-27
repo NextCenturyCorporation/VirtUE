@@ -18,13 +18,14 @@ import { VirtualMachine } from '../shared/models/vm.model';
 import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
-import { Mode, Datasets } from '../shared/enums/enums';
 
 import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
-import { ConfigUrls } from '../shared/enums/enums';
-
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+
+import { Mode } from '../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../shared/services/config-urls.enum';
+import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
 
 /**
  *
