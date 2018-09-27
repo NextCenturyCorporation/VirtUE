@@ -1,19 +1,23 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JScrollPane;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -153,13 +157,13 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 			List<DesktopVirtue> possibleApps, String params) {
 
 		JDialog dialog = new JDialog();
-		dialog.setTitle("Open Browser");
-		JScrollPane sp = new JScrollPane();
-		sp.getVerticalScrollBar().setUnitIncrement(16);
-		JPanel container = new JPanel();
+		dialog.setTitle("Where do you want to open " + defaultApplicationType.toString());
+		dialog.setAlwaysOnTop(true);
 
-		List<Pair<DesktopVirtue, ApplicationDefinition>> comboList = new ArrayList<Pair<DesktopVirtue, ApplicationDefinition>>();
-		JComboBox<Pair<DesktopVirtue, ApplicationDefinition>> combo = new JComboBox<Pair<DesktopVirtue, ApplicationDefinition>>();
+		Vector<Pair<DesktopVirtue, ApplicationDefinition>> comboList = new Vector<Pair<DesktopVirtue, ApplicationDefinition>>();
+		// JComboBox<Pair<DesktopVirtue, ApplicationDefinition>> list = new
+		// JComboBox<Pair<DesktopVirtue, ApplicationDefinition>>();
+
 		for (DesktopVirtue v : possibleApps) {
 			for (ApplicationDefinition a : v.getApps().values()) {
 				comboList.add(Pair.of(v, a));
@@ -170,9 +174,13 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 		logger.debug("postsort: " + comboList);
 		for (Pair<DesktopVirtue, ApplicationDefinition> item : comboList) {
 			logger.debug("added item: " + item);
-			combo.addItem(item);
 		}
-		combo.setRenderer(new VirtueAndAppListCellRenderer(iconService));
+		JLabel label = new JLabel("<html>Choose a virtue and application combo to run "
+				+ defaultApplicationType.toString() + " with params: <br/> &nbsp;&nbsp;" + params + "</html>");
+		JList<Pair<DesktopVirtue, ApplicationDefinition>> list = new JList<Pair<DesktopVirtue, ApplicationDefinition>>(
+				comboList);
+
+		list.setCellRenderer(new VirtueAndAppListCellRenderer(iconService));
 		// combo.setRenderer(new SimpleVirtueAndAppListCellRenderer());
 
 		JCheckBox saveCheckbox = new JCheckBox("Save a preference");
@@ -182,9 +190,8 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				@SuppressWarnings("unchecked")
-				Pair<DesktopVirtue, ApplicationDefinition> pair = (Pair<DesktopVirtue, ApplicationDefinition>) combo
-						.getSelectedItem();
+				Pair<DesktopVirtue, ApplicationDefinition> pair = list.getSelectedValue();
+
 				DesktopUser user;
 				try {
 					if (saveCheckbox.isSelected()) {
@@ -202,12 +209,56 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 				dialog.dispose();
 			}
 		});
+		int itemSize = comboList.size();
+		int showItemSize = itemSize < 10 ? itemSize : 10;
+		list.setVisibleRowCount(showItemSize);
+		GridBagLayout gbl = new GridBagLayout();
+		dialog.setLayout(gbl);
+		GridBagConstraints labelGbc = new GridBagConstraints();
+		labelGbc.fill = GridBagConstraints.BOTH;
+		labelGbc.gridx = 0;
+		labelGbc.gridy = 0;
+		labelGbc.gridheight = 1;
+		labelGbc.gridwidth = 2;
+		labelGbc.ipadx = 2;
+		labelGbc.ipady = 2;
+		// labelGbc.weightx=2;
+		// labelGbc.weighty = 200;
+		// scrollGbc.weightx = 1;
+		// scrollGbc.weighty = 1;
 
-		container.add(combo);
-		container.add(saveCheckbox);
-		container.add(openButton);
-		sp.setViewportView(container);
-		dialog.add(sp);
+		GridBagConstraints scrollGbc = new GridBagConstraints();
+		scrollGbc.fill = GridBagConstraints.BOTH;
+		scrollGbc.gridx = 0;
+		scrollGbc.gridy = 1;
+		scrollGbc.gridheight = 1;
+		scrollGbc.gridwidth = 2;
+		scrollGbc.weightx = 1;
+		scrollGbc.weighty = 1;
+		// scrollGbc.ipadx = 2;
+		// scrollGbc.ipady = 2;
+		scrollGbc.insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints checkGbc = new GridBagConstraints();
+		// checkGbc.fill = GridBagConstraints.BOTH;
+		checkGbc.gridx = 0;
+		checkGbc.gridy = 2;
+		GridBagConstraints openGbc = new GridBagConstraints();
+		// openGbc.fill = GridBagConstraints.BOTH;
+		openGbc.gridx = 1;
+		openGbc.gridy = 2;
+
+		JScrollPane listScroll = new JScrollPane(list);
+		// list.setBackground(Color.red);
+		list.setOpaque(false);
+		list.setBorder(BorderFactory.createEmptyBorder());
+		listScroll.setBorder(BorderFactory.createEmptyBorder());
+		listScroll.setMinimumSize(new Dimension(100, 300));
+		dialog.add(label, labelGbc);
+		dialog.add(listScroll, scrollGbc);
+		dialog.add(saveCheckbox, checkGbc);
+		dialog.add(openButton, openGbc);
+		// sp.setViewportView(container);
+		// dialog.add(sp);
 		dialog.setSize(new Dimension(400, 250));
 		dialog.setVisible(true);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

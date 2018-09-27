@@ -496,7 +496,6 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel alertContainer = new JPanel(new BorderLayout());
 		alertContainer.add(alert, BorderLayout.EAST);
 		alertContainer.setBackground(Color.DARK_GRAY);
-		alertContainer.setToolTipText("Alert History");
 		alert.setToolTipText("Alert History");
 
 		ImageIcon prefIcon = new ImageIcon(Sidebar.class.getResource("/images/close-button.png"));
@@ -510,7 +509,7 @@ public class Sidebar implements VirtueChangeHandler {
 		JPanel prefContainer = new JPanel(new BorderLayout());
 		prefContainer.add(prefs, BorderLayout.EAST);
 		prefContainer.setBackground(Color.DARK_GRAY);
-		prefContainer.setToolTipText("Clear Preferences");
+		prefs.setToolTipText("Clear Preferences");
 
 		neIconBar.add(prefContainer);
 		neIconBar.add(alertContainer);
