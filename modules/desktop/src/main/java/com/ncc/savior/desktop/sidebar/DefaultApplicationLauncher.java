@@ -1,24 +1,10 @@
 package com.ncc.savior.desktop.sidebar;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -33,8 +19,9 @@ import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
+import com.ncc.savior.desktop.sidebar.virtueapp.DefaultAppTableDialog;
+import com.ncc.savior.desktop.sidebar.virtueapp.IAppChooser;
 import com.ncc.savior.desktop.sidebar.virtueapp.StatusFirstVirtueAppComparitor;
-import com.ncc.savior.desktop.sidebar.virtueapp.VirtueAndAppListCellRenderer;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -155,113 +142,37 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 
 	private void startAppFromUserSelection(DefaultApplicationType defaultApplicationType,
 			List<DesktopVirtue> possibleApps, String params) {
-
-		JDialog dialog = new JDialog();
-		dialog.setTitle("Where do you want to open " + defaultApplicationType.toString());
-		dialog.setAlwaysOnTop(true);
-
 		Vector<Pair<DesktopVirtue, ApplicationDefinition>> comboList = new Vector<Pair<DesktopVirtue, ApplicationDefinition>>();
-		// JComboBox<Pair<DesktopVirtue, ApplicationDefinition>> list = new
-		// JComboBox<Pair<DesktopVirtue, ApplicationDefinition>>();
-
 		for (DesktopVirtue v : possibleApps) {
 			for (ApplicationDefinition a : v.getApps().values()) {
 				comboList.add(Pair.of(v, a));
 			}
 		}
-		logger.debug("Presort: " + comboList);
 		comboList.sort(new StatusFirstVirtueAppComparitor());
-		logger.debug("postsort: " + comboList);
-		for (Pair<DesktopVirtue, ApplicationDefinition> item : comboList) {
-			logger.debug("added item: " + item);
-		}
-		JLabel label = new JLabel("<html>Choose a virtue and application combo to run "
-				+ defaultApplicationType.toString() + " with params: <br/> &nbsp;&nbsp;" + params + "</html>");
-		JList<Pair<DesktopVirtue, ApplicationDefinition>> list = new JList<Pair<DesktopVirtue, ApplicationDefinition>>(
-				comboList);
 
-		list.setCellRenderer(new VirtueAndAppListCellRenderer(iconService));
-		// combo.setRenderer(new SimpleVirtueAndAppListCellRenderer());
+		// IAppChooser dald = new DefaultAppListDialog(iconService);
+		IAppChooser dald = new DefaultAppTableDialog(iconService);
+		dald.setVirtueAppChoices(comboList);
+		dald.setParameters(params);
+		dald.setAppType(defaultApplicationType);
+		dald.setStartAppBiConsumer((pair, ps) -> {
+			startAppWithParam(pair, ps);
+		});
 
-		JCheckBox saveCheckbox = new JCheckBox("Save a preference");
-		JButton openButton = new JButton("Open");
-		openButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				Pair<DesktopVirtue, ApplicationDefinition> pair = list.getSelectedValue();
-
-				DesktopUser user;
-				try {
-					if (saveCheckbox.isSelected()) {
-						user = authorizationService.getUser();
-						Preferences favorites = Preferences.userRoot().node("VirtUE/Desktop/" + user.getUsername()
-								+ "/defaultApps/" + defaultApplicationType.toString());
-						favorites.put(PREF_KEY_VIRTUE_TEMPLATE_ID, pair.getLeft().getTemplateId());
-						favorites.put(PREF_KEY_APP_ID, pair.getRight().getId());
-					}
-				} catch (Exception e1) {
-					String msg = "Unable to save default Application for " + defaultApplicationType.toString();
-					logAndAlertError(e1, "Error writing preferences ", msg);
-				}
-				startAppWithParam(pair, params);
-				dialog.dispose();
+		dald.setSavePreferenceAction((pair) -> {
+			try {
+				DesktopUser user = authorizationService.getUser();
+				Preferences favorites = Preferences.userRoot().node(
+						"VirtUE/Desktop/" + user.getUsername() + "/defaultApps/" + defaultApplicationType.toString());
+				favorites.put(PREF_KEY_VIRTUE_TEMPLATE_ID, pair.getLeft().getTemplateId());
+				favorites.put(PREF_KEY_APP_ID, pair.getRight().getId());
+			} catch (Exception e1) {
+				String msg = "Unable to save default Application for " + defaultApplicationType.toString();
+				logAndAlertError(e1, "Error writing preferences ", msg);
 			}
 		});
-		int itemSize = comboList.size();
-		int showItemSize = itemSize < 10 ? itemSize : 10;
-		list.setVisibleRowCount(showItemSize);
-		GridBagLayout gbl = new GridBagLayout();
-		dialog.setLayout(gbl);
-		GridBagConstraints labelGbc = new GridBagConstraints();
-		labelGbc.fill = GridBagConstraints.BOTH;
-		labelGbc.gridx = 0;
-		labelGbc.gridy = 0;
-		labelGbc.gridheight = 1;
-		labelGbc.gridwidth = 2;
-		labelGbc.ipadx = 2;
-		labelGbc.ipady = 2;
-		// labelGbc.weightx=2;
-		// labelGbc.weighty = 200;
-		// scrollGbc.weightx = 1;
-		// scrollGbc.weighty = 1;
 
-		GridBagConstraints scrollGbc = new GridBagConstraints();
-		scrollGbc.fill = GridBagConstraints.BOTH;
-		scrollGbc.gridx = 0;
-		scrollGbc.gridy = 1;
-		scrollGbc.gridheight = 1;
-		scrollGbc.gridwidth = 2;
-		scrollGbc.weightx = 1;
-		scrollGbc.weighty = 1;
-		// scrollGbc.ipadx = 2;
-		// scrollGbc.ipady = 2;
-		scrollGbc.insets = new Insets(5, 5, 5, 5);
-		GridBagConstraints checkGbc = new GridBagConstraints();
-		// checkGbc.fill = GridBagConstraints.BOTH;
-		checkGbc.gridx = 0;
-		checkGbc.gridy = 2;
-		GridBagConstraints openGbc = new GridBagConstraints();
-		// openGbc.fill = GridBagConstraints.BOTH;
-		openGbc.gridx = 1;
-		openGbc.gridy = 2;
-
-		JScrollPane listScroll = new JScrollPane(list);
-		// list.setBackground(Color.red);
-		list.setOpaque(false);
-		list.setBorder(BorderFactory.createEmptyBorder());
-		listScroll.setBorder(BorderFactory.createEmptyBorder());
-		listScroll.setMinimumSize(new Dimension(100, 300));
-		dialog.add(label, labelGbc);
-		dialog.add(listScroll, scrollGbc);
-		dialog.add(saveCheckbox, checkGbc);
-		dialog.add(openButton, openGbc);
-		// sp.setViewportView(container);
-		// dialog.add(sp);
-		dialog.setSize(new Dimension(400, 250));
-		dialog.setVisible(true);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dald.start();
 
 	}
 }

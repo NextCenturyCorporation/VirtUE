@@ -33,45 +33,11 @@ public class VirtueAndAppListCellRenderer implements ListCellRenderer<Pair<Deskt
 		DesktopVirtue v = value.getLeft();
 		ApplicationDefinition a = value.getRight();
 		VirtueState state = v.getVirtueState();
-		Color yellow = new Color(170, 170, 50);
-		Color green = new Color(0, 100, 0);
-		Color orange = new Color(204, 84, 0);
-		Color red = new Color(150, 0, 0);
-		Color statusColor = Color.RED;
-
-		switch (state) {
-		// ok now category
-		case RUNNING:
-			statusColor = getColor(isSelected, cellHasFocus, green);
-			break;
-		// ok soon category
-		case PAUSED:
-		case PAUSING:
-		case RESUMING:
-		case CREATING:
-		case LAUNCHING:
-			statusColor = getColor(isSelected, cellHasFocus, yellow);
-			break;
-		// ok in a while category
-		case STOPPED:
-		case UNPROVISIONED:
-			statusColor = getColor(isSelected, cellHasFocus, orange);
-			break;
-		// no good category
-		case DELETED:
-		case STOPPING:
-		case DELETING:
-		case ERROR:
-		default:
-			statusColor = getColor(isSelected, cellHasFocus, red);
-			break;
-
-		}
 		String iconKey = value.getRight().getIconKey();
 		Image image = iconService.getImageNow(iconKey);
 		JLabel virtueLabel = new JLabel(v.getName());
 		JLabel status = new JLabel(v.getVirtueState().toString());
-
+		Color statusColor = StatusColor.getColor(state, isSelected, cellHasFocus);
 		JLabel appLabel;
 		JLabel iconLabel = null;
 		if (image != null) {
@@ -117,8 +83,7 @@ public class VirtueAndAppListCellRenderer implements ListCellRenderer<Pair<Deskt
 
 		Color bg;
 		if (isSelected) {
-			component.setBorder(
-					BorderFactory.createLoweredBevelBorder());
+			component.setBorder(BorderFactory.createLoweredBevelBorder());
 			// bg = new Color();
 		} else {
 			component.setBorder(BorderFactory.createRaisedBevelBorder());
@@ -130,20 +95,4 @@ public class VirtueAndAppListCellRenderer implements ListCellRenderer<Pair<Deskt
 
 		return component;
 	}
-
-	private Color getColor(boolean isSelected, boolean cellHasFocus, Color baseColor) {
-		boolean highlight = isSelected || cellHasFocus;
-		float highlightPercent = .8f;
-		if (highlight) {
-			int r = (int) (baseColor.getRed() * highlightPercent);
-			int g = (int) (baseColor.getGreen() * highlightPercent);
-			int b = (int) (baseColor.getBlue() * highlightPercent);
-			Color c = new Color(r, g, b);
-			return c;
-		} else {
-			return baseColor;
-		}
-
-	}
-
 }
