@@ -28,6 +28,8 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -117,13 +119,19 @@ public class AwsEc2Wrapper {
 	public void startVirtualMachines(Collection<VirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
-		StartInstancesResult result = ec2.startInstances(startInstancesRequest);
-		for (InstanceStateChange i : result.getStartingInstances()) {
-			for (VirtualMachine vm : vms) {
-				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
-					vm.setState(VmState.LAUNCHING);
+		try {
+			StartInstancesResult result = ec2.startInstances(startInstancesRequest);
+			for (InstanceStateChange i : result.getStartingInstances()) {
+				for (VirtualMachine vm : vms) {
+					if (vm.getInfrastructureId().equals(i.getInstanceId())) {
+						vm.setState(VmState.LAUNCHING);
+					}
 				}
 			}
+		} catch (Exception e) {
+			String msg = "error starting virtual machines = " + vms;
+			logger.error(msg, e);
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, msg, e);
 		}
 	}
 
@@ -141,7 +149,9 @@ public class AwsEc2Wrapper {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("error", e);
+			String msg = "error stopping virtual machines = " + vms;
+			logger.error(msg, e);
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, msg, e);
 		}
 	}
 

@@ -443,6 +443,13 @@ public class XenHostManager {
 			guestManager.startGuests(linuxVms, finalLinuxFuture);
 		};
 		xenFuture.thenRun(startGuestsRunnable);
+		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
+		linuxFuture.handle((myVms, ex) -> {
+			if (ex != null) {
+				handleError(virtueInstance, finalXenFuture, xenVm, ex);
+			}
+			return myVms;
+		});
 	}
 
 	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms,
@@ -467,7 +474,15 @@ public class XenHostManager {
 			addVmsToStoppingPipeline(xenVm, finalXenFuture);
 		};
 
-		linuxFuture.thenRun(stopHostRunnable);
+		// linuxFuture.thenRun(stopHostRunnable);
+		linuxFuture.handle((myVms, ex) -> {
+			if (ex != null) {
+				handleError(virtueInstance, finalXenFuture, xenVm, ex);
+			} else {
+				stopHostRunnable.run();
+			}
+			return myVms;
+		});
 		finalXenFuture.thenRun(() -> {
 			for (VirtualMachine vm : linuxVms) {
 				CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm,
