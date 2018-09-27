@@ -104,11 +104,11 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
     }
     this.table.setUp({
       cols: this.getColumns(),
-      // opts: this.getSubMenu(),
       coloredLabels: this.hasColoredLabels(),
       filters: this.getTableFilters(),
       tableWidth: 12,
-      noDataMsg: this.getNoDataMsg()
+      noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Item) => !i.enabled
     });
   }
 

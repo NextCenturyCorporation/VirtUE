@@ -238,7 +238,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.printerTable.setUp({
       cols: this.getPrinterColumns(),
       coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table.
+      filters: [],
       tableWidth: 12,
       noDataMsg: "No printers have been added yet to this Virtue.",
       editingEnabled: () => !this.inViewMode()
@@ -305,7 +305,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.netWorkPermsTable.setUp({
       cols: this.getNetworkColumns(),
-      filters: [], // don't allow filtering on the form's child table.
+      filters: [],
       tableWidth: 10,
       noDataMsg: "This Virtue has not been granted permission to access any network",
       editingEnabled: () => !this.inViewMode()
@@ -414,6 +414,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       filters: [],
       tableWidth: 10,
       noDataMsg: "No file systems have been set up in the global settings",
+      elementIsDisabled: (fs: FileSysPermission) => !fs.enabled,
       editingEnabled: () => !this.inViewMode()
     });
   }
@@ -466,11 +467,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.allowedPasteTargetsTable.setUp({
       cols: this.getPasteColumns(),
-      // opts: this.getPasteSubMenu(),
       coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table.
+      filters: [],
       tableWidth: 10,
       noDataMsg: this.getNoPasteDataMsg(),
+      elementIsDisabled: (v: Virtue) => !v.enabled,
       editingEnabled: () => !this.inViewMode()
     });
   }

@@ -132,7 +132,6 @@ export class UserListComponent extends GenericListComponent {
    * @param user the user whose status we wish to toggle.
    */
   toggleItemStatus(user: User): void {
-    console.log(user);
     if (user.getName().toUpperCase() === 'ADMIN' && user.enabled) {
       this.openDialog('Disable ' + user.getName(), (() => this.setItemStatus(user, false)));
       // TODO: Remove this message when/if this is no longer applicable.

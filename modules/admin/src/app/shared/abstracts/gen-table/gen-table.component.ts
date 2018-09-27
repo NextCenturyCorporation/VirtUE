@@ -143,13 +143,13 @@ export class GenericTableComponent<T> {
   selectionMode: SelectionMode;
 
   /**
-  * compares two objects of the type held by this table's TableElements, and returns true if they are equal.
-  * Caller-defined.
-  */
+   * compares two objects of the type held by this table's TableElements, and returns true if they are equal.
+   * Caller-defined.
+   */
   equals?: (obj1: T, obj2: T) => boolean;
 
   /**
-   * A caller-overrideable function for defining whether the interactable columns/things in this table should be disabled, given
+   * A caller-overrideable function for defining whether the interactable components of columns in this table should be disabled, given
    * some caller-defined table state. Default is a function that returns false - disabling most interactable html objects.
    * Note that this doesn't disable sorting or filtering, or SubMenuOpts. Sub menus are expected to manage their existence
    * through their own "shouldAppear" function.
@@ -157,9 +157,21 @@ export class GenericTableComponent<T> {
   editingEnabled: (() => boolean) = () => false;
 
   /**
-   *
+   * Holds the object within a selected TableElement, if the table is in SINGLE selection mode.
    */
-   selectedObj: T;
+  selectedObj: T;
+
+  /**
+   * a caller-defined function that returns true iff a row should be shown as 'disabled' - greyed out, and unselectable, based on the
+   * state of the object held by that row's TableElement.
+   */
+  elementIsDisabled: ((obj: T) => boolean) = () => false;
+
+  /**
+   * A caller-defined function that returns a color to give a small label on each row, based on the object held by that row.
+   * Defaults to 'transparent', because most tables don't need
+   */
+  getColor: ((obj: T) => string) = () => 'transparent';
 
   /**
    * Set all parameters to default parameters for the meantime before the calling class calls [[setUp]]().
@@ -187,9 +199,6 @@ export class GenericTableComponent<T> {
     /** see this.[[colData]] */
     cols: Column[];
 
-    /** see this.[[subMenuOptions]] */
-    // opts: SubMenuOptions[];
-
     /** see this.[[filterOptions]] */
     filters: {value: string, text: string}[];
 
@@ -202,8 +211,14 @@ export class GenericTableComponent<T> {
     /** see this.[[noDataMessage]] */
     noDataMsg: string,
 
+    /** see this.[[elementShouldBeDisabled]] */
+    elementIsDisabled?: ((obj: T) => boolean),
+
     /** see this.[[hasColoredLabels]] */
     coloredLabels?: boolean;
+
+    /** see this.[[getColor]] */
+    getColor?: ((obj: T) => string),
 
     /** see this.[[editingEnabled]] */
     editingEnabled?: () => boolean
@@ -224,6 +239,9 @@ export class GenericTableComponent<T> {
 
     if (params.coloredLabels !== undefined) {
       this.hasColoredLabels = params.coloredLabels;
+      if (params.getColor) {
+        this.getColor = params.getColor;
+      }
     }
     else {
       this.hasColoredLabels = false;
@@ -235,6 +253,11 @@ export class GenericTableComponent<T> {
     if ((params.tableWidth >= 1 && params.tableWidth <= 12)) {
       this.tableWidth = params.tableWidth;
     }
+
+    if (params.elementIsDisabled !== undefined) {
+      this.elementIsDisabled = params.elementIsDisabled;
+    }
+
 
     if (params.editingEnabled !== undefined) {
       this.editingEnabled = params.editingEnabled;

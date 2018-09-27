@@ -46,6 +46,7 @@ export class VirtueModalComponent extends GenericModalComponent {
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
+    this.pluralItem = "Virtue Templates";
   }
 
   /**
@@ -88,22 +89,6 @@ export class VirtueModalComponent extends GenericModalComponent {
     return {
       serviceConfigUrl: ConfigUrls.VIRTUES,
       neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
-    };
-  }
-
-  /**
-   * See [[GenericListComponent.getListOptions]] for details
-   * @return child-list-specific information needed by the generic list page functions.
-   */
-  getListOptions(): {
-      prettyTitle: string,
-      itemName: string,
-      pluralItem: string,
-      domain?: string} {
-    return {
-      prettyTitle: "Virtue Templates",
-      itemName: "Virtue Template",
-      pluralItem: "Virtue Templates"
     };
   }
 

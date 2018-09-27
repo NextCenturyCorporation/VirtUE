@@ -150,11 +150,11 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
 
     this.childrenTable.setUp({
       cols: this.getColumns(),
-      // opts: this.getSubMenu(),
       coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table.
+      filters: [], // don't enable filtering by status on the form's child table.
       tableWidth: 9,
       noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Item) => !i.enabled,
       editingEnabled: () => !this.inViewMode()
     });
   }

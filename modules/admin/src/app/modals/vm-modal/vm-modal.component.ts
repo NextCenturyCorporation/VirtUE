@@ -47,6 +47,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
       super(router, baseUrlService, itemService, dialog, dialogRef, data);
+      this.pluralItem = "Virtual Machine Templates";
     }
 
   /**
@@ -75,23 +76,6 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       neededDatasets: [Datasets.APPS, Datasets.VMS]
     };
   }
-
-  /**
-   * See [[GenericListComponent.getListOptions]] for details
-   * @return child-list-specific information needed by the generic list page functions.
-   */
-  getListOptions(): {
-      prettyTitle: string,
-      itemName: string,
-      pluralItem: string,
-      domain?: string} {
-    return {
-      prettyTitle: "Virtual Machine Templates",
-      itemName: "Vm Template",
-      pluralItem: "VM Templates"
-    };
-  }
-
   /**
    * @return a string to be displayed in the virtue table, when no VM templates exit.
    */

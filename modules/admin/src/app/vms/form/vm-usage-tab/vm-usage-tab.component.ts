@@ -170,6 +170,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
       filters: [],
       tableWidth: 8,
       noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
+      elementIsDisabled: (v: Virtue) => !v.enabled,
       editingEnabled: () => !this.inViewMode()
     });
   }

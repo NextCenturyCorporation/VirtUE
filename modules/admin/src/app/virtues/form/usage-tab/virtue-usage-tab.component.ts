@@ -160,6 +160,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
       filters: [],
       tableWidth: 8,
       noDataMsg: "No users have been assigned this Virtue at the moment.",
+      elementIsDisabled: (u: User) => !u.enabled,
       editingEnabled: () => !this.inViewMode()
     });
   }

@@ -100,13 +100,11 @@ export class ConfigSensorsComponent extends GenericPageComponent implements OnIn
   getColumns(): Column[] {
     return [
       new TextColumn("Sensor Context", 3, (s: Sensor) => s.name, SORT_DIR.ASC),
-      // new LabelColumn("Security Levels:", 1),
       new RadioButtonColumn("Off",          1, "level", VigilenceLevel.OFF),
       new RadioButtonColumn("Default",      1, "level", VigilenceLevel.DEFAULT),
       new RadioButtonColumn("Low",          1, "level", VigilenceLevel.LOW),
       new RadioButtonColumn("High",         1, "level", VigilenceLevel.HIGH),
       new RadioButtonColumn("Adversarial",  2, "level", VigilenceLevel.ADVERSARIAL),
-      // new LabelColumn("Status:", 1),
       new RadioButtonColumn("On",           1, "status", "ON"),
       new RadioButtonColumn("Off",          1, "status", "OFF")
     ];

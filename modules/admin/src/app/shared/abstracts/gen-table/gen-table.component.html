@@ -76,11 +76,11 @@
     It is passed the preceeding list, followed by the values between colons -->
     <div *ngFor="let elem of elements | listFilterSort : sortColumn.sortField : sortDirection : filterColumnName : filterCondition : update;
      let index = index; trackBy: indexTracker"
-      appActiveClass [ngStyle]="{'background-color': elem.obj.enabled === false ? '#e7e7e7' : '#ffffff' }" fxLayout="row" class="mui-row table-row" >
+      appActiveClass [ngStyle]="{'background-color': elementIsDisabled(elem.obj) ? '#e7e7e7' : '#ffffff' }" fxLayout="row" class="mui-row table-row" >
 
       <!-- If this table should display colored labels (i.e., if the table holds Virtues) -->
       <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
-                [ngStyle]="{ 'background-color': elem.obj.color, 'left':'0px' }">
+                [ngStyle]="{ 'background-color': getColor(elem.obj), 'left':'0px' }">
       </div>
 
 
@@ -88,14 +88,14 @@
       <span *ngIf="selectionMode === 'multi'" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
         <mat-checkbox
           name="selectionCheckbox"
-          [disabled]="!elem.obj.enabled"
+          [disabled]="elementIsDisabled(elem.obj) || !editingEnabled()"
           [(ngModel)]="elem.selected"></mat-checkbox>
       </span>
 
       <!-- Note that this checkbox is for selection, and is not related to the checkboxes definable in Columns -->
       <span *ngIf="selectionMode === 'single'" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
         <mat-radio-group [(ngModel)]="selectedObj">
-          <mat-radio-button [value]="elem.obj" >
+          <mat-radio-button [value]="elem.obj" [disabled]="elementIsDisabled(elem.obj) || !editingEnabled()">
           </mat-radio-button>
         </mat-radio-group>
       </span>

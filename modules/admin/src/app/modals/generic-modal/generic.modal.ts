@@ -35,8 +35,11 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
 
 
-  /** a string to appear as the list's title - preferably a full description */
-  prettyTitle: string;
+  /** Appears below the modal's title, if defined */
+  headerMsg: string;
+
+  /** Appears in the modals title as: 'Add/Remove {pluralItem}' */
+  pluralItem: string;
 
 
   /** What the containing component watches, to get the user's selections back out of this modal. */
@@ -111,6 +114,8 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       filters: [],
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Item) => !i.enabled,
+      editingEnabled: () => true,
       selectionOptions: {
         selectionMode: this.getSelectionMode(),
         equals: (obj1: Item, obj2: Item) => {return obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID())}
