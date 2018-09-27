@@ -119,10 +119,26 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
 
   /**
    * @return true iff the page is in view mode.
-   * Used when defining most tab's tables, to prevent some types of action when the page is in 'View' mode.
+   * Used in the html to prevent some types of action when the page is in 'View' mode.
    */
   inViewMode(): boolean {
     return this.mode === Mode.VIEW;
+  }
+
+  /**
+   * @return true iff the page is in EDIT mode.
+   * Used in the html to prevent some actions while in EDIT mode.
+   */
+  inEditMode(): boolean {
+    return this.mode === Mode.EDIT;
+  }
+
+  /**
+   * @return true iff the page is in CREATE mode.
+   * Used in the html to change how the page gets displayed in CREATE mode.
+   */
+  inCreateMode(): boolean {
+    return this.mode === Mode.CREATE;
   }
 
   /**

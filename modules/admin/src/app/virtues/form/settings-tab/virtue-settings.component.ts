@@ -534,19 +534,19 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
         (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
         SelectionMode.SINGLE
     );
-
   }
+
 
   /**
    * this brings up a modal through which the user can select one or more Virtues, and have those selections be passed to some
    * caller-defined function when the user hits 'Submit'.
    *
-   * #uncommented
-   * @param currentSelection
-   * @param onComplete
-   * @param selectionMode
+   * @param currentSelection A list of virtue IDs, that should be marked as 'selected' when the modal gets initialized.
+   * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
+   * @param selectionMode Optional. Can be either SelectionMode.MULTI or SelectionMode.SINGLE, but defaults to MULTI
+   *                      if not given.
    *
-   * When implementing filters, the gnericModal should take in arbitray filters (which means this function needs to take them in as well)
+   * When implementing filters, the genericModal should take in arbitray filters (which means this function needs to take them in as well)
    * which are passed to the table as default filters, which can't be removed or edited. Other filters can be defined in the table, which
    * stack on top of those defaults.
    *

@@ -124,8 +124,8 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
 
     let dialogRef = this.getDialogRef(params);
 
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedIDs) => {
-      this.onChildrenChange.emit(selectedIDs);
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedItems) => {
+      this.onChildrenChange.emit(selectedItems);
     },
     () => { // on error
       sub.unsubscribe();

@@ -5,14 +5,14 @@
         <div>
           <br/>
           <mat-form-field>
-            <input type="text" [disabled]="mode === 'View'" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
+            <input type="text" [disabled]="inViewMode()" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
           </mat-form-field>
         </div>
-        <span *ngIf="mode!=='Create'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.getID() }}</span>
+        <span *ngIf="inCreateMode()" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.getID() }}</span>
         <div class="form-item margin-top-15">
           <div class="form-item margin-top-15">
             <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
-            <mat-slide-toggle [(ngModel)]="item.enabled" [disabled]="mode !== 'View'" (click)="statusChange()" [color]="'primary'">
+            <mat-slide-toggle [(ngModel)]="item.enabled" [disabled]="inViewMode()" (click)="statusChange()" [color]="'primary'">
               {{ item.enabled ? 'Enabled' : 'Disabled' }}
             </mat-slide-toggle>
           </div>
@@ -25,7 +25,7 @@
         <div class="mui-row titlebar">
           <div class="mui-col-md-12">
             <h3 class="titlebar-title">Virtual Machines</h3>
-            <button class="titlebar-button" [disabled]="mode === 'View'" (click)="activateModal(item.getID())">Add VM</button>
+            <button class="titlebar-button" [disabled]="inViewMode()" (click)="activateModal(item.getID())">Add VM</button>
           </div>
         </div>
       </div>
