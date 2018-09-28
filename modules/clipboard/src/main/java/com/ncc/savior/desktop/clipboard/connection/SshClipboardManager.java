@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -302,6 +303,16 @@ public class SshClipboardManager implements IClipboardManager {
 			}
 		} else {
 			SshUtil.sftpFile(session, fis, destinationFilePath);
+		}
+		try {
+			InputStream is = SshClipboardManager.class.getClassLoader().getResourceAsStream("savior-browser.sh");
+			SshUtil.sftpFile(session, is, "savior-browser-win.sh");
+			JavaUtil.sleepAndLogInterruption(100);
+			SshUtil.sendCommandFromSession(session,
+					"tr -d '\\15\\32' < " + "savior-browser-win.sh > savior-browser.sh");
+			SshUtil.sendCommandFromSession(session, "chmod 755 savior-browser.sh");
+		} catch (Exception e) {
+			logger.error("Failed to upload savior-browser.sh", e);
 		}
 	}
 
