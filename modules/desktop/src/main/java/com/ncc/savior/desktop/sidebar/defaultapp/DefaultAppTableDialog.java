@@ -16,7 +16,6 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -30,6 +29,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.ncc.savior.desktop.sidebar.ColorManager;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -38,16 +38,22 @@ import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class DefaultAppTableDialog extends BaseAppChooser {
+	private static final int ROW_HEIGHT = 32;
+	private static final int ICON_SIZE = 20;
 	private IIconService iconService;
 	private JTable table;
+	private int cellPadding = 5;
+	private ColorManager colorManager;
 
-	public DefaultAppTableDialog(IIconService iconService) {
+	public DefaultAppTableDialog(IIconService iconService, ColorManager colorManager) {
 		this.iconService = iconService;
+		this.colorManager = colorManager;
 	}
 
 	@Override
 	public void start() {
 		JDialog dialog = new JDialog();
+		// dialog.setSize(600, 400);
 		dialog.setTitle("Where do you want to open " + defaultApplicationType.toString());
 		dialog.setAlwaysOnTop(true);
 
@@ -57,8 +63,8 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		}
 		topLabelText += "</html>";
 		JLabel label = new JLabel(topLabelText);
-		JCheckBox saveCheckbox = new JCheckBox("Save a preference");
-		JButton openButton = new JButton("Open");
+		JButton saveOpenButton = new JButton("Open this always");
+		JButton openButton = new JButton("Open just once");
 
 		GridBagLayout gbl = new GridBagLayout();
 		dialog.setLayout(gbl);
@@ -88,12 +94,17 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		scrollGbc.insets = new Insets(5, 5, 5, 5);
 		GridBagConstraints checkGbc = new GridBagConstraints();
 		// checkGbc.fill = GridBagConstraints.BOTH;
-		checkGbc.gridx = 0;
+		checkGbc.gridx = 1;
 		checkGbc.gridy = 2;
+		checkGbc.weightx = 2;
+		checkGbc.insets = new Insets(5, 55, 5, 5);
 		GridBagConstraints openGbc = new GridBagConstraints();
 		// openGbc.fill = GridBagConstraints.BOTH;
-		openGbc.gridx = 1;
+		openGbc.gridx = 0;
 		openGbc.gridy = 2;
+		openGbc.weightx = 2;
+		openGbc.anchor = GridBagConstraints.EAST;
+		openGbc.insets = new Insets(5, 55, 5, 5);
 
 		// list.setBackground(Color.red);
 		TableModel tableModel = getTableModel(this.appList);
@@ -102,16 +113,26 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		JScrollPane listScroll = new JScrollPane(table);
 		table.setOpaque(false);
 		table.setBorder(BorderFactory.createEmptyBorder());
+		table.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		openButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Pair<DesktopVirtue, ApplicationDefinition> pair = getSelectedPair();
-				if (saveCheckbox.isSelected() && savePreferenceConsumer != null) {
+				startAppBiConsumer.accept(pair, params);
+				dialog.dispose();
+
+			}
+		});
+		saveOpenButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Pair<DesktopVirtue, ApplicationDefinition> pair = getSelectedPair();
+				if (savePreferenceConsumer != null) {
 					savePreferenceConsumer.accept(pair);
 				}
 				startAppBiConsumer.accept(pair, params);
-				// startAppWithParam(pair, params);
 				dialog.dispose();
 			}
 		});
@@ -121,7 +142,9 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		table.setDefaultRenderer(OS.class, getOsTableCellRenderer());
 		table.setRowSelectionAllowed(true);
 		table.setColumnSelectionAllowed(false);
-		table.setRowHeight(28);
+		table.setRowHeight(ROW_HEIGHT);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
 		// table.setAutoCreateRowSorter(true);
 		TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tableModel);
 		sorter.setComparator(0, new Comparator<ApplicationDefinition>() {
@@ -168,12 +191,16 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		listScroll.setMinimumSize(new Dimension(100, 300));
 		dialog.add(label, labelGbc);
 		dialog.add(listScroll, scrollGbc);
-		dialog.add(saveCheckbox, checkGbc);
+		dialog.add(saveOpenButton, checkGbc);
 		dialog.add(openButton, openGbc);
 
 		listScroll.setBorder(BorderFactory.createEmptyBorder());
 		listScroll.setMinimumSize(new Dimension(100, 300));
-		dialog.setSize(new Dimension(400, 250));
+		// dialog.setSize(new Dimension(600, 400));
+		dialog.pack();
+		Dimension size = dialog.getSize();
+		size.width = 800;
+		dialog.setSize(size);
 		dialog.setVisible(true);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -189,7 +216,7 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 				Image icon = iconService.getImageNow(app.getIconKey());
 				JLabel label;
 				if (icon != null) {
-					icon = icon.getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+					icon = icon.getScaledInstance(ICON_SIZE, ICON_SIZE, Image.SCALE_SMOOTH);
 					ImageIcon image = new ImageIcon(icon);
 					label = new JLabel(app.getName(), image, SwingConstants.LEADING);
 				} else {
@@ -210,6 +237,11 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 					boolean hasFocus, int row, int column) {
 				DesktopVirtue virtue = (DesktopVirtue) value;
 				JLabel label = new JLabel(virtue.getName());
+				// label.setBackground(colorManager.getHeaderColor(virtue.getTemplateId()));
+				// label.setForeground(Color.white);
+				// label.setForeground(colorManager.getHeaderColor(virtue.getTemplateId()));
+				label.setBackground(colorManager.getBodyColor(virtue.getTemplateId()));
+				label.setOpaque(true);
 				alterBySelection(label, isSelected, row);
 				return label;
 			}
@@ -224,7 +256,7 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
 					boolean hasFocus, int row, int column) {
 				VirtueState state = (VirtueState) value;
-				JLabel label = new JLabel(state.toString());
+				JLabel label = new JLabel(state.toString(), SwingConstants.CENTER);
 				Color color = StatusColor.getColor(state, isSelected, hasFocus);
 				label.setForeground(color);
 				alterBySelection(label, isSelected, row);
@@ -243,7 +275,14 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 				OS os = (OS) value;
 				JLabel label;
 				String name = os.name();
-				label = new JLabel(name);
+				Image icon = iconService.getImageNow(name);
+				if (icon != null) {
+					icon = icon.getScaledInstance(ICON_SIZE, ICON_SIZE, Image.SCALE_SMOOTH);
+					label = new JLabel(new ImageIcon(icon));
+					label.setToolTipText(name);
+				} else {
+					label = new JLabel(name);
+				}
 				alterBySelection(label, isSelected, row);
 				return label;
 			}
@@ -256,6 +295,7 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 			label.setBackground(label.getBackground().brighter());
 			label.setOpaque(true);
 		}
+		label.setBorder(BorderFactory.createEmptyBorder(cellPadding, cellPadding, cellPadding, cellPadding));
 	}
 
 	protected Pair<DesktopVirtue, ApplicationDefinition> getSelectedPair() {

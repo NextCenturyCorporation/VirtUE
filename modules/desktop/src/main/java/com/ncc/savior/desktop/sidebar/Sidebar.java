@@ -18,10 +18,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -98,8 +96,6 @@ public class Sidebar implements VirtueChangeHandler {
 	private AuthorizationService authService;
 	private IIconService iconService;
 
-	private Iterator<Color> colorItr;
-	private ArrayList<Color> colorList;
 	private JFrame frame;
 	private LoginPage loginPageView;
 
@@ -160,13 +156,16 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private DefaultApplicationLauncher defaulApplicationLauncher;
 
+	private ColorManager colorManager;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
-			boolean useColors, String style) {
+			ColorManager colorManager, boolean useColors, String style) {
 		this.authService = authService;
 		this.virtueIdToVtc = new HashMap<String, VirtueTileContainer>();
 		this.virtueIdToVlc = new HashMap<String, VirtueListContainer>();
 		this.virtueService = virtueService;
 		this.iconService = iconService;
+		this.colorManager = colorManager;
 
 		this.textField = new JTextField();
 		this.searchLabel = new JLabel();
@@ -181,13 +180,12 @@ public class Sidebar implements VirtueChangeHandler {
 
 		this.ghostText = new GhostText(textField, "search", searchLabel, searchIcon);
 
-		colorList = loadColors();
-		colorItr = colorList.iterator();
 		this.aboutDialog = new AboutDialog();
 		setupComparators();
 		setupLoadingGif();
 
-		this.defaulApplicationLauncher = new DefaultApplicationLauncher(authService, virtueService, iconService);
+		this.defaulApplicationLauncher = new DefaultApplicationLauncher(authService, virtueService, iconService,
+				colorManager);
 
 		AbstractVirtueView.addRemoveVirtueListener(new IRemoveVirtueListener() {
 
@@ -306,9 +304,10 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 
 		for (DesktopVirtue virtue : virtues) {
-			Color headerColor = getNextColor();
-			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, getNextColor(),
-					scrollPane, textField, ghostText);
+			Color headerColor = colorManager.getHeaderColor(virtue.getTemplateId());
+			Color bodyColor = colorManager.getBodyColor(virtue.getTemplateId());
+			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, bodyColor, scrollPane,
+					textField, ghostText);
 			VirtueListContainer vlc = new VirtueListContainer(virtue, virtueService, headerColor, scrollPane, textField,
 					ghostText);
 
@@ -447,7 +446,6 @@ public class Sidebar implements VirtueChangeHandler {
 		Image newCloseImg = closeImage.getScaledInstance(22, 22, java.awt.Image.SCALE_SMOOTH);
 		closeIcon = new ImageIcon(newCloseImg);
 
-		colorItr = colorList.iterator();
 		this.desktopContainer = new JPanel();
 		this.scrollPane = new JScrollPane();
 		this.appsTileView = new AppsTile(virtueService, scrollPane);
@@ -514,7 +512,6 @@ public class Sidebar implements VirtueChangeHandler {
 		neIconBar.add(prefContainer);
 		neIconBar.add(alertContainer);
 		neIconBar.add(about);
-
 
 		this.bottomBorder = new JPanel();
 		FlowLayout flowLayout_1 = (FlowLayout) bottomBorder.getLayout();
@@ -1053,51 +1050,6 @@ public class Sidebar implements VirtueChangeHandler {
 				defaulApplicationLauncher.clearPrefs();
 			}
 		});
-	}
-
-	private ArrayList<Color> loadColors() {
-		ArrayList<Color> colors = new ArrayList<Color>();
-		colors.add(new Color(189, 0, 38));
-		colors.add(new Color(227, 26, 28));
-
-		colors.add(new Color(34, 94, 168));
-		colors.add(new Color(29, 145, 192));
-
-		colors.add(new Color(35, 132, 67));
-		colors.add(new Color(65, 171, 93));
-
-		colors.add(new Color(204, 76, 2));
-		colors.add(new Color(236, 112, 20));
-
-		colors.add(new Color(136, 65, 157));
-		colors.add(new Color(140, 107, 177));
-
-		colors.add(new Color(206, 18, 86));
-		colors.add(new Color(231, 41, 138));
-
-		colors.add(new Color(106, 81, 163));
-		colors.add(new Color(128, 125, 186));
-
-		colors.add(new Color(203, 24, 29));
-		colors.add(new Color(239, 59, 44));
-
-		colors.add(new Color(191, 129, 45));
-		colors.add(new Color(223, 194, 125));
-
-		colors.add(new Color(53, 151, 143));
-		colors.add(new Color(128, 205, 193));
-
-		colors.add(new Color(127, 188, 65));
-		colors.add(new Color(184, 225, 134));
-
-		return colors;
-	}
-
-	private Color getNextColor() {
-		if (!colorItr.hasNext()) {
-			colorItr = colorList.iterator();
-		}
-		return colorItr.next();
 	}
 
 	public void setupComparators() {

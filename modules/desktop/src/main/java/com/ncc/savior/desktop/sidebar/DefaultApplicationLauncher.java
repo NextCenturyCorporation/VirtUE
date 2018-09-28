@@ -34,12 +34,14 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 	private AuthorizationService authorizationService;
 	private VirtueService virtueService;
 	private IIconService iconService;
+	private ColorManager colorManager;
 
 	public DefaultApplicationLauncher(AuthorizationService authService, VirtueService virtueService,
-			IIconService iconService) {
+			IIconService iconService, ColorManager colorManager) {
 		this.authorizationService = authService;
 		this.virtueService = virtueService;
 		this.iconService = iconService;
+		this.colorManager = colorManager;
 	}
 
 	@Override
@@ -151,7 +153,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 		comboList.sort(new StatusFirstVirtueAppComparitor());
 
 		// IAppChooser dald = new DefaultAppListDialog(iconService);
-		IAppChooser dald = new DefaultAppTableDialog(iconService);
+		IAppChooser dald = new DefaultAppTableDialog(iconService, colorManager);
 		dald.setVirtueAppChoices(comboList);
 		dald.setParameters(params);
 		dald.setAppType(defaultApplicationType);
