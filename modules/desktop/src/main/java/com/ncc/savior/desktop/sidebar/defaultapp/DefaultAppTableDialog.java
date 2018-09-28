@@ -3,6 +3,7 @@ package com.ncc.savior.desktop.sidebar.defaultapp;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -18,10 +19,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -63,8 +67,14 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		}
 		topLabelText += "</html>";
 		JLabel label = new JLabel(topLabelText);
-		JButton saveOpenButton = new JButton("Open this always");
+		FlowLayout flow = new FlowLayout(FlowLayout.CENTER);
+		flow.setHgap(50);
+		JPanel buttonPane = new JPanel(flow);
+		// buttonPane.setBorder(BorderFactory.createLineBorder(Color.red));
+		JButton saveOpenButton = new JButton("Open always");
 		JButton openButton = new JButton("Open just once");
+		buttonPane.add(saveOpenButton, FlowLayout.LEFT);
+		buttonPane.add(openButton, FlowLayout.LEFT);
 
 		GridBagLayout gbl = new GridBagLayout();
 		dialog.setLayout(gbl);
@@ -103,8 +113,10 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		openGbc.gridx = 0;
 		openGbc.gridy = 2;
 		openGbc.weightx = 2;
+		openGbc.gridwidth = 2;
 		openGbc.anchor = GridBagConstraints.EAST;
-		openGbc.insets = new Insets(5, 55, 5, 5);
+		openGbc.fill = GridBagConstraints.BOTH;
+		openGbc.insets = new Insets(5, 5, 5, 5);
 
 		// list.setBackground(Color.red);
 		TableModel tableModel = getTableModel(this.appList);
@@ -191,8 +203,9 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		listScroll.setMinimumSize(new Dimension(100, 300));
 		dialog.add(label, labelGbc);
 		dialog.add(listScroll, scrollGbc);
-		dialog.add(saveOpenButton, checkGbc);
-		dialog.add(openButton, openGbc);
+		// dialog.add(saveOpenButton, checkGbc);
+		// dialog.add(openButton, openGbc);
+		dialog.add(buttonPane, openGbc);
 
 		listScroll.setBorder(BorderFactory.createEmptyBorder());
 		listScroll.setMinimumSize(new Dimension(100, 300));
@@ -200,6 +213,18 @@ public class DefaultAppTableDialog extends BaseAppChooser {
 		dialog.pack();
 		Dimension size = dialog.getSize();
 		size.width = 800;
+
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				Pair<DesktopVirtue, ApplicationDefinition> pair = getSelectedPair();
+				boolean enabled = (pair != null);
+				openButton.setEnabled(enabled);
+				saveOpenButton.setEnabled(enabled);
+			}
+		});
+		openButton.setEnabled(false);
+		saveOpenButton.setEnabled(false);
 		dialog.setSize(size);
 		dialog.setVisible(true);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
