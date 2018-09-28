@@ -34,7 +34,7 @@ public class PermissionService {
 
 	public PermissionService(IPermissionDao permissionDao) {
 		this.permissionDao = permissionDao;
-		this.defaultClipboardPermission = ClipboardPermissionOption.DENY;
+		this.defaultClipboardPermission = ClipboardPermissionOption.ALLOW;
 	}
 
 	/**

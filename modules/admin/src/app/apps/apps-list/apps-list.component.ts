@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatDialogRef, MatDialogModule } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { Router } from '@angular/router';
 
@@ -10,7 +10,7 @@ import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
 import { Column } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
-import { RowOptions } from "../../shared/models/rowOptions.model"
+import { SubMenuOptions } from "../../shared/models/subMenuOptions.model";
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
@@ -20,19 +20,29 @@ import { AddAppComponent } from '../add-app/add-app.component';
 
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
+/**
+ * @class
+ * This class represents a table of Applications, which can be viewed, edited, duplicated, enabled/disabled, or deleted.
+ *
+ * Currently, very little of use is implemented with regard to applications. Only temporary boiler-plate exists for
+ * uploading(?) an application, and essentially no data exists to be displayed in the table.
+ *
+ * @extends GenericListComponent
+ */
 @Component({
-  selector: 'apps-list',
+  selector: 'app-apps-list',
   templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
   styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [ BaseUrlService, ItemService  ]
 })
-export class AppsListComponent extends GenericListComponent implements OnInit  {
+export class AppsListComponent extends GenericListComponent {
 
-  file: string;
-  url: string;
-
+  /**
+   * see [[GenericPageComponent.constructor]] for notes on parameters
+   */
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
@@ -40,71 +50,107 @@ export class AppsListComponent extends GenericListComponent implements OnInit  {
     dialog: MatDialog
   ) {
     super(router, baseUrlService, itemService, dialog);
+
+    // TODO fix app versioning - maybe make automatic?
+    // Apps need versions, but they can't default to anything, and it must be made clear
+    // that "version" on that modal means "the actual application's version", and not
+    // "version" as in "this is the 4th change I've made to this Chrome application item".
   }
 
-
-  getColumns(): Column[] {
-    //This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-    // to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
-    //
-    //Note: colWidths of all columns must add to exactly 12.
-    //Too low will not scale to fit, and too large will cause columns to wrap, within each row.
-    //See note next to a line containing "mui-col-md-12" in gen-list.component.html
-    return [
-    {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
-    {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-    {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
-    ];
-  }
-
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
-    return {
-      serviceConfigUrl: ConfigUrlEnum.APPS,
-      neededDatasets: ["apps"]
-    };
-  }
-
-  getListOptions(): {
-      prettyTitle: string,
-      itemName: string,
-      pluralItem: string,
-      domain: string} {
-    return {
-      prettyTitle: "Available Applications",
-      itemName: "Application",
-      pluralItem: "Applications",
-      domain: '/applications'
-    };
-  }
-
-  getNoDataMsg(): string {
-    return "No apps appear to be available at this time. To add an application, click on the button \"Add Application\" above.";
-  }
-
-  //Apps can't be disabled, so nothing to filter
-  getTableFilters(): {text:string, value:string}[] {
-    return [];
-  }
-
-  getOptionsList(): RowOptions[] {
-    return [new RowOptions("Remove", () => true, (i:Item) => this.openDialog('delete', i))];
-  }
-
-  //called after all the datasets have loaded
+  /**
+   * called after all the datasets have loaded. Pass the app list to the table.
+   */
   onPullComplete(): void {
     this.setItems(this.allApps.asList());
   }
 
+  /**
+   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
+   */
+  getColumns(): Column[] {
+    return [
+      new Column('name',    'Application Name', 5, 'asc'),
+      new Column('version', 'Version',          3, 'asc'),
+      new Column('os',      'Operating System', 4, 'desc')
+    ];
+  }
+
+  /**
+   * See [[GenericPageComponent.getPageOptions]]
+   * @return child-specific information needed by the generic page functions when loading data.
+   */
+  getPageOptions(): {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
+    return {
+      serviceConfigUrl: ConfigUrls.APPS,
+      neededDatasets: [Datasets.APPS]
+    };
+  }
+
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
+  getListOptions(): {
+      prettyTitle: string,
+      itemName: string,
+      pluralItem: string} {
+    return {
+      prettyTitle: "Available Applications",
+      itemName: "Application",
+      pluralItem: "Applications"
+    };
+  }
+
+  /**
+   * @return a string to be displayed in the table, when the table's 'items' array is undefined or empty.
+   */
+  getNoDataMsg(): string {
+    return "No apps appear to be available at this time. To add an application, click on the button \"Add Application\" above.";
+  }
+
+  /**
+   * overrides parent, [[GenericListComponent.getTableFilters]]
+   * @return an empty list; Apps can't be disabled, so nothing to filter
+   */
+  getTableFilters(): {text: string, value: string}[] {
+    return [];
+  }
+
+  /**
+   * overrides parent, [[GenericListComponent.getSubMenu]]
+   *
+   * see [[GenericPageComponent.openDialog]] for notes on that call.
+   *
+   * @return a submenu just with a "remove" option, to delete the Item from the backend
+   */
+  getSubMenu(): SubMenuOptions[] {
+    return [new SubMenuOptions("Remove", () => true, (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))];
+  }
+
+  /**
+   * Open a form in which the user can 'upload' an application. Currently just boiler-plate, and will probably change
+   * substantially in the future. May not remain a dialog.
+   */
   openAppsDialog(): void {
     let dialogRef = this.dialog.open(AddAppComponent, {
-      width: '480px',
-      data: { file: this.file, url: this.url }
+      width: '480px'//,
+      // data: { file: this.file, url: this.url }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
+    let sub = dialogRef.afterClosed().toPromise().then(result => {
+      console.log(result);
     });
+    // let sub = dialogRef.afterClosed().subscribe(result => {
+    //   console.log('The dialog was closed');
+    // },
+    // () => { // on error
+    //   sub.unsubscribe();
+    // },
+    // () => { // when finished
+    //   this.refreshData();
+    //   sub.unsubscribe();
+    // });
   }
 }

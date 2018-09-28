@@ -13,6 +13,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceNetworkInterfaceSpecification;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
@@ -27,6 +28,8 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.util.JavaUtil;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -41,6 +44,8 @@ import com.ncc.savior.virtueadmin.model.VmState;
 public class AwsEc2Wrapper {
 	private static final Logger logger = LoggerFactory.getLogger(AwsEc2Wrapper.class);
 	private static final int SSH_PORT = 22;
+	public static final String AWS_NOT_FOUND_ERROR_CODE = "InvalidVolume.NotFound";
+	public static final String AWS_VOLUME_IN_USE_ERROR_CODE = "VolumeInUse";
 
 	private AmazonEC2 ec2;
 
@@ -66,7 +71,7 @@ public class AwsEc2Wrapper {
 	}
 
 	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String name, Collection<String> securityGroupIds,
-			String serverKeyName, InstanceType instanceType, String subnetIds) {
+			String serverKeyName, InstanceType instanceType, String subnetIds, String iamRoleName) {
 
 		VirtualMachine vm = null;
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -86,6 +91,11 @@ public class AwsEc2Wrapper {
 			runInstancesRequest.withSubnetId(subnetIds).withSecurityGroupIds(securityGroupIds);
 		}
 
+		if (iamRoleName != null) {
+			IamInstanceProfileSpecification iamInstanceProfile = new IamInstanceProfileSpecification();
+			iamInstanceProfile.setName(iamRoleName);
+			runInstancesRequest.withIamInstanceProfile(iamInstanceProfile);
+		}
 		// .withSecurityGroups(securityGroups);
 		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
@@ -109,13 +119,19 @@ public class AwsEc2Wrapper {
 	public void startVirtualMachines(Collection<VirtualMachine> vms) {
 		List<String> instanceIds = AwsUtil.vmsToInstanceIds(vms);
 		StartInstancesRequest startInstancesRequest = new StartInstancesRequest(instanceIds);
-		StartInstancesResult result = ec2.startInstances(startInstancesRequest);
-		for (InstanceStateChange i : result.getStartingInstances()) {
-			for (VirtualMachine vm : vms) {
-				if (vm.getInfrastructureId().equals(i.getInstanceId())) {
-					vm.setState(VmState.LAUNCHING);
+		try {
+			StartInstancesResult result = ec2.startInstances(startInstancesRequest);
+			for (InstanceStateChange i : result.getStartingInstances()) {
+				for (VirtualMachine vm : vms) {
+					if (vm.getInfrastructureId().equals(i.getInstanceId())) {
+						vm.setState(VmState.LAUNCHING);
+					}
 				}
 			}
+		} catch (Exception e) {
+			String msg = "error starting virtual machines = " + vms;
+			logger.error(msg, e);
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, msg, e);
 		}
 	}
 
@@ -133,7 +149,9 @@ public class AwsEc2Wrapper {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("error", e);
+			String msg = "error stopping virtual machines = " + vms;
+			logger.error(msg, e);
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, msg, e);
 		}
 	}
 

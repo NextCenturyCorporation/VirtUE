@@ -28,7 +28,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
  * Implementation of {@link ITemplateManager} that stores all the template data
  * in memory. This implementation is for testing and demo purpose only and
  * should not be used in production.
- * 
+ *
  * See interface for function comments.
  *
  */
@@ -91,23 +91,23 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 		// Add a virtue with the initialized virtual machine.
 		VirtueTemplate virtueSingleAll = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Single VM Virtue",
-				"1.0", vmtsSingleAll, awsCloudformationTemplate, true, now, systemName);
+				"1", vmtsSingleAll, awsCloudformationTemplate, "#663399", true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmtsBrowsers = new HashSet<VirtualMachineTemplate>();
 		vmtsBrowsers.add(vmBrowser);
 		VirtueTemplate virtueSingleBrowsers = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Browser Virtue",
-				"1.0", vmtsBrowsers, awsCloudformationTemplate, true, now, systemName);
+				"1", vmtsBrowsers, awsCloudformationTemplate, "#808000", true, now, systemName);
 		List<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
 		vmts.add(vmBrowser);
 		vmts.add(vmAll);
 		vmts.add(vmMath);
-		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1.0",
-				vmts, awsCloudformationTemplate, true, now, systemName);
+		VirtueTemplate virtueAllVms = new VirtueTemplate(UUID.randomUUID().toString(), "Linux All VMs Virtue", "1",
+				vmts, awsCloudformationTemplate, "#FF7F50", true, now, systemName);
 
 		Set<VirtualMachineTemplate> vmsMath = new HashSet<VirtualMachineTemplate>();
 		vmsMath.add(vmMath);
-		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1.0",
-				vmsMath, awsCloudformationTemplate, true, now, systemName);
+		VirtueTemplate virtueMath = new VirtueTemplate(UUID.randomUUID().toString(), "Linux Math Virtue", "1",
+				vmsMath, awsCloudformationTemplate, "#C0C0C0", true, now, systemName);
 
 		addApplicationDefinition(calculator);
 		addApplicationDefinition(firefox);

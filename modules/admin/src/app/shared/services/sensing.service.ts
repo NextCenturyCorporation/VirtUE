@@ -11,26 +11,60 @@ const httpHeader = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
 };
 
+/**
+ * @class
+ * This class will query the backend (or wherever?) for sensor data, and return for processing and display.
+ *
+ * Will likely change drastically.
+ * TODO
+ * #uncommented
+ */
 @Injectable()
 export class SensingService {
 
+  /** #uncommented */
   baseUrl: string;
+  /** #uncommented */
+  private jsonfile = './assets/json/sensing.json';
+  /** #uncommented */
+  private configUrl = 'sensing';
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   constructor(
     private httpClient: HttpClient
   ) { }
 
-  private jsonfile = './assets/json/sensing.json';
-  private configUrl = 'admin/sensing';
-
-  public setBaseUrl( url: string ) {
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
+  public setBaseUrl( url: string ): void {
     this.baseUrl = url;
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public getSensingLog(): Observable<any> {
     return this.httpClient.get<any>(this.baseUrl + this.configUrl);
   }
 
+  /**
+   * #uncommented
+   * @param
+   *
+   * @return
+   */
   public getStaticList(): Observable<any> {
     // console.log('using static data');
     return this.httpClient.get<any>(this.jsonfile);

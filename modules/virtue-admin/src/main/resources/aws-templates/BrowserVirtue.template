@@ -9,7 +9,7 @@
         {
             "Properties": 
             {
-                "ImageId": "ami-2b500951",
+                "ImageId": "master",
                 "InstanceType" : "t2.small",
                 "SecurityGroups" : ["ssh_default_vpc", "default" ],
                 "Tags" : 

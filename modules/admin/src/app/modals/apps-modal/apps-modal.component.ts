@@ -6,66 +6,95 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+
 import { Column } from '../../shared/models/column.model';
-import { GenericModal } from '../generic-modal/generic.modal';
+import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * @class
+ * This class represents a list of applications, which can be selected.
+ *
+ *
+ * @extends [[GenericModalComponent]]
+ */
 @Component({
   selector: 'app-modal',
   templateUrl: '../generic-modal/generic.modal.html',
   styleUrls: ['../generic-modal/generic.modal.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-export class AppsModalComponent extends GenericModal {
+export class AppsModalComponent extends GenericModalComponent {
 
+  /**
+   * see [[GenericModalComponent.constructor]] for notes on parameters
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
       itemService: ItemService,
       dialog: MatDialog,
-      dialogRef: MatDialogRef<GenericModal>,
+      dialogRef: MatDialogRef<AppsModalComponent>,
     @Inject(MAT_DIALOG_DATA) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
   }
 
+  /**
+   * @return what columns should show up in the the app selection table
+   */
   getColumns(): Column[] {
     return [
-      {name: 'name', prettyName: 'App Name', isList: false, sortDefault: 'asc', colWidth:5, formatValue: undefined},
-      {name: 'version', prettyName: 'Version', isList: false, sortDefault: 'asc', colWidth:3, formatValue: undefined},
-      {name: 'os', prettyName: 'Operating System', isList: false, sortDefault: 'desc', colWidth:4, formatValue: undefined}
+      new Column('name',    'Application Name', 5, 'asc'),
+      new Column('version', 'Version',          3, 'asc'),
+      new Column('os',      'Operating System', 4, 'desc')
     ];
   }
 
+  /**
+   * This page only needs to list all available apps, and doesn't need ot request any other data.
+   *
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.APPS,
-      neededDatasets: ["apps"]
+      serviceConfigUrl: ConfigUrls.APPS,
+      neededDatasets: [Datasets.APPS]
     };
   }
 
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
       prettyTitle: "Available Applications",
       itemName: "Application",
-      pluralItem: "Applications",
-      domain: '/applications'
+      pluralItem: "Applications"
     };
   }
 
+  /**
+   * @return a string to be displayed in the virtue table, when no apps exit.
+   */
   getNoDataMsg(): string {
-    return "No apps appear to be available at this time.";
-  };
+    return "There are no applications available to add. Add new applications through the Applications tab.";
+  }
 
-  onPullComplete() {
+  /**
+   * populates the table once data is available.
+   */
+  onPullComplete(): void {
     this.setItems(this.allApps.asList());
   }
 }

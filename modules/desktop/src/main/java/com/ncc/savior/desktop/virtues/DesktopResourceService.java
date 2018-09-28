@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -134,6 +135,31 @@ public class DesktopResourceService {
 	// logger.debug("Started app=" + returnedApp);
 	// return returnedApp;
 	// }
+
+	public Collection<DesktopVirtueApplication> getReconnectionApps(String virtueId) {
+		try {
+			Response r = getListOfClass("virtue/" + virtueId + "/reconnect", "GET");
+			InputStream in = (InputStream) r.getEntity();
+			Collection<DesktopVirtueApplication> instances;
+			if (r.getStatus() >= 400) {
+				String data = streamToString(in);
+				logger.error("response (" + r.getStatus() + "): " + data);
+				instances = new ArrayList<DesktopVirtueApplication>();
+			} else {
+				instances = jsonMapper.readValue(in, new TypeReference<List<DesktopVirtueApplication>>() {
+				});
+			}
+			return instances;
+		} catch (InvalidUserLoginException e) {
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User not authorized to get reconnect apps",
+					e);
+		} catch (JsonParseException | JsonMappingException e) {
+			throw new SaviorException(SaviorErrorCode.JSON_ERROR, "Error trying to parse reconnection apps", e);
+		} catch (IOException e) {
+			throw new SaviorException(SaviorErrorCode.UNKNOWN_ERROR, "Unknown error trying to get reconnection apps",
+					e);
+		}
+	}
 
 	public static Client getIgnoreSSLClient() throws Exception {
 		SSLContext sslcontext = SSLContext.getInstance("TLS");

@@ -33,11 +33,13 @@ import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -62,17 +64,20 @@ public class AdminService {
 	@Autowired
 	private SecurityUserService securityService;
 
+	private PersistentStorageManager persistentStorageManager;
+
 	private String initialAdmin;
 
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			String initialAdmin) {
+			PersistentStorageManager persistentStorageManager, String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
 		this.userManager = userManager;
+		this.persistentStorageManager = persistentStorageManager;
 		this.initialAdmin = initialAdmin;
 		addInitialUser();
 	}
@@ -466,7 +471,7 @@ public class AdminService {
 		return user;
 	}
 
-	public String getSensingReponse() throws IOException {
+	public String getSensingResponse() throws IOException {
 		if (JavaUtil.isNotEmpty(sensingUri)) {
 			Client client = ClientBuilder.newClient();
 			Response response = client.target(sensingUri).request(MediaType.APPLICATION_JSON_TYPE).get();
@@ -496,5 +501,31 @@ public class AdminService {
 	public void rebootVm(String vmId) {
 		verifyAndReturnUser();
 		virtueManager.rebootVm(vmId);
+	}
+
+	public Iterable<VirtuePersistentStorage> getAllPersistentStorage() {
+		verifyAndReturnUser();
+		return persistentStorageManager.getAllPersistentStorage();
+	}
+
+	public Iterable<VirtuePersistentStorage> getPersistentStorageForUser(String username) {
+		verifyAndReturnUser();
+		return persistentStorageManager.getPersistentStorageForUser(username);
+	}
+
+	public VirtuePersistentStorage getPersistentStorage(String username, String virtueTemplateId) {
+		verifyAndReturnUser();
+		VirtuePersistentStorage ps = persistentStorageManager.getPersistentStorage(username, virtueTemplateId);
+		if (ps == null) {
+			throw new SaviorException(SaviorErrorCode.STORAGE_NOT_FOUND,
+					"Unable to find persistent storage for username=" + username + " virtueTemplateId="
+							+ virtueTemplateId);
+		}
+		return ps;
+	}
+
+	public void deletePersistentStorage(String username, String virtueTemplateId) {
+		verifyAndReturnUser();
+		persistentStorageManager.deletePersistentStorage(username, virtueTemplateId);
 	}
 }

@@ -37,6 +37,7 @@ import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
+import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -48,7 +49,7 @@ import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 /**
  * Rest resource that handles endpoints specifically for an administrator
- * 
+ *
  */
 
 @Path("/admin")
@@ -202,9 +203,9 @@ public class AdminResource {
 
 	/**
 	 * Gets all {@link VirtueTemplate}s in the system
-	 * 
+	 *
 	 * @return
-	 * 
+	 *
 	 */
 	@GET
 	@Produces("application/json")
@@ -253,7 +254,7 @@ public class AdminResource {
 	/**
 	 * Starts the given application after provisioning a new virtue from the given
 	 * template.
-	 * 
+	 *
 	 * @param templateId
 	 * @param applicationId
 	 * @return
@@ -402,18 +403,102 @@ public class AdminResource {
 		StreamingOutput stream = new StreamingOutput() {
 			@Override
 			public void write(OutputStream os) throws IOException, WebApplicationException {
-				importExportService.exportSystem(os);
+				importExportService.exportDatabaseWithoutImages(os);
 				os.flush();
 			}
 		};
 		return Response.ok(stream).build();
 	}
 
+	@GET
+	@Path("export/user")
+	@Produces("application/zip")
+	public Response exportAllUsers() {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedAllUsers(os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream)
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + "users" + ".zip\"").build();
+	}
+
+	@GET
+	@Path("export/user/{username}")
+	@Produces("application/zip")
+	public Response exportUser(@PathParam("username") String username) {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedUser(username, os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream)
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + username + ".zip\"").build();
+	}
+
+	@GET
+	@Path("export/virtue/template/{templateId}")
+	@Produces("application/zip")
+	public Response exportAllVirtueTemplates(@PathParam("templateId") String templateId) {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedVirtueTemplate(templateId, os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream)
+				.header("Content-Disposition", "attachment; filename=\"virtue-" + templateId + ".zip\"").build();
+	}
+
+	@GET
+	@Path("export/virtue/template")
+	@Produces("application/zip")
+	public Response exportSystemZipped() {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedAllTemplates(os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"allVirtueTemplates.zip\"")
+				.build();
+	}
+
+	@GET
+	@Path("export/virtualMachine/template/{templateId}")
+	@Produces("application/zip")
+	public Response exportVirtualMachineZipped(@PathParam("templateId") String templateId) {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedVirtualMachineTemplate(templateId, os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"vm-" + templateId + ".zip\"")
+				.build();
+	}
+
 	@POST
 	@Path("import")
 	@Produces("application/json")
+	@Consumes("application/json")
 	public void importSystem(InputStream stream) {
-		importExportService.importSystem(stream);
+		importExportService.importSystemDatabaseWithoutImages(stream);
+	}
+
+	@POST
+	@Path("import")
+	@Produces("application/json")
+	@Consumes({ "application/zip", "application/octet-stream" })
+	public void importZip(InputStream stream) {
+		importExportService.importZip(stream);
 	}
 
 	@GET
@@ -452,7 +537,7 @@ public class AdminResource {
 	@Produces("application/json")
 	public Response getSensing() throws IOException {
 		try {
-			String response = adminService.getSensingReponse();
+			String response = adminService.getSensingResponse();
 			return Response.ok(response).build();
 		} catch (Exception e) {
 			throw WebServiceUtil.createWebserviceException(e);
@@ -499,7 +584,7 @@ public class AdminResource {
 	 * returnable computed permissions are returned. This typically is a permission
 	 * for every possible pair of virtue template ID to every other virtue template
 	 * ID in both directions and every virtue template ID to the default setting.
-	 * 
+	 *
 	 * @param raw
 	 * @return
 	 */
@@ -519,7 +604,7 @@ public class AdminResource {
 	/**
 	 * Set a new value for a permission. The value should be sent as the body of the
 	 * POST.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param destId
 	 * @param optionStr
@@ -539,7 +624,7 @@ public class AdminResource {
 	 * computed taking into account any defaults when a more specific setting cannot
 	 * be found. To get just the raw permission that is stored in the data, set the
 	 * query parameter 'raw' to true.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param destId
 	 * @param raw
@@ -567,7 +652,7 @@ public class AdminResource {
 	 * Get list of permissions for a given source ID. If the query parameter 'raw'
 	 * is set to true, only permissions stored in the database are returned.
 	 * Otherwise, all returnable computed permissions are returned.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param raw
 	 * @return
@@ -591,7 +676,7 @@ public class AdminResource {
 	 * Clear a permission from the system if it exists. Once this operation occurs,
 	 * the computed permission should return a default value either from the source
 	 * ID or the system.
-	 * 
+	 *
 	 * @param sourceId
 	 * @param destId
 	 */
@@ -603,7 +688,7 @@ public class AdminResource {
 
 	/**
 	 * Returns the system default {@link ClipboardPermissionOption}.
-	 * 
+	 *
 	 * @param optionStr
 	 */
 	@GET
@@ -611,6 +696,36 @@ public class AdminResource {
 	public void setServiceDefaultPermission(@PathParam("option") String optionStr) {
 		ClipboardPermissionOption option = ClipboardPermissionOption.valueOf(optionStr);
 		permissionService.setDefaultClipboardPermission(option);
+	}
+
+	@GET
+	@Path("storage/")
+	@Produces("application/json")
+	public Iterable<VirtuePersistentStorage> getAllStorage() {
+		return adminService.getAllPersistentStorage();
+	}
+
+	@GET
+	@Path("storage/{user}/")
+	@Produces("application/json")
+	public Iterable<VirtuePersistentStorage> getPersistentStorageForUser(@PathParam("user") String username) {
+		return adminService.getPersistentStorageForUser(username);
+	}
+
+	@GET
+	@Path("storage/{user}/{virtueTemplateId}")
+	@Produces("application/json")
+	public VirtuePersistentStorage getPersistentStorage(@PathParam("user") String username,
+			@PathParam("virtueTemplateId") String virtueTemplateId) {
+		return adminService.getPersistentStorage(username, virtueTemplateId);
+	}
+
+	@DELETE
+	@Path("storage/{user}/{virtueTemplateId}")
+	@Produces("application/json")
+	public void deletePersistentStorage(@PathParam("user") String username,
+			@PathParam("virtueTemplateId") String virtueTemplateId) {
+		adminService.deletePersistentStorage(username, virtueTemplateId);
 	}
 
 	private Collection<String> getAllSourceIds() {

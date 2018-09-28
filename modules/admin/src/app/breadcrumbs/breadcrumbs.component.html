@@ -1,9 +1,8 @@
 <ol>
-  <li *ngFor="let bc of breadcrumbs; let last = last">
-    <span *ngIf="breadcrumbs.length === 1">{{ bc.label }}</span>
-    <span *ngIf="breadcrumbs.length > 1">
+  <li *ngFor="let bc of breadcrumbs; let idx = index">
+    <span *ngIf="idx !== breadcrumbs.length - 1">
      <a [routerLink]="bc.href">{{ bc.label }}</a>
    </span>
-    <!--<span *ngIf="!last" class="separator">/</span>-->
+   <span *ngIf="idx === breadcrumbs.length - 1"> {{ bc.label }}</span>
   </li>
 </ol>

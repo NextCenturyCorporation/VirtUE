@@ -1,112 +1,130 @@
-<div *ngIf="filterOptions.length > 0" >
-  <!-- if there are items, show this list -->
-  <div *ngIf="items.length > 0" class="mui-container-fluid">
-    <div class="mui-row">
-      <!-- Note: angular mui table always has 12 total column-widths of space. available -->
-      <div class="mui-col-md-12 padding-left-0 filters">
-        <ng-container *ngFor="let f of filterOptions; let idx = index">
-          <span *ngIf="filterValue === f.value"> {{f.text}} {{pluralItem}} </span>
-          <a *ngIf="filterValue !== f.value"  (click)="filterList(f.value)"> {{f.text}} {{pluralItem}} </a>
-          <ng-container *ngIf="idx < filterOptions.length-1">|</ng-container>
-        </ng-container>
-      </div>
-    </div>
-  </div>
-</div>
 
-
-<div class="mui-container-fluid data-list">
-  <div class="mui-row table-header-group" fxLayout="row">
-
-    <span *ngIf="hasCheckbox" fxFlex="10%" class="table-header float-left" fxLayoutAlign="center center">
-      <mat-checkbox
-        name="selectAll"
-        (change)="selectAll($event.checked)"></mat-checkbox>
-    </span>
-    <div class="table-header" fxFlex="auto">
-      <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.colWidth}}">
-        <div *ngIf="column.isList" >{{column.prettyName}}</div>
-        <a *ngIf="!column.isList" (click)="setColumnSortDirection(column, sortBy)">{{column.prettyName}}</a>
-        <span class="list-sorter" *ngIf="!column.isList" >
-          <span *ngIf="sortColumn.name === column.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
-          <span *ngIf="sortColumn.name === column.name && sortBy === 'desc'" class="fa fa-sort-down"></span>
-          <span class="fa fa-sort font-color-gray"></span>
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- if there are no items, show this message -->
-  <div *ngIf="items.length < 1" class="mui-container-fluid">
-    <div class="mui-row margin-top-10">
-      <div class="mui-col-md-12 padding-left-0">
-        <p class="no-data-message">
-          {{noDataMessage}}
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
-  It is passed the preceeding list, followed by the values between colons -->
-  <div *ngFor="let i of items | listFilter : sortColumn.name : 'status' : filterValue : sortDirection : (filterValue === '*')"
-    appActiveClass [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }" fxLayout="row" class="mui-row table-row" >
-    <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
-              [ngStyle]="{ 'background-color': i.color, 'left':'0px' }">
-    </div>
-    <span *ngIf="hasCheckbox === true" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
-      <mat-checkbox
-        name="cbVm"
-        [checked]="isSelected(i.getID())"
-        (change)="checkClicked($event.checked, i.getID())"
-        value="{{i.getID()}}" ></mat-checkbox>
-    </span>
-    <div fxFlex="auto">
-      <span class="mini-menu table-data mui-col-md-{{colData[0].colWidth}} transparent">
-        <a class="edit" *ngIf="colData[0].link !== undefined" (click)="callback(colData[0].link, i)">
-          {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
-        </a>
-        <div class="edit" *ngIf="colData[0].link === undefined">
-          {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
+<div class="mui-col-md-{{tableWidth}}">
+  <div *ngIf="filterOptions.length > 0" >
+    <!-- if there are items, show this list -->
+    <div *ngIf="items.length > 0" class="mui-container-fluid">
+      <div class="mui-row">
+        <!-- Note: angular mui table always has 12 total column-widths of space. available -->
+        <div class="mui-col-md-12 padding-left-0 filters">
+          <ng-container *ngFor="let f of filterOptions; let idx = index">
+            <span *ngIf="filterValue === f.value"> {{f.text}} {{pluralItem}} </span>
+            <a *ngIf="filterValue !== f.value"  (click)="filterList(f.value)"> {{f.text}} {{pluralItem}} </a>
+            <ng-container *ngIf="idx < filterOptions.length-1">|</ng-container>
+          </ng-container>
         </div>
-        <!-- change those 'a's to 'div's to make them not be blue and look like links. -->
-        <!-- TODO change this to move to the form page, but only in 'view' mode -->
-        <!-- <a class="edit" (click)="editItem(i)">{{ i[colData[0].name] }}</a> -->
-        <div class="menu-options" >
-          <a *ngFor="let o of rowOptions; let idx = index" (click)="callback(o.action, i)">
-            <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
-            <ng-container *ngIf="o.shouldAppear(i) && idx < rowOptions.length-1">|</ng-container>
-          </a>
-        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="mui-container-fluid data-list no-overflow">
+    <div class="mui-row table-header-group" fxLayout="row">
+
+      <span *ngIf="hasCheckbox" fxFlex="10%" class="table-header float-left" fxLayoutAlign="center center">
+        <mat-checkbox
+          name="selectAll"
+          (change)="selectAll($event.checked)"></mat-checkbox>
       </span>
-      <!-- Iterate over all columns after the first one (the name), which was displayed above -->
-      <div *ngFor="let column of colData | slice:1; let idx=index"
-          class="table-data mui-col-md-{{column.colWidth}} transparent">
-        <div *ngIf="column.isList">
-          <ul>
-              <ul [innerHTML]="column.formatValue(i)"></ul>
-          </ul>
-        </div>
-        <div *ngIf="!column.isList">
-          <div *ngIf="column.link" (click)="callback(link, i)">
-            {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
-          </div>
-          <div *ngIf="column.link === undefined">
-            {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
-          </div>
+      <div class="table-header" fxFlex="auto">
+        <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.colWidth}}">
+          <div *ngIf="column.sortDefault === undefined" >{{column.prettyName}}</div>
+          <ng-container *ngIf="column.sortDefault !== undefined" >
+            <a (click)="setColumnSortDirection(column)">{{column.prettyName}}</a>
+            <span class="list-sorter" >
+              <span *ngIf="sortColumn.name === column.name && sortBy === 'asc'" class="fa fa-sort-up"></span>
+              <span *ngIf="sortColumn.name === column.name && sortBy === 'desc'" class="fa fa-sort-down"></span>
+              <span class="fa fa-sort font-color-gray"></span>
+            </span>
+          </ng-container>
         </div>
       </div>
+    </div>
 
-      <div class="clearfix"></div>
+    <!-- if there are no items, show this message -->
+    <div *ngIf="items.length < 1" class="mui-container-fluid">
+      <div class="mui-row margin-top-10">
+        <div class="mui-col-md-12 padding-left-0">
+          <p class="no-data-message">
+            {{noDataMessage}}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
+    It is passed the preceeding list, followed by the values between colons -->
+    <!-- can make it pass a conditional that's set to some default in the calling class when setting up a table -->
+    <!-- May even be able to get rid of the filterValue? And just have the calling class change the condition? -->
+    <div *ngFor="let i of items | listFilterSort : sortColumn.name : sortDirection : filterColumn : filterCondition : update"
+      appActiveClass [ngStyle]="{'background-color':i.enabled ? '#ffffff' : '#e7e7e7' }" fxLayout="row" class="mui-row table-row" >
+      <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
+                [ngStyle]="{ 'background-color': i.color, 'left':'0px' }">
+      </div>
+      <!-- Note that this checkbox is for selection, and is not related to the checkboxes definable in Columns -->
+      <span *ngIf="hasCheckbox === true" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
+        <mat-checkbox
+          name="cbVm"
+          [disabled]="!i.enabled"
+          [checked]="isSelected(i.getID())"
+          (change)="selectionChange($event.checked, i.getID())"
+          value="{{i.getID()}}" ></mat-checkbox>
+      </span>
+      <div fxFlex="auto">
+        <span class="mini-menu table-data mui-col-md-{{colData[0].colWidth}} transparent">
+          <!-- 'a's look like links, 'div's don't. -->
+          <a class="edit" *ngIf="colData[0].link !== undefined" (click)="colData[0].link(i)">
+            {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
+          </a>
+          <div class="edit" *ngIf="colData[0].link === undefined">
+            {{ colData[0].formatValue ? colData[0].formatValue(i) : i[colData[0].name] }}
+          </div>
+
+          <div class="menu-options" >
+            <a *ngFor="let o of subMenuOptions; let idx = index" (click)="o.action(i)">
+              <ng-container *ngIf="o.shouldAppear(i)"> {{o.text}} </ng-container>
+              <ng-container *ngIf="o.shouldAppear(i) && idx < subMenuOptions.length-1">|</ng-container>
+            </a>
+          </div>
+        </span>
+        <!-- Iterate over all columns after the first one (the name), which was displayed above -->
+        <div *ngFor="let column of colData | slice:1; let idx=index"
+            class="table-data mui-col-md-{{column.colWidth}} transparent">
+          <div *ngIf="column.list !== undefined">
+            <ng-container *ngFor="let element of column.list(i)">
+              <ul>
+                <ul>
+                  <a class="edit" *ngIf="column.link" (click)="column.link(element)">
+                    {{ column.formatValue ? column.formatValue(element) : element.toString() }}
+                  </a>
+                  <div *ngIf="column.link === undefined">
+                    {{ column.formatValue ? column.formatValue(element) : element.toString() }}
+                  </div>
+                </ul>
+              </ul>
+            </ng-container>
+          </div>
+          <div *ngIf="column.list === undefined">
+            <div *ngIf="column.link" (click)="column.link(i)">
+              {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
+            </div>
+            <div *ngIf="column.link === undefined">
+              {{ column.formatValue ? column.formatValue(i) : i[column.name] }}
+            </div>
+
+          </div>
+        </div>
+
+        <div class="clearfix"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- TODO paging not implemented -->
-<div class="paging">
-  <div class="page-number mui-col-md-4">Page # of #</div>
-  <div class="page-controls mui-col-md-4">
-    << First | < Previous | Next> | Last >></div>
-  <div class="page-item-total mui-col-md-4">{{ items.length }} {{prettyTitle}}</div>
-  <div class="clearfix"></div>
+  <!-- TODO paging not implemented -->
+  <div *ngIf="items.length > 10" class="paging">
+    <div class="page-number mui-col-md-4">Page # of #</div>
+    <div class="page-controls mui-col-md-4">
+      << First | < Previous | Next> | Last >></div>
+    <div class="page-item-total mui-col-md-4">{{ items.length }} {{prettyTitle}}</div>
+    <div class="clearfix"></div>
+  </div>
 </div>

@@ -22,19 +22,27 @@ public enum SaviorErrorCode {
 	APPLICATION_ID_NOT_FOUND(25, "Application not found", 400),
 	PERMISSION_NOT_FOUND(26, "Permission not found", 400),
 	ID_MISMATCH(27, "Object IDs do not match"),
+	STORAGE_NOT_FOUND(28, "Storage not found"),
 	//bad data?
 	INVALID_INPUT(50, "Invalid input"),
+	
+	SSH_ERROR(60, "SSH Error"),
 	//Configuration errors
 	CONFIGURATION_ERROR(100, "Configuration error", 500),
 	//Configuration specific to import
 	IMPORT_NOT_FOUND(120, "Import was not found"),
+	IMAGE_IMPORT_ERROR(121, "Error importing image"),
 	//Runtime like errors
 	SERVICE_TIMEOUT(200, "Service timed out", 500),
 	XPRA_FAILED(201, "Error with XPRA server", 500),
-	AWS_ERROR(202, "Error with AWS", 500),
+	
 	JSON_ERROR(203, "Error reading json", 500),
 	INVALID_STATE(204, "Object in invalid state to perform action", 500),
 	//Other
+	
+	AWS_ERROR(300, "Error with AWS", 500),
+	VOLUME_IN_USE(301, "Volume in use" ,412),
+	MULTIPLE_STORAGE_ERROR(302, "Multiple Storage Errors", 400),
 	NOT_IMPLEMENTED(254, "function not implemented", 501), 
 	UNKNOWN_ERROR(255, "unknown error"), 
 	//Errors we shouldn't see because its older code

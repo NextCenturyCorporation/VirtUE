@@ -1,17 +1,17 @@
 <form name="vm-list">
-<h2 mat-dialog-title>Manage {{prettyTitle}}</h2>
+<h2 mat-dialog-title>Add/Remove {{pluralItem}}</h2>
 <div mat-dialog-content>
-  <p>Select virtual machines to include in the virtue.</p>
+  <p>{{title}}</p>
 
-  <item-table #table></item-table>
+  <app-item-table #table></app-item-table>
 
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button class="button" type="submit" (click)="submit();">
+  <button class="button" type="submit" (click)="submit();">
     Submit
   </button>
-  <button mat-button type="button" (click)="cancel();" mat-dialog-close>
+  <button type="button" (click)="cancel();" mat-dialog-close>
     Cancel
   </button>
 </div>

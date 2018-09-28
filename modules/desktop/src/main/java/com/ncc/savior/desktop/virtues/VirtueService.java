@@ -1,9 +1,9 @@
 package com.ncc.savior.desktop.virtues;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +13,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
+import com.ncc.savior.desktop.alerting.VirtueAlertMessage;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.rdp.IRdpClient;
@@ -66,6 +68,22 @@ public class VirtueService {
 		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());
 		this.rdpClient = rdpClient;
 		this.clipboardManager = clipboardManager;
+	}
+
+	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
+		Runnable runnable = () -> {
+			Collection<DesktopVirtueApplication> apps = desktopResourceService.getReconnectionApps(virtue.getId());
+			RgbColor color = colors.get(virtue.getId());
+			apps.parallelStream().forEach((app) -> {
+				try {
+					ensureConnection(app, virtue, color);
+				} catch (IOException e) {
+					logger.error("Error creating connection to app=" + app + " virtue=" + virtue);
+				}
+			});
+		};
+		Thread t = new Thread(runnable, "Temp-reconnect-thread");
+		t.start();
 	}
 
 	/**
@@ -140,7 +158,8 @@ public class VirtueService {
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					logger.error("clipboard manager connection failed!", e);
-					// TODO alert user? allow user to try again?
+					UserAlertingServiceHolder.sendAlert(new VirtueAlertMessage("Clipboard Failed", virtue,
+							"Failed to connect clipboard to virtue"));
 				}
 				client = connectionManager.createClient(params, color, virtue);
 			}
@@ -154,13 +173,9 @@ public class VirtueService {
 	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) throws IOException {
 		SshConnectionParameters params = null;
 		if (key != null && key.contains("BEGIN RSA PRIVATE KEY")) {
-			File pem = File.createTempFile(app.getName(), ".pem");
-			FileWriter writer = new FileWriter(pem);
-			writer.write(key);
-			writer.close();
-			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), pem);
+			params = SshConnectionParameters.withPemString(app.getHostname(), app.getPort(), app.getUserName(), key);
 		} else {
-			params = new SshConnectionParameters(app.getHostname(), app.getPort(), app.getUserName(), key);
+			params = SshConnectionParameters.withPassword(app.getHostname(), app.getPort(), app.getUserName(), key);
 		}
 		return params;
 	}

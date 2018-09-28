@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.windows.NativelyDeallocatedMemory;
+import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -22,7 +23,7 @@ public class UnicodeClipboardData extends ClipboardData implements Serializable 
 	}
 
 	@Override
-	public Pointer createWindowsData() {
+	public Pointer createWindowsData(WindowsClipboardWrapper wrapper) {
 		Memory winMemory = new NativelyDeallocatedMemory(getWindowsDataLengthBytes());
 		winMemory.clear();
 		winMemory.setWideString(0, data);

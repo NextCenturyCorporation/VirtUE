@@ -4,178 +4,184 @@ import {Breadcrumb} from './shared/models/breadcrumb.model';
 
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {ConfigComponent} from './config/config.component';
-import {UsersWrapperComponent} from './users/users.wrapper.component';
 import {UserListComponent} from './users/user-list/user-list.component';
-import {UserComponent} from './users/user/user.component';
+import {UserComponent} from './users/user.component';
 
-import {VirtuesWrapperComponent} from './virtues/virtues.wrapper.component';
 import {VirtueListComponent} from './virtues/virtue-list/virtue-list.component';
-import {VirtueComponent} from './virtues/virtue/virtue.component';
-import {VirtueSettingsComponent} from './virtues/virtue-settings/virtue-settings.component';
+import {VirtueComponent} from './virtues/virtue.component';
 
-import {VmsWrapperComponent} from './vms/vms.wrapper.component';
 import {VmListComponent} from './vms/vm-list/vm-list.component';
-import {VmComponent} from './vms/vm/vm.component';
+import {VmComponent} from './vms/vm.component';
 
-import {AppsComponent} from './apps/apps.component';
 import {AppsListComponent} from './apps/apps-list/apps-list.component';
 import {AddAppComponent} from './apps/add-app/add-app.component';
 
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 
+/**
+ * This defines all the navigable URLs, what components should be loaded at each, and what data should be passed in to that
+ * component.
+ * The paths build up in the nested objects.
+ *
+ * Note that nested objects are children of a near-copy of the parent page but without a defined component - if the
+ *  parent and the child have a component defined, it seems like both components get loaded/rendered. Or at least the parent's
+ *  component does, because that's all you see.
+ *
+ */
 const routes: Routes = [
   {
-  path: 'dashboard',
+    path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
+  }, {
+    path: 'dashboard',
     component: DashboardComponent,
     data: {
-      breadcrumbs: [
-        new Breadcrumb('Dashboard', '/dashboard')
-      ]
-  }
+      breadcrumb: new Breadcrumb('Dashboard', '/dashboard')
+    }
   }, {
-  path: 'settings',
+    path: 'settings',
     component: ConfigComponent,
     data: {
-      breadcrumbs: [
-        new Breadcrumb('Settings', '/settings')
-      ]
+      breadcrumb: new Breadcrumb('Global Settings', '/settings')
     }
   }, {
     path: 'users',
-    component: UsersWrapperComponent,
+    component: UserListComponent,
     data: {
-      breadcrumbs: [
-        new Breadcrumb('Users', '/users')
-      ]
+      breadcrumb: new Breadcrumb('Users', '/users')
+    },
+  }, {
+    path: 'users',
+    data: {
+      breadcrumb: new Breadcrumb('Users', '/users')
     },
     children: [
       {
-        path: '',
-        component: UserListComponent
-      }, {
       path: 'create',
+      component: UserComponent,
+      data: {
+        breadcrumb: new Breadcrumb('Add User Account', '/create')
+      }
+      }, {
+        path: 'view/:id',
         component: UserComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Add User Account', '/create')
-          ]
+          breadcrumb: new Breadcrumb('View User Account', '/view')
         }
       }, {
         path: 'edit/:id',
         component: UserComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Edit User Account', '/edit')
-          ]
+          breadcrumb: new Breadcrumb('Edit User Account', '/edit')
         }
       }, {
         path: 'duplicate/:id',
         component: UserComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Duplicate User Account',  '/duplicate')
-          ]
+          breadcrumb: new Breadcrumb('Duplicate User Account',  '/duplicate')
         }
       }
     ]
   }, {
     path: 'applications',
-    component: AppsComponent,
+    component: AppsListComponent,
     data: {
-      breadcrumbs: [
-        new Breadcrumb('Applications', '/apps')
-      ]
-    },
+      breadcrumb: new Breadcrumb('Applications', '/apps')
+    }
+  }, {
+      path: 'applications',
+      data: {
+        breadcrumb: new Breadcrumb('Applications', '/apps')
+      },
     children: [
       {
-        path: '',
-        component: AppsListComponent
-      }, {
         path: 'create',
         component: AddAppComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Install New App', '/create')
-          ]
+          breadcrumb: new Breadcrumb('Install New App', '/create')
         }
+      // }, {
+      //   path: 'view/:id',
+      //   component: AppComponent,
+      //   data: {
+      //     breadcrumb: new Breadcrumb('View Application',  '/view')
+      //   }
       }
     ]
   }, {
     path: 'virtues',
-    component: VirtuesWrapperComponent,
+    component: VirtueListComponent,
     data: {
-      breadcrumbs: [
-        new Breadcrumb('Virtues', '/virtues')
-      ]
+      breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
+    }
+  }, {
+    path: 'virtues',
+    data: {
+      breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
     },
     children: [
       {
-        path: '',
-        component: VirtueListComponent
-      }, {
         path: 'create',
         component: VirtueComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Create Virtue', '/create')
-          ]
+          breadcrumb: new Breadcrumb('Create Virtue Template', '/create')
+        }
+      }, {
+        path: 'view/:id',
+        component: VirtueComponent,
+        data: {
+          breadcrumb: new Breadcrumb('View Virtue', '/view')
         }
       }, {
       path: 'edit/:id',
         component: VirtueComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Edit Virtue', '/edit')
-          ]
+          breadcrumb: new Breadcrumb('Edit Virtue Template', '/edit')
         }
       }, {
         path: 'duplicate/:id',
         component: VirtueComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Duplicate Virtue', '/duplicate')
-          ]
+          breadcrumb: new Breadcrumb('Duplicate Virtue Template', '/duplicate')
         }
-      }, {
-      path: 'virtue-settings',
-        component: VirtueSettingsComponent
       }
     ]
   }, {
     path: 'vm-templates',
-    component: VmsWrapperComponent,
+    component: VmListComponent,
     data: {
-      breadcrumbs: [
-        new Breadcrumb('VM Templates', '/vm-templates')
-      ]
+      breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
+    }
+  }, {
+    path: 'vm-templates',
+    data: {
+      breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
     },
     children: [
       {
-        path: '',
-        component: VmListComponent
-      }, {
         path: 'create',
         component: VmComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Build Virtual Machine', '/create')
-          ]
+          breadcrumb: new Breadcrumb('Build Virtual Machine', '/create')
+        }
+      }, {
+        path: 'view/:id',
+        component: VmComponent,
+        data: {
+          breadcrumb: new Breadcrumb('View Virtual Machine', '/view')
         }
       }, {
         path: 'edit/:id',
         component: VmComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Edit Virtual Machine', '/edit')
-          ]
+          breadcrumb: new Breadcrumb('Edit Virtual Machine', '/edit')
         }
       }, {
         path: 'duplicate/:id',
         component: VmComponent,
         data: {
-          breadcrumbs: [
-            new Breadcrumb('Duplicate Virtual Machine', '/duplicate')
-          ]
+          breadcrumb: new Breadcrumb('Duplicate Virtual Machine', '/duplicate')
         }
       },
     ]
@@ -183,6 +189,10 @@ const routes: Routes = [
   {path: '**', component: PageNotFoundComponent}
 ];
 
+/**
+ * @class
+ * This class handles the routing to the main pages of the application.
+ */
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   // imports: [RouterModule.forRoot(routes, {

@@ -77,10 +77,9 @@ public class SshUtil {
 			String line;
 			JavaUtil.sleepAndLogInterruption(500);
 			while ((line = br.readLine()) != null || (line = er.readLine()) != null) {
-				logger.debug("  : " + line);
 				lines.add(line);
 			}
-			logger.debug("finished command successfully");
+			// logger.debug("finished command successfully");
 			return lines;
 		} catch (Exception e) {
 			logger.debug("finished command exceptionally", e);

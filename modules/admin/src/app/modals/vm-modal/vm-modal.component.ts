@@ -6,71 +6,95 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrlEnum } from '../../shared/enums/enums';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+
 import { Column } from '../../shared/models/column.model';
-import { GenericModal } from '../generic-modal/generic.modal';
+import { Item } from '../../shared/models/item.model';
+import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+/**
+ * @class
+ * This class represents a list of Virtual machine templates, which can be selected.
+ *
+ * @extends [[GenericModalComponent]]
+ */
 @Component({
   selector: 'app-vm-modal',
   templateUrl: '../generic-modal/generic.modal.html',
   styleUrls: ['../generic-modal/generic.modal.css'],
   providers: [ BaseUrlService, ItemService ]
 })
-export class VmModalComponent extends GenericModal {
+export class VmModalComponent extends GenericModalComponent implements OnInit {
 
-  checked = false;
-
-  selectedIDs: string[] = [];
-
+  /**
+   * see [[GenericModalComponent.constructor]] for notes on parameters
+   */
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
       itemService: ItemService,
       dialog: MatDialog,
-      dialogRef: MatDialogRef<GenericModal>,
+      dialogRef: MatDialogRef<GenericModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
       super(router, baseUrlService, itemService, dialog, dialogRef, data);
-
-      this.neededDatasets = ["apps", "vms"];
     }
 
+  /**
+   * @return what columns should show up in the the VM selection table
+   */
   getColumns(): Column[] {
     return [
-          {name: 'name', prettyName: 'App Name', isList: false, sortDefault: undefined, colWidth:5, formatValue: undefined},
-          {name: 'os', prettyName: 'Version', isList: false, sortDefault: undefined, colWidth:3, formatValue: undefined},
-          {name: 'childNamesHTML', prettyName: 'Assigned Applications', isList: true, sortDefault: undefined, colWidth:4, formatValue: this.getChildNamesHtml}
-        ];
+      new Column('name',  'Template Name',          5, 'asc'),
+      new Column('os',    'OS',                     3, 'asc'),
+      new Column('apps',  'Assigned Applications',  3, undefined, this.formatName, this.getChildren),
+    ];
   }
+
+  /**
+   * This page just needs to show all VMs, and the apps assigned to each VM.
+   *
+   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   */
   getPageOptions(): {
-      serviceConfigUrl: ConfigUrlEnum,
-      neededDatasets: string[]} {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: Datasets[]} {
     return {
-      serviceConfigUrl: ConfigUrlEnum.VMS,
-      neededDatasets: ["apps", "vms"]
+      serviceConfigUrl: ConfigUrls.VMS,
+      neededDatasets: [Datasets.APPS, Datasets.VMS]
     };
   }
 
+  /**
+   * See [[GenericListComponent.getListOptions]] for details
+   * @return child-list-specific information needed by the generic list page functions.
+   */
   getListOptions(): {
       prettyTitle: string,
       itemName: string,
       pluralItem: string,
-      domain: string} {
+      domain?: string} {
     return {
       prettyTitle: "Virtual Machine Templates",
       itemName: "Vm Template",
-      pluralItem: "VMs",
-      domain: '/vm-templates'
+      pluralItem: "VM Templates"
     };
   }
 
+  /**
+   * @return a string to be displayed in the virtue table, when no VM templates exit.
+   */
   getNoDataMsg(): string {
-    return  "No vms have been added at this time. To add a vm, click on the button \"Add Vm Template\" above.";
+    return "There are no virtual machine templates available to add. Create new templates through the Virtual Machines tab.";
   }
 
-  onPullComplete() {
+  /**
+   * populates the table once data is available.
+   */
+  onPullComplete(): void {
     this.setItems(this.allVms.asList());
   }
 }

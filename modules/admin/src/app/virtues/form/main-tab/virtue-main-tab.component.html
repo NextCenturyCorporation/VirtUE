@@ -1,0 +1,39 @@
+<div class="mui-container-fluid">
+  <div class="mui-row">
+    <div class="mui-col-md-10">
+      <div class="form-item">
+        <div>
+          <br/>
+          <mat-form-field>
+            <input type="text" [disabled]="mode === 'View'" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
+          </mat-form-field>
+        </div>
+        <span *ngIf="mode!=='Create'" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.getID() }}</span>
+        <div class="form-item margin-top-15">
+          <div class="form-item margin-top-15">
+            <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <mat-slide-toggle [(ngModel)]="item.enabled" [disabled]="mode !== 'View'" (click)="statusChange()" [color]="'primary'">
+              {{ item.enabled ? 'Enabled' : 'Disabled' }}
+            </mat-slide-toggle>
+          </div>
+        </div>
+        <div class="mui-row form-item margin-top-15">
+          <div class="mui-col-md-4">
+            <label>Version: &nbsp;&nbsp;{{newVersion}} </label>
+          </div>
+        </div>
+        <div class="mui-row titlebar">
+          <div class="mui-col-md-12">
+            <h3 class="titlebar-title">Virtual Machines</h3>
+            <button class="titlebar-button" [disabled]="mode === 'View'" (click)="activateModal(item.getID())">Add VM</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mui-row">
+    <app-item-table #childrenTable></app-item-table>
+  </div>
+
+</div>

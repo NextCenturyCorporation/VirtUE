@@ -80,7 +80,7 @@ public class VirtueTemplateIT {
 		String initialUser = "testUser1234";
 
 		VirtueTemplate vt = new VirtueTemplate((String) null, "Test Template", "v1", (VirtualMachineTemplate) null,
-				UUID.randomUUID().toString(), true, initialDate, initialUser);
+				UUID.randomUUID().toString(), "#FFFFFF", true, initialDate, initialUser);
 		Collection<String> vmtIds = new ArrayList<String>();
 		for (int i = 0; i <= vmtList.size() / 2; i++) {
 			vmtIds.add(vmtList.get(i).getId());
@@ -117,7 +117,7 @@ public class VirtueTemplateIT {
 		String initialUser = "testUser1234";
 
 		VirtueTemplate vt1 = new VirtueTemplate((String) null, "Test Template", "v1", (VirtualMachineTemplate) null,
-				UUID.randomUUID().toString(), true, initialDate, initialUser);
+				UUID.randomUUID().toString(), "#FFFFFF", true, initialDate, initialUser);
 		Collection<String> vmtIds = new ArrayList<String>();
 		for (int i = 0; i <= vmtList.size() / 2; i++) {
 			vmtIds.add(vmtList.get(i).getId());
@@ -160,7 +160,7 @@ public class VirtueTemplateIT {
 		// String awsTemplateName, boolean enabled, Date lastModification, String
 		// lastEditor
 		VirtueTemplate updatedVm = new VirtueTemplate(null, "new name", "new version",
-				(List<VirtualMachineTemplate>) null, "new template", !myVirtue.isEnabled(), null, null);
+				(List<VirtualMachineTemplate>) null, "new template", "#FFFFFF", !myVirtue.isEnabled(), null, null);
 		Collection<String> virtualMachineTemplateIds = new ArrayList<String>();
 		if (!myVirtue.getVirtualMachineTemplateIds().isEmpty()) {
 			virtualMachineTemplateIds.add(myVirtue.getVirtualMachineTemplateIds().iterator().next());

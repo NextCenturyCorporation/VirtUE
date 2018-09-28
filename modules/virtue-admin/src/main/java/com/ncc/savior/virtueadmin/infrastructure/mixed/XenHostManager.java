@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +18,10 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
+import com.amazonaws.services.ec2.model.AttachVolumeRequest;
+import com.amazonaws.services.ec2.model.AttachVolumeResult;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -35,6 +39,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -51,8 +56,11 @@ import com.ncc.savior.virtueadmin.model.VmState;
  *
  */
 public class XenHostManager {
-	private static final String VM_PREFIX = "VRTU-XG-";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
+	private static final String VM_PREFIX = "VRTU-XG-";
+
+	@Value("${virtue.aws.persistentStorage.deviceName}")
+	private String persistentVolumeDeviceName;
 	private VirtualMachineTemplate xenVmTemplate;
 	private AwsEc2Wrapper ec2Wrapper;
 	private String xenKeyName;
@@ -64,12 +72,16 @@ public class XenHostManager {
 	private String subnetId;
 	private Collection<String> securityGroupIds;
 	private CompletableFutureServiceProvider serviceProvider;
+	private PersistentStorageManager persistentStorageManager;
+	private String iamRoleName;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
-			Collection<String> securityGroupsNames, String vpcName, String subnetName, String xenAmi,
-			String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns) {
+			PersistentStorageManager psm, Collection<String> securityGroupsNames, String vpcName, String subnetName,
+			String xenAmi, String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns,
+			String iamRoleName) {
 		this.xenVmDao = vmDao;
+		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
 		this.ec2Wrapper = ec2Wrapper;
 		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
@@ -77,6 +89,7 @@ public class XenHostManager {
 
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
+		this.iamRoleName = iamRoleName;
 		this.xenInstanceType = xenInstanceType;
 		this.serverUser = System.getProperty("user.name");
 		this.keyManager = keyManager;
@@ -87,11 +100,12 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
-			String securityGroupsCommaSeparated, String vpcName, String subnetName, String xenAmi, String xenUser,
-			String xenKeyName, String xenInstanceType, boolean usePublicDns) {
-		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, splitOnComma(securityGroupsCommaSeparated),
-				vpcName, subnetName, xenAmi, xenUser, xenKeyName, InstanceType.fromValue(xenInstanceType),
-				usePublicDns);
+			PersistentStorageManager psm, String securityGroupsCommaSeparated, String vpcName, String subnetName,
+			String xenAmi, String xenUser, String xenKeyName, String xenInstanceType, boolean usePublicDns,
+			String iamRoleName) {
+		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm,
+				splitOnComma(securityGroupsCommaSeparated), vpcName, subnetName, xenAmi, xenUser, xenKeyName,
+				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -123,9 +137,13 @@ public class XenHostManager {
 		CompletableFuture<Collection<VirtualMachine>> finalLinuxFuture = linuxFuture;
 		String virtueName = virtue.getName();
 		virtueName = virtueName.replace(" ", "-");
+		// mainly this makes sure the volume is ready
+		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(), virtue.getTemplateId(),
+				virtue.getName());
+
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
-				xenInstanceType, subnetId);
+				xenInstanceType, subnetId, iamRoleName);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,
@@ -150,7 +168,7 @@ public class XenHostManager {
 			virtue.getVms().add(vm);
 		}
 
-		Runnable r = new Runnable() {
+		Runnable provisionRunnable = new Runnable() {
 
 			private String Dom0NfsSensorCmd = "/home/ec2-user/twosix/matt/nfs-sensor-target/run_docker.sh";
 
@@ -172,14 +190,47 @@ public class XenHostManager {
 				try {
 					// setup Xen VM
 					session = getSession(xen, session, privateKeyFile, 5);
+					Session finalSession = session;
+					Runnable copyS3Data = () -> {
+						try {
+							Collection<String> templateSet = new HashSet<String>();
+							for (VirtualMachineTemplate vmt : linuxVmts) {
+								String template = vmt.getTemplatePath();
+								templateSet.add(template);
+							}
+							List<String> lines = SshUtil.sendCommandFromSession(finalSession,
+									"sudo rm -rf /home/ec2-user/app-domains/master/* ");
 
+							copyFolderFromS3(finalSession, "standard");
+							for (String templatePath : templateSet) {
+								copyFolderFromS3(finalSession, templatePath);
+								lines = SshUtil.sendCommandFromSession(finalSession,
+										"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
+												+ templatePath + "/");
+								logger.debug("Copy standard files output: " + lines);
+							}
+						} catch (JSchException e) {
+							logger.error("Error attempting to copy s3 data", e);
+						} catch (IOException e) {
+							logger.error("Error attempting to copy s3 data", e);
+						}
+					};
+					Thread t = new Thread(copyS3Data, "copy-s3");
+					t.start();
 					copySshKey(session, privateKeyFile);
+					attachPersistentVolume(xen.getInfrastructureId(), virtue.getUsername(), virtue.getTemplateId(),
+							virtue.getName());
 					waitUntilXlListIsReady(session);
 					// JavaUtil.sleepAndLogInterruption(20000);
 					SshUtil.sendCommandFromSessionWithTimeout(session,
 							"nohup " + Dom0NfsSensorCmd + " > nfsSensor.log 2>&1", 300);
 					SshUtil.sendCommandFromSession(session, "sudo xl list");
-					logger.trace("Xen Host configure complete");
+					// List<String> persistOutput = SshUtil.sendCommandFromSession(session,
+					// "sudo mkdir -p /persist;sudo mount /dev/nvme1n1 /persist/");
+					// logger.debug("mounted persistent volume" + persistOutput);
+					logger.debug("Waiting for S3 copy to finish");
+					t.join();
+					logger.debug("Xen Host configure complete");
 					finalXenFuture.complete(xen);
 				} catch (JSchException e) {
 					logger.trace("Vm is not reachable yet: " + e.getMessage());
@@ -197,6 +248,16 @@ public class XenHostManager {
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				logger.debug("starting to provision guests");
 				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverUser);
+			}
+
+			private void copyFolderFromS3(Session finalSession, String templatePath) throws JSchException, IOException {
+				List<String> lines;
+				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
+						+ "; sudo aws s3 cp s3://persistent-storage-test/" + templatePath
+						+ " /home/ec2-user/app-domains/" + templatePath + "/ --recursive";
+				logger.debug("Running command: " + cmd);
+				lines = SshUtil.sendCommandFromSession(finalSession, cmd);
+				logger.debug("s3 copy output: " + lines.get(lines.size() - 1));
 			}
 
 			private Session getSession(VirtualMachine xen, Session session, File privateKeyFile, int maxAttempts) {
@@ -217,7 +278,7 @@ public class XenHostManager {
 
 		xenProvisionFuture.handle((xenVm2, ex) -> {
 			if (ex == null) {
-				r.run();
+				provisionRunnable.run();
 			} else {
 				handleError(virtue, finalXenFuture, xenVm2, ex);
 			}
@@ -232,6 +293,17 @@ public class XenHostManager {
 		// xenProvisionFuture.thenRun(r);
 		// Thread t = new Thread(r, "XenProvisioner-" + id);
 		// t.start();
+	}
+
+	protected void attachPersistentVolume(String instanceId, String username, String templateId, String templateName) {
+		String volumeId = persistentStorageManager.getOrCreatePersistentStorageForVirtue(username, templateId,
+				templateName);
+		if (volumeId != null) {
+			AttachVolumeRequest avr = new AttachVolumeRequest(volumeId, instanceId, persistentVolumeDeviceName);
+			AttachVolumeResult avrResult = ec2Wrapper.getEc2().attachVolume(avr);
+			String state = avrResult.getAttachment().getState();
+			logger.debug("Attaching volume state=" + state);
+		}
 	}
 
 	private void handleError(VirtueInstance virtue, CompletableFuture<?> future, VirtualMachine xenVm, Throwable ex) {
@@ -371,6 +443,13 @@ public class XenHostManager {
 			guestManager.startGuests(linuxVms, finalLinuxFuture);
 		};
 		xenFuture.thenRun(startGuestsRunnable);
+		CompletableFuture<VirtualMachine> finalXenFuture = xenFuture;
+		linuxFuture.handle((myVms, ex) -> {
+			if (ex != null) {
+				handleError(virtueInstance, finalXenFuture, xenVm, ex);
+			}
+			return myVms;
+		});
 	}
 
 	public void stopVirtue(VirtueInstance virtueInstance, Collection<VirtualMachine> linuxVms,
@@ -395,7 +474,15 @@ public class XenHostManager {
 			addVmsToStoppingPipeline(xenVm, finalXenFuture);
 		};
 
-		linuxFuture.thenRun(stopHostRunnable);
+		// linuxFuture.thenRun(stopHostRunnable);
+		linuxFuture.handle((myVms, ex) -> {
+			if (ex != null) {
+				handleError(virtueInstance, finalXenFuture, xenVm, ex);
+			} else {
+				stopHostRunnable.run();
+			}
+			return myVms;
+		});
 		finalXenFuture.thenRun(() -> {
 			for (VirtualMachine vm : linuxVms) {
 				CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm,

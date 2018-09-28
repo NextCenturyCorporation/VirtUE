@@ -52,6 +52,7 @@
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="userManager" />
+		<constructor-arg ref="persistentStorageManager" />
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
@@ -132,6 +133,18 @@
 		<constructor-arg ref="keyManager"></constructor-arg>
 	</bean>
 
+	<bean name="persistentStorageDao"
+		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaPersistentStorageDao">
+	</bean>
+
+	<bean name="persistentStorageManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager">
+		<constructor-arg ref="ec2Wrapper"></constructor-arg>
+		<constructor-arg ref="persistentStorageDao"></constructor-arg>
+		<constructor-arg value="${virtue.aws.persistentStorage.snapshotId}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.availabilityZone}"></constructor-arg>
+	</bean>
+
 	<bean name="xenManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.XenHostManager">
 		<constructor-arg ref="keyManager"></constructor-arg>
@@ -139,6 +152,7 @@
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 		<constructor-arg ref="awsRoute53"></constructor-arg>
 		<constructor-arg ref="virtueDao"></constructor-arg>
+		<constructor-arg ref="persistentStorageManager"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.server.vpc.name}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>
@@ -147,6 +161,7 @@
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
 		<property name="serverUser" value="${virtue.aws.serverUser}"></property>
 	</bean>
 
@@ -162,10 +177,16 @@
 		<constructor-arg ref="templateManager" />
 	</bean>
 
+	<bean name="xenGuestImageProvider"
+		class="com.ncc.savior.virtueadmin.infrastructure.images.S3ImageManager">
+		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+	</bean>
+
 	<bean name="importExportService"
 		class="com.ncc.savior.virtueadmin.service.ImportExportService">
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="userManager" />
+		<constructor-arg ref="xenGuestImageProvider" />
 	</bean>
 
 	<bean name="securityService"

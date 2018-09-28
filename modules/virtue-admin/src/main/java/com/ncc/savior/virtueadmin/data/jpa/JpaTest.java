@@ -54,8 +54,8 @@ public class JpaTest {
 			VirtualMachineTemplate vmt1 = new VirtualMachineTemplate(UUID.randomUUID().toString(), "test", OS.LINUX,
 					"myTemplatePath", apps1, loginUser, enabled, now, systemUser);
 			vmts1.add(vmt1);
-			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "v1", vmts1,
-					"default-template", enabled, now, systemUser);
+			VirtueTemplate vt1 = new VirtueTemplate(UUID.randomUUID().toString(), "template1", "1", vmts1,
+					"default-template", "#C0C0C0", enabled, now, systemUser);
 
 			tm.addApplicationDefinition(a1);
 			tm.addVmTemplate(vmt1);

@@ -1,6 +1,12 @@
 import { HashLocationStrategy, Location, LocationStrategy } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 
+/**
+ * @class
+ * Convert this to a generic form.
+ *
+ * #uncommented, because it will need to change drastically
+ */
 @Component({
   selector: 'app-config',
   templateUrl: './config.component.html',
@@ -12,13 +18,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ConfigComponent implements OnInit {
 
-  location: Location;
 
-  constructor( location: Location ) {
-    this.location = location;
-  }
+  /**
+   * #uncommented
+   */
+  constructor(
+    /** #uncommented */
+    protected location: Location
+   ) {}
 
-  ngOnInit() {
+  /**
+   * #uncommented
+   */
+  ngOnInit(): void {
   }
 
 }

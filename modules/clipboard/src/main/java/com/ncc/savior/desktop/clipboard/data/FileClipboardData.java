@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
 import com.ncc.savior.desktop.clipboard.windows.NativelyDeallocatedMemory;
+import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
@@ -112,7 +113,7 @@ public class FileClipboardData extends ClipboardData implements Serializable {
 	 * https://docs.microsoft.com/en-us/windows/desktop/api/shlobj_core/ns-shlobj_core-_dropfiles
 	 */
 	@Override
-	public Pointer createWindowsData() {
+	public Pointer createWindowsData(WindowsClipboardWrapper wrapper) {
 		try {
 			boolean wide = windowsWideText;
 			destinationFiles = writeFilesFromZip();

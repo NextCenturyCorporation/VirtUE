@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.clipboard.data;
 
 import com.ncc.savior.desktop.clipboard.ClipboardFormat;
+import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
 import com.sun.jna.Pointer;
 
 /**
@@ -18,7 +19,7 @@ public class UnknownClipboardData extends ClipboardData {
 	}
 
 	@Override
-	public Pointer createWindowsData() {
+	public Pointer createWindowsData(WindowsClipboardWrapper wrapper) {
 		return Pointer.NULL;
 	}
 
@@ -40,5 +41,10 @@ public class UnknownClipboardData extends ClipboardData {
 	@Override
 	public long getWindowsDataLengthBytes() {
 		return 0;
+	}
+
+	@Override
+	public String toString() {
+		return "UnknownClipboardData [getFormat()=" + getFormat() + ", isCacheable()=" + isCacheable() + "]";
 	}
 }
