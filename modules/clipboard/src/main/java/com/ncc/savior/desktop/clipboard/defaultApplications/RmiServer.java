@@ -14,11 +14,19 @@ import com.ncc.savior.desktop.clipboard.IClipboardMessageSenderReceiver;
 import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage;
 import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 
+/**
+ * Server side of RMI. This is hosted in the main application on a virtue VM.(at
+ * the moment clipboard)
+ * 
+ *
+ */
 public class RmiServer extends UnicastRemoteObject implements RmiInterface {
 	private static final String SERVICE_NAME = "SaviorDefaultApplication";
 	public static final String RMI_NAME = "//localhost/" + SERVICE_NAME;
 	private static final Logger logger = LoggerFactory.getLogger(RmiServer.class);
 	private static final long serialVersionUID = 1L;
+	// registry needed to prevent it from being garbage collected.
+	@SuppressWarnings("unused")
 	private static Registry registry;
 	private IClipboardMessageSenderReceiver transmitter;
 	private String sourceId;

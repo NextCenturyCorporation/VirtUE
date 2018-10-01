@@ -17,17 +17,12 @@ import com.ncc.savior.desktop.clipboard.IClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.IClipboardWrapper.IClipboardListener;
 import com.ncc.savior.desktop.clipboard.MessageTransmitter;
 import com.ncc.savior.desktop.clipboard.data.ClipboardData;
-import com.ncc.savior.desktop.clipboard.defaultApplications.IDefaultApplicationExecutor;
-import com.ncc.savior.desktop.clipboard.defaultApplications.LinuxDefaultApplicationExecutor;
 import com.ncc.savior.desktop.clipboard.defaultApplications.RmiServer;
-import com.ncc.savior.desktop.clipboard.defaultApplications.WindowsDefaultApplicationExecutor;
 import com.ncc.savior.desktop.clipboard.linux.X11ClipboardWrapper;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
-import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage;
-import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.desktop.clipboard.windows.WindowsClipboardWrapper;
@@ -194,11 +189,6 @@ public class ClipboardClient implements Closeable {
 			} catch (IOException e) {
 				logger.error("Error sending data message=" + dataMessage);
 			}
-		} else if (message instanceof DefaultApplicationMessage) {
-			IDefaultApplicationExecutor daEx = getDefaultApplicationExecutorForOperatingSystem();
-			DefaultApplicationMessage dam = (DefaultApplicationMessage) message;
-			DefaultApplicationType type = dam.getDefaultApplicationType();
-			daEx.runWithDefaultApplication(type, dam.getArguments());
 		}
 	}
 
@@ -258,24 +248,6 @@ public class ClipboardClient implements Closeable {
 			throw new RuntimeException("Clipboard is currently not supported on your operating system!");
 		}
 		return clipboardWrapper;
-	}
-
-	public static IDefaultApplicationExecutor getDefaultApplicationExecutorForOperatingSystem() {
-		OS os = JavaUtil.getOs();
-		IDefaultApplicationExecutor defaultAppExecutor;
-		switch (os) {
-		case LINUX:
-			defaultAppExecutor = new LinuxDefaultApplicationExecutor();
-			break;
-		case MAC:
-			throw new RuntimeException("Mac default applications are currently not supported!");
-		case WINDOWS:
-			defaultAppExecutor = new WindowsDefaultApplicationExecutor();
-			break;
-		default:
-			throw new RuntimeException("Default applications is currently not supported on your operating system!");
-		}
-		return defaultAppExecutor;
 	}
 
 	@Override
