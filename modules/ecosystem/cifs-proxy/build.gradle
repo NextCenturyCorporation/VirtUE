@@ -107,7 +107,7 @@ def getWebhost() {
 remotes {
 	webserver {
 	    host = project.getWebhost()
-		user = 'ec2-user'
+		user = 'fedora'
         // root of git tree
         identity = file('../../../vrtu.pem')
 	}
