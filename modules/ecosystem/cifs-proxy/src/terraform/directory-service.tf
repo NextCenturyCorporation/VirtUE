@@ -1,5 +1,4 @@
 locals {
-  dsname = "ds"
   samba_config_dir = "/var/lib/samba"
 }
 
@@ -12,7 +11,7 @@ resource "aws_instance" "directory_service" {
   subnet_id = "${data.aws_subnet.public_subnet.id}"
 
   tags {
-	Name = "${local.dsname}"
+	Name = "${var.dsname}"
 	Owner = "${data.external.local_user.result.user}"
 	class = "directory service"
 	automated = "terraform"
@@ -27,8 +26,8 @@ set -x # log it all
 set -e # bail out on error
 exec > /var/log/user_data.log 2>&1
 date
-hostnamectl set-hostname ${local.dsname}.${var.domain}
-sed -i 's/\(^127\.0\.0\.1 *\)/\1${local.dsname}.${var.domain} ${local.dsname} /' /etc/hosts
+hostnamectl set-hostname ${var.dsname}.${var.domain}
+sed -i 's/\(^127\.0\.0\.1 *\)/\1${var.dsname}.${var.domain} ${var.dsname} /' /etc/hosts
 dnf -y install samba samba-dc
 mv /etc/krb5.conf /etc/krb5.conf-orig || true
 samba-tool domain provision \

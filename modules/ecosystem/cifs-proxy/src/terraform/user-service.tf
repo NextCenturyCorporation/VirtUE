@@ -36,6 +36,7 @@ yum -y install \
 	oddjob-mkhomedir \
 	realmd \
 	samba-common-tools \
+	samba-dc \
 	sssd
 hostnamectl set-hostname ${local.myname}.${var.domain}
 sed -i 's/\(^127\.0\.0\.1 *\)/\1${local.myname}.${var.domain} ${local.myname} /' /etc/hosts
@@ -57,6 +58,7 @@ echo kerberos method = secrets and keytab
 echo '${var.admin_password}' | net -k ads keytab add http -U ${var.domain_admin_user}
 echo '${var.admin_password}' | net -k ads keytab add HTTP -U ${var.domain_admin_user}
 
+echo Configuring Kerberos for our domain
 cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 [libdefaults]
 	default_realm = ${upper(var.domain)}
@@ -72,6 +74,27 @@ cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 		admin_server = ${var.domain}
 	}
 EOCONF
+
+echo fixing reverse dns
+myaddress=$(ip address show dev eth0 | sed -n 's_ *inet \([^/]*\)/.*_\1_p')
+echo '${var.admin_password}' | kinit Administrator
+# if the zone doesn't exist, create it
+mysubnet=$(echo $myaddress | sed 's/\.[^.]*$//')
+zone=$(echo $mysubnet | awk -F . '{ print $3 "." $2 "." $1 }').in-addr.arpa
+samba-tool dns zoneinfo ${var.dsname} $zone \
+	   --kerberos=1 \
+	   >& /dev/null || \
+	samba-tool dns zonecreate ${var.dsname} $zone \
+		   --kerberos=1
+
+# remove reverse DNS PTR record (if any)
+lastOctet=$${myaddress/*./}
+samba-tool dns delete ${var.dsname} $zone $lastOctet PTR ${local.myname}.${var.domain} \
+	   --kerberos=1 \
+	   >& /dev/null || true
+# add new reverse DNS PTR record
+samba-tool dns add ${var.dsname} $zone $lastOctet PTR ${local.myname}.${var.domain} \
+	   --kerberos=1
 
 date
 EOF

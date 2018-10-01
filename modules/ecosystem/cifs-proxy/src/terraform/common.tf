@@ -53,6 +53,11 @@ variable "subnet_name" {
   default = "public_1a"
 }
 
+variable "dsname" {
+  description = "Host name of the directory service"
+  default = "ds"
+}
+
 variable "domain" {
   default = "test.savior"
 }
