@@ -41,6 +41,11 @@ import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * GUI code for default table-based application chooser for default
+ * applications.
+ *
+ */
 public class DefaultAppTableDialog extends BaseAppChooser {
 	private static final int ROW_HEIGHT = 32;
 	private static final int ICON_SIZE = 20;

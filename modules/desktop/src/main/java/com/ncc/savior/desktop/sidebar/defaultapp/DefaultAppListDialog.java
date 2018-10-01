@@ -22,6 +22,11 @@ import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * List based App Chooser for default applications.
+ *
+ *
+ */
 public class DefaultAppListDialog extends BaseAppChooser {
 	// private static final Logger logger =
 	// LoggerFactory.getLogger(DefaultAppListDialog.class);

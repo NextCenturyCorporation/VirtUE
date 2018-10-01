@@ -20,6 +20,11 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * Cell render for the list view Dialog ( {@link DefaultAppListDialog} ) .
+ *
+ *
+ */
 public class VirtueAndAppListCellRenderer implements ListCellRenderer<Pair<DesktopVirtue, ApplicationDefinition>> {
 	private IIconService iconService;
 

@@ -8,6 +8,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * Manager to handles which colors are to be associated with which virtues in
+ * the current instance of the desktop.
+ *
+ *
+ */
 public class ColorManager {
 	private Iterator<Pair<Color, Color>> colorItr;
 	private ArrayList<Pair<Color, Color>> colorList;
@@ -42,6 +48,14 @@ public class ColorManager {
 		return colors;
 	}
 
+	/**
+	 * Gets color associated with id that is typically bolder than the body color.
+	 * If no color is currently associated with id, the next color will get
+	 * assigned.
+	 *
+	 * @param id
+	 * @return
+	 */
 	public Color getHeaderColor(String id) {
 		Pair<Color, Color> colorPair = getColorPairForId(id);
 		return colorPair.getLeft();
@@ -56,6 +70,14 @@ public class ColorManager {
 		return color;
 	}
 
+	/**
+	 * Gets color associated with id that is typically duller than the header color.
+	 * If no color is currently associated with id, the next color will get
+	 * assigned.
+	 *
+	 * @param id
+	 * @return
+	 */
 	public Color getBodyColor(String id) {
 		return getColorPairForId(id).getRight();
 	}

@@ -10,6 +10,12 @@ import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.Defau
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * Base class for an application chooser which determines which application
+ * should be opened for a given type and arguments.
+ *
+ *
+ */
 public abstract class BaseAppChooser implements IAppChooser {
 	protected Vector<Pair<DesktopVirtue, ApplicationDefinition>> appList;
 	protected String params;

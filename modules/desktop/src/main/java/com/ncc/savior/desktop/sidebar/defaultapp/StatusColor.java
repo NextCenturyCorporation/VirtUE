@@ -4,6 +4,10 @@ import java.awt.Color;
 
 import com.ncc.savior.virtueadmin.model.VirtueState;
 
+/**
+ * Handles which color could be associated with a given status.
+ *
+ */
 public class StatusColor {
 	public static Color getColor(VirtueState state, boolean isSelected, boolean hasFocus) {
 		Color yellow = new Color(170, 170, 50);

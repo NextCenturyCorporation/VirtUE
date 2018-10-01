@@ -4,6 +4,11 @@ import java.util.Comparator;
 
 import com.ncc.savior.desktop.sidebar.VirtueListContainer;
 
+/**
+ * {@link Comparator} for {@link VirtueListContainer} that sorts by status.
+ *
+ *
+ */
 public class VirtueStatusComparator implements Comparator<VirtueListContainer> {
 	@Override
 	public int compare(VirtueListContainer va1, VirtueListContainer va2) {

@@ -7,6 +7,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * {@link Comparator} for a Pair of {@link DesktopVirtue} and
+ * {@link ApplicationDefinition} where the primary sort is status.
+ *
+ *
+ */
 public class StatusFirstVirtueAppComparitor implements Comparator<Pair<DesktopVirtue, ApplicationDefinition>> {
 
 	@Override
