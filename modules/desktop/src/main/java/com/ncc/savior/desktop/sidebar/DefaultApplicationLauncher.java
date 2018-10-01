@@ -27,6 +27,10 @@ import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
+/**
+ * Handles actually launching the default application.
+ *
+ */
 public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultApplicationLauncher.class);
 	private static final String PREF_KEY_VIRTUE_TEMPLATE_ID = "virtueId";
