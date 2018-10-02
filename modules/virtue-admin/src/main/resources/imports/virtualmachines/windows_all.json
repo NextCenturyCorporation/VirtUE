@@ -1,7 +1,7 @@
 {
 	"name": "windows All VM",
 	"os": "WINDOWS",
-	"templatePath": "ami-cfcd68b0",
+	"templatePath": "ami-74b21009",
 	"loginUser": "administrator",
 	"enabled": true,
 	"applicationIds": [
