@@ -1,8 +1,8 @@
 {
     "name": "Document Editor VM",
     "os": "WINDOWS",
-    "templatePath": "ami-74b21009",
-    "loginUser": "administrator",
+    "templatePath": "ami-05d864f01373c854a",
+    "loginUser": "virtue-admin",
     "enabled": true,
     "applicationIds": [
       "IMPORT_windows_word",
