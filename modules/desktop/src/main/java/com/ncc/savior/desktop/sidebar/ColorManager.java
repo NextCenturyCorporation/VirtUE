@@ -10,9 +10,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Manager to handles which colors are to be associated with which virtues in
- * the current instance of the desktop.
- *
- *
+ * the current instance of the desktop. Although user cannot get the pair, the
+ * header color is left and body color is right. The header color tends to be
+ * bolder and the body color tends to be duller of the same or similar shade.
  */
 public class ColorManager {
 	private Iterator<Pair<Color, Color>> colorItr;

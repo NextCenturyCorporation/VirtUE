@@ -22,7 +22,7 @@ import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.Defau
  */
 public class RemoteBrowserApplication {
 	private static final Logger logger = LoggerFactory.getLogger(ClipboardClient.class);
-	private static RmiInterface look_up;
+	private static RmiInterface lookUp;
 
 	public static void main(String[] args) {
 		remoteBrowserIpc(args);
@@ -31,8 +31,8 @@ public class RemoteBrowserApplication {
 	private static void remoteBrowserIpc(String[] args) {
 		try {
 			logger.debug("looking up rmi");
-			look_up = (RmiInterface) Naming.lookup(RmiServer.RMI_NAME);
-			look_up.open(DefaultApplicationType.BROWSER, args);
+			lookUp = (RmiInterface) Naming.lookup(RmiServer.RMI_NAME);
+			lookUp.open(DefaultApplicationType.BROWSER, args);
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			logger.error("Error sending Rmi", e);
 		}

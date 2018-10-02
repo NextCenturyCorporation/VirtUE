@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.clipboard.messages;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,13 +20,7 @@ public class DefaultApplicationMessage extends BaseClipboardMessage {
 	}
 
 	public DefaultApplicationMessage(String sourceId, DefaultApplicationType defaultApplicationType, String argument) {
-		this(sourceId, defaultApplicationType, stringToList(argument));
-	}
-
-	private static List<String> stringToList(String argument) {
-		List<String> list = new ArrayList<String>(1);
-		list.add(argument);
-		return list;
+		this(sourceId, defaultApplicationType, Collections.singletonList(argument));
 	}
 
 	public DefaultApplicationMessage(String sourceId, DefaultApplicationType defaultApplicationType,
@@ -37,15 +32,7 @@ public class DefaultApplicationMessage extends BaseClipboardMessage {
 
 	public DefaultApplicationMessage(String sourceId, DefaultApplicationType defaultApplicationType,
 			String[] arguments) {
-		this(sourceId, defaultApplicationType, arrayToList(arguments));
-	}
-
-	private static List<String> arrayToList(String[] args) {
-		List<String> list = new ArrayList<>(args.length);
-		for (String arg : args) {
-			list.add(arg);
-		}
-		return list;
+		this(sourceId, defaultApplicationType, Arrays.asList(arguments));
 	}
 
 	public List<String> getArguments() {
