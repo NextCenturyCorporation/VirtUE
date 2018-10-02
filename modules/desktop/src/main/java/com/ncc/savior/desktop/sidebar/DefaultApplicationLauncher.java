@@ -21,7 +21,7 @@ import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 import com.ncc.savior.desktop.sidebar.defaultapp.DefaultAppTableDialog;
 import com.ncc.savior.desktop.sidebar.defaultapp.IAppChooser;
-import com.ncc.savior.desktop.sidebar.defaultapp.StatusFirstVirtueAppComparitor;
+import com.ncc.savior.desktop.sidebar.defaultapp.StatusFirstVirtueAppComparator;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -154,7 +154,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 				comboList.add(Pair.of(v, a));
 			}
 		}
-		comboList.sort(new StatusFirstVirtueAppComparitor());
+		comboList.sort(new StatusFirstVirtueAppComparator());
 
 		// IAppChooser dald = new DefaultAppListDialog(iconService);
 		IAppChooser dald = new DefaultAppTableDialog(iconService, colorManager);

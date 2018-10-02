@@ -13,7 +13,7 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  *
  *
  */
-public class StatusFirstVirtueAppComparitor implements Comparator<Pair<DesktopVirtue, ApplicationDefinition>> {
+public class StatusFirstVirtueAppComparator implements Comparator<Pair<DesktopVirtue, ApplicationDefinition>> {
 
 	@Override
 	public int compare(Pair<DesktopVirtue, ApplicationDefinition> o1, Pair<DesktopVirtue, ApplicationDefinition> o2) {
