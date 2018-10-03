@@ -49,11 +49,11 @@ public class InMemoryTemplateManager implements ITemplateManager {
 
 	private void initTestDatabase() throws Exception {
 		ApplicationDefinition chrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome", "1.0",
-				OS.LINUX, null, "google-chrome");
+				OS.LINUX, null, "google-chrome",null);
 		ApplicationDefinition firefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
-				OS.LINUX, null, "firefox");
+				OS.LINUX, null, "firefox",null);
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
-				OS.LINUX, null, "gnome-calculator");
+				OS.LINUX, null, "gnome-calculator", null);
 
 		Collection<ApplicationDefinition> appsAll = new LinkedList<ApplicationDefinition>();
 		Collection<ApplicationDefinition> appsBrowsers = new LinkedList<ApplicationDefinition>();

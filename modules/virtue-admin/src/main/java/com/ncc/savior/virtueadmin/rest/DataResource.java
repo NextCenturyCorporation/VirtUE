@@ -137,44 +137,46 @@ public class DataResource {
 		} catch (Throwable t) {
 			logger.warn("Failed to load icons", t);
 		}
+		ArrayList<String> tagsBrowser = new ArrayList<String>();
+		tagsBrowser.add("BROWSER");
 
 		ApplicationDefinition linuxChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Linux)",
-				"1.0", OS.LINUX, "chrome", "google-chrome");
+				"1.0", OS.LINUX, "chrome", "google-chrome", tagsBrowser);
 		ApplicationDefinition linuxFirefox = new ApplicationDefinition(UUID.randomUUID().toString(), "Firefox", "1.0",
-				OS.LINUX, "firefox", "firefox");
+				OS.LINUX, "firefox", "firefox", tagsBrowser);
 		ApplicationDefinition calculator = new ApplicationDefinition(UUID.randomUUID().toString(), "Calculator", "1.0",
-				OS.LINUX, "calc", "gnome-calculator");
+				OS.LINUX, "calc", "gnome-calculator", null);
 		ApplicationDefinition lowriter = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Writer",
-				"1.0", OS.LINUX, "lo-writer", "lowriter");
+				"1.0", OS.LINUX, "lo-writer", "lowriter", null);
 		ApplicationDefinition localc = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Calc",
-				"1.0", OS.LINUX, "lo-calc", "localc");
+				"1.0", OS.LINUX, "lo-calc", "localc", null);
 		ApplicationDefinition lodraw = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Draw",
-				"1.0", OS.LINUX, "lo-draw", "lodraw");
+				"1.0", OS.LINUX, "lo-draw", "lodraw", null);
 		ApplicationDefinition loimpress = new ApplicationDefinition(UUID.randomUUID().toString(), "LibreOffice Impress",
-				"1.0", OS.LINUX, "lo-impress", "loimpress");
+				"1.0", OS.LINUX, "lo-impress", "loimpress", null);
 		ApplicationDefinition linuxTerminal = new ApplicationDefinition(UUID.randomUUID().toString(), "Terminal", "1.0",
-				OS.LINUX, "linux-terminal", "xterm");
+				OS.LINUX, "linux-terminal", "xterm", null);
 		ApplicationDefinition thunderBird = new ApplicationDefinition(UUID.randomUUID().toString(), "Thunderbird",
-				"1.0", OS.LINUX, "thunderbird", "thunderbird");
+				"1.0", OS.LINUX, "thunderbird", "thunderbird", null);
 
 		ApplicationDefinition windowsChrome = new ApplicationDefinition(UUID.randomUUID().toString(), "Chrome (Win)",
-				"1.0", OS.WINDOWS, "chrome", "c:\\windows\\notepad.exe");
+				"1.0", OS.WINDOWS, "chrome", "c:\\windows\\notepad.exe", tagsBrowser);
 		// "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 		ApplicationDefinition windowsEdge = new ApplicationDefinition(UUID.randomUUID().toString(), "Microsoft Edge",
-				"1.0", OS.WINDOWS, "ms-edge", "c:\\windows\\notepad.exe");
+				"1.0", OS.WINDOWS, "ms-edge", "c:\\windows\\notepad.exe", tagsBrowser);
 		ApplicationDefinition windowsWord = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Word 2013", "1.0", OS.WINDOWS, "ms-word", "c:\\windows\\notepad.exe");
+				"Microsoft Word 2013", "1.0", OS.WINDOWS, "ms-word", "c:\\windows\\notepad.exe", null);
 		ApplicationDefinition windowsExcel = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Excel 2013", "1.0", OS.WINDOWS, "ms-excel", "c:\\windows\\notepad.exe");
+				"Microsoft Excel 2013", "1.0", OS.WINDOWS, "ms-excel", "c:\\windows\\notepad.exe", null);
 		ApplicationDefinition windowsOutlook = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Microsoft Outlook 2013", "1.0", OS.WINDOWS, "ms-outlook", "c:\\windows\\notepad.exe");
+				"Microsoft Outlook 2013", "1.0", OS.WINDOWS, "ms-outlook", "c:\\windows\\notepad.exe", null);
 		ApplicationDefinition windowsPowershell = new ApplicationDefinition(UUID.randomUUID().toString(),
 				"Windows Powershell", "1.0", OS.WINDOWS, "ms-powershell",
-				"c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe");
+				"c:\\windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe", null);
 		ApplicationDefinition windowsSkype = new ApplicationDefinition(UUID.randomUUID().toString(), "Skype", "1.0",
-				OS.WINDOWS, "skype", "c:\\windows\\notepad.exe");
+				OS.WINDOWS, "skype", "c:\\windows\\notepad.exe", null);
 		ApplicationDefinition windowsCommandTerminal = new ApplicationDefinition(UUID.randomUUID().toString(),
-				"Windows Command Terminal", "1.0", OS.WINDOWS, "ms-terminal", "c:\\windows\\system32\\cmd.exe");
+				"Windows Command Terminal", "1.0", OS.WINDOWS, "ms-terminal", "c:\\windows\\system32\\cmd.exe", null);
 
 		// ApplicationDefinition gedit = new
 		// ApplicationDefinition(UUID.randomUUID().toString(), "GEdit", "1.0", OS.LINUX,

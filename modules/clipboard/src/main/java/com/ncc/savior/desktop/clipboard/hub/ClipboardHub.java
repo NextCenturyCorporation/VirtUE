@@ -30,6 +30,7 @@ import com.ncc.savior.desktop.clipboard.messages.ClipboardChangedMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardDataRequestMessage;
 import com.ncc.savior.desktop.clipboard.messages.ClipboardFormatsRequestMessage;
+import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage;
 import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.util.JavaUtil;
@@ -59,7 +60,8 @@ public class ClipboardHub {
 	private ICrossGroupDataGuard dataGuard;
 	private Set<ClipboardFormat> currentFormats;
 	private DisconnectListener disconnectListener;
-	private HashMap<String, String> groupIdToDisplayName;
+	private Map<String, String> groupIdToDisplayName;
+	private Set<IDefaultApplicationListener> defaultAppListeners;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
 		groupIdToDisplayName = new HashMap<String, String>();
@@ -72,6 +74,7 @@ public class ClipboardHub {
 		validFormats.add(ClipboardFormat.BITMAP);
 		this.dataGuard = dataGuard;
 		dataGuard.setGroupIdToDisplayNameMap(groupIdToDisplayName);
+		defaultAppListeners = new HashSet<IDefaultApplicationListener>();
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -262,6 +265,14 @@ public class ClipboardHub {
 				sendMessageHandleError(new ClipboardChangedMessage(clipboardOwnerId, currentFormats), transmitter,
 						destId);
 			}
+		} else if (message instanceof DefaultApplicationMessage) {
+			notifyDefaultApplicationHandlers((DefaultApplicationMessage) message);
+		}
+	}
+
+	private void notifyDefaultApplicationHandlers(DefaultApplicationMessage message) {
+		for (IDefaultApplicationListener listener : defaultAppListeners) {
+			listener.activateDefaultApp(message.getDefaultApplicationType(), message.getArguments());
 		}
 	}
 
@@ -325,6 +336,10 @@ public class ClipboardHub {
 
 	public void setDisconnectListener(DisconnectListener disconnectListener) {
 		this.disconnectListener = disconnectListener;
+	}
+
+	public void addDefaultApplicationListener(IDefaultApplicationListener dsf) {
+		defaultAppListeners.add(dsf);
 	}
 
 	public static interface DisconnectListener {

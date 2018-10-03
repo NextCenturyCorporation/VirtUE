@@ -1,7 +1,12 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 /**
  * Application Data Transfer Object (DTO).
@@ -17,24 +22,36 @@ public class ApplicationDefinition {
 	private OS os;
 	private String launchCommand;
 	private String iconKey;
+	@Transient
+	private String parameters;
+	@ElementCollection
+	private List<String> tags;
 
-	public ApplicationDefinition(String id, String name, String version, OS os, String iconKey) {
+	public ApplicationDefinition(String id, String name, String version, OS os, String iconKey, List<String> tags) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.version = version;
 		this.os = os;
 		this.iconKey = iconKey;
+		if (tags == null) {
+			tags = new ArrayList<String>(0);
+		}
+		this.tags = tags;
 	}
 
 	public ApplicationDefinition(String id, String displayName, String version, OS os, String iconKey,
-			String launchCommand) {
+			String launchCommand, List<String> tags) {
 		this.id = id;
 		this.name = displayName;
 		this.version = version;
 		this.os = os;
 		this.launchCommand = launchCommand;
 		this.iconKey = iconKey;
+		if (tags == null) {
+			tags = new ArrayList<String>(0);
+		}
+		this.tags = tags;
 	}
 
 	/**
@@ -101,10 +118,27 @@ public class ApplicationDefinition {
 		this.iconKey = iconKey;
 	}
 
+	public String getParameters() {
+		return parameters;
+	}
+
+	public void setParameters(String parameters) {
+		this.parameters = parameters;
+	}
+
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
+
 	@Override
 	public String toString() {
 		return "ApplicationDefinition [id=" + id + ", name=" + name + ", version=" + version + ", os=" + os
-				+ ", launchCommand=" + launchCommand + ", iconKey=" + iconKey + "]";
+				+ ", launchCommand=" + launchCommand + ", iconKey=" + iconKey + ", parameters=" + parameters + ", tags="
+				+ tags + "]";
 	}
 
 	@Override
@@ -116,6 +150,7 @@ public class ApplicationDefinition {
 		result = prime * result + ((launchCommand == null) ? 0 : launchCommand.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((os == null) ? 0 : os.hashCode());
+		result = prime * result + ((tags == null) ? 0 : tags.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		return result;
 	}
@@ -150,6 +185,11 @@ public class ApplicationDefinition {
 		} else if (!name.equals(other.name))
 			return false;
 		if (os != other.os)
+			return false;
+		if (tags == null) {
+			if (other.tags != null)
+				return false;
+		} else if (!tags.equals(other.tags))
 			return false;
 		if (version == null) {
 			if (other.version != null)

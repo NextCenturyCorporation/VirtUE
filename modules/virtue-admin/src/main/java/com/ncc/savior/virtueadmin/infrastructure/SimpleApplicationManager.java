@@ -53,7 +53,7 @@ public class SimpleApplicationManager implements IApplicationManager {
 	}
 
 	@Override
-	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, int maxTries) {
+	public void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition app, String cliParams, int maxTries) {
 		try {
 			SshConnectionParameters params = null;
 			if (vm.getPrivateKey() != null) {
@@ -111,7 +111,11 @@ public class SimpleApplicationManager implements IApplicationManager {
 				logger.debug("going to top of loop");
 			}
 			logger.debug("starting app");
-			initiator.startXpraApp(display, app.getLaunchCommand());
+			String cmd = app.getLaunchCommand();
+			if (cliParams != null) {
+				cmd += " " + cliParams;
+			}
+			initiator.startXpraApp(display, cmd);
 		} catch (IOException | InterruptedException e) {
 			String msg = "Error attempting to start application!";
 			logger.error(msg, e);
