@@ -31,6 +31,7 @@ exec > /var/log/user_data.log 2>&1
 date
 yum -y install \
 	adcli \
+	java-1.8.0-openjdk \
 	krb5-workstation \
 	oddjob \
 	oddjob-mkhomedir \

@@ -32,6 +32,8 @@ resource "aws_instance" "file_server" {
 	timeout = "10m"
   }
 
+  #TODO create spn, for example: sudo samba-tool spn add cifs/fileserver.test.savior@TEST.SAVIOR fileserver$
+  
   user_data = <<EOF
 <powershell>
   Start-Transcript -Path "c:\user_data.log" -append -force 

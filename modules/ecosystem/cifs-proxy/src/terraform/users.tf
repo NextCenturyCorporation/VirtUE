@@ -3,6 +3,9 @@
 #
 
 resource "null_resource" "user_creation" {
+  triggers {
+	ds_id = "${aws_instance.directory_service.id}"
+  }
 
   connection {
 	user = "fedora"
@@ -13,7 +16,7 @@ resource "null_resource" "user_creation" {
   
   provisioner "remote-exec" {
 	inline = [
-	  "sudo samba-tool user create bob ${var.bob_password}"
+	  "echo ${var.admin_password} | sudo samba-tool user create bob ${var.bob_password}"
 	]
   }
 
