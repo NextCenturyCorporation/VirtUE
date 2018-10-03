@@ -92,7 +92,7 @@
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 	</bean>
 
-	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.mixed.StaticVpcSubnetProvider">
+	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.StaticVpcSubnetProvider">
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
 		<constructor-arg value="${virtue.aws.server.subnet.name}" />

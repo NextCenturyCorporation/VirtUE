@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.infrastructure.mixed;
+package com.ncc.savior.virtueadmin.infrastructure.subnet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,5 +37,10 @@ public class StaticVpcSubnetProvider implements IVpcSubnetProvider {
 	@Override
 	public String getVpcId() {
 		return vpcId;
+	}
+
+	@Override
+	public void releaseSubnetId(String subnetId) {
+		//Do nothing		
 	}
 }
