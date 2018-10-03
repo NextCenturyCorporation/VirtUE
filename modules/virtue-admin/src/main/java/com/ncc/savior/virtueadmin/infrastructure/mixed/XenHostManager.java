@@ -69,24 +69,23 @@ public class XenHostManager {
 	private String serverUser;
 	private IKeyManager keyManager;
 	private XenGuestManagerFactory xenGuestManagerFactory;
-	private String subnetId;
 	private Collection<String> securityGroupIds;
 	private CompletableFutureServiceProvider serviceProvider;
 	private PersistentStorageManager persistentStorageManager;
 	private String iamRoleName;
+	private IVpcSubnetProvider vpcSubnetProvider;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
-			PersistentStorageManager psm, Collection<String> securityGroupsNames, String vpcName, String subnetName,
+			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, Collection<String> securityGroupsNames,
 			String xenAmi, String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns,
 			String iamRoleName) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
 		this.ec2Wrapper = ec2Wrapper;
-		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
-		this.subnetId = AwsUtil.getSubnetIdFromName(vpcId, subnetName, ec2Wrapper);
-
+		this.vpcSubnetProvider = vpcSubnetProvider;
+		String vpcId = vpcSubnetProvider.getVpcId();
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
 		this.iamRoleName = iamRoleName;
@@ -100,11 +99,11 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
-			PersistentStorageManager psm, String securityGroupsCommaSeparated, String vpcName, String subnetName,
+			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, String securityGroupsCommaSeparated,
 			String xenAmi, String xenUser, String xenKeyName, String xenInstanceType, boolean usePublicDns,
 			String iamRoleName) {
-		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm,
-				splitOnComma(securityGroupsCommaSeparated), vpcName, subnetName, xenAmi, xenUser, xenKeyName,
+		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider,
+				splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
 				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName);
 	}
 
@@ -141,6 +140,7 @@ public class XenHostManager {
 		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(), virtue.getTemplateId(),
 				virtue.getName());
 
+		String subnetId=vpcSubnetProvider.getSubnetId(virtue.getId());
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
 				xenInstanceType, subnetId, iamRoleName);

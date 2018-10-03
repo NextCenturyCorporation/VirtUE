@@ -106,9 +106,11 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 
 		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
-				windowsFuture, template.getName());
-		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
+		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), null);
+		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts, windowsFuture,
+				template.getName(), vi.getId());
+		vi.setVms(vms);
+
 		// if (!linuxVmts.isEmpty()) {
 
 		CompletableFuture<Collection<VirtualMachine>> linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
