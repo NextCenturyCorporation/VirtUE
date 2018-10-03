@@ -10,6 +10,7 @@ import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_set_desc;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_buffer_desc;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_cred_id_t;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_name_t;
+import com.sun.jna.NativeLong;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -107,12 +108,15 @@ public class GssUtils {
 
 	public static String getStringName(GssApi api, gss_name_t name) throws GSSException {
 		LOGGER.entry(name);
+		if (name.equals(GssApi.GSS_C_NO_NAME)) {
+			return "";
+		}
 		String stringname;
 		IntByReference minorStatus = new IntByReference();
 		gss_buffer_desc outputNameBuffer = new gss_buffer_desc();// outputNameHandle.getPointer());
 		int retval = api.gss_display_name(minorStatus, name, outputNameBuffer, null);
 		if (retval != 0) {
-			GSSException exception = new GSSException(retval, minorStatus.getValue(), "releasing name " + name);
+			GSSException exception = new GSSException(retval, minorStatus.getValue(), "getting display name for: " + name);
 			LOGGER.throwing(exception);
 			throw exception;
 		}
@@ -131,7 +135,8 @@ public class GssUtils {
 		UnpackedName result = new UnpackedName();
 		IntByReference minorStatus = new IntByReference();
 		gss_buffer_desc outputNameBuffer = new gss_buffer_desc();
-		PointerByReference nameTypeRef = new PointerByReference();
+		gss_OID_desc nameType = new gss_OID_desc();
+		PointerByReference nameTypeRef = new PointerByReference(nameType.getPointer());
 		int retval;
 		try {
 			retval = api.gss_display_name(minorStatus, name, outputNameBuffer, nameTypeRef);
@@ -151,13 +156,13 @@ public class GssUtils {
 				}
 			}
 		}
-		if (nameTypeRef.getValue() != null) {
-			gss_OID_desc nameType = new gss_OID_desc(nameTypeRef.getValue());
+		//if (nameTypeRef.getValue() != null) {
+			//gss_OID_desc nameType = new gss_OID_desc(nameTypeRef.getValue());
 			result.type = getOidString(api, nameType);
-		}
-		else {
-			result.type = "(null)";			
-		}
+		//}
+		//else {
+			//result.type = "(null)";			
+		//}
 		return result;
 	}
 
@@ -223,16 +228,27 @@ public class GssUtils {
 				// TODO maybe change this to do something mechanism-specific with
 				// gss_inquire_names_for_mech
 				gss_OID_set_desc oidSet = new gss_OID_set_desc(mechanismsOidSet.getValue());
-				result.append(",mechanisms=[");
-				if (oidSet.count.intValue() > 0) {
-					gss_OID_desc[] oidArray = (gss_OID_desc[]) oidSet.elements.toArray(oidSet.count.intValue());
-					for (gss_OID_desc oid : oidArray) {
+				int numOids = oidSet.count.intValue();
+				result.append(",mechanisms(");				
+				result.append(numOids);
+				result.append(")=[");
+				if (numOids > 0) {
+					gss_OID_desc[] oidArray = (gss_OID_desc[]) oidSet.elements.toArray(numOids);
+					for (int i = 0; i < numOids; i++) {
+						gss_OID_desc oid = oidArray[i];
+						result.append('[');
 						try {
-							result.append(getOidString(api, oid));
+							String[] namesForMech = getNamesForMech(api, oid);
+							if (namesForMech.length > 0) {
+								result.append(String.join(",", namesForMech));
+							}
+							else {
+								result.append(getOidString(api, oid));
+							}
 						} catch (GSSException e) {
 							result.append("<ERROR>");
 						}
-						result.append(',');
+						result.append("],");
 					}
 					// delete trailing ','
 					result.deleteCharAt(result.length() - 1);
@@ -263,6 +279,52 @@ public class GssUtils {
 			}
 		}
 		result.append(']');
+		LOGGER.exit(result.toString());
+		return result.toString();
+	}
+	
+	public static String[] getNamesForMech(GssApi api, gss_OID_desc oid) throws GSSException {
+		LOGGER.entry(api, oid);
+		IntByReference minorStatus = new IntByReference();
+		gss_OID_set_desc mechNames = new gss_OID_set_desc();
+		mechNames.count = new NativeLong(0);
+		System.out.println(">>>about to call inquire_names_for_mech");
+		int retval = api.gss_inquire_names_for_mech(minorStatus, oid, mechNames);
+		System.out.println("<<<back from inquire_names_for_mech");
+		if (retval != 0) {
+			throw new GSSException(retval, minorStatus.getValue(), "could not get names for mech: " + oid);
+		}
+		int numNames = mechNames.count.intValue();
+		System.out.println("*** gNFM: converting " + numNames);
+		String[] result;
+		if (mechNames.elements != null) {
+			gss_OID_desc[] mechNameArray = (gss_OID_desc[]) mechNames.elements.toArray(numNames);
+			System.out.println("*** gNFM: converted " + numNames);
+			result = new String[numNames];
+			for (int i = 0; i < numNames; i++) {
+				System.out.println("*** gNFM: trying #" + i);
+				result[i] = getOidString(api, mechNameArray[i]);
+			}
+		}
+		else {
+			result = new String[0];
+		}
+		System.out.println(">>>about to call release_oid_set");
+		retval = api.gss_release_oid_set(minorStatus, mechNames);
+		System.out.println(">>>back from release_oid_set");
+		if (retval != 0) {
+			throw new GSSException(retval, minorStatus.getValue(), "could not release mechanism names");
+		}
+		LOGGER.exit(result);
+		return result;
+	}
+
+	public static String decodeMajorStatus(int major) {
+		LOGGER.entry(major);
+		StringBuilder result = new StringBuilder();
+		result.append(major).append("(").append("calling=0x").append(Integer.toHexString(GSS_CALLING_ERROR(major)))
+				.append(",routine=0x").append(Integer.toHexString(GSS_ROUTINE_ERROR(major))).append(",suppl=0x")
+				.append(Integer.toHexString(GSS_SUPPLEMENTARY_ERROR(major))).append(")");
 		LOGGER.exit(result.toString());
 		return result.toString();
 	}

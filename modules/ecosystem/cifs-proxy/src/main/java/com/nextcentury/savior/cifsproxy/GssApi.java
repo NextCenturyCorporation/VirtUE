@@ -392,12 +392,16 @@ public interface GssApi extends Library {
 
 	int gss_display_name(IntByReference minorStatus /* minor_status */, gss_name_t inputName /* input_name */,
 			gss_buffer_desc outputNameBuffer /* output_name_buffer */,
-			PointerByReference outputNameType /* output_name_type */);
+			PointerByReference outputNameType /* output_name_type (gss_OID *) */);
 
 	int gss_oid_to_str(IntByReference minorStatus, /* minor_status */
 			gss_OID_desc oid, /* oid */
 			gss_buffer_desc outBuffer); /* oid_str */
 
+	int gss_inquire_names_for_mech(IntByReference minorStatus, /* minor_status */
+			gss_OID_desc mech, /* mechanism */
+			gss_OID_set_desc mechNames); /* name_types */
+	
 	/**
 	 * Initiates a secure connection between this computer and another (usually a
 	 * server). To be portable, an app should call this in a loop.
