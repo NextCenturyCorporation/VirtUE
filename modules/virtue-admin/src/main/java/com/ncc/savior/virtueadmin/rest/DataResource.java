@@ -226,9 +226,9 @@ public class DataResource {
 		// ssh, but prior to sensing or additional apps
 		// String windowsAmi = "ami-ca00afb7";
 		// String windowsAmi = "ami-6f69b310";
-		String windowsAmi = "ami-cfcd68b0";
+		String windowsAmi = "ami-05d864f01373c854a";
 		String linuxLoginUser = "user";
-		String windowsLoginUser = "administrator";
+		String windowsLoginUser = "virtue-admin";
 		VirtualMachineTemplate vmBrowser = new VirtualMachineTemplate(UUID.randomUUID().toString(), "Browsers",
 				OS.LINUX, allLinuxAmi, appsBrowsersLinux, linuxLoginUser, true, now, systemName, "System", new Date());
 		vmBrowser.setSecurityTag("power");

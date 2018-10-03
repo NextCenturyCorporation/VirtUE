@@ -92,7 +92,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/reconnect")
-	public Collection<DesktopVirtueApplication> startApplication(@PathParam("virtueId") String virtueId) {
+	public Collection<DesktopVirtueApplication> reconnectToVirtue(@PathParam("virtueId") String virtueId) {
 		return desktopService.getReconnectApps(virtueId);
 	}
 
