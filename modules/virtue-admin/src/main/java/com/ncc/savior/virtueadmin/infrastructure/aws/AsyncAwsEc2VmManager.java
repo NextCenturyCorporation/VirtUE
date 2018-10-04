@@ -2,7 +2,9 @@ package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -72,21 +74,25 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		this.vpcSubnetProvider = vpcSubnetProvider;
 	}
 
-//	@Override
-//	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
-//			CompletableFuture<Collection<VirtualMachine>> future) {
-//		Collection<VirtualMachineTemplate> vmTemplates = new ArrayList<VirtualMachineTemplate>(1);
-//		vmTemplates.add(vmt);
-//
-//		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future, null);
-//		if (vms.size() != 1) {
-//			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
-//			SaviorException e = new SaviorException(SaviorErrorCode.AWS_ERROR, msg);
-//			logger.error(msg, e);
-//			throw e;
-//		}
-//		return vms.iterator().next();
-//	}
+	// @Override
+	// public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user,
+	// VirtualMachineTemplate vmt,
+	// CompletableFuture<Collection<VirtualMachine>> future) {
+	// Collection<VirtualMachineTemplate> vmTemplates = new
+	// ArrayList<VirtualMachineTemplate>(1);
+	// vmTemplates.add(vmt);
+	//
+	// Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user,
+	// vmTemplates, future, null);
+	// if (vms.size() != 1) {
+	// String msg = "Error provisioning VM. Result has VM size of " + vms.size() + "
+	// and expected 1.";
+	// SaviorException e = new SaviorException(SaviorErrorCode.AWS_ERROR, msg);
+	// logger.error(msg, e);
+	// throw e;
+	// }
+	// return vms.iterator().next();
+	// }
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
@@ -102,7 +108,11 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			virtueName = virtueName.replace(" ", "-");
 			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + virtueName;
 
-			String subnetId = vpcSubnetProvider.getSubnetId(SubnetKey);
+			Map<String, String> tags = new HashMap<String, String>();
+			tags.put(IVpcSubnetProvider.TAG_USERNAME, user.getUsername());
+			tags.put(IVpcSubnetProvider.TAG_VIRTUE_NAME, virtue);
+			tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, SubnetKey);
+			String subnetId = vpcSubnetProvider.getSubnetId(SubnetKey, tags);
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, securityGroupIds, serverKeyName, instanceType,
 					subnetId, null);
 			vms.add(vm);
@@ -276,7 +286,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	 */
 	public void setDefaultSecurityGroups(List<String> defaultSecurityGroups) {
 		this.defaultSecurityGroups = defaultSecurityGroups;
-		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(defaultSecurityGroups, vpcSubnetProvider.getVpcId(), ec2Wrapper);
+		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(defaultSecurityGroups,
+				vpcSubnetProvider.getVpcId(), ec2Wrapper);
 	}
 
 	public void setDefaultSecurityGroupsCommaSeparated(String securityGroupsCommaSeparated) {

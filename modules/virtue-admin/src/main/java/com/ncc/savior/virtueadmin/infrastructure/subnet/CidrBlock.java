@@ -34,7 +34,7 @@ public class CidrBlock {
 				String netmaskString = slashSplit[1];
 				netmask = Integer.parseInt(netmaskString);
 				String ipString = slashSplit[0];
-				String[] ipSplit = ipString.split(".");
+				String[] ipSplit = ipString.split("\\.");
 				if (ipSplit.length == 4) {
 					a = Integer.parseInt(ipSplit[0]);
 					b = Integer.parseInt(ipSplit[1]);
@@ -67,9 +67,9 @@ public class CidrBlock {
 		int addition = 1 << bitsToChange;
 		
 		int newIpAsInt = ipAsInt + addition;
-		System.out.println(Integer.toString(ipAsInt, 2));
-		System.out.println(Integer.toString(addition, 2));
-		System.out.println(Integer.toString(newIpAsInt, 2));
+//		System.out.println(Integer.toString(ipAsInt, 2));
+//		System.out.println(Integer.toString(addition, 2));
+//		System.out.println(Integer.toString(newIpAsInt, 2));
 		return CidrBlock.fromIntegerAndMask(newIpAsInt, netmask);
 	}
 

@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure.subnet;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +14,7 @@ public class StaticVpcSubnetProvider implements IVpcSubnetProvider {
 	private String vpcId;
 	private AwsEc2Wrapper ec2Wrapper;
 
-	public StaticVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper,  String vpcName,String subnetName) {
+	public StaticVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, String vpcName, String subnetName) {
 		this.ec2Wrapper = ec2Wrapper;
 		getVpcAndSubnetIds(subnetName, vpcName);
 	}
@@ -30,17 +32,17 @@ public class StaticVpcSubnetProvider implements IVpcSubnetProvider {
 	}
 
 	@Override
-	public String getSubnetId(String subnetKey) {
-		return this.subnetId;
-	}
-
-	@Override
 	public String getVpcId() {
 		return vpcId;
 	}
 
 	@Override
 	public void releaseSubnetId(String subnetId) {
-		//Do nothing		
+		// Do nothing
+	}
+
+	@Override
+	public String getSubnetId(String subnetKey, Map<String, String> tags) {
+		return this.subnetId;
 	}
 }

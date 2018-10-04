@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure.subnet;
 
+import java.util.Map;
+
 /**
  * Implementations will provide subnetID and VPC ID for the system. Multiple
  * subnets may be used based on the given key (usually virtue id). If no subnet
@@ -9,6 +11,11 @@ package com.ncc.savior.virtueadmin.infrastructure.subnet;
  */
 public interface IVpcSubnetProvider {
 
+	String TAG_USERNAME = "username";
+	String TAG_VIRTUE_NAME = "virtue-name";
+	String TAG_VIRTUE_ID = "virtue-id";
+	String TAG_NAME = "Name";
+
 	/**
 	 * Returns subnet for the given key. Keys typically should be the same for a
 	 * virtue. Unfortunately, since this method may be called prior to virtue
@@ -17,7 +24,7 @@ public interface IVpcSubnetProvider {
 	 * @param subnetKey
 	 * @return
 	 */
-	String getSubnetId(String subnetKey);
+	String getSubnetId(String subnetKey, Map<String, String> tags);
 
 	/**
 	 * Tells the provider that the given subnet ID is no longer in use. The

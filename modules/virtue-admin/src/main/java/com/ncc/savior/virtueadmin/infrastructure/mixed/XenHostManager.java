@@ -10,8 +10,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -140,8 +142,11 @@ public class XenHostManager {
 		// mainly this makes sure the volume is ready
 		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(), virtue.getTemplateId(),
 				virtue.getName());
-
-		String subnetId=vpcSubnetProvider.getSubnetId(virtue.getId());
+		Map<String, String> tags = new HashMap<String, String>();
+		tags.put(IVpcSubnetProvider.TAG_USERNAME, virtue.getUsername());
+		tags.put(IVpcSubnetProvider.TAG_VIRTUE_NAME, virtue.getName());
+		tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, virtue.getId());
+		String subnetId = vpcSubnetProvider.getSubnetId(virtue.getId(), tags);
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
 				xenInstanceType, subnetId, iamRoleName);
