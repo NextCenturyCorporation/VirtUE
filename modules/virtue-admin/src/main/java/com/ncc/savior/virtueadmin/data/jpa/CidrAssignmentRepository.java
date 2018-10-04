@@ -10,4 +10,6 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
  */
 public interface CidrAssignmentRepository extends CrudRepository<CidrBlockAssignment, String> {
 
+	void deleteByInfrastructurId(String subnetId);
+
 }

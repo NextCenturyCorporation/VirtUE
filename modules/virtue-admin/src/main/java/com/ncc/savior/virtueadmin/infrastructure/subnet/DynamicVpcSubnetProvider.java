@@ -17,6 +17,7 @@ import com.amazonaws.services.ec2.model.AssociateRouteTableRequest;
 import com.amazonaws.services.ec2.model.CreateSubnetRequest;
 import com.amazonaws.services.ec2.model.CreateSubnetResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
+import com.amazonaws.services.ec2.model.DeleteSubnetRequest;
 import com.amazonaws.services.ec2.model.ModifySubnetAttributeRequest;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
@@ -39,12 +40,14 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private Boolean usePublicIp;
 	private String routeTableId;
 	private String availabilityZone;
+	private CidrBlock nextCidrBlockToTry;
 
 	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, String vpcName, String firstCidrBlock,
 			String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId, String availabilityZone) {
 		this.ec2 = ec2Wrapper.getEc2();
-		this.availabilityZone=availabilityZone;
+		this.availabilityZone = availabilityZone;
 		this.startingCidrBlock = CidrBlock.fromString(firstCidrBlock);
+		this.nextCidrBlockToTry = startingCidrBlock;
 		this.endCidrBlock = CidrBlock.fromString(endNonInclusiveCidrBlock);
 		this.usePublicIp = usePublicIp;
 		this.routeTableId = routeTableId;
@@ -67,7 +70,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	}
 
 	private synchronized CidrBlockAssignment getNextAvailableBlock(String subnetKey, Map<String, String> tags) {
-		Subnet subnet = createAwsSubnet(startingCidrBlock);
+		Subnet subnet = createAwsSubnet(nextCidrBlockToTry);
 
 		List<Tag> awsTags = new ArrayList<Tag>();
 		for (Entry<String, String> entry : tags.entrySet()) {
@@ -87,7 +90,9 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	}
 
 	private Subnet createAwsSubnet(CidrBlock cidrBlock) {
-		return createAwsSubnet(cidrBlock, 10);
+		Subnet subnet = createAwsSubnet(cidrBlock, 10);
+		nextCidrBlockToTry=nextCidrBlock(nextCidrBlockToTry);
+		return subnet;
 	}
 
 	private Subnet createAwsSubnet(CidrBlock cidrBlock, int numTries) {
@@ -113,11 +118,11 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 			} else if (e.getErrorCode().equals("InvalidSubnet.Conflict")) {
 				if (numTries > 0) {
 					numTries--;
-					CidrBlock nextBlock = CidrBlock.getNextCidrBlock(cidrBlock);
+					nextCidrBlockToTry= nextCidrBlock(cidrBlock);
 					logger.warn("Failed to create subnet at " + cidrBlock + " due to conflict.  Attempting subnet at "
-							+ nextBlock + ".  Retries left=" + numTries);
+							+ nextCidrBlockToTry + ".  Retries left=" + numTries);
 					// try again
-					return createAwsSubnet(nextBlock, numTries);
+					return createAwsSubnet(nextCidrBlockToTry, numTries);
 				} else {
 					throw new SaviorException(SaviorErrorCode.AWS_ERROR,
 							"Unable to create cidrBlock after many retries " + cidrBlock);
@@ -126,6 +131,16 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 			throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unable to create Subnet for cidr block=" + cidrBlock,
 					e);
 		}
+	}
+
+	private CidrBlock nextCidrBlock(CidrBlock cidrBlock) {
+		CidrBlock nextBlock = CidrBlock.getNextCidrBlock(cidrBlock);
+		// verify we didn't surpass the end block
+		if (nextBlock.greaterOrEqual(endCidrBlock)) {
+			nextBlock=startingCidrBlock;
+		}
+		//TODO verify we haven't already used the next block
+		return nextBlock;
 	}
 
 	/**
@@ -142,8 +157,9 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 
 	@Override
 	public void releaseSubnetId(String subnetId) {
-		// TODO Auto-generated method stub
-
+		DeleteSubnetRequest deleteSubnetRequest=new DeleteSubnetRequest(subnetId);
+		ec2.deleteSubnet(deleteSubnetRequest);
+		cidrRepo.deleteByInfrastructurId(subnetId);
 	}
 
 	@Override

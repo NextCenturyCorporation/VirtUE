@@ -58,19 +58,30 @@ public class CidrBlock {
 
 	public static CidrBlock getNextCidrBlock(CidrBlock cidr) {
 		int netmask = cidr.getNetmask();
-		int a = cidr.getA() << 24;
-		int b = cidr.getB() << 16;
-		int c = cidr.getC() << 8;
-		int d = cidr.getD();
-		int ipAsInt = a + b + c + d;
+		int ipAsInt = cidr.ipToInteger();
 		int bitsToChange = 32 - netmask;
 		int addition = 1 << bitsToChange;
-		
+
 		int newIpAsInt = ipAsInt + addition;
-//		System.out.println(Integer.toString(ipAsInt, 2));
-//		System.out.println(Integer.toString(addition, 2));
-//		System.out.println(Integer.toString(newIpAsInt, 2));
+		// System.out.println(Integer.toString(ipAsInt, 2));
+		// System.out.println(Integer.toString(addition, 2));
+		// System.out.println(Integer.toString(newIpAsInt, 2));
 		return CidrBlock.fromIntegerAndMask(newIpAsInt, netmask);
+	}
+
+	public boolean greaterOrEqual(CidrBlock endCidrBlock) {
+		int myInt = this.ipToInteger();
+		int otherInt = endCidrBlock.ipToInteger();
+		return myInt >= otherInt;
+	}
+
+	private int ipToInteger() {
+		int a = getA() << 24;
+		int b = getB() << 16;
+		int c = getC() << 8;
+		int d = getD();
+		int ipAsInt = a + b + c + d;
+		return ipAsInt;
 	}
 
 	private static CidrBlock fromIntegerAndMask(int ipAsInt, int netmask) {
