@@ -41,7 +41,7 @@ yum -y install \
 	sssd
 hostnamectl set-hostname ${local.myname}.${var.domain}
 sed -i 's/\(^127\.0\.0\.1 *\)/\1${local.myname}.${var.domain} ${local.myname} /' /etc/hosts
-(echo supersede domain-name-servers "${aws_instance.directory_service.private_ip}" ';'
+(echo supersede domain-name-servers "${var.ds_private_ip}" ';'
 echo supersede domain-search \"${var.domain}\";
 echo supersede domain-name \"${var.domain}\";
 ) >> /etc/dhcp/dhclient.conf
@@ -99,8 +99,7 @@ samba-tool dns add ${var.dsname} $zone $lastOctet PTR ${local.myname}.${var.doma
 
 date
 EOF
-
-  depends_on = [ "aws_instance.directory_service" /*,"aws_instance.file_server"*/ ]
+}
 
 #  provisioner "file" {
 #	destination = "/etc/krb5.conf.d/savior.conf"
@@ -113,44 +112,45 @@ EOF
 # whose keytab entry gets created by the net command above. It seems
 # like kinit should work even w/o this, but it doesn't.
 
-#data "template_file" "fix_user_service_upn_script" {
-#  template = "${file("user-service.ps1")}"
-#
-#  vars {
-#	password = "${var.admin_password}"
-#	hostname = "${local.myname}"
-#    domain = "${var.domain}"
-#  }
-#}
+data "template_file" "fix_user_service_upn_script" {
+  template = "${file("user-service.ps1")}"
 
-#resource "null_resource" "fix_user_service_upn" {
-#  triggers {
-#	ad_id = "${aws_instance.user_facing_server.id}"
-#  }
-#
-#  # Note: this runs on the file server because there doesn't appear to
-#  # be a way to do set a UPN from Linux.
-#
-#  connection {
-#	type     = "winrm"
-#	user     = "Administrator" # local admin user
-#	host     = "${aws_instance.file_server.public_dns}"
-#	password = "${var.admin_password}"
-#	https    = false
-#	use_ntlm = false
-#  }
-#
-#  provisioner "file" {
-#	content = "${data.template_file.fix_user_service_upn_script.rendered}"
-#	destination = "\\temp\\user-service.ps1"
-#  }
-#
-#  provisioner "remote-exec" {
-#	inline = [
-#	  "powershell \\temp\\user-service.ps1"
-#	]
-#  }
-#  
-#  depends_on = [ "aws_instance.file_server", "aws_instance.user_facing_server" ]
+  vars {
+	password = "${var.admin_password}"
+	hostname = "${local.myname}"
+    domain = "${var.domain}"
+    domain_admin_user = "${var.domain_admin_user}"
+  }
+}
+
+resource "null_resource" "fix_user_service_upn" {
+  triggers {
+	ad_id = "${aws_instance.user_facing_server.id}"
+  }
+
+  # Note: this runs on the file server because there doesn't appear to
+  # be a way to set a UPN from Linux.
+
+  connection {
+	type     = "winrm"
+	user     = "Administrator" # local admin user
+	host     = "${aws_instance.file_server.public_dns}"
+	password = "${var.admin_password}"
+	https    = false
+	use_ntlm = false
+  }
+
+  provisioner "file" {
+	content = "${data.template_file.fix_user_service_upn_script.rendered}"
+	destination = "\\temp\\user-service.ps1"
+  }
+
+  provisioner "remote-exec" {
+	inline = [
+	  "powershell \\temp\\user-service.ps1"
+	]
+  }
+  
+  depends_on = [ "aws_instance.file_server", "aws_instance.user_facing_server" ]
 
 }

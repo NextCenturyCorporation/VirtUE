@@ -3,7 +3,7 @@ Start-Transcript -Path "c:\users.log" -append -force
 Install-WindowsFeature -Name RSAT-AD-PowerShell
 
 $password = ConvertTo-SecureString -AsPlainText -Force "${admin_password}"
-$cred = new-object -typename System.Management.Automation.PSCredential -argumentlist Admin, $password
+$cred = new-object -typename System.Management.Automation.PSCredential -argumentlist TEST\${domain_admin_user}, $password
 $bobpassword = ConvertTo-SecureString -AsPlainText -Force "${bob_password}"
 
 echo "creating user bob"

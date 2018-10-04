@@ -47,7 +47,7 @@ resource "aws_instance" "file_server" {
   Install-WindowsFeature -Name RSAT-AD-PowerShell -LogPath "c:\install.log"
 
   echo "fixing DNS"
-  Get-NetAdapter | Set-DnsClientServerAddress -ServerAddresses "${aws_instance.directory_service.private_ip}"
+  Get-NetAdapter | Set-DnsClientServerAddress -ServerAddresses "${var.ds_private_ip}"
   Set-DnsClientGlobalSetting -SuffixSearchList "${var.domain}"
 
   echo "Joining domain & renaming, then rebooting"
@@ -57,16 +57,6 @@ resource "aws_instance" "file_server" {
   echo "Setup done"
 </powershell>
 EOF
-
-  # For some reason the rename doesn't take effect unless you reboot again.
-#  provisioner "remote-exec" {
-#	inline = [
-#	  "shutdown /r /t 0"
-#	]
-#  }
-  
-  # can't join the domain until the AD server is up
-  depends_on = [ "aws_instance.directory_service" ]
 }
 
 #  $ip = Get-NetIPAddress "${self.private_ip}"
