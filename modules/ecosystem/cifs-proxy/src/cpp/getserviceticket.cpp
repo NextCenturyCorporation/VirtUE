@@ -29,31 +29,49 @@ private:
 	T _value;
 };
 
+static void error(const char* message) {
+    std::cerr << message << std::endl;
+}
+
 krb5_error_code getServiceTicket(const char* inCacheFilename,
-		const char* serviceName, krb5_creds* outCreds) {
+                                 const char* serviceName, const char* user,
+                                 krb5_creds* outCreds) {
 	auto_free<krb5_context> context(krb5_free_context);
 	krb5_error_code ret = 0;
 
     ret = krb5_init_context(&*context);
     if (ret) {
+        error("krb5_init_context failed");
         return ret;
     }
 
     ret = krb5_cc_set_default_name(*context, inCacheFilename);
     if (ret) {
+        error("krb5_cc_set_default_name failed");
         return ret;
     }
 	krb5_ccache cache;
     ret = krb5_cc_default(*context, &cache);
     if (ret) {
+        error("krb5_cc_default failed");
         return ret;
     }
 
 	krb5_principal princ = NULL;
-    ret = krb5_cc_get_principal(*context, cache, &princ);
-	if (ret) {
-		return ret;
-	}
+    if (user == NULL) {
+        ret = krb5_cc_get_principal(*context, cache, &princ);
+        if (ret) {
+            error("krb5_cc_get_principal failed");
+            return ret;
+        }
+    }
+    else {
+        ret = krb5_parse_name(*context, user, &princ);
+        if (ret) {
+            error("krb5_parse_name (user) failed");
+            return ret;
+        }
+    }
 
 	krb5_creds inCreds;
 
@@ -62,11 +80,15 @@ krb5_error_code getServiceTicket(const char* inCacheFilename,
 	inCreds.client = princ;
     ret = krb5_parse_name(*context, serviceName, &inCreds.server);
     if (ret) {
+        error("krb5_parse_name (service) failed");
     	krb5_free_principal(*context, princ);
     	return ret;
     }
 
 	ret = krb5_get_credentials(*context, 0, cache, &inCreds, &outCreds);
+    if (ret) {
+        error("krb5_get_credentials failed");
+    }
 
 	krb5_free_principal(*context, princ);
 	krb5_free_principal(*context, inCreds.server);
@@ -75,20 +97,28 @@ krb5_error_code getServiceTicket(const char* inCacheFilename,
 }
 
 int main(int argc, const char* argv[]) {
-	if (argc != 3) {
+	if (argc < 3 || argc > 4) {
 		std::cerr << "error: usage: "
 				<< argv[0]
 				<< " <input-cache-file>"
 				<< " <service-name>"
+                  << " [user]"
 				<< std::endl;
 		return -1;
 	}
 	int i = 1;
 	const char* inCacheFilename = argv[i++];
 	const char* serviceName = argv[i++];
+    const char* user;
+    if (i < argc) {
+        user = argv[i++];
+    }
+    else {
+        user = NULL;
+    }
 	krb5_creds* creds = NULL;
 	krb5_error_code ret;
-	ret = getServiceTicket(inCacheFilename, serviceName, creds);
+	ret = getServiceTicket(inCacheFilename, serviceName, user, creds);
 	if (ret) {
 		std::cerr << "error getting service ticket: " << ret << std::endl;
 	}
