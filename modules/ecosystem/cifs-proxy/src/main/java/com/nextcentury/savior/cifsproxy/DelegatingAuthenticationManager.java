@@ -218,7 +218,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 
 	private void storeCredInto(Pointer acquiredCred, Path file, int overwriteCred) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
-		int defaultCred = 0;
+		int defaultCred = 1;
 		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:" + file);
 		gss_key_value_set credStore = new gss_key_value_set();
 		credStore.count = 1;

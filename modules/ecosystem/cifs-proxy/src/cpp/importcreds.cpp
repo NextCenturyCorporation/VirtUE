@@ -57,12 +57,12 @@ int main(int argc, char **argv) {
 
 	gss_cred_id_t outputCred;
 	majorStatus = gss_acquire_cred_from(&minorStatus, name, 0, GSS_C_NO_OID_SET,
-	GSS_C_BOTH, &credStore, &outputCred, NULL, NULL);
+                                        //	GSS_C_BOTH, &credStore, &outputCred, NULL, NULL);
+	GSS_C_INITIATE, &credStore, &outputCred, NULL, NULL);
 	CHECK_ERROR(majorStatus, minorStatus, "acquire_cred_from");
 
-#define INIT_NEEDED
 #if defined(ACQUIRE_NEEDED) || defined (INIT_NEEDED)
-	const char* serviceName = "cifs@fileserver";
+	const char* serviceName = "cifs@fileserver.test.savior";
 	//const char* serviceName = "cifs/fileserver.test.savior@TEST.SAVIOR";
 	gss_name_t gssServiceName;
 	gss_buffer_desc nameBuffer =
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 	gss_buffer_desc outputToken;
 	gss_ctx_id_t context = GSS_C_NO_CONTEXT;
 	majorStatus = gss_init_sec_context(&minorStatus, outputCred, &context, gssServiceName,
-			GSS_C_NO_OID, 0, 0, GSS_C_NO_CHANNEL_BINDINGS, NULL,
+			GSS_C_NO_OID, GSS_C_DELEG_FLAG, 0, GSS_C_NO_CHANNEL_BINDINGS, NULL,
 			NULL, &outputToken, NULL, NULL);
 	CHECK_ERROR(majorStatus, minorStatus, "init_sec_context");
 #endif
