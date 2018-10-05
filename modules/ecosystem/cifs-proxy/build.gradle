@@ -123,6 +123,7 @@ task nativeDeploy(dependsOn: bootJar) {
                 put from: 'getserviceticket', into: '.'
                 put from: 'gsscache', into: '.'
                 put from: 'importcreds', into: '.'
+                put from: 'switchprincipal', into: '.'
             }
         }
         println "copied native executables to " + remotes.webserver

@@ -34,3 +34,9 @@ add_executable(importcreds
   )
 target_include_directories(importcreds INTERFACE ${KRB5_INCLUDE_DIRS})
 target_link_libraries(importcreds ${KRB5_LIBRARIES})
+
+add_executable(switchprincipal
+  src/cpp/switchprincipal.cpp
+  )
+target_include_directories(switchprincipal INTERFACE ${KRB5_INCLUDE_DIRS})
+target_link_libraries(switchprincipal ${KRB5_LIBRARIES})
