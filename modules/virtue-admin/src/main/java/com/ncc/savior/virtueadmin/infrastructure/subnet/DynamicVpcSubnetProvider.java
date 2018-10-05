@@ -18,6 +18,7 @@ import com.amazonaws.services.ec2.model.CreateSubnetRequest;
 import com.amazonaws.services.ec2.model.CreateSubnetResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DeleteSubnetRequest;
+import com.amazonaws.services.ec2.model.DeleteSubnetResult;
 import com.amazonaws.services.ec2.model.ModifySubnetAttributeRequest;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
@@ -62,16 +63,37 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	@Override
 	public String getSubnetId(String subnetKey, Map<String, String> tags) {
 		CidrBlockAssignment assignment = getExistingSubnetId(subnetKey);
+		logger.debug("existing subnet for key=" + subnetKey + " is " + assignment);
 		if (assignment == null) {
 			assignment = getNextAvailableBlock(subnetKey, tags);
-			cidrRepo.save(assignment);
+			try {
+				cidrRepo.save(assignment);
+			} catch (Exception e) {
+				// If the save fails, its most likely because there is a straggling entry in the
+				// database. We should clear it (because AWS is king) and save one that reflects
+				// AWS.
+				logger.debug("Save failed, attempted to overwrite", e);
+				Iterable<CidrBlockAssignment> col = cidrRepo.findByCidrBlock(assignment.getCidrBlock());
+				logger.debug("Deleting " + col);
+				cidrRepo.deleteAll(col);
+				try {
+					cidrRepo.save(assignment);
+				} catch (Exception e1) {
+					String msg = "Error attempting to create subnet and store in database";
+					logger.error(msg, e1);
+					throw new SaviorException(SaviorErrorCode.DATABASE_ERROR, msg, e1);
+				}
+			}
 		}
-		return assignment.getInfrastructurId();
+		return assignment.getInfrastructureId();
 	}
 
 	private synchronized CidrBlockAssignment getNextAvailableBlock(String subnetKey, Map<String, String> tags) {
 		Subnet subnet = createAwsSubnet(nextCidrBlockToTry);
 
+		if (tags == null) {
+			tags = Collections.emptyMap();
+		}
 		List<Tag> awsTags = new ArrayList<Tag>();
 		for (Entry<String, String> entry : tags.entrySet()) {
 			awsTags.add(new Tag(entry.getKey(), entry.getValue()));
@@ -91,7 +113,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 
 	private Subnet createAwsSubnet(CidrBlock cidrBlock) {
 		Subnet subnet = createAwsSubnet(cidrBlock, 10);
-		nextCidrBlockToTry=nextCidrBlock(nextCidrBlockToTry);
+		nextCidrBlockToTry = nextCidrBlock(nextCidrBlockToTry);
 		return subnet;
 	}
 
@@ -110,7 +132,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 						.withSubnetId(subnet.getSubnetId()).withRouteTableId(routeTableId);
 				ec2.associateRouteTable(associateRouteTableRequest);
 			}
-
+			logger.debug("created cidrBlock subnet at " + cidrBlock + " " + subnet);
 			return subnet;
 		} catch (AmazonEC2Exception e) {
 			if (e.getErrorCode().equals("InvalidSubnet.Range")) {
@@ -118,7 +140,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 			} else if (e.getErrorCode().equals("InvalidSubnet.Conflict")) {
 				if (numTries > 0) {
 					numTries--;
-					nextCidrBlockToTry= nextCidrBlock(cidrBlock);
+					nextCidrBlockToTry = nextCidrBlock(cidrBlock);
 					logger.warn("Failed to create subnet at " + cidrBlock + " due to conflict.  Attempting subnet at "
 							+ nextCidrBlockToTry + ".  Retries left=" + numTries);
 					// try again
@@ -137,9 +159,9 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		CidrBlock nextBlock = CidrBlock.getNextCidrBlock(cidrBlock);
 		// verify we didn't surpass the end block
 		if (nextBlock.greaterOrEqual(endCidrBlock)) {
-			nextBlock=startingCidrBlock;
+			nextBlock = startingCidrBlock;
 		}
-		//TODO verify we haven't already used the next block
+		// TODO verify we haven't already used the next block
 		return nextBlock;
 	}
 
@@ -151,20 +173,46 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	 * @return
 	 */
 	public CidrBlockAssignment getExistingSubnetId(String subnetKey) {
+		Iterable<CidrBlockAssignment> all = cidrRepo.findAll();
+		logger.debug("DEBUG: ");
+		for (CidrBlockAssignment cidr : all) {
+			logger.debug("  " + cidr);
+		}
 		Optional<CidrBlockAssignment> opt = cidrRepo.findById(subnetKey);
 		return opt.isPresent() ? opt.get() : null;
 	}
 
 	@Override
-	public void releaseSubnetId(String subnetId) {
-		DeleteSubnetRequest deleteSubnetRequest=new DeleteSubnetRequest(subnetId);
-		ec2.deleteSubnet(deleteSubnetRequest);
-		cidrRepo.deleteByInfrastructurId(subnetId);
+	public String getVpcId() {
+		return vpcId;
 	}
 
 	@Override
-	public String getVpcId() {
-		return vpcId;
+	public void releaseBySubnetKey(String id) {
+		CidrBlockAssignment cidrAssignment = getExistingSubnetId(id);
+		String subnetId = cidrAssignment.getInfrastructureId();
+		DeleteSubnetRequest deleteSubnetRequest = new DeleteSubnetRequest(subnetId);
+		try {
+			DeleteSubnetResult result = ec2.deleteSubnet(deleteSubnetRequest);
+			logger.debug("result: " + result);
+		} catch (Exception e) {
+			logger.debug("exception", e);
+		}
+		Iterable<CidrBlockAssignment> all = cidrRepo.findAll();
+		logger.debug("DEBUG: pre-delete");
+		for (CidrBlockAssignment cidr : all) {
+			logger.debug("  " + cidr);
+		}
+		try {
+			cidrRepo.deleteById(id);
+		} catch (Throwable t) {
+			logger.debug("failed", t);
+		}
+		all = cidrRepo.findAll();
+		logger.debug("DEBUG: post-delete");
+		for (CidrBlockAssignment cidr : all) {
+			logger.debug("  " + cidr);
+		}
 	}
 
 }

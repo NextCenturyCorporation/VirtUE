@@ -10,10 +10,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -76,7 +74,6 @@ public class XenHostManager {
 	private CompletableFutureServiceProvider serviceProvider;
 	private PersistentStorageManager persistentStorageManager;
 	private String iamRoleName;
-	private IVpcSubnetProvider vpcSubnetProvider;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
@@ -87,7 +84,6 @@ public class XenHostManager {
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
 		this.ec2Wrapper = ec2Wrapper;
-		this.vpcSubnetProvider = vpcSubnetProvider;
 		String vpcId = vpcSubnetProvider.getVpcId();
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
@@ -127,7 +123,7 @@ public class XenHostManager {
 	// start vms with code below
 
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
-			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture, String subnetId) {
 		// if caller doesn't provide a future, we may still want one.
 		if (linuxFuture == null) {
 			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
@@ -142,11 +138,7 @@ public class XenHostManager {
 		// mainly this makes sure the volume is ready
 		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(), virtue.getTemplateId(),
 				virtue.getName());
-		Map<String, String> tags = new HashMap<String, String>();
-		tags.put(IVpcSubnetProvider.TAG_USERNAME, virtue.getUsername());
-		tags.put(IVpcSubnetProvider.TAG_VIRTUE_NAME, virtue.getName());
-		tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, virtue.getId());
-		String subnetId = vpcSubnetProvider.getSubnetId(virtue.getId(), tags);
+
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
 				xenInstanceType, subnetId, iamRoleName);

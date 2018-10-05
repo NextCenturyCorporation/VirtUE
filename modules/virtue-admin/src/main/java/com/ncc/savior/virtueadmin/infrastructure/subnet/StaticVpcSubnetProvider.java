@@ -37,12 +37,12 @@ public class StaticVpcSubnetProvider implements IVpcSubnetProvider {
 	}
 
 	@Override
-	public void releaseSubnetId(String subnetId) {
-		// Do nothing
+	public String getSubnetId(String subnetKey, Map<String, String> tags) {
+		return this.subnetId;
 	}
 
 	@Override
-	public String getSubnetId(String subnetKey, Map<String, String> tags) {
-		return this.subnetId;
+	public void releaseBySubnetKey(String id) {
+		// do nothing
 	}
 }

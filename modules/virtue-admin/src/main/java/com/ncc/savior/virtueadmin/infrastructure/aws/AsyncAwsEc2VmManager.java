@@ -2,9 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -97,7 +95,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
-			String virtue, String SubnetKey) {
+			String virtue, String subnetId) {
 		if (vmFutures == null) {
 			vmFutures = new CompletableFuture<Collection<VirtualMachine>>();
 		}
@@ -108,11 +106,6 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			virtueName = virtueName.replace(" ", "-");
 			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + virtueName;
 
-			Map<String, String> tags = new HashMap<String, String>();
-			tags.put(IVpcSubnetProvider.TAG_USERNAME, user.getUsername());
-			tags.put(IVpcSubnetProvider.TAG_VIRTUE_NAME, virtue);
-			tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, SubnetKey);
-			String subnetId = vpcSubnetProvider.getSubnetId(SubnetKey, tags);
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, securityGroupIds, serverKeyName, instanceType,
 					subnetId, null);
 			vms.add(vm);

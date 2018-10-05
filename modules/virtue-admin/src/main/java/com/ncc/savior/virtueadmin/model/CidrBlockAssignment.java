@@ -1,15 +1,17 @@
 package com.ncc.savior.virtueadmin.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
 public class CidrBlockAssignment {
-	@Id
+	@Column(unique=true)
 	private String cidrBlock;
+	@Id
 	private String assignmentId;
 	private String username;
-	private String infrastructurId;
+	private String infrastructureId;
 
 	/**
 	 * Used for jackson deserialization
@@ -18,12 +20,12 @@ public class CidrBlockAssignment {
 
 	}
 	
-	public CidrBlockAssignment(String cidrBlock, String assignmentId, String username, String infrastructurId) {
+	public CidrBlockAssignment(String cidrBlock, String assignmentId, String username, String infrastructureId) {
 		super();
 		this.cidrBlock = cidrBlock;
 		this.assignmentId = assignmentId;
 		this.username = username;
-		this.infrastructurId = infrastructurId;
+		this.infrastructureId = infrastructureId;
 	}
 
 	public String getCidrBlock() {
@@ -50,12 +52,18 @@ public class CidrBlockAssignment {
 		this.username = username;
 	}
 
-	public String getInfrastructurId() {
-		return infrastructurId;
+	public String getInfrastructureId() {
+		return infrastructureId;
 	}
 
-	public void setInfrastructurId(String infrastructurId) {
-		this.infrastructurId = infrastructurId;
+	public void setInfrastructureId(String infrastructureId) {
+		this.infrastructureId = infrastructureId;
+	}
+
+	@Override
+	public String toString() {
+		return "CidrBlockAssignment [cidrBlock=" + cidrBlock + ", assignmentId=" + assignmentId + ", username="
+				+ username + ", infrastructurId=" + infrastructureId + "]";
 	}
 
 }

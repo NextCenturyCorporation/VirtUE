@@ -27,14 +27,14 @@ public interface IVpcSubnetProvider {
 	String getSubnetId(String subnetKey, Map<String, String> tags);
 
 	/**
-	 * Tells the provider that the given subnet ID is no longer in use. The
+	 * Tells the provider that the given subnet is no longer in use. The
 	 * implementation then may decide whether to retain the subnet for later use or
 	 * remove it from the infrastructure. Call MUST be sure that the subnet is
 	 * actually no longer in use.
 	 * 
 	 * @param subnetId
 	 */
-	void releaseSubnetId(String subnetId);
+	void releaseBySubnetKey(String id);
 
 	/**
 	 * Returns the system VPC ID.
@@ -42,5 +42,7 @@ public interface IVpcSubnetProvider {
 	 * @return
 	 */
 	String getVpcId();
+
+	
 
 }
