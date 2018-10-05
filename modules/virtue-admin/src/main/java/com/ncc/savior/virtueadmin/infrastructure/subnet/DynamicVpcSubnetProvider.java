@@ -170,7 +170,9 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		if (nextBlock.greaterOrEqual(endCidrBlock)) {
 			nextBlock = startingCidrBlock;
 		}
-		// TODO verify we haven't already used the next block
+		// Should we check the database? or we do, it might be faster, but
+		// alternatively, not checking the database will allow us to fix database
+		// problems.
 		return nextBlock;
 	}
 
