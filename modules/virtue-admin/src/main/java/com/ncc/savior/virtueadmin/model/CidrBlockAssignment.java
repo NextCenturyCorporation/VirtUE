@@ -4,9 +4,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+/**
+ * Database model Entity for storing the assignment of a cidr block to a subnet.
+ * 
+ *
+ */
 @Entity
 public class CidrBlockAssignment {
-	@Column(unique=true)
+	@Column(unique = true)
 	private String cidrBlock;
 	@Id
 	private String assignmentId;
@@ -19,7 +24,7 @@ public class CidrBlockAssignment {
 	protected CidrBlockAssignment() {
 
 	}
-	
+
 	public CidrBlockAssignment(String cidrBlock, String assignmentId, String username, String infrastructureId) {
 		super();
 		this.cidrBlock = cidrBlock;

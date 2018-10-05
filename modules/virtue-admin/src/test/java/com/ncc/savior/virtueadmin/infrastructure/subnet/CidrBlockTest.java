@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.ncc.savior.virtueadmin.model.CidrBlock;
+
 public class CidrBlockTest {
 
 	@Test

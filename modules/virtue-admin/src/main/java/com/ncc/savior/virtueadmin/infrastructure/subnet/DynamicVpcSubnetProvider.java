@@ -18,7 +18,6 @@ import com.amazonaws.services.ec2.model.CreateSubnetRequest;
 import com.amazonaws.services.ec2.model.CreateSubnetResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DeleteSubnetRequest;
-import com.amazonaws.services.ec2.model.DeleteSubnetResult;
 import com.amazonaws.services.ec2.model.ModifySubnetAttributeRequest;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
@@ -27,8 +26,18 @@ import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.jpa.CidrAssignmentRepository;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
+import com.ncc.savior.virtueadmin.model.CidrBlock;
 import com.ncc.savior.virtueadmin.model.CidrBlockAssignment;
 
+/**
+ * {@link IVpcSubnetProvider} implementation that creates and removes dynamic
+ * subnets per given id. Subnets are created in AWS as well as references store
+ * in the database. When a conflict occurs, AWS wins and the database should be
+ * corrected over time.
+ * 
+ * This class still always returns a single VPC.
+ *
+ */
 public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private static final Logger logger = LoggerFactory.getLogger(DynamicVpcSubnetProvider.class);
 	private AmazonEC2 ec2;
@@ -72,7 +81,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				// If the save fails, its most likely because there is a straggling entry in the
 				// database. We should clear it (because AWS is king) and save one that reflects
 				// AWS.
-				logger.debug("Save failed, attempted to overwrite", e);
+				logger.debug("Save to database failed, attempted to overwrite", e);
 				Iterable<CidrBlockAssignment> col = cidrRepo.findByCidrBlock(assignment.getCidrBlock());
 				logger.debug("Deleting " + col);
 				cidrRepo.deleteAll(col);
@@ -173,11 +182,6 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	 * @return
 	 */
 	public CidrBlockAssignment getExistingSubnetId(String subnetKey) {
-		Iterable<CidrBlockAssignment> all = cidrRepo.findAll();
-		logger.debug("DEBUG: ");
-		for (CidrBlockAssignment cidr : all) {
-			logger.debug("  " + cidr);
-		}
 		Optional<CidrBlockAssignment> opt = cidrRepo.findById(subnetKey);
 		return opt.isPresent() ? opt.get() : null;
 	}
@@ -193,25 +197,14 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		String subnetId = cidrAssignment.getInfrastructureId();
 		DeleteSubnetRequest deleteSubnetRequest = new DeleteSubnetRequest(subnetId);
 		try {
-			DeleteSubnetResult result = ec2.deleteSubnet(deleteSubnetRequest);
-			logger.debug("result: " + result);
+			ec2.deleteSubnet(deleteSubnetRequest);
 		} catch (Exception e) {
-			logger.debug("exception", e);
-		}
-		Iterable<CidrBlockAssignment> all = cidrRepo.findAll();
-		logger.debug("DEBUG: pre-delete");
-		for (CidrBlockAssignment cidr : all) {
-			logger.debug("  " + cidr);
+			logger.debug("failed to delete subnet from AWS", e);
 		}
 		try {
 			cidrRepo.deleteById(id);
-		} catch (Throwable t) {
-			logger.debug("failed", t);
-		}
-		all = cidrRepo.findAll();
-		logger.debug("DEBUG: post-delete");
-		for (CidrBlockAssignment cidr : all) {
-			logger.debug("  " + cidr);
+		} catch (Exception e) {
+			logger.debug("Failed to delete cidr block from database", e);
 		}
 	}
 

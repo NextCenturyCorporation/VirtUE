@@ -1,8 +1,13 @@
-package com.ncc.savior.virtueadmin.infrastructure.subnet;
+package com.ncc.savior.virtueadmin.model;
 
-import com.amazonaws.services.cognitoidentity.model.InvalidParameterException;
 import com.ncc.savior.util.JavaUtil;
 
+/**
+ * Model class that contains a cidr block. Also contains utility methods for
+ * handling cidr block and manipulation.
+ * 
+ *
+ */
 public class CidrBlock {
 
 	private static final String DOT = ".";
@@ -16,7 +21,7 @@ public class CidrBlock {
 	public CidrBlock(int a, int b, int c, int d, int netmask) {
 		if (!validRange(a, b, c, d, netmask)) {
 			String cidr = a + DOT + b + DOT + c + DOT + d + SLASH + netmask;
-			throw new InvalidParameterException("'" + cidr + "' is not a valid CIDR String.");
+			throw new IllegalArgumentException("'" + cidr + "' is not a valid CIDR String.");
 		}
 		this.a = a;
 		this.b = b;
@@ -44,7 +49,7 @@ public class CidrBlock {
 				}
 			}
 		}
-		throw new InvalidParameterException("'" + cidrString + "' is not a valid CIDR String.");
+		throw new IllegalArgumentException("'" + cidrString + "' is not a valid CIDR String.");
 	}
 
 	private static boolean validRange(int a, int b, int c, int d, int netmask) {

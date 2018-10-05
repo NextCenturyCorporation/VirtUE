@@ -8,6 +8,12 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 
+/**
+ * {@link IVpcSubnetProvider} that uses a single VPC and single subnet and
+ * always returns those.
+ * 
+ *
+ */
 public class StaticVpcSubnetProvider implements IVpcSubnetProvider {
 	private static final Logger logger = LoggerFactory.getLogger(StaticVpcSubnetProvider.class);
 	private String subnetId;
