@@ -59,6 +59,11 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		this.startingCidrBlock = CidrBlock.fromString(firstCidrBlock);
 		this.nextCidrBlockToTry = startingCidrBlock;
 		this.endCidrBlock = CidrBlock.fromString(endNonInclusiveCidrBlock);
+		if (startingCidrBlock.greaterOrEqual(endCidrBlock)) {
+			throw new SaviorException(SaviorErrorCode.CONFIGURATION_ERROR,
+					"Ending CIDR block must be greater than starting CIDR block!  Starting=" + startingCidrBlock
+							+ ", Ending=" + endCidrBlock);
+		}
 		this.usePublicIp = usePublicIp;
 		this.routeTableId = routeTableId;
 		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
