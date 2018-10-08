@@ -40,6 +40,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
+import com.ncc.savior.virtueadmin.infrastructure.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -69,7 +70,6 @@ public class XenHostManager {
 	private String serverUser;
 	private IKeyManager keyManager;
 	private XenGuestManagerFactory xenGuestManagerFactory;
-	private String subnetId;
 	private Collection<String> securityGroupIds;
 	private CompletableFutureServiceProvider serviceProvider;
 	private PersistentStorageManager persistentStorageManager;
@@ -77,16 +77,14 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
-			PersistentStorageManager psm, Collection<String> securityGroupsNames, String vpcName, String subnetName,
+			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, Collection<String> securityGroupsNames,
 			String xenAmi, String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns,
 			String iamRoleName) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
 		this.ec2Wrapper = ec2Wrapper;
-		String vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
-		this.subnetId = AwsUtil.getSubnetIdFromName(vpcId, subnetName, ec2Wrapper);
-
+		String vpcId = vpcSubnetProvider.getVpcId();
 		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(securityGroupsNames, vpcId, ec2Wrapper);
 		this.xenKeyName = xenKeyName;
 		this.iamRoleName = iamRoleName;
@@ -100,11 +98,11 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
-			PersistentStorageManager psm, String securityGroupsCommaSeparated, String vpcName, String subnetName,
+			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, String securityGroupsCommaSeparated,
 			String xenAmi, String xenUser, String xenKeyName, String xenInstanceType, boolean usePublicDns,
 			String iamRoleName) {
-		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm,
-				splitOnComma(securityGroupsCommaSeparated), vpcName, subnetName, xenAmi, xenUser, xenKeyName,
+		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider,
+				splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
 				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName);
 	}
 
@@ -125,7 +123,7 @@ public class XenHostManager {
 	// start vms with code below
 
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
-			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture) {
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture, String subnetId) {
 		// if caller doesn't provide a future, we may still want one.
 		if (linuxFuture == null) {
 			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();

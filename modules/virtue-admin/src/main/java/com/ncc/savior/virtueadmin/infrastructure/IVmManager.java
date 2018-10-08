@@ -45,8 +45,8 @@ public interface IVmManager {
 	 * @param vmt
 	 * @return
 	 */
-	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
-			CompletableFuture<Collection<VirtualMachine>> vmFutures);
+//	VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
+//			CompletableFuture<Collection<VirtualMachine>> vmFutures);
 
 	/**
 	 * Convenience/Performance function to provision multiple VMs at one time. See
@@ -58,7 +58,8 @@ public interface IVmManager {
 	 * @return
 	 */
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures, String virtue);
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
+			String virtue, String networkKey);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
@@ -116,6 +117,4 @@ public interface IVmManager {
 	 * @return
 	 */
 	public VmState getVirtualMachineState(VirtualMachine vm);
-
-
 }

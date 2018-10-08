@@ -91,13 +91,30 @@
 		<constructor-arg ref="keyManager" />
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 	</bean>
+
+<!-- 	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.StaticVpcSubnetProvider"> -->
+<!-- 		<constructor-arg ref="ec2Wrapper" /> -->
+<!-- 		<constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
+<!-- 		<constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
+<!-- 	</bean> -->
+	
+	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.DynamicVpcSubnetProvider">
+		<constructor-arg ref="ec2Wrapper" />
+		<constructor-arg value="${virtue.aws.server.vpc.name}" />
+		<constructor-arg value="${virtue.aws.server.subnet.cidrStart}" />
+		<constructor-arg value="${virtue.aws.server.subnet.cidrEnd}" />
+		<constructor-arg value="${virtue.aws.usePublicDns}" />
+		<constructor-arg value="${virtue.aws.server.subnet.routeTableId}" />
+		<constructor-arg value="${virtue.aws.availabilityZone}"></constructor-arg>
+		
+	</bean>
+
 	<bean name="awsVmManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
 		<constructor-arg ref="futureServiceProvider" />
 		<constructor-arg ref="keyManager" />
 		<constructor-arg ref="ec2Wrapper" />
-		<constructor-arg value="${virtue.aws.server.vpc.name}" />
-		<constructor-arg value="${virtue.aws.server.subnet.name}" />
+		<constructor-arg ref="vpcSubnetProvider" />
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
 		<!-- <property name="awsProfile" value="">${virtue.aws.profile}</property> -->
@@ -125,6 +142,8 @@
 		<constructor-arg ref="xenManager"></constructor-arg>
 		<constructor-arg ref="awsVmManager"></constructor-arg>
 		<constructor-arg ref="windowStartupService"></constructor-arg>
+		<constructor-arg ref="futureServiceProvider"></constructor-arg>
+		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
 	</bean>
 
 	<bean name="windowStartupService"
@@ -153,9 +172,8 @@
 		<constructor-arg ref="awsRoute53"></constructor-arg>
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="persistentStorageManager"></constructor-arg>
+		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.server.vpc.name}"></constructor-arg>
-		<constructor-arg value="${virtue.aws.server.subnet.name}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.vmKey}"></constructor-arg>

@@ -154,7 +154,7 @@ public class VirtueInstance {
 		this.color = color;
 	}
 
-	protected void setVms(Collection<VirtualMachine> vms) {
+	public void setVms(Collection<VirtualMachine> vms) {
 		this.vms = vms;
 		state = getVirtueStateFrom(vms);
 	}
@@ -208,6 +208,9 @@ public class VirtueInstance {
 
 	private VirtueState getVirtueStateFrom(Collection<VirtualMachine> vms) {
 		// TODO this should probably be handled elsewhere or rethought
+		if (vms == null) {
+			return VirtueState.ERROR;
+		}
 		Set<VirtueState> states = new HashSet<VirtueState>();
 		for (VirtualMachine vm : vms) {
 			states.add(getVirtueStateFromVmState(vm.getState()));
