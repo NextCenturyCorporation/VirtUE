@@ -34,6 +34,8 @@ public class ApplicationIT {
 		public String os;
 		public String launchCommand;
 		public String iconKey;
+		public String parameters;
+		public List<String> tags;
 	}
 
 	@LocalServerPort
