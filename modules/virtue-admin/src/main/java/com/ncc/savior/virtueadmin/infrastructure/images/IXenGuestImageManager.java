@@ -12,6 +12,8 @@ public interface IXenGuestImageManager {
 
 	void pushImageToStream(String path, OutputStream out) throws IOException;
 
+	void pushImageToStreamWindows(String path, OutputStream out) throws IOException;
+
 	void storeStreamAsImage(String path, String type, InputStream uncloseableStream) throws IOException;
 
 }

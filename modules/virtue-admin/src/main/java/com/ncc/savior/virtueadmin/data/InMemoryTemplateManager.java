@@ -398,4 +398,9 @@ public class InMemoryTemplateManager implements ITemplateManager {
 		throw new RuntimeException("not implemented");
 	}
 
+	@Override
+	public Iterable<IconModel> getAllIcons() {
+		throw new RuntimeException("not implemented");
+	}
+
 }
