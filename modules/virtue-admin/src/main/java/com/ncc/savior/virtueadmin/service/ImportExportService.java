@@ -173,10 +173,9 @@ public class ImportExportService {
 		}
 	}
 
-	
-
 	public void importZip(InputStream stream) {
 		try {
+			logger.debug("Starting zip import");
 			// need to store the entrys to ensure they are added in the right order. They
 			// are relatively small so this shouldn't be a memory issue.
 			ArrayList<ApplicationDefinition> apps = new ArrayList<ApplicationDefinition>();
@@ -204,6 +203,10 @@ public class ImportExportService {
 			for (VirtueUser user : users) {
 				importUserFromObject(user);
 			}
+			for (IconModel icon : icons) {
+				importIconFromObject(icon);
+			}
+			logger.debug("Import completed successfully");
 		} catch (Throwable e) {
 			logger.error("Error importing", e);
 		}
@@ -451,6 +454,10 @@ public class ImportExportService {
 		}
 		user.setVirtueTemplates(myVts);
 		userManager.addUser(user);
+	}
+
+	private void importIconFromObject(IconModel icon) {
+		templateManager.addIcon(icon.getId(), icon.getData());
 	}
 
 	/**

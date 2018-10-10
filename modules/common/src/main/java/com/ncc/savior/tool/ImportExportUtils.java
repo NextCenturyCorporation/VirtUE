@@ -1,5 +1,6 @@
 package com.ncc.savior.tool;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -55,10 +56,16 @@ public class ImportExportUtils {
 					// skip
 
 				} else if (name.contains(ImportExportUtils.ICON_DEFN_ZIP_ROOT)) {
-					byte[] buffer = new byte[1024 * 10];
-					IOUtils.read(uncloseableStream, buffer);
+					byte[] buffer = new byte[1024];
+					ByteArrayOutputStream os = new ByteArrayOutputStream();
+					int len;
+					while ((len = IOUtils.read(uncloseableStream, buffer)) > 0) {
+						os.write(buffer, 0, len);
+					}
+					os.flush();
 					String id = name.substring(ImportExportUtils.ICON_DEFN_ZIP_ROOT.length(), name.length() - 4);
-					IconModel icon = new IconModel(id, buffer);
+					byte[] data = os.toByteArray();
+					IconModel icon = new IconModel(id, data);
 					icons.add(icon);
 				} else if (name.contains(ImportExportUtils.APPLICATION_DEFN_ZIP_ROOT)) {
 					ApplicationDefinition app = jsonMapper.readValue(uncloseableStream, ApplicationDefinition.class);
@@ -75,7 +82,8 @@ public class ImportExportUtils {
 				} else if (name.contains(ImportExportUtils.VIRTUAL_MACHINE_IMAGE_ZIP_ROOT)) {
 					vmImageConsumer.accept(entry, uncloseableStream);
 				}
-//				logger.debug("Entry: " + entry.getName() + " " + entry.isDirectory() + " " + entry.getSize());
+				// logger.debug("Entry: " + entry.getName() + " " + entry.isDirectory() + " " +
+				// entry.getSize());
 			}
 		}
 	}
