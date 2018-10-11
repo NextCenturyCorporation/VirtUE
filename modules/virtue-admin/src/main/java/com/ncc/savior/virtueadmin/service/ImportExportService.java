@@ -73,6 +73,9 @@ public class ImportExportService {
 	private PathMatchingResourcePatternResolver resourceResolver;
 	private IXenGuestImageManager imageManager;
 
+	@Autowired
+	private SecurityUserService securityService;
+
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager,
 			IXenGuestImageManager imageManager) {
 		this.jsonMapper = new ObjectMapper();
@@ -82,9 +85,6 @@ public class ImportExportService {
 		resourceResolver = new PathMatchingResourcePatternResolver();
 		this.rootClassPath = IMPORTS_LOCATION;
 	}
-
-	@Autowired
-	private SecurityUserService securityService;
 
 	/**
 	 * @return
@@ -108,6 +108,7 @@ public class ImportExportService {
 	}
 
 	public void exportZippedAllUsers(OutputStream out) {
+		verifyAndReturnUser();
 		Iterable<VirtueUser> users = userManager.getAllUsers();
 		HashSet<String> includedImagePaths = new HashSet<String>();
 		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
@@ -120,7 +121,7 @@ public class ImportExportService {
 	}
 
 	public void exportZippedUser(String username, OutputStream out) {
-		VirtueUser user = userManager.getUser(username);
+		VirtueUser user = verifyAndReturnUser();
 		HashSet<String> includedImagePaths = new HashSet<String>();
 		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
 			addUserToZipStream(user, includedImagePaths, zipOut);
@@ -129,7 +130,14 @@ public class ImportExportService {
 		}
 	}
 
+	/**
+	 * Exports all users and all icons and everything they have access to (virtue
+	 * templates, virtual machine templates, application definition).
+	 * 
+	 * @param os
+	 */
 	public void exportZippedAll(OutputStream os) {
+		verifyAndReturnUser();
 		Iterable<VirtueUser> users = userManager.getAllUsers();
 		HashSet<String> includedImagePaths = new HashSet<String>();
 		try (ZipOutputStream zipOut = new ZipOutputStream(os)) {
@@ -146,6 +154,7 @@ public class ImportExportService {
 	}
 
 	public void exportZippedAllTemplates(OutputStream out) {
+		verifyAndReturnUser();
 		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
 		HashSet<String> includedImagePaths = new HashSet<String>();
 		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
@@ -158,6 +167,7 @@ public class ImportExportService {
 	}
 
 	public void exportZippedVirtueTemplate(String virtueTemplateId, OutputStream out) {
+		verifyAndReturnUser();
 		VirtueTemplate template = templateManager.getVirtueTemplate(virtueTemplateId);
 		HashSet<String> includedEntries = new HashSet<String>();
 		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
@@ -168,6 +178,7 @@ public class ImportExportService {
 	}
 
 	public void exportZippedVirtualMachineTemplate(String virtualMachineTemplateId, OutputStream out) {
+		verifyAndReturnUser();
 		VirtualMachineTemplate template = templateManager.getVmTemplate(virtualMachineTemplateId);
 		HashSet<String> includedEntries = new HashSet<String>();
 		try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
@@ -177,8 +188,18 @@ public class ImportExportService {
 		}
 	}
 
+	/**
+	 * 
+	 * @param stream
+	 *            - stream of import zip file
+	 * @param waitUntilCompletion
+	 *            - if true, block the return until the upload is complete. If
+	 *            false, once the stream is read, return quicker even though more
+	 *            processing or transferring may be occurring.
+	 */
 	@Transactional
 	public void importZip(InputStream stream, boolean waitUntilCompletion) {
+		verifyAndReturnUser();
 		try {
 			logger.debug("Starting zip import");
 			// need to store the entrys to ensure they are added in the right order. They
@@ -214,7 +235,6 @@ public class ImportExportService {
 
 	}
 
-	
 	private void loadDatabaseObjects(ArrayList<ApplicationDefinition> apps, ArrayList<VirtualMachineTemplate> vms,
 			ArrayList<VirtueTemplate> vts, ArrayList<VirtueUser> users, ArrayList<IconModel> icons) {
 		for (ApplicationDefinition app : apps) {
@@ -304,7 +324,9 @@ public class ImportExportService {
 				// file");
 				ZipEntry ze = new ZipEntry(entryName);
 				zipOut.putNextEntry(ze);
-				imageManager.pushImageToStreamWindows(path, zipOut);
+				// See comments on Windows Export!
+				// imageManager.pushImageToStreamWindows(path, zipOut);
+				zipOut.write(1);
 				zipOut.closeEntry();
 				includedEntries.add(entryName);
 			}
@@ -639,7 +661,7 @@ public class ImportExportService {
 		}
 		return items;
 	}
-	
+
 	private void loadIconsFromIconsFolder() {
 		try {
 			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();

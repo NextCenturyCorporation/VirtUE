@@ -101,11 +101,16 @@ public class S3ImageManager implements IXenGuestImageManager {
 
 	@Override
 	public void pushImageToStreamWindows(String path, OutputStream out) throws IOException {
+		// Windows export needs rework. We can export our AWS windows *instances* since
+		// they were created by us (not based on an AWS-created AMI). However, we cannot
+		// export the AMI itself. Creating an instance to just then export seems
+		// convoluted.  
 		try {
 			String bucket = "temp-win-images";
+			String instanceId = null;
 			CreateInstanceExportTaskRequest createInstanceExportTaskRequest = new CreateInstanceExportTaskRequest();
 			logger.debug("attempting to export " + path + " to bucket " + bucket);
-			createInstanceExportTaskRequest.withInstanceId("i-00085cc3a52b6b827");
+			createInstanceExportTaskRequest.withInstanceId(instanceId);
 			ExportToS3TaskSpecification exportToS3Task = new ExportToS3TaskSpecification();
 			exportToS3Task.withContainerFormat(ContainerFormat.Ova);
 			exportToS3Task.withDiskImageFormat(DiskImageFormat.VMDK);

@@ -12,8 +12,23 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface IXenGuestImageManager {
 
+	/**
+	 * Writes a given image to the output stream.
+	 * 
+	 * @param path
+	 * @param out
+	 * @throws IOException
+	 */
 	void pushImageToStream(String path, OutputStream out) throws IOException;
 
+	/**
+	 * Needed special provisions for our Windows VMs. Writes the given image to the
+	 * output stream for a windows image.
+	 * 
+	 * @param path
+	 * @param out
+	 * @throws IOException
+	 */
 	void pushImageToStreamWindows(String path, OutputStream out) throws IOException;
 
 	/**
@@ -27,6 +42,14 @@ public interface IXenGuestImageManager {
 	 */
 	Runnable prepareImageUpload(String path, String type, InputStream uncloseableStream) throws IOException;
 
+	/**
+	 * Initiate push of image to final destination. Once called, the images cannot
+	 * be canceled. The returned future indicates when all loads have completed or
+	 * one failed.
+	 * 
+	 * @param imageCompletionRunnables
+	 * @return
+	 */
 	CompletableFuture<Void> finishImageLoad(List<Runnable> imageCompletionRunnables);
 
 }

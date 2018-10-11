@@ -3,7 +3,7 @@ package com.ncc.savior.tool;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -21,6 +21,11 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Utility functions for import and export.
+ * 
+ *
+ */
 public class ImportExportUtils {
 	private static final Logger logger = LoggerFactory.getLogger(ImportExportUtils.class);
 	public static String VIRTUE_TEMPLATE_ZIP_ROOT = "virtues/";
@@ -30,9 +35,26 @@ public class ImportExportUtils {
 	public static String USER_ZIP_ROOT = "user/";
 	public static String ICON_DEFN_ZIP_ROOT = "icons/";
 
-	public static void readImportExportZipStream(InputStream stream, ArrayList<VirtueUser> users,
-			ArrayList<VirtueTemplate> vts, ArrayList<VirtualMachineTemplate> vms, ArrayList<ApplicationDefinition> apps,
-			ArrayList<IconModel> icons, BiConsumer<ZipEntry, InputStream> vmImageConsumer)
+	/**
+	 * Read a zip file formatted for Savior import/export and store entries into the
+	 * given collections. For image files, process with the given
+	 * {@link BiConsumer}.
+	 * 
+	 * @param stream
+	 * @param users
+	 * @param vts
+	 * @param vms
+	 * @param apps
+	 * @param icons
+	 * @param vmImageConsumer
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	public static void readImportExportZipStream(InputStream stream, Collection<VirtueUser> users,
+			Collection<VirtueTemplate> vts, Collection<VirtualMachineTemplate> vms,
+			Collection<ApplicationDefinition> apps, Collection<IconModel> icons,
+			BiConsumer<ZipEntry, InputStream> vmImageConsumer)
 			throws JsonParseException, JsonMappingException, IOException {
 		ZipEntry entry;
 		try (ZipInputStream zipStream = new ZipInputStream(stream)) {

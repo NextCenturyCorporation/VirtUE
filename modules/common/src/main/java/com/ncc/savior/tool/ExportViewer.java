@@ -19,6 +19,9 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Application class that just lists what is contained in a exported zip file.
+ */
 public class ExportViewer {
 
 	private static final String INDENT = "  ";
