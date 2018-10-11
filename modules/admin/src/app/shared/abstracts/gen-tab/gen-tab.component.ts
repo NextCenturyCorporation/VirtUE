@@ -142,6 +142,14 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
   }
 
   /**
+   * @return true iff the page is in DUPLICATE mode.
+   * Used in the html to change how the page gets displayed in DUPLICATE mode.
+   */
+  inDuplicateMode(): boolean {
+    return this.mode === Mode.DUPLICATE;
+  }
+
+  /**
   * Called when item is being saved, to pull in and set any disconnected fields and check the data in its sphere
   * for validity.
   *

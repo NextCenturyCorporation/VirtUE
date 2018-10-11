@@ -92,25 +92,47 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
    */
   ngOnInit(): void {
     this.cmnDataComponentSetup();
-    this.fillTable();
+    this.setUpTable();
   }
 
   /**
-   * Sets up the table, according to parameters defined in this class' child classes.
+   * #uncommented
    */
-  fillTable(): void {
-    if (this.table === undefined) {
-      return;
-    }
-    this.table.setUp({
+  defaultTableParams() {
+    return {
       cols: this.getColumns(),
-      coloredLabels: this.hasColoredLabels(),
       filters: this.getTableFilters(),
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg(),
       elementIsDisabled: (i: Item) => !i.enabled
-    });
+    };
   }
+
+  /**
+   * Sets up the table
+   * #uncommented
+   *
+   * If all pages have an attribute, but require different values for it, then it should be set via a method in [[defaultTableParams]].
+   * If a page has a unique attribute that the other pages don't even need to see (like Virtue-list having a getColor field), that should be
+   * added in a customizeTableParams method, in that subclass. See [[VirtueListComponent.customizeTableParams]]
+   */
+  setUpTable(): void {
+    if (this.table === undefined) {
+      return;
+    }
+    let params = this.defaultTableParams();
+
+    this.customizeTableParams(params);
+
+    this.table.setUp(params);
+  }
+
+  /**
+   * Allow children to customize the parameters passed to the table. By default, do nothing.
+   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   */
+  customizeTableParams(paramsObject) {}
+
 
   /**
    * Populates the table with the input list of items.
@@ -189,14 +211,6 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
       new SubMenuOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
       new SubMenuOptions("Delete",  () => true,             (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))
     ];
-  }
-
-  /**
-   * @return whether or not the items being listed have colored labels. True for, and only for, all tables that list virtues.
-   * overridden by virtue-list, virtues-modal, main-user-tab, vm-usage-tab, and virtue-settings
-   */
-  hasColoredLabels(): boolean {
-    return false;
   }
 
 }

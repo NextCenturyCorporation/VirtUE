@@ -140,24 +140,43 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   }
 
   /**
-   * Sets up the table of children, using sub-class-defined-functions.
+   * #uncommented
+   * defines the child table  using sub-class-defined-functions.
+   */
+  defaultChildTableParams() {
+    return {
+      cols: this.getColumns(),
+      filters: [], // don't enable filtering by status on the form's child table.
+      tableWidth: 9,
+      noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Item) => !i.enabled,
+      editingEnabled: () => !this.inViewMode()
+    };
+  }
+
+  /**
+   * Sets up the table listing this item's children
    * See [[GenericTable.setUp]]()
+   * overridden by [[UserMainTabComponent]]
    */
   setUpChildTable(): void {
     if (this.childrenTable === undefined) {
       return;
     }
 
-    this.childrenTable.setUp({
-      cols: this.getColumns(),
-      coloredLabels: true,
-      filters: [], // don't enable filtering by status on the form's child table.
-      tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: (i: Item) => !i.enabled,
-      editingEnabled: () => !this.inViewMode()
-    });
+    let params = this.defaultChildTableParams();
+
+    this.customizeTableParams(params);
+
+    this.childrenTable.setUp(params);
   }
+
+  /**
+   * Allow children to customize the parameters passed to the table. By default, do nothing.
+   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   */
+  customizeTableParams(paramsObject) {}
+
 
   /**
    * Have each subclass define the format of their table.
@@ -202,16 +221,6 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    */
   getTableWidth(): number {
     return 9;
-  }
-
-  /**
-   * Whether or not the Items in the child table have colored labels they should be displayed with.
-   * Most main tabs won't have colored labels, so just return false.
-   * Overridden by [[UserMainTabComponent.hasColoredLabels]]().
-   * See [[GenericTable.setUp]]()
-   */
-  hasColoredLabels(): boolean {
-    return false;
   }
 
   /**

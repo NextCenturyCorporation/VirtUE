@@ -97,15 +97,11 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   }
 
   /**
-   * Sets up the table, according to parameters defined in this class' child classes.
+   * #uncommented
    */
-  setUpTable(): void {
-    if (this.table === undefined) {
-      return;
-    }
-    this.table.setUp({
+  defaultTableParams() {
+    return {
       cols: this.getColumns(),
-      coloredLabels: this.hasColoredLabels(),
       filters: [],
       tableWidth: 12,
       noDataMsg: this.getNoDataMsg(),
@@ -115,8 +111,34 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
         selectionMode: this.getSelectionMode(),
         equals: (obj1: Item, obj2: Item) => {return obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID())}
       }
-    });
+    };
   }
+
+  /**
+   * Sets up the table
+   * #uncommented
+   *
+   * If all instances of this table should have an attribute, and define it differently, then it should be set via a method in
+   * [[defaultTableParams]].
+   * If an instance needs a unique attribute that the other pages don't even need to see (like virtue-modal having a getColor field),
+   * then that should be added in a customizeTableParams method, in that subclass. See [[VirtueModalComponent.customizeTableParams]]
+   */
+  setUpTable(): void {
+    if (this.table === undefined) {
+      return;
+    }
+    let params = this.defaultTableParams();
+
+    this.customizeTableParams(params);
+
+    this.table.setUp(params);
+  }
+
+  /**
+   * Allow children to customize the parameters passed to the table. By default, do nothing.
+   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   */
+  customizeTableParams(paramsObject) {}
 
   /**
    * Sets the page's selection mode: can be {OFF, SINGLE, MULTI}. Default is MULTI.
@@ -164,14 +186,6 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    * @returns a string to be displayed in the table, when the table's 'elements' array is undefined or empty.
    */
   abstract getNoDataMsg(): string;
-
-  /**
-   * @return whether or not the elements being listed have colored labels. True for, and only for, all tables that list virtues.
-   * overridden to that effect by virtues-modal
-   */
-  hasColoredLabels(): boolean {
-    return false;
-  }
 
   /**
    * Notifies the component which created and is waiting on this modal that selections have been made,

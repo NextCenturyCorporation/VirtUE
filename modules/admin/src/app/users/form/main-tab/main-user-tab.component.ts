@@ -94,12 +94,20 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
+   * add colors to the child table defined in [[GenericMainTabComponent]], since here it will be showing Virtues.
+   */
+  customizeTableParams(params): void {
+    params['coloredLabels'] = true;
+    params['getColor'] = (v: Virtue) => v.color;
+  }
+
+  /**
    * In view mode, make labels in Virtue and VMs columns clickable.
    * @return what columns should show up in the user's virtue children table
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i), 
+      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                           () => this.getSubMenu()),
       new ListColumn('Virtual Machines', 3, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
       new ListColumn<Item>('Available Apps', 4, this.getGrandchildren,  this.formatName),
@@ -113,13 +121,6 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
    */
   getNoDataMsg(): string {
     return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
-  }
-
-  /**
-   * @return true always, since this table holds virtues.
-   */
-  hasColoredLabels(): boolean {
-    return true;
   }
 
   /**

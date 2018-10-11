@@ -6,9 +6,9 @@
           <br/>
           <mat-form-field>
             <input type="text" [disabled]="inViewMode()" [(ngModel)]="item.name" aria-label="Virtue Name" placeholder="Virtue Name" matInput />
+            <span *ngIf="!inCreateMode() && !inDuplicateMode()" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.getID() }}</span>
           </mat-form-field>
         </div>
-        <span *ngIf="inCreateMode()" style="clear: both;color: #aaa; font-size:10px;margin-top:5px;">ID: {{ item.getID() }}</span>
         <div class="form-item margin-top-15">
           <div class="form-item margin-top-15">
             <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>

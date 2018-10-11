@@ -468,6 +468,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.allowedPasteTargetsTable.setUp({
       cols: this.getPasteColumns(),
       coloredLabels: true,
+      getColor: (v: Virtue) => v.color,
       filters: [],
       tableWidth: 10,
       noDataMsg: this.getNoPasteDataMsg(),

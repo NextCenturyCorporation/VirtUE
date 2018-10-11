@@ -79,11 +79,11 @@ export class VirtueListComponent extends GenericListComponent {
   }
 
   /**
-   * Overrides parent, [[GenericListComponent.hasColoredLabels]]
-   * @return always true
+   * add colors to the table defined in [[GenericListComponent]], since here it will be showing Virtues.
    */
-  hasColoredLabels(): boolean {
-    return true;
+  customizeTableParams(params): void {
+    params['coloredLabels'] = true;
+    params['getColor'] = (v: Virtue) => v.color;
   }
 
   /**

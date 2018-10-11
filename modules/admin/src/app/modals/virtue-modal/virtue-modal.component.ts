@@ -64,10 +64,13 @@ export class VirtueModalComponent extends GenericModalComponent {
   }
 
   /**
-   * @return true because this table holds Virtue Templates
+   * add colors to the table defined in [[GenericModalComponent]], since here it will be showing Virtues.
+   * This is a little spaghetti-esque, but the alternative was either every subclass inheriting a "hasColoredLabels" method that means
+   * nothing to them and always returns false, or overiding the generic modals' table setup function here, with an almost-exact copy.
    */
-  hasColoredLabels(): boolean {
-    return true;
+  customizeTableParams(params): void {
+    params['coloredLabels'] = true;
+    params['getColor'] = (v: Virtue) => v.color;
   }
 
   /**
