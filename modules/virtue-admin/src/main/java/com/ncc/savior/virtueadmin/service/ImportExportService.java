@@ -10,10 +10,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.transaction.Transactional;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,7 +177,8 @@ public class ImportExportService {
 		}
 	}
 
-	public void importZip(InputStream stream) {
+	@Transactional
+	public void importZip(InputStream stream, boolean waitUntilCompletion) {
 		try {
 			logger.debug("Starting zip import");
 			// need to store the entrys to ensure they are added in the right order. They
@@ -183,34 +188,50 @@ public class ImportExportService {
 			ArrayList<VirtueTemplate> vts = new ArrayList<VirtueTemplate>();
 			ArrayList<VirtueUser> users = new ArrayList<VirtueUser>();
 			ArrayList<IconModel> icons = new ArrayList<IconModel>();
+			ArrayList<Runnable> imageCompletionRunnables = new ArrayList<Runnable>();
 			BiConsumer<ZipEntry, InputStream> vmImageConsumer = (entry, uncloseableStream) -> {
 				try {
-					importImage(entry, uncloseableStream);
+					Runnable runnable = importImage(entry, uncloseableStream);
+					imageCompletionRunnables.add(runnable);
 				} catch (IOException e) {
 					throw new SaviorException(SaviorErrorCode.IMAGE_IMPORT_ERROR, "Failed to import image " + entry, e);
 				}
 			};
+			// Prepares all the data to be pushed
 			ImportExportUtils.readImportExportZipStream(stream, users, vts, vms, apps, icons, vmImageConsumer);
-			for (ApplicationDefinition app : apps) {
-				templateManager.addApplicationDefinition(app);
-			}
-			for (VirtualMachineTemplate vm : vms) {
-				importVirtualMachineTemplateFromObject(vm);
-			}
-			for (VirtueTemplate vt : vts) {
-				importVirtueTemplateFromObject(vt);
-			}
-			for (VirtueUser user : users) {
-				importUserFromObject(user);
-			}
-			for (IconModel icon : icons) {
-				importIconFromObject(icon);
+			// Push database entries first as a transaction
+			loadDatabaseObjects(apps, vms, vts, users, icons);
+			// finish loading of images
+			CompletableFuture<Void> cf = imageManager.finishImageLoad(imageCompletionRunnables);
+			if (waitUntilCompletion) {
+				logger.debug("waiting for upload to S3");
+				cf.get();
 			}
 			logger.debug("Import completed successfully");
 		} catch (Throwable e) {
 			logger.error("Error importing", e);
 		}
 
+	}
+
+	
+	private void loadDatabaseObjects(ArrayList<ApplicationDefinition> apps, ArrayList<VirtualMachineTemplate> vms,
+			ArrayList<VirtueTemplate> vts, ArrayList<VirtueUser> users, ArrayList<IconModel> icons) {
+		for (ApplicationDefinition app : apps) {
+			templateManager.addApplicationDefinition(app);
+		}
+		for (VirtualMachineTemplate vm : vms) {
+			importVirtualMachineTemplateFromObject(vm);
+		}
+		for (VirtueTemplate vt : vts) {
+			importVirtueTemplateFromObject(vt);
+		}
+		for (VirtueUser user : users) {
+			importUserFromObject(user);
+		}
+		for (IconModel icon : icons) {
+			importIconFromObject(icon);
+		}
 	}
 
 	/**
@@ -221,7 +242,7 @@ public class ImportExportService {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean importImage(ZipEntry entry, InputStream uncloseableStream) throws IOException {
+	private Runnable importImage(ZipEntry entry, InputStream uncloseableStream) throws IOException {
 		String name = entry.getName();
 		String path = name.substring(ImportExportUtils.VIRTUAL_MACHINE_IMAGE_ZIP_ROOT.length());
 		String extension = "";
@@ -231,8 +252,8 @@ public class ImportExportService {
 			path = path.substring(0, dotIndex);
 		}
 		logger.debug("importing image to " + path + " of type " + extension + " " + entry.getSize());
-		imageManager.storeStreamAsImage(path, extension, uncloseableStream);
-		return true;
+		Runnable r = imageManager.prepareImageUpload(path, extension, uncloseableStream);
+		return r;
 	}
 
 	private void addUserToZipStream(VirtueUser user, HashSet<String> includedEntries, ZipOutputStream zipOut)
@@ -612,10 +633,30 @@ public class ImportExportService {
 					logger.error("Error trying to import user with name=" + name, t);
 				}
 			}
+			loadIconsFromIconsFolder();
 		} catch (IOException e) {
 			logger.error("Error importing all");
 		}
 		return items;
+	}
+	
+	private void loadIconsFromIconsFolder() {
+		try {
+			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+			Resource[] resources = resolver.getResources("icons/**.png");
+			for (Resource resource : resources) {
+				try {
+					byte[] bytes = IOUtils.toByteArray(resource.getInputStream());
+					String name = resource.getFilename();
+					name = name.substring(0, name.lastIndexOf("."));
+					templateManager.addIcon(name, bytes);
+				} catch (IOException e) {
+					logger.error("Failed to load icon at " + resource.getDescription());
+				}
+			}
+		} catch (IOException e) {
+			logger.error("failed to load icons folder", e);
+		}
 	}
 
 	private Set<String> getJsonFileNames(String type) throws IOException {

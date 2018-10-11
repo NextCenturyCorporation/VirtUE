@@ -5,7 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -124,7 +126,7 @@ public class S3ImageManager implements IXenGuestImageManager {
 					ExportTask task = taskResult.getExportTasks().get(0);
 					state = task.getState();
 					String msg = task.getStatusMessage();
-					logger.debug("image state=" + state+" msg="+msg);
+					logger.debug("image state=" + state + " msg=" + msg);
 				} else {
 					throw new SaviorException(SaviorErrorCode.AWS_ERROR,
 							"Error tracking windows export for path" + path);
@@ -138,11 +140,11 @@ public class S3ImageManager implements IXenGuestImageManager {
 	}
 
 	@Override
-	public void storeStreamAsImage(String path, String type, InputStream uncloseableStream) throws IOException {
-		storeStreamAsImageFromCustomBucket(bucketName, path, type, uncloseableStream);
+	public Runnable prepareImageUpload(String path, String type, InputStream uncloseableStream) throws IOException {
+		return storeStreamAsImageFromCustomBucket(bucketName, path, type, uncloseableStream);
 	}
 
-	private void storeStreamAsImageFromCustomBucket(String bucket, String path, String type,
+	private Runnable storeStreamAsImageFromCustomBucket(String bucket, String path, String type,
 			InputStream uncloseableStream) throws IOException {
 		String key = path + "/disk." + type;
 		File tmp = null;
@@ -166,7 +168,7 @@ public class S3ImageManager implements IXenGuestImageManager {
 				}
 
 			};
-			runAsync(r);
+			return r;
 		} catch (IOException e) {
 			if (tmp != null && tmp.exists()) {
 				tmp.delete();
@@ -175,8 +177,20 @@ public class S3ImageManager implements IXenGuestImageManager {
 		}
 	}
 
-	private void runAsync(Runnable r) {
-		executor.execute(r);
+	@SuppressWarnings("unused")
+	private CompletableFuture<Void> runAsync(Runnable r) {
+		CompletableFuture<Void> cf = CompletableFuture.runAsync(r, executor);
+		return cf;
+	}
+
+	@Override
+	public CompletableFuture<Void> finishImageLoad(List<Runnable> imageCompletionRunnables) {
+		List<CompletableFuture<Void>> cfs = new ArrayList<CompletableFuture<Void>>(imageCompletionRunnables.size());
+		for (Runnable runnable : imageCompletionRunnables) {
+			CompletableFuture<Void> cf = runAsync(runnable);
+			cfs.add(cf);
+		}
+		return CompletableFuture.allOf(cfs.toArray(new CompletableFuture[0]));
 	}
 
 }

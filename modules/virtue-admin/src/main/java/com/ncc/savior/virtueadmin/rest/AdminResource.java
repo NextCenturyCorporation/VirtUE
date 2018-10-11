@@ -512,8 +512,8 @@ public class AdminResource {
 	@Path("import")
 	@Produces("application/json")
 	@Consumes({ "application/zip", "application/octet-stream" })
-	public void importZip(InputStream stream) {
-		importExportService.importZip(stream);
+	public void importZip(InputStream stream, @QueryParam("waitForCompletion") @DefaultValue("true") boolean waitForCompletion) {
+		importExportService.importZip(stream, waitForCompletion);
 	}
 
 	@GET
