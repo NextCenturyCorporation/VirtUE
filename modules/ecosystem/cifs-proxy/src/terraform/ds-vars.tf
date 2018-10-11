@@ -3,5 +3,5 @@
 #
 
 variable "ds_private_ip" {
-  default = "10.1.4.247"
+  default = "10.1.4.128"
 }

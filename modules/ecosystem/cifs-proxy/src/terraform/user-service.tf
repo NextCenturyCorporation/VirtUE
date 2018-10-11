@@ -31,10 +31,12 @@ exec > /var/log/user_data.log 2>&1
 date
 yum -y install \
 	adcli \
+	cifs-utils \
 	java-1.8.0-openjdk \
 	krb5-workstation \
 	oddjob \
 	oddjob-mkhomedir \
+	openldap-clients \
 	realmd \
 	samba-common-tools \
 	samba-dc \
@@ -56,6 +58,7 @@ echo kerberos method = secrets and keytab
 ) | sed -i -e '/^\[global\]$/r /dev/stdin' \
     -e '/ *\(security\|realm\|workgroup\|kerberos method\) *=/d' \
     /etc/samba/smb.conf
+echo '${var.admin_password}' | net -k ads keytab flush -U ${var.domain_admin_user}
 echo '${var.admin_password}' | net -k ads keytab add http -U ${var.domain_admin_user}
 echo '${var.admin_password}' | net -k ads keytab add HTTP -U ${var.domain_admin_user}
 
@@ -76,9 +79,26 @@ cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 	}
 EOCONF
 
+echo Setting userPrincipalName and adding permissions for constrained delegation
+ldapfile=/tmp/ldap-$$
+domainparts=$(echo ${var.domain} | sed 's/\./,dc=/g')
+cat > $ldapfile <<EOLDAP
+dn: cn=${local.myname},cn=Computers,dc=$domainparts
+changetype: add
+add: msDS-AllowedToDelegateTo
+msDS-AllowedToDelegateTo: cifs/${upper(local.fsname)}
+msDS-AllowedToDelegateTo: cifs/${local.fsname}.${var.domain}
+-
+changetype: modify
+add: userPrincipalName
+userPrincipalName: http/${local.myname}.${var.domain}@${upper(var.domain)}
+-
+EOLDAP
+ldapmodify -f $ldapfile -w '${var.admin_password}' -x -H ldap://${var.dsname} -D "${var.domain_admin_user}@${var.domain}"
+
 echo fixing reverse dns
 myaddress=$(ip address show dev eth0 | sed -n 's_ *inet \([^/]*\)/.*_\1_p')
-echo '${var.admin_password}' | kinit Administrator
+echo '${var.admin_password}' | kinit ${var.domain_admin_user}
 # if the zone doesn't exist, create it
 mysubnet=$(echo $myaddress | sed 's/\.[^.]*$//')
 zone=$(echo $mysubnet | awk -F . '{ print $3 "." $2 "." $1 }').in-addr.arpa
