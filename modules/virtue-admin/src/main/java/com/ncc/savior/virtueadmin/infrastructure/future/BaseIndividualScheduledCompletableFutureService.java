@@ -101,8 +101,12 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 	private void cancelFuture(String id) {
 		ScheduledFuture<?> future = futureMap.get(id);
 		if (future != null) {
-			future.cancel(false);
-			futureMap.remove(id);
+			boolean success = future.cancel(false);
+			if (success) {
+				futureMap.remove(id);
+			} else {
+				logger.error("Failed to cancel future with id=" + id);
+			}
 		}
 	}
 
