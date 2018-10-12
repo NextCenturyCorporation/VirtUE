@@ -4,8 +4,8 @@
 #
 mydir=$(readlink --canonicalize $(dirname $0))
 cd "$mydir"
-echo -ne "directory server: \t"
-terraform state show aws_instance.directory_service | sed -n 's/public_dns *= \(.*\)/\1/p'
+#echo -ne "directory server: \t"
+#terraform state show aws_instance.directory_service | sed -n 's/public_dns *= \(.*\)/\1/p'
 echo -ne "file server: \t"
 terraform state show aws_instance.file_server | sed -n 's/public_dns *= \(.*\)/\1/p'
 echo -ne "user server: \t"

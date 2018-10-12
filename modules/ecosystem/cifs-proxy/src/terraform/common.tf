@@ -63,7 +63,7 @@ variable "domain" {
 }
 
 variable "domain_admin_user" {
-  default = "Administrator" # for samba/Active Directory
+  default = "Admin" # for EC2 Active Directory
 }
 
 locals {

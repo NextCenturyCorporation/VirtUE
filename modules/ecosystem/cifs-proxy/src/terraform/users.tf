@@ -7,9 +7,9 @@ data "template_file" "users_script" {
   template = "${file("users.ps1")}"
 
   vars {
-	domain_admin_user = "${var.domain_admin_user}"
 	admin_password = "${var.admin_password}"
 	bob_password = "${var.bob_password}"
+	domain_admin_user = "${var.domain_admin_user}"
   }
 }
 
@@ -18,6 +18,7 @@ data "template_file" "remove_users_script" {
 
   vars {
 	admin_password = "${var.admin_password}"
+	domain_admin_user = "${var.domain_admin_user}"
   }
 }
 
@@ -29,7 +30,7 @@ resource "null_resource" "user_creation" {
   }
 
   connection {
-	user = "Administrator"
+	user = "${var.domain_admin_user}"
 	password = "${var.admin_password}"
 	host = "${aws_instance.file_server.public_ip}"
 	type = "winrm"

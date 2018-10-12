@@ -2,6 +2,6 @@
 # created (at least for now).
 #
 
-variable "ds_private_ip" {
-  default = "10.1.4.128"
+locals {
+  ds_private_ip = "${aws_directory_service_directory.directory_service.dns_ip_addresses[0]}"
 }

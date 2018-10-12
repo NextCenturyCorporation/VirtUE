@@ -43,7 +43,7 @@ yum -y install \
 	sssd
 hostnamectl set-hostname ${local.myname}.${var.domain}
 sed -i 's/\(^127\.0\.0\.1 *\)/\1${local.myname}.${var.domain} ${local.myname} /' /etc/hosts
-(echo supersede domain-name-servers "${var.ds_private_ip}" ';'
+(echo supersede domain-name-servers "${local.ds_private_ip}" ';'
 echo supersede domain-search \"${var.domain}\";
 echo supersede domain-name \"${var.domain}\";
 ) >> /etc/dhcp/dhclient.conf
@@ -80,21 +80,20 @@ cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 EOCONF
 
 echo Setting userPrincipalName and adding permissions for constrained delegation
-ldapfile=/tmp/ldap-$$
+ldapfile=/tmp/ldap-$$$$
 domainparts=$(echo ${var.domain} | sed 's/\./,dc=/g')
 cat > $ldapfile <<EOLDAP
 dn: cn=${local.myname},cn=Computers,dc=$domainparts
-changetype: add
+changetype: modify
 add: msDS-AllowedToDelegateTo
 msDS-AllowedToDelegateTo: cifs/${upper(local.fsname)}
 msDS-AllowedToDelegateTo: cifs/${local.fsname}.${var.domain}
 -
-changetype: modify
-add: userPrincipalName
+replace: userPrincipalName
 userPrincipalName: http/${local.myname}.${var.domain}@${upper(var.domain)}
 -
 EOLDAP
-ldapmodify -f $ldapfile -w '${var.admin_password}' -x -H ldap://${var.dsname} -D "${var.domain_admin_user}@${var.domain}"
+ldapmodify -f $ldapfile -w '${var.admin_password}' -x -H ldap://${local.ds_private_ip} -D "${var.domain_admin_user}@${var.domain}"
 
 echo fixing reverse dns
 myaddress=$(ip address show dev eth0 | sed -n 's_ *inet \([^/]*\)/.*_\1_p')
@@ -102,19 +101,19 @@ echo '${var.admin_password}' | kinit ${var.domain_admin_user}
 # if the zone doesn't exist, create it
 mysubnet=$(echo $myaddress | sed 's/\.[^.]*$//')
 zone=$(echo $mysubnet | awk -F . '{ print $3 "." $2 "." $1 }').in-addr.arpa
-samba-tool dns zoneinfo ${var.dsname} $zone \
+samba-tool dns zoneinfo ${local.ds_private_ip} $zone \
 	   --kerberos=1 \
 	   >& /dev/null || \
-	samba-tool dns zonecreate ${var.dsname} $zone \
+	samba-tool dns zonecreate ${local.ds_private_ip} $zone \
 		   --kerberos=1
 
 # remove reverse DNS PTR record (if any)
 lastOctet=$${myaddress/*./}
-samba-tool dns delete ${var.dsname} $zone $lastOctet PTR ${local.myname}.${var.domain} \
+samba-tool dns delete ${local.ds_private_ip} $zone $lastOctet PTR ${local.myname}.${var.domain} \
 	   --kerberos=1 \
 	   >& /dev/null || true
 # add new reverse DNS PTR record
-samba-tool dns add ${var.dsname} $zone $lastOctet PTR ${local.myname}.${var.domain} \
+samba-tool dns add ${local.ds_private_ip} $zone $lastOctet PTR ${local.myname}.${var.domain} \
 	   --kerberos=1
 
 date
@@ -132,45 +131,45 @@ EOF
 # whose keytab entry gets created by the net command above. It seems
 # like kinit should work even w/o this, but it doesn't.
 
-data "template_file" "fix_user_service_upn_script" {
-  template = "${file("user-service.ps1")}"
-
-  vars {
-	password = "${var.admin_password}"
-	hostname = "${local.myname}"
-    domain = "${var.domain}"
-    domain_admin_user = "${var.domain_admin_user}"
-  }
-}
-
-resource "null_resource" "fix_user_service_upn" {
-  triggers {
-	ad_id = "${aws_instance.user_facing_server.id}"
-  }
-
-  # Note: this runs on the file server because there doesn't appear to
-  # be a way to set a UPN from Linux.
-
-  connection {
-	type     = "winrm"
-	user     = "Administrator" # local admin user
-	host     = "${aws_instance.file_server.public_dns}"
-	password = "${var.admin_password}"
-	https    = false
-	use_ntlm = false
-  }
-
-  provisioner "file" {
-	content = "${data.template_file.fix_user_service_upn_script.rendered}"
-	destination = "\\temp\\user-service.ps1"
-  }
-
-  provisioner "remote-exec" {
-	inline = [
-	  "powershell \\temp\\user-service.ps1"
-	]
-  }
-  
-  depends_on = [ "aws_instance.file_server", "aws_instance.user_facing_server" ]
-
-}
+#data "template_file" "fix_user_service_upn_script" {
+#  template = "${file("user-service.ps1")}"
+#
+#  vars {
+#	password = "${var.admin_password}"
+#	hostname = "${local.myname}"
+#    domain = "${var.domain}"
+#    domain_admin_user = "${var.domain_admin_user}"
+#  }
+#}
+#
+#resource "null_resource" "fix_user_service_upn" {
+#  triggers {
+#	ad_id = "${aws_instance.user_facing_server.id}"
+#  }
+#
+#  # Note: this runs on the file server because there doesn't appear to
+#  # be a way to set a UPN from Linux.
+#
+#  connection {
+#	type     = "winrm"
+#	user     = "Administrator" # local admin user
+#	host     = "${aws_instance.file_server.public_dns}"
+#	password = "${var.admin_password}"
+#	https    = false
+#	use_ntlm = false
+#  }
+#
+#  provisioner "file" {
+#	content = "${data.template_file.fix_user_service_upn_script.rendered}"
+#	destination = "\\temp\\user-service.ps1"
+#  }
+#
+#  provisioner "remote-exec" {
+#	inline = [
+#	  "powershell \\temp\\user-service.ps1"
+#	]
+#  }
+#  
+#  depends_on = [ "aws_instance.file_server", "aws_instance.user_facing_server" ]
+#
+#}

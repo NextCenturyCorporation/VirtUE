@@ -47,7 +47,7 @@ resource "aws_instance" "file_server" {
   Install-WindowsFeature -Name RSAT-AD-PowerShell -LogPath "c:\install.log"
 
   echo "fixing DNS"
-  Get-NetAdapter | Set-DnsClientServerAddress -ServerAddresses "${var.ds_private_ip}"
+  Get-NetAdapter | Set-DnsClientServerAddress -ServerAddresses "${local.ds_private_ip}"
   Set-DnsClientGlobalSetting -SuffixSearchList "${var.domain}"
 
   echo "Joining domain & renaming, then rebooting"
