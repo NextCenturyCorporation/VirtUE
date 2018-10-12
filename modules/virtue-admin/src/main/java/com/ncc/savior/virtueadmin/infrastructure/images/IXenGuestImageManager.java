@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
+import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 
 /**
  * Manages storing and retrieving images for Xen guest VMs.
@@ -38,14 +39,14 @@ public interface IXenGuestImageManager {
 	 * runnable is called. Returns a runnable that normally should be passed to
 	 * {@link IXenGuestImageManager#finishImageLoad(List)}. The caller can run the
 	 * runnables, but implementations may have extra controls for running them
-	 * efficiently. If Runnable is never called or passed back via
-	 * {@link #finishImageLoad(List)}, file should be backed out.
+	 * efficiently. If Runnable is never called or passed to
+	 * {@link #finishImageLoad(List)}, file should not be saved.
 	 * 
 	 * @param path
 	 *            - path is the image identifier used throughout the Savior system
 	 *            for virtual machine images. It is not necessarily a file system
 	 *            path and its actually meaning is determined by the
-	 *            {@link ICloudManager} implementation.
+	 *            {@link ICloudManager} implementation.  See {@link VirtualMachineTemplate}
 	 * @param type
 	 * @param uncloseableStream
 	 * @throws IOException
