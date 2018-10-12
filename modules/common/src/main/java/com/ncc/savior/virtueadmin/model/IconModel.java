@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.Comparator;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -38,5 +40,13 @@ public class IconModel {
 
 	public void setData(byte[] data) {
 		this.data = data;
+	}
+	
+	public static final Comparator<? super IconModel> CASE_INSENSITIVE_ID_COMPARATOR = new CaseInsensitiveIdComparator();
+	private static class CaseInsensitiveIdComparator implements Comparator<IconModel> {
+		@Override
+		public int compare(IconModel o1, IconModel o2) {
+			return String.CASE_INSENSITIVE_ORDER.compare(o1.getId(), o2.getId());
+		}
 	}
 }

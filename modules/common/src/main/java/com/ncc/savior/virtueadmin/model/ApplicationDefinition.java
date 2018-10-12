@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.ElementCollection;
@@ -197,5 +198,12 @@ public class ApplicationDefinition {
 		} else if (!version.equals(other.version))
 			return false;
 		return true;
+	}
+	public static final Comparator<? super ApplicationDefinition> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
+	private static class CaseInsensitiveNameComparator implements Comparator<ApplicationDefinition> {
+		@Override
+		public int compare(ApplicationDefinition o1, ApplicationDefinition o2) {
+			return String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName());
+		}
 	}
 }
