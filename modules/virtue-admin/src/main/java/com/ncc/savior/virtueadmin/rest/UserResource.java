@@ -116,7 +116,7 @@ public class UserResource {
 	@Path("virtue/{virtueId}/{applicationId}")
 	public void startApplication(@PathParam("virtueId") String virtueId,
 			@PathParam("applicationId") String applicationId) {
-		desktopService.startApplication(virtueId, applicationId);
+		desktopService.startApplication(virtueId, applicationId, null);
 	}
 
 	// JHU - User API - virtue application stop

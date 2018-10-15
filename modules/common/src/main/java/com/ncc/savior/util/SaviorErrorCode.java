@@ -43,6 +43,9 @@ public enum SaviorErrorCode {
 	AWS_ERROR(300, "Error with AWS", 500),
 	VOLUME_IN_USE(301, "Volume in use" ,412),
 	MULTIPLE_STORAGE_ERROR(302, "Multiple Storage Errors", 400),
+	
+	DATABASE_ERROR(401, "Database Error", 500),
+	
 	NOT_IMPLEMENTED(254, "function not implemented", 501), 
 	UNKNOWN_ERROR(255, "unknown error"), 
 	//Errors we shouldn't see because its older code

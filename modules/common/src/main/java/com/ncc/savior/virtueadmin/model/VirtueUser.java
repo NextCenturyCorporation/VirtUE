@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 
 import javax.persistence.ElementCollection;
@@ -141,5 +142,11 @@ public class VirtueUser {
 		}
 		return false;
 	}
-
+	public static final Comparator<? super VirtueUser> USERNAME_COMPARATOR = new UsernameComparator();
+	private static class UsernameComparator implements Comparator<VirtueUser> {
+		@Override
+		public int compare(VirtueUser o1, VirtueUser o2) {
+			return String.CASE_INSENSITIVE_ORDER.compare(o1.getUsername(), o2.getUsername());
+		}
+	}
 }

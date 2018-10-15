@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -258,5 +259,13 @@ public class VirtueTemplate {
 
 	public void setUserCreatedBy(String userCreatedBy) {
 		this.userCreatedBy = userCreatedBy;
+	}
+	
+	public static final Comparator<? super VirtueTemplate> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
+	private static class CaseInsensitiveNameComparator implements Comparator<VirtueTemplate> {
+		@Override
+		public int compare(VirtueTemplate o1, VirtueTemplate o2) {
+			return String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName());
+		}
 	}
 }

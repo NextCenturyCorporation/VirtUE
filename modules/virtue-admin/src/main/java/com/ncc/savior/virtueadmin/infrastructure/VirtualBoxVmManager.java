@@ -39,12 +39,6 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	private static final String ARGS_GETINFO = "showvminfo \"%s\" --machinereadable";
 
 	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
-			CompletableFuture<Collection<VirtualMachine>> future) {
-		throw new RuntimeException("not yet implemented");
-	}
-
-	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
 		VmState state = getVirtualMachineState(vm);
 		if (state.equals(VmState.RUNNING)) {
@@ -190,7 +184,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
-			String virtue) {
+			String virtue, String networkKey) {
 		throw new RuntimeException("not yet implemented");
 	}
 
