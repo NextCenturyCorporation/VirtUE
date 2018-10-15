@@ -401,7 +401,7 @@ public interface GssApi extends Library {
 	int gss_inquire_names_for_mech(IntByReference minorStatus, /* minor_status */
 			gss_OID_desc mech, /* mechanism */
 			gss_OID_set_desc mechNames); /* name_types */
-	
+
 	/**
 	 * Initiates a secure connection between this computer and another (usually a
 	 * server). To be portable, an app should call this in a loop.
@@ -460,6 +460,8 @@ public interface GssApi extends Library {
 	 * @param retFlags
 	 * @param timeRec
 	 * @param delegatedCredHandle
+	 *                                 Note: should be freed with
+	 *                                 {@link #gss_release_cred(IntByReference, gss_cred_id_t)}
 	 * @return
 	 */
 	int gss_accept_sec_context(IntByReference minorStatus, /* minor_status */
@@ -493,7 +495,10 @@ public interface GssApi extends Library {
 	 * @param time
 	 * @param desiredMechs
 	 * @param credUsage
+	 *                             a value from {@link GssCredentialUsage}
 	 * @param outputCredHandle
+	 *                             Note: should be freed with
+	 *                             {@link #gss_release_cred(IntByReference, gss_cred_id_t)}
 	 * @param actualMechs
 	 *                             Note: should be freed with
 	 *                             {@link #gss_release_oid_set(IntByReference, gss_OID_set_desc)}
@@ -508,6 +513,16 @@ public interface GssApi extends Library {
 			PointerByReference outputCredHandle, /* output_cred_handle */
 			PointerByReference actualMechs, /* actual_mechs */
 			IntByReference retTime); /* time_rec */
+
+	/**
+	 * Release storage for a credential.
+	 * 
+	 * @param minorStatus
+	 * @param credential
+	 * @return
+	 */
+	int gss_release_cred(IntByReference minorStatus, /* minor_status */
+			gss_cred_id_t credential); /* cred_handle */
 
 	/**
 	 * 
@@ -536,6 +551,7 @@ public interface GssApi extends Library {
 	 * @param desiredName
 	 * @param desiredMech
 	 * @param credUsage
+	 *                                 a value from {@link GssCredentialUsage}
 	 * @param initiatorTimeRequest
 	 * @param acceptorTimeRequest
 	 * @param outputCredHandle
@@ -569,6 +585,7 @@ public interface GssApi extends Library {
 	 *                              {@link #gss_release_name(IntByReference, gss_name_t)}
 	 * @param lifetimeRemaining
 	 * @param credUsage
+	 *                              a value from {@link GssCredentialUsage}
 	 * @param mechanismsOidSet
 	 *                              Note: should be freed with
 	 *                              {@link #gss_release_oid_set(IntByReference, gss_OID_set_desc)}
@@ -665,7 +682,8 @@ public interface GssApi extends Library {
 	 * 
 	 * @param minorStatus
 	 * @param credHandle
-	 * @param gssCInitiate
+	 * @param usage
+	 *                          a value from {@link GssCredentialUsage}
 	 * @param desiredMech
 	 * @param overwriteCred
 	 * @param defaultCred
@@ -676,7 +694,7 @@ public interface GssApi extends Library {
 	 */
 	int gss_store_cred_into(IntByReference minorStatus, /* minor_status */
 			Pointer credHandle, /* input_cred_handle */
-			int gssCInitiate, /* input_usage */
+			int usage, /* input_usage */
 			gss_OID_desc desiredMech, /* desired_mech */
 			int overwriteCred, /* overwrite_cred */
 			int defaultCred, /* default_cred */
