@@ -13,7 +13,7 @@
       <label>Status: </label>
     </div>
     <div class="mui-col-md-2">
-      <mat-slide-toggle [(ngModel)]="item.enabled" [disabled]="inViewMode()" (click)="statusChange()" [color]="'primary'">
+      <mat-slide-toggle [(ngModel)]="item.enabled" [disabled]="!inViewMode()" (click)="statusChange()" [color]="'primary'">
         {{ item.enabled ? 'Enabled' : 'Disabled' }}
       </mat-slide-toggle>
     </div>

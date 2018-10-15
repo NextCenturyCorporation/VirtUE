@@ -83,7 +83,6 @@
                 [ngStyle]="{ 'background-color': getColor(elem.obj), 'left':'0px' }">
       </div>
 
-
       <!-- Note that this checkbox is for selection, and is not related to the checkboxes definable in Columns -->
       <span *ngIf="selectionMode === 'multi'" class="float-left mui-col-md-1 table-data transparent " fxFlex="8%">
         <mat-checkbox
@@ -201,11 +200,14 @@
             </a>
           </div>
 
+          <div class="clearfix"></div>
 
         </div>
-
-        <div class="clearfix"></div>
       </div>
+
+      <!-- <span class="mui-row menu-options" fxFlex="100%"
+        [ngStyle]="{ 'background-image': 'linear-gradient(rgba(100,100,100,0),rgba(100,100,100,255))' }">
+      </span> -->
     </div>
   </div>
 
