@@ -158,6 +158,8 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private ColorManager colorManager;
 
+	private boolean useAdminColor = true;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			ColorManager colorManager, boolean useColors, String style) {
 		this.authService = authService;
@@ -304,6 +306,16 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 
 		for (DesktopVirtue virtue : virtues) {
+			if (useAdminColor) {
+				try {
+					Color hc = Color.decode(virtue.getColor());
+					Color bc = hc.brighter().brighter();
+					colorManager.setColors(virtue.getTemplateId(), hc, bc);
+				} catch (Exception e) {
+					logger.error("failed to load color", e);
+				}
+
+			}
 			Color headerColor = colorManager.getHeaderColor(virtue.getTemplateId());
 			Color bodyColor = colorManager.getBodyColor(virtue.getTemplateId());
 			VirtueTileContainer vtc = new VirtueTileContainer(virtue, virtueService, headerColor, bodyColor, scrollPane,

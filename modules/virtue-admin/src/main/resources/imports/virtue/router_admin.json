@@ -1,9 +1,10 @@
 {
-    "name": "Router Admin",
-    "version": "1.0",
-    "enabled": true,
-    "awsTemplateName": "default-template",
-    "virtualMachineTemplateIds": [
-      "IMPORT_linux_router_admin"
-    ]
-  }
+	"name": "Router Admin",
+	"version": "1.0",
+	"enabled": true,
+	"awsTemplateName": "default-template",
+	"color": "#6A51A3",
+	"virtualMachineTemplateIds": [
+		"IMPORT_linux_router_admin"
+	]
+}
