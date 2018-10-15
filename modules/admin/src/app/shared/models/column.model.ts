@@ -168,7 +168,7 @@ export class DropdownColumn<E> extends Column implements Sortable {
      * fieldName should hold the string 'enabled'.
      */
     public fieldName: string,
-    /** a function to return a list of possible */
+    /** a function to return a list of possible options. */
     public dropdownList: (elem: any) => E[],
     /**
      * A function that takes a object, and returns a string to be displayed in this column for that element.
