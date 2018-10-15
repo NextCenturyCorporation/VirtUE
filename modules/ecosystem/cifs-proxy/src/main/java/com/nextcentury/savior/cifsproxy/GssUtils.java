@@ -10,6 +10,7 @@ import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_set_desc;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_buffer_desc;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_cred_id_t;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_name_t;
+import com.sun.jna.NativeLong;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -26,21 +27,39 @@ public class GssUtils {
 	private GssUtils() {
 	}
 
+	/**
+	 * 
+	 * @param retval
+	 *                   return value from a {@link GssApi} call
+	 * @return the calling error portion of the return value
+	 */
 	public static int GSS_CALLING_ERROR(int retval) {
 		return retval & (GssApi.GSS_C_CALLING_ERROR_MASK << GssApi.GSS_C_CALLING_ERROR_OFFSET);
 	}
 
+	/**
+	 * 
+	 * @param retval
+	 *                   return value from a {@link GssApi} call
+	 * @return the routine error portion of the return value
+	 */
 	public static int GSS_ROUTINE_ERROR(int retval) {
 		return retval & (GssApi.GSS_C_ROUTINE_ERROR_MASK << GssApi.GSS_C_ROUTINE_ERROR_OFFSET);
 	}
 
+	/**
+	 * 
+	 * @param retval
+	 *                   return value from a {@link GssApi} call
+	 * @return the supplementary error portion of the return value
+	 */
 	public static int GSS_SUPPLEMENTARY_ERROR(int retval) {
 		return retval & (GssApi.GSS_C_SUPPLEMENTARY_MASK << GssApi.GSS_C_SUPPLEMENTARY_OFFSET);
 	}
 
-	public static int GSS_ERROR(int retval) {
-		return retval & ((GssApi.GSS_C_CALLING_ERROR_MASK << GssApi.GSS_C_CALLING_ERROR_OFFSET)
-				| (GssApi.GSS_C_ROUTINE_ERROR_MASK << GssApi.GSS_C_ROUTINE_ERROR_OFFSET));
+	public static boolean GSS_ERROR(int retval) {
+		return (retval & ((GssApi.GSS_C_CALLING_ERROR_MASK << GssApi.GSS_C_CALLING_ERROR_OFFSET)
+				| (GssApi.GSS_C_ROUTINE_ERROR_MASK << GssApi.GSS_C_ROUTINE_ERROR_OFFSET))) != 0;
 	}
 
 	/**
@@ -105,6 +124,18 @@ public class GssUtils {
 		LOGGER.exit();
 	}
 
+	/**
+	 * Turn a {@link gss_name_t} into a {@link String}.
+	 * 
+	 * @param api
+	 *                 api reference
+	 * @param name
+	 *                 input name
+	 * @return name as a string
+	 * @throws GSSException
+	 *                          if an error occurs calling
+	 *                          {@link GssApi#gss_display_name(IntByReference, gss_name_t, gss_buffer_desc, PointerByReference)}
+	 */
 	public static String getStringName(GssApi api, gss_name_t name) throws GSSException {
 		LOGGER.entry(name);
 		String stringname;
@@ -112,7 +143,8 @@ public class GssUtils {
 		gss_buffer_desc outputNameBuffer = new gss_buffer_desc();// outputNameHandle.getPointer());
 		int retval = api.gss_display_name(minorStatus, name, outputNameBuffer, null);
 		if (retval != 0) {
-			GSSException exception = new GSSException(retval, minorStatus.getValue(), "releasing name " + name);
+			GSSException exception = new GSSException(retval, minorStatus.getValue(),
+					"getting display name for: " + name);
 			LOGGER.throwing(exception);
 			throw exception;
 		}
@@ -122,11 +154,32 @@ public class GssUtils {
 		return stringname;
 	}
 
+	/**
+	 * A Java-friendly representation of a {@link gss_name_t}.
+	 * 
+	 * @author clong
+	 *
+	 */
 	public static class UnpackedName {
+		/** the name itself */
 		public String name;
+		/** the type of the name */
 		public String type;
 	}
 
+	/**
+	 * Get the name string and type string for a {@link gss_name_t}
+	 * 
+	 * @param api
+	 *                 api reference
+	 * @param name
+	 *                 input name
+	 * @return name & type structure
+	 * @throws GSSException
+	 *                          if an error occurred calling a {@link GssApi}
+	 *                          function (e.g.,
+	 *                          {@link GssApi#gss_display_name(IntByReference, gss_name_t, gss_buffer_desc, PointerByReference)})
+	 */
 	public static UnpackedName unpackName(GssApi api, gss_name_t name) throws GSSException {
 		UnpackedName result = new UnpackedName();
 		IntByReference minorStatus = new IntByReference();
@@ -161,6 +214,19 @@ public class GssUtils {
 		return result;
 	}
 
+	/**
+	 * Get a string representation of a GSS OID.
+	 * 
+	 * @param api
+	 *                api reference
+	 * @param oid
+	 *                input OID
+	 * @return string version of the OID, or "(null)" if oid is <code>null</code>
+	 * @throws GSSException
+	 *                          if an error occurred calling a {@link GssApi}
+	 *                          function (e.g.,
+	 *                          {@link GssApi#gss_oid_to_str(IntByReference, gss_OID_desc, gss_buffer_desc)})
+	 */
 	public static String getOidString(GssApi api, gss_OID_desc oid) throws GSSException {
 		if (oid == null || oid.length == 0) {
 			return "(null)";
@@ -170,9 +236,7 @@ public class GssUtils {
 		gss_buffer_desc typeBuffer = new gss_buffer_desc();
 		String nameTypeString;
 		try {
-			System.out.println(">>> about to call oid_to_str: oid=" + oid + ", typeBuffer=" + typeBuffer);
 			retval = api.gss_oid_to_str(minorStatus, oid, typeBuffer);
-			System.out.println("<<< back from oid_to_str");
 			if (retval != 0) {
 				GSSException exception = new GSSException(retval, minorStatus.getValue(),
 						"getting OID string for:" + oid);
@@ -191,6 +255,15 @@ public class GssUtils {
 		return nameTypeString;
 	}
 
+	/**
+	 * Turn a {@link gss_cred_id_t} into a {@link String}.
+	 * 
+	 * @param api
+	 *                 api reference
+	 * @param cred
+	 *                 input credential; must not be <code>null</code>
+	 * @return string representation of the credential
+	 */
 	public static String getCredInfo(GssApi api, gss_cred_id_t cred) {
 		LOGGER.entry(api, cred);
 		StringBuilder result = new StringBuilder(cred.toString());
@@ -223,12 +296,22 @@ public class GssUtils {
 				// TODO maybe change this to do something mechanism-specific with
 				// gss_inquire_names_for_mech
 				gss_OID_set_desc oidSet = new gss_OID_set_desc(mechanismsOidSet.getValue());
-				result.append(",mechanisms=[");
-				if (oidSet.count.intValue() > 0) {
-					gss_OID_desc[] oidArray = (gss_OID_desc[]) oidSet.elements.toArray(oidSet.count.intValue());
-					for (gss_OID_desc oid : oidArray) {
+				int numOids = oidSet.count.intValue();
+				result.append(",mechanisms(");
+				result.append(numOids);
+				result.append(")=[");
+				if (numOids > 0) {
+					gss_OID_desc[] oidArray = (gss_OID_desc[]) oidSet.elements.toArray(numOids);
+					for (int i = 0; i < numOids; i++) {
+						gss_OID_desc oid = oidArray[i];
+						result.append('[');
 						try {
-							result.append(getOidString(api, oid));
+							String[] namesForMech = getNamesForMech(api, oid);
+							if (namesForMech.length > 0) {
+								result.append(String.join(",", namesForMech));
+							} else {
+								result.append(getOidString(api, oid));
+							}
 						} catch (GSSException e) {
 							result.append("<ERROR>");
 						}
@@ -251,18 +334,73 @@ public class GssUtils {
 				api.gss_release_name(minorStatus, new gss_name_t(credName.getValue()));
 			}
 			if (mechanismsOidSet.getValue() != null) {
-				// TODO free this somehow
-				/*
 				gss_OID_set_desc tempOidSet = new gss_OID_set_desc(mechanismsOidSet.getValue());
-				if (tempOidSet.count.intValue() > 0) {
-					System.out.println(">>> about to release_oid_set: " + tempOidSet);
-					api.gss_release_oid_set(minorStatus, tempOidSet);
-					System.out.println("<<< back from release_oid_set");
+				int retval = api.gss_release_oid_set(minorStatus, tempOidSet);
+				if (retval != 0) {
+					LOGGER.warn("error while freeing mechanism OID set: " + retval + "." + minorStatus.getValue());
 				}
-				*/
 			}
 		}
 		result.append(']');
+		LOGGER.exit(result.toString());
+		return result.toString();
+	}
+
+	/**
+	 * Get all names of a OID that is a GSS mechanism.
+	 * 
+	 * @param api
+	 *                 api reference
+	 * @param mech
+	 *                 mechanism
+	 * @return string representations of the mechanism
+	 * @throws GSSException
+	 *                          if an error occurred calling a {@link GssApi}
+	 *                          function (e.g.,
+	 *                          {@link GssApi#gss_inquire_names_for_mech(IntByReference, gss_OID_desc, gss_OID_set_desc)})
+	 */
+	public static String[] getNamesForMech(GssApi api, gss_OID_desc mech) throws GSSException {
+		LOGGER.entry(api, mech);
+		IntByReference minorStatus = new IntByReference();
+		gss_OID_set_desc mechNames = new gss_OID_set_desc();
+		mechNames.count = new NativeLong(0);
+		int retval = api.gss_inquire_names_for_mech(minorStatus, mech, mechNames);
+		if (retval != 0) {
+			throw new GSSException(retval, minorStatus.getValue(), "could not get names for mech: " + mech);
+		}
+		int numNames = mechNames.count.intValue();
+		String[] result;
+		if (mechNames.elements != null) {
+			gss_OID_desc[] mechNameArray = (gss_OID_desc[]) mechNames.elements.toArray(numNames);
+			result = new String[numNames];
+			for (int i = 0; i < numNames; i++) {
+				result[i] = getOidString(api, mechNameArray[i]);
+			}
+		} else {
+			result = new String[0];
+		}
+		retval = api.gss_release_oid_set(minorStatus, mechNames);
+		if (retval != 0) {
+			throw new GSSException(retval, minorStatus.getValue(), "could not release mechanism names");
+		}
+		LOGGER.exit(result);
+		return result;
+	}
+
+	/**
+	 * Turn a major status (i.e., return value) from a {@link GssApi} call into a
+	 * string showing all parts of the error.
+	 * 
+	 * @param major
+	 *                  major error value
+	 * @return string showing error breakdown
+	 */
+	public static String decodeMajorStatus(int major) {
+		LOGGER.entry(major);
+		StringBuilder result = new StringBuilder();
+		result.append(major).append("(").append("calling=0x").append(Integer.toHexString(GSS_CALLING_ERROR(major)))
+				.append(",routine=0x").append(Integer.toHexString(GSS_ROUTINE_ERROR(major))).append(",suppl=0x")
+				.append(Integer.toHexString(GSS_SUPPLEMENTARY_ERROR(major))).append(")");
 		LOGGER.exit(result.toString());
 		return result.toString();
 	}

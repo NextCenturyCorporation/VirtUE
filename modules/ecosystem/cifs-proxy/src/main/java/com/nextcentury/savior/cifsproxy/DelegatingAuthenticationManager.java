@@ -33,7 +33,9 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 /**
- * Cache the user credentials passed to us.
+ * Wraps a real {@link AuthenticationManager}. Takes the user credentials passed
+ * to us and creates a Kerberos service ticket and caches it, so it can be used
+ * later to mount the filesystem with cifs.mount(8).
  * 
  * @author clong
  *
@@ -42,10 +44,22 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(DelegatingAuthenticationManager.class);
 
-	private AuthenticationManager amDelegate;
-	private Path cacheFile;
+	/**
+	 * The real {@link AuthenticationManager} to which we delegate.
+	 */
+	private final AuthenticationManager amDelegate;
+	/**
+	 * Where the service ticket will be stored.
+	 */
+	private final Path cacheFile;
+	/**
+	 * The instance of the {@link GssApi} to use.
+	 */
 	private GssApi gssapi = GssApi.INSTANCE;
 
+	/**
+	 * The name of the local host (e.g., "webserver").
+	 */
 	private String myhostname;
 
 	public DelegatingAuthenticationManager(AuthenticationManager amDelegate, Path cacheFile) {
@@ -58,7 +72,11 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		LOGGER.exit();
 	}
 
+	/**
+	 * Determine the local hostname and initialize it.
+	 */
 	private void initHostname() {
+		LOGGER.entry();
 		UnknownHostException exception = null;
 		try {
 			myhostname = InetAddress.getLocalHost().getHostName();
@@ -74,13 +92,16 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 			}
 		}
 		if (myhostname == null || myhostname.isEmpty()) {
-			throw new UndeclaredThrowableException(exception);
+			UndeclaredThrowableException undeclaredThrowableException = new UndeclaredThrowableException(exception);
+			LOGGER.throwing(undeclaredThrowableException);
+			throw undeclaredThrowableException;
 		}
+		LOGGER.exit();
 	}
 
 	/**
 	 * Delegates to the {@link AuthenticationManager} passed to
-	 * {@link #CachingAuthenticationManager(AuthenticationManager, String)}.
+	 * {@link #DelegatingAuthenticationManager(AuthenticationManager, String)}.
 	 * 
 	 * @throws AuthenticationServiceException
 	 *                                            if <code>authentication</code> is
@@ -104,7 +125,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		try {
 			acceptorCredential = createAcceptorCred();
 			proxyCred = getProxyCredential(serviceTicket, acceptorCredential);
-			storeCredInto(proxyCred, cacheFile);
+			storeCredInto(proxyCred, cacheFile, 1);
 		} catch (GSSException e) {
 			LOGGER.debug("got exception: " + e);
 			AuthenticationException exception = new AuthenticationCredentialsNotFoundException(
@@ -114,15 +135,33 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 			throw exception;
 		} finally {
 			if (acceptorCredential != null) {
-				// TODO
+				IntByReference minorStatus = new IntByReference();
+				int retval = gssapi.gss_release_cred(minorStatus, acceptorCredential);
+				if (retval != 0) {
+					LOGGER.warn("error while freeing acceptor credential: " + retval + "." + minorStatus.getValue());
+				}
 			}
-			// TODO clean up other creds
+			if (proxyCred != null) {
+				IntByReference minorStatus = new IntByReference();
+				int retval = gssapi.gss_release_cred(minorStatus, proxyCred);
+				if (retval != 0) {
+					LOGGER.warn("error while freeing proxy credential: " + retval + "." + minorStatus.getValue());
+				}
+			}
 		}
 		Authentication newAuth = amDelegate.authenticate(authentication);
 		LOGGER.exit(newAuth);
 		return newAuth;
 	}
 
+	/**
+	 * Create a GSS credential that can be used to accept or initiate connections.
+	 * 
+	 * @return GSS accept/initiate credential
+	 * @throws GSSException
+	 *                          if there was an error with a GSS call (e.g.,
+	 *                          {@link GssApi#gss_acquire_cred(IntByReference, gss_name_t, int, gss_OID_set_desc, int, PointerByReference, PointerByReference, IntByReference)})
+	 */
 	private gss_cred_id_t createAcceptorCred() throws GSSException {
 		LOGGER.entry();
 		IntByReference minorStatus = new IntByReference();
@@ -166,16 +205,32 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		return outputCred;
 	}
 
-	private gss_cred_id_t getProxyCredential(byte[] serviceTicket, gss_cred_id_t acceptorCredential)
+	/**
+	 * Get a GSS credential that can be used as a proxy for delegating
+	 * authentication.
+	 * 
+	 * @param serviceToken
+	 *                               the raw token sent to the server (e.g., created
+	 *                               by
+	 *                               {@link GssApi#gss_init_sec_context(IntByReference, gss_cred_id_t, PointerByReference, Pointer, gss_OID_desc, int, int, com.nextcentury.savior.cifsproxy.GssApi.gss_channel_bindings_struct, gss_buffer_desc, PointerByReference, gss_buffer_desc, IntByReference, IntByReference)})
+	 * @param acceptorCredential
+	 *                               our service credential (from
+	 *                               {@link #createAcceptorCred()})
+	 * @return a GSS proxy credential
+	 * @throws GSSException
+	 *                          * if there was an error with a GSS call (e.g.,
+	 *                          {@link GssApi#gss_accept_sec_context(IntByReference, PointerByReference, gss_cred_id_t, gss_buffer_desc, com.nextcentury.savior.cifsproxy.GssApi.gss_channel_bindings_struct, PointerByReference, PointerByReference, gss_buffer_desc, IntByReference, IntByReference, PointerByReference)})
+	 */
+	private gss_cred_id_t getProxyCredential(byte[] serviceToken, gss_cred_id_t acceptorCredential)
 			throws GSSException {
-		LOGGER.entry(serviceTicket, acceptorCredential);
+		LOGGER.entry(serviceToken, acceptorCredential);
 		GssApi gssapi = GssApi.INSTANCE;
 		IntByReference minorStatus = new IntByReference();
 		gss_buffer_desc outputToken = new gss_buffer_desc();
 
 		IntByReference retFlags = new IntByReference(0);
 		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
-		gss_buffer_desc inputToken = new gss_buffer_desc(serviceTicket);
+		gss_buffer_desc inputToken = new gss_buffer_desc(serviceToken);
 		PointerByReference delegatedCredHandle = new PointerByReference();
 		System.out.println(">>>about to call accept_sec_context");
 		PointerByReference sourceName = new PointerByReference(GssApi.GSS_C_NO_NAME);
@@ -186,15 +241,9 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 				+ GssUtils.getStringName(gssapi, plainSourceName) + "'");
 		/*
 		 * In theory you have to do this in a loop. In practice that doesn't seem to
-		 * happen. But just in case, check and warn.
+		 * ever happen. But just in case, check and warn.
 		 */
 		if (outputToken.length.longValue() != 0) {
-			// GSSException exception = new GSSException(retval, minorStatus.getValue(),
-			// "unsupported protocol (only single init/accept context packet is
-			// supported)");
-			// gssapi.gss_release_buffer(minorStatus, outputToken);
-			// LOGGER.throwing(exception);
-			// throw exception;
 			LOGGER.warn("unsupported protocol (only single init/accept context packet is supported)");
 		}
 		if (retval != 0) {
@@ -207,9 +256,22 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		return new gss_cred_id_t(delegatedCredHandle.getValue());
 	}
 
-	private void storeCredInto(Pointer acquiredCred, Path file) throws GSSException {
+	/**
+	 * Take a credential and store it in the specified file.
+	 * 
+	 * @param acquiredCred
+	 *                          the credential to store
+	 * @param file
+	 *                          the path to the file to store the credential in
+	 * @param overwriteCred
+	 *                          whether to overwrite an existing file or not (0 is
+	 *                          <code>false</code>, 1 is <code>true</code>)
+	 * @throws GSSException
+	 *                          if there was an error calling
+	 *                          {@link GssApi#gss_store_cred_into(IntByReference, Pointer, int, gss_OID_desc, int, int, gss_key_value_set, PointerByReference, IntByReference)}
+	 */
+	private void storeCredInto(Pointer acquiredCred, Path file, int overwriteCred) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
-		int overwriteCred = 1;
 		int defaultCred = 0;
 		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:" + file);
 		gss_key_value_set credStore = new gss_key_value_set();
