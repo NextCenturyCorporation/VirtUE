@@ -309,7 +309,7 @@ public class Sidebar implements VirtueChangeHandler {
 			if (useAdminColor) {
 				try {
 					Color hc = Color.decode(virtue.getColor());
-					Color bc = hc.brighter().brighter();
+					Color bc = hc.brighter();
 					colorManager.setColors(virtue.getTemplateId(), hc, bc);
 				} catch (Exception e) {
 					logger.error("failed to load color", e);
