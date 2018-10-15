@@ -206,6 +206,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		boolean clearDatabase = true;
 		try {
 			ec2.deleteSubnet(deleteSubnetRequest);
+			logger.debug("released subnet "+id);
 		} catch (Exception e) {
 			logger.debug("failed to delete subnet from AWS", e);
 		}
