@@ -203,15 +203,18 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		CidrBlockAssignment cidrAssignment = getExistingSubnetId(id);
 		String subnetId = cidrAssignment.getInfrastructureId();
 		DeleteSubnetRequest deleteSubnetRequest = new DeleteSubnetRequest(subnetId);
+		boolean clearDatabase = true;
 		try {
 			ec2.deleteSubnet(deleteSubnetRequest);
 		} catch (Exception e) {
 			logger.debug("failed to delete subnet from AWS", e);
 		}
-		try {
-			cidrRepo.deleteById(id);
-		} catch (Exception e) {
-			logger.debug("Failed to delete cidr block from database", e);
+		if (clearDatabase) {
+			try {
+				cidrRepo.deleteById(id);
+			} catch (Exception e) {
+				logger.debug("Failed to delete cidr block from database", e);
+			}
 		}
 	}
 
