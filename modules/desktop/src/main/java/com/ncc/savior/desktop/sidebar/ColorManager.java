@@ -81,4 +81,9 @@ public class ColorManager {
 	public Color getBodyColor(String id) {
 		return getColorPairForId(id).getRight();
 	}
+
+	public void setColors(String templateId, Color hc, Color bc) {
+		Pair<Color, Color> pair = Pair.of(hc, bc);
+		idToColor.put(templateId, pair);
+	}
 }

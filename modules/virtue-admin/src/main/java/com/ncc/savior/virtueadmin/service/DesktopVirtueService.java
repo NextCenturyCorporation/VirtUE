@@ -219,7 +219,7 @@ public class DesktopVirtueService {
 		for (ApplicationDefinition app : apps) {
 			appsMap.put(app.getId(), app);
 		}
-		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED);
+		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED, template.getColor());
 	}
 
 	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
@@ -230,7 +230,7 @@ public class DesktopVirtueService {
 			appsMap.put(app.getId(), app);
 		}
 		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap,
-				instance.getState());
+				instance.getState(), instance.getColor());
 	}
 
 	private VirtueUser verifyAndReturnUser() {

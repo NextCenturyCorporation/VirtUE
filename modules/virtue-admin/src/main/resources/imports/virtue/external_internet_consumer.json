@@ -1,9 +1,10 @@
 {
-    "name": "External Internet Consumer",
-    "version": "1.0",
-    "enabled": true,
-    "awsTemplateName": "default-template",
-    "virtualMachineTemplateIds": [
-      "IMPORT_external_internet_consumer"
-    ]
-  }
+	"name": "External Internet Consumer",
+	"version": "1.0",
+	"enabled": true,
+	"awsTemplateName": "default-template",
+	"color": "#CC4C02",
+	"virtualMachineTemplateIds": [
+		"IMPORT_external_internet_consumer"
+	]
+}
