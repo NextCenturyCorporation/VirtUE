@@ -13,16 +13,13 @@ public class JnaUtils {
 	private JnaUtils() {
 	}
 
-	static public Memory newMemory(String value) {
-		return newMemory(value, value.length() + 1);
-	}
-
-	static public Memory newMemory(String value, int length) {
-		Memory memory = new Memory(length);
-		memory.setString(0, value);
-		return memory;
-	}
-
+	/**
+	 * Allocate a new {@link Memory} object containing exactly the passed bytes.
+	 * 
+	 * @param bytes
+	 *                  what to fill the memory object with
+	 * @return a new, populated {@link Memory} object
+	 */
 	static public Memory newMemory(byte... bytes) {
 		Memory memory = new Memory(bytes.length);
 		memory.write(0, bytes, 0, bytes.length);

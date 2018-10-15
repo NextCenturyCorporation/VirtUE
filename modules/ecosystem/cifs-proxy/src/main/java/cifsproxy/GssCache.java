@@ -1,14 +1,8 @@
 package cifsproxy;
 
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 
 import com.nextcentury.savior.cifsproxy.GssApi;
-import com.nextcentury.savior.cifsproxy.GssUtils;
 import com.nextcentury.savior.cifsproxy.GssApi.GssCredentialUsage;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_desc;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_OID_set_desc;
@@ -17,6 +11,7 @@ import com.nextcentury.savior.cifsproxy.GssApi.gss_cred_id_t;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_element;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_set;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_name_t;
+import com.nextcentury.savior.cifsproxy.GssUtils;
 import com.nextcentury.savior.cifsproxy.JnaUtils;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -25,8 +20,21 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
+/**
+ * This class demonstrates how to call many of the GSSAPI functions (from
+ * {@link GssApi}). It is not used in the production system.
+ * 
+ * @author clong
+ *
+ */
 public class GssCache {
 
+	/**
+	 * No args are used.
+	 * 
+	 * @param args
+	 * @throws GSSException
+	 */
 	public static void main(String[] args) throws GSSException {
 		Native.setProtected(true);
 		GssApi gssapi = GssApi.INSTANCE;
@@ -35,17 +43,24 @@ public class GssCache {
 		Pointer gssTargetName = importName(gssapi, minorStatus);
 
 		gss_cred_id_t initCred = GssApi.GSS_C_NO_CREDENTIAL;
-		System.out.println("Look, no init!");
 		gss_buffer_desc outputToken = initSecContext(gssapi, minorStatus, gssTargetName, initCred);
 
-		System.out.println("Look, no accept!");
 		// acceptSecContext(gssapi, outputToken);
 
 		Pointer acquiredCred = acquireCred(gssapi, minorStatus);
 		storeCredInto(gssapi, minorStatus, acquiredCred);
-		System.out.println("Done");
 	}
 
+	/**
+	 * Example of calling
+	 * {@link GssApi#gss_accept_sec_context(IntByReference, PointerByReference, gss_cred_id_t, gss_buffer_desc, com.nextcentury.savior.cifsproxy.GssApi.gss_channel_bindings_struct, PointerByReference, PointerByReference, gss_buffer_desc, IntByReference, IntByReference, PointerByReference)}
+	 * 
+	 * @param gssapi
+	 * @param clientToken
+	 *                        raw token passed to the "server" (e.g., obtained from
+	 *                        {@link GssApi#gss_init_sec_context(IntByReference, gss_cred_id_t, PointerByReference, Pointer, gss_OID_desc, int, int, com.nextcentury.savior.cifsproxy.GssApi.gss_channel_bindings_struct, gss_buffer_desc, PointerByReference, gss_buffer_desc, IntByReference, IntByReference)})
+	 * @throws GSSException
+	 */
 	private static void acceptSecContext(GssApi gssapi, gss_buffer_desc clientToken) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
 		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
@@ -65,6 +80,15 @@ public class GssCache {
 		System.out.println("credential acquired");
 	}
 
+	/**
+	 * Example of calling
+	 * {@link GssApi#gss_acquire_cred(IntByReference, gss_name_t, int, gss_OID_set_desc, int, PointerByReference, PointerByReference, IntByReference)}
+	 * 
+	 * @param gssapi
+	 * @param minorStatus
+	 * @return
+	 * @throws GSSException
+	 */
 	private static Pointer acquireCred(GssApi gssapi, IntByReference minorStatus) throws GSSException {
 		gss_name_t desiredName = GssApi.GSS_C_NO_NAME;
 		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
@@ -76,8 +100,6 @@ public class GssCache {
 		desiredMechs.elements.elements = GssApi.MECH_KRB5.elements;
 		PointerByReference acquiredCredHandle = new PointerByReference();
 		Pointer actualMechsPtr = new Pointer(0);
-		PointerByReference actualMechsHandle = new PointerByReference(actualMechsPtr);
-		IntByReference retTime = new IntByReference();
 		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs,
 				GssCredentialUsage.GSS_C_INITIATE.getValue(), acquiredCredHandle, null, null);
 		if (retval != 0) {
@@ -88,6 +110,17 @@ public class GssCache {
 		return acquiredCredHandle.getValue();
 	}
 
+	/**
+	 * Example of calling
+	 * {@link GssApi#gss_init_sec_context(IntByReference, gss_cred_id_t, PointerByReference, Pointer, gss_OID_desc, int, int, com.nextcentury.savior.cifsproxy.GssApi.gss_channel_bindings_struct, gss_buffer_desc, PointerByReference, gss_buffer_desc, IntByReference, IntByReference)}
+	 * 
+	 * @param gssapi
+	 * @param minorStatus
+	 * @param gssTargetName
+	 * @param initCred
+	 * @return
+	 * @throws GSSException
+	 */
 	private static gss_buffer_desc initSecContext(GssApi gssapi, IntByReference minorStatus, Pointer gssTargetName,
 			gss_cred_id_t initCred) throws GSSException {
 		gss_buffer_desc inputToken = new gss_buffer_desc();
@@ -109,6 +142,15 @@ public class GssCache {
 		return outputToken;
 	}
 
+	/**
+	 * Example of calling
+	 * {@link GssApi#gss_import_name(IntByReference, gss_buffer_desc, gss_OID_desc, PointerByReference)}
+	 * 
+	 * @param gssapi
+	 * @param minorStatus
+	 * @return
+	 * @throws GSSException
+	 */
 	private static Pointer importName(GssApi gssapi, IntByReference minorStatus) throws GSSException {
 		Pointer gssTargetName;
 		gss_buffer_desc targetName = new gss_buffer_desc();
@@ -130,6 +172,15 @@ public class GssCache {
 
 	}
 
+	/**
+	 * Example of calling
+	 * {@link GssApi#gss_store_cred_into(IntByReference, Pointer, int, gss_OID_desc, int, int, gss_key_value_set, PointerByReference, IntByReference)}
+	 * 
+	 * @param gssapi
+	 * @param minorStatus
+	 * @param acquiredCred
+	 * @throws GSSException
+	 */
 	private static void storeCredInto(GssApi gssapi, IntByReference minorStatus, Pointer acquiredCred)
 			throws GSSException {
 		int overwriteCred = 1;
@@ -151,54 +202,4 @@ public class GssCache {
 		}
 		System.out.println("credential stored");
 	}
-
-	private static final Oid KERB_V5_OID;
-	static {
-		Oid tempOid;
-		try {
-			tempOid = new Oid("1.2.840.113554.1.2.2");
-		} catch (GSSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			tempOid = null;
-		}
-		KERB_V5_OID = tempOid;
-	}
-
-	@SuppressWarnings("unused")
-	private void dummy() throws GSSException {
-		System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-
-		GSSManager manager = GSSManager.getInstance();
-
-		GSSName clientName = manager.createName("clong@HQ.NEXTCENTURY.COM", GSSName.NT_USER_NAME);
-		GSSCredential clientCred = manager.createCredential(clientName, 8 * 3600, createKerberosOid(),
-				GSSCredential.INITIATE_ONLY);
-
-		GSSName serverName = manager.createName("cifs/WS9@HQ.NEXTCENTURY.COM", GSSName.NT_HOSTBASED_SERVICE);
-
-		GSSContext context = manager.createContext(serverName, createKerberosOid(), clientCred,
-				GSSContext.DEFAULT_LIFETIME);
-		context.requestMutualAuth(true);
-		context.requestConf(false);
-		context.requestInteg(true);
-
-		byte[] outToken = context.initSecContext(new byte[0], 0, 0);
-
-		Memory rawToken = new Memory(outToken.length);
-		System.out.println("context exported");
-
-		IntByReference minorStatus = new IntByReference();
-		gss_buffer_desc buffer = new gss_buffer_desc();
-		// buffer.value = rawContextBytes;
-		// buffer.length = new NativeLong(contextBytes.length);
-		PointerByReference contextHandle = new PointerByReference();
-		// GssApi.INSTANCE.gss_import_sec_context(minorStatus, buffer, contextHandle);
-		System.out.println("context imported");
-	}
-
-	private static Oid createKerberosOid() {
-		return KERB_V5_OID;
-	}
-
 }
