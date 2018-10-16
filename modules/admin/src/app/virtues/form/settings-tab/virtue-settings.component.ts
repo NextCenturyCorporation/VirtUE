@@ -327,6 +327,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.updateNetworkPermsTable();
   }
 
+  /**
+   * #uncommented
+   */
   removeNetwork(idx: number): void {
     this.item.networkWhiteList.splice(idx, 1);
     this.updateNetworkPermsTable();
