@@ -75,7 +75,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent<Virtue>;
 
   /** a table to display the network permissions granted to this Virtue */
-  @ViewChild('netWorkPermsTable') private netWorkPermsTable: GenericTableComponent<NetworkPermission>;
+  @ViewChild('networkPermsTable') private networkPermsTable: GenericTableComponent<NetworkPermission>;
 
   /** a table to display the file system permissions of this Virtue */
   @ViewChild('fileSysPermsTable') private fileSysPermsTable: GenericTableComponent<FileSysPermission>;
