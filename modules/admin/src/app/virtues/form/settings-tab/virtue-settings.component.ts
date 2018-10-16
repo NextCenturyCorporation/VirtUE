@@ -299,11 +299,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
    */
   setUpNetworkPermsTable(): void {
-    if (this.netWorkPermsTable === undefined) {
+    if (this.networkPermsTable === undefined) {
       return;
     }
 
-    this.netWorkPermsTable.setUp({
+    this.networkPermsTable.setUp({
       cols: this.getNetworkColumns(),
       filters: [],
       tableWidth: 0.85,
@@ -316,7 +316,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   * Once data has been pulled, fill in the table with
   */
   updateNetworkPermsTable(): void {
-    this.netWorkPermsTable.populate(this.item.networkWhiteList);
+    this.networkPermsTable.populate(this.item.networkWhiteList);
   }
 
   /**
