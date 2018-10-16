@@ -1,5 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+import { Column, SORT_DIR } from '../models/column.model';
+import { TableElement } from '../models/tableElement.model';
 /**
  * @class
  * This class filters, sorts, and returns a list based on input parameters.
@@ -15,18 +17,20 @@ import { Pipe, PipeTransform } from '@angular/core';
  *              stuff, {{i.getName()}}, whatever
  *            </div>
  *
- * Note that filtering removes anything that *doesn't*
+ * Note that filtering removes anything that *doesn't* match the filtering function
+ *
+ * So far, this is only used in [[GenericFormComponent]]s
  *
  */
 @Pipe({
   name: 'listFilterSort'
 })
-export class ListFilterPipe implements PipeTransform {
+export class ListFilterPipe<T> implements PipeTransform {
 
   /**
-   * @param list the list to be filtered.
-   * @param sortColumn the name of the attribute in each table element, which the list should be sorted on.
-   * @param sortDirection the direction in which the list should be sorted. Should be either 'asc' or 'desc'
+   * @param list the list to be filtered. Holds TableElements.
+   * @param formatElement a function to return a string for each element of the list, to be used when sorting.
+   * @param sortDirection the direction in which the list should be sorted. Should be either ASC or DESC
    * @param filterColumn the name of the attribute in each table element which should be used, when applying the filter.
    * @param filterCondition a function that returns true if the item, with its given attribute, should remain in the list.
    *    Defined in the component that defined the GenericTableComponent.
@@ -38,17 +42,17 @@ export class ListFilterPipe implements PipeTransform {
    *
    * @return
    */
-  transform(list: any[],
-            sortColumn: string, sortDirection: string,
+  transform(list: TableElement<T>[],
+            formatElement: (obj: any) => string, sortDirection: SORT_DIR,
             filterColumn: string, filterCondition: ((attribute) => boolean),
             update: boolean
-  ): any[] {
+  ): TableElement<T>[] {
     if (list.length < 2) {
       return list;
     }
 
     // this sorts list in-place, and so doesn't need to return anything.
-    this.sortList(list, sortColumn, sortDirection);
+    this.sortList(list, formatElement, sortDirection);
 
     // filterList actually returns a new list, and so its return value must be saved.
     return this.filterList(list, filterColumn, filterCondition)
@@ -65,9 +69,9 @@ export class ListFilterPipe implements PipeTransform {
    *
    * @return the list, filtered
    */
-  filterList(list: any[], filterColumn: string, filterCondition: ((attribute) => boolean)): any[] {
+  filterList(list: TableElement<T>[], filterColumn: string, filterCondition: ((attribute) => boolean)): TableElement<T>[] {
 
-    let filteredList = list.filter(element => filterCondition(element[filterColumn]));
+    let filteredList = list.filter(element => filterCondition(element.obj[filterColumn]));
 
     return filteredList;
   }
@@ -76,15 +80,15 @@ export class ListFilterPipe implements PipeTransform {
    * Sorts a input list in-place, based on given paramters.
    *
    * @param list the list to be filtered.
-   * @param sortColumn the name of the attribute in each table element, which the list should be sorted on.
-   * @param sortDirection the direction in which the list should be sorted. Should be either 'asc' or 'desc'
+   * @param formatElement the name of the attribute in each table element, which the list should be sorted on.
+   * @param sortDirection the direction in which the list should be sorted. Should be either ASC or DESC
    */
-  sortList(list: any[], propertyName: string, sortDirection: string): void {
+  sortList(list: TableElement<T>[], formatElement: (obj: any) => string, sortDirection: SORT_DIR): void {
 
-    if (sortDirection === 'desc') {
+    if (sortDirection === SORT_DIR.DESC) {
       list.sort((leftSide, rightSide): number => {
-        let left = leftSide[propertyName];
-        let right = rightSide[propertyName];
+        let left = formatElement(leftSide.obj);
+        let right = formatElement(rightSide.obj);
         if (typeof left === 'string') {
           left = left.toUpperCase();
         }
@@ -101,8 +105,8 @@ export class ListFilterPipe implements PipeTransform {
       });
     } else {
       list.sort((leftSide, rightSide): number => {
-        let left = leftSide[propertyName];
-        let right = rightSide[propertyName];
+        let left = formatElement(leftSide.obj);
+        let right = formatElement(rightSide.obj);
         if (typeof left === 'string') {
           left = left.toUpperCase();
         }

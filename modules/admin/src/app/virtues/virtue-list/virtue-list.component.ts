@@ -8,7 +8,10 @@ import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
 import { VirtualMachine } from '../../shared/models/vm.model';
 import { Virtue } from '../../shared/models/virtue.model';
-import { Column } from '../../shared/models/column.model';
+import {  Column,
+          TextColumn,
+          ListColumn,
+          SORT_DIR  } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -65,22 +68,22 @@ export class VirtueListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',        'Template Name',      2, 'asc',      this.formatName, undefined, (i: Item) => this.viewItem(i)),
-      new Column('vms',         'Virtual Machines',   2, undefined,  this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
-      new Column('apps',        'Applications',       2, undefined,  this.formatName, this.getGrandchildren),
-      new Column('lastEditor',  'Last Editor',        2, 'asc'),
-      new Column('version',     'Version',            1, 'asc'),
-      new Column('modDate',     'Modification Date',  2, 'desc'),
-      new Column('enabled',      'Status',             1, 'asc', this.formatStatus)
+      new TextColumn('Template Name',     2, (v: Virtue) => v.getName(), SORT_DIR.ASC,  (i: Item) => this.viewItem(i), () => this.getSubMenu()),
+      new ListColumn('Virtual Machines',  2, this.getChildren,      this.formatName,    (i: Item) => this.viewItem(i)),
+      new ListColumn('Applications',      2, this.getGrandchildren, this.formatName),
+      new TextColumn('Last Editor',       2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),
+      new TextColumn('Version',           1, (v: Virtue) => String(v.version),  SORT_DIR.ASC),
+      new TextColumn('Modification Date', 2, (v: Virtue) => v.modDate,          SORT_DIR.DESC),
+      new TextColumn('Status',            1, this.formatStatus,                 SORT_DIR.ASC)
     ];
   }
 
   /**
-   * Overrides parent, [[GenericListComponent.hasColoredLabels]]
-   * @return always true
+   * add colors to the table defined in [[GenericListComponent]], since here it will be showing Virtues.
    */
-  hasColoredLabels(): boolean {
-    return true;
+  customizeTableParams(params): void {
+    params['coloredLabels'] = true;
+    params['getColor'] = (v: Virtue) => v.color;
   }
 
   /**

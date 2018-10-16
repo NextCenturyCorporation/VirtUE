@@ -12,9 +12,17 @@ import { ItemService } from '../../../shared/services/item.service';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../../shared/models/item.model';
+import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
-import { Column } from '../../../shared/models/column.model';
+
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../../shared/models/column.model';
+
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
@@ -43,7 +51,7 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
 export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
   /** A table listing what users have been given access to this Virtue template */
-  @ViewChild('parentTable') private parentTable: GenericTableComponent;
+  @ViewChild('parentTable') private parentTable: GenericTableComponent<User>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
@@ -94,18 +102,19 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     if (changes.mode) {
       this.setMode(changes.mode);
       this.parentTable.colData = this.getParentColumns();
-      this.parentTable.subMenuOptions = this.getParentSubMenu();
+      // this.parentTable.subMenuOptions = this.getParentSubMenu();
     }
 
     if (changes.allUsers) {
+      let items: Item[] = [];
       let allUsers: DictList<Item> = changes.allUsers;
-      this.parentTable.items = [];
 
       for (let u of allUsers.asList()) {
         if (u.children.has(this.item.getID())) {
-          this.parentTable.items.push(u);
+          items.push(u);
         }
       }
+      this.parentTable.populate(items);
     }
 
   }
@@ -115,19 +124,13 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
    *         Links to the parent and the parent's children should only be clickable if not in view mode.
    */
   getParentColumns(): Column[] {
-    let cols = [
-      new Column('enabled',      'Account Status',   4, 'desc',    this.formatStatus)
+    return [
+      new TextColumn('Username',  3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                               () => this.getParentSubMenu()),
+      new ListColumn<Item>('Attached Virtues', 5, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)),
+      new TextColumn('Status',  4, this.formatStatus, SORT_DIR.ASC)
     ];
 
-    if (this.mode === Mode.VIEW) {
-      cols.unshift(new Column('childNames',  'Attached Virtues', 5, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)));
-      cols.unshift(new Column('name',        'Username',         3, 'asc',     undefined,       undefined, (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new Column('childNames',  'Attached Virtues', 5, undefined, this.formatName, this.getChildren));
-      cols.unshift(new Column('name',        'Username',         3, 'asc'));
-    }
-    return cols;
   }
 
   /**
@@ -137,8 +140,8 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   getParentSubMenu(): SubMenuOptions[] {
     if (this.mode === Mode.VIEW) {
       return [
-        new SubMenuOptions("View", () => true, (i: Item) => this.viewItem(i)),
-        new SubMenuOptions("Edit", () => true, (i: Item) => this.editItem(i))
+        new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
+        new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i))
       ];
     }
     else {
@@ -154,12 +157,11 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   setUpParentTable(): void {
     this.parentTable.setUp({
       cols: this.getParentColumns(),
-      opts: this.getParentSubMenu(),
-      coloredLabels: false,
       filters: [],
       tableWidth: 8,
       noDataMsg: "No users have been assigned this Virtue at the moment.",
-      hasCheckBoxes: false
+      elementIsDisabled: (u: User) => !u.enabled,
+      editingEnabled: () => !this.inViewMode()
     });
   }
 
