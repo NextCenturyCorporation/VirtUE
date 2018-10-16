@@ -168,7 +168,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
       // opts: this.getParentSubMenu(),
       coloredLabels: true,
       filters: [],
-      tableWidth: 8,
+      tableWidth: 0.66,
       noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
       elementIsDisabled: (v: Virtue) => !v.enabled,
       editingEnabled: () => !this.inViewMode()

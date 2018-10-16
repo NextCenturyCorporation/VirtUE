@@ -239,7 +239,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       cols: this.getPrinterColumns(),
       coloredLabels: true,
       filters: [],
-      tableWidth: 12,
+      tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
       editingEnabled: () => !this.inViewMode()
     });
@@ -306,7 +306,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.netWorkPermsTable.setUp({
       cols: this.getNetworkColumns(),
       filters: [],
-      tableWidth: 10,
+      tableWidth: 0.85,
       noDataMsg: "This Virtue has not been granted permission to access any network",
       editingEnabled: () => !this.inViewMode()
     });
@@ -412,7 +412,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.fileSysPermsTable.setUp({
       cols: this.getFileSysColumns(),
       filters: [],
-      tableWidth: 10,
+      tableWidth: 0.85,
       noDataMsg: "No file systems have been set up in the global settings",
       elementIsDisabled: (fs: FileSysPermission) => !fs.enabled,
       editingEnabled: () => !this.inViewMode()
@@ -470,7 +470,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       coloredLabels: true,
       getColor: (v: Virtue) => v.color,
       filters: [],
-      tableWidth: 10,
+      tableWidth: 0.85,
       noDataMsg: this.getNoPasteDataMsg(),
       elementIsDisabled: (v: Virtue) => !v.enabled,
       editingEnabled: () => !this.inViewMode()
@@ -531,13 +531,40 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * probably not.
    */
   activateDefaultBrowserVirtueModal(): void {
-    this.activateVirtueSelectionModal(
+    // this.activateVirtueSelectionModal(
+    this.activateModal_new(
+      this.getVirtueSelectionParams(
         [this.item.defaultBrowserVirtue],
         (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
         SelectionMode.SINGLE
-    );
+      )
+     );
   }
 
+  /**
+   * this defines the parameters for a modal through which the user can select one or more Virtues, and have those selections be passed to some
+   * caller-defined function when the user hits 'Submit'.
+   *
+   * @param currentSelection A list of virtue IDs, that should be marked as 'selected' when the modal gets initialized.
+   * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
+   * @param selectionMode Optional. Can be either SelectionMode.MULTI or SelectionMode.SINGLE, but defaults to MULTI
+   *                      if not given.
+   */
+  getVirtueSelectionParams(
+      currentSelection: string[],
+      onComplete: ((selectedVirtues: string[]) => void),
+      selectionMode?: SelectionMode
+    ) {
+        return  {
+            modalClass: VirtueModalComponent,
+            emitterName: "getSelections",
+            inData: {
+              selectionMode: selectionMode,
+              selectedIDs: currentSelection
+            },
+            onComplete: onComplete
+          }
+    }
 
   /**
    * this brings up a modal through which the user can select one or more Virtues, and have those selections be passed to some
@@ -558,8 +585,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
         onComplete: ((selectedVirtues: string[]) => void),
         selectionMode?: SelectionMode
   ): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
+    let dialogHeight = Math.floor(window.screen.height * 0.7);
+    let dialogWidth = Math.floor(window.screen.width * 0.7);
 
     if (selectionMode === undefined) {
       selectionMode = SelectionMode.MULTI;
@@ -591,9 +618,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     () => { // when finished
       sub.unsubscribe();
     });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
+    dialogRef.updatePosition({ top: '5%'});
 
   }
 

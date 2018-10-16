@@ -13,6 +13,7 @@ import { Mode } from '../../../abstracts/gen-form/mode.enum';
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
 
+import { VirtueModalComponent } from '../../../../modals/virtue-modal/virtue-modal.component';
 
 /**
  * @class
@@ -102,6 +103,21 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     }
   }
 
+  activateModal() {
+
+    this.activateModal_new(
+          {
+            modalClass: VirtueModalComponent,
+            emitterName: "getSelections",
+            inData: {
+              name: this.item.getName(), // this currently isn't used; see [[GenericModalComponent]]
+              selectedIDs: this.item.childIDs
+            },
+            onComplete: (selectedItems) => {this.onChildrenChange.emit(selectedItems);}
+          }
+        )
+  }
+
   /**
    * this brings up the subclass-defined-modal to add/remove children.
    *
@@ -109,9 +125,9 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    * This pops up to display options, or a selectable table, or something. DialogsComponent just checks
    * potentially dangerous user actions.
    */
-  activateModal(): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
+  activateModal2(): void {
+    let dialogHeight = Math.floor(window.screen.height * 0.7);
+    let dialogWidth = Math.floor(window.screen.width * 0.7);
 
     let params = {
       height: dialogHeight + 'px',
@@ -135,7 +151,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     });
     let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
+    dialogRef.updatePosition({ top: '5%' });
 
   }
 
@@ -147,7 +163,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     return {
       cols: this.getColumns(),
       filters: [], // don't enable filtering by status on the form's child table.
-      tableWidth: 9,
+      tableWidth: 0.75,
       noDataMsg: this.getNoDataMsg(),
       elementIsDisabled: (i: Item) => !i.enabled,
       editingEnabled: () => !this.inViewMode()
@@ -215,12 +231,12 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   abstract getNoDataMsg(): string;
 
   /**
-   * Define the default table width, as a # of twefths-of-the-parent-space.
+   * Define the default table width, as a fraction of the screen space.
    * The tables don't need to take up the full screen width, they're usually pretty sparse.
    * Can be overridden if necessary though.
    */
   getTableWidth(): number {
-    return 9;
+    return 0.75;
   }
 
   /**

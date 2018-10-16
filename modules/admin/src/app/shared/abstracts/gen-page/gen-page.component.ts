@@ -171,4 +171,50 @@ export abstract class GenericPageComponent {
       sub.unsubscribe();
     });
   }
+
+
+
+  /**
+   * this wrapper brings up a modal of a supplied type, passing along input data.
+   * When the emitter whose name was passed in emits a value, pass the value to the supplied onComplete function.
+   *
+   * This function really just exists so all the modals are the same size and position, and to abstract away all the boilerplate, so it doesn't
+   * have to be repeated everywhere a modal can be created.
+   *
+   * #uncommented
+   *
+   * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
+   */
+  activateModal_new(
+        params: {
+          modalClass: any,
+          emitterName: string,
+          inData: {},
+          onComplete: (any) => void
+        }
+  ): void {
+    let dialogHeight = Math.floor(window.screen.height * 0.7);
+    let dialogWidth = Math.floor(window.screen.width * 0.7);
+
+    let dialogRef = this.dialog.open( params.modalClass,  {
+      height: dialogHeight + 'px',
+      width: dialogWidth + 'px',
+      data: params.inData
+    });
+    console.log(params.emitterName);
+    console.log(dialogRef.componentInstance);
+    let sub = dialogRef.componentInstance[params.emitterName].subscribe((returnedData) => {
+      params.onComplete(returnedData);
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%'});
+
+  }
+
 }

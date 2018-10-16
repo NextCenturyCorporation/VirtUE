@@ -194,7 +194,7 @@ const routes: Routes = [
  * This class handles the routing to the main pages of the application.
  */
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {useHash: true})],
   // imports: [RouterModule.forRoot(routes, {
   //   useHash: true
   // })],

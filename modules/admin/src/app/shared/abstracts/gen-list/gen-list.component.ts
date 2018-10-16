@@ -102,7 +102,7 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
     return {
       cols: this.getColumns(),
       filters: this.getTableFilters(),
-      tableWidth: 12,
+      tableWidth: 1,
       noDataMsg: this.getNoDataMsg(),
       elementIsDisabled: (i: Item) => !i.enabled
     };

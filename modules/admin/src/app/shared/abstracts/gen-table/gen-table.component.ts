@@ -71,7 +71,7 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 @Component({
   selector: 'app\-table',
   templateUrl: './gen-table.component.html',
-  styleUrls: ['../gen-page/gen-page.component.css']
+  styleUrls: ['../gen-page/gen-page.component.css', './gen-table.component.css']
 })
 export class GenericTableComponent<T> {
 
@@ -124,7 +124,7 @@ export class GenericTableComponent<T> {
   /** The message that should show up intead of any table data, when [[elements]] is undefined or empty. */
   noDataMessage: string;
 
-  /** How much of the parent space should the table take up, expressed in 1/12's (e.g., must be between 1 and 12, inclusive) */
+  /** the fraction of the parent space should the table take up, from 0.01-1.00, inclusive. */
   tableWidth: number;
 
   /** The column which should the table should be sorted by */
@@ -183,7 +183,7 @@ export class GenericTableComponent<T> {
     this.filterOptions = [];
     this.elements = [];
     // this.subMenuOptions = [];
-    this.tableWidth = 12; // default to take up full space in container
+    this.tableWidth = 1; // default to take up full space in container
     this.selectionMode = SelectionMode.OFF;
   }
 
@@ -250,7 +250,7 @@ export class GenericTableComponent<T> {
     this.filterOptions = params.filters;
     this.noDataMessage = params.noDataMsg;
 
-    if ((params.tableWidth >= 1 && params.tableWidth <= 12)) {
+    if ((params.tableWidth >= 0.01 && params.tableWidth <= 1)) {
       this.tableWidth = params.tableWidth;
     }
 

@@ -53,6 +53,9 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   /** A table listing what users have been given access to this Virtue template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent<User>;
 
+  /** #uncommented */
+  @ViewChild('usageTable') private usageTable: GenericTableComponent<Number>;
+
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
@@ -73,6 +76,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   init(mode: Mode): void {
     this.setMode(mode);
     this.setUpParentTable();
+    this.setUpUsageTable();
   }
 
   /**
@@ -158,9 +162,24 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     this.parentTable.setUp({
       cols: this.getParentColumns(),
       filters: [],
-      tableWidth: 8,
+      tableWidth: 0.66,
       noDataMsg: "No users have been assigned this Virtue at the moment.",
       elementIsDisabled: (u: User) => !u.enabled,
+      editingEnabled: () => !this.inViewMode()
+    });
+  }
+
+  /**
+   * Sets up the table of parents
+   *
+   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+   */
+  setUpUsageTable(): void {
+    this.usageTable.setUp({
+      cols: [],
+      filters: [],
+      tableWidth: 0.66,
+      noDataMsg: "Not yet implemented",
       editingEnabled: () => !this.inViewMode()
     });
   }
