@@ -360,8 +360,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       return false;
     }
 
-    if ( !netPerm.destination|| !netPerm.protocol
-      || !netPerm.localPort  || !netPerm.remotePort ) {
+    if ( !netPerm.destination || !netPerm.protocol
+      || !netPerm.localPort   || !netPerm.remotePort ) {
       console.log("Network permission fields cannot be blank");
       return false;
     }
@@ -448,7 +448,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   getPasteColumns(): Column[] {
     return [
       new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
-                                                                                        ()=> this.getPasteSubMenu()),
+                                                                                        () => this.getPasteSubMenu()),
       new ListColumn<Item>('Available Applications', 4, this.getGrandchildren,  this.formatName),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
@@ -613,7 +613,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     dialogRef.updatePosition({ top: '5%', left: String(Math.floor(50 - wPercentageOfScreen / 2)) + '%' });
 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
-      if(newColor !== "") {
+      if (newColor !== "") {
         this.item.color = newColor;
       }
     },

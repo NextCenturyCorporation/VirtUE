@@ -92,29 +92,6 @@ export class GenericTableComponent<T> {
   hasColoredLabels: boolean;
 
   /**
-   * The filter options that appear above the table; each has text which the option's label, and
-   * a value which the status of the [[TableElement]] must match for that filter.
-   * Should be made generic and allow filtering on any column.
-   * Filters should be made into their own class as well, when that change happens.
-   *
-   * See note on [[GenericListComponent.getTableFilters]]().
-   */
-  filterOptions: {text: string, value: string}[];
-
-  /**
-   * This is the name of the attribute of the objects held by this table's TableElements that the filter should be applied to.
-   * So if this table shows Users, and you want to filter out all Users that don't have a certain username, then this should
-   * be 'name' to apply the filter using each User's 'name' value.
-   * Currently only the status/enabled column can be filtered on.
-   */
-  filterColumnName: string = 'enabled';
-
-  /** The current value the table should be filtered by - only matching elements are displayed. */
-  filterValue: string = '*';
-
-  filterCondition = (attribute: any) => {return String(attribute) === this.filterValue || this.filterValue === '*'};
-
-  /**
    * Call to re-render the table on a change to filterValue.
    * this just gets toggled, and is passed into the listFilterSort pipe, where it is ignored.
    * The fact that its value changes though, makes angular re-render the table, filtering it based on the currect criteria.
@@ -148,6 +125,36 @@ export class GenericTableComponent<T> {
    */
   equals?: (obj1: T, obj2: T) => boolean;
 
+
+  /**
+   * Holds the object within a selected TableElement, if the table is in SINGLE selection mode.
+   */
+  selectedObj: T;
+
+  /**
+   * The filter options that appear above the table; each has text which the option's label, and
+   * a value which the status of the [[TableElement]] must match for that filter.
+   * Should be made generic and allow filtering on any column.
+   * Filters should be made into their own class as well, when that change happens.
+   *
+   * See note on [[GenericListComponent.getTableFilters]]().
+   */
+  filterOptions: {text: string, value: string}[];
+
+  /**
+   * This is the name of the attribute of the objects held by this table's TableElements that the filter should be applied to.
+   * So if this table shows Users, and you want to filter out all Users that don't have a certain username, then this should
+   * be 'name' to apply the filter using each User's 'name' value.
+   * Currently only the status/enabled column can be filtered on.
+   */
+  filterColumnName: string = 'enabled';
+
+  /** The current value the table should be filtered by - only matching elements are displayed. */
+  filterValue: string = '*';
+
+  /** #uncommented */
+  filterCondition = (attribute: any) => String(attribute) === this.filterValue || this.filterValue === '*';
+
   /**
    * A caller-overrideable function for defining whether the interactable components of columns in this table should be disabled, given
    * some caller-defined table state. Default is a function that returns false - disabling most interactable html objects.
@@ -155,11 +162,6 @@ export class GenericTableComponent<T> {
    * through their own "shouldAppear" function.
    */
   editingEnabled: (() => boolean) = () => false;
-
-  /**
-   * Holds the object within a selected TableElement, if the table is in SINGLE selection mode.
-   */
-  selectedObj: T;
 
   /**
    * a caller-defined function that returns true iff a row should be shown as 'disabled' - greyed out, and unselectable, based on the

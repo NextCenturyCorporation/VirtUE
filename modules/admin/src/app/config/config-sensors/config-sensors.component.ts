@@ -25,7 +25,7 @@ class Sensor {
   constructor (
     public name: string,
     public level: VigilenceLevel
-  ){}
+  ) { }
 }
 
 /**

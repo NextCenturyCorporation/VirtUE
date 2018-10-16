@@ -63,7 +63,8 @@ export class UserListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Username',           3, (i: Item) => i.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i), () => this.getSubMenu()),
+      new TextColumn('Username',           3, (i: Item) => i.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                                () => this.getSubMenu()),
       new ListColumn('Available Virtues',  4, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Authorized Roles',   3, this.formatRoles, SORT_DIR.ASC),
       new TextColumn('Account Status',     2, this.formatStatus, SORT_DIR.DESC)

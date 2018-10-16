@@ -55,7 +55,7 @@ export class ListFilterPipe<T> implements PipeTransform {
     this.sortList(list, formatElement, sortDirection);
 
     // filterList actually returns a new list, and so its return value must be saved.
-    return this.filterList(list, filterColumn, filterCondition)
+    return this.filterList(list, filterColumn, filterCondition);
   }
 
   /**

@@ -77,7 +77,7 @@ abstract class LinkableColumn extends Column {
  */
 interface Sortable {
   /** A function that returns a string representing the given object, which this column should use when sorting the objects. */
-  sortField: (elem: any) => string
+  sortField: (elem: any) => string;
 }
 
 /**
@@ -180,7 +180,7 @@ export class DropdownColumn<E> extends Column implements Sortable {
      * A function that returns a string representing the given object, which this column should use when sorting the objects.
      */
     public sortField: (elem: any) => string
-  ){
+  ) {
     super(label, width);
   }
 }
