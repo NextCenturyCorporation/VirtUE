@@ -130,7 +130,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     });
 
     this.mainTab.onStatusChange.subscribe((newStatus) => {
-      if( this.mode === Mode.VIEW ) {
+      if ( this.mode === Mode.VIEW ) {
         this.toggleItemStatus(this.item);
       }
     });

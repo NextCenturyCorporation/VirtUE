@@ -197,7 +197,7 @@ export class DashboardComponent extends GenericListComponent {
       let staticSub = this.sensingService.getStaticList().subscribe(staticData => {
         this.sensorData = staticData[0].sensors;
       },
-      () => { //on error
+      () => {// on error
         staticSub.unsubscribe();
       },
       () => {// on complete

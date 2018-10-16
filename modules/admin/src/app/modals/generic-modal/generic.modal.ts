@@ -109,7 +109,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       editingEnabled: () => true,
       selectionOptions: {
         selectionMode: this.getSelectionMode(),
-        equals: (obj1: Item, obj2: Item) => {return obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID())}
+        equals: (obj1: Item, obj2: Item) => (obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID()))
       }
     };
   }

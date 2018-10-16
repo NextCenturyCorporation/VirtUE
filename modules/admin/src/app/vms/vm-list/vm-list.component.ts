@@ -64,7 +64,6 @@ export class VmListComponent extends GenericListComponent {
     return [
       new TextColumn('Template Name',     2, (v: VirtualMachine) => v.getName(),  SORT_DIR.ASC,
                                                                         (i: Item) => this.viewItem(i), () => this.getSubMenu()),
-                                                                        
       new TextColumn('OS',                1, (v: VirtualMachine) => v.os,         SORT_DIR.ASC),
       new ListColumn('Assigned Applications',  4, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Last Editor',       2, (v: VirtualMachine) => v.lastEditor, SORT_DIR.ASC),

@@ -166,8 +166,8 @@ export abstract class GenericPageComponent {
         action();
       }
     },
-    ()=>{},
-    ()=>{
+    () => {},
+    () => {
       sub.unsubscribe();
     });
   }

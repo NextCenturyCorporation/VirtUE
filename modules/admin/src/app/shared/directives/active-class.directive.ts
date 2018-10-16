@@ -4,8 +4,8 @@ import { Directive, ElementRef, HostListener, OnInit, Renderer2 } from '@angular
  * @class
  * This defines a directive which can be used in html files, to add an "active" css class to any component when the
  * mouse moves within the bounds of that component, and remove that class when the mouse leaves.
- * Note that the addition of a class re-renders the component, and so if you have many small components on the screen, whose labels/attributes
- * require calling non-trivial functions, those functions could be called very often as the mouse moves around.
+ * Note that the addition of a class re-renders the component, and so if you have many small components on the screen,
+ * whose labels/attributes require calling non-trivial functions, those functions could be called very often as the mouse moves around.
  */
 @Directive({
   selector: '[appActiveClass]'

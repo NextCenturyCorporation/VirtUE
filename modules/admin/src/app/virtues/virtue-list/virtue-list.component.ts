@@ -68,7 +68,8 @@ export class VirtueListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Template Name',     2, (v: Virtue) => v.getName(), SORT_DIR.ASC,  (i: Item) => this.viewItem(i), () => this.getSubMenu()),
+      new TextColumn('Template Name',     2, (v: Virtue) => v.getName(), SORT_DIR.ASC,  (i: Item) => this.viewItem(i),
+                                                                                                    () => this.getSubMenu()),
       new ListColumn('Virtual Machines',  2, this.getChildren,      this.formatName,    (i: Item) => this.viewItem(i)),
       new ListColumn('Applications',      2, this.getGrandchildren, this.formatName),
       new TextColumn('Last Editor',       2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),

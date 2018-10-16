@@ -219,7 +219,10 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
        new SubMenuOptions("Remove",
                       () => !this.inViewMode(),
                       (i: Item) => this.openDialog( 'Delete ' + i.getName(),
-                                                    () => {this.item.removeChild( i.getID() ); this.update({})}
+                                                    () => {
+                                                      this.item.removeChild( i.getID() );
+                                                      this.update({});
+                                                    }
                                                   )
                       )
     ];

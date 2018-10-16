@@ -138,7 +138,7 @@ export class AppsListComponent extends GenericListComponent {
    */
   openAppsDialog(): void {
     let dialogRef = this.dialog.open(AddAppComponent, {
-      width: '480px'//,
+      width: '480px'// ,
       // data: { file: this.file, url: this.url }
     });
 

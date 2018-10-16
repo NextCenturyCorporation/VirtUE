@@ -128,7 +128,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     // In any mode but view, nothing extra should happen. The local copy of item will have its status toggled, and that's it.
     // In view mode, this toggling should actually make a change to the backend.
     this.mainTab.onStatusChange.subscribe((newStatus) => {
-      if( this.mode === Mode.VIEW ) {
+      if ( this.mode === Mode.VIEW ) {
         this.toggleItemStatus(this.item);
       }
     });
