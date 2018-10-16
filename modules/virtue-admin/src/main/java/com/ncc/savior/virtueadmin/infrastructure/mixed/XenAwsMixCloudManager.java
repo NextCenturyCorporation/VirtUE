@@ -93,6 +93,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		//
 		// Currently, we use this future to pass it out so we can delete it elsewhere.
 		CompletableFuture.allOf(windowsFuture, xenFuture).thenRun(() -> {
+			logger.debug("Attempting to release subnet for "+virtueInstance.getName());
 			vpcSubnetProvider.releaseBySubnetKey(virtueInstance.getId());
 			future.complete(virtueInstance);
 		});

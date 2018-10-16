@@ -3,6 +3,7 @@
 	"version": "1.0",
 	"enabled": true,
 	"awsTemplateName": "default-template",
+	"color": "#BD00A8",
 	"virtualMachineTemplateIds": [
 		"IMPORT_linux_all"
 	]
