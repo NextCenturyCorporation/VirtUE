@@ -92,13 +92,14 @@
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 	</bean>
 
-<!-- 	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.StaticVpcSubnetProvider"> -->
-<!-- 		<constructor-arg ref="ec2Wrapper" /> -->
-<!-- 		<constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
-<!-- 		<constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
-<!-- 	</bean> -->
-	
-	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.DynamicVpcSubnetProvider">
+	<!-- <bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.StaticVpcSubnetProvider"> -->
+	<!-- <constructor-arg ref="ec2Wrapper" /> -->
+	<!-- <constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
+	<!-- <constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
+	<!-- </bean> -->
+
+	<bean name="vpcSubnetProvider"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.DynamicVpcSubnetProvider">
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrStart}" />
@@ -106,10 +107,17 @@
 		<constructor-arg value="${virtue.aws.usePublicDns}" />
 		<constructor-arg value="${virtue.aws.server.subnet.routeTableId}" />
 		<constructor-arg value="${virtue.aws.availabilityZone}"></constructor-arg>
-		
 	</bean>
 
-	<bean name="awsVmManager"
+	<bean name="securityGroupManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.SecurityGroupManager">
+		<constructor-arg ref="ec2Wrapper" />
+		<constructor-arg value="${virtue.aws.server.vpc.name}" />
+		<constructor-arg value="${virtue.aws.serverUser}" />
+	</bean>
+
+	<bean name="
+			awsVmManager "
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
 		<constructor-arg ref="futureServiceProvider" />
 		<constructor-arg ref="keyManager" />
@@ -144,6 +152,7 @@
 		<constructor-arg ref="windowStartupService"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg ref="securityGroupManager"></constructor-arg>
 	</bean>
 
 	<bean name="windowStartupService"

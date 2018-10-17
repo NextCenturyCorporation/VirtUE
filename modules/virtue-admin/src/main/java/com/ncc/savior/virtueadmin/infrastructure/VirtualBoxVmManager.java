@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueModifications;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -184,7 +185,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
-			String virtue, String networkKey) {
+			VirtueModifications virtueMods) {
 		throw new RuntimeException("not yet implemented");
 	}
 

@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.infrastructure.subnet;
+package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,7 +104,6 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 
 	private synchronized CidrBlockAssignment getNextAvailableBlock(String subnetKey, Map<String, String> tags) {
 		Subnet subnet = createAwsSubnet(nextCidrBlockToTry);
-
 		if (tags == null) {
 			tags = Collections.emptyMap();
 		}
@@ -206,7 +205,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		boolean clearDatabase = true;
 		try {
 			ec2.deleteSubnet(deleteSubnetRequest);
-			logger.debug("released subnet "+id);
+			logger.debug("released subnet " + id);
 		} catch (Exception e) {
 			logger.debug("failed to delete subnet from AWS", e);
 		}

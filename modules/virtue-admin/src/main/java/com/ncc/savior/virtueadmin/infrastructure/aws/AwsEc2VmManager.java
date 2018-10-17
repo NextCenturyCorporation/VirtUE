@@ -121,20 +121,24 @@ public class AwsEc2VmManager extends BaseVmManager {
 		ec2 = AmazonEC2ClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
 	}
 
-//	@Override
-//	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
-//			CompletableFuture<Collection<VirtualMachine>> future) {
-//		Collection<VirtualMachineTemplate> vmTemplates = new ArrayList<VirtualMachineTemplate>(1);
-//		vmTemplates.add(vmt);
-//		Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user, vmTemplates, future, null);
-//		if (vms.size() != 1) {
-//			String msg = "Error provisioning VM.  Result has VM size of " + vms.size() + " and expected 1.";
-//			SaviorException e = new SaviorException(SaviorErrorCode.AWS_ERROR, msg);
-//			logger.error(msg, e);
-//			throw e;
-//		}
-//		return vms.iterator().next();
-//	}
+	// @Override
+	// public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user,
+	// VirtualMachineTemplate vmt,
+	// CompletableFuture<Collection<VirtualMachine>> future) {
+	// Collection<VirtualMachineTemplate> vmTemplates = new
+	// ArrayList<VirtualMachineTemplate>(1);
+	// vmTemplates.add(vmt);
+	// Collection<VirtualMachine> vms = provisionVirtualMachineTemplates(user,
+	// vmTemplates, future, null);
+	// if (vms.size() != 1) {
+	// String msg = "Error provisioning VM. Result has VM size of " + vms.size() + "
+	// and expected 1.";
+	// SaviorException e = new SaviorException(SaviorErrorCode.AWS_ERROR, msg);
+	// logger.error(msg, e);
+	// throw e;
+	// }
+	// return vms.iterator().next();
+	// }
 
 	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
@@ -207,7 +211,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future,
-			String virtue, String networkKey) {
+			VirtueModifications virtueMods) {
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -224,7 +228,7 @@ public class AwsEc2VmManager extends BaseVmManager {
 			}
 			Instance instance = instances.get(0);
 			String clientUser = user.getUsername();
-			String virtueName = virtue == null ? "" : "-" + virtue;
+			String virtueName = virtueMods.getName() == null ? "" : "-" + virtueMods.getName();
 			virtueName = virtueName.replace(" ", "-");
 			String name = VM_PREFIX + clientUser + "-" + serverUser + virtueName;
 			String loginUsername = vmt.getLoginUser();

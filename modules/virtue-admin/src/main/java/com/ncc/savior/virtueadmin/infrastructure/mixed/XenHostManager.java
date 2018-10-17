@@ -38,9 +38,10 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueModifications;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
-import com.ncc.savior.virtueadmin.infrastructure.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -123,7 +124,8 @@ public class XenHostManager {
 	// start vms with code below
 
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
-			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture, String subnetId) {
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture,
+			VirtueModifications virtueMods) {
 		// if caller doesn't provide a future, we may still want one.
 		if (linuxFuture == null) {
 			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
@@ -138,10 +140,13 @@ public class XenHostManager {
 		// mainly this makes sure the volume is ready
 		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(), virtue.getTemplateId(),
 				virtue.getName());
-
+		Collection<String> secGroupIds = new HashSet<String>(securityGroupIds);
+		if (virtueMods.getSecurityGroupId() != null) {
+			secGroupIds.add(virtueMods.getSecurityGroupId());
+		}
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
-				xenInstanceType, subnetId, iamRoleName);
+				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
+				xenInstanceType, virtueMods.getSubnetId(), iamRoleName);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,

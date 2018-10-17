@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueModifications;
+import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.SecurityGroupManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
-import com.ncc.savior.virtueadmin.infrastructure.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -59,15 +61,20 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private IVpcSubnetProvider vpcSubnetProvider;
 
+	private SecurityGroupManager securityGroupManager;
+
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
-			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService, IVpcSubnetProvider vpcSubnetPRovider) {
+			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
+			IVpcSubnetProvider vpcSubnetPRovider, SecurityGroupManager securityGroupManager) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
 		this.serviceProvider = serviceProvider;
-		this.vpcSubnetProvider=vpcSubnetPRovider;
+		this.vpcSubnetProvider = vpcSubnetPRovider;
+		this.securityGroupManager = securityGroupManager;
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
+
 	}
 
 	@Override
@@ -93,7 +100,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		//
 		// Currently, we use this future to pass it out so we can delete it elsewhere.
 		CompletableFuture.allOf(windowsFuture, xenFuture).thenRun(() -> {
-			logger.debug("Attempting to release subnet for "+virtueInstance.getName());
+			logger.debug("Attempting to release subnet for " + virtueInstance.getName());
 			vpcSubnetProvider.releaseBySubnetKey(virtueInstance.getId());
 			future.complete(virtueInstance);
 		});
@@ -120,8 +127,12 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		tags.put(IVpcSubnetProvider.TAG_VIRTUE_NAME, vi.getName());
 		tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, vi.getId());
 		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
+		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupById(vi.getTemplateId());
+		VirtueModifications virtueMods = new VirtueModifications(template.getName());
+		virtueMods.setSubnetId(subnetId);
+		virtueMods.setSecurityGroupId(virtueSecurityGroupId);
 		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts, windowsFuture,
-				template.getName(), subnetId);
+				virtueMods);
 		vi.setVms(vms);
 
 		// if (!linuxVmts.isEmpty()) {
@@ -129,7 +140,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<Collection<VirtualMachine>> linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
-		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, subnetId);
+		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
 			// When xen (really NFS) and all windows VM's are up

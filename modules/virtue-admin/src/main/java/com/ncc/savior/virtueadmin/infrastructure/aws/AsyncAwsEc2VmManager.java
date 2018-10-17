@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -14,8 +15,8 @@ import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
-import com.ncc.savior.virtueadmin.infrastructure.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -95,19 +96,23 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
-			String virtue, String subnetId) {
+			VirtueModifications virtueMods) {
 		if (vmFutures == null) {
 			vmFutures = new CompletableFuture<Collection<VirtualMachine>>();
 		}
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			String clientUser = user.getUsername();
-			String virtueName = virtue == null ? "" : "-" + virtue;
+			String virtueName = virtueMods.getName() == null ? "" : "-" + virtueMods.getName();
 			virtueName = virtueName.replace(" ", "-");
 			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + virtueName;
 
-			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, securityGroupIds, serverKeyName, instanceType,
-					subnetId, null);
+			Collection<String> secGroupIds = new HashSet<String>(securityGroupIds);
+			if (virtueMods.getSecurityGroupId() != null) {
+				secGroupIds.add(virtueMods.getSecurityGroupId());
+			}
+			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, secGroupIds, serverKeyName, instanceType,
+					virtueMods.getSubnetId(), null);
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
