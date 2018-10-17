@@ -84,28 +84,34 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 	}
 
 	protected void onSuccess(String id, R result, CompletableFuture<R> cf) {
-		ScheduledFuture<?> future = futureMap.remove(id);
+		ScheduledFuture<?> future = futureMap.get(id);
 		if (future == null) {
 			super.onFailure(null, cf);
 		} else {
-			future.cancel(true);
+			cancelFuture(id);
 			super.onSuccess(result, cf);
 		}
 	}
 
 	protected void onFailure(String id, P initial, Exception e, CompletableFuture<R> cf) {
-		ScheduledFuture<?> future = futureMap.remove(id);
-		if (future != null) {
-			future.cancel(false);
-		}
+		cancelFuture(id);
 		super.onFailure(initial, e, cf);
 	}
 
-	protected void onFailure(String id, P initial, CompletableFuture<R> cf) {
-		ScheduledFuture<?> future = futureMap.remove(id);
+	private void cancelFuture(String id) {
+		ScheduledFuture<?> future = futureMap.get(id);
 		if (future != null) {
-			future.cancel(false);
+			boolean success = future.cancel(false);
+			if (success) {
+				futureMap.remove(id);
+			} else {
+				logger.error("Failed to cancel future with id=" + id);
+			}
 		}
+	}
+
+	protected void onFailure(String id, P initial, CompletableFuture<R> cf) {
+		cancelFuture(id);
 		super.onFailure(initial, cf);
 	}
 

@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -209,5 +210,12 @@ public class VirtualMachineTemplate {
 
 	public void setUserCreatedBy(String userCreatedBy) {
 		this.userCreatedBy = userCreatedBy;
+	}
+	public static final Comparator<? super VirtualMachineTemplate> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
+	private static class CaseInsensitiveNameComparator implements Comparator<VirtualMachineTemplate> {
+		@Override
+		public int compare(VirtualMachineTemplate o1, VirtualMachineTemplate o2) {
+			return String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName());
+		}
 	}
 }

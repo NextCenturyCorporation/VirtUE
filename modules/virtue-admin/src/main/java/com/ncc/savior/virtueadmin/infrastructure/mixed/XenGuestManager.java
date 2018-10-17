@@ -385,14 +385,14 @@ public class XenGuestManager {
 				int numSensingPorts = 3;
 				vm.setState(VmState.LAUNCHING);
 				serviceProvider.getVmNotifierService().startFutures(vm, null);
-				throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Restarting is not properly implemented!");
-				// createStartGuestVm(session, externalSshPort, externalSensingPort,
-				// startingInternalPort, numSensingPorts,
-				// null, null, vm, false);
+				// throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Restarting is not
+				// properly implemented!");
+				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
+						null, null, vm, false);
 			}
 			addToStartPipeline(linuxVms, linuxFuture);
 		} catch (Exception e) {
-			logger.error("Error attempting to start guests " + linuxVms);
+			logger.error("Error attempting to start guests " + linuxVms, e);
 			linuxFuture.completeExceptionally(e);
 		} finally {
 			SshUtil.disconnectLogErrors(session);

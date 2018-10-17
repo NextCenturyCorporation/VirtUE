@@ -98,6 +98,27 @@ public class DesktopResourceService {
 		return instances;
 	}
 
+	public List<DesktopVirtue> getApplicationsWithTag(String tag) {
+		List<DesktopVirtue> instances;
+		try {
+			Response r = getListOfClass("applications/" + tag, "GET");
+			InputStream in = (InputStream) r.getEntity();
+			if (r.getStatus() >= 400) {
+				String data = streamToString(in);
+				logger.error("response (" + r.getStatus() + "): " + data);
+				instances = new ArrayList<DesktopVirtue>();
+			} else {
+				instances = jsonMapper.readValue(in, new TypeReference<List<DesktopVirtue>>() {
+				});
+			}
+		} catch (IOException | ProcessingException e) {
+
+			logger.error("error attempting to get virtues.", e);
+			instances = new ArrayList<DesktopVirtue>();
+		}
+		return instances;
+	}
+
 	private String streamToString(InputStream bin) {
 		StringBuilder result = new StringBuilder();
 		try {
@@ -119,6 +140,10 @@ public class DesktopResourceService {
 	public DesktopVirtueApplication startApplication(String virtueId, ApplicationDefinition appDefn)
 			throws IOException {
 		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
+		String params = appDefn.getParameters();
+		if (params != null) {
+			target = target.queryParam("cliParams", params);
+		}
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
 		logger.debug("Started app=" + returnedApp);
 		return returnedApp;

@@ -454,11 +454,26 @@ public class AdminResource {
 		return Response.ok(stream)
 				.header("Content-Disposition", "attachment; filename=\"virtue-" + templateId + ".zip\"").build();
 	}
+	
+	@GET
+	@Path("export/all")
+	@Produces("application/zip")
+	public Response exportSystemZipped() {
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream os) throws IOException, WebApplicationException {
+				importExportService.exportZippedAll(os);
+				os.flush();
+			}
+		};
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"allVirtueTemplates.zip\"")
+				.build();
+	}
 
 	@GET
 	@Path("export/virtue/template")
 	@Produces("application/zip")
-	public Response exportSystemZipped() {
+	public Response exportAllVirtuesZipped() {
 		StreamingOutput stream = new StreamingOutput() {
 			@Override
 			public void write(OutputStream os) throws IOException, WebApplicationException {
@@ -497,8 +512,8 @@ public class AdminResource {
 	@Path("import")
 	@Produces("application/json")
 	@Consumes({ "application/zip", "application/octet-stream" })
-	public void importZip(InputStream stream) {
-		importExportService.importZip(stream);
+	public void importZip(InputStream stream, @QueryParam("waitForCompletion") @DefaultValue("true") boolean waitForCompletion) {
+		importExportService.importZip(stream, waitForCompletion);
 	}
 
 	@GET

@@ -17,7 +17,9 @@ import { VirtualMachine } from '../shared/models/vm.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
-import { ConfigUrls, Datasets, Mode } from '../shared/enums/enums';
+import { Mode } from '../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../shared/services/config-urls.enum';
+import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
@@ -128,7 +130,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     });
 
     this.mainTab.onStatusChange.subscribe((newStatus) => {
-      if( this.mode === Mode.VIEW ) {
+      if ( this.mode === Mode.VIEW ) {
         this.toggleItemStatus(this.item);
       }
     });

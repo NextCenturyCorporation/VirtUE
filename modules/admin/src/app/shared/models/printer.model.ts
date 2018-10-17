@@ -20,5 +20,6 @@ export class Printer {
   constructor( info: string ) {
     this.info = info;
     this.status = "incorporeal";
+    this.address = "1.2.3.4:" + info;
   }
 }

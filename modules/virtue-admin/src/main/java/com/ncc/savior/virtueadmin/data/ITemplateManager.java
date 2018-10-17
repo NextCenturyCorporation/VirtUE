@@ -166,4 +166,6 @@ public interface ITemplateManager {
 
 	Set<String> getAllIconKeys();
 
+	Iterable<IconModel> getAllIcons();
+
 }

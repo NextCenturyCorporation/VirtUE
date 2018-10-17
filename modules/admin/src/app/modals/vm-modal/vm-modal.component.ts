@@ -6,9 +6,17 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
 
-import { ConfigUrls, Datasets } from '../../shared/enums/enums';
-import { Column } from '../../shared/models/column.model';
-import { Item } from '../../shared/models/item.model';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+
+
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../shared/models/column.model';
+import { VirtualMachine } from '../../shared/models/vm.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -39,6 +47,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
       super(router, baseUrlService, itemService, dialog, dialogRef, data);
+      this.pluralItem = "Virtual Machine Templates";
     }
 
   /**
@@ -46,9 +55,11 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',  'Template Name',          5, 'asc'),
-      new Column('os',    'OS',                     3, 'asc'),
-      new Column('apps',  'Assigned Applications',  3, undefined, this.formatName, this.getChildren),
+      new TextColumn('Template Name',         4, (v: VirtualMachine) => v.getName(), SORT_DIR.ASC),
+      new ListColumn('Assigned Applications', 3, this.getChildren, this.formatName),
+      new TextColumn('Operating System',      3, (v: VirtualMachine) => v.modDate, SORT_DIR.DESC),
+      new TextColumn('Version',               1, (v: VirtualMachine) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 
@@ -65,23 +76,6 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       neededDatasets: [Datasets.APPS, Datasets.VMS]
     };
   }
-
-  /**
-   * See [[GenericListComponent.getListOptions]] for details
-   * @return child-list-specific information needed by the generic list page functions.
-   */
-  getListOptions(): {
-      prettyTitle: string,
-      itemName: string,
-      pluralItem: string,
-      domain?: string} {
-    return {
-      prettyTitle: "Virtual Machine Templates",
-      itemName: "Vm Template",
-      pluralItem: "VM Templates"
-    };
-  }
-
   /**
    * @return a string to be displayed in the virtue table, when no VM templates exit.
    */
@@ -93,6 +87,6 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.setItems(this.allVms.asList());
+    this.fillTable(this.allVms.asList());
   }
 }

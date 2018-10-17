@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.alerting.VirtueAlertMessage;
+import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.rdp.IRdpClient;
@@ -50,6 +51,7 @@ public class VirtueService {
 	private Map<String, RgbColor> colors;
 	private IRdpClient rdpClient;
 	private IClipboardManager clipboardManager;
+	protected AuthorizationService authorizationService;
 
 	static {
 		startableVirtueStates = new ArrayList<VirtueState>();
@@ -61,13 +63,14 @@ public class VirtueService {
 	}
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
-			IRdpClient rdpClient, IClipboardManager clipboardManager) {
+			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());
 		this.rdpClient = rdpClient;
 		this.clipboardManager = clipboardManager;
+		this.authorizationService = authService;
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
@@ -156,10 +159,10 @@ public class VirtueService {
 					logger.debug("connecting clipboard");
 					clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					logger.error("clipboard manager connection failed!", e);
-					UserAlertingServiceHolder.sendAlert(new VirtueAlertMessage("Clipboard Failed", virtue,
-							"Failed to connect clipboard to virtue"));
+					VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
+							"Failed to connect clipboard to virtue");
+					UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 				}
 				client = connectionManager.createClient(params, color, virtue);
 			}
@@ -290,5 +293,9 @@ public class VirtueService {
 		if (virtue.getVirtueState() != VirtueState.UNPROVISIONED) {
 			desktopResourceService.terminateVirtue(virtue.getId());
 		}
+	}
+
+	public List<DesktopVirtue> getApplicationsWithTag(String tag) {
+		return desktopResourceService.getApplicationsWithTag(tag);
 	}
 }

@@ -18,7 +18,9 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
-import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
+import { Mode } from '../../abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../../services/config-urls.enum';
+import { Datasets } from '../../abstracts/gen-data-page/datasets.enum';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
@@ -47,12 +49,6 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
   /** The label to appear on the tab */
   public tabName: string;
 
-  /**
-   * A reference to the Item being viewed/edited/etc.
-   * Refers to the same object as [[GenericFormComponent.item]]
-   * this gets reclassed by children tabs
-   */
-  protected item: Item;
 
   /**
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
@@ -65,7 +61,6 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
       // it's in create mode.
       // User chosen arbitrarily for this un-used value, because it doesn't
       // have as many attributes.
-      this.item = new User(undefined);
   }
 
   /**
@@ -120,6 +115,38 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
    */
   setMode(newMode: Mode): void {
     this.mode = newMode;
+  }
+
+  /**
+   * @return true iff the page is in view mode.
+   * Used in the html to prevent some types of action when the page is in 'View' mode.
+   */
+  inViewMode(): boolean {
+    return this.mode === Mode.VIEW;
+  }
+
+  /**
+   * @return true iff the page is in EDIT mode.
+   * Used in the html to prevent some actions while in EDIT mode.
+   */
+  inEditMode(): boolean {
+    return this.mode === Mode.EDIT;
+  }
+
+  /**
+   * @return true iff the page is in CREATE mode.
+   * Used in the html to change how the page gets displayed in CREATE mode.
+   */
+  inCreateMode(): boolean {
+    return this.mode === Mode.CREATE;
+  }
+
+  /**
+   * @return true iff the page is in DUPLICATE mode.
+   * Used in the html to change how the page gets displayed in DUPLICATE mode.
+   */
+  inDuplicateMode(): boolean {
+    return this.mode === Mode.DUPLICATE;
   }
 
   /**

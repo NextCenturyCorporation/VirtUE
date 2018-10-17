@@ -8,9 +8,12 @@ import { Router } from '@angular/router';
 import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
-import { Column } from '../../shared/models/column.model';
+import {  Column,
+          TextColumn,
+          ListColumn,
+          SORT_DIR  } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
-import { SubMenuOptions } from "../../shared/models/subMenuOptions.model";
+import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
@@ -20,7 +23,8 @@ import { AddAppComponent } from '../add-app/add-app.component';
 
 import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
-import { ConfigUrls, Datasets } from '../../shared/enums/enums';
+import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
  * @class
@@ -68,9 +72,9 @@ export class AppsListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', 5, 'asc'),
-      new Column('version', 'Version',          3, 'asc'),
-      new Column('os',      'Operating System', 4, 'desc')
+      new TextColumn('Application Name',  5, (a: Application) => a.getName(), SORT_DIR.ASC, undefined, () => this.getSubMenu()),
+      new TextColumn('Version',           3, (a: Application) => String(a.version), SORT_DIR.ASC),
+      new TextColumn('Operating System',  4, (a: Application) => a.os, SORT_DIR.DESC),
     ];
   }
 
@@ -134,7 +138,7 @@ export class AppsListComponent extends GenericListComponent {
    */
   openAppsDialog(): void {
     let dialogRef = this.dialog.open(AddAppComponent, {
-      width: '480px'//,
+      width: '480px'// ,
       // data: { file: this.file, url: this.url }
     });
 

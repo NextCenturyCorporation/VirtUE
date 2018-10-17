@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -122,11 +123,7 @@ public class SshClipboardManager implements IClipboardManager {
 			logger.error("Clipboard reconnect failed for client=" + clientId);
 			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
 					"Clipboard connection unable to reconnect after retries");
-			try {
-				UserAlertingServiceHolder.sendAlert(pam);
-			} catch (IOException e) {
-				logger.error("Error sending alert", e);
-			}
+			UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 		} else {
 			logger.error("Error: Unable to find properties for client=" + clientId + " after disconnected with error.");
 		}
@@ -144,11 +141,7 @@ public class SshClipboardManager implements IClipboardManager {
 		} catch (Exception e) {
 			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
 					"Local clipboard initialization failed.  Local clipboard will not be connected with virtues.");
-			try {
-				UserAlertingServiceHolder.sendAlert(pam);
-			} catch (IOException e2) {
-				logger.error("Error sending alert", e2);
-			}
+			UserAlertingServiceHolder.sendAlertLogError(pam, logger);
 			logger.error("Local clipboard client initialization failed", e);
 		}
 	}
@@ -310,6 +303,16 @@ public class SshClipboardManager implements IClipboardManager {
 			}
 		} else {
 			SshUtil.sftpFile(session, fis, destinationFilePath);
+		}
+		try {
+			InputStream is = SshClipboardManager.class.getClassLoader().getResourceAsStream("savior-browser.sh");
+			SshUtil.sftpFile(session, is, "savior-browser-win.sh");
+			JavaUtil.sleepAndLogInterruption(100);
+			SshUtil.sendCommandFromSession(session,
+					"tr -d '\\15\\32' < " + "savior-browser-win.sh > savior-browser.sh");
+			SshUtil.sendCommandFromSession(session, "chmod 755 savior-browser.sh");
+		} catch (Exception e) {
+			logger.error("Failed to upload savior-browser.sh", e);
 		}
 	}
 
