@@ -12,7 +12,7 @@ import { ItemService } from '../shared/services/item.service';
 import { ConfigUrls } from '../shared/services/config-urls.enum';
 
 import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
-import { Column } from '../shared/models/column.model';
+import { Column, TextColumn, SORT_DIR } from '../shared/models/column.model';
 import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.component';
 
 /**
@@ -134,11 +134,11 @@ export class DashboardComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-    new Column('sensor_id',   'Sensor',  3, 'asc'),
-    new Column('virtue name', 'Virtue',  3, 'asc', this.getVirtName),
-    new Column('kafka_topic', 'Kafka Topic', 3, 'asc'),
-    new Column('has cert',    'Certificate', 1, 'asc', this.hasCertificates),
-    new Column('updated_at',  'Last Update', 2, 'asc')
+    // new TextColumn('sensor_id',   'Sensor',  3, SORT_DIR.ASC),
+    // new TextColumn('virtue name', 'Virtue',  3, SORT_DIR.ASC, this.getVirtName),
+    // new TextColumn('kafka_topic', 'Kafka Topic', 3, SORT_DIR.ASC),
+    // new TextColumn('has cert',    'Certificate', 1, SORT_DIR.ASC, this.hasCertificates),
+    // new TextColumn('updated_at',  'Last Update', 2, SORT_DIR.ASC)
     ];
   }
 
@@ -197,7 +197,7 @@ export class DashboardComponent extends GenericListComponent {
       let staticSub = this.sensingService.getStaticList().subscribe(staticData => {
         this.sensorData = staticData[0].sensors;
       },
-      () => { //on error
+      () => {// on error
         staticSub.unsubscribe();
       },
       () => {// on complete

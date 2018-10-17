@@ -3,21 +3,21 @@
     <div class="mui-col-md-10">
       <div class="form-item">
         <br />
-        <mat-form-field *ngIf="mode !== 'Edit' && mode !== 'View'">
+        <mat-form-field *ngIf="!inEditMode() && ! inViewMode()">
           <input type="text" [(ngModel)]="item.name" placeholder="Username" matInput>
         </mat-form-field>
         <div class="form-item margin-top-15">
           <label>User Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
-          <mat-slide-toggle [disabled]="mode !== 'View'" [(ngModel)]="item.enabled" (click)="statusChange()" [color]="'primary'">
+          <mat-slide-toggle [disabled]="!inViewMode()" [(ngModel)]="item.enabled" (click)="statusChange()" [color]="'primary'">
             {{ item.enabled ? 'Enabled' : 'Disabled' }}
           </mat-slide-toggle>
         </div>
         <div>
           <div class="table-data">
             <label>Select Role(s)</label><br />
-            <mat-checkbox [(ngModel)]="roleUser" [checked]="roleUser" [disabled]="mode === 'View'"> User</mat-checkbox>
+            <mat-checkbox [(ngModel)]="roleUser" [checked]="roleUser" [disabled]="inViewMode()"> User</mat-checkbox>
             <br />
-            <mat-checkbox [(ngModel)]="roleAdmin" [checked]="roleAdmin" [disabled]="mode === 'View'"> Administrator</mat-checkbox>
+            <mat-checkbox [(ngModel)]="roleAdmin" [checked]="roleAdmin" [disabled]="inViewMode()"> Administrator</mat-checkbox>
           </div>
         </div>
       </div>
@@ -26,12 +26,12 @@
         <div class="mui-col-md-12">
           <br />
           <h3 class="titlebar-title">Virtue Templates</h3>
-          <button class="titlebar-button" [disabled]="mode === 'View'" (click)="activateModal()">Add Template</button>
+          <button class="titlebar-button" [disabled]="inViewMode()" (click)="activateModal()">Add Template</button>
         </div>
       </div>
 
       <div class="mui-row">
-        <app-item-table #childrenTable></app-item-table>
+        <app-table #childrenTable></app-table>
       </div>
 
     </div>

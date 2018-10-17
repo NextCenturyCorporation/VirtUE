@@ -9,8 +9,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
-import { Column } from '../../../shared/models/column.model';
+
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  CheckboxColumn,
+  DropdownColumn,
+  InputFieldColumn,
+  IconColumn,
+  RadioButtonColumn,
+  SORT_DIR
+} from '../../../shared/models/column.model';
+
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
+import { FileSysPermission } from '../../../shared/models/fileSysPermission.model';
 import { Printer } from '../../../shared/models/printer.model';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
@@ -21,6 +34,7 @@ import { ColorModalComponent } from "../../../modals/color-picker/color-picker.m
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
+import { SelectionMode } from '../../../shared/abstracts/gen-table/selectionMode.enum';
 
 import { NetworkProtocols } from '../../protocols.enum';
 
@@ -58,22 +72,22 @@ import { NetworkProtocols } from '../../protocols.enum';
 export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
 
   /** a table to display the Virtues that this Virtue is allowd to paste data into */
-  @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent;
+  @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent<Virtue>;
+
+  /** a table to display the network permissions granted to this Virtue */
+  @ViewChild('networkPermsTable') private networkPermsTable: GenericTableComponent<NetworkPermission>;
+
+  /** a table to display the file system permissions of this Virtue */
+  @ViewChild('fileSysPermsTable') private fileSysPermsTable: GenericTableComponent<FileSysPermission>;
+
+  /** a table to display the printers this Virtue can access */
+  @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
   /** local reference to the virtue-form's allVirtues variable. */
   private allVirtues: DictList<Virtue>;
-
-  /** a list of available browsers, one of which can be set as default. Currently a placeholder. */
-  browsers: string[];
-
-  /** used in html page to iterate over the elements of an enum. */
-  private keys = Object.keys;
-
-  /** local reference, so html can iterate over this enum's elements. */
-  private protocols = NetworkProtocols;
 
   /**
    * see [[GenericFormTabComponent.constructor]] for inherited parameters
@@ -86,15 +100,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.item = new Virtue({});
 
     this.tabName = 'Settings';
-
-    // TODO browser list is a placeholder
-    // Is this list supposed to be hard coded? User-defined? Automatically generated
-    // by perhaps tagging loaded browser applications as "browsers", and looking
-    // through all the applications this virtue has access to, and showing that list?
-    // The latter seems the most useful, but relies on the admin correctly tagging
-    // things when they load them.
-    this.browsers = ['Chrome', 'Firefox', 'This is a placeholder', 'TODO'];
-
   }
 
   /**
@@ -105,6 +110,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   init(mode: Mode): void {
     this.setMode(mode);
     this.setUpPasteableVirtuesTable();
+    this.setUpNetworkPermsTable();
+    this.setUpFileSysPermsTable();
+    this.setUpPrinterTable();
     // until GenericTable is made more generic (like for any input object, as opposed to only Items),
     // the other tables have to be defined individually in the html.
     // GenericTable would need to allow arbitrary objects/html in any column - so one could just as
@@ -141,13 +149,24 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     if (changes.allVirtues) {
       this.allVirtues = changes.allVirtues;
 
-      this.populatePasteableVirtuesTable();
+      this.updatePasteableVirtuesTable();
     }
 
     if (changes.mode) {
       this.setMode(changes.mode);
       this.setUpPasteableVirtuesTable();
     }
+
+    // if (changes.networks) {
+    //   // TODO update something
+    // }
+    // if (changes.printers) {
+    //   // TODO update something
+    // }
+    this.updateNetworkPermsTable();
+    this.updateFileSysPermsTable();
+    this.updatePrinterTable();
+
   }
 
   /**
@@ -165,47 +184,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     if (!this.checkNetworkPerms()) {
       // TODO tell the user
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Iterate through and check all the network permissions
-   * @return true if all lines of network permission are fully filled-out (and TODO valid).
-   *         false otherwise
-   */
-  checkNetworkPerms(): boolean {
-    for (let networkPermission of this.item.networkWhiteList) {
-      if ( !this.checkEnteredPermValid(networkPermission) ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Check a particular network permission - all 4 of its fields should be filled out and valid.
-   * @return true if all fields are valid.
-   */
-  checkEnteredPermValid(netPerm: NetworkPermission): boolean {
-
-    // instead of checking  '<=='
-    // first make sure that the ports aren't 0, because checking !port will be true
-    // if port === 0. Which would make the wrong error message appear.
-    if (netPerm.localPort === 0 || netPerm.remotePort === 0) {
-      console.log("Ports on network permissions must be greater than zero.");
-      return false;
-    }
-
-    if ( !netPerm.destination|| !netPerm.protocol
-      || !netPerm.localPort  || !netPerm.remotePort ) {
-        console.log("Network permission fields cannot be blank");
-        return false;
-    }
-
-    if (netPerm.localPort < 0 || netPerm.remotePort < 0) {
-      console.log("Ports on network permissions must be greater than zero.");
       return false;
     }
     return true;
@@ -230,33 +208,45 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return index;
   }
 
+  /************************************************************************************/
+  /************************************************************************************/
+
   /**
-   * Check whether all of a given type of filesystem permissions are enabled for this Virtue
-   * @param colName the name of the column we're checking values on - all column names
-   *                are attributes of the file system type hard-coded in [[Virtue]].
-   *
-   * @return true if all file systems have the given type of permission.
+   * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
+   * these things aren't Items. Generalizing the GenericTable further would be useful.
+   * @return what columns should show up in the network permissions table
    */
-  allChecked(colName: string): boolean {
-    for (let perm of this.item.fileSysPerms) {
-      if (perm[colName] === false) {
-        return false;
-      }
-    }
-    return true;
+  getPrinterColumns(): Column[] {
+    return [
+      new TextColumn('Printer Info',    5, (p: Printer) => p.info, SORT_DIR.ASC),
+      new TextColumn('Printer Status',  4, (p: Printer) => p.status, SORT_DIR.ASC),
+      new IconColumn('Revoke access',  3, 'delete', (p: Printer) => this.removePrinter(p)
+      )
+    ];
   }
 
-
   /**
-   * Grant/revoke a given type of permission on all filesystems .
-   * @param colName the name of the permission we're granting - all column names
-   *                are attributes of the file system type hard-coded in [[Virtue]].
-   * @param event given automatically, lets us know whether to check everything or uncheck everything.
-   */
-  checkAll(event: any, colName: string): void {
-    for (let perm of this.item.fileSysPerms) {
-      perm[colName] = event.checked;
+  * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+  *
+  * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+  */
+  setUpPrinterTable(): void {
+    if (this.printerTable === undefined) {
+      return;
     }
+
+    this.printerTable.setUp({
+      cols: this.getPrinterColumns(),
+      coloredLabels: true,
+      filters: [],
+      tableWidth: 12,
+      noDataMsg: "No printers have been added yet to this Virtue.",
+      editingEnabled: () => !this.inViewMode()
+    });
+  }
+
+  updatePrinterTable() {
+    this.printerTable.populate(this.item.allowedPrinters);
   }
 
   /**
@@ -265,93 +255,28 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   addNewPrinter(): void {
     this.item.allowedPrinters.push(new Printer("And another printer"));
+    this.updatePrinterTable();
   }
 
   /**
-   * This removes a printer from the Virtue's printer list.
+   * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
+   * Note that if there are several matching printers, only the first one is removed.
    */
-  removePrinter(index: number): void {
-    this.item.allowedPrinters.splice(index, 1);
-  }
-
-  /**
-   * Add a new netork permission to the virtue.
-   */
-  addNewNetworkPermission(): void {
-    this.item.networkWhiteList.push(new NetworkPermission());
-  }
-
-  /**
-   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
-   *
-   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
-   */
-  setUpPasteableVirtuesTable(): void {
-    if (this.allowedPasteTargetsTable === undefined) {
-      return;
-    }
-
-    this.allowedPasteTargetsTable.setUp({
-      cols: this.getPasteColumns(),
-      opts: this.getPasteSubMenu(),
-      coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table.
-      tableWidth: 10,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
-  }
-
-  /**
-   * @return a message telling the user that no paste permissions have been given to this
-   * virtue, in a way that is clear and relevant for the current mode.
-   */
-  getNoDataMsg(): string {
-    if (this.mode === Mode.VIEW) {
-      return "This virtue hasn't been granted access to paste data into any other virtues.";
-    }
-    else {
-      return 'Click "Add Virtue" to give this virtue permission to paste data into that one';
-    }
-  }
-
-  /**
-   * Once data has been pulled, fill in the table with the Virtue's current allow paste targets, if it has any.
-   */
-  populatePasteableVirtuesTable(): void {
-
-    if ( !(this.allVirtues) ) {
-      return;
-    }
-
-    this.allowedPasteTargetsTable.items = [];
-    for (let vID of this.item.allowedPasteTargets) {
-      if (this.allVirtues.has(vID)) {
-        this.allowedPasteTargetsTable.items.push(this.allVirtues.get(vID));
+  removePrinter(toDelete: Printer): void {
+    let index = 0;
+    for (let printer of this.item.allowedPrinters) {
+      if (printer.address === toDelete.address) {
+        break;
       }
+      index++;
     }
+    this.item.allowedPrinters.splice(index, 1);
+    this.updatePrinterTable();
   }
 
-  /**
-   * @return what columns should show up in the virtue's paste-permission table
-   *         The first column, the Virtue's name, should be clickable if and only if the page is in view mode.
-   */
-  getPasteColumns(): Column[] {
-    let cols: Column[] = [
-      new Column('apps',    'Available Applications',  4, undefined,  this.formatName, this.getGrandchildren),
-      new Column('version', 'Version',                2, 'desc'),
-      new Column('enabled',  'Status',                 1, 'asc',       this.formatStatus)
-    ];
 
-    if (this.mode === Mode.VIEW) {
-      cols.unshift(new Column('name', 'Virtue Template Name', 4, 'asc', this.formatName, undefined, (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new Column('name', 'Virtue Template Name', 4, 'asc'));
-    }
-
-    return cols;
-  }
+/************************************************************************************/
+/************************************************************************************/
 
   /**
    * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
@@ -360,13 +285,106 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getNetworkColumns(): Column[] {
     return [
-      new Column('destination',        'Host',         5, 'asc'),
-      new Column('protocol',    'Protocol',     3, 'asc'),
-      new Column('localPort',   'Local Port',   2, 'asc'),
-      new Column('remotePort',  'Remote Port',  2, 'asc')
+      new InputFieldColumn('Host',        4, 'destination', (netPerm: NetworkPermission) => netPerm.destination),
+      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.keys(NetworkProtocols),
+                          (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
+      new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
+      new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
+      new IconColumn('Revoke',  1, 'delete', (idx: number) => this.removeNetwork(idx))
     ];
   }
+  /**
+   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+   *
+   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+   */
+  setUpNetworkPermsTable(): void {
+    if (this.networkPermsTable === undefined) {
+      return;
+    }
 
+    this.networkPermsTable.setUp({
+      cols: this.getNetworkColumns(),
+      filters: [],
+      tableWidth: 10,
+      noDataMsg: "This Virtue has not been granted permission to access any network",
+      editingEnabled: () => !this.inViewMode()
+    });
+  }
+
+  /**
+  * Once data has been pulled, fill in the table with
+  */
+  updateNetworkPermsTable(): void {
+    this.networkPermsTable.populate(this.item.networkWhiteList);
+  }
+
+  /**
+  * Add a new netork permission to the virtue.
+  */
+  addNewNetworkPermission(): void {
+    this.item.networkWhiteList.push(new NetworkPermission());
+    this.updateNetworkPermsTable();
+  }
+
+  removeNetwork(idx: number): void {
+    this.item.networkWhiteList.splice(idx, 1);
+    this.updateNetworkPermsTable();
+  }
+
+  /**
+  * Iterate through and check all the network permissions
+  * @return true if all lines of network permission are fully filled-out (and TODO valid).
+  *         false otherwise
+  */
+  checkNetworkPerms(): boolean {
+    for (let networkPermission of this.item.networkWhiteList) {
+      if ( !this.checkEnteredPermValid(networkPermission) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+  * Check a particular network permission - all 4 of its fields should be filled out and valid.
+  * @return true if all fields are valid.
+  */
+  checkEnteredPermValid(netPerm: NetworkPermission): boolean {
+
+    // instead of checking  '<=='
+    // first make sure that the ports aren't 0, because checking !port will be true
+    // if port === 0. Which would make the wrong error message appear.
+    if (netPerm.localPort === 0 || netPerm.remotePort === 0) {
+      console.log("Ports on network permissions must be greater than zero.");
+      return false;
+    }
+
+    if ( !netPerm.destination || !netPerm.protocol
+      || !netPerm.localPort   || !netPerm.remotePort ) {
+      console.log("Network permission fields cannot be blank");
+      return false;
+    }
+
+    // if ( !(netPerm.localPort instanceof Number) || !(netPerm.remotePort instanceof Number) ) {
+    //   console.log("Local and Remote ports must be numbers.");
+    //   return false;
+    // }
+
+    if (netPerm.localPort < 0 || netPerm.remotePort < 0) {
+      console.log("Ports on network permissions must be greater than zero.");
+      return false;
+    }
+    return true;
+  }
+
+
+/************************************************************************************/
+/************************************************************************************/
+
+  updateFileSysPermsTable(): void {
+    this.fileSysPermsTable.populate(this.item.fileSysPerms);
+  }
   /**
    * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
    * these things aren't Items. Generalizing the GenericTable further would be useful.
@@ -374,13 +392,36 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getFileSysColumns(): Column[] {
     return [
-      new Column('location', 'Server & Drive',  6, 'asc'),
-      new Column('enabled',  'Enabled',         3),
-      new Column('read',     'Read',            1),
-      new Column('write',    'Write',           1),
-      new Column('execute',  'Execute',         1)
+      new TextColumn('Server & Drive',  6, (fs: FileSysPermission) => fs.location, SORT_DIR.ASC),
+      new CheckboxColumn('Enabled',     3, 'enabled'),
+      new CheckboxColumn('Read',        1, 'read', (fs: FileSysPermission) => !fs.enabled),
+      new CheckboxColumn('Write',       1, 'write', (fs: FileSysPermission) => !fs.enabled),
+      new CheckboxColumn('Execute',     1, 'execute', (fs: FileSysPermission) => !fs.enabled)
     ];
   }
+
+  /**
+   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+   *
+   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+   */
+  setUpFileSysPermsTable(): void {
+    if (this.fileSysPermsTable === undefined) {
+      return;
+    }
+    this.fileSysPermsTable.setUp({
+      cols: this.getFileSysColumns(),
+      filters: [],
+      tableWidth: 10,
+      noDataMsg: "No file systems have been set up in the global settings",
+      elementIsDisabled: (fs: FileSysPermission) => !fs.enabled,
+      editingEnabled: () => !this.inViewMode()
+    });
+  }
+
+
+/************************************************************************************/
+/************************************************************************************/
 
   /**
    * See [[GenericListComponent.getSubMenu]] for more details on this sort
@@ -395,10 +436,167 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
          if (index > -1) {
             this.item.allowedPasteTargets.splice(index, 1);
          }
-         this.populatePasteableVirtuesTable();
+         this.updatePasteableVirtuesTable();
        }
      )];
   }
+
+  /**
+   * @return what columns should show up in the virtue's paste-permission table
+   *         The first column, the Virtue's name, should be clickable if and only if the page is in view mode.
+   */
+  getPasteColumns(): Column[] {
+    return [
+      new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                        () => this.getPasteSubMenu()),
+      new ListColumn<Item>('Available Applications', 4, this.getGrandchildren,  this.formatName),
+      new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
+    ];
+  }
+
+  /**
+  * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+  *
+  * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+  */
+  setUpPasteableVirtuesTable(): void {
+    if (this.allowedPasteTargetsTable === undefined) {
+      return;
+    }
+
+    this.allowedPasteTargetsTable.setUp({
+      cols: this.getPasteColumns(),
+      coloredLabels: true,
+      getColor: (v: Virtue) => v.color,
+      filters: [],
+      tableWidth: 10,
+      noDataMsg: this.getNoPasteDataMsg(),
+      elementIsDisabled: (v: Virtue) => !v.enabled,
+      editingEnabled: () => !this.inViewMode()
+    });
+  }
+
+  /**
+   * Once data has been pulled, fill in the table with the Virtue's current allow paste targets, if it has any.
+   */
+  updatePasteableVirtuesTable(): void {
+
+    if ( !(this.allVirtues) ) {
+      return;
+    }
+
+    let items = [];
+    for (let vID of this.item.allowedPasteTargets) {
+      if (this.allVirtues.has(vID)) {
+        items.push(this.allVirtues.get(vID));
+      }
+    }
+    this.allowedPasteTargetsTable.populate(items);
+  }
+
+  /**
+   * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
+   */
+  activatePastableVirtueModal(): void {
+    this.activateVirtueSelectionModal( this.item.allowedPasteTargets, (selectedVirtues: string[]) => {
+        this.item.allowedPasteTargets = selectedVirtues;
+        this.updatePasteableVirtuesTable();
+      });
+  }
+
+  /**
+  * @return a message telling the user that no paste permissions have been given to this
+  * virtue, in a way that is clear and relevant for the current mode.
+  */
+  getNoPasteDataMsg(): string {
+    if (this.mode === Mode.VIEW) {
+      return "This virtue hasn't been granted access to paste data into any other virtues.";
+    }
+    else {
+      return 'Click "Add Virtue" to give this virtue permission to paste data into that one';
+    }
+  }
+
+/************************************************************************************/
+
+
+
+  /**
+   * this brings up a modal
+   * Note that the virtue selection modal will
+   * May want to define a filter so as to only show Virtues with browser applications?
+   * Perhaps they'd want to set a virtue as default that doesn't have a browser at the moment, but they're about to set one on it.
+   * Is it even possible to filter on virtues that have a browser? Unless browser applications can be flagged as a "browser" upon creation,
+   * probably not.
+   */
+  activateDefaultBrowserVirtueModal(): void {
+    this.activateVirtueSelectionModal(
+        [this.item.defaultBrowserVirtue],
+        (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
+        SelectionMode.SINGLE
+    );
+  }
+
+
+  /**
+   * this brings up a modal through which the user can select one or more Virtues, and have those selections be passed to some
+   * caller-defined function when the user hits 'Submit'.
+   *
+   * @param currentSelection A list of virtue IDs, that should be marked as 'selected' when the modal gets initialized.
+   * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
+   * @param selectionMode Optional. Can be either SelectionMode.MULTI or SelectionMode.SINGLE, but defaults to MULTI
+   *                      if not given.
+   *
+   * When implementing filters, the genericModal should take in arbitray filters (which means this function needs to take them in as well)
+   * which are passed to the table as default filters, which can't be removed or edited. Other filters can be defined in the table, which
+   * stack on top of those defaults.
+   *
+   */
+  activateVirtueSelectionModal(
+        currentSelection: string[],
+        onComplete: ((selectedVirtues: string[]) => void),
+        selectionMode?: SelectionMode
+  ): void {
+    let dialogHeight = 600;
+    let dialogWidth = 800;
+
+    if (selectionMode === undefined) {
+      selectionMode = SelectionMode.MULTI;
+    }
+
+    let dialogRef = this.dialog.open( VirtueModalComponent,  {
+      height: dialogHeight + 'px',
+      width: dialogWidth + 'px',
+      data: {
+        selectedIDs: currentSelection,
+        selectionMode: selectionMode
+      }
+    });
+
+    // This is hacky, and should be fixed eventually. This makes the Virtue being edited not show up in the list of
+    // Virtues which this one can paste data into.
+    dialogRef.componentInstance.table.filterColumnName = "id";
+
+    dialogRef.componentInstance.table.filterCondition = (attribute: any) => {
+      return String(attribute) !== this.item.getID();
+    };
+
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
+      onComplete(selectedVirtues);
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
+
+    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
+
+  }
+
 
   /**
    * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.
@@ -415,7 +613,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     dialogRef.updatePosition({ top: '5%', left: String(Math.floor(50 - wPercentageOfScreen / 2)) + '%' });
 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
-      if(newColor !== "") {
+      if (newColor !== "") {
         this.item.color = newColor;
       }
     },
@@ -425,42 +623,4 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     });
   }
 
-  /**
-   * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
-   */
-  activatePastableVirtueModal(): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
-
-    let dialogRef = this.dialog.open( VirtueModalComponent,  {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
-      data: {
-        selectedIDs: this.item.allowedPasteTargets
-      }
-    });
-
-    // This is hacky, and should be fixed eventually. This makes the Virtue being edited not show up in the list of
-    // Virtues which this one can paste data into.
-    dialogRef.componentInstance.table.filterColumn = "id";
-
-    dialogRef.componentInstance.table.filterCondition = (attribute: any) => {
-      return String(attribute) !== this.item.getID();
-    };
-
-    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedVirtues) => {
-      this.item.allowedPasteTargets = selectedVirtues;
-      this.populatePasteableVirtuesTable();
-    },
-    () => { // on error
-      sub.unsubscribe();
-    },
-    () => { // when finished
-      sub.unsubscribe();
-    });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
-
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
-
-  }
 }

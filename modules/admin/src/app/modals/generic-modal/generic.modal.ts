@@ -1,15 +1,17 @@
-import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { ItemService } from '../../shared/services/item.service';
+
+import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/gen-data-page.component';
+import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
+
+import { SelectionMode } from '../../shared/abstracts/gen-table/selectionMode.enum';
 import { Item } from '../../shared/models/item.model';
 import { Column } from '../../shared/models/column.model';
-import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
-
-import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
@@ -24,21 +26,30 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  */
 @Component({
   selector: 'app-generic-modal',
-  templateUrl: './generic.modal.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
   providers: [BaseUrlService, ItemService]
 })
-export abstract class GenericModalComponent extends GenericListComponent implements OnInit {
+export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
+
+  /** The table itself */
+  @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
+
+  /** Appears in the modals title as: 'Add/Remove {pluralItem}' */
+  pluralItem: string;
+
 
   /** What the containing component watches, to get the user's selections back out of this modal. */
   getSelections = new EventEmitter();
 
   /**
    * Only holds the initial input selections, is not kept up-to-date.
-   * Saved temporarily, and passed to table once table loads
+   * Just used to build a list of initial selections to pass to the table
    */
-  initialSelections: string[] = [];
+  selectedIDs: string[] = [];
 
+  /**
+   * The standard SelectionMode to set up this modal's table in. Most modals want multiple selection.
+   */
+  defaultSelectionMode: SelectionMode = SelectionMode.MULTI;
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
@@ -55,18 +66,21 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
       /** injected, is a reference to the modal dialog box itself. */
       public dialogRef: MatDialogRef<GenericModalComponent>,
 
-      /** holds the initial selections */
+      /** holds the initial selections, and possibly a SelectionMode */
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
       super(router, baseUrlService, itemService, dialog);
       if (data && data['selectedIDs']) {
-        this.initialSelections = data['selectedIDs'];
+        this.selectedIDs = data['selectedIDs'];
       }
       else {
         console.log("No field 'selectedIDs' in data input to modal");
-        this.initialSelections = [];
+        this.selectedIDs = [];
       }
 
+      if (data && data['selectionMode']) {
+        this.defaultSelectionMode = data.selectionMode;
+      }
 
       // TODO should we not allow addition of disabled items?
       // if so, note that select-all button will not act how user expects.
@@ -75,43 +89,117 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
   }
 
   /**
-   * this gives the childIDs the item was loaded with, and is only used to build
-   * the table - any changes will be made to this.table.selectedIDs.
+   * Called automatically on page render.
+   */
+  ngOnInit(): void {
+    this.cmnDataComponentSetup();
+    this.setUpTable();
+  }
+
+  /**
+   * #uncommented
+   */
+  defaultTableParams() {
+    return {
+      cols: this.getColumns(),
+      filters: [],
+      tableWidth: 12,
+      noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Item) => !i.enabled,
+      editingEnabled: () => true,
+      selectionOptions: {
+        selectionMode: this.getSelectionMode(),
+        equals: (obj1: Item, obj2: Item) => (obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID()))
+      }
+    };
+  }
+
+  /**
+   * Sets up the table
+   * #uncommented
    *
-   * @return a list of item IDs that should be initialized as 'selected' when the table builds.
+   * If all instances of this table should have an attribute, and define it differently, then it should be set via a method in
+   * [[defaultTableParams]].
+   * If an instance needs a unique attribute that the other pages don't even need to see (like virtue-modal having a getColor field),
+   * then that should be added in a customizeTableParams method, in that subclass. See [[VirtueModalComponent.customizeTableParams]]
    */
-  getSelectedIDs(): string[] {
-    return this.initialSelections;
+  setUpTable(): void {
+    if (this.table === undefined) {
+      return;
+    }
+    let params = this.defaultTableParams();
+
+    this.customizeTableParams(params);
+
+    this.table.setUp(params);
   }
 
   /**
-   * @return an empty list, because filters won't be very useful here until they can do more than filter on status
+   * Allow children to customize the parameters passed to the table. By default, do nothing.
+   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
    */
-  getTableFilters(): {text: string, value: string}[] {
-    return [];
+  customizeTableParams(paramsObject) {}
+
+  /**
+   * Sets the page's selection mode: can be {OFF, SINGLE, MULTI}. Default is MULTI.
+   * Subclasses should override this function, if they need a different mode.
+   * @return the selection mode to set this page in
+   */
+  getSelectionMode() {
+    return this.defaultSelectionMode;
   }
 
   /**
-   * @return true - all modals at the moment are for selection of a set of Items.
+   * Populates the table with the input list of objects.
+   * Abstracts away table from subclasses
+   *
+   * To make this whole class truly generic, we need to make this take its list of options from its callers.
+   * Also define the above equals in subclasses, and make this simply take in a list of objects to show, and selections.
+   * Simply pass those selections up to the table.
+   *
+   *
+   * @param newObjects the list of objects to be displayed in the table.
    */
-  hasCheckbox() {
-    return true;
+  fillTable(newObjects: Item[]): void {
+    this.table.populate(newObjects);
+    let selected = [];
+    for (let ID of this.selectedIDs) {
+      for (let item of newObjects) {
+        if (item.getID() === ID) {
+          selected.push(item);
+        }
+      }
+    }
+
+
+    this.table.setSelections(selected);
   }
 
   /**
-   * @return an empty list - no need for a submenu on Items in a modal at the moment
+   * This defines what columns show up in the table. See notes on [[Column]] types.
+   *
+   * @return a list of columns to be displayed within the table.
    */
-  getSubMenu(): SubMenuOptions[] {
-    return [];
-  }
+  abstract getColumns(): Column[];
+
+  /**
+   * @returns a string to be displayed in the table, when the table's 'elements' array is undefined or empty.
+   */
+  abstract getNoDataMsg(): string;
 
   /**
    * Notifies the component which created and is waiting on this modal that selections have been made,
    * then clears and closes the modal.
    */
   submit(): void {
-    this.getSelections.emit(this.table.selectedIDs);
-    this.table.clearSelections();
+    this.selectedIDs = [];
+
+    for (let i of this.table.getSelections()) {
+      this.selectedIDs.push(i.getID());
+    }
+
+    this.getSelections.emit(this.selectedIDs);
+    this.table.clear();
     this.dialogRef.close();
   }
 
@@ -119,7 +207,7 @@ export abstract class GenericModalComponent extends GenericListComponent impleme
    * Clears and closes the modal.
    */
   cancel() {
-    this.table.clearSelections();
+    this.table.clear();
     this.dialogRef.close();
   }
 

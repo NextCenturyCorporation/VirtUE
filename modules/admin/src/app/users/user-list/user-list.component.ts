@@ -5,7 +5,10 @@ import { Location } from '@angular/common';
 import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
-import { Column } from '../../shared/models/column.model';
+import {  Column,
+          TextColumn,
+          ListColumn,
+          SORT_DIR  } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
@@ -60,10 +63,11 @@ export class UserListComponent extends GenericListComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',        'Username',           3, 'asc',     undefined, undefined, (i: Item) => this.viewItem(i)),
-      new Column('childNames',  'Available Virtues',  4, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)),
-      new Column('roles',       'Authorized Roles',   3, 'asc',     this.formatRoles),
-      new Column('enabled',      'Account Status',     2, 'desc',    this.formatStatus)
+      new TextColumn('Username',           3, (i: Item) => i.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                                () => this.getSubMenu()),
+      new ListColumn('Available Virtues',  4, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
+      new TextColumn('Authorized Roles',   3, this.formatRoles, SORT_DIR.ASC),
+      new TextColumn('Account Status',     2, this.formatStatus, SORT_DIR.DESC)
     ];
   }
 
@@ -129,7 +133,6 @@ export class UserListComponent extends GenericListComponent {
    * @param user the user whose status we wish to toggle.
    */
   toggleItemStatus(user: User): void {
-    console.log(user);
     if (user.getName().toUpperCase() === 'ADMIN' && user.enabled) {
       this.openDialog('Disable ' + user.getName(), (() => this.setItemStatus(user, false)));
       // TODO: Remove this message when/if this is no longer applicable.

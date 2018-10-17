@@ -9,7 +9,12 @@ import { ItemService } from '../../shared/services/item.service';
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
 
-import { Column } from '../../shared/models/column.model';
+import {
+  Column,
+  TextColumn,
+  SORT_DIR
+} from '../../shared/models/column.model';
+import { Application } from '../../shared/models/application.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -41,6 +46,7 @@ export class AppsModalComponent extends GenericModalComponent {
     @Inject(MAT_DIALOG_DATA) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
+    this.pluralItem = "Applications";
   }
 
   /**
@@ -48,14 +54,14 @@ export class AppsModalComponent extends GenericModalComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', 5, 'asc'),
-      new Column('version', 'Version',          3, 'asc'),
-      new Column('os',      'Operating System', 4, 'desc')
+      new TextColumn('Application Name', 5, (a: Application) => a.getName(), SORT_DIR.ASC),
+      new TextColumn('Version',          3, (a: Application) => String(a.version), SORT_DIR.ASC),
+      new TextColumn('Operating System', 4, (a: Application) => a.os, SORT_DIR.DESC)
     ];
   }
 
   /**
-   * This page only needs to list all available apps, and doesn't need ot request any other data.
+   * This page only needs to list all available apps, and doesn't need to request any other data.
    *
    * See [[GenericPageComponent.getPageOptions]]() for details on return values
    */
@@ -65,22 +71,6 @@ export class AppsModalComponent extends GenericModalComponent {
     return {
       serviceConfigUrl: ConfigUrls.APPS,
       neededDatasets: [Datasets.APPS]
-    };
-  }
-
-  /**
-   * See [[GenericListComponent.getListOptions]] for details
-   * @return child-list-specific information needed by the generic list page functions.
-   */
-  getListOptions(): {
-      prettyTitle: string,
-      itemName: string,
-      pluralItem: string,
-      domain?: string} {
-    return {
-      prettyTitle: "Available Applications",
-      itemName: "Application",
-      pluralItem: "Applications"
     };
   }
 
@@ -95,6 +85,6 @@ export class AppsModalComponent extends GenericModalComponent {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.setItems(this.allApps.asList());
+    this.fillTable(this.allApps.asList());
   }
 }

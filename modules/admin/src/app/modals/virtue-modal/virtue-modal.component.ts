@@ -9,8 +9,13 @@ import { ItemService } from '../../shared/services/item.service';
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
 
-import { Column } from '../../shared/models/column.model';
-import { Item } from '../../shared/models/item.model';
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../shared/models/column.model';
+import { Virtue } from '../../shared/models/virtue.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
@@ -41,6 +46,7 @@ export class VirtueModalComponent extends GenericModalComponent {
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
     super(router, baseUrlService, itemService, dialog, dialogRef, data);
+    this.pluralItem = "Virtue Templates";
   }
 
   /**
@@ -48,27 +54,30 @@ export class VirtueModalComponent extends GenericModalComponent {
    */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Template Name',         3, 'asc'),
-      new Column('vms',     'Virtual Machines',      3, undefined, this.formatName, this.getChildren),
-      new Column('apps',    'Assigned Applications', 3, undefined, this.formatName,  this.getGrandchildren),
-      // new Column('version', 'Version',               1, 'asc'), // could this be useful?
-      new Column('modDate', 'Modification Date',     2, 'desc'),
-      new Column('enabled',  'Status',                1, 'asc', this.formatStatus)
+      new TextColumn('Template Name',         3, (v: Virtue) => v.getName(), SORT_DIR.ASC),
+      new ListColumn('Virtual Machines',      2, this.getChildren,      this.formatName),
+      new ListColumn('Assigned Applications', 3, this.getGrandchildren, this.formatName),
+      new TextColumn('Version',               1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Modification Date',     2, (v: Virtue) => v.modDate, SORT_DIR.DESC),
+      new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 
   /**
-   * @return true because this table holds Virtue Templates
+   * add colors to the table defined in [[GenericModalComponent]], since here it will be showing Virtues.
+   * This is a little spaghetti-esque, but the alternative was either every subclass inheriting a "hasColoredLabels" method that means
+   * nothing to them and always returns false, or overiding the generic modals' table setup function here, with an almost-exact copy.
    */
-  hasColoredLabels(): boolean {
-    return true;
+  customizeTableParams(params): void {
+    params['coloredLabels'] = true;
+    params['getColor'] = (v: Virtue) => v.color;
   }
 
   /**
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.setItems(this.allVirtues.asList());
+    this.fillTable(this.allVirtues.asList());
   }
 
   /**
@@ -83,22 +92,6 @@ export class VirtueModalComponent extends GenericModalComponent {
     return {
       serviceConfigUrl: ConfigUrls.VIRTUES,
       neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
-    };
-  }
-
-  /**
-   * See [[GenericListComponent.getListOptions]] for details
-   * @return child-list-specific information needed by the generic list page functions.
-   */
-  getListOptions(): {
-      prettyTitle: string,
-      itemName: string,
-      pluralItem: string,
-      domain?: string} {
-    return {
-      prettyTitle: "Virtue Templates",
-      itemName: "Virtue Template",
-      pluralItem: "Virtue Templates"
     };
   }
 

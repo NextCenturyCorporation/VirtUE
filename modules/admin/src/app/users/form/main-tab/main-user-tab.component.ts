@@ -4,7 +4,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
-import { Column } from '../../../shared/models/column.model';
+import { Virtue } from '../../../shared/models/virtue.model';
+
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../../shared/models/column.model';
+
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
@@ -86,26 +94,26 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
+   * add colors to the child table defined in [[GenericMainTabComponent]], since here it will be showing Virtues.
+   */
+  customizeTableParams(params): void {
+    params['coloredLabels'] = true;
+    params['getColor'] = (v: Virtue) => v.color;
+  }
+
+  /**
    * In view mode, make labels in Virtue and VMs columns clickable.
    * @return what columns should show up in the user's virtue children table
    */
   getColumns(): Column[] {
-    let cols: Column[] = [
-      new Column('apps',    'Assigned Applications',  3, undefined, this.formatName, this.getGrandchildren),
-      new Column('version', 'Version',                2, 'asc'),
-      new Column('enabled',  'Status',                 1, 'asc', this.formatStatus)
+    return [
+      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                          () => this.getSubMenu()),
+      new ListColumn('Virtual Machines', 3, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn<Item>('Available Apps', 4, this.getGrandchildren,  this.formatName),
+      new TextColumn('Version', 1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
-
-    if (this.mode === Mode.VIEW) {
-      cols.unshift(new Column('vms', 'Virtual Machines', 3, undefined, this.formatName, this.getChildren, (i: Item) => this.viewItem(i)));
-      cols.unshift(new Column('name', 'Virtue Template Name', 3, 'asc', this.formatName, undefined, (i: Item) => this.viewItem(i)));
-    }
-    else {
-      cols.unshift(new Column('vms', 'Virtual Machines', 3, undefined, this.formatName, this.getChildren));
-      cols.unshift(new Column('name', 'Virtue Template Name', 3, 'asc'));
-    }
-
-    return cols;
   }
 
   /**
@@ -113,13 +121,6 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
    */
   getNoDataMsg(): string {
     return "No virtues have been added yet. To add a virtue, click on the button \"Add Virtue\" above.";
-  }
-
-  /**
-   * @return true always, since this table holds virtues.
-   */
-  hasColoredLabels(): boolean {
-    return true;
   }
 
   /**
