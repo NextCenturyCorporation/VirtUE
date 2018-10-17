@@ -7,48 +7,11 @@
     height: 95% !important;
 }
 
-.tableViewPort {
-    height: 100% !important;
-    margin: 0; padding: 0;
-}
-
-.tableViewPort::after {
-    content: '';
-    position: relative;
-    bottom: 4em;
-    height: 4em;
-    width: 100%;
-    margin-bottom: -4em;
-    background: -webkit-linear-gradient(
-            rgba(255, 0, 255, 0) 0%,
-            rgba(0, 255, 255, 0.5) 100%
-    );
-    background-image: -moz-linear-gradient(
-            rgba(255, 0, 255, 0) 0%,
-            rgba(0, 255, 255, 0.5) 100%
-    );
-    background-image: -o-linear-gradient(
-            rgba(255, 0, 255, 0) 0%,
-            rgba(0, 255, 255, 0.5) 100%
-    );
-    background-image: linear-gradient(
-            rgba(255, 0, 255, 0) 0%,
-            rgba(0, 255, 255, 0.5) 100%
-    );
-    background-image: -ms-linear-gradient(
-            rgba(255, 0, 255, 0) 0%,
-            rgba(0, 255, 255, 0.5) 100%
-    );
-}
-
 .table {
-    height: 95% !important;
-}
-
-.table-row{
-  /* display: flex; */
-  justify-content: center;
-  align-items: center;
+    overflow-y: visible;
+    margin-top: 0;
+    margin-bottom: 0;
+    height: 100% !important;
 }
 
 /*  These center the lists (e.g. list of virtues under each user) within their column  */

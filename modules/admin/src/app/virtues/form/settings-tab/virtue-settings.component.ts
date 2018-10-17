@@ -218,9 +218,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Info',    5, (p: Printer) => p.info, SORT_DIR.ASC),
+      new TextColumn('Printer Info',    6, (p: Printer) => p.info, SORT_DIR.ASC),
       new TextColumn('Printer Status',  4, (p: Printer) => p.status, SORT_DIR.ASC),
-      new IconColumn('Revoke access',  3, 'delete', (p: Printer) => this.removePrinter(p)
+      new IconColumn('Revoke access',  2, 'delete', (p: Printer) => this.removePrinter(p)
       )
     ];
   }
@@ -286,7 +286,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   getNetworkColumns(): Column[] {
     return [
       new InputFieldColumn('Host',        4, 'destination', (netPerm: NetworkPermission) => netPerm.destination),
-      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.keys(NetworkProtocols),
+      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
                           (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
       new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
       new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
@@ -306,7 +306,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.networkPermsTable.setUp({
       cols: this.getNetworkColumns(),
       filters: [],
-      tableWidth: 0.85,
+      tableWidth: 0.95,
       noDataMsg: "This Virtue has not been granted permission to access any network",
       editingEnabled: () => !this.inViewMode()
     });
@@ -397,9 +397,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return [
       new TextColumn('Server & Drive',  6, (fs: FileSysPermission) => fs.location, SORT_DIR.ASC),
       new CheckboxColumn('Enabled',     3, 'enabled'),
-      new CheckboxColumn('Read',        1, 'read', (fs: FileSysPermission) => !fs.enabled),
-      new CheckboxColumn('Write',       1, 'write', (fs: FileSysPermission) => !fs.enabled),
-      new CheckboxColumn('Execute',     1, 'execute', (fs: FileSysPermission) => !fs.enabled)
+      new CheckboxColumn('Read',        1, 'read'),
+      new CheckboxColumn('Write',       1, 'write'),
+      new CheckboxColumn('Execute',     1, 'execute')
     ];
   }
 
@@ -415,7 +415,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.fileSysPermsTable.setUp({
       cols: this.getFileSysColumns(),
       filters: [],
-      tableWidth: 0.85,
+      tableWidth: 1,
       noDataMsg: "No file systems have been set up in the global settings",
       elementIsDisabled: (fs: FileSysPermission) => !fs.enabled,
       editingEnabled: () => !this.inViewMode()
@@ -502,10 +502,15 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
    */
   activatePastableVirtueModal(): void {
-    this.activateVirtueSelectionModal( this.item.allowedPasteTargets, (selectedVirtues: string[]) => {
-        this.item.allowedPasteTargets = selectedVirtues;
-        this.updatePasteableVirtuesTable();
-      });
+    this.activateModal_new(
+      this.getVirtueSelectionParams(
+          this.item.allowedPasteTargets,
+          (selectedVirtues: string[]) => {
+              this.item.allowedPasteTargets = selectedVirtues;
+              this.updatePasteableVirtuesTable();
+          }
+      )
+     );
   }
 
   /**
@@ -625,6 +630,28 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     dialogRef.updatePosition({ top: '5%'});
 
   }
+
+
+  /**
+   * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.
+   */
+  showColorModal(): void {
+    this.activateModal_new( {
+      modalClass: ColorModalComponent,
+      emitterName: "selectColor",
+      inData: {
+        color: this.item.color
+      },
+      onComplete: (newColor) => {
+        if (newColor !== "") {
+          this.item.color = newColor;
+        }
+      },
+      scale: {x: 0.4, y: 0.8} see stuff below
+    });
+  }
+  /**  Color modal boxes need to be made square. COlor modal needs to be fixed like the genericmodal was. All remianing activate*.odal functions
+   * need to be replaced TODO  */
 
 
   /**

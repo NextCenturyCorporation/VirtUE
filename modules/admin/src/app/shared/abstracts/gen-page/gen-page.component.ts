@@ -190,19 +190,24 @@ export abstract class GenericPageComponent {
           modalClass: any,
           emitterName: string,
           inData: {},
-          onComplete: (any) => void
+          onComplete: (any) => void,
+          scale?: {x: number, y : number}
         }
   ): void {
-    let dialogHeight = Math.floor(window.screen.height * 0.7);
-    let dialogWidth = Math.floor(window.screen.width * 0.7);
+    let scale = {x: 0.7, y: 0.7};
+    if (params.scale) {
+      let scale = params.scale;
+    }
+    // I'd think this way would be better, but modals have extra scroll bars this way.
+    let dialogHeight = Math.floor(scale.x * 100);
+    let dialogWidth = Math.floor(scale.y * 100);
 
     let dialogRef = this.dialog.open( params.modalClass,  {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
+      height: dialogHeight + '%',
+      width: dialogWidth + '%',
       data: params.inData
     });
-    console.log(params.emitterName);
-    console.log(dialogRef.componentInstance);
+
     let sub = dialogRef.componentInstance[params.emitterName].subscribe((returnedData) => {
       params.onComplete(returnedData);
     },
