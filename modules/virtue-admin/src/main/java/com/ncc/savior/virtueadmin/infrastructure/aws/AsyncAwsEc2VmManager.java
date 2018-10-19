@@ -21,6 +21,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 /**
  * {@link IVmManager} that uses AWS EC2 to create and manage VMs. The following
@@ -43,7 +44,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private static final String VM_PREFIX = "VRTU-W-";
 	private String serverKeyName;
 	private List<String> defaultSecurityGroups;
-	private String serverUser;
+	private String serverId;
 	private String awsProfile;
 	private InstanceType instanceType;
 	private AwsEc2Wrapper ec2Wrapper;
@@ -62,15 +63,15 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	 *            passed to {@link ProfileCredentialsProvider}.
 	 */
 	public AsyncAwsEc2VmManager(CompletableFutureServiceProvider serviceProvider, IKeyManager keyManager,
-			AwsEc2Wrapper ec2Wrapper, IVpcSubnetProvider vpcSubnetProvider) {
+			AwsEc2Wrapper ec2Wrapper, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider) {
 		this.ec2Wrapper = ec2Wrapper;
 		this.defaultSecurityGroups = new ArrayList<String>();
 		this.defaultSecurityGroups.add("default");
 
-		this.serverUser = System.getProperty("user.name");
 		this.instanceType = InstanceType.T2Small;
 		this.serviceProvider = serviceProvider;
 		this.vpcSubnetProvider = vpcSubnetProvider;
+		this.serverId=serverIdProvider.getServerId();
 	}
 
 	// @Override
@@ -105,7 +106,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			String clientUser = user.getUsername();
 			String virtueName = virtueMods.getName() == null ? "" : "-" + virtueMods.getName();
 			virtueName = virtueName.replace(" ", "-");
-			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + virtueName;
+			String namePrefix = VM_PREFIX + serverId + "-" + clientUser + virtueName;
 
 			Collection<String> secGroupIds = new HashSet<String>(securityGroupIds);
 			if (virtueMods.getSecurityGroupId() != null) {
@@ -305,21 +306,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		this.awsProfile = awsProfile;
 	}
 
-	public String getServerUser() {
-		return serverUser;
-	}
-
-	/**
-	 * Sets the server user used for naming AWS VM's. If it is null or an empty
-	 * string (after .trim()), the value will not be set. The default is set in the
-	 * constructor with the java property "user.name"
-	 * 
-	 * @param serverUser
-	 */
-	public void setServerUser(String serverUser) {
-		if (serverUser != null && !serverUser.trim().equals("")) {
-			this.serverUser = serverUser;
-		}
+	public String getServerId() {
+		return serverId;
 	}
 
 	public InstanceType getInstanceType() {

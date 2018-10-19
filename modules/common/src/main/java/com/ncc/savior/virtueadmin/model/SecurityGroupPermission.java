@@ -7,10 +7,12 @@ public class SecurityGroupPermission {
 	private String cidrIp;
 	private String ipProtocol;
 	private String description;
+	private String securityGroupId;
 
-	public SecurityGroupPermission(boolean ingress, Integer fromPort, Integer toPort, String cidrIp, String ipProtocol,
+	public SecurityGroupPermission(String securityGroupId, boolean ingress, Integer fromPort, Integer toPort, String cidrIp, String ipProtocol,
 			String desc) {
 		super();
+		this.securityGroupId=securityGroupId;
 		this.ingress = ingress;
 		this.fromPort = fromPort;
 		this.toPort = toPort;
@@ -67,10 +69,19 @@ public class SecurityGroupPermission {
 		this.description = description;
 	}
 
+	public String getSecurityGroupId() {
+		return securityGroupId;
+	}
+
+	public void setSecurityGroupId(String securityGroupId) {
+		this.securityGroupId = securityGroupId;
+	}
+
 	@Override
 	public String toString() {
 		return "SecurityGroupPermission [ingress=" + ingress + ", fromPort=" + fromPort + ", toPort=" + toPort
-				+ ", cidrIp=" + cidrIp + ", ipProtocol=" + ipProtocol + ", description=" + description + "]";
+				+ ", cidrIp=" + cidrIp + ", ipProtocol=" + ipProtocol + ", description=" + description
+				+ ", securityGroupId=" + securityGroupId + "]";
 	}
 
 }

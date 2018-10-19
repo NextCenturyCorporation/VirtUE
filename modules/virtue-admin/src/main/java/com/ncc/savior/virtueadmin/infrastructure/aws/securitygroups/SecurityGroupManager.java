@@ -15,7 +15,6 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
-import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressResult;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
@@ -36,6 +35,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
+import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 public class SecurityGroupManager {
 	private static final String FILTER_VPC_ID = "vpc-id";
@@ -52,13 +52,13 @@ public class SecurityGroupManager {
 	private String vpcId;
 	private String serverId;
 
-	public SecurityGroupManager(AwsEc2Wrapper ec2Wrapper, String vpcName, String serverId) {
+	public SecurityGroupManager(AwsEc2Wrapper ec2Wrapper, ServerIdProvider provider, String vpcName) {
 		this.ec2 = ec2Wrapper.getEc2();
 		this.vpcId = AwsUtil.getVpcIdFromVpcName(vpcName, ec2Wrapper);
 		if (!JavaUtil.isNotEmpty(serverId)) {
 			serverId = System.getProperty("user.name");
 		}
-		this.serverId = serverId;
+		this.serverId = provider.getServerId();
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class SecurityGroupManager {
 		}
 	}
 
-	public void listSecurityGroups() {
+	public void debugListSecurityGroups() {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
 		for (SecurityGroup sg : secGs) {
 			if (isThisServersSecurityGroup(sg)) {
@@ -104,7 +104,7 @@ public class SecurityGroupManager {
 					Integer to = ip.getToPort();
 					String protocol = ip.getIpProtocol();
 					List<IpRange> ips = ip.getIpv4Ranges();
-					logger.debug("   To: " + to + " From: " + from + " Protocol: " + protocol + " IPS: " + ips);
+					logger.debug("In   To: " + to + " From: " + from + " Protocol: " + protocol + " IPS: " + ips);
 				}
 				List<IpPermission> egress = sg.getIpPermissionsEgress();
 				for (IpPermission ip : egress) {
@@ -112,27 +112,11 @@ public class SecurityGroupManager {
 					Integer to = ip.getToPort();
 					String protocol = ip.getIpProtocol();
 					List<IpRange> ips = ip.getIpv4Ranges();
-					logger.debug("egr   To: " + to + " From: " + from + " Protocol: " + protocol + " IPS: " + ips);
+					logger.debug("Out   To: " + to + " From: " + from + " Protocol: " + protocol + " IPS: " + ips);
 				}
 			}
 		}
 		logger.debug("done");
-	}
-
-	private List<SecurityGroup> getAllSecurityGroupsFromAws() {
-		DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
-		Collection<Filter> filters = new ArrayList<Filter>();
-		filters.add(new Filter(FILTER_VPC_ID).withValues(vpcId));
-		filters.add(new Filter(FILTER_TAG + TAG_SERVER_ID).withValues(serverId));
-		describeSecurityGroupsRequest.setFilters(filters);
-		DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(describeSecurityGroupsRequest);
-		List<SecurityGroup> secGs = result.getSecurityGroups();
-		return secGs;
-	}
-
-	private boolean isThisServersSecurityGroup(SecurityGroup sg) {
-		return vpcId.equals(sg.getVpcId()) && (AwsUtil.tagEquals(sg.getTags(), TAG_SERVER_ID, serverId))
-				&& AwsUtil.tagEquals(sg.getTags(), TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE);
 	}
 
 	public List<String> getAllSecurityGroupIds() {
@@ -152,37 +136,6 @@ public class SecurityGroupManager {
 			map.put(sg.getGroupId(), permissions);
 		}
 		return map;
-	}
-
-	private Collection<SecurityGroupPermission> securityGroupToPermissionList(SecurityGroup sg) {
-		HashSet<SecurityGroupPermission> permissions = new HashSet<SecurityGroupPermission>();
-		for (IpPermission p : sg.getIpPermissions()) {
-			boolean ingress = true;
-			Integer fromPort = p.getFromPort();
-			Integer toPort = p.getToPort();
-			String ipProtocol = p.getIpProtocol();
-			for (IpRange r : p.getIpv4Ranges()) {
-				String cidrIp = r.getCidrIp();
-				String desc = r.getDescription();
-				SecurityGroupPermission sgp = new SecurityGroupPermission(ingress, fromPort, toPort, cidrIp, ipProtocol,
-						desc);
-				permissions.add(sgp);
-			}
-		}
-		for (IpPermission p : sg.getIpPermissionsEgress()) {
-			boolean ingress = false;
-			Integer fromPort = p.getFromPort();
-			Integer toPort = p.getToPort();
-			String ipProtocol = p.getIpProtocol();
-			for (IpRange r : p.getIpv4Ranges()) {
-				String cidrIp = r.getCidrIp();
-				String desc = r.getDescription();
-				SecurityGroupPermission sgp = new SecurityGroupPermission(ingress, fromPort, toPort, cidrIp, ipProtocol,
-						desc);
-				permissions.add(sgp);
-			}
-		}
-		return permissions;
 	}
 
 	public Collection<SecurityGroupPermission> getSecurityGroupPermissions(String groupId) {
@@ -221,17 +174,19 @@ public class SecurityGroupManager {
 		return groupId;
 	}
 
-	public void authorizeSecurityGroup(String groupId, SecurityGroupPermission permission) {
+	public void authorizeSecurityGroup(SecurityGroupPermission permission) {
 		try {
+			String groupId = permission.getSecurityGroupId();
 			Integer fromPort = permission.getFromPort();
 			Integer toPort = permission.getToPort();
 			String cidrIp = permission.getCidrIp();
 			String ipProtocol = permission.getIpProtocol();
 			if (permission.isIngress()) {
-//				AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest = new AuthorizeSecurityGroupIngressRequest();
-//				authorizeSecurityGroupIngressRequest.withGroupId(groupId).withFromPort(fromPort).withToPort(toPort)
-//						.withCidrIp(cidrIp).withIpProtocol(ipProtocol);
-				
+				// AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest =
+				// new AuthorizeSecurityGroupIngressRequest();
+				// authorizeSecurityGroupIngressRequest.withGroupId(groupId).withFromPort(fromPort).withToPort(toPort)
+				// .withCidrIp(cidrIp).withIpProtocol(ipProtocol);
+
 				AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest = new AuthorizeSecurityGroupIngressRequest();
 				// authorizeSecurityGroupEgressRequest.withGroupId(groupId).withFromPort(fromPort).withToPort(toPort)
 				// .withCidrIp(cidrIp).withIpProtocol(ipProtocol);
@@ -242,10 +197,8 @@ public class SecurityGroupManager {
 				ipPermission.withIpProtocol(ipProtocol).withFromPort(fromPort).withToPort(toPort)
 						.withIpv4Ranges(ipv4Range);
 				authorizeSecurityGroupIngressRequest.withIpPermissions(ipPermission).withGroupId(groupId);
-				
-				AuthorizeSecurityGroupIngressResult result = ec2
-						.authorizeSecurityGroupIngress(authorizeSecurityGroupIngressRequest);
-				logger.debug("result " + result);
+
+				ec2.authorizeSecurityGroupIngress(authorizeSecurityGroupIngressRequest);
 			} else {
 				AuthorizeSecurityGroupEgressRequest authorizeSecurityGroupEgressRequest = new AuthorizeSecurityGroupEgressRequest();
 				// authorizeSecurityGroupEgressRequest.withGroupId(groupId).withFromPort(fromPort).withToPort(toPort)
@@ -269,8 +222,9 @@ public class SecurityGroupManager {
 		}
 	}
 
-	public void revokeSecurityGroup(String groupId, SecurityGroupPermission permission) {
+	public void revokeSecurityGroup(SecurityGroupPermission permission) {
 		try {
+			String groupId = permission.getSecurityGroupId();
 			Integer fromPort = permission.getFromPort();
 			Integer toPort = permission.getToPort();
 			String cidrIp = permission.getCidrIp();
@@ -298,6 +252,53 @@ public class SecurityGroupManager {
 				throw e;
 			}
 		}
+	}
+
+	private List<SecurityGroup> getAllSecurityGroupsFromAws() {
+		DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
+		Collection<Filter> filters = new ArrayList<Filter>();
+		filters.add(new Filter(FILTER_VPC_ID).withValues(vpcId));
+		filters.add(new Filter(FILTER_TAG + TAG_SERVER_ID).withValues(serverId));
+		describeSecurityGroupsRequest.setFilters(filters);
+		DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(describeSecurityGroupsRequest);
+		List<SecurityGroup> secGs = result.getSecurityGroups();
+		return secGs;
+	}
+
+	private boolean isThisServersSecurityGroup(SecurityGroup sg) {
+		return vpcId.equals(sg.getVpcId()) && (AwsUtil.tagEquals(sg.getTags(), TAG_SERVER_ID, serverId))
+				&& AwsUtil.tagEquals(sg.getTags(), TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE);
+	}
+
+	private Collection<SecurityGroupPermission> securityGroupToPermissionList(SecurityGroup sg) {
+		HashSet<SecurityGroupPermission> permissions = new HashSet<SecurityGroupPermission>();
+		for (IpPermission p : sg.getIpPermissions()) {
+			boolean ingress = true;
+			Integer fromPort = p.getFromPort();
+			Integer toPort = p.getToPort();
+			String ipProtocol = p.getIpProtocol();
+			for (IpRange r : p.getIpv4Ranges()) {
+				String cidrIp = r.getCidrIp();
+				String desc = r.getDescription();
+				SecurityGroupPermission sgp = new SecurityGroupPermission(sg.getGroupId(), ingress, fromPort, toPort,
+						cidrIp, ipProtocol, desc);
+				permissions.add(sgp);
+			}
+		}
+		for (IpPermission p : sg.getIpPermissionsEgress()) {
+			boolean ingress = false;
+			Integer fromPort = p.getFromPort();
+			Integer toPort = p.getToPort();
+			String ipProtocol = p.getIpProtocol();
+			for (IpRange r : p.getIpv4Ranges()) {
+				String cidrIp = r.getCidrIp();
+				String desc = r.getDescription();
+				SecurityGroupPermission sgp = new SecurityGroupPermission(sg.getGroupId(), ingress, fromPort, toPort,
+						cidrIp, ipProtocol, desc);
+				permissions.add(sgp);
+			}
+		}
+		return permissions;
 	}
 
 	private String createGroupDescription() {
@@ -359,34 +360,34 @@ public class SecurityGroupManager {
 		VirtueAwsEc2Provider ec2Provider = new VirtueAwsEc2Provider(region, awsProfile);
 		AwsEc2Wrapper ec2Wrapper = new AwsEc2Wrapper(ec2Provider, "true");
 		String vpcName = "VIRTUE";
-		String serverId = "kdrummDev";
-		SecurityGroupManager sgm = new SecurityGroupManager(ec2Wrapper, vpcName, serverId);
+		ServerIdProvider sip = new ServerIdProvider(null);
+		SecurityGroupManager sgm = new SecurityGroupManager(ec2Wrapper, sip, vpcName);
 
-		sgm.listSecurityGroups();
-		String groupId = sgm.getSecurityGroupById("test-kd-del-soon");
+		sgm.debugListSecurityGroups();
+		String groupId = sgm.getSecurityGroupById("test-sg");
 		logger.debug("generated group=" + groupId);
-		sgm.authorizeSecurityGroup(groupId,
-				new SecurityGroupPermission(true, 10000, 10020, "192.168.0.1/32", "tcp", "a"));
-		sgm.authorizeSecurityGroup(groupId,
-				new SecurityGroupPermission(true, 10000, 10020, "192.168.0.4/32", "tcp", "b"));
-		sgm.authorizeSecurityGroup(groupId,
-				new SecurityGroupPermission(true, 10000, 10020, "192.168.0.10/32", "tcp", "c"));
-		sgm.authorizeSecurityGroup(groupId,
-				new SecurityGroupPermission(false, 10000, 10022, "192.168.0.2/32", "tcp", "d"));
-		sgm.authorizeSecurityGroup(groupId,
-				new SecurityGroupPermission(true, 10003, 10020, "192.168.0.3/32", "tcp", "e"));
-		sgm.authorizeSecurityGroup(groupId,
-				new SecurityGroupPermission(false, 10000, 10024, "192.168.0.4/32", "udp", "f"));
-		sgm.authorizeSecurityGroup(groupId,
-				new SecurityGroupPermission(true, 10005, 10020, "192.168.0.5/32", "udp", "g"));
+		sgm.authorizeSecurityGroup(
+				new SecurityGroupPermission(groupId, true, 10000, 10020, "192.168.0.1/32", "tcp", "a"));
+		sgm.authorizeSecurityGroup(
+				new SecurityGroupPermission(groupId, true, 10000, 10020, "192.168.0.4/32", "tcp", "b"));
+		sgm.authorizeSecurityGroup(
+				new SecurityGroupPermission(groupId, true, 10000, 10020, "192.168.0.10/32", "tcp", "c"));
+		sgm.authorizeSecurityGroup(
+				new SecurityGroupPermission(groupId, false, 10000, 10022, "192.168.0.2/32", "tcp", "d"));
+		sgm.authorizeSecurityGroup(
+				new SecurityGroupPermission(groupId, true, 10003, 10020, "192.168.0.3/32", "tcp", "e"));
+		sgm.authorizeSecurityGroup(
+				new SecurityGroupPermission(groupId, false, 10000, 10024, "192.168.0.4/32", "udp", "f"));
+		sgm.authorizeSecurityGroup(
+				new SecurityGroupPermission(groupId, true, 10005, 10020, "192.168.0.5/32", "udp", "g"));
 		// sgm.authorizeSecurityGroup(true, groupId, 10005, 10020, "192.168.0.5/32",
 		// "icmp");
 		logger.debug("added authorizations to group");
-		sgm.listSecurityGroups();
-		sgm.revokeSecurityGroup(groupId,
-				new SecurityGroupPermission(false, 10000, 10022, "192.168.0.2/32", "tcp", null));
-		sgm.revokeSecurityGroup(groupId,
-				new SecurityGroupPermission(true, 10003, 10020, "192.168.0.3/32", "tcp", null));
+		sgm.debugListSecurityGroups();
+		sgm.revokeSecurityGroup(
+				new SecurityGroupPermission(groupId, false, 10000, 10022, "192.168.0.2/32", "tcp", null));
+		sgm.revokeSecurityGroup(
+				new SecurityGroupPermission(groupId, true, 10003, 10020, "192.168.0.3/32", "tcp", null));
 		logger.debug("removed authorizations to group");
 		logger.debug(sgm.getSecurityGroupPermissions(groupId).toString());
 		try {
@@ -395,7 +396,7 @@ public class SecurityGroupManager {
 			logger.debug("expected exception");
 			// expected
 		}
-		sgm.listSecurityGroups();
+		sgm.debugListSecurityGroups();
 		logger.debug("list");
 		sgm.sync(new ArrayList<String>());
 		logger.debug("attempted to sync and deltete");
