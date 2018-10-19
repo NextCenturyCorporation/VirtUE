@@ -1,10 +1,13 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.Comparator;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupPermission {
+	public static final Comparator<? super SecurityGroupPermission> TEMPLATE_ID_COMPARATOR = new TemplateIdComparator();
 	private boolean ingress;
 	private Integer fromPort;
 	private Integer toPort;
@@ -95,10 +98,21 @@ public class SecurityGroupPermission {
 		return templateId;
 	}
 
+	public String getKey() {
+		return Integer.toString(this.hashCode(), 16);
+	}
+
 	@Override
 	public String toString() {
 		return "SecurityGroupPermission [ingress=" + ingress + ", fromPort=" + fromPort + ", toPort=" + toPort
 				+ ", cidrIp=" + cidrIp + ", ipProtocol=" + ipProtocol + ", description=" + description
 				+ ", securityGroupId=" + securityGroupId + ", templateId=" + templateId + "]";
+	}
+
+	private static class TemplateIdComparator implements Comparator<SecurityGroupPermission> {
+		@Override
+		public int compare(SecurityGroupPermission o1, SecurityGroupPermission o2) {
+			return String.CASE_INSENSITIVE_ORDER.compare(o1.getTemplateId(), o2.getTemplateId());
+		}
 	}
 }

@@ -127,7 +127,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		tags.put(IVpcSubnetProvider.TAG_VIRTUE_NAME, vi.getName());
 		tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, vi.getId());
 		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
-		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupById(vi.getTemplateId());
+		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupIdByTemplateId(vi.getTemplateId());
 		VirtueModifications virtueMods = new VirtueModifications(template.getName());
 		virtueMods.setSubnetId(subnetId);
 		virtueMods.setSecurityGroupId(virtueSecurityGroupId);

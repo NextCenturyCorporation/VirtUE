@@ -61,12 +61,6 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		this.serverId = provider.getServerId();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
-	 * ISecurityGroupManager#sync(java.util.Collection)
-	 */
 	@Override
 	public void sync(Collection<String> allTemplateIds) {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
@@ -120,12 +114,6 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		logger.debug("done");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
-	 * ISecurityGroupManager#getAllSecurityGroupIds()
-	 */
 	@Override
 	public List<String> getAllSecurityGroupIds() {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
@@ -136,12 +124,6 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		return ids;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
-	 * ISecurityGroupManager#getAllSecurityGroupPermissions()
-	 */
 	@Override
 	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroupPermissions() {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
@@ -153,12 +135,6 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		return map;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
-	 * ISecurityGroupManager#getSecurityGroupPermissions(java.lang.String)
-	 */
 	@Override
 	public Collection<SecurityGroupPermission> getSecurityGroupPermissionsByGroupId(String groupId) {
 		if (groupId != null) {
@@ -205,14 +181,8 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 				"Unable to find security group matching template ID=" + templateId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
-	 * ISecurityGroupManager#getSecurityGroupById(java.lang.String)
-	 */
 	@Override
-	public String getSecurityGroupById(String templateId) {
+	public String getSecurityGroupIdByTemplateId(String templateId) {
 		String groupId = getExistingGroupById(templateId);
 		if (groupId == null) {
 			String groupName = createGroupName(templateId);
@@ -223,13 +193,6 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		return groupId;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
-	 * ISecurityGroupManager#authorizeSecurityGroup(com.ncc.savior.virtueadmin.model
-	 * .SecurityGroupPermission)
-	 */
 	@Override
 	public void authorizeSecurityGroup(String groupId, SecurityGroupPermission permission) {
 		try {
@@ -278,13 +241,6 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
-	 * ISecurityGroupManager#revokeSecurityGroup(com.ncc.savior.virtueadmin.model.
-	 * SecurityGroupPermission)
-	 */
 	@Override
 	public void revokeSecurityGroup(String groupId, SecurityGroupPermission permission) {
 		try {
@@ -443,7 +399,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		SecurityGroupManager sgm = new SecurityGroupManager(ec2Wrapper, sip, vpcName);
 
 		sgm.debugListSecurityGroups();
-		String groupId = sgm.getSecurityGroupById("test-sg");
+		String groupId = sgm.getSecurityGroupIdByTemplateId("test-sg");
 		logger.debug("generated group=" + groupId);
 		sgm.authorizeSecurityGroup(groupId,
 				new SecurityGroupPermission(true, 10000, 10020, "192.168.0.1/32", "tcp", "a"));

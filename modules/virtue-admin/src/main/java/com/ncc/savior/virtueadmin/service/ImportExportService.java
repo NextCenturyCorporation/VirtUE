@@ -36,10 +36,12 @@ import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.images.IXenGuestImageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
 import com.ncc.savior.virtueadmin.model.OS;
+import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -72,16 +74,18 @@ public class ImportExportService {
 	private IUserManager userManager;
 	private PathMatchingResourcePatternResolver resourceResolver;
 	private IXenGuestImageManager imageManager;
+	private ISecurityGroupManager securityGroupManager;
 
 	@Autowired
 	private SecurityUserService securityService;
 
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager,
-			IXenGuestImageManager imageManager) {
+			IXenGuestImageManager imageManager, ISecurityGroupManager securityGroupManager) {
 		this.jsonMapper = new ObjectMapper();
 		this.templateManager = templateManager;
 		this.userManager = userManager;
 		this.imageManager = imageManager;
+		this.securityGroupManager = securityGroupManager;
 		resourceResolver = new PathMatchingResourcePatternResolver();
 		this.rootClassPath = IMPORTS_LOCATION;
 	}
@@ -210,6 +214,7 @@ public class ImportExportService {
 			ArrayList<VirtueUser> users = new ArrayList<VirtueUser>();
 			ArrayList<IconModel> icons = new ArrayList<IconModel>();
 			ArrayList<Runnable> imageCompletionRunnables = new ArrayList<Runnable>();
+			ArrayList<SecurityGroupPermission> sgps = new ArrayList<SecurityGroupPermission>();
 			BiConsumer<ZipEntry, InputStream> vmImageConsumer = (entry, uncloseableStream) -> {
 				try {
 					Runnable runnable = importImage(entry, uncloseableStream);
@@ -219,9 +224,9 @@ public class ImportExportService {
 				}
 			};
 			// Prepares all the data to be pushed
-			ImportExportUtils.readImportExportZipStream(stream, users, vts, vms, apps, icons, vmImageConsumer);
+			ImportExportUtils.readImportExportZipStream(stream, users, vts, vms, apps, icons, sgps, vmImageConsumer);
 			// Push database entries first as a transaction
-			loadDatabaseObjects(apps, vms, vts, users, icons);
+			loadDatabaseObjects(apps, vms, vts, users, icons, sgps);
 			// finish loading of images
 			CompletableFuture<Void> cf = imageManager.finishImageLoad(imageCompletionRunnables);
 			if (waitUntilCompletion) {
@@ -236,7 +241,8 @@ public class ImportExportService {
 	}
 
 	private void loadDatabaseObjects(ArrayList<ApplicationDefinition> apps, ArrayList<VirtualMachineTemplate> vms,
-			ArrayList<VirtueTemplate> vts, ArrayList<VirtueUser> users, ArrayList<IconModel> icons) {
+			ArrayList<VirtueTemplate> vts, ArrayList<VirtueUser> users, ArrayList<IconModel> icons,
+			ArrayList<SecurityGroupPermission> sgps) {
 		for (ApplicationDefinition app : apps) {
 			templateManager.addApplicationDefinition(app);
 		}
@@ -251,6 +257,14 @@ public class ImportExportService {
 		}
 		for (IconModel icon : icons) {
 			importIconFromObject(icon);
+		}
+		for (SecurityGroupPermission sgp : sgps) {
+			try {
+				String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(sgp.getTemplateId());
+				securityGroupManager.authorizeSecurityGroup(groupId, sgp);
+			} catch (Exception e) {
+				logger.warn("exception loading security group=" + sgp, e);
+			}
 		}
 	}
 
@@ -306,9 +320,30 @@ public class ImportExportService {
 			zipOut.write(baos.toByteArray());
 			zipOut.closeEntry();
 			includedEntries.add(entryName);
+			Collection<SecurityGroupPermission> permissions = securityGroupManager
+					.getSecurityGroupPermissionsByTemplateId(template.getId());
+			for (SecurityGroupPermission permission : permissions) {
+				addSecurityGroupPermissionToZipStream(permission, includedEntries, zipOut);
+			}
 		}
 		for (VirtualMachineTemplate vmt : template.getVmTemplates()) {
 			addVirtualMachineTemplateToZipStream(vmt, includedEntries, zipOut);
+		}
+	}
+
+	private void addSecurityGroupPermissionToZipStream(SecurityGroupPermission permission, Set<String> includedEntries,
+			ZipOutputStream zipOut) throws IOException {
+		String permissionId = permission.getKey();
+		String entryName = ImportExportUtils.SECURITY_GROUP_PERMISSION_ZIP_ROOT + permissionId + ".json";
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		if (!includedEntries.contains(entryName)) {
+			zipOut.putNextEntry(new ZipEntry(entryName));
+			// we use ByteArrayOutputStream because the jsonMapper may try to close the
+			// stream.
+			jsonMapper.writeValue(baos, permission);
+			zipOut.write(baos.toByteArray());
+			zipOut.closeEntry();
+			includedEntries.add(entryName);
 		}
 	}
 

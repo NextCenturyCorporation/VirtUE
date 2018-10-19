@@ -41,7 +41,7 @@ public interface ISecurityGroupManager {
 	 * @param templateId
 	 * @return
 	 */
-	String getSecurityGroupById(String templateId);
+	String getSecurityGroupIdByTemplateId(String templateId);
 
 	void authorizeSecurityGroup(String groupId, SecurityGroupPermission permission);
 

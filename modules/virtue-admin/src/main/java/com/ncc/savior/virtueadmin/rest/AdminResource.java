@@ -26,6 +26,8 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ncc.savior.util.SaviorErrorCode;
@@ -55,6 +57,7 @@ import com.ncc.savior.virtueadmin.util.WebServiceUtil;
 
 @Path("/admin")
 public class AdminResource {
+	private static final Logger logger = LoggerFactory.getLogger(AdminResource.class);
 
 	@Autowired
 	private DesktopVirtueService desktopService;
@@ -444,12 +447,16 @@ public class AdminResource {
 	@GET
 	@Path("export/virtue/template/{templateId}")
 	@Produces("application/zip")
-	public Response exportAllVirtueTemplates(@PathParam("templateId") String templateId) {
+	public Response exportVirtueTemplate(@PathParam("templateId") String templateId) {
 		StreamingOutput stream = new StreamingOutput() {
 			@Override
 			public void write(OutputStream os) throws IOException, WebApplicationException {
-				importExportService.exportZippedVirtueTemplate(templateId, os);
-				os.flush();
+				try {
+					importExportService.exportZippedVirtueTemplate(templateId, os);
+					os.flush();
+				} catch (Throwable t) {
+					logger.debug("", t);
+				}
 			}
 		};
 		return Response.ok(stream)
@@ -776,15 +783,14 @@ public class AdminResource {
 
 	@POST
 	@Path("securityGroup/template/{templateId}/revoke")
-	public void revokePermissionForTemplate(@PathParam("templateId") String templateId,
-			SecurityGroupPermission sgp) {
+	public void revokePermissionForTemplate(@PathParam("templateId") String templateId, SecurityGroupPermission sgp) {
 		adminService.revokeSecurityGroupsByKey(templateId, sgp);
 	}
 
 	@POST
 	@Path("securityGroup/template/{templateId}/authorize")
-	public void authorizePermissionFromTemplate(
-			@PathParam("templateId") String templateId, SecurityGroupPermission sgp) {
+	public void authorizePermissionFromTemplate(@PathParam("templateId") String templateId,
+			SecurityGroupPermission sgp) {
 		adminService.authorizeSecurityGroupsByKey(templateId, sgp);
 	}
 

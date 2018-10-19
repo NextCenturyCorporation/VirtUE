@@ -552,21 +552,21 @@ public class AdminService {
 
 	public void authorizeSecurityGroupsByKey(String templateId, SecurityGroupPermission sgp) {
 		verifyAndReturnUser();
-		String groupId = securityGroupManager.getSecurityGroupById(templateId);
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
 		sgp.setSecurityGroupId(groupId);
 		securityGroupManager.authorizeSecurityGroup(groupId, sgp);
 	}
 
 	public void revokeSecurityGroupsByKey(String templateId, SecurityGroupPermission sgp) {
 		verifyAndReturnUser();
-		String groupId = securityGroupManager.getSecurityGroupById(templateId);
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
 		sgp.setSecurityGroupId(groupId);
 		securityGroupManager.revokeSecurityGroup(groupId, sgp);
 	}
 
 	public String securityGroupIdByTemplateId(String templateId) {
 		verifyAndReturnUser();
-		String groupId = securityGroupManager.getSecurityGroupById(templateId);
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
 		return groupId;
 	}
 

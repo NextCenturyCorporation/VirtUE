@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -15,6 +16,7 @@ import java.util.zip.ZipEntry;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -46,6 +48,7 @@ public class ExportViewer {
 		ArrayList<VirtueTemplate> vts = new ArrayList<VirtueTemplate>();
 		ArrayList<VirtueUser> users = new ArrayList<VirtueUser>();
 		ArrayList<IconModel> icons = new ArrayList<IconModel>();
+		ArrayList<SecurityGroupPermission> sgps = new ArrayList<SecurityGroupPermission>();
 		Map<String, Long> imageToSizeMap = new TreeMap<String, Long>();
 		try {
 			BiConsumer<ZipEntry, InputStream> vmImageConsumer = (ze, stream) -> {
@@ -60,13 +63,14 @@ public class ExportViewer {
 				}
 				imageToSizeMap.put(path, size);
 			};
-			ImportExportUtils.readImportExportZipStream(fis, users, vts, vms, apps, icons, vmImageConsumer);
+			ImportExportUtils.readImportExportZipStream(fis, users, vts, vms, apps, icons, sgps, vmImageConsumer);
 			printUsers(users);
 			printVirtues(vts);
 			printVms(vms, imageToSizeMap);
 			printApps(apps);
 			printIcons(icons);
 			printImages(imageToSizeMap);
+			printSecurityGroupPermissions(sgps);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -122,13 +126,24 @@ public class ExportViewer {
 	}
 
 	private static void printUsers(ArrayList<VirtueUser> users) {
-		users.sort(VirtueUser.USERNAME_COMPARATOR);
 		System.out.println("Users (" + users.size() + "):");
 		Collections.sort(users, VirtueUser.USERNAME_COMPARATOR);
 		for (VirtueUser user : users) {
 			System.out.println(INDENT + user.getUsername() + " - " + user.getAuthorities());
 		}
 		System.out.println();
+	}
+
+	private static void printSecurityGroupPermissions(List<SecurityGroupPermission> sgps) {
+		System.out.println("SecurityGroupPermissions (" + sgps.size() + "):");
+		Collections.sort(sgps, SecurityGroupPermission.TEMPLATE_ID_COMPARATOR);
+		for (SecurityGroupPermission sgp : sgps) {
+			System.out.println(INDENT + " Key: " + sgp.getKey() + " Template: " + sgp.getTemplateId()
+					+ " SecurityGroup: " + sgp.getSecurityGroupId() + " Ingress: " + sgp.isIngress() + " CidrIp: "
+					+ sgp.getCidrIp() + " Protocol: " + sgp.getIpProtocol() + " ToPort: " + sgp.getToPort()
+					+ " FromPort: " + sgp.getFromPort());
+		}
+
 	}
 
 	private static void printUsage() {
