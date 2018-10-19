@@ -1,5 +1,9 @@
 package com.ncc.savior.virtueadmin.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 public class SecurityGroupPermission {
 	private boolean ingress;
 	private Integer fromPort;
@@ -8,11 +12,17 @@ public class SecurityGroupPermission {
 	private String ipProtocol;
 	private String description;
 	private String securityGroupId;
+	private String templateId;
 
-	public SecurityGroupPermission(String securityGroupId, boolean ingress, Integer fromPort, Integer toPort, String cidrIp, String ipProtocol,
+	// for jackson deserialization only
+	@SuppressWarnings("unused")
+	private SecurityGroupPermission() {
+
+	}
+
+	public SecurityGroupPermission(boolean ingress, Integer fromPort, Integer toPort, String cidrIp, String ipProtocol,
 			String desc) {
 		super();
-		this.securityGroupId=securityGroupId;
 		this.ingress = ingress;
 		this.fromPort = fromPort;
 		this.toPort = toPort;
@@ -77,11 +87,18 @@ public class SecurityGroupPermission {
 		this.securityGroupId = securityGroupId;
 	}
 
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateId() {
+		return templateId;
+	}
+
 	@Override
 	public String toString() {
 		return "SecurityGroupPermission [ingress=" + ingress + ", fromPort=" + fromPort + ", toPort=" + toPort
 				+ ", cidrIp=" + cidrIp + ", ipProtocol=" + ipProtocol + ", description=" + description
-				+ ", securityGroupId=" + securityGroupId + "]";
+				+ ", securityGroupId=" + securityGroupId + ", templateId=" + templateId + "]";
 	}
-
 }

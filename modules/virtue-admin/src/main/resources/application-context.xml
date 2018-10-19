@@ -57,6 +57,7 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="userManager" />
 		<constructor-arg ref="persistentStorageManager" />
+		<constructor-arg ref="securityGroupManager" />
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 

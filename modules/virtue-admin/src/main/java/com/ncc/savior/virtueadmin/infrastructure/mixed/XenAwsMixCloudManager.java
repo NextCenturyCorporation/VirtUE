@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueModifications;
-import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.SecurityGroupManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.OS;
@@ -61,11 +61,11 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private IVpcSubnetProvider vpcSubnetProvider;
 
-	private SecurityGroupManager securityGroupManager;
+	private ISecurityGroupManager securityGroupManager;
 
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
 			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
-			IVpcSubnetProvider vpcSubnetPRovider, SecurityGroupManager securityGroupManager) {
+			IVpcSubnetProvider vpcSubnetPRovider, ISecurityGroupManager securityGroupManager) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;

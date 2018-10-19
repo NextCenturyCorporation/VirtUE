@@ -34,6 +34,7 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
 import com.ncc.savior.virtueadmin.model.ClipboardPermissionOption;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -421,8 +422,8 @@ public class AdminResource {
 				os.flush();
 			}
 		};
-		return Response.ok(stream)
-				.header("Content-Disposition", "attachment; filename=\"virtue-" + "users" + ".zip\"").build();
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"virtue-" + "users" + ".zip\"")
+				.build();
 	}
 
 	@GET
@@ -436,8 +437,8 @@ public class AdminResource {
 				os.flush();
 			}
 		};
-		return Response.ok(stream)
-				.header("Content-Disposition", "attachment; filename=\"virtue-" + username + ".zip\"").build();
+		return Response.ok(stream).header("Content-Disposition", "attachment; filename=\"virtue-" + username + ".zip\"")
+				.build();
 	}
 
 	@GET
@@ -454,7 +455,7 @@ public class AdminResource {
 		return Response.ok(stream)
 				.header("Content-Disposition", "attachment; filename=\"virtue-" + templateId + ".zip\"").build();
 	}
-	
+
 	@GET
 	@Path("export/all")
 	@Produces("application/zip")
@@ -512,7 +513,8 @@ public class AdminResource {
 	@Path("import")
 	@Produces("application/json")
 	@Consumes({ "application/zip", "application/octet-stream" })
-	public void importZip(InputStream stream, @QueryParam("waitForCompletion") @DefaultValue("true") boolean waitForCompletion) {
+	public void importZip(InputStream stream,
+			@QueryParam("waitForCompletion") @DefaultValue("true") boolean waitForCompletion) {
 		importExportService.importZip(stream, waitForCompletion);
 	}
 
@@ -741,6 +743,62 @@ public class AdminResource {
 	public void deletePersistentStorage(@PathParam("user") String username,
 			@PathParam("virtueTemplateId") String virtueTemplateId) {
 		adminService.deletePersistentStorage(username, virtueTemplateId);
+	}
+
+	@GET
+	@Path("securityGroup/")
+	@Produces("application/json")
+	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroupsAndPermissions() {
+		return adminService.getAllSecurityGroups();
+	}
+
+	@GET
+	@Path("securityGroup/test")
+	@Produces("application/json")
+	public void create() {
+		SecurityGroupPermission sgp = new SecurityGroupPermission(true, 80, 80, "192.168.1.0/32", "tcp", "test");
+		adminService.authorizeSecurityGroupsByKey("test", sgp);
+	}
+
+	@GET
+	@Path("securityGroup/id/{groupId}")
+	@Produces("application/json")
+	public Collection<SecurityGroupPermission> getPermissionsByGroupId(@PathParam("groupId") String groupId) {
+		return adminService.getSecurityGroupPermissions(groupId);
+	}
+
+	@GET
+	@Path("securityGroup/template/{templateId}")
+	@Produces("application/json")
+	public Collection<SecurityGroupPermission> getGroupIdByTemplate(@PathParam("templateId") String templateId) {
+		return adminService.getSecurityGroupPermissionsByTemplate(templateId);
+	}
+
+	@POST
+	@Path("securityGroup/template/{templateId}/revoke")
+	public void revokePermissionForTemplate(@PathParam("templateId") String templateId,
+			SecurityGroupPermission sgp) {
+		adminService.revokeSecurityGroupsByKey(templateId, sgp);
+	}
+
+	@POST
+	@Path("securityGroup/template/{templateId}/authorize")
+	public void authorizePermissionFromTemplate(
+			@PathParam("templateId") String templateId, SecurityGroupPermission sgp) {
+		adminService.authorizeSecurityGroupsByKey(templateId, sgp);
+	}
+
+	@DELETE
+	@Path("securityGroup/template/{templateId}")
+	public void deleteByTemplateId(@PathParam("templateId") String templateId) {
+		String secGroupId = adminService.securityGroupIdByTemplateId(templateId);
+		adminService.deleteSecurityGroup(secGroupId);
+	}
+
+	@DELETE
+	@Path("securityGroup/id/{groupId}")
+	public void deleteByGroupId(@PathParam("groupId") String groupId) {
+		adminService.deleteSecurityGroup(groupId);
 	}
 
 	private Collection<String> getAllSourceIds() {

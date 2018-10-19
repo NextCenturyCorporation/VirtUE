@@ -37,7 +37,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
-public class SecurityGroupManager {
+public class SecurityGroupManager implements ISecurityGroupManager {
 	private static final String FILTER_VPC_ID = "vpc-id";
 	private static final String FILTER_GROUP_ID = "group-id";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityGroupManager.class);
@@ -61,12 +61,13 @@ public class SecurityGroupManager {
 		this.serverId = provider.getServerId();
 	}
 
-	/**
-	 * When ALL template IDs in the system are passed into this method, it will
-	 * delete any security groups that match this server and are not in the list.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param allTemplateIds
+	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
+	 * ISecurityGroupManager#sync(java.util.Collection)
 	 */
+	@Override
 	public void sync(Collection<String> allTemplateIds) {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
 		Set<String> securityGroupIdsToDelete = new HashSet<String>();
@@ -119,6 +120,13 @@ public class SecurityGroupManager {
 		logger.debug("done");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
+	 * ISecurityGroupManager#getAllSecurityGroupIds()
+	 */
+	@Override
 	public List<String> getAllSecurityGroupIds() {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
 		List<String> ids = new ArrayList<String>();
@@ -128,6 +136,13 @@ public class SecurityGroupManager {
 		return ids;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
+	 * ISecurityGroupManager#getAllSecurityGroupPermissions()
+	 */
+	@Override
 	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroupPermissions() {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
 		HashMap<String, Collection<SecurityGroupPermission>> map = new HashMap<String, Collection<SecurityGroupPermission>>();
@@ -138,7 +153,14 @@ public class SecurityGroupManager {
 		return map;
 	}
 
-	public Collection<SecurityGroupPermission> getSecurityGroupPermissions(String groupId) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
+	 * ISecurityGroupManager#getSecurityGroupPermissions(java.lang.String)
+	 */
+	@Override
+	public Collection<SecurityGroupPermission> getSecurityGroupPermissionsByGroupId(String groupId) {
 		if (groupId != null) {
 			DescribeSecurityGroupsRequest dsgr = new DescribeSecurityGroupsRequest();
 			Collection<Filter> filters = new ArrayList<Filter>();
@@ -147,8 +169,11 @@ public class SecurityGroupManager {
 			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
 			List<SecurityGroup> sgs = result.getSecurityGroups();
 			for (SecurityGroup sg : sgs) {
-				if (groupId.equals(sg.getGroupId())) {
+				if (sgs.size() == 1) {
 					return securityGroupToPermissionList(sg);
+				} else {
+					throw new SaviorException(SaviorErrorCode.SECURITY_GROUP_NOT_FOUND,
+							"More than one security group with ID=" + groupId + " found.");
 				}
 			}
 		}
@@ -156,13 +181,37 @@ public class SecurityGroupManager {
 				"Unable to find security group with ID=" + groupId);
 	}
 
-	/**
-	 * Returns the already existing security group id. If non exist, create a new
-	 * one. Should never return null.
+	@Override
+	public Collection<SecurityGroupPermission> getSecurityGroupPermissionsByTemplateId(String templateId) {
+		if (templateId != null) {
+			DescribeSecurityGroupsRequest dsgr = new DescribeSecurityGroupsRequest();
+			Collection<Filter> filters = new ArrayList<Filter>();
+			filters.add(new Filter(FILTER_TAG + TAG_TEMPLATE_ID).withValues(templateId));
+			dsgr.setFilters(filters);
+			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
+			List<SecurityGroup> sgs = result.getSecurityGroups();
+			for (SecurityGroup sg : sgs) {
+				if (isThisServersSecurityGroup(sg) && AwsUtil.tagEquals(sg.getTags(), TAG_TEMPLATE_ID, templateId)) {
+					if (sgs.size() == 1) {
+						return securityGroupToPermissionList(sg);
+					} else {
+						throw new SaviorException(SaviorErrorCode.SECURITY_GROUP_NOT_FOUND,
+								"More than one security group with template ID=" + templateId + " found.");
+					}
+				}
+			}
+		}
+		throw new SaviorException(SaviorErrorCode.SECURITY_GROUP_NOT_FOUND,
+				"Unable to find security group matching template ID=" + templateId);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param templateId
-	 * @return
+	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
+	 * ISecurityGroupManager#getSecurityGroupById(java.lang.String)
 	 */
+	@Override
 	public String getSecurityGroupById(String templateId) {
 		String groupId = getExistingGroupById(templateId);
 		if (groupId == null) {
@@ -174,9 +223,16 @@ public class SecurityGroupManager {
 		return groupId;
 	}
 
-	public void authorizeSecurityGroup(SecurityGroupPermission permission) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
+	 * ISecurityGroupManager#authorizeSecurityGroup(com.ncc.savior.virtueadmin.model
+	 * .SecurityGroupPermission)
+	 */
+	@Override
+	public void authorizeSecurityGroup(String groupId, SecurityGroupPermission permission) {
 		try {
-			String groupId = permission.getSecurityGroupId();
 			Integer fromPort = permission.getFromPort();
 			Integer toPort = permission.getToPort();
 			String cidrIp = permission.getCidrIp();
@@ -217,14 +273,21 @@ public class SecurityGroupManager {
 				// log and ignore
 				logger.debug("Attempted to authorize rule that already existed.  " + e.getLocalizedMessage());
 			} else {
-				throw e;
+				throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: "+e.getLocalizedMessage(),e);
 			}
 		}
 	}
 
-	public void revokeSecurityGroup(SecurityGroupPermission permission) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.
+	 * ISecurityGroupManager#revokeSecurityGroup(com.ncc.savior.virtueadmin.model.
+	 * SecurityGroupPermission)
+	 */
+	@Override
+	public void revokeSecurityGroup(String groupId, SecurityGroupPermission permission) {
 		try {
-			String groupId = permission.getSecurityGroupId();
 			Integer fromPort = permission.getFromPort();
 			Integer toPort = permission.getToPort();
 			String cidrIp = permission.getCidrIp();
@@ -249,8 +312,18 @@ public class SecurityGroupManager {
 				// log and ignore
 				logger.debug("Attempted to revoke rule that did not exist.  " + e.getLocalizedMessage());
 			} else {
-				throw e;
+				throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: "+e.getLocalizedMessage(),e);
 			}
+		}
+	}
+
+	@Override
+	public void removeSecurityGroup(String groupId) {
+		try {
+		DeleteSecurityGroupRequest deleteSecurityGroupRequest = new DeleteSecurityGroupRequest().withGroupId(groupId);
+		ec2.deleteSecurityGroup(deleteSecurityGroupRequest);
+		}catch(AmazonEC2Exception e) {
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: "+e.getLocalizedMessage(),e);
 		}
 	}
 
@@ -272,6 +345,8 @@ public class SecurityGroupManager {
 
 	private Collection<SecurityGroupPermission> securityGroupToPermissionList(SecurityGroup sg) {
 		HashSet<SecurityGroupPermission> permissions = new HashSet<SecurityGroupPermission>();
+		String templateId = AwsUtil.tagGet(sg.getTags(), TAG_TEMPLATE_ID);
+		
 		for (IpPermission p : sg.getIpPermissions()) {
 			boolean ingress = true;
 			Integer fromPort = p.getFromPort();
@@ -280,8 +355,10 @@ public class SecurityGroupManager {
 			for (IpRange r : p.getIpv4Ranges()) {
 				String cidrIp = r.getCidrIp();
 				String desc = r.getDescription();
-				SecurityGroupPermission sgp = new SecurityGroupPermission(sg.getGroupId(), ingress, fromPort, toPort,
-						cidrIp, ipProtocol, desc);
+				SecurityGroupPermission sgp = new SecurityGroupPermission(ingress, fromPort, toPort, cidrIp, ipProtocol,
+						desc);
+				sgp.setSecurityGroupId(sg.getGroupId());
+				sgp.setTemplateId(templateId);
 				permissions.add(sgp);
 			}
 		}
@@ -293,8 +370,10 @@ public class SecurityGroupManager {
 			for (IpRange r : p.getIpv4Ranges()) {
 				String cidrIp = r.getCidrIp();
 				String desc = r.getDescription();
-				SecurityGroupPermission sgp = new SecurityGroupPermission(sg.getGroupId(), ingress, fromPort, toPort,
-						cidrIp, ipProtocol, desc);
+				SecurityGroupPermission sgp = new SecurityGroupPermission(ingress, fromPort, toPort, cidrIp, ipProtocol,
+						desc);
+				sgp.setSecurityGroupId(sg.getGroupId());
+				sgp.setTemplateId(templateId);
 				permissions.add(sgp);
 			}
 		}
@@ -366,32 +445,32 @@ public class SecurityGroupManager {
 		sgm.debugListSecurityGroups();
 		String groupId = sgm.getSecurityGroupById("test-sg");
 		logger.debug("generated group=" + groupId);
-		sgm.authorizeSecurityGroup(
-				new SecurityGroupPermission(groupId, true, 10000, 10020, "192.168.0.1/32", "tcp", "a"));
-		sgm.authorizeSecurityGroup(
-				new SecurityGroupPermission(groupId, true, 10000, 10020, "192.168.0.4/32", "tcp", "b"));
-		sgm.authorizeSecurityGroup(
-				new SecurityGroupPermission(groupId, true, 10000, 10020, "192.168.0.10/32", "tcp", "c"));
-		sgm.authorizeSecurityGroup(
-				new SecurityGroupPermission(groupId, false, 10000, 10022, "192.168.0.2/32", "tcp", "d"));
-		sgm.authorizeSecurityGroup(
-				new SecurityGroupPermission(groupId, true, 10003, 10020, "192.168.0.3/32", "tcp", "e"));
-		sgm.authorizeSecurityGroup(
-				new SecurityGroupPermission(groupId, false, 10000, 10024, "192.168.0.4/32", "udp", "f"));
-		sgm.authorizeSecurityGroup(
-				new SecurityGroupPermission(groupId, true, 10005, 10020, "192.168.0.5/32", "udp", "g"));
+		sgm.authorizeSecurityGroup(groupId,
+				new SecurityGroupPermission(true, 10000, 10020, "192.168.0.1/32", "tcp", "a"));
+		sgm.authorizeSecurityGroup(groupId,
+				new SecurityGroupPermission(true, 10000, 10020, "192.168.0.4/32", "tcp", "b"));
+		sgm.authorizeSecurityGroup(groupId,
+				new SecurityGroupPermission(true, 10000, 10020, "192.168.0.10/32", "tcp", "c"));
+		sgm.authorizeSecurityGroup(groupId,
+				new SecurityGroupPermission(false, 10000, 10022, "192.168.0.2/32", "tcp", "d"));
+		sgm.authorizeSecurityGroup(groupId,
+				new SecurityGroupPermission(true, 10003, 10020, "192.168.0.3/32", "tcp", "e"));
+		sgm.authorizeSecurityGroup(groupId,
+				new SecurityGroupPermission(false, 10000, 10024, "192.168.0.4/32", "udp", "f"));
+		sgm.authorizeSecurityGroup(groupId,
+				new SecurityGroupPermission(true, 10005, 10020, "192.168.0.5/32", "udp", "g"));
 		// sgm.authorizeSecurityGroup(true, groupId, 10005, 10020, "192.168.0.5/32",
 		// "icmp");
 		logger.debug("added authorizations to group");
 		sgm.debugListSecurityGroups();
-		sgm.revokeSecurityGroup(
-				new SecurityGroupPermission(groupId, false, 10000, 10022, "192.168.0.2/32", "tcp", null));
-		sgm.revokeSecurityGroup(
-				new SecurityGroupPermission(groupId, true, 10003, 10020, "192.168.0.3/32", "tcp", null));
+		sgm.revokeSecurityGroup(groupId,
+				new SecurityGroupPermission(false, 10000, 10022, "192.168.0.2/32", "tcp", null));
+		sgm.revokeSecurityGroup(groupId,
+				new SecurityGroupPermission(true, 10003, 10020, "192.168.0.3/32", "tcp", null));
 		logger.debug("removed authorizations to group");
-		logger.debug(sgm.getSecurityGroupPermissions(groupId).toString());
+		logger.debug(sgm.getSecurityGroupPermissionsByGroupId(groupId).toString());
 		try {
-			logger.debug(sgm.getSecurityGroupPermissions("Asaf").toString());
+			logger.debug(sgm.getSecurityGroupPermissionsByGroupId("Asaf").toString());
 		} catch (Exception e) {
 			logger.debug("expected exception");
 			// expected
