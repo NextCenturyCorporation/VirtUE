@@ -119,9 +119,7 @@ task nativeDeploy(dependsOn: bootJar) {
     doFirst {
         ssh.run {
             session(remotes.webserver) {
-                put from: 'both', into: '.'
                 put from: 'getserviceticket', into: '.'
-                put from: 'gsscache', into: '.'
                 put from: 'importcreds', into: '.'
             }
         }
@@ -138,8 +136,10 @@ task bootDeploy(dependsOn: bootJar) {
                 put from: gsscacheJar.archivePath, into: '.'
                 put from: bootJar.archivePath, into: '.'
                 put from: 'src/main/resources/cifs-proxy-security.properties', into: '.'
+                put from: 'src/main/resources/logback.xml', into: '.'
             }
         }
+        println "deployed Java resources to " + remotes.webserver
     }
 }
 
