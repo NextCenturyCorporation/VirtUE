@@ -37,6 +37,11 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
+/**
+ * Main AWS based implementation of {@link ISecurityGroupManager}. Creates,
+ * edits, deletes security groups based on a key which is typically templateID.
+ * 
+ */
 public class SecurityGroupManager implements ISecurityGroupManager {
 	private static final String FILTER_VPC_ID = "vpc-id";
 	private static final String FILTER_GROUP_ID = "group-id";
@@ -236,7 +241,8 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 				// log and ignore
 				logger.debug("Attempted to authorize rule that already existed.  " + e.getLocalizedMessage());
 			} else {
-				throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: "+e.getLocalizedMessage(),e);
+				throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: " + e.getLocalizedMessage(),
+						e);
 			}
 		}
 	}
@@ -268,7 +274,8 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 				// log and ignore
 				logger.debug("Attempted to revoke rule that did not exist.  " + e.getLocalizedMessage());
 			} else {
-				throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: "+e.getLocalizedMessage(),e);
+				throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: " + e.getLocalizedMessage(),
+						e);
 			}
 		}
 	}
@@ -276,10 +283,11 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	@Override
 	public void removeSecurityGroup(String groupId) {
 		try {
-		DeleteSecurityGroupRequest deleteSecurityGroupRequest = new DeleteSecurityGroupRequest().withGroupId(groupId);
-		ec2.deleteSecurityGroup(deleteSecurityGroupRequest);
-		}catch(AmazonEC2Exception e) {
-			throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: "+e.getLocalizedMessage(),e);
+			DeleteSecurityGroupRequest deleteSecurityGroupRequest = new DeleteSecurityGroupRequest()
+					.withGroupId(groupId);
+			ec2.deleteSecurityGroup(deleteSecurityGroupRequest);
+		} catch (AmazonEC2Exception e) {
+			throw new SaviorException(SaviorErrorCode.AWS_ERROR, "Unknown AWS Error: " + e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -302,7 +310,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	private Collection<SecurityGroupPermission> securityGroupToPermissionList(SecurityGroup sg) {
 		HashSet<SecurityGroupPermission> permissions = new HashSet<SecurityGroupPermission>();
 		String templateId = AwsUtil.tagGet(sg.getTags(), TAG_TEMPLATE_ID);
-		
+
 		for (IpPermission p : sg.getIpPermissions()) {
 			boolean ingress = true;
 			Integer fromPort = p.getFromPort();

@@ -1,5 +1,8 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws;
 
+/**
+ * POJO class that handles extra information for a Virtue.
+ */
 public class VirtueModifications {
 
 	private String subnetId;

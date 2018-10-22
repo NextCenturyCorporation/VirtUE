@@ -5,6 +5,12 @@ import java.util.Comparator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+/**
+ * A domain object for a single security group permission. This maps to AWS
+ * IpPermission. Each security group can have many Security Group Permissions.
+ * 
+ *
+ */
 @JsonInclude(Include.NON_NULL)
 public class SecurityGroupPermission {
 	public static final Comparator<? super SecurityGroupPermission> TEMPLATE_ID_COMPARATOR = new TemplateIdComparator();
