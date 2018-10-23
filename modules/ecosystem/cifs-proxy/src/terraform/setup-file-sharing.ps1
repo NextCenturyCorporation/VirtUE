@@ -13,4 +13,4 @@ $cred = new-object -typename System.Management.Automation.PSCredential -argument
 $fileserver = Get-ADComputer -Identity fileserver -Credential $cred
 $webserver = Get-ADComputer -Identity webserver -Credential $cred
 Set-ADComputer -Identity $fileserver -PrincipalsAllowedToDelegateToAccount $webserver -Credential $cred
-
+Set-ADComputer $webserver -add @{"msDS-AllowedToDelegateTo"="cifs/fileserver.test.savior"} -Credential $cred
