@@ -4,12 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpSession;
@@ -246,23 +242,40 @@ public class MountController {
 	 * Carry out the mount operation
 	 * 
 	 * @param server
-	 *                           remote server to mount files from
+	 *                       remote server to mount files from
 	 * @param sourcePath
-	 *                           path on the remote server
+	 *                       path on the remote server
 	 * @param mountPath
-	 *                           local path to mount onto
+	 *                       local path to mount onto
 	 * @param readOnly
-	 *                           whether it should be read only (or read-write if
-	 *                           <code>false</code>)
+	 *                       whether it should be read only (or read-write if
+	 *                       <code>false</code>)
 	 * @param username
-	 *                           the user whose credentials we should use
+	 *                       the user whose credentials we should use
 	 * @throws WebServiceException
 	 */
-	private void doMount(String server, String sourcePath, String mountPath, boolean readOnly,
-			String username) throws WebServiceException {
+	private void doMount(String server, String sourcePath, String mountPath, boolean readOnly, String username)
+			throws WebServiceException {
 		LOGGER.entry(server, sourcePath, mountPath, readOnly, username);
-		File mountDir = new File(mountPath);
-		if (!mountDir.exists() && !mountDir.mkdir()) {
+		File destination = new File(MOUNT_ROOT, mountPath);
+		// make sure the destination is inside MOUNT_ROOT
+		String canonicalDest;
+		try {
+			canonicalDest = destination.getCanonicalPath();
+			LOGGER.debug("canonical mount path: " + canonicalDest);
+			if (!canonicalDest.substring(0, MOUNT_ROOT.length()).equals(MOUNT_ROOT)
+					|| canonicalDest.charAt(MOUNT_ROOT.length()) != File.separatorChar) {
+				WebServiceException wse = new WebServiceException("invalid mount path: " + mountPath);
+				LOGGER.throwing(wse);
+				throw wse;
+			}
+		} catch (IOException e) {
+			WebServiceException wse = new WebServiceException("could not create full path for mount path: " + mountPath,
+					e);
+			LOGGER.throwing(wse);
+			throw wse;
+		}
+		if (!destination.exists() && !destination.mkdir()) {
 			WebServiceException wse = new WebServiceException("could not create target mountpoint: " + mountPath);
 			LOGGER.throwing(wse);
 			throw wse;
@@ -274,7 +287,6 @@ public class MountController {
 		String simpleUsername = username.split("@")[0];
 
 		String options = "username=" + simpleUsername + (readOnly ? ",ro" : "") + ",sec=krb5,cruid=" + mountUser;
-		File destination = new File(MOUNT_ROOT, mountPath);
 		String[] args = { "sudo", MOUNT_COMMAND, "-t", "cifs", "//" + server + sourcePath,
 				destination.getAbsolutePath(), "-v", "-o", options };
 		LOGGER.debug("mount command: " + Arrays.toString(args));
@@ -282,6 +294,14 @@ public class MountController {
 		processBuilder.command(args);
 		runProcess(processBuilder, "mount");
 		LOGGER.exit();
+	}
+
+	@RequestMapping(path = "/unmount", params = { "mountPath" }, produces = "application/json", method = {
+			RequestMethod.GET, RequestMethod.POST })
+	@ResponseBody
+	public String unmountDirectory(HttpSession session, @RequestParam("mountPath") String mountPath) {
+
+		return "not implemented yet";
 	}
 
 	private void doUnMount(String mountPath, boolean wait) {
