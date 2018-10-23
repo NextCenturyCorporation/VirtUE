@@ -1,15 +1,16 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 /**
- * POJO class that handles extra information for a Virtue.
+ * POJO class that handles extra information for a Virtue. This class is for
+ * transient data used in virtue setup.
  */
-public class VirtueModifications {
+public class VirtueCreationAdditionalParameters {
 
 	private String subnetId;
 	private String name;
 	private String securityGroupId;
 
-	public VirtueModifications(String name) {
+	public VirtueCreationAdditionalParameters(String name) {
 		this.name = name;
 	}
 

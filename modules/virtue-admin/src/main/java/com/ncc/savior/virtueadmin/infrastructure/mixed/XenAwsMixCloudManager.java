@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
-import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueModifications;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
@@ -128,7 +128,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, vi.getId());
 		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
 		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupIdByTemplateId(vi.getTemplateId());
-		VirtueModifications virtueMods = new VirtueModifications(template.getName());
+		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters(template.getName());
 		virtueMods.setSubnetId(subnetId);
 		virtueMods.setSecurityGroupId(virtueSecurityGroupId);
 		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts, windowsFuture,

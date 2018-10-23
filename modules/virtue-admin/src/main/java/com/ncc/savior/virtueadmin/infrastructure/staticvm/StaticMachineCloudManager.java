@@ -5,7 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
-import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueModifications;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -34,7 +34,7 @@ public class StaticMachineCloudManager implements ICloudManager {
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 		Collection<VirtualMachineTemplate> templates = template.getVmTemplates();
 		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, templates, null,
-				new VirtueModifications(template.getName()));
+				new VirtueCreationAdditionalParameters(template.getName()));
 		VirtueInstance virtue = new VirtueInstance(UUID.randomUUID().toString(), template.getName(), user.getUsername(),
 				template.getId(), template.getColor(), template.getApplications(), vms);
 		return virtue;

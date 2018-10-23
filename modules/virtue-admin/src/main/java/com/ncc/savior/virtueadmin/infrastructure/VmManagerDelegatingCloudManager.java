@@ -3,7 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueModifications;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
@@ -32,7 +32,7 @@ public class VmManagerDelegatingCloudManager implements ICloudManager {
 	@Override
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, template.getVmTemplates(),
-				null, new VirtueModifications(template.getName()));
+				null, new VirtueCreationAdditionalParameters(template.getName()));
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
 		return vi;
 	}
