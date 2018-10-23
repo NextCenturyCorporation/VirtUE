@@ -5,7 +5,7 @@ import java.util.Map;
 import com.ncc.savior.util.JavaUtil;
 
 /**
- * Provides a server ID based on the following precadence:
+ * Provides a server ID based on the following precedence:
  * 
  * <ol>
  * <li>Java property "virtue.serverId"
