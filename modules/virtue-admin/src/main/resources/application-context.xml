@@ -28,6 +28,10 @@
 	<!-- class="com.ncc.savior.virtueadmin.data.InMemoryActiveVirtueDao"> -->
 	<!-- </bean> -->
 
+	<bean name="serverIdProvider" class="com.ncc.savior.virtueadmin.util.ServerIdProvider">
+		<constructor-arg value="${virtue.serverId}"></constructor-arg>
+	</bean>
+
 	<bean name="virtueDao"
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaActiveVirtueDao">
 	</bean>
@@ -53,6 +57,7 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="userManager" />
 		<constructor-arg ref="persistentStorageManager" />
+		<constructor-arg ref="securityGroupManager" />
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
@@ -92,13 +97,14 @@
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 	</bean>
 
-<!-- 	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.StaticVpcSubnetProvider"> -->
-<!-- 		<constructor-arg ref="ec2Wrapper" /> -->
-<!-- 		<constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
-<!-- 		<constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
-<!-- 	</bean> -->
-	
-	<bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.DynamicVpcSubnetProvider">
+	<!-- <bean name="vpcSubnetProvider" class="com.ncc.savior.virtueadmin.infrastructure.subnet.StaticVpcSubnetProvider"> -->
+	<!-- <constructor-arg ref="ec2Wrapper" /> -->
+	<!-- <constructor-arg value="${virtue.aws.server.vpc.name}" /> -->
+	<!-- <constructor-arg value="${virtue.aws.server.subnet.name}" /> -->
+	<!-- </bean> -->
+
+	<bean name="vpcSubnetProvider"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.DynamicVpcSubnetProvider">
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrStart}" />
@@ -106,20 +112,27 @@
 		<constructor-arg value="${virtue.aws.usePublicDns}" />
 		<constructor-arg value="${virtue.aws.server.subnet.routeTableId}" />
 		<constructor-arg value="${virtue.aws.availabilityZone}"></constructor-arg>
-		
 	</bean>
 
-	<bean name="awsVmManager"
+	<bean name="securityGroupManager"
+		class="com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.SecurityGroupManager">
+		<constructor-arg ref="ec2Wrapper" />
+		<constructor-arg ref="serverIdProvider" />
+		<constructor-arg value="${virtue.aws.server.vpc.name}" />
+	</bean>
+
+	<bean name="
+			awsVmManager "
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager">
 		<constructor-arg ref="futureServiceProvider" />
 		<constructor-arg ref="keyManager" />
 		<constructor-arg ref="ec2Wrapper" />
 		<constructor-arg ref="vpcSubnetProvider" />
+		<constructor-arg ref="serverIdProvider" />
 		<property name="serverKeyName" value="${virtue.aws.server.vmKey}"></property>
 		<property name="defaultSecurityGroupsCommaSeparated" value="${virtue.aws.server.securityGroups}"></property>
 		<!-- <property name="awsProfile" value="">${virtue.aws.profile}</property> -->
 		<property name="instanceType" value="${virtue.aws.instanceType}"></property>
-		<property name="serverUser" value="${virtue.aws.serverUser}"></property>
 		<property name="updateListener" ref="activeVirtueUpdater"></property>
 		<!-- <property name="defaultAmi" value="${virtue.aws.server.defaultAmi}"></property> -->
 	</bean>
@@ -144,6 +157,7 @@
 		<constructor-arg ref="windowStartupService"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg ref="securityGroupManager"></constructor-arg>
 	</bean>
 
 	<bean name="windowStartupService"
@@ -173,6 +187,7 @@
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="persistentStorageManager"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg ref="serverIdProvider" />
 		<constructor-arg value="${virtue.aws.xen.securityGroups}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.loginUser}"></constructor-arg>
@@ -180,7 +195,6 @@
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
-		<property name="serverUser" value="${virtue.aws.serverUser}"></property>
 	</bean>
 
 	<bean name="desktopService"

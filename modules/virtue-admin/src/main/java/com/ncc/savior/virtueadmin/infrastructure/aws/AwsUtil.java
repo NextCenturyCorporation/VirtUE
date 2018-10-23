@@ -347,4 +347,63 @@ public class AwsUtil {
 		return securityGroupIds;
 	}
 
+	/**
+	 * returns whether the given tag key exists or not. If key is null, always
+	 * returns false.
+	 * 
+	 * @param tags
+	 * @param key
+	 * @return
+	 */
+	public static boolean tagContains(List<Tag> tags, String key) {
+		// don't allow null tags;
+		if (key == null) {
+			return false;
+		}
+		for (Tag tag : tags) {
+			if (key.equals(tag.getKey())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * returns value of given tag or null if tag doesn't exist. If key is null,
+	 * returns null.
+	 * 
+	 * @param tags
+	 * @param key
+	 * @return
+	 */
+	public static String tagGet(List<Tag> tags, String key) {
+		// don't allow null tags;
+		if (key == null) {
+			return null;
+		}
+		for (Tag tag : tags) {
+			if (key.equals(tag.getKey())) {
+				return tag.getValue();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * returns whether the tag of given key matches the expected value. If expected
+	 * value is null, this always returns false.
+	 * 
+	 * @param tags
+	 * @param key
+	 * @param expectedValue
+	 * @return
+	 */
+	public static boolean tagEquals(List<Tag> tags, String key, String expectedValue) {
+		if (expectedValue == null) {
+			return false;
+		}
+		String actualValue = tagGet(tags, key);
+		return expectedValue.equals(actualValue);
+	}
+
 }
