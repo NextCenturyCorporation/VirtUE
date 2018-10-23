@@ -132,7 +132,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	@Override
 	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroupPermissions() {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
-		HashMap<String, Collection<SecurityGroupPermission>> map = new HashMap<String, Collection<SecurityGroupPermission>>();
+		Map<String, Collection<SecurityGroupPermission>> map = new HashMap<String, Collection<SecurityGroupPermission>>();
 		for (SecurityGroup sg : secGs) {
 			Collection<SecurityGroupPermission> permissions = securityGroupToPermissionList(sg);
 			map.put(sg.getGroupId(), permissions);
