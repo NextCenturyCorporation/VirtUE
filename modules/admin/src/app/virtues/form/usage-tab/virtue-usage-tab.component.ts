@@ -53,7 +53,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   /** A table listing what users have been given access to this Virtue template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent<User>;
 
-  /** #uncommented */
+  /** #uncommented unimplemented */
   @ViewChild('usageTable') private usageTable: GenericTableComponent<Number>;
 
   /** re-classing item, to make it easier and less error-prone to work with. */

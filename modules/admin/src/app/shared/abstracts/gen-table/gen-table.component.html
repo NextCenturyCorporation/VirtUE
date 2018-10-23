@@ -78,7 +78,7 @@
       appActiveClass [ngStyle]="{'background-color': elementIsDisabled(elem.obj) ? '#e7e7e7' : '#ffffff' }" fxLayout="row" class="mui-row table-row" >
 
       <!-- If this table should display colored labels (i.e., if the table holds Virtues) -->
-      <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
+      <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%" title="Element Color: {{getColor(elem.obj)}}"
                 [ngStyle]="{ 'background-color': getColor(elem.obj), 'left':'0px' }">
       </div>
 

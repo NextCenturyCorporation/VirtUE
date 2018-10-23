@@ -237,7 +237,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.printerTable.setUp({
       cols: this.getPrinterColumns(),
-      coloredLabels: true,
+      coloredLabels: false,
       filters: [],
       tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
@@ -328,7 +328,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * #uncommented
+   * This removes a network from the virtue's whitelist.
    */
   removeNetwork(idx: number): void {
     this.item.networkWhiteList.splice(idx, 1);
@@ -501,17 +501,23 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   /**
    * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
    */
-  activatePastableVirtueModal(): void {
-    this.activateModal_new(
-      this.getVirtueSelectionParams(
-          this.item.allowedPasteTargets,
-          (selectedVirtues: string[]) => {
-              this.item.allowedPasteTargets = selectedVirtues;
-              this.updatePasteableVirtuesTable();
-          }
-      )
-     );
-  }
+   activatePastableVirtueModal(): void {
+     this.activateVirtueSelectionModal( this.item.allowedPasteTargets, (selectedVirtues: string[]) => {
+         this.item.allowedPasteTargets = selectedVirtues;
+         this.updatePasteableVirtuesTable();
+       });
+   }
+  // activatePastableVirtueModal(): void {
+  //   this.activateModal_new(
+  //     this.getVirtueSelectionParams(
+  //         this.item.allowedPasteTargets,
+  //         (selectedVirtues: string[]) => {
+  //             this.item.allowedPasteTargets = selectedVirtues;
+  //             this.updatePasteableVirtuesTable();
+  //         }
+  //     )
+  //    );
+  // }
 
   /**
   * @return a message telling the user that no paste permissions have been given to this
@@ -539,19 +545,19 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * probably not.
    */
   activateDefaultBrowserVirtueModal(): void {
-    // this.activateVirtueSelectionModal(
-    this.activateModal_new(
-      this.getVirtueSelectionParams(
+    this.activateVirtueSelectionModal(
+    // this.activateModal_new(
+    //   this.getVirtueSelectionParams(
         [this.item.defaultBrowserVirtue],
         (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
         SelectionMode.SINGLE
-      )
-     );
+      );
+     // );
   }
 
   /**
-   * this defines the parameters for a modal through which the user can select one or more Virtues, and have those selections be passed to some
-   * caller-defined function when the user hits 'Submit'.
+   * this defines the parameters for a modal through which the user can select one or more Virtues, and have those selections be passed
+   * to some caller-defined function when the user hits 'Submit'.
    *
    * @param currentSelection A list of virtue IDs, that should be marked as 'selected' when the modal gets initialized.
    * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
@@ -571,7 +577,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
               selectedIDs: currentSelection
             },
             onComplete: onComplete
-          }
+          };
     }
 
   /**
@@ -632,26 +638,27 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
 
-  /**
-   * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.
-   */
-  showColorModal(): void {
-    this.activateModal_new( {
-      modalClass: ColorModalComponent,
-      emitterName: "selectColor",
-      inData: {
-        color: this.item.color
-      },
-      onComplete: (newColor) => {
-        if (newColor !== "") {
-          this.item.color = newColor;
-        }
-      },
-      scale: {x: 0.4, y: 0.8} see stuff below
-    });
-  }
-  /**  Color modal boxes need to be made square. COlor modal needs to be fixed like the genericmodal was. All remianing activate*.odal functions
-   * need to be replaced TODO  */
+  // /**
+  //  * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.
+  //  */
+  // showColorModal(): void {
+  //   this.activateModal_new( {
+  //     modalClass: ColorModalComponent,
+  //     emitterName: "selectColor",
+  //     inData: {
+  //       color: this.item.color
+  //     },
+  //     onComplete: (newColor) => {
+  //       if (newColor !== "") {
+  //         this.item.color = newColor;
+  //       }
+  //     },
+  //     scale: {x: 0.4, y: 0.8}
+  //   });
+  // }
+  // /**  Color modal boxes need to be made square. COlor modal needs to be fixed like the genericmodal was.
+  // All remianing activate*.odal functions need to be replaced TODO
+  // */
 
 
   /**

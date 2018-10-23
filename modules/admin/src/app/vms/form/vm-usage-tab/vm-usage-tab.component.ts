@@ -159,7 +159,9 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   }
 
   /**
-   * Sets up the table of parents
+   * Sets up the table of parents.
+   *
+   * Would be nicer if refactored the way gen-main-tab has the setUpChildTable function.
    *
    * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
    */
@@ -168,6 +170,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
       cols: this.getParentColumns(),
       // opts: this.getParentSubMenu(),
       coloredLabels: true,
+      getColor: (v: Virtue) => v.color,
       filters: [],
       tableWidth: 0.66,
       noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",

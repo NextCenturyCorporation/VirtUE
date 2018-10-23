@@ -145,6 +145,7 @@ export abstract class GenericPageComponent {
 
   /**
    * This opens a dialog to confirm irreversible or dangerous user actions before carrying them out.
+   * It could be merged with the modal creation below.
    *
    * @param actionDescription a user-readable description of what's being done, to display in the dialog
    * @param action a function to be called if the user selects 'OK'.
@@ -173,53 +174,75 @@ export abstract class GenericPageComponent {
   }
 
 
-
-  /**
-   * this wrapper brings up a modal of a supplied type, passing along input data.
-   * When the emitter whose name was passed in emits a value, pass the value to the supplied onComplete function.
-   *
-   * This function really just exists so all the modals are the same size and position, and to abstract away all the boilerplate, so it doesn't
-   * have to be repeated everywhere a modal can be created.
-   *
-   * #uncommented
-   *
-   * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
-   */
-  activateModal_new(
-        params: {
-          modalClass: any,
-          emitterName: string,
-          inData: {},
-          onComplete: (any) => void,
-          scale?: {x: number, y : number}
-        }
-  ): void {
-    let scale = {x: 0.7, y: 0.7};
-    if (params.scale) {
-      let scale = params.scale;
-    }
-    // I'd think this way would be better, but modals have extra scroll bars this way.
-    let dialogHeight = Math.floor(scale.x * 100);
-    let dialogWidth = Math.floor(scale.y * 100);
-
-    let dialogRef = this.dialog.open( params.modalClass,  {
-      height: dialogHeight + '%',
-      width: dialogWidth + '%',
-      data: params.inData
-    });
-
-    let sub = dialogRef.componentInstance[params.emitterName].subscribe((returnedData) => {
-      params.onComplete(returnedData);
-    },
-    () => { // on error
-      sub.unsubscribe();
-    },
-    () => { // when finished
-      sub.unsubscribe();
-    });
-
-    dialogRef.updatePosition({ top: '5%'});
-
-  }
+  // Use some version of this later if time. Currently, all item-selection modals use the (now-poorly named) 'genericModalComponent', and
+  // any other modals must be built separately, and their layout has to be fiddled with the same way that one was, until there's only one
+  // scrollbar. Ideally there's one modal frame, with subclasses which use the same html? Regardless, the content needs to be completely
+  // contained by the modal's template - so (as long as the content's width isn't set to some constant pixel value) the content could be
+  // any size, and there'd only be one scrollbar. That wrapper would have to be passed a callback function to be called on emit, and all
+  // of the inner classes would have to fit an interface with some function that gets called on submit, which returns the data that should
+  // be emitted. So all the classes that create a modal only need to know the type of modal they want, and what function should be called
+  // with the information that type of modal will return.
+  //
+  // The current GenericModalComponent should be renamed "SelectionModalComponent", but its html should stay, to be used by all modals.
+  // I think.
+  // I don't know if you can, say, inject an abstract object in the html, and then have every class that uses that html file define
+  // what subclass that abstract object should be.
+  // Oh maybe
+  // https://stackoverflow.com/questions/36325212/angular-dynamic-tabs-with-user-click-chosen-components?rq=1
+  // https://stackoverflow.com/questions/51271550/angular-2-inject-html-content-to-component-in-bootstrap-modal
+  //
+  // /**
+  //  * this wrapper brings up a modal of a supplied type, passing along input data.
+  //  * When the emitter whose name was passed in emits a value, pass the value to the supplied onComplete function.
+  //  *
+  //  * This function really just exists so all the modals are the same size and position, and to abstract away all the boilerplate, so it
+  //  * doesn't have to be repeated everywhere a modal can be created.
+  //  *
+  //  * #uncommented unimplemented
+  //  *
+  //  * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
+  //  */
+  // activateModal(
+  //       params: {
+  //         modalClass: any,
+  //         inData: {},
+  //         onComplete: (any) => void,
+  //         scale?: {x: number, y : number}
+  //       }
+  // ): void {
+  //   let scale = {x: 0.7, y: 0.7};
+  //   if (params.scale) {
+  //     let scale = params.scale;
+  //   }
+  //   // I'd think this way would be better, but modals have extra scroll bars this way.
+  //   let dialogHeight = Math.floor(scale.x * 100);
+  //   let dialogWidth = Math.floor(scale.y * 100);
+  //
+  //   let dialogRef = this.dialog.open( params.modalClass,  {
+  //     height: dialogHeight + '%',
+  //     width: dialogWidth + '%',
+  //     data: params.inData
+  //   });
+  //
+  //   // untested, because none of the things this function would need have been implemented
+  //   // Not sure if the scope inside onComplete is the same between the two below styles of passing in the callback
+  //   // Note that submitButtonWatcher is an emitter defined in the (future) abstract parent GenericModalComponent.
+  //   //
+  //   let sub = dialogRef.componentInstance.submitButtonWatcher.subscribe(
+  //     params.onComplete,
+  //     // (returnedData) => {
+  //     //   params.onComplete(returnedData);
+  //     // },
+  //     () => { // on error
+  //       sub.unsubscribe();
+  //     },
+  //     () => { // when finished
+  //       sub.unsubscribe();
+  //     }
+  //   );
+  //
+  //   dialogRef.updatePosition({ top: '5%'});
+  //
+  // }
 
 }

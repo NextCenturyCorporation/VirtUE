@@ -103,20 +103,23 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     }
   }
 
-  activateModal() {
-
-    this.activateModal_new(
-          {
-            modalClass: VirtueModalComponent,
-            emitterName: "getSelections",
-            inData: {
-              name: this.item.getName(), // this currently isn't used; see [[GenericModalComponent]]
-              selectedIDs: this.item.childIDs
-            },
-            onComplete: (selectedItems) => {this.onChildrenChange.emit(selectedItems);}
-          }
-        )
-  }
+  /**
+   * Don't delete unnecessarily - example of hopefully future-code
+   * See note above the commented-out GenericPageComponent.activateModal() function.
+   */
+  // activateModal() {
+  //
+  //   this.activateModal(
+  //         {
+  //           modalClass: VirtueModalComponent,
+  //           inData: {
+  //             name: this.item.getName(), // this currently isn't used; see [[GenericModalComponent]]
+  //             selectedIDs: this.item.childIDs
+  //           },
+  //           onComplete: (selectedItems) => {this.onChildrenChange.emit(selectedItems);}
+  //         }
+  //       )
+  // }
 
   /**
    * this brings up the subclass-defined-modal to add/remove children.
@@ -125,7 +128,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    * This pops up to display options, or a selectable table, or something. DialogsComponent just checks
    * potentially dangerous user actions.
    */
-  activateModal2(): void {
+  activateModal(): void {
     let dialogHeight = Math.floor(window.screen.height * 0.7);
     let dialogWidth = Math.floor(window.screen.width * 0.7);
 
@@ -156,7 +159,6 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   }
 
   /**
-   * #uncommented
    * defines the child table  using sub-class-defined-functions.
    */
   defaultChildTableParams() {

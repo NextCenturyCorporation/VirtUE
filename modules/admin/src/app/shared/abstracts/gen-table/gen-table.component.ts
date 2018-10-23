@@ -152,7 +152,8 @@ export class GenericTableComponent<T> {
   /** The current value the table should be filtered by - only matching elements are displayed. */
   filterValue: string = '*';
 
-  /** #uncommented */
+  /** the default filtering function, used in list pages. This, and [[filterValue]], should be made arbitrarily definable by whatever
+   * object is setting up the table. #unimplemented (filterCondition)*/
   filterCondition = (attribute: any) => String(attribute) === this.filterValue || this.filterValue === '*';
 
   /**

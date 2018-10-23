@@ -21,6 +21,12 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  * or unselect items, and when they click 'Submit', their selections are passed back to whatever component
  * spawned this object.
  *
+ * If you're looking to make a new modal, either copy the code from here (or colorModal) or take the time to make
+ * "GenericModalComponent" actually define a generic modal, as opposed to a selection modal that can generically hold
+ * a list of Item-subclass objects.
+ * See the commented-out GenericPageComponent.activateModal() function for the unimplemented design.
+ *
+ *
  * @extends [[GenericListComponent]] so that it can display the available items in the same way,
  * with the same filtering/sorting capabilities available to the user on any of the list pages.
  */
@@ -97,7 +103,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   }
 
   /**
-   * #uncommented
+   * defines the parameters for a table of selectable Items, using subclass-defined functions.
    */
   defaultTableParams() {
     return {
@@ -116,7 +122,6 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
 
   /**
    * Sets up the table
-   * #uncommented
    *
    * If all instances of this table should have an attribute, and define it differently, then it should be set via a method in
    * [[defaultTableParams]].
