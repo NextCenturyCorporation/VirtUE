@@ -25,7 +25,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nextcentury.savior.cifsproxy.ActiveDirectorySecurityConfig;
 import com.nextcentury.savior.cifsproxy.BaseSecurityConfig;
 import com.nextcentury.savior.cifsproxy.DelegatingAuthenticationManager;
+import com.nextcentury.savior.cifsproxy.GssApi;
 
+/**
+ * Handles the REST API for mounting and unmounting Windows shares.
+ * 
+ * @author clong
+ *
+ * @see DelegatingAuthenticationManager
+ */
 @RestController
 @PropertySources({ @PropertySource(BaseSecurityConfig.DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_CLASSPATH),
 		@PropertySource(value = BaseSecurityConfig.DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_WORKING_DIR, ignoreResourceNotFound = true) })
@@ -36,10 +44,22 @@ public class MountController {
 	/** path to the mount command */
 	private static final String MOUNT_COMMAND = "/bin/mount";
 
+	/**
+	 * Time until we assume mount has failed (in seconds)
+	 */
 	private static final long MOUNT_TIMEOUT = 60;
 
+	/**
+	 * The magic Kerberos environment variable telling it which credentials cache to
+	 * use (e.g., which file)
+	 */
 	private static final String KERBEROS_CCACHE_ENV_VAR = "KRB5CCNAME";
 
+	/**
+	 * Can only operate on the default credentials for the mounter
+	 * ({@link #mountUser}) account by one thread at a time, so use this to enforce
+	 * that.
+	 */
 	private static final Object MOUNT_CREDENTIALS_LOCK = new Object();
 
 	/** where to mount files for the Virtue */
@@ -123,6 +143,17 @@ public class MountController {
 		return "ok";
 	}
 
+	/**
+	 * Initialize a credential cache with our service credential. Currently uses
+	 * <code>kinit</code> but ideally we'd do this with {@link GssApi} calls.
+	 * 
+	 * @param cCacheFilename
+	 *                           the file to initialize
+	 * @param keytabFilename
+	 *                           the keytab to initialize with. Must contain the key
+	 *                           for the service (see
+	 *                           {@link DelegatingAuthenticationManager#getServiceName(char)}).
+	 */
 	private void initCCache(String cCacheFilename, String keytabFilename) {
 		LOGGER.entry(cCacheFilename, keytabFilename);
 		String serviceName = DelegatingAuthenticationManager.getServiceName('/');
@@ -133,6 +164,16 @@ public class MountController {
 		LOGGER.exit();
 	}
 
+	/**
+	 * Import credentials from one credentials file to another. Does not affect the
+	 * principal. Currently uses a helper program (importcreds), but ideally would
+	 * use {@link GssApi}.
+	 * 
+	 * @param toCCacheFilename
+	 *                               destination credential file
+	 * @param fromCCacheFilename
+	 *                               source credential file
+	 */
 	private void importCredentials(String toCCacheFilename, String fromCCacheFilename) {
 		LOGGER.entry(toCCacheFilename, fromCCacheFilename);
 		ProcessBuilder processBuilder = createProcessBuilder(toCCacheFilename);
@@ -142,6 +183,19 @@ public class MountController {
 		LOGGER.exit();
 	}
 
+	/**
+	 * Get a proxy service ticket for a file server and a specific user. Currently
+	 * uses <code>kvno</code>, but ideally would use {@link GssApi}.
+	 * 
+	 * @param ccacheFilename
+	 *                           location of existing credentials
+	 * @param username
+	 *                           user to get creds for
+	 * @param server
+	 *                           file server we need creds for
+	 * @param keytabFilename
+	 *                           location of our private creds
+	 */
 	private void getServiceTicket(String ccacheFilename, String username, String server, String keytabFilename) {
 		LOGGER.entry(ccacheFilename, username, server, keytabFilename);
 		// example: kvno -k /etc/krb5.keytab -P -U bob cifs/fileserver.test.savior
@@ -154,6 +208,24 @@ public class MountController {
 		LOGGER.exit();
 	}
 
+	/**
+	 * We obtain all the credentials with us (http/cifsProxyserver...) as the
+	 * principal and in a file, but mount.cifs(8) needs the user to be the principal
+	 * and in the default credential cache of some (local) user (not some arbitrary
+	 * file like we've been using up to this point in the process). This method
+	 * switches principals and copies the credential into the default credential
+	 * cache for <code>mountUser</code>. Currently uses a helper program
+	 * (<code>switchprincipal</code>), but ideally would use {@link GssApi}.
+	 * 
+	 * @param ccacheFilename
+	 *                           where our credentials are
+	 * @param mountUser
+	 *                           the user to copy credentials to (specifically to
+	 *                           this user's default cache)
+	 * @param username
+	 *                           the new principal (the user whose credentials will
+	 *                           be used to mount the files)
+	 */
 	private void switchPrincipal(String ccacheFilename, String mountUser, String username) {
 		LOGGER.entry(ccacheFilename, mountUser, username);
 		String simpleUsername = username.split("@")[0];
@@ -163,6 +235,12 @@ public class MountController {
 		LOGGER.exit();
 	}
 
+	/**
+	 * Helper function to debugging, by printing contents of a credential cache.
+	 * 
+	 * @param ccacheFile
+	 *                       cache file to print
+	 */
 	private void extraTracing(String ccacheFile) {
 		// this is a (short) debugging function, so don't trace entry/exit
 		if (LOGGER.isTraceEnabled()) {
@@ -170,6 +248,15 @@ public class MountController {
 		}
 	}
 
+	/**
+	 * Makes it easy to launch a subprocess that does Kerberos things.
+	 * 
+	 * @param ccacheFilename
+	 *                           the Kerberos credential cache to use (or
+	 *                           <code>null</code> to use the default)
+	 * @return the new process builder
+	 * @see #KERBEROS_CCACHE_ENV_VAR
+	 */
 	private ProcessBuilder createProcessBuilder(String ccacheFilename) {
 		LOGGER.entry(ccacheFilename);
 		ProcessBuilder pb = new ProcessBuilder();
