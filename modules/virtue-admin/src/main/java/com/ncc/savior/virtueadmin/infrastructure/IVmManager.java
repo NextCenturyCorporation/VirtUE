@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -59,7 +60,7 @@ public interface IVmManager {
 	 */
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
-			String virtue, String networkKey);
+			VirtueCreationAdditionalParameters virtueMods);
 
 	/**
 	 * Initiates a start action on the provided VM. It is not guaranteed that the VM
