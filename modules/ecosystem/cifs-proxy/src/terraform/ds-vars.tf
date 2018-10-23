@@ -1,5 +1,4 @@
-# Variables describing the directory service, which has been manually
-# created (at least for now).
+# Variables describing the directory service.
 #
 
 locals {

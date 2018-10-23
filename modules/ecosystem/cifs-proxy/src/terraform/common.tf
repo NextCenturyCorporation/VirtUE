@@ -76,12 +76,34 @@ variable "linux_ami" {
   # Using Fedora 28 because it has more recent version of Samba than
   # Ubuntu 18.04 LTS.  See https://alt.fedoraproject.org/cloud/ for
   # info.
+  #
+  # NOTE: If you change distributions, you probably need to change
+  # linux_user, too.
   description = "Fedora-Cloud-Base-28-20180922.0.x86_64-hvm-us-east-1-standard-0"
   default = "ami-0064c3021927a1bd5"
 }
 
+variable "linux_user" {
+  description = "The default user for our linux instance"
+  default = "fedora"
+}
+
 variable "linux_instance_type" {
   default = "t2.micro"
+}
+
+variable "helper_program_location" {
+  default = "../.."
+}
+
+variable "import_creds_program" {
+  description = "Helper program for importing Kerberos credentials from a file into the default context."
+  default = "importcreds"
+}
+
+variable "switch_principal_program" {
+  description = "Helper program for changing the Kerberos principal in a file."
+  default = "switchprincipal"
 }
 
 data "aws_vpc" "ad_vpc" {

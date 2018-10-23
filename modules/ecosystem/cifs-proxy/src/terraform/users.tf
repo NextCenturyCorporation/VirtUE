@@ -30,7 +30,7 @@ resource "null_resource" "user_creation" {
   }
 
   connection {
-	user = "${var.domain_admin_user}"
+	user = "Administrator" # local admin (for some reason cannot log in as domain admin when using Amazon AD)
 	password = "${var.admin_password}"
 	host = "${aws_instance.file_server.public_ip}"
 	type = "winrm"
