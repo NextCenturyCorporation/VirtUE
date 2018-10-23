@@ -16,6 +16,9 @@ public interface ISecurityGroupManager {
 	/**
 	 * When ALL template IDs in the system are passed into this method, it will
 	 * delete any security groups that match this server and are not in the list.
+	 * This will delete only and not creating missing. This method is mainly used to
+	 * cleanup extra entries that didn't get deleted in a normal fashion and is
+	 * typically needed in development.
 	 * 
 	 * @param allTemplateIds
 	 */
@@ -31,7 +34,7 @@ public interface ISecurityGroupManager {
 	Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroupPermissions();
 
 	Collection<SecurityGroupPermission> getSecurityGroupPermissionsByGroupId(String groupId);
-	
+
 	Collection<SecurityGroupPermission> getSecurityGroupPermissionsByTemplateId(String templateId);
 
 	/**

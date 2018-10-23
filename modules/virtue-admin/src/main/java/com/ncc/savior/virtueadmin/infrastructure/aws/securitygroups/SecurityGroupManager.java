@@ -71,7 +71,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
 		Set<String> securityGroupIdsToDelete = new HashSet<String>();
 		for (SecurityGroup sg : secGs) {
-			if (isThisServersSecurityGroup(sg)) {
+			if (doesSecurityGroupBelongToThisServer(sg)) {
 				List<Tag> tags = sg.getTags();
 				String templateId = AwsUtil.tagGet(tags, TAG_TEMPLATE_ID);
 				if (templateId != null && !allTemplateIds.contains(templateId)) {
@@ -94,7 +94,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	public void debugListSecurityGroups() {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
 		for (SecurityGroup sg : secGs) {
-			if (isThisServersSecurityGroup(sg)) {
+			if (doesSecurityGroupBelongToThisServer(sg)) {
 				// if (vpcId.equals(sg.getVpcId())) {
 				// if (AwsUtil.tagEquals(sg.getTags(), TAG_SERVER_ID, serverId)) {
 				logger.debug("SecurityGroup: " + sg.getGroupName());
@@ -172,7 +172,8 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
 			List<SecurityGroup> sgs = result.getSecurityGroups();
 			for (SecurityGroup sg : sgs) {
-				if (isThisServersSecurityGroup(sg) && AwsUtil.tagEquals(sg.getTags(), TAG_TEMPLATE_ID, templateId)) {
+				if (doesSecurityGroupBelongToThisServer(sg)
+						&& AwsUtil.tagEquals(sg.getTags(), TAG_TEMPLATE_ID, templateId)) {
 					if (sgs.size() == 1) {
 						return securityGroupToPermissionList(sg);
 					} else {
@@ -302,7 +303,14 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		return secGs;
 	}
 
-	private boolean isThisServersSecurityGroup(SecurityGroup sg) {
+	/**
+	 * Returns true if the security group has the required tags and values to
+	 * indicate that it was auto generated and owned by this server.
+	 * 
+	 * @param sg
+	 * @return
+	 */
+	private boolean doesSecurityGroupBelongToThisServer(SecurityGroup sg) {
 		return vpcId.equals(sg.getVpcId()) && (AwsUtil.tagEquals(sg.getTags(), TAG_SERVER_ID, serverId))
 				&& AwsUtil.tagEquals(sg.getTags(), TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE);
 	}
@@ -361,7 +369,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	private String getExistingGroupById(String templateId) {
 		List<SecurityGroup> secGs = getAllSecurityGroupsFromAws();
 		for (SecurityGroup sg : secGs) {
-			if (isThisServersSecurityGroup(sg)) {
+			if (doesSecurityGroupBelongToThisServer(sg)) {
 				List<Tag> tags = sg.getTags();
 				boolean idMatch = AwsUtil.tagEquals(tags, TAG_TEMPLATE_ID, templateId);
 				boolean serverMatch = AwsUtil.tagEquals(tags, TAG_SERVER_ID, serverId);
