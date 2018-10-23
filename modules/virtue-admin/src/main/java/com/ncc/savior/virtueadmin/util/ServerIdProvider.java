@@ -5,7 +5,11 @@ import java.util.Map;
 import com.ncc.savior.util.JavaUtil;
 
 /**
- * Provides a server ID based on the following precedence:
+ * Provides a server ID such that multiple servers can operate on the same AWS
+ * account and still be identifiable and segmented. This is particularly useful
+ * in development when there may be multiple developers as well as multiple
+ * integration environments (I.E. Development, Integration, Production, Test).
+ * Server Id is determined based on the following precedence:
  * 
  * <ol>
  * <li>Java property "virtue.serverId"
@@ -29,7 +33,7 @@ public class ServerIdProvider {
 		if (JavaUtil.isNotEmpty(prop)) {
 			this.serverId = prop;
 		}
-		serverId=serverId.replaceAll("-", "_");
+		serverId = serverId.replaceAll("-", "_");
 	}
 
 	private String createDefaultServerId() {
