@@ -16,17 +16,15 @@
             <span class="float-left text-align-center">Available Colors</span>
           </div>
         </div>
-        <!-- <div class="table"> -->
-          <mat-grid-list cols="5" rowHeight="1:1" fxLayout="row" class="mui-row table-row">
-            <mat-grid-tile *ngFor="let c of colorSet.getList()" >
-              <mat-card title="{{c.prettyName}}" *ngIf="c === selectedColor"
-                      [ngStyle]="{ 'background-color': c.hex, 'border':'4px solid black' }"
-                      (click)=onSelect(c)></mat-card>
-              <mat-card title="{{c.prettyName}}" *ngIf="c !== selectedColor"
-                      [ngStyle]="{ 'background-color': c.hex }" (click)=onSelect(c)></mat-card>
-            </mat-grid-tile>
-          </mat-grid-list>
-        <!-- </div> -->
+        <mat-grid-list cols="5" rowHeight="1:1" fxLayout="row" class="mui-row table-row">
+          <mat-grid-tile *ngFor="let c of colorSet.getList()" >
+            <mat-card title="{{c.prettyName}}" *ngIf="c === selectedColor"
+                    [ngStyle]="{ 'background-color': c.hex, 'border':'4px solid black' }"
+                    (click)=onSelect(c)></mat-card>
+            <mat-card title="{{c.prettyName}}" *ngIf="c !== selectedColor"
+                    [ngStyle]="{ 'background-color': c.hex }" (click)=onSelect(c)></mat-card>
+          </mat-grid-tile>
+        </mat-grid-list>
       </div>
     </div>
   </div>

@@ -237,7 +237,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.printerTable.setUp({
       cols: this.getPrinterColumns(),
-      coloredLabels: false,
       filters: [],
       tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
@@ -507,18 +506,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
          this.updatePasteableVirtuesTable();
        });
    }
-  // activatePastableVirtueModal(): void {
-  //   this.activateModal_new(
-  //     this.getVirtueSelectionParams(
-  //         this.item.allowedPasteTargets,
-  //         (selectedVirtues: string[]) => {
-  //             this.item.allowedPasteTargets = selectedVirtues;
-  //             this.updatePasteableVirtuesTable();
-  //         }
-  //     )
-  //    );
-  // }
-
   /**
   * @return a message telling the user that no paste permissions have been given to this
   * virtue, in a way that is clear and relevant for the current mode.
@@ -546,39 +533,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   activateDefaultBrowserVirtueModal(): void {
     this.activateVirtueSelectionModal(
-    // this.activateModal_new(
-    //   this.getVirtueSelectionParams(
         [this.item.defaultBrowserVirtue],
         (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
         SelectionMode.SINGLE
       );
-     // );
   }
-
-  /**
-   * this defines the parameters for a modal through which the user can select one or more Virtues, and have those selections be passed
-   * to some caller-defined function when the user hits 'Submit'.
-   *
-   * @param currentSelection A list of virtue IDs, that should be marked as 'selected' when the modal gets initialized.
-   * @param onComplete A function to pass the modal's list of selected objects to, once the user hits 'Submit'
-   * @param selectionMode Optional. Can be either SelectionMode.MULTI or SelectionMode.SINGLE, but defaults to MULTI
-   *                      if not given.
-   */
-  getVirtueSelectionParams(
-      currentSelection: string[],
-      onComplete: ((selectedVirtues: string[]) => void),
-      selectionMode?: SelectionMode
-    ) {
-        return  {
-            modalClass: VirtueModalComponent,
-            emitterName: "getSelections",
-            inData: {
-              selectionMode: selectionMode,
-              selectedIDs: currentSelection
-            },
-            onComplete: onComplete
-          };
-    }
 
   /**
    * this brings up a modal through which the user can select one or more Virtues, and have those selections be passed to some
@@ -599,16 +558,14 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
         onComplete: ((selectedVirtues: string[]) => void),
         selectionMode?: SelectionMode
   ): void {
-    let dialogHeight = Math.floor(window.screen.height * 0.7);
-    let dialogWidth = Math.floor(window.screen.width * 0.7);
 
     if (selectionMode === undefined) {
       selectionMode = SelectionMode.MULTI;
     }
 
     let dialogRef = this.dialog.open( VirtueModalComponent,  {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
+      height: '70%',
+      width: '70%',
       data: {
         selectedIDs: currentSelection,
         selectionMode: selectionMode
@@ -636,30 +593,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     dialogRef.updatePosition({ top: '5%'});
 
   }
-
-
-  // /**
-  //  * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.
-  //  */
-  // showColorModal(): void {
-  //   this.activateModal_new( {
-  //     modalClass: ColorModalComponent,
-  //     emitterName: "selectColor",
-  //     inData: {
-  //       color: this.item.color
-  //     },
-  //     onComplete: (newColor) => {
-  //       if (newColor !== "") {
-  //         this.item.color = newColor;
-  //       }
-  //     },
-  //     scale: {x: 0.4, y: 0.8}
-  //   });
-  // }
-  // /**  Color modal boxes need to be made square. COlor modal needs to be fixed like the genericmodal was.
-  // All remianing activate*.odal functions need to be replaced TODO
-  // */
-
 
   /**
    * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.

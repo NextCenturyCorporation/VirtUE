@@ -104,16 +104,16 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   }
 
   /**
-   * Don't delete unnecessarily - example of hopefully future-code
+   * Don't delete unnecessarily - example of hopefully future-code, to replace the below function.
    * See note above the commented-out GenericPageComponent.activateModal() function.
    */
   // activateModal() {
   //
-  //   this.activateModal(
+  //   // this function being defined in gen-page - would be largely similar to the below activateModal() function.
+  //   this.createModal(
   //         {
-  //           modalClass: VirtueModalComponent,
+  //           modalClass: this.getModalType(),
   //           inData: {
-  //             name: this.item.getName(), // this currently isn't used; see [[GenericModalComponent]]
   //             selectedIDs: this.item.childIDs
   //           },
   //           onComplete: (selectedItems) => {this.onChildrenChange.emit(selectedItems);}
@@ -129,14 +129,11 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    * potentially dangerous user actions.
    */
   activateModal(): void {
-    let dialogHeight = Math.floor(window.screen.height * 0.7);
-    let dialogWidth = Math.floor(window.screen.width * 0.7);
 
     let params = {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
+      height: '70%',
+      width: '70%',
       data: {
-        name: this.item.getName(), // this currently isn't used; see [[GenericModalComponent]]
         selectedIDs: this.item.childIDs
       }
     };
@@ -152,7 +149,6 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     () => { // when finished
       sub.unsubscribe();
     });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
     dialogRef.updatePosition({ top: '5%' });
 
