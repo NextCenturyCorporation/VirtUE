@@ -40,64 +40,34 @@ public class SecurityGroupPermission {
 		this.description = desc;
 	}
 
+	
+
 	public boolean isIngress() {
 		return ingress;
-	}
-
-	public void setIngress(boolean ingress) {
-		this.ingress = ingress;
 	}
 
 	public Integer getFromPort() {
 		return fromPort;
 	}
 
-	public void setFromPort(Integer fromPort) {
-		this.fromPort = fromPort;
-	}
-
 	public Integer getToPort() {
 		return toPort;
-	}
-
-	public void setToPort(Integer toPort) {
-		this.toPort = toPort;
 	}
 
 	public String getCidrIp() {
 		return cidrIp;
 	}
 
-	public void setCidrIp(String cidrIp) {
-		this.cidrIp = cidrIp;
-	}
-
 	public String getIpProtocol() {
 		return ipProtocol;
-	}
-
-	public void setIpProtocol(String ipProtocol) {
-		this.ipProtocol = ipProtocol;
 	}
 
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public String getSecurityGroupId() {
 		return securityGroupId;
-	}
-
-	public void setSecurityGroupId(String securityGroupId) {
-		this.securityGroupId = securityGroupId;
-	}
-
-	public void setTemplateId(String templateId) {
-		this.templateId = templateId;
 	}
 
 	public String getTemplateId() {
@@ -106,6 +76,38 @@ public class SecurityGroupPermission {
 
 	public String getKey() {
 		return Integer.toString(this.hashCode(), 16);
+	}
+
+	protected void setIngress(boolean ingress) {
+		this.ingress = ingress;
+	}
+
+	protected void setFromPort(Integer fromPort) {
+		this.fromPort = fromPort;
+	}
+
+	protected void setToPort(Integer toPort) {
+		this.toPort = toPort;
+	}
+
+	protected void setCidrIp(String cidrIp) {
+		this.cidrIp = cidrIp;
+	}
+
+	protected void setIpProtocol(String ipProtocol) {
+		this.ipProtocol = ipProtocol;
+	}
+
+	protected void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setSecurityGroupId(String securityGroupId) {
+		this.securityGroupId = securityGroupId;
+	}
+
+	public void setTemplateId(String templateId) {
+		this.templateId = templateId;
 	}
 
 	@Override
