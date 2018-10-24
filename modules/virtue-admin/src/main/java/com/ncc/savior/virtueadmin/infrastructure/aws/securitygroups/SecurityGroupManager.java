@@ -47,9 +47,8 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	private static final String FILTER_GROUP_ID = "group-id";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityGroupManager.class);
 	private static final String TAG_AUTO_GENERATED_TRUE = "true";
-	private static final String TAG_TEMPLATE_ID = "savior-sg-virtue-template-id";
-	private static final String TAG_AUTO_GENERATED = "savior-sg-auto-generated";
-	private static final String TAG_CREATED_TIME = "savior-sg-created-time";
+	private static final String TAG_AUTO_GENERATED = "savior-auto-generated";
+	private static final String TAG_CREATED_TIME = "savior-created-time";
 	private static final String TAG_NAME = "Name";
 	private static final String FILTER_TAG = "tag:";
 	private AmazonEC2 ec2;
@@ -72,7 +71,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		for (SecurityGroup sg : secGs) {
 			if (doesSecurityGroupBelongToThisServer(sg)) {
 				List<Tag> tags = sg.getTags();
-				String templateId = AwsUtil.tagGet(tags, TAG_TEMPLATE_ID);
+				String templateId = AwsUtil.tagGet(tags, AwsUtil.TAG_TEMPLATE_ID);
 				if (templateId != null && !allTemplateIds.contains(templateId)) {
 					// don't delete anything without the appropriate tags
 					securityGroupIdsToDelete.add(sg.getGroupId());
@@ -166,13 +165,13 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		if (templateId != null) {
 			DescribeSecurityGroupsRequest dsgr = new DescribeSecurityGroupsRequest();
 			Collection<Filter> filters = new ArrayList<Filter>();
-			filters.add(new Filter(FILTER_TAG + TAG_TEMPLATE_ID).withValues(templateId));
+			filters.add(new Filter(FILTER_TAG + AwsUtil.TAG_TEMPLATE_ID).withValues(templateId));
 			dsgr.setFilters(filters);
 			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
 			List<SecurityGroup> sgs = result.getSecurityGroups();
 			for (SecurityGroup sg : sgs) {
 				if (doesSecurityGroupBelongToThisServer(sg)
-						&& AwsUtil.tagEquals(sg.getTags(), TAG_TEMPLATE_ID, templateId)) {
+						&& AwsUtil.tagEquals(sg.getTags(), AwsUtil.TAG_TEMPLATE_ID, templateId)) {
 					if (sgs.size() == 1) {
 						return securityGroupToPermissionList(sg);
 					} else {
@@ -316,7 +315,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 
 	private Collection<SecurityGroupPermission> securityGroupToPermissionList(SecurityGroup sg) {
 		HashSet<SecurityGroupPermission> permissions = new HashSet<SecurityGroupPermission>();
-		String templateId = AwsUtil.tagGet(sg.getTags(), TAG_TEMPLATE_ID);
+		String templateId = AwsUtil.tagGet(sg.getTags(), AwsUtil.TAG_TEMPLATE_ID);
 
 		for (IpPermission p : sg.getIpPermissions()) {
 			boolean ingress = true;
@@ -370,7 +369,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		for (SecurityGroup sg : secGs) {
 			if (doesSecurityGroupBelongToThisServer(sg)) {
 				List<Tag> tags = sg.getTags();
-				boolean idMatch = AwsUtil.tagEquals(tags, TAG_TEMPLATE_ID, templateId);
+				boolean idMatch = AwsUtil.tagEquals(tags, AwsUtil.TAG_TEMPLATE_ID, templateId);
 				boolean serverMatch = AwsUtil.tagEquals(tags, AwsUtil.TAG_SERVER_ID, serverId);
 				if (idMatch && serverMatch) {
 					return sg.getGroupId();
@@ -386,7 +385,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		createTagsRequest.withResources(groupId);
 
 		Collection<Tag> tags = new ArrayList<Tag>();
-		tags.add(new Tag(TAG_TEMPLATE_ID, templateId));
+		tags.add(new Tag(AwsUtil.TAG_TEMPLATE_ID, templateId));
 		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
 		tags.add(new Tag(TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE));
 		// tags.add(new Tag(TAG_USER_CREATED, templateId));
@@ -407,10 +406,11 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	public static void main(String[] args) {
 		String awsProfile = "virtue";
 		String region = "us-east-1";
-		VirtueAwsEc2Provider ec2Provider = new VirtueAwsEc2Provider(region, awsProfile);
-		AwsEc2Wrapper ec2Wrapper = new AwsEc2Wrapper(ec2Provider, "true");
-		String vpcName = "VIRTUE";
 		ServerIdProvider sip = new ServerIdProvider(null);
+		VirtueAwsEc2Provider ec2Provider = new VirtueAwsEc2Provider(region, awsProfile);
+		AwsEc2Wrapper ec2Wrapper = new AwsEc2Wrapper(ec2Provider, sip, "true");
+		String vpcName = "VIRTUE";
+
 		SecurityGroupManager sgm = new SecurityGroupManager(ec2Wrapper, sip, vpcName);
 
 		sgm.debugListSecurityGroups();
