@@ -28,6 +28,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.model.CidrBlock;
 import com.ncc.savior.virtueadmin.model.CidrBlockAssignment;
+import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 /**
  * {@link IVpcSubnetProvider} implementation that creates and removes dynamic
@@ -51,10 +52,12 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private String routeTableId;
 	private String availabilityZone;
 	private CidrBlock nextCidrBlockToTry;
+	private String serverId;
 
-	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, String vpcName, String firstCidrBlock,
+	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, String vpcName, String firstCidrBlock,
 			String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId, String availabilityZone) {
 		this.ec2 = ec2Wrapper.getEc2();
+		this.serverId=serverIdProvider.getServerId();
 		this.availabilityZone = availabilityZone;
 		this.startingCidrBlock = CidrBlock.fromString(firstCidrBlock);
 		this.nextCidrBlockToTry = startingCidrBlock;
@@ -116,6 +119,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 					+ tags.get(IVpcSubnetProvider.TAG_VIRTUE_NAME);
 			awsTags.add(new Tag(IVpcSubnetProvider.TAG_NAME, name));
 		}
+		awsTags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest(Collections.singletonList(subnet.getSubnetId()),
 				awsTags);
 		ec2.createTags(createTagsRequest);

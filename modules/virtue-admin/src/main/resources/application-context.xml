@@ -76,7 +76,7 @@
 	<bean name="ec2Wrapper"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
-		<constructor-arg value="${virtue.aws.forceAssignPublicDns:default}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.usePublicDns:default}"></constructor-arg>
 	</bean>
 
 	<!-- <bean name="awsVmUpdater" -->
@@ -106,6 +106,7 @@
 	<bean name="vpcSubnetProvider"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.DynamicVpcSubnetProvider">
 		<constructor-arg ref="ec2Wrapper" />
+		<constructor-arg ref="serverIdProvider" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrStart}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrEnd}" />

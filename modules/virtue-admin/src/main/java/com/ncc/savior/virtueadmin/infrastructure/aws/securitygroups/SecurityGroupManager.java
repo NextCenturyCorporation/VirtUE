@@ -48,7 +48,6 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityGroupManager.class);
 	private static final String TAG_AUTO_GENERATED_TRUE = "true";
 	private static final String TAG_TEMPLATE_ID = "savior-sg-virtue-template-id";
-	private static final String TAG_SERVER_ID = "savior-sg-server-id";
 	private static final String TAG_AUTO_GENERATED = "savior-sg-auto-generated";
 	private static final String TAG_CREATED_TIME = "savior-sg-created-time";
 	private static final String TAG_NAME = "Name";
@@ -296,7 +295,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
 		Collection<Filter> filters = new ArrayList<Filter>();
 		filters.add(new Filter(FILTER_VPC_ID).withValues(vpcId));
-		filters.add(new Filter(FILTER_TAG + TAG_SERVER_ID).withValues(serverId));
+		filters.add(new Filter(FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
 		describeSecurityGroupsRequest.setFilters(filters);
 		DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(describeSecurityGroupsRequest);
 		List<SecurityGroup> secGs = result.getSecurityGroups();
@@ -311,7 +310,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	 * @return
 	 */
 	private boolean doesSecurityGroupBelongToThisServer(SecurityGroup sg) {
-		return vpcId.equals(sg.getVpcId()) && (AwsUtil.tagEquals(sg.getTags(), TAG_SERVER_ID, serverId))
+		return vpcId.equals(sg.getVpcId()) && (AwsUtil.tagEquals(sg.getTags(), AwsUtil.TAG_SERVER_ID, serverId))
 				&& AwsUtil.tagEquals(sg.getTags(), TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE);
 	}
 
@@ -372,7 +371,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 			if (doesSecurityGroupBelongToThisServer(sg)) {
 				List<Tag> tags = sg.getTags();
 				boolean idMatch = AwsUtil.tagEquals(tags, TAG_TEMPLATE_ID, templateId);
-				boolean serverMatch = AwsUtil.tagEquals(tags, TAG_SERVER_ID, serverId);
+				boolean serverMatch = AwsUtil.tagEquals(tags, AwsUtil.TAG_SERVER_ID, serverId);
 				if (idMatch && serverMatch) {
 					return sg.getGroupId();
 				}
@@ -388,7 +387,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 
 		Collection<Tag> tags = new ArrayList<Tag>();
 		tags.add(new Tag(TAG_TEMPLATE_ID, templateId));
-		tags.add(new Tag(TAG_SERVER_ID, serverId));
+		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
 		tags.add(new Tag(TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE));
 		// tags.add(new Tag(TAG_USER_CREATED, templateId));
 		tags.add(new Tag(TAG_CREATED_TIME, Long.toString(System.currentTimeMillis())));

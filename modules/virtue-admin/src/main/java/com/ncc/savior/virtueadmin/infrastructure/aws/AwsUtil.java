@@ -49,6 +49,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  */
 public class AwsUtil {
 	private static final Logger logger = LoggerFactory.getLogger(AwsUtil.class);
+	public static final String TAG_SERVER_ID = "savior-sg-server-id";
 
 	public static Collection<VirtualMachine> updateStatusOnVms(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
