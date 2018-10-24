@@ -79,7 +79,7 @@ public class MountController {
 	@ResponseBody
 	public String mountDirectory(HttpSession session, @RequestParam("server") String server,
 			@RequestParam("sourcePath") String sourcePath,
-			@RequestParam(value = "permissions", defaultValue = "rw") String permissions,
+			@RequestParam(value = "permissions", required = false, defaultValue = "rw") String permissions,
 			@RequestParam("mountPath") String mountPath) {
 		LOGGER.entry(session, server, sourcePath, permissions, mountPath);
 		boolean readOnly;
