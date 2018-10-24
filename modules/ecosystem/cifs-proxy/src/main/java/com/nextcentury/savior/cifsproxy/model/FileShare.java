@@ -10,7 +10,7 @@ import org.springframework.lang.NonNull;
  * @author clong
  *
  */
-public class FileShare {
+public class FileShare implements Comparable<FileShare> {
 
 	/**
 	 * In the future we may support other types.
@@ -33,6 +33,7 @@ public class FileShare {
 	}
 
 	private String name;
+	private String server;
 	private String path;
 	private Set<SharePermissions> permissions;
 	private ShareType type;
@@ -41,17 +42,20 @@ public class FileShare {
 	 * 
 	 * @param name
 	 *                        share name
+	 * @param server
+	 *                        name of the file server. Can be a host name or IP
+	 *                        address.
 	 * @param path
-	 *                        path to share on the network (e.g.,
-	 *                        "//server.my.domain/public")
+	 *                        path to share on the server (e.g., "/public")
 	 * @param permissions
 	 *                        permissions to grant on the share
 	 * @param type
 	 *                        type of share
 	 */
-	public FileShare(@NonNull String name, @NonNull String path, @NonNull Set<SharePermissions> permissions,
-			@NonNull ShareType type) {
+	public FileShare(@NonNull String name, @NonNull String server, @NonNull String path,
+			@NonNull Set<SharePermissions> permissions, @NonNull ShareType type) {
 		this.name = name;
+		this.server = server;
 		this.path = path;
 		this.permissions = permissions;
 		this.type = type;
@@ -65,9 +69,13 @@ public class FileShare {
 		return name;
 	}
 
+	public String getServer() {
+		return server;
+	}
+
 	/**
 	 * 
-	 * @return path to the share on the network (e.g., "//server.my.domain/public")
+	 * @return path to the share on the server (e.g., "public")
 	 */
 	public String getPath() {
 		return path;
@@ -101,5 +109,10 @@ public class FileShare {
 	@Override
 	public int hashCode() {
 		return name.hashCode();
+	}
+
+	@Override
+	public int compareTo(FileShare o) {
+		return name.compareTo(o.getName());
 	}
 }
