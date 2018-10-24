@@ -8,14 +8,11 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nextcentury.savior.cifsproxy.BaseSecurityConfig;
 import com.nextcentury.savior.cifsproxy.model.FileShare;
 import com.nextcentury.savior.cifsproxy.services.ShareService;
 
@@ -26,8 +23,6 @@ import com.nextcentury.savior.cifsproxy.services.ShareService;
  *
  */
 @RestController
-@PropertySources({ @PropertySource(BaseSecurityConfig.DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_CLASSPATH),
-		@PropertySource(value = BaseSecurityConfig.DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_WORKING_DIR, ignoreResourceNotFound = true) })
 public class ShareController {
 
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(ShareController.class);
@@ -46,9 +41,16 @@ public class ShareController {
 	@PostMapping("/share")
 	FileShare newShare(HttpSession session, @RequestBody FileShare share) {
 		LOGGER.entry(session, share);
+		validateShare(share);
 		service.newShare(session, share);
 		LOGGER.exit(share);
 		return share;
+	}
+
+	private void validateShare(FileShare share) {
+		if (share.getName() == null || share.getName().isEmpty()) {
+			throw new IllegalArgumentException("");
+		}
 	}
 	
 }
