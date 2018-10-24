@@ -11,7 +11,7 @@ import { SubMenuOptions } from '../../../models/subMenuOptions.model';
 import { Mode } from '../../../abstracts/gen-form/mode.enum';
 
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
+import { GenericFormTabComponent } from '../../gen-tab/gen-form-tab/gen-form-tab.component';
 
 import { VirtueModalComponent } from '../../../../modals/virtue-modal/virtue-modal.component';
 

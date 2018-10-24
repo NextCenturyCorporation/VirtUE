@@ -47,8 +47,11 @@ import { FooterComponent } from './footer/footer.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 import { ConfigComponent } from './config/config.component';
-import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
-import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
+import { ConfigActiveDirTabComponent } from './config/config-activeDir-tab/config-activeDir-tab.component';
+import { ConfigSensorsTabComponent } from './config/config-sensors-tab/config-sensors-tab.component';
+import { ConfigPrinterTabComponent } from './config/config-printer-tab/config-printer-tab.component';
+import { ConfigFileSysTabComponent } from './config/config-fileSys-tab/config-fileSys-tab.component';
+import { ConfigSettingsHistoryTabComponent } from './config/config-settingsHistory-tab/config-settingsHistory-tab.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
 
@@ -92,8 +95,12 @@ import { MessageService } from './shared/services/message.service';
   declarations: [
     AppComponent,
     BreadcrumbsComponent,
-    ConfigActiveDirComponent,
     ConfigComponent,
+    ConfigActiveDirTabComponent,
+    ConfigFileSysTabComponent,
+    ConfigPrinterTabComponent,
+    ConfigSensorsTabComponent,
+    ConfigSettingsHistoryTabComponent,
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
@@ -116,7 +123,6 @@ import { MessageService } from './shared/services/message.service';
     VmModalComponent,
     ColorModalComponent,
 
-    ConfigSensorsComponent,
     ListFilterPipe,
     PageNotFoundComponent,
 

@@ -15,7 +15,7 @@ import { DialogsComponent } from '../../../dialogs/dialogs.component';
 import { Item } from '../../models/item.model';
 
 import { GenericDataPageComponent } from '../gen-data-page/gen-data-page.component';
-import { GenericFormTabComponent } from '../gen-tab/gen-tab.component';
+import { GenericFormTabComponent } from '../gen-tab/gen-form-tab/gen-form-tab.component';
 import { GenericTableComponent } from '../gen-table/gen-table.component';
 import { GenericModalComponent } from '../../../modals/generic-modal/generic.modal';
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';

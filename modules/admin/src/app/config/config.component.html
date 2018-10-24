@@ -2,6 +2,41 @@
   <div id="content-header">
     <h1 class="title">Global Settings</h1>
   </div>
+  <div id="content-main">
+    <div id="content" class="content">
+      <mat-tab-group dynamicHeight=true>
+        <mat-tab label= {{activeDirTab.tabName}}>
+          <app-config-active-dir-tab #activeDirTab></app-config-active-dir-tab>
+        </mat-tab>
+        <mat-tab label= {{printerTab.tabName}}>
+          <app-config-printer-tab #printerTab></app-config-printer-tab>
+        </mat-tab>
+        <mat-tab label= {{fileSysTab.tabName}}>
+          <app-config-file-sys-tab #fileSysTab></app-config-file-sys-tab>
+        </mat-tab>
+        <mat-tab label= {{sensorsTab.tabName}}>
+          <app-config-sensors-tab #sensorsTab></app-config-sensors-tab>
+        </mat-tab>
+        <mat-tab label= {{settingsHistoryTab.tabName}}>
+          <app-config-settings-history-tab #settingsHistoryTab></app-config-settings-history-tab>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+    <div class="mui-row">
+      <hr>
+      <div class="mui-col-md-4">&nbsp;</div>
+      <div class="mui-col-md-4 form-item text-align-center">
+        <button  class="button-submit" (disabled)="changes()" (click)="save();" >Save Changes</button>
+        <button  class="button-cancel" (disabled)="changes()" (click)="revert()">Discard Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--
+<div id="content-container" class="config">
+  <div id="content-header">
+    <h1 class="title">Global Settings</h1>
+  </div>
 
   <div id="content-main">
     <div id="content" class="mui-container-fluid">
@@ -51,4 +86,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

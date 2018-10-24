@@ -265,6 +265,9 @@ export class GenericTableComponent<T> {
     if (params.editingEnabled !== undefined) {
       this.editingEnabled = params.editingEnabled;
     }
+    else {
+      this.editingEnabled = () => true;
+    }
 
     if (params.selectionOptions) {
       this.selectionMode = params.selectionOptions.selectionMode;

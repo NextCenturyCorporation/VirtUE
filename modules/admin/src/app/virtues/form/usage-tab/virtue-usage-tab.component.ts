@@ -31,7 +31,7 @@ import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum'
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-form-tab.component';
 
 /**
 * @class

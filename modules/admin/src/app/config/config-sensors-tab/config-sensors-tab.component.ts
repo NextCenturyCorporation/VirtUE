@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { GenericPageComponent } from '../../shared/abstracts/gen-page/gen-page.component';
+import { GenericTabComponent } from '../../shared/abstracts/gen-tab/gen-tab.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
 import { SensingModel } from '../../shared/models/sensing.model';
@@ -41,24 +41,21 @@ enum VigilenceLevel {
 
 /**
  * @class
- * This is kept because the html has a list of sensor types - in case we need those. Probably don't.
- *
- * #delete
+ * #unimplemented
  *
  */
 @Component({
-  selector: 'app-config-sensors',
-  templateUrl: './config-sensors.component.html',
-  styleUrls: ['./config-sensors.component.css']
+  selector: 'app-config-sensors-tab',
+  templateUrl: './config-sensors-tab.component.html',
+  styleUrls: ['./config-sensors-tab.component.css']
 })
-export class ConfigSensorsComponent extends GenericPageComponent implements OnInit {
+export class ConfigSensorsTabComponent extends GenericTabComponent implements OnInit {
 
-  /** #uncommented */
-  @ViewChild(GenericTableComponent) sensorTable: GenericTableComponent<Sensor>;
+  /** #uncommented, unimplemented */
+  @ViewChild(GenericTableComponent) generalSensorTable: GenericTableComponent<Sensor>;
 
 
   /**
-   *
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    */
   constructor(
@@ -66,18 +63,32 @@ export class ConfigSensorsComponent extends GenericPageComponent implements OnIn
     dialog: MatDialog
   ) {
     super(router, dialog);
+    this.tabName = "Global Sensors";
   }
 
   /**
-   *
+   * #unimplemented
    */
-  ngOnInit(): void {
+  init(): void {
     this.setUpTable();
-    this.sensorTable.populate([ new Sensor("In-resource (Unikernel)", VigilenceLevel.OFF),
-                                new Sensor("In-Virtue Controller", VigilenceLevel.OFF),
-                                new Sensor("Logging - Aggregate", VigilenceLevel.OFF),
-                                new Sensor("Logging - Archive", VigilenceLevel.OFF),
-                                new Sensor("Certificates Infrastructure", VigilenceLevel.OFF)]);
+  }
+
+  /**
+   * #unimplemented
+   */
+  setUp(): void {
+    this.generalSensorTable.populate([ new Sensor("In-resource (Unikernel)", VigilenceLevel.OFF),
+                              new Sensor("In-Virtue Controller", VigilenceLevel.OFF),
+                              new Sensor("Logging - Aggregate", VigilenceLevel.OFF),
+                              new Sensor("Logging - Archive", VigilenceLevel.OFF),
+                              new Sensor("Certificates Infrastructure", VigilenceLevel.OFF)]);
+  }
+
+  /**
+   * #unimplemented
+   */
+  update(changes: any): void {
+    return;
   }
 
 
@@ -85,10 +96,10 @@ export class ConfigSensorsComponent extends GenericPageComponent implements OnIn
    * Sets up the table, according to parameters defined in this class' child classes.
    */
   setUpTable(): void {
-    if (this.sensorTable === undefined) {
+    if (this.generalSensorTable === undefined) {
       return;
     }
-    this.sensorTable.setUp({
+    this.generalSensorTable.setUp({
       cols: this.getColumns(),
       filters: [],
       tableWidth: 1,
@@ -96,7 +107,7 @@ export class ConfigSensorsComponent extends GenericPageComponent implements OnIn
     });
   }
 
-  /** */
+  /** #unimplemented */
   getColumns(): Column[] {
     return [
       new TextColumn("Sensor Context", 3, (s: Sensor) => s.name, SORT_DIR.ASC),
@@ -108,5 +119,10 @@ export class ConfigSensorsComponent extends GenericPageComponent implements OnIn
       new RadioButtonColumn("On",           1, "status", "ON"),
       new RadioButtonColumn("Off",          1, "status", "OFF")
     ];
+  }
+
+  /** #unimplemented */
+  collectData(): boolean {
+    return true;
   }
 }

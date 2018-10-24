@@ -32,7 +32,7 @@ import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum'
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-form-tab.component';
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { SelectionMode } from '../../../shared/abstracts/gen-table/selectionMode.enum';
 
