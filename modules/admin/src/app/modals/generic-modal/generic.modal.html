@@ -1,16 +1,17 @@
+<div class="container">
+  <h2 mat-dialog-title>Add/Remove {{pluralItem}}</h2>
+  <div mat-dialog-content class="inset_table" flex>
 
-<h2 mat-dialog-title>Add/Remove {{pluralItem}}</h2>
-<div mat-dialog-content>
+    <app-table #table class="inset_table"></app-table>
 
-  <app-table #table></app-table>
+  </div>
 
-</div>
-
-<div mat-dialog-actions>
-  <button class="button" type="submit" (click)="submit();">
-    Submit
-  </button>
-  <button type="button" (click)="cancel();" mat-dialog-close>
-    Cancel
-  </button>
+  <div mat-dialog-actions style="align:bottom">
+    <button class="button" type="submit" (click)="submit();">
+      Submit
+    </button>
+    <button type="button" (click)="cancel();" mat-dialog-close>
+      Cancel
+    </button>
+  </div>
 </div>
