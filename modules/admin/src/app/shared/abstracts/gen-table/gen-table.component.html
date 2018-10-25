@@ -1,7 +1,7 @@
 
-<div class="mui-col-md-{{tableWidth}}">
+<div class="scaleToFit" [ngStyle]="{'width': tableWidth*100 + '%'}">
   <div *ngIf="filterOptions.length > 0" >
-    <!-- if there are elements, show this list -->
+    <!-- only show this list if the table isn't empty -->
     <div *ngIf="elements.length > 0" class="mui-container-fluid">
       <div class="mui-row">
         <!-- Note: angular mui table always has 12 total column-widths of space. available -->
@@ -16,8 +16,7 @@
     </div>
   </div>
 
-
-  <div class="mui-container-fluid data-list no-overflow">
+  <div class="mui-container-fluid data-list no-overflow table">
     <div class="mui-row table-header-group" fxLayout="row">
 
       <span *ngIf="selectionMode === 'multi'" fxFlex="8%" class="float-left mui-col-md-1 table-header" fxLayoutAlign="center center">
@@ -79,7 +78,7 @@
       appActiveClass [ngStyle]="{'background-color': elementIsDisabled(elem.obj) ? '#e7e7e7' : '#ffffff' }" fxLayout="row" class="mui-row table-row" >
 
       <!-- If this table should display colored labels (i.e., if the table holds Virtues) -->
-      <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%"
+      <div *ngIf="hasColoredLabels === true" class="float-left" fxFlex="1%" title="Element Color: {{getColor(elem.obj)}}"
                 [ngStyle]="{ 'background-color': getColor(elem.obj), 'left':'0px' }">
       </div>
 

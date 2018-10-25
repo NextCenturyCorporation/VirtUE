@@ -91,7 +91,7 @@ export class ConfigSensorsComponent extends GenericPageComponent implements OnIn
     this.sensorTable.setUp({
       cols: this.getColumns(),
       filters: [],
-      tableWidth: 12,
+      tableWidth: 1,
       noDataMsg: "No sensor data at the moment. It's not yet implemented."
     });
   }

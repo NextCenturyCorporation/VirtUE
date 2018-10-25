@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -28,6 +29,7 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
  */
 public class ImportExportUtils {
 	private static final Logger logger = LoggerFactory.getLogger(ImportExportUtils.class);
+	public static final String SECURITY_GROUP_PERMISSION_ZIP_ROOT = "securityGroupPermission/";
 	public static String VIRTUE_TEMPLATE_ZIP_ROOT = "virtues/";
 	public static String APPLICATION_DEFN_ZIP_ROOT = "applications/";
 	public static String VIRTUAL_MACHINE_TEMPLATE_ZIP_ROOT = "vms/";
@@ -54,7 +56,7 @@ public class ImportExportUtils {
 	public static void readImportExportZipStream(InputStream stream, Collection<VirtueUser> users,
 			Collection<VirtueTemplate> vts, Collection<VirtualMachineTemplate> vms,
 			Collection<ApplicationDefinition> apps, Collection<IconModel> icons,
-			BiConsumer<ZipEntry, InputStream> vmImageConsumer)
+			Collection<SecurityGroupPermission> sgp, BiConsumer<ZipEntry, InputStream> vmImageConsumer)
 			throws JsonParseException, JsonMappingException, IOException {
 		ZipEntry entry;
 		try (ZipInputStream zipStream = new ZipInputStream(stream)) {

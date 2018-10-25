@@ -5,6 +5,6 @@
  */
 export enum NetworkProtocols {
   TCPIP = "TCP/IP",
-  UDP = "UDP",
+  UDP = "UDP/IP",
   ICMP = "ICMP"
 }

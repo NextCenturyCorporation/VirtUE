@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -15,6 +16,7 @@ import java.util.zip.ZipEntry;
 
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -41,11 +43,12 @@ public class ExportViewer {
 
 	private static void readFile(File file) throws FileNotFoundException {
 		FileInputStream fis = new FileInputStream(file);
-		ArrayList<ApplicationDefinition> apps = new ArrayList<ApplicationDefinition>();
-		ArrayList<VirtualMachineTemplate> vms = new ArrayList<VirtualMachineTemplate>();
-		ArrayList<VirtueTemplate> vts = new ArrayList<VirtueTemplate>();
-		ArrayList<VirtueUser> users = new ArrayList<VirtueUser>();
-		ArrayList<IconModel> icons = new ArrayList<IconModel>();
+		List<ApplicationDefinition> apps = new ArrayList<ApplicationDefinition>();
+		List<VirtualMachineTemplate> vms = new ArrayList<VirtualMachineTemplate>();
+		List<VirtueTemplate> vts = new ArrayList<VirtueTemplate>();
+		List<VirtueUser> users = new ArrayList<VirtueUser>();
+		List<IconModel> icons = new ArrayList<IconModel>();
+		List<SecurityGroupPermission> sgps = new ArrayList<SecurityGroupPermission>();
 		Map<String, Long> imageToSizeMap = new TreeMap<String, Long>();
 		try {
 			BiConsumer<ZipEntry, InputStream> vmImageConsumer = (ze, stream) -> {
@@ -60,13 +63,14 @@ public class ExportViewer {
 				}
 				imageToSizeMap.put(path, size);
 			};
-			ImportExportUtils.readImportExportZipStream(fis, users, vts, vms, apps, icons, vmImageConsumer);
+			ImportExportUtils.readImportExportZipStream(fis, users, vts, vms, apps, icons, sgps, vmImageConsumer);
 			printUsers(users);
 			printVirtues(vts);
 			printVms(vms, imageToSizeMap);
 			printApps(apps);
 			printIcons(icons);
 			printImages(imageToSizeMap);
+			printSecurityGroupPermissions(sgps);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -82,7 +86,7 @@ public class ExportViewer {
 		System.out.println();
 	}
 
-	private static void printIcons(ArrayList<IconModel> icons) {
+	private static void printIcons(List<IconModel> icons) {
 		System.out.println("Icons (" + icons.size() + "): ");
 		Collections.sort(icons, IconModel.CASE_INSENSITIVE_ID_COMPARATOR);
 		for (IconModel icon : icons) {
@@ -91,7 +95,7 @@ public class ExportViewer {
 		System.out.println();
 	}
 
-	private static void printApps(ArrayList<ApplicationDefinition> apps) {
+	private static void printApps(List<ApplicationDefinition> apps) {
 		System.out.println("Applications (" + apps.size() + "):");
 		Collections.sort(apps, ApplicationDefinition.CASE_INSENSITIVE_NAME_COMPARATOR);
 		for (ApplicationDefinition app : apps) {
@@ -100,7 +104,7 @@ public class ExportViewer {
 		System.out.println();
 	}
 
-	private static void printVms(ArrayList<VirtualMachineTemplate> vms, Map<String, Long> imageToSizeMap) {
+	private static void printVms(List<VirtualMachineTemplate> vms, Map<String, Long> imageToSizeMap) {
 		System.out.println("Virtual Machines (" + imageToSizeMap.size() + "):");
 		Collections.sort(vms, VirtualMachineTemplate.CASE_INSENSITIVE_NAME_COMPARATOR);
 		for (VirtualMachineTemplate vm : vms) {
@@ -112,7 +116,7 @@ public class ExportViewer {
 		System.out.println();
 	}
 
-	private static void printVirtues(ArrayList<VirtueTemplate> vts) {
+	private static void printVirtues(List<VirtueTemplate> vts) {
 		System.out.println("Virtues (" + vts.size() + "):");
 		Collections.sort(vts, VirtueTemplate.CASE_INSENSITIVE_NAME_COMPARATOR);
 		for (VirtueTemplate vt : vts) {
@@ -121,14 +125,25 @@ public class ExportViewer {
 		System.out.println();
 	}
 
-	private static void printUsers(ArrayList<VirtueUser> users) {
-		users.sort(VirtueUser.USERNAME_COMPARATOR);
+	private static void printUsers(List<VirtueUser> users) {
 		System.out.println("Users (" + users.size() + "):");
 		Collections.sort(users, VirtueUser.USERNAME_COMPARATOR);
 		for (VirtueUser user : users) {
 			System.out.println(INDENT + user.getUsername() + " - " + user.getAuthorities());
 		}
 		System.out.println();
+	}
+
+	private static void printSecurityGroupPermissions(List<SecurityGroupPermission> sgps) {
+		System.out.println("SecurityGroupPermissions (" + sgps.size() + "):");
+		Collections.sort(sgps, SecurityGroupPermission.TEMPLATE_ID_COMPARATOR);
+		for (SecurityGroupPermission sgp : sgps) {
+			System.out.println(INDENT + " Key: " + sgp.getKey() + " Template: " + sgp.getTemplateId()
+					+ " SecurityGroup: " + sgp.getSecurityGroupId() + " Ingress: " + sgp.isIngress() + " CidrIp: "
+					+ sgp.getCidrIp() + " Protocol: " + sgp.getIpProtocol() + " ToPort: " + sgp.getToPort()
+					+ " FromPort: " + sgp.getFromPort());
+		}
+
 	}
 
 	private static void printUsage() {
