@@ -115,4 +115,10 @@ public class FileShare implements Comparable<FileShare> {
 	public int compareTo(FileShare o) {
 		return name.compareTo(o.getName());
 	}
+
+	@Override
+	public String toString() {
+		return "name: " + name + ", path: " + path + ", permissions: " + permissions + ", server: " + server
+				+ ", type: " + type;
+	}
 }
