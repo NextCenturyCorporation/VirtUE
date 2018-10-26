@@ -1,15 +1,24 @@
 package com.nextcentury.savior.cifsproxy.services;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
@@ -22,12 +31,15 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.nextcentury.savior.cifsproxy.ActiveDirectorySecurityConfig;
 import com.nextcentury.savior.cifsproxy.BaseSecurityConfig;
 import com.nextcentury.savior.cifsproxy.DelegatingAuthenticationManager;
 import com.nextcentury.savior.cifsproxy.GssApi;
 import com.nextcentury.savior.cifsproxy.model.FileShare;
 import com.nextcentury.savior.cifsproxy.model.FileShare.SharePermissions;
+import com.nextcentury.savior.cifsproxy.model.FileShare.ShareType;
 
 @Service
 @PropertySources({ @PropertySource(BaseSecurityConfig.DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_CLASSPATH),
@@ -38,6 +50,11 @@ public class ShareService {
 
 	/** path to the mount command */
 	private static final String MOUNT_COMMAND = "/bin/mount";
+
+	/**
+	 * Path to the unmount command
+	 */
+	private static final String UNMOUNT_COMMAND = "/bin/umount";
 
 	/**
 	 * Time until we assume mount has failed (in seconds)
@@ -57,6 +74,10 @@ public class ShareService {
 	 */
 	private static final Object MOUNT_CREDENTIALS_LOCK = new Object();
 
+	private static final String MOUNT_QUERY_COMMAND = "findmnt";
+	private static final String[] MOUNT_QUERY_COMMAND_ARGS = { "--json", "--canonicalize", "--types", "cifs",
+			"--nofsroot" };
+
 	/** where to mount files for the Virtue */
 	@Value("${mountRoot:/mnt/cifs-proxy}")
 	public String MOUNT_ROOT;
@@ -68,11 +89,16 @@ public class ShareService {
 	 */
 	@Value("${mountUser:mounter}")
 	public String mountUser;
-	
+
 	/**
 	 * Tracks what files shares are mounted and their mount points.
 	 */
 	Map<FileShare, String> mountPoints = new ConcurrentHashMap<>();
+
+	/**
+	 * Maps file share names to their shares (for lookup by name).
+	 */
+	Map<String, FileShare> sharesByName = new ConcurrentHashMap<>();
 
 	/**
 	 * Ensure that the root mountpoint exists.
@@ -434,14 +460,160 @@ public class ShareService {
 		// https://askubuntu.com/questions/752398/mount-cifs-hangs-and-becomes-unresponsive
 		String options = "username=" + simpleUsername + (readOnly ? ",ro" : "") + ",sec=krb5,vers=3.0,cruid="
 				+ mountUser;
-		String[] args = { "sudo", MOUNT_COMMAND, "-t", "cifs", "//" + share.getServer() + sourcePath,
-				canonicalDest, "-v", "-o", options };
+		String[] args = { "sudo", MOUNT_COMMAND, "-t", "cifs", "//" + share.getServer() + sourcePath, canonicalDest,
+				"-v", "-o", options };
 		LOGGER.debug("mount command: " + Arrays.toString(args));
 		ProcessBuilder processBuilder = createProcessBuilder(null);
 		processBuilder.command(args);
 		runProcess(processBuilder, "mount");
-		mountPoints.put(share, canonicalDest);
+		addInternal(share, canonicalDest);
 		LOGGER.exit();
 	}
 
+	private void addInternal(FileShare share, String canonicalDest) {
+		LOGGER.entry(share, canonicalDest);
+		mountPoints.put(share, canonicalDest);
+		sharesByName.put(share.getName(), share);
+		LOGGER.exit();
+	}
+
+	/**
+	 * Look up a file share by name
+	 * 
+	 * @param name
+	 *                 the name of the share to get
+	 * @return the share named <code>name</code>
+	 * 
+	 */
+	public FileShare getShare(String name) {
+		LOGGER.entry(name);
+		FileShare share = sharesByName.get(name);
+		LOGGER.exit(share);
+		return share;
+	}
+
+	/**
+	 * Remove and unmount the share with the given name
+	 * 
+	 * @param name
+	 *                 the name of the share to unmount
+	 * 
+	 * @throws IllegalArgumentException
+	 *                                      if the named share is not mounted
+	 */
+	public void removeShare(String name) throws IllegalArgumentException {
+		LOGGER.entry(name);
+		FileShare share = sharesByName.get(name);
+		if (share == null) {
+			IllegalArgumentException e = new IllegalArgumentException("share '" + name + "' is not mounted");
+			LOGGER.throwing(e);
+			throw e;
+		}
+		unmountShare(share);
+		mountPoints.remove(share);
+		sharesByName.remove(name);
+		LOGGER.exit();
+	}
+
+	/**
+	 * Unmount a share
+	 * 
+	 * @param share
+	 *                  the share to unmount
+	 */
+	private void unmountShare(FileShare share) {
+		LOGGER.entry(share);
+		ProcessBuilder processBuilder = createProcessBuilder(null);
+		List<String> command = new ArrayList<>();
+		command.add("sudo");
+		command.add(UNMOUNT_COMMAND);
+		command.add("--lazy");
+		command.add(getMountPoint(share));
+		processBuilder.command(command);
+		runProcess(processBuilder, "unmount " + share.getName());
+		LOGGER.exit();
+	}
+
+	/** Corresponds to output of {@link ShareService#MOUNT_QUERY_COMMAND}. */
+	protected static class Filesystems {
+		public List<Target> filesystems;
+	}
+
+	protected static class Target {
+		public String target;
+		public String source;
+		public String fstype;
+		public String options;
+	}
+
+	public void scan() throws IOException {
+		LOGGER.entry();
+		mountPoints.clear();
+		sharesByName.clear();
+
+		List<String> command = new ArrayList<>();
+		command.add(MOUNT_QUERY_COMMAND);
+		command.addAll(Arrays.asList(MOUNT_QUERY_COMMAND_ARGS));
+		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		processBuilder.redirectOutput(Redirect.PIPE);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug(
+					"running mount query: " + MOUNT_QUERY_COMMAND + " " + String.join(" ", MOUNT_QUERY_COMMAND_ARGS));
+		}
+		Process queryProcess = processBuilder.start();
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(queryProcess.getInputStream()));
+		StringJoiner sj = new StringJoiner("\n");
+		reader.lines().iterator().forEachRemaining(sj::add);
+		String queryOutput = sj.toString();
+		LOGGER.debug("query output: " + queryOutput);
+
+		if (queryOutput.length() > 0) {
+			MappingJsonFactory mappingJsonFactory = new MappingJsonFactory();
+			JsonParser parser = mappingJsonFactory.createParser(queryOutput);
+			Filesystems filesystems = parser.readValueAs(Filesystems.class);
+			if (filesystems != null) {
+				String prefix = MOUNT_ROOT + "/";
+				Pattern sourcePattern = Pattern.compile("//([^/]*)(/.*)");
+				for (Target target : filesystems.filesystems) {
+					if (target.target.startsWith(prefix)) {
+						// we've got a filesystem we should manage
+						Matcher sourceMatcher = sourcePattern.matcher(target.source);
+						if (sourceMatcher.matches()) {
+							String server = sourceMatcher.group(1);
+							String path = sourceMatcher.group(2);
+							String name = target.target.substring(MOUNT_ROOT.length() + 1);
+							List<String> options = Arrays.asList(target.options.split(","));
+							Set<SharePermissions> permissions = new HashSet<FileShare.SharePermissions>();
+							permissions.add(SharePermissions.READ);
+							if (options.contains("ro")) {
+							} else if (options.contains("rw")) {
+								permissions.add(SharePermissions.WRITE);
+							} else {
+								LOGGER.warn("Options contain neither 'ro' nor 'rw' for file share: " + name);
+							}
+							FileShare fileShare = new FileShare(name, server, path, permissions, ShareType.CIFS);
+							addInternal(fileShare, target.target);
+						} else {
+							LOGGER.warn("cannot parse source for CIFS filesystem: " + target.source);
+						}
+					}
+				}
+			}
+		}
+
+		LOGGER.exit();
+	}
+
+	public static void main(String[] args) throws IOException {
+		ShareService shareService = new ShareService();
+		shareService.MOUNT_ROOT = "/mnt/cifs-proxy";
+
+		shareService.scan();
+		Set<FileShare> shares = shareService.getShares();
+		System.out.println("Found " + shares.size() + " shares:");
+		for (FileShare fileShare : shares) {
+			System.out.println(fileShare);
+		}
+	}
 }
