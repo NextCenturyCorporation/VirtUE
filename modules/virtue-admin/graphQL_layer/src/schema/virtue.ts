@@ -1,21 +1,36 @@
-// virtue.js
+
+import rp = require('request-promise');
+
 export const typeDef = `
   extend type Query {
     virtues: [Virtue]
-    virtue(id: Int!): Virtue
+    virtue(id: String!): Virtue
   }
   type Virtue {
-    id: Int!
+    id: String!
     name: String
   }
 `;
+export type Virtue = {id: string, name: string};
 
-let virtues = [{id: 1, name: "V1"}];
+export function getVirtue(id: string) {
+  return rp({
+      uri: `http://localhost:8080/admin/virtue/template/` + id,
+      json: true
+    }).then((res: any) => res);
+}
+
+export function getVirtues() {
+  return rp({
+      uri: `http://localhost:8080/admin/virtue/template/`,
+      json: true
+    }).then((res: any) => res);
+}
 
 export const resolvers = {
   Query: {
-    virtues: () => virtues,
-    virtue: (id: number) => virtues[0],
+    virtues: () => getVirtues,
+    virtue: (id: string) => getVirtue(id),
   }//,
   // Virtue: {
   //   title: () => { ... },

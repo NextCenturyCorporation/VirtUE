@@ -1,58 +1,92 @@
-// user.js
 
+import rp = require('request-promise');
+import { getVirtues, Virtue } from './virtue';
 
 export const typeDef = `
   extend type Query {
-    user(id: Int!): User
+    user(username: String!): User
     users: [User]
   }
   extend type Mutation {
-    addUser(id: Int!, username: String!): User
-    changeName(id: Int!, newName: String!): User
+    addUser(newUserData: UserInput!): User
+    changeUser(username: String!, newUserData: UserInput!): User
   }
   type User {
-    id: Int!
-    username: String
+    username: String!
+    authorities: [String]
+    virtueTemplateIds: [String]
     virtues: [Virtue]
+    enabled: Boolean!
+  }
+  input UserInput{
+    username: String!
+    authorities: [String]
+    virtueTemplateIds: [String]
+    enabled: Boolean
   }
 `;
-type Virtue = {id: number, name: string};
-type User = {id: number, username: string, virtues: Virtue[]};
+type User = {username: string, virtueTemplateIds: string[], authorities: string[], enabled: boolean};
 
-let users: User[] = [{id: 34, username: "Bob", virtues: [{id: 1, name: "V1"}, {id: 2, name: "V2"}]}];
-
-function getUsers(): User[] {
-  return users;
-}
-
-function getUser(id: number): User {
-  return users.find(x => x.id === id);
-}
-
-function addUser(newId: number, username: string): User {
-  users.push({id:newId, username: username, virtues: [{id: 0, name: "V0"}]});
-  return users[users.length - 1];
-}
-
-function changeName(id: number, newName: string): User {
-  let user = getUser(id);
-  if (user !== undefined) {
-    user.username = newName;
-    console.log("changing name to ", user.username);
-    return user;
+function addUser(newUserData: User) {
+  if (newUserData.authorities === undefined) {
+    newUserData.authorities = [];
   }
+  if (newUserData.virtueTemplateIds === undefined) {
+    newUserData.virtueTemplateIds = [];
+  }
+  if (newUserData.enabled === undefined) {
+    newUserData.enabled = false;
+  }
+return rp({
+    uri: `http://localhost:8080/admin/user/`,
+    method: `POST`,
+    headers: {'Origin': 'http://localhost:4200'},
+    body: newUserData,
+    json: true
+  });
+}
+
+function changeUser(username: string, newUserData: User) {
+  return rp({
+      uri: `http://localhost:8080/admin/user/` + newUserData.username,
+      method: `POST`,
+      body: JSON.stringify(newUserData)
+    }).then((res: any) => {return res;});
+}
+
+function getUserVirtues(u: User) {
+  return getVirtues().then((virtues: Virtue[]) => {return virtues.filter(virtue => { return u.virtueTemplateIds.indexOf(virtue.id) !== -1})});
+}
+
+
+function getUser(username: string) {
+  return rp({
+      uri: `http://localhost:8080/admin/user/` + username,
+      method: `GET`
+    }).then((res: any) => {return JSON.parse(res);});
+}
+
+function getUsers() {
+  return rp({
+      uri: `http://localhost:8080/admin/user/`,
+      method: `GET`
+    }).then((res: any) => {return JSON.parse(res);});
 }
 
 export const resolvers = {
   Query: {
     users: () => getUsers(),
-    user: (_: any, input: {id: number}) => getUser(input.id),
+    user: (_: any, input: {name: string}) => getUser(input.name),
   },
   Mutation: {
-    addUser: (_: any, input: {id: number, username: string}) => addUser(input.id, input.username),
-    changeName: (_: any, input: {id: number, newName: string}) => changeName(input.id, input.newName)
+    addUser: (_: any, input: {newUserData: User}) => addUser(input.newUserData),
+    changeUser: (_: any, input: {username: string, newUserData: User}) => changeUser(input.username, input.newUserData)
   },
+  // // this is useful for doing light processing to the requested data, or for generated a simulated attribute
+  // // that doesn't directly exist on the object. Note anything here must also be in schema.
   User: {
-    name: () => username,
+    // username: (u: User) => u.username.toUpperCase(),
+    // initials: (u: User) => u.username[0] + " " + u.id[0]
+    virtues: (u: User) => getUserVirtues(u)
   }
 };

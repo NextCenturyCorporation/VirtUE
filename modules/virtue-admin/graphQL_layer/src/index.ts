@@ -1,12 +1,6 @@
-// const { ApolloServer, gql } = require('apollo-server');
-// const { merge } = require('lodash');
 
 import { ApolloServer, gql, makeExecutableSchema } from 'apollo-server';
 import { merge } from 'lodash';
-
-// const { typeDef as User, resolvers as userResolvers } = require('./schema/user.js');
-//
-// const { typeDef as Virtue, resolvers as virtueResolvers } = require('./schema/virtue.js');
 
 import {
   typeDef as User,
