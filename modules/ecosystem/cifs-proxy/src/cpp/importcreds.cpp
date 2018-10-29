@@ -1,6 +1,13 @@
 /*
  * importcreds.cpp
  *
+ * This program takes Kerberos credentials from an existing Kerberos
+ * credentials cache file and copies (imports) them into the current
+ * credential cache. The existing principal in the current cache is
+ * unmodified. If credentials in the imported file match (i.e., have
+ * the same service and principal as) those in the current cache, I'm
+ * not sure which credentials are retained.
+ *
  *  Created on: Sep 7, 2018
  *      Author: clong
  */
@@ -11,6 +18,10 @@
 #include <cstring>
 #include <cstdio>
 #include <iostream>
+
+void printUsage(const char* progname) {
+    fprintf(stderr, "%s: %s certCacheFile\n");
+}
 
 #define CHECK_ERROR(major,  minor, STRING)                              \
 	if (GSS_ERROR(major)) {                                             \
@@ -43,6 +54,12 @@ void printErrors(OM_uint32 status_code, OM_uint32 minorStatus, const char* messa
 }
 
 int main(int argc, char **argv) {
+    if (argc != 2) {
+        fprintf(stderr, "%s: error: missing arguments\n");
+        printUsage();
+        exit(-1);
+    }
+    
 	OM_uint32 minorStatus;
 	int majorStatus;
 	gss_name_t name = GSS_C_NO_NAME;
@@ -57,37 +74,8 @@ int main(int argc, char **argv) {
 
 	gss_cred_id_t outputCred;
 	majorStatus = gss_acquire_cred_from(&minorStatus, name, 0, GSS_C_NO_OID_SET,
-	GSS_C_BOTH, &credStore, &outputCred, NULL, NULL);
+                                        GSS_C_INITIATE, &credStore, &outputCred, NULL, NULL);
 	CHECK_ERROR(majorStatus, minorStatus, "acquire_cred_from");
-
-#define INIT_NEEDED
-#if defined(ACQUIRE_NEEDED) || defined (INIT_NEEDED)
-	const char* serviceName = "cifs@fileserver";
-	//const char* serviceName = "cifs/fileserver.test.savior@TEST.SAVIOR";
-	gss_name_t gssServiceName;
-	gss_buffer_desc nameBuffer =
-			{ strlen(serviceName) + 1, (void*) serviceName };
-
-	majorStatus = gss_import_name(&minorStatus, &nameBuffer, GSS_C_NT_HOSTBASED_SERVICE,
-			&gssServiceName);
-	CHECK_ERROR(majorStatus, minorStatus, "import_name");
-#endif
-    
-#ifdef INIT_NEEDED
-	gss_buffer_desc outputToken;
-	gss_ctx_id_t context = GSS_C_NO_CONTEXT;
-	majorStatus = gss_init_sec_context(&minorStatus, outputCred, &context, gssServiceName,
-			GSS_C_NO_OID, 0, 0, GSS_C_NO_CHANNEL_BINDINGS, NULL,
-			NULL, &outputToken, NULL, NULL);
-	CHECK_ERROR(majorStatus, minorStatus, "init_sec_context");
-#endif
-
-#ifdef ACQUIRE_NEEDED
-	gss_cred_id_t acquiredCred;
-	majorStatus = gss_acquire_cred(&minorStatus, gssServiceName, 0,
-	GSS_C_NO_OID_SET, GSS_C_INITIATE, &acquiredCred, NULL, NULL);
-	CHECK_ERROR(majorStatus, minorStatus, "acquire_cred");
-#endif
 
 	majorStatus = gss_store_cred(&minorStatus, outputCred, GSS_C_INITIATE,
 	GSS_C_NO_OID, 1, 1, NULL, NULL);
