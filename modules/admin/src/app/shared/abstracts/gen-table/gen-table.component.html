@@ -107,10 +107,10 @@
           <!-- If this column should display a single piece of text for each row-->
           <ng-container *ngIf="isText(column)">
             <!-- 'a's look like links, 'div's don't. -->
-            <a class="edit" *ngIf="column.link !== undefined && !editingEnabled()" (click)="column.link(elem.obj)">
+            <a class="edit" *ngIf="column.link !== undefined && !disableLinks()" (click)="column.link(elem.obj)">
               {{ column.formatElement(elem.obj) }}
             </a>
-            <div class="edit" *ngIf="column.link === undefined || editingEnabled()">
+            <div class="edit" *ngIf="column.link === undefined || disableLinks()">
               {{ column.formatElement(elem.obj) }}
             </div>
           </ng-container>
@@ -121,10 +121,10 @@
             <div *ngFor="let object of column.getList(elem.obj)">
               <ul>
                 <ul>
-                  <a *ngIf="column.link !== undefined && !editingEnabled()" (click)="column.link(object)">
+                  <a *ngIf="column.link !== undefined && !disableLinks()" (click)="column.link(object)">
                     {{ column.formatElements(object) }}
                   </a>
-                  <div *ngIf="column.link === undefined || editingEnabled()">
+                  <div *ngIf="column.link === undefined || disableLinks()">
                     {{ column.formatElements(object) }}
                   </div>
                 </ul>
@@ -163,10 +163,10 @@
 
           <ng-container *ngIf="isIcon(column)">
             <a *ngIf="editingEnabled()">
-              <mat-icon svgIcon="{{column.iconName}}" (click)="column.link(elem.obj)" aria-label="column.label">{{mode}}</mat-icon>
+              <mat-icon svgIcon="{{column.iconName}}" (click)="column.link(elem.obj)" aria-label="column.label"></mat-icon>
             </a>
             <div *ngIf="!editingEnabled()">
-              <mat-icon svgIcon="{{column.iconName}}" aria-label="column.label">{{mode}}</mat-icon>
+              <mat-icon svgIcon="{{column.iconName}}" aria-label="column.label"></mat-icon>
             </div>
           </ng-container>
 

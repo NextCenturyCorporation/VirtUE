@@ -158,11 +158,18 @@ export class GenericTableComponent<T> {
 
   /**
    * A caller-overrideable function for defining whether the interactable components of columns in this table should be disabled, given
-   * some caller-defined table state. Default is a function that returns false - disabling most interactable html objects.
+   * some caller-defined table state. Default is a function that returns true - disabling most interactable html objects.
    * Note that this doesn't disable sorting or filtering, or SubMenuOpts. Sub menus are expected to manage their existence
    * through their own "shouldAppear" function.
    */
-  editingEnabled: (() => boolean) = () => false;
+  editingEnabled: (() => boolean) = () => true;
+
+  /**
+   * A caller-overrideable function for defining whether any links in the table should be disabled.
+   * This is needed because the only sensible default for a table is for it to default to being editable, and for the links to be active.
+   * But many tables want links to be active only when the table isn't editable.
+   */
+  disableLinks: (() => boolean) = () => false;
 
   /**
    * a caller-defined function that returns true iff a row should be shown as 'disabled' - greyed out, and unselectable, based on the
@@ -172,7 +179,7 @@ export class GenericTableComponent<T> {
 
   /**
    * A caller-defined function that returns a color to give a small label on each row, based on the object held by that row.
-   * Defaults to 'transparent', because most tables don't need
+   * Defaults to 'transparent', because most tables don't need colored labels on their rows.
    */
   getColor: ((obj: T) => string) = () => 'transparent';
 
@@ -218,13 +225,16 @@ export class GenericTableComponent<T> {
     elementIsDisabled?: ((obj: T) => boolean),
 
     /** see this.[[hasColoredLabels]] */
-    coloredLabels?: boolean;
+    coloredLabels?: boolean,
 
     /** see this.[[getColor]] */
     getColor?: ((obj: T) => string),
 
     /** see this.[[editingEnabled]] */
-    editingEnabled?: () => boolean
+    editingEnabled?: () => boolean,
+
+    /** see this.[[disableLinks]] */
+    disableLinks?: () => boolean,
 
     /** Many tables aren't used for selection, but if selection of rows should be allow, all of the following should be defined. */
     selectionOptions?: {
@@ -265,8 +275,9 @@ export class GenericTableComponent<T> {
     if (params.editingEnabled !== undefined) {
       this.editingEnabled = params.editingEnabled;
     }
-    else {
-      this.editingEnabled = () => true;
+
+    if (params.disableLinks !== undefined) {
+      this.disableLinks = params.disableLinks;
     }
 
     if (params.selectionOptions) {
