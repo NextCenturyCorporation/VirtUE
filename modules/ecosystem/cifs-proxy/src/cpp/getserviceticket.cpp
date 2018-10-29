@@ -1,6 +1,11 @@
 /*
  * getserviceticket.cpp
  *
+ * This is an attempt at partially replicating the kvno(1) program. It
+ * attempts to get a service ticket for the specified service and adds
+ * it to the specified file. The user may also be specified, otherwise
+ * the current Kerberos user is used.
+ *
  *  Created on: Jul 5, 2018
  *      Author: clong
  */
