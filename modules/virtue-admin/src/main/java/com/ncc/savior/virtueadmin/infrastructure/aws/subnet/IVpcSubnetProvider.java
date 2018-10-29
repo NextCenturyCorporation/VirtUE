@@ -43,6 +43,5 @@ public interface IVpcSubnetProvider {
 	 */
 	String getVpcId();
 
-	
 
 }
