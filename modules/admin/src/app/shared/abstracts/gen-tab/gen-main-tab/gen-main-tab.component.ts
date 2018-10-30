@@ -13,6 +13,7 @@ import { Mode } from '../../../abstracts/gen-form/mode.enum';
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
 
+import { VirtueModalComponent } from '../../../../modals/virtue-modal/virtue-modal.component';
 
 /**
  * @class
@@ -103,6 +104,24 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   }
 
   /**
+   * Don't delete unnecessarily - example of hopefully future-code, to replace the below function.
+   * See note above the commented-out GenericPageComponent.activateModal() function.
+   */
+  // activateModal() {
+  //
+  //   // this function being defined in gen-page - would be largely similar to the below activateModal() function.
+  //   this.createModal(
+  //         {
+  //           modalClass: this.getModalType(),
+  //           inData: {
+  //             selectedIDs: this.item.childIDs
+  //           },
+  //           onComplete: (selectedItems) => {this.onChildrenChange.emit(selectedItems);}
+  //         }
+  //       )
+  // }
+
+  /**
    * this brings up the subclass-defined-modal to add/remove children.
    *
    * Note the distinction between this and DialogsComponent;
@@ -110,14 +129,11 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    * potentially dangerous user actions.
    */
   activateModal(): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
 
     let params = {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
+      height: '70%',
+      width: '70%',
       data: {
-        name: this.item.getName(), // this currently isn't used; see [[GenericModalComponent]]
         selectedIDs: this.item.childIDs
       }
     };
@@ -133,21 +149,19 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
     () => { // when finished
       sub.unsubscribe();
     });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
+    dialogRef.updatePosition({ top: '5%' });
 
   }
 
   /**
-   * #uncommented
    * defines the child table  using sub-class-defined-functions.
    */
   defaultChildTableParams() {
     return {
       cols: this.getColumns(),
       filters: [], // don't enable filtering by status on the form's child table.
-      tableWidth: 9,
+      tableWidth: 0.75,
       noDataMsg: this.getNoDataMsg(),
       elementIsDisabled: (i: Item) => !i.enabled,
       editingEnabled: () => !this.inViewMode()
@@ -218,12 +232,12 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   abstract getNoDataMsg(): string;
 
   /**
-   * Define the default table width, as a # of twefths-of-the-parent-space.
+   * Define the default table width, as a fraction of the screen space.
    * The tables don't need to take up the full screen width, they're usually pretty sparse.
    * Can be overridden if necessary though.
    */
   getTableWidth(): number {
-    return 9;
+    return 0.75;
   }
 
   /**

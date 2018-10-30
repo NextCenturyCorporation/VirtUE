@@ -38,15 +38,17 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
-import com.ncc.savior.virtueadmin.infrastructure.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 /**
  * This class handles creation, deletion, start, and stop among other management
@@ -67,19 +69,19 @@ public class XenHostManager {
 	private String xenKeyName;
 	private InstanceType xenInstanceType;
 	protected IActiveVirtueDao xenVmDao;
-	private String serverUser;
 	private IKeyManager keyManager;
 	private XenGuestManagerFactory xenGuestManagerFactory;
 	private Collection<String> securityGroupIds;
 	private CompletableFutureServiceProvider serviceProvider;
 	private PersistentStorageManager persistentStorageManager;
 	private String iamRoleName;
+	private String serverId;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
-			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, Collection<String> securityGroupsNames,
-			String xenAmi, String xenLoginUser, String xenKeyName, InstanceType xenInstanceType, boolean usePublicDns,
-			String iamRoleName) {
+			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
+			Collection<String> securityGroupsNames, String xenAmi, String xenLoginUser, String xenKeyName,
+			InstanceType xenInstanceType, boolean usePublicDns, String iamRoleName) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
@@ -89,7 +91,7 @@ public class XenHostManager {
 		this.xenKeyName = xenKeyName;
 		this.iamRoleName = iamRoleName;
 		this.xenInstanceType = xenInstanceType;
-		this.serverUser = System.getProperty("user.name");
+		this.serverId = serverIdProvider.getServerId();
 		this.keyManager = keyManager;
 		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53);
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
@@ -98,10 +100,10 @@ public class XenHostManager {
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
-			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, String securityGroupsCommaSeparated,
+			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider,ServerIdProvider serverIdProvider, String securityGroupsCommaSeparated,
 			String xenAmi, String xenUser, String xenKeyName, String xenInstanceType, boolean usePublicDns,
 			String iamRoleName) {
-		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider,
+		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider, serverIdProvider,
 				splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
 				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName);
 	}
@@ -123,7 +125,8 @@ public class XenHostManager {
 	// start vms with code below
 
 	public void provisionXenHost(VirtueInstance virtue, Collection<VirtualMachineTemplate> linuxVmts,
-			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture, String subnetId) {
+			CompletableFuture<VirtualMachine> xenFuture, CompletableFuture<Collection<VirtualMachine>> linuxFuture,
+			VirtueCreationAdditionalParameters virtueMods) {
 		// if caller doesn't provide a future, we may still want one.
 		if (linuxFuture == null) {
 			linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
@@ -138,10 +141,13 @@ public class XenHostManager {
 		// mainly this makes sure the volume is ready
 		persistentStorageManager.getOrCreatePersistentStorageForVirtue(virtue.getUsername(), virtue.getTemplateId(),
 				virtue.getName());
-
+		Collection<String> secGroupIds = new HashSet<String>(securityGroupIds);
+		if (virtueMods.getSecurityGroupId() != null) {
+			secGroupIds.add(virtueMods.getSecurityGroupId());
+		}
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
-				"VRTU-Xen-" + serverUser + "-" + virtue.getUsername() + "-" + virtueName, securityGroupIds, xenKeyName,
-				xenInstanceType, subnetId, iamRoleName);
+				"VRTU-Xen-" + serverId + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
+				xenInstanceType, virtueMods.getSubnetId(), iamRoleName);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,
@@ -160,7 +166,7 @@ public class XenHostManager {
 		final String id = virtue.getId();
 		for (VirtualMachineTemplate vmt : linuxVmts) {
 			String domainUUID = UUID.randomUUID().toString();
-			String name = VM_PREFIX + serverUser + "-" + virtue.getUsername() + "-" + domainUUID;
+			String name = VM_PREFIX + serverId + "-" + virtue.getUsername() + "-" + domainUUID;
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), name,
 					new ArrayList<ApplicationDefinition>(), VmState.CREATING, vmt.getOs(), "", "", 22, "", "", "", "");
 			virtue.getVms().add(vm);
@@ -245,7 +251,7 @@ public class XenHostManager {
 				// provision Xen Guest VMs
 				XenGuestManager guestManager = xenGuestManagerFactory.getXenGuestManager(xenVm);
 				logger.debug("starting to provision guests");
-				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverUser);
+				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverId);
 			}
 
 			private void copyFolderFromS3(Session finalSession, String templatePath) throws JSchException, IOException {
@@ -554,12 +560,6 @@ public class XenHostManager {
 			logger.debug("xen host stopping future complete");
 			xenFuture.complete(vm);
 		});
-	}
-
-	public void setServerUser(String serverUser) {
-		if (serverUser != null && !serverUser.trim().equals("")) {
-			this.serverUser = serverUser;
-		}
 	}
 
 	public XenGuestManager getGuestManager(String virtueId) {
