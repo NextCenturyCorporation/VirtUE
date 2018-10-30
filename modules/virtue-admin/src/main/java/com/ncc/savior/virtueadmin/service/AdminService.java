@@ -72,6 +72,9 @@ public class AdminService {
 
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
+	
+	@Value("${virtue.test:false}")
+	private boolean test;
 
 	private ISecurityGroupManager securityGroupManager;
 
@@ -86,8 +89,12 @@ public class AdminService {
 		this.initialAdmin = initialAdmin;
 		this.securityGroupManager = securityGroupManager;
 		addInitialUser();
+	}
 
-		sync(templateManager, securityGroupManager);
+	public void sync() {
+		if (!test) {
+			sync(templateManager, securityGroupManager);
+		}
 	}
 
 	private void sync(ITemplateManager templateManager, ISecurityGroupManager securityGroupManager) {
