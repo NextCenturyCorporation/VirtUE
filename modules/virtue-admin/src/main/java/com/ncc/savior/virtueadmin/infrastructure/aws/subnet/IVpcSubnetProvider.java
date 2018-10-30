@@ -1,4 +1,4 @@
-package com.ncc.savior.virtueadmin.infrastructure.subnet;
+package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
 import java.util.Map;
 

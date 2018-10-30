@@ -218,9 +218,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Info',    5, (p: Printer) => p.info, SORT_DIR.ASC),
+      new TextColumn('Printer Info',    6, (p: Printer) => p.info, SORT_DIR.ASC),
       new TextColumn('Printer Status',  4, (p: Printer) => p.status, SORT_DIR.ASC),
-      new IconColumn('Revoke access',  3, 'delete', (p: Printer) => this.removePrinter(p)
+      new IconColumn('Revoke access',  2, 'delete', (p: Printer) => this.removePrinter(p)
       )
     ];
   }
@@ -237,9 +237,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 
     this.printerTable.setUp({
       cols: this.getPrinterColumns(),
-      coloredLabels: true,
       filters: [],
-      tableWidth: 12,
+      tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
       editingEnabled: () => !this.inViewMode()
     });
@@ -286,7 +285,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   getNetworkColumns(): Column[] {
     return [
       new InputFieldColumn('Host',        4, 'destination', (netPerm: NetworkPermission) => netPerm.destination),
-      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.keys(NetworkProtocols),
+      new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
                           (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
       new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
       new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
@@ -306,7 +305,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.networkPermsTable.setUp({
       cols: this.getNetworkColumns(),
       filters: [],
-      tableWidth: 10,
+      tableWidth: 0.95,
       noDataMsg: "This Virtue has not been granted permission to access any network",
       editingEnabled: () => !this.inViewMode()
     });
@@ -327,6 +326,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.updateNetworkPermsTable();
   }
 
+  /**
+   * This removes a network from the virtue's whitelist.
+   */
   removeNetwork(idx: number): void {
     this.item.networkWhiteList.splice(idx, 1);
     this.updateNetworkPermsTable();
@@ -394,9 +396,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return [
       new TextColumn('Server & Drive',  6, (fs: FileSysPermission) => fs.location, SORT_DIR.ASC),
       new CheckboxColumn('Enabled',     3, 'enabled'),
-      new CheckboxColumn('Read',        1, 'read', (fs: FileSysPermission) => !fs.enabled),
-      new CheckboxColumn('Write',       1, 'write', (fs: FileSysPermission) => !fs.enabled),
-      new CheckboxColumn('Execute',     1, 'execute', (fs: FileSysPermission) => !fs.enabled)
+      new CheckboxColumn('Read',        1, 'read'),
+      new CheckboxColumn('Write',       1, 'write'),
+      new CheckboxColumn('Execute',     1, 'execute')
     ];
   }
 
@@ -412,7 +414,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     this.fileSysPermsTable.setUp({
       cols: this.getFileSysColumns(),
       filters: [],
-      tableWidth: 10,
+      tableWidth: 1,
       noDataMsg: "No file systems have been set up in the global settings",
       elementIsDisabled: (fs: FileSysPermission) => !fs.enabled,
       editingEnabled: () => !this.inViewMode()
@@ -470,7 +472,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       coloredLabels: true,
       getColor: (v: Virtue) => v.color,
       filters: [],
-      tableWidth: 10,
+      tableWidth: 0.85,
       noDataMsg: this.getNoPasteDataMsg(),
       elementIsDisabled: (v: Virtue) => !v.enabled,
       editingEnabled: () => !this.inViewMode()
@@ -498,13 +500,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   /**
    * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
    */
-  activatePastableVirtueModal(): void {
-    this.activateVirtueSelectionModal( this.item.allowedPasteTargets, (selectedVirtues: string[]) => {
-        this.item.allowedPasteTargets = selectedVirtues;
-        this.updatePasteableVirtuesTable();
-      });
-  }
-
+   activatePastableVirtueModal(): void {
+     this.activateVirtueSelectionModal( this.item.allowedPasteTargets, (selectedVirtues: string[]) => {
+         this.item.allowedPasteTargets = selectedVirtues;
+         this.updatePasteableVirtuesTable();
+       });
+   }
   /**
   * @return a message telling the user that no paste permissions have been given to this
   * virtue, in a way that is clear and relevant for the current mode.
@@ -535,9 +536,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
         [this.item.defaultBrowserVirtue],
         (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
         SelectionMode.SINGLE
-    );
+      );
   }
-
 
   /**
    * this brings up a modal through which the user can select one or more Virtues, and have those selections be passed to some
@@ -558,16 +558,14 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
         onComplete: ((selectedVirtues: string[]) => void),
         selectionMode?: SelectionMode
   ): void {
-    let dialogHeight = 600;
-    let dialogWidth = 800;
 
     if (selectionMode === undefined) {
       selectionMode = SelectionMode.MULTI;
     }
 
     let dialogRef = this.dialog.open( VirtueModalComponent,  {
-      height: dialogHeight + 'px',
-      width: dialogWidth + 'px',
+      height: '70%',
+      width: '70%',
       data: {
         selectedIDs: currentSelection,
         selectionMode: selectionMode
@@ -591,12 +589,10 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     () => { // when finished
       sub.unsubscribe();
     });
-    let leftPosition = ((window.screen.width) - dialogWidth) / 2;
 
-    dialogRef.updatePosition({ top: '5%', left: leftPosition + 'px' });
+    dialogRef.updatePosition({ top: '5%'});
 
   }
-
 
   /**
    * This brings up a modal with many colors, to let the user select a color as a label for a Virtue.

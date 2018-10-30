@@ -33,9 +33,11 @@ import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -71,14 +73,18 @@ public class AdminService {
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
 
+	private ISecurityGroupManager securityGroupManager;
+
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			PersistentStorageManager persistentStorageManager, String initialAdmin) {
+			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityManager,
+			String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
 		this.userManager = userManager;
 		this.persistentStorageManager = persistentStorageManager;
 		this.initialAdmin = initialAdmin;
+		this.securityGroupManager = securityManager;
 		addInitialUser();
 	}
 
@@ -528,4 +534,50 @@ public class AdminService {
 		verifyAndReturnUser();
 		persistentStorageManager.deletePersistentStorage(username, virtueTemplateId);
 	}
+
+	public Collection<SecurityGroupPermission> getSecurityGroupPermissions(String groupId) {
+		verifyAndReturnUser();
+		return securityGroupManager.getSecurityGroupPermissionsByGroupId(groupId);
+	}
+
+	public Collection<SecurityGroupPermission> getSecurityGroupPermissionsByTemplate(String templateId) {
+		verifyAndReturnUser();
+		return securityGroupManager.getSecurityGroupPermissionsByTemplateId(templateId);
+	}
+
+	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroups() {
+		verifyAndReturnUser();
+		return securityGroupManager.getAllSecurityGroupPermissions();
+	}
+
+	public void authorizeSecurityGroupsByKey(String templateId, SecurityGroupPermission sgp) {
+		verifyAndReturnUser();
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
+		sgp.setSecurityGroupId(groupId);
+		securityGroupManager.authorizeSecurityGroup(groupId, sgp);
+	}
+
+	public void revokeSecurityGroupsByKey(String templateId, SecurityGroupPermission sgp) {
+		verifyAndReturnUser();
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
+		sgp.setSecurityGroupId(groupId);
+		securityGroupManager.revokeSecurityGroup(groupId, sgp);
+	}
+
+	public String securityGroupIdByTemplateId(String templateId) {
+		verifyAndReturnUser();
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
+		return groupId;
+	}
+
+	public void deleteSecurityGroup(String groupId) {
+		verifyAndReturnUser();
+		securityGroupManager.removeSecurityGroup(groupId);
+	}
+
+	// public Map<String, Collection<SecurityGroupPermission>>
+	// getAllSecurityGroups() {
+	// verifyAndReturnUser();
+	// return securityGroupManager.getAllSecurityGroupPermissions();
+	// }
 }

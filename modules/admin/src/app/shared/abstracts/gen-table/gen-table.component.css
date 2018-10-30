@@ -3,10 +3,15 @@
   background-color: rgba(0, 0, 0, 0);
 }
 
+.scaleToFit {
+    height: 95% !important;
+}
+
 .table {
     overflow-y: visible;
     margin-top: 0;
     margin-bottom: 0;
+    height: 100% !important;
 }
 
 /*  These center the lists (e.g. list of virtues under each user) within their column  */
