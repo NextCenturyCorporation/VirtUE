@@ -15,13 +15,14 @@
 #include <iostream>
 #include <getopt.h>
 #include <krb5/krb5.h>
+#include <cstring>
 
 static char* progname;
 
 void usage() {
 	std::cerr << "usage: "
 			<< progname
-			<< " [-i inputCCache ] [-o outputCCache ] newPrincipal"
+			<< " [-i inputCCache ] [-o outputCCache ] newPrincipal | -"
 			<< std::endl;
 }
 
@@ -105,14 +106,19 @@ int main(int argc, char **argv) {
 			"could not determine principal from input cache", 2);
 
 	krb5_principal newPrincipal;
-	CHECK_ERROR(
-			krb5_build_principal(context, &newPrincipal, origPrincipal->realm.length,
-					origPrincipal->realm.data, newPrincipalName, NULL),
-			"could not make new principal named '"
+    if (strcmp(newPrincipalName, "-") != 0) {
+        CHECK_ERROR(
+                    krb5_build_principal(context, &newPrincipal, origPrincipal->realm.length,
+                                         origPrincipal->realm.data, newPrincipalName, NULL),
+                    "could not make new principal named '"
 					<< newPrincipalName
 					<< "' (maybe bad principal name format)",
-			3);
-	krb5_free_principal(context, origPrincipal);
+                    3);
+        krb5_free_principal(context, origPrincipal);
+    }
+    else {
+        newPrincipal = origPrincipal;
+    }
 
 	// use a temp in case the input & output are the same
 	krb5_ccache tempCCache;
