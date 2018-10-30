@@ -34,6 +34,7 @@ import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
@@ -76,7 +77,7 @@ public class AdminService {
 	private ISecurityGroupManager securityGroupManager;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager,
+			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager, IVpcSubnetProvider subnetProvider,
 			String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
@@ -87,10 +88,18 @@ public class AdminService {
 		this.securityGroupManager = securityGroupManager;
 		addInitialUser();
 
-		sync(templateManager, securityGroupManager);
+		sync(subnetProvider);
 	}
 
-	private void sync(ITemplateManager templateManager, ISecurityGroupManager securityGroupManager) {
+	private void sync(IVpcSubnetProvider subnetProvider) {
+		
+		Collection<String> existingVirtueIds=new HashSet<String>();
+		Iterable<VirtueInstance> virtueIds = virtueManager.getAllActiveVirtues();
+		for (VirtueInstance virtueId : virtueIds) {
+			existingVirtueIds.add(virtueId.getId());
+		}
+		subnetProvider.sync(existingVirtueIds);
+		
 		Set<String> allTemplateIds = new HashSet<String>();
 		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
 		for (VirtueTemplate template : templates) {
