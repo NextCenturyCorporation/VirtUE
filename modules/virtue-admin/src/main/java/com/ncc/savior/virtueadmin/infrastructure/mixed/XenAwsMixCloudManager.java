@@ -65,17 +65,18 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
 			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
-			IVpcSubnetProvider vpcSubnetPRovider, ISecurityGroupManager securityGroupManager) {
+			IVpcSubnetProvider vpcSubnetProvider, ISecurityGroupManager securityGroupManager) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
 		this.serviceProvider = serviceProvider;
-		this.vpcSubnetProvider = vpcSubnetPRovider;
+		this.vpcSubnetProvider = vpcSubnetProvider;
 		this.securityGroupManager = securityGroupManager;
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
-
 	}
+
+	
 
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
