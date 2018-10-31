@@ -165,10 +165,15 @@ EOF
 	destination = "/tmp/${var.switch_principal_program}"
   }
 
+  provisioner "file" {
+	source = "make-virtue-shares.sh"
+	destination = "/tmp/make-virtue-shares.sh"
+  }
+  
   provisioner "remote-exec" {
 	inline = [
 	  # install will make them executable by default
-	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program}"
+	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh"
 	]
   }
 }

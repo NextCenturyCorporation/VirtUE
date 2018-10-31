@@ -33,6 +33,7 @@ public class FileShare implements Comparable<FileShare> {
 	}
 
 	private String name;
+	private String virtue;
 	private String server;
 	private String path;
 	private Set<SharePermissions> permissions;
@@ -42,6 +43,8 @@ public class FileShare implements Comparable<FileShare> {
 	 * 
 	 * @param name
 	 *                        share name
+	 * @param virtue
+	 *                        name of the Virtue this share belongs to
 	 * @param server
 	 *                        name of the file server. Can be a host name or IP
 	 *                        address.
@@ -52,9 +55,10 @@ public class FileShare implements Comparable<FileShare> {
 	 * @param type
 	 *                        type of share
 	 */
-	public FileShare(@NonNull String name, @NonNull String server, @NonNull String path,
+	public FileShare(@NonNull String name, @NonNull String virtue, @NonNull String server, @NonNull String path,
 			@NonNull Set<SharePermissions> permissions, @NonNull ShareType type) {
 		this.name = name;
+		this.virtue = virtue;
 		this.server = server;
 		this.path = path;
 		this.permissions = permissions;
@@ -69,6 +73,18 @@ public class FileShare implements Comparable<FileShare> {
 		return name;
 	}
 
+	/**
+	 * 
+	 * @return the name of the Virtue
+	 */
+	public String getVirtue() {
+		return virtue;
+	}
+
+	/**
+	 * 
+	 * @return the server where this share lives
+	 */
 	public String getServer() {
 		return server;
 	}

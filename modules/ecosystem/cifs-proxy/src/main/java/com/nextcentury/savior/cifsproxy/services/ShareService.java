@@ -2,6 +2,7 @@ package com.nextcentury.savior.cifsproxy.services;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
@@ -91,6 +92,26 @@ public class ShareService {
 	public String mountUser;
 
 	/**
+	 * The directory where the Samba config files live (e.g., smb.conf).
+	 */
+	@Value("${sambaConfigDir:/etc/samba")
+	protected String sambaConfigDir;
+
+	/**
+	 * The relative path under {@link #sambaConfigDir} where individual share config
+	 * files live.
+	 */
+	@Value("${virtueSharesConfigDir:virtue-shares}")
+	protected String virtueSharesConfigDir;
+
+	/**
+	 * The helper shell program that creates the "virtue-shares.conf" file used as
+	 * part of the samba config.
+	 */
+	@Value("${sambaConfigHelper:make-virtue-shares.sh")
+	protected String SAMBA_CONFIG_HELPER;
+
+	/**
 	 * Tracks what files shares are mounted and their mount points.
 	 */
 	Map<FileShare, String> mountPoints = new ConcurrentHashMap<>();
@@ -106,14 +127,23 @@ public class ShareService {
 	 * @see #MOUNT_ROOT
 	 */
 	@PostConstruct
-	private void createMountRoot() {
+	private void createRequiredDirectories() {
 		LOGGER.entry();
 		File mountRoot = new File(MOUNT_ROOT);
 		if (!mountRoot.exists()) {
 			LOGGER.trace("making directory: " + MOUNT_ROOT);
-			mountRoot.mkdirs();
-			if (!mountRoot.exists()) {
+			if (!mountRoot.mkdirs()) {
 				UncheckedIOException wse = new UncheckedIOException("could not create mount directory: " + MOUNT_ROOT,
+						new IOException());
+				LOGGER.throwing(wse);
+				throw wse;
+			}
+		}
+		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
+		if (!configDir.exists()) {
+			LOGGER.trace("making directory " + configDir);
+			if (!configDir.mkdirs()) {
+				UncheckedIOException wse = new UncheckedIOException("could not create mount directory: " + configDir,
 						new IOException());
 				LOGGER.throwing(wse);
 				throw wse;
@@ -145,8 +175,11 @@ public class ShareService {
 	 * @throws IllegalArgumentException
 	 *                                      if permissions are empty or the share is
 	 *                                      already mounted
+	 * @throws IOException
+	 *                                      if there was an error creating config
+	 *                                      files
 	 */
-	public void newShare(HttpSession session, FileShare share) throws IllegalArgumentException {
+	public void newShare(HttpSession session, FileShare share) throws IllegalArgumentException, IOException {
 		LOGGER.entry(session, share);
 		Set<SharePermissions> permissions = share.getPermissions();
 		if (permissions.isEmpty()) {
@@ -161,7 +194,41 @@ public class ShareService {
 			throw e;
 		}
 		mountShare(session, share);
+		exportShare(share);
 		LOGGER.exit();
+	}
+
+	/**
+	 * Configure Samba to export the file share.
+	 * 
+	 * @param share
+	 *                  file share to export
+	 * @throws IOException
+	 */
+	private void exportShare(FileShare share) throws IOException {
+		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
+		File virtueConfigDir = new File(configDir, share.getVirtue());
+		if (!virtueConfigDir.mkdirs()) {
+			throw new IOException("could not create config dir: " + virtueConfigDir);
+		}
+		FileWriter configWriter = new FileWriter(new File(virtueConfigDir, share.getName() + ".conf"));
+		configWriter.write(makeShareConfig(share));
+		configWriter.close();
+		Runtime.getRuntime().exec(SAMBA_CONFIG_HELPER);
+	}
+
+	private String makeShareConfig(FileShare share) {
+		String mountPoint = getMountPoint(share);
+		File path = new File(MOUNT_ROOT, mountPoint);
+
+		StringBuilder config = new StringBuilder(
+				"[" + share.getName() + "]\n" + "path = " + path + "\n" + "valid users = " + share.getVirtue() + "\n");
+		// TODO someday add "hosts allow = " when we can get info about which hosts will
+		// be connecting
+		if (!share.getPermissions().contains(FileShare.SharePermissions.WRITE)) {
+			config.append("read only = yes");
+		}
+		return config.toString();
 	}
 
 	/**
@@ -576,27 +643,38 @@ public class ShareService {
 				String prefix = MOUNT_ROOT + "/";
 				Pattern sourcePattern = Pattern.compile("//([^/]*)(/.*)");
 				for (Target target : filesystems.filesystems) {
-					if (target.target.startsWith(prefix)) {
-						// we've got a filesystem we should manage
-						Matcher sourceMatcher = sourcePattern.matcher(target.source);
-						if (sourceMatcher.matches()) {
-							String server = sourceMatcher.group(1);
-							String path = sourceMatcher.group(2);
-							String name = target.target.substring(MOUNT_ROOT.length() + 1);
-							List<String> options = Arrays.asList(target.options.split(","));
-							Set<SharePermissions> permissions = new HashSet<FileShare.SharePermissions>();
-							permissions.add(SharePermissions.READ);
-							if (options.contains("ro")) {
-							} else if (options.contains("rw")) {
-								permissions.add(SharePermissions.WRITE);
+					try {
+						if (target.target.startsWith(prefix)) {
+							// we've got a filesystem we should manage
+							String relativePath = target.target.substring(MOUNT_ROOT.length() + 1);
+							String virtue = relativePath.split(File.separator)[0];
+							if (!virtue.isEmpty()) {
+								Matcher sourceMatcher = sourcePattern.matcher(target.source);
+								if (sourceMatcher.matches()) {
+									String server = sourceMatcher.group(1);
+									String path = sourceMatcher.group(2);
+									String name = target.target.substring(MOUNT_ROOT.length() + 1);
+									List<String> options = Arrays.asList(target.options.split(","));
+									Set<SharePermissions> permissions = new HashSet<FileShare.SharePermissions>();
+									permissions.add(SharePermissions.READ);
+									if (options.contains("ro")) {
+									} else if (options.contains("rw")) {
+										permissions.add(SharePermissions.WRITE);
+									} else {
+										LOGGER.warn("Options contain neither 'ro' nor 'rw' for file share: " + name);
+									}
+									FileShare fileShare = new FileShare(name, virtue, server, path, permissions,
+											ShareType.CIFS);
+									addInternal(fileShare, target.target);
+								} else {
+									LOGGER.warn("cannot parse source for CIFS filesystem: " + target.source);
+								}
 							} else {
-								LOGGER.warn("Options contain neither 'ro' nor 'rw' for file share: " + name);
+								LOGGER.warn("cannot get Virtue for mount point: " + target.target);
 							}
-							FileShare fileShare = new FileShare(name, server, path, permissions, ShareType.CIFS);
-							addInternal(fileShare, target.target);
-						} else {
-							LOGGER.warn("cannot parse source for CIFS filesystem: " + target.source);
 						}
+					} catch (RuntimeException e) {
+						LOGGER.warn("got exception while processing mount point '" + target.target + "': " + e);
 					}
 				}
 			}

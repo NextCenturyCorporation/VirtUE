@@ -10,6 +10,7 @@ import javax.xml.ws.WebServiceException;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.WebServerException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +55,13 @@ public class ShareController {
 	FileShare newShare(HttpSession session, @RequestBody FileShare share) {
 		LOGGER.entry(session, share);
 		validateShare(share);
-		service.newShare(session, share);
+		try {
+			service.newShare(session, share);
+		} catch (IllegalArgumentException | IOException e) {
+			WebServerException wse = new WebServerException("exception mounting a share", e);
+			LOGGER.throwing(wse);
+			throw wse;
+		}
 		LOGGER.exit(share);
 		return share;
 	}
