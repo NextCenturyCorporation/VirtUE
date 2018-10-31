@@ -67,9 +67,11 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		Runnable command = getRunnable(wrapper, id);
 		ScheduledFuture<?> future = schedule(command);
 		if (futureMap.containsKey(id)) {
-			logger.debug("Already had a future with ID=" + id + "Cancelling previous future.");
+			logger.debug("Already had a future with ID=" + id + " Cancelling previous future. Service="
+					+ getServiceName() + " P=" + p);
 			cancelFuture(id);
 		}
+//		logger.debug("adding future with id=" + id + " service=" + getServiceName() + " P=" + p);
 		futureMap.put(id, future);
 	}
 
@@ -108,6 +110,7 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		if (future != null) {
 			boolean success = future.cancel(false);
 			if (success) {
+//				logger.debug("Removing id from map.  id="+id);
 				futureMap.remove(id);
 			} else {
 				logger.error("Failed to cancel future with id=" + id);
