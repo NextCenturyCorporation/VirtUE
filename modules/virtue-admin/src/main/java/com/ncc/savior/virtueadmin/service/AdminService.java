@@ -72,11 +72,14 @@ public class AdminService {
 
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
+	
+	@Value("${virtue.test:false}")
+	private boolean test;
 
 	private ISecurityGroupManager securityGroupManager;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityManager,
+			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager,
 			String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
@@ -84,8 +87,23 @@ public class AdminService {
 		this.userManager = userManager;
 		this.persistentStorageManager = persistentStorageManager;
 		this.initialAdmin = initialAdmin;
-		this.securityGroupManager = securityManager;
+		this.securityGroupManager = securityGroupManager;
 		addInitialUser();
+	}
+
+	public void sync() {
+		if (!test) {
+			sync(templateManager, securityGroupManager);
+		}
+	}
+
+	private void sync(ITemplateManager templateManager, ISecurityGroupManager securityGroupManager) {
+		Set<String> allTemplateIds = new HashSet<String>();
+		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
+		for (VirtueTemplate template : templates) {
+			allTemplateIds.add(template.getId());
+		}
+		securityGroupManager.sync(allTemplateIds);
 	}
 
 	private void addInitialUser() {
