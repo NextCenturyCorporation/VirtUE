@@ -112,14 +112,20 @@ public class ShareService {
 	protected String SAMBA_CONFIG_HELPER;
 
 	/**
+	 * It's not safe to run the {@link #SAMBA_CONFIG_HELPER} multiple times
+	 * simultaneously, so use this object to serialize runs.
+	 */
+	protected static final Object SAMBA_CONFIG_HELPER_LOCK = new Object();
+
+	/**
 	 * Tracks what files shares are mounted and their mount points.
 	 */
-	Map<FileShare, String> mountPoints = new ConcurrentHashMap<>();
+	protected Map<FileShare, String> mountPoints = new ConcurrentHashMap<>();
 
 	/**
 	 * Maps file share names to their shares (for lookup by name).
 	 */
-	Map<String, FileShare> sharesByName = new ConcurrentHashMap<>();
+	protected Map<String, FileShare> sharesByName = new ConcurrentHashMap<>();
 
 	/**
 	 * Ensure that the root mountpoint exists.
@@ -214,7 +220,9 @@ public class ShareService {
 		FileWriter configWriter = new FileWriter(new File(virtueConfigDir, share.getName() + ".conf"));
 		configWriter.write(makeShareConfig(share));
 		configWriter.close();
-		Runtime.getRuntime().exec(SAMBA_CONFIG_HELPER);
+		synchronized (SAMBA_CONFIG_HELPER_LOCK) {
+			Runtime.getRuntime().exec(SAMBA_CONFIG_HELPER);
+		}
 	}
 
 	private String makeShareConfig(FileShare share) {
