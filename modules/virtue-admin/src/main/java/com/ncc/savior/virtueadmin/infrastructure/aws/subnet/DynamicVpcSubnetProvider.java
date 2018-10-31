@@ -155,6 +155,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 			awsTags.add(new Tag(AwsUtil.TAG_NAME, name));
 		}
 		awsTags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
+		awsTags.add(new Tag(AwsUtil.TAG_AUTO_GENERATED, AwsUtil.TAG_AUTO_GENERATED_TRUE));
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest(Collections.singletonList(subnet.getSubnetId()),
 				awsTags);
 		ec2.createTags(createTagsRequest);

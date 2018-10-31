@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -208,5 +209,12 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		} else if (OS.WINDOWS.equals(vm.getOs())) {
 			awsVmManager.rebootVm(vm, null);
 		}
+	}
+
+
+
+	@Override
+	public void sync(List<String> ids) {
+		awsVmManager.syncAll(ids);
 	}
 }

@@ -21,6 +21,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -56,6 +58,7 @@ import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
  * ROLE_ADMIN.
  */
 public class AdminService {
+	private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
 	public static final String DEFAULT_ICON_KEY = "DEFAULT";
 	private IActiveVirtueManager virtueManager;
 	private ITemplateManager templateManager;
@@ -74,11 +77,15 @@ public class AdminService {
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
 
+	@Value("${virtue.test:false}")
+	private boolean test;
+
 	private ISecurityGroupManager securityGroupManager;
+	private IVpcSubnetProvider subnetProvider;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager, IVpcSubnetProvider subnetProvider,
-			String initialAdmin) {
+			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager,
+			IVpcSubnetProvider subnetProvider, String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
@@ -86,26 +93,37 @@ public class AdminService {
 		this.persistentStorageManager = persistentStorageManager;
 		this.initialAdmin = initialAdmin;
 		this.securityGroupManager = securityGroupManager;
+		this.subnetProvider = subnetProvider;
 		addInitialUser();
-
-		sync(subnetProvider);
 	}
 
-	private void sync(IVpcSubnetProvider subnetProvider) {
-		
-		Collection<String> existingVirtueIds=new HashSet<String>();
-		Iterable<VirtueInstance> virtueIds = virtueManager.getAllActiveVirtues();
-		for (VirtueInstance virtueId : virtueIds) {
-			existingVirtueIds.add(virtueId.getId());
-		}
-		subnetProvider.sync(existingVirtueIds);
-		
-		Set<String> allTemplateIds = new HashSet<String>();
-		Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
-		for (VirtueTemplate template : templates) {
-			allTemplateIds.add(template.getId());
-		}
-		securityGroupManager.sync(allTemplateIds);
+	protected void sync() {
+		Runnable syncRunnable = () -> {
+			if (!test) {
+				try {
+					Collection<String> existingVirtueIds = new HashSet<String>();
+					Iterable<VirtueInstance> virtueIds = virtueManager.getAllActiveVirtues();
+					for (VirtueInstance virtueId : virtueIds) {
+						existingVirtueIds.add(virtueId.getId());
+					}
+					subnetProvider.sync(existingVirtueIds);
+
+					Set<String> allTemplateIds = new HashSet<String>();
+					Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
+					for (VirtueTemplate template : templates) {
+						allTemplateIds.add(template.getId());
+					}
+					securityGroupManager.sync(allTemplateIds);
+
+					virtueManager.sync();
+				} catch (Exception e) {
+					logger.debug("Syncing failed", e);
+				}
+			}
+		};
+		Thread t = new Thread(syncRunnable, "Startup-Sync");
+		t.setDaemon(true);
+		t.start();
 	}
 
 	private void addInitialUser() {
