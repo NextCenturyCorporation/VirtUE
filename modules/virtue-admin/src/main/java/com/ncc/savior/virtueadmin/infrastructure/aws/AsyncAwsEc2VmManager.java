@@ -10,7 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.Tag;
+import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
@@ -42,6 +50,7 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private static final Logger logger = LoggerFactory.getLogger(AsyncAwsEc2VmManager.class);
 	private static final String VM_PREFIX = "VRTU-W-";
+	private static final int TERMINATED = 48;
 	private String serverKeyName;
 	private List<String> defaultSecurityGroups;
 	private String serverId;
@@ -71,7 +80,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		this.instanceType = InstanceType.T2Small;
 		this.serviceProvider = serviceProvider;
 		this.vpcSubnetProvider = vpcSubnetProvider;
-		this.serverId=serverIdProvider.getServerId();
+		this.serverId = serverIdProvider.getServerId();
 	}
 
 	// @Override
@@ -340,5 +349,35 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
 			startVirtualMachine(vm, vmFutureFinal);
 		});
+	}
+
+	public void syncAll(List<String> ids) {
+		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
+		Collection<Filter> filters = new ArrayList<Filter>();
+		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+		describeInstancesRequest.setFilters(filters);
+		DescribeInstancesResult result = ec2Wrapper.getEc2().describeInstances(describeInstancesRequest);
+
+		List<String> instancesToBeTerminated = new ArrayList<String>();
+		for (Reservation res : result.getReservations()) {
+			for (Instance instance : res.getInstances()) {
+				List<Tag> tags = instance.getTags();
+				String instanceId = AwsUtil.tagGet(tags, AwsUtil.TAG_INSTANCE_ID);
+				Integer stateCode = instance.getState().getCode();
+				if (instanceId != null && !ids.contains(instanceId) &&  stateCode!=TERMINATED) {
+					instancesToBeTerminated.add(instance.getInstanceId());
+				}
+			}
+		}
+		if (!instancesToBeTerminated.isEmpty()) {
+			try {
+				logger.debug("Attempting to delete extra ec2 instances with ids=" + instancesToBeTerminated);
+				TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(
+						instancesToBeTerminated);
+				ec2Wrapper.getEc2().terminateInstances(terminateInstancesRequest);
+			} catch (AmazonEC2Exception e) {
+				logger.warn("Failed to terminate extra ec2 instances.  InstanceIds=" + instancesToBeTerminated, e);
+			}
+		}
 	}
 }

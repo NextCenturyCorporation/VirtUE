@@ -46,11 +46,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	private static final String FILTER_VPC_ID = "vpc-id";
 	private static final String FILTER_GROUP_ID = "group-id";
 	private static final Logger logger = LoggerFactory.getLogger(SecurityGroupManager.class);
-	private static final String TAG_AUTO_GENERATED_TRUE = "true";
-	private static final String TAG_AUTO_GENERATED = "savior-auto-generated";
-	private static final String TAG_CREATED_TIME = "savior-created-time";
-	private static final String TAG_NAME = "Name";
-	private static final String FILTER_TAG = "tag:";
+
 	private AmazonEC2 ec2;
 	private String vpcId;
 	private String serverId;
@@ -80,6 +76,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		}
 		for (String groupId : securityGroupIdsToDelete) {
 			try {
+				logger.debug("Attempting to delete extra security group with ID=" + groupId);
 				DeleteSecurityGroupRequest deleteSecurityGroupRequest = new DeleteSecurityGroupRequest();
 				deleteSecurityGroupRequest.withGroupId(groupId);
 				ec2.deleteSecurityGroup(deleteSecurityGroupRequest);
@@ -165,7 +162,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		if (templateId != null) {
 			DescribeSecurityGroupsRequest dsgr = new DescribeSecurityGroupsRequest();
 			Collection<Filter> filters = new ArrayList<Filter>();
-			filters.add(new Filter(FILTER_TAG + AwsUtil.TAG_TEMPLATE_ID).withValues(templateId));
+			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_TEMPLATE_ID).withValues(templateId));
 			dsgr.setFilters(filters);
 			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
 			List<SecurityGroup> sgs = result.getSecurityGroups();
@@ -294,7 +291,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest();
 		Collection<Filter> filters = new ArrayList<Filter>();
 		filters.add(new Filter(FILTER_VPC_ID).withValues(vpcId));
-		filters.add(new Filter(FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
 		describeSecurityGroupsRequest.setFilters(filters);
 		DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(describeSecurityGroupsRequest);
 		List<SecurityGroup> secGs = result.getSecurityGroups();
@@ -310,7 +307,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 	 */
 	private boolean doesSecurityGroupBelongToThisServer(SecurityGroup sg) {
 		return vpcId.equals(sg.getVpcId()) && (AwsUtil.tagEquals(sg.getTags(), AwsUtil.TAG_SERVER_ID, serverId))
-				&& AwsUtil.tagEquals(sg.getTags(), TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE);
+				&& AwsUtil.tagEquals(sg.getTags(), AwsUtil.TAG_AUTO_GENERATED, AwsUtil.TAG_AUTO_GENERATED_TRUE);
 	}
 
 	private Collection<SecurityGroupPermission> securityGroupToPermissionList(SecurityGroup sg) {
@@ -387,10 +384,10 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		Collection<Tag> tags = new ArrayList<Tag>();
 		tags.add(new Tag(AwsUtil.TAG_TEMPLATE_ID, templateId));
 		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
-		tags.add(new Tag(TAG_AUTO_GENERATED, TAG_AUTO_GENERATED_TRUE));
+		tags.add(new Tag(AwsUtil.TAG_AUTO_GENERATED, AwsUtil.TAG_AUTO_GENERATED_TRUE));
 		// tags.add(new Tag(TAG_USER_CREATED, templateId));
-		tags.add(new Tag(TAG_CREATED_TIME, Long.toString(System.currentTimeMillis())));
-		tags.add(new Tag(TAG_NAME, name));
+		tags.add(new Tag(AwsUtil.TAG_CREATED_TIME, Long.toString(System.currentTimeMillis())));
+		tags.add(new Tag(AwsUtil.TAG_NAME, name));
 		createTagsRequest.withTags(tags);
 		ec2.createTags(createTagsRequest);
 	}
