@@ -8,5 +8,7 @@ export enum ConfigUrls {
   VMS = "admin/virtualMachine/template/",
   VIRTUES = "admin/virtue/template/",
   USERS = "admin/user/",
+  PRINTERS = "admin/printer/",
+  FILE_SYSTEMS = "admin/fileSystem/",
   SENSORS = "admin/????"
 }

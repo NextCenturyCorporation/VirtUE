@@ -8,5 +8,7 @@ export enum Datasets {
   APPS = "allApps",
   VMS = "allVms",
   VIRTUES = "allVirtues",
-  USERS = "allUsers"
+  USERS = "allUsers",
+  PRINTERS = "allPrinters",
+  FILE_SYSTEMS = "allFileSystems"
 }

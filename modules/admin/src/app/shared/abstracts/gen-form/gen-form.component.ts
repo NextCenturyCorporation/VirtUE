@@ -237,24 +237,25 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
 
   /**
    * abstracts away what needs to happen when the page loads or reloads
-   * Build item's children - take the existing list of childIDs that item has, and build item.children based
+   * Build item's children - take the existing lists of IDs that item has, and build its attributes based
    * on the (possibly updated) datasets that were just pulled from the backend.
    * So if I've added 4 virtues to a user, but haven't saved, I can hit refresh and get updated data about those 4 virtues,
    * without having to re-add them.
    */
   updatePage(): void {
-    this.buildItemChildren();
+    this.buildIndexedObjAttributes(this.item, dataset);
     this.updateTabs();
   }
 
   /**
-   * Setter for item's childIDs list.
+   * Sets
    * Generally, [[updatePage]]() should be called after this.
    *
    * @param newChildIDs the new list of Items to be assigned as children of [[item]]
    */
-  setItemChildIDs(newChildIDs: string[]): void {
-    this.item.childIDs = newChildIDs;
+  setIndexedObjIDs(newChildIDs: string[]): void {
+    this.item.setChildIDs(newChildIDs);
+    this.updatePage();
   }
 
   /**
@@ -283,7 +284,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * Note that this doesn't initialize item.children.
    */
   initItem(): void {
-    let _item = this[this.datasetName].get(this.item.getID());
+    let _item = this.datasets[this.datasetName].get(this.item.getID());
     if (_item) {
       this.item = _item;
     }
@@ -299,9 +300,12 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
   /**
    * initializes and builds item.children, using item.childIDs and this.[[childDatasetName]]
    */
-  buildItemChildren(): void {
-    this.item.buildChildren(this[this.childDatasetName]);
-  }
+  // buildItemChildren(): void {
+  //   this.item.buildAttribute(
+  //       this.childDatasetName,
+  //       this.datasets[this.childDatasetName].getSubSet(this.item.getSetIDs(this.childDatasetName))
+  //     );
+  // }
 
   /**
    * Change over to edit mode. Does no saving or processing, just re-renders things

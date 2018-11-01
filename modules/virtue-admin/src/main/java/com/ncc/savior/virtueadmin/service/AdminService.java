@@ -33,6 +33,7 @@ import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -46,6 +47,8 @@ import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
@@ -58,6 +61,7 @@ public class AdminService {
 	public static final String DEFAULT_ICON_KEY = "DEFAULT";
 	private IActiveVirtueManager virtueManager;
 	private ITemplateManager templateManager;
+	private IResourceManager resourceManager;
 	private IUserManager userManager;
 
 	@Autowired
@@ -76,12 +80,13 @@ public class AdminService {
 	private ISecurityGroupManager securityGroupManager;
 
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityManager,
+			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityManager, IResourceManager resourceManager,
 			String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
 		this.userManager = userManager;
+		this.resourceManager = resourceManager;
 		this.persistentStorageManager = persistentStorageManager;
 		this.initialAdmin = initialAdmin;
 		this.securityGroupManager = securityManager;
@@ -106,7 +111,7 @@ public class AdminService {
 		}
 	}
 
-	public AdminService(ITemplateManager templateManager) {
+	public AdminService( ITemplateManager templateManager) {
 		verifyAndReturnUser();
 		this.templateManager = templateManager;
 	}
@@ -151,26 +156,40 @@ public class AdminService {
 		return viTemplate;
 	}
 
-	public VirtueTemplate toggleVirtueTemplateEnabled(String templateId) {
+	public VirtueTemplate setVirtueTemplateStatus(String templateId, boolean newStatus) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueTemplate viTemplate = templateManager.getVirtueTemplate(templateId);
-		boolean enabled = viTemplate.isEnabled();
-		viTemplate.setEnabled(!enabled);
+		viTemplate.setEnabled(newStatus);
 		viTemplate.setLastModification(new Date());
 		viTemplate.setLastEditor(user.getUsername());
 		templateManager.addVirtueTemplate(viTemplate);
 		return viTemplate;
 	}
 
-	public VirtualMachineTemplate toggleVirtualMachineTemplateEnabled(String templateId) {
+	public VirtualMachineTemplate setVirtualMachineTemplateStatus(String templateId, boolean newStatus) {
 		VirtueUser user = verifyAndReturnUser();
 		VirtualMachineTemplate vmtTemplate = templateManager.getVmTemplate(templateId);
-		boolean enabled = vmtTemplate.isEnabled();
-		vmtTemplate.setEnabled(!enabled);
+		vmtTemplate.setEnabled(newStatus);
 		vmtTemplate.setLastModification(new Date());
 		vmtTemplate.setLastEditor(user.getUsername());
 		templateManager.addVmTemplate(vmtTemplate);
 		return vmtTemplate;
+	}
+
+	public Printer setPrinterStatus(String printerId, boolean newStatus) {
+		verifyAndReturnUser();
+		Printer printer = resourceManager.getPrinter(printerId);
+		printer.setEnabled(newStatus);
+		resourceManager.updatePrinter(printer.getId(), printer);
+		return printer;
+	}
+
+	public FileSystem setFileSystemStaus(String fileSystemId, boolean newStatus) {
+		verifyAndReturnUser();
+		FileSystem fileSystem = resourceManager.getFileSystem(fileSystemId);
+		fileSystem.setEnabled(newStatus);
+		resourceManager.updateFileSystem(fileSystem.getId(), fileSystem);
+		return fileSystem;
 	}
 
 	public VirtualMachineTemplate getVmTemplate(String templateId) {
@@ -182,6 +201,16 @@ public class AdminService {
 	public VirtueInstance getActiveVirtue(String virtueId) {
 		verifyAndReturnUser();
 		return virtueManager.getActiveVirtue(virtueId);
+	}
+
+	public Printer getPrinter(String printerId) {
+		verifyAndReturnUser();
+		return resourceManager.getPrinter(printerId);
+	}
+
+	public FileSystem getFileSystem(String fileSystemId) {
+		verifyAndReturnUser();
+		return resourceManager.getFileSystem(fileSystemId);
 	}
 
 	public ApplicationDefinition getApplicationDefinition(String templateId) {
@@ -206,6 +235,28 @@ public class AdminService {
 		verifyAndReturnUser();
 		String id = UUID.randomUUID().toString();
 		return updateVmTemplate(id, vmTemplate);
+	}
+
+	public Printer createPrinter(Printer printer) {
+		verifyAndReturnUser();
+		printer.setId(UUID.randomUUID().toString());
+		return resourceManager.addPrinter(printer);
+	}
+
+	public FileSystem createFileSystem(FileSystem fileSystem) {
+		verifyAndReturnUser();
+		fileSystem.setId(UUID.randomUUID().toString());
+		return resourceManager.addFileSystem(fileSystem);
+	}
+
+	public Printer updatePrinter(String printerId, Printer printer) {
+		verifyAndReturnUser();
+		return resourceManager.updatePrinter(printerId, printer);
+	}
+
+	public FileSystem updateFileSystem(String fileSystemId, FileSystem fileSystem) {
+		verifyAndReturnUser();
+		return resourceManager.updateFileSystem(fileSystemId, fileSystem);
 	}
 
 	public ApplicationDefinition updateApplicationDefinitions(String templateId, ApplicationDefinition appDef) {
@@ -292,6 +343,16 @@ public class AdminService {
 	public void deleteVirtue(String instanceId) {
 		verifyAndReturnUser();
 		virtueManager.adminDeleteVirtue(instanceId);
+	}
+
+	public void deletePrinter(String instanceId) {
+		verifyAndReturnUser();
+		resourceManager.deletePrinter(instanceId);
+	}
+
+	public void deleteFileSystem(String instanceId) {
+		verifyAndReturnUser();
+		resourceManager.deleteFileSystem(instanceId);
 	}
 
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
@@ -580,4 +641,18 @@ public class AdminService {
 	// verifyAndReturnUser();
 	// return securityGroupManager.getAllSecurityGroupPermissions();
 	// }
+
+
+ 	public Iterable<Printer> getAllPrinters() {
+ 		verifyAndReturnUser();
+ 		return resourceManager.getAllPrinters();
+ 	}
+
+ 	public Iterable<Printer> getPrintersForVirtueTemplate(String virtueTemplateId) {
+ 		verifyAndReturnUser();
+		VirtueTemplate virtueTemplate = templateManager.getVirtueTemplate(virtueTemplateId);
+		Map<String, Printer> printers = resourceManager.getPrintersForVirtueTemplate(virtueTemplate);
+		return printers.values();
+ 	}
+
 }

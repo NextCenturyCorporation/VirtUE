@@ -19,7 +19,7 @@ import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum'
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
-import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
+import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-main-tab/gen-main-tab.component';
 
 /**
  * @class

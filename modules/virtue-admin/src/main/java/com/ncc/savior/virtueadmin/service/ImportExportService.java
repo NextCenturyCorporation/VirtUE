@@ -35,6 +35,7 @@ import com.ncc.savior.tool.ImportExportUtils;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
+import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.images.IXenGuestImageManager;
@@ -45,6 +46,8 @@ import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 
 /**
@@ -54,10 +57,10 @@ import com.ncc.savior.virtueadmin.security.SecurityUserService;
  * Users, Virtue Templates, or Virtual Machine Templates, the system will also
  * attempt to import dependencies. If an item or its dependency are not found,
  * an exception will be thrown.
- * 
+ *
  * Additionally, this service can import and export the entire database via
  * streams.
- * 
+ *
  *
  */
 public class ImportExportService {
@@ -72,6 +75,7 @@ public class ImportExportService {
 	private String rootClassPath;
 	private ITemplateManager templateManager;
 	private IUserManager userManager;
+	private IResourceManager resourceManager;
 	private PathMatchingResourcePatternResolver resourceResolver;
 	private IXenGuestImageManager imageManager;
 	private ISecurityGroupManager securityGroupManager;
@@ -80,10 +84,11 @@ public class ImportExportService {
 	private SecurityUserService securityService;
 
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager,
-			IXenGuestImageManager imageManager, ISecurityGroupManager securityGroupManager) {
+			IXenGuestImageManager imageManager, ISecurityGroupManager securityGroupManager, IResourceManager resourceManager) {
 		this.jsonMapper = new ObjectMapper();
 		this.templateManager = templateManager;
 		this.userManager = userManager;
+		this.resourceManager = resourceManager;
 		this.imageManager = imageManager;
 		this.securityGroupManager = securityGroupManager;
 		resourceResolver = new PathMatchingResourcePatternResolver();
@@ -137,7 +142,7 @@ public class ImportExportService {
 	/**
 	 * Exports all users and all icons and everything they have access to (virtue
 	 * templates, virtual machine templates, application definition).
-	 * 
+	 *
 	 * @param os
 	 */
 	public void exportZippedAll(OutputStream os) {
@@ -193,7 +198,7 @@ public class ImportExportService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param stream
 	 *            - stream of import zip file
 	 * @param waitUntilCompletion
@@ -270,7 +275,7 @@ public class ImportExportService {
 
 	/**
 	 * returns true for success
-	 * 
+	 *
 	 * @param entry
 	 * @param uncloseableStream
 	 * @return
@@ -419,7 +424,7 @@ public class ImportExportService {
 
 	/**
 	 * Imports the entire database. Used in conjunction with export system.
-	 * 
+	 *
 	 * @param stream
 	 * @throws IOException
 	 */
@@ -540,7 +545,7 @@ public class ImportExportService {
 
 	/**
 	 * Imports a user from a set of test users provided by APL.
-	 * 
+	 *
 	 * @param userKey
 	 * @return
 	 */
@@ -567,7 +572,7 @@ public class ImportExportService {
 
 	/**
 	 * Imports a applications from a set of test applications provided by APL.
-	 * 
+	 *
 	 * @param testApplication
 	 * @return
 	 */
@@ -588,7 +593,7 @@ public class ImportExportService {
 	/**
 	 * Imports a virtual machine from a set of test virtual machines provided by
 	 * APL.
-	 * 
+	 *
 	 * @param testVirtualMachine
 	 * @return
 	 */
@@ -619,7 +624,7 @@ public class ImportExportService {
 
 	/**
 	 * Imports a virtue from a set of test virtues provided by APL.
-	 * 
+	 *
 	 * @param testVirtue
 	 * @return
 	 */
@@ -651,7 +656,7 @@ public class ImportExportService {
 	/**
 	 * Imports all data that can be found in the import repository files. For an
 	 * item to be imported, all of its dependencies need to be importable as well.
-	 * 
+	 *
 	 * @return
 	 */
 	public int importAll() {

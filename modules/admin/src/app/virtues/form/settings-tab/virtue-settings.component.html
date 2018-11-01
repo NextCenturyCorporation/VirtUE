@@ -12,7 +12,7 @@
         <h4>General Settings</h4>
       </div>
       <div class="mui-col-md-2 float-right">
-        <mat-checkbox [(ngModel)]="item.unprovisioned" [disabled]="inViewMode()" >
+        <mat-checkbox [(ngModel)]="item.unprovisioned" [disabled]="inViewMode()" (click)=tempAddRandomPrinter()>
           Unprovisioned
         </mat-checkbox>
       </div>

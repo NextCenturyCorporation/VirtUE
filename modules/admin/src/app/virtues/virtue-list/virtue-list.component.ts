@@ -61,6 +61,7 @@ export class VirtueListComponent extends GenericListComponent {
    */
   onPullComplete(): void {
     this.setItems(this.allVirtues.asList());
+    this.tempAddRandomPrinter();
   }
 
   /**
@@ -121,6 +122,18 @@ export class VirtueListComponent extends GenericListComponent {
    */
   getNoDataMsg(): string {
     return "No virtues have been added at this time. To add a virtue, click on the button \"Add Virtue Template\" above.";
+  }
+
+  tempAddRandomPrinter() {
+    let sub = this.itemService.getItems(ConfigUrls.PRINTERS).subscribe( data => {
+        console.log(data);
+      }, () => {},
+      () => {sub.unsubscribe();}
+    );
+
+    // console.log(this.item.allowedPrinters);
+    // this.itemService.createItem(ConfigUrls.PRINTERS, new Printer("some printer"));
+    // this.updateFileSysPermsTable();
   }
 
 }

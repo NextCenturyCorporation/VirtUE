@@ -1,7 +1,9 @@
 import { DictList } from './dictionary.model';
 
-import { Mode } from '../abstracts/gen-form/mode.enum';
+import { IndexedObj } from './indexedObj.model';
 import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
+
+import { Mode } from '../abstracts/gen-form/mode.enum';
 
 /**
  * @class
@@ -19,12 +21,12 @@ import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
  *    - [[getID]]()
  *    - [[getName]]()
  *    - [[setID]]()
+ *    - [[getChildren]]()
+ *    - [[getChildIDs]]()
  *  - Attributes:
  *    - [[enabled]]
- *    - [[children]]
- *    - [[childIDs]]
  */
-export abstract class Item {
+export abstract class Item extends IndexedObj {
 
   /** a unique identifing string - not used by user */
   id: string;
@@ -43,15 +45,6 @@ export abstract class Item {
    */
   enabled: boolean;
 
-  /** a list of the IDs of this Item's children, saved to and loaded from backend */
-  childIDs: string[];
-
-  /**
-   * A [[DictList]] of references to this Item's children, as listed in childIDs.
-   * Not saved to backend.
-   */
-  children: DictList<Item>;
-
   /**
    * a shortened form the the last modificaiton date, suitible for display
    * Note: don't sort anything on this field, sort on a format that progresses like
@@ -66,34 +59,35 @@ export abstract class Item {
    * Gives default values for necessary attributes.
    */
   constructor() {
+    super();
     this.enabled = true;
     this.modDate = '';
 
     this.parentDomain = "NA";
 
-    this.childIDs = [];
-    this.children = new DictList<Item>();
+    this.setChildIDs([]);
+    this.setChildren(new DictList<IndexedObj>());
   }
 
-  /**
-   * This function uses [[childIDs]] and the input dataset to build a list of references to the Items
-   * identified in childIDs.
-   * @param childDataset the dataset in which to to look for child IDs.
-   */
-  buildChildren(childDataset: DictList<Item>): void {
-    this.children = new DictList<Item>();
-    if (this.childIDs) {
-      for (let childID of this.childIDs) {
-        let child: Item = childDataset.get(childID);
-        if (child) {
-          this.children.add(childID, child);
-        } else {
-          console.log("child ID in item not found in dataset. I.e., if this is for a user, \
-          it has a virtue ID attached to it which doesn't exist in the backend data.");
-        }
-      }
-    }
-  }
+
+  //
+  // /**
+  //  * This function uses [[childIDs]] and the input dataset to build a list of references to the Items
+  //  * identified in childIDs.
+  //  * @param childDataset the dataset in which to to look for child IDs.
+  //  */
+  // buildChildren(childDataset: DictList<Item>): void {
+  //   this.setChildren(new DictList<Item>());
+  //   for (let childID of this.getChildIDs()) {
+  //     let child: Item = childDataset.get(childID);
+  //     if (child) {
+  //       this.children.add(childID, child);
+  //     } else {
+  //       console.log("child ID in item not found in dataset. I.e., if this is for a user, \
+  //       it has a virtue ID attached to it which doesn't exist in the backend data.");
+  //     }
+  //   }
+  // }
 
   /**
    * Overriden by [[User]]
@@ -166,14 +160,27 @@ export abstract class Item {
    * @param index optional, calculated if not given. Just saves on time if it's available and can be passed in directly.
    */
   removeChild(id: string, index?: number): void {
-    this.children.remove(id);
+    this.getChildren().remove(id);
     if (index) {
-      this.childIDs.splice(index, 1);
+      this.getChildIDs().splice(index, 1);
     } else {
-      this.childIDs.splice(this.childIDs.indexOf(id), 1);
+      this.getChildIDs().splice(this.getChildIDs().indexOf(id), 1);
     }
 
   }
+
+  /** #uncommented */
+  abstract getChildIDs(): string[];
+
+  /** #uncommented */
+  abstract setChildIDs(newChildIDs: string[]): void;
+
+  /** #uncommented */
+  abstract getChildren(): DictList<IndexedObj>;
+
+  /** #uncommented */
+  abstract setChildren(newChildren: DictList<IndexedObj>): void;
+
 
   /**
    * Eventually this will be what is used by table to display the item's name - once the table is made to display classes that

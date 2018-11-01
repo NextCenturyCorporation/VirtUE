@@ -1,5 +1,7 @@
 
 import { Item } from './item.model';
+import { DictList } from './dictionary.model';
+import { IndexedObj } from './indexedObj.model';
 
 /**
  * @class
@@ -63,7 +65,25 @@ export class Application extends Item {
       this.launchCommand = '';
       this.iconKey = '';
     }
-
-    this.children = undefined;
   }
+
+  /** at the moment, Application doesn't depend on anything else, and so nothing needs to be built */
+  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {}
+
+
+  /** @override [[Item.getChildIDs]] */
+  getChildIDs(): string[] {
+    return [];
+  }
+
+  /** @override [[Item.getChildren]] */
+  getChildren(): DictList<IndexedObj> {
+    return undefined;
+  }
+
+  /** @override [[Item.setChildIDs]] */
+  setChildIDs(input: string[]): void {}
+
+  /** @override [[Item.setChildren]] */
+  setChildren(input: DictList<IndexedObj>): void {}
 }

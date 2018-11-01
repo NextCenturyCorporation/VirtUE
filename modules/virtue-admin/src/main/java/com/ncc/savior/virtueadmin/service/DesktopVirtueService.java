@@ -19,6 +19,7 @@ import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
+import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.infrastructure.IApplicationManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
@@ -30,18 +31,21 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
 /**
  * Virtue service to handle functions specifically for the desktop application.
- * 
+ *
  *
  */
 public class DesktopVirtueService {
 	private static final Logger logger = LoggerFactory.getLogger(DesktopVirtueService.class);
 	private IActiveVirtueManager activeVirtueManager;
 	private ITemplateManager templateManager;
+	private IResourceManager resourceManager;
 	private IApplicationManager applicationManager;
 
 	@Autowired
@@ -51,19 +55,20 @@ public class DesktopVirtueService {
 	private String windowsPassword;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
-			IApplicationManager applicationManager) {
+			IApplicationManager applicationManager, IResourceManager resourceManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
+		this.resourceManager = resourceManager;
 	}
 
 	/**
 	 * Gets all virtues as {@link DesktopVirtue}s for the user including Virtues
 	 * that have not been provisioned yet, but the user has the ability to
 	 * provision.
-	 * 
+	 *
 	 * @return
-	 * 
+	 *
 	 */
 	public Set<DesktopVirtue> getDesktopVirtuesForUser() {
 		VirtueUser user = verifyAndReturnUser();
@@ -187,7 +192,7 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueTemplate template = templateManager.getVirtueTemplateForUser(user, templateId);
 		if (template == null) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_NOT_FOUND,
 					"Unable to find template " + templateId);
 		}
 		VirtueInstance instance = activeVirtueManager.provisionTemplate(user, template);
@@ -198,7 +203,7 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance instance = activeVirtueManager.startVirtue(user, virtueId);
 		if (instance == null) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Unable to find virtue " + virtueId);
 		}
 		return convertVirtueInstanceToDesktopVirtue(instance);
 	}
@@ -207,7 +212,7 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance instance = activeVirtueManager.stopVirtue(user, virtueId);
 		if (instance == null) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Unable to find virtue " + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Unable to find virtue " + virtueId);
 		}
 		return convertVirtueInstanceToDesktopVirtue(instance);
 	}

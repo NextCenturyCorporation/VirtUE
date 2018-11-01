@@ -5,10 +5,13 @@ import { Item } from './item.model';
 import { Application } from './application.model';
 import { VirtualMachine } from './vm.model';
 
+import { IndexedObj } from './indexedObj.model';
+import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
+
 import { DictList } from './dictionary.model';
 
 import { NetworkPermission } from './networkPerm.model';
-import { FileSysPermission } from './fileSysPermission.model';
+import { FileSystem } from './fileSystem.model';
 import { Printer } from './printer.model';
 
 /**
@@ -46,6 +49,12 @@ export class Virtue extends Item {
   /** A full Date, of the last time this record was changed on the backend. */
   lastModification: Date;
 
+  /** #uncommented */
+  vmTemplates: DictList<IndexedObj>;
+
+  /** #uncommented */
+  vmTemplateIDs: string[];
+
   // /** #TODO what is this? */
   // awsTemplateName: string;
 
@@ -67,10 +76,12 @@ export class Virtue extends Item {
   allowedPasteTargets: string[];
 
   /** this virtue's r/w/e permissions for the different parts of the filesystem */
-  fileSysPerms: FileSysPermission[];
+  fileSystems: FileSystem[];
+  fileSystemIds: string[];
 
   /** a list of printers this virtue is allowed to use. Printers are found and set up in global settings. */
-  allowedPrinters: Printer[];
+  printers: Printer[];
+  printerIds: string[];
 
   /**
    * convert from whatever form the virtue object is in the database.
@@ -80,9 +91,10 @@ export class Virtue extends Item {
   constructor(virtueObj) {
     super();
     if (virtueObj) {
+      // console.log(JSON.stringify(virtueObj, null, 2));
       this.id = virtueObj.id;
       this.name = virtueObj.name;
-      this.childIDs = virtueObj.virtualMachineTemplateIds;
+      this.setChildIDs(virtueObj.virtualMachineTemplateIds);
       this.enabled = virtueObj.enabled;
 
       this.version = virtueObj.version;
@@ -114,25 +126,31 @@ export class Virtue extends Item {
       if (! this.allowedPasteTargets) {
         this.allowedPasteTargets = [];
       }
-      // TODO  Placeholder filesystems/servers - these will be defined in and pulled from the global settings.
-      if (! this.fileSysPerms) {
-        this.fileSysPerms = [
-          new FileSysPermission("File Server\\Media "),
-          new FileSysPermission("File Server\\Documents "),
-          new FileSysPermission("File Server\\C Drive "),
-          new FileSysPermission("File Server\\F Drive ")
-        ];
+      if (virtueObj.fileSystemIds) {
+        this.fileSystemIds = virtueObj.fileSystemIds;
+      }
+      // if (! this.fileSystems) {
+      //   this.fileSystems = [
+      //     new FileSystem("File Server\\Media "),
+      //     new FileSystem("File Server\\Documents "),
+      //     new FileSystem("File Server\\C Drive "),
+      //     new FileSystem("File Server\\F Drive ")
+      //   ];
+      // }
+
+      if (virtueObj.printerIds) {
+        this.printerIds = virtueObj.printerIds;
       }
       // TODO  Placeholder printers.
-      if (! this.allowedPrinters) {
-        this.allowedPrinters = [
-          new Printer("Printer 1"),
-          new Printer("Printer 2"),
-          new Printer("Printer 3"),
-          new Printer("Printer 4"),
-          new Printer("Printer 5")
-        ];
-      }
+      // if (! this.allowedPrinters) {
+      //   this.allowedPrinters = [
+      //     new Printer("Printer 1"),
+      //     new Printer("Printer 2"),
+      //     new Printer("Printer 3"),
+      //     new Printer("Printer 4"),
+      //     new Printer("Printer 5")
+      //   ];
+      // }
     }
 
 
@@ -143,4 +161,36 @@ export class Virtue extends Item {
     }
   }
 
+
+  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {
+
+    let vmDataset: DictList<IndexedObj> = childDatasets.get(Datasets.VMS);
+    let printerDataset: DictList<IndexedObj> = childDatasets.get(Datasets.PRINTERS);
+    let fileSystemDataset: DictList<IndexedObj> = childDatasets.get(Datasets.FILE_SYSTEMS);
+
+    this.setChildren(vmDataset.getSubSet(this.getChildIDs()));
+
+    this.printers = printerDataset.getSubSet(this.printerIds).asList() as Printer[];
+    this.fileSystems = fileSystemDataset.getSubSet(this.fileSystemIds).asList() as FileSystem[];
+  }
+
+  /** @override [[Item.getChildIDs]] */
+  getChildIDs(): string[] {
+    return this.vmTemplateIDs;
+  }
+
+  /** @override [[Item.getChildren]] */
+  getChildren(): DictList<IndexedObj> {
+    return this.vmTemplates;
+  }
+
+  /** @override [[Item.setChildIDs]] */
+  setChildIDs(newChildIDs: string[]): void {
+    this.vmTemplateIDs = newChildIDs;
+  }
+
+  /** @override [[Item.setChildren]] */
+  setChildren(newChildren: DictList<IndexedObj>): void {
+    this.vmTemplates = newChildren;
+  }
 }

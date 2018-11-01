@@ -163,10 +163,10 @@
 
           <ng-container *ngIf="isIcon(column)">
             <a *ngIf="editingEnabled()">
-              <mat-icon svgIcon="{{column.iconName}}" (click)="column.link(elem.obj)" aria-label="column.label"></mat-icon>
+              <mat-icon svgIcon="{{column.iconName}}" (click)="column.link(elem.obj)" aria-label="column.label">{{mode}}</mat-icon>
             </a>
             <div *ngIf="!editingEnabled()">
-              <mat-icon svgIcon="{{column.iconName}}" aria-label="column.label"></mat-icon>
+              <mat-icon svgIcon="{{column.iconName}}" aria-label="column.label">{{mode}}</mat-icon>
             </div>
           </ng-container>
 

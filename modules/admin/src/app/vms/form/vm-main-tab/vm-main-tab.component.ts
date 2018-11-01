@@ -19,7 +19,7 @@ import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum'
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
-import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
+import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-main-tab/gen-main-tab.component';
 
 import { OSSet } from '../../os.set';
 

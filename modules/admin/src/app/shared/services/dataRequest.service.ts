@@ -9,7 +9,8 @@ import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-import { Item } from '../models/item.model';
+// import { Item } from '../models/item.model';
+import { IndexedObj } from '../models/indexedObj.model';
 import { MessageService } from './message.service';
 
 /**
@@ -26,7 +27,7 @@ const httpOptions = {
  * location within the baseUrl should be given the request.
  */
 @Injectable()
-export class ItemService {
+export class DataRequestService {
 
   /** the root URL to query - the location of our virtue-admin server. */
   private baseUrl: string;
@@ -84,7 +85,7 @@ export class ItemService {
    */
   public getItem(configUrl: string, id: string): Observable<any> {
     let url = this.baseUrl + configUrl + id;
-    return this.httpClient.get<Item>(url).catch(this.errorHandler);
+    return this.httpClient.get<IndexedObj>(url).catch(this.errorHandler);
   }
 
   /**
@@ -165,7 +166,7 @@ export class ItemService {
    * @return a subscription that will return the updated object as it exists on the backend.
    */
   public setItemStatus(configUrl: string, id: string, newStatus: boolean): Observable<any> {
-    let url = this.baseUrl + configUrl + id + '/enable';
+    let url = this.baseUrl + configUrl + id + '/setStatus';
 
     return this.httpClient.post(url, newStatus).catch(this.errorHandler);
   }
@@ -212,6 +213,6 @@ export class ItemService {
    * @param massage the string to be saved to the log
    */
   private log (message: string): void {
-    this.messageService.add('ItemService: ' + message);
+    this.messageService.add('DataRequestService: ' + message);
   }
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Set;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
 import javax.persistence.Entity;
@@ -17,6 +18,10 @@ import org.hibernate.annotations.ColumnDefault;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
+
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.FileSystem;
+
 
 /**
  * Data Transfer Object (DTO) for templates.
@@ -43,6 +48,16 @@ public class VirtueTemplate {
 
 	private String color;
 
+	@ManyToMany()
+	private Collection<Printer> printers;
+	@ManyToMany()
+	private Collection<FileSystem> fileSystems;
+
+	@Transient //?
+	private Collection<String> printerIds;
+	@Transient //?
+	private Collection<String> fileSystemIds;
+
 	@Transient
 	private Collection<String> virtualMachineTemplateIds;
 	// private Set<String> startingResourceIds;
@@ -65,7 +80,8 @@ public class VirtueTemplate {
 		this.lastModification = template.getLastModification();
 		this.lastEditor = template.getLastEditor();
 		this.awsTemplateName = template.getAwsTemplateName();
-		this.awsTemplateName = template.getAwsTemplateName();
+		this.printers = template.getPrinters();
+		this.fileSystems = template.getFileSystems();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -157,6 +173,16 @@ public class VirtueTemplate {
 		return vmTemplates;
 	}
 
+	@JsonIgnore
+	public Collection<Printer> getPrinters() {
+		return printers;
+	}
+
+	@JsonIgnore
+	public Collection<FileSystem> getFileSystems() {
+		return fileSystems;
+	}
+
 	// below setters are used for jackson deserialization.
 	public void setId(String id) {
 		this.id = id;
@@ -189,7 +215,7 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 	}
 
-	public String  getColor() {
+	public String getColor() {
 		return color;
 	}
 
@@ -239,6 +265,28 @@ public class VirtueTemplate {
 		return applicationIds;
 	}
 
+	@JsonGetter
+	public Collection<String> getPrinterIds() {
+		if (printers != null) {
+			printerIds = new ArrayList<String>();
+			for (Printer p : printers) {
+				printerIds.add(p.getId());
+			}
+		}
+		return printerIds;
+	}
+
+	@JsonGetter
+	public Collection<String> getFileSystemIds() {
+		if (fileSystems != null) {
+			fileSystemIds = new ArrayList<String>();
+			for (FileSystem fs : fileSystems) {
+				fileSystemIds.add(fs.getId());
+			}
+		}
+		return fileSystemIds;
+	}
+
 	@JsonSetter
 	public void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
 		this.vmTemplates = null;
@@ -260,7 +308,51 @@ public class VirtueTemplate {
 	public void setUserCreatedBy(String userCreatedBy) {
 		this.userCreatedBy = userCreatedBy;
 	}
-	
+
+	public void addPrinter(Printer newPrinter) {
+		if (printers == null) {
+			printers = new ArrayList<Printer>();
+		}
+		if (printerIds == null) {
+			printerIds = new ArrayList<String>();
+		}
+		printers.add(newPrinter);
+		printerIds.add(newPrinter.getId());
+	}
+
+	public void addFileSystem(FileSystem newFileSystem) {
+		if (fileSystems == null) {
+			fileSystems = new ArrayList<FileSystem>();
+		}
+		if (fileSystemIds == null) {
+			fileSystemIds = new ArrayList<String>();
+		}
+		fileSystems.add(newFileSystem);
+		fileSystemIds.add(newFileSystem.getId());
+	}
+
+	public void removePrinter(Printer printer) {
+		Iterator<Printer> itr = getPrinters().iterator();
+		while (itr.hasNext()) {
+			Printer p = itr.next();
+			if (p.getId().equals(printer.getId())) {
+				itr.remove();
+				break;
+			}
+		}
+	}
+
+	public void removeFileSystem(FileSystem fileSystem) {
+		Iterator<FileSystem> itr = getFileSystems().iterator();
+		while (itr.hasNext()) {
+			FileSystem fs = itr.next();
+			if (fs.getId().equals(fileSystem.getId())) {
+				itr.remove();
+				break;
+			}
+		}
+	}
+
 	public static final Comparator<? super VirtueTemplate> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();
 	private static class CaseInsensitiveNameComparator implements Comparator<VirtueTemplate> {
 		@Override

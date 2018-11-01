@@ -20,7 +20,7 @@ import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum'
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 
-import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
+import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-main-tab/gen-main-tab.component';
 
 /**
  * @class

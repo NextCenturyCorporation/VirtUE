@@ -2,18 +2,16 @@ import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/cor
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { DialogsComponent } from '../../../../dialogs/dialogs.component';
+import { DialogsComponent } from '../../../../../dialogs/dialogs.component';
 
-import { Item } from '../../../models/item.model';
-import { User } from '../../../models/user.model';
-import { Column } from '../../../models/column.model';
-import { SubMenuOptions } from '../../../models/subMenuOptions.model';
-import { Mode } from '../../../abstracts/gen-form/mode.enum';
+import { Item } from '../../../../models/item.model';
+import { User } from '../../../../models/user.model';
+import { Column } from '../../../../models/column.model';
+import { SubMenuOptions } from '../../../../models/subMenuOptions.model';
+import { Mode } from '../../../../abstracts/gen-form/mode.enum';
 
-import { GenericTableComponent } from '../../gen-table/gen-table.component';
+import { GenericTableComponent } from '../../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../gen-form-tab.component';
-
-import { VirtueModalComponent } from '../../../../modals/virtue-modal/virtue-modal.component';
 
 /**
  * @class
@@ -212,13 +210,13 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    */
   getSubMenu(): SubMenuOptions[] {
     return [
-       new SubMenuOptions("View", () => this.inViewMode(), (childItem: Item) => this.viewItem(childItem)),
-       new SubMenuOptions("Edit", () => this.inViewMode(), (childItem: Item) => this.editItem(childItem)),
+       new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
+       new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i)),
        new SubMenuOptions("Remove",
                       () => !this.inViewMode(),
-                      (childItem: Item) => this.openDialog( 'Delete ' + childItem.getName(),
+                      (i: Item) => this.openDialog( 'Delete ' + i.getName(),
                                                     () => {
-                                                      this.item.removeChild( childItem.getID() );
+                                                      this.item.removeChild( i.getID() );
                                                       this.update({});
                                                     }
                                                   )

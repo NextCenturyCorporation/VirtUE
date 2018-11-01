@@ -528,6 +528,9 @@ public class DataResource {
 		return ids;
 	}
 
+	/**
+	 * This doesn't appear to be used?
+	 */
 	@GET
 	@Path("template/user/")
 	@Produces("application/json")

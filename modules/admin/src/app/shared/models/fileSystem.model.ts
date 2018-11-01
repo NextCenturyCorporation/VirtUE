@@ -1,3 +1,5 @@
+import { DictList } from './dictionary.model';
+import { IndexedObj } from './indexedObj.model';
 
 /**
  * @class
@@ -5,7 +7,10 @@
  *
  * Used in [[VirtueSettingsTabComponent]] and [[Virtue]]
  */
-export class FileSysPermission {
+export class FileSystem extends IndexedObj {
+
+  /** the id given by the backend */
+  id: string;
 
   /** Can this FS be access at all? */
   enabled: boolean = false;
@@ -26,5 +31,16 @@ export class FileSysPermission {
   constructor(
     /** @param location the address of this FS, relative to something, TODO */
     public location: string
-  ) {}
+  ) {
+    super("location" + "12345");
+  }
+
+  /** #uncommented */
+  getID(): string {
+    return this.id;
+  }
+
+  /** doesn't depend on anything else, and so nothing needs to be built */
+  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {}
+
 }

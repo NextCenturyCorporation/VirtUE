@@ -44,6 +44,8 @@ import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
@@ -191,9 +193,10 @@ public class AdminResource {
 
 	@GET
 	@Produces("application/json")
-	@Path("virtualMachine/template/{id}/toggle")
-	public VirtualMachineTemplate toggleVirtualMachineTemplateEnabled(@PathParam("id") String templateId) {
-		VirtualMachineTemplate virtualMachineTemplate = adminService.toggleVirtualMachineTemplateEnabled(templateId);
+	@Path("virtualMachine/template/{id}/setEnabled")
+	public VirtualMachineTemplate setVirtualMachineTemplateStatus(@PathParam("id") String templateId, String status) {
+		boolean newStatus = Boolean.parseBoolean(status);
+		VirtualMachineTemplate virtualMachineTemplate = adminService.setVirtualMachineTemplateStatus(templateId, newStatus);
 		return virtualMachineTemplate;
 	}
 
@@ -234,9 +237,10 @@ public class AdminResource {
 
 	@GET
 	@Produces("application/json")
-	@Path("virtue/template/{id}/toggle")
-	public VirtueTemplate toggleVirtueTemplateEnabled(@PathParam("id") String templateId) {
-		VirtueTemplate virtueTemplate = adminService.toggleVirtueTemplateEnabled(templateId);
+	@Path("virtue/template/{id}/setStatus")
+	public VirtueTemplate setVirtueTemplateStatus(@PathParam("id") String templateId, String status) {
+		boolean newStatus = Boolean.parseBoolean(status);
+		VirtueTemplate virtueTemplate = adminService.setVirtueTemplateStatus(templateId, newStatus);
 		return virtueTemplate;
 	}
 
@@ -339,8 +343,8 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("user/{username}/enable")
-	public void removeUser(@PathParam("username") String username, String enableString) {
+	@Path("user/{username}/setStatus")
+	public void setUserStatus(@PathParam("username") String username, String enableString) {
 		boolean enable = Boolean.parseBoolean(enableString);
 		adminService.enableDisableUser(username, enable);
 	}
@@ -816,4 +820,65 @@ public class AdminResource {
 		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
 		return sourceIds;
 	}
+
+/*************/
+
+	/**
+	 * Note the small difference between `/admin/printer` and `/admin/printer/`
+	 * The former makes a new printer, the latter returns a list of all of them.
+	 *
+	 */
+	@POST
+	@Produces("application/json")
+	@Path("printer")
+	public Printer createPrinter(Printer printer) {
+		return adminService.createPrinter(printer);
+	}
+
+	@PUT
+	@Produces("application/json")
+	@Path("printer/{printerId}")
+	public Printer updatePrinter(@PathParam("printerId") String printerId, Printer printer) {
+		if (!printer.getId().equals(printerId)) {
+			throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
+					"Given printer doesn't match printerId in path. Printer ID=" + printerId + ". Printer=" + printer);
+		}
+		return adminService.createPrinter(printer);
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("printer/{printerId}")
+	public Printer getPrinter(@PathParam("printerId") String printerId) {
+		Printer returnedPrinter = adminService.getPrinter(printerId);
+		return returnedPrinter;
+	}
+
+	// JHU - Admin API - user list
+	@GET
+	@Produces("application/json")
+	@Path("printer/")
+	public Iterable<Printer> getAllPrinters() {
+		ArrayList<Printer> ps = new ArrayList<Printer>();
+		ps.add(new Printer("id", "name", "address", "status", true));
+		return ps;
+		// return adminService.getAllPrinters();
+	}
+
+	// JHU - Admin API - user get
+	@DELETE
+	@Produces("application/json")
+	@Path("printer/{printerId}")
+	public void deletePrinter(@PathParam("printerId") String printerId) {
+		adminService.deletePrinter(printerId);
+	}
+
+	@POST
+	@Produces("application/json")
+	@Path("printer/{printerId}/setStatus")
+	public void setPrinterStatus(@PathParam("printerId") String printerId, String enableString) {
+		boolean enable = Boolean.parseBoolean(enableString);
+		adminService.setPrinterStatus(printerId, enable);
+	}
+
 }

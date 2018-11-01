@@ -12,14 +12,14 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 /**
  * Manages and stores all template information and definitions.
- * 
+ *
  *
  */
 public interface ITemplateManager {
 	/**
 	 * Returns a template for the given id if the given user has been assigned that
 	 * virtue template.
-	 * 
+	 *
 	 * @param user
 	 * @param templateId
 	 * @return
@@ -28,7 +28,7 @@ public interface ITemplateManager {
 
 	/**
 	 * Returns all the {@link VirtueTemplate} that the given user has access to.
-	 * 
+	 *
 	 * @param user
 	 * @return
 	 */
@@ -36,7 +36,7 @@ public interface ITemplateManager {
 
 	/**
 	 * Returns all the {@link VirtueTemplate} ids that the given user has access to.
-	 * 
+	 *
 	 * @param user
 	 * @return
 	 */
@@ -44,12 +44,12 @@ public interface ITemplateManager {
 
 	void assignApplicationToVmTemplate(String vmTemplateId, String applicationId);
 
-	void assingVmTemplateToVirtueTemplate(String virtueTemplate, String vmTemplateId);
+	void assingVmTemplateToVirtueTemplate(String virtueTemplateId, String vmTemplateId);
 
 	/**
 	 * Assigns a virtue to a user such that the user now has the ability to use that
 	 * {@link VirtueTemplate} from the id.
-	 * 
+	 *
 	 * @param user
 	 * @param virtueTemplateId
 	 */
@@ -58,8 +58,8 @@ public interface ITemplateManager {
 	/**
 	 * Removes the given virtue from the list of virtues that the user has the
 	 * ability to use. Calling this function does not affect any existing virtues,
-	 * but only the data store.
-	 * 
+	 * but only user's virtue list.
+	 *
 	 * @param user
 	 * @param virtueTemplateId
 	 */
@@ -67,14 +67,14 @@ public interface ITemplateManager {
 
 	/**
 	 * Returns all {@link VirtueTemplate} in the data store.
-	 * 
+	 *
 	 * @return
 	 */
 	Iterable<VirtueTemplate> getAllVirtueTemplates();
 
 	/**
 	 * Returns all {@link VirtualMachineTemplate} in the data store.
-	 * 
+	 *
 	 * @return
 	 */
 
@@ -82,7 +82,7 @@ public interface ITemplateManager {
 
 	/**
 	 * Returns all the {@link ApplicationDefinition}s in the data store.
-	 * 
+	 *
 	 * @param applicationId
 	 * @return
 	 */
@@ -91,7 +91,7 @@ public interface ITemplateManager {
 	/**
 	 * Returns {@link ApplicationDefinition} matching the given ID or throws a
 	 * SaviorException if not found.
-	 * 
+	 *
 	 * @param applicationId
 	 * @return
 	 */
@@ -100,7 +100,7 @@ public interface ITemplateManager {
 	/**
 	 * Returns {@link VirtueTemplate} matching the given ID or throws a
 	 * SaviorException if not found.
-	 * 
+	 *
 	 * @param applicationId
 	 * @return
 	 */
@@ -109,7 +109,7 @@ public interface ITemplateManager {
 	/**
 	 * Returns {@link VirtualMachineTemplate} matching the given ID or throws a
 	 * SaviorException if not found.
-	 * 
+	 *
 	 * @param applicationId
 	 * @return
 	 */
@@ -117,25 +117,29 @@ public interface ITemplateManager {
 
 	/**
 	 * Adds a new {@link ApplicationDefinition} to the data store.
-	 * 
+	 *
 	 * @param app
 	 */
 	void addApplicationDefinition(ApplicationDefinition app);
 
 	/**
 	 * Adds a new {@link VirtualMachineTemplate} to the data store.
-	 * 
+	 *
 	 * @param vmTemplate
 	 */
 	void addVmTemplate(VirtualMachineTemplate vmTemplate);
 
 	/**
 	 * adds a new {@link VirtueTemplate} to the data store.
-	 * 
+	 *
 	 * @param template
 	 */
 	void addVirtueTemplate(VirtueTemplate template);
 
+	/**
+	 * This doesn't appear to be used anywhere.
+	 * @return a list of all users who have been assigned virtues.
+	 */
 	Collection<String> getUsersWithTemplate();
 
 	void clear();
@@ -167,5 +171,4 @@ public interface ITemplateManager {
 	Set<String> getAllIconKeys();
 
 	Iterable<IconModel> getAllIcons();
-
 }

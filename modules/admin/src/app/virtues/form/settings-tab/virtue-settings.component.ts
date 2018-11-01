@@ -10,6 +10,8 @@ import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 
+import { ItemService } from '../../../shared/services/item.service';
+
 import {
   Column,
   TextColumn,
@@ -23,7 +25,7 @@ import {
 } from '../../../shared/models/column.model';
 
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
-import { FileSysPermission } from '../../../shared/models/fileSysPermission.model';
+import { FileSystem } from '../../../shared/models/fileSystem.model';
 import { Printer } from '../../../shared/models/printer.model';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
@@ -78,7 +80,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   @ViewChild('networkPermsTable') private networkPermsTable: GenericTableComponent<NetworkPermission>;
 
   /** a table to display the file system permissions of this Virtue */
-  @ViewChild('fileSysPermsTable') private fileSysPermsTable: GenericTableComponent<FileSysPermission>;
+  @ViewChild('fileSystemsTable') private fileSystemsTable: GenericTableComponent<FileSystem>;
 
   /** a table to display the printers this Virtue can access */
   @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
@@ -181,6 +183,15 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     console.log("collectData");
 
     // check all entries for validity before allowing save
+    this.item["printerIds"] = [];
+    for (let p of this.item.allowedPrinters) {
+      this.item["printerIds"].push(p.id);
+    }
+
+    this.item["fileSystemIds"] = [];
+    for (let fs of this.item.fileSystems) {
+      this.item["fileSystemIds"].push(fs.id);
+    }
 
     if (!this.checkNetworkPerms()) {
       // TODO tell the user
@@ -385,8 +396,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 /************************************************************************************/
 
   updateFileSysPermsTable(): void {
-    this.fileSysPermsTable.populate(this.item.fileSysPerms);
+    this.fileSystemsTable.populate(this.item.fileSystems);
   }
+
   /**
    * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
    * these things aren't Items. Generalizing the GenericTable further would be useful.
@@ -394,7 +406,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getFileSysColumns(): Column[] {
     return [
-      new TextColumn('Server & Drive',  6, (fs: FileSysPermission) => fs.location, SORT_DIR.ASC),
+      new TextColumn('Server & Drive',  6, (fs: FileSystem) => fs.location, SORT_DIR.ASC),
       new CheckboxColumn('Enabled',     3, 'enabled'),
       new CheckboxColumn('Read',        1, 'read'),
       new CheckboxColumn('Write',       1, 'write'),
@@ -408,19 +420,18 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
    */
   setUpFileSysPermsTable(): void {
-    if (this.fileSysPermsTable === undefined) {
+    if (this.fileSystemsTable === undefined) {
       return;
     }
-    this.fileSysPermsTable.setUp({
+    this.fileSystemsTable.setUp({
       cols: this.getFileSysColumns(),
       filters: [],
       tableWidth: 1,
       noDataMsg: "No file systems have been set up in the global settings",
-      elementIsDisabled: (fs: FileSysPermission) => !fs.enabled,
+      elementIsDisabled: (fs: FileSystem) => !fs.enabled,
       editingEnabled: () => !this.inViewMode()
     });
   }
-
 
 /************************************************************************************/
 /************************************************************************************/
