@@ -54,6 +54,8 @@ public class SwingWindow extends XpraWindow {
 
 	private WindowFrame window;
 
+	private boolean DrawColorOnIcon = false;
+
 	public SwingWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
 			IFocusNotifier focusNotifier) {
 		super(packet, packetSender, keyboard, focusNotifier);
@@ -171,8 +173,8 @@ public class SwingWindow extends XpraWindow {
 						// logger.debug("ID:" + packet.getWindowId() + " Window:" + this.toString());
 						g.drawImage(img, packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight(), null);
 						if (color != null && isMainWindow()) {
-							Color transparentColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 255);
-							g.setColor(transparentColor);
+							Color borderColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 255);
+							g.setColor(borderColor);
 							// g.setFill(Color.GREEN);
 							// g.drawLine(0, 0, canvas.getWidth(), canvas.getHeight());
 
@@ -231,28 +233,16 @@ public class SwingWindow extends XpraWindow {
 		Image icon = SwingImageEncoder.decodeImage(packet.getEncoding(), packet.getData());
 
 		if (icon != null) {
-			// Image colorIcon = new BufferedImage(icon.getWidth(null),
-			// icon.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-			Graphics g = icon.getGraphics();
-
-			// g.drawImage(icon, 0, 0, null);
-			g.setColor(color);
-			int width = icon.getWidth(null);
-			int height = icon.getHeight(null);
-
-			int nPoints = 4;
-			// int[] xPoints = new int[] { 1, width / 2, 1, 1 };
-			// int[] yPoints = new int[] { 1, 1, height / 2, 1 };
-
-			int[] xPoints = new int[] { 1, width / 2, 1, 1 };
-			int[] yPoints = new int[] { height / 2, 1, 1, height / 2 };
-
-			// int[] xPoints = new int[] { 1, width, width, 1, 1 };
-			// int[] yPoints = new int[] { height, height, height * 3 / 4, height * 3 / 4,
-			// height };
-			// int nPoints = 5;
-			// g.drawRect(1, 1, icon.getWidth(null) - 3, icon.getHeight(null) - 3);
-			g.fillPolygon(xPoints, yPoints, nPoints);
+			if (DrawColorOnIcon) {
+				Graphics g = icon.getGraphics();
+				g.setColor(color);
+				int width = icon.getWidth(null);
+				int height = icon.getHeight(null);
+				int nPoints = 4;
+				int[] xPoints = new int[] { 1, width / 2, 1, 1 };
+				int[] yPoints = new int[] { height / 2, 1, 1, height / 2 };
+				g.fillPolygon(xPoints, yPoints, nPoints);
+			}
 			SwingUtilities.invokeLater(new Runnable() {
 
 				@Override
