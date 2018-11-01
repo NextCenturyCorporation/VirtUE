@@ -137,17 +137,17 @@ resource "aws_instance" "file_server" {
   winrm set winrm/config/service/Auth '@{Basic="true"}'
   winrm set winrm/config/service '@{AllowUnencrypted="true"}'
   winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="1024"}'
-  echo Setting password
+  echo "Setting password"
   net user Administrator "${var.admin_password}"
   echo "Installing RSAT"
   Install-WindowsFeature -Name RSAT-AD-PowerShell
   echo "Renaming"
-  Rename-Computer -NewName "fileserver"
+  Rename-Computer -NewName "${local.fsname}"
   echo "Joining domain and rebooting"
   $password = ConvertTo-SecureString -AsPlainText -Force "${var.admin_password}"
   $cred = new-object -typename System.Management.Automation.PSCredential -argumentlist Admin, $password
   Add-Computer -DomainName "${var.domain}" -Credential $cred -Restart
-  echo Setup done  
+  echo "Setup done"
 </powershell>
 EOF
 
