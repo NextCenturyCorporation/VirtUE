@@ -214,7 +214,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			public void mouseClicked(MouseEvent event) {
 				if (!Sidebar.askAgain) {
 					try {
-						virtueService.startApplication(vc.getVirtue(), ad, new RgbColor(0, 0, 0, 0));
+						virtueService.startApplication(vc.getVirtue(), ad);
 
 						if (hasFullBorder()) {
 							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
@@ -310,7 +310,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 				dialog.setVisible(false);
 				dialog.dispose();
 				try {
-					virtueService.startApplication(virtue, ad, new RgbColor(0, 0, 0, 0));
+					virtueService.startApplication(virtue, ad);
 					// virtue.setVirtueState(VirtueState.LAUNCHING);
 					// vc.updateVirtue(virtue);
 				} catch (IOException e1) {
