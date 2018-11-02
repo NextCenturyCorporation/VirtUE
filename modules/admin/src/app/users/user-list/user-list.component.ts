@@ -12,14 +12,14 @@ import {  Column,
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';//
 
 import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 
-import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
@@ -29,15 +29,15 @@ import { ConfigUrls } from '../../shared/services/config-urls.enum';
  *
  * Also allows the creation of new Users.
  *
- * @extends GenericListComponent
+ * @extends ItemListComponent
  */
 @Component({
   selector: 'app-user-list',
-  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService  ]
+  templateUrl: '../../shared/abstracts/item-list/item-list.component.html',
+  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService  ]
 })
-export class UserListComponent extends GenericListComponent {
+export class UserListComponent extends ItemListComponent {
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
@@ -45,17 +45,17 @@ export class UserListComponent extends GenericListComponent {
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
   }
 
   /**
-   * called after all the datasets have loaded. Pass the user list to the table.
+   * called after all the datasetNames have loaded. Pass the user list to the table.
    */
   onPullComplete(): void {
-    this.setItems(this.allUsers.asList());
+    this.setItems(this.datasets[DatasetNames.USERS].asList());
   }
 
   /**
@@ -65,7 +65,7 @@ export class UserListComponent extends GenericListComponent {
     return [
       new TextColumn('Username',           3, (i: Item) => i.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn('Available Virtues',  4, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Available Virtues',  4, this.getVirtues, this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Authorized Roles',   3, this.formatRoles, SORT_DIR.ASC),
       new TextColumn('Account Status',     2, this.formatStatus, SORT_DIR.DESC)
     ];
@@ -77,10 +77,10 @@ export class UserListComponent extends GenericListComponent {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.USERS,
-      neededDatasets: [Datasets.VIRTUES, Datasets.USERS]
+      neededDatasets: [DatasetNames.VIRTUES, DatasetNames.USERS]
     };
 
   }
@@ -126,7 +126,7 @@ export class UserListComponent extends GenericListComponent {
 
   /**
    * Overrides parent, [[GenericPageComponent.toggleItemStatus]]. On the backend, vms/virtues/apps all only have a toggle function,
-   * but users only have a setStatus function. So our itemService has both, and we have to call the right
+   * but users only have a setStatus function. So our dataRequestService has both, and we have to call the right
    * one based on what type of item we're trying to toggle the status of.
    * That should be fixed, but is not critical.
    *
@@ -139,7 +139,7 @@ export class UserListComponent extends GenericListComponent {
       return;
     }
 
-    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, user.getID(), !user.enabled).subscribe( () => {
+    let sub = this.dataRequestService.setItemStatus(this.serviceConfigUrl, user.getID(), !user.enabled).subscribe( () => {
 
     },
     () => { // on error

@@ -2,6 +2,9 @@ import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/cor
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
+import { Printer } from '../../../shared/models/printer.model';
+import { FileSystem } from '../../../shared/models/fileSystem.model';
 import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
@@ -15,7 +18,7 @@ import {
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
@@ -50,6 +53,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
    */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
+    this.childDatasetName = Datasets.VMS;
   }
 
   /**
@@ -103,7 +107,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     return [
       new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn<Item>('Assigned Apps', 4, this.getChildren,  this.formatName),
+      new ListColumn<Item>('Assigned Apps', 4, this.getApps,  this.formatName),
       new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
@@ -143,5 +147,28 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
                           data: any
                         }) {
     return this.dialog.open( VmModalComponent, params);
+  }
+
+
+  /**
+   * Removes childItem from this.item.vmTemplates and its id from this.item.vmTemplateIds.
+   * Remember this.item is a Virtue here, and childItem can be a VirtualMachine, Printer, or .
+   *
+   * @param childItem the Item to be removed from this.[[item]]'s child lists.
+   * @override parent [[GenericMainTabComponent.removeChildObject]]()
+   */
+  removeChildObject(childItem: IndexedObj): void {
+    if (childItem instanceof VirtualMachine) {
+      this.item.removeChild(childItem, DatasetNames.VMS);
+    }
+    else if (childItem instanceof Printer) {
+      this.item.removeChild(childItem, DatasetNames.PRINTERS);
+    }
+    else if (childItem instanceof FileSystem) {
+      this.item.removeChild(childItem, DatasetNames.FILE_SYSTEMS);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Virtue.");
+    }
   }
 }

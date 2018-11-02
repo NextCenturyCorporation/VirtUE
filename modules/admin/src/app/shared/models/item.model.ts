@@ -1,7 +1,8 @@
 import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
-import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
+import { Toggleable } from './toggleable.interface';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 import { Mode } from '../abstracts/gen-form/mode.enum';
 
@@ -9,6 +10,7 @@ import { Mode } from '../abstracts/gen-form/mode.enum';
  * @class
  * This class represents a generic item - a [[User]], [[Virtue]], [[VirtualMachine]], or [[Application]].
  *
+ * #uncommented
  * It is one of the main building blocks of this system at the moment - everything is configured to
  * hold and use Items.
  *
@@ -21,12 +23,11 @@ import { Mode } from '../abstracts/gen-form/mode.enum';
  *    - [[getID]]()
  *    - [[getName]]()
  *    - [[setID]]()
- *    - [[getChildren]]()
- *    - [[getChildIDs]]()
+ *    - #uncommented
  *  - Attributes:
  *    - [[enabled]]
  */
-export abstract class Item extends IndexedObj {
+export abstract class Item extends IndexedObj implements Toggleable {
 
   /** a unique identifing string - not used by user */
   id: string;
@@ -64,30 +65,7 @@ export abstract class Item extends IndexedObj {
     this.modDate = '';
 
     this.parentDomain = "NA";
-
-    this.setChildIDs([]);
-    this.setChildren(new DictList<IndexedObj>());
   }
-
-
-  //
-  // /**
-  //  * This function uses [[childIDs]] and the input dataset to build a list of references to the Items
-  //  * identified in childIDs.
-  //  * @param childDataset the dataset in which to to look for child IDs.
-  //  */
-  // buildChildren(childDataset: DictList<Item>): void {
-  //   this.setChildren(new DictList<Item>());
-  //   for (let childID of this.getChildIDs()) {
-  //     let child: Item = childDataset.get(childID);
-  //     if (child) {
-  //       this.children.add(childID, child);
-  //     } else {
-  //       console.log("child ID in item not found in dataset. I.e., if this is for a user, \
-  //       it has a virtue ID attached to it which doesn't exist in the backend data.");
-  //     }
-  //   }
-  // }
 
   /**
    * Overriden by [[User]]
@@ -99,7 +77,7 @@ export abstract class Item extends IndexedObj {
   }
 
   /**
-  * @return a link to where this Item can be viewed/edited/duplicated - Something like "users/{view/edit/duplicate}/Phillip"
+   * @return a link to where this Item can be viewed/edited/duplicated - Something like "users/{view/edit/duplicate}/Phillip"
    *
    * @param mode the [[Mode]] this Item should be opened in.
    *
@@ -155,32 +133,22 @@ export abstract class Item extends IndexedObj {
   }
 
   /**
-   * This removes the child with the given id and index from childIDs and children.
-   * @param id the id of the Item to be remove
-   * @param index optional, calculated if not given. Just saves on time if it's available and can be passed in directly.
+   * This removes the child with the given id and index from the relevant list.
+   * If we ever add multiple lists of the same type (like two lists that hold virtues) then something here will need to change.
+   * Maybe just pass in an extra parameter saying the type of dataset
+   * @param id the id of the child to be removed
+   * @param datasetType the name of the dataset relating to the list the item should be removed from.
+   *        i.e., if you want to remove printer 12345 from Virtue V1's printer list, call `V1.removeChild( "1234", DatasetNames.PRINTERS );`
    */
-  removeChild(id: string, index?: number): void {
-    this.getChildren().remove(id);
-    if (index) {
-      this.getChildIDs().splice(index, 1);
-    } else {
-      this.getChildIDs().splice(this.getChildIDs().indexOf(id), 1);
-    }
+  removeChild(id: string, datasetType: DatasetNames): void {
 
+    // remove that id.
+    let childIDList: string[] = this.getRelatedIDList(datasetType);
+    childIDList.splice(childIDList.indexOf(id), 1);
+
+    // and remove the actual item.
+    this.getRelatedDict(datasetType).remove(id);
   }
-
-  /** #uncommented */
-  abstract getChildIDs(): string[];
-
-  /** #uncommented */
-  abstract setChildIDs(newChildIDs: string[]): void;
-
-  /** #uncommented */
-  abstract getChildren(): DictList<IndexedObj>;
-
-  /** #uncommented */
-  abstract setChildren(newChildren: DictList<IndexedObj>): void;
-
 
   /**
    * Eventually this will be what is used by table to display the item's name - once the table is made to display classes that
@@ -190,4 +158,5 @@ export abstract class Item extends IndexedObj {
   toString(): string {
     return this.getName();
   }
+
 }

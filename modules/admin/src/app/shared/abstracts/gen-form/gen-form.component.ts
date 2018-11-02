@@ -8,7 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
-import { ItemService } from '../../services/item.service';
+import { DataRequestService } from '../../services/dataRequest.service';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
@@ -22,7 +22,7 @@ import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 import { Mode } from './mode.enum';
-import { Datasets } from '../gen-data-page/datasets.enum';
+import { DatasetNames } from '../gen-data-page/datasetNames.enum';
 
 /**
  * @class __
@@ -51,7 +51,7 @@ import { Datasets } from '../gen-data-page/datasets.enum';
  * @extends [[GenericPageComponent]] because it needs to load data about an Item and its children, as well as other available children
  */
 @Component({
-  providers: [ BaseUrlService, ItemService ]
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export abstract class GenericFormComponent extends GenericDataPageComponent implements OnInit {
 
@@ -90,20 +90,20 @@ export abstract class GenericFormComponent extends GenericDataPageComponent impl
   mode: Mode;
 
   /** holds the name of the relevant dataset for Item being viewed;
-   *   e.g., in virtue.component, it should be set to `Datasets.VMS`
+   *   e.g., in virtue.component, it should be set to `DatasetNames.VMS`
    * Must be set in constructor of derived class.
    * Can't hold direct reference because that reference won't be updated when
    * the dataset is pulled or re-pulled
    */
-  datasetName: Datasets;
+  datasetName: DatasetNames;
 
   /** holds the name of the relevant dataset for the children of the Item being viewed;
-   *   e.g., in virtue.component, it should be set to `Datasets.VMS`
+   *   e.g., in virtue.component, it should be set to `DatasetNames.VMS`
    * Must be set in constructor of derived class.
    * Can't hold direct reference because that reference won't be updated when
    * the dataset is pulled or re-pulled
    */
-  childDatasetName: Datasets;
+  childDatasetName: DatasetNames;
 
   /**
    * Record whether an intial pull has already taken place.
@@ -127,10 +127,10 @@ export abstract class GenericFormComponent extends GenericDataPageComponent impl
     protected activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
 
     // the mode needs to be set before any other work can be done
     this.setMode();
@@ -243,19 +243,8 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * without having to re-add them.
    */
   updatePage(): void {
-    this.buildIndexedObjAttributes(this.item, dataset);
+    this.buildIndexedObjAttribute(this.item, this.datasetName);
     this.updateTabs();
-  }
-
-  /**
-   * Sets
-   * Generally, [[updatePage]]() should be called after this.
-   *
-   * @param newChildIDs the new list of Items to be assigned as children of [[item]]
-   */
-  setIndexedObjIDs(newChildIDs: string[]): void {
-    this.item.setChildIDs(newChildIDs);
-    this.updatePage();
   }
 
   /**
@@ -289,8 +278,8 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
       this.item = _item;
     }
     else {
-      console.log("No item with ID", this.item.getID(), "found in dataset", this.datasetName + ".");
-      // TODO let the user know it didn't load
+      console.log("No record with ID", this.item.getID(), "found in dataset", this.datasetName + ".");
+      // TODO let the user know it didn't load, and probably remove this console log
 
       // return to parent list page without saving anything.
       this.toListPage();
@@ -397,7 +386,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
   updateItem(redirect: () => void): void {
-    let sub = this.itemService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
+    let sub = this.dataRequestService.updateItem(this.serviceConfigUrl, this.item.getID(), JSON.stringify(this.item)).subscribe(
       data => {
         redirect();
       },
@@ -416,7 +405,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
   createItem(redirect: () => void): void {
-    let sub = this.itemService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
+    let sub = this.dataRequestService.createItem(this.serviceConfigUrl, JSON.stringify(this.item)).subscribe(
       createdItem => {
         // note that the returned created item is just ignored.
         redirect();

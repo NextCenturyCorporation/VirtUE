@@ -35,7 +35,7 @@ export class ListFilterPipe<T> implements PipeTransform {
    * @param filterCondition a function that returns true if the item, with its given attribute, should remain in the list.
    *    Defined in the component that defined the GenericTableComponent.
    *  - #TODO currently it defaults to sorting on the status column (item.enabled), but that should be
-   *    set/defined in gen-list and not gen-table
+   *    set/defined in item-list and not gen-table
    *  - Should look like: (attribute: any) => {return someBooleanConditional;}
    *
    * @param update completely ignored, but a chage makes the table being filtered re-render itself.

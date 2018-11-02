@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { ItemService } from '../shared/services/item.service';
+import { DataRequestService } from '../shared/services/dataRequest.service';
 
 import { AppsModalComponent } from '../modals/apps-modal/apps-modal.component';
 
@@ -19,7 +19,7 @@ import { Column } from '../shared/models/column.model';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../shared/services/config-urls.enum';
-import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
 
@@ -81,8 +81,8 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
     </div>
   </div>
     `,
-  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService ]
+  styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export class VmComponent extends GenericFormComponent implements OnDestroy {
 
@@ -103,15 +103,15 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/vm-templates', location, activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/vm-templates', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
     this.item = new VirtualMachine(undefined);
 
-    this.datasetName = Datasets.VMS;
-    this.childDatasetName = Datasets.APPS;
+    this.datasetName = DatasetNames.VMS;
+    this.childDatasetName = DatasetNames.APPS;
 
   }
 
@@ -175,10 +175,10 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.VMS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
+      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
     };
   }
 

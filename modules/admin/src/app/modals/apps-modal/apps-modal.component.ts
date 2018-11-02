@@ -4,10 +4,10 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import {
   Column,
@@ -30,7 +30,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   selector: 'app-modal',
   templateUrl: '../generic-modal/generic.modal.html',
   styleUrls: ['../generic-modal/generic.modal.css'],
-  providers: [ BaseUrlService, ItemService ]
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export class AppsModalComponent extends GenericModalComponent {
 
@@ -40,12 +40,12 @@ export class AppsModalComponent extends GenericModalComponent {
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
-      itemService: ItemService,
+      dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<AppsModalComponent>,
     @Inject(MAT_DIALOG_DATA) data: any
   ) {
-    super(router, baseUrlService, itemService, dialog, dialogRef, data);
+    super(router, baseUrlService, dataRequestService, dialog, dialogRef, data);
     this.pluralItem = "Applications";
   }
 
@@ -67,10 +67,10 @@ export class AppsModalComponent extends GenericModalComponent {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.APPS,
-      neededDatasets: [Datasets.APPS]
+      neededDatasets: [DatasetNames.APPS]
     };
   }
 
@@ -85,6 +85,6 @@ export class AppsModalComponent extends GenericModalComponent {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.allApps.asList());
+    this.fillTable(this.datasets[DatasetNames.APPS].asList());
   }
 }

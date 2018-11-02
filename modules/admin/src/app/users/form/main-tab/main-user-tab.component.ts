@@ -16,7 +16,7 @@ import {
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 
@@ -56,6 +56,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
    */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
+    this.childDatasetName = Datasets.VIRTUES;
   }
 
   /**
@@ -109,10 +110,9 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
     return [
       new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                           () => this.getSubMenu()),
-      new ListColumn('Virtual Machines', 3, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
-      new ListColumn<Item>('Available Apps', 4, this.getGrandchildren,  this.formatName),
+      new ListColumn('Virtual Machines', 3, this.getVms, this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn<Item>('Available Apps', 4, this.getVmApps,  this.formatName),
       new TextColumn('Version', 1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
-      new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 
@@ -136,5 +136,22 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
                           data: any
                         }) {
     return this.dialog.open( VirtueModalComponent, params);
+  }
+
+
+  /**
+   * Removes childItem from this.item.virtueTemplates and its id from this.item.virtueTemplateIds.
+   * Remember this.item is a user here, and childItem is a Virtue.
+   *
+   * @param childItem the Item to be removed from this.[[item]]'s child lists.
+   * @override parent [[GenericMainTabComponent.removeChildObject]]()
+   */
+  removeChildObject(childObj: IndexedObj): void {
+    if (childObj instanceof Virtue) {
+      this.item.removeChild(childObj, DatasetNames.VIRTUES);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Virtue.");
+    }
   }
 }

@@ -12,12 +12,12 @@ import {  Column,
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
@@ -28,15 +28,15 @@ import { ConfigUrls } from '../../shared/services/config-urls.enum';
  * Currently, all the applications available to each VM are listed, but apps don't have a view page yet so their names are
  * only displayed as text, instead of links.
  *
- * @extends GenericListComponent
+ * @extends ItemListComponent
  */
 @Component({
   selector: 'app-vm-list',
-  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService  ]
+  templateUrl: '../../shared/abstracts/item-list/item-list.component.html',
+  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService  ]
 })
-export class VmListComponent extends GenericListComponent {
+export class VmListComponent extends ItemListComponent {
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
@@ -44,17 +44,17 @@ export class VmListComponent extends GenericListComponent {
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
   }
 
   /**
    * called after all the datasets have loaded. Pass the vm list to the table.
    */
   onPullComplete(): void {
-    this.setItems(this.allVms.asList());
+    this.setItems(this.datasets[DatasetNames.VMS].asList());
   }
 
   /**
@@ -80,10 +80,10 @@ export class VmListComponent extends GenericListComponent {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.VMS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS]
+      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS]
     };
   }
 

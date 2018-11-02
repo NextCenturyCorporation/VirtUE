@@ -9,7 +9,6 @@ import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
 import { catchError, map, tap } from 'rxjs/operators';
 
-// import { Item } from '../models/item.model';
 import { IndexedObj } from '../models/indexedObj.model';
 import { MessageService } from './message.service';
 

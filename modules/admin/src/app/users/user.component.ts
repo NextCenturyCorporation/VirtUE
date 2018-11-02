@@ -8,7 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { ItemService } from '../shared/services/item.service';
+import { DataRequestService } from '../shared/services/dataRequest.service';
 
 import { VirtueModalComponent } from '../modals/virtue-modal/virtue-modal.component';
 
@@ -25,7 +25,7 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../shared/services/config-urls.enum';
-import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 /**
  *
@@ -77,8 +77,8 @@ import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
     </div>
   </div>
     `,
-  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService ]
+  styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export class UserComponent extends GenericFormComponent implements OnDestroy {
 
@@ -93,16 +93,16 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/users', location, activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/users', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
     this.item = new User(undefined);
 
-    this.datasetName = Datasets.USERS;
-    this.childDatasetName = Datasets.VIRTUES;
+    this.datasetName = DatasetNames.USERS;
+    this.childDatasetName = DatasetNames.VIRTUES;
   }
 
   /**
@@ -187,10 +187,10 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.USERS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
+      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS]
     };
   }
 
@@ -256,7 +256,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
       return;
     }
 
-    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, item.getID(), !item.enabled).subscribe( () => {
+    let sub = this.dataRequestService.setItemStatus(this.serviceConfigUrl, item.getID(), !item.enabled).subscribe( () => {
 
     },
     () => { // on error

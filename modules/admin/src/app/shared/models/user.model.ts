@@ -5,7 +5,7 @@ import { Virtue } from './virtue.model';
 import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
-import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 /**
 * @class
@@ -34,37 +34,29 @@ export class User extends Item {
     super();
     if (userObj) {
       this.name = userObj.username;
-      if (!userObj.authorities) {
-        this.roles = [];
-      }
-      else {
-        this.roles = userObj.authorities;
-      }
-
-      if (!userObj.virtueTemplateIds) {
-        this.virtueTemplateIDs = [];
-      }
-      else {
-        this.setChildIDs(userObj.virtueTemplateIds);
-      }
-
+      this.roles = userObj.authorities;
       this.enabled = userObj.enabled;
+      this.virtueTemplateIDs = userObj.virtueTemplateIDs;
 
-      this.parentDomain = '/users';
-
-      this.build = ['virtueTemplates']
     }
-    else {
+
+    if ( !this.roles) {
       this.roles = [];
     }
+    if ( !this.virtueTemplateIDs) {
+      this.virtueTemplateIDs = [];
+    }
+
+    this.parentDomain = '/users';
   }
 
-
-  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {
-
-    let virtueDataset: DictList<IndexedObj> = childDatasets.get(Datasets.VIRTUES);
-
-    this.setChildren(virtueDataset.getSubSet(this.getChildIDs()));
+  /**
+   * #uncommented
+   */
+  buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
+    if (datasetName === DatasetNames.VIRTUES) {
+      this.virtueTemplates = dataset.getSubset(this.virtueTemplateIDs) as DictList<Virtue>;
+    }
   }
 
   /**
@@ -85,24 +77,24 @@ export class User extends Item {
   }
 
 
-
-  /** @override [[Item.getChildIDs]] */
-  getChildIDs(): string[] {
-    return this.virtueTemplateIDs;
+  /** @override [[Item.getRelatedDict]] */
+  getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
+    if (datasetName === DatasetNames.VIRTUES) {
+      return this.virtueTemplates;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
   }
 
-  /** @override [[Item.getChildren]] */
-  getChildren(): DictList<IndexedObj> {
-    return this.virtueTemplates;
-  }
+  /**
+   * Currently Users only have one type of children, so just return that.
+   *
+   * @override [[Item.getRelatedIDList]]
+   */
+  getRelatedIDList(datasetName: DatasetNames): string[] {
 
-  /** @override [[Item.setChildIDs]] */
-  setChildIDs(newChildIDs: string[]): void {
-    this.virtueTemplateIDs = newChildIDs;
-  }
-
-  /** @override [[Item.setChildren]] */
-  setChildren(newChildren: DictList<IndexedObj>): void {
-    this.virtueTemplates = newChildren;
+    if (datasetName === DatasetNames.VIRTUES) {
+      return this.virtueTemplateIDs;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
   }
 }

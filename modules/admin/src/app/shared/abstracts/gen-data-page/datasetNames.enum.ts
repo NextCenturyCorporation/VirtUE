@@ -1,10 +1,10 @@
 
 /**
  * @enum
- * the names of the main four datasets, to provide an encapsulated interface for
+ * the names of the datasets we want to be able to load from, to provide an encapsulated interface for
  * pages requesting the population of datasets.
  */
-export enum Datasets {
+export enum DatasetNames {
   APPS = "allApps",
   VMS = "allVms",
   VIRTUES = "allVirtues",

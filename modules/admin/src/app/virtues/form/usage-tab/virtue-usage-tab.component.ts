@@ -6,9 +6,6 @@ import { MatDialog } from '@angular/material';
 // import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { ItemService } from '../../../shared/services/item.service';
-
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../../shared/models/item.model';
@@ -26,7 +23,7 @@ import {
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
@@ -46,7 +43,7 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-f
 @Component({
   selector: 'app-virtue-usage-tab',
   templateUrl: './virtue-usage-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
+  styleUrls: ['../../../shared/abstracts/item-list/item-list.component.css']
 })
 export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
@@ -129,9 +126,9 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
    */
   getParentColumns(): Column[] {
     return [
-      new TextColumn('Username',  3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Username',  3, (u: User) => u.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                () => this.getParentSubMenu()),
-      new ListColumn<Item>('Attached Virtues', 5, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn<Item>('Attached Virtues', 5, this.getVirtues,  this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Status',  4, this.formatStatus, SORT_DIR.ASC)
     ];
 

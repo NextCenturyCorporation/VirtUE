@@ -4,10 +4,10 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 
 import {
@@ -31,7 +31,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
   selector: 'app-vm-modal',
   templateUrl: '../generic-modal/generic.modal.html',
   styleUrls: ['../generic-modal/generic.modal.css'],
-  providers: [ BaseUrlService, ItemService ]
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export class VmModalComponent extends GenericModalComponent implements OnInit {
 
@@ -41,12 +41,12 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
-      itemService: ItemService,
+      dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<GenericModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
-      super(router, baseUrlService, itemService, dialog, dialogRef, data);
+      super(router, baseUrlService, dataRequestService, dialog, dialogRef, data);
       this.pluralItem = "Virtual Machine Templates";
     }
 
@@ -56,7 +56,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   getColumns(): Column[] {
     return [
       new TextColumn('Template Name',         3, (v: VirtualMachine) => v.getName(), SORT_DIR.ASC),
-      new ListColumn('Assigned Applications', 3, this.getChildren, this.formatName),
+      new ListColumn('Assigned Applications', 3, this.getApps, this.formatName),
       new TextColumn('Modification Date',      2, (v: VirtualMachine) => v.modDate, SORT_DIR.DESC),
       new TextColumn('Operating System',      2, (v: VirtualMachine) => v.os, SORT_DIR.ASC),
       new TextColumn('Version',               1, (v: VirtualMachine) => String(v.version), SORT_DIR.ASC),
@@ -71,10 +71,10 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.VMS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS]
+      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS]
     };
   }
   /**
@@ -88,6 +88,6 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.allVms.asList());
+    this.fillTable(this.datasets[DatasetNames.VMS].asList());
   }
 }

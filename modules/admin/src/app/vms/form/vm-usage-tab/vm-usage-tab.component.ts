@@ -7,9 +7,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { ItemService } from '../../../shared/services/item.service';
-
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../../shared/models/item.model';
@@ -29,7 +26,7 @@ import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-form-tab.component';
@@ -47,7 +44,7 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-f
 @Component({
   selector: 'app-vm-usage-tab',
   templateUrl: './vm-usage-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
+  styleUrls: ['../../../shared/abstracts/item-list/item-list.component.css']
 })
 export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
 
@@ -111,14 +108,14 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   update(changes: any): void {
     if (changes.allVirtues) {
       let allVirtues: DictList<Item> = changes.allVirtues;
-      let items: Item[] = [];
+      let parents: Item[] = [];
 
       for (let v of allVirtues.asList()) {
-        if (v.children.has(this.item.getID())) {
-         items.push(v);
+        if ((v as Virtue).vmTemplates.has(this.item.getID())) {
+         parents.push(v);
         }
       }
-      this.parentTable.populate(items);
+      this.parentTable.populate(parents);
     }
 
     if (changes.mode) {
@@ -136,7 +133,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     return [
       new TextColumn('Template Name',          3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                             () => this.getParentSubMenu()),
-      new ListColumn<Item>('Virtual Machines', 3, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn<Item>('Virtual Machines', 3, this.getVms,  this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                3, this.formatStatus, SORT_DIR.ASC)
     ];

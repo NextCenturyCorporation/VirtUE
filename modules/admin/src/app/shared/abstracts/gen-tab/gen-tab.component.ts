@@ -9,11 +9,18 @@ import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
+import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
+
+import { Item } from '../../models/item.model';
+import { User } from '../../models/user.model';
+import { Virtue } from '../../models/virtue.model';
+import { VirtualMachine } from '../../models/vm.model';
+import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
 import { Mode } from '../../abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../services/config-urls.enum';
-import { Datasets } from '../../abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../abstracts/gen-data-page/datasetNames.enum';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 

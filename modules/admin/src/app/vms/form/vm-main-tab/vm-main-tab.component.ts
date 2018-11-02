@@ -15,7 +15,7 @@ import {
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
@@ -36,7 +36,7 @@ import { OSSet } from '../../os.set';
 @Component({
   selector: 'app-vm-main-tab',
   templateUrl: './vm-main-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css'],
+  styleUrls: ['../../../shared/abstracts/item-list/item-list.component.css'],
   providers: [ OSSet ]
 })
 export class VmMainTabComponent extends GenericMainTabComponent implements OnInit {
@@ -55,6 +55,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
       protected osOptions: OSSet,
       router: Router, dialog: MatDialog) {
     super(router, dialog);
+    this.childDatasetName = Datasets.APPS;
   }
 
   /**

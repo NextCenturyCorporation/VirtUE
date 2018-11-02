@@ -15,16 +15,18 @@ import { GenericDataPageComponent } from '../gen-data-page/gen-data-page.compone
 import { GenericTableComponent } from '../gen-table/gen-table.component';
 
 import { Item } from '../../models/item.model';
-import { User } from '../../models/user.model';
+import { Toggleable } from '../../models/toggleable.interface';
+import { IndexedObj } from '../../models/indexedObj.model';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
-import { ItemService } from '../../services/item.service';
+import { DataRequestService } from '../../services/dataRequest.service';
 
+import { DatasetNames } from '../gen-data-page/datasetNames.enum';
 import { Mode } from '../gen-form/mode.enum';
 
 /**
 * @class
- * This class represents a collection of items in a table, to be viewed and interacted with.
+ * This class represents a collection of Items in a table, to be viewed and interacted with.
  * It holds a GenericTableComponent, and allows for sorting, filtering, and selection.
  * The data displayed in each column for each item is defined by the subclass, and can be text, a list, or a
  * link.
@@ -32,10 +34,10 @@ import { Mode } from '../gen-form/mode.enum';
  * @extends GenericDataPageComponent because the derivative list pages need to load a known type of data from the backend.
  */
 @Component({
-  templateUrl: './gen-list.component.html',
-  providers: [ BaseUrlService, ItemService, GenericTableComponent ]
+  templateUrl: './item-list.component.html',
+  providers: [ BaseUrlService, DataRequestService, GenericTableComponent ]
 })
-export abstract class GenericListComponent extends GenericDataPageComponent implements OnInit {
+export abstract class ItemListComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */
   @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
@@ -67,10 +69,10 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
 
     let params = this.getListOptions();
 
@@ -104,7 +106,7 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
       filters: this.getTableFilters(),
       tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
       noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: (i: Item) => !i.enabled
+      elementIsDisabled: (i: Toggleable) => !i.enabled
     };
   }
 

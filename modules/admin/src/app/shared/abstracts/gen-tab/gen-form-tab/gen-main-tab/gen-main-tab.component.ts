@@ -4,8 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { DialogsComponent } from '../../../../../dialogs/dialogs.component';
 
+import { IndexedObj } from '../../../../models/indexedObj.model';
 import { Item } from '../../../../models/item.model';
-import { User } from '../../../../models/user.model';
+import { User } from '../../../../models/user.model'; // just for temporary initialization, to prevent error while loading
 import { Column } from '../../../../models/column.model';
 import { SubMenuOptions } from '../../../../models/subMenuOptions.model';
 import { Mode } from '../../../../abstracts/gen-form/mode.enum';
@@ -13,9 +14,16 @@ import { Mode } from '../../../../abstracts/gen-form/mode.enum';
 import { GenericTableComponent } from '../../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../gen-form-tab.component';
 
+import { DatasetNames } from '../../../gen-data-page/datasetNames.enum';
+
 /**
  * @class
  * This class represents a 'main' tab for the form page of Users, Virtues, and Vms.
+ *
+ * The remove function assumes that the only things that can be removed from the item being viewed are the item's
+ * direct, Item children. Like a User's Virtues, a Virtue's VMs, a Vm's Apps. It can't be easily changed to allow
+ * the removal of other children, like Printers or FileSystems.
+ *
  *
  * As a main tab, it is assumed to list:
  *  - The item's name
@@ -33,6 +41,9 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    * this gets reclassed by children tabs
    */
   protected item: Item;
+
+  /** #uncommented */
+  childDatasetName: DatasetNames;
 
   /** A table for listing the item's children. */
   @ViewChild('childrenTable') protected childrenTable: GenericTableComponent<Item>;
@@ -92,7 +103,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    *                this tab's mode should be updated. The attribute is optional.
    */
   update(changes: any): void {
-    this.childrenTable.populate(this.item.children.asList());
+    this.childrenTable.populate(this.item.getRelatedDict(this.childDatasetName).asList());
     if (changes.mode) {
       // these three lines could be replaced with
       //    this.init(changes.mode)
@@ -132,7 +143,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
       height: '70%',
       width: '70%',
       data: {
-        selectedIDs: this.item.childIDs
+        selectedIDs: this.item.getRelatedIDList(this.childDatasetName)
       }
     };
 
@@ -210,13 +221,13 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    */
   getSubMenu(): SubMenuOptions[] {
     return [
-       new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
-       new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i)),
+       new SubMenuOptions("View", () => this.inViewMode(), (childItem: Item) => this.viewItem(childItem)),
+       new SubMenuOptions("Edit", () => this.inViewMode(), (childItem: Item) => this.editItem(childItem)),
        new SubMenuOptions("Remove",
                       () => !this.inViewMode(),
-                      (i: Item) => this.openDialog( 'Delete ' + i.getName(),
+                      (childItem: Item) => this.openDialog( 'Delete ' + childItem.getName(),
                                                     () => {
-                                                      this.item.removeChild( i.getID() );
+                                                      this.removeChildObject(childItem)
                                                       this.update({});
                                                     }
                                                   )
@@ -237,6 +248,14 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   getTableWidth(): number {
     return 0.75;
   }
+
+  /**
+   * Note that this assumes that the list from which we want to remove childObj can be determined solely based on the state of
+   * this.item and and what IndexedObj subclass childObj is.
+   *
+   * @param childObj the IndexedObj to be removed from this.[[item]]'s child lists.
+   */
+  abstract removeChildObject(childObj: IndexedObj);
 
   /**
    * Defined by subclasses, so each can load their own type of modal.

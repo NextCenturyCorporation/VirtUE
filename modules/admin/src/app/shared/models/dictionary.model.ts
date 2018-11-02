@@ -104,7 +104,7 @@
   }
 
   /** #uncommented */
-  getSubSet(keys: string[]): DictList<T> {
+  getSubset(keys: string[]): DictList<T> {
     let subset = new DictList<T>();
     for (let key of keys) {
       if (this.has(key)) {

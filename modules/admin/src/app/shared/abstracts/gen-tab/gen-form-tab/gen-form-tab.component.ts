@@ -14,7 +14,7 @@ import { DictList } from '../../../models/dictionary.model';
 import { Column } from '../../../models/column.model';
 import { Mode } from '../../../abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../services/config-urls.enum';
-import { Datasets } from '../../../abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../abstracts/gen-data-page/datasetNames.enum';
 
 import { GenericTabComponent } from '../gen-tab.component';
 

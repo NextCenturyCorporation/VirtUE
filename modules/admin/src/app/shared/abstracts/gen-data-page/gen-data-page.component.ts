@@ -7,13 +7,19 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
-import { DataRequestService } from '../../services/item.service';
+import { DataRequestService } from '../../services/dataRequest.service';
 
 import { Column } from '../../models/column.model';
 import { DictList, Dict } from '../../models/dictionary.model';
 
 // import { Item } from '../../models/item.model';
 import { IndexedObj } from '../../models/indexedObj.model';
+import { User } from '../../models/user.model';
+import { Virtue } from '../../models/virtue.model';
+import { VirtualMachine } from '../../models/vm.model';
+import { Application } from '../../models/application.model';
+import { Printer } from '../../models/printer.model';
+import { FileSystem } from '../../models/fileSystem.model';
 
 import { ConfigUrls } from '../../services/config-urls.enum';
 
@@ -21,7 +27,7 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 import { Mode } from '../gen-form/mode.enum';
 
-import { Datasets } from './datasets.enum';
+import { DatasetNames } from './datasetNames.enum';
 
 import { DatasetType } from './datasetType';
 
@@ -50,7 +56,7 @@ import { DatasetType } from './datasetType';
  * @extends [[GenericPageComponent]] to make use of the common formatting and navigation functions
  */
 @Component({
-providers: [ BaseUrlService, DataRequestService  ]
+providers: [ BaseUrlService, DataRequestService ]
 })
 export abstract class GenericDataPageComponent extends GenericPageComponent {
 
@@ -66,40 +72,25 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   */
   serviceConfigUrl: ConfigUrls;
 
-  /** a dataset of all users known to the system. Populated only if requested through [[neededDatasets]]. */
-  // allUsers: DictList<IndexedObj>;
-
-  /** a dataset of all Virtue Templates known to the system. Populated only if requested through [[neededDatasets]]. */
-  // allVirtues: DictList<IndexedObj>;
-
-  /** a dataset of all VM templates known to the system. Populated only if requested through [[neededDatasets]]. */
-  // allVms: DictList<IndexedObj>;
-
-  /** a dataset of all Applications known to the system. Populated only if requested through [[neededDatasets]]. */
-  // allApps: DictList<IndexedObj>;
-
-  /** a dataset of all Printers known to the system. Populated only if requested through [[neededDatasets]]. */
-  // allPrinters: DictList<IndexedObj>;
-
-  /** a dataset of all FileSystems known to the system. Populated only if requested through [[neededDatasets]]. */
-  // allFileSystems: DictList<IndexedObj>;
-
+  /**
+   * Holds all the datasets that get pulled in for the page. Doesn't need to be a DictList, but being a dictionary gives it
+   * a useful interface. It shouldn't really add any overhead.
+   */
   datasets: DictList<DictList<IndexedObj>>;
 
 
   /** holds the names and data types of each of the four datasets. */
   datasetMeta: Dict<DatasetType>;
 
-
  /**
   * Must hold a list of enumerations of the datasets to be loaded on page load or refresh,
   * in the order in which they should be loaded.
-  * Generally, this is lowest-highest. (ordering is app < vm < virtue < user)
+  * Generally, this is lowest-highest. (ordering is printer/fileSystem/app < vm < virtue < user)
   */
-  neededDatasets: Datasets[];
+  neededDatasets: DatasetNames[];
 
   /** #uncommented */
-  loadedDatasets:  Datasets[];
+  loadedDatasets:  DatasetNames[];
 
   /**
    * @param router Handles the navigation to/from different pages. Injected, and so is constant across components.
@@ -158,41 +149,41 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    */
   buildDatasetMeta() {
     this.datasetMeta = new Dict<DatasetType>();
-    this.datasetMeta[Datasets.PRINTERS] = {
+    this.datasetMeta[DatasetNames.PRINTERS] = {
           serviceUrl: ConfigUrls.PRINTERS,
           class: Printer,
-          datasetName: Datasets.PRINTERS,
+          datasetName: DatasetNames.PRINTERS,
           depends: []
         };
-    this.datasetMeta[Datasets.FILE_SYSTEMS] = {
+    this.datasetMeta[DatasetNames.FILE_SYSTEMS] = {
           serviceUrl: ConfigUrls.FILE_SYSTEMS,
           class: FileSystem,
-          datasetName: Datasets.FILE_SYSTEMS,
+          datasetName: DatasetNames.FILE_SYSTEMS,
           depends: []
         };
-    this.datasetMeta[Datasets.APPS] = {
+    this.datasetMeta[DatasetNames.APPS] = {
           serviceUrl: ConfigUrls.APPS,
           class: Application,
-          datasetName: Datasets.APPS,
+          datasetName: DatasetNames.APPS,
           depends: []
         };
-    this.datasetMeta[Datasets.VMS] = {
+    this.datasetMeta[DatasetNames.VMS] = {
           serviceUrl: ConfigUrls.VMS,
           class: VirtualMachine,
-          datasetName: Datasets.VMS,
-          depends: [Datasets.APPS]
+          datasetName: DatasetNames.VMS,
+          depends: [DatasetNames.APPS]
         };
-    this.datasetMeta[Datasets.VIRTUES] = {
+    this.datasetMeta[DatasetNames.VIRTUES] = {
           serviceUrl: ConfigUrls.VIRTUES,
           class: Virtue,
-          datasetName: Datasets.VIRTUES,
-          depends: [Datasets.VMS, Datasets.PRINTERS, Datasets.FILE_SYSTEMS]
+          datasetName: DatasetNames.VIRTUES,
+          depends: [DatasetNames.VMS, DatasetNames.PRINTERS, DatasetNames.FILE_SYSTEMS]
         };
-    this.datasetMeta[Datasets.USERS] = {
+    this.datasetMeta[DatasetNames.USERS] = {
           serviceUrl: ConfigUrls.USERS,
           class: User,
-          datasetName: Datasets.USERS,
-          depends: [Datasets.VIRTUES]
+          datasetName: DatasetNames.USERS,
+          depends: [DatasetNames.VIRTUES]
         };
   }
 
@@ -267,9 +258,9 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * returns. Note that the chain of functions is a chain of ansynchronous sub-processes, and so
    * while they wait on each other, control in the rest of the program doesn't wait on them.
    *
-   * The page will automatically update though when [[onPullComplete]]() changes some
-   * attribute that Angular is watching on that page, like items in [[GenericListComponent]],
-   * or item or item.children in [[GenericFormComponent]])
+   * The page will automatically re-render though when [[onPullComplete]]() changes some
+   * attribute that Angular is watching on that page, like item in [[GenericListComponent]],
+   * or item or item.{virtues, printes, etc.} in [[GenericFormComponent]])
    *
    ******************************************************************************
    * informal usage:
@@ -278,20 +269,20 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *                     {
    *                       serviceUrl: ConfigUrls.APPS,
    *                       class: Application,
-   *                       datasetName: Datasets.APPS,
+   *                       datasetName: DatasetNames.APPS,
    *                       depends: undefined
    *                     },
    *                     {
    *                       serviceUrl: ConfigUrls.VMS,
    *                       class: VirtualMachine,
-   *                       datasetName: Datasets.VMS,
-   *                       depends: Datasets.APPS
+   *                       datasetName: DatasetNames.VMS,
+   *                       depends: DatasetNames.APPS
    *                     },
    *                     {
    *                       serviceUrl: ConfigUrls.VIRTUES,
    *                       class: Virtue,
-   *                       datasetName: Datasets.VIRTUES,
-   *                       depends: Datasets.VMS
+   *                       datasetName: DatasetNames.VIRTUES,
+   *                       depends: DatasetNames.VMS
    *                     }
    *                 ],
    * Where
@@ -301,7 +292,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *   at end:
    *     {
    *       updateQueue = []
-   *       this.loadedDatasets  = [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
+   *       this.loadedDatasets  = [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
    *     }
    *
    ******************************************************************************
@@ -321,8 +312,12 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     updateQueue: DatasetType[]
   ): void {
     let sub = this.dataRequestService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
-
-      this.datasets[updateQueue[0].datasetName].clear(); // wipe the dataset first
+      if (this.datasets[updateQueue[0].datasetName] === undefined) {
+        this.datasets[updateQueue[0].datasetName] = new DictList<IndexedObj>();
+      }
+      else {
+        this.datasets[updateQueue[0].datasetName].clear(); // wipe the dataset first
+      }
 
       let obj: IndexedObj = null;
       for (let e of rawDataList) {
@@ -350,11 +345,13 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     },
     () => { // once the dataset has been pulled and fully processed above
 
-      // deal with self-referential objects.
-      this.buildIndexedObjAttributes(obj, updateQueue[0].datasetName);
-
       // mark this set as pulled
       this.loadedDatasets.push(updateQueue[0].datasetName);
+
+      // deal with self-referential objects.
+      for (let obj of this.datasets[updateQueue[0].datasetName].asList()) {
+        this.buildIndexedObjAttribute(obj, updateQueue[0].datasetName);
+      }
 
       // remove this set (the front element) from queue
       updateQueue.shift();
@@ -394,12 +391,12 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    */
   abstract getPageOptions(): {
         serviceConfigUrl: ConfigUrls,
-        neededDatasets: Datasets[]
+        neededDatasets: DatasetNames[]
       };
 
 
   /** #uncommented */
-  buildAllIndexedObjAttributes(obj: IndexedObj, dependencies: Datasets[]): void {
+  buildAllIndexedObjAttributes(obj: IndexedObj, dependencies: DatasetNames[]): void {
       // go through each of the datasets that this dataset depends on.
       for (let dependencySet of dependencies) {
 
@@ -408,24 +405,24 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
         // So if we're processing the Virtue dataset and we've already loaded the vm and printer dataset, then we should set up
         // this virtue's printer and vm lists (but not the filesystem list).
         if ( this.loadedDatasets.indexOf(dependencySet) !== -1) {
-          this.buildIndexedObjAttributes(item, dependencySet);
+          this.buildIndexedObjAttribute(obj, dependencySet);
         }
       }
   }
 
   /** #uncommented */
-  buildIndexedObjAttribute(obj: IndexedObj, dataset: Datasets): void {
-      // tell the item which of the datasets it depends on we're dealing with, and pass it the objects it needs from that dataset.
-      obj.buildAttribute(dataset,  this.datasets[dataset].subSet( item.getSetIDs(dataset) ) );
+  buildIndexedObjAttribute(obj: IndexedObj, datasetName: DatasetNames): void {
+      // tell the record which of the datasets it depends on we're dealing with, and pass it that dataset, so it can build its children.
+      obj.buildAttribute(datasetName, this.datasets[datasetName] );
   }
 
 
   /**
    * Deletes the [[Item]] and then refreshes the data on the page.
-   * @param item the Item to be deleted from the backend.
+   * @param obj the IndexedObj to be deleted from the backend.
    */
-  deleteItem(item: Item): void {
-    this.dataRequestService.deleteItem(this.serviceConfigUrl, item.getID()).then(() => {
+  deleteItem(obj: IndexedObj): void {
+    this.dataRequestService.deleteItem(this.serviceConfigUrl, obj.getID()).then(() => {
       this.refreshData();
     });
 
@@ -436,10 +433,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * TODO Change backend so everything works the same way.
    * Probably just make every work via a setStatus method, and remove the toggle.
    *
-   * @param item the item we're toggling the status of.
+   * @param obj the IndexedObj we're toggling the status of.
    */
-  toggleItemStatus(item: Item): void {
-    let sub = this.dataRequestService.toggleItemStatus(this.serviceConfigUrl, item.getID()).subscribe((updatedRecord) => {
+  toggleItemStatus(obj: IndexedObj): void {
+    let sub = this.dataRequestService.toggleItemStatus(this.serviceConfigUrl, obj.getID()).subscribe((updatedRecord) => {
       // note that updatedRecord is ignored - no need to use it.
       // Perhaps could check that its status is the opposite of item.status, in case maybe the update
       // didn't go through. Don't know if that's a reasonable check though.
@@ -455,16 +452,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   }
 
   /**
-   * Sets the status of an item.
+   * Sets the status of an IndexedObj.
    * This is only called by an overriding toggleItemStatus defined in userList.
    * See note there, and on toggleItemStatus above, for why.
    *
-   * @param item
+   * @param obj
    * @param newStatus
    *
    */
-  setItemStatus(item: Item, newStatus: boolean): void {
-    let sub = this.dataRequestService.setItemStatus(this.serviceConfigUrl, item.getID(), newStatus).subscribe(() => {
+  setItemStatus(obj: IndexedObj, newStatus: boolean): void {
+    let sub = this.dataRequestService.setItemStatus(this.serviceConfigUrl, obj.getID(), newStatus).subscribe(() => {
       this.refreshData();
     },
     error => {

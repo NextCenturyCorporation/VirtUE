@@ -1,12 +1,13 @@
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
+import { Toggleable } from './toggleable.interface';
 
 /**
  * @class
  * This class represnts a printer on the network.
  * TODO functionality for finding, setting up, and storing printers does not yet exist, so this class will likely change.
  */
-export class Printer extends IndexedObj {
+export class Printer extends IndexedObj implements Toggleable {
 
   /** the id given by the backend */
   id: string;
@@ -30,17 +31,19 @@ export class Printer extends IndexedObj {
 
 
     if (input instanceof Printer) {
-      super(input.id);
+      super();
+      this.id = input.id;
       this.info = input.info;
       this.status = input.status;
       this.address = input.address;
       this.enabled = input.enabled;
     }
     else {
-      super("totallyUniqueID");
-      this.info = info;
+      super();
+      this.id = input;
+      this.info = "info";
       this.status = "incorporeal";
-      this.address = "1.2.3.4:" + info;
+      this.address = "1.2.3.4:" + input;
       this.enabled = true;
     }
   }

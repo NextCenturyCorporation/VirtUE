@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/gen-data-page.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
@@ -32,7 +32,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  */
 @Component({
   selector: 'app-generic-modal',
-  providers: [BaseUrlService, ItemService]
+  providers: [BaseUrlService, DataRequestService]
 })
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
 
@@ -66,7 +66,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
-      itemService: ItemService,
+      dataRequestService: DataRequestService,
       dialog: MatDialog,
 
       /** injected, is a reference to the modal dialog box itself. */
@@ -75,7 +75,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       /** holds the initial selections, and possibly a SelectionMode */
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
-      super(router, baseUrlService, itemService, dialog);
+      super(router, baseUrlService, dataRequestService, dialog);
       if (data && data['selectedIDs']) {
         this.selectedIDs = data['selectedIDs'];
       }
@@ -215,5 +215,4 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
     this.table.clear();
     this.dialogRef.close();
   }
-
 }

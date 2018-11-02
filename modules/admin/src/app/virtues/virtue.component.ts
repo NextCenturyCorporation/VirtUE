@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { ItemService } from '../shared/services/item.service';
+import { DataRequestService } from '../shared/services/dataRequest.service';
 
 import { Item } from '../shared/models/item.model';
 import { Application } from '../shared/models/application.model';
@@ -18,7 +18,7 @@ import { Column } from '../shared/models/column.model';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../shared/services/config-urls.enum';
-import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VirtueMainTabComponent } from './form/main-tab/virtue-main-tab.component';
 import { VirtueSettingsTabComponent } from './form/settings-tab/virtue-settings.component';
@@ -88,8 +88,8 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
     </div>
   </div>
     `,
-  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService ]
+  styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
@@ -116,17 +116,17 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/virtues', location, activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/virtues', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
     this.item = new Virtue({color: this.defaultColor()});
 
-    this.datasetName = Datasets.VIRTUES;
-    this.childDatasetName = Datasets.VMS;
+    this.datasetName = DatasetNames.VIRTUES;
+    this.childDatasetName = DatasetNames.VMS;
 
   }
 
@@ -227,10 +227,10 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.VIRTUES,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
+      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS]
     };
   }
 

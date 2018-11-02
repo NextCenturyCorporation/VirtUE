@@ -1,14 +1,15 @@
 
 
 import { DictList } from './dictionary.model';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 /**
  * @class
  * Represents an object that can be pulled from the backend, and which upon load needs to be linked to other objects.
  * This is an generalization of [[Item]].
  *
- * Note this linking must not be circular. This essentially lets us make a chain of dependencies.
- * It needs to be able to be self-referential though. So we'll have to deal with dependencies in two stages.
+ * Note this linking must not be circular. We need to be able to create a chain of dependencies.
+ * It needs to be able to be self-referential though, per the spec. So we'll have to deal with dependencies in two stages.
  *
  *
  * E.g. A certain page needs to display a list of users and a list of virtues. The Virtues have virtual machines, printers, and file systems.
@@ -28,16 +29,29 @@ export abstract class IndexedObj {
   abstract getID(): string;
 
   /**
-   * @param childSet a Datasets enum that lets this object decide which attribute to give childObjects to.
-   * @param childObjects a DictList of the objects referenced by one of this IndexedObj's list of IDs.
+   * Empty by default. Items with children can override it.
+   *
+   * @param datasetName a DatasetNames enum that lets this object
+   * @param dataset #uncommented
    */
-  abstract buildAttribute( childSet: Datasets, childObjects: DictList<IndexedObj> ): void;
+  buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {}
+
 
   /**
-   * @param childSet a Datasets enum telling the objec which list of IDs to return
+   * Empty by default. Items with children can override it and make it return what it should.
+   * @param datasetName a DatasetNames enum telling the object which DictList of objects to return
+   * @return a DictList holding a set of child objects held by this.
+   */
+  getRelatedDict( datasetName: DatasetNames ): DictList<IndexedObj> {
+    return new DictList<IndexedObj>();
+  }
+
+  /**
+   * Empty by default. Items with children can override it and make it return what it should.
+   * @param datasetName a DatasetNames enum telling the object which list of IDs to return
    * @return a list of IDs that this object needs from the input childSet.
    */
-  abstract getSetIDs( childSet: Datasets ): string[];
-
-
+  getRelatedIDList( datasetName: DatasetNames ): string[] {
+    return [];
+  }
 }

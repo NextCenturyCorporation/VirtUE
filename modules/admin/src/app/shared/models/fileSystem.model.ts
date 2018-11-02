@@ -1,18 +1,25 @@
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
+import { Toggleable } from './toggleable.interface';
 
 /**
  * @class
  * This class represents a file system, which a virtue may be given various forms of access to.
  *
- * Used in [[VirtueSettingsTabComponent]] and [[Virtue]]
+ * Specifically, there will be a set of these that are defined by the admin, with default values for enabled/r/w/e.
+ *
+ * A virtue can have a FileSystem added to it, and then can change those default settings. Those settings are saved with
+ * the Virtue. So it doesn't work like the other IndexedObjects - while the FileSystem dataset needs to be pulled on the
+ * pages listed below, Virtues shouldn't use those values to set any of their attributes.
+ *
+ * Used in [[ConfigFileSysTabComponent]] [[VirtueSettingsTabComponent]] and [[Virtue]]
  */
-export class FileSystem extends IndexedObj {
+export class FileSystem extends IndexedObj implements Toggleable {
 
   /** the id given by the backend */
   id: string;
 
-  /** Can this FS be access at all? */
+  /** Can this FS be accessed at all? */
   enabled: boolean = false;
 
   /** Can the virtue read data on this FS? */
@@ -32,15 +39,13 @@ export class FileSystem extends IndexedObj {
     /** @param location the address of this FS, relative to something, TODO */
     public location: string
   ) {
-    super("location" + "12345");
+    super();
+    this.id = "location" + "12345";
   }
 
   /** #uncommented */
   getID(): string {
     return this.id;
   }
-
-  /** doesn't depend on anything else, and so nothing needs to be built */
-  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {}
 
 }

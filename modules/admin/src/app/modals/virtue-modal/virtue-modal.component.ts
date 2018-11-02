@@ -4,10 +4,10 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { ConfigUrls } from '../../shared/services/config-urls.enum';
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import {
   Column,
@@ -30,7 +30,7 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
   selector: 'app-virtue-modal',
   templateUrl: '../generic-modal/generic.modal.html',
   styleUrls: ['../generic-modal/generic.modal.css'],
-  providers: [ BaseUrlService, ItemService ]
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export class VirtueModalComponent extends GenericModalComponent {
 
@@ -40,12 +40,12 @@ export class VirtueModalComponent extends GenericModalComponent {
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
-      itemService: ItemService,
+      dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<VirtueModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
-    super(router, baseUrlService, itemService, dialog, dialogRef, data);
+    super(router, baseUrlService, dataRequestService, dialog, dialogRef, data);
     this.pluralItem = "Virtue Templates";
   }
 
@@ -55,8 +55,8 @@ export class VirtueModalComponent extends GenericModalComponent {
   getColumns(): Column[] {
     return [
       new TextColumn('Template Name',         3, (v: Virtue) => v.getName(), SORT_DIR.ASC),
-      new ListColumn('Virtual Machines',      2, this.getChildren,      this.formatName),
-      new ListColumn('Assigned Applications', 3, this.getGrandchildren, this.formatName),
+      new ListColumn('Virtual Machines',      2, this.getVms,      this.formatName),
+      new ListColumn('Assigned Applications', 3, this.getVmApps, this.formatName),
       new TextColumn('Version',               1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Modification Date',     2, (v: Virtue) => v.modDate, SORT_DIR.DESC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
@@ -77,7 +77,7 @@ export class VirtueModalComponent extends GenericModalComponent {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.allVirtues.asList());
+    this.fillTable(this.datasetNames[DatasetNames.VIRTUES].asList());
   }
 
   /**
@@ -88,10 +88,10 @@ export class VirtueModalComponent extends GenericModalComponent {
    */
   getPageOptions(): {
       serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
+      neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.VIRTUES,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
+      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
     };
   }
 

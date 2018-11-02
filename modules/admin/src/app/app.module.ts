@@ -49,9 +49,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ConfigComponent } from './config/config.component';
 import { ConfigActiveDirTabComponent } from './config/config-activeDir-tab/config-activeDir-tab.component';
 import { ConfigSensorsTabComponent } from './config/config-sensors-tab/config-sensors-tab.component';
-import { ConfigPrinterTabComponent } from './config/config-printer-tab/config-printer-tab.component';
-import { ConfigFileSysTabComponent } from './config/config-fileSys-tab/config-fileSys-tab.component';
-import { ConfigSettingsHistoryTabComponent } from './config/config-settingsHistory-tab/config-settingsHistory-tab.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
 
@@ -90,6 +87,7 @@ import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
+import { DataRequestService } from './shared/services/dataRequest.service';
 
 @NgModule({
   declarations: [
@@ -97,10 +95,7 @@ import { MessageService } from './shared/services/message.service';
     BreadcrumbsComponent,
     ConfigComponent,
     ConfigActiveDirTabComponent,
-    ConfigFileSysTabComponent,
-    ConfigPrinterTabComponent,
     ConfigSensorsTabComponent,
-    ConfigSettingsHistoryTabComponent,
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
@@ -168,6 +163,7 @@ import { MessageService } from './shared/services/message.service';
     OverlayContainer,
     BaseUrlService,
     MessageService,
+    DataRequestService,
     DatePipe
   ],
   bootstrap: [AppComponent],

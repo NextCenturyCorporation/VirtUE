@@ -7,7 +7,7 @@ import { Application } from './application.model';
 import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
-import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 /**
  * @class
@@ -53,7 +53,7 @@ export class VirtualMachine extends Item {
       this.id = vmObj.id;
       this.name = vmObj.name;
       this.enabled = vmObj.enabled;
-      this.setChildIDs(vmObj.applicationIds);
+      this.applicationIDs = vmObj.applicationIds;
       this.version = vmObj.version;
       if (! this.version) {
         this.version = 1;
@@ -68,30 +68,40 @@ export class VirtualMachine extends Item {
 
   }
 
-  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {
-    let appDataset: DictList<IndexedObj> = childDatasets.get(Datasets.APPS);
 
-    this.setChildren(appDataset.getSubSet(this.getChildIDs()));
+  /**
+   * #uncommented
+   */
+  buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
+
+    if (datasetName === DatasetNames.APPS) {
+      this.applications = dataset.getSubset(this.applicationIDs) as DictList<Application>;
+    }
+
   }
 
-
-  /** @override [[Item.getChildIDs]] */
-  getChildIDs(): string[] {
-    return this.applicationIDs;
+  /**
+   * Currently Vms only have one type of children, so just return that.
+   *
+   * @override [[Item.getRelatedDict]]
+   */
+  getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
+    if (datasetName === DatasetNames.APPS) {
+      return this.applications;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.APPS, was", datasetName);
   }
 
-  /** @override [[Item.getChildren]] */
-  getChildren(): DictList<IndexedObj> {
-    return this.applications;
-  }
+  /**
+   * Currently Vms only have one type of children, so just return that.
+   *
+   * @override [[Item.getRelatedIDList]]
+   */
+  getRelatedIDList(datasetName: DatasetNames): string[] {
 
-  /** @override [[Item.setChildIDs]] */
-  setChildIDs(newChildIDs: string[]): void {
-    this.applicationIDs = newChildIDs;
-  }
-
-  /** @override [[Item.setChildren]] */
-  setChildren(newChildren: DictList<IndexedObj>): void {
-    this.applications = newChildren;
+    if (datasetName === DatasetNames.APPS) {
+      return this.applicationIDs;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.APPS, was", datasetName);
   }
 }

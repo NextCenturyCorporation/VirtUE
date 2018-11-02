@@ -1,4 +1,4 @@
-import { Datasets } from './datasets.enum';
+import { DatasetNames } from './datasetNames.enum';
 
 /**
  * @interface
@@ -17,12 +17,12 @@ export interface DatasetType {
    *
    * Specified as a Dataset enum to encapsulate that.
    */
-  datasetName: Datasets;
+  datasetName: DatasetNames;
 
   /**
    * The dataset which members of this dataset have links to, and so which must be already loaded in order to fully-flesh
    * out the items in this dataset.
    * At the moment it's just used to build item.children from item.childIDs for each item in *this* dataset.
    */
-  depends: Datasets[];
+  depends: DatasetNames[];
 }

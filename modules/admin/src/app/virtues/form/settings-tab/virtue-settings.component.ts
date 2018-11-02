@@ -10,8 +10,6 @@ import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { DictList } from '../../../shared/models/dictionary.model';
 
-import { ItemService } from '../../../shared/services/item.service';
-
 import {
   Column,
   TextColumn,
@@ -30,7 +28,7 @@ import { Printer } from '../../../shared/models/printer.model';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
@@ -183,15 +181,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     console.log("collectData");
 
     // check all entries for validity before allowing save
-    this.item["printerIds"] = [];
-    for (let p of this.item.allowedPrinters) {
-      this.item["printerIds"].push(p.id);
-    }
 
-    this.item["fileSystemIds"] = [];
-    for (let fs of this.item.fileSystems) {
-      this.item["fileSystemIds"].push(fs.id);
-    }
 
     if (!this.checkNetworkPerms()) {
       // TODO tell the user
@@ -256,7 +246,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   updatePrinterTable() {
-    this.printerTable.populate(this.item.allowedPrinters);
+    this.printerTable.populate(this.item.printers.asList());
   }
 
   /**
@@ -264,7 +254,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * This is very much a temporary measure.
    */
   addNewPrinter(): void {
-    this.item.allowedPrinters.push(new Printer("And another printer"));
+    let p = new Printer("abcd" + this.item.printerIds.length)
+    this.item.printerIds.push(p.getID());
+    this.item.printers.add(p.getID(), p);
     this.updatePrinterTable();
   }
 
@@ -273,14 +265,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * Note that if there are several matching printers, only the first one is removed.
    */
   removePrinter(toDelete: Printer): void {
-    let index = 0;
-    for (let printer of this.item.allowedPrinters) {
-      if (printer.address === toDelete.address) {
-        break;
-      }
-      index++;
+    this.item.printers.remove(toDelete.getID());
+    let index = this.item.printerIds.indexOf(toDelete.getID(), 0);
+    if (index > -1) {
+       this.item.printerIds.splice(index, 1);
     }
-    this.item.allowedPrinters.splice(index, 1);
     this.updatePrinterTable();
   }
 
@@ -396,7 +385,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 /************************************************************************************/
 
   updateFileSysPermsTable(): void {
-    this.fileSystemsTable.populate(this.item.fileSystems);
+    this.fileSystemsTable.populate(this.item.fileSystems.asList());
   }
 
   /**
@@ -431,6 +420,19 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       elementIsDisabled: (fs: FileSystem) => !fs.enabled,
       editingEnabled: () => !this.inViewMode()
     });
+  }
+
+  /**
+   * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
+   * Note that if there are several matching printers, only the first one is removed.
+   */
+  removeFileSystem(toDelete: FileSystem): void {
+    this.item.fileSystems.remove(toDelete.getID());
+    let index = this.item.fileSystemIds.indexOf(toDelete.getID(), 0);
+    if (index > -1) {
+       this.item.fileSystemIds.splice(index, 1);
+    }
+    this.updateFileSysPermsTable();
   }
 
 /************************************************************************************/
@@ -544,8 +546,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   activateDefaultBrowserVirtueModal(): void {
     this.activateVirtueSelectionModal(
-        [this.item.defaultBrowserVirtue],
-        (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
+        [this.item.defaultBrowserVirtueId],
+        (selectedVirtueIds: string[]) => {this.item.defaultBrowserVirtueId = selectedVirtueIds[0];},
         SelectionMode.SINGLE
       );
   }

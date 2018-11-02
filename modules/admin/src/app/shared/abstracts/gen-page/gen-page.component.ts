@@ -11,7 +11,11 @@ import { DialogsComponent } from '../../../dialogs/dialogs.component';
 import { Column } from '../../models/column.model';
 import { DictList, Dict } from '../../models/dictionary.model';
 
+import { IndexedObj } from '../../models/indexedObj.model';
 import { Item } from '../../models/item.model';
+import { Toggleable } from '../../models/toggleable.interface';
+
+import { DatasetNames } from '../gen-data-page/datasetNames.enum';
 
 /**
 * @class
@@ -57,13 +61,15 @@ export abstract class GenericPageComponent {
 
   /**
    * Used in pages with tables of items.
+   * #uncommented
    * @param item the item whose status we want to display
    *
    * @return The item's status, in plain (and capitalized) english.
    */
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
+  formatStatus( obj: Toggleable ): string {
+    return obj.enabled ? 'Enabled' : 'Disabled';
   }
+
 
   /**
   * This is used in many tables to show an [[Item]]'s children. All lists in tables are gotten by passing
@@ -73,11 +79,11 @@ export abstract class GenericPageComponent {
   *
   * @return a list of the Item's children.
   */
-  getChildren(item: Item): Item[] {
-    if (!item) {
+  getChildren(obj: IndexedObj, childDatasetName: DatasetNames): IndexedObj[] {
+    if (!obj) {
       return [];
     }
-    return item.children.asList();
+    return obj.getRelatedDict(childDatasetName).asList();
   }
 
   /**
@@ -88,21 +94,52 @@ export abstract class GenericPageComponent {
    * re-called whenever the mouse enters or leaves a row in the table, so this
    * seems like a bit of a waste, given that an item's children/grandchildren won't
    * change randomly in the background.
-   * Doing it this way allows us to make the items within those lists clickable.
+   * Doing it this way allows us to make the items within those lists clickable, because we're giving the lists of
+   * full objects to the html, rather than just lists of names.
    *
-   * @param item the item whose grandchildren we want a list of.
+   * @param #uncommented
    *
-   * @return A list (not a set) of all the item's children's children.
+   * @return A list (not a set) of the requested type of the obj's children's children.
   */
-  getGrandchildren(item: Item): Item[] {
-    if (!item || !item.children) {
+  getGrandchildren(obj: IndexedObj, childDatasetName: DatasetNames, grandChildDatasetName: DatasetNames): IndexedObj[] {
+    if (!obj) {
       return [];
     }
-    let grandchildren: Item[] = [];
-    for (let c of item.children.asList()) {
-      grandchildren = grandchildren.concat(c.children.asList());
+    let grandchildren: IndexedObj[] = [];
+    for (let c of this.getChildren(obj, childDatasetName)) {
+      grandchildren = grandchildren.concat(this.getChildren(c, grandChildDatasetName));
     }
     return grandchildren;
+  }
+
+  /** #uncommented */
+  getVirtues(i: Item): IndexedObj[] {
+    return this.getChildren(i, DatasetNames.VIRTUES);
+  }
+
+  /** #uncommented */
+  getVirtueVms(i: Item): IndexedObj[] {
+    return this.getGrandChildren(i, DatasetNames.VIRTUES, DatasetNames.VMS);
+  }
+
+  /** #uncommented */
+  getVms(i: Item): IndexedObj[] {
+    return this.getChildren(i, DatasetNames.VMS);
+  }
+
+  /** #uncommented */
+  getVmApps(i: Item): IndexedObj[] {
+    return this.getGrandChildren(i, DatasetNames.VMS, DatasetNames.APPS);
+  }
+
+  /** #uncommented */
+  getPrinters(i: Item): IndexedObj[] {
+    return this.getChildren(i, DatasetNames.PRINTERS);
+  }
+
+  /** #uncommented */
+  getFileSystems(i: Item): IndexedObj[] {
+    return this.getChildren(i, DatasetNames.FILE_SYSTEMS);
   }
 
   /**

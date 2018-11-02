@@ -6,7 +6,7 @@ import { Application } from './application.model';
 import { VirtualMachine } from './vm.model';
 
 import { IndexedObj } from './indexedObj.model';
-import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 
 import { DictList } from './dictionary.model';
 
@@ -67,21 +67,24 @@ export class Virtue extends Item {
   /**
    * What virtue should any links clicked within this Virtue automatically open in?
    */
-  defaultBrowserVirtue: string;
+  defaultBrowserVirtueID: string;
+  defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
   networkWhiteList: NetworkPermission[];
 
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargets: string[];
+  allowedPasteTargetIDs: string[];
+  /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
+  allowedPasteTargets: DictList<Virtue>;
 
   /** this virtue's r/w/e permissions for the different parts of the filesystem */
-  fileSystems: FileSystem[];
-  fileSystemIds: string[];
+  fileSystems: DictList<FileSystem>;
+  fileSystemIDs: string[];
 
   /** a list of printers this virtue is allowed to use. Printers are found and set up in global settings. */
-  printers: Printer[];
-  printerIds: string[];
+  printers: DictList<Printer>;
+  printerIDs: string[];
 
   /**
    * convert from whatever form the virtue object is in the database.
@@ -94,23 +97,24 @@ export class Virtue extends Item {
       // console.log(JSON.stringify(virtueObj, null, 2));
       this.id = virtueObj.id;
       this.name = virtueObj.name;
-      this.setChildIDs(virtueObj.virtualMachineTemplateIds);
+
+      this.vmTemplateIDs = virtueObj. vmTemplateIds;
+      this.fileSystemIDs = virtueObj.fileSystemIds;
+      this.printerIDs = virtueObj.printerIds;
+      this.allowedPasteTargetIDs = virtueObj.pasteTargetIds;
+
       this.enabled = virtueObj.enabled;
 
       this.version = virtueObj.version;
-      if (! this.version) {
-        this.version = 1;
-      }
+      this.color = virtueObj.color;
 
       this.lastEditor = virtueObj.lastEditor;
       this.lastModification = virtueObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
-      this.color = virtueObj.color;
-
-      this.parentDomain = '/virtues';
 
 
-      // TODO set this.{all below} to the corresponding value in virtObj, once implemented on backend.
+
+      // TODO set all below to the corresponding value in virtObj, once implemented on backend.
       if (! this.networkWhiteList) {
         this.networkWhiteList = [];
       }
@@ -119,40 +123,20 @@ export class Virtue extends Item {
         this.unprovisioned = true;
       }
 
-      if (virtueObj.defaultBrowserVirtue) {
-        this.defaultBrowserVirtue = virtueObj.defaultBrowserVirtue;
+      if (virtueObj.defaultBrowserVirtueId) {
+        this.defaultBrowserVirtueID = virtueObj.defaultBrowserVirtueId;
       }
 
       if (! this.allowedPasteTargets) {
-        this.allowedPasteTargets = [];
+        this.allowedPasteTargetIDs = [];
       }
-      if (virtueObj.fileSystemIds) {
-        this.fileSystemIds = virtueObj.fileSystemIds;
-      }
-      // if (! this.fileSystems) {
-      //   this.fileSystems = [
-      //     new FileSystem("File Server\\Media "),
-      //     new FileSystem("File Server\\Documents "),
-      //     new FileSystem("File Server\\C Drive "),
-      //     new FileSystem("File Server\\F Drive ")
-      //   ];
-      // }
 
-      if (virtueObj.printerIds) {
-        this.printerIds = virtueObj.printerIds;
-      }
-      // TODO  Placeholder printers.
-      // if (! this.allowedPrinters) {
-      //   this.allowedPrinters = [
-      //     new Printer("Printer 1"),
-      //     new Printer("Printer 2"),
-      //     new Printer("Printer 3"),
-      //     new Printer("Printer 4"),
-      //     new Printer("Printer 5")
-      //   ];
-      // }
     }
 
+    this.parentDomain = '/virtues';
+    if (! this.version) {
+      this.version = 1;
+    }
 
     if (! this.color) {
       // TODO - is it better to have everything default to no color, or to something
@@ -162,35 +146,55 @@ export class Virtue extends Item {
   }
 
 
-  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {
+  /**
+   * #uncommented
+   */
+  buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
+    if (datasetName === DatasetNames.VIRTUES) {
+      this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueID) as Virtue;
+      this.allowedPasteTargets = dataset.getSubset(this.allowedPasteTargetIDs) as DictList<Virtue>;
+    }
+    if (datasetName === DatasetNames.VMS) {
+      this.vmTemplates = dataset.getSubset(this.vmTemplateIDs) as DictList<VirtualMachine>;
+    }
+    else if (datasetName === DatasetNames.FILE_SYSTEMS) {
+      this.fileSystems = dataset.getSubset(this.fileSystemIDs) as DictList<FileSystem>;
+    }
+    else if (datasetName === DatasetNames.PRINTERS) {
+      this.printers = dataset.getSubset(this.printerIDs) as DictList<Printer>;
+    }
 
-    let vmDataset: DictList<IndexedObj> = childDatasets.get(Datasets.VMS);
-    let printerDataset: DictList<IndexedObj> = childDatasets.get(Datasets.PRINTERS);
-    let fileSystemDataset: DictList<IndexedObj> = childDatasets.get(Datasets.FILE_SYSTEMS);
-
-    this.setChildren(vmDataset.getSubSet(this.getChildIDs()));
-
-    this.printers = printerDataset.getSubSet(this.printerIds).asList() as Printer[];
-    this.fileSystems = fileSystemDataset.getSubSet(this.fileSystemIds).asList() as FileSystem[];
   }
 
-  /** @override [[Item.getChildIDs]] */
-  getChildIDs(): string[] {
-    return this.vmTemplateIDs;
+  /** @override [[Item.getRelatedDict]] */
+  getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
+    switch (datasetName) {
+      case DatasetNames.VMS:
+        return this.vmTemplates;
+      case DatasetNames.PRINTERS:
+        return this.printers;
+      case DatasetNames.FILE_SYSTEMS:
+        return this.fileSystems;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.{VMS, PRINTERS, FILE_SYSTEMS}, was", datasetName);
+    return null;
   }
 
-  /** @override [[Item.getChildren]] */
-  getChildren(): DictList<IndexedObj> {
-    return this.vmTemplates;
-  }
-
-  /** @override [[Item.setChildIDs]] */
-  setChildIDs(newChildIDs: string[]): void {
-    this.vmTemplateIDs = newChildIDs;
-  }
-
-  /** @override [[Item.setChildren]] */
-  setChildren(newChildren: DictList<IndexedObj>): void {
-    this.vmTemplates = newChildren;
+  /**
+   * Currently Users only have one type of children, so just return that.
+   *
+   * @override [[Item.getRelatedIDList]]
+   */
+  getRelatedIDList(datasetName: DatasetNames): string[] {
+    switch (datasetName) {
+      case DatasetNames.VMS:
+        return this.vmTemplateIDs;
+      case DatasetNames.PRINTERS:
+        return this.printerIDs;
+      case DatasetNames.FILE_SYSTEMS:
+        return this.fileSystemIDs;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    return null;
   }
 }
