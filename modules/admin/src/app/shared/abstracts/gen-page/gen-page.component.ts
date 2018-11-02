@@ -101,7 +101,7 @@ export abstract class GenericPageComponent {
    *
    * @return A list (not a set) of the requested type of the obj's children's children.
   */
-  getGrandchildren(obj: IndexedObj, childDatasetName: DatasetNames, grandChildDatasetName: DatasetNames): IndexedObj[] {
+  getGrandChildren(obj: IndexedObj, childDatasetName: DatasetNames, grandChildDatasetName: DatasetNames): IndexedObj[] {
     if (!obj) {
       return [];
     }
@@ -130,6 +130,11 @@ export abstract class GenericPageComponent {
   /** #uncommented */
   getVmApps(i: Item): IndexedObj[] {
     return this.getGrandChildren(i, DatasetNames.VMS, DatasetNames.APPS);
+  }
+
+  /** #uncommented */
+  getApps(i: Item): IndexedObj[] {
+    return this.getChildren(i, DatasetNames.APPS);
   }
 
   /** #uncommented */

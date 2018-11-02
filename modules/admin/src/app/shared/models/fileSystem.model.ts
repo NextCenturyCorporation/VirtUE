@@ -9,7 +9,7 @@ import { Toggleable } from './toggleable.interface';
  * Specifically, there will be a set of these that are defined by the admin, with default values for enabled/r/w/e.
  *
  * A virtue can have a FileSystem added to it, and then can change those default settings. Those settings are saved with
- * the Virtue. So it doesn't work like the other IndexedObjects - while the FileSystem dataset needs to be pulled on the
+ * the Virtue. So it doesn't work like the other IndexedObj objects - while the FileSystem dataset needs to be pulled on the
  * pages listed below, Virtues shouldn't use those values to set any of their attributes.
  *
  * Used in [[ConfigFileSysTabComponent]] [[VirtueSettingsTabComponent]] and [[Virtue]]

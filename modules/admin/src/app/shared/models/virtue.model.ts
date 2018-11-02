@@ -53,7 +53,7 @@ export class Virtue extends Item {
   vmTemplates: DictList<IndexedObj>;
 
   /** #uncommented */
-  vmTemplateIDs: string[];
+  vmTemplateIds: string[];
 
   // /** #TODO what is this? */
   // awsTemplateName: string;
@@ -67,24 +67,24 @@ export class Virtue extends Item {
   /**
    * What virtue should any links clicked within this Virtue automatically open in?
    */
-  defaultBrowserVirtueID: string;
+  defaultBrowserVirtueId: string;
   defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
   networkWhiteList: NetworkPermission[];
 
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargetIDs: string[];
+  allowedPasteTargetIds: string[];
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
   allowedPasteTargets: DictList<Virtue>;
 
   /** this virtue's r/w/e permissions for the different parts of the filesystem */
   fileSystems: DictList<FileSystem>;
-  fileSystemIDs: string[];
+  fileSystemIds: string[];
 
   /** a list of printers this virtue is allowed to use. Printers are found and set up in global settings. */
   printers: DictList<Printer>;
-  printerIDs: string[];
+  printerIds: string[];
 
   /**
    * convert from whatever form the virtue object is in the database.
@@ -98,10 +98,10 @@ export class Virtue extends Item {
       this.id = virtueObj.id;
       this.name = virtueObj.name;
 
-      this.vmTemplateIDs = virtueObj. vmTemplateIds;
-      this.fileSystemIDs = virtueObj.fileSystemIds;
-      this.printerIDs = virtueObj.printerIds;
-      this.allowedPasteTargetIDs = virtueObj.pasteTargetIds;
+      this.vmTemplateIds = virtueObj. vmTemplateIds;
+      this.fileSystemIds = virtueObj.fileSystemIds;
+      this.printerIds = virtueObj.printerIds;
+      this.allowedPasteTargetIds = virtueObj.pasteTargetIds;
 
       this.enabled = virtueObj.enabled;
 
@@ -124,11 +124,11 @@ export class Virtue extends Item {
       }
 
       if (virtueObj.defaultBrowserVirtueId) {
-        this.defaultBrowserVirtueID = virtueObj.defaultBrowserVirtueId;
+        this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
       }
 
       if (! this.allowedPasteTargets) {
-        this.allowedPasteTargetIDs = [];
+        this.allowedPasteTargetIds = [];
       }
 
     }
@@ -151,17 +151,17 @@ export class Virtue extends Item {
    */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
     if (datasetName === DatasetNames.VIRTUES) {
-      this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueID) as Virtue;
-      this.allowedPasteTargets = dataset.getSubset(this.allowedPasteTargetIDs) as DictList<Virtue>;
+      this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueId) as Virtue;
+      this.allowedPasteTargets = dataset.getSubset(this.allowedPasteTargetIds) as DictList<Virtue>;
     }
     if (datasetName === DatasetNames.VMS) {
-      this.vmTemplates = dataset.getSubset(this.vmTemplateIDs) as DictList<VirtualMachine>;
+      this.vmTemplates = dataset.getSubset(this.vmTemplateIds) as DictList<VirtualMachine>;
     }
     else if (datasetName === DatasetNames.FILE_SYSTEMS) {
-      this.fileSystems = dataset.getSubset(this.fileSystemIDs) as DictList<FileSystem>;
+      this.fileSystems = dataset.getSubset(this.fileSystemIds) as DictList<FileSystem>;
     }
     else if (datasetName === DatasetNames.PRINTERS) {
-      this.printers = dataset.getSubset(this.printerIDs) as DictList<Printer>;
+      this.printers = dataset.getSubset(this.printerIds) as DictList<Printer>;
     }
 
   }
@@ -188,11 +188,11 @@ export class Virtue extends Item {
   getRelatedIDList(datasetName: DatasetNames): string[] {
     switch (datasetName) {
       case DatasetNames.VMS:
-        return this.vmTemplateIDs;
+        return this.vmTemplateIds;
       case DatasetNames.PRINTERS:
-        return this.printerIDs;
+        return this.printerIds;
       case DatasetNames.FILE_SYSTEMS:
-        return this.fileSystemIDs;
+        return this.fileSystemIds;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
     return null;

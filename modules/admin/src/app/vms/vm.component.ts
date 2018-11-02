@@ -95,6 +95,8 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
    */
   @ViewChild('usageTab') usageTab: VmUsageTabComponent;
 
+  /** reclassing */
+  item: VirtualMachine;
   /**
    * see [[GenericFormComponent.constructor]] for notes on parameters
    */
@@ -125,7 +127,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     // this.historyTab.init(this.mode);
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.setItemChildIDs(newChildIDs);
+      this.item.applicationIds = newChildIDs;
       this.updatePage();
     });
 
@@ -165,7 +167,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allVirtues: this.allVirtues, mode: this.mode});
+    this.usageTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
   }
 
   /**
@@ -204,10 +206,9 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     //  this.item['lastEditor'] = 'administrator';
 
     //  'enabled'      must be either true or false
-    this.item['applicationIds'] = this.item.childIDs;  // may be empty
+    // this.item['applicationIds'] = this.item.childIDs;  // may be empty
 
-    this.item.children = undefined;
-    this.item.childIDs = [];
+    this.item.applications = undefined;
     return true;
   }
 

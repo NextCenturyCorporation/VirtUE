@@ -77,7 +77,7 @@ export class VirtueModalComponent extends GenericModalComponent {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.datasetNames[DatasetNames.VIRTUES].asList());
+    this.fillTable(this.datasets[DatasetNames.VIRTUES].asList());
   }
 
   /**

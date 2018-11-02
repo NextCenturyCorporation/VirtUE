@@ -29,7 +29,7 @@ export class VirtualMachine extends Item {
   applications: DictList<IndexedObj>;
 
   /** #uncommented */
-  applicationIDs: string[];
+  applicationIds: string[];
 
   // /** #uncommented what is this? (templatePath)*/
   // templatePath: string;
@@ -53,7 +53,7 @@ export class VirtualMachine extends Item {
       this.id = vmObj.id;
       this.name = vmObj.name;
       this.enabled = vmObj.enabled;
-      this.applicationIDs = vmObj.applicationIds;
+      this.applicationIds = vmObj.applicationIds;
       this.version = vmObj.version;
       if (! this.version) {
         this.version = 1;
@@ -75,7 +75,7 @@ export class VirtualMachine extends Item {
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
 
     if (datasetName === DatasetNames.APPS) {
-      this.applications = dataset.getSubset(this.applicationIDs) as DictList<Application>;
+      this.applications = dataset.getSubset(this.applicationIds) as DictList<Application>;
     }
 
   }
@@ -100,7 +100,7 @@ export class VirtualMachine extends Item {
   getRelatedIDList(datasetName: DatasetNames): string[] {
 
     if (datasetName === DatasetNames.APPS) {
-      return this.applicationIDs;
+      return this.applicationIds;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.APPS, was", datasetName);
   }

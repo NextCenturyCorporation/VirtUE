@@ -86,9 +86,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
-  /** local reference to the virtue-form's allVirtues variable. */
-  private allVirtues: DictList<Virtue>;
-
   /**
    * see [[GenericFormTabComponent.constructor]] for inherited parameters
    */
@@ -147,9 +144,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   update(changes: any): void {
     if (changes.allVirtues) {
-      this.allVirtues = changes.allVirtues;
-
-      this.updatePasteableVirtuesTable();
+      this.updatePasteableVirtuesTable(changes.allVirtues);
     }
 
     if (changes.mode) {
@@ -447,10 +442,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   getPasteSubMenu(): SubMenuOptions[] {
     return [
        new SubMenuOptions("Remove", () => true, (i: Item) => {
-         let index = this.item.allowedPasteTargets.indexOf(i.getID(), 0);
+         let index = this.item.allowedPasteTargetIds.indexOf(i.getID(), 0);
          if (index > -1) {
-            this.item.allowedPasteTargets.splice(index, 1);
+            this.item.allowedPasteTargetIds.splice(index, 1);
          }
+         this.item.allowedPasteTargets.remove(i.getID());
          this.updatePasteableVirtuesTable();
        }
      )];
@@ -464,7 +460,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return [
       new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                         () => this.getPasteSubMenu()),
-      new ListColumn<Item>('Available Applications', 4, this.getGrandchildren,  this.formatName),
+      new ListColumn('Available Applications', 4, this.getVmApps,  this.formatName),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
@@ -493,29 +489,27 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * Once data has been pulled, fill in the table with the Virtue's current allow paste targets, if it has any.
+   * Fill in the table with the Virtue's current allow paste targets, if it has any.
+   * Use more recent definitions, if they are given.
    */
-  updatePasteableVirtuesTable(): void {
+  updatePasteableVirtuesTable(allVirtues?: DictList<Virtue>): void {
 
-    if ( !(this.allVirtues) ) {
-      return;
-    }
-
-    let items = [];
-    for (let vID of this.item.allowedPasteTargets) {
-      if (this.allVirtues.has(vID)) {
-        items.push(this.allVirtues.get(vID));
-      }
+    let items: Item[] = this.item.allowedPasteTargets.asList();
+    if (allVirtues) {
+      items = allVirtues.getSubset(this.item.allowedPasteTargetIds).asList();
     }
     this.allowedPasteTargetsTable.populate(items);
+
   }
 
   /**
    * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
    */
    activatePastableVirtueModal(): void {
-     this.activateVirtueSelectionModal( this.item.allowedPasteTargets, (selectedVirtues: string[]) => {
-         this.item.allowedPasteTargets = selectedVirtues;
+     this.activateVirtueSelectionModal( this.item.allowedPasteTargetIds, (selectedVirtueIds: string[]) => {
+         this.item.allowedPasteTargetIds = selectedVirtueIds;
+         // TODO this doesn't actually update the table, because allowedPasteTargets can't be updated from here.
+         // Need to send a messge to the form page to relaod, like the main tabs do.
          this.updatePasteableVirtuesTable();
        });
    }

@@ -108,10 +108,10 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
 
     if (changes.allUsers) {
       let items: Item[] = [];
-      let allUsers: DictList<Item> = changes.allUsers;
+      let allUsers: DictList<User> = changes.allUsers;
 
       for (let u of allUsers.asList()) {
-        if (u.children.has(this.item.getID())) {
+        if (u.virtueTemplates.has(this.item.getID())) {
           items.push(u);
         }
       }
@@ -128,7 +128,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     return [
       new TextColumn('Username',  3, (u: User) => u.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                () => this.getParentSubMenu()),
-      new ListColumn<Item>('Attached Virtues', 5, this.getVirtues,  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Attached Virtues', 5, this.getVirtues,  this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Status',  4, this.formatStatus, SORT_DIR.ASC)
     ];
 

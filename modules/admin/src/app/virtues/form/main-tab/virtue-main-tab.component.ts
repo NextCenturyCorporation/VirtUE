@@ -53,7 +53,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
    */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.childDatasetName = Datasets.VMS;
+    this.childDatasetName = DatasetNames.VMS;
   }
 
   /**
@@ -107,7 +107,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     return [
       new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn<Item>('Assigned Apps', 4, this.getApps,  this.formatName),
+      new ListColumn('Assigned Apps', 4, this.getApps,  this.formatName),
       new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
@@ -159,16 +159,16 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
    */
   removeChildObject(childItem: IndexedObj): void {
     if (childItem instanceof VirtualMachine) {
-      this.item.removeChild(childItem, DatasetNames.VMS);
+      this.item.removeChild(childItem.getID(), DatasetNames.VMS);
     }
     else if (childItem instanceof Printer) {
-      this.item.removeChild(childItem, DatasetNames.PRINTERS);
+      this.item.removeChild(childItem.getID(), DatasetNames.PRINTERS);
     }
     else if (childItem instanceof FileSystem) {
-      this.item.removeChild(childItem, DatasetNames.FILE_SYSTEMS);
+      this.item.removeChild(childItem.getID(), DatasetNames.FILE_SYSTEMS);
     }
     else {
-      console.log("The given object doesn't appear to be a Virtue.");
+      console.log("The given object doesn't appear to be a VM.");
     }
   }
 }

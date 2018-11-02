@@ -131,11 +131,11 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
    */
   getParentColumns(): Column[] {
     return [
-      new TextColumn('Template Name',          3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Template Name',     3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                             () => this.getParentSubMenu()),
-      new ListColumn<Item>('Virtual Machines', 3, this.getVms,  this.formatName, (i: Item) => this.viewItem(i)),
-      new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
-      new TextColumn('Status',                3, this.formatStatus, SORT_DIR.ASC)
+      new ListColumn('Virtual Machines',  3, this.getVms,  this.formatName, (i: Item) => this.viewItem(i)),
+      new TextColumn('Version',           2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',            3, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 

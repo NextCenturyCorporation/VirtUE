@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/cor
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
@@ -56,7 +57,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
    */
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.childDatasetName = Datasets.VIRTUES;
+    this.childDatasetName = DatasetNames.VIRTUES;
   }
 
   /**
@@ -111,7 +112,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
       new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                           () => this.getSubMenu()),
       new ListColumn('Virtual Machines', 3, this.getVms, this.formatName, (i: Item) => this.viewItem(i)),
-      new ListColumn<Item>('Available Apps', 4, this.getVmApps,  this.formatName),
+      new ListColumn('Available Apps', 4, this.getVmApps,  this.formatName),
       new TextColumn('Version', 1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
     ];
   }
@@ -148,7 +149,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
    */
   removeChildObject(childObj: IndexedObj): void {
     if (childObj instanceof Virtue) {
-      this.item.removeChild(childObj, DatasetNames.VIRTUES);
+      this.item.removeChild(childObj.getID(), DatasetNames.VIRTUES);
     }
     else {
       console.log("The given object doesn't appear to be a Virtue.");

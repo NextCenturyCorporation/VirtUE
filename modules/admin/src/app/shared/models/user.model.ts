@@ -23,7 +23,7 @@ export class User extends Item {
   virtueTemplates: DictList<IndexedObj>;
 
   /** #uncommented */
-  virtueTemplateIDs: string[];
+  virtueTemplateIds: string[];
 
   /**
    * convert from whatever form the user object is in the database.
@@ -36,15 +36,15 @@ export class User extends Item {
       this.name = userObj.username;
       this.roles = userObj.authorities;
       this.enabled = userObj.enabled;
-      this.virtueTemplateIDs = userObj.virtueTemplateIDs;
+      this.virtueTemplateIds = userObj.virtueTemplateIds;
 
     }
 
     if ( !this.roles) {
       this.roles = [];
     }
-    if ( !this.virtueTemplateIDs) {
-      this.virtueTemplateIDs = [];
+    if ( !this.virtueTemplateIds) {
+      this.virtueTemplateIds = [];
     }
 
     this.parentDomain = '/users';
@@ -55,7 +55,7 @@ export class User extends Item {
    */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
     if (datasetName === DatasetNames.VIRTUES) {
-      this.virtueTemplates = dataset.getSubset(this.virtueTemplateIDs) as DictList<Virtue>;
+      this.virtueTemplates = dataset.getSubset(this.virtueTemplateIds) as DictList<Virtue>;
     }
   }
 
@@ -93,7 +93,7 @@ export class User extends Item {
   getRelatedIDList(datasetName: DatasetNames): string[] {
 
     if (datasetName === DatasetNames.VIRTUES) {
-      return this.virtueTemplateIDs;
+      return this.virtueTemplateIds;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
   }

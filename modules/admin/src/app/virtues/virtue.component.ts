@@ -108,6 +108,9 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
    */
   @ViewChild('usageTab') usageTab: VirtueUsageTabComponent;
 
+  /** reclassing */
+  item: Virtue;
+
   /**
    * see [[GenericFormComponent.constructor]] for notes on parameters
    */
@@ -151,7 +154,7 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     // Must unsubscribe from all these when the VirtueComponent is destroyed
 
     this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.setItemChildIDs(newChildIDs);
+      this.item.vmTemplateIds = newChildIDs;
       this.updatePage();
     });
 
@@ -213,11 +216,11 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
     // This may need updating whenever the list of printers or whatever gets reset.
     // If I know printers, a refresh button for that list in particular will be greatly appreciated.
-    this.settingsTab.update({allVirtues: this.allVirtues, mode: this.mode});
+    this.settingsTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allUsers: this.allUsers, mode: this.mode});
+    this.usageTab.update({allUsers: this.datasets[DatasetNames.USERS], mode: this.mode});
   }
 
   /**
@@ -255,14 +258,14 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     //  this.item.version,  will be valid
     //  this.item.enabled,  should either be true or false
     //  this.item.color,    should be ok? make sure it has a default in the settings pane
-    this.item['virtualMachineTemplateIds'] = this.item.childIDs;
+    this.item['virtualMachineTemplateIds'] = this.item.vmTemplateIds;
 
     // note that children is set to undefined for a brief instant before the
     // page navigates away, during which time an exception would occur on the
     // table - that chunk of html has now been wrapped in a check, to not check
     // children's list size if children is undefined
-    this.item.children = undefined;
-    this.item.childIDs = [];
+    this.item.vmTemplates = undefined;
+    this.item.vmTemplateIds = [];
     return true;
   }
 

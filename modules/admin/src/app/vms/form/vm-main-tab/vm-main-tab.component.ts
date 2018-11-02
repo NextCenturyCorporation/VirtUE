@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/cor
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Item } from '../../../shared/models/item.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
 import { Application } from '../../../shared/models/application.model';
@@ -55,7 +56,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
       protected osOptions: OSSet,
       router: Router, dialog: MatDialog) {
     super(router, dialog);
-    this.childDatasetName = Datasets.APPS;
+    this.childDatasetName = DatasetNames.APPS;
   }
 
   /**
@@ -131,6 +132,24 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
   collectData(): boolean {
     this.item.version = this.newVersion;
     return true;
+  }
+
+
+
+  /**
+   * Removes childItem from this.item.vmTemplates and its id from this.item.vmTemplateIds.
+   * Remember this.item is a Virtue here, and childItem can be a VirtualMachine, Printer, or .
+   *
+   * @param childItem the Item to be removed from this.[[item]]'s child lists.
+   * @override parent [[GenericMainTabComponent.removeChildObject]]()
+   */
+  removeChildObject(childItem: IndexedObj): void {
+    if (childItem instanceof Application) {
+      this.item.removeChild(childItem.getID(), DatasetNames.APPS);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Application.");
+    }
   }
 
   /**

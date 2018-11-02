@@ -85,6 +85,8 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
   /** A tab for displaying the User's attached virtues, status, and assigned roles. */
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
 
+  /** reclassing */
+  item: User;
   /**
    * see [[GenericFormComponent.constructor]] for notes on parameters
    */
@@ -118,8 +120,8 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
     // Must unsubscribe from all these when the UserComponent is destroyed
 
-    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.setItemChildIDs(newChildIDs);
+    this.mainTab.onChildrenChange.subscribe((newVirtueIDs) => {
+      this.item.virtueTemplateIds = newVirtueIDs;
       this.updatePage();
     });
 
@@ -216,21 +218,19 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
 
 
-    if (this.mode === Mode.CREATE && !this.item.name) {
+    if (this.mode === Mode.CREATE && !this.item.getName()) {
       confirm("You need to enter a username.");
       return false;
     }
 
     // if not editing, make sure username isn't taken
 
-    this.item['username'] = this.item.name,
-    this.item['authorities'] = this.item['roles'], // since this is technically an item
-    this.item['virtueTemplateIds'] = this.item.childIDs;
+    this.item['username'] = this.item.getName();
+    this.item['authorities'] = this.item.roles;
 
     // so we're not trying to stringify a bunch of extra fields and data
-    this.item.children = undefined;
-    this.item.childIDs = [];
-    this.item['roles'] = [];
+    this.item.virtueTemplates = undefined;
+    this.item.roles = [];
     return true;
   }
 
