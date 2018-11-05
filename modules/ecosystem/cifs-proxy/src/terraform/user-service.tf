@@ -122,7 +122,7 @@ samba-tool dns add ${local.ds_private_ip} $zone $lastOctet PTR ${local.myname}.$
 	   --kerberos=1
 
 # create user that will mount files
-useradd --shell /bin/false mounter
+useradd --shell /bin/false --no-create-home mounter
 
 date
 touch /tmp/user_data-finished
