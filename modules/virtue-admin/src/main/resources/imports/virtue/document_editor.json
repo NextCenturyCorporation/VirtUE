@@ -3,6 +3,7 @@
     "version": "1.0",
     "enabled": true,
     "awsTemplateName": "default-template",
+    "color":"#238443",
     "virtualMachineTemplateIds": [
       "IMPORT_windows_document_editor"
     ]

@@ -16,7 +16,9 @@ import { Virtue } from '../shared/models/virtue.model';
 import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
-import { Mode, ConfigUrls, Datasets } from '../shared/enums/enums';
+import { Mode } from '../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../shared/services/config-urls.enum';
+import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
 
 import { VirtueMainTabComponent } from './form/main-tab/virtue-main-tab.component';
 import { VirtueSettingsTabComponent } from './form/settings-tab/virtue-settings.component';
@@ -154,7 +156,7 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     });
 
     this.mainTab.onStatusChange.subscribe((newStatus) => {
-      if( this.mode === Mode.VIEW ) {
+      if ( this.mode === Mode.VIEW ) {
         this.toggleItemStatus(this.item);
       }
     });

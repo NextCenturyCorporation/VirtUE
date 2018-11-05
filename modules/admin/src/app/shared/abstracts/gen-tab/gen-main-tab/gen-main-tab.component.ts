@@ -5,9 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DialogsComponent } from '../../../../dialogs/dialogs.component';
 
 import { Item } from '../../../models/item.model';
+import { User } from '../../../models/user.model';
 import { Column } from '../../../models/column.model';
 import { SubMenuOptions } from '../../../models/subMenuOptions.model';
-import { Mode } from '../../../enums/enums';
+import { Mode } from '../../../abstracts/gen-form/mode.enum';
 
 import { GenericTableComponent } from '../../gen-table/gen-table.component';
 import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
@@ -27,8 +28,15 @@ import { GenericFormTabComponent } from '../../gen-tab/gen-tab.component';
  */
 export abstract class GenericMainTabComponent extends GenericFormTabComponent implements OnInit {
 
+  /**
+   * A reference to the Item being viewed/edited/etc.
+   * Refers to the same object as [[GenericFormComponent.item]]
+   * this gets reclassed by children tabs
+   */
+  protected item: Item;
+
   /** A table for listing the item's children. */
-  @ViewChild('childrenTable') protected childrenTable: GenericTableComponent;
+  @ViewChild('childrenTable') protected childrenTable: GenericTableComponent<Item>;
 
   /** to notify the parent component that a new set of childIDs have been selected */
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
@@ -47,6 +55,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   constructor(router: Router, dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "General Info";
+    this.item = new User(undefined);
   }
 
   /**
@@ -84,14 +93,12 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    *                this tab's mode should be updated. The attribute is optional.
    */
   update(changes: any): void {
-    this.childrenTable.items = this.item.children.asList();
+    this.childrenTable.populate(this.item.children.asList());
     if (changes.mode) {
       // these three lines could be replaced with
       //    this.init(changes.mode)
       // But that might be too opaque.
       this.setMode(changes.mode);
-      this.childrenTable.colData = this.getColumns();
-      this.childrenTable.subMenuOptions = this.getSubMenu();
     }
   }
 
@@ -133,24 +140,43 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   }
 
   /**
-   * Sets up the table of children, using sub-class-defined-functions.
+   * #uncommented
+   * defines the child table  using sub-class-defined-functions.
+   */
+  defaultChildTableParams() {
+    return {
+      cols: this.getColumns(),
+      filters: [], // don't enable filtering by status on the form's child table.
+      tableWidth: 9,
+      noDataMsg: this.getNoDataMsg(),
+      elementIsDisabled: (i: Item) => !i.enabled,
+      editingEnabled: () => !this.inViewMode()
+    };
+  }
+
+  /**
+   * Sets up the table listing this item's children
    * See [[GenericTable.setUp]]()
+   * overridden by [[UserMainTabComponent]]
    */
   setUpChildTable(): void {
     if (this.childrenTable === undefined) {
       return;
     }
 
-    this.childrenTable.setUp({
-      cols: this.getColumns(),
-      opts: this.getSubMenu(),
-      coloredLabels: true,
-      filters: [], // don't allow filtering on the form's child table.
-      tableWidth: 9,
-      noDataMsg: this.getNoDataMsg(),
-      hasCheckBoxes: false
-    });
+    let params = this.defaultChildTableParams();
+
+    this.customizeTableParams(params);
+
+    this.childrenTable.setUp(params);
   }
+
+  /**
+   * Allow children to customize the parameters passed to the table. By default, do nothing.
+   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   */
+  customizeTableParams(paramsObject) {}
+
 
   /**
    * Have each subclass define the format of their table.
@@ -168,25 +194,22 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    *
    * see [[GenericPageComponent.openDialog]] for notes on that openDialog call.
    *
-   * @return a one-element list of row options; 'View' if mode is view, or 'Remove' otherwise.
+   * @return a list of row options; 'View', 'Edit', and 'Remove'.
    */
   getSubMenu(): SubMenuOptions[] {
-    if (this.mode === Mode.VIEW) {
-      return [
-         new SubMenuOptions("View", () => true, (i: Item) => this.viewItem(i)),
-         new SubMenuOptions("Edit", () => true, (i: Item) => this.editItem(i))
-      ];
-    }
-    else {
-      return [
-         new SubMenuOptions("Remove",
-                        () => true,
-                        (i: Item) => this.openDialog( 'Delete ' + i.getName(),
-                                                      () => this.item.removeChild( i.getID() )
-                                                    )
-                        )
-      ];
-    }
+    return [
+       new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
+       new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i)),
+       new SubMenuOptions("Remove",
+                      () => !this.inViewMode(),
+                      (i: Item) => this.openDialog( 'Delete ' + i.getName(),
+                                                    () => {
+                                                      this.item.removeChild( i.getID() );
+                                                      this.update({});
+                                                    }
+                                                  )
+                      )
+    ];
   }
 
   /**
@@ -201,16 +224,6 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    */
   getTableWidth(): number {
     return 9;
-  }
-
-  /**
-   * Whether or not the Items in the child table have colored labels they should be displayed with.
-   * Most main tabs won't have colored labels, so just return false.
-   * Overridden by [[UserMainTabComponent.hasColoredLabels]]().
-   * See [[GenericTable.setUp]]()
-   */
-  hasColoredLabels(): boolean {
-    return false;
   }
 
   /**

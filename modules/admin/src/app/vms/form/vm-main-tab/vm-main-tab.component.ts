@@ -4,14 +4,24 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { Item } from '../../../shared/models/item.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
-import { Column } from '../../../shared/models/column.model';
-import { Mode, ConfigUrls, Datasets } from '../../../shared/enums/enums';
+import { Application } from '../../../shared/models/application.model';
+
+import {
+  Column,
+  TextColumn,
+  ListColumn,
+  SORT_DIR
+} from '../../../shared/models/column.model';
+
+import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
+import { ConfigUrls } from '../../../shared/services/config-urls.enum';
+import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
 import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
 
-import { OSSet } from '../../../shared/sets/os.set';
+import { OSSet } from '../../os.set';
 
 /**
  * This class represents the main tab for a VirtualMachine template form - [[VmComponent]]
@@ -97,9 +107,10 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
    */
   getColumns(): Column[] {
     return [
-      new Column('name',    'Application Name', 5, 'asc'),
-      new Column('version', 'Version',          3, 'asc'),
-      new Column('os',      'Operating System', 4, 'desc')
+      new TextColumn('Application Name', 5, (a: Application) => a.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+                                                                                                () => this.getSubMenu()),
+      new TextColumn('Version',          3, (a: Application) => String(a.version), SORT_DIR.ASC),
+      new TextColumn('Operating System', 4, (a: Application) => a.os, SORT_DIR.DESC)
     ];
   }
 

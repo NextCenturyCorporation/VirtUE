@@ -21,6 +21,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,9 +35,12 @@ import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -53,6 +58,7 @@ import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
  * ROLE_ADMIN.
  */
 public class AdminService {
+	private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
 	public static final String DEFAULT_ICON_KEY = "DEFAULT";
 	private IActiveVirtueManager virtueManager;
 	private ITemplateManager templateManager;
@@ -71,15 +77,53 @@ public class AdminService {
 	@Value("${virtue.sensing.redirectUrl}")
 	private String sensingUri;
 
+	@Value("${virtue.test:false}")
+	private boolean test;
+
+	private ISecurityGroupManager securityGroupManager;
+	private IVpcSubnetProvider subnetProvider;
+
 	public AdminService(IActiveVirtueManager virtueManager, ITemplateManager templateManager, IUserManager userManager,
-			PersistentStorageManager persistentStorageManager, String initialAdmin) {
+			PersistentStorageManager persistentStorageManager, ISecurityGroupManager securityGroupManager,
+			IVpcSubnetProvider subnetProvider, String initialAdmin) {
 		super();
 		this.virtueManager = virtueManager;
 		this.templateManager = templateManager;
 		this.userManager = userManager;
 		this.persistentStorageManager = persistentStorageManager;
 		this.initialAdmin = initialAdmin;
+		this.securityGroupManager = securityGroupManager;
+		this.subnetProvider = subnetProvider;
 		addInitialUser();
+	}
+
+	protected void sync() {
+		Runnable syncRunnable = () -> {
+			if (!test) {
+				try {
+					Collection<String> existingVirtueIds = new HashSet<String>();
+					Iterable<VirtueInstance> virtueIds = virtueManager.getAllActiveVirtues();
+					for (VirtueInstance virtueId : virtueIds) {
+						existingVirtueIds.add(virtueId.getId());
+					}
+					subnetProvider.sync(existingVirtueIds);
+
+					Set<String> allTemplateIds = new HashSet<String>();
+					Iterable<VirtueTemplate> templates = templateManager.getAllVirtueTemplates();
+					for (VirtueTemplate template : templates) {
+						allTemplateIds.add(template.getId());
+					}
+					securityGroupManager.sync(allTemplateIds);
+
+					virtueManager.sync();
+				} catch (Exception e) {
+					logger.debug("Syncing failed", e);
+				}
+			}
+		};
+		Thread t = new Thread(syncRunnable, "Startup-Sync");
+		t.setDaemon(true);
+		t.start();
 	}
 
 	private void addInitialUser() {
@@ -528,4 +572,50 @@ public class AdminService {
 		verifyAndReturnUser();
 		persistentStorageManager.deletePersistentStorage(username, virtueTemplateId);
 	}
+
+	public Collection<SecurityGroupPermission> getSecurityGroupPermissions(String groupId) {
+		verifyAndReturnUser();
+		return securityGroupManager.getSecurityGroupPermissionsByGroupId(groupId);
+	}
+
+	public Collection<SecurityGroupPermission> getSecurityGroupPermissionsByTemplate(String templateId) {
+		verifyAndReturnUser();
+		return securityGroupManager.getSecurityGroupPermissionsByTemplateId(templateId);
+	}
+
+	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroups() {
+		verifyAndReturnUser();
+		return securityGroupManager.getAllSecurityGroupPermissions();
+	}
+
+	public void authorizeSecurityGroupsByKey(String templateId, SecurityGroupPermission sgp) {
+		verifyAndReturnUser();
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
+		sgp.setSecurityGroupId(groupId);
+		securityGroupManager.authorizeSecurityGroup(groupId, sgp);
+	}
+
+	public void revokeSecurityGroupsByKey(String templateId, SecurityGroupPermission sgp) {
+		verifyAndReturnUser();
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
+		sgp.setSecurityGroupId(groupId);
+		securityGroupManager.revokeSecurityGroup(groupId, sgp);
+	}
+
+	public String securityGroupIdByTemplateId(String templateId) {
+		verifyAndReturnUser();
+		String groupId = securityGroupManager.getSecurityGroupIdByTemplateId(templateId);
+		return groupId;
+	}
+
+	public void deleteSecurityGroup(String groupId) {
+		verifyAndReturnUser();
+		securityGroupManager.removeSecurityGroup(groupId);
+	}
+
+	// public Map<String, Collection<SecurityGroupPermission>>
+	// getAllSecurityGroups() {
+	// verifyAndReturnUser();
+	// return securityGroupManager.getAllSecurityGroupPermissions();
+	// }
 }

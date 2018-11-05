@@ -3,6 +3,7 @@
 	"version": "1.0",
 	"enabled": true,
 	"awsTemplateName": "default-template",
+	"color": "#7FBC41",
 	"virtualMachineTemplateIds": [
 		"IMPORT_windows_all"
 	]

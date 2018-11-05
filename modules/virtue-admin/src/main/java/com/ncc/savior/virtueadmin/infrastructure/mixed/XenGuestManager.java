@@ -112,7 +112,7 @@ public class XenGuestManager {
 				logger.debug("finished provisioning linux guest Vm=" + vm.getName());
 			}
 			logger.debug("finished provisioning of linux guest VMs=" + linuxVmts);
-			addVmToProvisionPipeline(vms, xenGuestFuture);
+			addVmToProvisionPipeline(linuxVms, xenGuestFuture);
 		} catch (JSchException e) {
 			logger.error("Vm is not reachable yet: ", e);
 			xenGuestFuture.completeExceptionally(e);
@@ -385,14 +385,14 @@ public class XenGuestManager {
 				int numSensingPorts = 3;
 				vm.setState(VmState.LAUNCHING);
 				serviceProvider.getVmNotifierService().startFutures(vm, null);
-				throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Restarting is not properly implemented!");
-				// createStartGuestVm(session, externalSshPort, externalSensingPort,
-				// startingInternalPort, numSensingPorts,
-				// null, null, vm, false);
+				// throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Restarting is not
+				// properly implemented!");
+				createStartGuestVm(session, externalSshPort, externalSensingPort, startingInternalPort, numSensingPorts,
+						null, null, vm, false);
 			}
 			addToStartPipeline(linuxVms, linuxFuture);
 		} catch (Exception e) {
-			logger.error("Error attempting to start guests " + linuxVms);
+			logger.error("Error attempting to start guests " + linuxVms, e);
 			linuxFuture.completeExceptionally(e);
 		} finally {
 			SshUtil.disconnectLogErrors(session);

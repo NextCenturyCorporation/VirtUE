@@ -1,5 +1,7 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.awt.Color;
+
 public class RgbColor {
 	private double opacity;
 	private double blue;
@@ -32,5 +34,10 @@ public class RgbColor {
 	@Override
 	public String toString() {
 		return "RgbColor [opacity=" + opacity + ", blue=" + blue + ", green=" + green + ", red=" + red + "]";
+	}
+
+	public static RgbColor fromColor(Color color) {
+		return new RgbColor(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0,
+				color.getAlpha() / 255.0);
 	}
 }

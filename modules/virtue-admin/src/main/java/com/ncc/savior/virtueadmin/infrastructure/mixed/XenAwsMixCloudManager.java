@@ -2,6 +2,9 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -9,6 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
+import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -54,15 +61,24 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private CompletableFutureServiceProvider serviceProvider;
 
+	private IVpcSubnetProvider vpcSubnetProvider;
+
+	private ISecurityGroupManager securityGroupManager;
+
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
-			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService) {
+			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
+			IVpcSubnetProvider vpcSubnetProvider, ISecurityGroupManager securityGroupManager) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
 		this.serviceProvider = serviceProvider;
+		this.vpcSubnetProvider = vpcSubnetProvider;
+		this.securityGroupManager = securityGroupManager;
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
 	}
+
+	
 
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
@@ -87,6 +103,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		//
 		// Currently, we use this future to pass it out so we can delete it elsewhere.
 		CompletableFuture.allOf(windowsFuture, xenFuture).thenRun(() -> {
+			logger.debug("Attempting to release subnet for " + virtueInstance.getName());
+			vpcSubnetProvider.releaseBySubnetKey(virtueInstance.getId());
 			future.complete(virtueInstance);
 		});
 	}
@@ -106,15 +124,26 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 
 		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
-		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts,
-				windowsFuture, template.getName());
-		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);
+		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), null);
+		Map<String, String> tags = new HashMap<String, String>();
+		tags.put(AwsUtil.TAG_USERNAME, user.getUsername());
+		tags.put(AwsUtil.TAG_VIRTUE_NAME, vi.getName());
+		tags.put(AwsUtil.TAG_INSTANCE_ID, vi.getId());
+		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
+		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupIdByTemplateId(vi.getTemplateId());
+		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters(template.getName());
+		virtueMods.setSubnetId(subnetId);
+		virtueMods.setSecurityGroupId(virtueSecurityGroupId);
+		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts, windowsFuture,
+				virtueMods);
+		vi.setVms(vms);
+
 		// if (!linuxVmts.isEmpty()) {
 
 		CompletableFuture<Collection<VirtualMachine>> linuxFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
-		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture);
+		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
 			// When xen (really NFS) and all windows VM's are up
@@ -180,5 +209,12 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		} else if (OS.WINDOWS.equals(vm.getOs())) {
 			awsVmManager.rebootVm(vm, null);
 		}
+	}
+
+
+
+	@Override
+	public void sync(List<String> ids) {
+		awsVmManager.syncAll(ids);
 	}
 }

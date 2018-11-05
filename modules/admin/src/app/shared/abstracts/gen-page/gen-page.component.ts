@@ -13,11 +13,6 @@ import { DictList, Dict } from '../../models/dictionary.model';
 
 import { Item } from '../../models/item.model';
 
-import { ColorSet } from '../../sets/color.set';
-
-import { Mode, ConfigUrls, Datasets } from '../../enums/enums';
-
-
 /**
 * @class
  * This is the generic class which provides a central source for many common functions, currently:
@@ -116,7 +111,7 @@ export abstract class GenericPageComponent {
    * @param item the Item to which we should navigate.
    */
   viewItem(item: Item): void {
-    this.router.navigate([item.getPageRoute(Mode.VIEW)]);
+    this.router.navigate([item.getViewURL()]);
   }
 
   /**
@@ -125,7 +120,7 @@ export abstract class GenericPageComponent {
    * @param item the Item which we should navigate to and edit.
    */
   editItem(item: Item): void {
-    this.router.navigate([item.getPageRoute(Mode.EDIT)]);
+    this.router.navigate([item.getEditURL()]);
   }
 
   /**
@@ -134,7 +129,7 @@ export abstract class GenericPageComponent {
    * @param item the Item to duplicate
    */
   dupItem(item: Item): void {
-    this.router.navigate([item.getPageRoute(Mode.DUPLICATE)]);
+    this.router.navigate([item.getDupURL()]);
   }
 
   /**
@@ -171,8 +166,8 @@ export abstract class GenericPageComponent {
         action();
       }
     },
-    ()=>{},
-    ()=>{
+    () => {},
+    () => {
       sub.unsubscribe();
     });
   }

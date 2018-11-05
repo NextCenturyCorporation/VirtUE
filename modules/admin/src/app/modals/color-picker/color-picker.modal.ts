@@ -3,7 +3,7 @@ import { Component, EventEmitter, Inject, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 
-import { ColorSet, Color } from '../../shared/sets/color.set';
+import { ColorSet, Color } from '../../virtues/color.set';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 

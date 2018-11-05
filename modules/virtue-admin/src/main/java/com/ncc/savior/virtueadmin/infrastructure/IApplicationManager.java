@@ -17,8 +17,9 @@ public interface IApplicationManager {
 	 * 
 	 * @param vm
 	 * @param application
+	 * @param params
 	 */
-	void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition application, int maxTries);
+	void startApplicationOnVm(VirtualMachine vm, ApplicationDefinition application, String params, int maxTries);
 
 	/**
 	 * Tries to get a started Xpra server. If none is found, it will attempt to

@@ -1,5 +1,5 @@
 
-import { NetworkProtocols } from '../enums/enums';
+import { NetworkProtocols } from '../../virtues/protocols.enum';
 
 /**
  * @class

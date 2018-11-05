@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
@@ -37,12 +38,6 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	private static final String ARGS_RESUME = "controlvm \"%s\" resume --type headless";
 	private static final String ARGS_POWEROFF = "controlvm \"%s\" poweroff --type headless";
 	private static final String ARGS_GETINFO = "showvminfo \"%s\" --machinereadable";
-
-	@Override
-	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
-			CompletableFuture<Collection<VirtualMachine>> future) {
-		throw new RuntimeException("not yet implemented");
-	}
 
 	@Override
 	public VirtualMachine startVirtualMachine(VirtualMachine vm, CompletableFuture<Collection<VirtualMachine>> future) {
@@ -190,7 +185,7 @@ public class VirtualBoxVmManager extends BaseVmManager implements IVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
-			String virtue) {
+			VirtueCreationAdditionalParameters virtueMods) {
 		throw new RuntimeException("not yet implemented");
 	}
 

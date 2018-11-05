@@ -81,10 +81,14 @@ public class SidebarApplication {
 		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
 		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
 		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
-		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager);
+		ColorManager colorManager = new ColorManager();
+		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager, authService,
+				colorManager);
 		IIconService iconService = new IconResourceService(drs);
-		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, useColors, style);
+
+		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, useColors, style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
+		clipboardHub.addDefaultApplicationListener(sidebar.getDefaultApplicationHandler());
 		controller.init(primaryFrame);
 	}
 }

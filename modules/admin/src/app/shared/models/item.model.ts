@@ -1,5 +1,7 @@
 import { DictList } from './dictionary.model';
-import { Mode, Datasets } from '../enums/enums';
+
+import { Mode } from '../abstracts/gen-form/mode.enum';
+import { Datasets } from '../abstracts/gen-data-page/datasets.enum';
 
 /**
  * @class
@@ -114,6 +116,27 @@ export abstract class Item {
       return this.parentDomain;
     }
     return this.parentDomain + '/' + mode.toLowerCase() + '/' + this.getID();
+  }
+
+  /**
+   * @return the url for the view page for this item
+   */
+  getViewURL(): string {
+    return this.getPageRoute(Mode.VIEW);
+  }
+
+  /**
+   * @return the url for the edit page for this item
+   */
+  getEditURL(): string {
+    return this.getPageRoute(Mode.EDIT);
+  }
+
+  /**
+   * @return the url at which one could create a duplicate of this item
+   */
+  getDupURL(): string {
+    return this.getPageRoute(Mode.DUPLICATE);
   }
 
   /**

@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,6 +53,22 @@ public class DesktopRestService {
 	}
 
 	/**
+	 * Gets all virtues as {@link DesktopVirtue}s for the user including Virtues
+	 * that have not been provisioned yet, but the user has the ability to
+	 * provision.
+	 * 
+	 * @return
+	 * 
+	 */
+	@GET
+	@Produces("application/json")
+	@Path("applications/{tag}")
+	public Set<DesktopVirtue> getVirtueApplicationsByUserAndTag(@PathParam("tag") String tag) {
+		Set<DesktopVirtue> virtues = desktopService.getVirtueApplicationsByUserAndTag(tag);
+		return virtues;
+	}
+
+	/**
 	 * Starts an application on a given virtue for the requesting user.
 	 * 
 	 * @param virtueId
@@ -62,8 +79,8 @@ public class DesktopRestService {
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/{applicationId}/start")
 	public DesktopVirtueApplication startApplication(@PathParam("virtueId") String virtueId,
-			@PathParam("applicationId") String applicationId) {
-		return desktopService.startApplication(virtueId, applicationId);
+			@PathParam("applicationId") String applicationId, @QueryParam("cliParams") String params) {
+		return desktopService.startApplication(virtueId, applicationId, params);
 	}
 
 	/**
@@ -75,7 +92,7 @@ public class DesktopRestService {
 	@GET
 	@Produces("application/json")
 	@Path("virtue/{virtueId}/reconnect")
-	public Collection<DesktopVirtueApplication> startApplication(@PathParam("virtueId") String virtueId) {
+	public Collection<DesktopVirtueApplication> reconnectToVirtue(@PathParam("virtueId") String virtueId) {
 		return desktopService.getReconnectApps(virtueId);
 	}
 

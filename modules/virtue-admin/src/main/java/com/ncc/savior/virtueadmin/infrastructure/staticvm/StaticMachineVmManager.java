@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -45,7 +46,6 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 		this.privateKey = privateKey;
 	}
 
-	@Override
 	public VirtualMachine provisionVirtualMachineTemplate(VirtueUser user, VirtualMachineTemplate vmt,
 			CompletableFuture<Collection<VirtualMachine>> future) {
 		VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),
@@ -78,7 +78,7 @@ public class StaticMachineVmManager extends BaseVmManager implements IVmManager 
 
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
-			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future, String virtue) {
+			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> future, VirtueCreationAdditionalParameters virtueMods) {
 		Collection<VirtualMachine> vms = new HashSet<VirtualMachine>();
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			VirtualMachine vm = new VirtualMachine(UUID.randomUUID().toString(), vmt.getName(), vmt.getApplications(),

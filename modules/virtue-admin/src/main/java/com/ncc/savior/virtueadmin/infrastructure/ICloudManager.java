@@ -9,6 +9,7 @@
 
 package com.ncc.savior.virtueadmin.infrastructure;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -69,5 +70,7 @@ public interface ICloudManager {
 	VirtueInstance stopVirtue(VirtueInstance virtueInstance);
 	
 	void rebootVm(VirtualMachine vm, String virtueId);
+
+	void sync(List<String> ids);
 
 }

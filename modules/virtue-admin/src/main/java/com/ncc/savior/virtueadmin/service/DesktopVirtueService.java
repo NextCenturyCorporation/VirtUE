@@ -3,8 +3,11 @@ package com.ncc.savior.virtueadmin.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -85,14 +88,37 @@ public class DesktopVirtueService {
 		return virtues;
 	}
 
-	public DesktopVirtueApplication startApplication(String virtueId, String applicationId) {
+	public Set<DesktopVirtue> getVirtueApplicationsByUserAndTag(String tag) {
+		Set<DesktopVirtue> all = getDesktopVirtuesForUser();
+		HashSet<DesktopVirtue> resultantVirtues = new HashSet<DesktopVirtue>();
+		Iterator<DesktopVirtue> vItr = all.iterator();
+		while (vItr.hasNext()) {
+			DesktopVirtue virtue = vItr.next();
+			Iterator<Entry<String, ApplicationDefinition>> appItr = virtue.getApps().entrySet().iterator();
+			HashMap<String, ApplicationDefinition> apps = new HashMap<String, ApplicationDefinition>();
+			while (appItr.hasNext()) {
+				ApplicationDefinition app = appItr.next().getValue();
+				if (app.getTags().contains(tag)) {
+					apps.put(app.getId(), app);
+				}
+			}
+			if (!apps.isEmpty()) {
+				virtue.setApps(apps);
+				resultantVirtues.add(virtue);
+			}
+		}
+		return resultantVirtues;
+	}
+
+	public DesktopVirtueApplication startApplication(String virtueId, String applicationId, String params) {
 		verifyAndReturnUser();
 		ApplicationDefinition application = templateManager.getApplicationDefinition(applicationId);
 		VirtualMachine vm = activeVirtueManager.getVmWithApplication(virtueId, applicationId);
 		vm = activeVirtueManager.startVirtualMachine(vm);
 		if (OS.LINUX.equals(vm.getOs())) {
-			applicationManager.startApplicationOnVm(vm, application, 15);
+			applicationManager.startApplicationOnVm(vm, application, params, 15);
 		} else {
+
 		}
 		String hostname = vm.getHostname();
 		DesktopVirtueApplication dva = new DesktopVirtueApplication(application, hostname, vm.getSshPort(),
@@ -123,7 +149,7 @@ public class DesktopVirtueService {
 				throw new SaviorException(SaviorErrorCode.INVALID_STATE, "Error with virtue state! " + s);
 			}
 		}
-		DesktopVirtueApplication app = startApplication(instance.getId(), applicationId);
+		DesktopVirtueApplication app = startApplication(instance.getId(), applicationId, null);
 		long b = System.currentTimeMillis();
 		logger.debug("Starting application from template took " + ((b - a) / 1000) / 60.0 + " minutes");
 		return app;
@@ -132,10 +158,10 @@ public class DesktopVirtueService {
 	public Collection<DesktopVirtueApplication> getReconnectApps(String virtueId) {
 		verifyAndReturnUser();
 		VirtueInstance virtue = activeVirtueManager.getActiveVirtue(virtueId);
-		ApplicationDefinition winApp = new ApplicationDefinition("reconnect", "reconnect", "1.0", OS.WINDOWS,
-				"default");
-		ApplicationDefinition linuxApp = new ApplicationDefinition("reconnect", "reconnect", "1.0", OS.LINUX,
-				"default");
+		ApplicationDefinition winApp = new ApplicationDefinition("reconnect", "reconnect", "1.0", OS.WINDOWS, "default",
+				null);
+		ApplicationDefinition linuxApp = new ApplicationDefinition("reconnect", "reconnect", "1.0", OS.LINUX, "default",
+				null);
 		Collection<DesktopVirtueApplication> col = new ArrayList<DesktopVirtueApplication>();
 		for (VirtualMachine vm : virtue.getVms()) {
 			String hostname = vm.getHostname();
@@ -193,7 +219,7 @@ public class DesktopVirtueService {
 		for (ApplicationDefinition app : apps) {
 			appsMap.put(app.getId(), app);
 		}
-		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED);
+		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED, template.getColor());
 	}
 
 	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
@@ -204,7 +230,7 @@ public class DesktopVirtueService {
 			appsMap.put(app.getId(), app);
 		}
 		return new DesktopVirtue(instance.getId(), instance.getName(), instance.getTemplateId(), appsMap,
-				instance.getState());
+				instance.getState(), instance.getColor());
 	}
 
 	private VirtueUser verifyAndReturnUser() {

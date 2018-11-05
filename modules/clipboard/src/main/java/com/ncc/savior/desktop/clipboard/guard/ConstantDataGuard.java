@@ -1,6 +1,6 @@
 package com.ncc.savior.desktop.clipboard.guard;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of {@link ICrossGroupDataGuard} which gives a static response.
@@ -26,7 +26,7 @@ public class ConstantDataGuard implements ICrossGroupDataGuard {
 	}
 
 	@Override
-	public void setGroupIdToDisplayNameMap(HashMap<String, String> groupIdToDisplayName) {
+	public void setGroupIdToDisplayNameMap(Map<String, String> groupIdToDisplayName) {
 		// this implementation never displays anything, so we don't need to store a
 		// reference to the map.
 	}

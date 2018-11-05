@@ -13,15 +13,17 @@ public class DesktopVirtue {
 	private String templateId;
 	private Map<String, ApplicationDefinition> apps;
 	private VirtueState virtueState;
+	private String color;
 
 	public DesktopVirtue(String id, String name, String templateId, Map<String, ApplicationDefinition> apps,
-			VirtueState virtueState) {
+			VirtueState virtueState, String color) {
 		super();
 		this.name = name;
 		this.apps = apps;
 		this.id = id;
 		this.templateId = templateId;
 		this.virtueState = virtueState;
+		this.color=color;
 	}
 
 	public DesktopVirtue(String id, String name, String templateId) {
@@ -77,10 +79,18 @@ public class DesktopVirtue {
 		this.virtueState = virtueState;
 	}
 
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
+
 	@Override
 	public String toString() {
 		return "DesktopVirtue [id=" + id + ", name=" + name + ", templateId=" + templateId + ", apps=" + apps
-				+ ", virtueState=" + virtueState + "]";
+				+ ", virtueState=" + virtueState + ", color=" + color + "]";
 	}
 
 	@Override

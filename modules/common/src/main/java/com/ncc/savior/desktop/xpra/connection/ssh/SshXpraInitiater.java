@@ -151,7 +151,8 @@ public class SshXpraInitiater implements IXpraInitiator {
 		}
 		try {
 			session = getConnectedSessionWithRetries();
-			String fullCommand = "export DISPLAY=:" + display + ";" + SUDO_OR_NOTHING + command;
+			String fullCommand = "export BROWSER=./savior-browser.sh; export DISPLAY=:" + display + ";"
+					+ SUDO_OR_NOTHING + command;
 			logger.debug("cmd: " + fullCommand);
 			channel = getConnectedChannel(fullCommand, session, null);
 			// InputStreamReader stream = new InputStreamReader(channel.getInputStream());

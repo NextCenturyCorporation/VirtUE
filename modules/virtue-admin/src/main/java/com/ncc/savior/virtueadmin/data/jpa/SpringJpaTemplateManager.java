@@ -330,6 +330,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 	}
 
 	@Override
+	public Iterable<IconModel> getAllIcons() {
+		return iconRepo.findAll();
+	}
+
+	@Override
 	public IconModel getIcon(String iconKey) {
 		Optional<IconModel> icon = iconRepo.findById(iconKey);
 		if (icon.isPresent()) {

@@ -3,5 +3,8 @@
     "version": "1.0",
     "os": "LINUX",
     "launchCommand": "google-chrome",
-    "iconKey": "chrome"
+    "iconKey": "chrome",
+    "tags": [
+    	"BROWSER"
+    ]
 }
