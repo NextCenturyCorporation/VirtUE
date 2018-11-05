@@ -19,6 +19,6 @@ else
 	configDir=virtue-shares
 fi
 
-for conffile in $(find $configDir -name '*.conf') ; do
+for conffile in "$(find $configDir -name '*.conf')" ; do
 	echo "include = $conffile"
 done > virtue-shares.conf
