@@ -3,7 +3,6 @@ package com.ncc.savior.desktop.sidebar;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,14 +13,13 @@ import com.ncc.savior.desktop.alerting.BaseAlertMessage;
 import com.ncc.savior.desktop.alerting.PlainAlertMessage;
 import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.alerting.VirtueAlertMessage;
-import com.ncc.savior.desktop.authorization.AuthorizationService;
-import com.ncc.savior.desktop.authorization.DesktopUser;
-import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 import com.ncc.savior.desktop.sidebar.defaultapp.DefaultAppTableDialog;
 import com.ncc.savior.desktop.sidebar.defaultapp.IAppChooser;
 import com.ncc.savior.desktop.sidebar.defaultapp.StatusFirstVirtueAppComparator;
+import com.ncc.savior.desktop.sidebar.prefs.DesktopPreference;
+import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -35,17 +33,17 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultApplicationLauncher.class);
 	private static final String PREF_KEY_VIRTUE_TEMPLATE_ID = "virtueId";
 	private static final String PREF_KEY_APP_ID = "appId";
-	private AuthorizationService authorizationService;
 	private VirtueService virtueService;
 	private IIconService iconService;
 	private ColorManager colorManager;
+	private PreferenceService preferenceService;
 
-	public DefaultApplicationLauncher(AuthorizationService authService, VirtueService virtueService,
-			IIconService iconService, ColorManager colorManager) {
-		this.authorizationService = authService;
+	public DefaultApplicationLauncher(VirtueService virtueService,
+			IIconService iconService, ColorManager colorManager, PreferenceService preferenceService) {
 		this.virtueService = virtueService;
 		this.iconService = iconService;
 		this.colorManager = colorManager;
+		this.preferenceService = preferenceService;
 	}
 
 	@Override
@@ -71,29 +69,6 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 
 	}
 
-	public void clearPrefs() {
-		try {
-			DesktopUser user = authorizationService.getUser();
-			Preferences defaultAppsPrefs = Preferences.userRoot()
-					.node("VirtUE/Desktop/" + user.getUsername() + "/defaultApps");
-			defaultAppsPrefs.removeNode();
-			// String[] apps = defaultAppsPrefs.childrenNames();
-			// for (String app : apps) {
-			// Preferences appPref = Preferences.userRoot()
-			// .node("VirtUE/Desktop/" + user.getUsername() + "/defaultApps/" + app);
-			// appPref.clear();
-			// appPref.rem
-			// }
-		} catch (InvalidUserLoginException e) {
-			String msg = "Unable to clear default application preferences because username is invalid.";
-			logAndAlertError(e, "Unable to get user", msg);
-		} catch (BackingStoreException e) {
-			String msg = "Unable to clear default application preferences because unable to find preferences.";
-			logAndAlertError(e, "Unable to get user", msg);
-		}
-
-	}
-
 	private void startAppWithParam(Pair<DesktopVirtue, ApplicationDefinition> pair, String params) {
 		logger.debug("Starting application on " + pair);
 
@@ -110,34 +85,31 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 
 	private Pair<DesktopVirtue, ApplicationDefinition> getSavedVirtueIdAndApplicationDefn(
 			DefaultApplicationType defaultApplicationType, List<DesktopVirtue> possibleApps) {
-		DesktopUser user;
-		try {
-			user = authorizationService.getUser();
-
-			Preferences favorites = Preferences.userRoot()
-					.node("VirtUE/Desktop/" + user.getUsername() + "/defaultApps/" + defaultApplicationType.toString());
-			String virtueTemplateId = favorites.get(PREF_KEY_VIRTUE_TEMPLATE_ID, null);
-			String appId = favorites.get(PREF_KEY_APP_ID, null);
-			if (virtueTemplateId == null || appId == null) {
-				return null;
-			} else {
-				for (DesktopVirtue v : possibleApps) {
-					if (virtueTemplateId.equals(v.getTemplateId())) {
-						for (ApplicationDefinition a : v.getApps().values()) {
-							if (appId.equals(a.getId())) {
-								return Pair.of(v, a);
-							}
+		// try {
+		Preferences favorites = preferenceService.getPreferenceNode(DesktopPreference.DEFAULT_APPS,
+				defaultApplicationType.toString());
+		String virtueTemplateId = favorites.get(PREF_KEY_VIRTUE_TEMPLATE_ID, null);
+		String appId = favorites.get(PREF_KEY_APP_ID, null);
+		if (virtueTemplateId == null || appId == null) {
+			return null;
+		} else {
+			for (DesktopVirtue v : possibleApps) {
+				if (virtueTemplateId.equals(v.getTemplateId())) {
+					for (ApplicationDefinition a : v.getApps().values()) {
+						if (appId.equals(a.getId())) {
+							return Pair.of(v, a);
 						}
 					}
 				}
-				return null;
 			}
-		} catch (InvalidUserLoginException e) {
-			String msg = "Unable to get valid user to get saved default Application for "
-					+ defaultApplicationType.toString();
-			logAndAlertError(e, "Unable to get user", msg);
+			return null;
 		}
-		return null;
+		// } catch (Exception e) {
+		// String msg = "Unable to get valid user to get saved default Application for "
+		// + defaultApplicationType.toString();
+		// logAndAlertError(e, "Unable to get user", msg);
+		// }
+		// return null;
 	}
 
 	protected void logAndAlertError(Exception e, String title, String msg) {
@@ -167,11 +139,10 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 
 		dald.setSavePreferenceAction((pair) -> {
 			try {
-				DesktopUser user = authorizationService.getUser();
-				Preferences favorites = Preferences.userRoot().node(
-						"VirtUE/Desktop/" + user.getUsername() + "/defaultApps/" + defaultApplicationType.toString());
-				favorites.put(PREF_KEY_VIRTUE_TEMPLATE_ID, pair.getLeft().getTemplateId());
-				favorites.put(PREF_KEY_APP_ID, pair.getRight().getId());
+				Preferences defaultApp = preferenceService.getPreferenceNode(DesktopPreference.DEFAULT_APPS,
+						defaultApplicationType.toString());
+				defaultApp.put(PREF_KEY_VIRTUE_TEMPLATE_ID, pair.getLeft().getTemplateId());
+				defaultApp.put(PREF_KEY_APP_ID, pair.getRight().getId());
 			} catch (Exception e1) {
 				String msg = "Unable to save default Application for " + defaultApplicationType.toString();
 				logAndAlertError(e1, "Error writing preferences ", msg);

@@ -20,6 +20,7 @@ import com.ncc.savior.desktop.clipboard.hub.ClipboardHub;
 import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.rdp.WindowsRdp;
+import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
 import com.ncc.savior.desktop.virtues.DesktopResourceService;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.IconResourceService;
@@ -84,7 +85,9 @@ public class SidebarApplication {
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager, authService);
 		IIconService iconService = new IconResourceService(drs);
 		ColorManager colorManager = new ColorManager();
-		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, useColors, style);
+		PreferenceService prefService = new PreferenceService(authService);
+		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService, useColors,
+				style);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		clipboardHub.addDefaultApplicationListener(sidebar.getDefaultApplicationHandler());
 		controller.init(primaryFrame);
