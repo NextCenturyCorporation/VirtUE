@@ -94,7 +94,7 @@ public class ShareService {
 	/**
 	 * The directory where the Samba config files live (e.g., smb.conf).
 	 */
-	@Value("${sambaConfigDir:/etc/samba")
+	@Value("${sambaConfigDir:/etc/samba}")
 	protected String sambaConfigDir;
 
 	/**
@@ -108,7 +108,7 @@ public class ShareService {
 	 * The helper shell program that creates the "virtue-shares.conf" file used as
 	 * part of the samba config.
 	 */
-	@Value("${sambaConfigHelper:make-virtue-shares.sh")
+	@Value("${sambaConfigHelper:make-virtue-shares.sh}")
 	protected String SAMBA_CONFIG_HELPER;
 
 	/**
@@ -220,8 +220,23 @@ public class ShareService {
 		FileWriter configWriter = new FileWriter(new File(virtueConfigDir, share.getName() + ".conf"));
 		configWriter.write(makeShareConfig(share));
 		configWriter.close();
+		ProcessBuilder processBuilder = new ProcessBuilder(SAMBA_CONFIG_HELPER);
+		processBuilder.directory(new File(sambaConfigDir));
+		int retval;
 		synchronized (SAMBA_CONFIG_HELPER_LOCK) {
-			Runtime.getRuntime().exec(SAMBA_CONFIG_HELPER);
+			Process process = processBuilder.start();
+			try {
+				retval = process.waitFor();
+			} catch (InterruptedException e) {
+				LOGGER.warn("Samba configuration helper was interrupted. Samba configuration may not be correct.");
+				retval = 0;
+			}
+		}
+		if (retval != 0) {
+			WebServiceException wse = new WebServiceException(
+					"error result from Samba configuration helper '" + SAMBA_CONFIG_HELPER + "': " + retval);
+			LOGGER.throwing(wse);
+			throw wse;
 		}
 	}
 
@@ -289,7 +304,7 @@ public class ShareService {
 		LOGGER.entry(fs);
 		String mountPoint = mountPoints.get(fs);
 		if (mountPoint == null) {
-			mountPoint = fs.getName();
+			mountPoint = fs.getVirtue() + File.separator + fs.getName();
 			mountPoints.put(fs, mountPoint);
 		}
 		LOGGER.exit(mountPoint);
@@ -497,7 +512,7 @@ public class ShareService {
 	private void doMount(FileShare share, String username) throws WebServiceException {
 		LOGGER.entry(share, username);
 		String mountPoint = getMountPoint(share);
-		File destination = new File(MOUNT_ROOT, mountPoint);
+		File destination = new File(MOUNT_ROOT + File.separator + mountPoint);
 		// make sure the destination is inside MOUNT_ROOT
 		String canonicalDest;
 		try {
@@ -517,9 +532,9 @@ public class ShareService {
 			LOGGER.throwing(wse);
 			throw wse;
 		}
-		if (!destination.exists() && !destination.mkdir()) {
+		if (!destination.exists() && !destination.mkdirs()) {
 			WebServiceException wse = new WebServiceException(
-					"could not create target mountpoint '" + mountPoint + "' for share '" + share.getName() + "'");
+					"could not create target mountpoint '" + destination + "' for share '" + share.getName() + "'");
 			LOGGER.throwing(wse);
 			throw wse;
 		}
