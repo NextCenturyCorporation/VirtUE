@@ -34,13 +34,13 @@ public class PreferenceService {
 	public PreferenceService(AuthorizationService authService) {
 		allPrefs = new HashMap<DesktopPreference, DesktopPreferenceDetails>();
 		allPrefs.put(DesktopPreference.FAVORITES, new DesktopPreferenceDetails("Favorite Applications",
-				"Applications that have been favorited by the user", "/favorites"));
+				"Applications that have been favorited by the user", "/favorites", true));
 		allPrefs.put(DesktopPreference.LAST_VIEW,
-				new DesktopPreferenceDetails("Last View", "The last view set by the user.", "/lastView"));
+				new DesktopPreferenceDetails("Last View", "The last view set by the user.", "/lastView", false));
 		allPrefs.put(DesktopPreference.LAST_SORT, new DesktopPreferenceDetails("Last Sort",
-				"The last virtue/application sorting mechanism set by user", "/lastSort"));
+				"The last virtue/application sorting mechanism set by user", "/lastSort", false));
 		allPrefs.put(DesktopPreference.DEFAULT_APPS, new DesktopPreferenceDetails("Default Applicaion - ",
-				"IDs for virtue and application to use for default application.", "/defaultApps", true));
+				"IDs for virtue and application to use for default application.", "/defaultApps", true, true));
 
 		authService.addLoginListener(new ILoginListener() {
 
@@ -219,7 +219,7 @@ public class PreferenceService {
 		}
 		for (String key : node.keys()) {
 			String value = node.get(key, null);
-			logger.debug(node + " " + key + ": " + value);
+			// logger.debug(node + " " + key + ": " + value);
 			if (JavaUtil.isNotEmpty(value)) {
 				DesktopPreferenceData pdto = new DesktopPreferenceData(relativeNodePath, key, value);
 				list.add(pdto);

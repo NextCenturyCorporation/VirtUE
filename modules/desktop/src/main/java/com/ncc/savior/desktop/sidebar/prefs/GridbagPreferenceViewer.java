@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Label;
 import java.awt.Point;
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.border.MatteBorder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,57 +62,67 @@ public class GridbagPreferenceViewer {
 				clearAllPreferences();
 			});
 			table.setOpaque(false);
-			table.setBorder(BorderFactory.createEmptyBorder());
-			table.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+			// table.setBorder(BorderFactory.createEmptyBorder());
+			// table.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 			int i = 1;
 			addHeaders(table);
 			for (DesktopPreference node : DesktopPreference.values()) {
 				DesktopPreferenceDetails desc = preferenceService.getDescription(node);
-				if (desc.isNodeCollection()) {
-					String[] elements = preferenceService.getCollectionElements(node);
-					for (String element : elements) {
-						data = preferenceService.getPreferenceData(node, element);
-						i += createSingleRow(table, node, element, data, i);
+				if (desc.isDisplayInPrefTable()) {
+					if (desc.isNodeCollection()) {
+						String[] elements = preferenceService.getCollectionElements(node);
+						for (String element : elements) {
+							data = preferenceService.getPreferenceData(node, element);
+							i += createSingleRow(table, node, element, data, i);
+						}
+					} else {
+						data = preferenceService.getPreferenceData(node, null);
+						i += createSingleRow(table, node, "", data, i);
 					}
-				} else {
-					data = preferenceService.getPreferenceData(node, null);
-					i += createSingleRow(table, node, "", data, i);
 				}
 			}
+			int width;
+			if (i == 1) {
+				// No prefs to show
+				table.removeAll();
+				addNoPrefLabel();
+				width = 400;
+			} else {
+				// gridbag
+				GridBagConstraints scrollGbc = new GridBagConstraints();
+				scrollGbc.fill = GridBagConstraints.BOTH;
+				scrollGbc.gridx = 0;
+				scrollGbc.gridy = 1;
+				scrollGbc.gridheight = 1;
+				scrollGbc.gridwidth = 2;
+				scrollGbc.weightx = 1;
+				scrollGbc.weighty = 1;
+				// scrollGbc.ipadx = 2;
+				// scrollGbc.ipady = 2;
+				scrollGbc.insets = new Insets(5, 5, 5, 5);
 
-			// gridbag
-			GridBagConstraints scrollGbc = new GridBagConstraints();
-			scrollGbc.fill = GridBagConstraints.BOTH;
-			scrollGbc.gridx = 0;
-			scrollGbc.gridy = 1;
-			scrollGbc.gridheight = 1;
-			scrollGbc.gridwidth = 2;
-			scrollGbc.weightx = 1;
-			scrollGbc.weighty = 1;
-			// scrollGbc.ipadx = 2;
-			// scrollGbc.ipady = 2;
-			scrollGbc.insets = new Insets(5, 5, 5, 5);
+				GridBagConstraints clearAllGbc = new GridBagConstraints();
+				// checkGbc.fill = GridBagConstraints.BOTH;
+				clearAllGbc.gridx = 1;
+				clearAllGbc.gridy = 2;
+				clearAllGbc.weightx = 2;
+				clearAllGbc.insets = new Insets(5, 55, 5, 5);
 
-			GridBagConstraints clearAllGbc = new GridBagConstraints();
-			// checkGbc.fill = GridBagConstraints.BOTH;
-			clearAllGbc.gridx = 1;
-			clearAllGbc.gridy = 2;
-			clearAllGbc.weightx = 2;
-			clearAllGbc.insets = new Insets(5, 55, 5, 5);
+				listScroll.setBorder(BorderFactory.createEmptyBorder());
+				listScroll.setMinimumSize(new Dimension(100, 300));
+				dialog.add(listScroll, scrollGbc);
+				dialog.add(clearAllButton, clearAllGbc);
+				// dialog.add(openButton, openGbc);
 
-			listScroll.setBorder(BorderFactory.createEmptyBorder());
-			listScroll.setMinimumSize(new Dimension(100, 300));
-			dialog.add(listScroll, scrollGbc);
-			dialog.add(clearAllButton, clearAllGbc);
-			// dialog.add(openButton, openGbc);
-
-			listScroll.setBorder(BorderFactory.createEmptyBorder());
-			listScroll.setMinimumSize(new Dimension(100, 300));
-			// dialog.setSize(new Dimension(600, 400));
+				listScroll.setBorder(BorderFactory.createEmptyBorder());
+				listScroll.setMinimumSize(new Dimension(100, 300));
+				// dialog.setSize(new Dimension(600, 400));
+				width = 600;
+			}
 			dialog.pack();
 			Dimension size = dialog.getSize();
-			size.width = 800;
+			size.width = width;
 
 			dialog.setSize(size);
 			dialog.setVisible(true);
@@ -120,12 +132,17 @@ public class GridbagPreferenceViewer {
 		}
 	}
 
+	private void addNoPrefLabel() {
+		Label label = new Label("No preferences set.");
+		dialog.add(label);
+	}
+
 	private void addHeaders(JPanel table) {
 		JLabel pathLabel = new JLabel("Name");
 		JLabel descLabel = new JLabel("Description");
 		JLabel keyLabel = new JLabel("Key");
 		JLabel valueLabel = new JLabel("Value");
-		JLabel clearLabel = new JLabel("Clear");
+		JLabel clearLabel = new JLabel("");
 		pathLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		descLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		keyLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -139,19 +156,19 @@ public class GridbagPreferenceViewer {
 		gbc.gridy = 0;
 		gbc.weightx = 1;
 
-		gbc.gridx = 1;
+		gbc.gridx = 0;
 		table.add(pathLabel, gbc);
 
-		gbc.gridx = 2;
+		gbc.gridx = 1;
 		table.add(descLabel, gbc);
 
-		gbc.gridx = 3;
-		table.add(keyLabel, gbc);
+		// gbc.gridx = 3;
+		// table.add(keyLabel, gbc);
+		//
+		// gbc.gridx = 4;
+		// table.add(valueLabel, gbc);
 
-		gbc.gridx = 4;
-		table.add(valueLabel, gbc);
-
-		gbc.gridx = 0;
+		gbc.gridx = 2;
 		table.add(clearLabel, gbc);
 	}
 
@@ -160,6 +177,13 @@ public class GridbagPreferenceViewer {
 		if (data.isEmpty()) {
 			return 0;
 		}
+		int topBorder = 0;
+		if (i == 1) {
+			topBorder = 1;
+		}
+		int rightBorder = 0;
+		int leftBorder = 1;
+		int bottomBorder = 1;
 		DesktopPreferenceDetails desc = preferenceService.getDescription(node);
 		String name = desc.getName();
 		if (desc.isNodeCollection() && element != null) {
@@ -185,9 +209,11 @@ public class GridbagPreferenceViewer {
 				reportError("Error clearing prefence", e);
 			}
 		});
-		nameLabel.setBorder(BorderFactory.createLineBorder(Color.black));
-		descriptionLabel.setBorder(BorderFactory.createLineBorder(Color.black));
-		clearButton.setBorder(BorderFactory.createLineBorder(Color.black));
+		MatteBorder border = BorderFactory.createMatteBorder(topBorder, leftBorder, bottomBorder, rightBorder,
+				Color.black);
+		nameLabel.setBorder(border);
+		descriptionLabel.setBorder(border);
+		// clearButton.setBorder(BorderFactory.createLineBorder(Color.black));
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.ipadx = 5;
@@ -199,31 +225,37 @@ public class GridbagPreferenceViewer {
 		gbc.weightx = 25;
 		gbc.gridheight = data.size();
 
-		gbc.gridx = 1;
+		gbc.gridx = 0;
 		table.add(nameLabel, gbc);
 
-		gbc.gridx = 2;
+		gbc.gridx = 1;
 		table.add(descriptionLabel, gbc);
 
-		gbc.gridx = 0;
+		gbc.gridx = 2;
 		gbc.weightx = 10;
 		table.add(clearButton, gbc);
 
 		int x = 0;
 		for (DesktopPreferenceData row : data) {
+
+			topBorder = (x == 0 ? topBorder : 0);
+			bottomBorder = (x == data.size() - 1 ? bottomBorder : 1);
+
 			JLabel valueLabel = new JLabel(row.getValue());
 			valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
 			gbc.gridx = 4;
 			gbc.gridy = i + 1 + x;
 			gbc.gridheight = 1;
-			valueLabel.setBorder(BorderFactory.createLineBorder(Color.black));
-			table.add(valueLabel, gbc);
+			valueLabel.setBorder(
+					BorderFactory.createMatteBorder(topBorder, leftBorder, bottomBorder, rightBorder, Color.black));
+			// table.add(valueLabel, gbc);
 
 			JLabel keyLabel = new JLabel(row.getKey());
 			keyLabel.setHorizontalAlignment(SwingConstants.CENTER);
 			gbc.gridx = 3;
-			keyLabel.setBorder(BorderFactory.createLineBorder(Color.black));
-			table.add(keyLabel, gbc);
+			keyLabel.setBorder(
+					BorderFactory.createMatteBorder(topBorder, leftBorder, bottomBorder, rightBorder, Color.black));
+			// table.add(keyLabel, gbc);
 
 			x++;
 

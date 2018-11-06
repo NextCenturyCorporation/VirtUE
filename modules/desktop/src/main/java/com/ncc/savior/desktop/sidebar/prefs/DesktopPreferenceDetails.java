@@ -12,17 +12,20 @@ public class DesktopPreferenceDetails {
 	private boolean nodeCollection;
 	private String description;
 	private String name;
+	private boolean displayInPrefTable;
 
-	public DesktopPreferenceDetails(String name, String description, String root, boolean nodeCollection) {
+	public DesktopPreferenceDetails(String name, String description, String root, boolean displayInPrefTable,
+			boolean nodeCollection) {
 		super();
 		this.root = root;
 		this.nodeCollection = nodeCollection;
 		this.description = description;
 		this.name = name;
+		this.displayInPrefTable = displayInPrefTable;
 	}
 
-	public DesktopPreferenceDetails(String name, String description, String root) {
-		this(name, description, root, false);
+	public DesktopPreferenceDetails(String name, String description, String root, boolean displayInPrefTable) {
+		this(name, description, root, displayInPrefTable, false);
 	}
 
 	public String getRoot() {
@@ -39,6 +42,10 @@ public class DesktopPreferenceDetails {
 
 	public String getName() {
 		return name;
+	}
+
+	public boolean isDisplayInPrefTable() {
+		return displayInPrefTable;
 	}
 
 }
