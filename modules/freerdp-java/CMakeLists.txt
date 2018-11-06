@@ -25,9 +25,11 @@ set_source_files_properties(src/main/swig/freerdp.i PROPERTIES
 set(CMAKE_SWIG_FLAGS -package com.nextcentury.savior.freerdp)
 include_directories(src/main/cpp)
 
-swig_add_module(
+swig_add_library(
 	jfreerdp
-	java
+	TYPE SHARED 
+	LANGUAGE java
+	SOURCES
 	src/main/swig/freerdp.i
 	src/main/cpp/FreeRDPWrapper.h
 	src/main/cpp/FreeRDPWrapper.cpp
