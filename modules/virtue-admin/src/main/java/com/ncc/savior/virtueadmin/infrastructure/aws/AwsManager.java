@@ -493,4 +493,9 @@ public class AwsManager implements ICloudManager {
 		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED,
 				"reboot virtue not implemented for " + this.getClass().getSimpleName());
 	}
+
+	@Override
+	public void sync(List<String> ids) {
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Sync not implemented in this implementation");
+	}
 }

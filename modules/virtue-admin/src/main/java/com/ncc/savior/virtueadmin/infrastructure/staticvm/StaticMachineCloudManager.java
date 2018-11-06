@@ -1,9 +1,12 @@
 package com.ncc.savior.virtueadmin.infrastructure.staticvm;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -61,7 +64,10 @@ public class StaticMachineCloudManager implements ICloudManager {
 	@Override
 	public void rebootVm(VirtualMachine vm, String virtue) {
 		// TODO Auto-generated method stub
-
 	}
 
+	@Override
+	public void sync(List<String> ids) {
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Sync not implemented in this implementation");
+	}
 }

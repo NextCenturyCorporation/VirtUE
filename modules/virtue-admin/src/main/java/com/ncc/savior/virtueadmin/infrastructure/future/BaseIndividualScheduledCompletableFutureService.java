@@ -66,6 +66,12 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		String id = getId(wrapper);
 		Runnable command = getRunnable(wrapper, id);
 		ScheduledFuture<?> future = schedule(command);
+		if (futureMap.containsKey(id)) {
+			logger.debug("Already had a future with ID=" + id + " Cancelling previous future. Service="
+					+ getServiceName() + " P=" + p);
+			cancelFuture(id);
+		}
+//		logger.debug("adding future with id=" + id + " service=" + getServiceName() + " P=" + p);
 		futureMap.put(id, future);
 	}
 
@@ -86,6 +92,7 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 	protected void onSuccess(String id, R result, CompletableFuture<R> cf) {
 		ScheduledFuture<?> future = futureMap.get(id);
 		if (future == null) {
+			logger.debug("Success but future was null.  Id=" + id + " Service=" + this.getServiceName());
 			super.onFailure(null, cf);
 		} else {
 			cancelFuture(id);
@@ -103,10 +110,14 @@ public abstract class BaseIndividualScheduledCompletableFutureService<P, R, X>
 		if (future != null) {
 			boolean success = future.cancel(false);
 			if (success) {
+//				logger.debug("Removing id from map.  id="+id);
 				futureMap.remove(id);
 			} else {
 				logger.error("Failed to cancel future with id=" + id);
 			}
+		} else {
+			logger.debug("Attempting to cancel future, but no future found!  Id=" + id + " Service="
+					+ this.getServiceName());
 		}
 	}
 

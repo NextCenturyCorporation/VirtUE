@@ -52,6 +52,13 @@ public class AwsUtil {
 	public static final String TAG_SERVER_ID = "savior-server-id";
 	public static final String TAG_TEMPLATE_ID = "savior-virtue-template-id";
 	public static final String TAG_INSTANCE_ID = "savior-virtue-instance-id";
+	public static final String TAG_USERNAME = "savior-username";
+	public static final String TAG_VIRTUE_NAME = "savior-virtue-name";
+	public static final String TAG_NAME = "Name";
+	public static final String TAG_AUTO_GENERATED_TRUE = "true";
+	public static final String TAG_AUTO_GENERATED = "savior-auto-generated";
+	public static final String TAG_CREATED_TIME = "savior-created-time";
+	public static final String FILTER_TAG = "tag:";
 
 	public static Collection<VirtualMachine> updateStatusOnVms(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();

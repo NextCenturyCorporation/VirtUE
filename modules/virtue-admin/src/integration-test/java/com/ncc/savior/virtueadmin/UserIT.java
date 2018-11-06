@@ -29,7 +29,7 @@ import io.restassured.response.Response;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource("/application-test.properties")
+@TestPropertySource("/application-int-test.properties")
 public class UserIT {
 
 	static class User {

@@ -32,7 +32,7 @@ import com.ncc.savior.virtueadmin.util.WebServiceUtil;
  */
 @Component
 @ApplicationPath("/")
-@PropertySources({ @PropertySource(value = "classpath:savior-server.properties", ignoreResourceNotFound = true),
+@PropertySources({ @PropertySource(value = "classpath:savior-server.properties", ignoreResourceNotFound = true), 
 		@PropertySource(value = "file:savior-server.properties", ignoreResourceNotFound = true) })
 public class ApiConfig extends ResourceConfig {
 
