@@ -1,0 +1,1464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
+ <office:meta>
+<dc:creator>Chris Long</dc:creator>
+<meta:initial-creator>Chris Long</meta:initial-creator>
+<dc:date>2018-11-05T21:17:59.369926725</dc:date>
+<meta:creation-date>2018-10-08T00:00:00</meta:creation-date>
+<meta:generator>LibreOffice/6.0.6.2$Linux_X86_64 LibreOffice_project/00m0$Build-2</meta:generator>
+<meta:keyword>cifs, savior, kerberos</meta:keyword>
+<dc:subject>Describes the CIFS Proxy SAVIOR component.</dc:subject>
+<dc:title>SAVIOR CIFS Proxy</dc:title>
+
+  <meta:editing-duration>PT7M50S</meta:editing-duration><meta:editing-cycles>5</meta:editing-cycles><meta:document-statistic meta:table-count="1" meta:image-count="0" meta:object-count="0" meta:page-count="7" meta:paragraph-count="168" meta:word-count="2057" meta:character-count="12519" meta:non-whitespace-character-count="10541"/></office:meta>
+ <office:settings>
+  <config:config-item-set config:name="ooo:view-settings">
+   <config:config-item config:name="ViewAreaTop" config:type="long">0</config:config-item>
+   <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
+   <config:config-item config:name="ViewAreaWidth" config:type="long">31328</config:config-item>
+   <config:config-item config:name="ViewAreaHeight" config:type="long">16688</config:config-item>
+   <config:config-item config:name="ShowRedlineChanges" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="InBrowseMode" config:type="boolean">false</config:config-item>
+   <config:config-item-map-indexed config:name="Views">
+    <config:config-item-map-entry>
+     <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">19632</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">2501</config:config-item>
+     <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
+     <config:config-item config:name="VisibleTop" config:type="long">0</config:config-item>
+     <config:config-item config:name="VisibleRight" config:type="long">31327</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">16686</config:config-item>
+     <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
+     <config:config-item config:name="ViewLayoutColumns" config:type="short">0</config:config-item>
+     <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="ZoomFactor" config:type="short">120</config:config-item>
+     <config:config-item config:name="IsSelectedFrame" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="AnchoredTextOverflowLegacy" config:type="boolean">false</config:config-item>
+    </config:config-item-map-entry>
+   </config:config-item-map-indexed>
+  </config:config-item-set>
+  <config:config-item-set config:name="ooo:configuration-settings">
+   <config:config-item config:name="PrintPaperFromSetup" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintFaxName" config:type="string"/>
+   <config:config-item config:name="PrintSingleJobs" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintProspectRTL" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintProspect" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintReversed" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintTextPlaceholder" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintTables" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="DoNotJustifyLinesWithManualBreak" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AlignTabStopPosition" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintLeftPages" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="IgnoreFirstLineIndentInNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary"/>
+   <config:config-item config:name="CollapseEmptyCellPara" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="RedlineProtectionKey" config:type="base64Binary"/>
+   <config:config-item config:name="UseOldPrinterMetrics" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UseOldNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AddExternalLeading" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="TreatSingleColumnBreakAsPageBreak" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UpdateFromTemplate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="IsLabelDocument" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="RsidRoot" config:type="int">1120994</config:config-item>
+   <config:config-item config:name="ConsiderTextWrapOnObjPos" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TableRowKeep" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TabsRelativeToIndent" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="SaveVersionOnClose" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UseFormerTextWrapping" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ChartAutoUpdate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="AddParaTableSpacingAtStart" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="AllowPrintJobCancel" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="AddParaTableSpacing" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintDrawings" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="AddParaSpacingToTableCells" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="UseFormerLineSpacing" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="OutlineLevelYieldsNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="LinkUpdateMode" config:type="short">1</config:config-item>
+   <config:config-item config:name="DoNotResetParaAttrsForNumFont" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ApplyUserData" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="StylesNoDefault" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="EmbeddedDatabaseName" config:type="string"/>
+   <config:config-item config:name="FloattableNomargins" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="BackgroundParaOverDrawings" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrinterName" config:type="string"/>
+   <config:config-item config:name="UseFormerObjectPositioning" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TabOverMargin" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="SaveGlobalDocumentLinks" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="CurrentDatabaseDataSource" config:type="string"/>
+   <config:config-item config:name="IsKernAsianPunctuation" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="CharacterCompressionType" config:type="short">0</config:config-item>
+   <config:config-item config:name="SmallCapsPercentage66" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="CurrentDatabaseCommand" config:type="string"/>
+   <config:config-item config:name="CurrentDatabaseCommandType" config:type="int">0</config:config-item>
+   <config:config-item config:name="FieldAutoUpdate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="IgnoreTabsAndBlanksForLineCalculation" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="LoadReadonly" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="DoNotCaptureDrawObjsOnPage" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ClipAsCharacterAnchoredWriterFlyFrames" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintBlackFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="DisableOffPagePositioning" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="SurroundTextWrapSmall" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UnxForceZeroExtLeading" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TabAtLeftIndentForParagraphsInList" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintRightPages" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">1524711</config:config-item>
+   <config:config-item config:name="MathBaselineAlignment" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="MsWordCompTrailingBlanks" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="InvertBorderSpacing" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="EmbedFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrinterIndependentLayout" config:type="string">high-resolution</config:config-item>
+   <config:config-item config:name="TabOverflow" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintGraphics" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PropLineSpacingShrinksFirstLine" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="UnbreakableNumberings" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AddFrameOffsets" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ClippedPictures" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="EmbedSystemFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ApplyParagraphMarkFormatToNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="SubtractFlysAnchoredAtFlys" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AddVerticalFrameOffsets" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ProtectForm" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintEmptyPages" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintControls" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintHiddenText" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintAnnotationMode" config:type="short">0</config:config-item>
+   <config:config-item config:name="PrintPageBackground" config:type="boolean">true</config:config-item>
+  </config:config-item-set>
+ </office:settings>
+ <office:scripts>
+  <office:script script:language="ooo:Basic">
+   <ooo:libraries xmlns:ooo="http://openoffice.org/2004/office" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <ooo:library-embedded ooo:name="Standard"/>
+   </ooo:libraries>
+  </office:script>
+ </office:scripts>
+ <office:font-face-decls>
+  <style:font-face style:name="Tahoma1" svg:font-family="Tahoma"/>
+  <style:font-face style:name="Courier New" svg:font-family="&apos;Courier New&apos;" style:font-family-generic="modern" style:font-pitch="fixed"/>
+  <style:font-face style:name="NSimSun" svg:font-family="NSimSun" style:font-family-generic="modern" style:font-pitch="fixed"/>
+  <style:font-face style:name="Times New Roman" svg:font-family="&apos;Times New Roman&apos;" style:font-family-generic="roman" style:font-pitch="variable"/>
+  <style:font-face style:name="Arial" svg:font-family="Arial" style:font-family-generic="swiss" style:font-pitch="variable"/>
+  <style:font-face style:name="SimSun" svg:font-family="SimSun" style:font-family-generic="system" style:font-pitch="variable"/>
+  <style:font-face style:name="Tahoma" svg:font-family="Tahoma" style:font-family-generic="system" style:font-pitch="variable"/>
+ </office:font-face-decls>
+ <office:styles>
+  <style:default-style style:family="graphic">
+   <style:graphic-properties svg:stroke-color="#3465a4" draw:fill-color="#729fcf" fo:wrap-option="wrap" draw:shadow-offset-x="0.1181in" draw:shadow-offset-y="0.1181in" draw:start-line-spacing-horizontal="0.1114in" draw:start-line-spacing-vertical="0.1114in" draw:end-line-spacing-horizontal="0.1114in" draw:end-line-spacing-vertical="0.1114in" style:flow-with-text="false"/>
+   <style:paragraph-properties style:text-autospace="ideograph-alpha" style:line-break="strict" style:font-independent-line-spacing="false">
+    <style:tab-stops/>
+   </style:paragraph-properties>
+   <style:text-properties style:use-window-font-color="true" style:font-name="Times New Roman" fo:font-size="12pt" fo:language="en" fo:country="GB" style:letter-kerning="true" style:font-name-asian="SimSun" style:font-size-asian="12pt" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Tahoma" style:font-size-complex="12pt" style:language-complex="hi" style:country-complex="IN"/>
+  </style:default-style>
+  <style:default-style style:family="paragraph">
+   <style:paragraph-properties fo:hyphenation-ladder-count="no-limit" style:text-autospace="ideograph-alpha" style:punctuation-wrap="hanging" style:line-break="strict" style:tab-stop-distance="0.4925in" style:writing-mode="page"/>
+   <style:text-properties style:use-window-font-color="true" style:font-name="Times New Roman" fo:font-size="12pt" fo:language="en" fo:country="GB" style:letter-kerning="true" style:font-name-asian="SimSun" style:font-size-asian="12pt" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Tahoma" style:font-size-complex="12pt" style:language-complex="hi" style:country-complex="IN" fo:hyphenate="false" fo:hyphenation-remain-char-count="2" fo:hyphenation-push-char-count="2"/>
+  </style:default-style>
+  <style:default-style style:family="table">
+   <style:table-properties table:border-model="collapsing"/>
+  </style:default-style>
+  <style:default-style style:family="table-row">
+   <style:table-row-properties fo:keep-together="auto"/>
+  </style:default-style>
+  <style:style style:name="Standard" style:family="paragraph" style:class="text"/>
+  <style:style style:name="Heading" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Text_20_body" style:class="text">
+   <style:paragraph-properties fo:margin-top="0.1665in" fo:margin-bottom="0.0835in" loext:contextual-spacing="false" fo:keep-with-next="always">
+    <style:tab-stops>
+     <style:tab-stop style:position="6.6929in" style:type="right"/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+   <style:text-properties style:font-name="Arial" fo:font-family="Arial" style:font-family-generic="swiss" style:font-pitch="variable" fo:font-size="14pt" style:font-name-asian="SimSun" style:font-family-asian="SimSun" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="14pt" style:font-name-complex="Tahoma" style:font-family-complex="Tahoma" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="Text_20_body" style:display-name="Text body" style:family="paragraph" style:parent-style-name="Standard" style:class="text">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0.0835in" loext:contextual-spacing="false"/>
+  </style:style>
+  <style:style style:name="List" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="list">
+   <style:text-properties style:font-name-complex="Tahoma1" style:font-family-complex="Tahoma"/>
+  </style:style>
+  <style:style style:name="Caption" style:family="paragraph" style:parent-style-name="Standard" style:class="extra">
+   <style:paragraph-properties fo:margin-top="0.0835in" fo:margin-bottom="0.0835in" loext:contextual-spacing="false" text:number-lines="false" text:line-number="0"/>
+   <style:text-properties fo:font-size="12pt" fo:font-style="italic" style:font-size-asian="12pt" style:font-style-asian="italic" style:font-name-complex="Tahoma1" style:font-family-complex="Tahoma" style:font-size-complex="12pt" style:font-style-complex="italic"/>
+  </style:style>
+  <style:style style:name="Index" style:family="paragraph" style:parent-style-name="Standard" style:class="index">
+   <style:paragraph-properties text:number-lines="false" text:line-number="0"/>
+   <style:text-properties style:font-name-complex="Tahoma1" style:font-family-complex="Tahoma"/>
+  </style:style>
+  <style:style style:name="Heading_20_1" style:display-name="Heading 1" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="1" style:class="text">
+   <style:text-properties fo:font-size="115%" fo:font-weight="bold" style:font-size-asian="115%" style:font-weight-asian="bold" style:font-size-complex="115%" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_1_5f_unnumbered" style:display-name="Heading_20_1_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_1" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_2" style:display-name="Heading 2" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="2" style:class="text">
+   <style:text-properties fo:font-size="14pt" fo:font-style="italic" fo:font-weight="bold" style:font-size-asian="14pt" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="14pt" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_2_5f_unnumbered" style:display-name="Heading_20_2_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_2" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_3" style:display-name="Heading 3" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="3" style:class="text">
+   <style:text-properties fo:font-size="14pt" fo:font-weight="bold" style:font-size-asian="14pt" style:font-weight-asian="bold" style:font-size-complex="14pt" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_3_5f_unnumbered" style:display-name="Heading_20_3_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_3" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_4" style:display-name="Heading 4" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="4" style:class="text">
+   <style:text-properties fo:font-size="85%" fo:font-style="italic" fo:font-weight="bold" style:font-size-asian="85%" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-size-complex="85%" style:font-style-complex="italic" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_4_5f_unnumbered" style:display-name="Heading_20_4_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_4" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_5" style:display-name="Heading 5" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="5" style:class="text">
+   <style:text-properties fo:font-size="85%" fo:font-weight="bold" style:font-size-asian="85%" style:font-weight-asian="bold" style:font-size-complex="85%" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_5_5f_unnumbered" style:display-name="Heading_20_5_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_5" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_6" style:display-name="Heading 6" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="6" style:class="text">
+   <style:text-properties fo:font-size="75%" fo:font-weight="bold" style:font-size-asian="75%" style:font-weight-asian="bold" style:font-size-complex="75%" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_6_5f_unnumbered" style:display-name="Heading_20_6_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_6" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_7" style:display-name="Heading 7" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="7" style:class="text">
+   <style:text-properties fo:font-size="75%" fo:font-weight="bold" style:font-size-asian="75%" style:font-weight-asian="bold" style:font-size-complex="75%" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_7_5f_unnumbered" style:display-name="Heading_20_7_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_7" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_8" style:display-name="Heading 8" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="8" style:class="text">
+   <style:text-properties fo:font-size="75%" fo:font-weight="bold" style:font-size-asian="75%" style:font-weight-asian="bold" style:font-size-complex="75%" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_8_5f_unnumbered" style:display-name="Heading_20_8_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_8" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_9" style:display-name="Heading 9" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="9" style:class="text">
+   <style:text-properties fo:font-size="75%" fo:font-weight="bold" style:font-size-asian="75%" style:font-weight-asian="bold" style:font-size-complex="75%" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_9_5f_unnumbered" style:display-name="Heading_20_9_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_9" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_10" style:display-name="Heading 10" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:default-outline-level="10" style:class="text">
+   <style:text-properties fo:font-size="75%" fo:font-weight="bold" style:font-size-asian="75%" style:font-weight-asian="bold" style:font-size-complex="75%" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Heading_5f_20_5f_10_5f_unnumbered" style:display-name="Heading_20_10_unnumbered" style:family="paragraph" style:parent-style-name="Heading_20_10" style:default-outline-level="" style:list-style-name=""/>
+  <style:style style:name="Heading_20_1.title" style:display-name="Heading 1.title" style:family="paragraph" style:parent-style-name="Heading_20_1" style:default-outline-level="" style:list-style-name="">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="Title" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Subtitle" style:class="chapter">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+   <style:text-properties fo:font-size="18pt" fo:font-weight="bold" style:font-size-asian="18pt" style:font-weight-asian="bold" style:font-size-complex="18pt" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="OrgTitle" style:family="paragraph" style:parent-style-name="Title">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" loext:contextual-spacing="false"/>
+   <style:text-properties fo:font-size="24pt"/>
+  </style:style>
+  <style:style style:name="Subtitle" style:family="paragraph" style:parent-style-name="Heading" style:next-style-name="Text_20_body" style:class="chapter">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+   <style:text-properties fo:font-size="14pt" fo:font-style="italic" style:font-size-asian="14pt" style:font-style-asian="italic" style:font-size-complex="14pt" style:font-style-complex="italic"/>
+  </style:style>
+  <style:style style:name="OrgSubtitle" style:family="paragraph" style:parent-style-name="Subtitle">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" loext:contextual-spacing="false"/>
+   <style:text-properties fo:font-size="20pt"/>
+  </style:style>
+  <style:style style:name="Text_20_body_20_indent" style:display-name="Text body indent" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="text">
+   <style:paragraph-properties fo:margin-left="0.1965in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
+  </style:style>
+  <style:style style:name="List_20_Indent" style:display-name="List Indent" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="text">
+   <style:paragraph-properties fo:margin-left="1.9689in" fo:margin-right="0in" fo:text-indent="-1.7717in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="0in"/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="First_20_line_20_indent" style:display-name="First line indent" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="text">
+   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:text-indent="0.1965in" style:auto-text-indent="false"/>
+  </style:style>
+  <style:style style:name="Hanging_20_indent" style:display-name="Hanging indent" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="text">
+   <style:paragraph-properties fo:margin-left="0.3937in" fo:margin-right="0in" fo:text-indent="-0.1965in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="0in"/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Salutation" style:family="paragraph" style:parent-style-name="Standard" style:class="text">
+   <style:paragraph-properties text:number-lines="false" text:line-number="0"/>
+  </style:style>
+  <style:style style:name="Contents_20_Heading" style:display-name="Contents Heading" style:family="paragraph" style:parent-style-name="Heading" style:class="index">
+   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" text:number-lines="false" text:line-number="0"/>
+   <style:text-properties fo:font-size="16pt" fo:font-weight="bold" style:font-size-asian="16pt" style:font-weight-asian="bold" style:font-size-complex="16pt" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Contents_20_1" style:display-name="Contents 1" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="6.6929in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_2" style:display-name="Contents 2" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="0.1965in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="6.4965in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_3" style:display-name="Contents 3" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="0.3929in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="6.3in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_4" style:display-name="Contents 4" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="0.5898in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="6.1035in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_5" style:display-name="Contents 5" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="0.7862in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="5.9071in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_6" style:display-name="Contents 6" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="0.9827in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="5.7102in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_7" style:display-name="Contents 7" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="1.1791in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="5.5138in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_8" style:display-name="Contents 8" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="1.3756in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="5.3173in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_9" style:display-name="Contents 9" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="1.572in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="5.1209in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Contents_20_10" style:display-name="Contents 10" style:family="paragraph" style:parent-style-name="Index" style:class="index">
+   <style:paragraph-properties fo:margin-left="1.7689in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false">
+    <style:tab-stops>
+     <style:tab-stop style:position="4.9244in" style:type="right" style:leader-style="dotted" style:leader-text="."/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Quotations" style:family="paragraph" style:parent-style-name="Standard" style:class="html">
+   <style:paragraph-properties fo:margin-left="0.3937in" fo:margin-right="0.3937in" fo:margin-top="0in" fo:margin-bottom="0.1965in" loext:contextual-spacing="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+  </style:style>
+  <style:style style:name="OrgFootnoteQuotations" style:family="paragraph" style:parent-style-name="Footnote" style:class="html">
+   <style:paragraph-properties fo:margin-left="0.3937in" fo:margin-right="0.3937in" fo:margin-top="0in" fo:margin-bottom="0.1965in" loext:contextual-spacing="false" fo:text-indent="0in" style:auto-text-indent="false"/>
+  </style:style>
+  <style:style style:name="Preformatted_20_Text" style:display-name="Preformatted Text" style:family="paragraph" style:parent-style-name="Standard" style:class="html">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" loext:contextual-spacing="false"/>
+   <style:text-properties style:font-name="Courier New" fo:font-family="&apos;Courier New&apos;" style:font-family-generic="modern" style:font-pitch="fixed" fo:font-size="10pt" style:font-name-asian="NSimSun" style:font-family-asian="NSimSun" style:font-family-generic-asian="modern" style:font-pitch-asian="fixed" style:font-size-asian="10pt" style:font-name-complex="Courier New" style:font-family-complex="&apos;Courier New&apos;" style:font-family-generic-complex="modern" style:font-pitch-complex="fixed" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="OrgVerse" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <loext:graphic-properties draw:fill="none" draw:fill-color="#729fcf"/>
+   <style:paragraph-properties fo:background-color="transparent" fo:padding="0in" fo:border="none" style:shadow="none"/>
+  </style:style>
+  <style:style style:name="OrgClock" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" loext:contextual-spacing="false"/>
+  </style:style>
+  <style:style style:name="OrgClockLastLine" style:family="paragraph" style:parent-style-name="OrgClock"/>
+  <style:style style:name="OrgPlanning" style:family="paragraph" style:parent-style-name="Text_20_body"/>
+  <style:style style:name="OrgFixedWidthBlock" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <loext:graphic-properties draw:fill="solid" draw:fill-color="#c0c0c0" draw:opacity="100%"/>
+   <style:paragraph-properties fo:background-color="#c0c0c0" fo:padding="0.0193in" fo:border="0.06pt solid #000000" style:shadow="none"/>
+  </style:style>
+  <style:style style:name="OrgFixedWidthBlockLastLine" style:family="paragraph" style:parent-style-name="OrgFixedWidthBlock">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0.0827in" loext:contextual-spacing="false"/>
+  </style:style>
+  <style:style style:name="OrgFormula" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:paragraph-properties>
+    <style:tab-stops>
+     <style:tab-stop style:position="6.6929in" style:type="right"/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="OrgSrcBlockLastLine" style:family="paragraph">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0.0827in" loext:contextual-spacing="false"/>
+  </style:style>
+  <style:style style:name="OrgCenter" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgFootnoteCenter" style:family="paragraph" style:parent-style-name="Footnote">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgTableContents" style:family="paragraph" style:parent-style-name="Text_20_body"/>
+  <style:style style:name="OrgTableHeading" style:family="paragraph" style:parent-style-name="OrgTableContents" style:class="extra">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false" text:number-lines="false" text:line-number="0"/>
+   <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="OrgTableHeadingLeft" style:family="paragraph" style:parent-style-name="OrgTableHeading">
+   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgTableHeadingRight" style:family="paragraph" style:parent-style-name="OrgTableHeading">
+   <style:paragraph-properties fo:text-align="end" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgTableHeadingCenter" style:family="paragraph" style:parent-style-name="OrgTableHeading">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgTableContentsLeft" style:family="paragraph" style:parent-style-name="OrgTableContents">
+   <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgTableContentsRight" style:family="paragraph" style:parent-style-name="OrgTableContents">
+   <style:paragraph-properties fo:text-align="end" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="OrgTableContentsCenter" style:family="paragraph" style:parent-style-name="OrgTableContents">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="Text_20_body_20_bold" style:display-name="Text body bold" style:family="paragraph" style:parent-style-name="Text_20_body" style:next-style-name="Text_20_body">
+   <style:text-properties fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="Footnote" style:family="paragraph" style:parent-style-name="Standard" style:class="extra">
+   <style:paragraph-properties fo:margin-left="0.1965in" fo:margin-right="0in" fo:text-indent="-0.1965in" style:auto-text-indent="false" text:number-lines="false" text:line-number="0"/>
+   <style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="Figure" style:family="paragraph" style:parent-style-name="Caption"/>
+  <style:style style:name="Illustration_20_Index_20_Heading" style:display-name="Illustration Index Heading" style:family="paragraph" style:parent-style-name="Heading" style:class="index">
+   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" text:number-lines="false" text:line-number="0"/>
+   <style:text-properties fo:font-size="16pt" fo:font-weight="bold" style:font-size-asian="16pt" style:font-weight-asian="bold" style:font-size-complex="16pt" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="Table" style:family="paragraph" style:parent-style-name="Caption" style:class="extra">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="Listing" style:family="paragraph" style:parent-style-name="Caption" style:class="extra">
+   <style:paragraph-properties fo:margin-left="0in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false" fo:keep-with-next="always">
+    <style:tab-stops/>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Horizontal_20_Line" style:display-name="Horizontal Line" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Text_20_body" style:class="html" style:master-page-name="">
+   <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0.0827in" loext:contextual-spacing="false" style:page-number="auto" fo:padding="0in" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.06pt solid #000000" style:shadow="none" text:number-lines="false" text:line-number="0" style:join-border="false"/>
+   <style:text-properties fo:font-size="6pt" style:font-size-asian="6pt" style:font-size-complex="6pt"/>
+  </style:style>
+  <style:style style:name="OrgInlineTaskHeading" style:family="paragraph" style:parent-style-name="Caption" style:next-style-name="Text_20_body">
+   <style:text-properties fo:font-style="normal" fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="Footer" style:family="paragraph" style:parent-style-name="Standard" style:class="extra">
+   <style:paragraph-properties text:number-lines="false" text:line-number="0">
+    <style:tab-stops>
+     <style:tab-stop style:position="3.8563in" style:type="center"/>
+     <style:tab-stop style:position="7.7126in" style:type="right"/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="Table_20_Contents" style:display-name="Table Contents" style:family="paragraph" style:parent-style-name="Standard" style:class="extra">
+   <style:paragraph-properties text:number-lines="false" text:line-number="0"/>
+  </style:style>
+  <style:style style:name="Emphasis" style:family="text">
+   <style:text-properties fo:font-style="italic" style:font-style-asian="italic" style:font-style-complex="italic"/>
+  </style:style>
+  <style:style style:name="Underline" style:family="text">
+   <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:background-color="transparent"/>
+  </style:style>
+  <style:style style:name="Strikethrough" style:family="text">
+   <style:text-properties style:text-line-through-style="solid" style:text-line-through-type="single"/>
+  </style:style>
+  <style:style style:name="Source_20_Text" style:display-name="Source Text" style:family="text">
+   <style:text-properties style:font-name="Courier New" fo:font-family="&apos;Courier New&apos;" style:font-family-generic="modern" style:font-pitch="fixed" fo:background-color="transparent" style:font-name-asian="NSimSun" style:font-family-asian="NSimSun" style:font-family-generic-asian="modern" style:font-pitch-asian="fixed" style:font-name-complex="Courier New" style:font-family-complex="&apos;Courier New&apos;" style:font-family-generic-complex="modern" style:font-pitch-complex="fixed"/>
+  </style:style>
+  <style:style style:name="Citation" style:family="text">
+   <style:text-properties fo:font-style="italic" style:font-style-asian="italic" style:font-style-complex="italic"/>
+  </style:style>
+  <style:style style:name="Example" style:family="text">
+   <style:text-properties style:font-name="Courier New" fo:font-family="&apos;Courier New&apos;" style:font-family-generic="modern" style:font-pitch="fixed" fo:background-color="transparent" style:font-name-asian="NSimSun" style:font-family-asian="NSimSun" style:font-family-generic-asian="modern" style:font-pitch-asian="fixed" style:font-name-complex="Courier New" style:font-family-complex="&apos;Courier New&apos;" style:font-family-generic-complex="modern" style:font-pitch-complex="fixed"/>
+  </style:style>
+  <style:style style:name="OrgCode" style:family="text" style:parent-style-name="Source_20_Text"/>
+  <style:style style:name="OrgTodo" style:family="text"/>
+  <style:style style:name="OrgDone" style:family="text"/>
+  <style:style style:name="OrgTag" style:family="text">
+   <style:text-properties fo:font-variant="small-caps" fo:background-color="transparent"/>
+  </style:style>
+  <style:style style:name="OrgTags" style:family="text"/>
+  <style:style style:name="OrgPriority" style:family="text"/>
+  <style:style style:name="OrgPriority-A" style:family="text" style:parent-style-name="OrgPriority"/>
+  <style:style style:name="OrgPriority-B" style:family="text" style:parent-style-name="OrgPriority"/>
+  <style:style style:name="OrgPriority-C" style:family="text" style:parent-style-name="OrgPriority"/>
+  <style:style style:name="OrgTimestamp" style:family="text">
+   <style:text-properties style:font-name="Courier New" fo:font-family="&apos;Courier New&apos;" style:font-family-generic="modern" style:font-pitch="fixed" fo:background-color="transparent" style:font-name-asian="NSimSun" style:font-family-asian="NSimSun" style:font-family-generic-asian="modern" style:font-pitch-asian="fixed" style:font-name-complex="Courier New" style:font-family-complex="&apos;Courier New&apos;" style:font-family-generic-complex="modern" style:font-pitch-complex="fixed"/>
+  </style:style>
+  <style:style style:name="OrgActiveTimestamp" style:family="text" style:parent-style-name="OrgTimestamp"/>
+  <style:style style:name="OrgInactiveTimestamp" style:family="text" style:parent-style-name="OrgTimestamp"/>
+  <style:style style:name="OrgTimestampKeyword" style:family="text">
+   <style:text-properties style:use-window-font-color="true" fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="OrgScheduledKeyword" style:family="text" style:parent-style-name="OrgTimestampKeyword"/>
+  <style:style style:name="OrgDeadlineKeyword" style:family="text" style:parent-style-name="OrgTimestampKeyword"/>
+  <style:style style:name="OrgClockKeyword" style:family="text" style:parent-style-name="OrgTimestampKeyword"/>
+  <style:style style:name="OrgClosedKeyword" style:family="text" style:parent-style-name="OrgTimestampKeyword"/>
+  <style:style style:name="OrgTimestampWrapper" style:family="text"/>
+  <style:style style:name="OrgTarget" style:family="text"/>
+  <style:style style:name="Bold" style:family="text">
+   <style:text-properties fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="Numbering_20_Symbols" style:display-name="Numbering Symbols" style:family="text"/>
+  <style:style style:name="Footnote_20_Symbol" style:display-name="Footnote Symbol" style:family="text"/>
+  <style:style style:name="Footnote_20_anchor" style:display-name="Footnote anchor" style:family="text">
+   <style:text-properties style:text-position="super 58%"/>
+  </style:style>
+  <style:style style:name="OrgSuperscript" style:family="text">
+   <style:text-properties style:text-position="super 58%"/>
+  </style:style>
+  <style:style style:name="OrgSubscript" style:family="text">
+   <style:text-properties style:text-position="sub 58%"/>
+  </style:style>
+  <style:style style:name="Internet_20_link" style:display-name="Internet link" style:family="text">
+   <style:text-properties fo:color="#000080" fo:language="zxx" fo:country="none" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" style:language-asian="zxx" style:country-asian="none" style:language-complex="zxx" style:country-complex="none"/>
+  </style:style>
+  <style:style style:name="Bullet_5f_20_5f_Symbols" style:display-name="Bullet_20_Symbols" style:family="text"/>
+  <style:style style:name="Visited_20_Internet_20_Link" style:display-name="Visited Internet Link" style:family="text">
+   <style:text-properties fo:color="#800000" fo:language="zxx" fo:country="none" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" style:language-asian="zxx" style:country-asian="none" style:language-complex="zxx" style:country-complex="none"/>
+  </style:style>
+  <style:style style:name="Graphics" style:family="graphic">
+   <style:graphic-properties text:anchor-type="paragraph" svg:x="0in" svg:y="0in" style:wrap="none" style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="center" style:horizontal-rel="paragraph"/>
+  </style:style>
+  <style:style style:name="Frame" style:family="graphic">
+   <style:graphic-properties text:anchor-type="paragraph" svg:x="0in" svg:y="0in" fo:margin-left="0.0791in" fo:margin-right="0.0791in" fo:margin-top="0.0791in" fo:margin-bottom="0.0791in" style:wrap="parallel" style:number-wrapped-paragraphs="no-limit" style:wrap-contour="false" style:vertical-pos="top" style:vertical-rel="paragraph-content" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" fo:padding="0.0591in" fo:border="0.06pt solid #000000"/>
+  </style:style>
+  <style:style style:name="OrgDisplayImage" style:family="graphic" style:parent-style-name="Graphics">
+   <style:graphic-properties text:anchor-type="paragraph" svg:x="0in" svg:y="0in" style:wrap="none" style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="center" style:horizontal-rel="paragraph"/>
+  </style:style>
+  <style:style style:name="OrgPageImage" style:family="graphic" style:parent-style-name="Graphics">
+   <style:graphic-properties text:anchor-type="page" svg:x="0in" svg:y="0in" fo:margin-top="0.0827in" fo:margin-bottom="0.0827in" style:vertical-pos="middle" style:vertical-rel="page" style:horizontal-pos="center" style:horizontal-rel="page" fo:background-color="transparent" draw:fill="none" draw:fill-color="#729fcf" style:shadow="none" draw:shadow-opacity="100%"/>
+  </style:style>
+  <style:style style:name="OrgCaptionedImage" style:family="graphic" style:parent-style-name="Graphics">
+   <style:graphic-properties svg:width="0.0161in" style:rel-width="100%" fo:min-height="0.0161in" text:anchor-type="paragraph" svg:x="0in" svg:y="0in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0in" fo:margin-bottom="0in" style:run-through="foreground" style:wrap="none" style:vertical-pos="from-top" style:vertical-rel="paragraph-content" style:horizontal-pos="from-left" style:horizontal-rel="paragraph-content" fo:padding="0in" fo:border="none" style:shadow="none" draw:shadow-opacity="100%" loext:rel-width-rel="paragraph"/>
+  </style:style>
+  <style:style style:name="OrgImageCaptionFrame" style:family="graphic" style:parent-style-name="Frame">
+   <style:graphic-properties text:anchor-type="paragraph" svg:x="0in" svg:y="0in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0in" fo:margin-bottom="0in" style:wrap="none" style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="center" style:horizontal-rel="paragraph" fo:padding="0in" fo:border="none"/>
+  </style:style>
+  <style:style style:name="OrgPageImageCaptionFrame" style:family="graphic" style:parent-style-name="Frame">
+   <style:graphic-properties text:anchor-type="paragraph" svg:x="0in" svg:y="0in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0.0827in" fo:margin-bottom="0.0827in" style:wrap="none" style:vertical-pos="middle" style:vertical-rel="page" style:horizontal-pos="center" style:horizontal-rel="page" fo:background-color="transparent" draw:fill="none" draw:fill-color="#729fcf" fo:padding="0in" fo:border="none" style:shadow="none" draw:shadow-opacity="100%"/>
+  </style:style>
+  <style:style style:name="OrgInlineImage" style:family="graphic" style:parent-style-name="Graphics">
+   <style:graphic-properties text:anchor-type="as-char" svg:x="0in" svg:y="0in" style:vertical-pos="top" style:vertical-rel="baseline" style:horizontal-pos="center" style:horizontal-rel="paragraph"/>
+  </style:style>
+  <style:style style:name="OrgFormula" style:family="graphic">
+   <style:graphic-properties text:anchor-type="as-char" svg:y="0in" fo:margin-left="0.0791in" fo:margin-right="0.0791in" style:vertical-pos="middle" style:vertical-rel="text" style:shadow="none" draw:shadow-opacity="100%"/>
+  </style:style>
+  <style:style style:name="OrgInlineFormula" style:family="graphic" style:parent-style-name="Formula">
+   <style:graphic-properties svg:y="0in" style:vertical-pos="middle" style:vertical-rel="text"/>
+  </style:style>
+  <style:style style:name="OrgDisplayFormula" style:family="graphic" style:parent-style-name="OrgFormula">
+   <style:graphic-properties svg:x="0in" svg:y="0in" style:vertical-pos="middle" style:vertical-rel="text" style:horizontal-pos="from-left" style:horizontal-rel="paragraph-content"/>
+  </style:style>
+  <style:style style:name="OrgFormulaCaptionFrame" style:family="graphic" style:parent-style-name="Frame">
+   <style:graphic-properties text:anchor-type="paragraph" svg:x="0in" svg:y="0in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0in" fo:margin-bottom="0in" style:wrap="right" style:number-wrapped-paragraphs="1" style:wrap-contour="false" style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="center" style:horizontal-rel="paragraph" fo:padding="0in" fo:border="none"/>
+  </style:style>
+  <style:style style:name="OrgCaptionedFormula" style:family="graphic" style:parent-style-name="OrgFormula">
+   <style:graphic-properties svg:x="0in" svg:y="0in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0in" fo:margin-bottom="0in" style:run-through="foreground" style:wrap="none" style:vertical-pos="from-top" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" fo:padding="0in" fo:border="none" style:shadow="none" draw:shadow-opacity="100%"/>
+  </style:style>
+  <style:style style:name="OrgInlineTaskFrame" style:family="graphic" style:parent-style-name="Frame">
+   <style:graphic-properties svg:x="0in" svg:y="0in" style:wrap="none" style:vertical-pos="top" style:vertical-rel="paragraph-content" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" fo:background-color="#ffffcc" style:background-transparency="0%" draw:fill="solid" draw:fill-color="#ffffcc" draw:opacity="100%" fo:padding="0.0591in" fo:border="0.26pt solid #000000" style:shadow="none" draw:shadow-opacity="100%"/>
+  </style:style>
+  <style:style style:name="Formula" style:family="graphic">
+   <style:graphic-properties text:anchor-type="as-char" svg:y="0in" fo:margin-left="0.0791in" fo:margin-right="0.0791in" style:vertical-pos="middle" style:vertical-rel="text"/>
+  </style:style>
+  <text:outline-style style:name="Outline">
+   <text:outline-level-style text:level="1" style:num-suffix=". " style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.3in" fo:margin-left="0.3in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="2" style:num-suffix=". " style:num-format="1" text:display-levels="2">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.4in" fo:margin-left="0.4in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="3" style:num-suffix=". " style:num-format="1" text:display-levels="3">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.5in" fo:margin-left="0.5in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="4" style:num-suffix=". " style:num-format="1" text:display-levels="4">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.6in" fo:margin-left="0.6in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="5" style:num-suffix=". " style:num-format="1" text:display-levels="5">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.7in" fo:margin-left="0.7in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="6" style:num-suffix=". " style:num-format="1" text:display-levels="6">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.8in" fo:margin-left="0.8in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="7" style:num-suffix=". " style:num-format="1" text:display-levels="7">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.9in" fo:margin-left="0.9in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="8" style:num-suffix=". " style:num-format="1" text:display-levels="8">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-1in" fo:margin-left="1in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="9" style:num-suffix=". " style:num-format="1" text:display-levels="9">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-1.1in" fo:margin-left="1.1in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="10" style:num-suffix=". " style:num-format="1" text:display-levels="10">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-1.2in" fo:margin-left="1.2in"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+  </text:outline-style>
+  <text:list-style style:name="List_20_1" style:display-name="List 1">
+   <text:list-level-style-bullet text:level="1" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.1575in" fo:text-indent="-0.1575in" fo:margin-left="0.1575in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="2" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.3154in" fo:text-indent="-0.1575in" fo:margin-left="0.3154in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="3" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.472in" fo:text-indent="-0.1575in" fo:margin-left="0.472in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="4" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.6299in" fo:text-indent="-0.1575in" fo:margin-left="0.6299in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="5" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.7874in" fo:text-indent="-0.1575in" fo:margin-left="0.7874in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="6" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.9453in" fo:text-indent="-0.1575in" fo:margin-left="0.9453in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="7" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.102in" fo:text-indent="-0.1575in" fo:margin-left="1.102in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="8" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.2598in" fo:text-indent="-0.1575in" fo:margin-left="1.2598in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="9" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.4173in" fo:text-indent="-0.1575in" fo:margin-left="1.4173in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="10" text:style-name="Numbering_20_Symbols" text:bullet-char="•">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.5752in" fo:text-indent="-0.1575in" fo:margin-left="1.5752in"/>
+    </style:list-level-properties>
+    <style:text-properties fo:font-family="OpenSymbol"/>
+   </text:list-level-style-bullet>
+  </text:list-style>
+  <text:list-style style:name="Numbering_20_1" style:display-name="Numbering 1">
+   <text:list-level-style-number text:level="1" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.1965in" fo:text-indent="-0.1965in" fo:margin-left="0.1965in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="2" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.3937in" fo:text-indent="-0.1965in" fo:margin-left="0.3937in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="3" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.5902in" fo:text-indent="-0.1965in" fo:margin-left="0.5902in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="4" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.7874in" fo:text-indent="-0.1965in" fo:margin-left="0.7874in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="5" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.9839in" fo:text-indent="-0.1965in" fo:margin-left="0.9839in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="6" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.1811in" fo:text-indent="-0.1965in" fo:margin-left="1.1811in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="7" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.378in" fo:text-indent="-0.1965in" fo:margin-left="1.378in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="8" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.5752in" fo:text-indent="-0.1965in" fo:margin-left="1.5752in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="9" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.7717in" fo:text-indent="-0.1965in" fo:margin-left="1.7717in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="10" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.9689in" fo:text-indent="-0.1965in" fo:margin-left="1.9689in"/>
+    </style:list-level-properties>
+   </text:list-level-style-number>
+  </text:list-style>
+  <text:list-style style:name="OrgNumberedList">
+   <text:list-level-style-number text:level="1" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="0.25in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="2" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="0.5in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="3" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="0.75in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="4" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="1in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="5" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="1.25in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="6" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="1.5in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="7" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="1.75in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="8" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="2in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="9" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="2.25in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="10" style:num-suffix="." style:num-format="1">
+    <style:list-level-properties text:space-before="2.5in" text:min-label-width="0.25in"/>
+   </text:list-level-style-number>
+  </text:list-style>
+  <text:list-style style:name="OrgBulletedList">
+   <text:list-level-style-bullet text:level="1" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="0.25in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="2" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="0.5in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="3" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="0.75in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="4" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="1in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="5" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="1.25in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="6" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="1.5in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="7" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="1.75in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="8" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="2in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="9" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="2.25in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+   <text:list-level-style-bullet text:level="10" text:style-name="Bullet_5f_20_5f_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="2.5in" text:min-label-width="0.25in"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
+   </text:list-level-style-bullet>
+  </text:list-style>
+  <text:list-style style:name="OrgDescriptionList">
+   <text:list-level-style-number text:level="1" style:num-format="">
+    <style:list-level-properties text:space-before="0.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="2" style:num-format="">
+    <style:list-level-properties text:space-before="0.5in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="3" style:num-format="">
+    <style:list-level-properties text:space-before="0.75in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="4" style:num-format="">
+    <style:list-level-properties text:space-before="1in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="5" style:num-format="">
+    <style:list-level-properties text:space-before="1.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="6" style:num-format="">
+    <style:list-level-properties text:space-before="1.5in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="7" style:num-format="">
+    <style:list-level-properties text:space-before="1.75in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="8" style:num-format="">
+    <style:list-level-properties text:space-before="2in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="9" style:num-format="">
+    <style:list-level-properties text:space-before="2.25in"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="10" style:num-format="">
+    <style:list-level-properties text:space-before="2.5in"/>
+   </text:list-level-style-number>
+  </text:list-style>
+  <text:list-style style:name="OrgSrcBlockNumberedLine">
+   <text:list-level-style-number text:level="1" style:num-format="1">
+    <style:list-level-properties text:space-before="0.25in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="2" style:num-format="1">
+    <style:list-level-properties text:space-before="0.5in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="3" style:num-format="1">
+    <style:list-level-properties text:space-before="0.75in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="4" style:num-format="1">
+    <style:list-level-properties text:space-before="1in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="5" style:num-format="1">
+    <style:list-level-properties text:space-before="1.25in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="6" style:num-format="1">
+    <style:list-level-properties text:space-before="1.5in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="7" style:num-format="1">
+    <style:list-level-properties text:space-before="1.75in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="8" style:num-format="1">
+    <style:list-level-properties text:space-before="2in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="9" style:num-format="1">
+    <style:list-level-properties text:space-before="2.25in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="10" style:num-format="1">
+    <style:list-level-properties text:space-before="2.5in" text:min-label-width="0.25in" text:min-label-distance="0.0398in" fo:text-align="end"/>
+   </text:list-level-style-number>
+  </text:list-style>
+  <text:notes-configuration text:note-class="footnote" text:citation-style-name="Footnote_20_Symbol" text:citation-body-style-name="Footnote_20_anchor" style:num-format="1" text:start-value="0" text:footnotes-position="page" text:start-numbering-at="document"/>
+  <text:notes-configuration text:note-class="endnote" style:num-format="i" text:start-value="0"/>
+  <text:linenumbering-configuration text:number-lines="false" text:offset="0.1965in" style:num-format="1" text:number-position="left" text:increment="5"/>
+ </office:styles>
+ <office:automatic-styles>
+  <style:style style:name="Table1" style:family="table">
+   <style:table-properties style:width="6.425in" style:rel-width="96%" fo:margin-top="0in" fo:margin-bottom="0.0785in" table:align="center"/>
+  </style:style>
+  <style:style style:name="Table1.A" style:family="table-column">
+   <style:table-column-properties style:column-width="0.4868in" style:rel-column-width="115*"/>
+  </style:style>
+  <style:style style:name="Table1.B" style:family="table-column">
+   <style:table-column-properties style:column-width="5.9382in" style:rel-column-width="1403*"/>
+  </style:style>
+  <style:style style:name="Table1.A1" style:family="table-cell">
+   <style:table-cell-properties fo:padding="0.0625in" fo:border-left="none" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:border-bottom="0.05pt solid #000000"/>
+  </style:style>
+  <style:style style:name="Table1.A2" style:family="table-cell">
+   <style:table-cell-properties fo:padding="0.0625in" fo:border-left="none" fo:border-right="none" fo:border-top="0.05pt solid #000000" fo:border-bottom="none"/>
+  </style:style>
+  <style:style style:name="Table1.A3" style:family="table-cell">
+   <style:table-cell-properties style:vertical-align="top" fo:padding="0.0625in" fo:border="none"/>
+  </style:style>
+  <style:style style:name="Table1.A7" style:family="table-cell">
+   <style:table-cell-properties fo:padding="0.0625in" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #000000"/>
+  </style:style>
+  <style:style style:name="Table1.B7" style:family="table-cell">
+   <style:table-cell-properties fo:padding="0.0625in" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #000000"/>
+  </style:style>
+  <style:style style:name="P1" style:family="paragraph" style:parent-style-name="Footer">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="P2" style:family="paragraph" style:parent-style-name="Footer">
+   <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
+  </style:style>
+  <style:style style:name="P3" style:family="paragraph" style:parent-style-name="Text_20_body" style:list-style-name="OrgNumberedList"/>
+  <style:style style:name="P4" style:family="paragraph" style:parent-style-name="Text_20_body" style:list-style-name="OrgBulletedList"/>
+  <style:style style:name="P5" style:family="paragraph" style:parent-style-name="Text_20_body" style:list-style-name="OrgBulletedList">
+   <style:text-properties officeooo:paragraph-rsid="00111ae2"/>
+  </style:style>
+  <style:style style:name="P6" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="00141644" officeooo:paragraph-rsid="00141644"/>
+  </style:style>
+  <style:style style:name="P7" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:paragraph-rsid="00141644"/>
+  </style:style>
+  <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Heading_20_1">
+   <style:text-properties officeooo:rsid="00141644" officeooo:paragraph-rsid="00141644"/>
+  </style:style>
+  <style:style style:name="P9" style:family="paragraph" style:parent-style-name="Heading_20_3">
+   <style:text-properties officeooo:paragraph-rsid="00141644"/>
+  </style:style>
+  <style:style style:name="P10" style:family="paragraph" style:parent-style-name="Heading_20_2">
+   <style:text-properties officeooo:rsid="00141644" officeooo:paragraph-rsid="00141644"/>
+  </style:style>
+  <style:style style:name="P11" style:family="paragraph" style:parent-style-name="Contents_20_1">
+   <style:paragraph-properties>
+    <style:tab-stops/>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="P12" style:family="paragraph" style:parent-style-name="Contents_20_2">
+   <style:paragraph-properties>
+    <style:tab-stops/>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="P13" style:family="paragraph" style:parent-style-name="Contents_20_3">
+   <style:paragraph-properties>
+    <style:tab-stops/>
+   </style:paragraph-properties>
+  </style:style>
+  <style:style style:name="T1" style:family="text">
+   <style:text-properties officeooo:rsid="00111ae2"/>
+  </style:style>
+  <style:style style:name="T2" style:family="text">
+   <style:text-properties officeooo:rsid="00130f42"/>
+  </style:style>
+  <style:style style:name="T3" style:family="text">
+   <style:text-properties officeooo:rsid="00141644"/>
+  </style:style>
+  <style:style style:name="Sect1" style:family="section">
+   <style:section-properties fo:background-color="#c0c0c0" style:editable="false">
+    <style:columns fo:column-count="1" fo:column-gap="0in"/>
+    <style:background-image/>
+   </style:section-properties>
+  </style:style>
+  <style:style style:name="Sect2" style:family="section">
+   <style:section-properties style:editable="false">
+    <style:columns fo:column-count="1" fo:column-gap="0in"/>
+   </style:section-properties>
+  </style:style>
+  <style:page-layout style:name="pm1" style:page-usage="mirrored">
+   <style:page-layout-properties fo:page-width="8.2681in" fo:page-height="11.6929in" style:num-format="1" style:print-orientation="portrait" fo:margin-top="0.7874in" fo:margin-bottom="0.7874in" fo:margin-left="0.7874in" fo:margin-right="0.7874in" style:writing-mode="lr-tb" style:layout-grid-color="#c0c0c0" style:layout-grid-lines="20" style:layout-grid-base-height="0.278in" style:layout-grid-ruby-height="0.139in" style:layout-grid-mode="none" style:layout-grid-ruby-below="false" style:layout-grid-print="false" style:layout-grid-display="false" style:footnote-max-height="0in">
+    <style:footnote-sep style:width="0.0071in" style:distance-before-sep="0.0398in" style:distance-after-sep="0.0398in" style:line-style="none" style:adjustment="left" style:rel-width="25%" style:color="#000000"/>
+   </style:page-layout-properties>
+   <style:header-style/>
+   <style:footer-style>
+    <style:header-footer-properties fo:min-height="0.2362in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0.1965in" style:dynamic-spacing="false"/>
+   </style:footer-style>
+  </style:page-layout>
+  <style:page-layout style:name="pm2">
+   <style:page-layout-properties fo:page-width="8.2681in" fo:page-height="11.6929in" style:num-format="1" style:print-orientation="portrait" fo:margin-top="0.7874in" fo:margin-bottom="0.7874in" fo:margin-left="0.7874in" fo:margin-right="0.7874in" style:writing-mode="lr-tb" style:layout-grid-color="#c0c0c0" style:layout-grid-lines="20" style:layout-grid-base-height="0.278in" style:layout-grid-ruby-height="0.139in" style:layout-grid-mode="none" style:layout-grid-ruby-below="false" style:layout-grid-print="false" style:layout-grid-display="false" style:footnote-max-height="0in">
+    <style:footnote-sep style:width="0.0071in" style:distance-before-sep="0.0398in" style:distance-after-sep="0.0398in" style:line-style="solid" style:adjustment="left" style:rel-width="25%" style:color="#000000"/>
+   </style:page-layout-properties>
+   <style:header-style/>
+   <style:footer-style/>
+  </style:page-layout>
+  <style:page-layout style:name="pm3" style:page-usage="mirrored">
+   <style:page-layout-properties fo:page-width="8.2681in" fo:page-height="11.6929in" style:num-format="i" style:print-orientation="portrait" fo:margin-top="0.7874in" fo:margin-bottom="0.7874in" fo:margin-left="0.7874in" fo:margin-right="0.7874in" style:writing-mode="lr-tb" style:layout-grid-color="#c0c0c0" style:layout-grid-lines="20" style:layout-grid-base-height="0.278in" style:layout-grid-ruby-height="0.139in" style:layout-grid-mode="none" style:layout-grid-ruby-below="false" style:layout-grid-print="false" style:layout-grid-display="false" style:footnote-max-height="0in">
+    <style:footnote-sep style:width="0.0071in" style:distance-before-sep="0.0398in" style:distance-after-sep="0.0398in" style:line-style="solid" style:adjustment="left" style:rel-width="25%" style:color="#000000"/>
+   </style:page-layout-properties>
+   <style:header-style/>
+   <style:footer-style>
+    <style:header-footer-properties fo:min-height="0in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0.1965in"/>
+   </style:footer-style>
+  </style:page-layout>
+  <style:page-layout style:name="pm4" style:page-usage="right">
+   <style:page-layout-properties fo:page-width="8.2681in" fo:page-height="11.6929in" style:num-format="1" style:print-orientation="portrait" fo:margin-top="0.7874in" fo:margin-bottom="0.7874in" fo:margin-left="0.7874in" fo:margin-right="0.7874in" fo:background-color="transparent" style:writing-mode="lr-tb" style:layout-grid-color="#c0c0c0" style:layout-grid-lines="20" style:layout-grid-base-height="0.278in" style:layout-grid-ruby-height="0.139in" style:layout-grid-mode="none" style:layout-grid-ruby-below="false" style:layout-grid-print="false" style:layout-grid-display="false" draw:fill="none" draw:fill-color="#729fcf" style:footnote-max-height="0in">
+    <style:footnote-sep style:width="0.0071in" style:distance-before-sep="0.0398in" style:distance-after-sep="0.0398in" style:line-style="solid" style:adjustment="left" style:rel-width="25%" style:color="#000000"/>
+   </style:page-layout-properties>
+   <style:header-style/>
+   <style:footer-style>
+    <style:header-footer-properties fo:min-height="0.2362in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0.1965in" style:dynamic-spacing="false"/>
+   </style:footer-style>
+  </style:page-layout>
+  <style:page-layout style:name="pm5" style:page-usage="mirrored">
+   <style:page-layout-properties fo:page-width="8.2681in" fo:page-height="11.6929in" style:num-format="1" style:print-orientation="portrait" fo:margin-top="0.7874in" fo:margin-bottom="0.7874in" fo:margin-left="0.7874in" fo:margin-right="0.7874in" style:writing-mode="lr-tb" style:layout-grid-color="#c0c0c0" style:layout-grid-lines="20" style:layout-grid-base-height="0.278in" style:layout-grid-ruby-height="0.139in" style:layout-grid-mode="none" style:layout-grid-ruby-below="false" style:layout-grid-print="false" style:layout-grid-display="false" style:footnote-max-height="0in">
+    <style:footnote-sep style:width="0.0071in" style:distance-before-sep="0.0398in" style:distance-after-sep="0.0398in" style:line-style="solid" style:adjustment="left" style:rel-width="25%" style:color="#000000"/>
+   </style:page-layout-properties>
+   <style:header-style/>
+   <style:footer-style>
+    <style:header-footer-properties fo:min-height="0.2362in" fo:margin-left="0in" fo:margin-right="0in" fo:margin-top="0.1965in" style:dynamic-spacing="false"/>
+   </style:footer-style>
+  </style:page-layout>
+ </office:automatic-styles>
+ <office:master-styles>
+  <style:master-page style:name="Standard" style:page-layout-name="pm1">
+   <style:footer>
+    <text:p text:style-name="P1"><text:page-number text:select-page="current">7</text:page-number></text:p>
+   </style:footer>
+  </style:master-page>
+  <style:master-page style:name="OrgTitlePage" style:page-layout-name="pm2" style:next-style-name="OrgFrontMatterPage"/>
+  <style:master-page style:name="OrgFrontMatterPage" style:page-layout-name="pm3">
+   <style:footer>
+    <text:p text:style-name="P1"><text:page-number text:select-page="current">0</text:page-number></text:p>
+   </style:footer>
+  </style:master-page>
+  <style:master-page style:name="OrgFirstPage" style:page-layout-name="pm4" style:next-style-name="OrgPage">
+   <style:footer>
+    <text:p text:style-name="P1"><text:page-number text:select-page="current">0</text:page-number></text:p>
+   </style:footer>
+  </style:master-page>
+  <style:master-page style:name="OrgPage" style:page-layout-name="pm5">
+   <style:footer>
+    <text:p text:style-name="P1"><text:page-number text:select-page="current">0</text:page-number></text:p>
+   </style:footer>
+  </style:master-page>
+ </office:master-styles>
+ <office:body>
+  <office:text text:use-soft-page-breaks="true">
+   <office:forms form:automatic-focus="false" form:apply-design-mode="false"/>
+   <text:sequence-decls>
+    <text:sequence-decl text:display-outline-level="2" text:separation-character="." text:name="Illustration"/>
+    <text:sequence-decl text:display-outline-level="2" text:separation-character="." text:name="Table"/>
+    <text:sequence-decl text:display-outline-level="2" text:separation-character="." text:name="Text"/>
+    <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
+    <text:sequence-decl text:display-outline-level="2" text:separation-character="." text:name="Equation"/>
+    <text:sequence-decl text:display-outline-level="2" text:separation-character="." text:name="Listing"/>
+   </text:sequence-decls>
+   <text:p text:style-name="OrgTitle"><text:title>SAVIOR CIFS Proxy</text:title></text:p>
+   <text:p text:style-name="OrgTitle"/>
+   <text:p text:style-name="OrgSubtitle"><text:initial-creator>Chris Long</text:initial-creator></text:p>
+   <text:p text:style-name="OrgSubtitle"/>
+   <text:p text:style-name="OrgSubtitle"><text:span text:style-name="OrgActiveTimestamp">&lt;2018-10-08 Mon&gt;</text:span></text:p>
+   <text:p text:style-name="OrgSubtitle"/>
+   <text:table-of-content text:style-name="Sect1" text:protected="true" text:name="Table of Contents">
+    <text:table-of-content-source text:outline-level="3">
+     <text:index-title-template text:style-name="Contents_20_Heading">Table of Contents</text:index-title-template>
+     <text:table-of-content-entry-template text:outline-level="1" text:style-name="Contents_20_1">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="2" text:style-name="Contents_20_2">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="3" text:style-name="Contents_20_3">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="4" text:style-name="Contents_20_4">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="5" text:style-name="Contents_20_5">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="6" text:style-name="Contents_20_6">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="7" text:style-name="Contents_20_7">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="8" text:style-name="Contents_20_8">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="9" text:style-name="Contents_20_9">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+     <text:table-of-content-entry-template text:outline-level="10" text:style-name="Contents_20_10">
+      <text:index-entry-link-start text:style-name="Internet_20_link"/>
+      <text:index-entry-chapter/>
+      <text:index-entry-text/>
+      <text:index-entry-link-end/>
+     </text:table-of-content-entry-template>
+    </text:table-of-content-source>
+    <text:index-body>
+     <text:index-title text:style-name="Sect2" text:name="Table of Contents_Head">
+      <text:p text:style-name="Contents_20_Heading">Table of Contents</text:p>
+     </text:index-title>
+     <text:p text:style-name="P11"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc641_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">1. <text:s/>Introduction</text:a></text:p>
+     <text:p text:style-name="P11"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc643_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">2. <text:s/>Goals</text:a></text:p>
+     <text:p text:style-name="P11"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc645_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">3. <text:s/>Design</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc647_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">3.1. <text:s/>Restricting access per-Virtue</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc649_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">3.2. <text:s/>Legacy and Virtue connections</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc651_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">3.3. <text:s/>Per-user or Per-Virtue?</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc653_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">3.4. <text:s/>Authentication</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc655_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">3.5. <text:s/>Access</text:a></text:p>
+     <text:p text:style-name="P11"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc657_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4. <text:s/>REST APIs</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc659_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.1. <text:s/>Virtue REST API</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc661_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.1.1. <text:s/>POST /virtue</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc663_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.1.2. <text:s/>DELETE /virtue?virtue=&lt;virtueName&gt;</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc665_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.1.3. <text:s/>GET /virtue?virtue=&lt;virtueName&gt;</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc669_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.2. <text:s/>Share REST API</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc671_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.2.1. <text:s/>POST /share</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc673_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.2.2. <text:s/>DELETE /share?share=&lt;shareName&gt;</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc675_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.2.3. <text:s/>GET /share?share=&lt;shareName&gt;</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc677_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">4.2.4. <text:s/>GET /status?share=&lt;shareName&gt;</text:a></text:p>
+     <text:p text:style-name="P11"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc679_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">5. <text:s/>Lifecycle</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc681_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">5.1. <text:s/>Startup</text:a></text:p>
+     <text:p text:style-name="P13"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc683_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">5.1.1. <text:s/>Virtual Machine Startup</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc685_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">5.2. <text:s/>Shutdown</text:a></text:p>
+     <text:p text:style-name="P12"><text:a xlink:type="simple" xlink:href="#__RefHeading___Toc687_2123474191" text:style-name="Internet_20_link" text:visited-style-name="Internet_20_link">5.3. <text:s/>Creation</text:a></text:p>
+    </text:index-body>
+   </text:table-of-content>
+   <text:h text:style-name="Heading_20_1" text:outline-level="1"><text:bookmark text:name="orgd32308f"/><text:bookmark-start text:name="__RefHeading___Toc641_2123474191"/><text:bookmark-start text:name="OrgXref.orgd32308f"/>Introduction <text:bookmark-end text:name="__RefHeading___Toc641_2123474191"/><text:bookmark-end text:name="OrgXref.orgd32308f"/></text:h>
+   <text:p text:style-name="Text_20_body">This document describes the CIFS Proxy component of the SAVIOR system. The purpose of this Proxy is to allow users to mount legacy Windows file shares—that is, Windows file shares that exist outside of SAVIOR and are ignorant of SAVIOR, Virtues, etc., for example, file shares that pre-date the use of SAVIOR. </text:p>
+   <text:h text:style-name="Heading_20_1" text:outline-level="1"><text:bookmark text:name="org3cd7463"/><text:bookmark-start text:name="__RefHeading___Toc643_2123474191"/><text:bookmark-start text:name="OrgXref.org3cd7463"/>Goals <text:bookmark-end text:name="__RefHeading___Toc643_2123474191"/><text:bookmark-end text:name="OrgXref.org3cd7463"/></text:h>
+   <text:p text:style-name="Text_20_body">Goals of this proxy are (in approximately this order) to: </text:p>
+   <text:list xml:id="list2511829423" text:style-name="OrgNumberedList">
+    <text:list-item>
+     <text:p text:style-name="P3">Restrict access to legacy file shares not only per user, but per Virtue. Specifically, within each Virtue, restrict access to the intersection of: </text:p>
+     <text:list text:style-name="OrgBulletedList">
+      <text:list-item>
+       <text:p text:style-name="P4"><text:soft-page-break/>What the user has access to (based on permissions in Active Directory for the file share) </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">What the Virtue has access to (based on settings in the Virtue-User Database) </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Work with existing the legacy file shares with no modification required. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Be secure. The Proxy should not introduce security vulnerabilities (beyond the desired file access as described above). </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Make legacy file shares visible to Virtues as remote file systems mountable by the native OS. This means, for example, that it cannot be web-only access or require a special client application. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Allow the user to mount legacy Windows files shares in a Virtue (virtual machine) without requiring a password. The user authenticates to the SAVIOR Desktop on startup, which should be sufficient. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Be performant. Access should be close to direct access to the file shares, especially in latency but also in throughput. </text:p>
+    </text:list-item>
+   </text:list>
+   <text:h text:style-name="Heading_20_1" text:outline-level="1"><text:bookmark text:name="orgdba14d0"/><text:bookmark-start text:name="__RefHeading___Toc645_2123474191"/><text:bookmark-start text:name="OrgXref.orgdba14d0"/>Design <text:bookmark-end text:name="__RefHeading___Toc645_2123474191"/><text:bookmark-end text:name="OrgXref.orgdba14d0"/></text:h>
+   <text:p text:style-name="Text_20_body">The table below summarizes how the design addresses each of the goals above: </text:p>
+   <text:section text:style-name="Sect2" text:name="Section1">
+    <table:table table:name="Table1" table:style-name="Table1">
+     <table:table-column table:style-name="Table1.A"/>
+     <table:table-column table:style-name="Table1.B"/>
+     <table:table-header-rows>
+      <table:table-row>
+       <table:table-cell table:style-name="Table1.A1" office:value-type="string">
+        <text:p text:style-name="OrgTableHeadingRight">Goal</text:p>
+       </table:table-cell>
+       <table:table-cell table:style-name="Table1.A1" office:value-type="string">
+        <text:p text:style-name="OrgTableHeadingLeft">Approach</text:p>
+       </table:table-cell>
+      </table:table-row>
+     </table:table-header-rows>
+     <table:table-row>
+      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsRight">1</text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsLeft">Use the Linux &quot;bind mounts&quot; feature to restrict access.</text:p>
+      </table:table-cell>
+     </table:table-row>
+     <table:table-row>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsRight">2</text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsLeft">Use the standard Linux <text:span text:style-name="OrgCode">mount.cifs</text:span> to mount the file share.</text:p>
+      </table:table-cell>
+     </table:table-row>
+     <table:table-row>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsRight">3</text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsLeft">Only provide the Proxy with user credentials. Use as simple a design as possible.</text:p>
+      </table:table-cell>
+     </table:table-row>
+     <table:table-row>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsRight">4</text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsLeft">Export files to each Virtue using Samba, as normal Windows file shares.</text:p>
+      </table:table-cell>
+     </table:table-row>
+     <table:table-row>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsRight">5</text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="Table1.A3" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsLeft">Cache user credentials in the Proxy and pass them to the remote file system.</text:p>
+      </table:table-cell>
+     </table:table-row>
+     <table:table-row>
+      <table:table-cell table:style-name="Table1.A7" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsRight">6</text:p>
+      </table:table-cell>
+      <table:table-cell table:style-name="Table1.B7" office:value-type="string">
+       <text:p text:style-name="OrgTableContentsLeft">Minimize the number of processes the files must pass through, and use existing tools where possible since they are likely already tuned to be performant.</text:p>
+      </table:table-cell>
+     </table:table-row>
+    </table:table>
+   </text:section>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org5e9b289"/><text:bookmark-start text:name="__RefHeading___Toc647_2123474191"/><text:bookmark-start text:name="OrgXref.org5e9b289"/>Restricting access per-Virtue <text:bookmark-end text:name="__RefHeading___Toc647_2123474191"/><text:bookmark-end text:name="OrgXref.org5e9b289"/></text:h>
+   <text:p text:style-name="Text_20_body">Goal #2 means that the Proxy will have the same access to legacy file shares that the user has in a non-SAVIOR/Virtue environment. Goal #1 means that the Proxy must somehow restrict this access to each Virtue based on rights granted to it. </text:p>
+   <text:p text:style-name="Text_20_body">The SAVIOR security model for file shares is to grant, for each Virtue and directory within a file share, exactly one of: </text:p>
+   <text:list xml:id="list2081917518" text:style-name="OrgBulletedList">
+    <text:list-item>
+     <text:p text:style-name="P4">Full access </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P4">Read-only access (including execute) </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P4">No access </text:p>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="Text_20_body">By default, no access is granted. Note that only per-directory permissions are possible, not per-file. </text:p>
+   <text:p text:style-name="Text_20_body"><text:soft-page-break/>These restrictions can be implemented using the &quot;bind mounts&quot; feature of the Linux <text:span text:style-name="OrgCode">mount</text:span> command. Among other things, the bind mounts feature allows an already-mounted directory to be remounted elsewhere, optionally with read-only permissions. </text:p>
+   <text:p text:style-name="Text_20_body">For example, given this directory structure where all access is allowed: </text:p>
+   <text:list xml:id="list151035486150124" text:style-name="OrgBulletedList">
+    <text:list-item>
+     <text:p text:style-name="P4">share/ </text:p>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P4">public/ </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">admin/ </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">system/ </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">README.TXT </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="Text_20_body"><text:span text:style-name="OrgCode">mount</text:span> could remount these subdirectories in a different location with Virtue-specific permissions that differ for each subdirectory, for example: </text:p>
+   <text:list xml:id="list151034492278919" text:style-name="OrgBulletedList">
+    <text:list-item>
+     <text:p text:style-name="P4">MyVirtue/ [read-only] </text:p>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P4">public/ [full access] </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">admin/ [read-only] </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">system/ [no access] </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">README.TXT [read-only (inherited from parent)] </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="Text_20_body">This could be accomplished with commands simliar to these (where &quot;…&quot; is replaced by the path to the appropriate place): </text:p>
+   <text:list xml:id="list151035819664341" text:style-name="OrgNumberedList">
+    <text:list-item>
+     <text:p text:style-name="P3"><text:span text:style-name="OrgCode">mount -o bind,ro .../share .../MyVirtue</text:span> </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3"><text:span text:style-name="OrgCode">mount -o bind .../share/public .../MyVirtue/public</text:span> </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3"><text:span text:style-name="OrgCode">mount -o bind .../INACCESSIBLE .../MyVirtue/public/system</text:span> </text:p>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="Text_20_body"><text:span text:style-name="OrgCode">INACCESSIBLE</text:span> is a pre-configured directory with no permissions granted. </text:p>
+   <text:p text:style-name="Text_20_body">The new directory can then be made available as a shared directory as normal. The Proxy will run a Samba server to export the shared directories. </text:p>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org97656af"/><text:bookmark-start text:name="__RefHeading___Toc649_2123474191"/><text:bookmark-start text:name="OrgXref.org97656af"/>Legacy and Virtue connections <text:bookmark-end text:name="__RefHeading___Toc649_2123474191"/><text:bookmark-end text:name="OrgXref.org97656af"/></text:h>
+   <text:p text:style-name="Text_20_body">The Proxy will &quot;speak&quot; SMB/CIFS both to mount file shares and to export file shares to the Virtues. For mounting, it will use the Linux standard <text:span text:style-name="OrgCode">mount.cifs</text:span> program. For exporting, it will run Samba configured as a file share server. </text:p>
+   <text:p text:style-name="Text_20_body">To secure <text:span text:style-name="T2">the file systems that the Proxy exports</text:span>, the Proxy will be configurable with username/password pairs for each file share to export. These will be generated by the Virtue Admin Server, which will set them in the Proxy and share <text:span text:style-name="T2">them</text:span> with the VMs in each Virtue as appropriate. </text:p>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org429d99e"/><text:bookmark-start text:name="__RefHeading___Toc651_2123474191"/><text:bookmark-start text:name="OrgXref.org429d99e"/>Per-user or Per-Virtue? <text:bookmark-end text:name="__RefHeading___Toc651_2123474191"/><text:bookmark-end text:name="OrgXref.org429d99e"/></text:h>
+   <text:p text:style-name="Text_20_body">A key design consideration is whether there should be an instance of the Proxy for each Virtue or a single one per user that is shared among the user&apos;s Virtues. </text:p>
+   <text:p text:style-name="Text_20_body">Pros of a single Proxy per user are: </text:p>
+   <text:list xml:id="list151034587197723" text:style-name="OrgBulletedList">
+    <text:list-item>
+     <text:p text:style-name="P4">Fewer Proxy instances than per Virtue, entailing: </text:p>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P4"><text:soft-page-break/>Reduced system complexity </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P4">Reduced costs on EC2 (because each Proxy requires a Linux VM) </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P4">Ability to mount each legacy file share once per user. This will save some network overhead and resources on the file Server. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P4">Faster system startup for the user since fewer Proxies need to be started on user login (assuming a &quot;cold start&quot; where no Virtues are already running for that user). </text:p>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="Text_20_body">The only con of a single Proxy per user is that a security breach in the Proxy would simultaneously compromise access for all Virtues for the user. However, since all Proxies will be running the same software stack, if one can be compromised, they all can. Also, every Proxy has whatever access to the legacy shares as the user has in a non-SAVIOR environment. </text:p>
+   <text:p text:style-name="Text_20_body">Based on the above analysis, a single Proxy per user will be used. </text:p>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org0f85cc5"/><text:bookmark-start text:name="__RefHeading___Toc653_2123474191"/><text:bookmark-start text:name="OrgXref.org0f85cc5"/>Authentication <text:bookmark-end text:name="__RefHeading___Toc653_2123474191"/><text:bookmark-end text:name="OrgXref.org0f85cc5"/></text:h>
+   <text:p text:style-name="Text_20_body">Goals #1, #2, #3, and #5 are addressed using S4U2Proxy (Services For User To Proxy), a.k.a. Kerberos resource-based constrained delegation. The Virtue Admin Server authenticates to the Proxy as the user, and the Proxy uses S4U2Proxy to pass these credentials to the file share. </text:p>
+   <text:p text:style-name="Text_20_body">This means the legacy file share thinks it is being contacted directly by the user and the access it provides to the files has exactly the rights of the user. It also allows the Proxy to mount the files without requiring the user to enter a password or otherwise authenticate (beyond the initial login via the SAVIOR Desktop). </text:p>
+   <text:p text:style-name="Text_20_body">The steps of the authentication are as follows: </text:p>
+   <text:list xml:id="list151035612105078" text:style-name="OrgNumberedList">
+    <text:list-item>
+     <text:p text:style-name="P3">The Virtue Admin Server requests a file share and authenticates as the user, by passing a service ticket for the Proxy with the user as the principal (and actually created by the VA Server as if by the user via S4U2Proxy). </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">The Proxy validates the ticket with the AD DS. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">The Proxy requests a service ticket for the file share (from the AD DS). </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">The Proxy uses this service ticket along with the one received from the VA Server to request from the AD DS a service ticket for the file share with the user as the principal. (This is the S4U2Proxy step.) </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">The Proxy passes this service ticket to the file share to authenticate as the user. </text:p>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="Text_20_body">This process requires permissions settings in Active Directory, as detailed in the Startup section. </text:p>
+   <text:p text:style-name="Text_20_body">For more information about S4U2Proxy, see <text:a xlink:type="simple" xlink:href="https://blogs.technet.microsoft.com/ashleymcglone/2016/08/30/powershell-remoting-kerberos-double-hop-solved-securely/" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link">https://blogs.technet.microsoft.com/ashleymcglone/2016/08/30/powershell-remoting-kerberos-double-hop-solved-securely/</text:a>. </text:p>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org3e0541b"/><text:bookmark-start text:name="__RefHeading___Toc655_2123474191"/><text:bookmark-start text:name="OrgXref.org3e0541b"/>Access <text:bookmark-end text:name="__RefHeading___Toc655_2123474191"/><text:bookmark-end text:name="OrgXref.org3e0541b"/></text:h>
+   <text:p text:style-name="Text_20_body">Access to a mapped share entails the following steps: </text:p>
+   <text:list xml:id="list151035592052697" text:style-name="OrgNumberedList">
+    <text:list-item>
+     <text:p text:style-name="P3">The user opens a legacy share file (or directory). </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">The request is sent (by the Virtue VM&apos;s OS) to the Proxy host for the Virtue. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Samba on the Proxy host attempts to access the file. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">If the file has not been mounted, the automounter invokes the Proxy helper script to mount <text:soft-page-break/>it: </text:p>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P3">It uses the cached service ticket obtained when the file share was configured (by the Virtue Admin Server) and the Proxy keytab to get a service ticket for the legacy file share. </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P3">It mounts the file share. </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P3">It uses mount bind to set up a file tree suitable for use by the Virtue. </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Samba serves the requested file. </text:p>
+    </text:list-item>
+   </text:list>
+   <text:h text:style-name="P8" text:outline-level="1"><text:bookmark-start text:name="__RefHeading___Toc657_2123474191"/>REST APIs<text:bookmark-end text:name="__RefHeading___Toc657_2123474191"/></text:h>
+   <text:p text:style-name="P7"><text:span text:style-name="T3">The REST APIs </text:span>will be authenticated via SPNEGO as the valid Active Directory user desiring access to the share. This not only provides security, but also allows the Proxy to authenticate as the user to the file share without requiring further authentication by the user (e.g., typing a password). </text:p>
+   <text:p text:style-name="P7">Note that this will require the Virtue Admin Server to use S4U2Proxy (Services For User To Proxy), a.k.a. Kerberos resource-based constrained delegation.</text:p>
+   <text:p text:style-name="P6">The REST API will restricted by network rules to be accessible only from the Virtue Admin Server.</text:p>
+   <text:p text:style-name="P6">Note for debugging &amp; testing: The API can be access via <text:span text:style-name="OrgCode">curl</text:span> if the user has Kerberos tickets (e.g., from <text:span text:style-name="OrgCode">kinit</text:span>) using the <text:span text:style-name="OrgCode">--negotiate</text:span> and <text:span text:style-name="OrgCode">--user</text:span> options. </text:p>
+   <text:h text:style-name="P10" text:outline-level="2"><text:bookmark-start text:name="__RefHeading___Toc659_2123474191"/>Virtue REST API<text:bookmark-end text:name="__RefHeading___Toc659_2123474191"/></text:h>
+   <text:p text:style-name="P6">The Proxy will provide a REST API for managing Virtue definitions. These will be local to the Proxy (vs. definitive like the Virtue definitions managed by the Virtue Admin Server).</text:p>
+   <text:h text:style-name="P9" text:outline-level="3"><text:bookmark-start text:name="OrgXref.orge3bcf691"/><text:bookmark-start text:name="__RefHeading___Toc661_2123474191"/>POST <text:span text:style-name="OrgCode">/virtue</text:span> <text:bookmark-end text:name="OrgXref.orge3bcf691"/><text:bookmark-end text:name="__RefHeading___Toc661_2123474191"/></text:h>
+   <text:p text:style-name="P7"><text:span text:style-name="T3">Define </text:span>a virtue. The parameters for the <text:span text:style-name="T3">V</text:span>irtue will be passed as JSON. Fields are TBD. What it returns is TBD.</text:p>
+   <text:h text:style-name="P9" text:outline-level="3"><text:bookmark text:name="orgad0f0b41"/><text:bookmark-start text:name="__RefHeading___Toc663_2123474191"/><text:bookmark-start text:name="OrgXref.orgad0f0b41"/>DELETE <text:span text:style-name="OrgCode">/virtue?virtue=&lt;virtueName&gt;</text:span> <text:bookmark-end text:name="__RefHeading___Toc663_2123474191"/><text:bookmark-end text:name="OrgXref.orgad0f0b41"/></text:h>
+   <text:p text:style-name="P7">Remove a <text:span text:style-name="T3">V</text:span>irtue <text:span text:style-name="T3">definition</text:span>. <text:span text:style-name="T3">This operation will fail if the Virtue has active mounts.</text:span> </text:p>
+   <text:h text:style-name="P9" text:outline-level="3"><text:bookmark text:name="org5a3c10a1"/><text:bookmark-start text:name="__RefHeading___Toc665_2123474191"/><text:bookmark-start text:name="OrgXref.org5a3c10a1"/>GET <text:span text:style-name="OrgCode">/virtue?virtue=&lt;virtueName&gt;</text:span> <text:bookmark-end text:name="__RefHeading___Toc665_2123474191"/><text:bookmark-end text:name="OrgXref.org5a3c10a1"/></text:h>
+   <text:p text:style-name="P7">The parameters for the virtue will be returned as JSON. Fields are TBD (likely the same or a superset of the format for <text:span text:style-name="T3">defining a V</text:span>irtue via POST).</text:p>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org7b8e859"/><text:bookmark-start text:name="__RefHeading___Toc669_2123474191"/><text:span text:style-name="T3">Share </text:span><text:bookmark-start text:name="OrgXref.org7b8e859"/>REST API <text:bookmark-end text:name="__RefHeading___Toc669_2123474191"/><text:bookmark-end text:name="OrgXref.org7b8e859"/></text:h>
+   <text:p text:style-name="Text_20_body">The Proxy will provide a REST API for setting up file shares and getting status. These calls are documented below. <text:s/></text:p>
+   <text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark-start text:name="OrgXref.orge3bcf69"/><text:bookmark-start text:name="__RefHeading___Toc671_2123474191"/><text:bookmark text:name="orge3bcf69"/><text:soft-page-break/>POST <text:span text:style-name="OrgCode">/share</text:span> <text:bookmark-end text:name="OrgXref.orge3bcf69"/><text:bookmark-end text:name="__RefHeading___Toc671_2123474191"/></text:h>
+   <text:p text:style-name="Text_20_body">Sets up a new file share. The parameters for the file share will be passed as JSON. Fields are TBD. What it returns is TBD, but probably will at least contain the path that can be used to mount the new file share. </text:p>
+   <text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark-start text:name="OrgXref.orgad0f0b4"/><text:bookmark-start text:name="__RefHeading___Toc673_2123474191"/><text:bookmark text:name="orgad0f0b4"/>DELETE <text:span text:style-name="OrgCode">/share?share=&lt;shareName&gt;</text:span> <text:bookmark-end text:name="OrgXref.orgad0f0b4"/><text:bookmark-end text:name="__RefHeading___Toc673_2123474191"/></text:h>
+   <text:p text:style-name="Text_20_body">Remove a file share. </text:p>
+   <text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark-start text:name="OrgXref.org5a3c10a"/><text:bookmark-start text:name="__RefHeading___Toc675_2123474191"/><text:bookmark text:name="org5a3c10a"/>GET <text:span text:style-name="OrgCode">/share?share=&lt;shareName&gt;</text:span> <text:bookmark-end text:name="OrgXref.org5a3c10a"/><text:bookmark-end text:name="__RefHeading___Toc675_2123474191"/></text:h>
+   <text:p text:style-name="Text_20_body">The parameters for the file share will be returned as JSON. Fields are TBD (likely the same or a superset of the format for setting up a share via POST). </text:p>
+   <text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark-start text:name="OrgXref.org2529ce2"/><text:bookmark-start text:name="__RefHeading___Toc677_2123474191"/><text:bookmark text:name="org2529ce2"/>GET <text:span text:style-name="OrgCode">/status?share=&lt;shareName&gt;</text:span> <text:bookmark-end text:name="OrgXref.org2529ce2"/><text:bookmark-end text:name="__RefHeading___Toc677_2123474191"/></text:h>
+   <text:p text:style-name="Text_20_body">Get some status information about the file share. Format TBD. </text:p>
+   <text:h text:style-name="Heading_20_1" text:outline-level="1"><text:bookmark text:name="orgd2bc58c"/><text:bookmark-start text:name="__RefHeading___Toc679_2123474191"/><text:bookmark-start text:name="OrgXref.orgd2bc58c"/>Lifecycle <text:bookmark-end text:name="__RefHeading___Toc679_2123474191"/><text:bookmark-end text:name="OrgXref.orgd2bc58c"/></text:h>
+   <text:p text:style-name="Text_20_body">This section describes the steps required for each part of the Proxy lifecycle. </text:p>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="orgc5c7088"/><text:bookmark-start text:name="__RefHeading___Toc681_2123474191"/><text:bookmark-start text:name="OrgXref.orgc5c7088"/>Startup <text:bookmark-end text:name="__RefHeading___Toc681_2123474191"/><text:bookmark-end text:name="OrgXref.orgc5c7088"/></text:h>
+   <text:p text:style-name="Text_20_body">This occurs when a user logs into SAVIOR. The Virtue Admin Server will do the following (or cause them to be done): </text:p>
+   <text:list xml:id="list151034996373868" text:style-name="OrgNumberedList">
+    <text:list-item>
+     <text:p text:style-name="P3">Start the Linux host for the Proxy. Internally (as part of the boot process), this will: </text:p>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P3">Start the Java web container for the Proxy. (Container TBD, candidates include Jetty and Tomcat.) </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P3">Start the Samba daemon. </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P3">Start the automounter daemon (maybe not for version 1). </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Set delegation privileges. Set the property &quot;msDS-AllowedToActOnBehalfOfOtherIdentity&quot; on Active Directory (see below for mechanisms): </text:p>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P3">for the Proxy to be the Virtue Admin Server host computer. </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P3">for all file servers the Proxy is allowed to mount to include the host computer for the Proxy. Note that this property may already have values so the new one must be appended. </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Invoke the REST API (described above) to set up file shares. </text:p>
+    </text:list-item>
+   </text:list>
+   <text:p text:style-name="Text_20_body">How to set msDS-AllowedToActOnBehalfOfOtherIdentity depends on the operating system. If $Server is the server to which access is desired (e.g., the file server) and $Client is the computer that needs to be able to delegate (e.g., the Proxy), the commands are: </text:p>
+   <text:list xml:id="list151034535798982" text:style-name="OrgBulletedList">
+    <text:list-item>
+     <text:p text:style-name="P4"><text:span text:style-name="Bold">Windows</text:span>: Use <text:span text:style-name="OrgCode">Set-ADComputer -Identity $Server <text:s text:c="3"/>-PrincipalsAllowedToDelegateToAccount $Client</text:span>. May also require <text:span text:style-name="OrgCode">-Cred $credential</text:span> with credentials for the domain admin or other user authorized to make this change. These can be obtained with (for example): </text:p>
+     <text:list>
+      <text:list-item>
+       <text:p text:style-name="P4"><text:soft-page-break/><text:span text:style-name="OrgCode">$password = ConvertTo-SecureString -AsPlainText -Force <text:s text:c="5"/>&quot;$admin_password}&quot;</text:span> </text:p>
+      </text:list-item>
+      <text:list-item>
+       <text:p text:style-name="P5"><text:span text:style-name="OrgCode">$cred = new-object -typename System.Management.Automation.PSCredential -argumentlist DOMAIN\$</text:span><text:span text:style-name="OrgCode"><text:span text:style-name="T1">domain_adminuser, $password</text:span></text:span> </text:p>
+      </text:list-item>
+     </text:list>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P4"><text:span text:style-name="Bold">Linux</text:span>: TBD. Some way to set msDS-AllowedToActOnBehalfOfOtherIdentity with an ldap-changing command. </text:p>
+    </text:list-item>
+   </text:list>
+   <text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark text:name="org491c413"/><text:bookmark-start text:name="__RefHeading___Toc683_2123474191"/><text:bookmark-start text:name="OrgXref.org491c413"/>Virtual Machine Startup <text:bookmark-end text:name="__RefHeading___Toc683_2123474191"/><text:bookmark-end text:name="OrgXref.org491c413"/></text:h>
+   <text:p text:style-name="Text_20_body">For every Virtue configured to have access to any file share, when any application VM for that Virtue starts up, the Virtue Admin Server will configure it with a network mount for each file share, pointing to the CIFS Proxy for the user. </text:p>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org60f7a33"/><text:bookmark-start text:name="__RefHeading___Toc685_2123474191"/><text:bookmark-start text:name="OrgXref.org60f7a33"/>Shutdown <text:bookmark-end text:name="__RefHeading___Toc685_2123474191"/><text:bookmark-end text:name="OrgXref.org60f7a33"/></text:h>
+   <text:p text:style-name="Text_20_body">This occurs when the last Virtue of a user exits. </text:p>
+   <text:list xml:id="list151035185364549" text:style-name="OrgNumberedList">
+    <text:list-item>
+     <text:p text:style-name="P3">Revoke delegation privileges. </text:p>
+    </text:list-item>
+    <text:list-item>
+     <text:p text:style-name="P3">Shutdown the Proxy host. </text:p>
+    </text:list-item>
+   </text:list>
+   <text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark text:name="org788a137"/><text:bookmark-start text:name="__RefHeading___Toc687_2123474191"/><text:bookmark-start text:name="OrgXref.org788a137"/>Creation <text:bookmark-end text:name="__RefHeading___Toc687_2123474191"/><text:bookmark-end text:name="OrgXref.org788a137"/></text:h>
+   <text:p text:style-name="Text_20_body">This section describes how to create a CIFS Proxy image. </text:p>
+   <text:p text:style-name="Text_20_body">TBD. </text:p>
+  </office:text>
+ </office:body>
+</office:document>
