@@ -107,7 +107,7 @@ def getWebhost() {
 remotes {
 	webserver {
 	    host = project.getWebhost()
-		user = 'ec2-user'
+		user = 'fedora'
         // root of git tree
         identity = file('../../../vrtu.pem')
 	}
@@ -121,6 +121,7 @@ task nativeDeploy(dependsOn: bootJar) {
             session(remotes.webserver) {
                 put from: 'getserviceticket', into: '.'
                 put from: 'importcreds', into: '.'
+                put from: 'switchprincipal', into: '.'
             }
         }
         println "copied native executables to " + remotes.webserver

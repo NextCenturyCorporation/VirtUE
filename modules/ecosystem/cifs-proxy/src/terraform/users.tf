@@ -2,12 +2,14 @@
 # Create users in our AD domain
 #
 
+
 data "template_file" "users_script" {
   template = "${file("users.ps1")}"
 
   vars {
 	admin_password = "${var.admin_password}"
 	bob_password = "${var.bob_password}"
+	domain_admin_user = "${var.domain_admin_user}"
   }
 }
 
@@ -16,16 +18,19 @@ data "template_file" "remove_users_script" {
 
   vars {
 	admin_password = "${var.admin_password}"
+	domain_admin_user = "${var.domain_admin_user}"
   }
 }
 
 resource "null_resource" "user_creation" {
   triggers {
-	ad_id = "${aws_directory_service_directory.active_directory.id}"
+	script_sha1 = "${sha1(data.template_file.users_script.template)}"
+	# Not depending on the remove script because it should only change
+	# when the add script does.
   }
 
   connection {
-	user = "Administrator"
+	user = "${var.domain_admin_user}"
 	password = "${var.admin_password}"
 	host = "${aws_instance.file_server.public_ip}"
 	type = "winrm"

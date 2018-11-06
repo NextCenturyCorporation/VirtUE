@@ -5,7 +5,7 @@ Start-Transcript -Path "c:\user_data.log" -append -force
 Install-WindowsFeature -Name RSAT-AD-PowerShell
 
 $password = ConvertTo-SecureString -AsPlainText -Force "${admin_password}"
-$cred = new-object -typename System.Management.Automation.PSCredential -argumentlist Admin, $password
+$cred = new-object -typename System.Management.Automation.PSCredential -argumentlist ${domain_admin_user}, $password
 
 echo "removing user bob"
 Remove-ADUser -Identity bob -Credential $cred -Confirm:$False

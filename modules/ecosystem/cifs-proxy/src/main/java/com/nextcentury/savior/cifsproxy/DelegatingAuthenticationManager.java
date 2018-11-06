@@ -168,7 +168,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		int retval;
 
 		gss_OID_desc nameType = GssApi.GSS_C_NT_HOSTBASED_SERVICE;
-		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, "http@" + myhostname, nameType);
+		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, "HTTP@" + myhostname, nameType);
 		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
 		desiredMechs.count = new NativeLong(1);
 		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);
@@ -179,6 +179,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0, GssApi.GSS_C_NO_OID_SET,
 				GssCredentialUsage.GSS_C_BOTH.getValue(), outputCredHandle, null, null);
 		LOGGER.trace("<<<back from acquire_cred");
+
 		GSSException exception = null;
 		try {
 			GssUtils.releaseName(gssapi, gssWebServiceName);
@@ -241,6 +242,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 			LOGGER.trace("<<back from accept_sec_context: " + retval + "." + minorStatus.getValue() + "\tname='"
 					+ GssUtils.getStringName(gssapi, plainSourceName) + "'");
 		}
+
 		/*
 		 * In theory you have to do this in a loop. In practice that doesn't seem to
 		 * ever happen. But just in case, check and warn.
@@ -274,7 +276,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	 */
 	private void storeCredInto(Pointer acquiredCred, Path file, int overwriteCred) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
-		int defaultCred = 0;
+		int defaultCred = 1;
 		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:" + file);
 		gss_key_value_set credStore = new gss_key_value_set();
 		credStore.count = 1;

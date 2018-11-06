@@ -392,7 +392,7 @@ public interface GssApi extends Library {
 
 	int gss_display_name(IntByReference minorStatus /* minor_status */, gss_name_t inputName /* input_name */,
 			gss_buffer_desc outputNameBuffer /* output_name_buffer */,
-			PointerByReference outputNameType /* output_name_type */);
+			PointerByReference outputNameType /* output_name_type (gss_OID *) */);
 
 	int gss_oid_to_str(IntByReference minorStatus, /* minor_status */
 			gss_OID_desc oid, /* oid */

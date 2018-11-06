@@ -138,6 +138,9 @@ public class GssUtils {
 	 */
 	public static String getStringName(GssApi api, gss_name_t name) throws GSSException {
 		LOGGER.entry(name);
+		if (name.equals(GssApi.GSS_C_NO_NAME)) {
+			return "";
+		}
 		String stringname;
 		IntByReference minorStatus = new IntByReference();
 		gss_buffer_desc outputNameBuffer = new gss_buffer_desc();// outputNameHandle.getPointer());
@@ -184,7 +187,8 @@ public class GssUtils {
 		UnpackedName result = new UnpackedName();
 		IntByReference minorStatus = new IntByReference();
 		gss_buffer_desc outputNameBuffer = new gss_buffer_desc();
-		PointerByReference nameTypeRef = new PointerByReference();
+		gss_OID_desc nameType = new gss_OID_desc();
+		PointerByReference nameTypeRef = new PointerByReference(nameType.getPointer());
 		int retval;
 		try {
 			retval = api.gss_display_name(minorStatus, name, outputNameBuffer, nameTypeRef);
@@ -204,13 +208,7 @@ public class GssUtils {
 				}
 			}
 		}
-		if (nameTypeRef.getValue() != null) {
-			gss_OID_desc nameType = new gss_OID_desc(nameTypeRef.getValue());
-			result.type = getOidString(api, nameType);
-		}
-		else {
-			result.type = "(null)";			
-		}
+		result.type = getOidString(api, nameType);
 		return result;
 	}
 
@@ -315,7 +313,7 @@ public class GssUtils {
 						} catch (GSSException e) {
 							result.append("<ERROR>");
 						}
-						result.append(',');
+						result.append("],");
 					}
 					// delete trailing ','
 					result.deleteCharAt(result.length() - 1);

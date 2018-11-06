@@ -53,13 +53,31 @@ variable "subnet_name" {
   default = "public_1a"
 }
 
+variable "dsname" {
+  description = "Host name of the directory service"
+  default = "ds"
+}
+
 variable "domain" {
   default = "test.savior"
 }
 
+variable "domain_admin_user" {
+  default = "Admin" # for EC2 Active Directory
+}
+
+locals {
+  # the first part of the domain (e.g., if the domain is 'foo.com',
+  # this is 'foo')"
+  domain_prefix = "${element(split(".", "${var.domain}"),0)}"
+}
+
 variable "linux_ami" {
-  description = "Amazon Linux 2 LTS Candidate 2 AMI (HVM), SSD Volume Type"
-  default = "ami-afd15ed0"
+  # Using Fedora 28 because it has more recent version of Samba than
+  # Ubuntu 18.04 LTS.  See https://alt.fedoraproject.org/cloud/ for
+  # info.
+  description = "Fedora-Cloud-Base-28-20180922.0.x86_64-hvm-us-east-1-standard-0"
+  default = "ami-0064c3021927a1bd5"
 }
 
 variable "linux_instance_type" {
