@@ -9,9 +9,11 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -41,7 +43,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
- * Security configuration for using Active Directory for Authentication.
+ * Security configuration for using Active Directory for Authentication. Works
+ * with the {@link DelegatingAuthenticationManager}.
  */
 @EnableWebSecurity
 @PropertySources({ @PropertySource(BaseSecurityConfig.DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_CLASSPATH),
@@ -53,28 +56,83 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 
 	private static final XLogger logger = XLoggerFactory.getXLogger(ActiveDirectorySecurityConfig.class);
 
+	/**
+	 * The key for storing the username in the current {@link HttpSession}.
+	 */
 	public static final String USERNAME_ATTRIBUTE = "USERNAME";
 
+	/**
+	 * The key for storing the {@link Path} to the credential cache in the current
+	 * {@link HttpSession}.
+	 * 
+	 * @see #serviceTicketFile
+	 */
+	public static final String CCACHE_PATH_ATTRIBUTE = "CCACHE_PATH";
+
+	/**
+	 * The key for storing the {@link Path} to the keytab in the current
+	 * {@link HttpSession}.
+	 * 
+	 * @see #keytabLocation
+	 */
+	public static final String KEYTAB_PATH_ATTRIBUTE = "KEYTAB_PATH";
+
+	/**
+	 * The key for storing the service name in the current {@link HttpSession}
+	 * (e.g., "http/webserver.test.savior").
+	 */
+	public static final String SERVICE_NAME_ATTRIBUTE = "SERVICE_NAME";
+
+	/**
+	 * 
+	 * @return standard Spring resolver for property values (e.g., {@link Value}
+	 *         annotation).
+	 */
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-	@Value("${savior.security.ad.domain:ERROR}")
+	/**
+	 * Required: Active Directory security domain.
+	 */
+	@Value("${savior.security.ad.domain}")
 	private String adDomain;
 
-	@Value("${savior.security.ad.url:ERROR}")
+	/**
+	 * Required: the URL to the active directory server
+	 * 
+	 * @see #getActiveDirectoryLdapAuthenticationProvider()
+	 */
+	@Value("${savior.security.ad.url}")
 	private String adUrl;
 
+	/**
+	 * URL for the LDAP service
+	 * 
+	 * @see #kerberosLdapContextSource()
+	 */
 	@Value("${savior.security.ldap}")
 	private String ldapURL;
 
+	/**
+	 * Required: The Active Directory principal the CIFS Proxy runs as, for example,
+	 * "HTTP/bob-cifs-proxy@savior.com".
+	 */
 	@Value("${savior.cifsproxy.principal}")
 	private String servicePrincipal;
 
+	/**
+	 * Location of the keytab for the {@link #servicePrincipal}. Defaults to
+	 * "/etc/krb5.keytab".
+	 */
 	@Value("${savior.cifsproxy.keytab:/etc/krb5.keytab}")
 	private File keytabLocation;
 
+	/**
+	 * Location of the temporary credential cache that will be used to stage creds
+	 * for mounting filesystems.
+	 */
 	static public Path serviceTicketFile;
 
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
@@ -85,6 +143,34 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		return provider;
 	}
 
+	/**
+	 * Checks that the attributes specified for {@link Value}s are ok (e.g.,
+	 * required ones are set, existence of required files).
+	 */
+	@PostConstruct
+	protected void validateValues() {
+		if (adDomain == null || "".equals(adDomain)) {
+			throw new IllegalArgumentException("domain must be specified");
+		}
+		if (adUrl == null || "".equals(adUrl)) {
+			throw new IllegalArgumentException("url must be specified");
+		}
+		if (servicePrincipal == null || "".equals(servicePrincipal)) {
+			throw new IllegalArgumentException("principal must be specified");
+		}
+		if (!keytabLocation.exists()) {
+			throw new IllegalArgumentException("keytab '" + keytabLocation + "' does not exist");
+		}
+	}
+
+	/**
+	 * Creates the temporary credential cache file.
+	 * 
+	 * @return a {@link DelegatingAuthenticationManager} that delegates to the
+	 *         superclass's {@link AuthenticationManager}
+	 * @see BaseSecurityConfig#authenticationManagerBean()
+	 * @see #serviceTicketFile
+	 */
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -93,7 +179,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		// we don't want anyone but us reading our ticket file
 		Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
 		FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
-		serviceTicketFile = Files.createTempFile("cifsproxy", "", attr);
+		serviceTicketFile = Files.createTempFile("cifsproxy-ccache", "", attr);
 
 		AuthenticationManager authenticationManagerBean = new DelegatingAuthenticationManager(
 				super.authenticationManagerBean(), serviceTicketFile);
@@ -143,6 +229,8 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				request.getSession().setAttribute(USERNAME_ATTRIBUTE, authentication.getName());
+				request.getSession().setAttribute(CCACHE_PATH_ATTRIBUTE, serviceTicketFile);
+				request.getSession().setAttribute(KEYTAB_PATH_ATTRIBUTE, keytabLocation.toPath());
 			}
 		});
 

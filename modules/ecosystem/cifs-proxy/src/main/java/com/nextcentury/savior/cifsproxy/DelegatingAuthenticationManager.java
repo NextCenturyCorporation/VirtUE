@@ -37,6 +37,8 @@ import com.sun.jna.ptr.PointerByReference;
  * to us and creates a Kerberos service ticket and caches it, so it can be used
  * later to mount the filesystem with cifs.mount(8).
  * 
+ * Depends on settings made by the {@link ActiveDirectorySecurityConfig}.
+ * 
  * @author clong
  *
  */
@@ -60,7 +62,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	/**
 	 * The name of the local host (e.g., "webserver").
 	 */
-	private String myhostname;
+	private static String myhostname = null;
 
 	public DelegatingAuthenticationManager(AuthenticationManager amDelegate, Path cacheFile) {
 		LOGGER.entry(amDelegate, cacheFile);
@@ -75,26 +77,28 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	/**
 	 * Determine the local hostname and initialize it.
 	 */
-	private void initHostname() {
+	private static void initHostname() {
 		LOGGER.entry();
-		UnknownHostException exception = null;
-		try {
-			myhostname = InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			exception = e;
-		}
-		if (exception != null) {
-			// try another strategy
-			if (System.getProperty("os.name").contains("windows")) {
-				myhostname = System.getenv("COMPUTERNAME");
-			} else {
-				myhostname = System.getenv("HOSTNAME");
+		if (myhostname == null) {
+			UnknownHostException exception = null;
+			try {
+				myhostname = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				exception = e;
 			}
-		}
-		if (myhostname == null || myhostname.isEmpty()) {
-			UndeclaredThrowableException undeclaredThrowableException = new UndeclaredThrowableException(exception);
-			LOGGER.throwing(undeclaredThrowableException);
-			throw undeclaredThrowableException;
+			if (exception != null) {
+				// try another strategy
+				if (System.getProperty("os.name").contains("windows")) {
+					myhostname = System.getenv("COMPUTERNAME");
+				} else {
+					myhostname = System.getenv("HOSTNAME");
+				}
+			}
+			if (myhostname == null || myhostname.isEmpty()) {
+				UndeclaredThrowableException undeclaredThrowableException = new UndeclaredThrowableException(exception);
+				LOGGER.throwing(undeclaredThrowableException);
+				throw undeclaredThrowableException;
+			}
 		}
 		LOGGER.exit();
 	}
@@ -168,7 +172,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		int retval;
 
 		gss_OID_desc nameType = GssApi.GSS_C_NT_HOSTBASED_SERVICE;
-		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, "HTTP@" + myhostname, nameType);
+		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, getServiceName('@'), nameType);
 		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
 		desiredMechs.count = new NativeLong(1);
 		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);
@@ -204,6 +208,11 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		gss_cred_id_t outputCred = new gss_cred_id_t(outputCredHandle.getValue());
 		LOGGER.exit(outputCred);
 		return outputCred;
+	}
+
+	public static String getServiceName(char delimiter) {
+		initHostname();
+		return "http" + delimiter + myhostname;
 	}
 
 	/**
@@ -257,7 +266,9 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 			throw exception;
 		}
 
-		return new gss_cred_id_t(delegatedCredHandle.getValue());
+		gss_cred_id_t gss_cred_id_t = new gss_cred_id_t(delegatedCredHandle.getValue());
+		LOGGER.exit(gss_cred_id_t);
+		return gss_cred_id_t;
 	}
 
 	/**
@@ -275,9 +286,11 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	 *                          {@link GssApi#gss_store_cred_into(IntByReference, Pointer, int, gss_OID_desc, int, int, gss_key_value_set, PointerByReference, IntByReference)}
 	 */
 	private void storeCredInto(Pointer acquiredCred, Path file, int overwriteCred) throws GSSException {
+		LOGGER.entry(acquiredCred, file, overwriteCred);
 		IntByReference minorStatus = new IntByReference();
 		int defaultCred = 1;
-		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:" + file);
+		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache",
+				"FILE:" + file.toAbsolutePath());
 		gss_key_value_set credStore = new gss_key_value_set();
 		credStore.count = 1;
 		credStore.elements = credElement;
@@ -290,9 +303,12 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 				GssApi.GSS_C_NO_OID, overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
 		LOGGER.trace("<<<back from store_cred_into:" + retval + "." + minorStatus.getValue());
 		if (retval != 0) {
-			throw new GSSException(retval, minorStatus.getValue(),
+			GSSException exception = new GSSException(retval, minorStatus.getValue(),
 					"storing credential: " + retval + "." + minorStatus.getValue());
+			LOGGER.throwing(exception);
+			throw exception;
 		}
+		LOGGER.exit();
 	}
 
 }

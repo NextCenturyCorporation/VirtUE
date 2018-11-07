@@ -66,7 +66,9 @@ int main(int argc, char **argv) {
 	gss_key_value_element_desc credElement;
 	credElement.key = "ccache";
 	const char* prefix = "FILE:";
-	credElement.value = strcat(strdup(prefix), argv[1]);
+    credElement.value = static_cast<char*>(malloc(strlen(prefix) + strlen(argv[1]) + 1));
+    strcpy(const_cast<char*>(credElement.value), prefix);
+    strcat(const_cast<char*>(credElement.value), argv[1]);
 
 	gss_key_value_set_desc credStore;
 	credStore.count = 1;
