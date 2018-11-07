@@ -161,7 +161,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private boolean useAdminColor = true;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
-			ColorManager colorManager, PreferenceService preferenceService, boolean useColors, String style) {
+			ColorManager colorManager, PreferenceService preferenceService) {
 		this.authService = authService;
 		this.virtueIdToVtc = new HashMap<String, VirtueTileContainer>();
 		this.virtueIdToVlc = new HashMap<String, VirtueListContainer>();
@@ -1066,7 +1066,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				GridbagPreferenceViewer prefViewer = new GridbagPreferenceViewer(preferenceService);
-				prefViewer.displayPreferences();
+				prefViewer.displayPreferences(frame);
 			}
 		});
 	}

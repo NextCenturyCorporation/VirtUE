@@ -1,6 +1,7 @@
 package com.ncc.savior.desktop.sidebar.prefs;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -36,28 +37,27 @@ public class GridbagPreferenceViewer {
 
 	private JDialog dialog;
 	private PreferenceService preferenceService;
+	private JButton clearAllButton;
+	private JScrollPane listScroll;
 
 	public GridbagPreferenceViewer(PreferenceService preferenceService) {
 		this.preferenceService = preferenceService;
 	}
 
-	public void displayPreferences() {
+	public void displayPreferences(Component frame) {
 		if (dialog != null) {
 			dialog.dispose();
 		}
 		this.dialog = new JDialog();
 
-		List<DesktopPreferenceData> data = null;
 		try {
-
 			dialog.setTitle("Preferences");
 			dialog.setAlwaysOnTop(true);
-			GridBagLayout dialogGbl = new GridBagLayout();
-			dialog.setLayout(dialogGbl);
+			dialog.setModal(true);
+			dialog.setLayout(new GridBagLayout());
 			JPanel table = new JPanel();
-			table.setLayout(new GridBagLayout());
-			JScrollPane listScroll = new JScrollPane(table);
-			JButton clearAllButton = new JButton("Clear All");
+			listScroll = new JScrollPane(table);
+			clearAllButton = new JButton("Clear All");
 			clearAllButton.addActionListener((e) -> {
 				clearAllPreferences();
 			});
@@ -65,76 +65,92 @@ public class GridbagPreferenceViewer {
 			// table.setBorder(BorderFactory.createEmptyBorder());
 			// table.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-			int i = 1;
-			addHeaders(table);
-			for (DesktopPreference node : DesktopPreference.values()) {
-				DesktopPreferenceDetails desc = preferenceService.getDescription(node);
-				if (desc.isDisplayInPrefTable()) {
-					if (desc.isNodeCollection()) {
-						String[] elements = preferenceService.getCollectionElements(node);
-						for (String element : elements) {
-							data = preferenceService.getPreferenceData(node, element);
-							i += createSingleRow(table, node, element, data, i);
-						}
-					} else {
-						data = preferenceService.getPreferenceData(node, null);
-						i += createSingleRow(table, node, "", data, i);
-					}
-				}
-			}
-			int width;
-			if (i == 1) {
-				// No prefs to show
-				table.removeAll();
-				addNoPrefLabel();
-				width = 400;
-			} else {
-				// gridbag
-				GridBagConstraints scrollGbc = new GridBagConstraints();
-				scrollGbc.fill = GridBagConstraints.BOTH;
-				scrollGbc.gridx = 0;
-				scrollGbc.gridy = 1;
-				scrollGbc.gridheight = 1;
-				scrollGbc.gridwidth = 2;
-				scrollGbc.weightx = 1;
-				scrollGbc.weighty = 1;
-				// scrollGbc.ipadx = 2;
-				// scrollGbc.ipady = 2;
-				scrollGbc.insets = new Insets(5, 5, 5, 5);
-
-				GridBagConstraints clearAllGbc = new GridBagConstraints();
-				// checkGbc.fill = GridBagConstraints.BOTH;
-				clearAllGbc.gridx = 1;
-				clearAllGbc.gridy = 2;
-				clearAllGbc.weightx = 2;
-				clearAllGbc.insets = new Insets(5, 55, 5, 5);
-
-				listScroll.setBorder(BorderFactory.createEmptyBorder());
-				listScroll.setMinimumSize(new Dimension(100, 300));
-				dialog.add(listScroll, scrollGbc);
-				dialog.add(clearAllButton, clearAllGbc);
-				// dialog.add(openButton, openGbc);
-
-				listScroll.setBorder(BorderFactory.createEmptyBorder());
-				listScroll.setMinimumSize(new Dimension(100, 300));
-				// dialog.setSize(new Dimension(600, 400));
-				width = 600;
-			}
-			dialog.pack();
+			reloadPreferences(table);
 			Dimension size = dialog.getSize();
-			size.width = width;
+			size.width = 600;
 
 			dialog.setSize(size);
+			dialog.setLocationRelativeTo(frame);
+			Point p = dialog.getLocation();
+			p.y = frame.getLocation().y + 50;
+			dialog.setLocation(p);
 			dialog.setVisible(true);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
 		} catch (BackingStoreException e1) {
 			reportError("Error attempting to get all Preferences", e1);
 		}
 	}
 
-	private void addNoPrefLabel() {
+	private void reloadPreferences(JPanel table) throws BackingStoreException {
+
+		table.removeAll();
+		table.setLayout(new GridBagLayout());
+		List<DesktopPreferenceData> data;
+		int i = 1;
+		addHeaders(table);
+		for (DesktopPreference node : DesktopPreference.values()) {
+			DesktopPreferenceDetails desc = preferenceService.getDescription(node);
+			if (desc.isDisplayInPrefTable()) {
+				if (desc.isNodeCollection()) {
+					String[] elements = preferenceService.getCollectionElements(node);
+					for (String element : elements) {
+						data = preferenceService.getPreferenceData(node, element);
+						i += createSingleRow(table, node, element, data, i);
+					}
+				} else {
+					data = preferenceService.getPreferenceData(node, null);
+					i += createSingleRow(table, node, "", data, i);
+				}
+			}
+		}
+
+		// No prefs to show
 		Label label = new Label("No preferences set.");
-		dialog.add(label);
+		label.setMinimumSize(new Dimension(200, 300));
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		dialog.add(label, gbc);
+
+		// gridbag
+		GridBagConstraints scrollGbc = new GridBagConstraints();
+		scrollGbc.fill = GridBagConstraints.BOTH;
+		scrollGbc.gridx = 0;
+		scrollGbc.gridy = 1;
+		scrollGbc.gridheight = 1;
+		scrollGbc.gridwidth = 2;
+		scrollGbc.weightx = 1;
+		scrollGbc.weighty = 1;
+		// scrollGbc.ipadx = 2;
+		// scrollGbc.ipady = 2;
+		scrollGbc.insets = new Insets(5, 5, 5, 5);
+
+		GridBagConstraints clearAllGbc = new GridBagConstraints();
+		// checkGbc.fill = GridBagConstraints.BOTH;
+		clearAllGbc.gridx = 1;
+		clearAllGbc.gridy = 2;
+		clearAllGbc.weightx = 2;
+		clearAllGbc.insets = new Insets(5, 55, 5, 5);
+		dialog.add(listScroll, scrollGbc);
+		dialog.add(clearAllButton, clearAllGbc);
+		listScroll.setBorder(BorderFactory.createEmptyBorder());
+		listScroll.setMinimumSize(new Dimension(100, 300));
+
+		if (i == 1) {
+			listScroll.setVisible(false);
+			clearAllButton.setVisible(false);
+			label.setVisible(true);
+			// width = 300;
+		} else {
+			listScroll.setVisible(true);
+			clearAllButton.setVisible(true);
+			label.setVisible(false);
+			// width = 600;
+		}
+		dialog.pack();
+		// return width;
 	}
 
 	private void addHeaders(JPanel table) {
@@ -199,12 +215,7 @@ public class GridbagPreferenceViewer {
 		clearButton.addActionListener((a) -> {
 			try {
 				preferenceService.clearPreference(node, null);
-				Dimension d = dialog.getSize();
-				Point p = dialog.getLocation();
-				dialog.dispose();
-				displayPreferences();
-				dialog.setSize(d);
-				dialog.setLocation(p);
+				reloadPreferences(table);
 			} catch (BackingStoreException e) {
 				reportError("Error clearing prefence", e);
 			}

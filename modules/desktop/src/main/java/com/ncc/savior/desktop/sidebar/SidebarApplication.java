@@ -52,8 +52,9 @@ public class SidebarApplication {
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
-		boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS, false);
-		String style = props.getString(PropertyManager.PROPERTY_STYLE);
+		// boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS,
+		// false);
+		// String style = props.getString(PropertyManager.PROPERTY_STYLE);
 		String sourceJarPath = props.getString(PropertyManager.PROPERTY_CLIPBOARD_JAR_PATH);
 
 		long dataGuardAskStickyTimeoutMillis = props.getLong(PropertyManager.PROPERTY_CLIPBOARD_ASK_TIMEOUT_MILLIS,
@@ -87,8 +88,7 @@ public class SidebarApplication {
 		PreferenceService prefService = new PreferenceService(authService);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager, authService,
 				colorManager);
-		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService, useColors,
-				style);
+		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		clipboardHub.addDefaultApplicationListener(sidebar.getDefaultApplicationHandler());
 		controller.init(primaryFrame);
