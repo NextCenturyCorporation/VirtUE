@@ -52,12 +52,13 @@
 
 	<jpa:repositories base-package="com.ncc.savior.virtueadmin.data.jpa" />
 
-	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService">
+	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService" init-method="sync">
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="userManager" />
 		<constructor-arg ref="persistentStorageManager" />
 		<constructor-arg ref="securityGroupManager" />
+		<constructor-arg ref="vpcSubnetProvider" />
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 

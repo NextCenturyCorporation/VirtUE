@@ -173,8 +173,12 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		desiredMechs.count = new NativeLong(1);
 		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);
 		PointerByReference outputCredHandle = new PointerByReference();
-		retval = gssapi.gss_acquire_cred(minorStatus, GssApi.GSS_C_NO_NAME, 0, GssApi.GSS_C_NO_OID_SET,
+		LOGGER.trace(">>>about to call acquire_cred");
+		// retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0,
+		// desiredMechs,
+		retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0, GssApi.GSS_C_NO_OID_SET,
 				GssCredentialUsage.GSS_C_BOTH.getValue(), outputCredHandle, null, null);
+		LOGGER.trace("<<<back from acquire_cred");
 		GSSException exception = null;
 		try {
 			GssUtils.releaseName(gssapi, gssWebServiceName);
@@ -228,9 +232,16 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
 		gss_buffer_desc inputToken = new gss_buffer_desc(serviceToken);
 		PointerByReference delegatedCredHandle = new PointerByReference();
+		LOGGER.trace(">>>about to call accept_sec_context");
 		PointerByReference sourceName = new PointerByReference(GssApi.GSS_C_NO_NAME);
 		int retval = gssapi.gss_accept_sec_context(minorStatus, contextHandle, acceptorCredential, inputToken,
 				GssApi.GSS_C_NO_CHANNEL_BINDINGS, sourceName, null, outputToken, retFlags, null, delegatedCredHandle);
+		gss_name_t plainSourceName = new gss_name_t(sourceName.getValue());
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("<<back from accept_sec_context: " + retval + "." + minorStatus.getValue() + "\tname='"
+					+ GssUtils.getStringName(gssapi, plainSourceName) + "'");
+		}
+
 		/*
 		 * In theory you have to do this in a loop. In practice that doesn't seem to
 		 * ever happen. But just in case, check and warn.
@@ -264,7 +275,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	 */
 	private void storeCredInto(Pointer acquiredCred, Path file, int overwriteCred) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
-		int defaultCred = 1;
+		int defaultCred = 0;
 		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:" + file);
 		gss_key_value_set credStore = new gss_key_value_set();
 		credStore.count = 1;
@@ -273,8 +284,10 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		PointerByReference oidsStoredHandle = new PointerByReference(oidsStored);
 		IntByReference credStored = new IntByReference();
 
+		LOGGER.trace(">>>about to call store_cred_into");
 		int retval = gssapi.gss_store_cred_into(minorStatus, acquiredCred, GssCredentialUsage.GSS_C_INITIATE.getValue(),
 				GssApi.GSS_C_NO_OID, overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
+		LOGGER.trace("<<<back from store_cred_into:" + retval + "." + minorStatus.getValue());
 		if (retval != 0) {
 			throw new GSSException(retval, minorStatus.getValue(),
 					"storing credential: " + retval + "." + minorStatus.getValue());

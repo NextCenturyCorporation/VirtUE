@@ -140,8 +140,10 @@ task bootDeploy(dependsOn: bootJar) {
                 put from: bootJar.archivePath, into: '.'
                 put from: 'src/main/resources/cifs-proxy.properties', into: '.'
                 put from: 'src/main/resources/cifs-proxy-security.properties', into: '.'
+                put from: 'src/main/resources/logback.xml', into: '.'
             }
         }
+        println "deployed Java resources to " + remotes.webserver
     }
 }
 

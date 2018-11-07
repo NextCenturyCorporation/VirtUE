@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure;
 
+import java.util.List;
 import java.util.Map;
 
 import com.ncc.savior.util.SaviorErrorCode;
@@ -44,6 +45,10 @@ public class OsBasedDelegatedCloudManager extends BaseDelegatedCloudManager {
 	@Override
 	public void rebootVm(VirtualMachine vm, String virtue) {
 		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public void sync(List<String> ids) {
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Sync not implemented in this implementation");
 	}
 }

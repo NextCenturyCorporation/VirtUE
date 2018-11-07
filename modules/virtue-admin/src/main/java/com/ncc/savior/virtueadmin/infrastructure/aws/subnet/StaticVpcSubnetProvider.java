@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -50,5 +51,10 @@ public class StaticVpcSubnetProvider implements IVpcSubnetProvider {
 	@Override
 	public void releaseBySubnetKey(String id) {
 		// do nothing
+	}
+
+	@Override
+	public void sync(Collection<String> existingVirtueIds) {
+		//do nothing
 	}
 }

@@ -102,7 +102,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 			// params);
 			ApplicationDefinition app = pair.getRight();
 			app.setParameters(params);
-			virtueService.startApplication(pair.getLeft(), app, null);
+			virtueService.startApplication(pair.getLeft(), app);
 		} catch (IOException e) {
 			logger.error("Error starting application", e);
 		}
