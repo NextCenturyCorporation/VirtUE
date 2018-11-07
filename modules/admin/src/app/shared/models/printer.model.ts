@@ -12,6 +12,9 @@ export class Printer extends IndexedObj implements Toggleable {
   /** the id given by the backend */
   id: string;
 
+  /** The printer's name */
+  name: string;
+
   /** The ip address of the printer */
   address: string;
 
@@ -27,25 +30,16 @@ export class Printer extends IndexedObj implements Toggleable {
   /**
    * @param info see [[info]]
    */
-  constructor( input: string | Printer ) {
+  constructor( printer?: {id?: string, name: string, info?: string, status: string, address: string, enabled: boolean} ) {
 
+    super();
+    this.id = printer.id;
+    this.name = printer.name;
+    this.info = printer.info;
+    this.status = printer.status;
+    this.address = printer.address;
+    this.enabled = printer.enabled;
 
-    if (input instanceof Printer) {
-      super();
-      this.id = input.id;
-      this.info = input.info;
-      this.status = input.status;
-      this.address = input.address;
-      this.enabled = input.enabled;
-    }
-    else {
-      super();
-      this.id = input;
-      this.info = "info";
-      this.status = "incorporeal";
-      this.address = "1.2.3.4:" + input;
-      this.enabled = true;
-    }
   }
 
   /** #uncommented */

@@ -11,8 +11,11 @@ import { Column } from '../../../../models/column.model';
 import { SubMenuOptions } from '../../../../models/subMenuOptions.model';
 import { Mode } from '../../../../abstracts/gen-form/mode.enum';
 
+import { BaseUrlService } from '../../../../services/baseUrl.service';
+import { DataRequestService } from '../../../../services/dataRequest.service';
+
 import { GenericTableComponent } from '../../../gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../gen-form-tab.component';
+import { ItemFormTabComponent } from '../item-form-tab.component';
 
 import { DatasetNames } from '../../../gen-data-page/datasetNames.enum';
 
@@ -32,12 +35,21 @@ import { DatasetNames } from '../../../gen-data-page/datasetNames.enum';
  *  - other minor info/settings that relate to *what* this item is, and how this template can be used.
  * How this item should work/be set up, should go in a 'settings' tab.
  *
+ * Also, this family of classes all deal with displaying many pieces of a single, locally-held, object. Any tab can change those pieces,
+ * and the central parent form [[ItemFormComponent]] just watches the event emitters of each tab, to know when to reload the Item's data USING
+ * local, previously pulled, datasets. E.g. if a User's virtueIds change, the form will use the new virtueIds to re-create item.virtues from the
+ * same virtue dataset that was pulled when the page loaded.
+ * Those tabs aren't in charge of updating the backend themselves.
+ *   This differs from the config-tabs (see [[ConfigPrinterTabComponent]]), which each track a different set of things, and must each
+ *   be able to update the backend themselves. The form still is what can reload their data though, and so must be notified when a change occurs.
+ *   The central form must therefore actually reload that tab's data from the backend, rather than re-create it from existing data like in above.
+ *
  */
-export abstract class GenericMainTabComponent extends GenericFormTabComponent implements OnInit {
+export abstract class ItemFormMainTabComponent extends ItemFormTabComponent implements OnInit {
 
   /**
    * A reference to the Item being viewed/edited/etc.
-   * Refers to the same object as [[GenericFormComponent.item]]
+   * Refers to the same object as [[ItemFormComponent.item]]
    * this gets reclassed by children tabs
    */
   protected item: Item;
@@ -58,14 +70,18 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   @Output() onStatusChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   /**
-   * see [[GenericFormTabComponent.constructor]] for input notes.
+   * see [[ItemFormTabComponent.constructor]] for input notes.
    *
    * Set name on all tabs to "General Info". This can be changed in subclasses if desired.
    */
-  constructor(router: Router, dialog: MatDialog) {
-    super(router, dialog);
-    this.tabName = "General Info";
-    this.item = new User(undefined);
+  constructor(
+    router: Router,
+    baseUrlService: BaseUrlService,
+    dataRequestService: DataRequestService,
+    dialog: MatDialog) {
+      super(router, baseUrlService, dataRequestService, dialog);
+      this.tabName = "General Info";
+      this.item = new User(undefined);
   }
 
   /**
@@ -76,11 +92,13 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    * as if you were in edit mode.
    */
   statusChange(): void {
-    this.onStatusChange.emit(this.item.enabled);
+    this.onStatusChange.emit();
+    // this just tells the parent form to toggle, so we don't need to pass the current value. The parent knows already.
+    // this.onStatusChange.emit(this.item.enabled);
   }
 
   /**
-   * See [[GenericFormTabComponent.init]] for generic info
+   * See [[ItemFormTabComponent.init]] for generic info
   * This sets the mode and sets up the page's children table.
   *
   * @param mode the mode to set up this tab as being in. Must be passed in.
@@ -92,7 +110,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
   }
 
   /**
-   * See [[GenericFormTabComponent.update]] for generic info
+   * See [[ItemFormTabComponent.update]] for generic info
    * This allows the parent component to update this tab's mode, as well as fill or re-fill
    * this tab's table with an updated item.children list.
    *
@@ -103,6 +121,7 @@ export abstract class GenericMainTabComponent extends GenericFormTabComponent im
    *                this tab's mode should be updated. The attribute is optional.
    */
   update(changes: any): void {
+    console.log(this.childDatasetName, this.item);
     this.childrenTable.populate(this.item.getRelatedDict(this.childDatasetName).asList());
     if (changes.mode) {
       // these three lines could be replaced with

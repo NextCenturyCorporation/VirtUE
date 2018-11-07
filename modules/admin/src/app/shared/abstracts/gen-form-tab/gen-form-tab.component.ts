@@ -7,6 +7,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
+import { BaseUrlService } from '../../services/baseUrl.service';
+import { DataRequestService } from '../../services/dataRequest.service';
+
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
@@ -26,26 +29,32 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 /**
  * @class
- * This class represents a tab in a [[GenericFormComponent]].
+ * This class represents a tab in a *FormComponent (currently just [[ItemFormComponent]]).
  * Each tab should have a different, unified, focus, be organized so as to require
  * a minimal amount of scrolling, and should give some indication of unsaved changes.
+ *
+ * This is for displaying many parts of one object, across a number of tabs, where the parent who holds all those tabs is the
+ * one responsible for talking to the backend and updating things. Each tab only makes local changes.
+ *
+ * Note that this works funcamentally different from the config-tabs. See notes on [[ConfigPrinterTabComponent]].
  *
  * @extends [[GenericPageComponent]] to make use of its formatting and navigation functions
  *
  */
-export abstract class GenericTabComponent extends GenericPageComponent implements OnInit {
+export abstract class GenericFormTabComponent extends GenericPageComponent implements OnInit {
 
   /** The label to appear on the tab */
   public tabName: string;
-
 
   /**
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
    */
   constructor(
     router: Router,
+    baseUrlService: BaseUrlService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog) {
-      super(router, dialog);
+      super(router, baseUrlService, dataRequestService, dialog);
   }
 
   /**
@@ -67,7 +76,7 @@ export abstract class GenericTabComponent extends GenericPageComponent implement
    * This finishes setting up the page, once all data requested by the parent form has returned and
    * the needed input is available.
    *
-   * Called in [[GenericFormComponent.onPullComplete]]
+   * Called in [[GenericTabbedFormComponent.onPullComplete]], see example in [[ItemFormComponent.onPullComplete]]
    *
    * #TODO dataCopy, a copy of item holding only the things which are to be saved (meaning not children), which can
    *  be compareed against every field and show an exclaimation mark if changes have been made.
@@ -90,12 +99,5 @@ export abstract class GenericTabComponent extends GenericPageComponent implement
    */
   abstract update(changes: any): void;
 
-  /**
-  * Called when item is being saved, to pull in and set any disconnected fields and check the data in its sphere
-  * for validity.
-  *
-  * @return false if the data that needs to be collected isn't available/valid/finished/applied
-  */
-  abstract collectData(): boolean;
 
 }

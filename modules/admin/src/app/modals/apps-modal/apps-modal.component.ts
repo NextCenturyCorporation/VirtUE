@@ -63,9 +63,9 @@ export class AppsModalComponent extends GenericModalComponent {
   /**
    * This page only needs to list all available apps, and doesn't need to request any other data.
    *
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {

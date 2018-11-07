@@ -25,10 +25,13 @@ import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
+import { BaseUrlService } from '../../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../../shared/services/dataRequest.service';
+
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-form-tab.component';
+import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component';
 
 /**
 * @class
@@ -38,14 +41,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-f
  *    - Users that have been granted this template
  *    - Virtue instances that have been built from this template (currently unimplemented)
  *
- * @extends [[GenericFormTabComponent]]
+ * @extends [[ItemFormTabComponent]]
  */
 @Component({
   selector: 'app-virtue-usage-tab',
   templateUrl: './virtue-usage-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/item-list/item-list.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
-export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
+export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnInit {
 
   /** A table listing what users have been given access to this Virtue template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent<User>;
@@ -57,16 +60,20 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   protected item: Virtue;
 
   /**
-   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
-  constructor(router: Router, dialog: MatDialog) {
-    super(router, dialog);
+  constructor(
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
     this.tabName = "Virtue Usage";
 
   }
 
   /**
-   * See [[GenericFormTabComponent.init]] for generic info
+   * See [[ItemFormTabComponent.init]] for generic info
    *
    * @param mode the [[Mode]] to set up the page in.
    */
@@ -77,7 +84,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being viewed/edited in the [[VirtueComponent]] parent
    */
@@ -91,7 +98,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   }
 
   /**
-   * See [[GenericFormTabComponent.update]] for generic info
+   * See [[ItemFormTabComponent.update]] for generic info
    * This allows the parent component to update this tab's mode, as well the contents of [[parentTable]]
    *
    * @param changes an object, which should have an attribute `mode: Mode` if
@@ -128,7 +135,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
     return [
       new TextColumn('Username',  3, (u: User) => u.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                () => this.getParentSubMenu()),
-      new ListColumn('Attached Virtues', 5, this.getVirtues,  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Attached Virtues', 5, (i: Item) => this.getVirtues(i),  this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Status',  4, this.formatStatus, SORT_DIR.ASC)
     ];
 

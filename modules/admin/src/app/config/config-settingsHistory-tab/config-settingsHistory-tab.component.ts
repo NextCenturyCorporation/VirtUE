@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { GenericTabComponent } from '../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericDataTabComponent } from '../../shared/abstracts/gen-data-page/gen-data-tab.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
 import {
@@ -13,6 +13,11 @@ import {
   IconColumn,
   SORT_DIR
 } from '../../shared/models/column.model';
+
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 /**
  * @class
@@ -24,7 +29,7 @@ import {
   templateUrl: './config-settingsHistory-tab.component.html',
   styleUrls: ['./config-settingsHistory-tab.component.css']
 })
-export class ConfigSettingsHistoryTabComponent extends GenericTabComponent implements OnInit {
+export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
 
   /** #uncommented, unimplemented */
   @ViewChild(GenericTableComponent) historyTable: GenericTableComponent<{foo: number, bar: string}>;
@@ -33,10 +38,11 @@ export class ConfigSettingsHistoryTabComponent extends GenericTabComponent imple
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    */
   constructor(
-    router: Router,
-    dialog: MatDialog
-  ) {
-    super(router, dialog);
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
     this.tabName = "Settings History";
   }
 
@@ -50,15 +56,21 @@ export class ConfigSettingsHistoryTabComponent extends GenericTabComponent imple
   /**
    * #unimplemented
    */
-  setUp(): void {
-    this.historyTable.populate([{foo: 1, bar: "A"}, {foo: 2, bar: "B"}, {foo: 3, bar: "C"}]);
+  onPullComplete(): void {
+    // this.historyTable.populate(this.datasets[DatasetNames.GLOBAL_SETTINGS_HISTORY].asList());
   }
 
   /**
    * #unimplemented
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
-  update(changes: any): void {
-    return;
+  getDataPageOptions(): {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: DatasetNames[]} {
+    return {
+      serviceConfigUrl: ConfigUrls.USERS,//ConfigUrls.GLOBAL_SETTINGS_HISTORY,
+      neededDatasets: []
+    };
   }
 
 
@@ -84,10 +96,5 @@ export class ConfigSettingsHistoryTabComponent extends GenericTabComponent imple
       new TextColumn("Settings Bar", 4, (s: {foo: string, bar: string}) => s.bar, SORT_DIR.ASC),
       new IconColumn("Revert button (placeholder)", 4, "restore", (obj) => {obj.foo++; })
     ];
-  }
-
-  /** #unimplemented */
-  collectData(): boolean {
-    return true;
   }
 }

@@ -59,7 +59,7 @@ public class VirtueTemplate {
 	private Collection<String> fileSystemIds;
 
 	@Transient
-	private Collection<String> virtualMachineTemplateIds;
+	private Collection<String> vmTemplateIds;
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
 
@@ -244,14 +244,14 @@ public class VirtueTemplate {
 	}
 
 	@JsonGetter
-	public Collection<String> getVirtualMachineTemplateIds() {
+	public Collection<String> getVmTemplateIds() {
 		if (vmTemplates != null) {
-			virtualMachineTemplateIds = new ArrayList<String>();
+			vmTemplateIds = new ArrayList<String>();
 			for (VirtualMachineTemplate vmt : vmTemplates) {
-				virtualMachineTemplateIds.add(vmt.getId());
+				vmTemplateIds.add(vmt.getId());
 			}
 		}
-		return virtualMachineTemplateIds;
+		return vmTemplateIds;
 	}
 
 	@JsonGetter
@@ -288,9 +288,9 @@ public class VirtueTemplate {
 	}
 
 	@JsonSetter
-	public void setVirtualMachineTemplateIds(Collection<String> virtualMachineTemplateIds) {
+	public void setVmTemplateIds(Collection<String> vmTemplateIds) {
 		this.vmTemplates = null;
-		this.virtualMachineTemplateIds = virtualMachineTemplateIds;
+		this.vmTemplateIds = vmTemplateIds;
 	}
 
 	public Date getTimeCreatedAt() {

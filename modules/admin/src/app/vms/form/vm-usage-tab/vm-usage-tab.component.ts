@@ -28,8 +28,11 @@ import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
+import { BaseUrlService } from '../../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../../shared/services/dataRequest.service';
+
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-form-tab.component';
+import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component';
 
 /**
 * @class
@@ -39,14 +42,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-f
  *    - Virtues that have been assigned this template
  *    - Running VMs that have been built from this template (currently unimplemented)
  *
- * @extends [[GenericFormTabComponent]]
+ * @extends [[ItemFormTabComponent]]
  */
 @Component({
   selector: 'app-vm-usage-tab',
   templateUrl: './vm-usage-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/item-list/item-list.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
-export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
+export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit {
 
   /** A table listing what virtues have been given access to this VM template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent<Virtue>;
@@ -63,16 +66,20 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   protected item: VirtualMachine;
 
   /**
-   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
-  constructor(router: Router, dialog: MatDialog) {
-    super(router, dialog);
+  constructor(
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
     this.tabName = "Virtual Machine Usage";
 
   }
 
   /**
-   * See [[GenericFormTabComponent.init]] for generic info
+   * See [[ItemFormTabComponent.init]] for generic info
    *
    * @param mode the [[Mode]] to set up the page in.
    */
@@ -83,7 +90,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being viewed/edited in the [[VirtualMachineComponent]] parent
    */
@@ -97,7 +104,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   }
 
   /**
-   * See [[GenericFormTabComponent.update]] for generic info
+   * See [[ItemFormTabComponent.update]] for generic info
    * This allows the parent component to update this tab's mode, as well the contents of [[parentTable]]
    *
    * @param changes an object, which should have an attribute `mode: Mode` if
@@ -133,7 +140,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
     return [
       new TextColumn('Template Name',     3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                             () => this.getParentSubMenu()),
-      new ListColumn('Virtual Machines',  3, this.getVms,  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Virtual Machines',  3, (i: Item) => this.getVms(i),  this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Version',           2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',            3, this.formatStatus, SORT_DIR.ASC)
     ];

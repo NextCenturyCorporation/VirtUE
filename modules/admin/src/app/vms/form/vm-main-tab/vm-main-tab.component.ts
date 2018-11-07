@@ -18,9 +18,12 @@ import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
+import { BaseUrlService } from '../../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../../shared/services/dataRequest.service';
+
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
-import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-main-tab/gen-main-tab.component';
+import { ItemFormMainTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-main-tab/item-form-main-tab.component';
 
 import { OSSet } from '../../os.set';
 
@@ -32,15 +35,15 @@ import { OSSet } from '../../os.set';
  *
  * Note that version number increases automatically.
  *
- * @extends [[GenericMainTabComponent]]
+ * @extends [[ItemFormMainTabComponent]]
  */
 @Component({
   selector: 'app-vm-main-tab',
   templateUrl: './vm-main-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/item-list/item-list.component.css'],
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css'],
   providers: [ OSSet ]
 })
-export class VmMainTabComponent extends GenericMainTabComponent implements OnInit {
+export class VmMainTabComponent extends ItemFormMainTabComponent implements OnInit {
 
   /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
@@ -49,18 +52,22 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
   protected item: VirtualMachine;
 
   /**
-   * see [[GenericMainTabComponent.constructor]] for inherited parameters
+   * see [[ItemFormMainTabComponent.constructor]] for inherited parameters
    */
   constructor(
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog,
       /** the available operating systems that this VM can be set as. */
-      protected osOptions: OSSet,
-      router: Router, dialog: MatDialog) {
-    super(router, dialog);
+      protected osOptions: OSSet
+      ) {
+    super(router, baseUrlService, dataRequestService, dialog);
     this.childDatasetName = DatasetNames.APPS;
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    * @param
    *
    * @return
@@ -78,7 +85,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
 
 
   /**
-   * Overrides parent, [[GenericFormTabComponent.setMode]]
+   * Overrides parent, [[ItemFormTabComponent.setMode]]
    *
    * @param newMode the Mode to set the page as.
    */
@@ -141,7 +148,7 @@ export class VmMainTabComponent extends GenericMainTabComponent implements OnIni
    * Remember this.item is a Virtue here, and childItem can be a VirtualMachine, Printer, or .
    *
    * @param childItem the Item to be removed from this.[[item]]'s child lists.
-   * @override parent [[GenericMainTabComponent.removeChildObject]]()
+   * @override parent [[ItemFormMainTabComponent.removeChildObject]]()
    */
   removeChildObject(childItem: IndexedObj): void {
     if (childItem instanceof Application) {

@@ -30,9 +30,13 @@ import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
+import { BaseUrlService } from '../../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../../shared/services/dataRequest.service';
+
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-form-tab.component';
+import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component';
+
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { SelectionMode } from '../../../shared/abstracts/gen-table/selectionMode.enum';
 
@@ -62,14 +66,14 @@ import { NetworkProtocols } from '../../protocols.enum';
  *
  * At the moment, only 'color' is saved to the backend.
  *
- * @extends [[GenericFormTabComponent]]
+ * @extends [[ItemFormTabComponent]]
  */
 @Component({
   selector: 'app-virtue-settings-tab',
   templateUrl: './virtue-settings.component.html',
   styleUrls: ['./virtue-settings.component.css']
 })
-export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
+export class VirtueSettingsTabComponent extends ItemFormTabComponent implements OnInit {
 
   /** a table to display the Virtues that this Virtue is allowd to paste data into */
   @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent<Virtue>;
@@ -87,12 +91,14 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   protected item: Virtue;
 
   /**
-   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
   constructor(
-    router: Router,
-    dialog: MatDialog) {
-    super(router, dialog);
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
 
     this.item = new Virtue({});
 
@@ -100,7 +106,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * See [[GenericFormTabComponent.init]] for generic info
+   * See [[ItemFormTabComponent.init]] for generic info
    *
    * @param mode the [[Mode]] to set up the page in.
    */
@@ -117,7 +123,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being viewed/edited in the [[VirtueComponent]] parent
    */
@@ -131,7 +137,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * See [[GenericFormTabComponent.update]] for generic info
+   * See [[ItemFormTabComponent.update]] for generic info
    * This allows the parent component to update this tab's mode, as well its allowedPasteTargetsTable
    *
    * This re-builds some parts of the table upon mode update, to allow the columns and row options to change dynamically
@@ -241,6 +247,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   updatePrinterTable() {
+    if (this.printerTable === undefined) {
+      return;
+    }
     this.printerTable.populate(this.item.printers.asList());
   }
 
@@ -249,9 +258,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * This is very much a temporary measure.
    */
   addNewPrinter(): void {
-    let p = new Printer("abcd" + this.item.printerIds.length)
-    this.item.printerIds.push(p.getID());
-    this.item.printers.add(p.getID(), p);
+    // #unimplemented
     this.updatePrinterTable();
   }
 
@@ -310,6 +317,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   * Once data has been pulled, fill in the table with
   */
   updateNetworkPermsTable(): void {
+    if (this.networkPermsTable === undefined) {
+      return;
+    }
     this.networkPermsTable.populate(this.item.networkWhiteList);
   }
 
@@ -380,6 +390,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
 /************************************************************************************/
 
   updateFileSysPermsTable(): void {
+    if (this.fileSystemsTable === undefined) {
+      return;
+    }
     this.fileSystemsTable.populate(this.item.fileSystems.asList());
   }
 
@@ -460,7 +473,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     return [
       new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                         () => this.getPasteSubMenu()),
-      new ListColumn('Available Applications', 4, this.getVmApps,  this.formatName),
+      new ListColumn('Available Applications', 4, (i: Item) => this.getVmApps(i),  this.formatName),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
@@ -493,6 +506,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * Use more recent definitions, if they are given.
    */
   updatePasteableVirtuesTable(allVirtues?: DictList<Virtue>): void {
+    if (this.allowedPasteTargetsTable === undefined) {
+      return;
+    }
 
     let items: Item[] = this.item.allowedPasteTargets.asList();
     if (allVirtues) {

@@ -10,7 +10,7 @@ import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/g
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
 import { SelectionMode } from '../../shared/abstracts/gen-table/selectionMode.enum';
-import { Item } from '../../shared/models/item.model';
+import { IndexedObj } from '../../shared/models/indexedObj.model';
 import { Column } from '../../shared/models/column.model';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -37,7 +37,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */
-  @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
+  @ViewChild(GenericTableComponent) table: GenericTableComponent<IndexedObj>;
 
   /** Appears in the modals title as: 'Add/Remove {pluralItem}' */
   pluralItem: string;
@@ -111,11 +111,10 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       filters: [],
       tableWidth: 1,
       noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: (i: Item) => !i.enabled,
       editingEnabled: () => true,
       selectionOptions: {
         selectionMode: this.getSelectionMode(),
-        equals: (obj1: Item, obj2: Item) => (obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID()))
+        equals: (obj1: IndexedObj, obj2: IndexedObj) => (obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID()))
       }
     };
   }
@@ -165,7 +164,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    *
    * @param newObjects the list of objects to be displayed in the table.
    */
-  fillTable(newObjects: Item[]): void {
+  fillTable(newObjects: IndexedObj[]): void {
     this.table.populate(newObjects);
     let selected = [];
     for (let ID of this.selectedIDs) {

@@ -80,10 +80,10 @@ export class AppsListComponent extends ItemListComponent {
   }
 
   /**
-   * See [[GenericPageComponent.getPageOptions]]
+   * See [[GenericDataPageComponent.getDataPageOptions]]
    * @return child-specific information needed by the generic page functions when loading data.
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {

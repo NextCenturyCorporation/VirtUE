@@ -273,7 +273,7 @@ public class AdminService {
 
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
 		VirtueUser user = verifyAndReturnUser();
-		Collection<String> vmtIds = template.getVirtualMachineTemplateIds();
+		Collection<String> vmtIds = template.getVmTemplateIds();
 		Iterable<VirtualMachineTemplate> vmts;
 		if (vmtIds == null) {
 			vmts = new ArrayList<VirtualMachineTemplate>();
@@ -642,7 +642,6 @@ public class AdminService {
 	// return securityGroupManager.getAllSecurityGroupPermissions();
 	// }
 
-
  	public Iterable<Printer> getAllPrinters() {
  		verifyAndReturnUser();
  		return resourceManager.getAllPrinters();
@@ -653,6 +652,11 @@ public class AdminService {
 		VirtueTemplate virtueTemplate = templateManager.getVirtueTemplate(virtueTemplateId);
 		Map<String, Printer> printers = resourceManager.getPrintersForVirtueTemplate(virtueTemplate);
 		return printers.values();
+ 	}
+
+ 	public void clearPrinters() {
+ 		verifyAndReturnUser();
+ 		resourceManager.clear();
  	}
 
 }

@@ -83,6 +83,7 @@ export class User extends Item {
       return this.virtueTemplates;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    return undefined;
   }
 
   /**
@@ -96,5 +97,6 @@ export class User extends Item {
       return this.virtueTemplateIds;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    return [];
   }
 }

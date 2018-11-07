@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { GenericTabComponent } from '../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericDataTabComponent } from '../../shared/abstracts/gen-data-page/gen-data-tab.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
 import { SensingModel } from '../../shared/models/sensing.model';
@@ -16,6 +16,11 @@ import {
   RadioButtonColumn,
   SORT_DIR
 } from '../../shared/models/column.model';
+
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 /**
  * Just for testing the radio button column
@@ -49,7 +54,7 @@ enum VigilenceLevel {
   templateUrl: './config-sensors-tab.component.html',
   styleUrls: ['./config-sensors-tab.component.css']
 })
-export class ConfigSensorsTabComponent extends GenericTabComponent implements OnInit {
+export class ConfigSensorsTabComponent extends GenericDataTabComponent implements OnInit {
 
   /** #uncommented, unimplemented */
   @ViewChild(GenericTableComponent) generalSensorTable: GenericTableComponent<Sensor>;
@@ -59,10 +64,11 @@ export class ConfigSensorsTabComponent extends GenericTabComponent implements On
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    */
   constructor(
-    router: Router,
-    dialog: MatDialog
-  ) {
-    super(router, dialog);
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
     this.tabName = "Global Sensors";
   }
 
@@ -87,10 +93,22 @@ export class ConfigSensorsTabComponent extends GenericTabComponent implements On
   /**
    * #unimplemented
    */
-  update(changes: any): void {
-    return;
+  onPullComplete(): void {
+    // this.generalSensorTable.populate(this.datasets[DatasetNames.SENSORS].asList());
   }
 
+  /**
+   * #unimplemented
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   */
+  getDataPageOptions(): {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: DatasetNames[]} {
+    return {
+      serviceConfigUrl: ConfigUrls.USERS,//ConfigUrls.SENSORS,
+      neededDatasets: []
+    };
+  }
 
   /**
    * Sets up the table, according to parameters defined in this class' child classes.
@@ -119,10 +137,5 @@ export class ConfigSensorsTabComponent extends GenericTabComponent implements On
       new RadioButtonColumn("On",           1, "status", "ON"),
       new RadioButtonColumn("Off",          1, "status", "OFF")
     ];
-  }
-
-  /** #unimplemented */
-  collectData(): boolean {
-    return true;
   }
 }

@@ -7,8 +7,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { DialogsComponent } from '../../../../dialogs/dialogs.component';
-
 import { Item } from '../../../models/item.model';
 import { DictList } from '../../../models/dictionary.model';
 import { Column } from '../../../models/column.model';
@@ -16,21 +14,26 @@ import { Mode } from '../../../abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../services/config-urls.enum';
 import { DatasetNames } from '../../../abstracts/gen-data-page/datasetNames.enum';
 
-import { GenericTabComponent } from '../gen-tab.component';
+import { BaseUrlService } from '../../../services/baseUrl.service';
+import { DataRequestService } from '../../../services/dataRequest.service';
+
+import { DialogsComponent } from '../../../../dialogs/dialogs.component';
+
+import { GenericFormTabComponent } from '../gen-form-tab.component';
 
 /**
  * @class
- * This class represents a tab in a [[GenericFormComponent]].
+ * This class represents a tab in a [[ItemFormComponent]].
  * Each tab should have a different, unified, focus, be organized so as to require
  * a minimal amount of scrolling, and should give some indication of unsaved changes.
  *
  * Extension of [[GenericTabComponent]] - see the comments on all of that class' abstract methods.
  */
-export abstract class GenericFormTabComponent extends GenericTabComponent implements OnInit {
+export abstract class ItemFormTabComponent extends GenericFormTabComponent implements OnInit {
 
   /**
    * what the user is doing to the item: {CREATE, EDIT, DUPLICATE, VIEW}
-   * Should always be the same as [[GenericFormComponent.mode]]
+   * Should always be the same as [[ItemFormComponent.mode]]
    */
   protected mode: Mode;
 
@@ -38,9 +41,11 @@ export abstract class GenericFormTabComponent extends GenericTabComponent implem
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
    */
   constructor(
-    router: Router,
-    dialog: MatDialog) {
-      super(router, dialog);
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
   }
 
   /**
@@ -56,10 +61,10 @@ export abstract class GenericFormTabComponent extends GenericTabComponent implem
    * This finishes setting up the page, once all data requested by the parent form has returned and
    * [[item]] has been given a value.
    *
-   * Called in [[GenericFormComponent.onPullComplete]]
+   * Called in [[ItemFormComponent.onPullComplete]]
    * Re-definition of [[GenericTabComponent.setUp]])(), to specify input type.
    *
-   * @param item a reference to [[GenericFormComponent.item]], the thing being viewed/edited/etc.
+   * @param item a reference to [[ItemFormComponent.item]], the thing being viewed/edited/etc.
    */
   abstract setUp(item: Item): void;
 

@@ -1,27 +1,21 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { Component, ViewChild, OnDestroy } from '@angular/core';
 import { Location } from '@angular/common';
-import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { DataRequestService } from '../shared/services/dataRequest.service';
 
-import { AppsModalComponent } from '../modals/apps-modal/apps-modal.component';
+// import { AppsModalComponent } from '../modals/apps-modal/apps-modal.component';
 
-import { Item } from '../shared/models/item.model';
-import { Application } from '../shared/models/application.model';
+// import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
-import { DictList } from '../shared/models/dictionary.model';
-import { Column } from '../shared/models/column.model';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../shared/services/config-urls.enum';
 import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
-import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
 
 import { VmMainTabComponent } from './form/vm-main-tab/vm-main-tab.component';
 import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component';
@@ -29,7 +23,7 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
 /**
  * @class
  * This class represents a detailed view of a Virtual Machine Template.
- * See comment on [[GenericFormComponent]] for generic info.
+ * See comment on [[ItemFormComponent]] for generic info.
  *
  * This form has:
  *  - a main tab showing the Vm's version, OS, and name (which can be changed), as well as the Apps that would
@@ -84,7 +78,7 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
   styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
   providers: [ BaseUrlService, DataRequestService ]
 })
-export class VmComponent extends GenericFormComponent implements OnDestroy {
+export class VmComponent extends ItemFormComponent implements OnDestroy {
 
   /** A tab for displaying and/or editing the VM template's name, status, version, and assigned applications */
   @ViewChild('mainTab') mainTab: VmMainTabComponent;
@@ -98,7 +92,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
   /** reclassing */
   item: VirtualMachine;
   /**
-   * see [[GenericFormComponent.constructor]] for notes on parameters
+   * see [[ItemFormComponent.constructor]] for notes on parameters
    */
   constructor(
     location: Location,
@@ -126,12 +120,12 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     this.usageTab.init(this.mode);
     // this.historyTab.init(this.mode);
 
-    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
+    this.mainTab.onChildrenChange.subscribe((newChildIDs: string[]) => {
       this.item.applicationIds = newChildIDs;
       this.updatePage();
     });
 
-    this.mainTab.onStatusChange.subscribe((newStatus) => {
+    this.mainTab.onStatusChange.subscribe((newStatus: boolean) => {
       if ( this.mode === Mode.VIEW ) {
         this.toggleItemStatus(this.item);
       }
@@ -173,9 +167,9 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
   /**
    * This page needs all datasets to load: This VM, the Virtues granted this VM template, and the Apps this VM has
    * been given.
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
@@ -200,6 +194,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     //  'id'           should be ok as-is. May be empty if creating new.
     //  'name'         can't be empty
     //  'os'           must be set
+
     this.item['loginUser'] = 'system'; // TODO does this still exist on the backend?
 
     // TODO check if necessary, and what the string should be (admin vs administrator)
@@ -208,7 +203,7 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     //  'enabled'      must be either true or false
     // this.item['applicationIds'] = this.item.childIDs;  // may be empty
 
-    this.item.applications = undefined;
+    delete this.item.applications;
     return true;
   }
 

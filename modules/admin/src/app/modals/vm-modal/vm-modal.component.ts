@@ -51,12 +51,19 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     }
 
   /**
+   * #uncommented
+   */
+  customizeTableParams(params): void {
+    params['elementIsDisabled'] = (vm: VirtualMachine) => !vm.enabled;
+  }
+
+  /**
    * @return what columns should show up in the the VM selection table
    */
   getColumns(): Column[] {
     return [
       new TextColumn('Template Name',         3, (v: VirtualMachine) => v.getName(), SORT_DIR.ASC),
-      new ListColumn('Assigned Applications', 3, this.getApps, this.formatName),
+      new ListColumn('Assigned Applications', 3, (v: VirtualMachine) => this.getApps(v), this.formatName),
       new TextColumn('Modification Date',      2, (v: VirtualMachine) => v.modDate, SORT_DIR.DESC),
       new TextColumn('Operating System',      2, (v: VirtualMachine) => v.os, SORT_DIR.ASC),
       new TextColumn('Version',               1, (v: VirtualMachine) => String(v.version), SORT_DIR.ASC),
@@ -67,9 +74,9 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   /**
    * This page just needs to show all VMs, and the apps assigned to each VM.
    *
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
@@ -77,6 +84,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
       neededDatasets: [DatasetNames.APPS, DatasetNames.VMS]
     };
   }
+
   /**
    * @return a string to be displayed in the virtue table, when no VM templates exit.
    */

@@ -90,6 +90,7 @@ export class VirtualMachine extends Item {
       return this.applications;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.APPS, was", datasetName);
+    return new DictList<IndexedObj>();
   }
 
   /**
@@ -103,5 +104,6 @@ export class VirtualMachine extends Item {
       return this.applicationIds;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.APPS, was", datasetName);
+    return [];
   }
 }

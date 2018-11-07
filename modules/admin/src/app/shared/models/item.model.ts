@@ -126,7 +126,7 @@ export abstract class Item extends IndexedObj implements Toggleable {
    *
    * Currently used only when a form loads, to make sure that the same attribute gets initialized with an ID as
    * would be querried by getID().
-   * See [[GenericFormComponent.ngOnInit]]()
+   * See [[ItemFormComponent.ngOnInit]]()
    */
   setID(id: string) {
     this.id = id;

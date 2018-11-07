@@ -6,6 +6,8 @@ import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
+import { BaseUrlService } from '../../services/baseUrl.service';
+import { DataRequestService } from '../../services/dataRequest.service';
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Column } from '../../models/column.model';
@@ -14,6 +16,8 @@ import { DictList, Dict } from '../../models/dictionary.model';
 import { IndexedObj } from '../../models/indexedObj.model';
 import { Item } from '../../models/item.model';
 import { Toggleable } from '../../models/toggleable.interface';
+
+import { ConfigUrls } from '../../services/config-urls.enum';
 
 import { DatasetNames } from '../gen-data-page/datasetNames.enum';
 
@@ -24,15 +28,33 @@ import { DatasetNames } from '../gen-data-page/datasetNames.enum';
  *  - dialogs
  *  - formatting
  */
+@Component({
+providers: [ DataRequestService, BaseUrlService, Router, MatDialog ]
+})
 export abstract class GenericPageComponent {
+
+
+
+
+  /**
+  * the highest-level, base url from which the backend is accessible.
+  * Currently only used within dashboard.
+  */
+  baseUrl: string;
+
+  /**  #uncommented must be set in constructor */
+  serviceConfigUrl: ConfigUrls;
 
   /**
    * @param router Handles the navigation to/from different pages. Injected, and so is constant across components.
+   * @param dataRequestService Injected. Uses the base URL and a ConfigUrl to pull data from datasets on the backend.
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
    */
   constructor(
-        protected router: Router,
-        protected dialog: MatDialog
+    protected router: Router,
+    protected baseUrlService: BaseUrlService,
+    protected dataRequestService: DataRequestService,
+    protected dialog: MatDialog
       ) {
     // override the route reuse strategy
     // Tell angular to load a fresh, new, component every time a URL that needs this component loads,
@@ -41,6 +63,12 @@ export abstract class GenericPageComponent {
 
     // make the page reload if the user clicks on a link to the same page they're on.
     this.router.navigated = false;
+
+    let sub = this.baseUrlService.getBaseUrl().subscribe( res => {
+      this.baseUrl = res[0].virtue_server;
+
+      this.dataRequestService.setBaseUrl(this.baseUrl);
+    }, () => {}, () => {sub.unsubscribe();});
 
   }
 
@@ -112,7 +140,9 @@ export abstract class GenericPageComponent {
     return grandchildren;
   }
 
-  /** #uncommented */
+  /**
+   *
+   */
   getVirtues(i: Item): IndexedObj[] {
     return this.getChildren(i, DatasetNames.VIRTUES);
   }
@@ -214,7 +244,6 @@ export abstract class GenericPageComponent {
       sub.unsubscribe();
     });
   }
-
 
   // Use some version of this later if time. Currently, all item-selection modals use the (now-poorly named) 'genericModalComponent', and
   // any other modals must be built separately, and their layout has to be fiddled with the same way that one was, until there's only one

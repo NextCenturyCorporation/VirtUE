@@ -22,7 +22,7 @@ export class SubMenuOptions {
    */
   constructor(
     public text: string,
-    public shouldAppear: (item: Item) => boolean,
-    public action: (item?: Item) => void
+    public shouldAppear: (obj: any) => boolean,
+    public action: (obj?: any) => void
   ) {}
 }

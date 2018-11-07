@@ -65,17 +65,17 @@ export class UserListComponent extends ItemListComponent {
     return [
       new TextColumn('Username',           3, (i: Item) => i.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn('Available Virtues',  4, this.getVirtues, this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Available Virtues',  4, (i: Item) => this.getVirtues(i), this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Authorized Roles',   3, this.formatRoles, SORT_DIR.ASC),
       new TextColumn('Account Status',     2, this.formatStatus, SORT_DIR.DESC)
     ];
   }
 
   /**
-   * See [[GenericPageComponent.getPageOptions]]
+   * See [[GenericDataPageComponent.getDataPageOptions]]
    * @return child-specific information needed by the generic page functions when loading data.
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {

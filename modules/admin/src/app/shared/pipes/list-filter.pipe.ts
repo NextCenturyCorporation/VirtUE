@@ -19,7 +19,7 @@ import { TableElement } from '../models/tableElement.model';
  *
  * Note that filtering removes anything that *doesn't* match the filtering function
  *
- * So far, this is only used in [[GenericFormComponent]]s
+ * So far, this is only used in [[ItemFormComponent]] subclasses
  *
  */
 @Pipe({

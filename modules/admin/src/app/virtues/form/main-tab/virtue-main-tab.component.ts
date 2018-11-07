@@ -20,9 +20,12 @@ import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
+import { BaseUrlService } from '../../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../../shared/services/dataRequest.service';
+
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
-import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-form-tab/gen-main-tab/gen-main-tab.component';
+import { ItemFormMainTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-main-tab/item-form-main-tab.component';
 
 /**
  * @class
@@ -33,14 +36,14 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-f
  *
  * Note that version number increases automatically.
  *
- * @extends [[GenericMainTabComponent]]
+ * @extends [[ItemFormMainTabComponent]]
  */
 @Component({
   selector: 'app-virtue-main-tab',
   templateUrl: './virtue-main-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
-export class VirtueMainTabComponent extends GenericMainTabComponent implements OnInit {
+export class VirtueMainTabComponent extends ItemFormMainTabComponent implements OnInit {
 
   /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
@@ -49,15 +52,19 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
   protected item: Virtue;
 
   /**
-   * see [[GenericMainTabComponent.constructor]] for parameters
+   * see [[ItemFormMainTabComponent.constructor]] for parameters
    */
-  constructor(router: Router, dialog: MatDialog) {
-    super(router, dialog);
+  constructor(
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
     this.childDatasetName = DatasetNames.VMS;
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being displayed by this tab's parent form.
    */
@@ -67,13 +74,14 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
       console.log("item passed to virtue-main-tab which was not a Virtue: ", item);
       return;
     }
+    console.log(item);
     this.item = item as Virtue;
 
     this.updateVersion();
   }
 
   /**
-   * Overrides parent, [[GenericFormTabComponent.setMode]]
+   * Overrides parent, [[ItemFormTabComponent.setMode]]
    *
    * @param newMode the Mode to set the page as.
    */
@@ -107,7 +115,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     return [
       new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn('Assigned Apps', 4, this.getApps,  this.formatName),
+      new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => this.getApps(v),  this.formatName),
       new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
@@ -155,7 +163,7 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
    * Remember this.item is a Virtue here, and childItem can be a VirtualMachine, Printer, or .
    *
    * @param childItem the Item to be removed from this.[[item]]'s child lists.
-   * @override parent [[GenericMainTabComponent.removeChildObject]]()
+   * @override parent [[ItemFormMainTabComponent.removeChildObject]]()
    */
   removeChildObject(childItem: IndexedObj): void {
     if (childItem instanceof VirtualMachine) {

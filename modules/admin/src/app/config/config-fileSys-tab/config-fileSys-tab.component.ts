@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { GenericTabComponent } from '../../shared/abstracts/gen-tab/gen-tab.component';
+import { GenericDataTabComponent } from '../../shared/abstracts/gen-data-page/gen-data-tab.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
 import {
@@ -13,6 +13,10 @@ import {
   SORT_DIR
 } from '../../shared/models/column.model';
 
+import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
+import { BaseUrlService } from '../../shared/services/baseUrl.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 /**
  * @class
@@ -26,7 +30,7 @@ import {
   templateUrl: './config-fileSys-tab.component.html',
   styleUrls: ['./config-fileSys-tab.component.css']
 })
-export class ConfigFileSysTabComponent extends GenericTabComponent implements OnInit {
+export class ConfigFileSysTabComponent extends GenericDataTabComponent implements OnInit {
 
   /** #uncommented, unimplemented */
   @ViewChild(GenericTableComponent) fileSystemsTable: GenericTableComponent<{foo: number, bar: string}>;
@@ -35,10 +39,11 @@ export class ConfigFileSysTabComponent extends GenericTabComponent implements On
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    */
   constructor(
-    router: Router,
-    dialog: MatDialog
-  ) {
-    super(router, dialog);
+      router: Router,
+      baseUrlService: BaseUrlService,
+      dataRequestService: DataRequestService,
+      dialog: MatDialog) {
+    super(router, baseUrlService, dataRequestService, dialog);
     this.tabName = "File Systems";
   }
 
@@ -52,15 +57,21 @@ export class ConfigFileSysTabComponent extends GenericTabComponent implements On
   /**
    * #unimplemented
    */
-  setUp(): void {
-    this.fileSystemsTable.populate([{foo: 1, bar: "A"}, {foo: 2, bar: "B"}, {foo: 3, bar: "C"}]);
+  onPullComplete(): void {
+    // this.fileSystemsTable.populate(this.datasets[DatasetNames.FILE_SYSTEMS].asList());
   }
 
   /**
    * #unimplemented
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
-  update(changes: any): void {
-    return;
+  getDataPageOptions(): {
+      serviceConfigUrl: ConfigUrls,
+      neededDatasets: DatasetNames[]} {
+    return {
+      serviceConfigUrl: ConfigUrls.USERS,//ConfigUrls.FILE_SYSTEMS,
+      neededDatasets: []//DatasetNames.FILE_SYSTEMS
+    };
   }
 
 
@@ -87,10 +98,4 @@ export class ConfigFileSysTabComponent extends GenericTabComponent implements On
       new IconColumn("Remove File System (placeholder)", 4, "delete", (obj) => {obj.foo++; })
     ];
   }
-
-  /** #unimplemented */
-  collectData(): boolean {
-    return true;
-  }
-
 }

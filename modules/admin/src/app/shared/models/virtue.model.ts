@@ -101,6 +101,7 @@ export class Virtue extends Item {
       this.vmTemplateIds = virtueObj. vmTemplateIds;
       this.fileSystemIds = virtueObj.fileSystemIds;
       this.printerIds = virtueObj.printerIds;
+
       this.allowedPasteTargetIds = virtueObj.pasteTargetIds;
 
       this.enabled = virtueObj.enabled;
@@ -161,6 +162,7 @@ export class Virtue extends Item {
       this.fileSystems = dataset.getSubset(this.fileSystemIds) as DictList<FileSystem>;
     }
     else if (datasetName === DatasetNames.PRINTERS) {
+      // console.log(this.printerIds);
       this.printers = dataset.getSubset(this.printerIds) as DictList<Printer>;
     }
 
@@ -195,6 +197,6 @@ export class Virtue extends Item {
         return this.fileSystemIds;
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
-    return null;
+    return [];
   }
 }

@@ -843,7 +843,7 @@ public class AdminResource {
 			throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
 					"Given printer doesn't match printerId in path. Printer ID=" + printerId + ". Printer=" + printer);
 		}
-		return adminService.createPrinter(printer);
+		return adminService.updatePrinter(printerId, printer);
 	}
 
 	@GET
@@ -859,9 +859,14 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("printer/")
 	public Iterable<Printer> getAllPrinters() {
-		ArrayList<Printer> ps = new ArrayList<Printer>();
-		ps.add(new Printer("id", "name", "address", "status", true));
-		return ps;
+		try {
+			return adminService.getAllPrinters();
+		} catch (Exception e) {
+			throw WebServiceUtil.createWebserviceException(e);
+		}
+		// ArrayList<Printer> ps = new ArrayList<Printer>();
+		// ps.add(new Printer("id", "name", "address", "status", true));
+		// return ps;
 		// return adminService.getAllPrinters();
 	}
 

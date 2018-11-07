@@ -62,23 +62,23 @@ export class VmListComponent extends ItemListComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Template Name',     2, (v: VirtualMachine) => v.getName(),  SORT_DIR.ASC,
-                                                                        (i: Item) => this.viewItem(i), () => this.getSubMenu()),
-      new TextColumn('OS',                1, (v: VirtualMachine) => v.os,         SORT_DIR.ASC),
-      new ListColumn('Assigned Applications',  4, this.getApps, this.formatName, (i: Item) => this.viewItem(i)),
-      new TextColumn('Last Editor',       2, (v: VirtualMachine) => v.lastEditor, SORT_DIR.ASC),
+      new TextColumn('Template Name',           2, (v: VirtualMachine) => v.getName(),  SORT_DIR.ASC,
+                                                                          (i: Item) => this.viewItem(i), () => this.getSubMenu()),
+      new TextColumn('OS',                      1, (v: VirtualMachine) => v.os,         SORT_DIR.ASC),
+      new ListColumn('Assigned Applications',   4, (v: VirtualMachine) => this.getApps(v), this.formatName, (i: Item) => this.viewItem(i)),
+      new TextColumn('Last Editor',             2, (v: VirtualMachine) => v.lastEditor, SORT_DIR.ASC),
       // new TextColumn('Version',           1, (v: VirtualMachine) => String(v.version),  SORT_DIR.ASC),
-      new TextColumn('Modification Date', 2, (v: VirtualMachine) => v.modDate,    SORT_DIR.DESC),
-      new TextColumn('Status',            1, this.formatStatus,                   SORT_DIR.ASC)
+      new TextColumn('Modification Date',       2, (v: VirtualMachine) => v.modDate,    SORT_DIR.DESC),
+      new TextColumn('Status',                  1, this.formatStatus,                   SORT_DIR.ASC)
 
     ];
   }
 
   /**
-   * See [[GenericPageComponent.getPageOptions]]
+   * See [[GenericDataPageComponent.getDataPageOptions]]
    * @return child-specific information needed by the generic page functions when loading data.
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {

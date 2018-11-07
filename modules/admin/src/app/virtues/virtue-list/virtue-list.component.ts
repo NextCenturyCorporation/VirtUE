@@ -71,8 +71,8 @@ export class VirtueListComponent extends ItemListComponent {
     return [
       new TextColumn('Template Name',     2, (v: Virtue) => v.getName(), SORT_DIR.ASC,  (i: Item) => this.viewItem(i),
                                                                                                     () => this.getSubMenu()),
-      new ListColumn('Virtual Machines',  2, this.getVms,      this.formatName,    (i: Item) => this.viewItem(i)),
-      new ListColumn('Applications',      2, this.getVmApps, this.formatName),
+      new ListColumn('Virtual Machines',  2, (i: Item) => this.getVms(i),      this.formatName,    (i: Item) => this.viewItem(i)),
+      new ListColumn('Applications',      2, (i: Item) => this.getVmApps(i), this.formatName),
       new TextColumn('Last Editor',       2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),
       new TextColumn('Version',           1, (v: Virtue) => String(v.version),  SORT_DIR.ASC),
       new TextColumn('Modification Date', 2, (v: Virtue) => v.modDate,          SORT_DIR.DESC),
@@ -89,10 +89,10 @@ export class VirtueListComponent extends ItemListComponent {
   }
 
   /**
-   * See [[GenericPageComponent.getPageOptions]]
+   * See [[GenericDataPageComponent.getDataPageOptions]]
    * @return child-specific information needed by the generic page functions when loading data.
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
@@ -125,11 +125,19 @@ export class VirtueListComponent extends ItemListComponent {
   }
 
   tempAddRandomPrinter() {
-    let sub = this.dataRequestService.getItems(ConfigUrls.PRINTERS).subscribe( data => {
-        console.log(data);
-      }, () => {},
-      () => {sub.unsubscribe();}
-    );
+    // let sub = this.dataRequestService.getItems(ConfigUrls.PRINTERS).subscribe( data => {
+    //     console.log(data);
+    //   }, () => {},
+    //   () => {sub.unsubscribe();}
+    // );
+
+    // let p = {info: "something", status: "active", address: "127.0.0.1", enabled: true};
+
+    // let sub2 = this.dataRequestService.createItem(ConfigUrls.PRINTERS, JSON.stringify(p)).subscribe( data => {
+    //     console.log(data);
+    //   }, () => {},
+    //   () => {sub2.unsubscribe();}
+    // );
 
     // console.log(this.item.allowedPrinters);
     // this.dataRequestService.createItem(ConfigUrls.PRINTERS, new Printer("some printer"));

@@ -91,7 +91,7 @@ export class DashboardComponent extends ItemListComponent {
    *
    * @return
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {

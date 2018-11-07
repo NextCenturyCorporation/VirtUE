@@ -23,6 +23,9 @@ import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
  */
 export abstract class IndexedObj {
 
+  /** #uncommented */
+  enabled: boolean;
+
   /**
    * @return a unique ID for this type of object.
    */

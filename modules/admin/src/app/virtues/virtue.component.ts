@@ -24,13 +24,14 @@ import { VirtueMainTabComponent } from './form/main-tab/virtue-main-tab.componen
 import { VirtueSettingsTabComponent } from './form/settings-tab/virtue-settings.component';
 import { VirtueUsageTabComponent } from './form/usage-tab/virtue-usage-tab.component';
 
-import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
+
 
 /**
  *
  * @class
  * This class represents a detailed view of a Virtue Template.
- * See comment on [[GenericFormComponent]] for generic info.
+ * See comment on [[ItemFormComponent]] for generic info.
  *
  * This form has:
  *  - a main tab for viewing the Vms made available to the Virtue, its version, and
@@ -91,7 +92,7 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
   styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
   providers: [ BaseUrlService, DataRequestService ]
 })
-export class VirtueComponent extends GenericFormComponent implements OnDestroy {
+export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
   /** A tab for displaying and/or editing the Virtue's name, status, version, and attached vms */
   @ViewChild('mainTab') mainTab: VirtueMainTabComponent;
@@ -112,7 +113,7 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
   item: Virtue;
 
   /**
-   * see [[GenericFormComponent.constructor]] for notes on parameters
+   * see [[ItemFormComponent.constructor]] for notes on parameters
    */
   constructor(
     location: Location,
@@ -153,12 +154,12 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
     // Must unsubscribe from all these when the VirtueComponent is destroyed
 
-    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
+    this.mainTab.onChildrenChange.subscribe((newChildIDs: string[]) => {
       this.item.vmTemplateIds = newChildIDs;
       this.updatePage();
     });
 
-    this.mainTab.onStatusChange.subscribe((newStatus) => {
+    this.mainTab.onStatusChange.subscribe(() => {
       if ( this.mode === Mode.VIEW ) {
         this.toggleItemStatus(this.item);
       }
@@ -226,14 +227,20 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
   /**
    * This page needs all 4 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
    * It also has a table showing the users that have been given access to this Virtue template.
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
       serviceConfigUrl: ConfigUrls.VIRTUES,
-      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS]
+      neededDatasets: [
+                        DatasetNames.APPS,
+                        DatasetNames.VMS,
+                        DatasetNames.PRINTERS,
+                        // DatasetNames.FILE_SYSTEMS,
+                        DatasetNames.VIRTUES,
+                        DatasetNames.USERS]
     };
   }
 

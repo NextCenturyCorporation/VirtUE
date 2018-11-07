@@ -21,7 +21,7 @@ import { Column } from '../shared/models/column.model';
 
 import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
-import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
 import { ConfigUrls } from '../shared/services/config-urls.enum';
@@ -31,7 +31,7 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
  *
  * @class
  * This class represents a detailed view of a User.
- * See comment on [[GenericFormComponent]] for generic info.
+ * See comment on [[ItemFormComponent]] for generic info.
  *
  * This form has:
  *  - a main tab for viewing the Virtues made available to the User
@@ -80,7 +80,7 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
   styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
   providers: [ BaseUrlService, DataRequestService ]
 })
-export class UserComponent extends GenericFormComponent implements OnDestroy {
+export class UserComponent extends ItemFormComponent implements OnDestroy {
 
   /** A tab for displaying the User's attached virtues, status, and assigned roles. */
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
@@ -88,7 +88,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
   /** reclassing */
   item: User;
   /**
-   * see [[GenericFormComponent.constructor]] for notes on parameters
+   * see [[ItemFormComponent.constructor]] for notes on parameters
    */
   constructor(
     location: Location,
@@ -120,7 +120,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
     // Must unsubscribe from all these when the UserComponent is destroyed
 
-    this.mainTab.onChildrenChange.subscribe((newVirtueIDs) => {
+    this.mainTab.onChildrenChange.subscribe((newVirtueIDs: string[]) => {
       this.item.virtueTemplateIds = newVirtueIDs;
       this.updatePage();
     });
@@ -129,7 +129,7 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     // parameter is extraneous. It just needs to emit something to let the form know that the user toggled the status.
     // In any mode but view, nothing extra should happen. The local copy of item will have its status toggled, and that's it.
     // In view mode, this toggling should actually make a change to the backend.
-    this.mainTab.onStatusChange.subscribe((newStatus) => {
+    this.mainTab.onStatusChange.subscribe(() => {
       if ( this.mode === Mode.VIEW ) {
         this.toggleItemStatus(this.item);
       }
@@ -185,9 +185,9 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
   /**
    * This page needs all 4 datasets, because there's a Table of Virtues, and under each Virtue
    * we want to display all the Apps it has available to it.
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
-  getPageOptions(): {
+  getDataPageOptions(): {
       serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {

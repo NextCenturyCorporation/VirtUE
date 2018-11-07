@@ -505,7 +505,7 @@ public class ImportExportService {
 	}
 
 	private void importVirtueTemplateFromObject(VirtueTemplate vt) {
-		Collection<String> vmtIds = vt.getVirtualMachineTemplateIds();
+		Collection<String> vmtIds = vt.getVmTemplateIds();
 		Iterable<VirtualMachineTemplate> vmts = templateManager.getVmTemplates(vmtIds);
 		Iterator<VirtualMachineTemplate> vmtItr = vmts.iterator();
 		Set<VirtualMachineTemplate> myVmts = new HashSet<VirtualMachineTemplate>();
@@ -636,7 +636,7 @@ public class ImportExportService {
 		Collection<VirtualMachineTemplate> vmts = new ArrayList<VirtualMachineTemplate>();
 		// boolean exists = templateManager.containsVirtueTemplate(id);
 		// if (!exists) {
-		for (String vmtId : vt.getVirtualMachineTemplateIds()) {
+		for (String vmtId : vt.getVmTemplateIds()) {
 			if (vmtId.startsWith(IMPORT_ID_PREFIX)) {
 				String vmtKey = vmtId.substring(IMPORT_ID_PREFIX.length(), vmtId.length());
 				VirtualMachineTemplate vmt = importVirtualMachineTemplate(vmtKey);

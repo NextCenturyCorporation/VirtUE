@@ -1,9 +1,13 @@
-/deep/
-.mat-form-field-infix {
-  padding: 0;
-  border-top: none;
+
+
+.fab-button {
+  background-color: #009700;
+  transform: scale(0.5);
 }
-/deep/
-.mat-form-field-underline {
- display: none;
+
+
+.plus {
+  transform: scale(1.8);
+  color: white;
+  fill: white;
 }
