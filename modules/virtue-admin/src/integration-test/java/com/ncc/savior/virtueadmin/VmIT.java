@@ -22,7 +22,7 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource("/application-test.properties")
+@TestPropertySource("/application-int-test.properties")
 public class VmIT {
 	
 	@LocalServerPort

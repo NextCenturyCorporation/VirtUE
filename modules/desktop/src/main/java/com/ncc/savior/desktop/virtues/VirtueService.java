@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.virtues;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.IClipboardManager;
 import com.ncc.savior.desktop.rdp.IRdpClient;
+import com.ncc.savior.desktop.sidebar.ColorManager;
 import com.ncc.savior.desktop.sidebar.RgbColor;
 import com.ncc.savior.desktop.xpra.IApplicationManagerFactory;
 import com.ncc.savior.desktop.xpra.XpraClient;
@@ -48,10 +50,10 @@ public class VirtueService {
 	public static ArrayList<VirtueState> startableVirtueStates;
 	public static ArrayList<VirtueState> stopableVirtueStates;
 	private Map<String, List<ApplicationDefinition>> pendingApps;
-	private Map<String, RgbColor> colors;
 	private IRdpClient rdpClient;
 	private IClipboardManager clipboardManager;
 	protected AuthorizationService authorizationService;
+	private ColorManager colorManager;
 
 	static {
 		startableVirtueStates = new ArrayList<VirtueState>();
@@ -63,20 +65,20 @@ public class VirtueService {
 	}
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
-			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService) {
+			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService, ColorManager colorManager) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
-		this.colors = Collections.synchronizedMap(new HashMap<String, RgbColor>());
 		this.rdpClient = rdpClient;
 		this.clipboardManager = clipboardManager;
 		this.authorizationService = authService;
+		this.colorManager = colorManager;
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
 		Runnable runnable = () -> {
 			Collection<DesktopVirtueApplication> apps = desktopResourceService.getReconnectionApps(virtue.getId());
-			RgbColor color = colors.get(virtue.getId());
+			RgbColor color = getColorFromVirtue(virtue);
 			apps.parallelStream().forEach((app) -> {
 				try {
 					ensureConnection(app, virtue, color);
@@ -87,6 +89,12 @@ public class VirtueService {
 		};
 		Thread t = new Thread(runnable, "Temp-reconnect-thread");
 		t.start();
+	}
+
+	private RgbColor getColorFromVirtue(DesktopVirtue virtue) {
+		Color bodyColor = colorManager.getBodyColor(virtue.getTemplateId());
+		RgbColor color = RgbColor.fromColor(bodyColor);
+		return color;
 	}
 
 	/**
@@ -196,7 +204,7 @@ public class VirtueService {
 		for (DesktopVirtue virtue : list) {
 			List<ApplicationDefinition> pending = pendingApps.get(virtue.getId());
 			if (VirtueState.RUNNING.equals(virtue.getVirtueState()) && pending != null && !pending.isEmpty()) {
-				RgbColor color = colors.get(virtue.getId());
+				RgbColor color = getColorFromVirtue(virtue);
 				Iterator<ApplicationDefinition> itr = pending.iterator();
 				while (itr.hasNext()) {
 					ApplicationDefinition appDefn = itr.next();
@@ -229,8 +237,9 @@ public class VirtueService {
 	 * @param color
 	 * @throws IOException
 	 */
-	public void startApplication(DesktopVirtue v, ApplicationDefinition appDefn, RgbColor color) throws IOException {
+	public void startApplication(DesktopVirtue v, ApplicationDefinition appDefn) throws IOException {
 		// TODO check to see if we have an XPRA connection
+		RgbColor color = getColorFromVirtue(v);
 		Thread t = new Thread(() -> {
 			DesktopVirtue virtue = v;
 			try {
@@ -238,7 +247,7 @@ public class VirtueService {
 				DesktopVirtueApplication app;
 				if (virtueId == null) {
 					virtue = desktopResourceService.createVirtue(virtue.getTemplateId());
-					addPendingAppStart(virtue.getId(), appDefn, color);
+					addPendingAppStart(virtue.getId(), appDefn);
 					// Set old object with new status
 					v.setId(virtue.getId());
 					v.setVirtueState(virtue.getVirtueState());
@@ -248,9 +257,9 @@ public class VirtueService {
 						ensureConnection(app, virtue, color);
 					} else if (VirtueState.STOPPED.equals(virtue.getVirtueState())) {
 						startVirtue(virtue);
-						addPendingAppStart(virtue.getId(), appDefn, color);
+						addPendingAppStart(virtue.getId(), appDefn);
 					} else {
-						addPendingAppStart(virtue.getId(), appDefn, color);
+						addPendingAppStart(virtue.getId(), appDefn);
 					}
 				}
 			} catch (Throwable e) {
@@ -260,13 +269,12 @@ public class VirtueService {
 		t.start();
 	}
 
-	private void addPendingAppStart(String virtueId, ApplicationDefinition appDefn, RgbColor color) {
+	private void addPendingAppStart(String virtueId, ApplicationDefinition appDefn) {
 		logger.debug("Adding pending application=" + appDefn);
 		List<ApplicationDefinition> apps = pendingApps.get(virtueId);
 		if (apps == null) {
 			apps = new ArrayList<ApplicationDefinition>();
 			pendingApps.put(virtueId, apps);
-			colors.put(virtueId, color);
 		}
 		apps.add(appDefn);
 	}

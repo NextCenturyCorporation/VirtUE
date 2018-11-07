@@ -10,9 +10,9 @@ Running virtue-admin:
   #be greater than the first block for this to work properly.  It is highly recommended that 
   #all servers on the same VPC use unique CIDR block ranges.
   #First CIDR block in range used for dynamic subnets, inclusive.
-  virtue.aws.server.subnet.cidrStart=10.0.8.0/24
+  virtue.aws.server.subnet.cidrStart=10.1.9.0/28
   #End CIDR block in range used for dynamic subnets, not inclusive.
-  virtue.aws.server.subnet.cidrEnd=10.0.9.0/24  
+  virtue.aws.server.subnet.cidrEnd=10.1.10.0/28  
   #AWS Route Table id to assign all dynamic subnets
   virtue.aws.server.subnet.routeTableId=rtb-16314b6c
 5. Run 'gradle run' or com.ncc.savior.virtueadmin.VirtueAdminApplication as a java application

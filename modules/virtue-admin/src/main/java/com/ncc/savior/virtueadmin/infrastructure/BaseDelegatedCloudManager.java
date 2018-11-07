@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -37,7 +38,8 @@ public abstract class BaseDelegatedCloudManager implements ICloudManager {
 		Map<IVmManager, Collection<VirtualMachineTemplate>> mapping = createVmManagerMappingFromVmTemplates(vmts);
 		for (Entry<IVmManager, Collection<VirtualMachineTemplate>> entry : mapping.entrySet()) {
 			IVmManager manager = entry.getKey();
-			Collection<VirtualMachine> myVms = manager.provisionVirtualMachineTemplates(user, vmts, null, template.getName(), null);
+			VirtueCreationAdditionalParameters virtueMod = new VirtueCreationAdditionalParameters(template.getName());
+			Collection<VirtualMachine> myVms = manager.provisionVirtualMachineTemplates(user, vmts, null, virtueMod);
 			vms.addAll(myVms);
 		}
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), vms);

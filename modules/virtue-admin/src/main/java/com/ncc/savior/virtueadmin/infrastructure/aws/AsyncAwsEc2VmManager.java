@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.infrastructure.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -9,17 +10,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.Tag;
+import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
-import com.ncc.savior.virtueadmin.infrastructure.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 /**
  * {@link IVmManager} that uses AWS EC2 to create and manage VMs. The following
@@ -40,9 +50,10 @@ import com.ncc.savior.virtueadmin.model.VmState;
 public class AsyncAwsEc2VmManager extends BaseVmManager {
 	private static final Logger logger = LoggerFactory.getLogger(AsyncAwsEc2VmManager.class);
 	private static final String VM_PREFIX = "VRTU-W-";
+	private static final int TERMINATED = 48;
 	private String serverKeyName;
 	private List<String> defaultSecurityGroups;
-	private String serverUser;
+	private String serverId;
 	private String awsProfile;
 	private InstanceType instanceType;
 	private AwsEc2Wrapper ec2Wrapper;
@@ -61,15 +72,15 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	 *            passed to {@link ProfileCredentialsProvider}.
 	 */
 	public AsyncAwsEc2VmManager(CompletableFutureServiceProvider serviceProvider, IKeyManager keyManager,
-			AwsEc2Wrapper ec2Wrapper, IVpcSubnetProvider vpcSubnetProvider) {
+			AwsEc2Wrapper ec2Wrapper, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider) {
 		this.ec2Wrapper = ec2Wrapper;
 		this.defaultSecurityGroups = new ArrayList<String>();
 		this.defaultSecurityGroups.add("default");
 
-		this.serverUser = System.getProperty("user.name");
 		this.instanceType = InstanceType.T2Small;
 		this.serviceProvider = serviceProvider;
 		this.vpcSubnetProvider = vpcSubnetProvider;
+		this.serverId = serverIdProvider.getServerId();
 	}
 
 	// @Override
@@ -95,19 +106,23 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 	@Override
 	public Collection<VirtualMachine> provisionVirtualMachineTemplates(VirtueUser user,
 			Collection<VirtualMachineTemplate> vmTemplates, CompletableFuture<Collection<VirtualMachine>> vmFutures,
-			String virtue, String subnetId) {
+			VirtueCreationAdditionalParameters virtueMods) {
 		if (vmFutures == null) {
 			vmFutures = new CompletableFuture<Collection<VirtualMachine>>();
 		}
 		ArrayList<VirtualMachine> vms = new ArrayList<VirtualMachine>(vmTemplates.size());
 		for (VirtualMachineTemplate vmt : vmTemplates) {
 			String clientUser = user.getUsername();
-			String virtueName = virtue == null ? "" : "-" + virtue;
+			String virtueName = virtueMods.getName() == null ? "" : "-" + virtueMods.getName();
 			virtueName = virtueName.replace(" ", "-");
-			String namePrefix = VM_PREFIX + serverUser + "-" + clientUser + virtueName;
+			String namePrefix = VM_PREFIX + serverId + "-" + clientUser + virtueName;
 
-			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, securityGroupIds, serverKeyName, instanceType,
-					subnetId, null);
+			Collection<String> secGroupIds = new HashSet<String>(securityGroupIds);
+			if (virtueMods.getSecurityGroupId() != null) {
+				secGroupIds.add(virtueMods.getSecurityGroupId());
+			}
+			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, secGroupIds, serverKeyName, instanceType,
+					virtueMods.getSubnetId(), null);
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
@@ -300,21 +315,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		this.awsProfile = awsProfile;
 	}
 
-	public String getServerUser() {
-		return serverUser;
-	}
-
-	/**
-	 * Sets the server user used for naming AWS VM's. If it is null or an empty
-	 * string (after .trim()), the value will not be set. The default is set in the
-	 * constructor with the java property "user.name"
-	 * 
-	 * @param serverUser
-	 */
-	public void setServerUser(String serverUser) {
-		if (serverUser != null && !serverUser.trim().equals("")) {
-			this.serverUser = serverUser;
-		}
+	public String getServerId() {
+		return serverId;
 	}
 
 	public InstanceType getInstanceType() {
@@ -347,5 +349,35 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		stopFuture.thenAccept((Collection<VirtualMachine> stoppedVm) -> {
 			startVirtualMachine(vm, vmFutureFinal);
 		});
+	}
+
+	public void syncAll(List<String> ids) {
+		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
+		Collection<Filter> filters = new ArrayList<Filter>();
+		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+		describeInstancesRequest.setFilters(filters);
+		DescribeInstancesResult result = ec2Wrapper.getEc2().describeInstances(describeInstancesRequest);
+
+		List<String> instancesToBeTerminated = new ArrayList<String>();
+		for (Reservation res : result.getReservations()) {
+			for (Instance instance : res.getInstances()) {
+				List<Tag> tags = instance.getTags();
+				String instanceId = AwsUtil.tagGet(tags, AwsUtil.TAG_INSTANCE_ID);
+				Integer stateCode = instance.getState().getCode();
+				if (instanceId != null && !ids.contains(instanceId) &&  stateCode!=TERMINATED) {
+					instancesToBeTerminated.add(instance.getInstanceId());
+				}
+			}
+		}
+		if (!instancesToBeTerminated.isEmpty()) {
+			try {
+				logger.debug("Attempting to delete extra ec2 instances with ids=" + instancesToBeTerminated);
+				TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(
+						instancesToBeTerminated);
+				ec2Wrapper.getEc2().terminateInstances(terminateInstancesRequest);
+			} catch (AmazonEC2Exception e) {
+				logger.warn("Failed to terminate extra ec2 instances.  InstanceIds=" + instancesToBeTerminated, e);
+			}
+		}
 	}
 }

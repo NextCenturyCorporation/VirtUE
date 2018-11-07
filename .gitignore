@@ -58,3 +58,4 @@ docker/server-images/virtue-admin/virtue-admin-0.0.1-SNAPSHOT.zip
 docker/server-images/workbench/admin.tar.gz
 *.dot
 /modules/ecosystem/cifs-proxy/switchprincipal
+modules/ecosystem/cifs-proxy/src/cpp/Makefile

@@ -1,10 +1,14 @@
 package com.ncc.savior.virtueadmin.infrastructure.staticvm;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
@@ -32,7 +36,8 @@ public class StaticMachineCloudManager implements ICloudManager {
 	@Override
 	public VirtueInstance createVirtue(VirtueUser user, VirtueTemplate template) throws Exception {
 		Collection<VirtualMachineTemplate> templates = template.getVmTemplates();
-		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, templates, null, template.getName(), null);
+		Collection<VirtualMachine> vms = vmManager.provisionVirtualMachineTemplates(user, templates, null,
+				new VirtueCreationAdditionalParameters(template.getName()));
 		VirtueInstance virtue = new VirtueInstance(UUID.randomUUID().toString(), template.getName(), user.getUsername(),
 				template.getId(), template.getColor(), template.getApplications(), vms);
 		return virtue;
@@ -41,7 +46,7 @@ public class StaticMachineCloudManager implements ICloudManager {
 	@Override
 	public VirtueInstance startVirtue(VirtueInstance virtueInstance) {
 		// single machine should always be started with this implementation.
-		for(VirtualMachine vm:virtueInstance.getVms()) {
+		for (VirtualMachine vm : virtueInstance.getVms()) {
 			vm.setState(VmState.RUNNING);
 		}
 		return virtueInstance;
@@ -59,7 +64,10 @@ public class StaticMachineCloudManager implements ICloudManager {
 	@Override
 	public void rebootVm(VirtualMachine vm, String virtue) {
 		// TODO Auto-generated method stub
-
 	}
 
+	@Override
+	public void sync(List<String> ids) {
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Sync not implemented in this implementation");
+	}
 }

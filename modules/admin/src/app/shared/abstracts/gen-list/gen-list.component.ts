@@ -96,25 +96,25 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
   }
 
   /**
-   * #uncommented
+   * returns the default parameters for the table on a list page, using subclass-defined features.
    */
   defaultTableParams() {
     return {
       cols: this.getColumns(),
       filters: this.getTableFilters(),
-      tableWidth: 12,
+      tableWidth: 1, // as a fraction of the parent object's width: a float in the range (0, 1].
       noDataMsg: this.getNoDataMsg(),
       elementIsDisabled: (i: Item) => !i.enabled
     };
   }
 
   /**
-   * Sets up the table
-   * #uncommented
+   * Sets up the table of Items.
    *
-   * If all pages have an attribute, but require different values for it, then it should be set via a method in [[defaultTableParams]].
-   * If a page has a unique attribute that the other pages don't even need to see (like Virtue-list having a getColor field), that should be
-   * added in a customizeTableParams method, in that subclass. See [[VirtueListComponent.customizeTableParams]]
+   * If all subclass-lists' tables have an attribute, but require different values for it, then it should be set via a method in
+   * [[defaultTableParams]].
+   * If a page has a unique attribute that the other pages don't even need to see (like Virtue-list having a getColor field), then
+   * that should be added in a customizeTableParams method, in that subclass. See [[VirtueListComponent.customizeTableParams]]
    */
   setUpTable(): void {
     if (this.table === undefined) {
@@ -129,7 +129,7 @@ export abstract class GenericListComponent extends GenericDataPageComponent impl
 
   /**
    * Allow children to customize the parameters passed to the table. By default, do nothing.
-   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   * @param paramsObject the parameters to be passed to the table. see [[GenericTable.setUp]]
    */
   customizeTableParams(paramsObject) {}
 
