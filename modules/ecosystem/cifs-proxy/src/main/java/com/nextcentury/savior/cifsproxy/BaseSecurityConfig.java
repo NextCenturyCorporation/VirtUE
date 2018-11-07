@@ -48,8 +48,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	}
 
-	protected static final String DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_CLASSPATH = "classpath:cifs-proxy-security.properties";
-	protected static final String DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_WORKING_DIR = "file:cifs-proxy-security.properties";
+	public static final String DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_CLASSPATH = "classpath:cifs-proxy-security.properties";
+	public static final String DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_WORKING_DIR = "file:cifs-proxy-security.properties";
 
 	private static Logger logger = LoggerFactory.getLogger(BaseSecurityConfig.class);
 
