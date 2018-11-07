@@ -32,6 +32,12 @@ variable "user_private_key_file" {
   default = "vrtu.pem"
 }
 
+variable "linux_user" {
+  # The user name to use to ssh into a machine we create (as a normal user)
+  # Change this if the Linux AMI distro changes
+  default = "fedora"
+}
+
 variable "bob_password" {
   default = "Test1234."
 }
@@ -81,11 +87,6 @@ variable "linux_ami" {
   # linux_user, too.
   description = "Fedora-Cloud-Base-28-20180922.0.x86_64-hvm-us-east-1-standard-0"
   default = "ami-0064c3021927a1bd5"
-}
-
-variable "linux_user" {
-  description = "The default user for our linux instance"
-  default = "fedora"
 }
 
 variable "linux_instance_type" {

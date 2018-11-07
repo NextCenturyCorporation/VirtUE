@@ -113,13 +113,16 @@ remotes {
 	}
 }
 
+ssh.settings {
+      knownHosts = allowAnyHosts
+}
+
 task nativeDeploy(dependsOn: bootJar) {
     group 'Native'
     description 'Copies native executables to the server'
     doFirst {
         ssh.run {
             session(remotes.webserver) {
-                put from: 'getserviceticket', into: '.'
                 put from: 'importcreds', into: '.'
                 put from: 'switchprincipal', into: '.'
             }
@@ -134,8 +137,8 @@ task bootDeploy(dependsOn: bootJar) {
     doFirst {
         ssh.run {
             session(remotes.webserver) {
-                put from: gsscacheJar.archivePath, into: '.'
                 put from: bootJar.archivePath, into: '.'
+                put from: 'src/main/resources/cifs-proxy.properties', into: '.'
                 put from: 'src/main/resources/cifs-proxy-security.properties', into: '.'
                 put from: 'src/main/resources/logback.xml', into: '.'
             }

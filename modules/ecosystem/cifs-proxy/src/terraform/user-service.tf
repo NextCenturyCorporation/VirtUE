@@ -29,6 +29,7 @@ resource "aws_instance" "user_facing_server" {
 set -x
 exec > /var/log/user_data.log 2>&1
 date
+# samba-dc provides samba-tool
 yum -y install \
 	adcli \
 	cifs-utils \
@@ -38,6 +39,7 @@ yum -y install \
 	oddjob-mkhomedir \
 	openldap-clients \
 	realmd \
+	samba \
 	samba-common-tools \
 	samba-dc \
 	sssd
@@ -50,13 +52,16 @@ echo supersede domain-name \"${var.domain}\";
 systemctl restart network.service
 sed -i 's/^\(\[libdefaults\]\)/\1\n  rdns = false/' /etc/krb5.conf
 echo ${var.admin_password} | realm join --membership-software=samba --user ${var.domain_admin_user} ${var.domain}
+echo Making minimal smb.conf so net ads keytab works
+cp /etc/samba/smb.conf /etc/samba/smb.conf-orig
 (
-echo security = ads
+echo security = user
 echo realm = ${var.domain}
 echo workgroup = "${local.domain_prefix}"
 echo kerberos method = secrets and keytab
 ) | sed -i -e '/^\[global\]$/r /dev/stdin' \
     -e '/ *\(security\|realm\|workgroup\|kerberos method\) *=/d' \
+	-e '/ *printing *=/,$d' \
     /etc/samba/smb.conf
 echo '${var.admin_password}' | net -k ads keytab flush -U ${var.domain_admin_user}
 echo '${var.admin_password}' | net -k ads keytab add http -U ${var.domain_admin_user}
@@ -119,6 +124,7 @@ samba-tool dns add ${local.ds_private_ip} $zone $lastOctet PTR ${local.myname}.$
 # create user that will mount files
 useradd --shell /bin/false mounter
 
+touch /tmp/user_data-finished
 date
 EOF
   # end of user_data
@@ -129,6 +135,12 @@ EOF
 	private_key = "${file(var.user_private_key_file)}"
   }
   
+  # The following file and remote-exec provisioners set up samba
+  provisioner "file" {
+	source = "virtue.conf"
+	destination = "/tmp/virtue.conf"
+  }
+
   #
   # Helper programs
   #
@@ -144,11 +156,21 @@ EOF
 
   provisioner "remote-exec" {
 	inline = [
+	  "while ! [ -e /tmp/user_data-finished ]; do echo -n '.' ; sleep 2; done",
+	  "echo '    include = virtue.conf' | sudo tee --append /etc/samba/smb.conf > /dev/null",
+	  "sudo cp /tmp/virtue.conf /etc/samba",
+	  "sudo touch /etc/samba/virtue-shares.conf",
+	  "sudo systemctl enable smb nmb",
+	  "sudo systemctl start smb nmb",
+	]
+  }
+
+  provisioner "remote-exec" {
+	inline = [
 	  # install will make them executable by default
 	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program}"
 	]
   }
-  
 }
 
 #  provisioner "file" {
