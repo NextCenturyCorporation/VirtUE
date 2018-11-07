@@ -179,6 +179,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0, GssApi.GSS_C_NO_OID_SET,
 				GssCredentialUsage.GSS_C_BOTH.getValue(), outputCredHandle, null, null);
 		LOGGER.trace("<<<back from acquire_cred");
+
 		GSSException exception = null;
 		try {
 			GssUtils.releaseName(gssapi, gssWebServiceName);
@@ -275,7 +276,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 	 */
 	private void storeCredInto(Pointer acquiredCred, Path file, int overwriteCred) throws GSSException {
 		IntByReference minorStatus = new IntByReference();
-		int defaultCred = 0;
+		int defaultCred = 1;
 		gss_key_value_element.ByReference credElement = new gss_key_value_element.ByReference("ccache", "FILE:" + file);
 		gss_key_value_set credStore = new gss_key_value_set();
 		credStore.count = 1;
