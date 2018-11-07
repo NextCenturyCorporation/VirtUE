@@ -66,10 +66,12 @@ public class GridbagPreferenceViewer {
 			// table.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 			reloadPreferences(table);
+			dialog.pack();
 			Dimension size = dialog.getSize();
 			size.width = 600;
 
 			dialog.setSize(size);
+
 			dialog.setLocationRelativeTo(frame);
 			Point p = dialog.getLocation();
 			p.y = frame.getLocation().y + 50;
@@ -107,7 +109,7 @@ public class GridbagPreferenceViewer {
 
 		// No prefs to show
 		Label label = new Label("No preferences set.");
-		label.setMinimumSize(new Dimension(200, 300));
+
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
@@ -149,7 +151,6 @@ public class GridbagPreferenceViewer {
 			label.setVisible(false);
 			// width = 600;
 		}
-		dialog.pack();
 		// return width;
 	}
 
