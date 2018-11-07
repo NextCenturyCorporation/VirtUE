@@ -114,7 +114,10 @@ public class GridbagPreferenceViewer {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		dialog.add(label, gbc);
+		JPanel labelp = new JPanel();
+		labelp.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+		labelp.add(label);
+		dialog.add(labelp, gbc);
 
 		// gridbag
 		GridBagConstraints scrollGbc = new GridBagConstraints();
@@ -143,12 +146,12 @@ public class GridbagPreferenceViewer {
 		if (i == 1) {
 			listScroll.setVisible(false);
 			clearAllButton.setVisible(false);
-			label.setVisible(true);
+			labelp.setVisible(true);
 			// width = 300;
 		} else {
 			listScroll.setVisible(true);
 			clearAllButton.setVisible(true);
-			label.setVisible(false);
+			labelp.setVisible(false);
 			// width = 600;
 		}
 		// return width;
