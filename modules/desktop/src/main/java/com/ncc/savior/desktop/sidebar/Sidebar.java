@@ -71,6 +71,16 @@ import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
  *
  */
 public class Sidebar implements VirtueChangeHandler {
+	private static final String PREFERENCE_SORT = "sort";
+	private static final String PREFERENCE_VIEW = "view";
+	private static final String VIEW_VIRTUE_LIST = "vl";
+	private static final String VIEW_VIRTUE_TILE = "vt";
+	private static final String VIEW_FAVORITES = "fv";
+	private static final String VIEW_APP_LIST = "al";
+	private static final String VIEW_APP_TILE = "at";
+	private static final String SORT_STATUS = "Status";
+	private static final String SORT_ALPHABETICAL = "Alphabetical";
+
 	private static final Logger logger = LoggerFactory.getLogger(Sidebar.class);
 
 	private ImageIcon inactiveFavoriteIcon = (new ImageIcon(
@@ -396,7 +406,7 @@ public class Sidebar implements VirtueChangeHandler {
 								String selected = (String) dropDownBox.getSelectedItem();
 								VirtueApplicationItem favoritedVa;
 								switch (selected) {
-								case "Alphabetical":
+								case SORT_ALPHABETICAL:
 									favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue,
 											favoritesTileView, dom.getChangeListener(), saviorTile, true, frame,
 											textField, dropDownBox, null, ghostText, headerColor,
@@ -404,7 +414,7 @@ public class Sidebar implements VirtueChangeHandler {
 									favoritedVa.tileSetup();
 									favoritesTileView.addFavorite(ad, virtue, favoritedVa, textField, null, ghostText);
 									break;
-								case "Status":
+								case SORT_STATUS:
 									favoritedVa = new VirtueApplicationItem(ad, virtueService, scrollPane, vtc, virtue,
 											favoritesTileView, dom.getChangeListener(), saviorTile, true, frame,
 											textField, dropDownBox, null, ghostText, headerColor,
@@ -676,10 +686,14 @@ public class Sidebar implements VirtueChangeHandler {
 		JLabel sortByLabel = new JLabel("sorted by: ");
 		sortByLabel.setFont(new Font("Roboto", Font.PLAIN, 14));
 		sortByLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 0, 0));
-		String[] sortingOptions = { "Alphabetical", "Status" };
+		String[] sortingOptions = { SORT_ALPHABETICAL, SORT_STATUS };
 		this.dropDownBox = new JComboBox<String>(sortingOptions);
 		Preferences lastSort = preferenceService.getPreferenceNode(DesktopPreference.LAST_SORT);
-		dropDownBox.setSelectedItem(lastSort.get("sort", "Alphabetical"));
+		String lastSortText = lastSort.get(PREFERENCE_SORT, SORT_ALPHABETICAL);
+		if (!JavaUtil.isNotEmpty(lastSortText)) {
+			lastSortText = SORT_ALPHABETICAL;
+		}
+		dropDownBox.setSelectedItem(lastSortText);
 		dropDownBox.setBorder(BorderFactory.createEmptyBorder(7, 0, 0, 0));
 		dropDownBox.setBackground(new Color(248, 248, 255));
 		Color bgColor = dropDownBox.getBackground();
@@ -757,7 +771,7 @@ public class Sidebar implements VirtueChangeHandler {
 	public void sortByOption(String keyword) {
 		String selected = (String) dropDownBox.getSelectedItem();
 		switch (selected) {
-		case "Alphabetical":
+		case SORT_ALPHABETICAL:
 			appsListView.search(keyword, null,
 					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 			appsTileView.search(keyword, null,
@@ -767,7 +781,7 @@ public class Sidebar implements VirtueChangeHandler {
 			virtueTileView.search(keyword, null, null);
 			virtueListView.search(keyword, null, null);
 			break;
-		case "Status":
+		case SORT_STATUS:
 			appsListView.search(keyword, sortAppsByStatus,
 					va -> va.getApplicationName().toLowerCase().contains(keyword.toLowerCase()));
 			appsTileView.search(keyword, sortAppsByStatus,
@@ -781,7 +795,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderFavoritesView() {
-		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "fv");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, PREFERENCE_VIEW, VIEW_FAVORITES);
 		desktopView = DesktopView.FAVORITES;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
@@ -796,7 +810,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderAppsListView() {
-		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "al");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, PREFERENCE_VIEW, VIEW_APP_LIST);
 		desktopView = DesktopView.APPS_LIST;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
@@ -811,7 +825,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderAppsTileView() {
-		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "at");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, PREFERENCE_VIEW, VIEW_APP_TILE);
 		desktopView = DesktopView.APPS_TILE;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
@@ -826,7 +840,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderVirtueTileView() {
-		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "vt");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, PREFERENCE_VIEW, VIEW_VIRTUE_TILE);
 		desktopView = DesktopView.VIRTUE_TILE;
 		applicationsOpen = false;
 		tileLabel.setIcon(activeTileIcon);
@@ -840,7 +854,7 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderVirtueListView() {
-		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "vl");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, PREFERENCE_VIEW, VIEW_VIRTUE_LIST);
 		desktopView = DesktopView.VIRTUE_LIST;
 		applicationsOpen = false;
 		tileLabel.setIcon(inactiveTileIcon);
@@ -859,14 +873,14 @@ public class Sidebar implements VirtueChangeHandler {
 		textField.setText("");
 		String selected = (String) dropDownBox.getSelectedItem();
 		switch (selected) {
-		case "Alphabetical":
+		case SORT_ALPHABETICAL:
 			appsListView.search(null, null, null);
 			appsTileView.search(null, null, null);
 			favoritesTileView.search(null, null, null);
 			virtueTileView.search(null, null, null);
 			virtueListView.search(null, null, null);
 			break;
-		case "Status":
+		case SORT_STATUS:
 			appsListView.search(null, sortAppsByStatus, null);
 			appsTileView.search(null, sortAppsByStatus, null);
 			favoritesTileView.search(null, sortAppsByStatus, null);
@@ -879,26 +893,26 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public void setInitialViewPort() {
 		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		String view = lastView.get("view", null);
+		String view = lastView.get(PREFERENCE_VIEW, null);
 		if (!JavaUtil.isNotEmpty(view)) {
-			lastView.put("view", "at");
-			view = "at";
+			lastView.put(PREFERENCE_VIEW, VIEW_APP_TILE);
+			view = VIEW_APP_TILE;
 		}
 		switch (view) {
-		case "at":
+		case VIEW_APP_TILE:
 		default:
 			renderAppsTileView();
 			break;
-		case "al":
+		case VIEW_APP_LIST:
 			renderAppsListView();
 			break;
-		case "fv":
+		case VIEW_FAVORITES:
 			renderFavoritesView();
 			break;
-		case "vt":
+		case VIEW_VIRTUE_TILE:
 			renderVirtueTileView();
 			break;
-		case "vl":
+		case VIEW_VIRTUE_LIST:
 			renderVirtueListView();
 			break;
 
@@ -1035,7 +1049,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) dropDownBox.getSelectedItem();
-				preferenceService.put(DesktopPreference.LAST_SORT, null, "sort", selected);
+				preferenceService.put(DesktopPreference.LAST_SORT, null, PREFERENCE_SORT, selected);
 				sortWithKeyword();
 			}
 
