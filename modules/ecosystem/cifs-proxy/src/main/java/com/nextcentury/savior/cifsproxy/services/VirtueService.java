@@ -28,7 +28,7 @@ import com.nextcentury.savior.cifsproxy.model.Virtue;
 public class VirtueService {
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(VirtueService.class);
 
-	private static final long PROCESS_TIMEOUT_MS = 500;
+	private static final long PROCESS_TIMEOUT_MS = 5000;
 
 	protected Map<String, Virtue> virtuesByName = new HashMap<String, Virtue>();
 
@@ -48,7 +48,8 @@ public class VirtueService {
 	public void newVirtue(Virtue virtue) throws IllegalArgumentException, InterruptedIOException, IOException {
 		LOGGER.entry(virtue);
 		if (virtuesByName.containsKey(virtue.getName())) {
-			IllegalArgumentException e = new IllegalArgumentException();
+			IllegalArgumentException e = new IllegalArgumentException(
+					"virtue '" + virtue.getName() + "' already exists");
 			throw e;
 		}
 		createLinuxUser(virtue);
@@ -60,8 +61,8 @@ public class VirtueService {
 
 	private void createLinuxUser(Virtue virtue) throws IOException, InterruptedIOException {
 		LOGGER.entry(virtue);
-		ProcessBuilder processBuilder = new ProcessBuilder("sudo", "useradd", "--comment", virtue.getName(), "--no-create-home",
-				"--no-user-group", "--shell", "/bin/false", virtue.getUsername());
+		ProcessBuilder processBuilder = new ProcessBuilder("sudo", "useradd", "--comment", virtue.getName(),
+				"--no-create-home", "--no-user-group", "--shell", "/bin/false", virtue.getUsername());
 		processBuilder.inheritIO();
 		Process process = processBuilder.start();
 		boolean processDone;
@@ -89,15 +90,21 @@ public class VirtueService {
 
 	private void setSambaPassword(Virtue virtue) throws IOException, InterruptedIOException {
 		LOGGER.entry(virtue);
-		int debuglevel = LOGGER.isDebugEnabled() ? 2 : 0;
-		ProcessBuilder processBuilder = new ProcessBuilder("sudo", "smbpasswd", "-a", "-D", "" + debuglevel, "-s",
-				virtue.getUsername());
+		int debuglevel = LOGGER.isTraceEnabled() ? 5 : LOGGER.isDebugEnabled() ? 2 : 0;
+		String[] args = { "sudo", "smbpasswd", "-a", "-D", "" + debuglevel, "-s", virtue.getUsername() };
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("running smbpassword with: " + String.join(" ", args));
+		}
+		ProcessBuilder processBuilder = new ProcessBuilder(args);
 		processBuilder.redirectError(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
 		Process process = processBuilder.start();
 		OutputStream outputStream = process.getOutputStream();
 		OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream);
 		outputWriter.write(virtue.getPassword());
 		outputWriter.write('\n');
+		outputWriter.write(virtue.getPassword());
+		outputWriter.write('\n');
+		outputWriter.flush();
 
 		boolean processDone;
 		try {
