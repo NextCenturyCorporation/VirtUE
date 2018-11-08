@@ -781,9 +781,6 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderFavoritesView() {
-		// Preferences lastView =
-		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		// lastView.put("view", "fv");
 		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "fv");
 		desktopView = DesktopView.FAVORITES;
 		applicationsOpen = true;
@@ -799,9 +796,6 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderAppsListView() {
-		// Preferences lastView =
-		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		// lastView.put("view", "al");
 		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "al");
 		desktopView = DesktopView.APPS_LIST;
 		applicationsOpen = true;
@@ -817,9 +811,6 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderAppsTileView() {
-		// Preferences lastView =
-		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		// lastView.put("view", "at");
 		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "at");
 		desktopView = DesktopView.APPS_TILE;
 		applicationsOpen = true;
@@ -835,9 +826,6 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderVirtueTileView() {
-		// Preferences lastView =
-		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		// lastView.put("view", "vt");
 		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "vt");
 		desktopView = DesktopView.VIRTUE_TILE;
 		applicationsOpen = false;
@@ -852,9 +840,6 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderVirtueListView() {
-		// Preferences lastView =
-		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		// lastView.put("view", "vl");
 		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "vl");
 		desktopView = DesktopView.VIRTUE_LIST;
 		applicationsOpen = false;
