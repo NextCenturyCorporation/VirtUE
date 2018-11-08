@@ -27,7 +27,6 @@ import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_element;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_set;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_name_t;
 import com.sun.jna.Native;
-import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
