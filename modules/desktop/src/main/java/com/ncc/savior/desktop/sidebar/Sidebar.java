@@ -61,6 +61,7 @@ import com.ncc.savior.desktop.sidebar.prefs.GridbagPreferenceViewer;
 import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.VirtueService;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
@@ -780,8 +781,10 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderFavoritesView() {
-		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		lastView.put("view", "fv");
+		// Preferences lastView =
+		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
+		// lastView.put("view", "fv");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "fv");
 		desktopView = DesktopView.FAVORITES;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
@@ -796,8 +799,10 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderAppsListView() {
-		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		lastView.put("view", "al");
+		// Preferences lastView =
+		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
+		// lastView.put("view", "al");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "al");
 		desktopView = DesktopView.APPS_LIST;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
@@ -812,8 +817,10 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderAppsTileView() {
-		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		lastView.put("view", "at");
+		// Preferences lastView =
+		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
+		// lastView.put("view", "at");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "at");
 		desktopView = DesktopView.APPS_TILE;
 		applicationsOpen = true;
 		favoritesView.setVisible(true);
@@ -828,8 +835,10 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderVirtueTileView() {
-		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		lastView.put("view", "vt");
+		// Preferences lastView =
+		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
+		// lastView.put("view", "vt");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "vt");
 		desktopView = DesktopView.VIRTUE_TILE;
 		applicationsOpen = false;
 		tileLabel.setIcon(activeTileIcon);
@@ -843,8 +852,10 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	public void renderVirtueListView() {
-		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
-		lastView.put("view", "vl");
+		// Preferences lastView =
+		// preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
+		// lastView.put("view", "vl");
+		preferenceService.put(DesktopPreference.LAST_VIEW, null, "view", "vl");
 		desktopView = DesktopView.VIRTUE_LIST;
 		applicationsOpen = false;
 		tileLabel.setIcon(inactiveTileIcon);
@@ -884,13 +895,13 @@ public class Sidebar implements VirtueChangeHandler {
 	public void setInitialViewPort() {
 		Preferences lastView = preferenceService.getPreferenceNode(DesktopPreference.LAST_VIEW);
 		String view = lastView.get("view", null);
-		if (view == null) {
+		if (!JavaUtil.isNotEmpty(view)) {
 			lastView.put("view", "at");
 			view = "at";
 		}
-
 		switch (view) {
 		case "at":
+		default:
 			renderAppsTileView();
 			break;
 		case "al":
@@ -905,6 +916,7 @@ public class Sidebar implements VirtueChangeHandler {
 		case "vl":
 			renderVirtueListView();
 			break;
+
 		}
 	}
 
@@ -1038,7 +1050,7 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = (String) dropDownBox.getSelectedItem();
-				preferenceService.put(DesktopPreference.LAST_VIEW, null, "sort", selected);
+				preferenceService.put(DesktopPreference.LAST_SORT, null, "sort", selected);
 				sortWithKeyword();
 			}
 
