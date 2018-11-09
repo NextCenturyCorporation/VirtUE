@@ -2,7 +2,6 @@ package com.nextcentury.savior.cifsproxy.controllers;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpSession;
 import javax.xml.ws.WebServiceException;
 
 import org.slf4j.ext.XLogger;
@@ -23,8 +22,8 @@ public class VirtueController {
 	private VirtueService service;
 
 	@PostMapping("/virtue")
-	Virtue newVirtue(HttpSession session, @RequestBody Virtue virtue) {
-		LOGGER.entry(session, virtue);
+	Virtue newVirtue(@RequestBody Virtue virtue) {
+		LOGGER.entry(virtue);
 		try {
 			service.newVirtue(virtue);
 		} catch (IllegalArgumentException | IOException e) {
