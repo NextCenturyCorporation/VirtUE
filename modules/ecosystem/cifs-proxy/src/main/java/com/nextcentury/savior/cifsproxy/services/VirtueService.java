@@ -104,15 +104,18 @@ public class VirtueService {
 		}
 		ProcessBuilder processBuilder = new ProcessBuilder(args);
 		processBuilder.redirectError(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
+		LOGGER.trace("starting smbpassword");
 		Process process = processBuilder.start();
 		OutputStream outputStream = process.getOutputStream();
 		OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream);
+		LOGGER.trace("sending password to smbpassword");
 		outputWriter.write(virtue.getPassword());
 		outputWriter.write('\n');
 		outputWriter.write(virtue.getPassword());
 		outputWriter.write('\n');
 		outputWriter.flush();
 
+		LOGGER.trace("waiting for smbpassword...");
 		boolean processDone;
 		try {
 			processDone = process.waitFor(PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS);
@@ -122,6 +125,7 @@ public class VirtueService {
 			LOGGER.throwing(ioe);
 			throw ioe;
 		}
+		LOGGER.trace("...done waiting for smbpassword");
 		if (!processDone) {
 			IOException ioe = new IOException("smbpasswd took too long (> " + PROCESS_TIMEOUT_MS + "ms)");
 			LOGGER.throwing(ioe);
