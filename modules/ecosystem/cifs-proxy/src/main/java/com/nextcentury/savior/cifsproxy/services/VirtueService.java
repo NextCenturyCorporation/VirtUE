@@ -80,7 +80,13 @@ public class VirtueService {
 			throw ioe;
 		}
 		int exitValue = process.exitValue();
-		if (exitValue != 0) {
+		switch (exitValue) {
+		case 0: // OK
+			break;
+		case 9: // username already in use
+			LOGGER.info("virtue '" + virtue.getUsername() + "' already existed");
+			break;
+		default:
 			IOException ioe = new IOException("useradd failed with code: " + exitValue);
 			LOGGER.throwing(ioe);
 			throw ioe;
