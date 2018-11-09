@@ -8,6 +8,7 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.ProcessBuilder.Redirect;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -133,5 +134,19 @@ public class VirtueService {
 			throw ioe;
 		}
 		LOGGER.exit();
+	}
+
+	public Collection<Virtue> getVirtues() {
+		LOGGER.entry();
+		Collection<Virtue> virtues = virtuesByName.values();
+		LOGGER.exit(virtues);
+		return virtues; 
+	}
+
+	public Virtue getVirtue(String name) {
+		LOGGER.entry(name);
+		Virtue virtue = virtuesByName.get(name);
+		LOGGER.exit(virtue);
+		return virtue;
 	}
 }
