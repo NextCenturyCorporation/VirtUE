@@ -76,8 +76,8 @@ public class GridbagPreferenceViewer {
 			Point p = dialog.getLocation();
 			p.y = frame.getLocation().y + 50;
 			dialog.setLocation(p);
-			dialog.setVisible(true);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
 
 		} catch (BackingStoreException e1) {
 			reportError("Error attempting to get all Preferences", e1);
