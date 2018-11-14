@@ -181,10 +181,11 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				ModifySubnetAttributeRequest modifySubnetAttributeRequest = new ModifySubnetAttributeRequest()
 						.withMapPublicIpOnLaunch(usePublicIp).withSubnetId(subnet.getSubnetId());
 				ec2.modifySubnetAttribute(modifySubnetAttributeRequest);
-				AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest()
-						.withSubnetId(subnet.getSubnetId()).withRouteTableId(routeTableId);
-				ec2.associateRouteTable(associateRouteTableRequest);
 			}
+			AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest()
+					.withSubnetId(subnet.getSubnetId()).withRouteTableId(routeTableId);
+			ec2.associateRouteTable(associateRouteTableRequest);
+
 			logger.debug("created cidrBlock subnet at " + cidrBlock + " " + subnet);
 			return subnet;
 		} catch (AmazonEC2Exception e) {
