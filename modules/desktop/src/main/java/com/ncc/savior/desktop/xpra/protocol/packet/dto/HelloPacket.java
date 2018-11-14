@@ -3,13 +3,18 @@ package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
 import com.ncc.savior.desktop.xpra.protocol.keyboard.IKeyMap;
@@ -25,6 +30,8 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  */
 public class HelloPacket extends Packet {
+	private static final XLogger LOGGER = XLoggerFactory.getXLogger(HelloPacket.class);
+
 	private static final String VERSION = "version";
 	private static final String DESKTOP_SIZE = "desktop_size";
 	private static final String CAPABILITY_UUID = "uuid";
@@ -70,47 +77,28 @@ public class HelloPacket extends Packet {
 	}
 
 	public static HelloPacket createDefaultRequest() {
-		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-		double maxW = -1;
-		double maxH = -1;
 		double maxX = 0;
 		double maxY = 0;
-		double cornerWidth = 0;
-		double cornerHeight = 0;
-		double y = 0;
-		double x = 0;
-		int[][] monitors = getMonitorSizes();
 		GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-		for (GraphicsDevice d : devices) {
-			double currHeight = d.getDefaultConfiguration().getBounds().getHeight();
-			double currWidth = d.getDefaultConfiguration().getBounds().getWidth();
-			x = d.getDefaultConfiguration().getBounds().getX();
-			y = d.getDefaultConfiguration().getBounds().getY();
-			if (y >= maxY) {
-				maxY = y;
-				if (currHeight > cornerHeight) {
-					cornerHeight = currHeight;
-				}
+		for (GraphicsDevice device : devices) {
+			Rectangle bounds = device.getDefaultConfiguration().getBounds();
+			if (bounds.getMaxX() > maxX) {
+				maxX = bounds.getMaxX();
 			}
-			if (x >= maxX) {
-				maxX = x;
-				if (currWidth > cornerWidth) {
-					cornerWidth = currWidth;
-				}
+			if (bounds.getMaxY() > maxY) {
+				maxY = bounds.getMaxY();
 			}
 		}
 
-		maxH = y + cornerHeight;
-		maxW = x + cornerWidth;
-
-		int[] screen = new int[] { (int) maxW, (int) maxH };
+		LOGGER.debug("max size: " + maxX + "x" + maxY);
+		int[] screen = new int[] { (int) maxX, (int) maxY };
 		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
+		Map<String, Object> map = new HashMap<String, Object>();
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
-		map.put(DPI, 96);
+		map.put(DPI, Toolkit.getDefaultToolkit().getScreenResolution());
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
-		// map.put(SCREEN_SIZES, new int[][] {});
-		int[][] screenSizes = monitors;
+		int[][] screenSizes = getMonitorSizes();
 		map.put(SCREEN_SIZES, screenSizes);
 		map.put(ENCODINGS, encodings);
 		map.put(ZLIB, true);
@@ -138,7 +126,7 @@ public class HelloPacket extends Packet {
 		map.put("generic_window_types", true);
 		map.put("window.initiate-moveresize", true);
 
-		Map<String, Object> windowMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> windowMap = new HashMap<String, Object>();
 		windowMap.put("raise", true);
 		windowMap.put("initiate-moveresize", true);
 		windowMap.put("resize-counter", true);
@@ -178,12 +166,15 @@ public class HelloPacket extends Packet {
 	private static int[][] getMonitorSizes() {
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] gs = ge.getScreenDevices();
+		GraphicsDevice defaultDevice = ge.getDefaultScreenDevice();
 		int[][] monitors = new int[gs.length][];
 		for (int i = 0; i < gs.length; i++) {
 			DisplayMode dm = gs[i].getDisplayMode();
 			int[] display = new int[] { dm.getWidth(), dm.getHeight() };
 			// sb.append(i + ", width: " + dm.getWidth() + ", height: " + dm.getHeight() +
 			// "\n");
+			LOGGER.debug("monitor " + i + ": " + dm.getWidth() + " x " + dm.getHeight()
+					+ (gs[i] == defaultDevice ? " (default)" : ""));
 			monitors[i] = display;
 		}
 		return monitors;
