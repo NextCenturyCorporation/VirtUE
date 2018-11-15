@@ -78,15 +78,14 @@ public class XenHostManager {
 	private String serverId;
 	protected String region;
 	protected String bucket;
-	// MAKE CONFIGURABLE!!!
-	protected String kmsKey = "59d72316-ac86-47e4-b53f-2f8eca90aaf5";
+	protected String kmsKey ;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
 			Collection<String> securityGroupsNames, String xenAmi, String xenLoginUser, String xenKeyName,
 			InstanceType xenInstanceType, boolean usePublicDns, String iamRoleName, String region,
-			String imageBucketName) {
+			String imageBucketName, String kmsKey) {
 		this.xenVmDao = vmDao;
 		this.persistentStorageManager = psm;
 		this.serviceProvider = serviceProvider;
@@ -100,6 +99,7 @@ public class XenHostManager {
 		this.xenInstanceType = xenInstanceType;
 		this.serverId = serverIdProvider.getServerId();
 		this.keyManager = keyManager;
+		this.kmsKey = kmsKey;
 		this.xenGuestManagerFactory = new XenGuestManagerFactory(keyManager, serviceProvider, route53);
 		this.xenVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "XenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), xenLoginUser, false, new Date(0), "system");
@@ -109,10 +109,11 @@ public class XenHostManager {
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao virtueDao,
 			PersistentStorageManager psm, IVpcSubnetProvider vpcSubnetProvider, ServerIdProvider serverIdProvider,
 			String securityGroupsCommaSeparated, String xenAmi, String xenUser, String xenKeyName,
-			String xenInstanceType, boolean usePublicDns, String iamRoleName, String region, String imageBucketName) {
+			String xenInstanceType, boolean usePublicDns, String iamRoleName, String region, String imageBucketName,
+			String kmsKey) {
 		this(keyManager, ec2Wrapper, serviceProvider, route53, virtueDao, psm, vpcSubnetProvider, serverIdProvider,
 				splitOnComma(securityGroupsCommaSeparated), xenAmi, xenUser, xenKeyName,
-				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName, region, imageBucketName);
+				InstanceType.fromValue(xenInstanceType), usePublicDns, iamRoleName, region, imageBucketName, kmsKey);
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -317,7 +318,7 @@ public class XenHostManager {
 				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
 						+ "; sudo java -cp /home/ec2-user/s3download.jar " + "com.ncc.savior.server.s3.S3Download "
 						+ region + " " + encryptionkey + " " + bucket + " " + templatePath + "/" + fileName
-						+ " /home/ec2-user/app-domains/" + templatePath+"/" + fileName;
+						+ " /home/ec2-user/app-domains/" + templatePath + "/" + fileName;
 
 				logger.debug("Running command: " + cmd);
 				lines = SshUtil.sendCommandFromSession(finalSession, cmd);

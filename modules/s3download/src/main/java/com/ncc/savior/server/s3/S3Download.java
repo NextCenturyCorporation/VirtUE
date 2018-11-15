@@ -3,16 +3,9 @@ package com.ncc.savior.server.s3;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.Security;
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;
-import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper;
-import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
-import com.amazonaws.auth.PropertiesFileCredentialsProvider;
-import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -29,14 +22,14 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 public class S3Download {
 
 	public static void main(String[] args) throws IOException {
-		if (args.length==4) {
+		if (args.length == 4) {
 			downloadUnencrypted(args);
-		}else if (args.length==5) {
+		} else if (args.length == 5) {
 			downloadEncrypted(args);
-		}else {
+		} else {
 			usage("Invalid number of parameters");
 		}
-		
+
 	}
 
 	public static void downloadUnencrypted(String[] args) throws FileNotFoundException, IOException {
@@ -45,7 +38,7 @@ public class S3Download {
 		String key = args[2];
 		String destinationPath = args[3];
 
-		AWSCredentialsProviderChain credentialsProvider = getCredentialsProvider();
+		AWSCredentialsProviderChain credentialsProvider = S3Util.getCredentialsProvider();
 		AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
 		download(bucket, key, destinationPath, s3);
 	}
@@ -59,7 +52,7 @@ public class S3Download {
 		String key = args[3];
 		String destinationPath = args[4];
 
-		AWSCredentialsProviderChain credentialsProvider = getCredentialsProvider();
+		AWSCredentialsProviderChain credentialsProvider = S3Util.getCredentialsProvider();
 
 		KMSEncryptionMaterialsProvider materialProvider = new KMSEncryptionMaterialsProvider(kmsCmkId);
 		CryptoConfiguration cryptoConfig = new CryptoConfiguration().withAwsKmsRegion(RegionUtils.getRegion(region));
@@ -75,33 +68,18 @@ public class S3Download {
 		S3Object obj = encryptionClient.getObject(bucket, key);
 		S3ObjectInputStream stream = obj.getObjectContent();
 		FileOutputStream out = new FileOutputStream(destinationPath);
-		copyLarge(stream, out, new byte[4096]);
-	}
-
-	private static AWSCredentialsProviderChain getCredentialsProvider() {
-		AWSCredentialsProviderChain credentialsProvider = new AWSCredentialsProviderChain(
-				new EnvironmentVariableCredentialsProvider(), new SystemPropertiesCredentialsProvider(),
-				new ProfileCredentialsProvider("virtue"), new PropertiesFileCredentialsProvider("./aws.properties"),
-				new EC2ContainerCredentialsProviderWrapper());
-		return credentialsProvider;
+		S3Util.copyLarge(stream, out, new byte[4096]);
 	}
 
 	private static void usage(String string) {
-		System.out.println(
-				"Download encrypted parameters: <awsRegion> <kmsCmkId> <s3BucketName> <s3ObjectKey> <localDestinationFilePath>");
-		System.out.println(
-				"Download unencrypted parameters: <awsRegion> <s3BucketName> <s3ObjectKey> <localDestinationFilePath>");
-		System.exit(-1);
-	}
-
-	public static long copyLarge(final InputStream input, final OutputStream output, final byte[] buffer)
-			throws IOException {
-		long count = 0;
-		int n;
-		while (-1 != (n = input.read(buffer))) {
-			output.write(buffer, 0, n);
-			count += n;
+		if (string!=null && !string.trim().equals("")) {
+			System.out.println("Error: "+string);
 		}
-		return count;
+		System.out.println("Usage: ");
+		System.out.println(
+				"  Download encrypted parameters: <awsRegion> <kmsCmkId> <s3BucketName> <s3ObjectKey> <localDestinationFilePath>");
+		System.out.println(
+				"  Download unencrypted parameters: <awsRegion> <s3BucketName> <s3ObjectKey> <localDestinationFilePath>");
+		System.exit(-1);
 	}
 }

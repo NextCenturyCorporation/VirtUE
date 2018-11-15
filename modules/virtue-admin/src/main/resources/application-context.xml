@@ -201,6 +201,7 @@
 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.s3.image.bucketName}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
 	</bean>
 
 	<bean name="desktopService"
@@ -215,11 +216,10 @@
 		<constructor-arg ref="templateManager" />
 	</bean>
 
-	<!-- FIX HARDCODE!!!! -->
 	<bean name="xenGuestImageProvider"
 		class="com.ncc.savior.virtueadmin.infrastructure.images.S3EncryptingImageManager">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
-		<constructor-arg value="59d72316-ac86-47e4-b53f-2f8eca90aaf5"></constructor-arg>
+		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
 	</bean>
 
 	<bean name="importExportService"

@@ -1,7 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.images;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,23 +79,6 @@ public class S3EncryptingImageManager implements IXenGuestImageManager {
 			}
 		};
 		this.executor = Executors.newFixedThreadPool(2, threadFactory);
-		try {
-			InputStream stream = new FileInputStream("initrd.img-4.2.0-42-generic");
-			Runnable r = storeStreamAsImageFromCustomBucket("xen-images-encrypted", "standard", "initrd",
-					"img-4.2.0-42-generic", stream);
-			runAsync(r);
-
-			stream = new FileInputStream("swap.qcow2");
-			r = storeStreamAsImageFromCustomBucket("xen-images-encrypted", "standard", "swap", "qcow2", stream);
-			runAsync(r);
-			stream = new FileInputStream("vmlinuz-4.2.0-42-generic");
-			r = storeStreamAsImageFromCustomBucket("xen-images-encrypted", "standard", "vmlinuz-4", "2.0-42-generic",
-					stream);
-			runAsync(r);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override
