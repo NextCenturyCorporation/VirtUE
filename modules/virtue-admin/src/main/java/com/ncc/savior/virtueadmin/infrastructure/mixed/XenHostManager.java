@@ -59,6 +59,12 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
  *
  */
 public class XenHostManager {
+	private static final String S3_DOWNLOAD_MAIN_CLASS = "com.ncc.savior.server.s3.S3Download";
+	private static final String XEN_LINUX_IMAGE_NAME = "disk.qcow2";
+	private static final String XEN_STANDARD = "standard";
+	private static final String XEN_STANDARD_FILE2 = "vmlinuz-4.2.0-42-generic";
+	private static final String XEN_STANDARD_SWAP_FILE = "swap.qcow2";
+	private static final String XEN_STANDARD_FILE1 = "initrd.img-4.2.0-42-generic";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private static final String VM_PREFIX = "VRTU-XG-";
 
@@ -251,7 +257,7 @@ public class XenHostManager {
 						List<String> lines = SshUtil.sendCommandFromSession(finalSession,
 								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
 
-						copyFolderFromS3Cli(finalSession, "standard");
+						copyFolderFromS3Cli(finalSession, XEN_STANDARD);
 						for (String templatePath : templateSet) {
 							copyFolderFromS3Cli(finalSession, templatePath);
 							lines = SshUtil.sendCommandFromSession(finalSession,
@@ -280,11 +286,11 @@ public class XenHostManager {
 						List<String> lines = SshUtil.sendCommandFromSession(finalSession,
 								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
 
-						copyFileFromS3Java(finalSession, "standard", "initrd.img-4.2.0-42-generic", kmsKey);
-						copyFileFromS3Java(finalSession, "standard", "swap.qcow2", kmsKey);
-						copyFileFromS3Java(finalSession, "standard", "vmlinuz-4.2.0-42-generic", kmsKey);
+						copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE1, kmsKey);
+						copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_SWAP_FILE, kmsKey);
+						copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE2, kmsKey);
 						for (String templatePath : templateSet) {
-							copyFileFromS3Java(finalSession, templatePath, "disk.qcow2", kmsKey);
+							copyFileFromS3Java(finalSession, templatePath, XEN_LINUX_IMAGE_NAME, kmsKey);
 							// copyFolderFromS3Java(finalSession, templatePath, "master.cfg.bak");
 							lines = SshUtil.sendCommandFromSession(finalSession,
 									"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
@@ -315,7 +321,7 @@ public class XenHostManager {
 					String encryptionkey) throws JSchException, IOException {
 				List<String> lines;
 				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
-						+ "; sudo java -cp /home/ec2-user/s3download.jar " + "com.ncc.savior.server.s3.S3Download "
+						+ "; sudo java -cp /home/ec2-user/s3download.jar " + S3_DOWNLOAD_MAIN_CLASS+" "
 						+ region + " " + encryptionkey + " " + bucket + " " + templatePath + "/" + fileName
 						+ " /home/ec2-user/app-domains/" + templatePath + "/" + fileName;
 
