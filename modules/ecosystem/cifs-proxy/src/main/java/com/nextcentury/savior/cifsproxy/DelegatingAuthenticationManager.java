@@ -27,7 +27,6 @@ import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_element;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_set;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_name_t;
 import com.sun.jna.Native;
-import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -171,37 +170,15 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		IntByReference minorStatus = new IntByReference();
 		int retval;
 
-		gss_OID_desc nameType = GssApi.GSS_C_NT_HOSTBASED_SERVICE;
-		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, getServiceName('@'), nameType);
-		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
-		desiredMechs.count = new NativeLong(1);
-		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);
 		PointerByReference outputCredHandle = new PointerByReference();
 		LOGGER.trace(">>>about to call acquire_cred");
-		// retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0,
-		// desiredMechs,
-		retval = gssapi.gss_acquire_cred(minorStatus, gssWebServiceName, 0, GssApi.GSS_C_NO_OID_SET,
+		retval = gssapi.gss_acquire_cred(minorStatus, GssApi.GSS_C_NO_NAME, 0, GssApi.GSS_C_NO_OID_SET,
 				GssCredentialUsage.GSS_C_BOTH.getValue(), outputCredHandle, null, null);
 		LOGGER.trace("<<<back from acquire_cred");
 
-		GSSException exception = null;
-		try {
-			GssUtils.releaseName(gssapi, gssWebServiceName);
-		} catch (GSSException e) {
-			exception = e;
-		}
 		if (retval != 0) {
-			/*
-			 * this exception is more important than one from release_name (if any), so
-			 * clobber it
-			 */
-			if (exception != null) {
-				LOGGER.warn("ignoring exception from GssUtils.releaseName: " + exception);
-			}
-			exception = new GSSException(retval, minorStatus.getValue(), "acquiring credential (for S4U2Proxy)");
+			GSSException exception = new GSSException(retval, minorStatus.getValue(), "acquiring credential (for S4U2Proxy)");
 			LOGGER.warn("error from gss_acquire_cred: " + retval + "." + minorStatus.getValue());
-		}
-		if (exception != null) {
 			LOGGER.throwing(exception);
 			throw exception;
 		}

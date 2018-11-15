@@ -9,8 +9,8 @@
 
 buildscript {
 	ext {
-		springBootVersion = '2.0.4.RELEASE'
-		springVersion = '5.0.8.RELEASE'
+		springBootVersion = '2.1.0.RELEASE'
+		springVersion = '5.1.2.RELEASE'
 		springSecurityVersion = '5.0.7.RELEASE'
 	}
 	repositories {
@@ -26,7 +26,7 @@ buildscript {
 
 plugins {
 	// note: can't use a variable for the version here :(
-	id 'org.springframework.boot' version '2.0.4.RELEASE'
+	id 'org.springframework.boot' version '2.1.0.RELEASE'
 }
 
 // Apply the java plugin to add support for Java
@@ -138,9 +138,9 @@ task bootDeploy(dependsOn: bootJar) {
         ssh.run {
             session(remotes.webserver) {
                 put from: bootJar.archivePath, into: '.'
-                put from: 'src/main/resources/cifs-proxy.properties', into: '.'
-                put from: 'src/main/resources/cifs-proxy-security.properties', into: '.'
-                put from: 'src/main/resources/logback.xml', into: '.'
+                //put from: 'src/main/resources/cifs-proxy.properties', into: '.'
+                //put from: 'src/main/resources/cifs-proxy-security.properties', into: '.'
+                //put from: 'src/main/resources/logback.xml', into: '.'
             }
         }
         println "deployed Java resources to " + remotes.webserver
@@ -164,6 +164,7 @@ dependencies {
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.2'
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'
+
 /*
 	compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
 
@@ -189,6 +190,8 @@ dependencies {
     	
 	//testCompile('org.springframework.boot:spring-boot-starter-test')
 
+    compile group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.0'
+    
     gsscacheJar group: 'net.java.dev.jna', name: 'jna', version: '4.5.1'
 } 
 

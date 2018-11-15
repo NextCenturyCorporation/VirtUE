@@ -244,6 +244,9 @@ public abstract class XpraApplicationManager {
 		int wid = packet.getWindowId();
 		XpraApplication app = applications.get(wid);
 		if (app != null) {
+			logger.debug("new window dimensions: " + packet.getWindowId() + " @ " + packet.getWidth() + "x"
+					+ packet.getHeight() + "+" + packet.getX() + "x" + packet.getY() + " #"
+					+ packet.getResizeCounter());
 			app.setLocationSize(packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight());
 		} else {
 			logger.warn("Received packet with invalid application. packet=" + packet);

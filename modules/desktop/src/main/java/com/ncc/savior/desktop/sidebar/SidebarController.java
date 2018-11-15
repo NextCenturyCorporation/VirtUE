@@ -102,17 +102,14 @@ public class SidebarController {
 		currentVirtues.clear();
 
 		Runnable runnable = new Runnable() {
-
 			@Override
 			public void run() {
 				while (!terminatePollThread) {
 					try {
 						DesktopUser currentUser = authService.getUser();
-						// DesktopUser currentUser = new DesktopUser("dummy", "");
 						if (currentUser != null) {
 							List<DesktopVirtue> virtues;
 							try {
-
 								virtues = virtueService.getVirtuesForUser();
 							} catch (IOException e1) {
 								// TODO do something with connection errors.
@@ -144,14 +141,12 @@ public class SidebarController {
 	}
 
 	protected void updateVirtues(List<DesktopVirtue> virtues) throws IOException {
-		Iterator<DesktopVirtue> itr = virtues.iterator();
 		List<DesktopVirtue> addedVirtues = new ArrayList<DesktopVirtue>();
 		Map<String, DesktopVirtue> newCurrentVirtues = new TreeMap<String, DesktopVirtue>();
 		if (logger.isTraceEnabled()) {
 			logger.trace("current Virtues: (" + currentVirtues.size() + ") " + currentVirtues);
 		}
-		while (itr.hasNext()) {
-			DesktopVirtue v = itr.next();
+		for (DesktopVirtue v : virtues) {
 			String key = getMapKey(v);
 			if (currentVirtues.containsKey(key)) {
 				DesktopVirtue old = currentVirtues.remove(key);
@@ -265,7 +260,7 @@ public class SidebarController {
 			}
 			changeHandler.addVirtues(virtues);
 		} catch (Exception e) {
-			logger.error("Error sending remove virtue event", e);
+			logger.error("Error sending add virtue event", e);
 		}
 	}
 

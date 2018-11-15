@@ -182,6 +182,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 						.withMapPublicIpOnLaunch(usePublicIp).withSubnetId(subnet.getSubnetId());
 				ec2.modifySubnetAttribute(modifySubnetAttributeRequest);
 			}
+
 			AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest()
 					.withSubnetId(subnet.getSubnetId()).withRouteTableId(routeTableId);
 			ec2.associateRouteTable(associateRouteTableRequest);

@@ -78,7 +78,7 @@ public class XenHostManager {
 	private String serverId;
 	protected String region;
 	protected String bucket;
-	protected String kmsKey ;
+	protected String kmsKey;
 
 	public XenHostManager(IKeyManager keyManager, AwsEc2Wrapper ec2Wrapper,
 			CompletableFutureServiceProvider serviceProvider, Route53Manager route53, IActiveVirtueDao vmDao,
@@ -281,11 +281,11 @@ public class XenHostManager {
 						List<String> lines = SshUtil.sendCommandFromSession(finalSession,
 								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
 
-						copyFolderFromS3Java(finalSession, "standard", "initrd.img-4.2.0-42-generic", kmsKey);
-						copyFolderFromS3Java(finalSession, "standard", "swap.qcow2", kmsKey);
-						copyFolderFromS3Java(finalSession, "standard", "vmlinuz-4.2.0-42-generic", kmsKey);
+						copyFileFromS3Java(finalSession, "standard", "initrd.img-4.2.0-42-generic", kmsKey);
+						copyFileFromS3Java(finalSession, "standard", "swap.qcow2", kmsKey);
+						copyFileFromS3Java(finalSession, "standard", "vmlinuz-4.2.0-42-generic", kmsKey);
 						for (String templatePath : templateSet) {
-							copyFolderFromS3Java(finalSession, templatePath, "disk.qcow2", kmsKey);
+							copyFileFromS3Java(finalSession, templatePath, "disk.qcow2", kmsKey);
 							// copyFolderFromS3Java(finalSession, templatePath, "master.cfg.bak");
 							lines = SshUtil.sendCommandFromSession(finalSession,
 									"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
@@ -312,7 +312,7 @@ public class XenHostManager {
 				logger.debug("s3 copy output: " + lines.get(lines.size() - 1));
 			}
 
-			private void copyFolderFromS3Java(Session finalSession, String templatePath, String fileName,
+			private void copyFileFromS3Java(Session finalSession, String templatePath, String fileName,
 					String encryptionkey) throws JSchException, IOException {
 				List<String> lines;
 				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
@@ -420,19 +420,12 @@ public class XenHostManager {
 			ch.connect();
 			InputStream stream = new FileInputStream(privateKeyFile);
 			ch.put(stream, privateKeyFile.getName());
-			// 400 from octal to decimal
-			ch.chmod(256, privateKeyFile.getName());
-		} catch (JSchException e) {
-			logger.error("Error attempting to copy private key", e);
-		} catch (FileNotFoundException e) {
-			logger.error("Error attempting to copy private key", e);
-		} catch (SftpException e) {
-			logger.error("Error attempting to copy private key", e);
+			ch.chmod(0400, privateKeyFile.getName());
+		} catch (JSchException | FileNotFoundException | SftpException e) {
+			logger.error("Error attempting to copy private key file '" + privateKeyFile + "'", e);
 		} finally {
-
 			ch.disconnect();
 		}
-
 	}
 
 	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms,
