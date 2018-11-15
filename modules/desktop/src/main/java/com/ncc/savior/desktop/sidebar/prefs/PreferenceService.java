@@ -131,6 +131,7 @@ public class PreferenceService {
 	 * @param value
 	 */
 	public void put(DesktopPreference node, String collectionElement, String key, String value) {
+		logger.trace("Put Pref " + node + " el=" + collectionElement + " key=" + key + " val=" + value);
 		Preferences pref = getPreferenceNode(node, collectionElement);
 		pref.put(key, value);
 	}
