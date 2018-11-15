@@ -345,9 +345,7 @@ public class XenHostManager {
 	protected void waitUntilXlListIsReady(PrintStream ps, BufferedReader br) {
 		while (true) {
 			ps.println("sudo xl list");
-
 		}
-
 	}
 
 	protected void copySshKey(Session session, File privateKeyFile) {
@@ -357,19 +355,12 @@ public class XenHostManager {
 			ch.connect();
 			InputStream stream = new FileInputStream(privateKeyFile);
 			ch.put(stream, privateKeyFile.getName());
-			// 400 from octal to decimal
-			ch.chmod(256, privateKeyFile.getName());
-		} catch (JSchException e) {
-			logger.error("Error attempting to copy private key", e);
-		} catch (FileNotFoundException e) {
-			logger.error("Error attempting to copy private key", e);
-		} catch (SftpException e) {
-			logger.error("Error attempting to copy private key", e);
+			ch.chmod(0400, privateKeyFile.getName());
+		} catch (JSchException | FileNotFoundException | SftpException e) {
+			logger.error("Error attempting to copy private key file '" + privateKeyFile + "'", e);
 		} finally {
-
 			ch.disconnect();
 		}
-
 	}
 
 	public void deleteVirtue(String id, Collection<VirtualMachine> linuxVms,
