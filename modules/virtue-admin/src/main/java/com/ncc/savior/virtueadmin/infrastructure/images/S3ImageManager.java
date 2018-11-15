@@ -69,7 +69,6 @@ public class S3ImageManager implements IXenGuestImageManager {
 			}
 		};
 		this.executor = Executors.newFixedThreadPool(2, threadFactory);
-		
 	}
 
 	@Override

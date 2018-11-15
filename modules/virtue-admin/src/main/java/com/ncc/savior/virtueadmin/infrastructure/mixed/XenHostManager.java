@@ -408,9 +408,7 @@ public class XenHostManager {
 	protected void waitUntilXlListIsReady(PrintStream ps, BufferedReader br) {
 		while (true) {
 			ps.println("sudo xl list");
-
 		}
-
 	}
 
 	protected void copySshKey(Session session, File privateKeyFile) {
