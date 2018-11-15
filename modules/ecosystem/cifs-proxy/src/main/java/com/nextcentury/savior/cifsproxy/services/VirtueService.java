@@ -51,6 +51,7 @@ public class VirtueService {
 		if (virtuesByName.containsKey(virtue.getName())) {
 			IllegalArgumentException e = new IllegalArgumentException(
 					"virtue '" + virtue.getName() + "' already exists");
+			LOGGER.throwing(e);
 			throw e;
 		}
 		createLinuxUser(virtue);
