@@ -77,4 +77,6 @@ public interface IActiveVirtueManager {
 
 	void rebootVm(String vmId);
 
+	void sync();
+
 }

@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -10,11 +11,6 @@ import java.util.Map;
  *
  */
 public interface IVpcSubnetProvider {
-
-	String TAG_USERNAME = "username";
-	String TAG_VIRTUE_NAME = "virtue-name";
-	String TAG_VIRTUE_ID = "virtue-id";
-	String TAG_NAME = "Name";
 
 	/**
 	 * Returns subnet for the given key. Keys typically should be the same for a
@@ -43,5 +39,12 @@ public interface IVpcSubnetProvider {
 	 */
 	String getVpcId();
 
+	/**
+	 * Will remove any subnets where the instance doesn't exist. This does NOT
+	 * create subnets for an instance if the subnet does not exist.
+	 * 
+	 * @param existingVirtueIds
+	 */
+	void sync(Collection<String> existingVirtueIds);
 
 }
