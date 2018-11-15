@@ -1,12 +1,16 @@
 package com.nextcentury.savior.cifsproxy.controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.ws.WebServiceException;
 
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,4 +38,20 @@ public class VirtueController {
 		LOGGER.exit(virtue);
 		return virtue;
 	}
+	
+	@GetMapping("/virtue")
+	List<Virtue> getVirtues() {
+		LOGGER.entry();
+		ArrayList<Virtue> virtues = new ArrayList<>(service.getVirtues());
+		LOGGER.exit(virtues);
+		return virtues;
+	}
+
+	@GetMapping("/virtue/{name}")
+	Virtue getVirtue(@PathVariable String name) {
+		LOGGER.entry(name);
+		Virtue virtue = service.getVirtue(name);
+		LOGGER.exit(virtue);
+		return virtue;
+	}	
 }

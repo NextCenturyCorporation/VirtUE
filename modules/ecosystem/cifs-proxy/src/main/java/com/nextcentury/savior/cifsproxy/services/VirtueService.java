@@ -8,6 +8,7 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.ProcessBuilder.Redirect;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,7 @@ public class VirtueService {
 		if (virtuesByName.containsKey(virtue.getName())) {
 			IllegalArgumentException e = new IllegalArgumentException(
 					"virtue '" + virtue.getName() + "' already exists");
+			LOGGER.throwing(e);
 			throw e;
 		}
 		createLinuxUser(virtue);
@@ -103,15 +105,18 @@ public class VirtueService {
 		}
 		ProcessBuilder processBuilder = new ProcessBuilder(args);
 		processBuilder.redirectError(Redirect.INHERIT).redirectOutput(Redirect.INHERIT);
+		LOGGER.trace("starting smbpassword");
 		Process process = processBuilder.start();
 		OutputStream outputStream = process.getOutputStream();
 		OutputStreamWriter outputWriter = new OutputStreamWriter(outputStream);
+		LOGGER.trace("sending password to smbpassword");
 		outputWriter.write(virtue.getPassword());
 		outputWriter.write('\n');
 		outputWriter.write(virtue.getPassword());
 		outputWriter.write('\n');
 		outputWriter.flush();
 
+		LOGGER.trace("waiting for smbpassword...");
 		boolean processDone;
 		try {
 			processDone = process.waitFor(PROCESS_TIMEOUT_MS, TimeUnit.MILLISECONDS);
@@ -121,6 +126,7 @@ public class VirtueService {
 			LOGGER.throwing(ioe);
 			throw ioe;
 		}
+		LOGGER.trace("...done waiting for smbpassword");
 		if (!processDone) {
 			IOException ioe = new IOException("smbpasswd took too long (> " + PROCESS_TIMEOUT_MS + "ms)");
 			LOGGER.throwing(ioe);
@@ -133,5 +139,19 @@ public class VirtueService {
 			throw ioe;
 		}
 		LOGGER.exit();
+	}
+
+	public Collection<Virtue> getVirtues() {
+		LOGGER.entry();
+		Collection<Virtue> virtues = virtuesByName.values();
+		LOGGER.exit(virtues);
+		return virtues; 
+	}
+
+	public Virtue getVirtue(String name) {
+		LOGGER.entry(name);
+		Virtue virtue = virtuesByName.get(name);
+		LOGGER.exit(virtue);
+		return virtue;
 	}
 }
