@@ -184,7 +184,7 @@ public class S3ImageManager implements IXenGuestImageManager {
 	}
 
 	@SuppressWarnings("unused")
-	protected CompletableFuture<Void> runAsync(Runnable r) {
+	private CompletableFuture<Void> runAsync(Runnable r) {
 		CompletableFuture<Void> cf = CompletableFuture.runAsync(r, executor);
 		return cf;
 	}
