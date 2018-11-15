@@ -12,6 +12,10 @@ import com.amazonaws.services.s3.AmazonS3EncryptionClientBuilder;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.KMSEncryptionMaterialsProvider;
 
+/**
+ * Minimalistic application used to upload files to s3 with encrypted transmission and storage. 
+ *
+ */
 public class S3Upload {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {

@@ -39,7 +39,8 @@ import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
 
 /**
- * S3 based image manager.
+ * S3 based image manager that uses the AWS encryption client for encrypted
+ * transmission.
  *
  */
 public class S3EncryptingImageManager implements IXenGuestImageManager {

@@ -16,7 +16,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 /**
- * Small application to pull down encrypted S3 images.
+ * Minimalistic application to pull down encrypted S3 images.
  *
  */
 public class S3Download {

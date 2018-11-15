@@ -11,6 +11,10 @@ import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 
+/**
+ * Untility methods for S3 uploads and downloads. 
+ *
+ */
 public class S3Util {
 	public static AWSCredentialsProviderChain getCredentialsProvider() {
 		AWSCredentialsProviderChain credentialsProvider = new AWSCredentialsProviderChain(
