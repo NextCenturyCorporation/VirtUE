@@ -203,8 +203,7 @@ public class XenHostManager {
 					// setup Xen VM
 					session = getSession(xen, session, privateKeyFile, 5);
 					Session finalSession = session;
-					Runnable copyS3Data = getCopyS3DataRunnableUsingCli(linuxVmts, finalSession);
-					copyS3Data = getCopyS3DataRunnableUsingJava(linuxVmts, finalSession);
+					Runnable copyS3Data = getCopyS3DataRunnableUsingJava(linuxVmts, finalSession);
 					Thread t = new Thread(copyS3Data, "copy-s3");
 					t.start();
 					copySshKey(session, privateKeyFile);

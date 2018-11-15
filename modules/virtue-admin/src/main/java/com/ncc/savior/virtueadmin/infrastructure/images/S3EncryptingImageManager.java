@@ -44,12 +44,12 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
  *
  */
 public class S3EncryptingImageManager implements IXenGuestImageManager {
+	private static final String LINUX_IMAGE_DISK_FILENAME = "disk.qcow2";
+
 	private static final Logger logger = LoggerFactory.getLogger(S3EncryptingImageManager.class);
 
 	@Value("${virtue.aws.s3.image.bucketName}")
 	protected String bucketName;
-
-	private String filename;
 
 	private ExecutorService executor;
 
@@ -65,7 +65,6 @@ public class S3EncryptingImageManager implements IXenGuestImageManager {
 		this.kmsId = kmsId;
 		// this.s3 = ec2Provider.getS3();
 		this.ec2Provider = ec2Provider;
-		this.filename = "disk.qcow2";
 		ThreadFactory threadFactory = new ThreadFactory() {
 			private int id = 0;
 
@@ -88,16 +87,14 @@ public class S3EncryptingImageManager implements IXenGuestImageManager {
 	}
 
 	private void pushImageToStreamFromCustomBucket(String bucket, String path, OutputStream out) throws IOException {
-		String key = path + "/" + filename;
-		logger.error("********ERROR ERROR ERRROR Need to get kmsId somehow");
-		String kmsId = "";
+		String key = path + "/" + LINUX_IMAGE_DISK_FILENAME;
 		AmazonS3Encryption encryptionClient = ec2Provider.getS3EncryptionClient(kmsId);
 
-		// This method has some specific limitations that need to be headed! check the
-		// docs
 		S3ObjectInputStream stream = null;
 		try {
 			logger.debug("Exporting image at " + path + " started.");
+			// This method (AmazonS3.getObject()) has some specific limitations that need to
+			// be headed! check the docs
 			S3Object obj = encryptionClient.getObject(bucket, key);
 			stream = obj.getObjectContent();
 			IOUtils.copyLarge(stream, out);
