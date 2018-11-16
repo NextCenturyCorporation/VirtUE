@@ -254,13 +254,13 @@ public class XenHostManager {
 							String template = vmt.getTemplatePath();
 							templateSet.add(template);
 						}
-						List<String> lines = SshUtil.sendCommandFromSession(finalSession,
+						SshUtil.sendCommandFromSession(finalSession,
 								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
 
 						copyFolderFromS3Cli(finalSession, XEN_STANDARD);
 						for (String templatePath : templateSet) {
 							copyFolderFromS3Cli(finalSession, templatePath);
-							lines = SshUtil.sendCommandFromSession(finalSession,
+							List<String> lines = SshUtil.sendCommandFromSession(finalSession,
 									"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
 											+ templatePath + "/");
 							logger.debug("Copy standard files output: " + lines);
@@ -321,8 +321,8 @@ public class XenHostManager {
 					String encryptionkey) throws JSchException, IOException {
 				List<String> lines;
 				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
-						+ "; sudo java -cp /home/ec2-user/s3download.jar " + S3_DOWNLOAD_MAIN_CLASS+" "
-						+ region + " " + encryptionkey + " " + bucket + " " + templatePath + "/" + fileName
+						+ "; sudo java -cp /home/ec2-user/s3download.jar " + S3_DOWNLOAD_MAIN_CLASS + " " + region + " "
+						+ encryptionkey + " " + bucket + " " + templatePath + "/" + fileName
 						+ " /home/ec2-user/app-domains/" + templatePath + "/" + fileName;
 
 				logger.debug("Running command: " + cmd);
