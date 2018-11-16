@@ -52,7 +52,8 @@
 
 	<jpa:repositories base-package="com.ncc.savior.virtueadmin.data.jpa" />
 
-	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService" init-method="sync">
+	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService"
+		init-method="sync">
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="userManager" />
@@ -198,6 +199,9 @@
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.s3.image.bucketName}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
 	</bean>
 
 	<bean name="desktopService"
@@ -213,8 +217,9 @@
 	</bean>
 
 	<bean name="xenGuestImageProvider"
-		class="com.ncc.savior.virtueadmin.infrastructure.images.S3ImageManager">
+		class="com.ncc.savior.virtueadmin.infrastructure.images.S3EncryptingImageManager">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
 	</bean>
 
 	<bean name="importExportService"

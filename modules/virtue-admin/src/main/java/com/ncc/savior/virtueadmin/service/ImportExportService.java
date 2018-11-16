@@ -320,10 +320,14 @@ public class ImportExportService {
 			zipOut.write(baos.toByteArray());
 			zipOut.closeEntry();
 			includedEntries.add(entryName);
-			Collection<SecurityGroupPermission> permissions = securityGroupManager
-					.getSecurityGroupPermissionsByTemplateId(template.getId());
-			for (SecurityGroupPermission permission : permissions) {
-				addSecurityGroupPermissionToZipStream(permission, includedEntries, zipOut);
+			try {
+				Collection<SecurityGroupPermission> permissions = securityGroupManager
+						.getSecurityGroupPermissionsByTemplateId(template.getId());
+				for (SecurityGroupPermission permission : permissions) {
+					addSecurityGroupPermissionToZipStream(permission, includedEntries, zipOut);
+				}
+			} catch (SaviorException e) {
+				// if security group is not found, that is ok.
 			}
 		}
 		for (VirtualMachineTemplate vmt : template.getVmTemplates()) {
