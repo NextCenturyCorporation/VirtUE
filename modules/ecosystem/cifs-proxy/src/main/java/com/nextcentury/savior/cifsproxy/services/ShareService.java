@@ -80,7 +80,7 @@ public class ShareService {
 			"--nofsroot" };
 
 	/** where to mount files for the Virtue */
-	@Value("${mountRoot:/mnt/cifs-proxy}")
+	@Value("${savior.cifsproxy.mountRoot:/mnt/cifs-proxy}")
 	public String MOUNT_ROOT;
 
 	/**
@@ -88,27 +88,27 @@ public class ShareService {
 	 * mount.cifs(8) can only use default user credentials and ignores
 	 * {@value #KERBEROS_CCACHE_ENV_VAR}.
 	 */
-	@Value("${mountUser:mounter}")
+	@Value("${savior.cifsproxy.mountUser:mounter}")
 	public String mountUser;
 
 	/**
 	 * The directory where the Samba config files live (e.g., smb.conf).
 	 */
-	@Value("${sambaConfigDir:/etc/samba}")
+	@Value("${savior.cifsproxy.sambaConfigDir:/etc/samba}")
 	protected String sambaConfigDir;
 
 	/**
 	 * The relative path under {@link #sambaConfigDir} where individual share config
 	 * files live.
 	 */
-	@Value("${virtueSharesConfigDir:virtue-shares}")
+	@Value("${savior.cifsproxy.virtueSharesConfigDir:virtue-shares}")
 	protected String virtueSharesConfigDir;
 
 	/**
 	 * The helper shell program that creates the "virtue-shares.conf" file used as
 	 * part of the samba config.
 	 */
-	@Value("${sambaConfigHelper:make-virtue-shares.sh}")
+	@Value("${savior.cifsproxy.sambaConfigHelper:make-virtue-shares.sh}")
 	protected String SAMBA_CONFIG_HELPER;
 
 	/**
