@@ -10,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
@@ -35,10 +37,10 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 	private String xenServerKeyName;
 	private IKeyManager keyManager;
 	private SshKeyInjector sshKeyInjector;
-	private boolean usePublicDns=true;
+	private boolean usePublicDns = true;
 
-	public BruteForceAwsZenCloudManager(VirtueAwsEc2Provider ec2Provider, IKeyManager keyManager,String xenAmi, String vmKeyName,
-			List<String> vmSecurityGroups, String xenKeyName) {
+	public BruteForceAwsZenCloudManager(VirtueAwsEc2Provider ec2Provider, IKeyManager keyManager, String xenAmi,
+			String vmKeyName, List<String> vmSecurityGroups, String xenKeyName) {
 		this.ec2 = ec2Provider.getEc2();
 		this.instanceType = InstanceType.T2Small;
 		this.defaultSecurityGroups = vmSecurityGroups;
@@ -46,11 +48,11 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 		this.xenUser = new VirtueUser("XenUser", new ArrayList<String>(), true);
 		this.xenVmt = new VirtualMachineTemplate(UUID.randomUUID().toString(), "ZenTemplate", OS.LINUX, xenAmi,
 				new ArrayList<ApplicationDefinition>(), "admin", false, new Date(0), "system");
-		//TODO redo xen config
-		this.xenInstanceType=InstanceType.T2Small;
+		// TODO redo xen config
+		this.xenInstanceType = InstanceType.T2Small;
 		this.xenSecurityGroups = vmSecurityGroups;
 		this.xenServerKeyName = xenKeyName;
-		this.keyManager=keyManager;
+		this.keyManager = keyManager;
 		this.sshKeyInjector = new SshKeyInjector();
 	}
 
@@ -126,7 +128,12 @@ public class BruteForceAwsZenCloudManager implements ICloudManager {
 	@Override
 	public void rebootVm(VirtualMachine vm, String virtue) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void sync(List<String> ids) {
+		throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Sync not implemented in this implementation");
 	}
 
 }

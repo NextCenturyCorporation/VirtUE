@@ -19,12 +19,15 @@ import com.amazonaws.services.ec2.model.InstanceNetworkInterfaceSpecification;
 import com.amazonaws.services.ec2.model.InstanceStateChange;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.ResourceType;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
+import com.amazonaws.services.ec2.model.Tag;
+import com.amazonaws.services.ec2.model.TagSpecification;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.ncc.savior.util.JavaUtil;
@@ -34,6 +37,7 @@ import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 /**
  * Class that essentially wraps the AWS EC2 interface to provide a simpler
@@ -52,9 +56,11 @@ public class AwsEc2Wrapper {
 	// If null, use subnet default setting. If true, force public ip. If false,
 	// force no public ip.
 	private Boolean forcePublicIp;
+	private String serverId;
 
-	public AwsEc2Wrapper(VirtueAwsEc2Provider ec2Provider, String forcePublicIp) {
+	public AwsEc2Wrapper(VirtueAwsEc2Provider ec2Provider, ServerIdProvider serverIdProvider, String forcePublicIp) {
 		this.ec2 = ec2Provider.getEc2();
+		this.serverId = serverIdProvider.getServerId();
 		if (!JavaUtil.isNotEmpty(forcePublicIp) || forcePublicIp.equalsIgnoreCase("default")
 				|| forcePublicIp.equalsIgnoreCase("null")) {
 			this.forcePublicIp = null;
@@ -96,6 +102,10 @@ public class AwsEc2Wrapper {
 			iamInstanceProfile.setName(iamRoleName);
 			runInstancesRequest.withIamInstanceProfile(iamInstanceProfile);
 		}
+		String instanceId = UUID.randomUUID().toString();
+		runInstancesRequest.withTagSpecifications(new TagSpecification().withResourceType(ResourceType.Instance)
+				.withTags(new Tag(AwsUtil.TAG_SERVER_ID, serverId), new Tag(AwsUtil.TAG_TEMPLATE_ID, vmt.getId()),
+						new Tag(AwsUtil.TAG_INSTANCE_ID, instanceId)));
 		// .withSecurityGroups(securityGroups);
 		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
@@ -109,10 +119,9 @@ public class AwsEc2Wrapper {
 		String loginUsername = vmt.getLoginUser();
 		String privateKeyName = serverKeyName;
 
-		vm = new VirtualMachine(UUID.randomUUID().toString(), name,
-				new ArrayList<ApplicationDefinition>(vmt.getApplications()), VmState.CREATING, vmt.getOs(),
-				instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT, loginUsername, null, privateKeyName,
-				instance.getPublicIpAddress());
+		vm = new VirtualMachine(instanceId, name, new ArrayList<ApplicationDefinition>(vmt.getApplications()),
+				VmState.CREATING, vmt.getOs(), instance.getInstanceId(), instance.getPublicDnsName(), SSH_PORT,
+				loginUsername, null, privateKeyName, instance.getPublicIpAddress());
 		return vm;
 	}
 

@@ -24,7 +24,7 @@ import io.restassured.http.ContentType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource("/application-test.properties")
+@TestPropertySource("/application-int-test.properties")
 public class ApplicationIT {
 
 	static class Application {

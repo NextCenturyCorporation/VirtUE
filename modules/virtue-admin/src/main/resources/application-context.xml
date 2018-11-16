@@ -56,13 +56,15 @@
 
 	<jpa:repositories base-package="com.ncc.savior.virtueadmin.data.jpa" />
 
-	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService">
+	<bean name="adminService" class="com.ncc.savior.virtueadmin.service.AdminService"
+		init-method="sync">
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="userManager" />
 		<constructor-arg ref="persistentStorageManager" />
 		<constructor-arg ref="securityGroupManager" />
 		<constructor-arg ref="resourceManager" />
+		<constructor-arg ref="vpcSubnetProvider" />
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
 
@@ -81,7 +83,8 @@
 	<bean name="ec2Wrapper"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
-		<constructor-arg value="${virtue.aws.forceAssignPublicDns:default}"></constructor-arg>
+		<constructor-arg ref="serverIdProvider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.usePublicDns:default}"></constructor-arg>
 	</bean>
 
 	<!-- <bean name="awsVmUpdater" -->
@@ -111,6 +114,7 @@
 	<bean name="vpcSubnetProvider"
 		class="com.ncc.savior.virtueadmin.infrastructure.aws.subnet.DynamicVpcSubnetProvider">
 		<constructor-arg ref="ec2Wrapper" />
+		<constructor-arg ref="serverIdProvider" />
 		<constructor-arg value="${virtue.aws.server.vpc.name}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrStart}" />
 		<constructor-arg value="${virtue.aws.server.subnet.cidrEnd}" />
@@ -200,6 +204,9 @@
 		<constructor-arg value="${virtue.aws.xen.instanceType}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.usePublicDns}"></constructor-arg>
 		<constructor-arg value="${virtue.aws.xen.iamRole}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.region}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.s3.image.bucketName}"></constructor-arg>
+		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
 	</bean>
 
 	<bean name="desktopService"
@@ -216,8 +223,9 @@
 	</bean>
 
 	<bean name="xenGuestImageProvider"
-		class="com.ncc.savior.virtueadmin.infrastructure.images.S3ImageManager">
+		class="com.ncc.savior.virtueadmin.infrastructure.images.S3EncryptingImageManager">
 		<constructor-arg ref="awsEc2Provider"></constructor-arg>
+		<constructor-arg value="${virtue.aws.kms.key}"></constructor-arg>
 	</bean>
 
 	<bean name="importExportService"

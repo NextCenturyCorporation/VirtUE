@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.sidebar.RgbColor;
+import com.ncc.savior.util.LoggerUtil;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtueApplication;
@@ -30,20 +31,35 @@ public class FreeRdpClient implements IRdpClient {
 		String host = app.getHostname();
 		String appPath = app.getWindowsApplicationPath();
 		String password = app.getPrivateKey();
-		String params = String.format("/f /u:%s /v:%s /app:\"%s\" /p:\"%s\"", user, host, appPath, password);
-		String[] params2 = new String[] { exe.getAbsolutePath(), "/f", "/u:" + user, "/v:" + host,
-				"/app:\"" + appPath + "\"", "/p:\"" + password + "\"" };
-		logger.debug("Exe=" + exe.getAbsolutePath() + " Params=" + params);
+		String logLevel;
+		// translate our log level into levels for xfreerdp
+		switch (LoggerUtil.getLevel(logger)) {
+		case DEBUG:
+			logLevel = "DEBUG";
+			break;
+		case ERROR:
+			logLevel = "ERROR";
+			break;
+		case INFO:
+			logLevel = "INFO";
+			break;
+		case TRACE:
+			logLevel = "TRACE";
+			break;
+		case WARN:
+			logLevel = "WARN";
+			break;
+		default:
+			logLevel = "FATAL";
+		}
+		String[] params2 = new String[] { exe.getAbsolutePath(), "/f", "/cert-tofu", "/log-level:" + logLevel,
+				"/span", "/u:" + user, "/v:" + host, "/app:" + appPath, "/p:" + password };
+		logger.debug("Params=" + String.join(" ", params2));
 
-		// Process p = Runtime.getRuntime().exec(exe.getAbsolutePath() + " " + params);
-		Process p = new ProcessBuilder(params2)
-				.redirectErrorStream(true)
-				.redirectOutput(Redirect.INHERIT)
-				// .redirectOutput(new File("logs/rdp.out"))
-				.start();
+		Process p = new ProcessBuilder(params2).redirectOutput(Redirect.INHERIT).redirectError(Redirect.INHERIT)
+				.redirectInput(Redirect.INHERIT).start();
 		final Process process = p;
 		Thread t = new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				try {
