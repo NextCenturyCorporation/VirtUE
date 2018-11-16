@@ -140,7 +140,7 @@ EOF
 	source = "virtue.conf"
 	destination = "/tmp/virtue.conf"
   }
-  
+
   provisioner "remote-exec" {
 	inline = [
 	  "while ! [ -e /tmp/user_data-finished ]; do echo -n '.' ; sleep 2; done",

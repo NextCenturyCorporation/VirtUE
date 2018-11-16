@@ -20,7 +20,7 @@ import com.ncc.savior.virtueadmin.UserIT.User;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource("/application-test.properties")
+@TestPropertySource("/application-int-test.properties")
 public class ImportIT {
 
 	@LocalServerPort

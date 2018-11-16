@@ -54,6 +54,8 @@ public class SwingWindow extends XpraWindow {
 
 	private WindowFrame window;
 
+	private boolean DrawColorOnIcon = false;
+
 	public SwingWindow(NewWindowPacket packet, IPacketSender packetSender, IKeyboard keyboard,
 			IFocusNotifier focusNotifier) {
 		super(packet, packetSender, keyboard, focusNotifier);
@@ -171,9 +173,14 @@ public class SwingWindow extends XpraWindow {
 						// logger.debug("ID:" + packet.getWindowId() + " Window:" + this.toString());
 						g.drawImage(img, packet.getX(), packet.getY(), packet.getWidth(), packet.getHeight(), null);
 						if (color != null && isMainWindow()) {
-							g.setColor(color);
+							Color borderColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 255);
+							g.setColor(borderColor);
 							// g.setFill(Color.GREEN);
-							g.drawLine(0, 0, canvas.getWidth(), canvas.getHeight());
+							// g.drawLine(0, 0, canvas.getWidth(), canvas.getHeight());
+
+							g.drawRect(0, 0, canvas.getWidth() - 1, canvas.getHeight() - 1);
+							g.drawRect(1, 1, canvas.getWidth() - 3, canvas.getHeight() - 3);
+							// g.drawRect(2, 2, canvas.getWidth() - 5, canvas.getHeight() - 5);
 						}
 						if (debugOutput) {
 							logger.warn("Debug output not implemented");
@@ -224,7 +231,18 @@ public class SwingWindow extends XpraWindow {
 	@Override
 	public void setWindowIcon(WindowIconPacket packet) {
 		Image icon = SwingImageEncoder.decodeImage(packet.getEncoding(), packet.getData());
+
 		if (icon != null) {
+			if (DrawColorOnIcon) {
+				Graphics g = icon.getGraphics();
+				g.setColor(color);
+				int width = icon.getWidth(null);
+				int height = icon.getHeight(null);
+				int nPoints = 4;
+				int[] xPoints = new int[] { 1, width / 2, 1, 1 };
+				int[] yPoints = new int[] { height / 2, 1, 1, height / 2 };
+				g.fillPolygon(xPoints, yPoints, nPoints);
+			}
 			SwingUtilities.invokeLater(new Runnable() {
 
 				@Override

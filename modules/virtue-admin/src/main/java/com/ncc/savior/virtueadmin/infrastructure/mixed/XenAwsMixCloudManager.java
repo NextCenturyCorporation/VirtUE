@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.infrastructure.mixed;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
@@ -65,17 +67,18 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
 			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
-			IVpcSubnetProvider vpcSubnetPRovider, ISecurityGroupManager securityGroupManager) {
+			IVpcSubnetProvider vpcSubnetProvider, ISecurityGroupManager securityGroupManager) {
 		super();
 		this.xenHostManager = xenHostManager;
 		this.awsVmManager = awsVmManager;
 		this.serviceProvider = serviceProvider;
-		this.vpcSubnetProvider = vpcSubnetPRovider;
+		this.vpcSubnetProvider = vpcSubnetProvider;
 		this.securityGroupManager = securityGroupManager;
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
-
 	}
+
+	
 
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
@@ -123,9 +126,9 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<Collection<VirtualMachine>> windowsFuture = new CompletableFuture<Collection<VirtualMachine>>();
 		VirtueInstance vi = new VirtueInstance(template, user.getUsername(), null);
 		Map<String, String> tags = new HashMap<String, String>();
-		tags.put(IVpcSubnetProvider.TAG_USERNAME, user.getUsername());
-		tags.put(IVpcSubnetProvider.TAG_VIRTUE_NAME, vi.getName());
-		tags.put(IVpcSubnetProvider.TAG_VIRTUE_ID, vi.getId());
+		tags.put(AwsUtil.TAG_USERNAME, user.getUsername());
+		tags.put(AwsUtil.TAG_VIRTUE_NAME, vi.getName());
+		tags.put(AwsUtil.TAG_INSTANCE_ID, vi.getId());
 		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
 		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupIdByTemplateId(vi.getTemplateId());
 		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters(template.getName());
@@ -206,5 +209,12 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		} else if (OS.WINDOWS.equals(vm.getOs())) {
 			awsVmManager.rebootVm(vm, null);
 		}
+	}
+
+
+
+	@Override
+	public void sync(List<String> ids) {
+		awsVmManager.syncAll(ids);
 	}
 }

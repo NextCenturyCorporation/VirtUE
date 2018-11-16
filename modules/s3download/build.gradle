@@ -1,0 +1,52 @@
+group 'com.ncc.savior'
+version '0.1.0-SNAPSHOT'
+
+buildscript {
+	ext {
+		springBootVersion = '2.0.0.M7'
+		springSecurityVersion = '5.0.0.RELEASE'
+        springDataVersion = '2.0.2.RELEASE'
+        jerseyVersion = '2.26'
+	}
+	
+	repositories {
+		mavenCentral()
+		//maven { url "https://repo.spring.io/snapshot" }
+		//maven { url "https://repo.spring.io/milestone" }
+	}
+	
+	dependencies {
+	    classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+	}
+}
+	
+apply plugin: 'java'
+apply plugin: 'application'
+
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+  imports {
+      mavenBom 'com.amazonaws:aws-java-sdk-bom:1.11.263'
+  }
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    //maven { url "https://repo.spring.io/milestone" }
+}
+
+mainClassName = "com.ncc.savior.server.s3.S3Download"
+
+task fatJar(type: Jar) {
+    classifier = 'all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+dependencies {
+	compile 'com.amazonaws:aws-java-sdk-s3'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

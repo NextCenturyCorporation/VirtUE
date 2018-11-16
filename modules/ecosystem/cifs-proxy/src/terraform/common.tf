@@ -83,11 +83,6 @@ variable "linux_ami" {
   default = "ami-0064c3021927a1bd5"
 }
 
-variable "linux_user" {
-  description = "The default user for our linux instance"
-  default = "fedora"
-}
-
 variable "linux_instance_type" {
   default = "t2.micro"
 }

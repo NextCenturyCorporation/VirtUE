@@ -1,6 +1,8 @@
 package com.ncc.savior.virtueadmin.virtue;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -236,5 +238,15 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		} else {
 			throw new SaviorException(SaviorErrorCode.VM_NOT_FOUND, "Could not find virtue with the vm ID=" + vmId);
 		}
+	}
+
+	@Override
+	public void sync() {
+		Iterable<VirtueInstance> virtues = virtueDao.getAllActiveVirtues();
+		List<String> ids = new ArrayList<String>();
+		for (VirtueInstance v:virtues) {
+			ids.add(v.getId());
+		}
+//		cloudManager.sync(ids);
 	}
 }

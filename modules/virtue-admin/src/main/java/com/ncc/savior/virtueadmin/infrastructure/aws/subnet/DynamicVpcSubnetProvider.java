@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws.subnet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ import com.amazonaws.services.ec2.model.CreateSubnetRequest;
 import com.amazonaws.services.ec2.model.CreateSubnetResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DeleteSubnetRequest;
+import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
+import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.ModifySubnetAttributeRequest;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
@@ -54,10 +58,11 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 	private CidrBlock nextCidrBlockToTry;
 	private String serverId;
 
-	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, String vpcName, String firstCidrBlock,
-			String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId, String availabilityZone) {
+	public DynamicVpcSubnetProvider(AwsEc2Wrapper ec2Wrapper, ServerIdProvider serverIdProvider, String vpcName,
+			String firstCidrBlock, String endNonInclusiveCidrBlock, boolean usePublicIp, String routeTableId,
+			String availabilityZone) {
 		this.ec2 = ec2Wrapper.getEc2();
-		this.serverId=serverIdProvider.getServerId();
+		this.serverId = serverIdProvider.getServerId();
 		this.availabilityZone = availabilityZone;
 		this.startingCidrBlock = CidrBlock.fromString(firstCidrBlock);
 		this.nextCidrBlockToTry = startingCidrBlock;
@@ -105,6 +110,37 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		return assignment.getInfrastructureId();
 	}
 
+	@Override
+	public void sync(Collection<String> existingVirtueIds) {
+		DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
+		Collection<Filter> filters = new ArrayList<Filter>();
+
+		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+
+		describeSubnetsRequest.setFilters(filters);
+		DescribeSubnetsResult result = ec2.describeSubnets(describeSubnetsRequest);
+
+		ArrayList<String> subnetsToDelete = new ArrayList<String>();
+
+		List<Subnet> subnets = result.getSubnets();
+		for (Subnet subnet : subnets) {
+			String instanceId = AwsUtil.tagGet(subnet.getTags(), AwsUtil.TAG_INSTANCE_ID);
+			if (!existingVirtueIds.contains(instanceId)) {
+				subnetsToDelete.add(subnet.getSubnetId());
+			}
+		}
+
+		for (String subnetId : subnetsToDelete) {
+			try {
+				logger.debug("Attempting to delete extra subnet: " + subnetId);
+				DeleteSubnetRequest deleteSubnetRequest = new DeleteSubnetRequest(subnetId);
+				ec2.deleteSubnet(deleteSubnetRequest);
+			} catch (Exception e) {
+				logger.warn("Failed to delete subnet with ID=" + subnetId, e);
+			}
+		}
+	}
+
 	private synchronized CidrBlockAssignment getNextAvailableBlock(String subnetKey, Map<String, String> tags) {
 		Subnet subnet = createAwsSubnet(nextCidrBlockToTry);
 		if (tags == null) {
@@ -114,17 +150,17 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 		for (Entry<String, String> entry : tags.entrySet()) {
 			awsTags.add(new Tag(entry.getKey(), entry.getValue()));
 		}
-		if (!tags.containsKey(IVpcSubnetProvider.TAG_NAME)) {
-			String name = tags.get(IVpcSubnetProvider.TAG_USERNAME) + "-"
-					+ tags.get(IVpcSubnetProvider.TAG_VIRTUE_NAME);
-			awsTags.add(new Tag(IVpcSubnetProvider.TAG_NAME, name));
+		if (!tags.containsKey(AwsUtil.TAG_NAME)) {
+			String name = tags.get(AwsUtil.TAG_USERNAME) + "-" + tags.get(AwsUtil.TAG_VIRTUE_NAME);
+			awsTags.add(new Tag(AwsUtil.TAG_NAME, name));
 		}
 		awsTags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
+		awsTags.add(new Tag(AwsUtil.TAG_AUTO_GENERATED, AwsUtil.TAG_AUTO_GENERATED_TRUE));
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest(Collections.singletonList(subnet.getSubnetId()),
 				awsTags);
 		ec2.createTags(createTagsRequest);
 		CidrBlockAssignment assignment = new CidrBlockAssignment(subnet.getCidrBlock(), subnetKey,
-				tags.get(IVpcSubnetProvider.TAG_USERNAME), subnet.getSubnetId());
+				tags.get(AwsUtil.TAG_USERNAME), subnet.getSubnetId());
 		return assignment;
 	}
 
@@ -145,10 +181,12 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 				ModifySubnetAttributeRequest modifySubnetAttributeRequest = new ModifySubnetAttributeRequest()
 						.withMapPublicIpOnLaunch(usePublicIp).withSubnetId(subnet.getSubnetId());
 				ec2.modifySubnetAttribute(modifySubnetAttributeRequest);
-				AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest()
-						.withSubnetId(subnet.getSubnetId()).withRouteTableId(routeTableId);
-				ec2.associateRouteTable(associateRouteTableRequest);
 			}
+
+			AssociateRouteTableRequest associateRouteTableRequest = new AssociateRouteTableRequest()
+					.withSubnetId(subnet.getSubnetId()).withRouteTableId(routeTableId);
+			ec2.associateRouteTable(associateRouteTableRequest);
+
 			logger.debug("created cidrBlock subnet at " + cidrBlock + " " + subnet);
 			return subnet;
 		} catch (AmazonEC2Exception e) {

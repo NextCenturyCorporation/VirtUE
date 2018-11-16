@@ -27,7 +27,6 @@ import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_element;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_key_value_set;
 import com.nextcentury.savior.cifsproxy.GssApi.gss_name_t;
 import com.sun.jna.Native;
-import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -171,32 +170,15 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		IntByReference minorStatus = new IntByReference();
 		int retval;
 
-		gss_OID_desc nameType = GssApi.GSS_C_NT_HOSTBASED_SERVICE;
-		gss_name_t gssWebServiceName = GssUtils.importName(gssapi, getServiceName('@'), nameType);
-		gss_OID_set_desc desiredMechs = new gss_OID_set_desc();
-		desiredMechs.count = new NativeLong(1);
-		desiredMechs.elements = new gss_OID_desc.ByReference(GssApi.MECH_KRB5.length, GssApi.MECH_KRB5.elements);
 		PointerByReference outputCredHandle = new PointerByReference();
+		LOGGER.trace(">>>about to call acquire_cred");
 		retval = gssapi.gss_acquire_cred(minorStatus, GssApi.GSS_C_NO_NAME, 0, GssApi.GSS_C_NO_OID_SET,
 				GssCredentialUsage.GSS_C_BOTH.getValue(), outputCredHandle, null, null);
-		GSSException exception = null;
-		try {
-			GssUtils.releaseName(gssapi, gssWebServiceName);
-		} catch (GSSException e) {
-			exception = e;
-		}
+		LOGGER.trace("<<<back from acquire_cred");
+
 		if (retval != 0) {
-			/*
-			 * this exception is more important than one from release_name (if any), so
-			 * clobber it
-			 */
-			if (exception != null) {
-				LOGGER.warn("ignoring exception from GssUtils.releaseName: " + exception);
-			}
-			exception = new GSSException(retval, minorStatus.getValue(), "acquiring credential (for S4U2Proxy)");
+			GSSException exception = new GSSException(retval, minorStatus.getValue(), "acquiring credential (for S4U2Proxy)");
 			LOGGER.warn("error from gss_acquire_cred: " + retval + "." + minorStatus.getValue());
-		}
-		if (exception != null) {
 			LOGGER.throwing(exception);
 			throw exception;
 		}
@@ -237,9 +219,16 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		PointerByReference contextHandle = new PointerByReference(GssApi.GSS_C_NO_CONTEXT);
 		gss_buffer_desc inputToken = new gss_buffer_desc(serviceToken);
 		PointerByReference delegatedCredHandle = new PointerByReference();
+		LOGGER.trace(">>>about to call accept_sec_context");
 		PointerByReference sourceName = new PointerByReference(GssApi.GSS_C_NO_NAME);
 		int retval = gssapi.gss_accept_sec_context(minorStatus, contextHandle, acceptorCredential, inputToken,
 				GssApi.GSS_C_NO_CHANNEL_BINDINGS, sourceName, null, outputToken, retFlags, null, delegatedCredHandle);
+		gss_name_t plainSourceName = new gss_name_t(sourceName.getValue());
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("<<back from accept_sec_context: " + retval + "." + minorStatus.getValue() + "\tname='"
+					+ GssUtils.getStringName(gssapi, plainSourceName) + "'");
+		}
+
 		/*
 		 * In theory you have to do this in a loop. In practice that doesn't seem to
 		 * ever happen. But just in case, check and warn.
@@ -286,8 +275,10 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 		PointerByReference oidsStoredHandle = new PointerByReference(oidsStored);
 		IntByReference credStored = new IntByReference();
 
+		LOGGER.trace(">>>about to call store_cred_into");
 		int retval = gssapi.gss_store_cred_into(minorStatus, acquiredCred, GssCredentialUsage.GSS_C_INITIATE.getValue(),
 				GssApi.GSS_C_NO_OID, overwriteCred, defaultCred, credStore, oidsStoredHandle, credStored);
+		LOGGER.trace("<<<back from store_cred_into:" + retval + "." + minorStatus.getValue());
 		if (retval != 0) {
 			GSSException exception = new GSSException(retval, minorStatus.getValue(),
 					"storing credential: " + retval + "." + minorStatus.getValue());

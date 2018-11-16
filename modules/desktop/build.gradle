@@ -17,6 +17,7 @@ dependencies {
 	compile project(':common')
 	compile project(':clipboard')
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+	compile group: 'org.slf4j', name: 'slf4j-ext', version: '1.7.25'    
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
