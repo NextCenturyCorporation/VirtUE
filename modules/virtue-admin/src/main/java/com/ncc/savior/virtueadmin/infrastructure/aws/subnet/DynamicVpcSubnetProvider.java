@@ -124,7 +124,7 @@ public class DynamicVpcSubnetProvider implements IVpcSubnetProvider {
 
 		List<Subnet> subnets = result.getSubnets();
 		for (Subnet subnet : subnets) {
-			String instanceId = AwsUtil.tagGet(subnet.getTags(), AwsUtil.TAG_INSTANCE_ID);
+			String instanceId = AwsUtil.tagGet(subnet.getTags(), AwsUtil.TAG_VIRTUE_INSTANCE_ID);
 			if (!existingVirtueIds.contains(instanceId)) {
 				subnetsToDelete.add(subnet.getSubnetId());
 			}

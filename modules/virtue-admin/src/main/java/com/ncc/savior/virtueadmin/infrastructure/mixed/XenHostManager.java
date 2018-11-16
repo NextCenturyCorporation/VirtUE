@@ -145,9 +145,11 @@ public class XenHostManager {
 		if (virtueMods.getSecurityGroupId() != null) {
 			secGroupIds.add(virtueMods.getSecurityGroupId());
 		}
+		virtueMods.setVirtueId(virtue.getId());
+		virtueMods.setVirtueTemplateId(virtue.getTemplateId());
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverId + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
-				xenInstanceType, virtueMods.getSubnetId(), iamRoleName);
+				xenInstanceType, virtueMods, iamRoleName);
 
 		// VirtualMachine xenVm = new VirtualMachine(null, null, null, null, OS.LINUX,
 		// null,

@@ -122,7 +122,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 				secGroupIds.add(virtueMods.getSecurityGroupId());
 			}
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, secGroupIds, serverKeyName, instanceType,
-					virtueMods.getSubnetId(), null);
+					virtueMods, null);
 			vms.add(vm);
 		}
 		notifyOnUpdateVms(vms);
@@ -362,7 +362,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		for (Reservation res : result.getReservations()) {
 			for (Instance instance : res.getInstances()) {
 				List<Tag> tags = instance.getTags();
-				String instanceId = AwsUtil.tagGet(tags, AwsUtil.TAG_INSTANCE_ID);
+				String instanceId = AwsUtil.tagGet(tags, AwsUtil.TAG_VIRTUE_INSTANCE_ID);
 				Integer stateCode = instance.getState().getCode();
 				if (instanceId != null && !ids.contains(instanceId) &&  stateCode!=TERMINATED) {
 					instancesToBeTerminated.add(instance.getInstanceId());
