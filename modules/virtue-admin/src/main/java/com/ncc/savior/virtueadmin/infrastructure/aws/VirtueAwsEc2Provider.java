@@ -10,12 +10,17 @@ import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.auth.PropertiesFileCredentialsProvider;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.route53.AmazonRoute53Async;
 import com.amazonaws.services.route53.AmazonRoute53AsyncClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.AmazonS3Encryption;
+import com.amazonaws.services.s3.AmazonS3EncryptionClientBuilder;
+import com.amazonaws.services.s3.model.CryptoConfiguration;
+import com.amazonaws.services.s3.model.KMSEncryptionMaterialsProvider;
 
 /**
  * Provides AWS support classes such as {@link AmazonEC2} or
@@ -93,4 +98,12 @@ public class VirtueAwsEc2Provider {
 		return route53Client;
 	}
 
+	public AmazonS3Encryption getS3EncryptionClient(String kmsCmkId) {
+		KMSEncryptionMaterialsProvider materialProvider = new KMSEncryptionMaterialsProvider(kmsCmkId);
+		CryptoConfiguration cryptoConfig = new CryptoConfiguration().withAwsKmsRegion(RegionUtils.getRegion(region));
+		AmazonS3Encryption encryptionClient = AmazonS3EncryptionClientBuilder.standard()
+				.withCredentials(new ProfileCredentialsProvider()).withEncryptionMaterials(materialProvider)
+				.withCryptoConfiguration(cryptoConfig).withRegion(region).build();
+		return encryptionClient;
+	}
 }
