@@ -2,6 +2,7 @@
 import { Item } from './item.model';
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
+import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
@@ -65,6 +66,13 @@ export class Application extends Item {
       this.launchCommand = '';
       this.iconKey = '';
     }
+  }
+
+  /**
+   * @return the APPS subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.APPS;
   }
 
   removeChild(obj): void {}

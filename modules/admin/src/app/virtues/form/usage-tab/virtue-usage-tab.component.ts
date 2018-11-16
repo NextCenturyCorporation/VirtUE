@@ -22,11 +22,7 @@ import {
 
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
-
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { DataRequestService } from '../../../shared/services/dataRequest.service';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
@@ -64,10 +60,8 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
    */
   constructor(
       router: Router,
-      baseUrlService: BaseUrlService,
-      dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(router, dialog);
     this.tabName = "Virtue Usage";
 
   }

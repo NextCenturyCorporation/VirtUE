@@ -1,6 +1,7 @@
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
 import { Toggleable } from './toggleable.interface';
+import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
@@ -46,7 +47,10 @@ export class Printer extends IndexedObj implements Toggleable {
   getID(): string {
     return this.id;
   }
-
-  /** doesn't depend on anything else, and so nothing needs to be built */
-  buildAttributes(childDatasets: DictList<(DictList<IndexedObj>)> ): void {}
+  /**
+   * @return the PRINTERS subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.PRINTERS;
+  }
 }

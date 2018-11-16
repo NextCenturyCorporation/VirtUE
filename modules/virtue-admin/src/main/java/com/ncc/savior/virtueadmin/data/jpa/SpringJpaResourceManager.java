@@ -12,6 +12,10 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IResourceManager;
@@ -24,6 +28,8 @@ import com.ncc.savior.virtueadmin.model.FileSystem;
  */
 @Repository
 public class SpringJpaResourceManager implements IResourceManager {
+	private final static Logger logger = LoggerFactory.getLogger(SpringJpaResourceManager.class);
+
 	@Autowired
 	private PrinterRepository printerRepo;
 	@Autowired
@@ -61,7 +67,6 @@ public class SpringJpaResourceManager implements IResourceManager {
 				"File System id=" + fileSystemId + " not found.");
 	}
 
-	/** #uncommented */
 	@Override
 	public Map<String, Printer> getPrintersForVirtueTemplate(VirtueTemplate virtue) {
 		Collection<Printer> printers = virtue.getPrinters();
@@ -72,7 +77,6 @@ public class SpringJpaResourceManager implements IResourceManager {
 		return map;
 	}
 
-	/** #uncommented */
 	@Override
 	public Map<String, FileSystem> getFileSystemsForVirtueTemplate(VirtueTemplate virtue) {
 		Collection<FileSystem> fileSystems = virtue.getFileSystems();
@@ -83,12 +87,6 @@ public class SpringJpaResourceManager implements IResourceManager {
 		return map;
 	}
 
-	/**
-	 * #uncommented
-	 *
-	 * See commented line - the code below it does the same thing as getPrinterIds, except it doesn't use a hashset.
-	 * Do we really need that?
-	 */
 	@Override
 	public Collection<String> getPrinterIdsForVirtueTemplate(VirtueTemplate virtue) {
 		Collection<Printer> printers = virtue.getPrinters();
@@ -99,9 +97,6 @@ public class SpringJpaResourceManager implements IResourceManager {
 		return ids;
 	}
 
-	/**
-	 * #uncommented
-	 */
 	@Override
 	public Collection<String> getFileSystemIdsForVirtueTemplate(VirtueTemplate virtue) {
 		Collection<String> fileSystemIds = virtue.getFileSystemIds();
@@ -112,71 +107,17 @@ public class SpringJpaResourceManager implements IResourceManager {
 		return ids;
 	}
 
-	/** This doesn't appear to be something that'd ever be used - no function makes a rest call to simply add/revoke one item
-	 * from another, they just make a change to the virtue object and update the whole thing. These functions exist for users
-	 * and virtues as well, but they aren't used there either.
-	 */
-	// /**
-	//  * #uncommented
-	//  */
-	// @Override
-	// public void assignPrinterToVirtueTemplate(String virtueTemplateId, String printerId) {
-	// 	VirtueTemplate virtue = getVirtueTemplate(virtueTemplateId);
-	// 	Printer printer = getPrinter(printerId);
-	// 	virtue.addPrinter(printer);
-	// 	virtueTemplateRepo.save(virtue);
-	// }
-	//
-	//
-	// /** #uncommented */
-	// @Override
-	// public void assignFileSystemToVirtueTemplate(String virtueTemplateId, String fileSystemId) {
-	// 	VirtueTemplate virtue = getVirtueTemplate(virtueTemplateId);
-	// 	FileSystem fileSystem = getFileSystem(fileSystemId);
-	// 	virtue.addFileSystem(fileSystem);
-	// 	virtueTemplateRepo.save(virtue);
-	// }
-	//
-	// /**
-	//  * #uncommented
-	//  */
-	// @Override
-	// public void revokePrinterFromVirtueTemplate(String virtueTemplateId, String printerId) {
-	// 	VirtueTemplate virtue = getVirtueTemplate(virtueTemplateId);
-	// 	Printer printer = getPrinter(printerId);
-	//
-	// 	virtue.removePrinter(printer);
-	// 	virtueTemplateRepo.save(virtue);
-	// }
-	//
-	// /**
-	//  * #uncommented
-	//  */
-	// @Override
-	// public void revokeFileSystemFromVirtueTemplate(String virtueTemplateId, String fileSystemId) {
-	// 	VirtueTemplate virtue = getVirtueTemplate(virtueTemplateId);
-	// 	FileSystem fileSystem = getFileSystem(fileSystemId);
-	//
-	// 	virtue.removeFileSystem(fileSystem);
-	// 	virtueTemplateRepo.save(virtue);
-	// }
-
-
-
-	/** #uncommented */
 	@Override
 	public Iterable<Printer> getAllPrinters() {
 		return printerRepo.findAll();
 	}
 
-	/** #uncommented */
 	@Override
 	public Iterable<FileSystem> getAllFileSystems() {
 		return fileSystemRepo.findAll();
 	}
 
 
-	/** #uncommented */
 	@Override
 	public Printer getPrinter(String printerId) {
 		Printer printer = printerRepo.findById(printerId).get();
@@ -188,7 +129,6 @@ public class SpringJpaResourceManager implements IResourceManager {
 		}
 	}
 
-	/** #uncommented */
 	@Override
 	public FileSystem getFileSystem(String fileSystemId) {
 		FileSystem fileSystem = fileSystemRepo.findById(fileSystemId).get();
@@ -200,7 +140,6 @@ public class SpringJpaResourceManager implements IResourceManager {
 		}
 	}
 
-	/** #uncommented */
 	@Override
 	public VirtueTemplate getVirtueTemplate(String virtueTemplateId) {
 		VirtueTemplate virtueTemplate = virtueTemplateRepo.findById(virtueTemplateId).get();
@@ -212,112 +151,92 @@ public class SpringJpaResourceManager implements IResourceManager {
 		}
 	}
 
-	/** #uncommented */
 	@Override
 	public Printer addPrinter(Printer printer) {
-		checkPrinterExists(printer.getId(), true);
+		breakIfPrinterExists(printer.getId());
 		return printerRepo.save(printer);
 	}
 
-	/** #uncommented */
 	@Override
 	public FileSystem addFileSystem(FileSystem fileSystem) {
-		checkFileSystemExists(fileSystem.getId(), true);
+		breakIfFileSystemExists(fileSystem.getId());
 		return fileSystemRepo.save(fileSystem);
 	}
 
-	/** #uncommented */
 	@Override
 	public Printer updatePrinter(String id, Printer printer) {
-		checkPrinterExists(id, false);
+		breakIfPrinterDoesntExist(id);
 		printer.setId(id);
 		return printerRepo.save(printer);
 	}
 
-	/** #uncommented */
 	@Override
 	public FileSystem updateFileSystem(String id, FileSystem fileSystem) {
-		checkFileSystemExists(id, false);
+		breakIfFileSystemDoesntExist(id);
 		fileSystem.setId(id);
 		return fileSystemRepo.save(fileSystem);
 	}
 
-	/** #uncommented */
 	@Override
 	public void deleteFileSystem(String fileSystemId) {
 		fileSystemRepo.deleteById(fileSystemId);
 	}
 
-	/** #uncommented */
 	@Override
 	public void deletePrinter(String printerId) {
 		printerRepo.deleteById(printerId);
 	}
 
-	/** #uncommented */
 	@Override
 	public Iterable<Printer> getPrinters(Collection<String> printerIds) {
 		return printerRepo.findAllById(printerIds);
 	}
 
-	/** #uncommented */
 	@Override
 	public Iterable<FileSystem> getFileSystems(Collection<String> fileSystemIds) {
 		return fileSystemRepo.findAllById(fileSystemIds);
 	}
 
-	/** #uncommented */
 	@Override
 	public boolean containsPrinter(String id) {
 		return printerRepo.existsById(id);
 	}
 
-	/** #uncommented */
 	@Override
 	public boolean containsFileSystem(String id) {
 		return fileSystemRepo.existsById(id);
 	}
 
-
-	/**
-	 * If breakIffExists is true, an exception will be thrown if the printer exists in the repository already.
-	 * If breakIffExists is false, an exception will be thrown if the printer does not exist.
-	 */
-	@Override
-	public void checkPrinterExists(String printerId, boolean breakIffExists) {
-
-		boolean printerExists = containsPrinter(printerId);
-
-		if ( printerExists && breakIffExists ) {
+	private void breakIfPrinterExists(String printerId) {
+		if ( containsPrinter(printerId) ) {
 			throw new SaviorException(SaviorErrorCode.PRINTER_ALREADY_EXISTS,
 					"Printer with id=" + printerId + " already exists.");
 		}
-		else if ( !printerExists && !breakIffExists ) {
+	}
+
+	private void breakIfPrinterDoesntExist(String printerId) {
+		if ( ! containsPrinter(printerId) ) {
 			throw new SaviorException(SaviorErrorCode.PRINTER_NOT_FOUND,
 					"Printer with id=" + printerId + " not found.");
 		}
 	}
 
-	/**
-	 * If breakIffExists is true, an exception will be thrown if the fileSystem exists in the repository already.
-	 * If breakIffExists is false, an exception will be thrown if the fileSystem does not exist.
-	 */
-	@Override
-	public void checkFileSystemExists(String fileSystemId, boolean breakIffExists) {
+	private void breakIfFileSystemExists(String fileSystemId) {
 
-		boolean fileSystemExists = containsFileSystem(fileSystemId);
-
-		if ( fileSystemExists && breakIffExists ) {
+		if ( containsFileSystem(fileSystemId) ) {
 			throw new SaviorException(SaviorErrorCode.FILE_SYSTEM_ALREADY_EXISTS,
 					"FileSystem with id=" + fileSystemId + " already exists.");
 		}
-		else if ( !fileSystemExists && !breakIffExists ) {
+	}
+
+	private void breakIfFileSystemDoesntExist(String fileSystemId) {
+		if ( !containsFileSystem(fileSystemId) ) {
 			throw new SaviorException(SaviorErrorCode.FILE_SYSTEM_NOT_FOUND,
 					"FileSystem with id=" + fileSystemId + " not found.");
 		}
 	}
 
-	/** #uncommented */
+	/** delete all printer and fileSystem records */
 	@Override
 	public void clear() {
 		printerRepo.deleteAll();

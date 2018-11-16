@@ -5,9 +5,6 @@ import { Observable } from 'rxjs/Observable';
 import { MatDialog, MatDialogRef, MatDialogModule } from '@angular/material';
 import { DialogsComponent } from '../dialogs/dialogs.component';
 
-import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { DataRequestService } from '../shared/services/dataRequest.service';
-
 import { GenericPageComponent } from '../shared/abstracts/gen-page/gen-page.component';
 
 import { ConfigActiveDirTabComponent } from './config-activeDir-tab/config-activeDir-tab.component';
@@ -17,7 +14,6 @@ import { ConfigSensorsTabComponent } from './config-sensors-tab/config-sensors-t
 import { ConfigSettingsHistoryTabComponent } from './config-settingsHistory-tab/config-settingsHistory-tab.component';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
 import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 // import { GenericDataPageComponent } from '../shared/abstracts/gen-data-page/gen-data-page.component';
@@ -66,11 +62,9 @@ export class ConfigComponent extends GenericPageComponent {
    */
   constructor(
     router: Router,
-    baseUrlService: BaseUrlService,
-    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(router, dialog);
   }
 
 

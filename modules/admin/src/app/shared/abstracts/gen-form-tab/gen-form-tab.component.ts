@@ -7,9 +7,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { BaseUrlService } from '../../services/baseUrl.service';
-import { DataRequestService } from '../../services/dataRequest.service';
-
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
@@ -22,7 +19,7 @@ import { Application } from '../../models/application.model';
 import { DictList } from '../../models/dictionary.model';
 import { Column } from '../../models/column.model';
 import { Mode } from '../../abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../services/config-urls.enum';
+
 import { DatasetNames } from '../../abstracts/gen-data-page/datasetNames.enum';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
@@ -51,10 +48,8 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
    */
   constructor(
     router: Router,
-    baseUrlService: BaseUrlService,
-    dataRequestService: DataRequestService,
     dialog: MatDialog) {
-      super(router, baseUrlService, dataRequestService, dialog);
+      super(router, dialog);
   }
 
   /**

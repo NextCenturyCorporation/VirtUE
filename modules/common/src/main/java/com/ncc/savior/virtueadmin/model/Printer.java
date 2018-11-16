@@ -112,9 +112,9 @@ public class Printer {
 			return false;
 		Printer other = (Printer) obj;
 		if (name == null) {
-			if (other.name != null)
+			if (other.getName() != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!name.equals(other.getName()))
 			return false;
 		if (id == null) {
 			if (other.id != null)
@@ -122,16 +122,16 @@ public class Printer {
 		} else if (!id.equals(other.id))
 			return false;
 		if (address == null) {
-			if (other.address != null)
+			if (other.getAddress() != null)
 				return false;
-		} else if (!address.equals(other.address))
+		} else if (!address.equals(other.getAddress()))
 			return false;
 		if (status == null) {
-			if (other.status != null)
+			if (other.getStatus() != null)
 				return false;
-		} else if (!status.equals(other.status))
+		} else if (!status.equals(other.getStatus()))
 			return false;
-		if (enabled != other.enabled)
+		if (enabled != other.isEnabled())
 			return false;
 		return true;
 	}

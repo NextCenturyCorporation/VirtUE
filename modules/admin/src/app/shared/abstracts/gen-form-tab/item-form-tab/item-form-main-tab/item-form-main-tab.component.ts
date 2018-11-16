@@ -11,9 +11,6 @@ import { Column } from '../../../../models/column.model';
 import { SubMenuOptions } from '../../../../models/subMenuOptions.model';
 import { Mode } from '../../../../abstracts/gen-form/mode.enum';
 
-import { BaseUrlService } from '../../../../services/baseUrl.service';
-import { DataRequestService } from '../../../../services/dataRequest.service';
-
 import { GenericTableComponent } from '../../../gen-table/gen-table.component';
 import { ItemFormTabComponent } from '../item-form-tab.component';
 
@@ -35,14 +32,17 @@ import { DatasetNames } from '../../../gen-data-page/datasetNames.enum';
  *  - other minor info/settings that relate to *what* this item is, and how this template can be used.
  * How this item should work/be set up, should go in a 'settings' tab.
  *
- * Also, this family of classes all deal with displaying many pieces of a single, locally-held, object. Any tab can change those pieces,
- * and the central parent form [[ItemFormComponent]] just watches the event emitters of each tab, to know when to reload the Item's data USING
- * local, previously pulled, datasets. E.g. if a User's virtueIds change, the form will use the new virtueIds to re-create item.virtues from the
+ * Also, this family of classes all deal with displaying many pieces of a single, locally-held, object.
+ * Any tab can change those pieces, and the central parent form [[ItemFormComponent]] just watches the
+ * event emitters of each tab, to know when to reload the Item's data USING local, previously pulled, datasets.
+ * E.g. if a User's virtueIds change, the form will use the new virtueIds to re-create item.virtues from the
  * same virtue dataset that was pulled when the page loaded.
+ *
  * Those tabs aren't in charge of updating the backend themselves.
- *   This differs from the config-tabs (see [[ConfigPrinterTabComponent]]), which each track a different set of things, and must each
- *   be able to update the backend themselves. The form still is what can reload their data though, and so must be notified when a change occurs.
- *   The central form must therefore actually reload that tab's data from the backend, rather than re-create it from existing data like in above.
+ *   This differs from the config-tabs (see [[ConfigPrinterTabComponent]]), which each track a different set
+ *   of things, and must each be able to update the backend themselves. The form still is what can reload their
+ *   data though, and so must be notified when a change occurs. The central form must therefore actually reload
+ *   that tab's data from the backend, rather than re-create it from existing data like in above.
  *
  */
 export abstract class ItemFormMainTabComponent extends ItemFormTabComponent implements OnInit {
@@ -60,12 +60,16 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
   /** A table for listing the item's children. */
   @ViewChild('childrenTable') protected childrenTable: GenericTableComponent<Item>;
 
-  /** to notify the parent component that a new set of childIDs have been selected */
+  /** to notify the parent item form that one of this.item's lists of child ids has been changed */
   @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   /**
    * To notify the parent component that the item's status has been toggled.
    * Only meaningful in view mode.
+   *
+   * it should just emit the new value.
+   * It just needs to emit something to let the form know that the user toggled the status.
+   * Item's `enabled` field should only be mutable from the view page.
    */
   @Output() onStatusChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
@@ -76,25 +80,27 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    */
   constructor(
     router: Router,
-    baseUrlService: BaseUrlService,
-    dataRequestService: DataRequestService,
     dialog: MatDialog) {
-      super(router, baseUrlService, dataRequestService, dialog);
+      super(router, dialog);
       this.tabName = "General Info";
-      this.item = new User(undefined);
+      this.item = new User({enabled: false});
   }
 
   /**
+   * Note that for the foreseeable future, the status toggle will only be active in view mode.
+   *
    * Called whenever the status toggle is clicked, to notify the parent component.
    * The parent components ignore it unless the page is in view mode, in which case they send
    * off a request to the backend actually toggling the status of this item.
-   * This lets the toggle actually work in view mode, without having to save the item as a whole
-   * as if you were in edit mode.
+   * This lets the toggle actually work in view mode, while letting it make only local changes in other modes,
+   * without having to save the item as a whole as if you were in edit mode.
    */
   statusChange(): void {
-    this.onStatusChange.emit();
-    // this just tells the parent form to toggle, so we don't need to pass the current value. The parent knows already.
-    // this.onStatusChange.emit(this.item.enabled);
+    // this.item.enabled = !this.item.enabled;
+    // this is actually worrying, but I don't know how to get around it. When the user clicks on the toggle, this function gets called,
+    // and then soon afterwards the item.enabled field is actually toggled. So inside this function, enabled still has the old value.
+    // To pass the right value to the backend, we therefore have to negate it. But if the ordering ever changes, then this
+    this.onStatusChange.emit(!this.item.enabled);
   }
 
   /**
@@ -121,7 +127,6 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    *                this tab's mode should be updated. The attribute is optional.
    */
   update(changes: any): void {
-    console.log(this.childDatasetName, this.item);
     this.childrenTable.populate(this.item.getRelatedDict(this.childDatasetName).asList());
     if (changes.mode) {
       // these three lines could be replaced with
@@ -130,24 +135,6 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
       this.setMode(changes.mode);
     }
   }
-
-  /**
-   * Don't delete unnecessarily - example of hopefully future-code, to replace the below function.
-   * See note above the commented-out GenericPageComponent.activateModal() function.
-   */
-  // activateModal() {
-  //
-  //   // this function being defined in gen-page - would be largely similar to the below activateModal() function.
-  //   this.createModal(
-  //         {
-  //           modalClass: this.getModalType(),
-  //           inData: {
-  //             selectedIDs: this.item.childIDs
-  //           },
-  //           onComplete: (selectedItems) => {this.onChildrenChange.emit(selectedItems);}
-  //         }
-  //       )
-  // }
 
   /**
    * this brings up the subclass-defined-modal to add/remove children.
@@ -246,7 +233,7 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
                       () => !this.inViewMode(),
                       (childItem: Item) => this.openDialog( 'Delete ' + childItem.getName(),
                                                     () => {
-                                                      this.removeChildObject(childItem)
+                                                      this.removeChildObject(childItem);
                                                       this.update({});
                                                     }
                                                   )

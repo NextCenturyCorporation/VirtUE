@@ -17,7 +17,6 @@ import {
   SORT_DIR
 } from '../../shared/models/column.model';
 
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
@@ -52,7 +51,7 @@ enum VigilenceLevel {
 @Component({
   selector: 'app-config-sensors-tab',
   templateUrl: './config-sensors-tab.component.html',
-  styleUrls: ['./config-sensors-tab.component.css']
+  styleUrls: ['../config.component.css', './config-sensors-tab.component.css']
 })
 export class ConfigSensorsTabComponent extends GenericDataTabComponent implements OnInit {
 
@@ -102,10 +101,8 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.USERS,//ConfigUrls.SENSORS,
       neededDatasets: []
     };
   }

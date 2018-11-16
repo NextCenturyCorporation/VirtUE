@@ -21,7 +21,6 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 
 /**
@@ -93,10 +92,8 @@ export class VirtueListComponent extends ItemListComponent {
    * @return child-specific information needed by the generic page functions when loading data.
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.VIRTUES,
       neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
     };
   }
@@ -125,7 +122,7 @@ export class VirtueListComponent extends ItemListComponent {
   }
 
   tempAddRandomPrinter() {
-    // let sub = this.dataRequestService.getItems(ConfigUrls.PRINTERS).subscribe( data => {
+    // let sub = this.dataRequestService.getItems(Subdomains.PRINTERS).subscribe( data => {
     //     console.log(data);
     //   }, () => {},
     //   () => {sub.unsubscribe();}
@@ -133,14 +130,14 @@ export class VirtueListComponent extends ItemListComponent {
 
     // let p = {info: "something", status: "active", address: "127.0.0.1", enabled: true};
 
-    // let sub2 = this.dataRequestService.createItem(ConfigUrls.PRINTERS, JSON.stringify(p)).subscribe( data => {
+    // let sub2 = this.dataRequestService.createItem(Subdomains.PRINTERS, JSON.stringify(p)).subscribe( data => {
     //     console.log(data);
     //   }, () => {},
     //   () => {sub2.unsubscribe();}
     // );
 
     // console.log(this.item.allowedPrinters);
-    // this.dataRequestService.createItem(ConfigUrls.PRINTERS, new Printer("some printer"));
+    // this.dataRequestService.createItem(Subdomains.PRINTERS, new Printer("some printer"));
     // this.updateFileSysPermsTable();
   }
 

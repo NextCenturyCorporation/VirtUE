@@ -15,7 +15,7 @@ import {
   SORT_DIR
 } from '../../shared/models/column.model';
 
-import { Printer } from '../../shared/models/printer.model';
+import { FileSystem } from '../../shared/models/fileSystem.model';
 import { GenericModalComponent } from '../generic-modal/generic.modal';
 
 import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
@@ -27,12 +27,11 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
  * @extends [[GenericModalComponent]]
  */
 @Component({
-  selector: 'app-printer-selection-modal',
+  selector: 'app-file-system-selection-modal',
   templateUrl: '../generic-modal/generic.modal.html',
-  styleUrls: ['../generic-modal/generic.modal.css'],
-  providers: [ BaseUrlService, DataRequestService ]
+  styleUrls: ['../generic-modal/generic.modal.css']
 })
-export class PrinterSelectionModalComponent extends GenericModalComponent {
+export class FileSystemSelectionModalComponent extends GenericModalComponent {
 
   /**
    * see [[GenericModalComponent.constructor]] for notes on parameters
@@ -42,11 +41,11 @@ export class PrinterSelectionModalComponent extends GenericModalComponent {
       baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
-      dialogRef: MatDialogRef<PrinterSelectionModalComponent>,
+      dialogRef: MatDialogRef<FileSystemSelectionModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
     super(router, baseUrlService, dataRequestService, dialog, dialogRef, data);
-    this.pluralItem = "Printers";
+    this.pluralItem = "FileSystems";
   }
 
   /**
@@ -54,9 +53,9 @@ export class PrinterSelectionModalComponent extends GenericModalComponent {
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Printer',   3, (p: Printer) => p.name, SORT_DIR.ASC),
-      new TextColumn('Status',    1, (p: Printer) => String(p.status), SORT_DIR.ASC),
-      new TextColumn('Address',   2, (p: Printer) => p.address, SORT_DIR.DESC)
+      new TextColumn('Name',   3, (fs: FileSystem) => fs.name, SORT_DIR.ASC),
+      new TextColumn('Address',   2, (fs: FileSystem) => fs.address, SORT_DIR.ASC),
+      new TextColumn('Default perms',      1, (fs: FileSystem) => fs.formatPerms(), SORT_DIR.ASC)
     ];
   }
 
@@ -64,14 +63,14 @@ export class PrinterSelectionModalComponent extends GenericModalComponent {
    * #uncommented
    */
   customizeTableParams(params): void {
-    params['elementIsDisabled'] = (p: Printer) => !p.enabled;
+    params['elementIsDisabled'] = (fs: FileSystem) => !fs.enabled;
   }
 
   /**
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.datasets[DatasetNames.PRINTERS].asList());
+    this.fillTable(this.datasets[DatasetNames.FILE_SYSTEMS].asList());
   }
 
   /**
@@ -83,7 +82,7 @@ export class PrinterSelectionModalComponent extends GenericModalComponent {
   getDataPageOptions(): {
       neededDatasets: DatasetNames[]} {
     return {
-      neededDatasets: [DatasetNames.PRINTERS]
+      neededDatasets: [DatasetNames.FILE_SYSTEMS]
     };
   }
 
@@ -91,6 +90,6 @@ export class PrinterSelectionModalComponent extends GenericModalComponent {
    * @return a string to be displayed in the virtue table, when no virtue templates exit.
    */
   getNoDataMsg(): string {
-    return "No printers have been connected to this system.";
+    return "No file systems have been set up on the global settings page.";
   }
 }

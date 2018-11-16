@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.io.File;
+import org.apache.commons.io.FileUtils;
+import java.nio.charset.StandardCharsets;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -90,7 +94,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("application")
+	@Path("application/create")
 	public ApplicationDefinition createNewApplicationDefinition(ApplicationDefinition appDef) {
 		return adminService.createNewApplicationDefinition(appDef);
 	}
@@ -158,7 +162,7 @@ public class AdminResource {
 	// JHU - Admin API - role create
 	@POST
 	@Produces("application/json")
-	@Path("virtualMachine/template/")
+	@Path("virtualMachine/template/create")
 	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate templateId) {
 		return adminService.createVmTemplate(templateId);
 	}
@@ -191,9 +195,9 @@ public class AdminResource {
 		adminService.deleteVmTemplate(templateId);
 	}
 
-	@GET
+	@PUT
 	@Produces("application/json")
-	@Path("virtualMachine/template/{id}/setEnabled")
+	@Path("virtualMachine/template/{id}/setStatus")
 	public VirtualMachineTemplate setVirtualMachineTemplateStatus(@PathParam("id") String templateId, String status) {
 		boolean newStatus = Boolean.parseBoolean(status);
 		VirtualMachineTemplate virtualMachineTemplate = adminService.setVirtualMachineTemplateStatus(templateId, newStatus);
@@ -202,7 +206,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("virtue/template")
+	@Path("virtue/template/create")
 	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
 		VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate(template);
 		return virtueTemplate;
@@ -235,12 +239,12 @@ public class AdminResource {
 		return virtueTemplate;
 	}
 
-	@GET
+	@PUT
 	@Produces("application/json")
 	@Path("virtue/template/{id}/setStatus")
-	public VirtueTemplate setVirtueTemplateStatus(@PathParam("id") String templateId, String status) {
-		boolean newStatus = Boolean.parseBoolean(status);
-		VirtueTemplate virtueTemplate = adminService.setVirtueTemplateStatus(templateId, newStatus);
+	public VirtueTemplate setVirtueTemplateStatus(@PathParam("id") String templateId, String newStatus) {
+		boolean status = Boolean.parseBoolean(newStatus);
+		VirtueTemplate virtueTemplate = adminService.setVirtueTemplateStatus(templateId, status);
 		return virtueTemplate;
 	}
 
@@ -248,6 +252,7 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
+		logger.debug("\n" + template.getFileSystems().size());
 		VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
 		return virtueTemplate;
 	}
@@ -301,7 +306,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("user/")
+	@Path("user/create")
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
 		return adminService.createUpdateUser(newUser);
 	}
@@ -341,16 +346,16 @@ public class AdminResource {
 		adminService.removeUser(usernameToRemove);
 	}
 
-	@POST
+	@PUT
 	@Produces("application/json")
 	@Path("user/{username}/setStatus")
-	public void setUserStatus(@PathParam("username") String username, String enableString) {
-		boolean enable = Boolean.parseBoolean(enableString);
-		adminService.enableDisableUser(username, enable);
+	public void setUserStatus(@PathParam("username") String username, String newStatus) {
+		boolean status = Boolean.parseBoolean(newStatus);
+		adminService.enableDisableUser(username, status);
 	}
 
 	// JHU - Admin API - user role authorize
-	@POST
+	@POST // #TODO PUT? Is this idempotent? What in here should prevent duplicates?
 	@Produces("application/json")
 	@Path("user/{username}/assign/{templateId}")
 	public void assignTemplateToUser(@PathParam("username") String username,
@@ -359,7 +364,7 @@ public class AdminResource {
 	}
 
 	// JHU - Admin API - user role unauthorize
-	@POST
+	@POST // #TODO PUT
 	@Produces("application/json")
 	@Path("user/{username}/revoke/{templateId}")
 	public void revokeTemplateToUser(@PathParam("username") String username,
@@ -638,7 +643,7 @@ public class AdminResource {
 	 * @param optionStr
 	 * @return
 	 */
-	@POST
+	@POST // #TODO PUT
 	@Path("permission/{sourceId}/{destId}")
 	public String setPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
 			String optionStr) {
@@ -727,7 +732,7 @@ public class AdminResource {
 	}
 
 	@GET
-	@Path("storage/")
+	@Path("storage")
 	@Produces("application/json")
 	public Iterable<VirtuePersistentStorage> getAllStorage() {
 		return adminService.getAllPersistentStorage();
@@ -757,7 +762,7 @@ public class AdminResource {
 	}
 
 	@GET
-	@Path("securityGroup/")
+	@Path("securityGroup")
 	@Produces("application/json")
 	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroupsAndPermissions() {
 		return adminService.getAllSecurityGroups();
@@ -785,13 +790,13 @@ public class AdminResource {
 		return adminService.getSecurityGroupPermissionsByTemplate(templateId);
 	}
 
-	@POST
+	@POST // #TODO PUT
 	@Path("securityGroup/template/{templateId}/revoke")
 	public void revokePermissionForTemplate(@PathParam("templateId") String templateId, SecurityGroupPermission sgp) {
 		adminService.revokeSecurityGroupsByKey(templateId, sgp);
 	}
 
-	@POST
+	@POST  // #TODO PUT?
 	@Path("securityGroup/template/{templateId}/authorize")
 	public void authorizePermissionFromTemplate(@PathParam("templateId") String templateId,
 			SecurityGroupPermission sgp) {
@@ -823,14 +828,9 @@ public class AdminResource {
 
 /*************/
 
-	/**
-	 * Note the small difference between `/admin/printer` and `/admin/printer/`
-	 * The former makes a new printer, the latter returns a list of all of them.
-	 *
-	 */
 	@POST
 	@Produces("application/json")
-	@Path("printer")
+	@Path("printer/create")
 	public Printer createPrinter(Printer printer) {
 		return adminService.createPrinter(printer);
 	}
@@ -857,13 +857,10 @@ public class AdminResource {
 	// JHU - Admin API - user list
 	@GET
 	@Produces("application/json")
-	@Path("printer/")
+	@Path("printer")
 	public Iterable<Printer> getAllPrinters() {
-		try {
-			return adminService.getAllPrinters();
-		} catch (Exception e) {
-			throw WebServiceUtil.createWebserviceException(e);
-		}
+		return adminService.getAllPrinters();
+
 		// ArrayList<Printer> ps = new ArrayList<Printer>();
 		// ps.add(new Printer("id", "name", "address", "status", true));
 		// return ps;
@@ -878,12 +875,64 @@ public class AdminResource {
 		adminService.deletePrinter(printerId);
 	}
 
-	@POST
+	@PUT
 	@Produces("application/json")
 	@Path("printer/{printerId}/setStatus")
 	public void setPrinterStatus(@PathParam("printerId") String printerId, String enableString) {
 		boolean enable = Boolean.parseBoolean(enableString);
 		adminService.setPrinterStatus(printerId, enable);
+	}
+	/********************/
+
+	@POST
+	@Produces("application/json")
+	@Path("fileSystem/create")
+	public FileSystem createFileSystem(FileSystem fileSystem) {
+		return adminService.createFileSystem(fileSystem);
+	}
+
+	@PUT
+	@Produces("application/json")
+	@Path("fileSystem/{fileSystemId}")
+	public FileSystem updateFileSystem(@PathParam("fileSystemId") String fileSystemId, FileSystem fileSystem) {
+		if (!fileSystem.getId().equals(fileSystemId)) {
+			throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
+					"Given fileSystem doesn't match input id. FileSystem ID=" + fileSystemId + ". FileSystem=" + fileSystem);
+		}
+		return adminService.updateFileSystem(fileSystemId, fileSystem);
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("fileSystem/{fileSystemId}")
+	public FileSystem getFileSystem(@PathParam("fileSystemId") String fileSystemId) {
+		FileSystem returnedFileSystem = adminService.getFileSystem(fileSystemId);
+		return returnedFileSystem;
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("fileSystem")
+	public Iterable<FileSystem> getAllFileSystems() {
+		// ArrayList<FileSystem> ps = new ArrayList<FileSystem>();
+		// ps.add(new FileSystem("id", "name", "address", "status", true));
+		// return ps;
+		return adminService.getAllFileSystems();
+	}
+
+	@DELETE
+	@Produces("application/json")
+	@Path("fileSystem/{fileSystemId}")
+	public void deleteFileSystem(@PathParam("fileSystemId") String fileSystemId) {
+		adminService.deleteFileSystem(fileSystemId);
+	}
+
+	@PUT
+	@Produces("application/json")
+	@Path("fileSystem/{fileSystemId}/setStatus")
+	public void setFileSystemStatus(@PathParam("fileSystemId") String fileSystemId, String enableString) {
+		boolean enable = Boolean.parseBoolean(enableString);
+		adminService.setFileSystemStatus(fileSystemId, enable);
 	}
 
 }

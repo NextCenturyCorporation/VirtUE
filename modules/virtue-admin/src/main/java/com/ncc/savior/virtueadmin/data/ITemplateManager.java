@@ -134,7 +134,7 @@ public interface ITemplateManager {
 	 *
 	 * @param template
 	 */
-	void addVirtueTemplate(VirtueTemplate template);
+	VirtueTemplate addVirtueTemplate(VirtueTemplate template);
 
 	/**
 	 * This doesn't appear to be used anywhere.

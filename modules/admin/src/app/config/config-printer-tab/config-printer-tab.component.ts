@@ -14,7 +14,6 @@ import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-tabl
 import { Printer } from '../../shared/models/printer.model';
 import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
@@ -38,7 +37,7 @@ import {
 @Component({
   selector: 'app-config-printer-tab',
   templateUrl: './config-printer-tab.component.html',
-  styleUrls: ['./config-printer-tab.component.css']
+  styleUrls: ['../config.component.css']
 })
 export class ConfigPrinterTabComponent extends GenericDataTabComponent {
 
@@ -90,11 +89,13 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
   /** #unimplemented */
   getColumns(): Column[] {
     return [
-      new TextColumn("Printer", 5, (p: Printer) => p.name, SORT_DIR.ASC, undefined, () => this.getSubMenu()),
+      new TextColumn("Printer", 4, (p: Printer) => p.name, SORT_DIR.ASC, undefined, () => this.getSubMenu()),
       new TextColumn("Printer address", 3, (p: Printer) => p.address, SORT_DIR.ASC),
-      new TextColumn("Printer status", 1, (p: Printer) => p.status, SORT_DIR.ASC),
-      new CheckboxColumn("Enable", 2, "enabled"),
-      new IconColumn("Options", 1, "settings", (p: Printer) => this.addName(p))
+      new TextColumn("Printer status", 2, (p: Printer) => p.status, SORT_DIR.ASC),
+      new CheckboxColumn("Enable", 1, "enabled", undefined,
+              (p: Printer, checked: boolean) => this.setItemAvailability(p, checked)),
+      new IconColumn("Options", 1, "settings", (p: Printer) => this.printPrinter(p)),
+      new IconColumn("Remove Printer", 1, "delete", (p: Printer) => this.deleteItem(p))
     ];
   }
 
@@ -115,21 +116,23 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.PRINTERS,
       neededDatasets: [DatasetNames.PRINTERS]
     };
   }
 
   togglePrinter(printer: Printer) {
     // remember this is 'status' like 'enabled'/'disabled', not a printer status like 'idle'/'busy'/'broken'/etc
-    this.setItemStatus(printer, !printer.enabled);
+    this.setItemAvailability(printer, !printer.enabled);
   }
 
   addPrinter() {
-    this.createItem(new Printer({id: "2", name: "Makerbot 3D printer", info: "b/w", address: "127.0.0.2", status: "on", enabled: true}));
+    this.createItem(new Printer({id: "2", name: "Brother HL", info: "b/w", address: "127.0.0.1", status: "on", enabled: true}));
+  }
+
+  printPrinter(p: Printer) {
+    console.log(p);
   }
 
   addName(p: Printer) {
@@ -137,12 +140,5 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
     this.updateItem(p);
   }
 
-
-  /**
-   * Reload page, dropping unsaved changes. Saving must be done separately.
-   */
-  refreshPage(): void {
-    this.cmnDataComponentSetup();
-  }
 
 }

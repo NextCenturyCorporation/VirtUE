@@ -10,7 +10,6 @@ import { DataRequestService } from '../../services/dataRequest.service';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
-import { ConfigUrls } from '../../services/config-urls.enum';
 import { DatasetNames } from '../../abstracts/gen-data-page/datasetNames.enum';
 
 import { GenericDataPageComponent } from './gen-data-page.component';

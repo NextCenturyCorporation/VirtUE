@@ -4,40 +4,64 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
+import javax.persistence.Embeddable;
 
 /**
- * Application Data Transfer Object (DTO).
- *
  *
  */
 @Entity
+// @Embeddable
 public class FileSystem {
 	@Id
 	private String id;
+	private String address;
 	private String name;
-	private boolean status;
+	private boolean enabled;
+	private boolean readPerm;
+	private boolean writePerm;
+	private boolean executePerm;
 
-	public FileSystem(String id, String name, boolean status) {
+	public FileSystem(String id, String name, String address, boolean enabled,
+										boolean readPerm, boolean writePerm, boolean executePerm) {
 		super();
 		this.id = id;
+		this.address = address;
 		this.name = name;
-		this.status = status;
+		this.enabled = enabled;
+		this.readPerm = readPerm;
+		this.writePerm = writePerm;
+		this.executePerm = executePerm;
 	}
 
 	/**
 	 * Used for jackson deserialization
 	 */
-	protected FileSystem() {
-
+ 	public FileSystem() {
+		this.id = "id_65536";
+		this.name = "name_65536"; // easily searchable value, just for debugging
+		this.address = "address_65536";
+		this.enabled = true;
+		this.readPerm = false;
+		this.writePerm = true;
+		this.executePerm = false;
 	}
 
 	public FileSystem(String templateId, FileSystem fileSys) {
 		this.id = templateId;
 		this.name = fileSys.getName();
+		this.address = fileSys.getAddress();
+		this.enabled = fileSys.isEnabled();
+		this.readPerm = fileSys.getReadPerm();
+		this.writePerm = fileSys.getWritePerm();
+		this.executePerm = fileSys.getExecutePerm();
 	}
 
 	public String getId() {
@@ -48,8 +72,28 @@ public class FileSystem {
 		return name;
 	}
 
+	public String getAddress() {
+		return address;
+	}
+
+	@JsonGetter
 	public boolean isEnabled() {
-		return status;
+		return enabled;
+	}
+
+	@JsonGetter
+	public boolean getReadPerm() {
+		return readPerm;
+	}
+
+	@JsonGetter
+	public boolean getWritePerm() {
+		return writePerm;
+	}
+
+	@JsonGetter
+	public boolean getExecutePerm() {
+		return executePerm;
 	}
 
 	// below setters used for jackson deserialization
@@ -61,13 +105,30 @@ public class FileSystem {
 		this.name = name;
 	}
 
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
 	public void setEnabled(boolean newStatus) {
-		this.status = newStatus;
+		this.enabled = newStatus;
+	}
+
+	public void setReadPerm(boolean read) {
+		this.readPerm = read;
+	}
+
+	public void setWritePerm(boolean write) {
+		this.writePerm = write;
+	}
+
+	public void setExecutePerm(boolean execute) {
+		this.executePerm = execute;
 	}
 
 	@Override
 	public String toString() {
-		return "FileSystem [id=" + id + ", name=" + name + "]";
+		return "FileSystem [id=" + id + ", name=" + name + ", address=" + address + ", enabled=" + enabled +
+		", readPerm=" + readPerm + ", writePerm=" + writePerm + ", executePerm=" + executePerm + "]";
 	}
 
 	@Override
@@ -76,6 +137,7 @@ public class FileSystem {
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((address == null) ? 0 : address.hashCode());
 		return result;
 	}
 
@@ -87,17 +149,15 @@ public class FileSystem {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+
 		FileSystem other = (FileSystem) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		if (id == null || !id.equals(other.id))
 			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
+		if (name == null || !name.equals(other.name))
 			return false;
+		if (address == null || !address.equals(other.address))
+			return false;
+
 		return true;
 	}
 	public static final Comparator<? super FileSystem> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();

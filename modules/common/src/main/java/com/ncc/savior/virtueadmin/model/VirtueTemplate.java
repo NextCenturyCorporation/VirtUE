@@ -11,7 +11,11 @@ import java.util.stream.Collectors;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.ElementCollection;
 import javax.persistence.Transient;
+import javax.persistence.Column;
+import javax.persistence.Lob;
+import javax.persistence.Embedded;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -26,7 +30,10 @@ import com.ncc.savior.virtueadmin.model.FileSystem;
 /**
  * Data Transfer Object (DTO) for templates.
  *
- *
+ * Note that while the workbench keeps track of ids, and generates the related object lists as needed (e.g. vmTemplateIds vs vmTemplates),
+ * this keeps track of vmTemplates, and generates their ids when requested. The ids are taken from the front end, used to build the
+ * objects, and thereafter the objects are the final authority. When passed to the frontend again, its the id list that matters - it doesn't
+ * get rebuilt.
  */
 @Entity
 public class VirtueTemplate {
@@ -34,8 +41,6 @@ public class VirtueTemplate {
 	private String id;
 	private String name;
 	private String version;
-	@ManyToMany()
-	private Collection<VirtualMachineTemplate> vmTemplates;
 	@ColumnDefault("true")
 	private boolean enabled;
 	private Date lastModification;
@@ -49,22 +54,27 @@ public class VirtueTemplate {
 	private String color;
 
 	@ManyToMany()
-	private Collection<Printer> printers;
+	private Collection<VirtualMachineTemplate> vmTemplates;
 	@ManyToMany()
+	private Collection<Printer> printers;
+
+	// @Embedded
+	// @Lob
+	@ElementCollection()
 	private Collection<FileSystem> fileSystems;
 
-	@Transient //?
-	private Collection<String> printerIds;
-	@Transient //?
-	private Collection<String> fileSystemIds;
 
 	@Transient
+	private Collection<String> printerIds;
+	@Transient
+	private Collection<String> fileSystemIds;
+	@Transient
 	private Collection<String> vmTemplateIds;
+
 	// private Set<String> startingResourceIds;
 	// private Set<String> startingTransducerIds;
 
 	/**
-	 * Used for jackson deserialization
 	 *
 	 * @param template
 	 * @param templateId
@@ -75,6 +85,7 @@ public class VirtueTemplate {
 		this.name = template.getName();
 		this.version = template.getVersion();
 		this.vmTemplates = template.getVmTemplates();
+		this.vmTemplateIds = template.getVmTemplateIds();
 		this.color = template.getColor();
 		this.enabled = template.isEnabled();
 		this.lastModification = template.getLastModification();
@@ -82,6 +93,14 @@ public class VirtueTemplate {
 		this.awsTemplateName = template.getAwsTemplateName();
 		this.printers = template.getPrinters();
 		this.fileSystems = template.getFileSystems();
+		this.printerIds = template.getPrinterIds();
+		this.fileSystemIds = template.getFileSystemIds();
+		if (this.fileSystems == null) {
+			this.fileSystems = new ArrayList<FileSystem>();
+		}
+		if (this.fileSystemIds == null) {
+			this.fileSystemIds = new ArrayList<String>();
+		}
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -96,6 +115,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
@@ -111,6 +131,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, String awsTemplateName, String color, boolean enabled,
@@ -128,6 +149,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -144,10 +166,15 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
+	/**
+	 * Used for jackson deserialization
+	 */
 	protected VirtueTemplate() {
 		super();
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public String getId() {
@@ -176,11 +203,6 @@ public class VirtueTemplate {
 	@JsonIgnore
 	public Collection<Printer> getPrinters() {
 		return printers;
-	}
-
-	@JsonIgnore
-	public Collection<FileSystem> getFileSystems() {
-		return fileSystems;
 	}
 
 	// below setters are used for jackson deserialization.
@@ -284,13 +306,29 @@ public class VirtueTemplate {
 				fileSystemIds.add(fs.getId());
 			}
 		}
+		// return new ArrayList<String>();
 		return fileSystemIds;
+	}
+
+	@JsonGetter
+	public Collection<FileSystem> getFileSystems() {
+		return fileSystems;
 	}
 
 	@JsonSetter
 	public void setVmTemplateIds(Collection<String> vmTemplateIds) {
 		this.vmTemplates = null;
 		this.vmTemplateIds = vmTemplateIds;
+	}
+
+	@JsonSetter
+	public void setFileSystemIds(Collection<String> fileSystemIds) {
+		this.fileSystemIds = fileSystemIds;
+	}
+
+	@JsonSetter
+	public void setFileSystems(Collection<FileSystem> fileSystems) {
+		this.fileSystems = fileSystems;
 	}
 
 	public Date getTimeCreatedAt() {
@@ -307,6 +345,10 @@ public class VirtueTemplate {
 
 	public void setUserCreatedBy(String userCreatedBy) {
 		this.userCreatedBy = userCreatedBy;
+	}
+
+	public void setPrinters(Collection<Printer> printers) {
+		this.printers = printers;
 	}
 
 	public void addPrinter(Printer newPrinter) {

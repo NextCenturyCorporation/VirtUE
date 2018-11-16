@@ -24,7 +24,6 @@ import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
 import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 /**
@@ -125,13 +124,13 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
       this.updatePage();
     });
 
-    // newStatus is just item.enabled - item is a common reference across tabs and form, so the actual value of the
-    // parameter is extraneous. It just needs to emit something to let the form know that the user toggled the status.
-    // In any mode but view, nothing extra should happen. The local copy of item will have its status toggled, and that's it.
-    // In view mode, this toggling should actually make a change to the backend.
-    this.mainTab.onStatusChange.subscribe(() => {
+    // newStatus is just `!this.item.enabled`, but it makes it simplest and most likely to be idempotent (i.e. not have
+    // either the local or remote item's enabled field toggled twice) if the actual negation is done before this chain starts.
+    // It just needs to emit something to let the form know that the user toggled the status.
+    // The check doesn't hurt, but is no longer needed - item's `enabled` field should only be mutable from the view page.
+    this.mainTab.onStatusChange.subscribe((newStatus) => {
       if ( this.mode === Mode.VIEW ) {
-        this.toggleItemStatus(this.item);
+        this.setItemAvailability(this.item, newStatus);
       }
     });
 
@@ -188,19 +187,16 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.USERS,
       neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS]
     };
   }
 
   /**
-   * create and fill the fields the backend expects to see, pull in/record any
-   * uncollected inputs, and check that the item is valid to be saved
+   * Pull in/record any uncollected inputs and check that the item is valid to be saved
    *
-   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   * @return true if [[item]] is valid for saving, false otherwise.
    */
   finalizeItem(): boolean {
     // Note
@@ -225,12 +221,6 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
 
     // if not editing, make sure username isn't taken
 
-    this.item['username'] = this.item.getName();
-    this.item['authorities'] = this.item.roles;
-
-    // so we're not trying to stringify a bunch of extra fields and data
-    this.item.virtueTemplates = undefined;
-    this.item.roles = [];
     return true;
   }
 
@@ -242,29 +232,4 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     this.mainTab.onStatusChange.unsubscribe();
   }
 
-  /**
-   * Overrides parent, [[GenericPageComponent.toggleItemStatus]].
-   * See note at [[UserListComponent.toggleItemStatus]].
-   * Copied from there ^. Should eventually change, at which point this can be removed.
-   *
-   * @param item the user whose status we wish to toggle.
-   */
-  toggleItemStatus(item: Item): void {
-    if (item.getName().toUpperCase() === "ADMIN" && item.enabled) {
-      console.log("Don't allow the toggling of the admin user. We need that. #TODO");
-      item.enabled = true;
-      return;
-    }
-
-    let sub = this.dataRequestService.setItemStatus(this.serviceConfigUrl, item.getID(), !item.enabled).subscribe( () => {
-
-    },
-    () => { // on error
-      sub.unsubscribe();
-    },
-    () => { // when finished
-      sub.unsubscribe();
-    });
-
-  }
 }

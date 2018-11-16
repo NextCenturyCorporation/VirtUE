@@ -223,13 +223,13 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
 
   /**
    * abstracts away what needs to happen when the page loads or reloads
-   * Build item's children - take the existing lists of IDs that item has, and build its attributes based
-   * on the (possibly updated) datasets that were just pulled from the backend.
-   * So if I've added 4 virtues to a user, but haven't saved, I can hit refresh and get updated data about those 4 virtues,
-   * without having to re-add them.
+   * Build item's children - take the current lists of IDs that item has, and build its attributes based
+   * on the datasets that were pulled from the backend when the page loaded.
    */
   updatePage(): void {
-    this.buildIndexedObjAttribute(this.item, this.datasetName);
+    for (let childDatasetName of this.datasetsMeta[this.datasetName].depends) {
+      this.buildIndexedObjAttribute(this.item, childDatasetName);
+    }
     this.updateTabs();
   }
 
@@ -325,7 +325,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
       console.log("Item not valid."); // TODO give useful error message
       return;
     }
-    console.log(this.item);
+
     if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
       this.createItem(this.item, redirect);
     }

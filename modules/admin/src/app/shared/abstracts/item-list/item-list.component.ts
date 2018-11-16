@@ -207,8 +207,8 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    */
   getSubMenu(): SubMenuOptions[] {
     return [
-      new SubMenuOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.toggleItemStatus(i)),
-      new SubMenuOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.toggleItemStatus(i)),
+      new SubMenuOptions("Enable",  (i: Item) => !i.enabled, (i: Item) => this.setItemAvailability(i, true)),
+      new SubMenuOptions("Disable", (i: Item) => i.enabled, (i: Item) => this.setItemAvailability(i, false)),
       new SubMenuOptions("Edit",    () => true,             (i: Item) => this.editItem(i)),
       new SubMenuOptions("Duplicate", () => true,           (i: Item) => this.dupItem(i)),
       new SubMenuOptions("Delete",  () => true,             (i: Item) => this.openDialog('Delete ' + i.getName(), () => this.deleteItem(i)))

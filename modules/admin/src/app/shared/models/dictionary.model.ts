@@ -10,11 +10,15 @@
  * When written, this was a useful tool. Due to other changes, the times when the dictionary part is actually used have becom minimal,
  * and so performance would likely not be impacted much if all this were replaced with regular list operations.
  *
- * If I got rid of it though, I'd have to write a bunch of search loops, instead of using the one built here.
+ * If I got rid of it though, I'd have to either write a bunch of search loops, or just replace this class with a list that has a search.
  *
  * @example // usage:
- *      let dataset = new DictList<Item>()
- *      dataset.add( "username1", new User() )
+ *      let dataset = new DictList<Item>();
+ *      dataset.add( "username1", new User(...) );
+ *
+ *      let virtueDataset = new DictList<Virtue>();
+ *      let v = new Virtue(...);
+ *      virtueDataset.add(v.getID(), v);
  *
  */
  export class DictList<T> {
@@ -25,11 +29,14 @@
   /** a generic list */
   private list: T[] = [];
 
-  /** #uncommented */
   keys(): string[] {
     let keys: string[] = [];
     for (let key in this.dict) {
-      keys.push(key);
+      // this check added simply because of a tslint complaint that shouldn't matter in this context
+      // but which I can't find a way to turn off.
+      if (this.dict.hasOwnProperty(key)) {
+        keys.push(key);
+      }
     }
     return keys;
   }
@@ -44,7 +51,8 @@
   add(key: string, e: T): void {
     if (key in this.dict) {
       console.log("Key ", key + ": ", e, " already in dict.");
-      return;
+      throw new Error("Key " + key + ": " + JSON.stringify(e) + " already in dict.");
+      // return;
     }
     this.dict[key] = e;
     this.list.push(e);
@@ -78,7 +86,7 @@
   }
 
   /**
-   * Removes an objet from this collection
+   * Removes an object from this collection
    * @param key the key of the object to remove
    */
   remove(key: string): void {
@@ -103,8 +111,9 @@
     this.list = null;
   }
 
-  /** #uncommented */
+
   getSubset(keys: string[]): DictList<T> {
+    // if (keys ===)
     let subset = new DictList<T>();
     for (let key of keys) {
       if (this.has(key)) {
@@ -112,6 +121,15 @@
       }
     }
     return subset;
+  }
+
+  /**  */
+  trimTo(keysToKeep: string[]): void {
+    for (let key of this.keys()) {
+      if ( keysToKeep.indexOf(key) === -1 ) {
+        this.remove(key);
+      }
+    }
   }
 }
 

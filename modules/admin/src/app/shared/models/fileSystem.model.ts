@@ -1,6 +1,7 @@
 import { DictList } from './dictionary.model';
 import { IndexedObj } from './indexedObj.model';
 import { Toggleable } from './toggleable.interface';
+import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
@@ -12,35 +13,57 @@ import { Toggleable } from './toggleable.interface';
  * the Virtue. So it doesn't work like the other IndexedObj objects - while the FileSystem dataset needs to be pulled on the
  * pages listed below, Virtues shouldn't use those values to set any of their attributes.
  *
+ *  Does it need to be pulled? On anything besides the modal and the config tab?
+ *    I guess - so we can show some marker when a value is different from the default.
+ *
  * Used in [[ConfigFileSysTabComponent]] [[VirtueSettingsTabComponent]] and [[Virtue]]
  */
 export class FileSystem extends IndexedObj implements Toggleable {
 
   /** the id given by the backend */
-  id: string;
+  id: string = "12345"; // default to something recognizable so it's clear if something goes wrong.
+
+  /** the address of this FS, relative to something, TODO */
+  address: string;
+
+  /** some name to identify this file system. */
+  name: string;
 
   /** Can this FS be accessed at all? */
-  enabled: boolean = false;
+  enabled: boolean = true;
 
   /** Can the virtue read data on this FS? */
-  read: boolean = false;
+  readPerm: boolean = false;
 
   /** Can the virtue write data to this FS? */
-  write: boolean = false;
+  writePerm: boolean = false;
 
   /** Can the virtue execute files on this FS?
-   * TODO on, or from? The 2x2 of executable source and execution location*/
-  execute: boolean = false;
+   * TODO on the FS, or from it? Both? Either?*/
+  executePerm: boolean = false;
 
-  /**
-   * Location is defined by the parameter, everything else defaults to false.
-   */
-  constructor(
-    /** @param location the address of this FS, relative to something, TODO */
-    public location: string
-  ) {
+  constructor( fs: {id?: string, name: string, address: string} | FileSystem ) {
     super();
-    this.id = "location" + "12345";
+
+    if (fs.id !== undefined) {
+      this.id = fs.id;
+    }
+
+    this.name = fs.name;
+    this.address = fs.address;
+
+    if ( 'enabled' in fs) {
+      this.enabled = fs.enabled;
+    }
+    if ( 'readPerm' in fs) {
+      this.readPerm = fs.readPerm;
+    }
+    if ( 'writePerm' in fs) {
+      this.writePerm = fs.writePerm;
+    }
+    if ( 'executePerm' in fs) {
+      this.executePerm = fs.executePerm;
+    }
   }
 
   /** #uncommented */
@@ -48,4 +71,14 @@ export class FileSystem extends IndexedObj implements Toggleable {
     return this.id;
   }
 
+  /**
+   * @return the FILE_SYSTEMS subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.FILE_SYSTEMS;
+  }
+
+  formatPerms() {
+    return this.readPerm ? " R " : "" + this.writePerm ? " W " : "" + this.executePerm ? " E " : "";
+  }
 }

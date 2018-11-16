@@ -51,30 +51,30 @@ export class DataRequestService {
   }
 
   /**
-   * Request all items in the dataset at [[configUrl]]
+   * Request all items in the dataset at [[subdomain]]
    * The most commonly-used function - see [[GenericDataPageComponent.recursivePullData]]
    *
-   * @param configUrl the path describing to virtue-admin what set of data we're requesting
+   * @param subdomain the path describing to virtue-admin what set of data we're requesting
    *
    * @return a subscription that will return a list of objects, if/when available.
    *         Is an 'any', because we don't know what form those objects are in. And really it doesn't matter what
    *         we put there - types only matter at compile time, and what those objects look like isn't known until runtime.
    *         You could replace 'any' with anything you want and it wouldn't change how the program worked.
    */
-  public getItems(configUrl: string): Observable<any[]> {
-    let src = this.baseUrl + configUrl;
-    return this.httpClient.get<any[]>(src).catch(this.errorHandler);
+  public getRecords(subdomain: string): Observable<any[]> {
+    let url = this.baseUrl + subdomain;
+    return this.httpClient.get<any[]>(url).catch(this.errorHandler);
   }
 
   /**
-   * Request an item with the specified ID, in the dataset at [[configUrl]]
+   * Request an item with the specified ID, in the dataset at [[subdomain]]
    * At the moment, never used.
    * If we ever need to cut down on requests and processing, we can call this when building the top-level sets in in the user,
    * vm, and application forms instead of [[getItems]]. That is, if we're looking at a User, request only the current User's data,
    * instead of requesting all of them and just picking out the one we want to view/edit/duplicate. Note that virtues is not
    * included in that list, because virtue's settings tab requires a list of all other virtues.
    *
-   * @param configUrl the path describing to virtue-admin what set of data we're requesting
+   * @param subdomain the path describing to virtue-admin what set of data we're requesting
    * @param id the identifying key for the item we're requesting.
    *
    * @return a subscription that will return the requested object, if it exists.
@@ -82,27 +82,29 @@ export class DataRequestService {
    *         we put there - types only matter at compile time, and what those objects look like isn't known until runtime.
    *         You could replace 'any' with anything you want and it wouldn't change how the program worked.
    */
-  public getItem(configUrl: string, id: string): Observable<any> {
-    let url = this.baseUrl + configUrl + id;
+  public getRecord(subdomain: string, id: string): Observable<any> {
+    let url = this.baseUrl + subdomain + id;
     return this.httpClient.get<IndexedObj>(url).catch(this.errorHandler);
   }
 
   /**
-   * @param configUrl the path describing to virtue-admin what set of data to save this item to
+   * @param subdomain the path describing to virtue-admin what set of data to save this item to
    * @param itemData a JSON.stringify-ed Item. Must have the attributes the backend expects to see.
    *                 Those are set in each item-form's [[finalizeItem]] method.
    *
    * @return a subscription that will return the saved object as it exists on the backend.
    */
-  public createItem(configUrl: string, itemData: string): Observable<any> {
-    let url = this.baseUrl + configUrl;
-
+  public createRecord(subdomain: string, itemData: string): Observable<any> {
+    let url = this.baseUrl + subdomain + "create";
+    console.log("**", url);
+    console.log("**", itemData);
+    console.log("**", httpOptions.headers);
     return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
   }
 
   /**
-   * Delete the item with the given id, in the dataset at [[configUrl]]
-   * @param configUrl the path describing to virtue-admin what set of data we're requesting to access
+   * Delete the item with the given id, in the dataset at [[subdomain]]
+   * @param subdomain the path describing to virtue-admin what set of data we're requesting to access
    * @param id the identifying key for the item to be deleted.
    *
    * @return a Promise that will return nothing
@@ -112,13 +114,15 @@ export class DataRequestService {
    * Perhaps that region could allow deletion? There's gotta be a balance between recording everything and making
    * logs and histories to cluttered to be useful.
    *
+   * Also note that the delete and get requests are to the same address. Does that matter? #TODO LOOK HERE
+   *
    * Note that this works correctly, using promises. Everything else should be changed eventually to use them,
    * instead of subscriptions we only use once.
    * See https://codecraft.tv/courses/angular/http/http-with-promises/
    */
-  public deleteItem(configUrl: string, id: string): Promise<any> {
+  public deleteRecord(subdomain: string, id: string): Promise<any> {
 
-    let url = this.baseUrl + configUrl + id;
+    let url = this.baseUrl + subdomain + id;
 
     console.log('Deleting item at:', url);
 
@@ -126,8 +130,8 @@ export class DataRequestService {
   }
 
   /**
-   * Update the item with the given id, in the dataset at {configUrl}
-   * @param configUrl the path describing to virtue-admin what set of data we're requesting to access
+   * Update the item with the given id, in the dataset at {subdomain}
+   * @param subdomain the path describing to virtue-admin what set of data we're requesting to access
    * @param id the identifying key for the item to be updated.
    * @param itemData a JSON.stringify-ed Item, to be saved to the backend.
    *                 Must have the attributes the backend expects to see. Those are set in each item-form's [[finalizeItem]] method.
@@ -135,39 +139,25 @@ export class DataRequestService {
    * @return a subscription that will return the updated object as it exists on the backend.
    *
    */
-  public updateItem(configUrl: string, id: string, itemData: string): Observable<any> {
-    let url = this.baseUrl + configUrl + id;
+  public updateRecord(subdomain: string, id: string, itemData: string): Observable<any> {
+    let url = this.baseUrl + subdomain + id;
 
     return this.httpClient.put(url, itemData, httpOptions).catch(this.errorHandler);
   }
 
   /**
-   * Toggle the status of the item with the given id, in the dataset at [[configUrl]]
+   * Set the status of the item with the given id, in the dataset at [[subdomain]], to the given value.
    *
-   * @param configUrl the path describing to virtue-admin what set of data we're requesting to access
-   * @param id the identifying key for the item to be enabled/disabled.
-   *
-   * @return a subscription that will return the updated object as it exists on the backend.
-   */
-  public toggleItemStatus(configUrl: string, id: string): Observable<any> {
-    let url = this.baseUrl + configUrl + id + '/toggle';
-
-    return this.httpClient.get(url).catch(this.errorHandler);
-  }
-
-  /**
-   * Set the status of the item with the given id, in the dataset at [[configUrl]], to the given value.
-   *
-   * @param configUrl the path describing to virtue-admin what set of data we're requesting to access
+   * @param subdomain the path describing to virtue-admin what set of data we're requesting to access
    * @param id the identifying key for the item to be enabled/disabled.
    * @param newStatus the new true/false status this item should have.
    *
    * @return a subscription that will return the updated object as it exists on the backend.
    */
-  public setItemStatus(configUrl: string, id: string, newStatus: boolean): Observable<any> {
-    let url = this.baseUrl + configUrl + id + '/setStatus';
+  public setRecordAvailability(subdomain: string, id: string, newStatus: boolean): Observable<any> {
+    let url = this.baseUrl + subdomain + id + '/setStatus';
 
-    return this.httpClient.post(url, newStatus).catch(this.errorHandler);
+    return this.httpClient.put(url, newStatus).catch(this.errorHandler);
   }
 
   /**

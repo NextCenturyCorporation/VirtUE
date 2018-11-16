@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
@@ -58,6 +61,8 @@ import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
  * ROLE_ADMIN.
  */
 public class AdminService {
+	private final static Logger logger = LoggerFactory.getLogger(AdminService.class);
+
 	public static final String DEFAULT_ICON_KEY = "DEFAULT";
 	private IActiveVirtueManager virtueManager;
 	private ITemplateManager templateManager;
@@ -118,7 +123,18 @@ public class AdminService {
 
 	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
 		verifyAndReturnUser();
-		return templateManager.getAllVirtueTemplates();
+		// return templateManager.getAllVirtueTemplates();
+		Iterable<VirtueTemplate> virtuesItr = templateManager.getAllVirtueTemplates();
+		ArrayList<VirtueTemplate> virtues = new ArrayList<VirtueTemplate>();
+		virtuesItr.forEach(virtues::add);
+
+		for (VirtueTemplate v : virtues) {
+      if (v.getName() != null && v.getName().equals("aa_newVirtue2")) {
+				logger.debug("# " + v.getFileSystems().iterator().next());
+				logger.debug("# " + v.getFileSystems().iterator().next().getReadPerm());
+      }
+    }
+		return virtues;
 	}
 
 	public Iterable<VirtualMachineTemplate> getAllVmTemplates() {
@@ -162,8 +178,7 @@ public class AdminService {
 		viTemplate.setEnabled(newStatus);
 		viTemplate.setLastModification(new Date());
 		viTemplate.setLastEditor(user.getUsername());
-		templateManager.addVirtueTemplate(viTemplate);
-		return viTemplate;
+		return templateManager.addVirtueTemplate(viTemplate);
 	}
 
 	public VirtualMachineTemplate setVirtualMachineTemplateStatus(String templateId, boolean newStatus) {
@@ -184,7 +199,7 @@ public class AdminService {
 		return printer;
 	}
 
-	public FileSystem setFileSystemStaus(String fileSystemId, boolean newStatus) {
+	public FileSystem setFileSystemStatus(String fileSystemId, boolean newStatus) {
 		verifyAndReturnUser();
 		FileSystem fileSystem = resourceManager.getFileSystem(fileSystemId);
 		fileSystem.setEnabled(newStatus);
@@ -243,6 +258,8 @@ public class AdminService {
 		return resourceManager.addPrinter(printer);
 	}
 
+// just try deleting something? Either pick out those, or just redo the repo. It's not that back. And then start saving it.
+
 	public FileSystem createFileSystem(FileSystem fileSystem) {
 		verifyAndReturnUser();
 		fileSystem.setId(UUID.randomUUID().toString());
@@ -273,6 +290,23 @@ public class AdminService {
 
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
 		VirtueUser user = verifyAndReturnUser();
+
+		logger.debug("% " + template.getFileSystems().iterator().next());
+		logger.debug("% " + template.getFileSystems().iterator().next().getReadPerm());
+
+		if ( !templateId.equals(template.getId()) ) {
+			template = new VirtueTemplate(templateId, template);
+			template.setUserCreatedBy(user.getUsername());
+			template.setTimeCreatedAt(new Date());
+		}
+
+
+		// This ensures no doubles of the same object are stored in the VirtueTemplate.
+		// Is that for storage optimization? Error checking, because it shouldn't happen?
+		// It checks whether two items are equal using their equals() method. Which isn't implemented for at least
+		// VirtueTemplates, and even if it were, merging on equal objects would only give a different
+		// result than merging on ids, if equals() didn't check object id.
+		// See the next code chunks (doing the same as below, but for printers and file systems), for proposed change.
 		Collection<String> vmtIds = template.getVmTemplateIds();
 		Iterable<VirtualMachineTemplate> vmts;
 		if (vmtIds == null) {
@@ -281,21 +315,28 @@ public class AdminService {
 			vmts = templateManager.getVmTemplates(vmtIds);
 		}
 		Iterator<VirtualMachineTemplate> itr = vmts.iterator();
-		if (!templateId.equals(template.getId())) {
-			template = new VirtueTemplate(templateId, template);
-			template.setUserCreatedBy(user.getUsername());
-			template.setTimeCreatedAt(new Date());
+		Set<VirtualMachineTemplate> vmTemplateSet = new HashSet<VirtualMachineTemplate>();
+		while (itr.hasNext()) {
+			vmTemplateSet.add(itr.next());
 		}
 
-		Set<VirtualMachineTemplate> vmTemplates = new HashSet<VirtualMachineTemplate>();
-		while (itr.hasNext()) {
-			vmTemplates.add(itr.next());
+		// create list of printers from the virtueTemplate's printer id list, ignoring duplicates.
+		List<Printer> printerSet = new ArrayList<Printer>();
+		Collection<String> printerIds = template.getPrinterIds();
+		if (printerIds != null) {
+			Iterable<Printer> itrPrinters = resourceManager.getPrinters(new HashSet<String>(printerIds));
+			itrPrinters.forEach(printerSet::add); // go through the iterator and add each item to the printers ArrayList.
 		}
-		template.setVmTemplates(vmTemplates);
+
+		template.setVmTemplates(vmTemplateSet);
+		template.setPrinters(printerSet);
 		template.setLastEditor(user.getUsername());
 		template.setLastModification(new Date());
-		templateManager.addVirtueTemplate(template);
-		return template;
+
+
+		VirtueTemplate savedTemplate = templateManager.addVirtueTemplate(template);
+
+		return savedTemplate;
 	}
 
 	public VirtualMachineTemplate updateVmTemplate(String templateId, VirtualMachineTemplate vmTemplate) {
@@ -645,6 +686,11 @@ public class AdminService {
  	public Iterable<Printer> getAllPrinters() {
  		verifyAndReturnUser();
  		return resourceManager.getAllPrinters();
+ 	}
+
+ 	public Iterable<FileSystem> getAllFileSystems() {
+ 		verifyAndReturnUser();
+		return resourceManager.getAllFileSystems();
  	}
 
  	public Iterable<Printer> getPrintersForVirtueTemplate(String virtueTemplateId) {

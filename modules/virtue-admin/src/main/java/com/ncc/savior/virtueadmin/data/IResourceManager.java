@@ -71,9 +71,5 @@ public interface IResourceManager {
 
 	public boolean containsFileSystem(String id);
 
-	public void checkFileSystemExists(String fileSystemId, boolean breakIffExists);
-
-	public void checkPrinterExists(String printerId, boolean breakIfExists);
-
 	public void clear();
 }

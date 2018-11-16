@@ -11,11 +11,8 @@ import { Item } from '../../../models/item.model';
 import { DictList } from '../../../models/dictionary.model';
 import { Column } from '../../../models/column.model';
 import { Mode } from '../../../abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../services/config-urls.enum';
-import { DatasetNames } from '../../../abstracts/gen-data-page/datasetNames.enum';
 
-import { BaseUrlService } from '../../../services/baseUrl.service';
-import { DataRequestService } from '../../../services/dataRequest.service';
+import { DatasetNames } from '../../../abstracts/gen-data-page/datasetNames.enum';
 
 import { DialogsComponent } from '../../../../dialogs/dialogs.component';
 
@@ -42,10 +39,8 @@ export abstract class ItemFormTabComponent extends GenericFormTabComponent imple
    */
   constructor(
       router: Router,
-      baseUrlService: BaseUrlService,
-      dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(router, dialog);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter, Output } from '@angular/core';
 import {  MatButtonModule,
           MatDialog,
           MatIconModule
@@ -27,11 +27,10 @@ import { FileSystem } from '../../../shared/models/fileSystem.model';
 import { Printer } from '../../../shared/models/printer.model';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { DataRequestService } from '../../../shared/services/dataRequest.service';
+import { PrinterSelectionModalComponent } from '../../../modals/printer-modal/printer-selection.modal';
+import { FileSystemSelectionModalComponent } from '../../../modals/fileSystem-modal/fileSystem-selection.modal';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
@@ -82,7 +81,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   @ViewChild('networkPermsTable') private networkPermsTable: GenericTableComponent<NetworkPermission>;
 
   /** a table to display the file system permissions of this Virtue */
-  @ViewChild('fileSystemsTable') private fileSystemsTable: GenericTableComponent<FileSystem>;
+  @ViewChild('fileSystemsPermsTable') private fileSystemsPermsTable: GenericTableComponent<FileSystem>;
 
   /** a table to display the printers this Virtue can access */
   @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
@@ -90,15 +89,16 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
+  /** to notify the parent item form that one of this.item's lists of child ids has been changed */
+  @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
+
   /**
    * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
   constructor(
       router: Router,
-      baseUrlService: BaseUrlService,
-      dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(router, dialog);
 
     this.item = new Virtue({});
 
@@ -179,10 +179,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    * @return true if all network permission fields have been filled out
    */
   collectData(): boolean {
-    console.log("collectData");
-
     // check all entries for validity before allowing save
-
 
     if (!this.checkNetworkPerms()) {
       // TODO tell the user
@@ -198,12 +195,12 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    * to their index, and so if you put a ngModel on (apparently) any part of an element within an ngFor, it loses track (??) of
    * that item and hangs - as in, Angular hangs. And the containing tab needs to be killed either through the browser's
    * tab manager, or the browser needs to be killed at the system level (xkill, system process manager, kill, killall, etc.).
-   * This is prevented by manually telling it track things by index, using the below code, adding "; trackBy: indexTracker" to the
-   * end of the ngFor statement.
+   * This is prevented by manually telling it track things by index, using the below code, and adding "; trackBy: indexTracker" to
+   * the end of the offending ngFor statement.
    * ...
    *
    * @param index an index, automagically passed in.
-   * @param value a value, auto{black}magically passed in.
+   * @param value a value, automagically passed in.
    * @return the index that was passed in.
    */
   indexTracker(index: number, value: any): number {
@@ -220,7 +217,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Info',    6, (p: Printer) => p.info, SORT_DIR.ASC),
+      new TextColumn('Printer Name',    6, (p: Printer) => p.name, SORT_DIR.ASC),
       new TextColumn('Printer Status',  4, (p: Printer) => p.status, SORT_DIR.ASC),
       new IconColumn('Revoke access',  2, 'delete', (p: Printer) => this.removePrinter(p)
       )
@@ -242,6 +239,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       filters: [],
       tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
+      elementIsDisabled: (p: Printer) => !p.enabled,
       editingEnabled: () => !this.inViewMode()
     });
   }
@@ -253,14 +251,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     this.printerTable.populate(this.item.printers.asList());
   }
 
-  /**
-   * This adds a new printer object to the Virtue's printer list.
-   * This is very much a temporary measure.
-   */
-  addNewPrinter(): void {
-    // #unimplemented
-    this.updatePrinterTable();
-  }
 
   /**
    * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
@@ -276,6 +266,131 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   }
 
 
+  /**
+   * this brings up the subclass-defined-modal to add/remove children.
+   *
+   * Note the distinction between this and DialogsComponent;
+   * This pops up to display options, or a selectable table, or something. DialogsComponent just checks
+   * potentially dangerous user actions.
+   */
+  activatePrinterModal(): void {
+
+    let params = {
+      height: '70%',
+      width: '70%',
+      data: {
+        selectedIDs: this.item.getRelatedIDList(DatasetNames.PRINTERS)
+      }
+    };
+
+    let dialogRef = this.dialog.open( PrinterSelectionModalComponent, params);
+
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedIds) => {
+      this.item.printerIds = selectedIds;
+      this.onChildrenChange.emit();
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%' });
+
+  }
+
+/************************************************************************************/
+/************************************************************************************/
+
+  updateFileSysPermsTable(): void {
+    if (this.fileSystemsPermsTable === undefined) {
+      return;
+    }
+    this.fileSystemsPermsTable.populate(this.item.fileSystems.asList());
+  }
+
+  /**
+   * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
+   * these things aren't Items. Generalizing the GenericTable further would be useful.
+   * @return what columns should show up in the network permissions table
+   */
+  getFileSysColumns(): Column[] {
+    return [
+      new TextColumn('Server & Drive',  3, (fs: FileSystem) => fs.name, SORT_DIR.ASC),
+      new TextColumn('Address',         3, (fs: FileSystem) => fs.address, SORT_DIR.ASC),
+      new CheckboxColumn('Enabled',     3, 'enabled'),
+      new CheckboxColumn('Read',        1, 'readPerm'),
+      new CheckboxColumn('Write',       1, 'writePerm'),
+      new CheckboxColumn('Execute',     1, 'executePerm')
+    ];
+  }
+
+  /**
+   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+   *
+   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+   */
+  setUpFileSysPermsTable(): void {
+    if (this.fileSystemsPermsTable === undefined) {
+      return;
+    }
+    this.fileSystemsPermsTable.setUp({
+      cols: this.getFileSysColumns(),
+      filters: [],
+      tableWidth: 1,
+      noDataMsg: "No file systems have been set up in the global settings",
+      elementIsDisabled: (fs: FileSystem) => !fs.enabled,
+      editingEnabled: () => !this.inViewMode()
+    });
+  }
+
+  /**
+   * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
+   * Note that if there are several matching printers, only the first one is removed.
+   */
+  removeFileSystem(toDelete: FileSystem): void {
+    this.item.fileSystems.remove(toDelete.getID());
+    let index = this.item.fileSystemIds.indexOf(toDelete.getID(), 0);
+    if (index > -1) {
+       this.item.fileSystemIds.splice(index, 1);
+    }
+    this.updateFileSysPermsTable();
+  }
+
+  /**
+   * this brings up the subclass-defined-modal to add/remove children.
+   *
+   * Note the distinction between this and DialogsComponent;
+   * This pops up to display options, or a selectable table, or something. DialogsComponent just checks
+   * potentially dangerous user actions.
+   */
+  activateFileSystemModal(): void {
+
+    let params = {
+      height: '70%',
+      width: '70%',
+      data: {
+        selectedIDs: this.item.getRelatedIDList(DatasetNames.FILE_SYSTEMS)
+      }
+    };
+
+    let dialogRef = this.dialog.open( FileSystemSelectionModalComponent, params);
+
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedIds) => {
+      this.item.fileSystemIds = selectedIds;
+      this.onChildrenChange.emit();
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%' });
+
+  }
 /************************************************************************************/
 /************************************************************************************/
 
@@ -383,64 +498,6 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       return false;
     }
     return true;
-  }
-
-
-/************************************************************************************/
-/************************************************************************************/
-
-  updateFileSysPermsTable(): void {
-    if (this.fileSystemsTable === undefined) {
-      return;
-    }
-    this.fileSystemsTable.populate(this.item.fileSystems.asList());
-  }
-
-  /**
-   * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
-   * these things aren't Items. Generalizing the GenericTable further would be useful.
-   * @return what columns should show up in the network permissions table
-   */
-  getFileSysColumns(): Column[] {
-    return [
-      new TextColumn('Server & Drive',  6, (fs: FileSystem) => fs.location, SORT_DIR.ASC),
-      new CheckboxColumn('Enabled',     3, 'enabled'),
-      new CheckboxColumn('Read',        1, 'read'),
-      new CheckboxColumn('Write',       1, 'write'),
-      new CheckboxColumn('Execute',     1, 'execute')
-    ];
-  }
-
-  /**
-   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
-   *
-   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
-   */
-  setUpFileSysPermsTable(): void {
-    if (this.fileSystemsTable === undefined) {
-      return;
-    }
-    this.fileSystemsTable.setUp({
-      cols: this.getFileSysColumns(),
-      filters: [],
-      tableWidth: 1,
-      noDataMsg: "No file systems have been set up in the global settings",
-      elementIsDisabled: (fs: FileSystem) => !fs.enabled,
-      editingEnabled: () => !this.inViewMode()
-    });
-  }
-
-  /**
-   * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
-   * Note that if there are several matching printers, only the first one is removed.
-   */
-  removeFileSystem(toDelete: FileSystem): void {
-    this.item.fileSystems.remove(toDelete.getID());
-    let index = this.item.fileSystemIds.indexOf(toDelete.getID(), 0);
-    if (index > -1) {
-       this.item.fileSystemIds.splice(index, 1);
-    }
-    this.updateFileSysPermsTable();
   }
 
 /************************************************************************************/
@@ -557,7 +614,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   activateDefaultBrowserVirtueModal(): void {
     this.activateVirtueSelectionModal(
         [this.item.defaultBrowserVirtueId],
-        (selectedVirtueIds: string[]) => {this.item.defaultBrowserVirtueId = selectedVirtueIds[0];},
+        (selectedVirtueIds: string[]) => { this.item.defaultBrowserVirtueId = selectedVirtueIds[0]; },
         SelectionMode.SINGLE
       );
   }

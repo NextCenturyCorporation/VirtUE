@@ -18,7 +18,6 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
  * @class
@@ -79,10 +78,8 @@ export class VmListComponent extends ItemListComponent {
    * @return child-specific information needed by the generic page functions when loading data.
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.VMS,
       neededDatasets: [DatasetNames.APPS, DatasetNames.VMS]
     };
   }

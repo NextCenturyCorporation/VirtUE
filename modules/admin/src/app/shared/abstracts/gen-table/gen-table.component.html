@@ -155,10 +155,21 @@
 
           <!-- if it's a checkbox column -->
           <ng-container *ngIf="isCheckbox(column)">
-            <mat-checkbox
-            [disabled]="!editingEnabled() || (column.disabled && column.disabled(elem.obj))"
-            [(ngModel)]="elem.obj[column.toggleableFieldName]">
-            </mat-checkbox>
+            <!-- if angular should just automatically update the local elem.obj object -->
+            <ng-container *ngIf="column.onChange === undefined">
+              <mat-checkbox
+              [disabled]="!editingEnabled() || (column.disabled && column.disabled(elem.obj))"
+              [(ngModel)]="elem.obj[column.toggleableFieldName]">
+              </mat-checkbox>
+            </ng-container>
+
+            <!-- if we don't care about the local copy of elem.obj, and want some master copy to be updated on check/uncheck. -->
+            <ng-container *ngIf="column.onChange !== undefined">
+              <mat-checkbox
+              [disabled]="!editingEnabled() || (column.disabled && column.disabled(elem.obj))"
+              [checked]="elem.obj[column.toggleableFieldName]" (change)="column.onChange(elem.obj, $event.checked)">
+              </mat-checkbox>
+            </ng-container>
           </ng-container>
 
           <ng-container *ngIf="isIcon(column)">

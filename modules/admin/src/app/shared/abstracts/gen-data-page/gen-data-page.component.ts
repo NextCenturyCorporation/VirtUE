@@ -12,7 +12,7 @@ import { DataRequestService } from '../../services/dataRequest.service';
 import { Column } from '../../models/column.model';
 import { DictList, Dict } from '../../models/dictionary.model';
 
-// import { Item } from '../../models/item.model';
+import { Item } from '../../models/item.model';
 import { IndexedObj } from '../../models/indexedObj.model';
 import { User } from '../../models/user.model';
 import { Virtue } from '../../models/virtue.model';
@@ -21,7 +21,7 @@ import { Application } from '../../models/application.model';
 import { Printer } from '../../models/printer.model';
 import { FileSystem } from '../../models/fileSystem.model';
 
-import { ConfigUrls } from '../../services/config-urls.enum';
+import { Subdomains } from '../../services/subdomains.enum';
 
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
@@ -29,13 +29,13 @@ import { Mode } from '../gen-form/mode.enum';
 
 import { DatasetNames } from './datasetNames.enum';
 
-import { DatasetType } from './datasetType';
+import { DatasetType, DatasetsMeta } from './datasetType';
 
 
 /**
 * @class
  * This is the generic class which all pages that must load Item data from the backend must extend.
- * It has functions for pulling that data, as well as linking it together; a Virtue containing a list of VM childIDs will
+ * It has functions for pulling that data, as well as linking it together; a Virtue containing a list of VM ids will
  * be generated a list of references to the actual VM objects. This significantly reduces the number of requests made to
  * the backend, as compared to having to request and wait for the data on every object referenced via a childID separately.
  *
@@ -60,13 +60,6 @@ providers: [ BaseUrlService, DataRequestService ]
 })
 export abstract class GenericDataPageComponent extends GenericPageComponent {
 
-
-  /**
-  * tells DataRequestService where to make changes on the backend - specific to each type
-  * of item. Must be set in constructor of derived class. Not used to make the initial data pull.
-  */
-  serviceConfigUrl: ConfigUrls;
-
   /**
    * Holds all the datasets that get pulled in for the page. Doesn't need to be a DictList, but being a dictionary gives it
    * a useful interface. It shouldn't really add any overhead.
@@ -75,7 +68,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
 
   /** holds the names and data types of each of the four datasets. */
-  datasetMeta: Dict<DatasetType>;
+  datasetsMeta: Dict<DatasetType>;
 
  /**
   * Must hold a list of enumerations of the datasets to be loaded on page load or refresh,
@@ -92,29 +85,21 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    */
   constructor(
     router: Router,
-    baseUrlService: BaseUrlService,
-    dataRequestService: DataRequestService,
+    protected baseUrlService: BaseUrlService,
+    protected dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, dataRequestService, dialog);
-    // Initialize these empty. These get overwritten if/when their data is pulled from the backend.
-    // this.allUsers = new DictList<IndexedObj>();
-    // this.allVirtues = new DictList<IndexedObj>();
-    // this.allVms = new DictList<IndexedObj>();
-    // this.allApps = new DictList<IndexedObj>();
-    // this.allPrinters = new DictList<Printer>();
-    // this.allFileSystems = new DictList<FileSystem>();
+    super(router, dialog);
 
     // This really only needs to be a dictionary (i.e. it could just be a normal {} object), but I like the DictList interface.
     this.datasets = new DictList<DictList<IndexedObj>>();
 
-    this.buildDatasetMeta();
-
     // Every derivative of this class must define getDataPageOptions
     let params = this.getDataPageOptions();
-    this.serviceConfigUrl = params.serviceConfigUrl;
     this.neededDatasets = params.neededDatasets;
     this.loadedDatasets = [];
+
+    this.datasetsMeta = new DatasetsMeta().getDatasets();
   }
 
   /**
@@ -123,7 +108,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * right away. Before onPullComplete was implemented, this was used to delay the initialization of page
    * components until data from the backend had probably been retrieved.
    */
-  refreshData(wait?: boolean): void {
+  refreshPage(wait?: boolean): void {
     if (wait) {
       setTimeout(() => {
         this.pullData();
@@ -132,51 +117,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     }
     // else
     this.pullData();
-  }
-
-  /**
-   * This defines the metadata about the 4 main datasets, so they can be used generically when pulling data.
-   * Could be put into a different file, along with the dataset interface.
-   * Called in constructor.
-   */
-  buildDatasetMeta() {
-    this.datasetMeta = new Dict<DatasetType>();
-    this.datasetMeta[DatasetNames.PRINTERS] = {
-          serviceUrl: ConfigUrls.PRINTERS,
-          class: Printer,
-          datasetName: DatasetNames.PRINTERS,
-          depends: []
-        };
-    this.datasetMeta[DatasetNames.FILE_SYSTEMS] = {
-          serviceUrl: ConfigUrls.FILE_SYSTEMS,
-          class: FileSystem,
-          datasetName: DatasetNames.FILE_SYSTEMS,
-          depends: []
-        };
-    this.datasetMeta[DatasetNames.APPS] = {
-          serviceUrl: ConfigUrls.APPS,
-          class: Application,
-          datasetName: DatasetNames.APPS,
-          depends: []
-        };
-    this.datasetMeta[DatasetNames.VMS] = {
-          serviceUrl: ConfigUrls.VMS,
-          class: VirtualMachine,
-          datasetName: DatasetNames.VMS,
-          depends: [DatasetNames.APPS]
-        };
-    this.datasetMeta[DatasetNames.VIRTUES] = {
-          serviceUrl: ConfigUrls.VIRTUES,
-          class: Virtue,
-          datasetName: DatasetNames.VIRTUES,
-          depends: [DatasetNames.VMS, DatasetNames.PRINTERS, DatasetNames.FILE_SYSTEMS]
-        };
-    this.datasetMeta[DatasetNames.USERS] = {
-          serviceUrl: ConfigUrls.USERS,
-          class: User,
-          datasetName: DatasetNames.USERS,
-          depends: [DatasetNames.VIRTUES]
-        };
   }
 
   /**
@@ -213,12 +153,12 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     let updateQueue: any[] = [];
 
     for (let dName of this.neededDatasets) {
-      if ( !(dName in this.datasetMeta)) {
+      if ( !(dName in this.datasetsMeta)) {
         // throw error TODO
         console.log("Unrecognized dataset name");
       }
       else {
-        updateQueue.push(this.datasetMeta[dName]);
+        updateQueue.push(this.datasetsMeta[dName]);
       }
     }
     if (updateQueue.length > 0) {
@@ -259,19 +199,19 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *   pass in:
    *     updateQueue:[
    *                     {
-   *                       serviceUrl: ConfigUrls.APPS,
+   *                       subdomain: Subdomains.APPS,
    *                       class: Application,
    *                       datasetName: DatasetNames.APPS,
    *                       depends: undefined
    *                     },
    *                     {
-   *                       serviceUrl: ConfigUrls.VMS,
+   *                       subdomain: Subdomains.VMS,
    *                       class: VirtualMachine,
    *                       datasetName: DatasetNames.VMS,
    *                       depends: DatasetNames.APPS
    *                     },
    *                     {
-   *                       serviceUrl: ConfigUrls.VIRTUES,
+   *                       subdomain: Subdomains.VIRTUES,
    *                       class: Virtue,
    *                       datasetName: DatasetNames.VIRTUES,
    *                       depends: DatasetNames.VMS
@@ -303,16 +243,15 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   recursivePullData(
     updateQueue: DatasetType[]
   ): void {
-    let sub = this.dataRequestService.getItems(updateQueue[0].serviceUrl).subscribe( rawDataList => {
+    let sub = this.dataRequestService.getRecords(updateQueue[0].subdomain).subscribe( rawDataList => {
 
       this.datasets[updateQueue[0].datasetName] = new DictList<IndexedObj>();
 
       let obj: IndexedObj = null;
       for (let e of rawDataList) {
-        // if (updateQueue[0].datasetName === DatasetNames.PRINTERS) {
-        if (e.id === "6b3d4784-0fe5-4443-a08c-644c90f609ae") {
-          console.log("\t", e);
-        }
+        // if (updateQueue[0].datasetName === DatasetNames.FILE_SYSTEMS) {
+        //   console.log("%\t", e);
+        // }
 
         // these objects come in with some number of lists of IDs pertaining to objects they need to be linked to.
         // Like a User has a list of Virtues that needs to be populated, based on the virtueTemplateIDs list it comes in with.
@@ -320,9 +259,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
         // Application has none.
         // It's here in the constructor that those id lists are set.
         obj = new (updateQueue[0].class)(e);
-        if (obj.getID() === "6b3d4784-0fe5-4443-a08c-644c90f609ae") {
-          console.log("\t", obj);
-        }
+        // if (updateQueue[0].datasetName === DatasetNames.FILE_SYSTEMS) {
+        // if (obj.getID() === "6b3d4784-0fe5-4443-a08c-644c90f609ae") {
+        //   console.log("*\t", obj);
+        // }
 
         this.datasets[updateQueue[0].datasetName].add(obj.getID(), obj);
 
@@ -342,6 +282,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
       // mark this set as pulled
       this.loadedDatasets.push(updateQueue[0].datasetName);
+
+      // if (updateQueue[0].datasetName === DatasetNames.FILE_SYSTEMS) {
+      //   console.log(this.datasets[updateQueue[0].datasetName]);
+      // }
 
       // deal with self-referential objects.
       for (let obj of this.datasets[updateQueue[0].datasetName].asList()) {
@@ -385,7 +329,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * type of object this page focuses on, and a list of the datasets which should be loaded upon page load or refresh.
    */
   abstract getDataPageOptions(): {
-        serviceConfigUrl: ConfigUrls,
         neededDatasets: DatasetNames[]
       };
 
@@ -407,8 +350,12 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   /** #uncommented */
   buildIndexedObjAttribute(obj: IndexedObj, datasetName: DatasetNames): void {
-      // tell the record which of the datasets it depends on we're dealing with, and pass it that dataset, so it can build its children.
-      obj.buildAttribute(datasetName, this.datasets[datasetName] );
+    // tell the record which of the datasets it depends on we're dealing with, and pass it that dataset, so it can build its children.
+    if (this.datasets[datasetName] === undefined) {
+      console.log("No dataset called", datasetName, "has been built.");
+      return;
+    }
+    obj.buildAttribute(datasetName, this.datasets[datasetName] );
   }
 
 
@@ -419,12 +366,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
   updateItem(obj: IndexedObj, redirect?: () => void): void {
-    if (this.serviceConfigUrl === undefined) {
-      console.log("Destination url not set! [[serviceConfigUrl]]");
-      return;
-    }
-    let sub = this.dataRequestService.updateItem(this.serviceConfigUrl, obj.getID(), JSON.stringify(obj)).subscribe(
-      data => {
+
+    let sub = this.dataRequestService.updateRecord(obj.getSubdomain(), obj.getID(), obj.getFormatForSave()).subscribe(
+      updatedObject => {
+        console.log(updatedObject);
         if (redirect) {
           redirect();
         }
@@ -447,14 +392,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
   createItem(obj: IndexedObj, redirect?: () => void): void {
-    console.log("Here!", this.serviceConfigUrl);
-    if (this.serviceConfigUrl === undefined) {
-      console.log("Destination url not set! [[serviceConfigUrl]]");
-      return;
-    }
-    let sub = this.dataRequestService.createItem(this.serviceConfigUrl, JSON.stringify(obj)).subscribe(
+
+    let sub = this.dataRequestService.createRecord(obj.getSubdomain(), obj.getFormatForSave()).subscribe(
       createdItem => {
-        console.log("Here2!");
+        console.log(createdItem);
         // note that the returned created item is just ignored.
         if (redirect) {
           redirect();
@@ -477,71 +418,43 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * @param obj the IndexedObj to be deleted from the backend.
    */
   deleteItem(obj: IndexedObj): void {
-    if (this.serviceConfigUrl === undefined) {
-      console.log("Destination url not set! [[serviceConfigUrl]]");
-      return;
-    }
-    this.dataRequestService.deleteItem(this.serviceConfigUrl, obj.getID()).then(() => {
+
+    this.dataRequestService.deleteRecord(obj.getSubdomain(), obj.getID()).then(() => {
       this.refreshPage();
     });
 
   }
 
   /**
-   * overriden by user-list, to instead call the setItemStatus method below.
-   * TODO Change backend so everything works the same way.
-   * Probably just make every work via a setStatus method, and remove the toggle.
-   *
-   * @param obj the IndexedObj we're toggling the status of.
-   */
-  toggleItemStatus(obj: IndexedObj): void {
-    this.setItemStatus(obj, obj.enabled);
-    //
-    // if (this.serviceConfigUrl === undefined) {
-    //   console.log("Destination url not set! [[serviceConfigUrl]]");
-    //   return;
-    // }
-    // let sub = this.dataRequestService.toggleItemStatus(this.serviceConfigUrl, obj.getID()).subscribe((updatedRecord) => {
-    //   // note that updatedRecord is ignored - no need to use it.
-    //   // Perhaps could check that its status is the opposite of what was went in, in case maybe the update
-    //   // didn't go through. Don't know if that's a reasonable check though.
-    //   // TODO
-    //
-    //   this.refreshPage();
-    // },
-    // error => { // on error
-    //   sub.unsubscribe();
-    // },
-    // () => {
-    //   sub.unsubscribe();
-    // });
-  }
-
-  /**
-   * Sets the status of an IndexedObj.
-   * This is only called by an overriding toggleItemStatus defined in userList.
-   * See note there, and on toggleItemStatus above, for why.
+   * Sets an IndexedObj's 'enabled' field.
+   * #uncommented
    *
    * @param obj
    * @param newStatus
    *
    */
-  setItemStatus(obj: IndexedObj, newStatus: boolean): void {
-    if (this.serviceConfigUrl === undefined) {
-      console.log("Destination url not set! [[serviceConfigUrl]]");
-      return;
+  setItemAvailability(obj: IndexedObj, newStatus: boolean): void {
+
+    obj.enabled = newStatus;
+    console.log(obj.enabled);
+    /** #temporary */
+    if (obj instanceof User) {
+      let user: User = obj as User;
+      if (user.getName().toUpperCase() === 'ADMIN' && user.enabled) {
+        // this.openDialog('Disable ' + user.getName(), (() => this.setItemStatus(user, false)));
+        // TODO: Remove this message when/if this is no longer applicable.
+        console.log("Don't disable the admin. You need that.");
+        return;
+      }
     }
-    let sub = this.dataRequestService.setItemStatus(this.serviceConfigUrl, obj.getID(), newStatus).subscribe(() => {
+
+    let sub = this.dataRequestService.setRecordAvailability(obj.getSubdomain(), obj.getID(), newStatus).subscribe(() => {
+      sub.unsubscribe();
       this.refreshPage();
     },
     error => {
       sub.unsubscribe();
-    },
-    () => {
-      sub.unsubscribe();
+      this.refreshPage();
     });
   }
-
-  /** # so subclasses can override it, and have something that will be called whenever a change is sent to the backend. */
-  refreshPage() {}
 }

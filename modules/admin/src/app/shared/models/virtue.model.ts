@@ -7,6 +7,7 @@ import { VirtualMachine } from './vm.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
+import { Subdomains } from '../services/subdomains.enum';
 
 import { DictList } from './dictionary.model';
 
@@ -41,7 +42,7 @@ import { Printer } from './printer.model';
 export class Virtue extends Item {
 
   /** What iteration of edit this template is on. Automatically increases on edit. */
-  version: number;
+  version: number = 1;
 
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
@@ -50,19 +51,19 @@ export class Virtue extends Item {
   lastModification: Date;
 
   /** #uncommented */
-  vmTemplates: DictList<IndexedObj>;
+  vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
 
   /** #uncommented */
-  vmTemplateIds: string[];
+  vmTemplateIds: string[] = [];
 
   // /** #TODO what is this? */
   // awsTemplateName: string;
 
   /** A hex string of the color to be shown on this Virtue's label, both on the workbench and the desktop app */
-  color: string;
+  color: string = 'transparent';
 
   /** #TODO what is this? #uncommented (unprovisioned) */
-  unprovisioned: boolean;
+  unprovisioned: boolean = true;
 
   /**
    * What virtue should any links clicked within this Virtue automatically open in?
@@ -71,81 +72,118 @@ export class Virtue extends Item {
   defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
-  networkWhiteList: NetworkPermission[];
+  networkWhiteList: NetworkPermission[] = [];
 
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargetIds: string[];
+  allowedPasteTargetIds: string[] = [];
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargets: DictList<Virtue>;
+  allowedPasteTargets: DictList<Virtue> = new DictList<Virtue>();
 
-  /** this virtue's r/w/e permissions for the different parts of the filesystem */
-  fileSystems: DictList<FileSystem>;
-  fileSystemIds: string[];
+  /** this virtue's r/w/e permissions for the filesystem
+   * Note that fileSystems is saved and loaded with the virtue. While everything else is saved as a list of IDs,
+   * here, the list of IDs is just used to update the names of the saved fileSystems, since each virtue can set its own individual
+   * permissions for a given fileSystem.
+   */
+  fileSystems: DictList<FileSystem> = new DictList<FileSystem>();
+  fileSystemIds: string[] = [];
 
   /** a list of printers this virtue is allowed to use. Printers are found and set up in global settings. */
-  printers: DictList<Printer>;
-  printerIds: string[];
+  printers: DictList<Printer> = new DictList<Printer>();
+  printerIds: string[] = [];
 
   /**
    * convert from whatever form the virtue object is in the database.
+   *
+   * Note that there doesn't currently appear to be any good way to compare if two objects have the same
+   * attributes, without simply iterating through them all and checking. 'instanceof' appears to only work
+   * for items created from the same prototype.
+   *
+   * The signature is equivalent to 'any', but
    *
    * @param virtueObj a virtue record, retrieved from the backend, which we want to convert into a Virtue.
    */
   constructor(virtueObj) {
     super();
-    if (virtueObj) {
-      // console.log(JSON.stringify(virtueObj, null, 2));
-      this.id = virtueObj.id;
+    this.parentDomain = '/virtues';
+    if ('name' in virtueObj) {
       this.name = virtueObj.name;
+    }
 
-      this.vmTemplateIds = virtueObj. vmTemplateIds;
-      this.fileSystemIds = virtueObj.fileSystemIds;
-      this.printerIds = virtueObj.printerIds;
+    if ('id' in virtueObj) {
+      if (virtueObj.id === "1f4e0394-5b60-4d0a-b632-721834b09945") {
+        console.log(virtueObj.fileSystems);
+      }
+      this.id = virtueObj.id;
+    }
 
-      this.allowedPasteTargetIds = virtueObj.pasteTargetIds;
-
+    if ('enabled' in virtueObj) {
       this.enabled = virtueObj.enabled;
+    }
 
-      this.version = virtueObj.version;
-      this.color = virtueObj.color;
+    if ('vmTemplateIds' in virtueObj && virtueObj.vmTemplateIds) {
+      this.vmTemplateIds = virtueObj.vmTemplateIds;
+    }
 
+    if ('fileSystemIds' in virtueObj && virtueObj.fileSystemIds) {
+      this.fileSystemIds = virtueObj.fileSystemIds;
+    }
+
+    // `Array.isArray` apparently doesn't work on some legacy browsers (i.e., IE) - we should be fine.
+    // https://stackoverflow.com/a/20989617/3015812
+    if ('fileSystems' in virtueObj && virtueObj.fileSystems && Array.isArray(virtueObj.fileSystems)) {
+      for (let fs of virtueObj.fileSystems) {
+        this.fileSystems.add(fs.id, fs);
+      }
+    }
+
+    if ('printerIds' in virtueObj && virtueObj.printerIds) {
+      this.printerIds = virtueObj.printerIds;
+    }
+
+    if ('allowedPasteTargetIds' in virtueObj && virtueObj.allowedPasteTargetIds) {
+      this.allowedPasteTargetIds = virtueObj.allowedPasteTargetIds;
+    }
+
+    if ('lastEditor' in virtueObj) {
       this.lastEditor = virtueObj.lastEditor;
+    }
+
+    if ('lastModification' in virtueObj) {
       this.lastModification = virtueObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
-
-
-
-      // TODO set all below to the corresponding value in virtObj, once implemented on backend.
-      if (! this.networkWhiteList) {
-        this.networkWhiteList = [];
-      }
-
-      if (! this.unprovisioned) {
-        this.unprovisioned = true;
-      }
-
-      if (virtueObj.defaultBrowserVirtueId) {
-        this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
-      }
-
-      if (! this.allowedPasteTargets) {
-        this.allowedPasteTargetIds = [];
-      }
-
     }
 
-    this.parentDomain = '/virtues';
-    if (! this.version) {
-      this.version = 1;
+    if ('networkWhiteList' in virtueObj && virtueObj.networkWhiteList) {
+      this.networkWhiteList = virtueObj.networkWhiteList;
     }
 
-    if (! this.color) {
-      // TODO - is it better to have everything default to no color, or to something
-      // like silver (#C0C0C0), to let the user know that colors are available?
-      this.color = 'transparent';
+    if ('unprovisioned' in virtueObj) {
+      this.unprovisioned = virtueObj.unprovisioned;
+    }
+
+    if ('defaultBrowserVirtueId' in virtueObj) {
+      this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
+    }
+
+    if ('version' in virtueObj) {
+      this.version = virtueObj.version;
+    }
+
+    if ('color' in virtueObj) {
+      this.color = virtueObj.color;
+    }
+
+    if (this.id === "1f4e0394-5b60-4d0a-b632-721834b09945") {
+      console.log(this);
     }
   }
 
+  /**
+   * @return the VIRTUES subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.VIRTUES;
+  }
 
   /**
    * #uncommented
@@ -159,14 +197,32 @@ export class Virtue extends Item {
       this.vmTemplates = dataset.getSubset(this.vmTemplateIds) as DictList<VirtualMachine>;
     }
     else if (datasetName === DatasetNames.FILE_SYSTEMS) {
-      this.fileSystems = dataset.getSubset(this.fileSystemIds) as DictList<FileSystem>;
+      let fileSystemDefaults = dataset.getSubset(this.fileSystemIds) as DictList<FileSystem>;
+      this.updateFileSystems(fileSystemDefaults);
     }
     else if (datasetName === DatasetNames.PRINTERS) {
-      // console.log(this.printerIds);
       this.printers = dataset.getSubset(this.printerIds) as DictList<Printer>;
     }
 
   }
+
+  updateFileSystems(selectedFileSystemDefaultPerms: DictList<FileSystem>) {
+    if (this.fileSystems === undefined) {
+      this.fileSystems = new DictList<FileSystem>();
+    }
+
+    for (let newFileSystem of selectedFileSystemDefaultPerms.asList()) {
+      if ( this.fileSystems.has(newFileSystem.getID())) {
+        this.fileSystems.get(newFileSystem.getID()).name = newFileSystem.name;
+      }
+      else {
+        this.fileSystems.add(newFileSystem.getID(), newFileSystem);
+      }
+    }
+
+    this.fileSystems.trimTo(this.fileSystemIds);
+  }
+
 
   /** @override [[Item.getRelatedDict]] */
   getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
@@ -177,9 +233,10 @@ export class Virtue extends Item {
         return this.printers;
       case DatasetNames.FILE_SYSTEMS:
         return this.fileSystems;
+      default:
+        console.log("You shouldn't be here. Expected datasetName === DatasetNames.{VMS, PRINTERS}, was", datasetName);
+        return null;
     }
-    console.log("You shouldn't be here. Expected datasetName === DatasetNames.{VMS, PRINTERS, FILE_SYSTEMS}, was", datasetName);
-    return null;
   }
 
   /**
@@ -198,5 +255,33 @@ export class Virtue extends Item {
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
     return [];
+  }
+
+  protected getInBackendFormat() {
+
+
+    let virtue = {
+        name: this.name,
+        id: this.id,
+        enabled: this.enabled,
+        vmTemplateIds: this.vmTemplateIds,
+        fileSystemIds: this.fileSystemIds,
+        fileSystems: this.fileSystems.asList(),
+        printerIds: this.printerIds,
+        allowedPasteTargetIds: this.allowedPasteTargetIds,
+        lastEditor: this.lastEditor,
+        lastModification: this.lastModification,
+        networkWhiteList: this.networkWhiteList,
+        unprovisioned: this.unprovisioned,
+        version: this.version,
+        defaultBrowserVirtueId: this.defaultBrowserVirtueId,
+        color: this.color
+
+    };
+
+    // // just to clear a little memory.
+    // this.virtueTemplates = undefined;
+    // this.roles = [];
+    return virtue;
   }
 }

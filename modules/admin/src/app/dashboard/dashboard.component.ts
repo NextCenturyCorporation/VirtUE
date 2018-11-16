@@ -9,7 +9,6 @@ import { SensingModel } from '../shared/models/sensing.model';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { SensingService } from '../shared/services/sensing.service';
 import { DataRequestService } from '../shared/services/dataRequest.service';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
 
 import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 import { Column, TextColumn, SORT_DIR } from '../shared/models/column.model';
@@ -92,10 +91,8 @@ export class DashboardComponent extends ItemListComponent {
    * @return
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.VIRTUES,
       neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
     };
   }

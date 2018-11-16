@@ -15,11 +15,8 @@ import {
 } from '../../../shared/models/column.model';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { DataRequestService } from '../../../shared/services/dataRequest.service';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { AppsModalComponent } from '../../../modals/apps-modal/apps-modal.component';
 
@@ -56,13 +53,11 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
    */
   constructor(
       router: Router,
-      baseUrlService: BaseUrlService,
-      dataRequestService: DataRequestService,
       dialog: MatDialog,
       /** the available operating systems that this VM can be set as. */
       protected osOptions: OSSet
       ) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(router, dialog);
     this.childDatasetName = DatasetNames.APPS;
   }
 

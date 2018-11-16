@@ -40,6 +40,7 @@ import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
+import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
@@ -54,6 +55,8 @@ import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
 import com.ncc.savior.virtueadmin.service.PermissionService;
@@ -72,6 +75,9 @@ public class DataResource {
 
 	@Autowired
 	private IUserManager userManager;
+
+	@Autowired
+	private IResourceManager resourceManager;
 
 	@Qualifier("virtueDao")
 	@Autowired
@@ -450,6 +456,26 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(developer, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(developer, virtueMath.getId());
 
+		Printer printer3d = new Printer(UUID.randomUUID().toString(), "Makerbot 3D Printer", "127.0.0.10", "printing", true);
+		Printer printerEpson = new Printer(UUID.randomUUID().toString(), "Epson 2780", "127.0.0.12", "Idle", true);
+		Printer printerBrother = new Printer(UUID.randomUUID().toString(), "Brother HL 5040", "127.0.0.13", "Error: Out of paper", true);
+
+		resourceManager.addPrinter(printer3d);
+		resourceManager.addPrinter(printerEpson);
+		resourceManager.addPrinter(printerBrother);
+
+
+		FileSystem backupsFS = new FileSystem(UUID.randomUUID().toString(), "Backup tapes", "127.0.0.40", true, false, false, true);
+		FileSystem longTermFS = new FileSystem(UUID.randomUUID().toString(), "Long-term storage", "127.0.0.41", true, false, false, true);
+		FileSystem sharedFS = new FileSystem(UUID.randomUUID().toString(), "Shared files", "127.0.0.42", true, false, false, true);
+		// FileSystem backupsFS = new FileSystem(UUID.randomUUID().toString(), "Backup tapes", "127.0.0.40");
+		// FileSystem longTermFS = new FileSystem(UUID.randomUUID().toString(), "Long-term storage", "127.0.0.41");
+		// FileSystem sharedFS = new FileSystem(UUID.randomUUID().toString(), "Shared files", "127.0.0.42");
+
+		resourceManager.addFileSystem(backupsFS);
+		resourceManager.addFileSystem(longTermFS);
+		resourceManager.addFileSystem(sharedFS);
+
 		logger.info("Data preloaded");
 		return Response.ok().entity("success").build();
 	}
@@ -648,6 +674,13 @@ public class DataResource {
 	}
 
 	@GET
+	// @Path("resources/clear/")
+	public String clearResourcesDatabase() {
+		resourceManager.clear();
+		return "database cleared.";
+	}
+
+	@GET
 	@Path("active/clear/")
 	public String clearActiveDatabase() {
 		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
@@ -671,7 +704,7 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("storage/")
+	@Path("storage")
 	@Produces("application/json")
 	public Iterable<VirtuePersistentStorage> getAllStorage() {
 		return persistentStorageManager.getAllPersistentStorage();
@@ -690,6 +723,7 @@ public class DataResource {
 		clearActiveDatabase();
 		clearUsers();
 		clearTemplatesDatabase();
+		clearResourcesDatabase();
 		userManager.clear(true);
 		return "database cleared.";
 	}

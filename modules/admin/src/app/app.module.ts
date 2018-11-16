@@ -71,6 +71,8 @@ import { VmModalComponent } from './modals/vm-modal/vm-modal.component';
 import { ColorModalComponent } from './modals/color-picker/color-picker.modal';
 import { PrinterModalComponent } from './modals/printer-modal/printer.modal';
 import { PrinterSelectionModalComponent } from './modals/printer-modal/printer-selection.modal';
+// import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
+import { FileSystemSelectionModalComponent } from './modals/fileSystem-modal/fileSystem-selection.modal';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
 import { VmMainTabComponent } from './vms/form/vm-main-tab/vm-main-tab.component';
@@ -128,6 +130,8 @@ import { DataRequestService } from './shared/services/dataRequest.service';
     ColorModalComponent,
     PrinterModalComponent,
     PrinterSelectionModalComponent,
+    // FileSystemModalComponent,
+    FileSystemSelectionModalComponent,
 
     ListFilterPipe,
     PageNotFoundComponent,
@@ -183,7 +187,11 @@ import { DataRequestService } from './shared/services/dataRequest.service';
     AppsModalComponent,
     VmModalComponent,
     VirtueModalComponent,
-    ColorModalComponent
+    ColorModalComponent,
+    // PrinterModalComponent,
+    PrinterSelectionModalComponent,
+    // FileSystemModalComponent,
+    FileSystemSelectionModalComponent
   ]
 })
 

@@ -6,7 +6,6 @@ import { MatDialog } from '@angular/material';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 
@@ -77,10 +76,8 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.VMS,
       neededDatasets: [DatasetNames.APPS, DatasetNames.VMS]
     };
   }

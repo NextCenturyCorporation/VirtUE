@@ -44,7 +44,7 @@ export abstract class Item extends IndexedObj implements Toggleable {
    *    from showing up on a user's list.
    *  - Applications can't be disabled - should be done at the VM/Virtue level.
    */
-  enabled: boolean;
+  enabled: boolean = true;
 
   /**
    * a shortened form the the last modificaiton date, suitible for display
@@ -61,7 +61,6 @@ export abstract class Item extends IndexedObj implements Toggleable {
    */
   constructor() {
     super();
-    this.enabled = true;
     this.modDate = '';
 
     this.parentDomain = "NA";

@@ -14,7 +14,6 @@ import {
   SORT_DIR
 } from '../../shared/models/column.model';
 
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
@@ -27,7 +26,7 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
 @Component({
   selector: 'app-config-settings-history-tab',
   templateUrl: './config-settingsHistory-tab.component.html',
-  styleUrls: ['./config-settingsHistory-tab.component.css']
+  styleUrls: ['../config.component.css', './config-settingsHistory-tab.component.css']
 })
 export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
 
@@ -65,10 +64,8 @@ export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.USERS,//ConfigUrls.GLOBAL_SETTINGS_HISTORY,
       neededDatasets: []
     };
   }

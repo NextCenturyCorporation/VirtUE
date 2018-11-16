@@ -201,12 +201,13 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	}
 
 	@Override
-	public void addVirtueTemplate(VirtueTemplate template) {
+	public VirtueTemplate addVirtueTemplate(VirtueTemplate template) {
 		Collection<ApplicationDefinition> apps = template.getApplications();
 		verifyAppsExist(apps);
 		Collection<VirtualMachineTemplate> vmts = template.getVmTemplates();
 		verifyVmTemplatesExist(vmts);
 		templates.put(template.getId(), template);
+		return template;
 	}
 
 	@Override

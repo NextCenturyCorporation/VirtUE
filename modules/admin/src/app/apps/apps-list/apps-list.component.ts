@@ -25,7 +25,6 @@ import { AddAppComponent } from '../add-app/add-app.component';
 import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
  * @class
@@ -84,10 +83,8 @@ export class AppsListComponent extends ItemListComponent {
    * @return child-specific information needed by the generic page functions when loading data.
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.APPS,
       neededDatasets: [DatasetNames.APPS]
     };
   }

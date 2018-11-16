@@ -5,7 +5,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { GenericDataTabComponent } from '../../shared/abstracts/gen-data-page/gen-data-tab.component';
 
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
@@ -22,7 +21,7 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
 @Component({
   selector: 'app-config-active-dir-tab',
   templateUrl: './config-activeDir-tab.component.html',
-  styleUrls: ['./config-activeDir-tab.component.css']
+  styleUrls: ['../config.component.css', './config-activeDir-tab.component.css']
 })
 export class ConfigActiveDirTabComponent extends GenericDataTabComponent {
 
@@ -55,11 +54,9 @@ export class ConfigActiveDirTabComponent extends GenericDataTabComponent {
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.USERS,//ConfigUrls.is this how this will be done?
-      neededDatasets: []//DatasetNames.I'm pretty sure not.
+      neededDatasets: [] // DatasetNames. Is this how this will be populated? I'm pretty sure not.
     };
   }
 }

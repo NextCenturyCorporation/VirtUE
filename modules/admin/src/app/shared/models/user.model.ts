@@ -6,6 +6,7 @@ import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
+import { Subdomains } from '../services/subdomains.enum';
 
 /**
 * @class
@@ -48,6 +49,13 @@ export class User extends Item {
     }
 
     this.parentDomain = '/users';
+  }
+
+  /**
+   * @return the USERS subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.USERS;
   }
 
   /**
@@ -98,5 +106,19 @@ export class User extends Item {
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
     return [];
+  }
+
+  protected getInBackendFormat() {
+    let user = {
+      username: this.name,
+      authorities: this.roles,
+      enabled: this.enabled,
+      virtueTemplateIds: this.virtueTemplateIds
+    };
+
+    // // just to clear a little memory.
+    // this.virtueTemplates = undefined;
+    // this.roles = [];
+    return user;
   }
 }

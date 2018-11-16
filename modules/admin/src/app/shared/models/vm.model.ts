@@ -8,6 +8,7 @@ import { DictList } from './dictionary.model';
 
 import { IndexedObj } from './indexedObj.model';
 import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
+import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
@@ -70,6 +71,13 @@ export class VirtualMachine extends Item {
 
 
   /**
+   * @return the VMS subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.VMS;
+  }
+
+  /**
    * #uncommented
    */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
@@ -105,5 +113,25 @@ export class VirtualMachine extends Item {
     }
     console.log("You shouldn't be here. Expected datasetName === DatasetNames.APPS, was", datasetName);
     return [];
+  }
+
+  protected getInBackendFormat() {
+
+
+    let vm = {
+      id: this.id,
+      name: this.name,
+      enabled: this.enabled,
+      applicationIds: this.applicationIds,
+      version: this.version,
+      lastModification: this.lastModification,
+      os: this.os,
+      lastEditor: 'administrator',
+      loginUser: 'system' // TODO does this still exist on the backend?
+    };
+    // // just to clear a little memory.
+    // this.virtueTemplates = undefined;
+    // this.roles = [];
+    return vm;
   }
 }

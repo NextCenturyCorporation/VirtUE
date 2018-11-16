@@ -9,6 +9,9 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -28,6 +31,8 @@ import com.ncc.savior.virtueadmin.model.VirtueUser;
  */
 @Repository
 public class SpringJpaTemplateManager implements ITemplateManager {
+	private final static Logger logger = LoggerFactory.getLogger(SpringJpaTemplateManager.class);
+
 	@Autowired
 	private VirtueTemplateRepository virtueTemplateRepo;
 	@Autowired
@@ -48,7 +53,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		this.userRepo = userRepo;
 	}
 
-	/** #uncommented
+	/**
 	 * This doesn't care whether the user exists on the backend.
 	 */
 	@Override
@@ -61,7 +66,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		return map;
 	}
 
-	/** #uncommented
+	/**
 	 * This doesn't care whether the user exists on the backend.
 	 */
 	@Override
@@ -79,7 +84,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		return map;
 	}
 
-	/** #uncommented
+	/**
 	 */
 	@Override
 	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
@@ -92,25 +97,22 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 				"Virtue Template id=" + templateId + " not found.");
 	}
 
- 	/** #uncommented */
-	@Override
+ 	@Override
 	public Iterable<VirtueTemplate> getAllVirtueTemplates() {
 		return virtueTemplateRepo.findAll();
 	}
 
- 	/** #uncommented */
-	@Override
+ 	@Override
 	public Iterable<VirtualMachineTemplate> getAllVirtualMachineTemplates() {
 		return vmTemplateRepo.findAll();
 	}
 
- 	/** #uncommented */
-	@Override
+ 	@Override
 	public Iterable<ApplicationDefinition> getAllApplications() {
 		return appRepo.findAll();
 	}
 
- 	/** #uncommented
+ 	/**
 	 * It doesn't look like there's a reason to use Optionals here. */
 	@Override
 	public ApplicationDefinition getApplicationDefinition(String applicationId) {
@@ -123,7 +125,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		}
 	}
 
- 	/** #uncommented
+ 	/**
 	 * It doesn't look like there's a reason to use Optionals here. */
 	@Override
 	public VirtualMachineTemplate getVmTemplate(String templateId) {
@@ -136,7 +138,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		}
 	}
 
- 	/** #uncommented
+ 	/**
 	 * It doesn't look like there's a reason to use Optionals here. */
 	@Override
 	public VirtueTemplate getVirtueTemplate(String templateId) {
@@ -149,7 +151,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		}
 	}
 
- 	/** #uncommented
+ 	/**
 	 * It doesn't look like there's a reason to use Optionals here.
 	 * Made not private and not included in interface, because it has same functionality as SpringJpaUserManager.getUser
 	 */
@@ -163,13 +165,11 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		}
 	}
 
-	/** #uncommented */
 	@Override
 	public void addApplicationDefinition(ApplicationDefinition app) {
 		appRepo.save(app);
 	}
 
-	/** #uncommented */
 	@Override
 	public void addVmTemplate(VirtualMachineTemplate vmTemplate) {
 		Collection<ApplicationDefinition> apps = new HashSet<ApplicationDefinition>();
@@ -193,19 +193,31 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 			// "Unable to find application with id=" + app.getId());
 			// }
 		}
-		// vmTemplateRepo.save(vmTemplate);
+		// vmTemplateRepo.save(vmTemplate); // why is this commented out too? (see addVirtueTemplate function)
+		//
 		vmTemplate.setApplications(apps);
 	}
 
-	/** #uncommented */
 	@Override
-	public void addVirtueTemplate(VirtueTemplate template) {
+	public VirtueTemplate addVirtueTemplate(VirtueTemplate template) {
 		Collection<VirtualMachineTemplate> vms = new HashSet<VirtualMachineTemplate>();
 		for (VirtualMachineTemplate vm : template.getVmTemplates()) {
 			vms.add(vm);
 		}
 		template.setVmTemplates(new HashSet<VirtualMachineTemplate>());
-		virtueTemplateRepo.save(template);
+
+		if (template.getFileSystems().iterator().hasNext()) {
+			logger.debug("$1 " + template.getFileSystems().iterator().next());
+			logger.debug("$1 " + template.getFileSystems().iterator().next().getReadPerm());
+		}
+
+		VirtueTemplate savedTemplate = virtueTemplateRepo.save(template);
+
+		if (template.getFileSystems().iterator().hasNext()) {
+			logger.debug("$2 " + savedTemplate.getFileSystems().iterator().next());
+			logger.debug("$2 " + savedTemplate.getFileSystems().iterator().next().getReadPerm());
+		}
+
 		// adding empty template and then adding vmtempaltes (that are already in db)
 		// seem to work better for jpa
 		for (VirtualMachineTemplate vmt : vms) {
@@ -214,31 +226,30 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 			// template.getVmTemplates().add(managedVmt);
 		}
 		template.setVmTemplates(vms);
-		// virtueTemplateRepo.save(template);
+		// virtueTemplateRepo.save(template); // TODO how do changes made after saving the object propogate to that object?
+		return savedTemplate;
 	}
 
-	/** #uncommented
-	 * This will save the input user to the backend, even if
-	 */
 	@Override
 	public void assignVirtueTemplateToUser(VirtueUser user, String virtueTemplateId) {
-		// VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		// This would let you add something to a user that hasn't actually been saved to the backend yet.
 		// But it's different from how everything else works, and we don't actually use it.
+		// VirtueUser existing = userRepo.findById(user.getUsername()).orElse(null);
 		// if (existing != null) {
 		// 	user = existing;
 		// }
 
-		assertUserExists(user.getUsername());
+
+		// make sure that the only change made is the addition of the virtueTemplate.
+		user = getUser(user.getUsername());
 		VirtueTemplate vt = getVirtueTemplate(virtueTemplateId);
 		user.addVirtueTemplate(vt);
 		userRepo.save(user);
 	}
 
-	/** #uncommented */
+
 	@Override
 	public void revokeVirtueTemplateFromUser(VirtueUser user, String virtueTemplateId) {
-
 		assertUserExists(user.getUsername());
 		Iterator<VirtueTemplate> itr = user.getVirtueTemplates().iterator();
 		while (itr.hasNext()) {
@@ -253,10 +264,10 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 	@Override
 	public void assignApplicationToVmTemplate(String vmTemplateId, String applicationId) throws NoSuchElementException {
-		VirtualMachineTemplate vmt = getVmTemplate(vmTemplateId);
+		VirtualMachineTemplate vmTemplate = getVmTemplate(vmTemplateId);
 		ApplicationDefinition app = getApplicationDefinition(applicationId);
-		vmt.getApplications().add(app);
-		vmTemplateRepo.save(vmt);
+		vmTemplate.getApplications().add(app); // #TODO add a method for adding an app - check ID uniqueness there.
+		vmTemplateRepo.save(vmTemplate);
 	}
 
 	@Override
@@ -264,7 +275,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 			throws NoSuchElementException {
 		VirtueTemplate virtueTemplate = getVirtueTemplate(virtueTemplateId);
 		VirtualMachineTemplate vmTemplate = getVmTemplate(vmTemplateId);
-		virtueTemplate.getVmTemplates().add(vmTemplate);
+		virtueTemplate.getVmTemplates().add(vmTemplate);// #TODO add a method for adding an vmTemplate - check ID uniqueness there.
 		virtueTemplateRepo.save(virtueTemplate);
 	}
 
@@ -372,7 +383,6 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 
 
 
-	/** #uncommented */
 	private void assertUserExists(String username) {
 		if (userRepo.findById(username) == null) {
 			throw new SaviorException(SaviorErrorCode.USER_NOT_FOUND,

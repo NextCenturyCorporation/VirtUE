@@ -8,7 +8,11 @@
         </mat-form-field>
         <div class="form-item margin-top-15">
           <label>User Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
-          <mat-slide-toggle [disabled]="!inViewMode()" [(ngModel)]="item.enabled" (click)="statusChange()" [color]="'primary'">
+          <!--Note that we need [checked] and (change) - to update `item.enabled`
+              manually, instead of letting angular do it through [(ngModel)].
+              Otherwise it either doesn't work or there's an opportunity for a race condition.
+              -->
+          <mat-slide-toggle [disabled]="!inViewMode()" [checked]="item.enabled" (change)="statusChange()" [color]="'primary'">
             {{ item.enabled ? 'Enabled' : 'Disabled' }}
           </mat-slide-toggle>
         </div>

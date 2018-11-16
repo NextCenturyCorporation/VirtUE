@@ -201,7 +201,6 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
     for (let i of this.table.getSelections()) {
       this.selectedIDs.push(i.getID());
     }
-
     this.getSelections.emit(this.selectedIDs);
     this.table.clear();
     this.dialogRef.close();

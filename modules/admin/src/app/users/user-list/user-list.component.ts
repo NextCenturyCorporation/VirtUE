@@ -12,7 +12,7 @@ import {  Column,
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { DataRequestService } from '../../shared/services/dataRequest.service';//
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { MatDialog } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
@@ -20,7 +20,6 @@ import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
 
 /**
  * @class
@@ -76,10 +75,8 @@ export class UserListComponent extends ItemListComponent {
    * @return child-specific information needed by the generic page functions when loading data.
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.USERS,
       neededDatasets: [DatasetNames.VIRTUES, DatasetNames.USERS]
     };
 
@@ -122,34 +119,6 @@ export class UserListComponent extends ItemListComponent {
       return '';
     }
     return user.roles.sort().toString();
-  }
-
-  /**
-   * Overrides parent, [[GenericPageComponent.toggleItemStatus]]. On the backend, vms/virtues/apps all only have a toggle function,
-   * but users only have a setStatus function. So our dataRequestService has both, and we have to call the right
-   * one based on what type of item we're trying to toggle the status of.
-   * That should be fixed, but is not critical.
-   *
-   * @param user the user whose status we wish to toggle.
-   */
-  toggleItemStatus(user: User): void {
-    if (user.getName().toUpperCase() === 'ADMIN' && user.enabled) {
-      this.openDialog('Disable ' + user.getName(), (() => this.setItemStatus(user, false)));
-      // TODO: Remove this message when/if this is no longer applicable.
-      return;
-    }
-
-    let sub = this.dataRequestService.setItemStatus(this.serviceConfigUrl, user.getID(), !user.enabled).subscribe( () => {
-
-    },
-    () => { // on error
-      sub.unsubscribe();
-    },
-    () => { // when finished
-      this.refreshData();
-      sub.unsubscribe();
-    });
-
   }
 
 }

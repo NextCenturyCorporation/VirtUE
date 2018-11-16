@@ -17,11 +17,8 @@ import {
 } from '../../../shared/models/column.model';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { DataRequestService } from '../../../shared/services/dataRequest.service';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
@@ -56,10 +53,8 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
    */
   constructor(
       router: Router,
-      baseUrlService: BaseUrlService,
-      dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(router, dialog);
     this.childDatasetName = DatasetNames.VMS;
   }
 
@@ -74,7 +69,6 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
       console.log("item passed to virtue-main-tab which was not a Virtue: ", item);
       return;
     }
-    console.log(item);
     this.item = item as Virtue;
 
     this.updateVersion();

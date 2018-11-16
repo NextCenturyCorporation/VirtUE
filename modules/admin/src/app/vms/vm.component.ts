@@ -12,7 +12,6 @@ import { DataRequestService } from '../shared/services/dataRequest.service';
 import { VirtualMachine } from '../shared/models/vm.model';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
 import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
@@ -125,9 +124,11 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
       this.updatePage();
     });
 
-    this.mainTab.onStatusChange.subscribe((newStatus: boolean) => {
+
+    // see [[ItemComponent.initializeTabs]] for notes on this
+    this.mainTab.onStatusChange.subscribe((newStatus) => {
       if ( this.mode === Mode.VIEW ) {
-        this.toggleItemStatus(this.item);
+        this.setItemAvailability(this.item, newStatus);
       }
     });
 
@@ -170,10 +171,8 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.VMS,
       neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
     };
   }
@@ -194,16 +193,10 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
     //  'id'           should be ok as-is. May be empty if creating new.
     //  'name'         can't be empty
     //  'os'           must be set
-
-    this.item['loginUser'] = 'system'; // TODO does this still exist on the backend?
-
-    // TODO check if necessary, and what the string should be (admin vs administrator)
-    //  this.item['lastEditor'] = 'administrator';
-
     //  'enabled'      must be either true or false
-    // this.item['applicationIds'] = this.item.childIDs;  // may be empty
-
-    delete this.item.applications;
+    // this.item['applicationIds'] = this.item.applicationIds;  // may be empty
+    // delete this.item.applications;
+    this.item.applications = undefined;
     return true;
   }
 

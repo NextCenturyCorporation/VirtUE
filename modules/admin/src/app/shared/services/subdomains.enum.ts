@@ -3,7 +3,7 @@
  * @enum
  * The paths on the backend which must be queried for each of those datasets
  */
-export enum ConfigUrls {
+export enum Subdomains {
   APPS = "admin/application/",
   VMS = "admin/virtualMachine/template/",
   VIRTUES = "admin/virtue/template/",

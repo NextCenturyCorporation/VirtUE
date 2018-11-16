@@ -17,7 +17,6 @@ import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
 import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VirtueMainTabComponent } from './form/main-tab/virtue-main-tab.component';
@@ -127,19 +126,11 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
-    this.item = new Virtue({color: this.defaultColor()});
+    this.item = new Virtue({});
 
     this.datasetName = DatasetNames.VIRTUES;
     this.childDatasetName = DatasetNames.VMS;
 
-  }
-
-  /**
-   * This only stays until the data loads, if the data has a color (or if mode is CREATE).
-   * @return 'transparent'
-   */
-  defaultColor(): string {
-    return 'transparent';
   }
 
   /**
@@ -154,15 +145,19 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
     // Must unsubscribe from all these when the VirtueComponent is destroyed
 
-    this.mainTab.onChildrenChange.subscribe((newChildIDs: string[]) => {
-      this.item.vmTemplateIds = newChildIDs;
+    this.mainTab.onChildrenChange.subscribe((newChildIds: string[]) => {
+      this.item.vmTemplateIds = newChildIds;
       this.updatePage();
     });
 
-    this.mainTab.onStatusChange.subscribe(() => {
+    this.mainTab.onStatusChange.subscribe((newStatus) => {
       if ( this.mode === Mode.VIEW ) {
-        this.toggleItemStatus(this.item);
+        this.setItemAvailability(this.item, newStatus);
       }
+    });
+
+    this.settingsTab.onChildrenChange.subscribe(() => {
+      this.updatePage();
     });
 
     // TODO build activity table showing running instances of this virtue template,
@@ -230,25 +225,22 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
    * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
    */
   getDataPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
       neededDatasets: DatasetNames[]} {
     return {
-      serviceConfigUrl: ConfigUrls.VIRTUES,
       neededDatasets: [
                         DatasetNames.APPS,
                         DatasetNames.VMS,
                         DatasetNames.PRINTERS,
-                        // DatasetNames.FILE_SYSTEMS,
+                        DatasetNames.FILE_SYSTEMS,
                         DatasetNames.VIRTUES,
                         DatasetNames.USERS]
     };
   }
 
   /**
-   * create and fill the fields the backend expects to see, pull in/record any
-   * uncollected inputs, and check that the item is valid to be saved
+   * Pull in/record any uncollected inputs, and check that the item is valid to be saved
    *
-   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   * @return true if [[item]] is valid, false otherwise.
    */
   finalizeItem(): boolean {
     if ( !this.mainTab.collectData() ) {
@@ -265,14 +257,13 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     //  this.item.version,  will be valid
     //  this.item.enabled,  should either be true or false
     //  this.item.color,    should be ok? make sure it has a default in the settings pane
-    this.item['virtualMachineTemplateIds'] = this.item.vmTemplateIds;
 
-    // note that children is set to undefined for a brief instant before the
+    // note that vmTemplates is set to undefined for a brief instant before the
     // page navigates away, during which time an exception would occur on the
     // table - that chunk of html has now been wrapped in a check, to not check
-    // children's list size if children is undefined
+    // the 's list size if vmTemplates is undefined
     this.item.vmTemplates = undefined;
-    this.item.vmTemplateIds = [];
+
     return true;
   }
 
