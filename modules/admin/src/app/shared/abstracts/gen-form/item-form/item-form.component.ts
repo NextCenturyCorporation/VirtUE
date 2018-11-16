@@ -319,23 +319,56 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    *
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
-  private createOrUpdate(redirect: () => void): void {
+  private createOrUpdate(redirect: (newItemData?) => void): void {
     // collects/updates data for and in the item, in preparation for saving.
     if ( ! this.finalizeItem()) {
       console.log("Item not valid."); // TODO give useful error message
       return;
     }
 
-    if (this.mode === Mode.DUPLICATE || this.mode === Mode.CREATE) {
+    if ( this.inDuplicateMode() || this.inCreateMode() ) {
       this.createItem(this.item, redirect);
     }
-    else if ( this.mode === Mode.EDIT) {
+    else if ( this.inEditMode() ) {
       this.updateItem(this.item, redirect);
     }
     else {
       console.log("Could not save or update - mode not valid. Mode set to: ", this.mode);
     }
   }
+
+  /**
+   * @return true iff the page is in view mode.
+   * Used in the html to prevent some types of action when the page is in 'View' mode.
+   */
+  inViewMode(): boolean {
+    return this.mode === Mode.VIEW;
+  }
+
+  /**
+   * @return true iff the page is in EDIT mode.
+   * Used in the html to prevent some actions while in EDIT mode.
+   */
+  inEditMode(): boolean {
+    return this.mode === Mode.EDIT;
+  }
+
+  /**
+   * @return true iff the page is in CREATE mode.
+   * Used in the html to change how the page gets displayed in CREATE mode.
+   */
+  inCreateMode(): boolean {
+    return this.mode === Mode.CREATE;
+  }
+
+  /**
+   * @return true iff the page is in DUPLICATE mode.
+   * Used in the html to change how the page gets displayed in DUPLICATE mode.
+   */
+  inDuplicateMode(): boolean {
+    return this.mode === Mode.DUPLICATE;
+  }
+
 
   /**
    * create and fill the fields the backend expects to see, pull in/record any

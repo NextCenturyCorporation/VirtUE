@@ -120,27 +120,27 @@ export class Virtue extends Item {
       this.enabled = virtueObj.enabled;
     }
 
-    if ('vmTemplateIds' in virtueObj && virtueObj.vmTemplateIds) {
+    if (virtueObj.vmTemplateIds) {
       this.vmTemplateIds = virtueObj.vmTemplateIds;
     }
 
-    if ('fileSystemIds' in virtueObj && virtueObj.fileSystemIds) {
+    if (virtueObj.fileSystemIds) {
       this.fileSystemIds = virtueObj.fileSystemIds;
     }
 
     // `Array.isArray` apparently doesn't work on some legacy browsers (i.e., IE) - we should be fine.
     // https://stackoverflow.com/a/20989617/3015812
-    if ('fileSystems' in virtueObj && virtueObj.fileSystems && Array.isArray(virtueObj.fileSystems)) {
+    if (virtueObj.fileSystems && Array.isArray(virtueObj.fileSystems)) {
       for (let fs of virtueObj.fileSystems) {
         this.fileSystems.add(fs.id, fs);
       }
     }
 
-    if ('printerIds' in virtueObj && virtueObj.printerIds) {
+    if (virtueObj.printerIds) {
       this.printerIds = virtueObj.printerIds;
     }
 
-    if ('allowedPasteTargetIds' in virtueObj && virtueObj.allowedPasteTargetIds) {
+    if (virtueObj.allowedPasteTargetIds) {
       this.allowedPasteTargetIds = virtueObj.allowedPasteTargetIds;
     }
 
@@ -153,7 +153,7 @@ export class Virtue extends Item {
       this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
     }
 
-    if ('networkWhiteList' in virtueObj && virtueObj.networkWhiteList) {
+    if (virtueObj.networkWhiteList) {
       this.networkWhiteList = virtueObj.networkWhiteList;
     }
 

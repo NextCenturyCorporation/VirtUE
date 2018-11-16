@@ -760,7 +760,7 @@ public class ImportExportService {
 	private VirtueUser verifyAndReturnUser() {
 		VirtueUser user = securityService.getCurrentUser();
 		if (!user.getAuthorities().contains(VirtueUser.ROLE_ADMIN)) {
-			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User did not have ADMIN role");
+			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED, "User does not have ADMIN role");
 		}
 		return user;
 	}

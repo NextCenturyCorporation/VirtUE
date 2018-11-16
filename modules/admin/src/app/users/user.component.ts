@@ -63,13 +63,13 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
-        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
-        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
+        <button  *ngIf=" !inViewMode() " class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+        <button  *ngIf=" inEditMode()" class="button-submit" (click)="save();" >Save</button>
+        <button  *ngIf=" inEditMode() " class="button-cancel" (click)="toViewMode()">Discard Changes</button>
+        <button  *ngIf=" !inViewMode() " class="button-cancel" (click)="toListPage()">Cancel</button>
 
-        <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
-        <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
+        <button  *ngIf="inViewMode()" class="button-submit" (click)="toEditMode();" >Edit</button>
+        <button  *ngIf="inViewMode()" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>

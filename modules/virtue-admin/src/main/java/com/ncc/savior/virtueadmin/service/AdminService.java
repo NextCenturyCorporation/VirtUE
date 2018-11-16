@@ -327,8 +327,10 @@ public class AdminService {
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
 		VirtueUser user = verifyAndReturnUser();
 
-		logger.debug("% " + template.getFileSystems().iterator().next());
-		logger.debug("% " + template.getFileSystems().iterator().next().getReadPerm());
+		// if (template.getFileSystems().iterator().hasNext()) {
+		// 	logger.debug("% " + template.getFileSystems().iterator().next());
+		// 	logger.debug("% " + template.getFileSystems().iterator().next().getReadPerm());
+		// }
 
 		if ( !templateId.equals(template.getId()) ) {
 			template = new VirtueTemplate(templateId, template);

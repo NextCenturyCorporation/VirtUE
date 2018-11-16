@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import com.ncc.savior.virtueadmin.model.Printer;
 import com.ncc.savior.virtueadmin.model.FileSystem;
+import com.ncc.savior.virtueadmin.model.PersonalizableFileSystem;
 
 
 /**
@@ -58,10 +59,11 @@ public class VirtueTemplate {
 	@ManyToMany()
 	private Collection<Printer> printers;
 
-	// @Embedded
 	// @Lob
-	@ElementCollection()
-	private Collection<FileSystem> fileSystems;
+	// @ManyToMany()
+	// @ElementCollection()
+	@Embedded
+	private Collection<PersonalizableFileSystem> fileSystems;
 
 
 	@Transient
@@ -96,7 +98,7 @@ public class VirtueTemplate {
 		this.printerIds = template.getPrinterIds();
 		this.fileSystemIds = template.getFileSystemIds();
 		if (this.fileSystems == null) {
-			this.fileSystems = new ArrayList<FileSystem>();
+			this.fileSystems = new ArrayList<PersonalizableFileSystem>();
 		}
 		if (this.fileSystemIds == null) {
 			this.fileSystemIds = new ArrayList<String>();
@@ -115,7 +117,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
@@ -131,7 +133,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, String awsTemplateName, String color, boolean enabled,
@@ -149,7 +151,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -166,7 +168,7 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
 	}
 
 	/**
@@ -174,7 +176,7 @@ public class VirtueTemplate {
 	 */
 	protected VirtueTemplate() {
 		super();
-		this.fileSystems = new ArrayList<FileSystem>();
+		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
 	}
 
 	public String getId() {
@@ -302,7 +304,7 @@ public class VirtueTemplate {
 	public Collection<String> getFileSystemIds() {
 		if (fileSystems != null) {
 			fileSystemIds = new ArrayList<String>();
-			for (FileSystem fs : fileSystems) {
+			for (PersonalizableFileSystem fs : fileSystems) {
 				fileSystemIds.add(fs.getId());
 			}
 		}
@@ -311,7 +313,7 @@ public class VirtueTemplate {
 	}
 
 	@JsonGetter
-	public Collection<FileSystem> getFileSystems() {
+	public Collection<PersonalizableFileSystem> getFileSystems() {
 		return fileSystems;
 	}
 
@@ -327,7 +329,7 @@ public class VirtueTemplate {
 	}
 
 	@JsonSetter
-	public void setFileSystems(Collection<FileSystem> fileSystems) {
+	public void setFileSystems(Collection<PersonalizableFileSystem> fileSystems) {
 		this.fileSystems = fileSystems;
 	}
 
@@ -362,9 +364,9 @@ public class VirtueTemplate {
 		printerIds.add(newPrinter.getId());
 	}
 
-	public void addFileSystem(FileSystem newFileSystem) {
+	public void addFileSystem(PersonalizableFileSystem newFileSystem) {
 		if (fileSystems == null) {
-			fileSystems = new ArrayList<FileSystem>();
+			fileSystems = new ArrayList<PersonalizableFileSystem>();
 		}
 		if (fileSystemIds == null) {
 			fileSystemIds = new ArrayList<String>();
@@ -384,10 +386,10 @@ public class VirtueTemplate {
 		}
 	}
 
-	public void removeFileSystem(FileSystem fileSystem) {
-		Iterator<FileSystem> itr = getFileSystems().iterator();
+	public void removeFileSystem(PersonalizableFileSystem fileSystem) {
+		Iterator<PersonalizableFileSystem> itr = getFileSystems().iterator();
 		while (itr.hasNext()) {
-			FileSystem fs = itr.next();
+			PersonalizableFileSystem fs = itr.next();
 			if (fs.getId().equals(fileSystem.getId())) {
 				itr.remove();
 				break;

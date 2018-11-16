@@ -319,10 +319,11 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     return [
       new TextColumn('Server & Drive',  3, (fs: FileSystem) => fs.name, SORT_DIR.ASC),
       new TextColumn('Address',         3, (fs: FileSystem) => fs.address, SORT_DIR.ASC),
-      new CheckboxColumn('Enabled',     3, 'enabled'),
+      new CheckboxColumn('Enabled',     2, 'enabled'),
       new CheckboxColumn('Read',        1, 'readPerm'),
       new CheckboxColumn('Write',       1, 'writePerm'),
-      new CheckboxColumn('Execute',     1, 'executePerm')
+      new CheckboxColumn('Execute',     1, 'executePerm'),
+      new IconColumn('Revoke access',   1, 'delete', (fs: FileSystem) => this.removeFileSystem(fs))
     ];
   }
 

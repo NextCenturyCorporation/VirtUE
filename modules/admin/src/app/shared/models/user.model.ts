@@ -18,13 +18,13 @@ import { Subdomains } from '../services/subdomains.enum';
 export class User extends Item {
 
   /** What roles this User is granted - currently can be 'User' and/or 'Admin' */
-  roles: string[];
+  roles: string[] = [];
 
   /** #uncommented */
-  virtueTemplates: DictList<IndexedObj>;
+  virtueTemplates: DictList<Virtue> = new DictList<Virtue>();
 
   /** #uncommented */
-  virtueTemplateIds: string[];
+  virtueTemplateIds: string[] = [];
 
   /**
    * convert from whatever form the user object is in the database.
@@ -33,22 +33,23 @@ export class User extends Item {
    */
   constructor(userObj) {
     super();
-    if (userObj) {
-      this.name = userObj.username;
-      this.roles = userObj.authorities;
-      this.enabled = userObj.enabled;
-      this.virtueTemplateIds = userObj.virtueTemplateIds;
-
-    }
-
-    if ( !this.roles) {
-      this.roles = [];
-    }
-    if ( !this.virtueTemplateIds) {
-      this.virtueTemplateIds = [];
-    }
-
     this.parentDomain = '/users';
+
+    if (userObj.username) {
+      this.name = userObj.username;
+    }
+
+    if (userObj.authorities) {
+      this.roles = userObj.authorities;
+    }
+
+    if ('enabled' in userObj) {
+    this.enabled = userObj.enabled;
+    }
+
+    if (userObj.virtueTemplateIds) {
+      this.virtueTemplateIds = userObj.virtueTemplateIds;
+    }
   }
 
   /**

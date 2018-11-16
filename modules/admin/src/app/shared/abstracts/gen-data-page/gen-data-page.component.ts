@@ -391,14 +391,17 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
-  createItem(obj: IndexedObj, redirect?: () => void): void {
+  createItem(obj: IndexedObj, onSuccess?: (createdItem?: IndexedObj) => void): void {
 
     let sub = this.dataRequestService.createRecord(obj.getSubdomain(), obj.getFormatForSave()).subscribe(
       createdItem => {
-        console.log(createdItem);
-        // note that the returned created item is just ignored.
-        if (redirect) {
-          redirect();
+        if (onSuccess) {
+          if (createdItem !== null) {
+            onSuccess(createdItem);
+          }
+          else {
+            onSuccess();
+          }
         }
         else {
           this.refreshPage();

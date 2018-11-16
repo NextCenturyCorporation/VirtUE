@@ -27,10 +27,10 @@ export class VirtualMachine extends Item {
   version: number;
 
   /** #uncommented */
-  applications: DictList<IndexedObj>;
+  applications: DictList<Application> = new DictList<Application>();
 
   /** #uncommented */
-  applicationIds: string[];
+  applicationIds: string[] = [];
 
   // /** #uncommented what is this? (templatePath)*/
   // templatePath: string;
@@ -50,21 +50,32 @@ export class VirtualMachine extends Item {
    */
   constructor(vmObj) {
     super();
-    if (vmObj) {
+    this.parentDomain = '/vm-templates';
+    
+    if (vmObj.id) {
       this.id = vmObj.id;
+    }
+    if (vmObj.name) {
       this.name = vmObj.name;
+    }
+    if ('enabled' in vmObj) {
       this.enabled = vmObj.enabled;
+    }
+    if (vmObj.applicationIds) {
       this.applicationIds = vmObj.applicationIds;
+    }
+    if ('version' in vmObj) {
       this.version = vmObj.version;
-      if (! this.version) {
-        this.version = 1;
-      }
+    }
+    if (vmObj.lastEditor) {
       this.lastEditor = vmObj.lastEditor;
+    }
+    if (vmObj.lastModification) {
       this.lastModification = vmObj.lastModification;
       this.modDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
+    }
+    if (vmObj.os) {
       this.os = vmObj.os;
-
-      this.parentDomain = '/vm-templates';
     }
 
   }
