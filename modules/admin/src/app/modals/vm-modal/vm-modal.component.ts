@@ -73,13 +73,10 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
   /**
    * This page just needs to show all VMs, and the apps assigned to each VM.
    *
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS];
   }
 
   /**

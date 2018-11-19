@@ -220,21 +220,19 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
   }
 
   /**
-   * This page needs all 4 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
+   * This page needs all 6 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
    * It also has a table showing the users that have been given access to this Virtue template.
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * The settings tab now also allows connection to printers and filesystems.
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [
-                        DatasetNames.APPS,
-                        DatasetNames.VMS,
-                        DatasetNames.PRINTERS,
-                        DatasetNames.FILE_SYSTEMS,
-                        DatasetNames.VIRTUES,
-                        DatasetNames.USERS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [
+            DatasetNames.APPS,
+            DatasetNames.VMS,
+            DatasetNames.PRINTERS,
+            DatasetNames.FILE_SYSTEMS,
+            DatasetNames.VIRTUES,
+            DatasetNames.USERS];
   }
 
   /**

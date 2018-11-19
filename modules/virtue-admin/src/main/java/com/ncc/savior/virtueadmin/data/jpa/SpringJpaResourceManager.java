@@ -22,7 +22,6 @@ import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.Printer;
 import com.ncc.savior.virtueadmin.model.FileSystem;
-import com.ncc.savior.virtueadmin.model.PersonalizableFileSystem;
 
 /**
  * {@link ITemplateManager} that uses Spring and JPA.
@@ -58,8 +57,8 @@ public class SpringJpaResourceManager implements IResourceManager {
 	 * @return the fileSystem attached to the virtueTemplate, that has the given fileSystemId.
 	 */
 	@Override
-	public PersonalizableFileSystem getFileSystemForVirtueTemplate(VirtueTemplate virtue, String fileSystemId) {
-		for (PersonalizableFileSystem fileSystem : virtue.getFileSystems()) {
+	public FileSystem getFileSystemForVirtueTemplate(VirtueTemplate virtue, String fileSystemId) {
+		for (FileSystem fileSystem : virtue.getFileSystems()) {
 			if (fileSystem.getId().equals(fileSystemId)) {
 				return fileSystem;
 			}
@@ -79,10 +78,10 @@ public class SpringJpaResourceManager implements IResourceManager {
 	}
 
 	@Override
-	public Map<String, PersonalizableFileSystem> getFileSystemsForVirtueTemplate(VirtueTemplate virtue) {
-		Collection<PersonalizableFileSystem> fileSystems = virtue.getFileSystems();
-		Map<String, PersonalizableFileSystem> map = new HashMap<String, PersonalizableFileSystem>();
-		for (PersonalizableFileSystem fs : fileSystems) {
+	public Map<String, FileSystem> getFileSystemsForVirtueTemplate(VirtueTemplate virtue) {
+		Collection<FileSystem> fileSystems = virtue.getFileSystems();
+		Map<String, FileSystem> map = new HashMap<String, FileSystem>();
+		for (FileSystem fs : fileSystems) {
 			map.put(fs.getId(), fs);
 		}
 		return map;

@@ -61,13 +61,10 @@ export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
 
   /**
    * #unimplemented
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: []
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [];
   }
 
 

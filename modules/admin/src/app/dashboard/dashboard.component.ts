@@ -19,7 +19,7 @@ import { ItemListComponent } from '../shared/abstracts/item-list/item-list.compo
  *
  * #uncommented #unimplemented
  *
- * It really shouldn't even extend that class. It'll probably eventuall have a few tables, but certainly more than that.
+ * It really shouldn't even extend that class. It'll probably eventually have a few tables, but certainly more than that.
  * Ideally graphs and whatnot. This may be the most interesting page here.
  * @class
  * @extends
@@ -86,15 +86,12 @@ export class DashboardComponent extends ItemListComponent {
 
   /**
    * #uncommented
-   * @param
    *
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    * @return
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
   }
 
   /**

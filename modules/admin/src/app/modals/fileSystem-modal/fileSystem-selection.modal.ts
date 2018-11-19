@@ -22,7 +22,7 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
 
 /**
  * @class
- * This class represents a list of Printers, which can be selected.
+ * This class represents a selectable list of FileSystems.
  *
  * @extends [[GenericModalComponent]]
  */
@@ -49,7 +49,7 @@ export class FileSystemSelectionModalComponent extends GenericModalComponent {
   }
 
   /**
-   * @return what columns should show up in the the printer selection table
+   * @return what columns should show up in the the fileSystem selection table
    */
   getColumns(): Column[] {
     return [
@@ -60,7 +60,7 @@ export class FileSystemSelectionModalComponent extends GenericModalComponent {
   }
 
   /**
-   * #uncommented
+   * @override [[GenericModalComponent.customizeTableParams]]
    */
   customizeTableParams(params): void {
     params['elementIsDisabled'] = (fs: FileSystem) => !fs.enabled;
@@ -74,16 +74,10 @@ export class FileSystemSelectionModalComponent extends GenericModalComponent {
   }
 
   /**
-   * This page needs all datasets to load except allUsers: it displays all printers, the VMs assigned to each printer,
-   * and the apps available to each Printer through its VMs.
-   *
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.FILE_SYSTEMS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.FILE_SYSTEMS];
   }
 
   /**

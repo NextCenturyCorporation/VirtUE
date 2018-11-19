@@ -13,17 +13,10 @@ import { ConfigFileSysTabComponent } from './config-fileSys-tab/config-fileSys-t
 import { ConfigSensorsTabComponent } from './config-sensors-tab/config-sensors-tab.component';
 import { ConfigSettingsHistoryTabComponent } from './config-settingsHistory-tab/config-settingsHistory-tab.component';
 
-import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
-
-// import { GenericDataPageComponent } from '../shared/abstracts/gen-data-page/gen-data-page.component';
-
-
 /**
  * @class
- * Convert this to a generic form.
- *
- * #uncommented, because it will need to change drastically
+ * This holds the tabs on which various global settings can be defined.
+ * See the individual tab classes for their respective details.
  */
 @Component({
   selector: 'app-config',
@@ -32,34 +25,16 @@ import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enu
 })
 export class ConfigComponent extends GenericPageComponent {
 
-  /**
-   * #uncommented
-   */
   @ViewChild('activeDirTab') activeDirTab: ConfigActiveDirTabComponent;
 
-  /**
-   * #uncommented
-   */
   @ViewChild('printerTab') printerTab: ConfigPrinterTabComponent;
 
-  /**
-   * #uncommented
-   */
   @ViewChild('fileSysTab') fileSysTab: ConfigFileSysTabComponent;
 
-  /**
-   * #uncommented
-   */
   @ViewChild('sensorTab') sensorTab: ConfigSensorsTabComponent;
 
-  /**
-   * #uncommented
-   */
   @ViewChild('settingsHistoryTab') settingsHistoryTab: ConfigSettingsHistoryTabComponent;
 
-  /**
-   * #uncommented
-   */
   constructor(
     router: Router,
     dialog: MatDialog

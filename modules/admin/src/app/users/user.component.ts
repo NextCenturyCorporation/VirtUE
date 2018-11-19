@@ -100,7 +100,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     super('/users', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
-    this.item = new User(undefined);
+    this.item = new User({});
 
     this.datasetName = DatasetNames.USERS;
     this.childDatasetName = DatasetNames.VIRTUES;
@@ -184,13 +184,10 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
   /**
    * This page needs all 4 datasets, because there's a Table of Virtues, and under each Virtue
    * we want to display all the Apps it has available to it.
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS];
   }
 
   /**

@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import com.ncc.savior.virtueadmin.model.Printer;
 import com.ncc.savior.virtueadmin.model.FileSystem;
-import com.ncc.savior.virtueadmin.model.PersonalizableFileSystem;
 
 
 /**
@@ -59,12 +58,12 @@ public class VirtueTemplate {
 	@ManyToMany()
 	private Collection<Printer> printers;
 
-	// @Lob
-	// @ManyToMany()
-	// @ElementCollection()
-	@Embedded
-	private Collection<PersonalizableFileSystem> fileSystems;
+	@ManyToMany()
+	@ElementCollection()
+	private Collection<FileSystem> fileSystems;
 
+	@ElementCollection()
+	private Collection<String> allowedPasteTargetIds;
 
 	@Transient
 	private Collection<String> printerIds;
@@ -97,8 +96,9 @@ public class VirtueTemplate {
 		this.fileSystems = template.getFileSystems();
 		this.printerIds = template.getPrinterIds();
 		this.fileSystemIds = template.getFileSystemIds();
+		this.allowedPasteTargetIds = template.getAllowedPasteTargetIds();
 		if (this.fileSystems == null) {
-			this.fileSystems = new ArrayList<PersonalizableFileSystem>();
+			this.fileSystems = new ArrayList<FileSystem>();
 		}
 		if (this.fileSystemIds == null) {
 			this.fileSystemIds = new ArrayList<String>();
@@ -117,7 +117,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
@@ -133,7 +133,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, String awsTemplateName, String color, boolean enabled,
@@ -151,7 +151,7 @@ public class VirtueTemplate {
 		this.lastModification = lastModification;
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
-		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -168,7 +168,7 @@ public class VirtueTemplate {
 		this.awsTemplateName = awsTemplateName;
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
-		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class VirtueTemplate {
 	 */
 	protected VirtueTemplate() {
 		super();
-		this.fileSystems = new ArrayList<PersonalizableFileSystem>();
+		this.fileSystems = new ArrayList<FileSystem>();
 	}
 
 	public String getId() {
@@ -304,7 +304,7 @@ public class VirtueTemplate {
 	public Collection<String> getFileSystemIds() {
 		if (fileSystems != null) {
 			fileSystemIds = new ArrayList<String>();
-			for (PersonalizableFileSystem fs : fileSystems) {
+			for (FileSystem fs : fileSystems) {
 				fileSystemIds.add(fs.getId());
 			}
 		}
@@ -313,8 +313,13 @@ public class VirtueTemplate {
 	}
 
 	@JsonGetter
-	public Collection<PersonalizableFileSystem> getFileSystems() {
+	public Collection<FileSystem> getFileSystems() {
 		return fileSystems;
+	}
+
+	@JsonGetter
+	public Collection<String> getAllowedPasteTargetIds() {
+		return allowedPasteTargetIds;
 	}
 
 	@JsonSetter
@@ -329,8 +334,13 @@ public class VirtueTemplate {
 	}
 
 	@JsonSetter
-	public void setFileSystems(Collection<PersonalizableFileSystem> fileSystems) {
+	public void setFileSystems(Collection<FileSystem> fileSystems) {
 		this.fileSystems = fileSystems;
+	}
+
+	@JsonSetter
+	public void setAllowedPasteTargetIds(Collection<String> allowedPasteTargetIds) {
+		 this.allowedPasteTargetIds = allowedPasteTargetIds;
 	}
 
 	public Date getTimeCreatedAt() {
@@ -364,9 +374,9 @@ public class VirtueTemplate {
 		printerIds.add(newPrinter.getId());
 	}
 
-	public void addFileSystem(PersonalizableFileSystem newFileSystem) {
+	public void addFileSystem(FileSystem newFileSystem) {
 		if (fileSystems == null) {
-			fileSystems = new ArrayList<PersonalizableFileSystem>();
+			fileSystems = new ArrayList<FileSystem>();
 		}
 		if (fileSystemIds == null) {
 			fileSystemIds = new ArrayList<String>();
@@ -386,10 +396,10 @@ public class VirtueTemplate {
 		}
 	}
 
-	public void removeFileSystem(PersonalizableFileSystem fileSystem) {
-		Iterator<PersonalizableFileSystem> itr = getFileSystems().iterator();
+	public void removeFileSystem(FileSystem fileSystem) {
+		Iterator<FileSystem> itr = getFileSystems().iterator();
 		while (itr.hasNext()) {
-			PersonalizableFileSystem fs = itr.next();
+			FileSystem fs = itr.next();
 			if (fs.getId().equals(fileSystem.getId())) {
 				itr.remove();
 				break;

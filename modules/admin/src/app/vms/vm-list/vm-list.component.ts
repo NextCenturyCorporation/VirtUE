@@ -74,14 +74,10 @@ export class VmListComponent extends ItemListComponent {
   }
 
   /**
-   * See [[GenericDataPageComponent.getDataPageOptions]]
-   * @return child-specific information needed by the generic page functions when loading data.
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS];
   }
 
 

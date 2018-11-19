@@ -410,6 +410,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       new IconColumn('Revoke',  1, 'delete', (idx: number) => this.removeNetwork(idx))
     ];
   }
+
   /**
    * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
    *
@@ -582,9 +583,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    activatePastableVirtueModal(): void {
      this.activateVirtueSelectionModal( this.item.allowedPasteTargetIds, (selectedVirtueIds: string[]) => {
          this.item.allowedPasteTargetIds = selectedVirtueIds;
-         // TODO this doesn't actually update the table, because allowedPasteTargets can't be updated from here.
-         // Need to send a messge to the form page to relaod, like the main tabs do.
-         this.updatePasteableVirtuesTable();
+         this.onChildrenChange.emit();
        });
    }
   /**
@@ -690,13 +689,12 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     dialogRef.updatePosition({ top: '5%', left: String(Math.floor(50 - wPercentageOfScreen / 2)) + '%' });
 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
-      if (newColor !== "") {
         this.item.color = newColor;
-      }
-    },
-    () => {},
-    () => {
+      });
+
+    let closedSub = dialogRef.afterClosed().subscribe(() => {
       sub.unsubscribe();
+      closedSub.unsubscribe();
     });
   }
 

@@ -71,20 +71,12 @@ export class ColorModalComponent implements OnInit {
     this.selectedColor = color;
   }
 
-  /**
-   * if the user clicks cancel. Emits the currently-selected color, and closes the dialog.
-   */
   submit(): void {
     this.selectColor.emit(this.selectedColor.hex);
     this.dialogRef.close();
   }
 
-  /**
-   * if the user clicks cancel. Emits an obvious non-color before closing, so that the subscribed component
-   * knows to ignore it and unsubscribe.
-   */
   cancel() {
-    this.selectColor.emit("");
     this.dialogRef.close();
   }
 

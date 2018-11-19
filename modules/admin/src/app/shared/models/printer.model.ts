@@ -28,9 +28,6 @@ export class Printer extends IndexedObj implements Toggleable {
   /** Whether the printer is enabled or disabled. */
   enabled: boolean;
 
-  /**
-   * @param info see [[info]]
-   */
   constructor( printer?: {id?: string, name: string, info?: string, status: string, address: string, enabled: boolean} ) {
 
     super();
@@ -43,10 +40,10 @@ export class Printer extends IndexedObj implements Toggleable {
 
   }
 
-  /** #uncommented */
   getID(): string {
     return this.id;
   }
+
   /**
    * @return the PRINTERS subdomain
    */

@@ -79,14 +79,10 @@ export class AppsListComponent extends ItemListComponent {
   }
 
   /**
-   * See [[GenericDataPageComponent.getDataPageOptions]]
-   * @return child-specific information needed by the generic page functions when loading data.
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS];
   }
 
   /**

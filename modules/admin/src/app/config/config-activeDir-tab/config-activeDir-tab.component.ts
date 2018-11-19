@@ -11,11 +11,14 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 /**
  * @class
- * This component allows the user (an admin) to set up activ directories. For something.
- * TODO ask about active directories
+ * This component allows the user (an admin) to connect the VirtUE system to (an?) Active Directory - AD is what all users will use to
+ * log into the desktop, as well as what the admin will use to log into this workbench.
+ *
  * #uncommented, because this is a stub.
  *
- * This probably shouldn't be a GenericDataTabComponent. Maybe.
+ * Should this be a GenericDataTabComponent? What would this pull from the backend?
+ * I assume a list of currently-set-up ADs. But then how would you set up the first one?
+ * Is there a way to make sure that an admin can't change their own privileges? Is that desireable?
  *
  */
 @Component({
@@ -51,12 +54,9 @@ export class ConfigActiveDirTabComponent extends GenericDataTabComponent {
 
   /**
    * #unimplemented
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [] // DatasetNames. Is this how this will be populated? I'm pretty sure not.
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return []; // DatasetNames.SOMETHING Is this how this will be populated?
   }
 }

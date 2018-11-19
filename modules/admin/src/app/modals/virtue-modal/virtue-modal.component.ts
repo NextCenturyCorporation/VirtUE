@@ -84,13 +84,10 @@ export class VirtueModalComponent extends GenericModalComponent {
    * This page needs all datasets to load except allUsers: it displays all virtues, the VMs assigned to each virtue,
    * and the apps available to each Virtue through its VMs.
    *
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
   }
 
   /**

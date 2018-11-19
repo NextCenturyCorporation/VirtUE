@@ -29,10 +29,7 @@ import {
 
 /**
  * @class
- * This component allows the user (an admin) to set up activ directories. For something.
- * TODO ask about active directories
- * #uncommented, because this is a stub.
- * also #move to a tab on the global settings form
+ * This component allows the user (an admin) to set up printers
  */
 @Component({
   selector: 'app-config-printer-tab',
@@ -41,7 +38,6 @@ import {
 })
 export class ConfigPrinterTabComponent extends GenericDataTabComponent {
 
-  /** #uncommented, unimplemented */
   @ViewChild(GenericTableComponent) printersTable: GenericTableComponent<Printer>;
 
   /**
@@ -56,15 +52,12 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
     this.tabName = "Printers";
   }
 
-  /**
-   * #unimplemented
-   */
   init(): void {
     this.setUpTable();
   }
 
   /**
-   * #commented
+   * @override [[GenericDataPageComponent.onPullComplete]]
    */
   onPullComplete(): void {
     this.printersTable.populate(this.datasets[DatasetNames.PRINTERS].asList());
@@ -112,18 +105,13 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
   }
 
   /**
-   * #unimplemented
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+  * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.PRINTERS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.PRINTERS];
   }
 
   togglePrinter(printer: Printer) {
-    // remember this is 'status' like 'enabled'/'disabled', not a printer status like 'idle'/'busy'/'broken'/etc
     this.setItemAvailability(printer, !printer.enabled);
   }
 

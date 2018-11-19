@@ -39,16 +39,20 @@ import { DatasetType, DatasetsMeta } from './datasetType';
  * be generated a list of references to the actual VM objects. This significantly reduces the number of requests made to
  * the backend, as compared to having to request and wait for the data on every object referenced via a childID separately.
  *
- * Children must define:
- *  - neededDatasets
+ *
+ * Children must implement:
+ *  - getNeededDatasets
  *      a list of Dataset enums telling this page what information to request from the backend.
  *      currently, if a page needs data on a user, it must request info on all users. That could be changed,
  *      but I haven't noticed any discernible lag. Should eventually see how many users can be added before things start to slow down,
  *      and where the bottleneck there is.
+ *        The alternative is to request each required member separately, recursively. So pull user to get virtueIds, then pull of those
+ *        virtues in turn, and for each of those pull each vmId, and so on. Many many more requests, but may be needed.
+ *        The real answer would be to switch to GraphQL, so all that gets done on the backend. Aside from actually writing the graphql
+ *        server, this would be the only class that would have to change substantially. I think. This class's children would simply need
+ *        to define a GQL request, instead of a list of needed datasets.
  *
- * and also must implement:
- *  - getDataPageOptions
- *      defines some page-specific values that dictate where data is pulled, and where later requests to the backend should be made.
+ *
  *  - onPullComplete
  *      a function to be called once all the requested datasets have been pulled and processed. Usually needed for setting page values
  *      to some part of the data that was requested, and so which wasn't available at render time.
@@ -66,8 +70,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    */
   datasets: DictList<DictList<IndexedObj>>;
 
-
-  /** holds the names and data types of each of the four datasets. */
+  /** holds the names and data types of each of the datasets. */
   datasetsMeta: Dict<DatasetType>;
 
  /**
@@ -77,12 +80,8 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   */
   neededDatasets: DatasetNames[];
 
-  /** #uncommented */
   loadedDatasets:  DatasetNames[];
 
-  /**
-   * #uncommented
-   */
   constructor(
     router: Router,
     protected baseUrlService: BaseUrlService,
@@ -94,9 +93,8 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     // This really only needs to be a dictionary (i.e. it could just be a normal {} object), but I like the DictList interface.
     this.datasets = new DictList<DictList<IndexedObj>>();
 
-    // Every derivative of this class must define getDataPageOptions
-    let params = this.getDataPageOptions();
-    this.neededDatasets = params.neededDatasets;
+    // Every derivative of this class must define getNeededDatasets
+    this.neededDatasets = this.getNeededDatasets();
     this.loadedDatasets = [];
 
     this.datasetsMeta = new DatasetsMeta().getDatasets();
@@ -104,7 +102,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   /**
    * @param wait whether or not the code should wait 1/3 second before refreshing.
-   * Currently the wait time is never used, so the default is to ignore it amd refresh the data
+   * Currently the wait time is never used, so the default is to ignore it and refresh the data
    * right away. Before onPullComplete was implemented, this was used to delay the initialization of page
    * components until data from the backend had probably been retrieved.
    */
@@ -325,12 +323,9 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   /**
    * Must be implemented by all sub-classes.
    *
-   * @return an object holding the url that [[DataRequestService]] should be querying when making changes on the
-   * type of object this page focuses on, and a list of the datasets which should be loaded upon page load or refresh.
+   * @return a list of the datasets which should be loaded upon page load or refresh.
    */
-  abstract getDataPageOptions(): {
-        neededDatasets: DatasetNames[]
-      };
+  abstract getNeededDatasets(): DatasetNames[];
 
 
   /** #uncommented */
@@ -391,13 +386,13 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *
    * @param redirect a redirect function to call (only) after the saving process has successfully completed.
    */
-  createItem(obj: IndexedObj, onSuccess?: (createdItem?: IndexedObj) => void): void {
+  createItem(obj: IndexedObj, onSuccess?: (createdObj?: IndexedObj) => void): void {
 
     let sub = this.dataRequestService.createRecord(obj.getSubdomain(), obj.getFormatForSave()).subscribe(
-      createdItem => {
+      createdObj => {
         if (onSuccess) {
-          if (createdItem !== null) {
-            onSuccess(createdItem);
+          if (createdObj !== null) {
+            onSuccess(createdObj);
           }
           else {
             onSuccess();
@@ -417,7 +412,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   }
 
   /**
-   * Deletes the [[Item]] and then refreshes the data on the page.
+   * Deletes the [[IndexedObj]] and then refreshes the data on the page.
    * @param obj the IndexedObj to be deleted from the backend.
    */
   deleteItem(obj: IndexedObj): void {

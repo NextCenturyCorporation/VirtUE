@@ -22,7 +22,7 @@ import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 /**
- * Just for testing the radio button column
+ * Temporary, just for showcasing the radio button column
  */
 class Sensor {
   public status: string;
@@ -98,13 +98,10 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
 
   /**
    * #unimplemented
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: []
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [];
   }
 
   /**

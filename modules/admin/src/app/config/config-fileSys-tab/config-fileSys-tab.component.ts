@@ -65,14 +65,10 @@ export class ConfigFileSysTabComponent extends GenericDataTabComponent implement
   }
 
   /**
-   * #unimplemented
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.FILE_SYSTEMS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.FILE_SYSTEMS];
   }
 
 

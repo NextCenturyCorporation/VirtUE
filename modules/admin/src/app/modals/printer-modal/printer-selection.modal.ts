@@ -78,13 +78,10 @@ export class PrinterSelectionModalComponent extends GenericModalComponent {
    * This page needs all datasets to load except allUsers: it displays all printers, the VMs assigned to each printer,
    * and the apps available to each Printer through its VMs.
    *
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.PRINTERS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.PRINTERS];
   }
 
   /**

@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.FileSystem;
-import com.ncc.savior.virtueadmin.model.PersonalizableFileSystem;
 import com.ncc.savior.virtueadmin.model.Printer;
 
 /**
@@ -17,11 +16,11 @@ public interface IResourceManager {
 
 	public Printer getPrinterForVirtueTemplate(VirtueTemplate virtue, String printerId);
 
-	public PersonalizableFileSystem getFileSystemForVirtueTemplate(VirtueTemplate virtue, String fileSystemId);
+	public FileSystem getFileSystemForVirtueTemplate(VirtueTemplate virtue, String fileSystemId);
 
 	public Map<String, Printer> getPrintersForVirtueTemplate(VirtueTemplate virtue);
 
-	public Map<String, PersonalizableFileSystem> getFileSystemsForVirtueTemplate(VirtueTemplate virtue);
+	public Map<String, FileSystem> getFileSystemsForVirtueTemplate(VirtueTemplate virtue);
 
 	public Collection<String> getPrinterIdsForVirtueTemplate(VirtueTemplate virtue);
 

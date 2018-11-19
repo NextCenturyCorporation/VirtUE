@@ -168,13 +168,10 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
   /**
    * This page needs all datasets to load: This VM, the Virtues granted this VM template, and the Apps this VM has
    * been given.
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
   }
 
   /**

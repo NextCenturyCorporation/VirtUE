@@ -62,13 +62,10 @@ export class AppsModalComponent extends GenericModalComponent {
   /**
    * This page only needs to list all available apps, and doesn't need to request any other data.
    *
-   * See [[GenericDataPageComponent.getDataPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getDataPageOptions(): {
-      neededDatasets: DatasetNames[]} {
-    return {
-      neededDatasets: [DatasetNames.APPS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS];
   }
 
   /**
