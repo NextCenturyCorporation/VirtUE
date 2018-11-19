@@ -128,12 +128,15 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		Map<String, String> tags = new HashMap<String, String>();
 		tags.put(AwsUtil.TAG_USERNAME, user.getUsername());
 		tags.put(AwsUtil.TAG_VIRTUE_NAME, vi.getName());
-		tags.put(AwsUtil.TAG_INSTANCE_ID, vi.getId());
+		tags.put(AwsUtil.TAG_VIRTUE_INSTANCE_ID, vi.getId());
+		tags.put(AwsUtil.TAG_VIRTUE_TEMPLATE_ID, vi.getTemplateId());
 		String subnetId = vpcSubnetProvider.getSubnetId(vi.getId(), tags);
 		String virtueSecurityGroupId = securityGroupManager.getSecurityGroupIdByTemplateId(vi.getTemplateId());
 		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters(template.getName());
 		virtueMods.setSubnetId(subnetId);
 		virtueMods.setSecurityGroupId(virtueSecurityGroupId);
+		virtueMods.setVirtueId(vi.getId());
+		virtueMods.setVirtueTemplateId(vi.getTemplateId());
 		Collection<VirtualMachine> vms = awsVmManager.provisionVirtualMachineTemplates(user, windowsVmts, windowsFuture,
 				virtueMods);
 		vi.setVms(vms);
