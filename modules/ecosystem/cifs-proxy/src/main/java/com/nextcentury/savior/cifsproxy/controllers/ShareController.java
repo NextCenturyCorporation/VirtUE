@@ -22,7 +22,8 @@ import com.nextcentury.savior.cifsproxy.model.FileShare;
 import com.nextcentury.savior.cifsproxy.services.ShareService;
 
 /**
- * Implements the CIFS Proxy REST API as defined in the SAVIOR CIFS Proxy documentation.
+ * Implements the CIFS Proxy REST API as defined in the SAVIOR CIFS Proxy
+ * documentation.
  * 
  * @author clong
  *
@@ -89,7 +90,9 @@ public class ShareController {
 
 	private void validateShare(FileShare share) {
 		if (share.getName() == null || share.getName().isEmpty()) {
-			throw new IllegalArgumentException("");
+			IllegalArgumentException iae = new IllegalArgumentException("share name must be specified");
+			LOGGER.throwing(iae);
+			throw iae;
 		}
 	}
 }
