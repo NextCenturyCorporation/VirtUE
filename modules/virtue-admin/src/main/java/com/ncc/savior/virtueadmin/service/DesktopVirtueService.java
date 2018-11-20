@@ -49,12 +49,14 @@ public class DesktopVirtueService {
 
 	@Value("${virtue.aws.windows.password}")
 	private String windowsPassword;
+	private Set<PollHandler> pollHandlers;
 
 	public DesktopVirtueService(IActiveVirtueManager activeVirtueManager, ITemplateManager templateManager,
 			IApplicationManager applicationManager) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.templateManager = templateManager;
 		this.applicationManager = applicationManager;
+		this.pollHandlers = new HashSet<PollHandler>();
 	}
 
 	/**
@@ -85,6 +87,7 @@ public class DesktopVirtueService {
 				virtues.add(dv);
 			}
 		}
+		notifyPollHandlers(user, templates, templateIdToActiveVirtues);
 		return virtues;
 	}
 
@@ -219,7 +222,8 @@ public class DesktopVirtueService {
 		for (ApplicationDefinition app : apps) {
 			appsMap.put(app.getId(), app);
 		}
-		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED, template.getColor());
+		return new DesktopVirtue(null, template.getName(), template.getId(), appsMap, VirtueState.UNPROVISIONED,
+				template.getColor());
 	}
 
 	private DesktopVirtue convertVirtueInstanceToDesktopVirtue(VirtueInstance instance) {
@@ -260,5 +264,26 @@ public class DesktopVirtueService {
 		VirtueUser user = verifyAndReturnUser();
 		VirtueInstance instance = activeVirtueManager.deleteVirtue(user, id);
 		return convertVirtueInstanceToDesktopVirtue(instance);
+	}
+
+	private void notifyPollHandlers(VirtueUser user, Map<String, VirtueTemplate> templates,
+			Map<String, Set<VirtueInstance>> templateIdToActiveVirtues) {
+		for (PollHandler ph : pollHandlers) {
+			try {
+				ph.onPoll(user, templates, templateIdToActiveVirtues);
+			} catch (Exception e) {
+				logger.warn("Failed to notify Poll Handler!", e);
+			}
+		}
+	}
+	
+	public void addPollHandler(PollHandler ph) {
+		pollHandlers.add(ph);
+	}
+
+	public static interface PollHandler {
+
+		public void onPoll(VirtueUser user, Map<String, VirtueTemplate> templates,
+				Map<String, Set<VirtueInstance>> templateIdToActiveVirtues);
 	}
 }
