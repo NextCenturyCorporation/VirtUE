@@ -128,7 +128,7 @@ export class DashboardComponent extends ItemListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent]].
    */
   getColumns(): Column[] {
     return [

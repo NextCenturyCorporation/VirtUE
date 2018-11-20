@@ -55,9 +55,7 @@ enum VigilenceLevel {
 })
 export class ConfigSensorsTabComponent extends GenericDataTabComponent implements OnInit {
 
-  /** #uncommented, unimplemented */
   @ViewChild(GenericTableComponent) generalSensorTable: GenericTableComponent<Sensor>;
-
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
@@ -68,18 +66,15 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
     super(router, baseUrlService, dataRequestService, dialog);
-    this.tabName = "Global Sensors";
+    this.tabLabel = "Global Sensors";
   }
 
-  /**
-   * #unimplemented
-   */
   init(): void {
     this.setUpTable();
   }
 
   /**
-   * #unimplemented
+   * called once data is available - mocked here. #unimplemented
    */
   setUp(): void {
     this.generalSensorTable.populate([ new Sensor("In-resource (Unikernel)", VigilenceLevel.OFF),
@@ -103,10 +98,7 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
   getNeededDatasets(): DatasetNames[] {
     return [];
   }
-
-  /**
-   * Sets up the table, according to parameters defined in this class' child classes.
-   */
+  
   setUpTable(): void {
     if (this.generalSensorTable === undefined) {
       return;

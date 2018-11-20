@@ -24,4 +24,17 @@ export class NetworkPermission {
 
   /** The port to connect to on the desination */
   remotePort: number;
+
+  equals(obj: any): boolean {
+    if (!obj) {
+      return false;
+    }
+    // remember instanceof just checks the prototype.
+    // If any of these don't exist, that's ok.
+    return (obj.destination === this.destination)
+        && (obj.protocol === this.protocol)
+        && (obj.localPort === this.localPort)
+        && (obj.remotePort === this.remotePort);
+  }
+
 }

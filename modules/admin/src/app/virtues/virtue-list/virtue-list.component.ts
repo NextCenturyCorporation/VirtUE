@@ -64,7 +64,7 @@ export class VirtueListComponent extends ItemListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
@@ -74,13 +74,13 @@ export class VirtueListComponent extends ItemListComponent {
       new ListColumn('Applications',      2, (i: Item) => this.getVmApps(i), this.formatName),
       new TextColumn('Last Editor',       2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),
       new TextColumn('Version',           1, (v: Virtue) => String(v.version),  SORT_DIR.ASC),
-      new TextColumn('Modification Date', 2, (v: Virtue) => v.modDate,          SORT_DIR.DESC),
+      new TextColumn('Modification Date', 2, (v: Virtue) => v.readableModificationDate,          SORT_DIR.DESC),
       new TextColumn('Status',            1, this.formatStatus,                 SORT_DIR.ASC)
     ];
   }
 
   /**
-   * add colors to the table defined in [[GenericListComponent]], since here it will be showing Virtues.
+   * add colors to the table defined in [[ItemListComponent]], since here it will be showing Virtues.
    */
   customizeTableParams(params): void {
     params['coloredLabels'] = true;
@@ -96,7 +96,7 @@ export class VirtueListComponent extends ItemListComponent {
 
 
   /**
-   * See [[GenericListComponent.getListOptions]] for details
+   * See [[ItemListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {

@@ -23,23 +23,20 @@ export class FileSystem extends IndexedObj implements Toggleable {
   /** the id given by the backend */
   id: string = "12345"; // default to something recognizable so it's clear if something goes wrong.
 
-  /** the address of this FS, relative to something, TODO */
   address: string;
 
-  /** some name to identify this file system. */
   name: string;
 
-  /** Can this FS be accessed at all? */
+  /** whether this FS can be accessed at all */
   enabled: boolean = true;
 
-  /** Can the virtue read data on this FS? */
   readPerm: boolean = false;
 
-  /** Can the virtue write data to this FS? */
   writePerm: boolean = false;
 
-  /** Can the virtue execute files on this FS?
-   * TODO on the FS, or from it? Both? Either?*/
+  /**
+   * TODO is this execution privileges on the FS, or from it? Both? Either?
+   */
   executePerm: boolean = false;
 
   constructor( fs: {id?: string, name: string, address: string} | FileSystem ) {
@@ -66,7 +63,6 @@ export class FileSystem extends IndexedObj implements Toggleable {
     }
   }
 
-  /** #uncommented */
   getID(): string {
     return this.id;
   }
@@ -79,6 +75,6 @@ export class FileSystem extends IndexedObj implements Toggleable {
   }
 
   formatPerms() {
-    return this.readPerm ? " R " : "" + this.writePerm ? " W " : "" + this.executePerm ? " E " : "";
+    return (this.readPerm ? " R " : "") + (this.writePerm ? " W " : "") + (this.executePerm ? " E " : "");
   }
 }

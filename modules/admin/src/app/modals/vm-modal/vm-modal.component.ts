@@ -63,7 +63,7 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
     return [
       new TextColumn('Template Name',         3, (v: VirtualMachine) => v.getName(), SORT_DIR.ASC),
       new ListColumn('Assigned Applications', 3, (v: VirtualMachine) => this.getApps(v), this.formatName),
-      new TextColumn('Modification Date',      2, (v: VirtualMachine) => v.modDate, SORT_DIR.DESC),
+      new TextColumn('Modification Date',      2, (v: VirtualMachine) => v.readableModificationDate, SORT_DIR.DESC),
       new TextColumn('Operating System',      2, (v: VirtualMachine) => v.os, SORT_DIR.ASC),
       new TextColumn('Version',               1, (v: VirtualMachine) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)

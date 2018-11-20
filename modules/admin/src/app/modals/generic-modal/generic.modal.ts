@@ -26,9 +26,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  * a list of Item-subclass objects.
  * See the commented-out GenericPageComponent.activateModal() function for the unimplemented design.
  *
- *
- * @extends [[GenericListComponent]] so that it can display the available items in the same way,
- * with the same filtering/sorting capabilities available to the user on any of the list pages.
  */
 @Component({
   selector: 'app-generic-modal',

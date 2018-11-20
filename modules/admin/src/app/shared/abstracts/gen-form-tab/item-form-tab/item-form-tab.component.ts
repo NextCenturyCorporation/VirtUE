@@ -24,7 +24,14 @@ import { GenericFormTabComponent } from '../gen-form-tab.component';
  * Each tab should have a different, unified, focus, be organized so as to require
  * a minimal amount of scrolling, and should give some indication of unsaved changes.
  *
- * Extension of [[GenericTabComponent]] - see the comments on all of that class' abstract methods.
+ * This family of classes all deal with displaying many pieces of a single, locally-held, object.
+ * Any tab can change those pieces, and the central parent form [[ItemFormComponent]] just watches the
+ * event emitters of each tab, to know when to reload the Item's data, using local (previously pulled) datasets.
+ * E.g. if a User's virtueIds change, the form will use the new virtueIds to re-create item.virtues from the
+ * same Virtue dataset that was pulled when the page first loaded.
+ * These tabs aren't in charge of updating the backend themselves.
+ *
+ * Extension of [[GenericFormTabComponent]] - see the comments on all of that class' abstract methods.
  */
 export abstract class ItemFormTabComponent extends GenericFormTabComponent implements OnInit {
 
@@ -47,17 +54,17 @@ export abstract class ItemFormTabComponent extends GenericFormTabComponent imple
    * This does whatever setup can be done at render time, before data is available. Called by containing component.
    * Usually, if the tab has a table this is where table.setUp({...}) would be called.
    *
-   * Re-definition of [[GenericTabComponent.init]])(), to specify input type.
+   * Re-definition of [[GenericFormTabComponent.init]])(), to specify input type.
    * @param mode the mode to set up this tab as being in. Must be passed in.
    */
   abstract init(mode: Mode): void;
 
   /**
    * This finishes setting up the page, once all data requested by the parent form has returned and
-   * [[item]] has been given a value.
+   * [[ItemFormComponent.item]] has been given a value.
    *
    * Called in [[ItemFormComponent.onPullComplete]]
-   * Re-definition of [[GenericTabComponent.setUp]])(), to specify input type.
+   * Re-definition of [[GenericFormTabComponent.setUp]])(), to specify input type.
    *
    * @param item a reference to [[ItemFormComponent.item]], the thing being viewed/edited/etc.
    */

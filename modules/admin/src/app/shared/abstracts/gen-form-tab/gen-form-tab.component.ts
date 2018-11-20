@@ -26,14 +26,17 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 /**
  * @class
- * This class represents a tab in a *FormComponent (currently just [[ItemFormComponent]]).
+ * This class represents a tab in a FormComponent (currently just [[ItemFormComponent]]).
  * Each tab should have a different, unified, focus, be organized so as to require
  * a minimal amount of scrolling, and should give some indication of unsaved changes.
  *
  * This is for displaying many parts of one object, across a number of tabs, where the parent who holds all those tabs is the
  * one responsible for talking to the backend and updating things. Each tab only makes local changes.
  *
- * Note that this works funcamentally different from the config-tabs. See notes on [[ConfigPrinterTabComponent]].
+ * Only enable save button if any fields are marked as edited?
+ *  - show red exclaimation mark on tab with changed, unsaved data
+ *
+ * Note that this works fundamentally different from the data-tabs. See notes on [[GenericDataTabComponent]].
  *
  * @extends [[GenericPageComponent]] to make use of its formatting and navigation functions
  *
@@ -43,9 +46,6 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
   /** The label to appear on the tab */
   public tabName: string;
 
-  /**
-   * @param dialog Injected. This is a pop-up for verifying irreversable user actions
-   */
   constructor(
     router: Router,
     dialog: MatDialog) {
@@ -60,10 +60,6 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
   /**
    * This does whatever setup can be done at render time, before data is available. Called by containing component.
    * Usually, if the tab has a table this is where table.setUp({...}) would be called.
-   *
-   * Only enable save button if any fields are marked as edited?
-   *
-   * show red exclaimation mark on tab with changed, unsaved data
    */
   abstract init(data: any): void;
 
@@ -74,14 +70,12 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
    * Called in [[GenericTabbedFormComponent.onPullComplete]], see example in [[ItemFormComponent.onPullComplete]]
    *
    * #TODO dataCopy, a copy of item holding only the things which are to be saved (meaning not children), which can
-   *  be compareed against every field and show an exclaimation mark if changes have been made.
-   * use onChange method? or does that only happen on enter, for text fields?
+   *  be compareed against every field and show an exclaimation mark or something if changes have been made.
+   * use onChange method? or would that only update on enter, for text fields?
    *
-   * Ideally this method should be safe to call multiple times with different inputs, idempotent, and sufficient based
-   * on those inputs. Meaning that if someone calls `setUp(input1)`, some misc. other functions, and then calls `setUp(input2)`,
-   *  the page must be in the same state as if they had just initialized this object and called `setUp(input2)`
-   * immediately.
-   *
+   * Ideally this method should be safe to call multiple times with different inputs, idempotent, and sufficient to fully build the page,
+   * based on those inputs. Meaning that if someone calls `setUp(input1)`, some misc. other functions, and then calls `setUp(input2)`,
+   * the page should be in the same state as if they had just initialized this object and called `setUp(input2)` immediately.
    */
   abstract setUp(data: any): void;
 

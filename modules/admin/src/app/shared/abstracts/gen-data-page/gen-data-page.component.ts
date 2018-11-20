@@ -20,6 +20,7 @@ import { VirtualMachine } from '../../models/vm.model';
 import { Application } from '../../models/application.model';
 import { Printer } from '../../models/printer.model';
 import { FileSystem } from '../../models/fileSystem.model';
+import { Toggleable } from '../../models/toggleable.interface';
 
 import { Subdomains } from '../../services/subdomains.enum';
 
@@ -42,15 +43,18 @@ import { DatasetType, DatasetsMeta } from './datasetType';
  *
  * Children must implement:
  *  - getNeededDatasets
- *      a list of Dataset enums telling this page what information to request from the backend.
+ *    - a list of Dataset enums telling this page what information to request from the backend.
  *      currently, if a page needs data on a user, it must request info on all users. That could be changed,
  *      but I haven't noticed any discernible lag. Should eventually see how many users can be added before things start to slow down,
  *      and where the bottleneck there is.
- *        The alternative is to request each required member separately, recursively. So pull user to get virtueIds, then pull of those
- *        virtues in turn, and for each of those pull each vmId, and so on. Many many more requests, but may be needed.
+ *      - The alternative is to request each required member separately, recursively. So pull user to get virtueIds, then pull each those
+ *        virtues in turn, and for each of those pull their vmIds, and so on. Many many more requests, but may be faster if the system
+ *        ever has enough objects that pulling them all would slow down/crash the browser.
  *        The real answer would be to switch to GraphQL, so all that gets done on the backend. Aside from actually writing the graphql
- *        server, this would be the only class that would have to change substantially. I think. This class's children would simply need
- *        to define a GQL request, instead of a list of needed datasets.
+ *        server, this would be the only class that would have to change substantially, I think.
+ *          - This class's children would simply need to define a GQL request, instead of a list of needed datasets.
+ *          - The children of genericTabComponent that aren't children of GenericDataTabComponent, would need to change how they update.
+ *            But probably only slightly.
  *
  *
  *  - onPullComplete
@@ -65,10 +69,17 @@ providers: [ BaseUrlService, DataRequestService ]
 export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   /**
-   * Holds all the datasets that get pulled in for the page. Doesn't need to be a DictList, but being a dictionary gives it
+  * the highest-level, base url from which the backend is accessible.
+  * Currently only used within dashboard.
+  */
+  baseUrl: string;
+
+  /**
+   * Holds all the datasets that get pulled in for the page.
+   * This really only needs to be a dictionary (i.e. it could just be a normal {} object), but being a dictlist gives it
    * a useful interface. It shouldn't really add any overhead.
    */
-  datasets: DictList<DictList<IndexedObj>>;
+  datasets: DictList<DictList<IndexedObj>> = new DictList<DictList<IndexedObj>>();
 
   /** holds the names and data types of each of the datasets. */
   datasetsMeta: Dict<DatasetType>;
@@ -76,11 +87,18 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
  /**
   * Must hold a list of enumerations of the datasets to be loaded on page load or refresh,
   * in the order in which they should be loaded.
+  *
   * Generally, this is lowest-highest. (ordering is printer/fileSystem/app < vm < virtue < user)
+  * - So if dataset A has references (e.g. a list of IDs) to items from dataset B, and this loads A before loading B, then those references
+  *   will simply remain references, instead of having links to the actual objects. Everything else should work fine.
+  *   So if you need Virtues and VMs, but not FileSystems, Printers, or Apps, then just put down `[DatasetNames.VMS, DatasetNames.VIRTUES]`
+  *
+  * - If for some reason you want to load Virtues and Vms, but don't want to build out the referenced objects between the two sets
+  *   (say you just want the names of all of them, and don't want to waste time building anything else), then request them in opposite order.
   */
   neededDatasets: DatasetNames[];
 
-  loadedDatasets:  DatasetNames[];
+  loadedDatasets:  DatasetNames[] = [];
 
   constructor(
     router: Router,
@@ -90,12 +108,8 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   ) {
     super(router, dialog);
 
-    // This really only needs to be a dictionary (i.e. it could just be a normal {} object), but I like the DictList interface.
-    this.datasets = new DictList<DictList<IndexedObj>>();
-
-    // Every derivative of this class must define getNeededDatasets
+    // Every subclass must define getNeededDatasets
     this.neededDatasets = this.getNeededDatasets();
-    this.loadedDatasets = [];
 
     this.datasetsMeta = new DatasetsMeta().getDatasets();
   }
@@ -148,15 +162,15 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *
    */
   pullData(): void {
-    let updateQueue: any[] = [];
+    let updateQueue: DatasetType[] = [];
 
-    for (let dName of this.neededDatasets) {
-      if ( !(dName in this.datasetsMeta)) {
+    for (let datasetName of this.neededDatasets) {
+      if ( !(datasetName in this.datasetsMeta)) {
         // throw error TODO
         console.log("Unrecognized dataset name");
       }
       else {
-        updateQueue.push(this.datasetsMeta[dName]);
+        updateQueue.push(this.datasetsMeta[datasetName]);
       }
     }
     if (updateQueue.length > 0) {
@@ -236,31 +250,31 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    * subscriptions, since we only want to receive a single value, not listen to a stream. Services are set up
    * using subscriptions though, and so long as we make sure to unsubscribe from everything that gets subscribed to,
    * it should work out the same. Note that not unsubscribing led to a large memory leak in Firefox.
-   * (Apparently chrome automatically stopped subscriptions by components being destroyed/GC'd.)
+   * (Apparently chrome automatically stops subscriptions by components being destroyed/GC'd.)
    */
   recursivePullData(
     updateQueue: DatasetType[]
   ): void {
-    let sub = this.dataRequestService.getRecords(updateQueue[0].subdomain).subscribe( rawDataList => {
+    // Make a throw-away object of the currently to-be-requested type, just to get its subdomain.
+    // Feels hacky, but I need to be able to get an object's subdomain, without knowing its class, as well as be able to get that same
+    // subdomain *only* knowing the class.
+    // The alternative would be to have every IndexObj subclass have a static function to return the subdomain, as well as a regular
+    // function that calls that static function. Just to eliminate the below line.
+    let subdomain = new (updateQueue[0].class)({}).getSubdomain();
+
+    let sub = this.dataRequestService.getRecords(subdomain).subscribe( rawDataList => {
 
       this.datasets[updateQueue[0].datasetName] = new DictList<IndexedObj>();
 
       let obj: IndexedObj = null;
       for (let e of rawDataList) {
-        // if (updateQueue[0].datasetName === DatasetNames.FILE_SYSTEMS) {
-        //   console.log("%\t", e);
-        // }
 
         // these objects come in with some number of lists of IDs pertaining to objects they need to be linked to.
-        // Like a User has a list of Virtues that needs to be populated, based on the virtueTemplateIDs list it comes in with.
+        // Like a User needs to have a list of Virtues, populated based on the virtueTemplateIDs list it comes in with.
         // Virtue has one list each for vms, printers, and filesystems.
         // Application has none.
         // It's here in the constructor that those id lists are set.
         obj = new (updateQueue[0].class)(e);
-        // if (updateQueue[0].datasetName === DatasetNames.FILE_SYSTEMS) {
-        // if (obj.getID() === "6b3d4784-0fe5-4443-a08c-644c90f609ae") {
-        //   console.log("*\t", obj);
-        // }
 
         this.datasets[updateQueue[0].datasetName].add(obj.getID(), obj);
 
@@ -280,10 +294,6 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
       // mark this set as pulled
       this.loadedDatasets.push(updateQueue[0].datasetName);
-
-      // if (updateQueue[0].datasetName === DatasetNames.FILE_SYSTEMS) {
-      //   console.log(this.datasets[updateQueue[0].datasetName]);
-      // }
 
       // deal with self-referential objects.
       for (let obj of this.datasets[updateQueue[0].datasetName].asList()) {
@@ -305,15 +315,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       // Close this subscription once it's done everything it needed to.
       // Remember that 'let' creates scope-bound variables, and so each recursive layer
       // of this function will have its own 'sub' object. The current sub hides the subs
-      // of the outer (older) scopes, and so all references to 'sub' after its declaration refer
-      // to the 'sub' object of the current scope, and no other.
+      // of the outer (older) scopes, and so all references to 'sub' after its declaration
+      // refer to the 'sub' object of the current scope, and no other.
+      // i.e. So long as 'sub' gets defined at the top of this function, you don't have to worry about scope.
       sub.unsubscribe();
       return;
     });
   }
 
   /**
-   * Must be implemented by all sub-classes.
+   * Necessary.
    *
    * This function is called when the data requested from the back-end returns.
    * See comment on [[recursivePullData]]()
@@ -321,31 +332,36 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   abstract onPullComplete(): void;
 
   /**
-   * Must be implemented by all sub-classes.
+   * Necessary.
    *
    * @return a list of the datasets which should be loaded upon page load or refresh.
    */
   abstract getNeededDatasets(): DatasetNames[];
 
 
-  /** #uncommented */
+  /**
+   * request that the object be given each (loaded) dataset it depends on, to build any attributes it requires.
+   */
   buildAllIndexedObjAttributes(obj: IndexedObj, dependencies: DatasetNames[]): void {
-      // go through each of the datasets that this dataset depends on.
-      for (let dependencySet of dependencies) {
+    // go through each of the datasets that this dataset depends on.
+    for (let dependencySet of dependencies) {
 
-        // if this childSet has been built already (i.e., if it was on the neededDatasets list ahead of this current dataset)
-        // then assume we want to use it to build indexedObj's attributes.
-        // So if we're processing the Virtue dataset and we've already loaded the vm and printer dataset, then we should set up
-        // this virtue's printer and vm lists (but not the filesystem list).
-        if ( this.loadedDatasets.indexOf(dependencySet) !== -1) {
-          this.buildIndexedObjAttribute(obj, dependencySet);
-        }
+      // if this childSet has been built already (i.e., if it was on the neededDatasets list ahead of this current dataset)
+      // then assume we want to use it to build indexedObj's attributes.
+      // So if we're processing the Virtue dataset and we've already loaded the vm and printer dataset, then we should set up
+      // this virtue's printer and vm lists (but not the filesystem list).
+      if ( this.loadedDatasets.indexOf(dependencySet) !== -1) {
+        this.buildIndexedObjAttribute(obj, dependencySet);
       }
+    }
   }
 
-  /** #uncommented */
+  /**
+   * Hand a dataset to the object, so it can build out any related fields that object has.
+   */
   buildIndexedObjAttribute(obj: IndexedObj, datasetName: DatasetNames): void {
-    // tell the record which of the datasets it depends on we're dealing with, and pass it that dataset, so it can build its children.
+    // tell the object which of the datasets it depends on we're dealing with, and pass it that dataset, so the object can build
+    // its (ie the object's) children.
     if (this.datasets[datasetName] === undefined) {
       console.log("No dataset called", datasetName, "has been built.");
       return;
@@ -356,9 +372,9 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
 
   /**
-   * saves the item's current state to the backend, overwriting whatever record corresponds with item.getID().
+   * saves the item's current state to the backend.
    *
-   * @param redirect a redirect function to call (only) after the saving process has successfully completed.
+   * @param redirect a function to call (only) after the saving process has successfully completed.
    */
   updateItem(obj: IndexedObj, redirect?: () => void): void {
 
@@ -411,12 +427,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
       });
   }
 
-  /**
-   * Deletes the [[IndexedObj]] and then refreshes the data on the page.
-   * @param obj the IndexedObj to be deleted from the backend.
-   */
   deleteItem(obj: IndexedObj): void {
-
     this.dataRequestService.deleteRecord(obj.getSubdomain(), obj.getID()).then(() => {
       this.refreshPage();
     });
@@ -425,16 +436,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   /**
    * Sets an IndexedObj's 'enabled' field.
-   * #uncommented
-   *
-   * @param obj
-   * @param newStatus
-   *
    */
-  setItemAvailability(obj: IndexedObj, newStatus: boolean): void {
+  setItemAvailability(obj: IndexedObj & Toggleable, newStatus: boolean): void {
 
     obj.enabled = newStatus;
-    console.log(obj.enabled);
     /** #temporary */
     if (obj instanceof User) {
       let user: User = obj as User;

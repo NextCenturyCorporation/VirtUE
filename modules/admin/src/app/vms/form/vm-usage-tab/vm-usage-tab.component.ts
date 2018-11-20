@@ -121,8 +121,7 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
 
     if (changes.mode) {
       this.setMode(changes.mode);
-      this.parentTable.colData = this.getParentColumns();
-      // this.parentTable.subMenuOptions = this.getParentSubMenu();
+      this.setUpParentTable();
     }
   }
 
@@ -173,6 +172,7 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
       tableWidth: 0.66,
       noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
       elementIsDisabled: (v: Virtue) => !v.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }

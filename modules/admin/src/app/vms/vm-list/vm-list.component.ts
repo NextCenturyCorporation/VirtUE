@@ -57,7 +57,7 @@ export class VmListComponent extends ItemListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
@@ -67,7 +67,7 @@ export class VmListComponent extends ItemListComponent {
       new ListColumn('Assigned Applications',   4, (v: VirtualMachine) => this.getApps(v), this.formatName, (i: Item) => this.viewItem(i)),
       new TextColumn('Last Editor',             2, (v: VirtualMachine) => v.lastEditor, SORT_DIR.ASC),
       // new TextColumn('Version',           1, (v: VirtualMachine) => String(v.version),  SORT_DIR.ASC),
-      new TextColumn('Modification Date',       2, (v: VirtualMachine) => v.modDate,    SORT_DIR.DESC),
+      new TextColumn('Modification Date',       2, (v: VirtualMachine) => v.readableModificationDate,    SORT_DIR.DESC),
       new TextColumn('Status',                  1, this.formatStatus,                   SORT_DIR.ASC)
 
     ];
@@ -82,7 +82,7 @@ export class VmListComponent extends ItemListComponent {
 
 
   /**
-   * See [[GenericListComponent.getListOptions]] for details
+   * See [[ItemListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {

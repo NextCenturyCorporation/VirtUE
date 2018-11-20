@@ -68,7 +68,7 @@ export class AppsListComponent extends ItemListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
@@ -86,7 +86,7 @@ export class AppsListComponent extends ItemListComponent {
   }
 
   /**
-   * See [[GenericListComponent.getListOptions]] for details
+   * See [[ItemListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {
@@ -108,7 +108,7 @@ export class AppsListComponent extends ItemListComponent {
   }
 
   /**
-   * overrides parent, [[GenericListComponent.getTableFilters]]
+   * overrides parent, [[ItemListComponent.getTableFilters]]
    * @return an empty list; Apps can't be disabled, so nothing to filter
    */
   getTableFilters(): {text: string, value: string}[] {
@@ -116,7 +116,7 @@ export class AppsListComponent extends ItemListComponent {
   }
 
   /**
-   * overrides parent, [[GenericListComponent.getSubMenu]]
+   * overrides parent, [[ItemListComponent.getSubMenu]]
    *
    * see [[GenericPageComponent.openDialog]] for notes on that call.
    *

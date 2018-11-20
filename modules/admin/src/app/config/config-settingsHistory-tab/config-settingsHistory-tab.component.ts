@@ -30,7 +30,7 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
 })
 export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
 
-  /** #uncommented, unimplemented */
+  /** #unimplemented */
   @ViewChild(GenericTableComponent) historyTable: GenericTableComponent<{foo: number, bar: string}>;
 
   /**
@@ -42,12 +42,9 @@ export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
     super(router, baseUrlService, dataRequestService, dialog);
-    this.tabName = "Settings History";
+    this.tabLabel = "Settings History";
   }
 
-  /**
-   * #unimplemented
-   */
   init(): void {
     this.setUpTable();
   }
@@ -67,10 +64,6 @@ export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
     return [];
   }
 
-
-  /**
-   * Sets up the table, according to parameters defined in this class' child classes.
-   */
   setUpTable(): void {
     if (this.historyTable === undefined) {
       return;
@@ -83,7 +76,6 @@ export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
     });
   }
 
-  /** #unimplemented */
   getColumns(): Column[] {
     return [
       new TextColumn("Settings Foo", 4, (s: {foo: string, bar: string}) => s.foo, SORT_DIR.ASC),

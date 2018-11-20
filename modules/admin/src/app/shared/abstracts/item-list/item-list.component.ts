@@ -16,7 +16,6 @@ import { GenericTableComponent } from '../gen-table/gen-table.component';
 
 import { Item } from '../../models/item.model';
 import { Toggleable } from '../../models/toggleable.interface';
-import { IndexedObj } from '../../models/indexedObj.model';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { DataRequestService } from '../../services/dataRequest.service';
@@ -61,7 +60,7 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    * Parsed out of url path
    * Only used in the list html page though, in the create-new-item button
    */
-  domain: string;
+  subdomain: string;
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
@@ -80,13 +79,13 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
     this.itemName = params.itemName;
     this.pluralItem = params.pluralItem;
 
-    // pull the domain, e.g. '/users', '/virtues', etc., out of the url.
+    // pull the top subdomain, e.g. '/users', '/virtues', etc., out of the url.
     // Used only when to navigate to the create page for this type of item, via the 'Add new {{itemName}}' button.
-    let url = this.router.routerState.snapshot.url;
-    if (url[0] === '/') {
-      url = url.substr(1);
-    }
-    this.domain = '/' + url.split('/')[0];
+    this.subdomain = this.getSubdomain();
+  }
+
+  protected getSubdomain(): string {
+    return '/' + this.getRouterUrlPieces()[0];
   }
 
   /**
@@ -131,7 +130,7 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
 
   /**
    * Allow children to customize the parameters passed to the table. By default, do nothing.
-   * @param paramsObject the parameters to be passed to the table. see [[GenericTable.setUp]]
+   * @param paramsObject the parameters to be passed to the table. see [[GenericTableComponent.setUp]]
    */
   customizeTableParams(paramsObject) {}
 
@@ -168,10 +167,9 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
   }
 
   /**
-   * This defines what columns show up in the table. If supplied, formatValue(i:Item) will be called
-   * to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+   * This defines what columns show up in the table.
    *
-   * Note: colWidths of all columns must add to exactly 12.
+   * Note: the summed widths of all columns must add to exactly 12.
    * Too low will not scale to fit, and too large will cause columns to wrap, within each row.
    *
    * @return a list of columns to be displayed within the table of Items.

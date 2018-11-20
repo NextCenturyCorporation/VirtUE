@@ -137,16 +137,11 @@ export abstract class ItemFormComponent extends GenericTabbedFormComponent imple
     let urlValid = true;
     // Parse url, making sure it's set up the expected way.
 
-    let url = this.router.routerState.snapshot.url;
-    // console.log(this.location);
-    // The url may start with an initial slash; remove it if it does.
-    if (url[0] === '/') {
-      url = url.substr(1);
-    }
-    // split the path into a list of route stops,
+    // get a list of route stops,
+    let route = this.getRouterUrlPieces();
+
     // check that the first stop is the same as what the parentDomain for this component should be.
     // Remember that the parentDomain has a beginning forward slash, while the split URL had its slashes removed.
-    let route = url.split('/');
     if (route[0] !== this.parentDomain.substr(1)) {
       // something about the routing system has changed.
       urlValid = false;
@@ -165,7 +160,7 @@ export abstract class ItemFormComponent extends GenericTabbedFormComponent imple
         urlValid = false;
     }
     if (!urlValid) {
-      if (this.router.routerState.snapshot.url === this.parentDomain) {
+      if (this.getRouterUrl() === this.parentDomain) {
         // apparently sometimes when an error happens on a form page, the system
         // quits and returns to {parentDomain}, and then for some reason re-calls the
         // constructor for the form component it just left. Which leads here and
@@ -202,15 +197,15 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
   /**
    * See comments at [[GenericPageComponent.onPullComplete]]()
    *
-   * Set up the parts of the page/tabs that rely on this.item, and set up the page only the first time
+   * Set up the parts of the page/tabs that rely on this.item, and set up the page only the first time.
    *
    * @see [[initialPullComplete]]
    */
   onPullComplete(): void {
     // Refreshes to the datasets should only update the actual datasets in the background, and not overwrite/undo
     // any changes/edits made to the data on the page.
-    // So update [[item]] only the first time datasets are pulled, or if the page is only being viewed.
-    if (! this.initialPullComplete || this.mode === Mode.VIEW) {
+    // So update item only the first time datasets are pulled, or if the page is only being viewed.
+    if ( !this.initialPullComplete || this.mode === Mode.VIEW ) {
       if (this.mode !== Mode.CREATE) {// no data to retrieve if creating a new one.
         this.initItem();
       }
@@ -255,14 +250,13 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
 
   /**
    * Change over to edit mode. Does no saving or processing, just re-renders things
-   * in the new mode. Doesn't
+   * in the new mode.
    * This now just changes the URL, re-sets [[mode]], and asks the tabs
    * to update.
+   * See note on [[toViewMode]]
    */
   toEditMode(): void {
-    // this.editItem(this.item); // this reloads the whole page
     this.location.go(this.item.getPageRoute(Mode.EDIT));
-    // this.setMode(); // this uses the router state, which isn't affected by location.*()
     this.mode = Mode.EDIT;
     this.updateTabs();
 
@@ -297,7 +291,8 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
   }
 
   /**
-   * Save changes to backend and return to list page. Or should it be to previous domain?
+   * Save changes to backend and return to list page.
+   * #TODO Eventually this should return to the previous domain.
    */
   saveAndReturn(): void {
     this.createOrUpdate(() => this.toListPage());

@@ -19,8 +19,9 @@ import { GenericDataPageComponent } from './gen-data-page.component';
  * This does almost nothing, but provides a minimal interface for using these sorts of tabs (i.e., tabs that have their own data),
  * in constrast to the tabs that must be managed by a [[GenericTabbedFormComponent]] parent.
  *
- * Doing it all separately for each tabs works much better, so long as the tabs don't use the same datasets.
- * If they do (like if multiple tabs need access to the list of vm-templates), then we should probably figure something out.
+ * Pulling data separately for each tab works much better in this case, so long as the tabs don't use the same datasets.
+ * If they do (like if multiple tabs need access to the list of vm-templates), and the amount of shared data is large, then we should
+ * probably figure something out.
  * Perhaps use the update method to pass in the common data (would need to make containing page inherit from GenericDataPageComponent).
  *
  * Remember that all tabs are built simulataneously when their containing page loads.
@@ -31,11 +32,8 @@ import { GenericDataPageComponent } from './gen-data-page.component';
 export abstract class GenericDataTabComponent extends GenericDataPageComponent implements OnInit {
 
   /** The label to appear on the tab */
-  public tabName: string;
+  public tabLabel: string;
 
-  /**
-   * #uncommented
-   */
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
@@ -53,8 +51,7 @@ export abstract class GenericDataTabComponent extends GenericDataPageComponent i
   }
 
   /**
-   * Initialize the tab, called on render.
-   * Must be implemented.
+   * Tab-specific initialization, called on render.
    */
   abstract init(): void;
 

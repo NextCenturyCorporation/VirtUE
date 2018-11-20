@@ -49,7 +49,7 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
     super(router, baseUrlService, dataRequestService, dialog);
-    this.tabName = "Printers";
+    this.tabLabel = "Printers";
   }
 
   init(): void {
@@ -63,9 +63,6 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
     this.printersTable.populate(this.datasets[DatasetNames.PRINTERS].asList());
   }
 
-  /**
-   * Sets up the table, according to parameters defined in this class' child classes.
-   */
   setUpTable(): void {
     if (this.printersTable === undefined) {
       return;
@@ -79,7 +76,6 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
     });
   }
 
-  /** #unimplemented */
   getColumns(): Column[] {
     return [
       new TextColumn("Printer", 4, (p: Printer) => p.name, SORT_DIR.ASC, undefined, () => this.getSubMenu()),
@@ -94,7 +90,7 @@ export class ConfigPrinterTabComponent extends GenericDataTabComponent {
 
 
   /**
-   * @return a list of links to show up as a submenu on each printer. Currently just an enable/disable option.
+   * @return a list of links to show up as a submenu on each printer.
    */
   getSubMenu(): SubMenuOptions[] {
     return [

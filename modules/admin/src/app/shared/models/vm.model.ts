@@ -11,12 +11,7 @@ import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
 import { Subdomains } from '../services/subdomains.enum';
 
 /**
- * @class
- * @extends
- *
- * Represents a VirtualMachine.
- * Children are Application objects.
- *
+ * Represents a virtual machine template.
  */
 export class VirtualMachine extends Item {
 
@@ -26,10 +21,8 @@ export class VirtualMachine extends Item {
   /** what version of edit this template currently is at */
   version: number;
 
-  /** #uncommented */
   applications: DictList<Application> = new DictList<Application>();
 
-  /** #uncommented */
   applicationIds: string[] = [];
 
   // /** #uncommented what is this? (templatePath)*/
@@ -51,7 +44,7 @@ export class VirtualMachine extends Item {
   constructor(vmObj) {
     super();
     this.parentDomain = '/vm-templates';
-    
+
     if (vmObj.id) {
       this.id = vmObj.id;
     }
@@ -71,8 +64,8 @@ export class VirtualMachine extends Item {
       this.lastEditor = vmObj.lastEditor;
     }
     if (vmObj.lastModification) {
-      this.lastModification = vmObj.lastModification;
-      this.modDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
+      this.modificationDate = vmObj.lastModification;
+      this.readableModificationDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
     }
     if (vmObj.os) {
       this.os = vmObj.os;
@@ -135,7 +128,7 @@ export class VirtualMachine extends Item {
       enabled: this.enabled,
       applicationIds: this.applicationIds,
       version: this.version,
-      lastModification: this.lastModification,
+      lastModification: this.modificationDate,
       os: this.os,
       lastEditor: 'administrator',
       loginUser: 'system' // TODO does this still exist on the backend?

@@ -35,8 +35,6 @@ import { Printer } from './printer.model';
  * This is a template. When saved to the backend, an image will be built and stored there, which in turn is what is used to create
  * virtue instances whenever a virtue-desktop user clicks on an application under that Virtue's umbrella.
  *
- * [[children]] are VirtualMachine objects.
- *
  * @extends [[Item]]
  */
 export class Virtue extends Item {
@@ -46,9 +44,6 @@ export class Virtue extends Item {
 
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
-
-  /** A full Date, of the last time this record was changed on the backend. */
-  lastModification: Date;
 
   /** #uncommented */
   vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
@@ -149,8 +144,8 @@ export class Virtue extends Item {
     }
 
     if ('lastModification' in virtueObj) {
-      this.lastModification = virtueObj.lastModification;
-      this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
+      this.modificationDate = virtueObj.lastModification;
+      this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
     }
 
     if (virtueObj.networkWhiteList) {
@@ -270,7 +265,7 @@ export class Virtue extends Item {
         printerIds: this.printerIds,
         allowedPasteTargetIds: this.allowedPasteTargetIds,
         lastEditor: this.lastEditor,
-        lastModification: this.lastModification,
+        lastModification: this.modificationDate,
         networkWhiteList: this.networkWhiteList,
         unprovisioned: this.unprovisioned,
         version: this.version,

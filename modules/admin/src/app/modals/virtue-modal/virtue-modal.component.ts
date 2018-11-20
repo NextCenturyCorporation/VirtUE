@@ -57,7 +57,7 @@ export class VirtueModalComponent extends GenericModalComponent {
       new ListColumn('Virtual Machines',      2, (v: Virtue) => this.getVms(v),      this.formatName),
       new ListColumn('Assigned Applications', 3, (v: Virtue) => this.getVmApps(v), this.formatName),
       new TextColumn('Version',               1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
-      new TextColumn('Modification Date',     2, (v: Virtue) => v.modDate, SORT_DIR.DESC),
+      new TextColumn('Modification Date',     2, (v: Virtue) => v.readableModificationDate, SORT_DIR.DESC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
   }

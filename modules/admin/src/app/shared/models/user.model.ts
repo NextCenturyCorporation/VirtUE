@@ -11,7 +11,6 @@ import { Subdomains } from '../services/subdomains.enum';
 /**
 * @class
  * Represents a User.
- * Children are Virtue objects.
  *
  * @extends [[Item]]
  */

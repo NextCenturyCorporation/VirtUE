@@ -29,15 +29,6 @@ providers: [ Router, MatDialog ]
 })
 export abstract class GenericPageComponent {
 
-
-
-
-  /**
-  * the highest-level, base url from which the backend is accessible.
-  * Currently only used within dashboard.
-  */
-  baseUrl: string;
-
   /**
    * @param router Handles the navigation to/from different pages. Injected, and so is constant across components.
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
@@ -49,11 +40,10 @@ export abstract class GenericPageComponent {
     // override the route reuse strategy
     // Tell angular to load a fresh, new, component every time a URL that needs this component loads,
     // even if the user has been on that page before.
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    // this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     // make the page reload if the user clicks on a link to the same page they're on.
-    this.router.navigated = false;
-
+    // this.router.navigated = false;
 
   }
 
@@ -73,11 +63,7 @@ export abstract class GenericPageComponent {
   }
 
   /**
-   * Used in pages with tables of items.
-   * #uncommented
-   * @param item the item whose status we want to display
-   *
-   * @return The item's status, in plain (and capitalized) english.
+   * @return The toggleable object's status, in plain (and capitalized) english.
    */
   formatStatus( obj: Toggleable ): string {
     return obj.enabled ? 'Enabled' : 'Disabled';
@@ -85,14 +71,17 @@ export abstract class GenericPageComponent {
 
 
   /**
-  * This is used in many tables to show an [[Item]]'s children. All lists in tables are gotten by passing
-  * an item to a function that has the scope of the object containing and defining the table.
-  *
-  * @param item the [[Item]] whose children we want a list of
-  *
-  * @return a list of the Item's children.
-  */
-  getChildren(obj: IndexedObj, childDatasetName: DatasetNames): IndexedObj[] {
+   * The following two functions are generally just used in tables to display the indexedObjs attached
+   * to an [[IndexedObj]] (ie the `children`), and the indexedObjs attached to each of those (i.e. the `grandchildren`).
+   * It used to be all generated (as an html string) whenever an item was created or its children updated, but now
+   * is done on the fly. These functions get re-called whenever the mouse enters or leaves a row in the table, so this
+   * seems like a bit of a waste, given that an item's children/grandchildren won't change randomly in the background,
+   * but it doesn't seem to slow anything down atm, with our small datasets.
+   *
+   * Doing it this way is much more generic, and even within the tables it allows us to make the items within those an
+   * indexedObj's children list clickable, because we're giving the lists of full objects to the html, rather than just lists of names.
+   */
+  private getChildren(obj: IndexedObj, childDatasetName: DatasetNames): IndexedObj[] {
     if (!obj) {
       return [];
     }
@@ -100,21 +89,11 @@ export abstract class GenericPageComponent {
   }
 
   /**
-   * The following two functions are used in tables to display the items attached
-   * to an [[Item]] (children) and the items attched to each of those (grandchildren).
-   * It used to be all generated (as an html string) whenever an item was created
-   * or its children updated, but now is doen on the fly. These functions get
-   * re-called whenever the mouse enters or leaves a row in the table, so this
-   * seems like a bit of a waste, given that an item's children/grandchildren won't
-   * change randomly in the background.
-   * Doing it this way allows us to make the items within those lists clickable, because we're giving the lists of
-   * full objects to the html, rather than just lists of names.
-   *
-   * @param #uncommented
-   *
    * @return A list (not a set) of the requested type of the obj's children's children.
-  */
-  getGrandChildren(obj: IndexedObj, childDatasetName: DatasetNames, grandChildDatasetName: DatasetNames): IndexedObj[] {
+   * Example: For an input User, look through that user's Virtue children, and generate a list of all of those
+   * virtues' collective Printers.
+   */
+  private getGrandChildren(obj: IndexedObj, childDatasetName: DatasetNames, grandChildDatasetName: DatasetNames): IndexedObj[] {
     if (!obj) {
       return [];
     }
@@ -125,54 +104,43 @@ export abstract class GenericPageComponent {
     return grandchildren;
   }
 
-  /**
-   *
-   */
   getVirtues(i: Item): IndexedObj[] {
     return this.getChildren(i, DatasetNames.VIRTUES);
   }
 
-  /** #uncommented */
   getVirtueVms(i: Item): IndexedObj[] {
     return this.getGrandChildren(i, DatasetNames.VIRTUES, DatasetNames.VMS);
   }
 
-  /** #uncommented */
   getVms(i: Item): IndexedObj[] {
     return this.getChildren(i, DatasetNames.VMS);
   }
 
-  /** #uncommented */
   getVmApps(i: Item): IndexedObj[] {
     return this.getGrandChildren(i, DatasetNames.VMS, DatasetNames.APPS);
   }
 
-  /** #uncommented */
   getApps(i: Item): IndexedObj[] {
     return this.getChildren(i, DatasetNames.APPS);
   }
 
-  /** #uncommented */
   getPrinters(i: Item): IndexedObj[] {
     return this.getChildren(i, DatasetNames.PRINTERS);
   }
 
-  /** #uncommented */
   getFileSystems(i: Item): IndexedObj[] {
     return this.getChildren(i, DatasetNames.FILE_SYSTEMS);
   }
 
   /**
    * Navigates to the form page for this item.
-   *
-   * @param item the Item to which we should navigate.
    */
   viewItem(item: Item): void {
     this.router.navigate([item.getViewURL()]);
   }
 
   /**
-   * Navigates to and enable for editing form page for `item`.
+   * Navigates to, and enable for editing, the form page for `item`.
    *
    * @param item the Item which we should navigate to and edit.
    */
@@ -182,8 +150,6 @@ export abstract class GenericPageComponent {
 
   /**
    * Navigates to a form page pre-filled with `item`'s attributes.
-   *
-   * @param item the Item to duplicate
    */
   dupItem(item: Item): void {
     this.router.navigate([item.getDupURL()]);
@@ -191,12 +157,26 @@ export abstract class GenericPageComponent {
 
   /**
    * A generic method for navigating to some input page.
-   * Abstracts away the router from most(!!) sub classes #TODO
    *
    * @param targetPath the path to navigate to.
    */
   goToPage(targetPath: string) {
     this.router.navigate([targetPath]);
+  }
+
+  getRouterUrl(): string {
+    return this.router.routerState.snapshot.url;
+  }
+
+  /**
+   * Abstracts away the router from subclasses
+   */
+  getRouterUrlPieces(): string[] {
+    let url = this.getRouterUrl();
+    if (url[0] === '/') {
+      url = url.substr(1);
+    }
+    return url.split('/');
   }
 
 

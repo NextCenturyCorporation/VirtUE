@@ -58,7 +58,7 @@ export class UserListComponent extends ItemListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in [[GenericListComponent.getColumns]].
+   * @return a list of the columns to show up in the table. See details in [[ItemListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
@@ -79,7 +79,7 @@ export class UserListComponent extends ItemListComponent {
   }
 
   /**
-   * See [[GenericListComponent.getListOptions]] for details
+   * See [[ItemListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {

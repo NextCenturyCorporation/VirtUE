@@ -6,10 +6,10 @@
       <div class="mui-row">
         <!-- Note: angular mui table always has 12 total column-widths of space. available -->
         <div class="mui-col-md-12 padding-left-0 filters">
-          <ng-container *ngFor="let f of filterOptions; let idx = index">
+          <ng-container *ngFor="let f of filterOptions; let filterIdx = index">
             <span *ngIf="filterValue === f.value"> {{f.text}} {{pluralItem}} </span>
             <a *ngIf="filterValue !== f.value"  (click)="filterList(f.value)"> {{f.text}} {{pluralItem}} </a>
-            <ng-container *ngIf="idx < filterOptions.length-1">|</ng-container>
+            <ng-container *ngIf="filterIdx < filterOptions.length-1">|</ng-container>
           </ng-container>
         </div>
       </div>
@@ -26,7 +26,7 @@
       </span>
 
       <div class="table-header" fxFlex="auto">
-        <div *ngFor="let column of colData" class="table-header full mui-col-md-{{column.width}}">
+        <div *ngFor="let column of columns" class="table-header full mui-col-md-{{column.width}}">
 
           <!-- if it's a checkbox column -->
           <ng-container *ngIf="isCheckbox(column)">
@@ -74,7 +74,7 @@
     <!-- That pipe character calls a PipeTransform object, ListFilterPipe.
     It is passed the preceeding list, followed by the values between colons -->
     <div *ngFor="let elem of elements | listFilterSort : sortColumn.sortField : sortDirection : filterColumnName : filterCondition : update;
-     let index = index; trackBy: indexTracker"
+     let elemIndex = index; trackBy: indexTracker"
       appActiveClass [ngStyle]="{'background-color': elementIsDisabled(elem.obj) ? '#e7e7e7' : '#ffffff' }" fxLayout="row" class="mui-row table-row" >
 
       <!-- If this table should display colored labels (i.e., if the table holds Virtues) -->
@@ -101,7 +101,7 @@
       <div fxFlex="auto">
 
         <!-- Iterate over all columns -->
-        <div *ngFor="let column of colData; let index = index; trackBy: indexTracker"
+        <div *ngFor="let column of columns; let colIndex = index; trackBy: indexTracker"
             class="table-data mui-col-md-{{column.width}} transparent">
 
           <!-- If this column should display a single piece of text for each row-->
@@ -137,7 +137,7 @@
             <mat-form-field floatLabel="never">
               <mat-select placeholder="{{column.fieldName}}" [disabled]="!editingEnabled()"
                        [(ngModel)]="elem.obj[column.fieldName]" required >
-                <mat-option *ngFor="let p of column.dropdownList(); let idx = index" value="{{column.formatElement(p)}}" >
+                <mat-option *ngFor="let p of column.dropdownList(); let dropdownIdx = index" value="{{column.formatElement(p)}}" >
                   {{p}}
                 </mat-option>
               </mat-select>
@@ -204,9 +204,9 @@
 
           <!-- If this column type allows for a list of SubMenuOptions. Currently only TextColumn. -->
           <div *ngIf="column.subMenuOpts !== undefined" class="menu-options" >
-            <a *ngFor="let o of filterMenuOptions(column.subMenuOpts(), elem.obj); let idx = index" (click)="o.action(elem.obj)">
+            <a *ngFor="let o of filterMenuOptions(column.subMenuOpts(), elem.obj); let subMenuIdx = index" (click)="o.action(elem.obj)">
               <ng-container> {{o.text}} </ng-container>
-              <ng-container *ngIf="idx < filterMenuOptions(column.subMenuOpts(), elem.obj).length - 1">|</ng-container>
+              <ng-container *ngIf="subMenuIdx < filterMenuOptions(column.subMenuOpts(), elem.obj).length - 1">|</ng-container>
             </a>
           </div>
 

@@ -25,7 +25,7 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
  * @class
  * This component allows the user (an admin) to set up activ directories. For something.
  * TODO ask about active directories
- * #uncommented, because this is a stub.
+ * #uncommented, unimplemented, because this is a stub.
  * also #move to a tab on the global settings form
  */
 @Component({
@@ -35,7 +35,6 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
 })
 export class ConfigFileSysTabComponent extends GenericDataTabComponent implements OnInit {
 
-  /** #uncommented, unimplemented */
   @ViewChild(GenericTableComponent) fileSystemsTable: GenericTableComponent<FileSystem>;
 
   /**
@@ -47,19 +46,13 @@ export class ConfigFileSysTabComponent extends GenericDataTabComponent implement
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
     super(router, baseUrlService, dataRequestService, dialog);
-    this.tabName = "File Systems";
+    this.tabLabel = "File Systems";
   }
 
-  /**
-   * #unimplemented
-   */
   init(): void {
     this.setUpTable();
   }
 
-  /**
-   * #unimplemented
-   */
   onPullComplete(): void {
     this.fileSystemsTable.populate(this.datasets[DatasetNames.FILE_SYSTEMS].asList());
   }
@@ -71,10 +64,6 @@ export class ConfigFileSysTabComponent extends GenericDataTabComponent implement
     return [DatasetNames.FILE_SYSTEMS];
   }
 
-
-  /**
-   * Sets up the table, according to parameters defined in this class' child classes.
-   */
   setUpTable(): void {
     if (this.fileSystemsTable === undefined) {
       return;
@@ -88,7 +77,6 @@ export class ConfigFileSysTabComponent extends GenericDataTabComponent implement
     });
   }
 
-  /** #unimplemented */
   getColumns(): Column[] {
     return [
       new TextColumn("File system", 3, (fs: FileSystem) => fs.name, SORT_DIR.ASC),
@@ -109,7 +97,6 @@ export class ConfigFileSysTabComponent extends GenericDataTabComponent implement
   addFileSystem() {
     let fs = new FileSystem({name: "Long-term storage", address: "123.4.5.6.7:~/lts"});
     this.createItem(fs);
-    this.dataRequestService.getRecords(fs.getSubdomain()).subscribe( (d) => { console.log(d); } );
   }
 
   printFileSystem(fs: FileSystem) {

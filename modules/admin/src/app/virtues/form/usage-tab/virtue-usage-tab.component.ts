@@ -103,8 +103,7 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
   update(changes: any): void {
     if (changes.mode) {
       this.setMode(changes.mode);
-      this.parentTable.colData = this.getParentColumns();
-      // this.parentTable.subMenuOptions = this.getParentSubMenu();
+      this.setUpParentTable();
     }
 
     if (changes.allUsers) {
@@ -163,6 +162,7 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
       tableWidth: 0.66,
       noDataMsg: "No users have been assigned this Virtue at the moment.",
       elementIsDisabled: (u: User) => !u.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }

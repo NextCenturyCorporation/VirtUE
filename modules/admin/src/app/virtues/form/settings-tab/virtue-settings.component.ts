@@ -240,6 +240,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
       elementIsDisabled: (p: Printer) => !p.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }
@@ -257,11 +258,12 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    * Note that if there are several matching printers, only the first one is removed.
    */
   removePrinter(toDelete: Printer): void {
-    this.item.printers.remove(toDelete.getID());
-    let index = this.item.printerIds.indexOf(toDelete.getID(), 0);
-    if (index > -1) {
-       this.item.printerIds.splice(index, 1);
-    }
+    this.item.removeChild(toDelete.getID(), DatasetNames.PRINTERS);
+    // this.item.printers.remove(toDelete.getID());
+    // let index = this.item.printerIds.indexOf(toDelete.getID(), 0);
+    // if (index > -1) {
+    //    this.item.printerIds.splice(index, 1);
+    // }
     this.updatePrinterTable();
   }
 
@@ -342,6 +344,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       tableWidth: 1,
       noDataMsg: "No file systems have been set up in the global settings",
       elementIsDisabled: (fs: FileSystem) => !fs.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }
@@ -351,11 +354,12 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    * Note that if there are several matching printers, only the first one is removed.
    */
   removeFileSystem(toDelete: FileSystem): void {
-    this.item.fileSystems.remove(toDelete.getID());
-    let index = this.item.fileSystemIds.indexOf(toDelete.getID(), 0);
-    if (index > -1) {
-       this.item.fileSystemIds.splice(index, 1);
-    }
+    this.item.removeChild(toDelete.getID(), DatasetNames.FILE_SYSTEMS);
+    // this.item.fileSystems.remove(toDelete.getID());
+    // let index = this.item.fileSystemIds.indexOf(toDelete.getID(), 0);
+    // if (index > -1) {
+    //    this.item.fileSystemIds.splice(index, 1);
+    // }
     this.updateFileSysPermsTable();
   }
 
@@ -407,7 +411,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
                           (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
       new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
       new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
-      new IconColumn('Revoke',  1, 'delete', (idx: number) => this.removeNetwork(idx))
+      new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
   }
 
@@ -451,7 +455,18 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   /**
    * This removes a network from the virtue's whitelist.
    */
-  removeNetwork(idx: number): void {
+  removeNetwork(netPerm: NetworkPermission): void {
+    if (this.item.networkWhiteList === undefined || this.item.networkWhiteList.length === 0) {
+      return;
+    }
+
+    let idx = 0;
+    for (let nP of this.item.networkWhiteList) {
+      if (netPerm.equals(nP)) {
+        break
+      }
+      idx++;
+    }
     this.item.networkWhiteList.splice(idx, 1);
     this.updateNetworkPermsTable();
   }
@@ -556,6 +571,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       tableWidth: 0.85,
       noDataMsg: this.getNoPasteDataMsg(),
       elementIsDisabled: (v: Virtue) => !v.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }
@@ -691,7 +707,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
         this.item.color = newColor;
       });
-
+''
     let closedSub = dialogRef.afterClosed().subscribe(() => {
       sub.unsubscribe();
       closedSub.unsubscribe();

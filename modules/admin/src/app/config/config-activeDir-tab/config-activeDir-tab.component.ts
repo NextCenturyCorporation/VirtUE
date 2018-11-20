@@ -17,7 +17,8 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
  * #uncommented, because this is a stub.
  *
  * Should this be a GenericDataTabComponent? What would this pull from the backend?
- * I assume a list of currently-set-up ADs. But then how would you set up the first one?
+ * I assume a list of currently-set-up ADs. But then how would you set up the first one? That's probably a general question:
+ *    - how do you add the first admin?
  * Is there a way to make sure that an admin can't change their own privileges? Is that desireable?
  *
  */
@@ -37,11 +38,9 @@ export class ConfigActiveDirTabComponent extends GenericDataTabComponent {
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
     super(router, baseUrlService, dataRequestService, dialog);
-    this.tabName = "Active Directories";
+    this.tabLabel = "Active Directories";
   }
-  /**
-   * #unimplemented
-   */
+
   init(): void {
   }
 

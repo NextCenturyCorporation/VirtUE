@@ -10,13 +10,9 @@ import { Mode } from '../abstracts/gen-form/mode.enum';
  * @class
  * This class represents a generic item - a [[User]], [[Virtue]], [[VirtualMachine]], or [[Application]].
  *
- * #uncommented
- * It is one of the main building blocks of this system at the moment - everything is configured to
- * hold and use Items.
- *
  * These are constructed from records retrieved from the backend in [[GenericDataPageComponent.recursivePullData]].
  *  Those records have the same data as Items, but the names of attributes aren't consistent, and so a conversion
- *  is done in each Item-subclass' constructor.
+*  is done in each Item-subclass' constructor, and a conversion back in the inherited [[IndexedObj.getInBackendFormat]] method
  *
  * The generic ways of interacting with Items are:
  *  - Methods:
@@ -46,29 +42,25 @@ export abstract class Item extends IndexedObj implements Toggleable {
    */
   enabled: boolean = true;
 
+  /** A full Date, of the last time this record was changed on the backend. */
+  modificationDate: Date;
+
   /**
    * a shortened form the the last modificaiton date, suitible for display
    * Note: don't sort anything on this field, sort on a format that progresses like
    *    year:month:day:hour:minute:second
    */
-  modDate: string;
+  readableModificationDate: string = "";
 
-  /** a link to the parent domain for this item - '/users', '/virtues', etc. */
-  parentDomain: string;
+  /** a link to the parent domain for this item - i.e. '/users', '/virtues', etc. */
+  parentDomain: string = "NA";
 
-  /**
-   * Gives default values for necessary attributes.
-   */
+
   constructor() {
     super();
-    this.modDate = '';
-
-    this.parentDomain = "NA";
   }
 
   /**
-   * Overriden by [[User]]
-   *
    * @return the item's displayable/human-readable name. Not guarenteed to be unique.
    */
   getName(): string {
@@ -143,7 +135,10 @@ export abstract class Item extends IndexedObj implements Toggleable {
 
     // remove that id.
     let childIDList: string[] = this.getRelatedIDList(datasetType);
-    childIDList.splice(childIDList.indexOf(id), 1);
+    let index = childIDList.indexOf(id);
+    if (index > -1) {
+       childIDList.splice(index, 1);
+    }
 
     // and remove the actual item.
     this.getRelatedDict(datasetType).remove(id);

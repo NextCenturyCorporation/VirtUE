@@ -6,38 +6,35 @@ import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
- * Represents an object that can be pulled from the backend, and which upon load needs to be linked to other objects.
+ * Represents an object that can be pulled from the backend, and which has references (via lists of IDs) to other IndexObjs.
  * This is an generalization of [[Item]].
  *
- * Note this linking must not be circular. We need to be able to create a chain of dependencies.
+ * Note this linking currently isn't set up to handle circular dependencies. We need to be able to create a chain of dependencies.
  * It needs to be able to be self-referential though, per the spec. So we'll have to deal with dependencies in two stages.
  *
+ * E.g. A certain page needs to display a list of users and a list of virtues, along with all data about those virtues.
+ *      The Virtues have virtual machines, printers, and file systems.
+ *      The virtual machines have applications.
  *
- * E.g. A certain page needs to display a list of users and a list of virtues.
- * The Virtues have virtual machines, printers, and file systems.
- * The virtual machines have applications.
- *
- * Thus, we'd need to first load the applications, use them to set up the virtual machines, and then load the printers and file systems.
- * It can then set up the virtues, and thereafter set up the Users.
+ *      Thus, we'd need to first load the applications, use them to set up the virtual machines, and then load the printers and file systems.
+ *      It can then set up the virtues, and thereafter set up the Users.
  *
  *
  * This type of of object is needed to load all data in the same way.
  */
 export abstract class IndexedObj {
 
-  /** #uncommented */
-  enabled: boolean;
-
   /**
-   * @return a unique ID for this type of object.
+   * @return a unique ID for this object.
    */
   abstract getID(): string;
 
   /**
-   * tells [[DataRequestService]] where to make changes on the backend - specific to each subclass.
+   * tells [[DataRequestService]] where this type of object lives on the backend.
    * @return The subdomain at which this sort of object is made accessible, on the virtue-admin backend server.
    */
   abstract getSubdomain(): string;
+
 
   /**
    * Empty by default. Items with children can override it.
@@ -46,7 +43,6 @@ export abstract class IndexedObj {
    * @param dataset #uncommented
    */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {}
-
 
   /**
    * Empty by default. Items with children can override it and make it return what it should.
@@ -58,9 +54,8 @@ export abstract class IndexedObj {
   }
 
   /**
-   * Empty by default. Items with children can override it and make it return what it should.
+   * Empty by default. Items with children can override it.
    * @param datasetName a DatasetNames enum telling the object which list of IDs to return
-   * @return a list of IDs that this object needs from the input childSet.
    */
   getRelatedIDList( datasetName: DatasetNames ): string[] {
     return [];
@@ -70,6 +65,9 @@ export abstract class IndexedObj {
     return JSON.stringify(this.getInBackendFormat());
   }
 
+  /**
+   * Overridden by some subclasses
+   */
   protected getInBackendFormat(): any {
     return this;
   }

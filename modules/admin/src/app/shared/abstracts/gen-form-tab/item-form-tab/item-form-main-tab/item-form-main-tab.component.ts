@@ -20,29 +20,19 @@ import { DatasetNames } from '../../../gen-data-page/datasetNames.enum';
  * @class
  * This class represents a 'main' tab for the form page of Users, Virtues, and Vms.
  *
- * The remove function assumes that the only things that can be removed from the item being viewed are the item's
- * direct, Item children. Like a User's Virtues, a Virtue's VMs, a Vm's Apps. It can't be easily changed to allow
+ * The remove function assumes that the only things that can be removed here from the item being viewed are the item's
+ * direct, `Item`, children. Like a User's Virtues, a Virtue's VMs, or a Vm's Apps. It can't be easily changed to allow
  * the removal of other children, like Printers or FileSystems.
- *
+ * All main pages currently only show/allow removal of those main children though.
  *
  * As a main tab, it is assumed to list:
  *  - The item's name
  *  - the item's status
- *  - the item's children
+ *  - the item's direct children
  *  - other minor info/settings that relate to *what* this item is, and how this template can be used.
- * How this item should work/be set up, should go in a 'settings' tab.
  *
- * Also, this family of classes all deal with displaying many pieces of a single, locally-held, object.
- * Any tab can change those pieces, and the central parent form [[ItemFormComponent]] just watches the
- * event emitters of each tab, to know when to reload the Item's data USING local, previously pulled, datasets.
- * E.g. if a User's virtueIds change, the form will use the new virtueIds to re-create item.virtues from the
- * same virtue dataset that was pulled when the page loaded.
- *
- * Those tabs aren't in charge of updating the backend themselves.
- *   This differs from the config-tabs (see [[ConfigPrinterTabComponent]]), which each track a different set
- *   of things, and must each be able to update the backend themselves. The form still is what can reload their
- *   data though, and so must be notified when a change occurs. The central form must therefore actually reload
- *   that tab's data from the backend, rather than re-create it from existing data like in above.
+ * Everything on how this item should work/be set up, or its connections to other entities, should go in a 'settings' tab, which
+ * should be a direct subclass of ItemFormTabComponent.
  *
  */
 export abstract class ItemFormMainTabComponent extends ItemFormTabComponent implements OnInit {
@@ -54,7 +44,6 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    */
   protected item: Item;
 
-  /** #uncommented */
   childDatasetName: DatasetNames;
 
   /** A table for listing the item's children. */
@@ -83,7 +72,7 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
     dialog: MatDialog) {
       super(router, dialog);
       this.tabName = "General Info";
-      this.item = new User({enabled: false});
+      this.item = new User({enabled: false}); // just until data from the backend gets set up.
   }
 
   /**
@@ -92,14 +81,8 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    * Called whenever the status toggle is clicked, to notify the parent component.
    * The parent components ignore it unless the page is in view mode, in which case they send
    * off a request to the backend actually toggling the status of this item.
-   * This lets the toggle actually work in view mode, while letting it make only local changes in other modes,
-   * without having to save the item as a whole as if you were in edit mode.
    */
   statusChange(): void {
-    // this.item.enabled = !this.item.enabled;
-    // this is actually worrying, but I don't know how to get around it. When the user clicks on the toggle, this function gets called,
-    // and then soon afterwards the item.enabled field is actually toggled. So inside this function, enabled still has the old value.
-    // To pass the right value to the backend, we therefore have to negate it. But if the ordering ever changes, then this
     this.onStatusChange.emit(!this.item.enabled);
   }
 
@@ -127,13 +110,10 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    *                this tab's mode should be updated. The attribute is optional.
    */
   update(changes: any): void {
-    this.childrenTable.populate(this.item.getRelatedDict(this.childDatasetName).asList());
     if (changes.mode) {
-      // these three lines could be replaced with
-      //    this.init(changes.mode)
-      // But that might be too opaque.
       this.setMode(changes.mode);
     }
+    this.childrenTable.populate(this.item.getRelatedDict(this.childDatasetName).asList());
   }
 
   /**
@@ -170,7 +150,7 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
   }
 
   /**
-   * defines the child table  using sub-class-defined-functions.
+   * defines the child table using sub-class-defined-functions.
    */
   defaultChildTableParams() {
     return {
@@ -179,6 +159,7 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
       tableWidth: 0.75,
       noDataMsg: this.getNoDataMsg(),
       elementIsDisabled: (i: Item) => !i.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     };
   }
@@ -206,7 +187,6 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    */
   customizeTableParams(paramsObject) {}
 
-
   /**
    * Have each subclass define the format of their table.
    * @return a list of columns that should appear in this tab's child table.
@@ -214,8 +194,7 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
   abstract getColumns(): Column[];
 
   /**
-   * See [[GenericListComponent.getSubMenu]] for more details on this sort
-   * of method.
+   * See [[TextColumn]] for more details on the submenu.
    *
    * A set of row options, to be displayed on each item in the child table.
    * Generally, we want them to be linkable and viewable only in view mode,
@@ -232,11 +211,11 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
        new SubMenuOptions("Remove",
                       () => !this.inViewMode(),
                       (childItem: Item) => this.openDialog( 'Delete ' + childItem.getName(),
-                                                    () => {
-                                                      this.removeChildObject(childItem);
-                                                      this.update({});
-                                                    }
-                                                  )
+                                                            () => {
+                                                              this.removeChildObject(childItem);
+                                                              this.update({});
+                                                            }
+                                                          )
                       )
     ];
   }

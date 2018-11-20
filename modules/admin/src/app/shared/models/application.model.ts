@@ -22,8 +22,6 @@ import { Subdomains } from '../services/subdomains.enum';
  *
  * #TODO make apps meaningful
  *
- * Children are null.
- *
  * At time of writing (early Aug 2018), version means nothing, and launchCommand and iconKey are not used.
  *
  * @extends [[Item]]

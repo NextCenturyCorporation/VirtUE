@@ -23,7 +23,7 @@ import {
 
 import { SelectionMode } from './selectionMode.enum';
 
-import { TableElement } from '../../models/tableElement.model';
+import { TableElement } from './tableElement.wrapper';
 
 import { SubMenuOptions } from '../../models/subMenuOptions.model';
 import { DictList } from '../../models/dictionary.model';
@@ -31,9 +31,9 @@ import { DictList } from '../../models/dictionary.model';
 import { GenericPageComponent } from '../gen-page/gen-page.component';
 
 
-/********************************************
+/**
  * @class
- * This class represents a generic table, displaying a list of [[TableElements]] all holding the same (generic) type of object.
+ * This class represents a generic table, displaying a list of [[TableElement]]s all holding the same (generic) type of object.
  *
  * TableElements hold objects, and can be marked as 'selected', if the table's [[selectionMode]] is MULTI or SINGLE.
  * Selections should be set by passing in a list of the objects to be selected (not IDs or anything, to keep this generic)
@@ -67,48 +67,47 @@ import { GenericPageComponent } from '../gen-page/gen-page.component';
  *
  *
  *
- * ********************************************/
+ */
 @Component({
-  selector: 'app\-table',
+  selector: 'app-table',
   templateUrl: './gen-table.component.html',
   styleUrls: ['../gen-page/gen-page.component.css', './gen-table.component.css']
 })
 export class GenericTableComponent<T> {
 
   /**
-   * This defines what columns show up in the table. If supplied, [[GenericPageComponent.formatValue]](i: Item) will be called
-   * to get the text for that item for that column. If not supplied, the text will be assumed to be "item.{colData.name}"
+   * This defines what columns show up in the table.
    */
-  colData: Column[];
+  private columns: Column[];
 
   /**
    * This list is what gets actually displayed in the table.
    *
    * Table will automatically update once this is set, and will display an no-data-message in the meantime.
    */
-  elements: TableElement<T>[];
+  private elements: TableElement<T>[];
 
   /** used to put a colored bar for everywhere virtues show up */
-  hasColoredLabels: boolean;
+  private hasColoredLabels: boolean;
 
   /**
    * Call to re-render the table on a change to filterValue.
    * this just gets toggled, and is passed into the listFilterSort pipe, where it is ignored.
    * The fact that its value changes though, makes angular re-render the table, filtering it based on the currect criteria.
    */
-  update: boolean = false;
+  private update: boolean = false;
 
   /** The message that should show up intead of any table data, when [[elements]] is undefined or empty. */
-  noDataMessage: string;
+  private noDataMessage: string;
 
   /** the fraction of the parent space should the table take up, from 0.01-1.00, inclusive. */
-  tableWidth: number;
+  private tableWidth: number;
 
   /** The column which should the table should be sorted by */
-  sortColumn: Column;
+  private sortColumn: Column;
 
   /** Whether the table should be sorted in an ascending or descending pattern. Valid values are ASC or DESC */
-  sortDirection: string = SORT_DIR.ASC;
+  private sortDirection: string = SORT_DIR.ASC;
 
   /**
    * Holds a [[SelectionMode]] describing whether rows in the table can be selected, and if so, how many values can be selected.
@@ -123,13 +122,13 @@ export class GenericTableComponent<T> {
    * compares two objects of the type held by this table's TableElements, and returns true if they are equal.
    * Caller-defined.
    */
-  equals?: (obj1: T, obj2: T) => boolean;
+  private equals?: (obj1: T, obj2: T) => boolean;
 
 
   /**
    * Holds the object within a selected TableElement, if the table is in SINGLE selection mode.
    */
-  selectedObj: T;
+  private selectedObj: T;
 
   /**
    * The filter options that appear above the table; each has text which the option's label, and
@@ -137,7 +136,7 @@ export class GenericTableComponent<T> {
    * Should be made generic and allow filtering on any column.
    * Filters should be made into their own class as well, when that change happens.
    *
-   * See note on [[GenericListComponent.getTableFilters]]().
+   * See note on [[ItemListComponent.getTableFilters]]().
    */
   filterOptions: {text: string, value: string}[];
 
@@ -158,30 +157,30 @@ export class GenericTableComponent<T> {
 
   /**
    * A caller-overrideable function for defining whether the interactable components of columns in this table should be disabled, given
-   * some caller-defined table state. Default is a function that returns true - disabling most interactable html objects.
-   * Note that this doesn't disable sorting or filtering, or SubMenuOpts. Sub menus are expected to manage their existence
+   * some caller-defined table state. Default is a function that returns true - enabling most interactable html objects.
+   * Note that this doesn't affect sorting or filtering, or SubMenuOpts. Sub menus are expected to manage their existence
    * through their own "shouldAppear" function.
    */
-  editingEnabled: (() => boolean) = () => true;
+  private editingEnabled: (() => boolean) = () => true;
 
   /**
-   * A caller-overrideable function for defining whether any links in the table should be disabled.
-   * This is needed because the only sensible default for a table is for it to default to being editable, and for the links to be active.
-   * But many tables want links to be active only when the table isn't editable.
+   * A caller-overrideable function for defining whether all links in the table should be disabled.
+   * This is needed because the only sensible default for a simple table is for it to default to being editable, and for the links
+   * to be active. But many other tables want links to be active only when the table isn't editable.
    */
-  disableLinks: (() => boolean) = () => false;
+  private disableLinks: (() => boolean) = () => false;
 
   /**
    * a caller-defined function that returns true iff a row should be shown as 'disabled' - greyed out, and unselectable, based on the
    * state of the object held by that row's TableElement.
    */
-  elementIsDisabled: ((obj: T) => boolean) = () => false;
+  private elementIsDisabled: ((obj: T) => boolean) = () => false;
 
   /**
    * A caller-defined function that returns a color to give a small label on each row, based on the object held by that row.
-   * Defaults to 'transparent', because most tables don't need colored labels on their rows.
+   * Defaults to 'transparent'.
    */
-  getColor: ((obj: T) => string) = () => 'transparent';
+  private getColor: ((obj: T) => string) = () => 'transparent';
 
   /**
    * Set all parameters to default parameters for the meantime before the calling class calls [[setUp]]().
@@ -189,7 +188,7 @@ export class GenericTableComponent<T> {
   constructor() {
     // create meaningless empty column to prevent exceptions before setUp() is called by the parent component's ngOnInit
     this.sortColumn = new TextColumn("", 0, (e) => e.toString(), SORT_DIR.ASC);
-    this.colData = [this.sortColumn];
+    this.columns = [this.sortColumn];
     this.filterOptions = [];
     this.elements = [];
     // this.subMenuOptions = [];
@@ -206,7 +205,7 @@ export class GenericTableComponent<T> {
    *
    */
   setUp(params: {
-    /** see this.[[colData]] */
+    /** see this.[[columns]] */
     cols: Column[];
 
     /** see this.[[filterOptions]] */
@@ -248,7 +247,7 @@ export class GenericTableComponent<T> {
       }
     }
   ): void {
-    this.colData = params.cols;
+    this.columns = params.cols;
 
     if (params.coloredLabels !== undefined) {
       this.hasColoredLabels = params.coloredLabels;
@@ -284,8 +283,8 @@ export class GenericTableComponent<T> {
       this.selectionMode = params.selectionOptions.selectionMode;
       this.equals = params.selectionOptions.equals;
     }
-    if (this.colData && this.colData.length > 0 && (this.colData[0] instanceof TextColumn)) {
-      this.sortColumn = this.colData[0];
+    if (this.columns && this.columns.length > 0 && (this.columns[0] instanceof TextColumn)) {
+      this.sortColumn = this.columns[0];
     }
   }
 
