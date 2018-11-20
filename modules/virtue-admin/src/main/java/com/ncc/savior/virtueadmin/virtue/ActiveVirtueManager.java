@@ -254,7 +254,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		for (VirtueInstance v : virtues) {
 			ids.add(v.getId());
 		}
-		// cloudManager.sync(ids);
+		cloudManager.sync(ids);
 	}
 
 	// private class VmUpdateListener implements IStateUpdateListener {
@@ -289,10 +289,8 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	}
 
 	public static interface VirtueCreationDeletionListener {
-
 		void onVirtueCreation(VirtueInstance virtue);
 
 		void onVirtueDeletion(VirtueInstance virtue);
-
 	}
 }

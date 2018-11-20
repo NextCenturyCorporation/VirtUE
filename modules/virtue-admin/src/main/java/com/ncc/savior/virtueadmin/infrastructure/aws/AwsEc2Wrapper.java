@@ -77,7 +77,7 @@ public class AwsEc2Wrapper {
 	}
 
 	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String name, Collection<String> securityGroupIds,
-			String serverKeyName, InstanceType instanceType, String subnetIds, String iamRoleName) {
+			String serverKeyName, InstanceType instanceType, VirtueCreationAdditionalParameters virtueMods, String iamRoleName) {
 
 		VirtualMachine vm = null;
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -90,11 +90,11 @@ public class AwsEc2Wrapper {
 			InstanceNetworkInterfaceSpecification networkInterfaces = new InstanceNetworkInterfaceSpecification();
 			networkInterfaces.setAssociatePublicIpAddress(forcePublicIp);
 			networkInterfaces.setDeviceIndex(0);
-			networkInterfaces.setSubnetId(subnetIds);
+			networkInterfaces.setSubnetId(virtueMods.getSubnetId());
 			networkInterfaces.setGroups(securityGroupIds);
 			runInstancesRequest.withNetworkInterfaces(networkInterfaces);
 		} else {
-			runInstancesRequest.withSubnetId(subnetIds).withSecurityGroupIds(securityGroupIds);
+			runInstancesRequest.withSubnetId(virtueMods.getSubnetId()).withSecurityGroupIds(securityGroupIds);
 		}
 
 		if (iamRoleName != null) {
@@ -104,8 +104,8 @@ public class AwsEc2Wrapper {
 		}
 		String instanceId = UUID.randomUUID().toString();
 		runInstancesRequest.withTagSpecifications(new TagSpecification().withResourceType(ResourceType.Instance)
-				.withTags(new Tag(AwsUtil.TAG_SERVER_ID, serverId), new Tag(AwsUtil.TAG_TEMPLATE_ID, vmt.getId()),
-						new Tag(AwsUtil.TAG_INSTANCE_ID, instanceId)));
+				.withTags(new Tag(AwsUtil.TAG_SERVER_ID, serverId), new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmt.getId()),
+						new Tag(AwsUtil.TAG_VM_INSTANCE_ID, instanceId), new Tag(AwsUtil.TAG_VIRTUE_INSTANCE_ID, virtueMods.getVirtueId()),new Tag(AwsUtil.TAG_VIRTUE_TEMPLATE_ID, virtueMods.getVirtueTemplateId())));
 		// .withSecurityGroups(securityGroups);
 		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
