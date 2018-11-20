@@ -77,7 +77,8 @@ public class AwsEc2Wrapper {
 	}
 
 	public VirtualMachine provisionVm(VirtualMachineTemplate vmt, String name, Collection<String> securityGroupIds,
-			String serverKeyName, InstanceType instanceType, VirtueCreationAdditionalParameters virtueMods, String iamRoleName) {
+			String serverKeyName, InstanceType instanceType, VirtueCreationAdditionalParameters virtueMods,
+			String iamRoleName) {
 
 		VirtualMachine vm = null;
 		RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
@@ -105,7 +106,11 @@ public class AwsEc2Wrapper {
 		String instanceId = UUID.randomUUID().toString();
 		runInstancesRequest.withTagSpecifications(new TagSpecification().withResourceType(ResourceType.Instance)
 				.withTags(new Tag(AwsUtil.TAG_SERVER_ID, serverId), new Tag(AwsUtil.TAG_VM_TEMPLATE_ID, vmt.getId()),
-						new Tag(AwsUtil.TAG_VM_INSTANCE_ID, instanceId), new Tag(AwsUtil.TAG_VIRTUE_INSTANCE_ID, virtueMods.getVirtueId()),new Tag(AwsUtil.TAG_VIRTUE_TEMPLATE_ID, virtueMods.getVirtueTemplateId())));
+						new Tag(AwsUtil.TAG_VM_INSTANCE_ID, instanceId),
+						new Tag(AwsUtil.TAG_VIRTUE_INSTANCE_ID, virtueMods.getVirtueId()),
+						new Tag(AwsUtil.TAG_VIRTUE_TEMPLATE_ID, virtueMods.getVirtueTemplateId()),
+						new Tag(AwsUtil.TAG_PRIMARY, virtueMods.getPrimaryPurpose().toString()),
+						new Tag(AwsUtil.TAG_SECONDARY, virtueMods.getSecondaryPurpose().toString())));
 		// .withSecurityGroups(securityGroups);
 		RunInstancesResult result = ec2.runInstances(runInstancesRequest);
 
