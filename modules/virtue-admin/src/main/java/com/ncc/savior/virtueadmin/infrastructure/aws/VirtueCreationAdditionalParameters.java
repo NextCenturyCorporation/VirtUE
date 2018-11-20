@@ -9,6 +9,16 @@ public class VirtueCreationAdditionalParameters {
 	private String subnetId;
 	private String name;
 	private String securityGroupId;
+	private String virtueId;
+	private String virtueTemplateId;
+
+	public void setVirtueId(String virtueId) {
+		this.virtueId = virtueId;
+	}
+
+	public void setVirtueTemplateId(String virtueTemplateId) {
+		this.virtueTemplateId = virtueTemplateId;
+	}
 
 	public VirtueCreationAdditionalParameters(String name) {
 		this.name = name;
@@ -38,4 +48,11 @@ public class VirtueCreationAdditionalParameters {
 		this.securityGroupId = securityGroupId;
 	}
 
+	public String getVirtueId() {
+		return virtueId;
+	}
+
+	public String getVirtueTemplateId() {
+		return virtueTemplateId;
+	}
 }
