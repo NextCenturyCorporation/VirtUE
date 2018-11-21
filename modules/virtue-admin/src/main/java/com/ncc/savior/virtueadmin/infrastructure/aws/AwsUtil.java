@@ -421,10 +421,10 @@ public class AwsUtil {
 	}
 
 	public static enum VirtuePrimaryPurpose {
-		USER_VIRTUE, IMAGE_CREATION
+		USER_VIRTUE, IMAGE_CREATION, CIFS_PROXY
 	}
 
 	public static enum VirtueSecondaryPurpose {
-		WINDOWS, XEN_HOST
+		WINDOWS, XEN_HOST, CIFS_PROXY
 	}
 }
