@@ -67,7 +67,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		for (SecurityGroup sg : secGs) {
 			if (doesSecurityGroupBelongToThisServer(sg)) {
 				List<Tag> tags = sg.getTags();
-				String templateId = AwsUtil.tagGet(tags, AwsUtil.TAG_TEMPLATE_ID);
+				String templateId = AwsUtil.tagGet(tags, AwsUtil.TAG_VIRTUE_TEMPLATE_ID);
 				if (templateId != null && !allTemplateIds.contains(templateId)) {
 					// don't delete anything without the appropriate tags
 					securityGroupIdsToDelete.add(sg.getGroupId());
@@ -162,13 +162,13 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		if (templateId != null) {
 			DescribeSecurityGroupsRequest dsgr = new DescribeSecurityGroupsRequest();
 			Collection<Filter> filters = new ArrayList<Filter>();
-			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_TEMPLATE_ID).withValues(templateId));
+			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_VIRTUE_TEMPLATE_ID).withValues(templateId));
 			dsgr.setFilters(filters);
 			DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(dsgr);
 			List<SecurityGroup> sgs = result.getSecurityGroups();
 			for (SecurityGroup sg : sgs) {
 				if (doesSecurityGroupBelongToThisServer(sg)
-						&& AwsUtil.tagEquals(sg.getTags(), AwsUtil.TAG_TEMPLATE_ID, templateId)) {
+						&& AwsUtil.tagEquals(sg.getTags(), AwsUtil.TAG_VIRTUE_TEMPLATE_ID, templateId)) {
 					if (sgs.size() == 1) {
 						return securityGroupToPermissionList(sg);
 					} else {
@@ -312,7 +312,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 
 	private Collection<SecurityGroupPermission> securityGroupToPermissionList(SecurityGroup sg) {
 		HashSet<SecurityGroupPermission> permissions = new HashSet<SecurityGroupPermission>();
-		String templateId = AwsUtil.tagGet(sg.getTags(), AwsUtil.TAG_TEMPLATE_ID);
+		String templateId = AwsUtil.tagGet(sg.getTags(), AwsUtil.TAG_VIRTUE_TEMPLATE_ID);
 
 		for (IpPermission p : sg.getIpPermissions()) {
 			boolean ingress = true;
@@ -366,7 +366,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		for (SecurityGroup sg : secGs) {
 			if (doesSecurityGroupBelongToThisServer(sg)) {
 				List<Tag> tags = sg.getTags();
-				boolean idMatch = AwsUtil.tagEquals(tags, AwsUtil.TAG_TEMPLATE_ID, templateId);
+				boolean idMatch = AwsUtil.tagEquals(tags, AwsUtil.TAG_VIRTUE_TEMPLATE_ID, templateId);
 				boolean serverMatch = AwsUtil.tagEquals(tags, AwsUtil.TAG_SERVER_ID, serverId);
 				if (idMatch && serverMatch) {
 					return sg.getGroupId();
@@ -382,7 +382,7 @@ public class SecurityGroupManager implements ISecurityGroupManager {
 		createTagsRequest.withResources(groupId);
 
 		Collection<Tag> tags = new ArrayList<Tag>();
-		tags.add(new Tag(AwsUtil.TAG_TEMPLATE_ID, templateId));
+		tags.add(new Tag(AwsUtil.TAG_VIRTUE_TEMPLATE_ID, templateId));
 		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
 		tags.add(new Tag(AwsUtil.TAG_AUTO_GENERATED, AwsUtil.TAG_AUTO_GENERATED_TRUE));
 		// tags.add(new Tag(TAG_USER_CREATED, templateId));

@@ -14,6 +14,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.desktop.alerting.BaseAlertMessage;
 import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.alerting.VirtueAlertMessage;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
@@ -65,7 +66,8 @@ public class VirtueService {
 	}
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
-			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService, ColorManager colorManager) {
+			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService,
+			ColorManager colorManager) {
 		this.desktopResourceService = desktopResourceService;
 		this.connectionManager = new XpraConnectionManager(appManger);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
@@ -83,7 +85,11 @@ public class VirtueService {
 				try {
 					ensureConnection(app, virtue, color);
 				} catch (IOException e) {
-					logger.error("Error creating connection to app=" + app + " virtue=" + virtue);
+					logger.error("Error creating connection to app=" + app + " virtue=" + virtue, e);
+					BaseAlertMessage alertMessage = new VirtueAlertMessage(
+							"Error connecting to virtue " + virtue.getName(), virtue,
+							"Error connecting to virtue " + virtue.getName());
+					UserAlertingServiceHolder.sendAlertLogError(alertMessage, logger);
 				}
 			});
 		};
@@ -139,7 +145,7 @@ public class VirtueService {
 					p.waitFor();
 					clipboardManager.closeConnection(cId);
 				} catch (InterruptedException | IOException e) {
-					logger.error("Error tracking RDP connection and closing associated clipboard");
+					logger.error("Error tracking RDP connection and closing associated clipboard", e);
 				} finally {
 
 				}
@@ -219,6 +225,11 @@ public class VirtueService {
 							ensureConnection(app, virtue, color);
 						} catch (Exception e) {
 							logger.error("error starting pending application", e);
+							BaseAlertMessage alertMessage = new VirtueAlertMessage(
+									"Failed to start application " + appDefn.getName(), virtue,
+									"Failed to start application " + appDefn.getName() + " for virtue "
+											+ virtue.getName());
+							UserAlertingServiceHolder.sendAlertLogError(alertMessage, logger);
 						}
 					});
 					t.start();
@@ -264,6 +275,11 @@ public class VirtueService {
 				}
 			} catch (Throwable e) {
 				logger.error("Error starting application", e);
+
+				BaseAlertMessage alertMessage = new VirtueAlertMessage(
+						"Failed to start application " + appDefn.getName(), v,
+						"Failed to start application " + appDefn.getName() + " for virtue " + v.getName());
+				UserAlertingServiceHolder.sendAlertLogError(alertMessage, logger);
 			}
 		});
 		t.start();

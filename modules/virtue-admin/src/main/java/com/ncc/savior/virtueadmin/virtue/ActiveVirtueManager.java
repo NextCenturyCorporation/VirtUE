@@ -247,6 +247,6 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		for (VirtueInstance v:virtues) {
 			ids.add(v.getId());
 		}
-//		cloudManager.sync(ids);
+		cloudManager.sync(ids);
 	}
 }
