@@ -83,7 +83,7 @@
 	</bean>
 
 	<bean name="cifsProxyDao"
-		class="com.ncc.savior.virtueadmin.cifsproxy.MemoryCifsProxyDao">
+		class="com.ncc.savior.virtueadmin.data.jpa.JpaCifsProxyDao">
 		<constructor-arg value="${virtue.cifs.timeoutMills}"></constructor-arg>
 	</bean>
 

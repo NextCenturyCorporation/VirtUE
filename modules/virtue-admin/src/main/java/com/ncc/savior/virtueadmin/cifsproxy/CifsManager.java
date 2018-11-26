@@ -32,6 +32,10 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager.VirtueCreationDeletionListener;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
+/**
+ * Main manager class than handles creation and deletion of CIFs Proxies. There
+ * should be one instance per user that is logged in or has an active virtue.
+ */
 public class CifsManager {
 	private static final Logger logger = LoggerFactory.getLogger(CifsManager.class);
 	@Autowired
@@ -48,16 +52,17 @@ public class CifsManager {
 
 	public CifsManager(ServerIdProvider serverIdProvider, IActiveVirtueManager activeVirtueManager,
 			DesktopVirtueService desktopService, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
-			CompletableFutureServiceProvider serviceProvider, String cifsProxyAmi, String cifsProxyLoginUser, String cifsKeyName, String instanceType) {
+			CompletableFutureServiceProvider serviceProvider, String cifsProxyAmi, String cifsProxyLoginUser,
+			String cifsKeyName, String instanceType) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.cifsProxyDao = cifsProxyDao;
 		this.wrapper = wrapper;
 		this.serviceProvider = serviceProvider;
 		this.serverId = serverIdProvider.getServerId();
 		this.securityGroupIds = new ArrayList<String>();
-		this.cifsKeyName=cifsKeyName;
-		this.instanceType=InstanceType.fromValue(instanceType);
-		serviceProvider.getExecutor().scheduleAtFixedRate(getTestForTimeoutRunnable(), 5000, 5000,
+		this.cifsKeyName = cifsKeyName;
+		this.instanceType = InstanceType.fromValue(instanceType);
+		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 5000, 5000,
 				TimeUnit.MILLISECONDS);
 		desktopService.addPollHandler(new PollHandler() {
 
@@ -107,7 +112,7 @@ public class CifsManager {
 			@Override
 			public void run() {
 				Set<VirtueUser> users = cifsProxyDao.getAllUsers();
-				logger.debug("Testing for timeouts for users=" + users);
+				// logger.debug("Testing for timeouts for users=" + users);
 				for (VirtueUser user : users) {
 					testAndShutdownCifs(user);
 				}

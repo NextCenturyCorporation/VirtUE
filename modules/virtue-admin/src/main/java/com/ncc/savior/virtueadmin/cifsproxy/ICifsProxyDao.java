@@ -5,6 +5,11 @@ import java.util.Set;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
+/**
+ * Dao than handles storing existance and timeout for CIFS Proxy VMs as well as
+ * their timeout time.
+ *
+ */
 public interface ICifsProxyDao {
 
 	VirtualMachine getCifsVm(VirtueUser user);

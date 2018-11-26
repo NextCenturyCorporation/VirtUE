@@ -1,38 +1,39 @@
-package com.ncc.savior.virtueadmin.cifsproxy;
+package com.ncc.savior.virtueadmin.data;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.ncc.savior.virtueadmin.cifsproxy.ICifsProxyDao;
+import com.ncc.savior.virtueadmin.model.CifsProxyData;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 
 public class MemoryCifsProxyDao implements ICifsProxyDao {
 
-	private HashMap<String, MemoryCifsData> userMap;
+	private HashMap<String, CifsProxyData> userMap;
 	private long timeoutDelayMillis;
 
 	public MemoryCifsProxyDao(long timeoutDelayMillis) {
-		this.userMap = new HashMap<String, MemoryCifsData>();
+		this.userMap = new HashMap<String, CifsProxyData>();
 		this.timeoutDelayMillis = timeoutDelayMillis;
 	}
 
 	@Override
 	public synchronized VirtualMachine getCifsVm(VirtueUser user) {
-		MemoryCifsData data = userMap.get(user.getUsername());
+		CifsProxyData data = userMap.get(user.getUsername());
 		if (data == null) {
 			return null;
 		} else {
 			return data.getCifsVm();
 		}
-
 	}
 
 	@Override
 	public synchronized void updateCifsVm(VirtueUser user, VirtualMachine vm) {
-		MemoryCifsData data = userMap.get(user.getUsername());
+		CifsProxyData data = userMap.get(user.getUsername());
 		if (data == null) {
-			data = new MemoryCifsData(user, vm, getTimeoutTimeFromNow());
+			data = new CifsProxyData(user, vm, getTimeoutTimeFromNow());
 		} else {
 			data.setCifsVm(vm);
 		}
@@ -45,7 +46,7 @@ public class MemoryCifsProxyDao implements ICifsProxyDao {
 
 	@Override
 	public synchronized void updateUserTimeout(VirtueUser user) {
-		MemoryCifsData data = userMap.get(user.getUsername());
+		CifsProxyData data = userMap.get(user.getUsername());
 		if (data != null) {
 			data.setTimeoutMillis(getTimeoutTimeFromNow());
 		}
@@ -54,7 +55,7 @@ public class MemoryCifsProxyDao implements ICifsProxyDao {
 
 	@Override
 	public synchronized long getUserTimeout(VirtueUser user) {
-		MemoryCifsData data = userMap.get(user.getUsername());
+		CifsProxyData data = userMap.get(user.getUsername());
 		if (data != null) {
 			return data.getTimeoutMillis();
 		}
@@ -69,46 +70,11 @@ public class MemoryCifsProxyDao implements ICifsProxyDao {
 	@Override
 	public synchronized Set<VirtueUser> getAllUsers() {
 		HashSet<VirtueUser> set = new HashSet<VirtueUser>();
-		for (MemoryCifsData entry : userMap.values()) {
+		for (CifsProxyData entry : userMap.values()) {
 			set.add(entry.getUser());
 		}
 		return set;
 	}
 
-	private class MemoryCifsData {
-		private VirtueUser user;
-		private VirtualMachine cifsVm;
-		private long timeoutMillis;
-
-		protected MemoryCifsData(VirtueUser user, VirtualMachine cifsVm, long timeoutMillis) {
-			super();
-			this.user = user;
-			this.cifsVm = cifsVm;
-			this.timeoutMillis = timeoutMillis;
-		}
-
-		public VirtueUser getUser() {
-			return user;
-		}
-
-		public void setUser(VirtueUser user) {
-			this.user = user;
-		}
-
-		public VirtualMachine getCifsVm() {
-			return cifsVm;
-		}
-
-		public void setCifsVm(VirtualMachine cifsVm) {
-			this.cifsVm = cifsVm;
-		}
-
-		public long getTimeoutMillis() {
-			return timeoutMillis;
-		}
-
-		public void setTimeoutMillis(long timeoutMillis) {
-			this.timeoutMillis = timeoutMillis;
-		}
-	}
+	
 }

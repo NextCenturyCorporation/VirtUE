@@ -21,8 +21,9 @@ public enum SaviorErrorCode {
 	USER_NOT_FOUND(24, "User not found", 400), 
 	APPLICATION_ID_NOT_FOUND(25, "Application not found", 400),
 	PERMISSION_NOT_FOUND(26, "Permission not found", 400),
-	ID_MISMATCH(27, "Object IDs do not match"),
-	STORAGE_NOT_FOUND(28, "Storage not found"),
+	ID_MISMATCH(27, "Object IDs do not match", 400),
+	STORAGE_NOT_FOUND(28, "Storage not found", 400),
+	CIFS_PROXY_NOT_FOUND(29, "CIFS Proxy not found", 400),
 	//bad data?
 	INVALID_INPUT(50, "Invalid input"),
 	
