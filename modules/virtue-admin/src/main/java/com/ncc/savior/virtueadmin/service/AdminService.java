@@ -164,12 +164,6 @@ public class AdminService {
 		ArrayList<VirtueTemplate> virtues = new ArrayList<VirtueTemplate>();
 		virtuesItr.forEach(virtues::add);
 
-		for (VirtueTemplate v : virtues) {
-      if (v.getName() != null && v.getName().equals("aa_newVirtue2")) {
-				logger.debug("# " + v.getFileSystems().iterator().next());
-				logger.debug("# " + v.getFileSystems().iterator().next().getReadPerm());
-      }
-    }
 		return virtues;
 	}
 
@@ -331,6 +325,11 @@ public class AdminService {
 		// 	logger.debug("% " + template.getFileSystems().iterator().next());
 		// 	logger.debug("% " + template.getFileSystems().iterator().next().getReadPerm());
 		// }
+		logger.debug("1% " + template.getNetworkWhitelist());
+		if (template.getNetworkWhitelist().iterator().hasNext()) {
+			logger.debug("2% " + template.getNetworkWhitelist().iterator().next());
+			logger.debug("3% " + template.getNetworkWhitelist().iterator().next().getHost());
+		}
 
 		if ( !templateId.equals(template.getId()) ) {
 			template = new VirtueTemplate(templateId, template);

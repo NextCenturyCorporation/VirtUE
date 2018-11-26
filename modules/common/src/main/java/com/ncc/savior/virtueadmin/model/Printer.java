@@ -108,31 +108,28 @@ public class Printer {
 			return true;
 		if (obj == null)
 			return false;
+
 		if (getClass() != obj.getClass())
 			return false;
 		Printer other = (Printer) obj;
-		if (name == null) {
-			if (other.getName() != null)
-				return false;
-		} else if (!name.equals(other.getName()))
+
+		// check if both null or same reference, and if not, then check equals.
+		if (name != other.getName() || !name.equals(other.getName())) {
 			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		}
+		if (id != other.id || !id.equals(other.id)) {
 			return false;
-		if (address == null) {
-			if (other.getAddress() != null)
-				return false;
-		} else if (!address.equals(other.getAddress()))
+		}
+		if (address != other.address || !address.equals(other.address)) {
 			return false;
-		if (status == null) {
-			if (other.getStatus() != null)
-				return false;
-		} else if (!status.equals(other.getStatus()))
+		}
+		if (status != other.status || !status.equals(other.status)) {
 			return false;
-		if (enabled != other.isEnabled())
+		}
+		if (enabled != other.isEnabled()) {
 			return false;
+		}
+
 		return true;
 	}
 	public static final Comparator<? super Printer> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();

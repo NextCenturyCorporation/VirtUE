@@ -206,17 +206,7 @@ public class SpringJpaTemplateManager implements ITemplateManager {
 		}
 		template.setVmTemplates(new HashSet<VirtualMachineTemplate>());
 
-		if (template.getFileSystems().iterator().hasNext()) {
-			logger.debug("$1 " + template.getFileSystems().iterator().next());
-			logger.debug("$1 " + template.getFileSystems().iterator().next().getReadPerm());
-		}
-
 		VirtueTemplate savedTemplate = virtueTemplateRepo.save(template);
-
-		if (template.getFileSystems().iterator().hasNext()) {
-			logger.debug("$2 " + savedTemplate.getFileSystems().iterator().next());
-			logger.debug("$2 " + savedTemplate.getFileSystems().iterator().next().getReadPerm());
-		}
 
 		// adding empty template and then adding vmtempaltes (that are already in db)
 		// seem to work better for jpa

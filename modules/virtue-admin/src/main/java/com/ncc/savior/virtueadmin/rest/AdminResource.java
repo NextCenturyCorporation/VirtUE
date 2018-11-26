@@ -252,6 +252,7 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
+		logger.debug("here! " + template);
 		VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
 		return virtueTemplate;
 	}

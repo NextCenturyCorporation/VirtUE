@@ -4,10 +4,20 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import com.ncc.savior.virtueadmin.model.NetworkProtocol;
 
@@ -16,22 +26,25 @@ import com.ncc.savior.virtueadmin.model.NetworkProtocol;
  *
  *
  */
-@Entity
+@Embeddable
 public class WhitelistedNetwork {
-	@Id
-	private String id;
+	@JsonIgnore
+	private static final Logger logger = LoggerFactory.getLogger(WhitelistedNetwork.class);
+
 	private String host;
-	private NetworkProtocol protocol;
 	private int localPort;
 	private int remotePort;
 
-	public WhitelistedNetwork(String id, String host, NetworkProtocol protocol, int localPort, int remotePort) {
-		super();
-		this.id = id;
+	// @Embedded
+	// @Enumerated(EnumType.STRING)
+	private NetworkProtocol protocol;
+
+	public WhitelistedNetwork(String host, NetworkProtocol protocol, int localPort, int remotePort) {
+		logger.debug("here2 ");
 		this.host = host;
-		this.protocol = protocol;
 		this.localPort = localPort;
 		this.remotePort = remotePort;
+		this.protocol = protocol;
 	}
 
 	/**
@@ -40,61 +53,68 @@ public class WhitelistedNetwork {
 	 */
 	protected WhitelistedNetwork() {
 
+		logger.debug("here ");
+		protocol = NetworkProtocol.TCPIP;
 	}
 
-	public WhitelistedNetwork(String id, WhitelistedNetwork wlNetwork) {
-		this.id = id;
+	public WhitelistedNetwork(WhitelistedNetwork wlNetwork) {
+		logger.debug("here3 ");
 		this.host = wlNetwork.getHost();
-		this.protocol = wlNetwork.getProtocol();
 		this.localPort = wlNetwork.getLocalPort();
 		this.remotePort = wlNetwork.getRemotePort();
+		// this.protocol = wlNetwork.getProtocol();
 	}
 
-	public String getId() {
-		return id;
-	}
-
+	@JsonGetter
 	public String getHost() {
+		logger.debug("getHost");
 		return host;
 	}
 
-	public NetworkProtocol getProtocol() {
-		return protocol;
-	}
-
+	@JsonGetter
 	public int getLocalPort() {
 		return localPort;
 	}
 
+	@JsonGetter
 	public int getRemotePort() {
 		return remotePort;
 	}
 
-	// below setters used for jackson deserialization
-	public void setId(String id) {
-		this.id = id;
-	}
+	// @JsonGetter
+	// public NetworkProtocol getProtocol() {
+	// 	return protocol;
+	// }
 
+	// below setters used for jackson deserialization
+	@JsonSetter
 	public void setHost(String host) {
+		logger.debug("setHost " + host);
 		this.host = host;
 	}
 
-	public void setProtocol(NetworkProtocol protocol) {
-		this.protocol = protocol;
-	}
-
+	@JsonSetter
 	public void setLocalPort(int localPort) {
+		logger.debug("setLocalPort " + localPort);
 		this.localPort = localPort;
 	}
 
+	@JsonSetter
 	public void setRemotePort(int remotePort) {
+		logger.debug("setRemotePort " + remotePort);
 		this.remotePort = remotePort;
 	}
 
+	// @JsonSetter
+	// public void setProtocol(NetworkProtocol protocol) {
+	// 	logger.debug("setProtocol " + protocol);
+	// 	this.protocol = protocol;
+	// }
+
 	@Override
 	public String toString() {
-		return "Whitelisted Network: [id=" + id + ", host=" + host + ", protocol=" + protocol + ", localPort=" + localPort
-				+ ", remotePort=" + remotePort + "]";
+		return "Whitelisted Network: [host=" + host + ", localPort=" + localPort
+				+ ", remotePort=" + remotePort + ", protocol=" + protocol + "]";
 	}
 
 	/**
@@ -104,7 +124,6 @@ public class WhitelistedNetwork {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((host == null) ? 0 : host.hashCode());
 		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
 		// result = prime * result + ((localPort == -1) ? 0 : localPort);
@@ -120,28 +139,24 @@ public class WhitelistedNetwork {
 			return true;
 		if (obj == null)
 			return false;
+
 		if (getClass() != obj.getClass())
 			return false;
 		WhitelistedNetwork other = (WhitelistedNetwork) obj;
-		if (host == null) {
-			if (other.host != null)
-				return false;
-		} else if (!host.equals(other.host))
+
+		// check if both null or same reference, and if not, then check equals.
+		if (host != other.host || !host.equals(other.getHost())) {
 			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		}
+		// if (protocol != other.protocol || !protocol.equals(other.getProtocol())) {
+		// 	return false;
+		// }
+		if (localPort != other.getLocalPort()) {
 			return false;
-		if (protocol == null) {
-			if (other.protocol != null)
-				return false;
-		} else if (!protocol.equals(other.protocol))
+		}
+		if (remotePort != other.getRemotePort()) {
 			return false;
-		if (localPort != other.localPort)
-			return false;
-		if (remotePort != other.remotePort)
-			return false;
+		}
 		return true;
 	}
 	public static final Comparator<? super WhitelistedNetwork> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();

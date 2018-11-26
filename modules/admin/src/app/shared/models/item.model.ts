@@ -61,7 +61,7 @@ export abstract class Item extends IndexedObj implements Toggleable {
   }
 
   /**
-   * @return the item's displayable/human-readable name. Not guarenteed to be unique.
+   * @return the item's displayable/human-readable name. Not guaranteed to be unique.
    */
   getName(): string {
     return this.name;
@@ -129,7 +129,8 @@ export abstract class Item extends IndexedObj implements Toggleable {
    * Maybe just pass in an extra parameter saying the type of dataset
    * @param id the id of the child to be removed
    * @param datasetType the name of the dataset relating to the list the item should be removed from.
-   *        i.e., if you want to remove printer 12345 from Virtue V1's printer list, call `V1.removeChild( "1234", DatasetNames.PRINTERS );`
+   *        i.e., if you want to remove printer with ID=12345 from Virtue V1's printer list, call
+   *             `V1.removeChild( "1234", DatasetNames.PRINTERS );`
    */
   removeChild(id: string, datasetType: DatasetNames): void {
 

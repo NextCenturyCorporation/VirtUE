@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import com.ncc.savior.virtueadmin.model.Printer;
 import com.ncc.savior.virtueadmin.model.FileSystem;
+import com.ncc.savior.virtueadmin.model.WhitelistedNetwork;
 
 
 /**
@@ -65,6 +66,10 @@ public class VirtueTemplate {
 	@ElementCollection()
 	private Collection<String> allowedPasteTargetIds;
 
+	@Embedded
+	@ElementCollection(targetClass = WhitelistedNetwork.class)
+	private Collection<WhitelistedNetwork> networkWhitelist;
+
 	@Transient
 	private Collection<String> printerIds;
 	@Transient
@@ -93,15 +98,24 @@ public class VirtueTemplate {
 		this.lastEditor = template.getLastEditor();
 		this.awsTemplateName = template.getAwsTemplateName();
 		this.printers = template.getPrinters();
-		this.fileSystems = template.getFileSystems();
 		this.printerIds = template.getPrinterIds();
+		this.fileSystems = template.getFileSystems();
 		this.fileSystemIds = template.getFileSystemIds();
+
 		this.allowedPasteTargetIds = template.getAllowedPasteTargetIds();
+		this.networkWhitelist = template.getNetworkWhitelist();
+
 		if (this.fileSystems == null) {
 			this.fileSystems = new ArrayList<FileSystem>();
 		}
 		if (this.fileSystemIds == null) {
 			this.fileSystemIds = new ArrayList<String>();
+		}
+		if (this.allowedPasteTargetIds == null) {
+			this.allowedPasteTargetIds = new ArrayList<String>();
+		}
+		if (this.networkWhitelist == null) {
+			this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 		}
 	}
 
@@ -118,6 +132,8 @@ public class VirtueTemplate {
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 		this.fileSystems = new ArrayList<FileSystem>();
+		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, VirtualMachineTemplate vmTemplate,
@@ -134,6 +150,8 @@ public class VirtueTemplate {
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 		this.fileSystems = new ArrayList<FileSystem>();
+		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, String awsTemplateName, String color, boolean enabled,
@@ -152,6 +170,8 @@ public class VirtueTemplate {
 		this.lastEditor = lastEditor;
 		this.awsTemplateName = awsTemplateName;
 		this.fileSystems = new ArrayList<FileSystem>();
+		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public VirtueTemplate(String id, String name, String version, Collection<VirtualMachineTemplate> vmTemplates,
@@ -169,6 +189,8 @@ public class VirtueTemplate {
 		this.userCreatedBy = userCreatedBy;
 		this.timeCreatedAt = timeCreatedAt;
 		this.fileSystems = new ArrayList<FileSystem>();
+		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	/**
@@ -177,6 +199,8 @@ public class VirtueTemplate {
 	protected VirtueTemplate() {
 		super();
 		this.fileSystems = new ArrayList<FileSystem>();
+		this.allowedPasteTargetIds = new ArrayList<String>();
+		this.networkWhitelist = new ArrayList<WhitelistedNetwork>();
 	}
 
 	public String getId() {
@@ -228,7 +252,7 @@ public class VirtueTemplate {
 	public String toString() {
 		return "VirtueTemplate [id=" + id + ", name=" + name + ", version=" + version + ", vmTemplates=" + vmTemplates
 				+ ", color=" + color + ", enabled=" + enabled + ", lastModification=" + lastModification + ", lastEditor=" + lastEditor
-				+ ", awsTemplateName=" + awsTemplateName + "]";
+				+ ", awsTemplateName=" + awsTemplateName + ", networkWhitelist=" + networkWhitelist + "]";
 	}
 
 	public String getAwsTemplateName() {
@@ -322,6 +346,11 @@ public class VirtueTemplate {
 		return allowedPasteTargetIds;
 	}
 
+	@JsonGetter
+	public Collection<WhitelistedNetwork> getNetworkWhitelist() {
+		return networkWhitelist;
+	}
+
 	@JsonSetter
 	public void setVmTemplateIds(Collection<String> vmTemplateIds) {
 		this.vmTemplates = null;
@@ -341,6 +370,11 @@ public class VirtueTemplate {
 	@JsonSetter
 	public void setAllowedPasteTargetIds(Collection<String> allowedPasteTargetIds) {
 		 this.allowedPasteTargetIds = allowedPasteTargetIds;
+	}
+
+	@JsonSetter
+	public void setNetworkWhitelist(Collection<WhitelistedNetwork> networkWhitelist) {
+		this.networkWhitelist = networkWhitelist;
 	}
 
 	public Date getTimeCreatedAt() {

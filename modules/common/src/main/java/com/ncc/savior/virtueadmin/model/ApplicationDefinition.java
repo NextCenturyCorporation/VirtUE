@@ -11,7 +11,7 @@ import javax.persistence.Transient;
 
 /**
  * Application Data Transfer Object (DTO).
- * 
+ *
  *
  */
 @Entity
@@ -162,41 +162,35 @@ public class ApplicationDefinition {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		ApplicationDefinition other = (ApplicationDefinition) obj;
-		if (iconKey == null) {
-			if (other.iconKey != null)
-				return false;
-		} else if (!iconKey.equals(other.iconKey))
+
+		// check if both null or same reference, and if not, then check equals.
+		if (iconKey != other.iconKey || !iconKey.equals(other.iconKey)) {
 			return false;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
+		}
+		if (id != other.id || !id.equals(other.id)) {
 			return false;
-		if (launchCommand == null) {
-			if (other.launchCommand != null)
-				return false;
-		} else if (!launchCommand.equals(other.launchCommand))
+		}
+		if (launchCommand != other.launchCommand || !launchCommand.equals(other.launchCommand)) {
 			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
+		}
+		if (name != other.name || !name.equals(other.name)) {
 			return false;
-		if (os != other.os)
+		}
+		if (os != other.os || !os.equals(other.os)) {
 			return false;
-		if (tags == null) {
-			if (other.tags != null)
-				return false;
-		} else if (!tags.equals(other.tags))
+		}
+		if (tags != other.tags || !tags.equals(other.tags)) {
 			return false;
-		if (version == null) {
-			if (other.version != null)
-				return false;
-		} else if (!version.equals(other.version))
+		}
+		if (version != other.version || !version.equals(other.version)) {
 			return false;
+		}
+
 		return true;
 	}
 	public static final Comparator<? super ApplicationDefinition> CASE_INSENSITIVE_NAME_COMPARATOR = new CaseInsensitiveNameComparator();

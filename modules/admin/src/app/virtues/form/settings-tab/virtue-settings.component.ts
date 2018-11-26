@@ -100,7 +100,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
       dialog: MatDialog) {
     super(router, dialog);
 
-    this.item = new Virtue({});
+    this.item = new Virtue();
 
     this.tabName = 'Settings';
   }
@@ -406,7 +406,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getNetworkColumns(): Column[] {
     return [
-      new InputFieldColumn('Host',        4, 'destination', (netPerm: NetworkPermission) => netPerm.destination),
+      new InputFieldColumn('Host',        4, 'host', (netPerm: NetworkPermission) => netPerm.host),
       new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
                           (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
       new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
@@ -441,14 +441,14 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     if (this.networkPermsTable === undefined) {
       return;
     }
-    this.networkPermsTable.populate(this.item.networkWhiteList);
+    this.networkPermsTable.populate(this.item.networkWhitelist);
   }
 
   /**
   * Add a new netork permission to the virtue.
   */
   addNewNetworkPermission(): void {
-    this.item.networkWhiteList.push(new NetworkPermission());
+    this.item.networkWhitelist.push(new NetworkPermission());
     this.updateNetworkPermsTable();
   }
 
@@ -456,18 +456,18 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    * This removes a network from the virtue's whitelist.
    */
   removeNetwork(netPerm: NetworkPermission): void {
-    if (this.item.networkWhiteList === undefined || this.item.networkWhiteList.length === 0) {
+    if (this.item.networkWhitelist === undefined || this.item.networkWhitelist.length === 0) {
       return;
     }
 
     let idx = 0;
-    for (let nP of this.item.networkWhiteList) {
+    for (let nP of this.item.networkWhitelist) {
       if (netPerm.equals(nP)) {
-        break
+        break;
       }
       idx++;
     }
-    this.item.networkWhiteList.splice(idx, 1);
+    this.item.networkWhitelist.splice(idx, 1);
     this.updateNetworkPermsTable();
   }
 
@@ -477,42 +477,10 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
   *         false otherwise
   */
   checkNetworkPerms(): boolean {
-    for (let networkPermission of this.item.networkWhiteList) {
-      if ( !this.checkEnteredPermValid(networkPermission) ) {
+    for (let networkPermission of this.item.networkWhitelist) {
+      if ( !networkPermission.checkValid() ) {
         return false;
       }
-    }
-    return true;
-  }
-
-  /**
-  * Check a particular network permission - all 4 of its fields should be filled out and valid.
-  * @return true if all fields are valid.
-  */
-  checkEnteredPermValid(netPerm: NetworkPermission): boolean {
-
-    // instead of checking  '<=='
-    // first make sure that the ports aren't 0, because checking !port will be true
-    // if port === 0. Which would make the wrong error message appear.
-    if (netPerm.localPort === 0 || netPerm.remotePort === 0) {
-      console.log("Ports on network permissions must be greater than zero.");
-      return false;
-    }
-
-    if ( !netPerm.destination || !netPerm.protocol
-      || !netPerm.localPort   || !netPerm.remotePort ) {
-      console.log("Network permission fields cannot be blank");
-      return false;
-    }
-
-    // if ( !(netPerm.localPort instanceof Number) || !(netPerm.remotePort instanceof Number) ) {
-    //   console.log("Local and Remote ports must be numbers.");
-    //   return false;
-    // }
-
-    if (netPerm.localPort < 0 || netPerm.remotePort < 0) {
-      console.log("Ports on network permissions must be greater than zero.");
-      return false;
     }
     return true;
   }
@@ -707,7 +675,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
         this.item.color = newColor;
       });
-''
+
     let closedSub = dialogRef.afterClosed().subscribe(() => {
       sub.unsubscribe();
       closedSub.unsubscribe();

@@ -100,7 +100,7 @@ export class UserComponent extends ItemFormComponent implements OnDestroy {
     super('/users', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
-    this.item = new User({});
+    this.item = new User();
 
     this.datasetName = DatasetNames.USERS;
     this.childDatasetName = DatasetNames.VIRTUES;

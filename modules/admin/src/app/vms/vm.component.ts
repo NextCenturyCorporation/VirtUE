@@ -103,7 +103,7 @@ export class VmComponent extends ItemFormComponent implements OnDestroy {
   ) {
     super('/vm-templates', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
-    this.item = new VirtualMachine({});
+    this.item = new VirtualMachine();
 
     this.datasetName = DatasetNames.VMS;
     this.childDatasetName = DatasetNames.APPS;

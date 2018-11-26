@@ -211,19 +211,16 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
    *   pass in:
    *     updateQueue:[
    *                     {
-   *                       subdomain: Subdomains.APPS,
    *                       class: Application,
    *                       datasetName: DatasetNames.APPS,
    *                       depends: undefined
    *                     },
    *                     {
-   *                       subdomain: Subdomains.VMS,
    *                       class: VirtualMachine,
    *                       datasetName: DatasetNames.VMS,
    *                       depends: DatasetNames.APPS
    *                     },
    *                     {
-   *                       subdomain: Subdomains.VIRTUES,
    *                       class: Virtue,
    *                       datasetName: DatasetNames.VIRTUES,
    *                       depends: DatasetNames.VMS
@@ -260,7 +257,7 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     // subdomain *only* knowing the class.
     // The alternative would be to have every IndexObj subclass have a static function to return the subdomain, as well as a regular
     // function that calls that static function. Just to eliminate the below line.
-    let subdomain = new (updateQueue[0].class)({}).getSubdomain();
+    let subdomain = new (updateQueue[0].class)().getSubdomain();
 
     let sub = this.dataRequestService.getRecords(subdomain).subscribe( rawDataList => {
 

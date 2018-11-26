@@ -1,9 +1,12 @@
 package com.ncc.savior.virtueadmin.model;
 
+// import javax.persistence.Embeddable;
+
 /**
  * adapted from https://stackoverflow.com/questions/3978654/best-way-to-create-enum-of-strings
  *
  */
+// @Embeddable
 public enum NetworkProtocol {
     TCPIP("TCP/IP"),
     UDPIP("UDP/IP"),
@@ -26,4 +29,14 @@ public enum NetworkProtocol {
     public String toString() {
         return text;
     }
+
+    // @JsonGetter
+    // getText() {
+    //   return text;
+    // }
+    //
+    // @JsonSetter
+    // setText( String text ) {
+    //   this.text = text;
+    // }
 }

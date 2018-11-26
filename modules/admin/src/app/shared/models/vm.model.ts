@@ -19,7 +19,7 @@ export class VirtualMachine extends Item {
   os: string;
 
   /** what version of edit this template currently is at */
-  version: number;
+  version: number = 1;
 
   applications: DictList<Application> = new DictList<Application>();
 
@@ -41,34 +41,20 @@ export class VirtualMachine extends Item {
    * convert from whatever form the vm object is in the database.
    * @param vmObj a virtual machine record, retrieved from the backend, which we want to convert into a VirtualMachine.
    */
-  constructor(vmObj) {
+  constructor(vmObj?) {
     super();
     this.parentDomain = '/vm-templates';
 
-    if (vmObj.id) {
+    if (vmObj) {
       this.id = vmObj.id;
-    }
-    if (vmObj.name) {
       this.name = vmObj.name;
-    }
-    if ('enabled' in vmObj) {
       this.enabled = vmObj.enabled;
-    }
-    if (vmObj.applicationIds) {
+      this.os = vmObj.os;
       this.applicationIds = vmObj.applicationIds;
-    }
-    if ('version' in vmObj) {
       this.version = vmObj.version;
-    }
-    if (vmObj.lastEditor) {
       this.lastEditor = vmObj.lastEditor;
-    }
-    if (vmObj.lastModification) {
       this.modificationDate = vmObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(vmObj.lastModification, 'short');
-    }
-    if (vmObj.os) {
-      this.os = vmObj.os;
     }
 
   }

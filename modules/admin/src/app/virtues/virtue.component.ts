@@ -126,7 +126,7 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
-    this.item = new Virtue({});
+    this.item = new Virtue();
 
     this.datasetName = DatasetNames.VIRTUES;
     this.childDatasetName = DatasetNames.VMS;
@@ -261,7 +261,6 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
     // table - that chunk of html has now been wrapped in a check, to not check
     // the 's list size if vmTemplates is undefined
     this.item.vmTemplates = undefined;
-
     return true;
   }
 

@@ -110,7 +110,7 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
       new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
       new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => this.getApps(v),  this.formatName),
-      new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
+      new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.os), SORT_DIR.ASC),
       new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];

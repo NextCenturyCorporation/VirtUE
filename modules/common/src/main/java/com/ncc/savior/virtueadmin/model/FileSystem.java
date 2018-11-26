@@ -146,16 +146,21 @@ public class FileSystem {
 			return true;
 		if (obj == null)
 			return false;
+
 		if (getClass() != obj.getClass())
 			return false;
-
 		FileSystem other = (FileSystem) obj;
-		if (id == null || !id.equals(other.id))
+
+		// check if both null or same reference, and if not, then check equals.
+		if (id == null || !id.equals(other.id)) {
 			return false;
-		if (name == null || !name.equals(other.name))
+		}
+		if (name == null || !name.equals(other.name)) {
 			return false;
-		if (address == null || !address.equals(other.address))
+		}
+		if (address == null || !address.equals(other.address)) {
 			return false;
+		}
 
 		return true;
 	}

@@ -57,13 +57,10 @@ export class DataRequestService {
    * @param subdomain the path describing to virtue-admin what set of data we're requesting
    *
    * @return a subscription that will return a list of objects, if/when available.
-   *         Is an 'any', because we don't know what form those objects are in. And really it doesn't matter what
-   *         we put there - types only matter at compile time, and what those objects look like isn't known until runtime.
-   *         You could replace 'any' with anything you want and it wouldn't change how the program worked.
    */
-  public getRecords(subdomain: string): Observable<any[]> {
+  public getRecords(subdomain: string): Observable<IndexedObj[]> {
     let url = this.baseUrl + subdomain;
-    return this.httpClient.get<any[]>(url).catch(this.errorHandler);
+    return this.httpClient.get<IndexedObj[]>(url).catch(this.errorHandler);
   }
 
   /**
@@ -78,11 +75,8 @@ export class DataRequestService {
    * @param id the identifying key for the item we're requesting.
    *
    * @return a subscription that will return the requested object, if it exists.
-   *         Is an 'any', because we don't know what form the object will be in. And really it doesn't matter what
-   *         we put there - types only matter at compile time, and what those objects look like isn't known until runtime.
-   *         You could replace 'any' with anything you want and it wouldn't change how the program worked.
    */
-  public getRecord(subdomain: string, id: string): Observable<any> {
+  public getRecord(subdomain: string, id: string): Observable<IndexedObj> {
     let url = this.baseUrl + subdomain + id;
     return this.httpClient.get<IndexedObj>(url).catch(this.errorHandler);
   }
@@ -94,11 +88,8 @@ export class DataRequestService {
    *
    * @return a subscription that will return the saved object as it exists on the backend.
    */
-  public createRecord(subdomain: string, itemData: string): Observable<any> {
+  public createRecord(subdomain: string, itemData: string): Observable<IndexedObj> {
     let url = this.baseUrl + subdomain + "create";
-    console.log("**", url);
-    console.log("**", itemData);
-    console.log("**", httpOptions.headers);
     return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
   }
 
@@ -114,9 +105,7 @@ export class DataRequestService {
    * Perhaps that region could allow deletion? There's gotta be a balance between recording everything and making
    * logs and histories to cluttered to be useful.
    *
-   * Also note that the delete and get requests are to the same address. Does that matter? #TODO LOOK HERE
-   *
-   * Note that this works correctly, using promises. Everything else should be changed eventually to use them,
+   * Note that this works correctly, using promises. It'd be cleaner if everything else could be changed eventually to use them,
    * instead of subscriptions we only use once.
    * See https://codecraft.tv/courses/angular/http/http-with-promises/
    */
@@ -139,9 +128,8 @@ export class DataRequestService {
    * @return a subscription that will return the updated object as it exists on the backend.
    *
    */
-  public updateRecord(subdomain: string, id: string, itemData: string): Observable<any> {
+  public updateRecord(subdomain: string, id: string, itemData: string): Observable<IndexedObj> {
     let url = this.baseUrl + subdomain + id;
-
     return this.httpClient.put(url, itemData, httpOptions).catch(this.errorHandler);
   }
 
@@ -154,7 +142,7 @@ export class DataRequestService {
    *
    * @return a subscription that will return the updated object as it exists on the backend.
    */
-  public setRecordAvailability(subdomain: string, id: string, newStatus: boolean): Observable<any> {
+  public setRecordAvailability(subdomain: string, id: string, newStatus: boolean): Observable<IndexedObj> {
     let url = this.baseUrl + subdomain + id + '/setStatus';
 
     return this.httpClient.put(url, newStatus).catch(this.errorHandler);

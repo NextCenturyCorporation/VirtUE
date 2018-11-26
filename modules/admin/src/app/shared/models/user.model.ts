@@ -30,23 +30,14 @@ export class User extends Item {
    *
    * @param userObj a user record, retrieved from the backend, which we want to convert into a User.
    */
-  constructor(userObj) {
+  constructor(userObj?) {
     super();
     this.parentDomain = '/users';
 
-    if (userObj.username) {
+    if (userObj) {
       this.name = userObj.username;
-    }
-
-    if (userObj.authorities) {
       this.roles = userObj.authorities;
-    }
-
-    if ('enabled' in userObj) {
-    this.enabled = userObj.enabled;
-    }
-
-    if (userObj.virtueTemplateIds) {
+      this.enabled = userObj.enabled;
       this.virtueTemplateIds = userObj.virtueTemplateIds;
     }
   }
@@ -116,9 +107,6 @@ export class User extends Item {
       virtueTemplateIds: this.virtueTemplateIds
     };
 
-    // // just to clear a little memory.
-    // this.virtueTemplates = undefined;
-    // this.roles = [];
     return user;
   }
 }

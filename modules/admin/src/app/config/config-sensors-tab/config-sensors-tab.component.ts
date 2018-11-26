@@ -98,7 +98,7 @@ export class ConfigSensorsTabComponent extends GenericDataTabComponent implement
   getNeededDatasets(): DatasetNames[] {
     return [];
   }
-  
+
   setUpTable(): void {
     if (this.generalSensorTable === undefined) {
       return;

@@ -39,27 +39,29 @@ export class FileSystem extends IndexedObj implements Toggleable {
    */
   executePerm: boolean = false;
 
-  constructor( fs: {id?: string, name: string, address: string} | FileSystem ) {
+  constructor( fs?: {id?: string, name: string, address: string} | FileSystem ) {
     super();
 
-    if (fs.id !== undefined) {
-      this.id = fs.id;
-    }
+    if (fs) {
+      if (fs.id !== undefined) {
+        this.id = fs.id;
+      }
 
-    this.name = fs.name;
-    this.address = fs.address;
+      this.name = fs.name;
+      this.address = fs.address;
 
-    if ( 'enabled' in fs) {
-      this.enabled = fs.enabled;
-    }
-    if ( 'readPerm' in fs) {
-      this.readPerm = fs.readPerm;
-    }
-    if ( 'writePerm' in fs) {
-      this.writePerm = fs.writePerm;
-    }
-    if ( 'executePerm' in fs) {
-      this.executePerm = fs.executePerm;
+      if ( 'enabled' in fs) {
+        this.enabled = fs.enabled;
+      }
+      if ( 'readPerm' in fs) {
+        this.readPerm = fs.readPerm;
+      }
+      if ( 'writePerm' in fs) {
+        this.writePerm = fs.writePerm;
+      }
+      if ( 'executePerm' in fs) {
+        this.executePerm = fs.executePerm;
+      }
     }
   }
 

@@ -67,7 +67,7 @@ export class Virtue extends Item {
   defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
-  networkWhiteList: NetworkPermission[] = [];
+  networkWhitelist: NetworkPermission[] = [];
 
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
   allowedPasteTargetIds: string[] = [];
@@ -93,84 +93,46 @@ export class Virtue extends Item {
    * attributes, without simply iterating through them all and checking. 'instanceof' appears to only work
    * for items created from the same prototype.
    *
-   * The signature is equivalent to 'any', but
+   * TODO should this be durable, or fail-fast?
    *
    * @param virtueObj a virtue record, retrieved from the backend, which we want to convert into a Virtue.
    */
-  constructor(virtueObj) {
+  constructor(virtueObj?) {
     super();
     this.parentDomain = '/virtues';
-    if ('name' in virtueObj) {
+
+    if (virtueObj) {
       this.name = virtueObj.name;
-    }
-
-    if ('id' in virtueObj) {
-      if (virtueObj.id === "1f4e0394-5b60-4d0a-b632-721834b09945") {
-        console.log(virtueObj.fileSystems);
-      }
       this.id = virtueObj.id;
-    }
-
-    if ('enabled' in virtueObj) {
       this.enabled = virtueObj.enabled;
-    }
-
-    if (virtueObj.vmTemplateIds) {
       this.vmTemplateIds = virtueObj.vmTemplateIds;
-    }
-
-    if (virtueObj.fileSystemIds) {
+      this.allowedPasteTargetIds = virtueObj.allowedPasteTargetIds;
+      this.printerIds = virtueObj.printerIds;
       this.fileSystemIds = virtueObj.fileSystemIds;
-    }
 
-    // `Array.isArray` apparently doesn't work on some legacy browsers (i.e., IE) - we should be fine.
-    // https://stackoverflow.com/a/20989617/3015812
-    if (virtueObj.fileSystems && Array.isArray(virtueObj.fileSystems)) {
       for (let fs of virtueObj.fileSystems) {
         this.fileSystems.add(fs.id, fs);
       }
-    }
 
-    if (virtueObj.printerIds) {
-      this.printerIds = virtueObj.printerIds;
-    }
-
-    if (virtueObj.allowedPasteTargetIds) {
-      this.allowedPasteTargetIds = virtueObj.allowedPasteTargetIds;
-    }
-
-    if ('lastEditor' in virtueObj) {
       this.lastEditor = virtueObj.lastEditor;
-    }
 
-    if ('lastModification' in virtueObj) {
       this.modificationDate = virtueObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
-    }
 
-    if (virtueObj.networkWhiteList) {
-      this.networkWhiteList = virtueObj.networkWhiteList;
-    }
+      // TODO not on backend yet
+      // console.log(virtueObj);
+      if (virtueObj.networkWhitelist) {
+        for (let netPerm of virtueObj.networkWhitelist) {
+          this.networkWhitelist.push(new NetworkPermission(netPerm));
+        }
+      }
 
-    if ('unprovisioned' in virtueObj) {
       this.unprovisioned = virtueObj.unprovisioned;
-    }
-
-    if ('defaultBrowserVirtueId' in virtueObj) {
       this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
-    }
-
-    if ('version' in virtueObj) {
       this.version = virtueObj.version;
-    }
-
-    if ('color' in virtueObj) {
       this.color = virtueObj.color;
     }
 
-    if (this.id === "1f4e0394-5b60-4d0a-b632-721834b09945") {
-      console.log(this);
-    }
   }
 
   /**
@@ -254,7 +216,6 @@ export class Virtue extends Item {
 
   protected getInBackendFormat() {
 
-
     let virtue = {
         name: this.name,
         id: this.id,
@@ -266,17 +227,13 @@ export class Virtue extends Item {
         allowedPasteTargetIds: this.allowedPasteTargetIds,
         lastEditor: this.lastEditor,
         lastModification: this.modificationDate,
-        networkWhiteList: this.networkWhiteList,
+        networkWhitelist: this.networkWhitelist,
         unprovisioned: this.unprovisioned,
         version: this.version,
         defaultBrowserVirtueId: this.defaultBrowserVirtueId,
         color: this.color
 
     };
-
-    // // just to clear a little memory.
-    // this.virtueTemplates = undefined;
-    // this.roles = [];
     return virtue;
   }
 }
