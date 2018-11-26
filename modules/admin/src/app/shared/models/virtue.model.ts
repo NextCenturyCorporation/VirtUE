@@ -45,10 +45,8 @@ export class Virtue extends Item {
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
 
-  /** #uncommented */
   vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
 
-  /** #uncommented */
   vmTemplateIds: string[] = [];
 
   // /** #TODO what is this? */
@@ -60,9 +58,7 @@ export class Virtue extends Item {
   /** #TODO what is this? #uncommented (unprovisioned) */
   unprovisioned: boolean = true;
 
-  /**
-   * What virtue should any links clicked within this Virtue automatically open in?
-   */
+  /** What virtue should any links clicked within this Virtue automatically open in */
   defaultBrowserVirtueId: string;
   defaultBrowserVirtue: Virtue;
 
@@ -119,8 +115,6 @@ export class Virtue extends Item {
       this.modificationDate = virtueObj.lastModification;
       this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
 
-      // TODO not on backend yet
-      // console.log(virtueObj);
       if (virtueObj.networkWhitelist) {
         for (let netPerm of virtueObj.networkWhitelist) {
           this.networkWhitelist.push(new NetworkPermission(netPerm));
@@ -178,6 +172,51 @@ export class Virtue extends Item {
     }
 
     this.fileSystems.trimTo(this.fileSystemIds);
+  }
+
+
+  getVms(): IndexedObj[] {
+    return this.getChildren(DatasetNames.VMS);
+  }
+
+  getVmApps(): IndexedObj[] {
+    return this.getGrandChildren(DatasetNames.VMS, DatasetNames.APPS);
+  }
+
+  getPrinters(): IndexedObj[] {
+    return this.getChildren(DatasetNames.PRINTERS);
+  }
+
+  getFileSystems(): IndexedObj[] {
+    return this.getChildren(DatasetNames.FILE_SYSTEMS);
+  }
+
+
+  removeUnspecifiedChild(childObj: IndexedObj) {
+    if (childObj instanceof VirtualMachine) {
+      this.removeVm(childObj);
+    }
+    else if (childObj instanceof Printer) {
+      this.removePrinter(childObj);
+    }
+    else if (childObj instanceof FileSystem) {
+      this.removeFileSystem(childObj);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Vm, Printer, or FileSystem.");
+    }
+  }
+
+  removeVm(vm: VirtualMachine) {
+    this.removeChild(vm.getID(), DatasetNames.VMS);
+  }
+
+  removePrinter(printer: Printer) {
+    this.removeChild(printer.getID(), DatasetNames.PRINTERS);
+  }
+
+  removeFileSystem(fileSys: FileSystem) {
+    this.removeChild(fileSys.getID(), DatasetNames.FILE_SYSTEMS);
   }
 
 

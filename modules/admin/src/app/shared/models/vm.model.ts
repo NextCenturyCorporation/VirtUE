@@ -105,9 +105,24 @@ export class VirtualMachine extends Item {
     return [];
   }
 
+  getApps(): IndexedObj[] {
+    return this.getChildren(DatasetNames.APPS);
+  }
+
+  removeUnspecifiedChild(childItem: IndexedObj): void {
+    if (childItem instanceof Application) {
+      this.removeApp(childItem);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Application.");
+    }
+  }
+
+  removeApp(childApp: Application): void {
+    this.removeChild(childApp.getID(), DatasetNames.APPS);
+  }
+
   protected getInBackendFormat() {
-
-
     let vm = {
       id: this.id,
       name: this.name,
@@ -119,9 +134,7 @@ export class VirtualMachine extends Item {
       lastEditor: 'administrator',
       loginUser: 'system' // TODO does this still exist on the backend?
     };
-    // // just to clear a little memory.
-    // this.virtueTemplates = undefined;
-    // this.roles = [];
+
     return vm;
   }
 }

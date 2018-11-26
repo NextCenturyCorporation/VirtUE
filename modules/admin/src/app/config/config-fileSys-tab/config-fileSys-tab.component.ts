@@ -23,10 +23,6 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 /**
  * @class
- * This component allows the user (an admin) to set up activ directories. For something.
- * TODO ask about active directories
- * #uncommented, unimplemented, because this is a stub.
- * also #move to a tab on the global settings form
  */
 @Component({
   selector: 'app-config-file-sys-tab',

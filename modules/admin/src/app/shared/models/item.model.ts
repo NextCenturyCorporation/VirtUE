@@ -145,6 +145,8 @@ export abstract class Item extends IndexedObj implements Toggleable {
     this.getRelatedDict(datasetType).remove(id);
   }
 
+  abstract removeUnspecifiedChild(childObj: IndexedObj);
+
   /**
    * Eventually this will be what is used by table to display the item's name - once the table is made to display classes that
    *  implement a simple interface, consisting of at least toString().

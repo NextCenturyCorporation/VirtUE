@@ -5,8 +5,8 @@ import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
- * This class represnts a printer on the network.
- * TODO functionality for finding, setting up, and storing printers does not yet exist, so this class will likely change.
+ * This class represnts a printer on the network. These are set up in the global settings' printer config page, and then can be added
+ * to any Virtue.
  */
 export class Printer extends IndexedObj implements Toggleable {
 

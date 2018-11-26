@@ -99,6 +99,27 @@ export class User extends Item {
     return [];
   }
 
+  getVirtues(): IndexedObj[] {
+    return this.getChildren(DatasetNames.VIRTUES);
+  }
+
+  getVirtueVms(): IndexedObj[] {
+    return this.getGrandChildren(DatasetNames.VIRTUES, DatasetNames.VMS);
+  }
+
+  removeUnspecifiedChild(childObj: IndexedObj): void {
+    if (childObj instanceof Virtue) {
+      this.removeVirtue(childObj);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Virtue.");
+    }
+  }
+
+  removeVirtue(virtue: Virtue) {
+    this.removeChild(virtue.getID(), DatasetNames.VIRTUES);
+  }
+
   protected getInBackendFormat() {
     let user = {
       username: this.name,

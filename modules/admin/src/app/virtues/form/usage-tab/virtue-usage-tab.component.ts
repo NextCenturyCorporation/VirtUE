@@ -126,9 +126,9 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
    */
   getParentColumns(): Column[] {
     return [
-      new TextColumn('Username',  3, (u: User) => u.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Username',  3, (u: User) => u.getName(), SORT_DIR.ASC, (u: User) => this.viewItem(u),
                                                                                () => this.getParentSubMenu()),
-      new ListColumn('Attached Virtues', 5, (i: Item) => this.getVirtues(i),  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Attached Virtues', 5, (u: User) => u.getVirtues(),  this.formatName, (v: Virtue) => this.viewItem(v)),
       new TextColumn('Status',  4, this.formatStatus, SORT_DIR.ASC)
     ];
 

@@ -69,5 +69,5 @@ export class Application extends Item {
     return Subdomains.APPS;
   }
 
-  removeChild(obj): void {}
+  removeUnspecifiedChild(obj): void {}
 }

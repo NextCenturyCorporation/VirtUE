@@ -44,6 +44,28 @@ export abstract class IndexedObj {
    */
   buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {}
 
+
+  /**
+   * The following two functions are generally just used in tables to display the indexedObjs attached
+   * to an [[IndexedObj]] (ie the `children`), and the indexedObjs attached to each of those (i.e. the `grandchildren`).
+   */
+  protected getChildren(childDatasetName: DatasetNames): IndexedObj[] {
+    return this.getRelatedDict(childDatasetName).asList();
+  }
+
+  /**
+   * @return A list (not a set) of the requested type of this obj's children's children.
+   * Example: For an input User, look through that user's Virtue children, and generate a list of all of those
+   * virtues' collective Printers.
+   */
+  protected getGrandChildren(childDatasetName: DatasetNames, grandChildDatasetName: DatasetNames): IndexedObj[] {
+    let grandchildren: IndexedObj[] = [];
+    for (let c of this.getChildren(childDatasetName)) {
+      grandchildren = grandchildren.concat(c.getChildren(grandChildDatasetName));
+    }
+    return grandchildren;
+  }
+
   /**
    * Empty by default. Items with children can override it and make it return what it should.
    * @param datasetName a DatasetNames enum telling the object which DictList of objects to return

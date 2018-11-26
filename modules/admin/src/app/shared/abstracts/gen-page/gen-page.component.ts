@@ -63,102 +63,37 @@ export abstract class GenericPageComponent {
   }
 
   /**
+   * TODO the Toggleable object is what should know how to display a status, no?
+   *  -but toggleable is an interface..
    * @return The toggleable object's status, in plain (and capitalized) english.
    */
   formatStatus( obj: Toggleable ): string {
     return obj.enabled ? 'Enabled' : 'Disabled';
   }
 
-
-  /**
-   * The following two functions are generally just used in tables to display the indexedObjs attached
-   * to an [[IndexedObj]] (ie the `children`), and the indexedObjs attached to each of those (i.e. the `grandchildren`).
-   * It used to be all generated (as an html string) whenever an item was created or its children updated, but now
-   * is done on the fly. These functions get re-called whenever the mouse enters or leaves a row in the table, so this
-   * seems like a bit of a waste, given that an item's children/grandchildren won't change randomly in the background,
-   * but it doesn't seem to slow anything down atm, with our small datasets.
-   *
-   * Doing it this way is much more generic, and even within the tables it allows us to make the items within those an
-   * indexedObj's children list clickable, because we're giving the lists of full objects to the html, rather than just lists of names.
-   */
-  private getChildren(obj: IndexedObj, childDatasetName: DatasetNames): IndexedObj[] {
-    if (!obj) {
-      return [];
-    }
-    return obj.getRelatedDict(childDatasetName).asList();
-  }
-
-  /**
-   * @return A list (not a set) of the requested type of the obj's children's children.
-   * Example: For an input User, look through that user's Virtue children, and generate a list of all of those
-   * virtues' collective Printers.
-   */
-  private getGrandChildren(obj: IndexedObj, childDatasetName: DatasetNames, grandChildDatasetName: DatasetNames): IndexedObj[] {
-    if (!obj) {
-      return [];
-    }
-    let grandchildren: IndexedObj[] = [];
-    for (let c of this.getChildren(obj, childDatasetName)) {
-      grandchildren = grandchildren.concat(this.getChildren(c, grandChildDatasetName));
-    }
-    return grandchildren;
-  }
-
-  getVirtues(i: Item): IndexedObj[] {
-    return this.getChildren(i, DatasetNames.VIRTUES);
-  }
-
-  getVirtueVms(i: Item): IndexedObj[] {
-    return this.getGrandChildren(i, DatasetNames.VIRTUES, DatasetNames.VMS);
-  }
-
-  getVms(i: Item): IndexedObj[] {
-    return this.getChildren(i, DatasetNames.VMS);
-  }
-
-  getVmApps(i: Item): IndexedObj[] {
-    return this.getGrandChildren(i, DatasetNames.VMS, DatasetNames.APPS);
-  }
-
-  getApps(i: Item): IndexedObj[] {
-    return this.getChildren(i, DatasetNames.APPS);
-  }
-
-  getPrinters(i: Item): IndexedObj[] {
-    return this.getChildren(i, DatasetNames.PRINTERS);
-  }
-
-  getFileSystems(i: Item): IndexedObj[] {
-    return this.getChildren(i, DatasetNames.FILE_SYSTEMS);
-  }
-
   /**
    * Navigates to the form page for this item.
    */
   viewItem(item: Item): void {
-    this.router.navigate([item.getViewURL()]);
+    this.goToPage(item.getViewURL());
   }
 
   /**
    * Navigates to, and enable for editing, the form page for `item`.
-   *
-   * @param item the Item which we should navigate to and edit.
    */
   editItem(item: Item): void {
-    this.router.navigate([item.getEditURL()]);
+    this.goToPage(item.getEditURL());
   }
 
   /**
    * Navigates to a form page pre-filled with `item`'s attributes.
    */
   dupItem(item: Item): void {
-    this.router.navigate([item.getDupURL()]);
+    this.goToPage(item.getDupURL());
   }
 
   /**
-   * A generic method for navigating to some input page.
-   *
-   * @param targetPath the path to navigate to.
+   * @param targetPath the subdomain path to navigate to.
    */
   goToPage(targetPath: string) {
     this.router.navigate([targetPath]);

@@ -48,20 +48,20 @@ import { NetworkProtocols } from '../../protocols.enum';
  *
  * This has four sub-tabs at the moment:
  *    - 'General'
- *      - Color
- *      - default browser
- *      - provisioned or not (?) #TODO
- *      - list of virtues this one can paste data into
+ *        - Color
+ *        - default browser
+ *        - provisioned or not (?) #TODO
+ *        - list of virtues this one can paste data into
  *    - 'Network'
- *      - list of permitted connections
+ *        - list of permitted connections
  *    - 'Resources'
- *      - file system permissions
- *        - editable list, generated from global settings? #TODO
- *        - for each file system, R/W/E permissions can be given.
- *      - Printers
- *        - editable list, pulled from global settings.
+ *        - file system permissions
+ *            - editable list, generated from global settings #TODO
+ *            - for each file system, R/W/E permissions can be given.
+ *        - Printers
+ *            - editable list, pulled from global settings.
  *    - 'Sensors'
- *      - Nothing at the moment #TODO
+ *        - Nothing at the moment #TODO
  *
  * At the moment, only 'color' is saved to the backend.
  *
@@ -258,12 +258,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    * Note that if there are several matching printers, only the first one is removed.
    */
   removePrinter(toDelete: Printer): void {
-    this.item.removeChild(toDelete.getID(), DatasetNames.PRINTERS);
-    // this.item.printers.remove(toDelete.getID());
-    // let index = this.item.printerIds.indexOf(toDelete.getID(), 0);
-    // if (index > -1) {
-    //    this.item.printerIds.splice(index, 1);
-    // }
+    this.item.removePrinter(toDelete);
     this.updatePrinterTable();
   }
 
@@ -349,17 +344,8 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
     });
   }
 
-  /**
-   * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
-   * Note that if there are several matching printers, only the first one is removed.
-   */
   removeFileSystem(toDelete: FileSystem): void {
-    this.item.removeChild(toDelete.getID(), DatasetNames.FILE_SYSTEMS);
-    // this.item.fileSystems.remove(toDelete.getID());
-    // let index = this.item.fileSystemIds.indexOf(toDelete.getID(), 0);
-    // if (index > -1) {
-    //    this.item.fileSystemIds.splice(index, 1);
-    // }
+    this.item.removeFileSystem(toDelete);
     this.updateFileSysPermsTable();
   }
 
@@ -513,9 +499,9 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    */
   getPasteColumns(): Column[] {
     return [
-      new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
                                                                                         () => this.getPasteSubMenu()),
-      new ListColumn('Available Applications', 4, (i: Item) => this.getVmApps(i),  this.formatName),
+      new ListColumn('Available Applications', 4, (v: Virtue) => v.getVmApps(),  this.formatName),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];

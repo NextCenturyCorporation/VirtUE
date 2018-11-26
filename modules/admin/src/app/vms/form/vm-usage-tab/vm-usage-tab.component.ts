@@ -131,9 +131,9 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
    */
   getParentColumns(): Column[] {
     return [
-      new TextColumn('Template Name',     3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Template Name',     3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
                                                                                             () => this.getParentSubMenu()),
-      new ListColumn('Virtual Machines',  3, (i: Item) => this.getVms(i),  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Virtual Machines',  3, (v: Virtue) => v.getVms(),  this.formatName, (vm: VirtualMachine) => this.viewItem(vm)),
       new TextColumn('Version',           2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',            3, this.formatStatus, SORT_DIR.ASC)
     ];
@@ -146,8 +146,8 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
   getParentSubMenu(): SubMenuOptions[] {
     if (this.mode === Mode.VIEW) {
       return [
-        new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
-        new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i))
+        new SubMenuOptions("View", () => this.inViewMode(), (v: Virtue) => this.viewItem(v)),
+        new SubMenuOptions("Edit", () => this.inViewMode(), (v: Virtue) => this.editItem(v))
       ];
     }
     else {

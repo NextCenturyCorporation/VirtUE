@@ -6,6 +6,7 @@ import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
+import { VirtualMachine } from '../../../shared/models/vm.model';
 
 import {
   Column,
@@ -111,10 +112,10 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
                                                                                           () => this.getSubMenu()),
-      new ListColumn('Virtual Machines', 3, (i: Item) => this.getVms(i), this.formatName, (i: Item) => this.viewItem(i)),
-      new ListColumn('Available Apps', 4, (i: Item) => this.getVmApps(i),  this.formatName),
+      new ListColumn('Virtual Machines', 3, (v: Virtue) => v.getVms(), this.formatName, (vm: VirtualMachine) => this.viewItem(vm)),
+      new ListColumn('Available Apps', 4, (v: Virtue) => v.getVmApps(),  this.formatName),
       new TextColumn('Version', 1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
     ];
   }
@@ -141,20 +142,4 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
     return this.dialog.open( VirtueModalComponent, params);
   }
 
-
-  /**
-   * Removes childItem from this.item.virtueTemplates and its id from this.item.virtueTemplateIds.
-   * Remember this.item is a user here, and childItem is a Virtue.
-   *
-   * @param childItem the Item to be removed from this.[[item]]'s child lists.
-   * @override parent [[ItemFormMainTabComponent.removeChildObject]]()
-   */
-  removeChildObject(childObj: IndexedObj): void {
-    if (childObj instanceof Virtue) {
-      this.item.removeChild(childObj.getID(), DatasetNames.VIRTUES);
-    }
-    else {
-      console.log("The given object doesn't appear to be a Virtue.");
-    }
-  }
 }

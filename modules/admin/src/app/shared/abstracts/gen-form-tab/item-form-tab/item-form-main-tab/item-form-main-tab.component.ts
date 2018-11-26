@@ -20,11 +20,6 @@ import { DatasetNames } from '../../../gen-data-page/datasetNames.enum';
  * @class
  * This class represents a 'main' tab for the form page of Users, Virtues, and Vms.
  *
- * The remove function assumes that the only things that can be removed here from the item being viewed are the item's
- * direct, `Item`, children. Like a User's Virtues, a Virtue's VMs, or a Vm's Apps. It can't be easily changed to allow
- * the removal of other children, like Printers or FileSystems.
- * All main pages currently only show/allow removal of those main children though.
- *
  * As a main tab, it is assumed to list:
  *  - The item's name
  *  - the item's status
@@ -109,8 +104,8 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    * @param changes an object, which should have an attribute `mode: Mode` if
    *                this tab's mode should be updated. The attribute is optional.
    */
-  update(changes: any): void {
-    if (changes.mode) {
+  update(changes?: any): void {
+    if (changes && changes.mode) {
       this.setMode(changes.mode);
     }
     this.childrenTable.populate(this.item.getRelatedDict(this.childDatasetName).asList());
@@ -212,8 +207,8 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
                       () => !this.inViewMode(),
                       (childItem: Item) => this.openDialog( 'Delete ' + childItem.getName(),
                                                             () => {
-                                                              this.removeChildObject(childItem);
-                                                              this.update({});
+                                                              this.item.removeUnspecifiedChild(childItem);
+                                                              this.update();
                                                             }
                                                           )
                       )
@@ -233,14 +228,6 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
   getTableWidth(): number {
     return 0.75;
   }
-
-  /**
-   * Note that this assumes that the list from which we want to remove childObj can be determined solely based on the state of
-   * this.item and and what IndexedObj subclass childObj is.
-   *
-   * @param childObj the IndexedObj to be removed from this.[[item]]'s child lists.
-   */
-  abstract removeChildObject(childObj: IndexedObj);
 
   /**
    * Defined by subclasses, so each can load their own type of modal.

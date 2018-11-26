@@ -137,23 +137,6 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
   }
 
 
-
-  /**
-   * Removes childItem from this.item.vmTemplates and its id from this.item.vmTemplateIds.
-   * Remember this.item is a Virtue here, and childItem can be a VirtualMachine, Printer, or .
-   *
-   * @param childItem the Item to be removed from this.[[item]]'s child lists.
-   * @override parent [[ItemFormMainTabComponent.removeChildObject]]()
-   */
-  removeChildObject(childItem: IndexedObj): void {
-    if (childItem instanceof Application) {
-      this.item.removeChild(childItem.getID(), DatasetNames.APPS);
-    }
-    else {
-      console.log("The given object doesn't appear to be a Application.");
-    }
-  }
-
   /**
    * Loads an AppsModalComponent
    * @param parameters to be passed into the modal

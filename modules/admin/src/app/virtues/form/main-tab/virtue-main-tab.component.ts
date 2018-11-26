@@ -89,13 +89,12 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
 
   /**
    * Updates what value gets listed as the current version.
-   * In edit mode, the version is what version it'll be saved as; The current version + 1.
+   * In edit mode, the version is the number it would be saved as: the current version + 1.
    * Otherwise, it should just show the current version.
    */
   updateVersion(): void {
     this.newVersion = this.item.version;
 
-    // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
     if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }
@@ -109,8 +108,8 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
     return [
       new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => this.getApps(v),  this.formatName),
-      new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.os), SORT_DIR.ASC),
+      new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => v.getApps(),  this.formatName),
+      new TextColumn('OS',      2, (vm: VirtualMachine) => String(vm.os), SORT_DIR.ASC),
       new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
@@ -151,26 +150,4 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
     return this.dialog.open( VmModalComponent, params);
   }
 
-
-  /**
-   * Removes childItem from this.item.vmTemplates and its id from this.item.vmTemplateIds.
-   * Remember this.item is a Virtue here, and childItem can be a VirtualMachine, Printer, or .
-   *
-   * @param childItem the Item to be removed from this.[[item]]'s child lists.
-   * @override parent [[ItemFormMainTabComponent.removeChildObject]]()
-   */
-  removeChildObject(childItem: IndexedObj): void {
-    if (childItem instanceof VirtualMachine) {
-      this.item.removeChild(childItem.getID(), DatasetNames.VMS);
-    }
-    else if (childItem instanceof Printer) {
-      this.item.removeChild(childItem.getID(), DatasetNames.PRINTERS);
-    }
-    else if (childItem instanceof FileSystem) {
-      this.item.removeChild(childItem.getID(), DatasetNames.FILE_SYSTEMS);
-    }
-    else {
-      console.log("The given object doesn't appear to be a VM.");
-    }
-  }
 }
