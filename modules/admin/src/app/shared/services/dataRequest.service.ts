@@ -51,7 +51,7 @@ export class DataRequestService {
   }
 
   /**
-   * Request all items in the dataset at [[subdomain]]
+   * Request all items in the dataset at {subdomain}
    * The most commonly-used function - see [[GenericDataPageComponent.recursivePullData]]
    *
    * @param subdomain the path describing to virtue-admin what set of data we're requesting
@@ -64,10 +64,10 @@ export class DataRequestService {
   }
 
   /**
-   * Request an item with the specified ID, in the dataset at [[subdomain]]
+   * Request an item with the specified ID, in the dataset at {subdomain}
    * At the moment, never used.
    * If we ever need to cut down on requests and processing, we can call this when building the top-level sets in in the user,
-   * vm, and application forms instead of [[getItems]]. That is, if we're looking at a User, request only the current User's data,
+   * vm, and application forms instead of [[getRecords]]. That is, if we're looking at a User, request only the current User's data,
    * instead of requesting all of them and just picking out the one we want to view/edit/duplicate. Note that virtues is not
    * included in that list, because virtue's settings tab requires a list of all other virtues.
    *
@@ -94,7 +94,7 @@ export class DataRequestService {
   }
 
   /**
-   * Delete the item with the given id, in the dataset at [[subdomain]]
+   * Delete the item with the given id, in the dataset at {subdomain}
    * @param subdomain the path describing to virtue-admin what set of data we're requesting to access
    * @param id the identifying key for the item to be deleted.
    *
@@ -134,7 +134,7 @@ export class DataRequestService {
   }
 
   /**
-   * Set the status of the item with the given id, in the dataset at [[subdomain]], to the given value.
+   * Set the status of the item with the given id, in the dataset at {subdomain}, to the given value.
    *
    * @param subdomain the path describing to virtue-admin what set of data we're requesting to access
    * @param id the identifying key for the item to be enabled/disabled.

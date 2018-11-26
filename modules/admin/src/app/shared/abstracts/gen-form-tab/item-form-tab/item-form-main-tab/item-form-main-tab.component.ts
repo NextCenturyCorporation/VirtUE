@@ -161,7 +161,7 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
 
   /**
    * Sets up the table listing this item's children
-   * See [[GenericTable.setUp]]()
+   * See [[GenericTableComponent.setUp]]()
    * overridden by [[UserMainTabComponent]]
    */
   setUpChildTable(): void {
@@ -178,7 +178,7 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
 
   /**
    * Allow children to customize the parameters passed to the table. By default, do nothing.
-   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   * @param paramsObject the object to be passed to the table. see [[GenericTableComponent.setUp]]
    */
   customizeTableParams(paramsObject) {}
 

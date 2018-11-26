@@ -32,7 +32,7 @@ import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/ite
 
 /**
 * @class
- * This class represents a tab in [[VMComponent]], listing places this VM template has been used
+ * This class represents a tab in [[VmComponent]], listing places this VM template has been used
  *
  * It holds two tables:
  *    - Virtues that have been assigned this template
@@ -86,7 +86,7 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
   /**
    * See [[ItemFormTabComponent.setUp]] for generic info
    *
-   * @param item a reference to the Item being viewed/edited in the [[VirtualMachineComponent]] parent
+   * @param item a reference to the Item being viewed/edited in the [[VmComponent]] parent
    */
   setUp(item: Item): void {
     if ( !(item instanceof VirtualMachine) ) {

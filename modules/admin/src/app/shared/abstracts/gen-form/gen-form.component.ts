@@ -68,12 +68,7 @@ export abstract class GenericTabbedFormComponent extends GenericDataPageComponen
 
   }
 
-  /**
-   * On render, store the id of the item to be viewed/edited/duplicated from the specified path.
-   * This id is what's used to set [[item]] in [[onPullComplete]]().
-   *
-   * Then call the same functions that get called on render in all [[GenericPageComponent]]s.
-   */
+  /** on render */
   ngOnInit(): void {
     this.cmnDataComponentSetup();
     this.initializeTabs();
@@ -82,14 +77,14 @@ export abstract class GenericTabbedFormComponent extends GenericDataPageComponen
   /**
    * See comments at [[GenericPageComponent.onPullComplete]]()
    *
-   * Set up the parts of the page/tabs that rely on this.item, and set up the page only the first time
+   * Set up the parts of the page/tabs that rely on the data that was requested from the backend, and if this is the first time data was
+   * requested for this component, set up the page.
    *
    * @see [[initialPullComplete]]
    */
   onPullComplete(): void {
     // Refreshes to the datasets should only update the actual datasets in the background, and not overwrite/undo
     // any changes/edits made to the data on the page.
-    // So update [[item]] only the first time datasets are pulled, or if the page is only being viewed.
     if (! this.initialPullComplete) {
       this.setUpTabs();
     }

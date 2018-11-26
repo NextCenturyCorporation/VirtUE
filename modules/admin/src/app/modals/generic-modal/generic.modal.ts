@@ -137,7 +137,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
 
   /**
    * Allow children to customize the parameters passed to the table. By default, do nothing.
-   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   * @param paramsObject the object to be passed to the table. see [[GenericTableComponent.setUp]]
    */
   customizeTableParams(paramsObject) {}
 

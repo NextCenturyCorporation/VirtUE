@@ -475,7 +475,7 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
 /************************************************************************************/
 
   /**
-   * See [[GenericListComponent.getSubMenu]] for more details on this sort
+   * See [[ItemListComponent.getSubMenu]] for more details on this sort
    * of method.
    *
    * @return Just a list with one option: to remove the attached Virtue from the list of ones this one can paste data into.

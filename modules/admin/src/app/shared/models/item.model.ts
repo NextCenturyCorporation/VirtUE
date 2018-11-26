@@ -125,8 +125,6 @@ export abstract class Item extends IndexedObj implements Toggleable {
 
   /**
    * This removes the child with the given id and index from the relevant list.
-   * If we ever add multiple lists of the same type (like two lists that hold virtues) then something here will need to change.
-   * Maybe just pass in an extra parameter saying the type of dataset
    * @param id the id of the child to be removed
    * @param datasetType the name of the dataset relating to the list the item should be removed from.
    *        i.e., if you want to remove printer with ID=12345 from Virtue V1's printer list, call

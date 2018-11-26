@@ -1,4 +1,3 @@
-import { TableElement } from './tableElement.model';
 import { Item } from './item.model';
 import { SubMenuOptions } from './subMenuOptions.model';
 

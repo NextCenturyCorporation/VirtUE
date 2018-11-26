@@ -220,7 +220,7 @@ export class GenericTableComponent<T> {
     /** see this.[[noDataMessage]] */
     noDataMsg: string,
 
-    /** see this.[[elementShouldBeDisabled]] */
+    /** see this.[[elementIsDisabled]] */
     elementIsDisabled?: ((obj: T) => boolean),
 
     /** see this.[[hasColoredLabels]] */
@@ -484,7 +484,7 @@ export class GenericTableComponent<T> {
   }
 
   /**
-   * Each column in the table can define a list of options to show up on each row, within that column. See [[Column.subMenuOpts]].
+   * Each column in the table can define a list of options to show up on each row, within that column. See [[TextColumn.subMenuOpts]].
    * The column has a list of options that can show up, but whether any option should show up can depend on the state of the
    * object in that row.
    * e.g., you may want a different menu to show up for disabled row-elements, than for enabled ones. We'd like to display

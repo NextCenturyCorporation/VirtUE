@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { Column, SORT_DIR } from '../models/column.model';
-import { TableElement } from '../models/tableElement.model';
+import { Column, SORT_DIR } from '../../models/column.model';
+import { TableElement } from './tableElement.wrapper';
 /**
  * @class
  * This class filters, sorts, and returns a list based on input parameters.

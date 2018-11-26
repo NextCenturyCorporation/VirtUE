@@ -89,7 +89,7 @@ import { ActiveClassDirective } from './shared/directives/active-class.directive
 import { DialogsComponent } from './dialogs/dialogs.component';
 
 
-import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
+import { ListFilterPipe } from './shared/abstracts/gen-table/list-filter.pipe';
 
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
