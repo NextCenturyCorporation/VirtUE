@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# /etc/samba/virtue/<virtue>/<share>.conf
+# Create a master include file for all the samba configs for the Virtue shares
 #
 progname=$0
 
@@ -19,6 +19,4 @@ else
 	configDir=virtue-shares
 fi
 
-for conffile in "$(find $configDir -name '*.conf')" ; do
-	echo "include = $conffile"
-done > virtue-shares.conf
+find $configDir -name '*.conf' -exec echo "include = {}" \; > virtue-shares.conf
