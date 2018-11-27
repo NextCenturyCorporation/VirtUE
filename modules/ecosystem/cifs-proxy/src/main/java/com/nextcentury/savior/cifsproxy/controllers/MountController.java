@@ -38,14 +38,13 @@ public class MountController {
 	@Autowired
 	private ShareService service;
 
-	@RequestMapping(path = "/mount", params = { "virtue", "server", "sourcePath", "permissions",
-			"mountPath" }, produces = "application/json", method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(path = "/mount", params = { "virtue", "server", "sourcePath",
+			"permissions", }, produces = "application/json", method = { RequestMethod.GET, RequestMethod.POST })
 	@ResponseBody
 	public FileShare mountDirectory(HttpSession session, @RequestParam("virtue") String virtue,
 			@RequestParam("server") String server, @RequestParam("sourcePath") String sourcePath,
-			@RequestParam(value = "permissions", required = false, defaultValue = "rw") String permissions,
-			@RequestParam("mountPath") String mountPath) {
-		LOGGER.entry(session, server, sourcePath, permissions, mountPath);
+			@RequestParam(value = "permissions", required = false, defaultValue = "rw") String permissions) {
+		LOGGER.entry(session, server, sourcePath, permissions);
 		Set<SharePermissions> permissionSet = new HashSet<>();
 		switch (permissions) {
 		case "rw":
@@ -58,7 +57,7 @@ public class MountController {
 			throw new IllegalArgumentException("permissions must be 'r' or 'rw' (was '" + permissions + "')");
 		}
 
-		FileShare fileShare = new FileShare(virtue + "_" + server + sourcePath.replace(File.pathSeparatorChar, '_'),
+		FileShare fileShare = new FileShare(virtue + "_" + server + "_" + sourcePath.replace(File.separatorChar, '_'),
 				virtue, server, sourcePath, permissionSet, ShareType.CIFS);
 		try {
 			service.newShare(session, fileShare);
