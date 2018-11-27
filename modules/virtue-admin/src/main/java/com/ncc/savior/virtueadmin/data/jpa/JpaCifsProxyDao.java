@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.data.jpa;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -96,5 +97,17 @@ public class JpaCifsProxyDao implements ICifsProxyDao {
 
 	private long getTimeoutTimeFromNow() {
 		return System.currentTimeMillis() + timeoutDelayMillis;
+	}
+
+	@Override
+	public Collection<VirtualMachine> getAllCifsVms() {
+		// TODO can probably be optimized to just get data from database, but since we
+		// don't intend to have large number of users during this phase, this will do.
+		Iterable<CifsProxyData> all = cifsRepo.findAll();
+		Set<VirtualMachine> vms = new HashSet<VirtualMachine>();
+		for (CifsProxyData data : all) {
+			vms.add(data.getCifsVm());
+		}
+		return vms;
 	}
 }

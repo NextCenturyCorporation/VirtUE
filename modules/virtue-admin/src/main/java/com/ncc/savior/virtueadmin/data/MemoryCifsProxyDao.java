@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.data;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -72,6 +73,15 @@ public class MemoryCifsProxyDao implements ICifsProxyDao {
 		HashSet<VirtueUser> set = new HashSet<VirtueUser>();
 		for (CifsProxyData entry : userMap.values()) {
 			set.add(entry.getUser());
+		}
+		return set;
+	}
+
+	@Override
+	public Collection<VirtualMachine> getAllCifsVms() {
+		HashSet<VirtualMachine> set = new HashSet<VirtualMachine>();
+		for (CifsProxyData entry : userMap.values()) {
+			set.add(entry.getCifsVm());
 		}
 		return set;
 	}

@@ -1,5 +1,6 @@
 package com.ncc.savior.virtueadmin.cifsproxy;
 
+import java.util.Collection;
 import java.util.Set;
 
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -23,5 +24,7 @@ public interface ICifsProxyDao {
 	void deleteCifsVm(VirtueUser user);
 
 	Set<VirtueUser> getAllUsers();
+
+	Collection<VirtualMachine> getAllCifsVms();
 
 }
