@@ -27,6 +27,7 @@ import javax.xml.ws.WebServiceException;
 
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -41,6 +42,7 @@ import com.nextcentury.savior.cifsproxy.GssApi;
 import com.nextcentury.savior.cifsproxy.model.FileShare;
 import com.nextcentury.savior.cifsproxy.model.FileShare.SharePermissions;
 import com.nextcentury.savior.cifsproxy.model.FileShare.ShareType;
+import com.nextcentury.savior.cifsproxy.model.Virtue;
 
 @Service
 @PropertySources({ @PropertySource(BaseSecurityConfig.DEFAULT_CIFS_PROXY_SECURITY_PROPERTIES_CLASSPATH),
@@ -116,6 +118,9 @@ public class ShareService {
 	 * simultaneously, so use this object to serialize runs.
 	 */
 	protected static final Object SAMBA_CONFIG_HELPER_LOCK = new Object();
+
+	@Autowired
+	private VirtueService virtueService;
 
 	/**
 	 * Tracks what files shares are mounted and their mount points.
@@ -199,8 +204,25 @@ public class ShareService {
 			LOGGER.throwing(e);
 			throw e;
 		}
-		mountShare(session, share);
-		exportShare(share);
+		if (virtueService.getVirtue(share.getVirtue()) == null) {
+			IllegalArgumentException e = new IllegalArgumentException("unknown Virtue '" + share.getVirtue() + "'");
+			LOGGER.throwing(e);
+			throw e;
+		}
+		try {
+			mountShare(session, share);
+			exportShare(share);
+		} catch (IOException e) {
+			// undo the mount and clean up
+			try {
+				unmountShare(share);
+			} catch (Throwable t) {
+				LOGGER.info("error unmounting after an error with share: " + share);
+			}
+			mountPoints.remove(share);
+			sharesByName.remove(share.getName());
+			throw e;
+		}
 		LOGGER.exit();
 	}
 
@@ -212,14 +234,23 @@ public class ShareService {
 	 * @throws IOException
 	 */
 	private void exportShare(FileShare share) throws IOException {
-		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
-		File virtueConfigDir = new File(configDir, share.getVirtue());
-		if (!virtueConfigDir.mkdirs()) {
+		LOGGER.entry(share);
+		File configFile = getSambaConfigFile(share);
+		File virtueConfigDir = configFile.getParentFile();
+		LOGGER.debug("creating config directory '" + virtueConfigDir.getAbsolutePath() + "'");
+		if (!virtueConfigDir.exists() && !virtueConfigDir.mkdirs()) {
 			throw new IOException("could not create config dir: " + virtueConfigDir);
 		}
-		FileWriter configWriter = new FileWriter(new File(virtueConfigDir, share.getName() + ".conf"));
-		configWriter.write(makeShareConfig(share));
-		configWriter.close();
+		LOGGER.debug("writing config file '" + share.getName() + ".conf" + "'");
+		try (FileWriter configWriter = new FileWriter(configFile)) {
+			configWriter.write(makeShareConfig(share));
+		}
+		updateSambaConfig();
+		LOGGER.exit();
+	}
+
+	private void updateSambaConfig() throws IOException {
+		LOGGER.entry();
 		ProcessBuilder processBuilder = new ProcessBuilder(SAMBA_CONFIG_HELPER);
 		processBuilder.directory(new File(sambaConfigDir));
 		int retval;
@@ -233,24 +264,37 @@ public class ShareService {
 			}
 		}
 		if (retval != 0) {
-			WebServiceException wse = new WebServiceException(
+			IOException e = new IOException(
 					"error result from Samba configuration helper '" + SAMBA_CONFIG_HELPER + "': " + retval);
-			LOGGER.throwing(wse);
-			throw wse;
+			LOGGER.throwing(e);
+			throw e;
 		}
+		LOGGER.exit();
+	}
+
+	private File getSambaConfigFile(FileShare share) {
+		LOGGER.entry(share);
+		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
+		File virtueConfigDir = new File(configDir, share.getVirtue());
+		File configFile = new File(virtueConfigDir, share.getName() + ".conf");
+		LOGGER.exit(configFile);
+		return configFile;
 	}
 
 	private String makeShareConfig(FileShare share) {
+		LOGGER.entry(share);
 		String mountPoint = getMountPoint(share);
 		File path = new File(MOUNT_ROOT, mountPoint);
 
-		StringBuilder config = new StringBuilder(
-				"[" + share.getName() + "]\n" + "path = " + path + "\n" + "valid users = " + share.getVirtue() + "\n");
+		Virtue virtue = virtueService.getVirtue(share.getVirtue());
+		StringBuilder config = new StringBuilder("[" + share.getName() + "]\n" + "path = " + path + "\n"
+				+ "valid users = " + virtue.getUsername() + "\n");
 		// TODO someday add "hosts allow = " when we can get info about which hosts will
 		// be connecting
 		if (!share.getPermissions().contains(FileShare.SharePermissions.WRITE)) {
-			config.append("read only = yes");
+			config.append("read only = yes\n");
 		}
+		LOGGER.exit(config.toString());
 		return config.toString();
 	}
 
@@ -300,6 +344,14 @@ public class ShareService {
 		LOGGER.exit();
 	}
 
+	/**
+	 * Get the relative mount point for a file share. Stores the value in
+	 * {@link #mountPoints} if it was not already present.
+	 *
+	 * @param fs
+	 * @return relative mount point for the file system
+	 * @see #MOUNT_ROOT
+	 */
 	private String getMountPoint(FileShare fs) {
 		LOGGER.entry(fs);
 		String mountPoint = mountPoints.get(fs);
@@ -556,13 +608,6 @@ public class ShareService {
 		ProcessBuilder processBuilder = createProcessBuilder(null);
 		processBuilder.command(args);
 		runProcess(processBuilder, "mount");
-		addInternal(share, canonicalDest);
-		LOGGER.exit();
-	}
-
-	private void addInternal(FileShare share, String canonicalDest) {
-		LOGGER.entry(share, canonicalDest);
-		mountPoints.put(share, canonicalDest);
 		sharesByName.put(share.getName(), share);
 		LOGGER.exit();
 	}
@@ -590,8 +635,11 @@ public class ShareService {
 	 * 
 	 * @throws IllegalArgumentException
 	 *                                      if the named share is not mounted
+	 * @throws IOException
+	 *                                      if the Samba config file for the share
+	 *                                      cannot be deleted
 	 */
-	public void removeShare(String name) throws IllegalArgumentException {
+	public void removeShare(String name) throws IllegalArgumentException, IOException {
 		LOGGER.entry(name);
 		FileShare share = sharesByName.get(name);
 		if (share == null) {
@@ -610,17 +658,25 @@ public class ShareService {
 	 * 
 	 * @param share
 	 *                  the share to unmount
+	 * @throws IOException
+	 *                         if the Samba config file for the share exists and
+	 *                         cannot be deleted
 	 */
-	private void unmountShare(FileShare share) {
+	private void unmountShare(FileShare share) throws IOException {
 		LOGGER.entry(share);
 		ProcessBuilder processBuilder = createProcessBuilder(null);
 		List<String> command = new ArrayList<>();
 		command.add("sudo");
 		command.add(UNMOUNT_COMMAND);
 		command.add("--lazy");
-		command.add(getMountPoint(share));
+		String mountPoint = MOUNT_ROOT + File.separator + getMountPoint(share);
+		LOGGER.debug("Unmounting '" + mountPoint + "'");
+		command.add(mountPoint);
 		processBuilder.command(command);
+		LOGGER.trace("Running unmount: " + String.join(" ", command));
 		runProcess(processBuilder, "unmount " + share.getName());
+		File sambaConfigFile = getSambaConfigFile(share);
+		Files.deleteIfExists(sambaConfigFile.toPath());
 		LOGGER.exit();
 	}
 
@@ -670,13 +726,14 @@ public class ShareService {
 						if (target.target.startsWith(prefix)) {
 							// we've got a filesystem we should manage
 							String relativePath = target.target.substring(MOUNT_ROOT.length() + 1);
-							String virtue = relativePath.split(File.separator)[0];
+							String[] targetPath = relativePath.split(File.separator);
+							String virtue = targetPath[0];
 							if (!virtue.isEmpty()) {
 								Matcher sourceMatcher = sourcePattern.matcher(target.source);
 								if (sourceMatcher.matches()) {
 									String server = sourceMatcher.group(1);
 									String path = sourceMatcher.group(2);
-									String name = target.target.substring(MOUNT_ROOT.length() + 1);
+									String name = targetPath[targetPath.length - 1];
 									List<String> options = Arrays.asList(target.options.split(","));
 									Set<SharePermissions> permissions = new HashSet<FileShare.SharePermissions>();
 									permissions.add(SharePermissions.READ);
@@ -688,7 +745,9 @@ public class ShareService {
 									}
 									FileShare fileShare = new FileShare(name, virtue, server, path, permissions,
 											ShareType.CIFS);
-									addInternal(fileShare, target.target);
+
+									sharesByName.put(fileShare.getName(), fileShare);
+									getMountPoint(fileShare);
 								} else {
 									LOGGER.warn("cannot parse source for CIFS filesystem: " + target.source);
 								}

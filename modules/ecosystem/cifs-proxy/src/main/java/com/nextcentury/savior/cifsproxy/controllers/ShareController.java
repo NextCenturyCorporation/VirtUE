@@ -70,7 +70,13 @@ public class ShareController {
 	@DeleteMapping("/share/{name}")
 	void removeShare(@PathVariable String name) {
 		LOGGER.entry();
-		service.removeShare(name);
+		try {
+			service.removeShare(name);
+		} catch (IllegalArgumentException | IOException e) {
+			WebServerException wse = new WebServerException("exception unmounting a share", e);
+			LOGGER.throwing(wse);
+			throw wse;
+		}
 		LOGGER.exit();
 	}
 
