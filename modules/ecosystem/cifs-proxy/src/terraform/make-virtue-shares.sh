@@ -14,9 +14,12 @@ if [ $# -gt 1 ]; then
 fi
 
 if [ $# -eq 1 ]; then
-	configDir=$1
+	configDir="$1"
 else
 	configDir=virtue-shares
 fi
 
-find $configDir -name '*.conf' -exec echo "include = {}" \; > virtue-shares.conf
+find "$(readlink --canonicalize $configDir)" \
+	 -name '*.conf' \
+	 -exec echo "include = {}" \; \
+	 > virtue-shares.conf

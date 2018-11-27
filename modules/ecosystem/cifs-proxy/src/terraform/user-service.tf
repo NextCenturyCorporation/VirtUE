@@ -144,7 +144,7 @@ EOF
   provisioner "remote-exec" {
 	inline = [
 	  "while ! [ -e /tmp/user_data-finished ]; do echo -n '.' ; sleep 2; done",
-	  "echo '    include = virtue.conf' | sudo tee --append /etc/samba/smb.conf > /dev/null",
+	  "echo '    include = /etc/samba/virtue.conf' | sudo tee --append /etc/samba/smb.conf > /dev/null",
 	  "sudo cp /tmp/virtue.conf /etc/samba",
 	  "sudo touch /etc/samba/virtue-shares.conf",
 	  "sudo systemctl enable smb nmb",
