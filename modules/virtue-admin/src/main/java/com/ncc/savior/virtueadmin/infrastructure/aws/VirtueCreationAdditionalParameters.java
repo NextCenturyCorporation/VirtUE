@@ -16,6 +16,7 @@ public class VirtueCreationAdditionalParameters {
 	private String virtueTemplateId;
 	private VirtuePrimaryPurpose primaryPurpose;
 	private VirtueSecondaryPurpose secondaryPurpose;
+	private String username;
 
 	public void setVirtueId(String virtueId) {
 		this.virtueId = virtueId;
@@ -75,5 +76,13 @@ public class VirtueCreationAdditionalParameters {
 
 	public void setSecondaryPurpose(VirtueSecondaryPurpose secondaryPurpose) {
 		this.secondaryPurpose = secondaryPurpose;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }
