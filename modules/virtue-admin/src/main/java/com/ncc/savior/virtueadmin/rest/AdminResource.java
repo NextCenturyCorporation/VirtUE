@@ -94,7 +94,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("application/create")
+	@Path("application")
 	public ApplicationDefinition createNewApplicationDefinition(ApplicationDefinition appDef) {
 		return adminService.createNewApplicationDefinition(appDef);
 	}
@@ -162,7 +162,7 @@ public class AdminResource {
 	// JHU - Admin API - role create
 	@POST
 	@Produces("application/json")
-	@Path("virtualMachine/template/create")
+	@Path("virtualMachine/template")
 	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate templateId) {
 		return adminService.createVmTemplate(templateId);
 	}
@@ -206,7 +206,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("virtue/template/create")
+	@Path("virtue/template")
 	public VirtueTemplate createNewVirtueTemplate(VirtueTemplate template) {
 		VirtueTemplate virtueTemplate = adminService.createNewVirtueTemplate(template);
 		return virtueTemplate;
@@ -258,7 +258,6 @@ public class AdminResource {
 	}
 
 	@DELETE
-	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public void deleteVirtueTemplate(@PathParam("id") String templateId) {
 		adminService.deleteVirtueTemplate(templateId);
@@ -306,7 +305,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("user/create")
+	@Path("user")
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
 		return adminService.createUpdateUser(newUser);
 	}
@@ -340,14 +339,12 @@ public class AdminResource {
 
 	// JHU - Admin API - user get
 	@DELETE
-	@Produces("application/json")
 	@Path("user/{username}")
 	public void removeUser(@PathParam("username") String usernameToRemove) {
 		adminService.removeUser(usernameToRemove);
 	}
 
 	@PUT
-	@Produces("application/json")
 	@Path("user/{username}/setStatus")
 	public void setUserStatus(@PathParam("username") String username, String newStatus) {
 		boolean status = Boolean.parseBoolean(newStatus);
@@ -356,7 +353,6 @@ public class AdminResource {
 
 	// JHU - Admin API - user role authorize
 	@POST // #TODO PUT? Is this idempotent? What in here should prevent duplicates?
-	@Produces("application/json")
 	@Path("user/{username}/assign/{templateId}")
 	public void assignTemplateToUser(@PathParam("username") String username,
 			@PathParam("templateId") String templateId) {
@@ -365,7 +361,6 @@ public class AdminResource {
 
 	// JHU - Admin API - user role unauthorize
 	@POST // #TODO PUT
-	@Produces("application/json")
 	@Path("user/{username}/revoke/{templateId}")
 	public void revokeTemplateToUser(@PathParam("username") String username,
 			@PathParam("templateId") String templateId) {
@@ -382,7 +377,6 @@ public class AdminResource {
 	// JHU - Admin API - user logout
 	@GET
 	@Path("user/{username}/logout")
-	@Produces("application/json")
 	public void logoutUser(@PathParam("username") String username) {
 		adminService.logoutUser(username);
 	}
@@ -404,7 +398,6 @@ public class AdminResource {
 
 	@DELETE
 	@Path("session/{sessionId}")
-	@Produces("application/json")
 	public void invalidateSession(@PathParam("sessionId") String sessionId) {
 		adminService.invalidateSession(sessionId);
 	}
@@ -519,7 +512,6 @@ public class AdminResource {
 
 	@POST
 	@Path("import")
-	@Produces("application/json")
 	@Consumes("application/json")
 	public void importSystem(InputStream stream) {
 		importExportService.importSystemDatabaseWithoutImages(stream);
@@ -527,7 +519,6 @@ public class AdminResource {
 
 	@POST
 	@Path("import")
-	@Produces("application/json")
 	@Consumes({ "application/zip", "application/octet-stream" })
 	public void importZip(InputStream stream,
 			@QueryParam("waitForCompletion") @DefaultValue("true") boolean waitForCompletion) {
@@ -602,7 +593,6 @@ public class AdminResource {
 
 	@GET
 	@Path("vm/reboot/{id}")
-	@Produces("application/json")
 	public void rebootVm(@PathParam("id") String vmId) {
 		try {
 			adminService.rebootVm(vmId);
@@ -755,7 +745,6 @@ public class AdminResource {
 
 	@DELETE
 	@Path("storage/{user}/{virtueTemplateId}")
-	@Produces("application/json")
 	public void deletePersistentStorage(@PathParam("user") String username,
 			@PathParam("virtueTemplateId") String virtueTemplateId) {
 		adminService.deletePersistentStorage(username, virtueTemplateId);
@@ -770,7 +759,6 @@ public class AdminResource {
 
 	@GET
 	@Path("securityGroup/test")
-	@Produces("application/json")
 	public void create() {
 		SecurityGroupPermission sgp = new SecurityGroupPermission(true, 80, 80, "192.168.1.0/32", "tcp", "test");
 		adminService.authorizeSecurityGroupsByKey("test", sgp);
@@ -830,7 +818,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("printer/create")
+	@Path("printer")
 	public Printer createPrinter(Printer printer) {
 		return adminService.createPrinter(printer);
 	}
@@ -860,23 +848,15 @@ public class AdminResource {
 	@Path("printer")
 	public Iterable<Printer> getAllPrinters() {
 		return adminService.getAllPrinters();
-
-		// ArrayList<Printer> ps = new ArrayList<Printer>();
-		// ps.add(new Printer("id", "name", "address", "status", true));
-		// return ps;
-		// return adminService.getAllPrinters();
 	}
 
-	// JHU - Admin API - user get
 	@DELETE
-	@Produces("application/json")
 	@Path("printer/{printerId}")
 	public void deletePrinter(@PathParam("printerId") String printerId) {
 		adminService.deletePrinter(printerId);
 	}
 
 	@PUT
-	@Produces("application/json")
 	@Path("printer/{printerId}/setStatus")
 	public void setPrinterStatus(@PathParam("printerId") String printerId, String enableString) {
 		boolean enable = Boolean.parseBoolean(enableString);
@@ -886,7 +866,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("fileSystem/create")
+	@Path("fileSystem")
 	public FileSystem createFileSystem(FileSystem fileSystem) {
 		return adminService.createFileSystem(fileSystem);
 	}
@@ -921,14 +901,12 @@ public class AdminResource {
 	}
 
 	@DELETE
-	@Produces("application/json")
 	@Path("fileSystem/{fileSystemId}")
 	public void deleteFileSystem(@PathParam("fileSystemId") String fileSystemId) {
 		adminService.deleteFileSystem(fileSystemId);
 	}
 
 	@PUT
-	@Produces("application/json")
 	@Path("fileSystem/{fileSystemId}/setStatus")
 	public void setFileSystemStatus(@PathParam("fileSystemId") String fileSystemId, String enableString) {
 		boolean enable = Boolean.parseBoolean(enableString);

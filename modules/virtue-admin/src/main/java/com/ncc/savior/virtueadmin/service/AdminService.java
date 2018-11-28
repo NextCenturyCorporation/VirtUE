@@ -321,16 +321,6 @@ public class AdminService {
 	public VirtueTemplate updateVirtueTemplate(String templateId, VirtueTemplate template) {
 		VirtueUser user = verifyAndReturnUser();
 
-		// if (template.getFileSystems().iterator().hasNext()) {
-		// 	logger.debug("% " + template.getFileSystems().iterator().next());
-		// 	logger.debug("% " + template.getFileSystems().iterator().next().getReadPerm());
-		// }
-		logger.debug("1% " + template.getNetworkWhitelist());
-		if (template.getNetworkWhitelist().iterator().hasNext()) {
-			logger.debug("2% " + template.getNetworkWhitelist().iterator().next());
-			logger.debug("3% " + template.getNetworkWhitelist().iterator().next().getHost());
-		}
-
 		if ( !templateId.equals(template.getId()) ) {
 			template = new VirtueTemplate(templateId, template);
 			template.setUserCreatedBy(user.getUsername());

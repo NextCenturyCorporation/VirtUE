@@ -15,13 +15,10 @@ export class RouterService {
 
   private history: string;
 
-  public randID: string;
-
   constructor(
     private router: Router,
     private location: Location
   ) {
-    this.randID = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
     this.router.events
         .filter(e => e instanceof RoutesRecognized)
         .pairwise()
