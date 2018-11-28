@@ -89,7 +89,7 @@ export class DataRequestService {
    * @return a subscription that will return the saved object as it exists on the backend.
    */
   public createRecord(subdomain: string, itemData: string): Observable<IndexedObj> {
-    let url = this.baseUrl + subdomain + "create";
+    let url = this.baseUrl + subdomain;
     return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
   }
 

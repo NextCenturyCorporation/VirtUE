@@ -674,7 +674,7 @@ public class DataResource {
 	}
 
 	@GET
-	// @Path("resources/clear/")
+	@Path("resources/clear/")
 	public String clearResourcesDatabase() {
 		resourceManager.clear();
 		return "database cleared.";
