@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Item } from '../../../shared/models/item.model';
@@ -15,6 +14,7 @@ import {
   SORT_DIR
 } from '../../../shared/models/column.model';
 
+import { RouterService } from '../../../shared/services/router.service';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 
@@ -57,9 +57,9 @@ export class UserMainTabComponent extends ItemFormMainTabComponent implements On
    * see [[ItemFormMainTabComponent.constructor]] for parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       dialog: MatDialog) {
-    super(router, dialog);
+    super(routerService, dialog);
     this.childDatasetName = DatasetNames.VIRTUES;
   }
 

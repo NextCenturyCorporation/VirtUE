@@ -3,10 +3,14 @@ import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
+
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/pairwise';
+
+import { RouterService } from '../../services/router.service';
 
 import { Column } from '../../models/column.model';
 import { DictList, Dict } from '../../models/dictionary.model';
@@ -24,27 +28,16 @@ import { DatasetNames } from '../gen-data-page/datasetNames.enum';
  *  - dialogs
  *  - formatting
  */
-@Component({
-providers: [ Router, MatDialog ]
-})
 export abstract class GenericPageComponent {
 
   /**
-   * @param router Handles the navigation to/from different pages. Injected, and so is constant across components.
+   * @param routerService Handles the navigation to/from different pages. Injected, and so is constant across components.
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
    */
   constructor(
-    protected router: Router,
+    protected routerService: RouterService,
     protected dialog: MatDialog
       ) {
-    // override the route reuse strategy
-    // Tell angular to load a fresh, new, component every time a URL that needs this component loads,
-    // even if the user has been on that page before.
-    // this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
-    // make the page reload if the user clicks on a link to the same page they're on.
-    // this.router.navigated = false;
-
   }
 
   /**
@@ -75,45 +68,26 @@ export abstract class GenericPageComponent {
    * Navigates to the form page for this item.
    */
   viewItem(item: Item): void {
-    this.goToPage(item.getViewURL());
+    this.routerService.goToPage(item.getViewURL());
   }
 
   /**
    * Navigates to, and enable for editing, the form page for `item`.
    */
   editItem(item: Item): void {
-    this.goToPage(item.getEditURL());
+    this.routerService.goToPage(item.getEditURL());
   }
 
   /**
    * Navigates to a form page pre-filled with `item`'s attributes.
    */
   dupItem(item: Item): void {
-    this.goToPage(item.getDupURL());
+    this.routerService.goToPage(item.getDupURL());
   }
 
-  /**
-   * @param targetPath the subdomain path to navigate to.
-   */
-  goToPage(targetPath: string) {
-    this.router.navigate([targetPath]);
+  toPreviousPage() {
+    this.routerService.toPreviousPage();
   }
-
-  getRouterUrl(): string {
-    return this.router.routerState.snapshot.url;
-  }
-
-  /**
-   * Abstracts away the router from subclasses
-   */
-  getRouterUrlPieces(): string[] {
-    let url = this.getRouterUrl();
-    if (url[0] === '/') {
-      url = url.substr(1);
-    }
-    return url.split('/');
-  }
-
 
   /**
    * This opens a dialog to confirm irreversible or dangerous user actions before carrying them out.

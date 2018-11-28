@@ -1,11 +1,10 @@
 import { Component, OnInit, Inject, ViewChild } from '@angular/core';
-import { HashLocationStrategy, Location, LocationStrategy } from '@angular/common';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { SensingModel } from '../shared/models/sensing.model';
 
+import { RouterService } from '../shared/services/router.service';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { SensingService } from '../shared/services/sensing.service';
 import { DataRequestService } from '../shared/services/dataRequest.service';
@@ -27,8 +26,7 @@ import { ItemListComponent } from '../shared/abstracts/item-list/item-list.compo
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css'],
-  providers: [ BaseUrlService, SensingService, DataRequestService ]
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent extends ItemListComponent {
 
@@ -71,7 +69,7 @@ export class DashboardComponent extends ItemListComponent {
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
-    router: Router,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog,
@@ -80,7 +78,7 @@ export class DashboardComponent extends ItemListComponent {
      */
     private sensingService: SensingService,
   ) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(routerService, baseUrlService, dataRequestService, dialog);
 
   }
 

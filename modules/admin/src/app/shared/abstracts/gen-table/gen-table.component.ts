@@ -3,7 +3,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 

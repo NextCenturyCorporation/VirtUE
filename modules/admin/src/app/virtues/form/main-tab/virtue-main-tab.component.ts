@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Printer } from '../../../shared/models/printer.model';
@@ -15,6 +14,8 @@ import {
   ListColumn,
   SORT_DIR
 } from '../../../shared/models/column.model';
+
+import { RouterService } from '../../../shared/services/router.service';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 
@@ -52,9 +53,9 @@ export class VirtueMainTabComponent extends ItemFormMainTabComponent implements 
    * see [[ItemFormMainTabComponent.constructor]] for parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       dialog: MatDialog) {
-    super(router, dialog);
+    super(routerService, dialog);
     this.childDatasetName = DatasetNames.VMS;
   }
 

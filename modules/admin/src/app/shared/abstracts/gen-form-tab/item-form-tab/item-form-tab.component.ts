@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild, Input } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
+
+import { RouterService } from '../../../services/router.service';
 
 import { Item } from '../../../models/item.model';
 import { DictList } from '../../../models/dictionary.model';
@@ -45,9 +45,9 @@ export abstract class ItemFormTabComponent extends GenericFormTabComponent imple
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       dialog: MatDialog) {
-    super(router, dialog);
+    super(routerService, dialog);
   }
 
   /**

@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { DialogsComponent } from '../../../../../dialogs/dialogs.component';
 
@@ -11,6 +10,7 @@ import { Column } from '../../../../models/column.model';
 import { SubMenuOptions } from '../../../../models/subMenuOptions.model';
 import { Mode } from '../../../../abstracts/gen-form/mode.enum';
 
+import { RouterService } from '../../../../services/router.service';
 import { GenericTableComponent } from '../../../gen-table/gen-table.component';
 import { ItemFormTabComponent } from '../item-form-tab.component';
 
@@ -63,9 +63,9 @@ export abstract class ItemFormMainTabComponent extends ItemFormTabComponent impl
    * Set name on all tabs to "General Info". This can be changed in subclasses if desired.
    */
   constructor(
-    router: Router,
+    routerService: RouterService,
     dialog: MatDialog) {
-      super(router, dialog);
+      super(routerService, dialog);
       this.tabName = "General Info";
       this.item = new User({enabled: false}); // just until data from the backend gets set up.
   }

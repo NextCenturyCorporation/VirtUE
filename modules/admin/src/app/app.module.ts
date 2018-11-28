@@ -79,6 +79,7 @@ import { VmMainTabComponent } from './vms/form/vm-main-tab/vm-main-tab.component
 import { VmUsageTabComponent } from './vms/form/vm-usage-tab/vm-usage-tab.component';
 import { VmComponent} from './vms/vm.component';
 import { AppsModalComponent } from './modals/apps-modal/apps-modal.component';
+import { OSSet } from './vms/os.set';
 
 import { AppsListComponent } from './apps/apps-list/apps-list.component';
 import { AddAppComponent } from './apps/add-app/add-app.component';
@@ -96,6 +97,7 @@ import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
 import { DataRequestService } from './shared/services/dataRequest.service';
+import { RouterService } from './shared/services/router.service';
 
 @NgModule({
   declarations: [
@@ -175,10 +177,12 @@ import { DataRequestService } from './shared/services/dataRequest.service';
     OverlayModule
   ],
   providers: [
-    OverlayContainer,
     BaseUrlService,
-    MessageService,
     DataRequestService,
+    MessageService,
+    OverlayContainer,
+    RouterService,
+    OSSet,
     DatePipe
   ],
   bootstrap: [AppComponent],

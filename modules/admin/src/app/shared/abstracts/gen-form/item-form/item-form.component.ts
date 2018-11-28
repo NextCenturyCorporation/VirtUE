@@ -1,12 +1,12 @@
 import { Component, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
+
+import { ActivatedRoute } from '@angular/router';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
+import { RouterService } from '../../../services/router.service';
 import { BaseUrlService } from '../../../services/baseUrl.service';
 import { DataRequestService } from '../../../services/dataRequest.service';
 
@@ -48,9 +48,6 @@ import { DatasetNames } from '../../gen-data-page/datasetNames.enum';
  *
  * @extends [[GenericDataPageComponent]] because it needs to load data about an Item and its children, as well as other available children
  */
-@Component({
-  providers: [ BaseUrlService, DataRequestService ]
-})
 export abstract class ItemFormComponent extends GenericTabbedFormComponent implements OnInit {
 
   /**
@@ -104,27 +101,25 @@ export abstract class ItemFormComponent extends GenericTabbedFormComponent imple
   childDatasetName: DatasetNames;
 
   /**
-   * see [[GenericTabbedFormComponent]] and [[GenericPageComponent.constructor]] for notes on inherited parameters
+   * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    * @param parentDomain Used to check page for errors, and navigate back to the list page for this type of item upon save or cancel
    */
   constructor(
     protected parentDomain: string,
-    location: Location,
-    activatedRoute: ActivatedRoute,
-    router: Router,
+    protected activatedRoute: ActivatedRoute,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
+    super( routerService, baseUrlService, dataRequestService, dialog);
 
     // the mode needs to be set before any other work can be done
     this.setMode();
   }
 
   /**
-   * This parses the url path (via the routing info in activatedRoute)
-   * and uses that to set what mode (view/create/edit/duplicate) the page
+   * This uses the route (generally the same as the URL) to set what mode (view/create/edit/duplicate) the page
    * ought to be in.
    *
    * This has a number of checks, because it would probably break if there are changes made to
@@ -134,48 +129,53 @@ export abstract class ItemFormComponent extends GenericTabbedFormComponent imple
    */
   setMode(): boolean {
     this.mode = Mode.CREATE;
-    let urlValid = true;
-    // Parse url, making sure it's set up the expected way.
+    let routerMode = this.getModeFromRouter();
+
+    if (routerMode !== undefined) {
+      this.mode = routerMode;
+      return true;
+    }
+
+    return false;
+  }
+
+  getModeFromRouter(): Mode {
 
     // get a list of route stops,
-    let route = this.getRouterUrlPieces();
+    let route = this.routerService.getRouterUrlPieces();
 
     // check that the first stop is the same as what the parentDomain for this component should be.
-    // Remember that the parentDomain has a beginning forward slash, while the split URL had its slashes removed.
-    if (route[0] !== this.parentDomain.substr(1)) {
-      // something about the routing system has changed.
-      urlValid = false;
+    // Remember that the parentDomain has a beginning forward slash, while the split route url had its slashes removed.
+    if (route[0] === this.parentDomain.substr(1)) {
+      if (route[1] === 'create') {
+        return Mode.CREATE;
+      } else if (route[1] === 'edit') {
+        return Mode.EDIT;
+      } else if (route[1] === 'duplicate') {
+        return Mode.DUPLICATE;
+      } else if (route[1] === 'view') {
+        return Mode.VIEW;
+      }
     }
 
-    if (route[1] === 'create') {
-        this.mode = Mode.CREATE;
-    } else if (route[1] === 'edit') {
-        this.mode = Mode.EDIT;
-    } else if (route[1] === 'duplicate') {
-        this.mode = Mode.DUPLICATE;
-    } else if (route[1] === 'view') {
-        this.mode = Mode.VIEW;
-    } else {
-        // something about the routing system has changed.
-        urlValid = false;
+
+    // Now in error
+    // something about the routing system has changed.
+
+    if (this.routerService.getRouterUrl() === this.parentDomain) {
+      // apparently sometimes when an error happens on a form page, the system
+      // quits and returns to {parentDomain}, and then for some reason re-calls the
+      // constructor for the form component it just left. Which leads here and
+      // breaks because the URL is wrong. Strange. So don't print out the below
+      // error on those cases.
+      return undefined;
     }
-    if (!urlValid) {
-      if (this.getRouterUrl() === this.parentDomain) {
-        // apparently sometimes when an error happens on a form page, the system
-        // quits and returns to {parentDomain}, and then for some reason re-calls the
-        // constructor for the form component it just left. Which leads here and
-        // breaks because the URL is wrong. Strange. So don't print out the below
-        // error on those cases.
-        return false;
-      }
-      console.log("ERROR: Can't decipher URL; Something about \
+    console.log("ERROR: Can't decipher URL; Something about \
 the routing system has changed. Returning to " + this.parentDomain.substr(1) + " page.\n       Expects something like \
 " + this.parentDomain + "/create, " + this.parentDomain + "/duplicate/key-value, or " + this.parentDomain + "/edit/key-value,\
- but got: \n       " + this.router.routerState.snapshot.url);
-      this.goToPage(this.parentDomain);
-      return false;
-    }
-    return true;
+but got: \n       " + this.routerService.getRouterUrl());
+    this.routerService.goToPage(this.parentDomain);
+    return undefined;
   }
 
   /**
@@ -187,7 +187,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    */
   ngOnInit(): void {
     if (this.mode !== Mode.CREATE) {
-      this.item.setID(this.activatedRoute.snapshot.params['id']);
+      this.item.setID(this.getRouteParam("id"));
     }
 
     this.cmnDataComponentSetup();
@@ -256,7 +256,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * See note on [[toViewMode]]
    */
   toEditMode(): void {
-    this.location.go(this.item.getPageRoute(Mode.EDIT));
+    this.routerService.changeUrlWithoutNavigation(this.item.getEditURL());
     this.mode = Mode.EDIT;
     this.updateTabs();
 
@@ -277,7 +277,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * affected by any Location method.
    */
   toViewMode(): void {
-    this.location.go(this.item.getPageRoute(Mode.VIEW));
+    this.routerService.changeUrlWithoutNavigation(this.item.getViewURL());
 
     this.mode = Mode.VIEW;
     this.cmnDataComponentSetup();
@@ -287,7 +287,7 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    * Return to this Item's list page. Does no processing or saving first.
    */
   toListPage(): void {
-    this.goToPage(this.parentDomain);
+    this.routerService.goToPage(this.parentDomain);
   }
 
   /**
@@ -303,6 +303,19 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
    */
   save(): void {
     this.createOrUpdate(() => this.toViewMode());
+  }
+
+  cancel(): void {
+    // Go back to whatever the previous page was, unless you navigated to this page in view mode, and clicked edit.
+    // If you did so, just go back to view. This lets you hit cancel again on that view page, and go back to the previous page
+    // from that.
+    if (this.mode == Mode.EDIT && this.getModeFromRouter() === Mode.VIEW) {
+      this.toViewMode();
+      // this.routerService.goToPage(this.item.getViewURL());
+    }
+    else {
+      this.toPreviousPage();
+    }
   }
 
   /**
@@ -330,6 +343,10 @@ the routing system has changed. Returning to " + this.parentDomain.substr(1) + "
     else {
       console.log("Could not save or update - mode not valid. Mode set to: ", this.mode);
     }
+  }
+
+  getRouteParam(paramName: string): string {
+    return this.activatedRoute.snapshot.params[paramName];
   }
 
   /**

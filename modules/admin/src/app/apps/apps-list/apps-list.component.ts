@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { MatDialog, MatDialogRef, MatDialogModule } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { Router } from '@angular/router';
 
 import { IndexedObj } from '../../shared/models/indexedObj.model';
 import { Item } from '../../shared/models/item.model';
@@ -16,6 +14,7 @@ import {  Column,
 import { DictList } from '../../shared/models/dictionary.model';
 import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
+import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
@@ -38,8 +37,7 @@ import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.
 @Component({
   selector: 'app-apps-list',
   templateUrl: '../../shared/abstracts/item-list/item-list.component.html',
-  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css'],
-  providers: [ BaseUrlService, DataRequestService  ]
+  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css']
 })
 export class AppsListComponent extends ItemListComponent {
 
@@ -47,12 +45,12 @@ export class AppsListComponent extends ItemListComponent {
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
-    router: Router,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(routerService, baseUrlService, dataRequestService, dialog);
 
     // TODO fix app versioning - maybe make automatic?
     // Apps need versions, but they can't default to anything, and it must be made clear

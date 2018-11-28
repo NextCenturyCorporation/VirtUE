@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { GenericDataTabComponent } from '../../shared/abstracts/gen-data-page/gen-data-tab.component';
 
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
+
+import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
@@ -33,11 +34,11 @@ export class ConfigActiveDirTabComponent extends GenericDataTabComponent {
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(routerService, baseUrlService, dataRequestService, dialog);
     this.tabLabel = "Active Directories";
   }
 

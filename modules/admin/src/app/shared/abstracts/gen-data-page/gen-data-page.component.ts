@@ -1,11 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
+import { RouterService } from '../../services/router.service';
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { DataRequestService } from '../../services/dataRequest.service';
 
@@ -63,9 +62,6 @@ import { DatasetType, DatasetsMeta } from './datasetType';
  *
  * @extends [[GenericPageComponent]] to make use of the common formatting and navigation functions
  */
-@Component({
-providers: [ BaseUrlService, DataRequestService ]
-})
 export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   /**
@@ -101,12 +97,12 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
   loadedDatasets:  DatasetNames[] = [];
 
   constructor(
-    router: Router,
+    routerService: RouterService,
     protected baseUrlService: BaseUrlService,
     protected dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, dialog);
+    super(routerService, dialog);
 
     // Every subclass must define getNeededDatasets
     this.neededDatasets = this.getNeededDatasets();

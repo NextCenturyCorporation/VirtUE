@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { GenericDataTabComponent } from '../../shared/abstracts/gen-data-page/gen-data-tab.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
@@ -15,6 +14,8 @@ import {
 } from '../../shared/models/column.model';
 
 import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
+
+import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
@@ -37,11 +38,11 @@ export class ConfigSettingsHistoryTabComponent extends GenericDataTabComponent {
    * see [[GenericPageComponent.constructor]] for notes on inherited parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(routerService, baseUrlService, dataRequestService, dialog);
     this.tabLabel = "Settings History";
   }
 

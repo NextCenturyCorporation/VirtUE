@@ -15,7 +15,7 @@
             <span *ngIf="!inViewMode()">
               {{ item.enabled ? 'Enabled' : 'Disabled' }}
             </span>
-            <mat-slide-toggle *ngIf="inViewMode()" [(ngModel)]="item.enabled" (click)="statusChange()" [color]="'primary'">
+            <mat-slide-toggle *ngIf="inViewMode()" [checked]="item.enabled" (change)="statusChange()" [color]="'primary'">
               {{ item.enabled ? 'Enabled' : 'Disabled' }}
             </mat-slide-toggle>
           </div>
