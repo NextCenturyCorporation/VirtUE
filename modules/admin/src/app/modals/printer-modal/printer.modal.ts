@@ -12,7 +12,7 @@ import { Printer } from '../../shared/models/printer.model';
  */
 @Component({
   selector: 'app-printer-modal',
-  templateUrl: './printer.modal.html'//,
+  templateUrl: './printer.modal.html' // ,
   // styleUrls: ['./printer.modal.css']
 })
 export class PrinterModalComponent implements OnInit {
