@@ -194,6 +194,7 @@
 
 	<bean name="persistentStorageManager"
 		class="com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager">
+		<constructor-arg ref="serverIdProvider"></constructor-arg>
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="persistentStorageDao"></constructor-arg>
 		<constructor-arg value="${virtue.aws.persistentStorage.snapshotId}"></constructor-arg>
