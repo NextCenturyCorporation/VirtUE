@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
@@ -60,6 +61,9 @@ public class CifsManager {
 	private String serverId;
 	private ArrayList<String> securityGroupIds;
 
+	@Value("${virtue.test:false}")
+	private boolean test;
+
 	public CifsManager(ServerIdProvider serverIdProvider, IActiveVirtueManager activeVirtueManager,
 			DesktopVirtueService desktopService, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
 			CompletableFutureServiceProvider serviceProvider, String cifsProxyAmi, String cifsProxyLoginUser,
@@ -74,7 +78,9 @@ public class CifsManager {
 		this.instanceType = InstanceType.fromValue(instanceType);
 		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
-		sync();
+		if (!test) {
+			sync();
+		}
 		desktopService.addPollHandler(new PollHandler() {
 
 			@Override
