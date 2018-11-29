@@ -22,6 +22,8 @@ import { DataRequestService } from '../../shared/services/dataRequest.service';
 /**
  * @class
  * #unimplemented
+ * Will be used to display a history of changes to global settings, once versioning and histories have been
+ * figured out.
  *
  */
 @Component({
