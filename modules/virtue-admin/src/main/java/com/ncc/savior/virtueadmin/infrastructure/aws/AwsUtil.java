@@ -61,6 +61,8 @@ public class AwsUtil {
 	public static final String FILTER_TAG = "tag:";
 	public static final String TAG_VM_TEMPLATE_ID = "savior-vm-template-id";
 	public static final String TAG_VM_INSTANCE_ID = "savior-vm-instance-id";
+	public static final String TAG_PRIMARY = "savior-primary";
+	public static final String TAG_SECONDARY = "savior-secondary";
 
 	public static Collection<VirtualMachine> updateStatusOnVms(AmazonEC2 ec2, Collection<VirtualMachine> vms) {
 		Map<String, VirtualMachine> instanceIdsToVm = new HashMap<String, VirtualMachine>();
@@ -418,4 +420,11 @@ public class AwsUtil {
 		return expectedValue.equals(actualValue);
 	}
 
+	public static enum VirtuePrimaryPurpose {
+		USER_VIRTUE, IMAGE_CREATION, CIFS_PROXY
+	}
+
+	public static enum VirtueSecondaryPurpose {
+		WINDOWS, XEN_HOST, CIFS_PROXY
+	}
 }
