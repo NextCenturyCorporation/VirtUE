@@ -303,7 +303,7 @@ public class XenHostManager {
 							lines = SshUtil.sendCommandFromSession(finalSession,
 									"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
 											+ templatePath + "/");
-							logger.debug("Copy standard files output: " + lines);
+							logger.debug("Copy "+templatePath+" files output: " + lines);
 						}
 					} catch (JSchException e) {
 						logger.error("Error attempting to copy s3 data", e);

@@ -1,7 +1,13 @@
 package com.ncc.savior.desktop.xpra.protocol.packet;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility functions for appropriately reading packet data and converting to the
@@ -10,6 +16,8 @@ import java.util.Map;
  *
  */
 public class PacketUtils {
+	private static final Logger logger = LoggerFactory.getLogger(PacketUtils.class);
+
 	public static boolean asBoolean(Object obj) {
 		if (obj instanceof Boolean) {
 			return (Boolean) obj;
@@ -41,7 +49,35 @@ public class PacketUtils {
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> asStringObjectMap(Object obj) {
-		return (Map<String, Object>) obj;
+		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> origMap = (Map<String, Object>) obj;
+		for (Entry<String, Object> entry : origMap.entrySet()) {
+			Object value = entry.getValue();
+			value = convertByteArraysToStrings(value);
+			map.put(entry.getKey(), value);
+		}
+		return map;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Object convertByteArraysToStrings(Object value) {
+		if (value instanceof byte[]) {
+			value = new String((byte[]) value);
+		} else if (value instanceof Map) {
+			value = asStringObjectMap(value);
+		} else if (value instanceof List) {
+			value = convertByteArraysToStrings((List<Object>) value);
+		}
+		return value;
+	}
+
+	public static List<Object> convertByteArraysToStrings(List<Object> oldList) {
+		List<Object> list = new ArrayList<Object>();
+		for (Object o : oldList) {
+			Object v = convertByteArraysToStrings(o);
+			list.add(v);
+		}
+		return list;
 	}
 
 	public static Map<String, Object> asStringObjectMap(List<Object> list, int index) {

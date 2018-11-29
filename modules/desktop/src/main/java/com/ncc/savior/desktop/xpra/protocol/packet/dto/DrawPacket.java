@@ -1,6 +1,14 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.protocol.ImageEncoding;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -14,6 +22,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketUtils;
  *
  */
 public class DrawPacket extends WindowPacket implements IImagePacket {
+	private static final Logger logger = LoggerFactory.getLogger(DrawPacket.class);
 	private int x;
 	private int y;
 	private int width;
@@ -22,6 +31,8 @@ public class DrawPacket extends WindowPacket implements IImagePacket {
 	private byte[] data;
 	private int sequence;
 	private int rowstride;
+	private Map<String, Object> meta;
+
 
 	protected DrawPacket(int windowId, int x, int y, int width, int height, ImageEncoding encoding, byte[] data,
 			int sequence, int rowstride) {
@@ -38,14 +49,39 @@ public class DrawPacket extends WindowPacket implements IImagePacket {
 
 	public DrawPacket(List<Object> list) {
 		super(PacketUtils.asInt(list.get(1)), PacketType.DRAW);
+		list = new ArrayList<>(list);
 		this.x = PacketUtils.asInt(list.get(2));
 		this.y = PacketUtils.asInt(list.get(3));
 		this.width = PacketUtils.asInt(list.get(4));
 		this.height = PacketUtils.asInt(list.get(5));
 		this.encoding = ImageEncoding.parse(PacketUtils.asString(list.get(6)));
-		this.data = (byte[]) list.get(7);
+		Object data = list.get(7);
+		if (data instanceof String) {
+			// logger.debug(encoding + " as string");
+			this.data = ((String) data).getBytes();
+		} else {
+			// logger.debug(encoding + " as byte");
+			this.data = (byte[]) data;
+		}
+		// this.data = (byte[]) list.get(7);
 		this.sequence = PacketUtils.asInt(list.get(8));
 		this.rowstride = PacketUtils.asInt(list.get(9));
+		if (list.size() > 10) {
+			this.meta = PacketUtils.asStringObjectMap(list.get(10));
+			if (meta.containsKey("zlib")) {
+				Inflater zlib = new Inflater();
+				zlib.setInput(this.data);
+				byte[] bytes = new byte[width * height * 4];
+				try {
+					int numBytes = zlib.inflate(bytes);
+					this.data = Arrays.copyOf(bytes, numBytes);
+				} catch (DataFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		}
 	}
 
 	@Override
@@ -99,7 +135,7 @@ public class DrawPacket extends WindowPacket implements IImagePacket {
 	public String toString() {
 		return "DrawPacket [windowId=" + windowId + ", x=" + x + ", y=" + y + ", width=" + width + ", height=" + height
 				+ ", encoding=" + encoding + ", dataSize=" + data.length + ", sequence=" + sequence + ", rowstride="
-				+ rowstride + ", type=" + type + "]";
+				+ rowstride + ", type=" + type + ", meta=" + meta + "]";
 	}
 
 }

@@ -1,8 +1,10 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * This represents the metadata passed around for a new window.
@@ -13,8 +15,15 @@ public class WindowMetadata {
 
 	private Map<String, Object> metadata;
 
-	public WindowMetadata(Map<String, Object> metadata) {
-		this.metadata = metadata;
+	public WindowMetadata(Map<String, Object> raw) {
+		this.metadata = new HashMap<String, Object>();
+		for (Entry<String, Object> entry : raw.entrySet()) {
+			Object value = entry.getValue();
+			if (value instanceof byte[]) {
+				value = new String((byte[]) value);
+			}
+			this.metadata.put(entry.getKey(), value);
+		}
 	}
 
 	public List<String> getClassInstance() {
@@ -107,6 +116,10 @@ public class WindowMetadata {
 		if (ret != null) {
 			@SuppressWarnings("unchecked")
 			List<String> list = (List<String>) ret;
+			// List<String> list = new ArrayList<String>();
+			// for (byte[] b : ret) {
+			// list.add(new String(b));
+			// }
 			return list;
 		}
 		return new ArrayList<String>(0);
@@ -150,7 +163,7 @@ public class WindowMetadata {
 	}
 
 	private String getString(String key) {
-		return (String) metadata.get(key);
+		return (String) (metadata.get(key));
 	}
 
 	@Override

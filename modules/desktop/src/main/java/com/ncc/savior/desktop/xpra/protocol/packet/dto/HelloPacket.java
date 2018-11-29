@@ -92,7 +92,7 @@ public class HelloPacket extends Packet {
 
 		LOGGER.debug("max size: " + maxX + "x" + maxY);
 		int[] screen = new int[] { (int) maxX, (int) maxY };
-		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
+		String[] encodings = new String[] { "png" };
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
@@ -100,11 +100,18 @@ public class HelloPacket extends Packet {
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
 		int[][] screenSizes = getMonitorSizes();
 		map.put(SCREEN_SIZES, screenSizes);
+		map.put(ENCODINGS + ".core", encodings);
+		map.put(ENCODINGS + ".generic", false);
 		map.put(ENCODINGS, encodings);
-		map.put(ZLIB, true);
+		map.put(ENCODING, encodings[0]);
+		map.put(ZLIB, false);
 		map.put(CLIPBOARD, false);
 		map.put(NOTIFICATIONS, true);
 		map.put(CURSORS, true);
+		map.put("named_cursors", true);
+		// map.put("encodings.rgb_formats", new String[] { "rgb24" });
+		// map.put("encodings.cursor", encodings);
+
 		map.put(NAMED_CURSORS, true);
 		map.put(SERVER_WINDOW_MOVE_RESIZE, true);
 		map.put(SERVER_WINDOW_RESIZE, true);
@@ -112,7 +119,7 @@ public class HelloPacket extends Packet {
 		map.put(BENCODE, true);
 		map.put(RENCODE, false);
 		map.put(CHUNKED_COMPRESSION, true);
-		map.put(ENCODING, encodings[0]);
+
 		map.put(PLATFORM, System.getProperty("os.name").toLowerCase());
 		map.put(CAPABILITY_UUID, UUID.randomUUID().toString().replace("-", ""));
 
@@ -120,6 +127,8 @@ public class HelloPacket extends Packet {
 		map.put(KEYBOARD_SYNC, false);
 		map.put(XKBMAP_LAYOUT, Locale.getDefault().getLanguage());
 		map.put(XKBMAP_VARIANT, Locale.getDefault().getVariant());
+
+		map.put("generic-rgb-encodings", false);
 
 		map.put("wants_events", true);
 		map.put("share", true);

@@ -3,6 +3,7 @@ package com.ncc.savior.desktop.xpra.application.swing;
 import java.awt.AWTException;
 import java.awt.Cursor;
 import java.awt.HeadlessException;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Transparency;
@@ -27,10 +28,6 @@ import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.CursorPacket;
 import com.ncc.savior.desktop.xpra.protocol.packet.dto.Packet;
-
-
-
-
 
 /**
  * This class handles packets that aren't directly related to specific windows.
@@ -58,10 +55,10 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 		// this.cursorNameMap.put("col-resize", Cursor.getPredefinedCursor(Cursor.);
 		// this.cursorNameMap.put("row-resize", Cursor.getPredefinedCursor(Cursor.);
 		this.cursorNameMap.put("text", Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-		this.cursorNameMap.put("n-resize",  Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
-		this.cursorNameMap.put("s-resize",  Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
-		this.cursorNameMap.put("w-resize",  Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
-		this.cursorNameMap.put("e-resize",  Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+		this.cursorNameMap.put("n-resize", Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+		this.cursorNameMap.put("s-resize", Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
+		this.cursorNameMap.put("w-resize", Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+		this.cursorNameMap.put("e-resize", Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
 		this.cursorNameMap.put("ne-resize", Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR));
 		this.cursorNameMap.put("se-resize", Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR));
 		this.cursorNameMap.put("nw-resize", Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
@@ -126,10 +123,16 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 						+ packet.getBytes() + " Packet=" + packet);
 			}
 			try {
-				BufferedImage bimg = cursorPacketToBufferedImage(packet);
+				Image bimg = cursorPacketToBufferedImage(packet);
+				int dim = Math.max(bimg.getWidth(null), bimg.getHeight(null));
+				float mult = 1.5f;
+				dim *= mult;
+				BufferedImage bi = new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB);
+				bi.getGraphics().drawImage(bimg, 0, 0, null);
 				Toolkit kit = Toolkit.getDefaultToolkit();
-				Cursor imgCursor = kit.createCustomCursor(bimg, new Point(packet.getxHotspot(), packet.getyHotspot()),
-						packet.getName());
+				int xhot = (int) (packet.getxHotspot() * mult);
+				int yhot = (int) (packet.getyHotspot() * mult);
+				Cursor imgCursor = kit.createCustomCursor(bi, new Point(xhot, yhot), packet.getName());
 
 				SwingUtilities.invokeLater(new Runnable() {
 
@@ -154,7 +157,7 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 		}
 	}
 
-	private BufferedImage cursorPacketToBufferedImage(CursorPacket packet) {
+	private Image cursorPacketToBufferedImage(CursorPacket packet) {
 		int width = packet.getWidth();
 		int height = packet.getHeight();
 		ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_sRGB);
@@ -167,6 +170,7 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 
 		BufferedImage img = new BufferedImage(colorModel, raster, true, null);
 		img.getRaster().setDataElements(0, 0, width, height, packet.getBytes());
+		// return img.getScaledInstance(32, 32, 0);
 		return img;
 	}
 

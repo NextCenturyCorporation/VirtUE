@@ -79,6 +79,14 @@ public class XpraConnectionManager {
 			throws IOException {
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
+		// TODO DELETE ME
+		// File dir = DebugPacketHandler.getDefaultTimeBasedDirectory();
+		// dir = new File(dir, virtue.getId());
+		// dir.mkdirs();
+		// DebugPacketHandler debugHandler = new DebugPacketHandler(dir);
+		// client.addPacketListener(debugHandler);
+		// client.addPacketSendListener(debugHandler);
+		// TODO End debug
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.setErrorCallback((msg, e) -> {
 			applicationManager.closeAllWindows();
