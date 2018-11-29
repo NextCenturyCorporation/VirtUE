@@ -12,23 +12,19 @@ import { Printer } from '../../shared/models/printer.model';
  */
 @Component({
   selector: 'app-printer-modal',
-  templateUrl: './printer.modal.html',
-  styleUrls: ['./printer.modal.css']
+  templateUrl: './printer.modal.html' // ,
+  // styleUrls: ['./printer.modal.css']
 })
 export class PrinterModalComponent implements OnInit {
 
-  /** what the calling component subscribes to, in order to receive back the selected color */
+  /** what the calling component subscribes to, in order to receive back the created printer */
   createPrinter = new EventEmitter<Printer>();
 
   newPrinter: Printer;
 
-  /**
-   * #uncommented
-   */
   constructor(
     /** a reference to the dialog box itself */
     private dialogRef: MatDialogRef<PrinterModalComponent>,
-    /** #I don't think this is usable/necessary */
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
 

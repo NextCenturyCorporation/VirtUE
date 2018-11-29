@@ -60,7 +60,7 @@ public class VirtueTemplate {
 	private Collection<Printer> printers;
 
 	@ManyToMany()
-	@ElementCollection()
+	// @ElementCollection()
 	private Collection<FileSystem> fileSystems;
 
 	@ElementCollection()

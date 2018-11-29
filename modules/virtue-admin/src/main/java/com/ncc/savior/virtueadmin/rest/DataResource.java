@@ -558,14 +558,14 @@ public class DataResource {
 	 * This doesn't appear to be used?
 	 */
 	@GET
-	@Path("template/user/")
+	@Path("template/user")
 	@Produces("application/json")
 	public Collection<String> getAllUsersWithTemplates() {
 		return templateManager.getUsersWithTemplate();
 	}
 
 	@GET
-	@Path("user/")
+	@Path("user")
 	@Produces("application/json")
 	public Iterable<VirtueUser> getUsers() {
 		return userManager.getAllUsers();
@@ -667,21 +667,21 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("templates/clear/")
+	@Path("templates/clear")
 	public String clearTemplatesDatabase() {
 		templateManager.clear();
 		return "database cleared.";
 	}
 
 	@GET
-	// @Path("resources/clear/")
+	@Path("resources/clear")
 	public String clearResourcesDatabase() {
 		resourceManager.clear();
 		return "database cleared.";
 	}
 
 	@GET
-	@Path("active/clear/")
+	@Path("active/clear")
 	public String clearActiveDatabase() {
 		Iterable<VirtueInstance> all = activeVirtueDao.getAllActiveVirtues();
 		for (VirtueInstance vi : all) {
@@ -697,7 +697,7 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("user/clear/")
+	@Path("user/clear")
 	public String clearUsers() {
 		userManager.clear(false);
 		return "Users cleared.";
@@ -711,14 +711,14 @@ public class DataResource {
 	}
 
 	@GET
-	@Path("storage/clear/")
+	@Path("storage/clear")
 	public String clearStorage() {
 		persistentStorageManager.deleteAllPersistentStorage();
 		return "storage cleared";
 	}
 
 	@GET
-	@Path("clear/")
+	@Path("clear")
 	public String clearAll() {
 		clearActiveDatabase();
 		clearUsers();
