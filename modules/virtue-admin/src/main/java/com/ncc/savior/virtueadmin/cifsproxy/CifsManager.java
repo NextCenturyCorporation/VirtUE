@@ -79,7 +79,6 @@ public class CifsManager {
 		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
 
-		sync();
 		desktopService.addPollHandler(new PollHandler() {
 
 			@Override
