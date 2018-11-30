@@ -29,6 +29,7 @@ public class SwingImageEncoder {
 		// logger.debug("decoding image: " + encoding.toString());
 		switch (encoding) {
 		case png:
+		case jpeg:
 			// case rgb24:
 			BufferedImage img = null;
 			try {

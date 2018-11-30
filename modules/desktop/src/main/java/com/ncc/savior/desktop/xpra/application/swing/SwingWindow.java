@@ -165,7 +165,6 @@ public class SwingWindow extends XpraWindow {
 					if (closed) {
 						return;
 					}
-					logger.debug("draw packet: " + packet.getEncoding() + " " + packet);
 					Image img = SwingImageEncoder.decodeImage(packet.getEncoding(), packet.getData(), packet.getWidth(),
 							packet.getHeight());
 					if (img != null && !closed && canvas != null) {
