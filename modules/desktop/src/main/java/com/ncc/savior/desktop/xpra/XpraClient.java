@@ -41,7 +41,7 @@ import com.ncc.savior.desktop.xpra.protocol.packet.dto.SetDeflatePacket;
 public class XpraClient implements Closeable {
 
 	// public static final String VERSION = "0.15.0";
-	public static final String VERSION = "2.4.2";
+	public static final String VERSION = "2.1.2";
 	private static final Logger logger = LoggerFactory.getLogger(XpraClient.class);
 	private final IEncoder sendEncoder;
 	private PacketDistributer internalPacketDistributer;

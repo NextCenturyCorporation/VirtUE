@@ -92,7 +92,7 @@ public class HelloPacket extends Packet {
 
 		LOGGER.debug("max size: " + maxX + "x" + maxY);
 		int[] screen = new int[] { (int) maxX, (int) maxY };
-		String[] encodings = new String[] { "png" };
+		String[] encodings = new String[] { "jpeg", "png", "png/P" }; // h264
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
@@ -100,11 +100,11 @@ public class HelloPacket extends Packet {
 		map.put(CLIENT_TYPE, CLIENT_TYPE_VALUE);
 		int[][] screenSizes = getMonitorSizes();
 		map.put(SCREEN_SIZES, screenSizes);
-		map.put(ENCODINGS + ".core", encodings);
-		map.put(ENCODINGS + ".generic", false);
+		// map.put(ENCODINGS + ".core", encodings);
+		// map.put(ENCODINGS + ".generic", false);
 		map.put(ENCODINGS, encodings);
 		map.put(ENCODING, encodings[0]);
-		map.put(ZLIB, false);
+		map.put(ZLIB, true);
 		map.put(CLIPBOARD, false);
 		map.put(NOTIFICATIONS, true);
 		map.put(CURSORS, true);
@@ -128,7 +128,7 @@ public class HelloPacket extends Packet {
 		map.put(XKBMAP_LAYOUT, Locale.getDefault().getLanguage());
 		map.put(XKBMAP_VARIANT, Locale.getDefault().getVariant());
 
-		map.put("generic-rgb-encodings", false);
+		// map.put("generic-rgb-encodings", false);
 
 		map.put("wants_events", true);
 		map.put("share", true);
