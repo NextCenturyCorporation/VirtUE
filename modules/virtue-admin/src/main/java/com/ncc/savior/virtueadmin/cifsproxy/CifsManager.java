@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
@@ -60,6 +61,9 @@ public class CifsManager {
 	private String serverId;
 	private ArrayList<String> securityGroupIds;
 
+	@Value("${virtue.test:false}")
+	private boolean test;
+
 	public CifsManager(ServerIdProvider serverIdProvider, IActiveVirtueManager activeVirtueManager,
 			DesktopVirtueService desktopService, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
 			CompletableFutureServiceProvider serviceProvider, String cifsProxyAmi, String cifsProxyLoginUser,
@@ -74,7 +78,7 @@ public class CifsManager {
 		this.instanceType = InstanceType.fromValue(instanceType);
 		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
-		sync();
+
 		desktopService.addPollHandler(new PollHandler() {
 
 			@Override
@@ -107,45 +111,47 @@ public class CifsManager {
 
 	}
 
-	private void sync() {
-		AmazonEC2 ec2 = wrapper.getEc2();
-		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
-		List<Filter> filters = new ArrayList<Filter>();
-		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
-		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_PRIMARY)
-				.withValues(VirtuePrimaryPurpose.CIFS_PROXY.toString()));
-		describeInstancesRequest.withFilters(filters);
-		DescribeInstancesResult result = ec2.describeInstances(describeInstancesRequest);
-		List<Reservation> reservations = result.getReservations();
-		Collection<VirtualMachine> allVmsInDb = cifsProxyDao.getAllCifsVms();
-		List<String> instancesToBeTerminated = new ArrayList<String>();
+	protected void sync() {
+		if (!test) {
+			AmazonEC2 ec2 = wrapper.getEc2();
+			DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
+			List<Filter> filters = new ArrayList<Filter>();
+			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+			filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_PRIMARY)
+					.withValues(VirtuePrimaryPurpose.CIFS_PROXY.toString()));
+			describeInstancesRequest.withFilters(filters);
+			DescribeInstancesResult result = ec2.describeInstances(describeInstancesRequest);
+			List<Reservation> reservations = result.getReservations();
+			Collection<VirtualMachine> allVmsInDb = cifsProxyDao.getAllCifsVms();
+			List<String> instancesToBeTerminated = new ArrayList<String>();
 
-		for (Reservation res : reservations) {
-			for (Instance instance : res.getInstances()) {
-				boolean match = false;
-				String idOfAwsInstance = instance.getInstanceId();
-				for (VirtualMachine vmInDb : allVmsInDb) {
-					String dbId = vmInDb.getInfrastructureId();
-					if (idOfAwsInstance.equals(dbId)) {
-						match = true;
+			for (Reservation res : reservations) {
+				for (Instance instance : res.getInstances()) {
+					boolean match = false;
+					String idOfAwsInstance = instance.getInstanceId();
+					for (VirtualMachine vmInDb : allVmsInDb) {
+						String dbId = vmInDb.getInfrastructureId();
+						if (idOfAwsInstance.equals(dbId)) {
+							match = true;
+						}
+					}
+					if (!match) {
+						instancesToBeTerminated.add(idOfAwsInstance);
 					}
 				}
-				if (!match) {
-					instancesToBeTerminated.add(idOfAwsInstance);
-				}
 			}
-		}
-		logger.debug("sync is removing instances=" + instancesToBeTerminated);
-		if (!instancesToBeTerminated.isEmpty()) {
-			try {
-				logger.debug("Attempting to delete extra CIFS Proxy ec2 instances with ids=" + instancesToBeTerminated);
-				TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(
-						instancesToBeTerminated);
-				wrapper.getEc2().terminateInstances(terminateInstancesRequest);
-			} catch (AmazonEC2Exception e) {
-				logger.warn(
-						"Failed to terminate extra CIFS Proxy ec2 instances.  InstanceIds=" + instancesToBeTerminated,
-						e);
+			logger.debug("sync is removing instances=" + instancesToBeTerminated);
+			if (!instancesToBeTerminated.isEmpty()) {
+				try {
+					logger.debug(
+							"Attempting to delete extra CIFS Proxy ec2 instances with ids=" + instancesToBeTerminated);
+					TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(
+							instancesToBeTerminated);
+					wrapper.getEc2().terminateInstances(terminateInstancesRequest);
+				} catch (AmazonEC2Exception e) {
+					logger.warn("Failed to terminate extra CIFS Proxy ec2 instances.  InstanceIds="
+							+ instancesToBeTerminated, e);
+				}
 			}
 		}
 	}

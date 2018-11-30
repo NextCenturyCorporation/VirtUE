@@ -87,7 +87,7 @@
 		<constructor-arg value="${virtue.cifs.timeoutMills}"></constructor-arg>
 	</bean>
 
-	<bean name="cifsProxyManager" class="com.ncc.savior.virtueadmin.cifsproxy.CifsManager">
+	<bean name="cifsProxyManager" class="com.ncc.savior.virtueadmin.cifsproxy.CifsManager" init-method="sync">
 		<constructor-arg ref="serverIdProvider"></constructor-arg>
 		<constructor-arg ref="activeVirtueManager"></constructor-arg>
 		<constructor-arg ref="desktopService"></constructor-arg>
