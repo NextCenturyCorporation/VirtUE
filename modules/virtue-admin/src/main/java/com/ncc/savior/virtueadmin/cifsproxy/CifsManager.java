@@ -111,7 +111,7 @@ public class CifsManager {
 
 	}
 
-	private void sync() {
+	protected void sync() {
 		if (!test) {
 			AmazonEC2 ec2 = wrapper.getEc2();
 			DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
