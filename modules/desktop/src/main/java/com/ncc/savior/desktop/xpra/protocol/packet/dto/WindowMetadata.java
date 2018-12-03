@@ -116,24 +116,10 @@ public class WindowMetadata {
 		if (ret != null) {
 			@SuppressWarnings("unchecked")
 			List<String> list = (List<String>) ret;
-			// List<String> list = new ArrayList<String>();
-			// for (byte[] b : ret) {
-			// list.add(new String(b));
-			// }
 			return list;
 		}
 		return new ArrayList<String>(0);
 	}
-
-	// private List<Integer> getIntegerList(String key) {
-	// Object ret = metadata.get(key);
-	// if (ret != null) {
-	// @SuppressWarnings("unchecked")
-	// List<Integer> list = (List<Integer>) ret;
-	// return list;
-	// }
-	// return new ArrayList<Integer>(0);
-	// }
 
 	private boolean getBoolean(String key) {
 		return getBoolean(key, false);
