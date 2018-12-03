@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, OnInit, Injectable, EventEmitter, Output } from '@angular/core';
 import {  MatButtonModule,
           MatDialog,
           MatIconModule
@@ -23,16 +23,19 @@ import {
 } from '../../../shared/models/column.model';
 
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
-import { FileSysPermission } from '../../../shared/models/fileSysPermission.model';
+import { FileSystem } from '../../../shared/models/fileSystem.model';
 import { Printer } from '../../../shared/models/printer.model';
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
+
+import { PrinterSelectionModalComponent } from '../../../modals/printer-modal/printer-selection.modal';
+import { FileSystemSelectionModalComponent } from '../../../modals/fileSystem-modal/fileSystem-selection.modal';
 
 import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
 import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component';
+
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
 import { SelectionMode } from '../../../shared/abstracts/gen-table/selectionMode.enum';
 
@@ -45,31 +48,31 @@ import { NetworkProtocols } from '../../protocols.enum';
  *
  * This has four sub-tabs at the moment:
  *    - 'General'
- *      - Color
- *      - default browser
- *      - provisioned or not (?) #TODO
- *      - list of virtues this one can paste data into
+ *        - Color
+ *        - default browser
+ *        - provisioned or not (?) #TODO
+ *        - list of virtues this one can paste data into
  *    - 'Network'
- *      - list of permitted connections
+ *        - list of permitted connections
  *    - 'Resources'
- *      - file system permissions
- *        - editable list, generated from global settings? #TODO
- *        - for each file system, R/W/E permissions can be given.
- *      - Printers
- *        - editable list, pulled from global settings.
+ *        - file system permissions
+ *            - editable list, generated from global settings #TODO
+ *            - for each file system, R/W/E permissions can be given.
+ *        - Printers
+ *            - editable list, pulled from global settings.
  *    - 'Sensors'
- *      - Nothing at the moment #TODO
+ *        - Nothing at the moment #TODO
  *
  * At the moment, only 'color' is saved to the backend.
  *
- * @extends [[GenericFormTabComponent]]
+ * @extends [[ItemFormTabComponent]]
  */
 @Component({
   selector: 'app-virtue-settings-tab',
   templateUrl: './virtue-settings.component.html',
   styleUrls: ['./virtue-settings.component.css']
 })
-export class VirtueSettingsTabComponent extends GenericFormTabComponent implements OnInit {
+export class VirtueSettingsTabComponent extends ItemFormTabComponent implements OnInit {
 
   /** a table to display the Virtues that this Virtue is allowd to paste data into */
   @ViewChild('allowedPasteTargetsTable') private allowedPasteTargetsTable: GenericTableComponent<Virtue>;
@@ -78,7 +81,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   @ViewChild('networkPermsTable') private networkPermsTable: GenericTableComponent<NetworkPermission>;
 
   /** a table to display the file system permissions of this Virtue */
-  @ViewChild('fileSysPermsTable') private fileSysPermsTable: GenericTableComponent<FileSysPermission>;
+  @ViewChild('fileSystemsPermsTable') private fileSystemsPermsTable: GenericTableComponent<FileSystem>;
 
   /** a table to display the printers this Virtue can access */
   @ViewChild('printerTable') private printerTable: GenericTableComponent<Printer>;
@@ -86,24 +89,24 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   /** re-classing item, to make it easier and less error-prone to work with. */
   protected item: Virtue;
 
-  /** local reference to the virtue-form's allVirtues variable. */
-  private allVirtues: DictList<Virtue>;
+  /** to notify the parent item form that one of this.item's lists of child ids has been changed */
+  @Output() onChildrenChange: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   /**
-   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
   constructor(
-    router: Router,
-    dialog: MatDialog) {
+      router: Router,
+      dialog: MatDialog) {
     super(router, dialog);
 
-    this.item = new Virtue({});
+    this.item = new Virtue();
 
     this.tabName = 'Settings';
   }
 
   /**
-   * See [[GenericFormTabComponent.init]] for generic info
+   * See [[ItemFormTabComponent.init]] for generic info
    *
    * @param mode the [[Mode]] to set up the page in.
    */
@@ -120,7 +123,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being viewed/edited in the [[VirtueComponent]] parent
    */
@@ -134,7 +137,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   }
 
   /**
-   * See [[GenericFormTabComponent.update]] for generic info
+   * See [[ItemFormTabComponent.update]] for generic info
    * This allows the parent component to update this tab's mode, as well its allowedPasteTargetsTable
    *
    * This re-builds some parts of the table upon mode update, to allow the columns and row options to change dynamically
@@ -147,9 +150,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   update(changes: any): void {
     if (changes.allVirtues) {
-      this.allVirtues = changes.allVirtues;
-
-      this.updatePasteableVirtuesTable();
+      this.updatePasteableVirtuesTable(changes.allVirtues);
     }
 
     if (changes.mode) {
@@ -178,8 +179,6 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * @return true if all network permission fields have been filled out
    */
   collectData(): boolean {
-    console.log("collectData");
-
     // check all entries for validity before allowing save
 
     if (!this.checkNetworkPerms()) {
@@ -196,12 +195,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    * to their index, and so if you put a ngModel on (apparently) any part of an element within an ngFor, it loses track (??) of
    * that item and hangs - as in, Angular hangs. And the containing tab needs to be killed either through the browser's
    * tab manager, or the browser needs to be killed at the system level (xkill, system process manager, kill, killall, etc.).
-   * This is prevented by manually telling it track things by index, using the below code, adding "; trackBy: indexTracker" to the
-   * end of the ngFor statement.
+   * This is prevented by manually telling it track things by index, using the below code, and adding "; trackBy: indexTracker" to
+   * the end of the offending ngFor statement.
    * ...
    *
    * @param index an index, automagically passed in.
-   * @param value a value, auto{black}magically passed in.
+   * @param value a value, automagically passed in.
    * @return the index that was passed in.
    */
   indexTracker(index: number, value: any): number {
@@ -218,7 +217,7 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getPrinterColumns(): Column[] {
     return [
-      new TextColumn('Printer Info',    6, (p: Printer) => p.info, SORT_DIR.ASC),
+      new TextColumn('Printer Name',    6, (p: Printer) => p.name, SORT_DIR.ASC),
       new TextColumn('Printer Status',  4, (p: Printer) => p.status, SORT_DIR.ASC),
       new IconColumn('Revoke access',  2, 'delete', (p: Printer) => this.removePrinter(p)
       )
@@ -240,40 +239,149 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       filters: [],
       tableWidth: 1,
       noDataMsg: "No printers have been added yet to this Virtue.",
+      elementIsDisabled: (p: Printer) => !p.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }
 
   updatePrinterTable() {
-    this.printerTable.populate(this.item.allowedPrinters);
+    if (this.printerTable === undefined) {
+      return;
+    }
+    this.printerTable.populate(this.item.printers.asList());
   }
 
-  /**
-   * This adds a new printer object to the Virtue's printer list.
-   * This is very much a temporary measure.
-   */
-  addNewPrinter(): void {
-    this.item.allowedPrinters.push(new Printer("And another printer"));
-    this.updatePrinterTable();
-  }
 
   /**
    * This removes a printer from the Virtue's printer list, using the printer's address as an ID.
    * Note that if there are several matching printers, only the first one is removed.
    */
   removePrinter(toDelete: Printer): void {
-    let index = 0;
-    for (let printer of this.item.allowedPrinters) {
-      if (printer.address === toDelete.address) {
-        break;
-      }
-      index++;
-    }
-    this.item.allowedPrinters.splice(index, 1);
+    this.item.removePrinter(toDelete);
     this.updatePrinterTable();
   }
 
 
+  /**
+   * this brings up the subclass-defined-modal to add/remove children.
+   *
+   * Note the distinction between this and DialogsComponent;
+   * This pops up to display options, or a selectable table, or something. DialogsComponent just checks
+   * potentially dangerous user actions.
+   */
+  activatePrinterModal(): void {
+
+    let params = {
+      height: '70%',
+      width: '70%',
+      data: {
+        selectedIDs: this.item.getRelatedIDList(DatasetNames.PRINTERS)
+      }
+    };
+
+    let dialogRef = this.dialog.open( PrinterSelectionModalComponent, params);
+
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedIds) => {
+      this.item.printerIds = selectedIds;
+      this.onChildrenChange.emit();
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%' });
+
+  }
+
+/************************************************************************************/
+/************************************************************************************/
+
+  updateFileSysPermsTable(): void {
+    if (this.fileSystemsPermsTable === undefined) {
+      return;
+    }
+    this.fileSystemsPermsTable.populate(this.item.fileSystems.asList());
+  }
+
+  /**
+   * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
+   * these things aren't Items. Generalizing the GenericTable further would be useful.
+   * @return what columns should show up in the network permissions table
+   */
+  getFileSysColumns(): Column[] {
+    return [
+      new TextColumn('Server & Drive',  3, (fs: FileSystem) => fs.name, SORT_DIR.ASC),
+      new TextColumn('Address',         3, (fs: FileSystem) => fs.address, SORT_DIR.ASC),
+      new CheckboxColumn('Enabled',     2, 'enabled'),
+      new CheckboxColumn('Read',        1, 'readPerm'),
+      new CheckboxColumn('Write',       1, 'writePerm'),
+      new CheckboxColumn('Execute',     1, 'executePerm'),
+      new IconColumn('Revoke access',   1, 'delete', (fs: FileSystem) => this.removeFileSystem(fs))
+    ];
+  }
+
+  /**
+   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
+   *
+   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
+   */
+  setUpFileSysPermsTable(): void {
+    if (this.fileSystemsPermsTable === undefined) {
+      return;
+    }
+    this.fileSystemsPermsTable.setUp({
+      cols: this.getFileSysColumns(),
+      filters: [],
+      tableWidth: 1,
+      noDataMsg: "No file systems have been set up in the global settings",
+      elementIsDisabled: (fs: FileSystem) => !fs.enabled,
+      disableLinks: () => !this.inViewMode(),
+      editingEnabled: () => !this.inViewMode()
+    });
+  }
+
+  removeFileSystem(toDelete: FileSystem): void {
+    this.item.removeFileSystem(toDelete);
+    this.updateFileSysPermsTable();
+  }
+
+  /**
+   * this brings up the subclass-defined-modal to add/remove children.
+   *
+   * Note the distinction between this and DialogsComponent;
+   * This pops up to display options, or a selectable table, or something. DialogsComponent just checks
+   * potentially dangerous user actions.
+   */
+  activateFileSystemModal(): void {
+
+    let params = {
+      height: '70%',
+      width: '70%',
+      data: {
+        selectedIDs: this.item.getRelatedIDList(DatasetNames.FILE_SYSTEMS)
+      }
+    };
+
+    let dialogRef = this.dialog.open( FileSystemSelectionModalComponent, params);
+
+    let sub = dialogRef.componentInstance.getSelections.subscribe((selectedIds) => {
+      this.item.fileSystemIds = selectedIds;
+      this.onChildrenChange.emit();
+    },
+    () => { // on error
+      sub.unsubscribe();
+    },
+    () => { // when finished
+      sub.unsubscribe();
+    });
+
+    dialogRef.updatePosition({ top: '5%' });
+
+  }
 /************************************************************************************/
 /************************************************************************************/
 
@@ -284,14 +392,15 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getNetworkColumns(): Column[] {
     return [
-      new InputFieldColumn('Host',        4, 'destination', (netPerm: NetworkPermission) => netPerm.destination),
+      new InputFieldColumn('Host',        4, 'host', (netPerm: NetworkPermission) => netPerm.host),
       new DropdownColumn(  'Protocol',    3, 'protocol', () => Object.values(NetworkProtocols),
                           (protocol: NetworkProtocols) => protocol, (netPerm: NetworkPermission) => String(netPerm.protocol)),
       new InputFieldColumn('Local Port',  2, 'localPort', (netPerm: NetworkPermission) => String(netPerm.localPort)),
       new InputFieldColumn('Remote Port', 2, 'remotePort', (netPerm: NetworkPermission) => String(netPerm.remotePort)),
-      new IconColumn('Revoke',  1, 'delete', (idx: number) => this.removeNetwork(idx))
+      new IconColumn('Revoke',  1, 'delete', (netPerm: NetworkPermission) => this.removeNetwork(netPerm))
     ];
   }
+
   /**
    * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
    *
@@ -315,22 +424,36 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   * Once data has been pulled, fill in the table with
   */
   updateNetworkPermsTable(): void {
-    this.networkPermsTable.populate(this.item.networkWhiteList);
+    if (this.networkPermsTable === undefined) {
+      return;
+    }
+    this.networkPermsTable.populate(this.item.networkWhitelist);
   }
 
   /**
   * Add a new netork permission to the virtue.
   */
   addNewNetworkPermission(): void {
-    this.item.networkWhiteList.push(new NetworkPermission());
+    this.item.networkWhitelist.push(new NetworkPermission());
     this.updateNetworkPermsTable();
   }
 
   /**
    * This removes a network from the virtue's whitelist.
    */
-  removeNetwork(idx: number): void {
-    this.item.networkWhiteList.splice(idx, 1);
+  removeNetwork(netPerm: NetworkPermission): void {
+    if (this.item.networkWhitelist === undefined || this.item.networkWhitelist.length === 0) {
+      return;
+    }
+
+    let idx = 0;
+    for (let nP of this.item.networkWhitelist) {
+      if (netPerm.equals(nP)) {
+        break;
+      }
+      idx++;
+    }
+    this.item.networkWhitelist.splice(idx, 1);
     this.updateNetworkPermsTable();
   }
 
@@ -340,93 +463,19 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   *         false otherwise
   */
   checkNetworkPerms(): boolean {
-    for (let networkPermission of this.item.networkWhiteList) {
-      if ( !this.checkEnteredPermValid(networkPermission) ) {
+    for (let networkPermission of this.item.networkWhitelist) {
+      if ( !networkPermission.checkValid() ) {
         return false;
       }
     }
     return true;
   }
 
-  /**
-  * Check a particular network permission - all 4 of its fields should be filled out and valid.
-  * @return true if all fields are valid.
-  */
-  checkEnteredPermValid(netPerm: NetworkPermission): boolean {
-
-    // instead of checking  '<=='
-    // first make sure that the ports aren't 0, because checking !port will be true
-    // if port === 0. Which would make the wrong error message appear.
-    if (netPerm.localPort === 0 || netPerm.remotePort === 0) {
-      console.log("Ports on network permissions must be greater than zero.");
-      return false;
-    }
-
-    if ( !netPerm.destination || !netPerm.protocol
-      || !netPerm.localPort   || !netPerm.remotePort ) {
-      console.log("Network permission fields cannot be blank");
-      return false;
-    }
-
-    // if ( !(netPerm.localPort instanceof Number) || !(netPerm.remotePort instanceof Number) ) {
-    //   console.log("Local and Remote ports must be numbers.");
-    //   return false;
-    // }
-
-    if (netPerm.localPort < 0 || netPerm.remotePort < 0) {
-      console.log("Ports on network permissions must be greater than zero.");
-      return false;
-    }
-    return true;
-  }
-
-
-/************************************************************************************/
-/************************************************************************************/
-
-  updateFileSysPermsTable(): void {
-    this.fileSysPermsTable.populate(this.item.fileSysPerms);
-  }
-  /**
-   * Note that this is done in the style of a GenericTable, but doesn't actually use one, because
-   * these things aren't Items. Generalizing the GenericTable further would be useful.
-   * @return what columns should show up in the network permissions table
-   */
-  getFileSysColumns(): Column[] {
-    return [
-      new TextColumn('Server & Drive',  6, (fs: FileSysPermission) => fs.location, SORT_DIR.ASC),
-      new CheckboxColumn('Enabled',     3, 'enabled'),
-      new CheckboxColumn('Read',        1, 'read'),
-      new CheckboxColumn('Write',       1, 'write'),
-      new CheckboxColumn('Execute',     1, 'execute')
-    ];
-  }
-
-  /**
-   * Sets up the table describing what Virtues this Virtue is allowed to paste data into.
-   *
-   * See [[GenericTable.setUp]]() for details on what needs to be passed into the table's setUp function.
-   */
-  setUpFileSysPermsTable(): void {
-    if (this.fileSysPermsTable === undefined) {
-      return;
-    }
-    this.fileSysPermsTable.setUp({
-      cols: this.getFileSysColumns(),
-      filters: [],
-      tableWidth: 1,
-      noDataMsg: "No file systems have been set up in the global settings",
-      elementIsDisabled: (fs: FileSysPermission) => !fs.enabled,
-      editingEnabled: () => !this.inViewMode()
-    });
-  }
-
-
 /************************************************************************************/
 /************************************************************************************/
 
   /**
-   * See [[GenericListComponent.getSubMenu]] for more details on this sort
+   * See [[ItemListComponent.getSubMenu]] for more details on this sort
    * of method.
    *
    * @return Just a list with one option: to remove the attached Virtue from the list of ones this one can paste data into.
@@ -434,10 +483,11 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
   getPasteSubMenu(): SubMenuOptions[] {
     return [
        new SubMenuOptions("Remove", () => true, (i: Item) => {
-         let index = this.item.allowedPasteTargets.indexOf(i.getID(), 0);
+         let index = this.item.allowedPasteTargetIds.indexOf(i.getID(), 0);
          if (index > -1) {
-            this.item.allowedPasteTargets.splice(index, 1);
+            this.item.allowedPasteTargetIds.splice(index, 1);
          }
+         this.item.allowedPasteTargets.remove(i.getID());
          this.updatePasteableVirtuesTable();
        }
      )];
@@ -449,9 +499,9 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   getPasteColumns(): Column[] {
     return [
-      new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Template Name',  4, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
                                                                                         () => this.getPasteSubMenu()),
-      new ListColumn<Item>('Available Applications', 4, this.getGrandchildren,  this.formatName),
+      new ListColumn('Available Applications', 4, (v: Virtue) => v.getVmApps(),  this.formatName),
       new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
@@ -475,35 +525,35 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
       tableWidth: 0.85,
       noDataMsg: this.getNoPasteDataMsg(),
       elementIsDisabled: (v: Virtue) => !v.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }
 
   /**
-   * Once data has been pulled, fill in the table with the Virtue's current allow paste targets, if it has any.
+   * Fill in the table with the Virtue's current allow paste targets, if it has any.
+   * Use more recent definitions, if they are given.
    */
-  updatePasteableVirtuesTable(): void {
-
-    if ( !(this.allVirtues) ) {
+  updatePasteableVirtuesTable(allVirtues?: DictList<Virtue>): void {
+    if (this.allowedPasteTargetsTable === undefined) {
       return;
     }
 
-    let items = [];
-    for (let vID of this.item.allowedPasteTargets) {
-      if (this.allVirtues.has(vID)) {
-        items.push(this.allVirtues.get(vID));
-      }
+    let items: Item[] = this.item.allowedPasteTargets.asList();
+    if (allVirtues) {
+      items = allVirtues.getSubset(this.item.allowedPasteTargetIds).asList();
     }
     this.allowedPasteTargetsTable.populate(items);
+
   }
 
   /**
    * this brings up the modal to add/remove virtues that this Virtue has permission to paste data into.
    */
    activatePastableVirtueModal(): void {
-     this.activateVirtueSelectionModal( this.item.allowedPasteTargets, (selectedVirtues: string[]) => {
-         this.item.allowedPasteTargets = selectedVirtues;
-         this.updatePasteableVirtuesTable();
+     this.activateVirtueSelectionModal( this.item.allowedPasteTargetIds, (selectedVirtueIds: string[]) => {
+         this.item.allowedPasteTargetIds = selectedVirtueIds;
+         this.onChildrenChange.emit();
        });
    }
   /**
@@ -533,8 +583,8 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
    */
   activateDefaultBrowserVirtueModal(): void {
     this.activateVirtueSelectionModal(
-        [this.item.defaultBrowserVirtue],
-        (selectedVirtues: string[]) => {this.item.defaultBrowserVirtue = selectedVirtues[0]; },
+        [this.item.defaultBrowserVirtueId],
+        (selectedVirtueIds: string[]) => { this.item.defaultBrowserVirtueId = selectedVirtueIds[0]; },
         SelectionMode.SINGLE
       );
   }
@@ -609,13 +659,12 @@ export class VirtueSettingsTabComponent extends GenericFormTabComponent implemen
     dialogRef.updatePosition({ top: '5%', left: String(Math.floor(50 - wPercentageOfScreen / 2)) + '%' });
 
     const sub = dialogRef.componentInstance.selectColor.subscribe((newColor) => {
-      if (newColor !== "") {
         this.item.color = newColor;
-      }
-    },
-    () => {},
-    () => {
+      });
+
+    let closedSub = dialogRef.afterClosed().subscribe(() => {
       sub.unsubscribe();
+      closedSub.unsubscribe();
     });
   }
 

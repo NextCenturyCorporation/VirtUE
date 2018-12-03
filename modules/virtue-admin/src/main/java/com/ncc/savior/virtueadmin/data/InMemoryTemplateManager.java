@@ -186,27 +186,28 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	public ApplicationDefinition getApplicationDefinition(String applicationId) {
 		ApplicationDefinition app = applications.get(applicationId);
 		if (app == null) {
-			throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND, "not found");
+			throw new SaviorException(SaviorErrorCode.APPLICATION_NOT_FOUND, "not found");
 		}
 		return app;
 	}
 
 	@Override
 	public VirtueTemplate getVirtueTemplateForUser(VirtueUser user, String templateId) {
-		Collection<String> userTemplates = userToTemplateId.get(user.getUsername());
-		if (userTemplates != null && userTemplates.contains(templateId)) {
+		Collection<String> usersVirtueTemplates = userToTemplateId.get(user.getUsername());
+		if (usersVirtueTemplates != null && usersVirtueTemplates.contains(templateId)) {
 			return getTemplate(templateId);
 		}
 		return null;
 	}
 
 	@Override
-	public void addVirtueTemplate(VirtueTemplate template) {
+	public VirtueTemplate addVirtueTemplate(VirtueTemplate template) {
 		Collection<ApplicationDefinition> apps = template.getApplications();
 		verifyAppsExist(apps);
 		Collection<VirtualMachineTemplate> vmts = template.getVmTemplates();
 		verifyVmTemplatesExist(vmts);
 		templates.put(template.getId(), template);
+		return template;
 	}
 
 	@Override
@@ -231,7 +232,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 			}
 			list.add(virtueTemplateId);
 		} else {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_NOT_FOUND,
 					"Unable to find Virtue Template Id=" + virtueTemplateId);
 		}
 	}
@@ -244,7 +245,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 				list.remove(virtueTemplateId);
 			}
 		} else {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_TEMPLATE_NOT_FOUND,
 					"Unable to find Virtue Template Id=" + virtueTemplateId);
 		}
 	}
@@ -267,7 +268,7 @@ public class InMemoryTemplateManager implements ITemplateManager {
 	private void verifyAppsExist(Collection<ApplicationDefinition> apps) {
 		for (ApplicationDefinition app : apps) {
 			if (!applications.containsKey(app.getId())) {
-				throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND,
+				throw new SaviorException(SaviorErrorCode.APPLICATION_NOT_FOUND,
 						"Application ID=" + app + " not found.");
 			}
 		}

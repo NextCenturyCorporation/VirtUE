@@ -71,3 +71,18 @@
   border: 1px solid #B2B2B2;
   overflow-y: scroll;
 }
+
+
+
+
+.fab-button {
+  background-color: #009700;
+  transform: scale(0.5);
+}
+
+
+.plus {
+  transform: scale(1.8);
+  color: white;
+  fill: white;
+}

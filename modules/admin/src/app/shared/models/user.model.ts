@@ -4,47 +4,57 @@ import { Virtue } from './virtue.model';
 
 import { DictList } from './dictionary.model';
 
+import { IndexedObj } from './indexedObj.model';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
+import { Subdomains } from '../services/subdomains.enum';
+
 /**
 * @class
  * Represents a User.
- * Children are Virtue objects.
  *
  * @extends [[Item]]
  */
 export class User extends Item {
 
   /** What roles this User is granted - currently can be 'User' and/or 'Admin' */
-  roles: string[];
+  roles: string[] = [];
+
+  /** #uncommented */
+  virtueTemplates: DictList<Virtue> = new DictList<Virtue>();
+
+  /** #uncommented */
+  virtueTemplateIds: string[] = [];
 
   /**
    * convert from whatever form the user object is in the database.
    *
    * @param userObj a user record, retrieved from the backend, which we want to convert into a User.
    */
-  constructor(userObj) {
+  constructor(userObj?) {
     super();
+    this.parentDomain = '/users';
+
     if (userObj) {
       this.name = userObj.username;
-      if (!userObj.authorities) {
-        this.roles = [];
-      }
-      else {
-        this.roles = userObj.authorities;
-      }
-
-      if (!userObj.virtueTemplateIds) {
-        this.childIDs = [];
-      }
-      else {
-        this.childIDs = userObj.virtueTemplateIds;
-      }
-
+      this.roles = userObj.authorities;
       this.enabled = userObj.enabled;
-
-      this.parentDomain = '/users';
+      this.virtueTemplateIds = userObj.virtueTemplateIds;
     }
-    else {
-      this.roles = [];
+  }
+
+  /**
+   * @return the USERS subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.USERS;
+  }
+
+  /**
+   * #uncommented
+   */
+  buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
+    if (datasetName === DatasetNames.VIRTUES) {
+      this.virtueTemplates = dataset.getSubset(this.virtueTemplateIds) as DictList<Virtue>;
     }
   }
 
@@ -63,5 +73,61 @@ export class User extends Item {
    */
   setID(id: string) {
     this.name = id;
+  }
+
+
+  /** @override [[Item.getRelatedDict]] */
+  getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
+    if (datasetName === DatasetNames.VIRTUES) {
+      return this.virtueTemplates;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    return undefined;
+  }
+
+  /**
+   * Currently Users only have one type of children, so just return that.
+   *
+   * @override [[Item.getRelatedIDList]]
+   */
+  getRelatedIDList(datasetName: DatasetNames): string[] {
+
+    if (datasetName === DatasetNames.VIRTUES) {
+      return this.virtueTemplateIds;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    return [];
+  }
+
+  getVirtues(): IndexedObj[] {
+    return this.getChildren(DatasetNames.VIRTUES);
+  }
+
+  getVirtueVms(): IndexedObj[] {
+    return this.getGrandChildren(DatasetNames.VIRTUES, DatasetNames.VMS);
+  }
+
+  removeUnspecifiedChild(childObj: IndexedObj): void {
+    if (childObj instanceof Virtue) {
+      this.removeVirtue(childObj);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Virtue.");
+    }
+  }
+
+  removeVirtue(virtue: Virtue) {
+    this.removeChild(virtue.getID(), DatasetNames.VIRTUES);
+  }
+
+  protected getInBackendFormat() {
+    let user = {
+      username: this.name,
+      authorities: this.roles,
+      enabled: this.enabled,
+      virtueTemplateIds: this.virtueTemplateIds
+    };
+
+    return user;
   }
 }

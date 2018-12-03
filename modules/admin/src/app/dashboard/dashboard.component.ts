@@ -8,16 +8,19 @@ import { SensingModel } from '../shared/models/sensing.model';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { SensingService } from '../shared/services/sensing.service';
-import { ItemService } from '../shared/services/item.service';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
+import { DataRequestService } from '../shared/services/dataRequest.service';
 
-import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 import { Column, TextColumn, SORT_DIR } from '../shared/models/column.model';
-import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.component';
+import { ItemListComponent } from '../shared/abstracts/item-list/item-list.component';
 
 /**
  * Note: this class will be significantly overhauled soon, to actually implement connection to the sensors
- * #uncommented
+ *
+ * #uncommented #unimplemented
+ *
+ * It really shouldn't even extend that class. It'll probably eventually have a few tables, but certainly more than that.
+ * Ideally graphs and whatnot. This may be the most interesting page here.
  * @class
  * @extends
  */
@@ -25,9 +28,9 @@ import { GenericListComponent } from '../shared/abstracts/gen-list/gen-list.comp
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
-  providers: [ BaseUrlService, SensingService, ItemService ]
+  providers: [ BaseUrlService, SensingService, DataRequestService ]
 })
-export class DashboardComponent extends GenericListComponent {
+export class DashboardComponent extends ItemListComponent {
 
   // not used, but probably should be
   // form: FormGroup;
@@ -70,30 +73,25 @@ export class DashboardComponent extends GenericListComponent {
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog,
     /**
      * #uncommented
      */
     private sensingService: SensingService,
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
 
   }
 
   /**
    * #uncommented
-   * @param
    *
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    * @return
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.VIRTUES,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
   }
 
   /**
@@ -130,7 +128,7 @@ export class DashboardComponent extends GenericListComponent {
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent]].
    */
   getColumns(): Column[] {
     return [
@@ -149,7 +147,7 @@ export class DashboardComponent extends GenericListComponent {
    * @return
    */
   getVirtName(d: any): string {
-    return this.allVirtues.get(d.virtue_id).getName();
+    return this.datasets[DatasetNames.VIRTUES].get(d.virtue_id).getName();
   }
 
   /**

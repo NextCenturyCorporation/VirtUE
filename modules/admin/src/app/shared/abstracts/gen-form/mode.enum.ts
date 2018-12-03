@@ -1,7 +1,7 @@
 
 /**
  * @enum
- * The mode a form page can be in. See [[GenericFormComponent]].
+ * The mode a form page can be in. See [[ItemFormComponent]].
  */
 export enum Mode {
   CREATE = "Create",

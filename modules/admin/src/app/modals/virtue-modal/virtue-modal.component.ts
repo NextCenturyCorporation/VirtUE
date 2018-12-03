@@ -4,10 +4,9 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import {
   Column,
@@ -30,7 +29,7 @@ import { MatDialogRef, MAT_DIALOG_DATA  } from '@angular/material';
   selector: 'app-virtue-modal',
   templateUrl: '../generic-modal/generic.modal.html',
   styleUrls: ['../generic-modal/generic.modal.css'],
-  providers: [ BaseUrlService, ItemService ]
+  providers: [ BaseUrlService, DataRequestService ]
 })
 export class VirtueModalComponent extends GenericModalComponent {
 
@@ -40,12 +39,12 @@ export class VirtueModalComponent extends GenericModalComponent {
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
-      itemService: ItemService,
+      dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<VirtueModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
-    super(router, baseUrlService, itemService, dialog, dialogRef, data);
+    super(router, baseUrlService, dataRequestService, dialog, dialogRef, data);
     this.pluralItem = "Virtue Templates";
   }
 
@@ -55,10 +54,10 @@ export class VirtueModalComponent extends GenericModalComponent {
   getColumns(): Column[] {
     return [
       new TextColumn('Template Name',         3, (v: Virtue) => v.getName(), SORT_DIR.ASC),
-      new ListColumn('Virtual Machines',      2, this.getChildren,      this.formatName),
-      new ListColumn('Assigned Applications', 3, this.getGrandchildren, this.formatName),
+      new ListColumn('Virtual Machines',      2, (v: Virtue) => v.getVms(),      this.formatName),
+      new ListColumn('Assigned Applications', 3, (v: Virtue) => v.getVmApps(), this.formatName),
       new TextColumn('Version',               1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
-      new TextColumn('Modification Date',     2, (v: Virtue) => v.modDate, SORT_DIR.DESC),
+      new TextColumn('Modification Date',     2, (v: Virtue) => v.readableModificationDate, SORT_DIR.DESC),
       new TextColumn('Status',                1, this.formatStatus, SORT_DIR.ASC)
     ];
   }
@@ -69,6 +68,7 @@ export class VirtueModalComponent extends GenericModalComponent {
    * nothing to them and always returns false, or overiding the generic modals' table setup function here, with an almost-exact copy.
    */
   customizeTableParams(params): void {
+    params['elementIsDisabled'] = (v: Virtue) => !v.enabled;
     params['coloredLabels'] = true;
     params['getColor'] = (v: Virtue) => v.color;
   }
@@ -77,22 +77,17 @@ export class VirtueModalComponent extends GenericModalComponent {
    * populates the table once data is available.
    */
   onPullComplete(): void {
-    this.fillTable(this.allVirtues.asList());
+    this.fillTable(this.datasets[DatasetNames.VIRTUES].asList());
   }
 
   /**
    * This page needs all datasets to load except allUsers: it displays all virtues, the VMs assigned to each virtue,
    * and the apps available to each Virtue through its VMs.
    *
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.VIRTUES,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
   }
 
   /**

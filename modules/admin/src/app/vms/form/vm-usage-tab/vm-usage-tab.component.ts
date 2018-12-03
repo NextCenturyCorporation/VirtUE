@@ -7,9 +7,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { ItemService } from '../../../shared/services/item.service';
-
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../../shared/models/item.model';
@@ -28,28 +25,27 @@ import {
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component';
 
 /**
 * @class
- * This class represents a tab in [[VMComponent]], listing places this VM template has been used
+ * This class represents a tab in [[VmComponent]], listing places this VM template has been used
  *
  * It holds two tables:
  *    - Virtues that have been assigned this template
  *    - Running VMs that have been built from this template (currently unimplemented)
  *
- * @extends [[GenericFormTabComponent]]
+ * @extends [[ItemFormTabComponent]]
  */
 @Component({
   selector: 'app-vm-usage-tab',
   templateUrl: './vm-usage-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
-export class VmUsageTabComponent extends GenericFormTabComponent implements OnInit {
+export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit {
 
   /** A table listing what virtues have been given access to this VM template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent<Virtue>;
@@ -66,16 +62,18 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   protected item: VirtualMachine;
 
   /**
-   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
-  constructor(router: Router, dialog: MatDialog) {
+  constructor(
+      router: Router,
+      dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "Virtual Machine Usage";
 
   }
 
   /**
-   * See [[GenericFormTabComponent.init]] for generic info
+   * See [[ItemFormTabComponent.init]] for generic info
    *
    * @param mode the [[Mode]] to set up the page in.
    */
@@ -86,9 +84,9 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
-   * @param item a reference to the Item being viewed/edited in the [[VirtualMachineComponent]] parent
+   * @param item a reference to the Item being viewed/edited in the [[VmComponent]] parent
    */
   setUp(item: Item): void {
     if ( !(item instanceof VirtualMachine) ) {
@@ -100,7 +98,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   }
 
   /**
-   * See [[GenericFormTabComponent.update]] for generic info
+   * See [[ItemFormTabComponent.update]] for generic info
    * This allows the parent component to update this tab's mode, as well the contents of [[parentTable]]
    *
    * @param changes an object, which should have an attribute `mode: Mode` if
@@ -111,20 +109,19 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   update(changes: any): void {
     if (changes.allVirtues) {
       let allVirtues: DictList<Item> = changes.allVirtues;
-      let items: Item[] = [];
+      let parents: Item[] = [];
 
       for (let v of allVirtues.asList()) {
-        if (v.children.has(this.item.getID())) {
-         items.push(v);
+        if ((v as Virtue).vmTemplates.has(this.item.getID())) {
+         parents.push(v);
         }
       }
-      this.parentTable.populate(items);
+      this.parentTable.populate(parents);
     }
 
     if (changes.mode) {
       this.setMode(changes.mode);
-      this.parentTable.colData = this.getParentColumns();
-      // this.parentTable.subMenuOptions = this.getParentSubMenu();
+      this.setUpParentTable();
     }
   }
 
@@ -134,11 +131,11 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
    */
   getParentColumns(): Column[] {
     return [
-      new TextColumn('Template Name',          3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Template Name',     3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
                                                                                             () => this.getParentSubMenu()),
-      new ListColumn<Item>('Virtual Machines', 3, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)),
-      new TextColumn('Version',               2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
-      new TextColumn('Status',                3, this.formatStatus, SORT_DIR.ASC)
+      new ListColumn('Virtual Machines',  3, (v: Virtue) => v.getVms(),  this.formatName, (vm: VirtualMachine) => this.viewItem(vm)),
+      new TextColumn('Version',           2, (v: Virtue) => String(v.version), SORT_DIR.ASC),
+      new TextColumn('Status',            3, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 
@@ -149,8 +146,8 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
   getParentSubMenu(): SubMenuOptions[] {
     if (this.mode === Mode.VIEW) {
       return [
-        new SubMenuOptions("View", () => this.inViewMode(), (i: Item) => this.viewItem(i)),
-        new SubMenuOptions("Edit", () => this.inViewMode(), (i: Item) => this.editItem(i))
+        new SubMenuOptions("View", () => this.inViewMode(), (v: Virtue) => this.viewItem(v)),
+        new SubMenuOptions("Edit", () => this.inViewMode(), (v: Virtue) => this.editItem(v))
       ];
     }
     else {
@@ -175,6 +172,7 @@ export class VmUsageTabComponent extends GenericFormTabComponent implements OnIn
       tableWidth: 0.66,
       noDataMsg: "No virtue template has been assigned this virtual machine template at the moment.",
       elementIsDisabled: (v: Virtue) => !v.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }

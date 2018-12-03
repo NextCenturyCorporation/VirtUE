@@ -15,13 +15,12 @@ import {  Column,
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 
 /**
@@ -34,15 +33,15 @@ import { ConfigUrls } from '../../shared/services/config-urls.enum';
  * way to mark which ones are unavailable due to their VM being disabled, and apps don't have a view page yet so their names
  * are only displayed as text, instead of links.
  *
- * @extends GenericListComponent
+ * @extends ItemListComponent
  */
 @Component({
   selector: 'app-virtue-list',
-  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService  ]
+  templateUrl: '../../shared/abstracts/item-list/item-list.component.html',
+  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService  ]
 })
-export class VirtueListComponent extends GenericListComponent {
+export class VirtueListComponent extends ItemListComponent {
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
@@ -50,37 +49,38 @@ export class VirtueListComponent extends GenericListComponent {
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
   }
 
   /**
    * called after all the datasets have loaded. Pass the virtue list to the table.
    */
   onPullComplete(): void {
-    this.setItems(this.allVirtues.asList());
+    this.setItems(this.datasets[DatasetNames.VIRTUES].asList());
+    this.tempAddRandomPrinter();
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
       new TextColumn('Template Name',     2, (v: Virtue) => v.getName(), SORT_DIR.ASC,  (i: Item) => this.viewItem(i),
                                                                                                     () => this.getSubMenu()),
-      new ListColumn('Virtual Machines',  2, this.getChildren,      this.formatName,    (i: Item) => this.viewItem(i)),
-      new ListColumn('Applications',      2, this.getGrandchildren, this.formatName),
+      new ListColumn('Virtual Machines',  2, (v: Virtue) => v.getVms(),     this.formatName,    (i: Item) => this.viewItem(i)),
+      new ListColumn('Applications',      2, (v: Virtue) => v.getVmApps(),  this.formatName),
       new TextColumn('Last Editor',       2, (v: Virtue) => v.lastEditor,       SORT_DIR.ASC),
       new TextColumn('Version',           1, (v: Virtue) => String(v.version),  SORT_DIR.ASC),
-      new TextColumn('Modification Date', 2, (v: Virtue) => v.modDate,          SORT_DIR.DESC),
+      new TextColumn('Modification Date', 2, (v: Virtue) => v.readableModificationDate,          SORT_DIR.DESC),
       new TextColumn('Status',            1, this.formatStatus,                 SORT_DIR.ASC)
     ];
   }
 
   /**
-   * add colors to the table defined in [[GenericListComponent]], since here it will be showing Virtues.
+   * add colors to the table defined in [[ItemListComponent]], since here it will be showing Virtues.
    */
   customizeTableParams(params): void {
     params['coloredLabels'] = true;
@@ -88,21 +88,15 @@ export class VirtueListComponent extends GenericListComponent {
   }
 
   /**
-   * See [[GenericPageComponent.getPageOptions]]
-   * @return child-specific information needed by the generic page functions when loading data.
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.VIRTUES,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
   }
 
 
   /**
-   * See [[GenericListComponent.getListOptions]] for details
+   * See [[ItemListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {
@@ -121,6 +115,26 @@ export class VirtueListComponent extends GenericListComponent {
    */
   getNoDataMsg(): string {
     return "No virtues have been added at this time. To add a virtue, click on the button \"Add Virtue Template\" above.";
+  }
+
+  tempAddRandomPrinter() {
+    // let sub = this.dataRequestService.getItems(Subdomains.PRINTERS).subscribe( data => {
+    //     console.log(data);
+    //   }, () => {},
+    //   () => {sub.unsubscribe();}
+    // );
+
+    // let p = {info: "something", status: "active", address: "127.0.0.1", enabled: true};
+
+    // let sub2 = this.dataRequestService.createItem(Subdomains.PRINTERS, JSON.stringify(p)).subscribe( data => {
+    //     console.log(data);
+    //   }, () => {},
+    //   () => {sub2.unsubscribe();}
+    // );
+
+    // console.log(this.item.allowedPrinters);
+    // this.dataRequestService.createItem(Subdomains.PRINTERS, new Printer("some printer"));
+    // this.updateFileSysPermsTable();
   }
 
 }

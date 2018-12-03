@@ -4,13 +4,13 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { GenericDataPageComponent } from '../../shared/abstracts/gen-data-page/gen-data-page.component';
 import { GenericTableComponent } from '../../shared/abstracts/gen-table/gen-table.component';
 
 import { SelectionMode } from '../../shared/abstracts/gen-table/selectionMode.enum';
-import { Item } from '../../shared/models/item.model';
+import { IndexedObj } from '../../shared/models/indexedObj.model';
 import { Column } from '../../shared/models/column.model';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -26,18 +26,15 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  * a list of Item-subclass objects.
  * See the commented-out GenericPageComponent.activateModal() function for the unimplemented design.
  *
- *
- * @extends [[GenericListComponent]] so that it can display the available items in the same way,
- * with the same filtering/sorting capabilities available to the user on any of the list pages.
  */
 @Component({
   selector: 'app-generic-modal',
-  providers: [BaseUrlService, ItemService]
+  providers: [BaseUrlService, DataRequestService]
 })
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
 
   /** The table itself */
-  @ViewChild(GenericTableComponent) table: GenericTableComponent<Item>;
+  @ViewChild(GenericTableComponent) table: GenericTableComponent<IndexedObj>;
 
   /** Appears in the modals title as: 'Add/Remove {pluralItem}' */
   pluralItem: string;
@@ -66,7 +63,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
   constructor(
       router: Router,
       baseUrlService: BaseUrlService,
-      itemService: ItemService,
+      dataRequestService: DataRequestService,
       dialog: MatDialog,
 
       /** injected, is a reference to the modal dialog box itself. */
@@ -75,7 +72,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       /** holds the initial selections, and possibly a SelectionMode */
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
-      super(router, baseUrlService, itemService, dialog);
+      super(router, baseUrlService, dataRequestService, dialog);
       if (data && data['selectedIDs']) {
         this.selectedIDs = data['selectedIDs'];
       }
@@ -111,11 +108,10 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       filters: [],
       tableWidth: 1,
       noDataMsg: this.getNoDataMsg(),
-      elementIsDisabled: (i: Item) => !i.enabled,
       editingEnabled: () => true,
       selectionOptions: {
         selectionMode: this.getSelectionMode(),
-        equals: (obj1: Item, obj2: Item) => (obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID()))
+        equals: (obj1: IndexedObj, obj2: IndexedObj) => (obj1 && obj2 && (obj1.getID() !== undefined) && (obj1.getID() === obj2.getID()))
       }
     };
   }
@@ -141,7 +137,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
 
   /**
    * Allow children to customize the parameters passed to the table. By default, do nothing.
-   * @param paramsObject the object to be passed to the table. see [[GenericTable.setUp]]
+   * @param paramsObject the object to be passed to the table. see [[GenericTableComponent.setUp]]
    */
   customizeTableParams(paramsObject) {}
 
@@ -165,7 +161,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    *
    * @param newObjects the list of objects to be displayed in the table.
    */
-  fillTable(newObjects: Item[]): void {
+  fillTable(newObjects: IndexedObj[]): void {
     this.table.populate(newObjects);
     let selected = [];
     for (let ID of this.selectedIDs) {
@@ -202,7 +198,6 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
     for (let i of this.table.getSelections()) {
       this.selectedIDs.push(i.getID());
     }
-
     this.getSelections.emit(this.selectedIDs);
     this.table.clear();
     this.dialogRef.close();
@@ -215,5 +210,4 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
     this.table.clear();
     this.dialogRef.close();
   }
-
 }

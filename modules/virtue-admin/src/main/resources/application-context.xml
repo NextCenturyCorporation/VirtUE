@@ -46,6 +46,10 @@
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaTemplateManager">
 	</bean>
 
+	<bean name="resourceManager"
+		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaResourceManager">
+	</bean>
+
 	<bean name="userManager"
 		class="com.ncc.savior.virtueadmin.data.jpa.SpringJpaUserManager">
 	</bean>
@@ -59,6 +63,7 @@
 		<constructor-arg ref="userManager" />
 		<constructor-arg ref="persistentStorageManager" />
 		<constructor-arg ref="securityGroupManager" />
+		<constructor-arg ref="resourceManager" />
 		<constructor-arg ref="vpcSubnetProvider" />
 		<constructor-arg value="${savior.initialAdmin}" />
 	</bean>
@@ -227,6 +232,7 @@
 		<constructor-arg ref="activeVirtueManager" />
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="appManager" />
+		<constructor-arg ref="resourceManager" />
 	</bean>
 
 	<bean name="userService" class="com.ncc.savior.virtueadmin.service.UserDataService">
@@ -245,6 +251,7 @@
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="userManager" />
 		<constructor-arg ref="xenGuestImageProvider" />
+		<constructor-arg ref="resourceManager" />
 	</bean>
 
 	<bean name="securityService"
@@ -258,4 +265,4 @@
 		<!-- <property name="defaultClipboardPermission" value="ASK" /> -->
 	</bean>
 
-</beans>  
+</beans>

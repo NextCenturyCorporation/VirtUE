@@ -78,7 +78,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 		// TODO could be more efficient
 		Optional<VirtueInstance> virtue = virtueRepository.findById(virtueId);
 		if (!virtue.isPresent()) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Unable to find virtue with id=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Unable to find virtue with id=" + virtueId);
 		}
 		Collection<VirtualMachine> vms = virtue.get().getVms();
 		for (VirtualMachine vm : vms) {
@@ -89,7 +89,7 @@ public class SpringJpaActiveVirtueDao implements IActiveVirtueDao {
 				}
 			}
 		}
-		throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND,
+		throw new SaviorException(SaviorErrorCode.APPLICATION_NOT_FOUND,
 				"Unable to find a VM with application with id=" + applicationId + " in virtue with id=" + virtueId);
 	}
 

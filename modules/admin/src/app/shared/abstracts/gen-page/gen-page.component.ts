@@ -11,7 +11,11 @@ import { DialogsComponent } from '../../../dialogs/dialogs.component';
 import { Column } from '../../models/column.model';
 import { DictList, Dict } from '../../models/dictionary.model';
 
+import { IndexedObj } from '../../models/indexedObj.model';
 import { Item } from '../../models/item.model';
+import { Toggleable } from '../../models/toggleable.interface';
+
+import { DatasetNames } from '../gen-data-page/datasetNames.enum';
 
 /**
 * @class
@@ -20,6 +24,9 @@ import { Item } from '../../models/item.model';
  *  - dialogs
  *  - formatting
  */
+@Component({
+providers: [ Router, MatDialog ]
+})
 export abstract class GenericPageComponent {
 
   /**
@@ -27,16 +34,16 @@ export abstract class GenericPageComponent {
    * @param dialog Injected. This is a pop-up for verifying irreversable user actions
    */
   constructor(
-        protected router: Router,
-        protected dialog: MatDialog
+    protected router: Router,
+    protected dialog: MatDialog
       ) {
     // override the route reuse strategy
     // Tell angular to load a fresh, new, component every time a URL that needs this component loads,
     // even if the user has been on that page before.
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    // this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     // make the page reload if the user clicks on a link to the same page they're on.
-    this.router.navigated = false;
+    // this.router.navigated = false;
 
   }
 
@@ -56,90 +63,55 @@ export abstract class GenericPageComponent {
   }
 
   /**
-   * Used in pages with tables of items.
-   * @param item the item whose status we want to display
-   *
-   * @return The item's status, in plain (and capitalized) english.
+   * TODO the Toggleable object is what should know how to display a status, no?
+   *  -but toggleable is an interface..
+   * @return The toggleable object's status, in plain (and capitalized) english.
    */
-  formatStatus( item: Item ): string {
-    return item.enabled ? 'Enabled' : 'Disabled';
-  }
-
-  /**
-  * This is used in many tables to show an [[Item]]'s children. All lists in tables are gotten by passing
-  * an item to a function that has the scope of the object containing and defining the table.
-  *
-  * @param item the [[Item]] whose children we want a list of
-  *
-  * @return a list of the Item's children.
-  */
-  getChildren(item: Item): Item[] {
-    if (!item) {
-      return [];
-    }
-    return item.children.asList();
-  }
-
-  /**
-   * The following two functions are used in tables to display the items attached
-   * to an [[Item]] (children) and the items attched to each of those (grandchildren).
-   * It used to be all generated (as an html string) whenever an item was created
-   * or its children updated, but now is doen on the fly. These functions get
-   * re-called whenever the mouse enters or leaves a row in the table, so this
-   * seems like a bit of a waste, given that an item's children/grandchildren won't
-   * change randomly in the background.
-   * Doing it this way allows us to make the items within those lists clickable.
-   *
-   * @param item the item whose grandchildren we want a list of.
-   *
-   * @return A list (not a set) of all the item's children's children.
-  */
-  getGrandchildren(item: Item): Item[] {
-    if (!item || !item.children) {
-      return [];
-    }
-    let grandchildren: Item[] = [];
-    for (let c of item.children.asList()) {
-      grandchildren = grandchildren.concat(c.children.asList());
-    }
-    return grandchildren;
+  formatStatus( obj: Toggleable ): string {
+    return obj.enabled ? 'Enabled' : 'Disabled';
   }
 
   /**
    * Navigates to the form page for this item.
-   *
-   * @param item the Item to which we should navigate.
    */
   viewItem(item: Item): void {
-    this.router.navigate([item.getViewURL()]);
+    this.goToPage(item.getViewURL());
   }
 
   /**
-   * Navigates to and enable for editing form page for `item`.
-   *
-   * @param item the Item which we should navigate to and edit.
+   * Navigates to, and enable for editing, the form page for `item`.
    */
   editItem(item: Item): void {
-    this.router.navigate([item.getEditURL()]);
+    this.goToPage(item.getEditURL());
   }
 
   /**
    * Navigates to a form page pre-filled with `item`'s attributes.
-   *
-   * @param item the Item to duplicate
    */
   dupItem(item: Item): void {
-    this.router.navigate([item.getDupURL()]);
+    this.goToPage(item.getDupURL());
   }
 
   /**
-   * A generic method for navigating to some input page.
-   * Abstracts away the router from most(!!) sub classes #TODO
-   *
-   * @param targetPath the path to navigate to.
+   * @param targetPath the subdomain path to navigate to.
    */
   goToPage(targetPath: string) {
     this.router.navigate([targetPath]);
+  }
+
+  getRouterUrl(): string {
+    return this.router.routerState.snapshot.url;
+  }
+
+  /**
+   * Abstracts away the router from subclasses
+   */
+  getRouterUrlPieces(): string[] {
+    let url = this.getRouterUrl();
+    if (url[0] === '/') {
+      url = url.substr(1);
+    }
+    return url.split('/');
   }
 
 
@@ -172,7 +144,6 @@ export abstract class GenericPageComponent {
       sub.unsubscribe();
     });
   }
-
 
   // Use some version of this later if time. Currently, all item-selection modals use the (now-poorly named) 'genericModalComponent', and
   // any other modals must be built separately, and their layout has to be fiddled with the same way that one was, until there's only one

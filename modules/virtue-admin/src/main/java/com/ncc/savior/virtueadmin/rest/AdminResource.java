@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import java.io.File;
+import org.apache.commons.io.FileUtils;
+import java.nio.charset.StandardCharsets;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -44,6 +48,8 @@ import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
 import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
@@ -156,7 +162,7 @@ public class AdminResource {
 	// JHU - Admin API - role create
 	@POST
 	@Produces("application/json")
-	@Path("virtualMachine/template/")
+	@Path("virtualMachine/template")
 	public VirtualMachineTemplate createVmTemplate(VirtualMachineTemplate templateId) {
 		return adminService.createVmTemplate(templateId);
 	}
@@ -189,11 +195,12 @@ public class AdminResource {
 		adminService.deleteVmTemplate(templateId);
 	}
 
-	@GET
+	@PUT
 	@Produces("application/json")
-	@Path("virtualMachine/template/{id}/toggle")
-	public VirtualMachineTemplate toggleVirtualMachineTemplateEnabled(@PathParam("id") String templateId) {
-		VirtualMachineTemplate virtualMachineTemplate = adminService.toggleVirtualMachineTemplateEnabled(templateId);
+	@Path("virtualMachine/template/{id}/setStatus")
+	public VirtualMachineTemplate setVirtualMachineTemplateStatus(@PathParam("id") String templateId, String status) {
+		boolean newStatus = Boolean.parseBoolean(status);
+		VirtualMachineTemplate virtualMachineTemplate = adminService.setVirtualMachineTemplateStatus(templateId, newStatus);
 		return virtualMachineTemplate;
 	}
 
@@ -232,11 +239,12 @@ public class AdminResource {
 		return virtueTemplate;
 	}
 
-	@GET
+	@PUT
 	@Produces("application/json")
-	@Path("virtue/template/{id}/toggle")
-	public VirtueTemplate toggleVirtueTemplateEnabled(@PathParam("id") String templateId) {
-		VirtueTemplate virtueTemplate = adminService.toggleVirtueTemplateEnabled(templateId);
+	@Path("virtue/template/{id}/setStatus")
+	public VirtueTemplate setVirtueTemplateStatus(@PathParam("id") String templateId, String newStatus) {
+		boolean status = Boolean.parseBoolean(newStatus);
+		VirtueTemplate virtueTemplate = adminService.setVirtueTemplateStatus(templateId, status);
 		return virtueTemplate;
 	}
 
@@ -244,12 +252,12 @@ public class AdminResource {
 	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public VirtueTemplate updateVirtueTemplate(@PathParam("id") String templateId, VirtueTemplate template) {
+		logger.debug("here! " + template);
 		VirtueTemplate virtueTemplate = adminService.updateVirtueTemplate(templateId, template);
 		return virtueTemplate;
 	}
 
 	@DELETE
-	@Produces("application/json")
 	@Path("virtue/template/{id}")
 	public void deleteVirtueTemplate(@PathParam("id") String templateId) {
 		adminService.deleteVirtueTemplate(templateId);
@@ -297,7 +305,7 @@ public class AdminResource {
 
 	@POST
 	@Produces("application/json")
-	@Path("user/")
+	@Path("user")
 	public VirtueUser createUpdateUser(VirtueUser newUser) {
 		return adminService.createUpdateUser(newUser);
 	}
@@ -331,23 +339,20 @@ public class AdminResource {
 
 	// JHU - Admin API - user get
 	@DELETE
-	@Produces("application/json")
 	@Path("user/{username}")
 	public void removeUser(@PathParam("username") String usernameToRemove) {
 		adminService.removeUser(usernameToRemove);
 	}
 
-	@POST
-	@Produces("application/json")
-	@Path("user/{username}/enable")
-	public void removeUser(@PathParam("username") String username, String enableString) {
-		boolean enable = Boolean.parseBoolean(enableString);
-		adminService.enableDisableUser(username, enable);
+	@PUT
+	@Path("user/{username}/setStatus")
+	public void setUserStatus(@PathParam("username") String username, String newStatus) {
+		boolean status = Boolean.parseBoolean(newStatus);
+		adminService.enableDisableUser(username, status);
 	}
 
 	// JHU - Admin API - user role authorize
-	@POST
-	@Produces("application/json")
+	@POST // #TODO PUT? Is this idempotent? What in here should prevent duplicates?
 	@Path("user/{username}/assign/{templateId}")
 	public void assignTemplateToUser(@PathParam("username") String username,
 			@PathParam("templateId") String templateId) {
@@ -355,8 +360,7 @@ public class AdminResource {
 	}
 
 	// JHU - Admin API - user role unauthorize
-	@POST
-	@Produces("application/json")
+	@POST // #TODO PUT
 	@Path("user/{username}/revoke/{templateId}")
 	public void revokeTemplateToUser(@PathParam("username") String username,
 			@PathParam("templateId") String templateId) {
@@ -373,7 +377,6 @@ public class AdminResource {
 	// JHU - Admin API - user logout
 	@GET
 	@Path("user/{username}/logout")
-	@Produces("application/json")
 	public void logoutUser(@PathParam("username") String username) {
 		adminService.logoutUser(username);
 	}
@@ -395,7 +398,6 @@ public class AdminResource {
 
 	@DELETE
 	@Path("session/{sessionId}")
-	@Produces("application/json")
 	public void invalidateSession(@PathParam("sessionId") String sessionId) {
 		adminService.invalidateSession(sessionId);
 	}
@@ -510,7 +512,6 @@ public class AdminResource {
 
 	@POST
 	@Path("import")
-	@Produces("application/json")
 	@Consumes("application/json")
 	public void importSystem(InputStream stream) {
 		importExportService.importSystemDatabaseWithoutImages(stream);
@@ -518,7 +519,6 @@ public class AdminResource {
 
 	@POST
 	@Path("import")
-	@Produces("application/json")
 	@Consumes({ "application/zip", "application/octet-stream" })
 	public void importZip(InputStream stream,
 			@QueryParam("waitForCompletion") @DefaultValue("true") boolean waitForCompletion) {
@@ -593,7 +593,6 @@ public class AdminResource {
 
 	@GET
 	@Path("vm/reboot/{id}")
-	@Produces("application/json")
 	public void rebootVm(@PathParam("id") String vmId) {
 		try {
 			adminService.rebootVm(vmId);
@@ -634,7 +633,7 @@ public class AdminResource {
 	 * @param optionStr
 	 * @return
 	 */
-	@POST
+	@POST // #TODO PUT
 	@Path("permission/{sourceId}/{destId}")
 	public String setPermission(@PathParam("sourceId") String sourceId, @PathParam("destId") String destId,
 			String optionStr) {
@@ -723,7 +722,7 @@ public class AdminResource {
 	}
 
 	@GET
-	@Path("storage/")
+	@Path("storage")
 	@Produces("application/json")
 	public Iterable<VirtuePersistentStorage> getAllStorage() {
 		return adminService.getAllPersistentStorage();
@@ -746,14 +745,13 @@ public class AdminResource {
 
 	@DELETE
 	@Path("storage/{user}/{virtueTemplateId}")
-	@Produces("application/json")
 	public void deletePersistentStorage(@PathParam("user") String username,
 			@PathParam("virtueTemplateId") String virtueTemplateId) {
 		adminService.deletePersistentStorage(username, virtueTemplateId);
 	}
 
 	@GET
-	@Path("securityGroup/")
+	@Path("securityGroup")
 	@Produces("application/json")
 	public Map<String, Collection<SecurityGroupPermission>> getAllSecurityGroupsAndPermissions() {
 		return adminService.getAllSecurityGroups();
@@ -761,7 +759,6 @@ public class AdminResource {
 
 	@GET
 	@Path("securityGroup/test")
-	@Produces("application/json")
 	public void create() {
 		SecurityGroupPermission sgp = new SecurityGroupPermission(true, 80, 80, "192.168.1.0/32", "tcp", "test");
 		adminService.authorizeSecurityGroupsByKey("test", sgp);
@@ -781,13 +778,13 @@ public class AdminResource {
 		return adminService.getSecurityGroupPermissionsByTemplate(templateId);
 	}
 
-	@POST
+	@POST // #TODO PUT
 	@Path("securityGroup/template/{templateId}/revoke")
 	public void revokePermissionForTemplate(@PathParam("templateId") String templateId, SecurityGroupPermission sgp) {
 		adminService.revokeSecurityGroupsByKey(templateId, sgp);
 	}
 
-	@POST
+	@POST  // #TODO PUT?
 	@Path("securityGroup/template/{templateId}/authorize")
 	public void authorizePermissionFromTemplate(@PathParam("templateId") String templateId,
 			SecurityGroupPermission sgp) {
@@ -816,4 +813,104 @@ public class AdminResource {
 		sourceIds.add(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID);
 		return sourceIds;
 	}
+
+/*************/
+
+	@POST
+	@Produces("application/json")
+	@Path("printer")
+	public Printer createPrinter(Printer printer) {
+		return adminService.createPrinter(printer);
+	}
+
+	@PUT
+	@Produces("application/json")
+	@Path("printer/{printerId}")
+	public Printer updatePrinter(@PathParam("printerId") String printerId, Printer printer) {
+		if (!printer.getId().equals(printerId)) {
+			throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
+					"Given printer doesn't match printerId in path. Printer ID=" + printerId + ". Printer=" + printer);
+		}
+		return adminService.updatePrinter(printerId, printer);
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("printer/{printerId}")
+	public Printer getPrinter(@PathParam("printerId") String printerId) {
+		Printer returnedPrinter = adminService.getPrinter(printerId);
+		return returnedPrinter;
+	}
+
+	// JHU - Admin API - user list
+	@GET
+	@Produces("application/json")
+	@Path("printer")
+	public Iterable<Printer> getAllPrinters() {
+		return adminService.getAllPrinters();
+	}
+
+	@DELETE
+	@Path("printer/{printerId}")
+	public void deletePrinter(@PathParam("printerId") String printerId) {
+		adminService.deletePrinter(printerId);
+	}
+
+	@PUT
+	@Path("printer/{printerId}/setStatus")
+	public void setPrinterStatus(@PathParam("printerId") String printerId, String enableString) {
+		boolean enable = Boolean.parseBoolean(enableString);
+		adminService.setPrinterStatus(printerId, enable);
+	}
+	/********************/
+
+	@POST
+	@Produces("application/json")
+	@Path("fileSystem")
+	public FileSystem createFileSystem(FileSystem fileSystem) {
+		return adminService.createFileSystem(fileSystem);
+	}
+
+	@PUT
+	@Produces("application/json")
+	@Path("fileSystem/{fileSystemId}")
+	public FileSystem updateFileSystem(@PathParam("fileSystemId") String fileSystemId, FileSystem fileSystem) {
+		if (!fileSystem.getId().equals(fileSystemId)) {
+			throw new SaviorException(SaviorErrorCode.ID_MISMATCH,
+					"Given fileSystem doesn't match input id. FileSystem ID=" + fileSystemId + ". FileSystem=" + fileSystem);
+		}
+		return adminService.updateFileSystem(fileSystemId, fileSystem);
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("fileSystem/{fileSystemId}")
+	public FileSystem getFileSystem(@PathParam("fileSystemId") String fileSystemId) {
+		FileSystem returnedFileSystem = adminService.getFileSystem(fileSystemId);
+		return returnedFileSystem;
+	}
+
+	@GET
+	@Produces("application/json")
+	@Path("fileSystem")
+	public Iterable<FileSystem> getAllFileSystems() {
+		// ArrayList<FileSystem> ps = new ArrayList<FileSystem>();
+		// ps.add(new FileSystem("id", "name", "address", "status", true));
+		// return ps;
+		return adminService.getAllFileSystems();
+	}
+
+	@DELETE
+	@Path("fileSystem/{fileSystemId}")
+	public void deleteFileSystem(@PathParam("fileSystemId") String fileSystemId) {
+		adminService.deleteFileSystem(fileSystemId);
+	}
+
+	@PUT
+	@Path("fileSystem/{fileSystemId}/setStatus")
+	public void setFileSystemStatus(@PathParam("fileSystemId") String fileSystemId, String enableString) {
+		boolean enable = Boolean.parseBoolean(enableString);
+		adminService.setFileSystemStatus(fileSystemId, enable);
+	}
+
 }

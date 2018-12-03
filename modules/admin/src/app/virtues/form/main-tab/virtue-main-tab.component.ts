@@ -2,6 +2,9 @@ import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/cor
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
+import { Printer } from '../../../shared/models/printer.model';
+import { FileSystem } from '../../../shared/models/fileSystem.model';
 import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
 import { VirtualMachine } from '../../../shared/models/vm.model';
@@ -14,12 +17,12 @@ import {
 } from '../../../shared/models/column.model';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
-import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
+import { ItemFormMainTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-main-tab/item-form-main-tab.component';
 
 /**
  * @class
@@ -30,14 +33,14 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
  *
  * Note that version number increases automatically.
  *
- * @extends [[GenericMainTabComponent]]
+ * @extends [[ItemFormMainTabComponent]]
  */
 @Component({
   selector: 'app-virtue-main-tab',
   templateUrl: './virtue-main-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
-export class VirtueMainTabComponent extends GenericMainTabComponent implements OnInit {
+export class VirtueMainTabComponent extends ItemFormMainTabComponent implements OnInit {
 
   /** the version to be displayed. See [[updateVersion]] for details */
   private newVersion: number;
@@ -46,14 +49,17 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
   protected item: Virtue;
 
   /**
-   * see [[GenericMainTabComponent.constructor]] for parameters
+   * see [[ItemFormMainTabComponent.constructor]] for parameters
    */
-  constructor(router: Router, dialog: MatDialog) {
+  constructor(
+      router: Router,
+      dialog: MatDialog) {
     super(router, dialog);
+    this.childDatasetName = DatasetNames.VMS;
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being displayed by this tab's parent form.
    */
@@ -69,7 +75,7 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
   }
 
   /**
-   * Overrides parent, [[GenericFormTabComponent.setMode]]
+   * Overrides parent, [[ItemFormTabComponent.setMode]]
    *
    * @param newMode the Mode to set the page as.
    */
@@ -83,13 +89,12 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
 
   /**
    * Updates what value gets listed as the current version.
-   * In edit mode, the version is what version it'll be saved as; The current version + 1.
+   * In edit mode, the version is the number it would be saved as: the current version + 1.
    * Otherwise, it should just show the current version.
    */
   updateVersion(): void {
     this.newVersion = this.item.version;
 
-    // if (this.mode === Mode.EDIT || this.mode === Mode.DUPLICATE) {
     if (this.mode === Mode.EDIT) {
       this.newVersion++;
     }
@@ -103,8 +108,8 @@ export class VirtueMainTabComponent extends GenericMainTabComponent implements O
     return [
       new TextColumn('VM Template Name', 4, (vm: VirtualMachine) => vm.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
                                                                                                 () => this.getSubMenu()),
-      new ListColumn<Item>('Assigned Apps', 4, this.getChildren,  this.formatName),
-      new TextColumn('OS', 2, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
+      new ListColumn('Assigned Apps', 4, (v: VirtualMachine) => v.getApps(),  this.formatName),
+      new TextColumn('OS',      2, (vm: VirtualMachine) => String(vm.os), SORT_DIR.ASC),
       new TextColumn('Version', 1, (vm: VirtualMachine) => String(vm.version), SORT_DIR.ASC),
       new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
@@ -144,4 +149,5 @@ To add a virtual machine template, click on the button \"Add VM\" above.";
                         }) {
     return this.dialog.open( VmModalComponent, params);
   }
+
 }

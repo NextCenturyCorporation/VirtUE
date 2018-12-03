@@ -8,7 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { ItemService } from '../shared/services/item.service';
+import { DataRequestService } from '../shared/services/dataRequest.service';
 
 import { VirtueModalComponent } from '../modals/virtue-modal/virtue-modal.component';
 
@@ -21,17 +21,16 @@ import { Column } from '../shared/models/column.model';
 
 import { UserMainTabComponent } from './form/main-tab/main-user-tab.component';
 
-import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
-import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 /**
  *
  * @class
  * This class represents a detailed view of a User.
- * See comment on [[GenericFormComponent]] for generic info.
+ * See comment on [[ItemFormComponent]] for generic info.
  *
  * This form has:
  *  - a main tab for viewing the Virtues made available to the User
@@ -64,45 +63,47 @@ import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
-        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
-        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
+        <button  *ngIf=" !inViewMode() " class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+        <button  *ngIf=" inEditMode()" class="button-submit" (click)="save();" >Save</button>
+        <button  *ngIf=" inEditMode() " class="button-cancel" (click)="toViewMode()">Discard Changes</button>
+        <button  *ngIf=" !inViewMode() " class="button-cancel" (click)="toListPage()">Cancel</button>
 
-        <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
-        <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
+        <button  *ngIf="inViewMode()" class="button-submit" (click)="toEditMode();" >Edit</button>
+        <button  *ngIf="inViewMode()" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
     </div>
   </div>
     `,
-  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService ]
+  styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService ]
 })
-export class UserComponent extends GenericFormComponent implements OnDestroy {
+export class UserComponent extends ItemFormComponent implements OnDestroy {
 
   /** A tab for displaying the User's attached virtues, status, and assigned roles. */
   @ViewChild('mainTab') mainTab: UserMainTabComponent;
 
+  /** reclassing */
+  item: User;
   /**
-   * see [[GenericFormComponent.constructor]] for notes on parameters
+   * see [[ItemFormComponent.constructor]] for notes on parameters
    */
   constructor(
     location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/users', location, activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/users', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
     // gets overwritten once the datasets load, if mode is EDIT or DUPLICATE
-    this.item = new User(undefined);
+    this.item = new User();
 
-    this.datasetName = Datasets.USERS;
-    this.childDatasetName = Datasets.VIRTUES;
+    this.datasetName = DatasetNames.USERS;
+    this.childDatasetName = DatasetNames.VIRTUES;
   }
 
   /**
@@ -118,18 +119,18 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
     // Must unsubscribe from all these when the UserComponent is destroyed
 
-    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.setItemChildIDs(newChildIDs);
+    this.mainTab.onChildrenChange.subscribe((newVirtueIDs: string[]) => {
+      this.item.virtueTemplateIds = newVirtueIDs;
       this.updatePage();
     });
 
-    // newStatus is just item.enabled - item is a common reference across tabs and form, so the actual value of the
-    // parameter is extraneous. It just needs to emit something to let the form know that the user toggled the status.
-    // In any mode but view, nothing extra should happen. The local copy of item will have its status toggled, and that's it.
-    // In view mode, this toggling should actually make a change to the backend.
+    // newStatus is just `!this.item.enabled`, but it makes it simplest and most likely to be idempotent (i.e. not have
+    // either the local or remote item's enabled field toggled twice) if the actual negation is done before this chain starts.
+    // It just needs to emit something to let the form know that the user toggled the status.
+    // The check doesn't hurt, but is no longer needed - item's `enabled` field should only be mutable from the view page.
     this.mainTab.onStatusChange.subscribe((newStatus) => {
       if ( this.mode === Mode.VIEW ) {
-        this.toggleItemStatus(this.item);
+        this.setItemAvailability(this.item, newStatus);
       }
     });
 
@@ -183,22 +184,16 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
   /**
    * This page needs all 4 datasets, because there's a Table of Virtues, and under each Virtue
    * we want to display all the Apps it has available to it.
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.USERS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES, DatasetNames.USERS];
   }
 
   /**
-   * create and fill the fields the backend expects to see, pull in/record any
-   * uncollected inputs, and check that the item is valid to be saved
+   * Pull in/record any uncollected inputs and check that the item is valid to be saved
    *
-   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   * @return true if [[item]] is valid for saving, false otherwise.
    */
   finalizeItem(): boolean {
     // Note
@@ -216,21 +211,13 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
 
 
 
-    if (this.mode === Mode.CREATE && !this.item.name) {
+    if (this.mode === Mode.CREATE && !this.item.getName()) {
       confirm("You need to enter a username.");
       return false;
     }
 
     // if not editing, make sure username isn't taken
 
-    this.item['username'] = this.item.name,
-    this.item['authorities'] = this.item['roles'], // since this is technically an item
-    this.item['virtueTemplateIds'] = this.item.childIDs;
-
-    // so we're not trying to stringify a bunch of extra fields and data
-    this.item.children = undefined;
-    this.item.childIDs = [];
-    this.item['roles'] = [];
     return true;
   }
 
@@ -242,29 +229,4 @@ export class UserComponent extends GenericFormComponent implements OnDestroy {
     this.mainTab.onStatusChange.unsubscribe();
   }
 
-  /**
-   * Overrides parent, [[GenericPageComponent.toggleItemStatus]].
-   * See note at [[UserListComponent.toggleItemStatus]].
-   * Copied from there ^. Should eventually change, at which point this can be removed.
-   *
-   * @param item the user whose status we wish to toggle.
-   */
-  toggleItemStatus(item: Item): void {
-    if (item.getName().toUpperCase() === "ADMIN" && item.enabled) {
-      console.log("Don't allow the toggling of the admin user. We need that. #TODO");
-      item.enabled = true;
-      return;
-    }
-
-    let sub = this.itemService.setItemStatus(this.serviceConfigUrl, item.getID(), !item.enabled).subscribe( () => {
-
-    },
-    () => { // on error
-      sub.unsubscribe();
-    },
-    () => { // when finished
-      sub.unsubscribe();
-    });
-
-  }
 }

@@ -5,6 +5,7 @@ import { MatDialog, MatDialogRef, MatDialogModule } from '@angular/material';
 import { DialogsComponent } from '../../dialogs/dialogs.component';
 import { Router } from '@angular/router';
 
+import { IndexedObj } from '../../shared/models/indexedObj.model';
 import { Item } from '../../shared/models/item.model';
 import { User } from '../../shared/models/user.model';
 import { Virtue } from '../../shared/models/virtue.model';
@@ -16,15 +17,14 @@ import { DictList } from '../../shared/models/dictionary.model';
 import { SubMenuOptions } from '../../shared/models/subMenuOptions.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { Application } from '../../shared/models/application.model';
 import { AddAppComponent } from '../add-app/add-app.component';
 
-import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 /**
  * @class
@@ -33,15 +33,15 @@ import { ConfigUrls } from '../../shared/services/config-urls.enum';
  * Currently, very little of use is implemented with regard to applications. Only temporary boiler-plate exists for
  * uploading(?) an application, and essentially no data exists to be displayed in the table.
  *
- * @extends GenericListComponent
+ * @extends ItemListComponent
  */
 @Component({
   selector: 'app-apps-list',
-  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService  ]
+  templateUrl: '../../shared/abstracts/item-list/item-list.component.html',
+  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService  ]
 })
-export class AppsListComponent extends GenericListComponent {
+export class AppsListComponent extends ItemListComponent {
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
@@ -49,10 +49,10 @@ export class AppsListComponent extends GenericListComponent {
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
 
     // TODO fix app versioning - maybe make automatic?
     // Apps need versions, but they can't default to anything, and it must be made clear
@@ -64,11 +64,11 @@ export class AppsListComponent extends GenericListComponent {
    * called after all the datasets have loaded. Pass the app list to the table.
    */
   onPullComplete(): void {
-    this.setItems(this.allApps.asList());
+    this.setItems(this.datasets[DatasetNames.APPS].asList());
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
@@ -79,20 +79,14 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
-   * See [[GenericPageComponent.getPageOptions]]
-   * @return child-specific information needed by the generic page functions when loading data.
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.APPS,
-      neededDatasets: [Datasets.APPS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS];
   }
 
   /**
-   * See [[GenericListComponent.getListOptions]] for details
+   * See [[ItemListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {
@@ -114,7 +108,7 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
-   * overrides parent, [[GenericListComponent.getTableFilters]]
+   * overrides parent, [[ItemListComponent.getTableFilters]]
    * @return an empty list; Apps can't be disabled, so nothing to filter
    */
   getTableFilters(): {text: string, value: string}[] {
@@ -122,7 +116,7 @@ export class AppsListComponent extends GenericListComponent {
   }
 
   /**
-   * overrides parent, [[GenericListComponent.getSubMenu]]
+   * overrides parent, [[ItemListComponent.getSubMenu]]
    *
    * see [[GenericPageComponent.openDialog]] for notes on that call.
    *

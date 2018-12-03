@@ -1,4 +1,3 @@
-import { TableElement } from './tableElement.model';
 import { Item } from './item.model';
 import { SubMenuOptions } from './subMenuOptions.model';
 
@@ -201,7 +200,9 @@ export class CheckboxColumn extends Column {
      * A function that deteremines whether or not a particular TableElement's checkbox should be disabled, based on that TableElement's
      * current state.
      */
-    public disabled?: (obj: any) => boolean
+    public disabled?: (obj: any) => boolean,
+    /**  Do something on check/uncheck. */
+    public onChange?: (obj: any, checked: boolean) => any
   ) {
     super(label, width);
   }
