@@ -218,6 +218,26 @@ public class ShareService {
 	public void newShare(HttpSession session, FileShare share) throws IllegalArgumentException, IOException {
 		LOGGER.entry(session, share);
 		Set<SharePermissions> permissions = share.getPermissions();
+		if (share.getName() == null || share.getName().isEmpty()) {
+			IllegalArgumentException e = new IllegalArgumentException("name cannot be empty");
+			LOGGER.throwing(e);
+			throw e;
+		}
+		if (share.getVirtueId() == null || share.getVirtueId().isEmpty()) {
+			IllegalArgumentException e = new IllegalArgumentException("virtueId cannot be empty");
+			LOGGER.throwing(e);
+			throw e;
+		}
+		if (share.getServer() == null || share.getServer().isEmpty()) {
+			IllegalArgumentException e = new IllegalArgumentException("server cannot be empty");
+			LOGGER.throwing(e);
+			throw e;
+		}
+		if (share.getPath() == null || share.getPath().isEmpty()) {
+			IllegalArgumentException e = new IllegalArgumentException("path cannot be empty");
+			LOGGER.throwing(e);
+			throw e; 
+		}
 		if (permissions.isEmpty()) {
 			IllegalArgumentException e = new IllegalArgumentException("permissions cannot be empty");
 			LOGGER.throwing(e);

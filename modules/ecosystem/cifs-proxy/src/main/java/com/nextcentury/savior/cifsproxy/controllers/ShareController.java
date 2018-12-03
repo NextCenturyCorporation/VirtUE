@@ -55,7 +55,6 @@ public class ShareController {
 	@PostMapping("/share")
 	FileShare newShare(HttpSession session, @RequestBody FileShare share) {
 		LOGGER.entry(session, share);
-		validateShare(share);
 		try {
 			service.newShare(session, share);
 		} catch (IllegalArgumentException | IOException e) {
@@ -92,13 +91,5 @@ public class ShareController {
 		}
 		LOGGER.exit("");
 		return "";
-	}
-
-	private void validateShare(FileShare share) {
-		if (share.getName() == null || share.getName().isEmpty()) {
-			IllegalArgumentException iae = new IllegalArgumentException("share name must be specified");
-			LOGGER.throwing(iae);
-			throw iae;
-		}
 	}
 }
