@@ -1,5 +1,6 @@
 package com.ncc.savior.desktop.xpra;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
@@ -20,6 +21,7 @@ import com.ncc.savior.desktop.xpra.connection.ssh.SshConnectionFactory.SshConnec
 import com.ncc.savior.desktop.xpra.connection.ssh.SshXpraInitiater;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory;
 import com.ncc.savior.desktop.xpra.connection.tcp.TcpConnectionFactory.TcpConnectionParameters;
+import com.ncc.savior.desktop.xpra.debug.DebugPacketHandler;
 import com.ncc.savior.virtueadmin.model.desktop.DesktopVirtue;
 
 public class XpraConnectionManager {
@@ -30,8 +32,9 @@ public class XpraConnectionManager {
 	private HashMap<Class<? extends IConnectionParameters>, IXpraInitiator.IXpraInitatorFactory> initiaterMap;
 	private HashMap<String, XpraApplicationManager> activeAppManagers;
 	private IApplicationManagerFactory applicationManagerFactory;
+	private boolean packetDebug;
 
-	public XpraConnectionManager(IApplicationManagerFactory appManagerFactory) {
+	public XpraConnectionManager(IApplicationManagerFactory appManagerFactory, boolean packetDebug) {
 		this.applicationManagerFactory = appManagerFactory;
 		connectionFactoryMap = new HashMap<Class<? extends IConnectionParameters>, BaseConnectionFactory>();
 		// Set values by config?
@@ -53,6 +56,7 @@ public class XpraConnectionManager {
 		});
 		activeClientsMap = new HashMap<String, XpraClient>();
 		activeAppManagers = new HashMap<String, XpraApplicationManager>();
+		this.packetDebug = packetDebug;
 	}
 
 	/**
@@ -79,14 +83,14 @@ public class XpraConnectionManager {
 			throws IOException {
 		BaseConnectionFactory factory = connectionFactoryMap.get(params.getClass());
 		XpraClient client = new XpraClient();
-		// TODO DELETE ME
-		// File dir = DebugPacketHandler.getDefaultTimeBasedDirectory();
-		// dir = new File(dir, virtue.getId());
-		// dir.mkdirs();
-		// DebugPacketHandler debugHandler = new DebugPacketHandler(dir);
-		// client.addPacketListener(debugHandler);
-		// client.addPacketSendListener(debugHandler);
-		// TODO End debug
+		if (packetDebug) {
+			File dir = DebugPacketHandler.getDefaultTimeBasedDirectory();
+			dir = new File(dir, virtue.getId());
+			dir.mkdirs();
+			DebugPacketHandler debugHandler = new DebugPacketHandler(dir);
+			client.addPacketListener(debugHandler);
+			client.addPacketSendListener(debugHandler);
+		}
 		XpraApplicationManager applicationManager = applicationManagerFactory.getApplicationManager(client, color);
 		client.setErrorCallback((msg, e) -> {
 			applicationManager.closeAllWindows();

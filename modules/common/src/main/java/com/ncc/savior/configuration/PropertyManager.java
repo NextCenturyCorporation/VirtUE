@@ -45,6 +45,7 @@ public class PropertyManager {
 	public static final String PROPERTY_CLIPBOARD_JAR_PATH = "savior.desktop.clipboard.jar";
 	public static final String PROPERTY_CLIPBOARD_ASK_TIMEOUT_MILLIS = "savior.desktop.clipboard.askTimeoutMillis";
 	public static final String PROPERTY_ALERT_PERSIST_TIME = "savior.desktop.alerts.persistMillis";
+	public static final String PROPERTY_PACKET_DEBUG = "savior.desktop.debug.packet";
 	private Properties props;
 
 	public PropertyManager(File... files) {

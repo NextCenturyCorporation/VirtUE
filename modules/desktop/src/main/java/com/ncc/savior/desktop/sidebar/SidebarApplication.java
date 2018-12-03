@@ -52,6 +52,7 @@ public class SidebarApplication {
 		String requiredDomain = props.getString(PropertyManager.PROPERTY_REQUIRED_DOMAIN);
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
+		boolean packetDebug = props.getBoolean(PropertyManager.PROPERTY_PACKET_DEBUG, false);
 		// boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS,
 		// false);
 		// String style = props.getString(PropertyManager.PROPERTY_STYLE);
@@ -87,7 +88,7 @@ public class SidebarApplication {
 		IIconService iconService = new IconResourceService(drs);
 		PreferenceService prefService = new PreferenceService(authService);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager, authService,
-				colorManager);
+				colorManager, packetDebug);
 		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		clipboardHub.addDefaultApplicationListener(sidebar.getDefaultApplicationHandler());

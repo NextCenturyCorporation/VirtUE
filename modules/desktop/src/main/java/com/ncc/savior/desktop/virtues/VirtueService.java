@@ -67,9 +67,9 @@ public class VirtueService {
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
 			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService,
-			ColorManager colorManager) {
+			ColorManager colorManager, boolean packetDebug) {
 		this.desktopResourceService = desktopResourceService;
-		this.connectionManager = new XpraConnectionManager(appManger);
+		this.connectionManager = new XpraConnectionManager(appManger, packetDebug);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.rdpClient = rdpClient;
 		this.clipboardManager = clipboardManager;

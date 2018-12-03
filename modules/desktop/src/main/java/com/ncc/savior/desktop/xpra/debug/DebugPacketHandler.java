@@ -180,8 +180,14 @@ public class DebugPacketHandler implements IPacketHandler {
 		BufferedWriter writer = null;
 
 		try {
-			String typeString = (p instanceof UnknownPacket ? (String) ((UnknownPacket) p).getList().get(0)
-					: p.getType().toString());
+			String typeString;
+			if (p instanceof UnknownPacket) {
+				byte[] first = (byte[]) ((UnknownPacket) p).getList().get(0);
+				typeString = new String(first);
+
+			} else {
+				typeString = p.getType().toString();
+			}
 			String windowPostfix = "";
 			if (p instanceof WindowPacket) {
 				windowPostfix = "-" + ((WindowPacket) p).getWindowId();
