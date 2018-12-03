@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,29 @@ public class ShareService {
 	private static final String[] MOUNT_QUERY_COMMAND_ARGS = { "--json", "--canonicalize", "--types", "cifs",
 			"--nofsroot" };
 
+	/**
+	 * Maximum length for the name of a file share. From
+	 * https://msdn.microsoft.com/en-us/library/cc246567.aspx
+	 */
+	private static final int MAX_SHARE_NAME_LENGTH = 80;
+
+	/**
+	 * Characters disallowed in file share names. Control characters (0x00-0x1F) are
+	 * also invalid. From https://msdn.microsoft.com/en-us/library/cc422525.aspx
+	 */
+	private static final String INVALID_SHARE_NAME_CHARS = "\"\\/[]:|<>+=;,*?";
+
+	/**
+	 * A regular expression for a valid character in a POSIX filename (for POSIX
+	 * "fully portable filenames").
+	 */
+	private static final String POSIX_FILENAME_CHAR_REGEX = "[0-9A-Za-z._-]";
+
+	/**
+	 * Maximum length of a POSIX-compliant filename.
+	 */
+	private static final int POSIX_FILENAME_MAX_LEN = 14;
+
 	/** where to mount files for the Virtue */
 	@Value("${savior.cifsproxy.mountRoot:/mnt/cifs-proxy}")
 	public String MOUNT_ROOT;
@@ -123,7 +147,8 @@ public class ShareService {
 	private VirtueService virtueService;
 
 	/**
-	 * Tracks what files shares are mounted and their mount points.
+	 * Tracks what files shares are mounted and their mount points (relative to
+	 * {@link #MOUNT_ROOT}).
 	 */
 	protected Map<FileShare, String> mountPoints = new ConcurrentHashMap<>();
 
@@ -204,15 +229,16 @@ public class ShareService {
 			LOGGER.throwing(e);
 			throw e;
 		}
-		if (virtueService.getVirtue(share.getVirtue()) == null) {
-			IllegalArgumentException e = new IllegalArgumentException("unknown Virtue '" + share.getVirtue() + "'");
+		if (virtueService.getVirtue(share.getVirtueId()) == null) {
+			IllegalArgumentException e = new IllegalArgumentException("unknown Virtue '" + share.getVirtueId() + "'");
 			LOGGER.throwing(e);
 			throw e;
 		}
+		share.initExportedName(createExportName(share));
 		try {
 			mountShare(session, share);
 			exportShare(share);
-		} catch (IOException e) {
+		} catch (IOException | RuntimeException e) {
 			// undo the mount and clean up
 			try {
 				unmountShare(share);
@@ -221,6 +247,7 @@ public class ShareService {
 			}
 			mountPoints.remove(share);
 			sharesByName.remove(share.getName());
+			LOGGER.throwing(e);
 			throw e;
 		}
 		LOGGER.exit();
@@ -275,8 +302,8 @@ public class ShareService {
 	private File getSambaConfigFile(FileShare share) {
 		LOGGER.entry(share);
 		File configDir = new File(sambaConfigDir, virtueSharesConfigDir);
-		File virtueConfigDir = new File(configDir, share.getVirtue());
-		File configFile = new File(virtueConfigDir, share.getName() + ".conf");
+		File virtueConfigDir = new File(configDir, sanitizeFilename(share.getVirtueId()));
+		File configFile = new File(virtueConfigDir, sanitizeFilename(share.getName()) + ".conf");
 		LOGGER.exit(configFile);
 		return configFile;
 	}
@@ -286,9 +313,9 @@ public class ShareService {
 		String mountPoint = getMountPoint(share);
 		File path = new File(MOUNT_ROOT, mountPoint);
 
-		Virtue virtue = virtueService.getVirtue(share.getVirtue());
-		StringBuilder config = new StringBuilder("[" + share.getName() + "]\n" + "path = " + path + "\n"
-				+ "valid users = " + virtue.getUsername() + "\n");
+		Virtue virtue = virtueService.getVirtue(share.getVirtueId());
+		StringBuilder config = new StringBuilder("[" + share.getName() + "]\n" + "path = " + path.getAbsolutePath()
+				+ "\n" + "valid users = " + virtue.getUsername() + "\n");
 		// TODO someday add "hosts allow = " when we can get info about which hosts will
 		// be connecting
 		if (!share.getPermissions().contains(FileShare.SharePermissions.WRITE)) {
@@ -356,11 +383,38 @@ public class ShareService {
 		LOGGER.entry(fs);
 		String mountPoint = mountPoints.get(fs);
 		if (mountPoint == null) {
-			mountPoint = fs.getVirtue() + File.separator + fs.getName();
+			mountPoint = sanitizeFilename(fs.getVirtueId()) + File.separator + fs.getExportedName();
 			mountPoints.put(fs, mountPoint);
 		}
 		LOGGER.exit(mountPoint);
 		return mountPoint;
+	}
+
+	/**
+	 * Make sure a name is suitable as a file name. Nearly all *nix filesystems
+	 * allow any character except '/' (and null), but our filenames are only used
+	 * internally so we can afford to be conservative and go with POSIX compliance
+	 * (see {@link #POSIX_FILENAME_CHAR_REGEX}).
+	 * 
+	 * @param name
+	 *                 original name
+	 * @return a version of <code>name</code> that is a suitable (POSIX) filename
+	 */
+	private String sanitizeFilename(String name) {
+		LOGGER.entry(name);
+		StringBuilder filename = new StringBuilder();
+		Pattern charRegex = Pattern.compile(POSIX_FILENAME_CHAR_REGEX);
+		int maxLen = Math.min(name.length(), POSIX_FILENAME_MAX_LEN);
+		for (int i = 0; i < maxLen; i++) {
+			char c = name.charAt(i);
+			if (charRegex.matcher(String.valueOf(c)).matches()) {
+				filename.append(c);
+			} else {
+				filename.append("_");
+			}
+		}
+		LOGGER.exit(filename.toString());
+		return filename.toString();
 	}
 
 	/**
@@ -763,6 +817,52 @@ public class ShareService {
 		}
 
 		LOGGER.exit();
+	}
+
+	/**
+	 * Generate a suitable export name for the share. Per Microsoft specs, it must
+	 * be at most {@link #MAX_SHARE_NAME_LENGTH} characters long, and may not
+	 * contain any characters from {@link #INVALID_SHARE_NAME_CHARS}.
+	 * 
+	 * To ensure functionality with Samba, leading and trailing spaces will not be
+	 * generated, either. (It's possible that would work, but Samba strips leading
+	 * spaces from normal parameter values.)
+	 * 
+	 * It also must be different from any export names currently in use, where case
+	 * is not significant.
+	 * 
+	 * @param share
+	 * @return
+	 */
+	private String createExportName(FileShare share) {
+		StringBuilder exportName = new StringBuilder();
+		String startingName = share.getName().trim();
+		// replace invalid characters
+		int maxLength = Math.min(startingName.length(), MAX_SHARE_NAME_LENGTH);
+		for (int i = 0; i < maxLength; i++) {
+			int c = startingName.codePointAt(i);
+			char newChar;
+			if (INVALID_SHARE_NAME_CHARS.indexOf(c) != -1 || c <= 0x1F) {
+				newChar = '_';
+			} else {
+				newChar = startingName.charAt(i);
+			}
+			exportName.append(newChar);
+		}
+
+		// ensure there are no duplicates
+		Collection<FileShare> shares = sharesByName.values();
+		int suffix = 1;
+		while (shares.stream()
+				.anyMatch((FileShare fs) -> fs.getExportedName().equalsIgnoreCase(exportName.toString()))) {
+			suffix++;
+			String suffixAsString = Integer.toString(suffix);
+			// replace the end with the suffix
+			int baseLength = Math.min(exportName.length(), MAX_SHARE_NAME_LENGTH - suffixAsString.length());
+			exportName.replace(baseLength, exportName.length(), suffixAsString);
+		}
+
+		return exportName.toString();
 	}
 
 	public static void main(String[] args) throws IOException {

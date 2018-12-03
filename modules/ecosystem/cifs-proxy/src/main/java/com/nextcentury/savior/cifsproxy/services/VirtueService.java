@@ -11,6 +11,7 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.ext.XLogger;
@@ -31,7 +32,12 @@ public class VirtueService {
 
 	private static final long PROCESS_TIMEOUT_MS = 5000;
 
-	protected Map<String, Virtue> virtuesByName = new HashMap<String, Virtue>();
+	/**
+	 * Maximum length of a Linux username, including null terminator.
+	 */
+	private static final int MAX_USERNAME_LENGTH = 32;
+
+	protected Map<String, Virtue> virtuesById = new HashMap<String, Virtue>();
 
 	/**
 	 * Define a new Virtue
@@ -48,17 +54,31 @@ public class VirtueService {
 	 */
 	public void newVirtue(Virtue virtue) throws IllegalArgumentException, InterruptedIOException, IOException {
 		LOGGER.entry(virtue);
-		if (virtuesByName.containsKey(virtue.getName())) {
-			IllegalArgumentException e = new IllegalArgumentException(
-					"virtue '" + virtue.getName() + "' already exists");
+		if (virtuesById.containsKey(virtue.getId())) {
+			IllegalArgumentException e = new IllegalArgumentException("virtue '" + virtue.getId() + "' already exists");
 			LOGGER.throwing(e);
 			throw e;
 		}
+		if (virtue.getUsername() == null || virtue.getUsername().length() == 0) {
+			virtue.initUsername(createUsername(virtue));
+		}
+		if (virtue.getPassword() == null || virtue.getPassword().length() == 0) {
+			virtue.initPassword(createPassword());
+		}
 		createLinuxUser(virtue);
 		setSambaPassword(virtue);
-		virtue.clearPassword();
-		virtuesByName.put(virtue.getName(), virtue);
+		virtuesById.put(virtue.getId(), virtue);
 		LOGGER.exit();
+	}
+
+	private String createPassword() {
+		LOGGER.entry();
+		Random random = new Random();
+		int length = 12 + random.nextInt(4);
+		String password = new Random().ints(length, 33, 122)
+				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+		LOGGER.exit(password);
+		return password;
 	}
 
 	private void createLinuxUser(Virtue virtue) throws IOException, InterruptedIOException {
@@ -143,15 +163,90 @@ public class VirtueService {
 
 	public Collection<Virtue> getVirtues() {
 		LOGGER.entry();
-		Collection<Virtue> virtues = virtuesByName.values();
+		Collection<Virtue> virtues = virtuesById.values();
 		LOGGER.exit(virtues);
-		return virtues; 
+		return virtues;
 	}
 
-	public Virtue getVirtue(String name) {
-		LOGGER.entry(name);
-		Virtue virtue = virtuesByName.get(name);
+	public Virtue getVirtue(String id) {
+		LOGGER.entry(id);
+		Virtue virtue = virtuesById.get(id);
 		LOGGER.exit(virtue);
 		return virtue;
+	}
+
+	/**
+	 * Create a Virtue username from its name, subject to Linux username
+	 * constraints, and such that it does not collide with any already-known
+	 * Virtues.
+	 * 
+	 * POSIX allows any name with characters in the set [a-zA-Z0-9._-] except that
+	 * the first character cannot be '-' (see
+	 * http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_437
+	 * and
+	 * http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_282).
+	 * However, some Linux systems require usernames to match "^[a-z][-a-z0-9_.]*$"
+	 * and be at most {@link #MAX_USERNAME_LENGTH} characters long (possibly
+	 * including the null terminator), so this method creates names that comply with
+	 * that.
+	 * 
+	 * @return
+	 */
+	public String createUsername(Virtue virtue) {
+		StringBuilder username = new StringBuilder();
+		// create a candidate username
+		String virtueName = virtue.getName();
+		int maxLen = Math.min(virtueName.length(), MAX_USERNAME_LENGTH - 1);
+		for (int i = 0; i < maxLen; i++) {
+			char c = virtueName.charAt(i);
+			char newChar;
+			switch (Character.getType(c)) {
+			case Character.LOWERCASE_LETTER:
+				newChar = c;
+				break;
+			case Character.UPPERCASE_LETTER:
+				newChar = Character.toLowerCase(c);
+				break;
+			case Character.DECIMAL_DIGIT_NUMBER:
+				if (username.length() > 0) {
+					newChar = c;
+				} else {
+					continue;
+				}
+				break;
+			default:
+				switch (c) {
+				case '-':
+				case '_':
+				case '.':
+					if (username.length() > 0) {
+						newChar = c;
+					} else {
+						continue;
+					}
+					break;
+				default:
+					// invalid char for username
+					newChar = '_';
+					break;
+				}
+			}
+			username.append(newChar);
+		}
+		if (username.length() == 0) {
+			username.append("virtue");
+		}
+
+		// make sure it's unique
+		Collection<Virtue> virtues = virtuesById.values();
+		int suffix = 1;
+		while (virtues.stream().anyMatch((Virtue v) -> v.getUsername().equals(username.toString()))) {
+			suffix++;
+			String suffixAsString = Integer.toString(suffix);
+			// replace the end with the suffix
+			int baseLength = Math.min(username.length(), MAX_USERNAME_LENGTH - 1 - suffixAsString.length());
+			username.replace(baseLength, username.length(), suffixAsString);
+		}
+		return username.toString();
 	}
 }
