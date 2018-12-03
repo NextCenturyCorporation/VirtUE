@@ -2,6 +2,9 @@ package com.nextcentury.savior.cifsproxy.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 
 import com.nextcentury.savior.cifsproxy.model.Virtue;
@@ -9,7 +12,7 @@ import com.nextcentury.savior.cifsproxy.model.Virtue;
 class VirtueServiceTest {
 
 	@Test
-	void testCreateUsername_simple() {
+	void testCreateUsername_simple() throws FileNotFoundException, IOException {
 		VirtueService virtueService = new VirtueService();
 		Virtue virtue = new Virtue("simple", "simple");
 		String username = virtueService.createUsername(virtue);
@@ -17,7 +20,7 @@ class VirtueServiceTest {
 	}
 
 	@Test
-	void testCreateUsername_upper() {
+	void testCreateUsername_upper() throws FileNotFoundException, IOException {
 		VirtueService virtueService = new VirtueService();
 		Virtue virtue = new Virtue("UpPEr", "test");
 		String username = virtueService.createUsername(virtue);
@@ -25,7 +28,7 @@ class VirtueServiceTest {
 	}
 	
 	@Test
-	void testCreateUsername_numbers() {
+	void testCreateUsername_numbers() throws FileNotFoundException, IOException {
 		VirtueService virtueService = new VirtueService();
 		Virtue virtue = new Virtue("13thing42", "test");
 		String username = virtueService.createUsername(virtue);
@@ -33,7 +36,7 @@ class VirtueServiceTest {
 	}
 	
 	@Test
-	void testCreateUsername_symbols() {
+	void testCreateUsername_symbols() throws FileNotFoundException, IOException {
 		VirtueService virtueService = new VirtueService();
 		Virtue virtue = new Virtue("8foo*bar[ish ness-", "test");
 		String username = virtueService.createUsername(virtue);
@@ -41,7 +44,7 @@ class VirtueServiceTest {
 	}
 	
 	@Test
-	void testCreateUsername_long() {
+	void testCreateUsername_long() throws FileNotFoundException, IOException {
 		VirtueService virtueService = new VirtueService();
 		Virtue virtue = new Virtue("a much longer name than we're ever likely to actually have", "test");
 		String username = virtueService.createUsername(virtue);
@@ -49,17 +52,24 @@ class VirtueServiceTest {
 	}
 
 	@Test
-	void testCreateUsername_collision() {
+	void testCreateUsername_collision() throws FileNotFoundException, IOException {
 		VirtueService virtueService = new VirtueService();
 		Virtue virtue = new Virtue("a much longer name than we're ever likely to actually have", "test");
 		String username = virtueService.createUsername(virtue);
 
 		assertEquals("a_much_longer_name_than_we_re_e", username);
 		
+		virtue.initUsername(username);
 		virtueService.virtuesById.put("v1", virtue);
-
-		Virtue virtue2 = new Virtue("a much longer name than we're ever likely to actually have", "test");
 		username = virtueService.createUsername(virtue);
 		assertEquals("a_much_longer_name_than_we_re_2", username);
-	}	
+	}
+	
+	@Test
+	void testCreateUsername_root() throws FileNotFoundException, IOException {
+		VirtueService virtueService = new VirtueService();
+		Virtue virtue = new Virtue("root", "test");
+		String username = virtueService.createUsername(virtue);
+		assertEquals("root2", username);
+	}
 }

@@ -3,6 +3,10 @@
  */
 package com.nextcentury.savior.cifsproxy.services;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
@@ -10,8 +14,10 @@ import java.io.OutputStreamWriter;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.ext.XLogger;
@@ -36,6 +42,8 @@ public class VirtueService {
 	 * Maximum length of a Linux username, including null terminator.
 	 */
 	private static final int MAX_USERNAME_LENGTH = 32;
+
+	private static final String PASSWORD_FILE = "/etc/passwd";
 
 	protected Map<String, Virtue> virtuesById = new HashMap<String, Virtue>();
 
@@ -191,8 +199,12 @@ public class VirtueService {
 	 * that.
 	 * 
 	 * @return
+	 * @throws IOException
+	 *                                   if the password file could not be read
+	 * @throws FileNotFoundException
+	 *                                   if the password file does not exist
 	 */
-	public String createUsername(Virtue virtue) {
+	public String createUsername(Virtue virtue) throws FileNotFoundException, IOException {
 		StringBuilder username = new StringBuilder();
 		// create a candidate username
 		String virtueName = virtue.getName();
@@ -237,10 +249,12 @@ public class VirtueService {
 			username.append("virtue");
 		}
 
+		Set<String> allUsers = getAllUsers();
 		// make sure it's unique
 		Collection<Virtue> virtues = virtuesById.values();
 		int suffix = 1;
-		while (virtues.stream().anyMatch((Virtue v) -> v.getUsername().equals(username.toString()))) {
+		while (virtues.stream().anyMatch((Virtue v) -> v.getUsername().equals(username.toString()))
+				|| allUsers.contains(username.toString())) {
 			suffix++;
 			String suffixAsString = Integer.toString(suffix);
 			// replace the end with the suffix
@@ -248,5 +262,31 @@ public class VirtueService {
 			username.replace(baseLength, username.length(), suffixAsString);
 		}
 		return username.toString();
+	}
+
+	/**
+	 * Figure out currently valid user names. Since the Proxy will only allow local
+	 * user logins, we can just read /etc/passwd. If the Proxy allowed domain
+	 * logins, we'd need to run getent(1), instead.
+	 * 
+	 * @return
+	 * @throws IOException
+	 *                                   if there was an error reading the password
+	 *                                   file (see {@link #createPassword()})
+	 * @throws FileNotFoundException
+	 *                                   if the {@link #PASSWORD_FILE} does not
+	 *                                   exist
+	 */
+	private Set<String> getAllUsers() throws FileNotFoundException, IOException {
+		File pwdFile = new File(PASSWORD_FILE);
+		Set<String> users = new HashSet<>();
+		try (BufferedReader reader = new BufferedReader(new FileReader(pwdFile))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] fields = line.split(":", 2);
+				users.add(fields[0]);
+			}
+		}
+		return users;
 	}
 }
