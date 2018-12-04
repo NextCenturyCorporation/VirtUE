@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Location } from '@angular/common';
 
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/pairwise';
+
 import { Router, ActivationEnd, NavigationStart, NavigationEnd, RoutesRecognized } from '@angular/router';
 
 
