@@ -87,6 +87,24 @@
 		<constructor-arg value="${virtue.aws.usePublicDns:default}"></constructor-arg>
 	</bean>
 
+	<bean name="cifsProxyDao"
+		class="com.ncc.savior.virtueadmin.data.jpa.JpaCifsProxyDao">
+		<constructor-arg value="${virtue.cifs.timeoutMills}"></constructor-arg>
+	</bean>
+
+	<bean name="cifsProxyManager" class="com.ncc.savior.virtueadmin.cifsproxy.CifsManager" init-method="sync">
+		<constructor-arg ref="serverIdProvider"></constructor-arg>
+		<constructor-arg ref="activeVirtueManager"></constructor-arg>
+		<constructor-arg ref="desktopService"></constructor-arg>
+		<constructor-arg ref="cifsProxyDao"></constructor-arg>
+		<constructor-arg ref="ec2Wrapper"></constructor-arg>
+		<constructor-arg ref="futureServiceProvider"></constructor-arg>
+		<constructor-arg value="${virtue.cifs.ami}"></constructor-arg>
+		<constructor-arg value="${virtue.cifs.loginUser}"></constructor-arg>
+		<constructor-arg value="${virtue.cifs.keyName}"></constructor-arg>
+		<constructor-arg value="${virtue.cifs.instanceType}"></constructor-arg>
+	</bean>
+
 	<!-- <bean name="awsVmUpdater" -->
 	<!-- class="com.ncc.savior.virtueadmin.infrastructure.aws.AwsVmUpdater"> -->
 	<!-- <constructor-arg ref="awsEc2Provider"></constructor-arg> -->

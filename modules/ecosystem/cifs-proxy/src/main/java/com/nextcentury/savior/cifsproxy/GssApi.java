@@ -277,10 +277,10 @@ public interface GssApi extends Library {
 	class gss_OID_set_desc extends Structure {
 		public NativeLong count;
 		/**
-		 * This can be one element, or (if {@link #count} > 1) a contiguous block of
+		 * This can be one element, or (if {@link #count} &gt; 1) a contiguous block of
 		 * multiple elements.
 		 * 
-		 * @see https://www.eshayne.com/jnaex/index.html?example=15
+		 * See https://www.eshayne.com/jnaex/index.html?example=15
 		 */
 		public gss_OID_desc.ByReference elements; // gss_OID_desc[]
 
