@@ -24,12 +24,11 @@ public enum SaviorErrorCode {
 	ID_MISMATCH(27, "Object IDs do not match", 400),
 	STORAGE_NOT_FOUND(28, "Storage not found", 400),
 	CIFS_PROXY_NOT_FOUND(29, "CIFS Proxy not found", 400),
-	STORAGE_NOT_FOUND(30, "Storage not found"),
-	PRINTER_NOT_FOUND(31, "Printer not found"),
-	FILE_SYSTEM_NOT_FOUND(32, "File System not found"),
-	PRINTER_ALREADY_EXISTS(33, "A printer with that ID already exists"),
-	FILE_SYSTEM_ALREADY_EXISTS(34, "A file system with that ID already exists"),
-  
+	PRINTER_NOT_FOUND(30, "Printer not found"),
+	FILE_SYSTEM_NOT_FOUND(31, "File System not found"),
+	PRINTER_ALREADY_EXISTS(32, "A printer with that ID already exists"),
+	FILE_SYSTEM_ALREADY_EXISTS(33, "A file system with that ID already exists"),
+
 	//bad data?
 	INVALID_INPUT(50, "Invalid input"),
 
