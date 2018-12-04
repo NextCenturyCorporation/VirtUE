@@ -104,7 +104,7 @@ public class DelegatingAuthenticationManager implements AuthenticationManager {
 
 	/**
 	 * Delegates to the {@link AuthenticationManager} passed to
-	 * {@link #DelegatingAuthenticationManager(AuthenticationManager, String)}.
+	 * {@link #DelegatingAuthenticationManager(AuthenticationManager, Path)}
 	 * 
 	 * @throws AuthenticationServiceException
 	 *                                            if <code>authentication</code> is

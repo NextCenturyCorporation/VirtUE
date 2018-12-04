@@ -122,10 +122,10 @@ samba-tool dns add ${local.ds_private_ip} $zone $lastOctet PTR ${local.myname}.$
 	   --kerberos=1
 
 # create user that will mount files
-useradd --shell /bin/false mounter
+useradd --shell /bin/false --no-create-home mounter
 
-touch /tmp/user_data-finished
 date
+touch /tmp/user_data-finished
 EOF
   # end of user_data
 
@@ -141,6 +141,17 @@ EOF
 	destination = "/tmp/virtue.conf"
   }
 
+  provisioner "remote-exec" {
+	inline = [
+	  "while ! [ -e /tmp/user_data-finished ]; do echo -n '.' ; sleep 2; done",
+	  "echo '    include = /etc/samba/virtue.conf' | sudo tee --append /etc/samba/smb.conf > /dev/null",
+	  "sudo cp /tmp/virtue.conf /etc/samba",
+	  "sudo touch /etc/samba/virtue-shares.conf",
+	  "sudo systemctl enable smb nmb",
+	  "sudo systemctl start smb nmb",
+	]
+  }
+
   #
   # Helper programs
   #
@@ -154,21 +165,15 @@ EOF
 	destination = "/tmp/${var.switch_principal_program}"
   }
 
-  provisioner "remote-exec" {
-	inline = [
-	  "while ! [ -e /tmp/user_data-finished ]; do echo -n '.' ; sleep 2; done",
-	  "echo '    include = virtue.conf' | sudo tee --append /etc/samba/smb.conf > /dev/null",
-	  "sudo cp /tmp/virtue.conf /etc/samba",
-	  "sudo touch /etc/samba/virtue-shares.conf",
-	  "sudo systemctl enable smb nmb",
-	  "sudo systemctl start smb nmb",
-	]
+  provisioner "file" {
+	source = "make-virtue-shares.sh"
+	destination = "/tmp/make-virtue-shares.sh"
   }
-
+  
   provisioner "remote-exec" {
 	inline = [
 	  # install will make them executable by default
-	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program}"
+	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh"
 	]
   }
 }

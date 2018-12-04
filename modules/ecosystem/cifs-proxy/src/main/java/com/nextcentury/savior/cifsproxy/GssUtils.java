@@ -67,7 +67,7 @@ public class GssUtils {
 	 * {@link GssApi#gss_import_name(IntByReference, gss_buffer_desc, gss_OID_desc, PointerByReference)}.
 	 * 
 	 * Note: The returned <code>gss_name_t</code> must be freed with
-	 * {@link #releaseName(gss_name_t)} (or
+	 * {@link #releaseName(GssApi, gss_name_t)} (or
 	 * {@link GssApi#gss_release_name(IntByReference, gss_name_t)}) when it is no
 	 * longer in use.
 	 * 
@@ -177,7 +177,7 @@ public class GssUtils {
 	 *                 api reference
 	 * @param name
 	 *                 input name
-	 * @return name & type structure
+	 * @return name &amp; type structure
 	 * @throws GSSException
 	 *                          if an error occurred calling a {@link GssApi}
 	 *                          function (e.g.,

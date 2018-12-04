@@ -10,6 +10,7 @@ import javax.xml.ws.WebServiceException;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.WebServerException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +22,8 @@ import com.nextcentury.savior.cifsproxy.model.FileShare;
 import com.nextcentury.savior.cifsproxy.services.ShareService;
 
 /**
- * Implements the CIFS Proxy REST API as defined in the SAVIOR CIFS Proxy documentation.
+ * Implements the CIFS Proxy REST API as defined in the SAVIOR CIFS Proxy
+ * documentation.
  * 
  * @author clong
  *
@@ -53,8 +55,13 @@ public class ShareController {
 	@PostMapping("/share")
 	FileShare newShare(HttpSession session, @RequestBody FileShare share) {
 		LOGGER.entry(session, share);
-		validateShare(share);
-		service.newShare(session, share);
+		try {
+			service.newShare(session, share);
+		} catch (IllegalArgumentException | IOException e) {
+			WebServerException wse = new WebServerException("exception mounting a share", e);
+			LOGGER.throwing(wse);
+			throw wse;
+		}
 		LOGGER.exit(share);
 		return share;
 	}
@@ -62,7 +69,13 @@ public class ShareController {
 	@DeleteMapping("/share/{name}")
 	void removeShare(@PathVariable String name) {
 		LOGGER.entry();
-		service.removeShare(name);
+		try {
+			service.removeShare(name);
+		} catch (IllegalArgumentException | IOException e) {
+			WebServerException wse = new WebServerException("exception unmounting a share", e);
+			LOGGER.throwing(wse);
+			throw wse;
+		}
 		LOGGER.exit();
 	}
 
@@ -78,11 +91,5 @@ public class ShareController {
 		}
 		LOGGER.exit("");
 		return "";
-	}
-
-	private void validateShare(FileShare share) {
-		if (share.getName() == null || share.getName().isEmpty()) {
-			throw new IllegalArgumentException("");
-		}
 	}
 }

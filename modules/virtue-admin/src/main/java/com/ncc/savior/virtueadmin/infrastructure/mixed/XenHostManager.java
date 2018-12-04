@@ -36,6 +36,8 @@ import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpose;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
@@ -161,6 +163,8 @@ public class XenHostManager {
 		}
 		virtueMods.setVirtueId(virtue.getId());
 		virtueMods.setVirtueTemplateId(virtue.getTemplateId());
+		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.USER_VIRTUE);
+		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverId + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
 				xenInstanceType, virtueMods, iamRoleName);
@@ -247,6 +251,7 @@ public class XenHostManager {
 				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverId);
 			}
 
+			@SuppressWarnings("unused")
 			private Runnable getCopyS3DataRunnableUsingCli(Collection<VirtualMachineTemplate> linuxVmts,
 					Session finalSession) {
 				Runnable copyS3Data = () -> {

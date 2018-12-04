@@ -8,7 +8,11 @@ apply: .plan.out
 	terraform apply .plan.out && mv -f .plan.out .plan.out.last
 
 next:
-	[ -f .plan.out ] && $(MAKE) apply || $(MAKE) plan
+	if [ -f .plan.out ] then \
+		$(MAKE) apply ; \
+	else \
+		$(MAKE) plan \
+	fi
 
 Destroy:
 	terraform destroy -auto-approve

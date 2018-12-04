@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.virtue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,9 +35,12 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	private IActiveVirtueDao virtueDao;
 	private ICloudManager cloudManager;
 
+	private Set<VirtueCreationDeletionListener> virtueCreationDeletionListeners;
+
 	public ActiveVirtueManager(ICloudManager cloudManager, IActiveVirtueDao virtueDao) {
 		this.cloudManager = cloudManager;
 		this.virtueDao = virtueDao;
+		this.virtueCreationDeletionListeners = new HashSet<VirtueCreationDeletionListener>();
 	}
 
 	@Override
@@ -73,6 +77,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			logger.debug("From template=" + template);
 			logger.debug("  created instance=" + vi);
 			virtueDao.addVirtue(vi);
+			onVirtueCreation(vi);
 			return vi;
 		} catch (Exception e) {
 			// TODO fix cloud manager to not throw exception. Throw something more specific.
@@ -111,6 +116,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			cloudManager.deleteVirtue(vi, future);
 			future.thenAccept((virtue) -> {
 				virtueDao.deleteVirtue(virtue);
+				onVirtueDeletion(virtue);
 			});
 		} else {
 			throw new SaviorException(SaviorErrorCode.USER_NOT_AUTHORIZED,
@@ -133,6 +139,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			cloudManager.deleteVirtue(vi, future);
 			future.thenAccept((virtue) -> {
 				virtueDao.deleteVirtue(virtue);
+				onVirtueDeletion(virtue);
 			});
 		}
 	}
@@ -244,9 +251,46 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public void sync() {
 		Iterable<VirtueInstance> virtues = virtueDao.getAllActiveVirtues();
 		List<String> ids = new ArrayList<String>();
-		for (VirtueInstance v:virtues) {
+		for (VirtueInstance v : virtues) {
 			ids.add(v.getId());
 		}
 		cloudManager.sync(ids);
+	}
+
+	// private class VmUpdateListener implements IStateUpdateListener {
+	// @Override
+	// public void updateVmState(String vmId, VmState state) {
+	// updateVmState(vmId, state);
+	// }
+	// }
+	@Override
+	public void addVirtueCreationDeletionListener(VirtueCreationDeletionListener vcdl) {
+		virtueCreationDeletionListeners.add(vcdl);
+	}
+
+	private void onVirtueCreation(VirtueInstance virtue) {
+		for (VirtueCreationDeletionListener listener : virtueCreationDeletionListeners) {
+			try {
+				listener.onVirtueCreation(virtue);
+			} catch (Exception e) {
+				logger.warn("Failed to notify virtue creation! Virtue=" + virtue, e);
+			}
+		}
+	}
+
+	private void onVirtueDeletion(VirtueInstance virtue) {
+		for (VirtueCreationDeletionListener listener : virtueCreationDeletionListeners) {
+			try {
+				listener.onVirtueDeletion(virtue);
+			} catch (Exception e) {
+				logger.warn("Failed to notify virtue creation! Virtue=" + virtue, e);
+			}
+		}
+	}
+
+	public static interface VirtueCreationDeletionListener {
+		void onVirtueCreation(VirtueInstance virtue);
+
+		void onVirtueDeletion(VirtueInstance virtue);
 	}
 }
