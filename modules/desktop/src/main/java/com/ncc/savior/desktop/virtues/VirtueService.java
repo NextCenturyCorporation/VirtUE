@@ -164,22 +164,29 @@ public class VirtueService {
 
 			SshConnectionParameters params = getConnectionParams(app, key);
 			String colorDesc = (color == null ? "" : " with color " + color.toString());
-			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
-			XpraClient client = connectionManager.getExistingClient(params);
-			if (client == null || client.getStatus() == Status.ERROR) {
-				logger.debug("needed new connection");
-				try {
-					connectionManager.createXpraServerAndAddDisplayToParams(params);
-					logger.debug("connecting clipboard");
-					clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
-				} catch (IOException e) {
-					logger.error("clipboard manager connection failed!", e);
-					VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
-							"Failed to connect clipboard to virtue");
-					UserAlertingServiceHolder.sendAlertLogError(pam, logger);
+			logger.debug("**verifying connection to " + app.getHostname() + colorDesc);
+			// synchronized by virtue prevents user from clicking the application button
+			// twice and getting 2 connections.
+			logger.debug("**waiting on " + virtue.getName());
+			synchronized (virtue) {
+				logger.debug("**has lock on " + virtue.getName());
+				XpraClient client = connectionManager.getExistingClient(params);
+				if (client == null || client.getStatus() == Status.ERROR) {
+					logger.debug("needed new connection");
+					try {
+						connectionManager.createXpraServerAndAddDisplayToParams(params);
+						logger.debug("connecting clipboard");
+						clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
+					} catch (IOException e) {
+						logger.error("clipboard manager connection failed!", e);
+						VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
+								"Failed to connect clipboard to virtue");
+						UserAlertingServiceHolder.sendAlertLogError(pam, logger);
+					}
+					client = connectionManager.createClient(params, color, virtue);
 				}
-				client = connectionManager.createClient(params, color, virtue);
 			}
+			logger.debug("**released lock on " + virtue.getName());
 		} finally {
 			if (file != null && file.exists()) {
 				file.delete();
