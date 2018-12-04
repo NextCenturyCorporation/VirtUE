@@ -309,7 +309,7 @@ but got: \n       " + this.routerService.getRouterUrl());
     // Go back to whatever the previous page was, unless you navigated to this page in view mode, and clicked edit.
     // If you did so, just go back to view. This lets you hit cancel again on that view page, and go back to the previous page
     // from that.
-    if (this.mode == Mode.EDIT && this.getModeFromRouter() === Mode.VIEW) {
+    if (this.mode === Mode.EDIT && this.getModeFromRouter() === Mode.VIEW) {
       this.toViewMode();
       // this.routerService.goToPage(this.item.getViewURL());
     }
