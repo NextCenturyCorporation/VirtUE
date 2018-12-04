@@ -47,10 +47,10 @@ public class VirtueController {
 		return virtues;
 	}
 
-	@GetMapping("/virtue/{name}")
-	Virtue getVirtue(@PathVariable String name) {
-		LOGGER.entry(name);
-		Virtue virtue = service.getVirtue(name);
+	@GetMapping("/virtue/{id}")
+	Virtue getVirtue(@PathVariable String id) {
+		LOGGER.entry(id);
+		Virtue virtue = service.getVirtue(id);
 		LOGGER.exit(virtue);
 		return virtue;
 	}	
