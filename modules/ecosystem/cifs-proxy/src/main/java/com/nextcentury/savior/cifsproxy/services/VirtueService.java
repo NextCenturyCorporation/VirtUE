@@ -53,8 +53,9 @@ public class VirtueService {
 	 * @param virtue
 	 *                   the new Virtue
 	 * @throws IllegalArgumentException
-	 *                                      if a Virtue with the same name was
-	 *                                      already defined
+	 *                                      if the passed Virtue has invalid fields
+	 *                                      (e.g., Virtue with the same ID was
+	 *                                      already defined)
 	 * @throws IOException
 	 *                                      if the Virtue could not be created
 	 * @throws InterruptedIOException
@@ -69,6 +70,14 @@ public class VirtueService {
 		}
 		if (virtue.getUsername() == null || virtue.getUsername().length() == 0) {
 			virtue.initUsername(createUsername(virtue));
+		} else {
+			Set<String> allUsers = getAllUsers();
+			if (allUsers.contains(virtue.getUsername())) {
+				IllegalArgumentException e = new IllegalArgumentException(
+						"duplicate user '" + virtue.getUsername() + "'");
+				LOGGER.throwing(e);
+				throw e;
+			}
 		}
 		if (virtue.getPassword() == null || virtue.getPassword().length() == 0) {
 			virtue.initPassword(createPassword());
