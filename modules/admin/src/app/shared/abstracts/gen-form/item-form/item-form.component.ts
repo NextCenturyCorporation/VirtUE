@@ -291,11 +291,10 @@ but got: \n       " + this.routerService.getRouterUrl());
   }
 
   /**
-   * Save changes to backend and return to list page.
-   * #TODO Eventually this should return to the previous domain.
+   * Save changes to backend and return to the previous domain.
    */
   saveAndReturn(): void {
-    this.createOrUpdate(() => this.toListPage());
+    this.createOrUpdate(() => this.toPreviousPage());
   }
 
   /**
