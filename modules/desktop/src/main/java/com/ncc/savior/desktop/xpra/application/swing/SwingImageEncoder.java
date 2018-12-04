@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.protocol.ImageEncoding;
 
-
 /**
  * This class handles decoding images for the system. Additional encodings will
  * be implemented as needed.
@@ -27,6 +26,7 @@ public class SwingImageEncoder {
 	public static Image decodeImage(ImageEncoding encoding, byte[] data) {
 		switch (encoding) {
 		case png:
+		case jpeg:
 			Image img = null;
 			try {
 				img = ImageIO.read(new ByteArrayInputStream(data));
