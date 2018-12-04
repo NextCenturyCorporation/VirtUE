@@ -3,25 +3,20 @@ package com.ncc.savior.virtueadmin.data.jpa;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IResourceManager;
-import com.ncc.savior.virtueadmin.model.VirtueTemplate;
-import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.model.FileSystem;
+import com.ncc.savior.virtueadmin.model.Printer;
+import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 
 /**
  * {@link ITemplateManager} that uses Spring and JPA.
@@ -43,6 +38,7 @@ public class SpringJpaResourceManager implements IResourceManager {
 		this.virtueTemplateRepo = vtRepo;
 	}
 
+	@Override
 	public Printer getPrinterForVirtueTemplate(VirtueTemplate virtue, String printerId) {
 		for (Printer printer : virtue.getPrinters()) {
 			if (printer.getId().equals(printerId)) {
