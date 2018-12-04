@@ -8,6 +8,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager.VirtueCreationDeletionListener;
 
 /**
  * Manages and controls active {@link VirtueInstance}s for the system. This
@@ -78,5 +79,7 @@ public interface IActiveVirtueManager {
 	void rebootVm(String vmId);
 
 	void sync();
+
+	void addVirtueCreationDeletionListener(VirtueCreationDeletionListener vcdl);
 
 }
