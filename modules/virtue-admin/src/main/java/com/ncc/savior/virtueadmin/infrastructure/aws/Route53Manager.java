@@ -28,7 +28,7 @@ import com.amazonaws.services.route53.model.ResourceRecordSet;
 /**
  * Wrapper class to simplify Route53 calls in AWS. Each instance can only impact
  * a single domain and that domain is added to all hostnames.
- * 
+ *
  *
  */
 public class Route53Manager {

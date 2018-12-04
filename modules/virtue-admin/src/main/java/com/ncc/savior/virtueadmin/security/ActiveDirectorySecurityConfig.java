@@ -43,6 +43,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	protected ActiveDirectorySecurityConfig() {
 		super("ActiveDirectory");
+		logger.debug("ActiveDirectorySecurityConfig: " + adDomain + " " + adUrl);
 	}
 
 	private static final XLogger logger = XLoggerFactory.getXLogger(ActiveDirectorySecurityConfig.class);
@@ -71,6 +72,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	private File keytabLocation;
 
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
+		logger.debug("getActiveDirectoryLdapAuthenticationProvider: " + adDomain + " " + adUrl);
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
 		provider.setConvertSubErrorCodesToExceptions(true);

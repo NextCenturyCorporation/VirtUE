@@ -34,7 +34,6 @@ public class Printer {
 
 	/**
 	 * Used for jackson deserialization
-	 * This file was copied from ApplicationDefinition - don't know if we still need this.
 	 */
 	protected Printer() {
 
