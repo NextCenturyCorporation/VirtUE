@@ -55,6 +55,7 @@ public class VirtueService {
 	private IClipboardManager clipboardManager;
 	protected AuthorizationService authorizationService;
 	private ColorManager colorManager;
+	private HashMap<String, Object> locks;
 
 	static {
 		startableVirtueStates = new ArrayList<VirtueState>();
@@ -75,6 +76,7 @@ public class VirtueService {
 		this.clipboardManager = clipboardManager;
 		this.authorizationService = authService;
 		this.colorManager = colorManager;
+		this.locks=new HashMap<String,Object>();
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
@@ -164,12 +166,11 @@ public class VirtueService {
 
 			SshConnectionParameters params = getConnectionParams(app, key);
 			String colorDesc = (color == null ? "" : " with color " + color.toString());
-			logger.debug("**verifying connection to " + app.getHostname() + colorDesc);
+			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
 			// synchronized by virtue prevents user from clicking the application button
 			// twice and getting 2 connections.
-			logger.debug("**waiting on " + virtue.getName());
-			synchronized (virtue) {
-				logger.debug("**has lock on " + virtue.getName());
+			Object lock = getLock(virtue);
+			synchronized (lock) {
 				XpraClient client = connectionManager.getExistingClient(params);
 				if (client == null || client.getStatus() == Status.ERROR) {
 					logger.debug("needed new connection");
@@ -186,12 +187,21 @@ public class VirtueService {
 					client = connectionManager.createClient(params, color, virtue);
 				}
 			}
-			logger.debug("**released lock on " + virtue.getName());
 		} finally {
 			if (file != null && file.exists()) {
 				file.delete();
 			}
 		}
+	}
+
+	private synchronized Object getLock(DesktopVirtue virtue) {
+		String key = virtue.getTemplateId();
+		Object lock = locks.get(key);
+		if (lock == null) {
+			lock = new Object();
+			locks.put(key, lock);
+		}
+		return lock;
 	}
 
 	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) throws IOException {
