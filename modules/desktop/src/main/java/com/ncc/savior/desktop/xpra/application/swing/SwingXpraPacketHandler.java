@@ -123,6 +123,10 @@ public class SwingXpraPacketHandler implements IPacketHandler {
 						+ packet.getBytes() + " Packet=" + packet);
 			}
 			try {
+				// For some reason, Xpra version 2.4.2 no longer sends named cursors, like
+				// "pointer", but instead only sends images for the cursors. The ones that get
+				// sent are too big and look terrible. This just makes them look somewhat
+				// reasonable.
 				Image bimg = cursorPacketToBufferedImage(packet);
 				int dim = Math.max(bimg.getWidth(null), bimg.getHeight(null));
 				float mult = 1.5f;

@@ -1,11 +1,8 @@
 package com.ncc.savior.desktop.xpra.protocol.packet.dto;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +29,6 @@ public class DrawPacket extends WindowPacket implements IImagePacket {
 	private int sequence;
 	private int rowstride;
 	private Map<String, Object> meta;
-
 
 	protected DrawPacket(int windowId, int x, int y, int width, int height, ImageEncoding encoding, byte[] data,
 			int sequence, int rowstride) {
@@ -69,17 +65,9 @@ public class DrawPacket extends WindowPacket implements IImagePacket {
 		if (list.size() > 10) {
 			this.meta = PacketUtils.asStringObjectMap(list.get(10));
 			if (meta.containsKey("zlib")) {
-				Inflater zlib = new Inflater();
-				zlib.setInput(this.data);
-				byte[] bytes = new byte[width * height * 4];
-				try {
-					int numBytes = zlib.inflate(bytes);
-					this.data = Arrays.copyOf(bytes, numBytes);
-				} catch (DataFormatException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+				// Hello Packet disables zlib so we should never have this. If we ever get here,
+				// something weird happened. We should warn and continue.
+				logger.warn("Found DrawPacket that is claimed to be zlib encrypted!  Zlib is not implemented!");
 			}
 		}
 	}

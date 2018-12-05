@@ -40,7 +40,7 @@ public class SwingImageEncoder {
 		case rgb24:
 			// This is not efficient. Hopefully its only used for an occasional icon.
 			image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-			buffer = (image.getRaster().getDataBuffer());
+			buffer = image.getRaster().getDataBuffer();
 			array = ((DataBufferInt) buffer).getData();
 			for (int i = 0; i + 2 < data.length; i = i + 3) {
 				byte b2 = data[i];
