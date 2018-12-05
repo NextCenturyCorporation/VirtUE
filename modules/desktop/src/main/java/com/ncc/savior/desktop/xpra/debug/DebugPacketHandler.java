@@ -181,16 +181,16 @@ public class DebugPacketHandler implements IPacketHandler {
 
 		try {
 			String typeString;
+			String windowPostfix = "";
 			if (p instanceof UnknownPacket) {
 				byte[] first = (byte[]) ((UnknownPacket) p).getList().get(0);
 				typeString = new String(first);
 
 			} else {
 				typeString = p.getType().toString();
-			}
-			String windowPostfix = "";
-			if (p instanceof WindowPacket) {
-				windowPostfix = "-" + ((WindowPacket) p).getWindowId();
+				if (p instanceof WindowPacket) {
+					windowPostfix = "-" + ((WindowPacket) p).getWindowId();
+				}
 			}
 			File file = new File(debugDirectory, timestamp + "-" + typeString + windowPostfix + ".txt");
 			writer = new BufferedWriter(new FileWriter(file));

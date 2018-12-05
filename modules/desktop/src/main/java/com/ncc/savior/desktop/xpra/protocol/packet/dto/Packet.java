@@ -8,7 +8,8 @@ import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
 /**
  * Base Packet class.
  *
- *
+ * First entry in list is always type which is known prior to class
+ * instantiation.
  */
 public abstract class Packet {
 	protected PacketType type;
