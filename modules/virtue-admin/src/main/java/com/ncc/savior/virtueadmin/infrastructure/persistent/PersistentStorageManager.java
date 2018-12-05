@@ -50,10 +50,9 @@ public class PersistentStorageManager {
 		this.persistentStorageDao = persistentStorageDao;
 		this.snapshotIdForNewPersistentStorageDrive = snapshotIdForNewPersistentStorageDrive;
 		this.availabilityZone = availabilityZone;
-		sync();
 	}
 
-	private void sync() {
+	public void sync() {
 		AmazonEC2 ec2 = ec2Wrapper.getEc2();
 		DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest();
 		Collection<Filter> filters = new ArrayList<Filter>();
