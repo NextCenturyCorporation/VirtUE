@@ -92,7 +92,9 @@ public class HelloPacket extends Packet {
 
 		LOGGER.debug("max size: " + maxX + "x" + maxY);
 		int[] screen = new int[] { (int) maxX, (int) maxY };
-		String[] encodings = new String[] { "h264", "jpeg", "png", "png/P" };
+		// removing h264 from this list causes the server to use RGB. I have no idea
+		// why.
+		String[] encodings = new String[] { "jpeg", "png", "png/P", "h264" };
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put(VERSION, XpraClient.VERSION);
 		map.put(DESKTOP_SIZE, screen);
@@ -112,7 +114,7 @@ public class HelloPacket extends Packet {
 		map.put(BENCODE, true);
 		map.put(RENCODE, false);
 		map.put(CHUNKED_COMPRESSION, true);
-		map.put(ENCODING, encodings[0]);
+		map.put(ENCODING, encodings[1]);
 		map.put(PLATFORM, System.getProperty("os.name").toLowerCase());
 		map.put(CAPABILITY_UUID, UUID.randomUUID().toString().replace("-", ""));
 

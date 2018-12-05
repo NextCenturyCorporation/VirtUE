@@ -165,7 +165,8 @@ public class SwingWindow extends XpraWindow {
 					if (closed) {
 						return;
 					}
-					Image img = SwingImageEncoder.decodeImage(packet.getEncoding(), packet.getData());
+					Image img = SwingImageEncoder.decodeImage(packet.getEncoding(), packet.getData(), packet.getWidth(),
+							packet.getHeight());
 					if (img != null && !closed && canvas != null) {
 						Graphics g = canvas.getGraphics();
 						// g.setGlobalBlendMode(BlendMode.SCREEN);
@@ -230,13 +231,14 @@ public class SwingWindow extends XpraWindow {
 
 	@Override
 	public void setWindowIcon(WindowIconPacket packet) {
-		Image icon = SwingImageEncoder.decodeImage(packet.getEncoding(), packet.getData());
+		int width = (int) Math.sqrt(packet.getData().length / 4);
+		Image icon = SwingImageEncoder.decodeImage(packet.getEncoding(), packet.getData(), width, width);
 
 		if (icon != null) {
 			if (DrawColorOnIcon) {
 				Graphics g = icon.getGraphics();
 				g.setColor(color);
-				int width = icon.getWidth(null);
+				width = icon.getWidth(null);
 				int height = icon.getHeight(null);
 				int nPoints = 4;
 				int[] xPoints = new int[] { 1, width / 2, 1, 1 };

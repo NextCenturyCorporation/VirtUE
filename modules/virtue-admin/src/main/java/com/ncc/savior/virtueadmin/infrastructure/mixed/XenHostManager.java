@@ -62,11 +62,7 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
  */
 public class XenHostManager {
 	private static final String S3_DOWNLOAD_MAIN_CLASS = "com.ncc.savior.server.s3.S3Download";
-	private static final String XEN_LINUX_IMAGE_NAME = "disk.qcow2";
 	private static final String XEN_STANDARD = "standard";
-	private static final String XEN_STANDARD_FILE2 = "vmlinuz-4.2.0-42-generic";
-	private static final String XEN_STANDARD_SWAP_FILE = "swap.qcow2";
-	private static final String XEN_STANDARD_FILE1 = "initrd.img-4.2.0-42-generic";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private static final String VM_PREFIX = "VRTU-XG-";
 
@@ -291,7 +287,7 @@ public class XenHostManager {
 							String template = vmt.getTemplatePath();
 							templateSet.add(template);
 						}
-						List<String> lines = SshUtil.sendCommandFromSession(finalSession,
+						SshUtil.sendCommandFromSession(finalSession,
 								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
 
 						// copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE1, kmsKey);
@@ -327,7 +323,8 @@ public class XenHostManager {
 				logger.debug("s3 copy output: " + lines.get(lines.size() - 1));
 			}
 
-			private void copyFolderFromS3Java(Session finalSession, String templatePath, String kmsKey) throws JSchException, IOException {
+			private void copyFolderFromS3Java(Session finalSession, String templatePath, String kmsKey)
+					throws JSchException, IOException {
 				if (!templatePath.endsWith("/")) {
 					templatePath += "/";
 				}

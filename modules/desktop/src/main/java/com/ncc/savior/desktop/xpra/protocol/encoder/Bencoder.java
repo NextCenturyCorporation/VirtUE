@@ -3,12 +3,15 @@ package com.ncc.savior.desktop.xpra.protocol.encoder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation on Bencode encoding/decoding.
@@ -16,6 +19,7 @@ import java.util.Map.Entry;
  *
  */
 public class Bencoder {
+	private static final Logger logger = LoggerFactory.getLogger(Bencoder.class);
 	private static final char PREFIX_INT = 'i';
 	private static final char SUFIX_NEGATIVE = '-';
 	private static final char POSTFIX_NONSTR = 'e';
@@ -158,8 +162,14 @@ public class Bencoder {
 		char ch = (char) bis.read();
 		if (Character.isDigit(ch)) {
 			int length = decodeStringLength(ch, bis);
-			String s = decodeString(bis, length);
-			return s;
+			byte[] b = decodeByte(bis, length);
+			// String s = new String(b);
+			// if (Arrays.equals(s.getBytes(), b)) {
+			// return s;
+			// } else {
+			return b;
+			// }
+			// return b;
 		} else if (ch == PREFIX_INT) {
 			Long i = decodeLong(bis);
 			return i;
@@ -177,19 +187,18 @@ public class Bencoder {
 		}
 	}
 
-	private String decodeString(InputStream bis, int length) throws IOException {
-		char[] value = new char[length];
+	private byte[] decodeByte(InputStream bis, int length) throws IOException {
+		byte[] value = new byte[length];
 		int b;
 		for (int i = 0; i < length; i++) {
 			b = bis.read();
 			if (b == -1) {
 				throw new IOException("Stream ended");
 			} else {
-				value[i] = (char) b;
+				value[i] = (byte) b;
 			}
 		}
-		String s = new String(value);
-		return s;
+		return value;
 	}
 
 	private int decodeStringLength(char startedFrom, InputStream bis) throws IOException {
@@ -232,14 +241,20 @@ public class Bencoder {
 	}
 
 	private List<Object> decodeList(InputStream bis) throws IOException {
-		List<Object> list = new LinkedList<Object>();
+		List<Object> list = new ArrayList<Object>();
 		char ch;
 		while (true) {
 			ch = (char) bis.read();
 			if (Character.isDigit(ch)) {
 				int length = decodeStringLength(ch, bis);
-				String s = decodeString(bis, length);
-				list.add(s);
+				byte[] b = decodeByte(bis, length);
+				// String s = new String(b);
+				// if (Arrays.equals(s.getBytes(), b)) {
+				list.add(b);
+				// } else {
+				// logger.debug("byte: " + b.length + " string: " + s.getBytes().length);
+				// list.add(b);
+				// }
 			} else if (ch == PREFIX_INT) {
 				Long i = decodeLong(bis);
 				list.add(i);
@@ -265,9 +280,9 @@ public class Bencoder {
 			ch = (char) bis.read();
 			if (Character.isDigit(ch)) {
 				int length = decodeStringLength(ch, bis);
-				String s = decodeString(bis, length);
+				byte[] s = decodeByte(bis, length);
 				Object o = decodeObject(bis);
-				map.put(s, o);
+				map.put(new String(s), o);
 			} else if (ch == POSTFIX_NONSTR) {
 				break;
 			} else if ((byte) ch == -1) {
