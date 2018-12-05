@@ -47,8 +47,11 @@ import { FooterComponent } from './footer/footer.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 import { ConfigComponent } from './config/config.component';
-import { ConfigActiveDirComponent } from './config/config-active-dir/config-active-dir.component';
-import { ConfigSensorsComponent } from './config/config-sensors/config-sensors.component';
+import { ConfigActiveDirTabComponent } from './config/config-activeDir-tab/config-activeDir-tab.component';
+import { ConfigSensorsTabComponent } from './config/config-sensors-tab/config-sensors-tab.component';
+import { ConfigPrinterTabComponent } from './config/config-printer-tab/config-printer-tab.component';
+import { ConfigFileSysTabComponent } from './config/config-fileSys-tab/config-fileSys-tab.component';
+import { ConfigSettingsHistoryTabComponent } from './config/config-settingsHistory-tab/config-settingsHistory-tab.component';
 
 import { GenericTableComponent } from './shared/abstracts/gen-table/gen-table.component';
 
@@ -63,8 +66,13 @@ import { VirtueMainTabComponent } from './virtues/form/main-tab/virtue-main-tab.
 import { VirtueSettingsTabComponent } from './virtues/form/settings-tab/virtue-settings.component';
 import { VirtueUsageTabComponent } from './virtues/form/usage-tab/virtue-usage-tab.component';
 // import { VirtueHistoryTabComponent } from './virtues/form/history-tab/virtue-history-tab.component';
-import { ColorModalComponent } from './modals/color-picker/color-picker.modal';
 import { VmModalComponent } from './modals/vm-modal/vm-modal.component';
+
+import { ColorModalComponent } from './modals/color-picker/color-picker.modal';
+import { PrinterModalComponent } from './modals/printer-modal/printer.modal';
+import { PrinterSelectionModalComponent } from './modals/printer-modal/printer-selection.modal';
+// import { FileSystemModalComponent } from './modals/fileSystem-modal/fileSystem.modal';
+import { FileSystemSelectionModalComponent } from './modals/fileSystem-modal/fileSystem-selection.modal';
 
 import { VmListComponent } from './vms/vm-list/vm-list.component';
 import { VmMainTabComponent } from './vms/form/vm-main-tab/vm-main-tab.component';
@@ -81,19 +89,24 @@ import { ActiveClassDirective } from './shared/directives/active-class.directive
 import { DialogsComponent } from './dialogs/dialogs.component';
 
 
-import { ListFilterPipe } from './shared/pipes/list-filter.pipe';
+import { ListFilterPipe } from './shared/abstracts/gen-table/list-filter.pipe';
 
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
 import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
+import { DataRequestService } from './shared/services/dataRequest.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     BreadcrumbsComponent,
-    ConfigActiveDirComponent,
     ConfigComponent,
+    ConfigActiveDirTabComponent,
+    ConfigSensorsTabComponent,
+    ConfigPrinterTabComponent,
+    ConfigFileSysTabComponent,
+    ConfigSettingsHistoryTabComponent,
     FooterComponent,
     HeaderComponent,
     DashboardComponent,
@@ -115,8 +128,11 @@ import { MessageService } from './shared/services/message.service';
     VirtueModalComponent,
     VmModalComponent,
     ColorModalComponent,
+    PrinterModalComponent,
+    PrinterSelectionModalComponent,
+    // FileSystemModalComponent,
+    FileSystemSelectionModalComponent,
 
-    ConfigSensorsComponent,
     ListFilterPipe,
     PageNotFoundComponent,
 
@@ -162,6 +178,7 @@ import { MessageService } from './shared/services/message.service';
     OverlayContainer,
     BaseUrlService,
     MessageService,
+    DataRequestService,
     DatePipe
   ],
   bootstrap: [AppComponent],
@@ -170,7 +187,11 @@ import { MessageService } from './shared/services/message.service';
     AppsModalComponent,
     VmModalComponent,
     VirtueModalComponent,
-    ColorModalComponent
+    ColorModalComponent,
+    // PrinterModalComponent,
+    PrinterSelectionModalComponent,
+    // FileSystemModalComponent,
+    FileSystemSelectionModalComponent
   ]
 })
 

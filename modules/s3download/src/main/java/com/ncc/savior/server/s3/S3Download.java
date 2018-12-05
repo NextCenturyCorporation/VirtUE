@@ -1,9 +1,11 @@
 package com.ncc.savior.server.s3;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Security;
+import java.util.List;
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.regions.RegionUtils;
@@ -12,8 +14,10 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3EncryptionClientBuilder;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.KMSEncryptionMaterialsProvider;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 /**
  * Minimalistic application to pull down encrypted S3 images.
@@ -29,7 +33,6 @@ public class S3Download {
 		} else {
 			usage("Invalid number of parameters");
 		}
-
 	}
 
 	public static void downloadUnencrypted(String[] args) throws FileNotFoundException, IOException {
@@ -65,15 +68,42 @@ public class S3Download {
 
 	private static void download(String bucket, String key, String destinationPath, AmazonS3 encryptionClient)
 			throws FileNotFoundException, IOException {
-		S3Object obj = encryptionClient.getObject(bucket, key);
-		S3ObjectInputStream stream = obj.getObjectContent();
-		FileOutputStream out = new FileOutputStream(destinationPath);
-		S3Util.copyLarge(stream, out, new byte[4096]);
+		if (key.trim().endsWith("/")) {
+			// download folder
+			File destination = new File(destinationPath);
+			if (destination.isFile()) {
+				throw new IllegalArgumentException(
+						"key represents a directory, but destination a file.  Cannot copy a directory to a file.");
+			}
+
+			ObjectListing objListing = encryptionClient.listObjects(bucket, key);
+			List<S3ObjectSummary> oss = objListing.getObjectSummaries();
+			for (S3ObjectSummary os : oss) {
+				String myKey = os.getKey();
+				if (!myKey.endsWith("/")) {
+					// file
+					String filename = myKey;
+					int slashIndex = myKey.lastIndexOf("/");
+					if (slashIndex > -1) {
+						filename = filename.substring(slashIndex + 1);
+					}
+					System.out.println("Downloading key " + myKey + " to " + filename);
+					download(bucket, myKey, destination + File.separator + filename, encryptionClient);
+				}
+			}
+		} else {
+			// download file
+			S3Object obj = encryptionClient.getObject(bucket, key);
+			S3ObjectInputStream stream = obj.getObjectContent();
+			FileOutputStream out = new FileOutputStream(destinationPath);
+			S3Util.copyLarge(stream, out, new byte[4096]);
+		}
+
 	}
 
 	private static void usage(String string) {
-		if (string!=null && !string.trim().equals("")) {
-			System.out.println("Error: "+string);
+		if (string != null && !string.trim().equals("")) {
+			System.out.println("Error: " + string);
 		}
 		System.out.println("Usage: ");
 		System.out.println(

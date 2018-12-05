@@ -25,7 +25,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
 
 /**
  * Implementation of {@link IActiveVirtueManager}.
- * 
+ *
  * See interface for more descriptions.
  *
  */
@@ -107,7 +107,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public VirtueInstance deleteVirtue(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		}
 
@@ -131,7 +131,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public void adminDeleteVirtue(String instanceId) {
 		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(instanceId);
 		if (!opt.isPresent()) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND,
 					"Virtue id=" + instanceId + " was not found");
 		} else {
 			VirtueInstance vi = opt.get();
@@ -158,7 +158,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			// We throw an exception here mainly because nulls are handled strangely by
 			// Jersey (They return a 204 which means success with no content). Throwing an
 			// exception allows our exception handling system deal with the error better.
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with id=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Cannot find virtue with id=" + virtueId);
 		}
 	}
 
@@ -166,7 +166,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public VirtueInstance getVirtueForUserFromTemplateId(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(user, instanceId);
 		if (vi == null) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND,
 					"Cannot find virtue with id=" + instanceId + " for user=" + user.getUsername());
 		}
 		return vi;
@@ -185,7 +185,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 						"User=" + user.getUsername() + " is not authorized to start virtueId=" + virtueId);
 			}
 		} else {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
 		}
 	}
 
@@ -202,7 +202,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 						"User=" + user.getUsername() + " is not authorized to stop virtueId=" + virtueId);
 			}
 		} else {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Could not find virtue with ID=" + virtueId);
 		}
 	}
 

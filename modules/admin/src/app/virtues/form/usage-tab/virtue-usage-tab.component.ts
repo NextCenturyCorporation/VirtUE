@@ -6,9 +6,6 @@ import { MatDialog } from '@angular/material';
 // import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { BaseUrlService } from '../../../shared/services/baseUrl.service';
-import { ItemService } from '../../../shared/services/item.service';
-
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
 import { Item } from '../../../shared/models/item.model';
@@ -25,13 +22,12 @@ import {
 
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VmModalComponent } from '../../../modals/vm-modal/vm-modal.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
-import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-tab.component';
+import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component';
 
 /**
 * @class
@@ -41,14 +37,14 @@ import { GenericFormTabComponent } from '../../../shared/abstracts/gen-tab/gen-t
  *    - Users that have been granted this template
  *    - Virtue instances that have been built from this template (currently unimplemented)
  *
- * @extends [[GenericFormTabComponent]]
+ * @extends [[ItemFormTabComponent]]
  */
 @Component({
   selector: 'app-virtue-usage-tab',
   templateUrl: './virtue-usage-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-list/gen-list.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
-export class VirtueUsageTabComponent extends GenericFormTabComponent implements OnInit {
+export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnInit {
 
   /** A table listing what users have been given access to this Virtue template */
   @ViewChild('parentTable') private parentTable: GenericTableComponent<User>;
@@ -60,16 +56,18 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   protected item: Virtue;
 
   /**
-   * see [[GenericFormTabComponent.constructor]] for inherited parameters
+   * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
-  constructor(router: Router, dialog: MatDialog) {
+  constructor(
+      router: Router,
+      dialog: MatDialog) {
     super(router, dialog);
     this.tabName = "Virtue Usage";
 
   }
 
   /**
-   * See [[GenericFormTabComponent.init]] for generic info
+   * See [[ItemFormTabComponent.init]] for generic info
    *
    * @param mode the [[Mode]] to set up the page in.
    */
@@ -80,7 +78,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being viewed/edited in the [[VirtueComponent]] parent
    */
@@ -94,7 +92,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   }
 
   /**
-   * See [[GenericFormTabComponent.update]] for generic info
+   * See [[ItemFormTabComponent.update]] for generic info
    * This allows the parent component to update this tab's mode, as well the contents of [[parentTable]]
    *
    * @param changes an object, which should have an attribute `mode: Mode` if
@@ -105,16 +103,15 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
   update(changes: any): void {
     if (changes.mode) {
       this.setMode(changes.mode);
-      this.parentTable.colData = this.getParentColumns();
-      // this.parentTable.subMenuOptions = this.getParentSubMenu();
+      this.setUpParentTable();
     }
 
     if (changes.allUsers) {
       let items: Item[] = [];
-      let allUsers: DictList<Item> = changes.allUsers;
+      let allUsers: DictList<User> = changes.allUsers;
 
       for (let u of allUsers.asList()) {
-        if (u.children.has(this.item.getID())) {
+        if (u.virtueTemplates.has(this.item.getID())) {
           items.push(u);
         }
       }
@@ -129,9 +126,9 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
    */
   getParentColumns(): Column[] {
     return [
-      new TextColumn('Username',  3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Username',  3, (u: User) => u.getName(), SORT_DIR.ASC, (u: User) => this.viewItem(u),
                                                                                () => this.getParentSubMenu()),
-      new ListColumn<Item>('Attached Virtues', 5, this.getChildren,  this.formatName, (i: Item) => this.viewItem(i)),
+      new ListColumn('Attached Virtues', 5, (u: User) => u.getVirtues(),  this.formatName, (v: Virtue) => this.viewItem(v)),
       new TextColumn('Status',  4, this.formatStatus, SORT_DIR.ASC)
     ];
 
@@ -165,6 +162,7 @@ export class VirtueUsageTabComponent extends GenericFormTabComponent implements 
       tableWidth: 0.66,
       noDataMsg: "No users have been assigned this Virtue at the moment.",
       elementIsDisabled: (u: User) => !u.enabled,
+      disableLinks: () => !this.inViewMode(),
       editingEnabled: () => !this.inViewMode()
     });
   }

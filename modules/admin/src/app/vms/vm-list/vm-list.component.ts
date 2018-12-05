@@ -12,13 +12,12 @@ import {  Column,
 import { DictList } from '../../shared/models/dictionary.model';
 
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
-import { ItemService } from '../../shared/services/item.service';
+import { DataRequestService } from '../../shared/services/dataRequest.service';
 
 import { DialogsComponent } from '../../dialogs/dialogs.component';
-import { GenericListComponent } from '../../shared/abstracts/gen-list/gen-list.component';
+import { ItemListComponent } from '../../shared/abstracts/item-list/item-list.component';
 
-import { Datasets } from '../../shared/abstracts/gen-data-page/datasets.enum';
-import { ConfigUrls } from '../../shared/services/config-urls.enum';
+import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 /**
  * @class
@@ -28,15 +27,15 @@ import { ConfigUrls } from '../../shared/services/config-urls.enum';
  * Currently, all the applications available to each VM are listed, but apps don't have a view page yet so their names are
  * only displayed as text, instead of links.
  *
- * @extends GenericListComponent
+ * @extends ItemListComponent
  */
 @Component({
   selector: 'app-vm-list',
-  templateUrl: '../../shared/abstracts/gen-list/gen-list.component.html',
-  styleUrls: ['../../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService  ]
+  templateUrl: '../../shared/abstracts/item-list/item-list.component.html',
+  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService  ]
 })
-export class VmListComponent extends GenericListComponent {
+export class VmListComponent extends ItemListComponent {
 
   /**
    * see [[GenericPageComponent.constructor]] for notes on parameters
@@ -44,52 +43,46 @@ export class VmListComponent extends GenericListComponent {
   constructor(
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, itemService, dialog);
+    super(router, baseUrlService, dataRequestService, dialog);
   }
 
   /**
    * called after all the datasets have loaded. Pass the vm list to the table.
    */
   onPullComplete(): void {
-    this.setItems(this.allVms.asList());
+    this.setItems(this.datasets[DatasetNames.VMS].asList());
   }
 
   /**
-   * @return a list of the columns to show up in the table. See details in parent, [[GenericListComponent.getColumns]].
+   * @return a list of the columns to show up in the table. See details in parent, [[ItemListComponent.getColumns]].
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Template Name',     2, (v: VirtualMachine) => v.getName(),  SORT_DIR.ASC,
-                                                                        (i: Item) => this.viewItem(i), () => this.getSubMenu()),
-      new TextColumn('OS',                1, (v: VirtualMachine) => v.os,         SORT_DIR.ASC),
-      new ListColumn('Assigned Applications',  4, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
-      new TextColumn('Last Editor',       2, (v: VirtualMachine) => v.lastEditor, SORT_DIR.ASC),
+      new TextColumn('Template Name',           2, (v: VirtualMachine) => v.getName(),  SORT_DIR.ASC,
+                                                                          (i: Item) => this.viewItem(i), () => this.getSubMenu()),
+      new TextColumn('OS',                      1, (v: VirtualMachine) => v.os,         SORT_DIR.ASC),
+      new ListColumn('Assigned Applications',   4, (v: VirtualMachine) => v.getApps(), this.formatName, (i: Item) => this.viewItem(i)),
+      new TextColumn('Last Editor',             2, (v: VirtualMachine) => v.lastEditor, SORT_DIR.ASC),
       // new TextColumn('Version',           1, (v: VirtualMachine) => String(v.version),  SORT_DIR.ASC),
-      new TextColumn('Modification Date', 2, (v: VirtualMachine) => v.modDate,    SORT_DIR.DESC),
-      new TextColumn('Status',            1, this.formatStatus,                   SORT_DIR.ASC)
+      new TextColumn('Modification Date',       2, (v: VirtualMachine) => v.readableModificationDate,    SORT_DIR.DESC),
+      new TextColumn('Status',                  1, this.formatStatus,                   SORT_DIR.ASC)
 
     ];
   }
 
   /**
-   * See [[GenericPageComponent.getPageOptions]]
-   * @return child-specific information needed by the generic page functions when loading data.
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.VMS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS];
   }
 
 
   /**
-   * See [[GenericListComponent.getListOptions]] for details
+   * See [[ItemListComponent.getListOptions]] for details
    * @return child-list-specific information needed by the generic list page functions.
    */
   getListOptions(): {

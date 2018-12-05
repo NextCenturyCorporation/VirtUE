@@ -20,7 +20,7 @@
 #include <iostream>
 
 void printUsage(const char* progname) {
-    fprintf(stderr, "%s: %s certCacheFile\n");
+    fprintf(stderr, "%s: %s certCacheFile\n", progname, progname);
 }
 
 #define CHECK_ERROR(major,  minor, STRING)                              \
@@ -55,8 +55,8 @@ void printErrors(OM_uint32 status_code, OM_uint32 minorStatus, const char* messa
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        fprintf(stderr, "%s: error: missing arguments\n");
-        printUsage();
+        fprintf(stderr, "%s: error: missing arguments\n", argv[0]);
+        printUsage(argv[0]);
         exit(-1);
     }
     

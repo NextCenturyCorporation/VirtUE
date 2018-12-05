@@ -1,0 +1,16 @@
+<div class="titlebar">
+  <h2>File Systems</h2>
+</div>
+
+<div class="mui-col-md-2 float-right">
+  <br>
+  <label>Add File System &nbsp;&nbsp;</label>
+  <button mat-mini-fab mat-button class="fab-button" (click)="addFileSystem()" >
+    <mat-icon class="plus" svgIcon="plus" aria-label="Add and configure a file system for virtue to be given access to."
+    ></mat-icon>
+  </button>
+</div>
+<form id="fileSystems">
+  <app-table #fileSystemsTable></app-table>
+
+</form>

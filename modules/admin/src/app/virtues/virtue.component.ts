@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { ItemService } from '../shared/services/item.service';
+import { DataRequestService } from '../shared/services/dataRequest.service';
 
 import { Item } from '../shared/models/item.model';
 import { Application } from '../shared/models/application.model';
@@ -17,20 +17,20 @@ import { DictList } from '../shared/models/dictionary.model';
 import { Column } from '../shared/models/column.model';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
-import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VirtueMainTabComponent } from './form/main-tab/virtue-main-tab.component';
 import { VirtueSettingsTabComponent } from './form/settings-tab/virtue-settings.component';
 import { VirtueUsageTabComponent } from './form/usage-tab/virtue-usage-tab.component';
 
-import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
+
 
 /**
  *
  * @class
  * This class represents a detailed view of a Virtue Template.
- * See comment on [[GenericFormComponent]] for generic info.
+ * See comment on [[ItemFormComponent]] for generic info.
  *
  * This form has:
  *  - a main tab for viewing the Vms made available to the Virtue, its version, and
@@ -75,23 +75,23 @@ import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.comp
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
-          <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
-          <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
-          <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
+          <button  *ngIf=" !inViewMode() " class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+          <button  *ngIf=" inEditMode()" class="button-submit" (click)="save();" >Save</button>
+          <button  *ngIf=" inEditMode() " class="button-cancel" (click)="toViewMode()">Discard Changes</button>
+          <button  *ngIf=" !inViewMode() " class="button-cancel" (click)="toListPage()">Cancel</button>
 
-          <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
-          <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
+          <button  *ngIf="inViewMode()" class="button-submit" (click)="toEditMode();" >Edit</button>
+          <button  *ngIf="inViewMode()" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
     </div>
   </div>
     `,
-  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService ]
+  styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService ]
 })
-export class VirtueComponent extends GenericFormComponent implements OnDestroy {
+export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
   /** A tab for displaying and/or editing the Virtue's name, status, version, and attached vms */
   @ViewChild('mainTab') mainTab: VirtueMainTabComponent;
@@ -108,34 +108,29 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
    */
   @ViewChild('usageTab') usageTab: VirtueUsageTabComponent;
 
+  /** reclassing */
+  item: Virtue;
+
   /**
-   * see [[GenericFormComponent.constructor]] for notes on parameters
+   * see [[ItemFormComponent.constructor]] for notes on parameters
    */
   constructor(
     location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/virtues', location, activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/virtues', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'
-    this.item = new Virtue({color: this.defaultColor()});
+    this.item = new Virtue();
 
-    this.datasetName = Datasets.VIRTUES;
-    this.childDatasetName = Datasets.VMS;
+    this.datasetName = DatasetNames.VIRTUES;
+    this.childDatasetName = DatasetNames.VMS;
 
-  }
-
-  /**
-   * This only stays until the data loads, if the data has a color (or if mode is CREATE).
-   * @return 'transparent'
-   */
-  defaultColor(): string {
-    return 'transparent';
   }
 
   /**
@@ -150,15 +145,19 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
     // Must unsubscribe from all these when the VirtueComponent is destroyed
 
-    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.setItemChildIDs(newChildIDs);
+    this.mainTab.onChildrenChange.subscribe((newChildIds: string[]) => {
+      this.item.vmTemplateIds = newChildIds;
       this.updatePage();
     });
 
     this.mainTab.onStatusChange.subscribe((newStatus) => {
       if ( this.mode === Mode.VIEW ) {
-        this.toggleItemStatus(this.item);
+        this.setItemAvailability(this.item, newStatus);
       }
+    });
+
+    this.settingsTab.onChildrenChange.subscribe(() => {
+      this.updatePage();
     });
 
     // TODO build activity table showing running instances of this virtue template,
@@ -213,32 +212,33 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
 
     // This may need updating whenever the list of printers or whatever gets reset.
     // If I know printers, a refresh button for that list in particular will be greatly appreciated.
-    this.settingsTab.update({allVirtues: this.allVirtues, mode: this.mode});
+    this.settingsTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allUsers: this.allUsers, mode: this.mode});
+    this.usageTab.update({allUsers: this.datasets[DatasetNames.USERS], mode: this.mode});
   }
 
   /**
-   * This page needs all 4 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
+   * This page needs all 6 datasets, because there's a Table of Vms, wich includes the apps available in each VM.
    * It also has a table showing the users that have been given access to this Virtue template.
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * The settings tab now also allows connection to printers and filesystems.
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.VIRTUES,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES, Datasets.USERS]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [
+            DatasetNames.APPS,
+            DatasetNames.VMS,
+            DatasetNames.PRINTERS,
+            DatasetNames.FILE_SYSTEMS,
+            DatasetNames.VIRTUES,
+            DatasetNames.USERS];
   }
 
   /**
-   * create and fill the fields the backend expects to see, pull in/record any
-   * uncollected inputs, and check that the item is valid to be saved
+   * Pull in/record any uncollected inputs, and check that the item is valid to be saved
    *
-   * @return true if [[item]] is valid and can be saved to the backend, false otherwise.
+   * @return true if [[item]] is valid, false otherwise.
    */
   finalizeItem(): boolean {
     if ( !this.mainTab.collectData() ) {
@@ -255,14 +255,12 @@ export class VirtueComponent extends GenericFormComponent implements OnDestroy {
     //  this.item.version,  will be valid
     //  this.item.enabled,  should either be true or false
     //  this.item.color,    should be ok? make sure it has a default in the settings pane
-    this.item['virtualMachineTemplateIds'] = this.item.childIDs;
 
-    // note that children is set to undefined for a brief instant before the
+    // note that vmTemplates is set to undefined for a brief instant before the
     // page navigates away, during which time an exception would occur on the
     // table - that chunk of html has now been wrapped in a check, to not check
-    // children's list size if children is undefined
-    this.item.children = undefined;
-    this.item.childIDs = [];
+    // the 's list size if vmTemplates is undefined
+    this.item.vmTemplates = undefined;
     return true;
   }
 

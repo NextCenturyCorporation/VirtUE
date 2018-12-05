@@ -12,7 +12,10 @@
         <div class="form-item margin-top-15">
           <div class="form-item margin-top-15">
             <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
-            <mat-slide-toggle [(ngModel)]="item.enabled" [disabled]="!inViewMode()" (click)="statusChange()" [color]="'primary'">
+            <span *ngIf="!inViewMode()">
+              {{ item.enabled ? 'Enabled' : 'Disabled' }}
+            </span>
+            <mat-slide-toggle *ngIf="inViewMode()" [(ngModel)]="item.enabled" (click)="statusChange()" [color]="'primary'">
               {{ item.enabled ? 'Enabled' : 'Disabled' }}
             </mat-slide-toggle>
           </div>
