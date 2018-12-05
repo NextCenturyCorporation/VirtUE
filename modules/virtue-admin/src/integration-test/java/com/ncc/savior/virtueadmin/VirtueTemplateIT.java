@@ -85,7 +85,7 @@ public class VirtueTemplateIT {
 		for (int i = 0; i <= vmtList.size() / 2; i++) {
 			vmtIds.add(vmtList.get(i).getId());
 		}
-		vt.setVirtualMachineTemplateIds(vmtIds);
+		vt.setVmTemplateIds(vmtIds);
 		ContentType contentType = ContentType.JSON;
 		VirtueTemplate newVt = given().port(randomServerPort).when().body(vt).contentType(contentType)
 				.post("/admin/virtue/template/").then().extract().as(VirtueTemplate.class);
@@ -98,7 +98,7 @@ public class VirtueTemplateIT {
 		// verify id was given
 		assertThat(newVt.getId()).isNotNull();
 
-		Collection<String> newVmtIds = newVt.getVirtualMachineTemplateIds();
+		Collection<String> newVmtIds = newVt.getVmTemplateIds();
 		for (String id : newVmtIds) {
 			assertThat(vmtIds).contains(id);
 		}
@@ -122,7 +122,7 @@ public class VirtueTemplateIT {
 		for (int i = 0; i <= vmtList.size() / 2; i++) {
 			vmtIds.add(vmtList.get(i).getId());
 		}
-		vt1.setVirtualMachineTemplateIds(vmtIds);
+		vt1.setVmTemplateIds(vmtIds);
 		ContentType contentType = ContentType.JSON;
 		VirtueTemplate newVt = given().port(randomServerPort).when().body(vt1).contentType(contentType)
 				.post("/admin/virtue/template/").then().extract().as(VirtueTemplate.class);
@@ -162,10 +162,10 @@ public class VirtueTemplateIT {
 		VirtueTemplate updatedVm = new VirtueTemplate(null, "new name", "new version",
 				(List<VirtualMachineTemplate>) null, "new template", "#FFFFFF", !myVirtue.isEnabled(), null, null);
 		Collection<String> virtualMachineTemplateIds = new ArrayList<String>();
-		if (!myVirtue.getVirtualMachineTemplateIds().isEmpty()) {
-			virtualMachineTemplateIds.add(myVirtue.getVirtualMachineTemplateIds().iterator().next());
+		if (!myVirtue.getVmTemplateIds().isEmpty()) {
+			virtualMachineTemplateIds.add(myVirtue.getVmTemplateIds().iterator().next());
 		}
-		updatedVm.setVirtualMachineTemplateIds(virtualMachineTemplateIds);
+		updatedVm.setVmTemplateIds(virtualMachineTemplateIds);
 
 		VirtueTemplate updateReturned = given().port(randomServerPort).when().body(updatedVm)
 				.contentType(ContentType.JSON).put("/admin/virtue/template/" + myVirtue.getId()).then().extract()
@@ -175,7 +175,7 @@ public class VirtueTemplateIT {
 				.then().extract().as(VirtueTemplate.class);
 
 		assertThat(virtue).isNotNull();
-		assertThat(virtue.getVirtualMachineTemplateIds()).isEqualTo(updatedVm.getVirtualMachineTemplateIds());
+		assertThat(virtue.getVmTemplateIds()).isEqualTo(updatedVm.getVmTemplateIds());
 		assertThat(virtue.getId()).isEqualTo(myVirtue.getId());
 		assertThat(virtue.getVersion()).isEqualTo(updatedVm.getVersion());
 		assertThat(virtue.getName()).isEqualTo(updatedVm.getName());
@@ -183,7 +183,7 @@ public class VirtueTemplateIT {
 		assertThat(virtue.isEnabled()).isEqualTo(updatedVm.isEnabled());
 
 		assertThat(updateReturned).isNotNull();
-		assertThat(updateReturned.getVirtualMachineTemplateIds()).isEqualTo(updatedVm.getVirtualMachineTemplateIds());
+		assertThat(updateReturned.getVmTemplateIds()).isEqualTo(updatedVm.getVmTemplateIds());
 		assertThat(updateReturned.getId()).isEqualTo(myVirtue.getId());
 		assertThat(updateReturned.getVersion()).isEqualTo(updatedVm.getVersion());
 		assertThat(updateReturned.getName()).isEqualTo(updatedVm.getName());
@@ -207,7 +207,7 @@ public class VirtueTemplateIT {
 				.then().extract().as(VirtueTemplate.class);
 
 		assertThat(virtue).isNotNull();
-		assertThat(virtue.getVirtualMachineTemplateIds()).isEqualTo(updateReturned.getVirtualMachineTemplateIds());
+		assertThat(virtue.getVmTemplateIds()).isEqualTo(updateReturned.getVmTemplateIds());
 		assertThat(virtue.getId()).isEqualTo(updateReturned.getId());
 		assertThat(virtue.getVersion()).isEqualTo(updateReturned.getVersion());
 		assertThat(virtue.getName()).isEqualTo(updateReturned.getName());
@@ -217,7 +217,7 @@ public class VirtueTemplateIT {
 		assertThat(myVirtue.isEnabled()).isEqualTo(!updateReturned.isEnabled());
 
 		assertThat(updateReturned).isNotNull();
-		assertThat(updateReturned.getVirtualMachineTemplateIds()).containsAll(myVirtue.getVirtualMachineTemplateIds());
+		assertThat(updateReturned.getVmTemplateIds()).containsAll(myVirtue.getVmTemplateIds());
 		assertThat(updateReturned.getId()).isEqualTo(myVirtue.getId());
 		assertThat(updateReturned.getVersion()).isEqualTo(myVirtue.getVersion());
 		assertThat(updateReturned.getName()).isEqualTo(myVirtue.getName());

@@ -2,9 +2,11 @@ import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/cor
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
 import { Virtue } from '../../../shared/models/virtue.model';
+import { VirtualMachine } from '../../../shared/models/vm.model';
 
 import {
   Column,
@@ -15,12 +17,12 @@ import {
 
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../../../shared/services/config-urls.enum';
-import { Datasets } from '../../../shared/abstracts/gen-data-page/datasets.enum';
+
+import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
 
 import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 
-import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-main-tab/gen-main-tab.component';
+import { ItemFormMainTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-main-tab/item-form-main-tab.component';
 
 /**
  * @class
@@ -33,14 +35,14 @@ import { GenericMainTabComponent } from '../../../shared/abstracts/gen-tab/gen-m
  * should be rectified. The backend just takes usernames and makes a new entry if it hasn't seen that name before,
  * and overwrites the current entry for that name if it has.
  *
- * @extends [[GenericMainTabComponent]]
+ * @extends [[ItemFormMainTabComponent]]
  */
 @Component({
   selector: 'app-main-user-tab',
   templateUrl: './main-user-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-tab/gen-tab.component.css']
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
-export class UserMainTabComponent extends GenericMainTabComponent implements OnInit {
+export class UserMainTabComponent extends ItemFormMainTabComponent implements OnInit {
 
   /** whether or not this user has 'user' rights - I assume this is a temporary role #TODO */
   private roleUser: boolean;
@@ -52,14 +54,17 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   protected item: User;
 
   /**
-   * see [[GenericMainTabComponent.constructor]] for parameters
+   * see [[ItemFormMainTabComponent.constructor]] for parameters
    */
-  constructor(router: Router, dialog: MatDialog) {
+  constructor(
+      router: Router,
+      dialog: MatDialog) {
     super(router, dialog);
+    this.childDatasetName = DatasetNames.VIRTUES;
   }
 
   /**
-   * See [[GenericFormTabComponent.setUp]] for generic info
+   * See [[ItemFormTabComponent.setUp]] for generic info
    *
    * @param item a reference to the Item being displayed by this tab's parent form.
    */
@@ -76,7 +81,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
-   * See [[GenericFormTabComponent.collectData]]
+   * See [[ItemFormTabComponent.collectData]]
    * records the user's roles.
    * #TODO add a check for username in create mode, to at least check for uniqueness.
    *
@@ -94,7 +99,7 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
   }
 
   /**
-   * add colors to the child table defined in [[GenericMainTabComponent]], since here it will be showing Virtues.
+   * add colors to the child table defined in [[ItemFormMainTabComponent]], since here it will be showing Virtues.
    */
   customizeTableParams(params): void {
     params['coloredLabels'] = true;
@@ -107,12 +112,11 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
    */
   getColumns(): Column[] {
     return [
-      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (i: Item) => this.viewItem(i),
+      new TextColumn('Virtue Template Name', 3, (v: Virtue) => v.getName(), SORT_DIR.ASC, (v: Virtue) => this.viewItem(v),
                                                                                           () => this.getSubMenu()),
-      new ListColumn('Virtual Machines', 3, this.getChildren, this.formatName, (i: Item) => this.viewItem(i)),
-      new ListColumn<Item>('Available Apps', 4, this.getGrandchildren,  this.formatName),
+      new ListColumn('Virtual Machines', 3, (v: Virtue) => v.getVms(), this.formatName, (vm: VirtualMachine) => this.viewItem(vm)),
+      new ListColumn('Available Apps', 4, (v: Virtue) => v.getVmApps(),  this.formatName),
       new TextColumn('Version', 1, (v: Virtue) => String(v.version), SORT_DIR.ASC),
-      new TextColumn('Status',  1, this.formatStatus, SORT_DIR.ASC)
     ];
   }
 
@@ -137,4 +141,5 @@ export class UserMainTabComponent extends GenericMainTabComponent implements OnI
                         }) {
     return this.dialog.open( VirtueModalComponent, params);
   }
+
 }

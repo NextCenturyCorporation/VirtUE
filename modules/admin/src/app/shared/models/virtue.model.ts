@@ -5,10 +5,14 @@ import { Item } from './item.model';
 import { Application } from './application.model';
 import { VirtualMachine } from './vm.model';
 
+import { IndexedObj } from './indexedObj.model';
+import { DatasetNames } from '../abstracts/gen-data-page/datasetNames.enum';
+import { Subdomains } from '../services/subdomains.enum';
+
 import { DictList } from './dictionary.model';
 
 import { NetworkPermission } from './networkPerm.model';
-import { FileSysPermission } from './fileSysPermission.model';
+import { FileSystem } from './fileSystem.model';
 import { Printer } from './printer.model';
 
 /**
@@ -31,116 +35,244 @@ import { Printer } from './printer.model';
  * This is a template. When saved to the backend, an image will be built and stored there, which in turn is what is used to create
  * virtue instances whenever a virtue-desktop user clicks on an application under that Virtue's umbrella.
  *
- * [[children]] are VirtualMachine objects.
- *
  * @extends [[Item]]
  */
 export class Virtue extends Item {
 
   /** What iteration of edit this template is on. Automatically increases on edit. */
-  version: number;
+  version: number = 1;
 
   /** #TODO do we need this? Can anyone else edit templates, besides the admin? Or will there be multiple, distinguishable, admins? */
   lastEditor: string;
 
-  /** A full Date, of the last time this record was changed on the backend. */
-  lastModification: Date;
+  vmTemplates: DictList<VirtualMachine> = new DictList<VirtualMachine>();
+
+  vmTemplateIds: string[] = [];
 
   // /** #TODO what is this? */
   // awsTemplateName: string;
 
   /** A hex string of the color to be shown on this Virtue's label, both on the workbench and the desktop app */
-  color: string;
+  color: string = 'transparent';
 
   /** #TODO what is this? #uncommented (unprovisioned) */
-  unprovisioned: boolean;
+  unprovisioned: boolean = true;
 
-  /**
-   * What virtue should any links clicked within this Virtue automatically open in?
-   */
-  defaultBrowserVirtue: string;
+  /** What virtue should any links clicked within this Virtue automatically open in */
+  defaultBrowserVirtueId: string;
+  defaultBrowserVirtue: Virtue;
 
   /** A list of networks this Virtue is permitted to connect to */
-  networkWhiteList: NetworkPermission[];
+  networkWhitelist: NetworkPermission[] = [];
 
   /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
-  allowedPasteTargets: string[];
+  allowedPasteTargetIds: string[] = [];
+  /** this holds the IDs of the virtues that this virtue is allowed to paste data into. */
+  allowedPasteTargets: DictList<Virtue> = new DictList<Virtue>();
 
-  /** this virtue's r/w/e permissions for the different parts of the filesystem */
-  fileSysPerms: FileSysPermission[];
+  /** this virtue's r/w/e permissions for the filesystem
+   * Note that fileSystems is saved and loaded with the virtue. While everything else is saved as a list of IDs,
+   * here, the list of IDs is just used to update the names of the saved fileSystems, since each virtue can set its own individual
+   * permissions for a given fileSystem.
+   */
+  fileSystems: DictList<FileSystem> = new DictList<FileSystem>();
+  fileSystemIds: string[] = [];
 
   /** a list of printers this virtue is allowed to use. Printers are found and set up in global settings. */
-  allowedPrinters: Printer[];
+  printers: DictList<Printer> = new DictList<Printer>();
+  printerIds: string[] = [];
 
   /**
    * convert from whatever form the virtue object is in the database.
    *
+   * Note that there doesn't currently appear to be any good way to compare if two objects have the same
+   * attributes, without simply iterating through them all and checking. 'instanceof' appears to only work
+   * for items created from the same prototype.
+   *
+   * TODO should this be durable, or fail-fast?
+   *
    * @param virtueObj a virtue record, retrieved from the backend, which we want to convert into a Virtue.
    */
-  constructor(virtueObj) {
+  constructor(virtueObj?) {
     super();
-    if (virtueObj) {
-      this.id = virtueObj.id;
-      this.name = virtueObj.name;
-      this.childIDs = virtueObj.virtualMachineTemplateIds;
-      this.enabled = virtueObj.enabled;
+    this.parentDomain = '/virtues';
 
-      this.version = virtueObj.version;
-      if (! this.version) {
-        this.version = 1;
+    if (virtueObj) {
+      this.name = virtueObj.name;
+      this.id = virtueObj.id;
+      this.enabled = virtueObj.enabled;
+      this.vmTemplateIds = virtueObj.vmTemplateIds;
+      this.allowedPasteTargetIds = virtueObj.allowedPasteTargetIds;
+      this.printerIds = virtueObj.printerIds;
+      this.fileSystemIds = virtueObj.fileSystemIds;
+
+      for (let fs of virtueObj.fileSystems) {
+        this.fileSystems.add(fs.id, fs);
       }
 
       this.lastEditor = virtueObj.lastEditor;
-      this.lastModification = virtueObj.lastModification;
-      this.modDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
+
+      this.modificationDate = virtueObj.lastModification;
+      this.readableModificationDate = new DatePipe('en-US').transform(virtueObj.lastModification, 'short');
+
+      if (virtueObj.networkWhitelist) {
+        for (let netPerm of virtueObj.networkWhitelist) {
+          this.networkWhitelist.push(new NetworkPermission(netPerm));
+        }
+      }
+
+      this.unprovisioned = virtueObj.unprovisioned;
+      this.defaultBrowserVirtueId = virtueObj.defaultBrowserVirtueId;
+      this.version = virtueObj.version;
       this.color = virtueObj.color;
+    }
 
-      this.parentDomain = '/virtues';
+  }
 
+  /**
+   * @return the VIRTUES subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.VIRTUES;
+  }
 
-      // TODO set this.{all below} to the corresponding value in virtObj, once implemented on backend.
-      if (! this.networkWhiteList) {
-        this.networkWhiteList = [];
+  /**
+   * #uncommented
+   */
+  buildAttribute( datasetName: DatasetNames, dataset: DictList<IndexedObj> ): void {
+    if (datasetName === DatasetNames.VIRTUES) {
+      this.defaultBrowserVirtue = dataset.get(this.defaultBrowserVirtueId) as Virtue;
+      this.allowedPasteTargets = dataset.getSubset(this.allowedPasteTargetIds) as DictList<Virtue>;
+    }
+    if (datasetName === DatasetNames.VMS) {
+      this.vmTemplates = dataset.getSubset(this.vmTemplateIds) as DictList<VirtualMachine>;
+    }
+    else if (datasetName === DatasetNames.FILE_SYSTEMS) {
+      let fileSystemDefaults = dataset.getSubset(this.fileSystemIds) as DictList<FileSystem>;
+      this.updateFileSystems(fileSystemDefaults);
+    }
+    else if (datasetName === DatasetNames.PRINTERS) {
+      this.printers = dataset.getSubset(this.printerIds) as DictList<Printer>;
+    }
+
+  }
+
+  updateFileSystems(selectedFileSystemDefaultPerms: DictList<FileSystem>) {
+    if (this.fileSystems === undefined) {
+      this.fileSystems = new DictList<FileSystem>();
+    }
+
+    for (let newFileSystem of selectedFileSystemDefaultPerms.asList()) {
+      if ( this.fileSystems.has(newFileSystem.getID())) {
+        this.fileSystems.get(newFileSystem.getID()).name = newFileSystem.name;
       }
-
-      if (! this.unprovisioned) {
-        this.unprovisioned = true;
-      }
-
-      if (virtueObj.defaultBrowserVirtue) {
-        this.defaultBrowserVirtue = virtueObj.defaultBrowserVirtue;
-      }
-
-      if (! this.allowedPasteTargets) {
-        this.allowedPasteTargets = [];
-      }
-      // TODO  Placeholder filesystems/servers - these will be defined in and pulled from the global settings.
-      if (! this.fileSysPerms) {
-        this.fileSysPerms = [
-          new FileSysPermission("File Server\\Media "),
-          new FileSysPermission("File Server\\Documents "),
-          new FileSysPermission("File Server\\C Drive "),
-          new FileSysPermission("File Server\\F Drive ")
-        ];
-      }
-      // TODO  Placeholder printers.
-      if (! this.allowedPrinters) {
-        this.allowedPrinters = [
-          new Printer("Printer 1"),
-          new Printer("Printer 2"),
-          new Printer("Printer 3"),
-          new Printer("Printer 4"),
-          new Printer("Printer 5")
-        ];
+      else {
+        this.fileSystems.add(newFileSystem.getID(), newFileSystem);
       }
     }
 
+    this.fileSystems.trimTo(this.fileSystemIds);
+  }
 
-    if (! this.color) {
-      // TODO - is it better to have everything default to no color, or to something
-      // like silver (#C0C0C0), to let the user know that colors are available?
-      this.color = 'transparent';
+
+  getVms(): IndexedObj[] {
+    return this.getChildren(DatasetNames.VMS);
+  }
+
+  getVmApps(): IndexedObj[] {
+    return this.getGrandChildren(DatasetNames.VMS, DatasetNames.APPS);
+  }
+
+  getPrinters(): IndexedObj[] {
+    return this.getChildren(DatasetNames.PRINTERS);
+  }
+
+  getFileSystems(): IndexedObj[] {
+    return this.getChildren(DatasetNames.FILE_SYSTEMS);
+  }
+
+
+  removeUnspecifiedChild(childObj: IndexedObj) {
+    if (childObj instanceof VirtualMachine) {
+      this.removeVm(childObj);
+    }
+    else if (childObj instanceof Printer) {
+      this.removePrinter(childObj);
+    }
+    else if (childObj instanceof FileSystem) {
+      this.removeFileSystem(childObj);
+    }
+    else {
+      console.log("The given object doesn't appear to be a Vm, Printer, or FileSystem.");
     }
   }
 
+  removeVm(vm: VirtualMachine) {
+    this.removeChild(vm.getID(), DatasetNames.VMS);
+  }
+
+  removePrinter(printer: Printer) {
+    this.removeChild(printer.getID(), DatasetNames.PRINTERS);
+  }
+
+  removeFileSystem(fileSys: FileSystem) {
+    this.removeChild(fileSys.getID(), DatasetNames.FILE_SYSTEMS);
+  }
+
+
+  /** @override [[Item.getRelatedDict]] */
+  getRelatedDict(datasetName: DatasetNames): DictList<IndexedObj> {
+    switch (datasetName) {
+      case DatasetNames.VMS:
+        return this.vmTemplates;
+      case DatasetNames.PRINTERS:
+        return this.printers;
+      case DatasetNames.FILE_SYSTEMS:
+        return this.fileSystems;
+      default:
+        console.log("You shouldn't be here. Expected datasetName === DatasetNames.{VMS, PRINTERS}, was", datasetName);
+        return null;
+    }
+  }
+
+  /**
+   * Currently Users only have one type of children, so just return that.
+   *
+   * @override [[Item.getRelatedIDList]]
+   */
+  getRelatedIDList(datasetName: DatasetNames): string[] {
+    switch (datasetName) {
+      case DatasetNames.VMS:
+        return this.vmTemplateIds;
+      case DatasetNames.PRINTERS:
+        return this.printerIds;
+      case DatasetNames.FILE_SYSTEMS:
+        return this.fileSystemIds;
+    }
+    console.log("You shouldn't be here. Expected datasetName === DatasetNames.VIRTUES, was", datasetName);
+    return [];
+  }
+
+  protected getInBackendFormat() {
+
+    let virtue = {
+        name: this.name,
+        id: this.id,
+        enabled: this.enabled,
+        vmTemplateIds: this.vmTemplateIds,
+        fileSystemIds: this.fileSystemIds,
+        fileSystems: this.fileSystems.asList(),
+        printerIds: this.printerIds,
+        allowedPasteTargetIds: this.allowedPasteTargetIds,
+        lastEditor: this.lastEditor,
+        lastModification: this.modificationDate,
+        networkWhitelist: this.networkWhitelist,
+        unprovisioned: this.unprovisioned,
+        version: this.version,
+        defaultBrowserVirtueId: this.defaultBrowserVirtueId,
+        color: this.color
+
+    };
+    return virtue;
+  }
 }

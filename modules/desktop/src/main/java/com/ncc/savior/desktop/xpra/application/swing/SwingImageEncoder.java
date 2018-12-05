@@ -30,7 +30,6 @@ public class SwingImageEncoder {
 		switch (encoding) {
 		case png:
 		case jpeg:
-			// case rgb24:
 			BufferedImage img = null;
 			try {
 				img = ImageIO.read(new ByteArrayInputStream(data));

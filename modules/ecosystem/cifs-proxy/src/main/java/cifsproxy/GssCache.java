@@ -27,6 +27,7 @@ import com.sun.jna.ptr.PointerByReference;
  * @author clong
  *
  */
+@SuppressWarnings("unused")
 public class GssCache {
 
 	/**
@@ -99,7 +100,6 @@ public class GssCache {
 		desiredMechs.elements.length = GssApi.MECH_KRB5.length;
 		desiredMechs.elements.elements = GssApi.MECH_KRB5.elements;
 		PointerByReference acquiredCredHandle = new PointerByReference();
-		Pointer actualMechsPtr = new Pointer(0);
 		int retval = gssapi.gss_acquire_cred(minorStatus, desiredName, 0, desiredMechs,
 				GssCredentialUsage.GSS_C_INITIATE.getValue(), acquiredCredHandle, null, null);
 		if (retval != 0) {

@@ -1,27 +1,20 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
+import { Component, ViewChild, OnDestroy } from '@angular/core';
 import { Location } from '@angular/common';
-import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
 
 import { BaseUrlService } from '../shared/services/baseUrl.service';
-import { ItemService } from '../shared/services/item.service';
+import { DataRequestService } from '../shared/services/dataRequest.service';
 
-import { AppsModalComponent } from '../modals/apps-modal/apps-modal.component';
+// import { AppsModalComponent } from '../modals/apps-modal/apps-modal.component';
 
-import { Item } from '../shared/models/item.model';
-import { Application } from '../shared/models/application.model';
+// import { Application } from '../shared/models/application.model';
 import { VirtualMachine } from '../shared/models/vm.model';
-import { DictList } from '../shared/models/dictionary.model';
-import { Column } from '../shared/models/column.model';
 
 import { Mode } from '../shared/abstracts/gen-form/mode.enum';
-import { ConfigUrls } from '../shared/services/config-urls.enum';
-import { Datasets } from '../shared/abstracts/gen-data-page/datasets.enum';
+import { DatasetNames } from '../shared/abstracts/gen-data-page/datasetNames.enum';
 
-import { GenericFormComponent } from '../shared/abstracts/gen-form/gen-form.component';
+import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-form.component';
 
 import { VmMainTabComponent } from './form/vm-main-tab/vm-main-tab.component';
 import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component';
@@ -29,7 +22,7 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
 /**
  * @class
  * This class represents a detailed view of a Virtual Machine Template.
- * See comment on [[GenericFormComponent]] for generic info.
+ * See comment on [[ItemFormComponent]] for generic info.
  *
  * This form has:
  *  - a main tab showing the Vm's version, OS, and name (which can be changed), as well as the Apps that would
@@ -68,23 +61,23 @@ import { VmUsageTabComponent } from './form/vm-usage-tab/vm-usage-tab.component'
         <hr>
         <div class="mui-col-md-4">&nbsp;</div>
         <div class="mui-col-md-4 form-item text-align-center">
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
-        <button  *ngIf="mode !== 'View'" class="button-submit" (click)="save();" >Save</button>
-        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toViewMode()">Discard Changes</button>
-        <button  *ngIf="mode !== 'View'" class="button-cancel" (click)="toListPage()">Cancel</button>
+        <button  *ngIf=" !inViewMode() " class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
+        <button  *ngIf=" inEditMode()" class="button-submit" (click)="save();" >Save</button>
+        <button  *ngIf=" inEditMode() " class="button-cancel" (click)="toViewMode()">Discard Changes</button>
+        <button  *ngIf=" !inViewMode() " class="button-cancel" (click)="toListPage()">Cancel</button>
 
-        <button  *ngIf="mode === 'View'" class="button-submit" (click)="toEditMode();" >Edit</button>
-        <button  *ngIf="mode === 'View'" class="button-cancel" (click)="toListPage();" >Return</button>
+        <button  *ngIf="inViewMode()" class="button-submit" (click)="toEditMode();" >Edit</button>
+        <button  *ngIf="inViewMode()" class="button-cancel" (click)="toListPage();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
     </div>
   </div>
     `,
-  styleUrls: ['../shared/abstracts/gen-list/gen-list.component.css'],
-  providers: [ BaseUrlService, ItemService ]
+  styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
+  providers: [ BaseUrlService, DataRequestService ]
 })
-export class VmComponent extends GenericFormComponent implements OnDestroy {
+export class VmComponent extends ItemFormComponent implements OnDestroy {
 
   /** A tab for displaying and/or editing the VM template's name, status, version, and assigned applications */
   @ViewChild('mainTab') mainTab: VmMainTabComponent;
@@ -95,23 +88,25 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
    */
   @ViewChild('usageTab') usageTab: VmUsageTabComponent;
 
+  /** reclassing */
+  item: VirtualMachine;
   /**
-   * see [[GenericFormComponent.constructor]] for notes on parameters
+   * see [[ItemFormComponent.constructor]] for notes on parameters
    */
   constructor(
     location: Location,
     activatedRoute: ActivatedRoute,
     router: Router,
     baseUrlService: BaseUrlService,
-    itemService: ItemService,
+    dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/vm-templates', location, activatedRoute, router, baseUrlService, itemService, dialog);
+    super('/vm-templates', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
 
-    this.item = new VirtualMachine(undefined);
+    this.item = new VirtualMachine();
 
-    this.datasetName = Datasets.VMS;
-    this.childDatasetName = Datasets.APPS;
+    this.datasetName = DatasetNames.VMS;
+    this.childDatasetName = DatasetNames.APPS;
 
   }
 
@@ -124,14 +119,16 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     this.usageTab.init(this.mode);
     // this.historyTab.init(this.mode);
 
-    this.mainTab.onChildrenChange.subscribe((newChildIDs) => {
-      this.setItemChildIDs(newChildIDs);
+    this.mainTab.onChildrenChange.subscribe((newChildIDs: string[]) => {
+      this.item.applicationIds = newChildIDs;
       this.updatePage();
     });
 
+
+    // see [[ItemComponent.initializeTabs]] for notes on this
     this.mainTab.onStatusChange.subscribe((newStatus) => {
       if ( this.mode === Mode.VIEW ) {
-        this.toggleItemStatus(this.item);
+        this.setItemAvailability(this.item, newStatus);
       }
     });
 
@@ -165,21 +162,16 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
 
     // needs an initial update to populate the parent table.
     // this could use periodic updating, to get a somewhat live-feed of what's currently running.
-    this.usageTab.update({allVirtues: this.allVirtues, mode: this.mode});
+    this.usageTab.update({allVirtues: this.datasets[DatasetNames.VIRTUES], mode: this.mode});
   }
 
   /**
    * This page needs all datasets to load: This VM, the Virtues granted this VM template, and the Apps this VM has
    * been given.
-   * See [[GenericPageComponent.getPageOptions]]() for details on return values
+   * @override [[GenericDataPageComponent.getNeededDatasets]]()
    */
-  getPageOptions(): {
-      serviceConfigUrl: ConfigUrls,
-      neededDatasets: Datasets[]} {
-    return {
-      serviceConfigUrl: ConfigUrls.VMS,
-      neededDatasets: [Datasets.APPS, Datasets.VMS, Datasets.VIRTUES]
-    };
+  getNeededDatasets(): DatasetNames[] {
+    return [DatasetNames.APPS, DatasetNames.VMS, DatasetNames.VIRTUES];
   }
 
   /**
@@ -198,16 +190,10 @@ export class VmComponent extends GenericFormComponent implements OnDestroy {
     //  'id'           should be ok as-is. May be empty if creating new.
     //  'name'         can't be empty
     //  'os'           must be set
-    this.item['loginUser'] = 'system'; // TODO does this still exist on the backend?
-
-    // TODO check if necessary, and what the string should be (admin vs administrator)
-    //  this.item['lastEditor'] = 'administrator';
-
     //  'enabled'      must be either true or false
-    this.item['applicationIds'] = this.item.childIDs;  // may be empty
-
-    this.item.children = undefined;
-    this.item.childIDs = [];
+    // this.item['applicationIds'] = this.item.applicationIds;  // may be empty
+    // delete this.item.applications;
+    this.item.applications = undefined;
     return true;
   }
 

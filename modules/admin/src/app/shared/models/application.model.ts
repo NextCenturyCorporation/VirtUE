@@ -1,5 +1,8 @@
 
 import { Item } from './item.model';
+import { DictList } from './dictionary.model';
+import { IndexedObj } from './indexedObj.model';
+import { Subdomains } from '../services/subdomains.enum';
 
 /**
  * @class
@@ -19,8 +22,6 @@ import { Item } from './item.model';
  *
  * #TODO make apps meaningful
  *
- * Children are null.
- *
  * At time of writing (early Aug 2018), version means nothing, and launchCommand and iconKey are not used.
  *
  * @extends [[Item]]
@@ -28,19 +29,19 @@ import { Item } from './item.model';
 export class Application extends Item {
 
   /** #uncommented (version) #TODO is this the application's version? unlike Virtue.version and vm.version*/
-  version: string;
+  version: string = '';
 
   /** The operating system which this particular application is able to run */
-  os: string;
+  os: string = '';
 
   /** #uncommented #TODO not sure how to change this, but it probably will need to change. (launchCommand)
    * Are these commands? are they defined here?
    * See notes at top of class
    */
-  launchCommand: string;
+  launchCommand: string = '';
 
   /** #uncommented TODO (iconKey) */
-  iconKey: string;
+  iconKey: string = '';
 
   /**
    * convert from whatever form the application object is in the database.
@@ -48,6 +49,8 @@ export class Application extends Item {
    */
   constructor(appObj) {
     super();
+    this.parentDomain = '/apps';
+
     if (appObj) {
       this.id = appObj.id;
       this.name = appObj.name;
@@ -56,14 +59,15 @@ export class Application extends Item {
       this.launchCommand = appObj.launchCommand;
       this.iconKey = appObj.iconKey;
 
-      this.parentDomain = '/apps';
     }
-    else {
-      this.os = '';
-      this.launchCommand = '';
-      this.iconKey = '';
-    }
-
-    this.children = undefined;
   }
+
+  /**
+   * @return the APPS subdomain
+   */
+  getSubdomain(): string {
+    return Subdomains.APPS;
+  }
+
+  removeUnspecifiedChild(obj): void {}
 }

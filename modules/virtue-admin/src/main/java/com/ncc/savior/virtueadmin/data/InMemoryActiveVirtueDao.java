@@ -21,7 +21,7 @@ import com.ncc.savior.virtueadmin.model.VmState;
  * Implementation of {@link IActiveVirtueDao} that stores all the Active Virtue
  * data in memory. This implementation is for testing and demo purpose only and
  * should not be used in production.
- * 
+ *
  * See interface for function comments.
  *
  */
@@ -100,10 +100,10 @@ public class InMemoryActiveVirtueDao implements IActiveVirtueDao {
 			}
 			// if we drop out of the list of vms, we couldn't find the vm with that
 			// application id.
-			throw new SaviorException(SaviorErrorCode.APPLICATION_ID_NOT_FOUND,
+			throw new SaviorException(SaviorErrorCode.APPLICATION_NOT_FOUND,
 					"Cannot find application with ID=" + applicationId + " in virtue id=" + virtueId);
 		} else {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_ID_NOT_FOUND, "Cannot find virtue with ID=" + virtueId);
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Cannot find virtue with ID=" + virtueId);
 		}
 	}
 
