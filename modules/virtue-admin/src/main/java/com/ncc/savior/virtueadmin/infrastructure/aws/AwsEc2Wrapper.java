@@ -126,6 +126,9 @@ public class AwsEc2Wrapper {
 			if (virtueMods.getSecondaryPurpose() != null) {
 				tags.add(new Tag(AwsUtil.TAG_SECONDARY, virtueMods.getSecondaryPurpose().toString()));
 			}
+			if (virtueMods.getUsername()!=null) {
+				tags.add(new Tag(AwsUtil.TAG_USERNAME, virtueMods.getUsername()));
+			}
 		}
 		runInstancesRequest
 				.withTagSpecifications(new TagSpecification().withResourceType(ResourceType.Instance).withTags(tags));

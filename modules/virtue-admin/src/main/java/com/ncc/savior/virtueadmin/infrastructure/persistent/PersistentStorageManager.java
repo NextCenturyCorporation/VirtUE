@@ -17,15 +17,17 @@ import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DeleteVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
+import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.ec2.model.TagSpecification;
 import com.amazonaws.services.ec2.model.Volume;
 import com.amazonaws.services.ec2.model.VolumeType;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.virtueadmin.data.IPersistentStorageDao;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.model.VirtuePersistentStorage;
+import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 
 /**
  * Manages creating, deleting etc persistent storage and keeping the database
@@ -37,14 +39,69 @@ public class PersistentStorageManager {
 	private IPersistentStorageDao persistentStorageDao;
 	private String snapshotIdForNewPersistentStorageDrive;
 	private String availabilityZone;
+	private String serverId;
 
-	public PersistentStorageManager(AwsEc2Wrapper ec2Wrapper, IPersistentStorageDao persistentStorageDao,
-			String snapshotIdForNewPersistentStorageDrive, String availabilityZone) {
+	public PersistentStorageManager(ServerIdProvider serverIdProvider, AwsEc2Wrapper ec2Wrapper,
+			IPersistentStorageDao persistentStorageDao, String snapshotIdForNewPersistentStorageDrive,
+			String availabilityZone) {
 		super();
+		this.serverId = serverIdProvider.getServerId();
 		this.ec2Wrapper = ec2Wrapper;
 		this.persistentStorageDao = persistentStorageDao;
 		this.snapshotIdForNewPersistentStorageDrive = snapshotIdForNewPersistentStorageDrive;
 		this.availabilityZone = availabilityZone;
+		sync();
+	}
+
+	private void sync() {
+		AmazonEC2 ec2 = ec2Wrapper.getEc2();
+		DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest();
+		Collection<Filter> filters = new ArrayList<Filter>();
+		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+		describeVolumesRequest.withFilters(filters);
+		DescribeVolumesResult result = ec2.describeVolumes(describeVolumesRequest);
+		List<Volume> volumesInAws = result.getVolumes();
+		logger.debug("volumes in AWS: " + volumesInAws.size() + " - " + volumesInAws);
+		Iterable<VirtuePersistentStorage> volumesInDatabase = persistentStorageDao.getAllPersistentStorage();
+		logger.debug("Volumes in DB: " + volumesInDatabase);
+
+		// clear extra entries in database. This may be common if we manually clear
+		// volumes.
+		for (VirtuePersistentStorage dbv : volumesInDatabase) {
+			String dbId = dbv.getInfrastructureId();
+			boolean match = false;
+			for (Volume awsV : volumesInAws) {
+				String awsId = awsV.getVolumeId();
+				if (awsId.equals(dbId)) {
+					match = true;
+					break;
+				}
+			}
+			if (!match) {
+				logger.debug("deleting persistent storage entry in database but not in AWS: " + dbv);
+				persistentStorageDao.deletePersistentStorage(dbv);
+			}
+		}
+
+		// clear extra entries in AWS
+		volumesInDatabase = persistentStorageDao.getAllPersistentStorage();
+		for (Volume awsV : volumesInAws) {
+			boolean match = false;
+			String awsId = awsV.getVolumeId();
+			for (VirtuePersistentStorage dbv : volumesInDatabase) {
+				String dbId = dbv.getInfrastructureId();
+				if (awsId.equals(dbId)) {
+					match = true;
+					break;
+				}
+			}
+			if (!match) {
+				logger.debug("deleting persistent storage volume in AWS, but not in database: " + awsV);
+				DeleteVolumeRequest deleteVolumeRequest = new DeleteVolumeRequest();
+				deleteVolumeRequest.withVolumeId(awsV.getVolumeId());
+				ec2.deleteVolume(deleteVolumeRequest);
+			}
+		}
 	}
 
 	/**
@@ -90,7 +147,7 @@ public class PersistentStorageManager {
 		if (ps == null) {
 			// storage doesn't exist, create a new one.
 			String volumeName = username + "-" + virtueTemplateName + "-" + virtueTemplateId;
-			volumeId = getNewVolumeId(volumeName);
+			volumeId = getNewVolumeId(volumeName, virtueTemplateId, username);
 			VirtuePersistentStorage newPs = new VirtuePersistentStorage(username, volumeId, virtueTemplateId);
 			persistentStorageDao.savePersistentStorage(newPs);
 		}
@@ -145,24 +202,28 @@ public class PersistentStorageManager {
 		return persistentStorageDao.getAllPersistentStorage();
 	}
 
-	private String getNewVolumeId(String name) {
+	private String getNewVolumeId(String name, String virtueTemplateId, String username) {
 		AmazonEC2 ec2 = ec2Wrapper.getEc2();
 		CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest();
 		createVolumeRequest.setSnapshotId(snapshotIdForNewPersistentStorageDrive);
 		createVolumeRequest.setAvailabilityZone(availabilityZone);
 		createVolumeRequest.setVolumeType(VolumeType.Gp2);
-		TagSpecification ts = new TagSpecification();
 		Collection<Tag> tags = new ArrayList<Tag>();
-		tags.add(new Tag("Name", name));
-		ts.setTags(tags);
-		// createVolumeRequest.withTagSpecifications(ts);
+		tags.add(new Tag(AwsUtil.TAG_NAME, name));
+		tags.add(new Tag(AwsUtil.TAG_SERVER_ID, serverId));
+		tags.add(new Tag(AwsUtil.TAG_VIRTUE_TEMPLATE_ID, virtueTemplateId));
+		tags.add(new Tag(AwsUtil.TAG_USERNAME, username));
+		tags.add(new Tag(AwsUtil.TAG_AUTO_GENERATED, AwsUtil.TAG_AUTO_GENERATED_TRUE));
+		tags.add(new Tag(AwsUtil.TAG_PRIMARY, AwsUtil.VirtuePrimaryPurpose.PERSISTENT_STORAGE.toString()));
+		tags.add(new Tag(AwsUtil.TAG_SECONDARY, AwsUtil.VirtueSecondaryPurpose.PERSISTENT_STORAGE.toString()));
 		CreateVolumeResult result = ec2.createVolume(createVolumeRequest);
 
 		Volume volume = result.getVolume();
 		String id = volume.getVolumeId();
 
 		CreateTagsRequest createTagsRequest = new CreateTagsRequest();
-		createTagsRequest.withResources(id).withTags(new Tag("Name", name));
+		createTagsRequest.withResources(id).withTags(tags);
+		// createTagsRequest.withResources(id).withTags(new Tag("Name", name)).withtag;
 		ec2.createTags(createTagsRequest);
 		return id;
 	}

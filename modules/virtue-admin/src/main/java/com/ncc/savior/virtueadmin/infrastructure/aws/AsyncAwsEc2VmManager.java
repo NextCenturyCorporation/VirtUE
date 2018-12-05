@@ -125,6 +125,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			}
 			virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.USER_VIRTUE);
 			virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.WINDOWS);
+			virtueMods.setUsername(user.getUsername());
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, secGroupIds, serverKeyName, instanceType,
 					virtueMods, null);
 			vms.add(vm);

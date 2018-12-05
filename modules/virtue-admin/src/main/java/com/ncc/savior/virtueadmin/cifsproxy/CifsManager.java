@@ -162,6 +162,7 @@ public class CifsManager {
 		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters(name);
 		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.CIFS_PROXY);
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.CIFS_PROXY);
+		virtueMods.setUsername(user.getUsername());
 		VirtualMachine vm = wrapper.provisionVm(this.cifsProxyVmTemplate, name, securityGroupIds, cifsKeyName,
 				instanceType, virtueMods, null);
 		return vm;

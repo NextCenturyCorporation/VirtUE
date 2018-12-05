@@ -165,6 +165,7 @@ public class XenHostManager {
 		virtueMods.setVirtueTemplateId(virtue.getTemplateId());
 		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.USER_VIRTUE);
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
+		virtueMods.setUsername(virtue.getUsername());
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverId + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
 				xenInstanceType, virtueMods, iamRoleName);
