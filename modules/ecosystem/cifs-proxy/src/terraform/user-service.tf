@@ -46,24 +46,10 @@ yum -y install \
 
 sed -i 's/^\(\[libdefaults\]\)/\1\n  rdns = false/' /etc/krb5.conf
 
-echo Adding permissions for constrained delegation
-ldapfile=/tmp/ldap-$$$$
-domainparts=$(echo ${var.domain} | sed 's/\./,dc=/g')
-cat > $ldapfile <<EOLDAP
-dn: cn=${local.myname},cn=Computers,dc=$domainparts
-changetype: modify
-add: msDS-AllowedToDelegateTo
-msDS-AllowedToDelegateTo: cifs/${upper(local.fsname)}
-msDS-AllowedToDelegateTo: cifs/${local.fsname}.${var.domain}
--
-EOLDAP
-ldapmodify -f $ldapfile -w '${var.admin_password}' -x -H ldap://${local.ds_private_ip} -D "${var.domain_admin_user}@${var.domain}"
-
 # create user that will mount files
 useradd --shell /bin/false --no-create-home mounter
 
 date
-touch /tmp/user_data-finished
 EOF
   # end of user_data
 
@@ -81,8 +67,6 @@ EOF
 
   provisioner "remote-exec" {
 	inline = [
-	  "while ! [ -e /tmp/user_data-finished ]; do echo -n '.' ; sleep 2; done",
-	  "echo '    include = /etc/samba/virtue.conf' | sudo tee --append /etc/samba/smb.conf > /dev/null",
 	  "sudo cp /tmp/virtue.conf /etc/samba",
 	  "sudo touch /etc/samba/virtue-shares.conf",
 	  "sudo systemctl enable smb nmb",
@@ -113,11 +97,17 @@ EOF
 	destination = "/tmp/post-deploy-config.sh"
   }
   
+  provisioner "file" {
+	source = "allow-delegation.sh"
+	destination = "/tmp/allow-delegation.sh"
+  }
+  
   provisioner "remote-exec" {
 	inline = [
 	  # install will make them executable by default
-	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh",
-	  "/usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip}"
+	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh",
+	  "/usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip}",
+	  "/usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --delegater ${local.myname} --target ${local.fsname}"
 	]
   }  
 }

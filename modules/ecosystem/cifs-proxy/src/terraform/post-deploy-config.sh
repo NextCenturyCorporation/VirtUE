@@ -90,6 +90,7 @@ echo security = user
 echo realm = ${domain}
 echo workgroup = "${domainPrefix}"
 echo kerberos method = secrets and keytab
+echo include = /etc/samba/virtue.conf
 ) | sed -i -e '/^\[global\]$/r /dev/stdin' \
     -e '/ *\(security\|realm\|workgroup\|kerberos method\) *=/d' \
 	-e '/ *printing *=/,$d' \
