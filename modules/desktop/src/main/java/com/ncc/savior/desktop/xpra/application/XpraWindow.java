@@ -77,9 +77,10 @@ public abstract class XpraWindow implements IXpraWindow {
 			button = 5;
 			delta = -delta;
 		}
-		if (x < 0 || y < 0) {
-			throw new IllegalArgumentException("Minus coordinates are not allowed: " + x + ", " + y);
-		}
+		// if (x < 0 || y < 0) {
+		// throw new IllegalArgumentException("Minus coordinates are not allowed: " + x
+		// + ", " + y);
+		// }
 		// new WheelMotionPacket(id, button, distance, x, y);
 		for (int i = 0; i < delta; i++) {
 			sendPacket(new MouseButtonActionPacket(id, button, true, x, y), "mouse wheel packet");
