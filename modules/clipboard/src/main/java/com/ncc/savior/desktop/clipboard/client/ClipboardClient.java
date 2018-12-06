@@ -125,8 +125,11 @@ public class ClipboardClient implements Closeable {
 			}
 		};
 		clipboardWrapper.setClipboardListener(listener);
-		transmitter.sendMessageToHub(new ClipboardFormatsRequestMessage(myId));
 		RmiServer.bindServer(myId, transmitter);
+	}
+	
+	public void initRemoteClient() throws IOException {
+		transmitter.sendMessageToHub(new ClipboardFormatsRequestMessage(myId));
 	}
 
 	/**
