@@ -4,9 +4,10 @@ import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 // import { MatTabsModule } from '@angular/material/tabs';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
+
+import { RouterService } from '../../../shared/services/router.service';
 
 import { Item } from '../../../shared/models/item.model';
 import { User } from '../../../shared/models/user.model';
@@ -59,9 +60,9 @@ export class VirtueUsageTabComponent extends ItemFormTabComponent implements OnI
    * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       dialog: MatDialog) {
-    super(router, dialog);
+    super(routerService, dialog);
     this.tabName = "Virtue Usage";
 
   }

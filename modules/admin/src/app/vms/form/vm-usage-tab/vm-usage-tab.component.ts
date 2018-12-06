@@ -4,7 +4,6 @@ import { Location } from '@angular/common';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
@@ -23,6 +22,8 @@ import {
 } from '../../../shared/models/column.model';
 
 import { SubMenuOptions } from '../../../shared/models/subMenuOptions.model';
+
+import { RouterService } from '../../../shared/services/router.service';
 
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
@@ -65,9 +66,9 @@ export class VmUsageTabComponent extends ItemFormTabComponent implements OnInit 
    * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       dialog: MatDialog) {
-    super(router, dialog);
+    super(routerService, dialog);
     this.tabName = "Virtual Machine Usage";
 
   }

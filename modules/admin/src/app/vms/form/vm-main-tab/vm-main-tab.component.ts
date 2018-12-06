@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { IndexedObj } from '../../../shared/models/indexedObj.model';
 import { Item } from '../../../shared/models/item.model';
@@ -14,6 +13,7 @@ import {
   SORT_DIR
 } from '../../../shared/models/column.model';
 
+import { RouterService } from '../../../shared/services/router.service';
 import { Mode } from '../../../shared/abstracts/gen-form/mode.enum';
 
 import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNames.enum';
@@ -37,8 +37,7 @@ import { OSSet } from '../../os.set';
 @Component({
   selector: 'app-vm-main-tab',
   templateUrl: './vm-main-tab.component.html',
-  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css'],
-  providers: [ OSSet ]
+  styleUrls: ['../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component.css']
 })
 export class VmMainTabComponent extends ItemFormMainTabComponent implements OnInit {
 
@@ -52,12 +51,12 @@ export class VmMainTabComponent extends ItemFormMainTabComponent implements OnIn
    * see [[ItemFormMainTabComponent.constructor]] for inherited parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       dialog: MatDialog,
       /** the available operating systems that this VM can be set as. */
       protected osOptions: OSSet
       ) {
-    super(router, dialog);
+    super(routerService, dialog);
     this.childDatasetName = DatasetNames.APPS;
   }
 

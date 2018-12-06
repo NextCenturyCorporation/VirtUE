@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Inject, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
+import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
@@ -29,8 +29,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 @Component({
   selector: 'app-vm-modal',
   templateUrl: '../generic-modal/generic.modal.html',
-  styleUrls: ['../generic-modal/generic.modal.css'],
-  providers: [ BaseUrlService, DataRequestService ]
+  styleUrls: ['../generic-modal/generic.modal.css']
 })
 export class VmModalComponent extends GenericModalComponent implements OnInit {
 
@@ -38,14 +37,14 @@ export class VmModalComponent extends GenericModalComponent implements OnInit {
    * see [[GenericModalComponent.constructor]] for notes on parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<GenericModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
     ) {
-      super(router, baseUrlService, dataRequestService, dialog, dialogRef, data);
+      super(routerService, baseUrlService, dataRequestService, dialog, dialogRef, data);
       this.pluralItem = "Virtual Machine Templates";
     }
 

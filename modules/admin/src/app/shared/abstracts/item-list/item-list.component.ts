@@ -3,7 +3,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 
@@ -17,6 +16,7 @@ import { GenericTableComponent } from '../gen-table/gen-table.component';
 import { Item } from '../../models/item.model';
 import { Toggleable } from '../../models/toggleable.interface';
 
+import { RouterService } from '../../services/router.service';
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { DataRequestService } from '../../services/dataRequest.service';
 
@@ -33,8 +33,7 @@ import { Mode } from '../gen-form/mode.enum';
  * @extends GenericDataPageComponent because the derivative list pages need to load a known type of data from the backend.
  */
 @Component({
-  templateUrl: './item-list.component.html',
-  providers: [ BaseUrlService, DataRequestService, GenericTableComponent ]
+  templateUrl: './item-list.component.html'
 })
 export abstract class ItemListComponent extends GenericDataPageComponent implements OnInit {
 
@@ -66,12 +65,12 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
-    router: Router,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(routerService, baseUrlService, dataRequestService, dialog);
 
     let params = this.getListOptions();
 
@@ -85,7 +84,7 @@ export abstract class ItemListComponent extends GenericDataPageComponent impleme
   }
 
   protected getSubdomain(): string {
-    return '/' + this.getRouterUrlPieces()[0];
+    return '/' + this.routerService.getRouterUrlPieces()[0];
   }
 
   /**

@@ -1,11 +1,10 @@
 import { Component, OnInit, ViewChild, Input } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
+
+import { RouterService } from '../../services/router.service';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
@@ -47,9 +46,9 @@ export abstract class GenericFormTabComponent extends GenericPageComponent imple
   public tabName: string;
 
   constructor(
-    router: Router,
+    routerService: RouterService,
     dialog: MatDialog) {
-      super(router, dialog);
+      super(routerService, dialog);
   }
 
   /**

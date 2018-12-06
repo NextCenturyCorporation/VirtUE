@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { HashLocationStrategy, Location, LocationStrategy } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { MatDialog, MatDialogRef, MatDialogModule } from '@angular/material';
 import { DialogsComponent } from '../dialogs/dialogs.component';
+
+import { RouterService } from '../shared/services/router.service';
 
 import { GenericPageComponent } from '../shared/abstracts/gen-page/gen-page.component';
 
@@ -36,10 +37,10 @@ export class ConfigComponent extends GenericPageComponent {
   @ViewChild('settingsHistoryTab') settingsHistoryTab: ConfigSettingsHistoryTabComponent;
 
   constructor(
-    router: Router,
+    routerService: RouterService,
     dialog: MatDialog
   ) {
-    super(router, dialog);
+    super(routerService, dialog);
   }
 
 

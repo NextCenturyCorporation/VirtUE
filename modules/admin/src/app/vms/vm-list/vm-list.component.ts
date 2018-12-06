@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
-import { Router } from '@angular/router';
 
 import { Item } from '../../shared/models/item.model';
 import { Application } from '../../shared/models/application.model';
@@ -11,6 +10,7 @@ import {  Column,
           SORT_DIR  } from '../../shared/models/column.model';
 import { DictList } from '../../shared/models/dictionary.model';
 
+import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
@@ -32,8 +32,7 @@ import { DatasetNames } from '../../shared/abstracts/gen-data-page/datasetNames.
 @Component({
   selector: 'app-vm-list',
   templateUrl: '../../shared/abstracts/item-list/item-list.component.html',
-  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css'],
-  providers: [ BaseUrlService, DataRequestService  ]
+  styleUrls: ['../../shared/abstracts/item-list/item-list.component.css']
 })
 export class VmListComponent extends ItemListComponent {
 
@@ -41,12 +40,12 @@ export class VmListComponent extends ItemListComponent {
    * see [[GenericPageComponent.constructor]] for notes on parameters
    */
   constructor(
-    router: Router,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(routerService, baseUrlService, dataRequestService, dialog);
   }
 
   /**

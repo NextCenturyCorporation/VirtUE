@@ -3,9 +3,9 @@ import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { BaseUrlService } from '../../services/baseUrl.service';
+import { RouterService } from '../../services/router.service';
 import { DataRequestService } from '../../services/dataRequest.service';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
@@ -35,11 +35,11 @@ export abstract class GenericDataTabComponent extends GenericDataPageComponent i
   public tabLabel: string;
 
   constructor(
-    router: Router,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog) {
-      super(router, baseUrlService, dataRequestService, dialog);
+      super(routerService, baseUrlService, dataRequestService, dialog);
   }
 
   /**

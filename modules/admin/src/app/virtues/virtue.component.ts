@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild, QueryList, OnDestroy } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { MatDialog, MatSlideToggleModule } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
+import { RouterService } from '../shared/services/router.service';
 import { BaseUrlService } from '../shared/services/baseUrl.service';
 import { DataRequestService } from '../shared/services/dataRequest.service';
 
@@ -77,19 +77,17 @@ import { ItemFormComponent } from '../shared/abstracts/gen-form/item-form/item-f
         <div class="mui-col-md-4 form-item text-align-center">
           <button  *ngIf=" !inViewMode() " class="button-submit" (click)="saveAndReturn();" >Save and Return</button>
           <button  *ngIf=" inEditMode()" class="button-submit" (click)="save();" >Save</button>
-          <button  *ngIf=" inEditMode() " class="button-cancel" (click)="toViewMode()">Discard Changes</button>
-          <button  *ngIf=" !inViewMode() " class="button-cancel" (click)="toListPage()">Cancel</button>
+          <button  *ngIf=" !inViewMode() " class="button-cancel" (click)="cancel()">Cancel</button>
 
           <button  *ngIf="inViewMode()" class="button-submit" (click)="toEditMode();" >Edit</button>
-          <button  *ngIf="inViewMode()" class="button-cancel" (click)="toListPage();" >Return</button>
+          <button  *ngIf="inViewMode()" class="button-cancel" (click)="cancel();" >Return</button>
         </div>
         <div class="mui-col-md-4"></div>
       </div>
     </div>
   </div>
     `,
-  styleUrls: ['../shared/abstracts/item-list/item-list.component.css'],
-  providers: [ BaseUrlService, DataRequestService ]
+  styleUrls: ['../shared/abstracts/item-list/item-list.component.css']
 })
 export class VirtueComponent extends ItemFormComponent implements OnDestroy {
 
@@ -115,14 +113,13 @@ export class VirtueComponent extends ItemFormComponent implements OnDestroy {
    * see [[ItemFormComponent.constructor]] for notes on parameters
    */
   constructor(
-    location: Location,
     activatedRoute: ActivatedRoute,
-    router: Router,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super('/virtues', location, activatedRoute, router, baseUrlService, dataRequestService, dialog);
+    super('/virtues', activatedRoute, routerService, baseUrlService, dataRequestService, dialog);
 
     // set up empty (except for a default color), will get replaced in render (ngOnInit) if
     // mode is not 'CREATE'

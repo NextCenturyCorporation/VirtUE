@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
+import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
@@ -28,8 +28,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
  *
  */
 @Component({
-  selector: 'app-generic-modal',
-  providers: [BaseUrlService, DataRequestService]
+  selector: 'app-generic-modal'
 })
 export abstract class GenericModalComponent extends GenericDataPageComponent implements OnInit {
 
@@ -61,7 +60,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
    * @param data is defined in calling component, holds the initial selections
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
@@ -72,7 +71,7 @@ export abstract class GenericModalComponent extends GenericDataPageComponent imp
       /** holds the initial selections, and possibly a SelectionMode */
       @Inject(MAT_DIALOG_DATA) public data: any
     ) {
-      super(router, baseUrlService, dataRequestService, dialog);
+      super(routerService, baseUrlService, dataRequestService, dialog);
       if (data && data['selectedIDs']) {
         this.selectedIDs = data['selectedIDs'];
       }

@@ -1,8 +1,8 @@
 import { Component, ElementRef, EventEmitter, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 
+import { RouterService } from '../../shared/services/router.service';
 import { BaseUrlService } from '../../shared/services/baseUrl.service';
 import { DataRequestService } from '../../shared/services/dataRequest.service';
 
@@ -37,14 +37,14 @@ export class FileSystemSelectionModalComponent extends GenericModalComponent {
    * see [[GenericModalComponent.constructor]] for notes on parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       baseUrlService: BaseUrlService,
       dataRequestService: DataRequestService,
       dialog: MatDialog,
       dialogRef: MatDialogRef<FileSystemSelectionModalComponent>,
       @Inject( MAT_DIALOG_DATA ) data: any
   ) {
-    super(router, baseUrlService, dataRequestService, dialog, dialogRef, data);
+    super(routerService, baseUrlService, dataRequestService, dialog, dialogRef, data);
     this.pluralItem = "FileSystems";
   }
 

@@ -4,7 +4,6 @@ import {  MatButtonModule,
           MatIconModule
 } from '@angular/material';
 
-import { ActivatedRoute, Router } from '@angular/router';
 
 import { Item } from '../../../shared/models/item.model';
 import { Virtue } from '../../../shared/models/virtue.model';
@@ -22,6 +21,8 @@ import {
   SORT_DIR
 } from '../../../shared/models/column.model';
 
+import { RouterService } from '../../../shared/services/router.service';
+
 import { NetworkPermission } from '../../../shared/models/networkPerm.model';
 import { FileSystem } from '../../../shared/models/fileSystem.model';
 import { Printer } from '../../../shared/models/printer.model';
@@ -32,8 +33,8 @@ import { DatasetNames } from '../../../shared/abstracts/gen-data-page/datasetNam
 import { PrinterSelectionModalComponent } from '../../../modals/printer-modal/printer-selection.modal';
 import { FileSystemSelectionModalComponent } from '../../../modals/fileSystem-modal/fileSystem-selection.modal';
 
-import { ColorModalComponent } from "../../../modals/color-picker/color-picker.modal";
-import { VirtueModalComponent } from "../../../modals/virtue-modal/virtue-modal.component";
+import { ColorModalComponent } from '../../../modals/color-picker/color-picker.modal';
+import { VirtueModalComponent } from '../../../modals/virtue-modal/virtue-modal.component';
 import { ItemFormTabComponent } from '../../../shared/abstracts/gen-form-tab/item-form-tab/item-form-tab.component';
 
 import { GenericTableComponent } from '../../../shared/abstracts/gen-table/gen-table.component';
@@ -96,9 +97,9 @@ export class VirtueSettingsTabComponent extends ItemFormTabComponent implements 
    * see [[ItemFormTabComponent.constructor]] for inherited parameters
    */
   constructor(
-      router: Router,
+      routerService: RouterService,
       dialog: MatDialog) {
-    super(router, dialog);
+    super(routerService, dialog);
 
     this.item = new Virtue();
 

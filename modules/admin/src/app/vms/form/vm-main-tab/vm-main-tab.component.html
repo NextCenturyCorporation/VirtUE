@@ -9,11 +9,12 @@
     </div>
   </div>
   <div class="mui-row form-item margin-top-15">
-    <div class="mui-col-md-1">
-      <label>Status: </label>
-    </div>
-    <div class="mui-col-md-2">
-      <mat-slide-toggle [(ngModel)]="item.enabled" [disabled]="!inViewMode()" (click)="statusChange()" [color]="'primary'">
+    <div class="form-item margin-top-15">
+      <label>Status:  &nbsp;&nbsp;&nbsp;&nbsp;</label>
+      <span *ngIf="!inViewMode()">
+        {{ item.enabled ? 'Enabled' : 'Disabled' }}
+      </span>
+      <mat-slide-toggle *ngIf="inViewMode()" [checked]="item.enabled" (change)="statusChange()" [color]="'primary'">
         {{ item.enabled ? 'Enabled' : 'Disabled' }}
       </mat-slide-toggle>
     </div>

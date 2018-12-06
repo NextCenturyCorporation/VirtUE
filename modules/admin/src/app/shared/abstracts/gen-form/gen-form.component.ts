@@ -1,12 +1,10 @@
 import { Component, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
-import { Location } from '@angular/common';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
+import { RouterService } from '../../services/router.service';
 import { BaseUrlService } from '../../services/baseUrl.service';
 import { DataRequestService } from '../../services/dataRequest.service';
 
@@ -35,9 +33,6 @@ import { DatasetNames } from '../gen-data-page/datasetNames.enum';
  *
  * @extends [[GenericDataPageComponent]] because it needs to load data about an Item and its children, as well as other available children
  */
-@Component({
-  providers: [ BaseUrlService, DataRequestService ]
-})
 export abstract class GenericTabbedFormComponent extends GenericDataPageComponent implements OnInit {
 
 
@@ -53,18 +48,14 @@ export abstract class GenericTabbedFormComponent extends GenericDataPageComponen
 
   /**
    * see [[GenericDataPageComponent.constructor]] for notes on inherited parameters
-   * @param location used to change the URL without making a full redirect and reload.
-   * @param activatedRoute used to get the path, to parse out the requested item's ID.
    */
   constructor(
-    protected location: Location,
-    protected activatedRoute: ActivatedRoute,
-    router: Router,
+    routerService: RouterService,
     baseUrlService: BaseUrlService,
     dataRequestService: DataRequestService,
     dialog: MatDialog
   ) {
-    super(router, baseUrlService, dataRequestService, dialog);
+    super(routerService, baseUrlService, dataRequestService, dialog);
 
   }
 
