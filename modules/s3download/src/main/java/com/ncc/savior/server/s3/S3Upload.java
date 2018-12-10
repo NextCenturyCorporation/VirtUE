@@ -65,6 +65,8 @@ public class S3Upload {
 			upload.waitForCompletion();
 		} catch (AmazonClientException | InterruptedException e) {
 			e.printStackTrace();
+		}finally {
+			tm.shutdownNow(true);
 		}
 	}
 
