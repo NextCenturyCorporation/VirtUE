@@ -33,7 +33,7 @@ date
 yum -y install \
 	adcli \
 	cifs-utils \
-	java-1.8.0-openjdk \
+	java-1.8.0-openjdk-headless \
 	krb5-workstation \
 	oddjob \
 	oddjob-mkhomedir \
@@ -50,28 +50,25 @@ sed -i 's/^\(\[libdefaults\]\)/\1\n  rdns = false/' /etc/krb5.conf
 useradd --shell /bin/false --no-create-home mounter
 
 date
+touch /tmp/user_data-finished
 EOF
   # end of user_data
 
   connection {
+	# Normal (on-create) connection works w/o specifying host here,
+	# but on-destroy ssh connection fails with an empty host if host
+	# is not specified. Weird. (see
+	# https://github.com/hashicorp/terraform/issues/15219)
+	host = "${self.public_ip}"
 	type = "ssh"
 	user = "${var.linux_user}"
 	private_key = "${file(var.user_private_key_file)}"
   }
   
-  # The following file and remote-exec provisioners set up samba
+  # custom config file for samba
   provisioner "file" {
 	source = "virtue.conf"
 	destination = "/tmp/virtue.conf"
-  }
-
-  provisioner "remote-exec" {
-	inline = [
-	  "sudo cp /tmp/virtue.conf /etc/samba",
-	  "sudo touch /etc/samba/virtue-shares.conf",
-	  "sudo systemctl enable smb nmb",
-	  "sudo systemctl start smb nmb",
-	]
   }
 
   #
@@ -104,59 +101,23 @@ EOF
   
   provisioner "remote-exec" {
 	inline = [
+	  "while ! [ -e /tmp/user_data-finished ]; do sleep 2; done",
+	  "sudo cp /tmp/virtue.conf /etc/samba/",
+	  "sudo touch /etc/samba/virtue-shares.conf",
+	  "sudo systemctl enable smb nmb",
+	  "sudo systemctl start smb nmb",
 	  # install will make them executable by default
 	  "sudo install --target-directory=/usr/local/bin /tmp/${var.import_creds_program} /tmp/${var.switch_principal_program} /tmp/make-virtue-shares.sh /tmp/post-deploy-config.sh /tmp/allow-delegation.sh",
-	  "/usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip}",
-	  "/usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --delegater ${local.myname} --target ${local.fsname}"
+	  "sudo /usr/local/bin/post-deploy-config.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --hostname ${local.myname} --dcip ${local.ds_private_ip} --verbose",
+	  "sleep 5",
+	  "sudo /usr/local/bin/allow-delegation.sh --domain ${var.domain} --admin ${var.domain_admin_user} --password ${var.admin_password} --delegater ${local.myname} --target ${local.fsname} --verbose"
 	]
   }  
-}
-
-  
-# The stuff below sets the userPrincipalName (upn) of the user
-# service.  Without this, kinit doesn't work for the http principal,
-# whose keytab entry gets created by the net command above. It seems
-# like kinit should work even w/o this, but it doesn't.
-
-data "template_file" "fix_user_service_upn_script" {
-  template = "${file("user-service.ps1")}"
-
-  vars {
-	password = "${var.admin_password}"
-	hostname = "${local.myname}"
-    domain = "${var.domain}"
-    domain_admin_user = "${var.domain_admin_user}"
-  }
-}
-
-resource "null_resource" "fix_user_service_upn" {
-  triggers {
-	ad_id = "${aws_instance.user_facing_server.id}"
-  }
-
-  # Note: this runs on the file server because there doesn't appear to
-  # be a way to set a UPN from Linux.
-
-  connection {
-	type     = "winrm"
-	user     = "Administrator" # local admin user
-	host     = "${aws_instance.file_server.public_dns}"
-	password = "${var.admin_password}"
-	https    = false
-	use_ntlm = false
-  }
-
-  provisioner "file" {
-	content = "${data.template_file.fix_user_service_upn_script.rendered}"
-	destination = "\\temp\\user-service.ps1"
-  }
 
   provisioner "remote-exec" {
+	when = "destroy"
 	inline = [
-	  "powershell \\temp\\user-service.ps1"
+	  "echo '${var.admin_password}' | sudo realm leave --remove --user ${var.domain_admin_user} ${var.domain}"
 	]
   }
-  
-  depends_on = [ "aws_instance.file_server", "aws_instance.user_facing_server" ]
-
 }

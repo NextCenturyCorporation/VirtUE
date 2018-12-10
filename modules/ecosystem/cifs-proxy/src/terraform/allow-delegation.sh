@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Allow Kerberos constrained delegation, for example:
 #
@@ -11,7 +11,7 @@ progname="$0"
 info() { printf "\n%s %s\n\n" "$( date )" "$*" >&2; }
 error() { printf "%s: %s: error: %s\n" "$( date )" "$progname" "$*" >&2; }
 usage() {
-	echo "${progname}: usage: ${progname} OPTIONS"
+	echo "${progname}: usage: ${progname} OPTIONS [--verbose]"
 	echo -e "\t--domain DOMAIN"
 	echo -e "\t--admin ADMIN_USER [default=Administrator]"
 	echo -e	"\t--password ADMIN_PASSWORD"
@@ -47,6 +47,8 @@ while [ $# -gt 0 ]; do
 		--dc) dc="$2"
 			  shift
 			  ;;
+		--verbose) verbose=1
+				   ;;
 		--help|-h) usage
 				   exit 0
 				   ;;
@@ -55,6 +57,7 @@ while [ $# -gt 0 ]; do
 		   exit 1
 		   ;;
 	esac
+	shift
 done
 
 mustBeSet() { [ -z "$1" ] && (error "$2" must be specified; usage) >&2 && exit 2; }
@@ -67,16 +70,29 @@ if [ -z "$dc" ]; then
 	dc=$domain
 fi
 
+[ $verbose -eq 1 ] && set -x
+
 ldapfile=/tmp/ldap-$$
-domainparts=${domain//./,dc=}
+domainPrefix=${domain/.*}
+domainparts="${domain//./,dc=}"
+[ $verbose -eq 1 ] && ldapsearch -w "${domainAdminPassword}" -x -H ldap://${dc} -D "${domainAdmin}@${domain}" -b "OU=Computers,OU=${domainPrefix},DC=${domainparts}" cn="${delegater}"
 cat > $ldapfile <<EOLDAP
-dn: cn=${delegater},cn=Computers,dc=$domainparts
+dn: cn=${delegater},ou=Computers,ou=${domainPrefix},dc=${domainparts}
 changetype: modify
 add: msDS-AllowedToDelegateTo
 msDS-AllowedToDelegateTo: cifs/${target^^}
-msds-AllowedToDelegateTo: cifs/${target}.${domain}
+msDS-AllowedToDelegateTo: cifs/${target}.${domain}
 -
 EOLDAP
-ldapmodify -f $ldapfile -w '${domainAdminPassword}' -x -H ldap://${dc} \
-		   -D "${domainAdmin}@${domain}" \
-	&& rm -f $ldapfile
+ldapmodify -f $ldapfile -w "${domainAdminPassword}" -x -H ldap://${dc} \
+		   -D "${domainAdmin}@${domain}"
+retval=$?
+# 20 is "Type or value exists", which happens if the target was
+# already in the delegation list, which is ok. (There doesn't seem to
+# be a way to tell ldapmodify to ignore that "error", so we'll ignore
+# it here.)
+if [ $retval -eq 0 ] || [ $retval -eq 20 ]; then
+	rm -f $ldapfile
+else
+	exit $retval
+fi

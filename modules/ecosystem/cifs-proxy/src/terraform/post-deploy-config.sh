@@ -9,7 +9,7 @@ progname="$0"
 info() { printf "\n%s %s\n\n" "$( date )" "$*" >&2; }
 error() { printf "%s: %s: error: %s\n" "$( date )" "$progname" "$*" >&2; }
 usage() {
-	echo "${progname}: usage: ${progname} OPTIONS [--pretend]"
+	echo "${progname}: usage: ${progname} OPTIONS [--pretend] [--verbose]"
 	echo -e "\t--domain DOMAIN"
 	echo -e "\t--admin ADMIN_USER [default=Administrator]"
 	echo -e	"\t--password ADMIN_PASSWORD"
@@ -115,33 +115,12 @@ cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 		admin_server = ${domain}
 	}
 EOCONF
-
-# fixing reverse dns
-myaddress=$(ip address show dev eth0 | sed -n 's_ *inet \([^/]*\)/.*_\1_p')
-echo "${domainAdminPassword}" | kinit ${domainAdmin}
-# if the zone doesn't exist, create it
-mysubnet=$(echo $myaddress | sed 's/\.[^.]*$//')
-zone=$(echo $mysubnet | awk -F . '{ print $3 "." $2 "." $1 }').in-addr.arpa
-samba-tool dns zoneinfo ${dcip} $zone \
-	   --kerberos=1 \
-	   >& /dev/null || \
-	samba-tool dns zonecreate ${dcip} $zone \
-		   --kerberos=1
-
-# remove reverse DNS PTR record (if any)
-lastOctet=${myaddress/*./}
-samba-tool dns delete ${dcip} $zone $lastOctet PTR ${hostname}.${domain} \
-	   --kerberos=1 \
-	   >& /dev/null || true
-# add new reverse DNS PTR record
-samba-tool dns add ${dcip} $zone $lastOctet PTR ${hostname}.${domain} \
-	   --kerberos=1
-
+ 
 # set userPrincipalName
 ldapfile=/tmp/ldap-$$
 domainparts=${domain//./,dc=}
 cat > $ldapfile <<EOLDAP
-dn: cn=${hostname},cn=Computers,dc=$domainparts
+dn: cn=${hostname},ou=Computers,ou=${domainPrefix},dc=$domainparts
 changetype: modify
 replace: userPrincipalName
 userPrincipalName: http/${hostname}.${domain}@${domain^^}
