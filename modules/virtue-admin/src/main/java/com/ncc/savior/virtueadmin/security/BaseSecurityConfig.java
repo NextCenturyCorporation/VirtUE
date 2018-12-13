@@ -32,6 +32,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.http.MediaType;
 
 import com.ncc.savior.virtueadmin.config.CorsFilter;
 import com.ncc.savior.virtueadmin.data.IUserManager;
@@ -78,13 +79,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				response.setStatus(200);
-				// response.addHeader("Access-Control-Allow-Origin", "*");
-				// response.setHeader("Access-Control-Allow-Headers", "responseType");
-				// response.addHeader("Access-Control-Allow-Headers", "responseType");
-				// response.setFilter(new CorsFilter(env));
-		    // response.setHeader("Access-Control-Allow-Methods", "POST");
-
-				logger.debug("\n***  " + request.getHeaderNames() + "\n" + response.getHeaderNames() + "\n");
+				response.setContentType(MediaType.APPLICATION_JSON.toString());
 				response.getWriter().println("Login success");
 			}
 		};

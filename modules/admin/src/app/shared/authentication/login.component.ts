@@ -44,14 +44,14 @@ export class LoginComponent implements OnInit {
 
         this.loading = true;
         this.authenticationService.login(this.f.username.value, this.f.password.value)
-          // .pipe(map((data) => {console.log(data); return data;}))
+					// .pipe(data => {console.log(data); return data;})
           .subscribe(
             data => {
-							console.log("data");
-							console.log(data);
-              this.router.navigate([this.returnUrl]);
+							console.log(JSON.stringify(data));
+              // this.router.navigate([this.returnUrl]);
             },
             error => {
+              console.log("in error");
               console.log(error);
               this.loading = false;
             });

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+// import { map } from 'rxjs/operators';
+import 'rxjs/add/operator/map'
 
 import { BaseUrlService } from './baseUrl.service';
 
@@ -34,20 +35,38 @@ export class AuthenticationService {
       //   // .set('response_type', 'code')
       //   .set('password', password)
 
-      const httpOptions = {
-        // headers: new HttpHeaders(
-        //       { 'Content-Type': 'application/json',
-        //         'responseType': 'json',
-        //         'username': username, 'password': password
-        //       })
-        // headers: new HttpHeaders({ 'Content-Type': 'text/html', 'responseType': 'text' })
-        headers: new HttpHeaders({ 'Content-Type': 'text/html' })
-      };
+      // const httpOptions = {
+      //   // headers: new HttpHeaders(
+      //   //       { 'Content-Type': 'application/json',
+      //   //         'responseType': 'json',
+      //   //         'username': username, 'password': password
+      //   //       })
+      //   headers: new HttpHeaders({ 'Content-Type': 'text/plain'})
+      //   // headers: new HttpHeaders({ 'Content-Type': 'text/html' })
+      // };
+      var httpOptions = {
+           headers: new HttpHeaders({
+              'Accept':'plain/text'
+           }),
+           'responseType': 'text' as 'json'
+        }
 
       console.log(`${this.baseUrl}login`, username, password);
       // return this.httpClient.post<any>(`${this.baseUrl}login`, {  params: params, headers: headers})
       // return this.httpClient.get<string>(`${this.baseUrl}login`, httpOptions)
-      return this.httpClient.post<string>(`${this.baseUrl}login`, JSON.stringify({username: username, password: password}), httpOptions)
+      return this.httpClient.post(
+            `${this.baseUrl}login`,
+            JSON.stringify({username: username, password: password}),
+            httpOptions
+          )
+            // .pipe((data) => {console.log(JSON.stringify(data)); return data;});
+      // return this.httpClient.post<string>(`${this.baseUrl}login`, JSON.stringify({username: username, password: password}), httpOptions)
+        // .map((res:any, r2:any) => {
+        //       console.log(res, r2);
+        //        // res.json() //Convert response to JSON
+        //        //OR
+        //        return res.text(); //Convert response to a string
+        //    })
           // .pipe((user: any) => {
           //   console.log("returned: ", user);
           //     // login successful if there's a jwt token in the response
