@@ -33,7 +33,8 @@ public class RunRemoteCommandCompletableFutureService
 	}
 
 	@Override
-	protected String getId(BaseCompletableFutureService<VirtualMachine, VirtualMachine, CommandGenerator>.Wrapper wrapper) {
+	protected String getId(
+			BaseCompletableFutureService<VirtualMachine, VirtualMachine, CommandGenerator>.Wrapper wrapper) {
 		return wrapper.param.getId();
 	}
 
@@ -45,7 +46,8 @@ public class RunRemoteCommandCompletableFutureService
 		String command = null;
 		try {
 			command = wrapper.extra.getCommand(vm);
-			runCommand(vm, command);
+			int timeout = wrapper.extra.getTimeoutMillis();
+			runCommand(vm, command, timeout);
 			onSuccess(id, vm, wrapper.future);
 		} catch (Throwable t) {
 			logger.error("Command failed.  Command=" + command + "vm=" + vm, t);
@@ -54,16 +56,20 @@ public class RunRemoteCommandCompletableFutureService
 
 	}
 
-	private void runCommand(VirtualMachine vm, String command) throws IOException, JSchException {
+	private void runCommand(VirtualMachine vm, String command, int timeout) throws IOException, JSchException {
 		File privateKeyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
-		
-		
+
 		// Jsch is not thread safe
 		Session session = null;
 		ChannelExec channel = null;
 		try {
-			session = SshUtil.getConnectedSession(vm, privateKeyFile);
-			List<String> lines = SshUtil.sendCommandFromSession(session, command);
+			session = SshUtil.getConnectedSessionWithRetries(vm, privateKeyFile, 3, 1000);
+			List<String> lines;
+			if (timeout > 0) {
+				lines = SshUtil.sendCommandFromSessionWithTimeout(session, command, timeoutMillis);
+			} else {
+				lines = SshUtil.sendCommandFromSession(session, command);
+			}
 			logger.debug(lines.toString());
 		} finally {
 			if (channel != null) {
@@ -88,10 +94,19 @@ public class RunRemoteCommandCompletableFutureService
 
 	public static class CommandGenerator {
 		private String command;
+		private int timeoutMillis;
 		private Function<VirtualMachine, String> function;
 
 		public CommandGenerator(String command) {
 			this.command = command;
+		}
+
+		public int getTimeoutMillis() {
+			return this.timeoutMillis;
+		}
+
+		public void setTimeoutMillis(int timeoutMillis) {
+			this.timeoutMillis = timeoutMillis;
 		}
 
 		public CommandGenerator(Function<VirtualMachine, String> function) {

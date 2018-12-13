@@ -239,8 +239,8 @@ public class CifsManager {
 					principal);
 			return cifPropertyUpdate;
 		}));
-		String cifPropertyUpdate = String.format("echo 'savior.security.ad.domain=%s' >> cifs-proxy-security.properties;",
-				cifsDomain);
+		String cifPropertyUpdate = String
+				.format("echo 'savior.security.ad.domain=%s' >> cifs-proxy-security.properties;", cifsDomain);
 		cifPropertyUpdate += String.format("echo 'savior.security.ad.url=%s' >> cifs-proxy-security.properties;",
 				cifsAdUrl);
 		cifPropertyUpdate += String.format("echo 'savior.security.ldap=%s' >> cifs-proxy-security.properties;",
@@ -255,13 +255,15 @@ public class CifsManager {
 			return cifsKinit;
 		}));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifsStart));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
+		CommandGenerator cg = new CommandGenerator((myVm) -> {
 			String cifsHostname = vm.getInternalHostname();
 			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
 			String cifsUpTest = String.format(
 					"while ! curl http://%s:8080/hello 2> /dev/null ; do echo -n '.' ; sleep 1; done", cifsHostname);
 			return cifsUpTest;
-		}));
+		});
+		cg.setTimeoutMillis(30000);
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, cg);
 		cf.thenAccept((VirtualMachine myVm) -> {
 			logger.debug("CIFS Proxy future complete");
 			future.complete(myVm);

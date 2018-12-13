@@ -324,4 +324,18 @@ public class SshUtil {
 			logger.warn("Error attempting to disconnect SSH session.", t);
 		}
 	}
+
+	public static Session getConnectedSessionWithRetries(VirtualMachine vm, File privateKeyFile, int numTries,
+			int timeBetweenTriesMillis) throws JSchException {
+		JSchException lastException = null;
+		do {
+			try {
+				return getConnectedSession(vm, privateKeyFile);
+			} catch (JSchException e) {
+				numTries--;
+				lastException = e;
+			}
+		} while (numTries > 0);
+		throw lastException;
+	}
 }
