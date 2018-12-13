@@ -33,6 +33,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.config.CorsFilter;
 
 /**
  * Base security configuration for Savior Server. All other security
@@ -71,18 +72,28 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		};
 		AuthenticationSuccessHandler successHandler=new AuthenticationSuccessHandler() {
-			
+
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				response.setStatus(200);
+				// response.addHeader("Access-Control-Allow-Origin", "*");
+				// response.setHeader("Access-Control-Allow-Headers", "responseType");
+				// response.addHeader("Access-Control-Allow-Headers", "responseType");
+				// response.setFilter(new CorsFilter(env));
+		    // response.setHeader("Access-Control-Allow-Methods", "POST");
+
+				logger.debug("\n***  " + request.getHeaderNames() + "\n" + response.getHeaderNames() + "\n");
 				response.getWriter().println("Login success");
 			}
 		};
 		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
 				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**").hasRole(USER_ROLE)
 				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
-				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login").permitAll().and().logout().permitAll();
+				.failureHandler(authenticationFailureHandler).successHandler(successHandler)
+				.loginPage("/login").and().logout().permitAll();
+
+		// http.useFilter();
 
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 

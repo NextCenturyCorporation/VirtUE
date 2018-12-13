@@ -8,7 +8,7 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 
 import { DatePipe } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -99,6 +99,12 @@ import { MessageService } from './shared/services/message.service';
 import { DataRequestService } from './shared/services/dataRequest.service';
 import { RouterService } from './shared/services/router.service';
 
+import { AuthGuard } from './shared/authentication/auth.guard';
+import { JwtInterceptor } from './shared/authentication/jwt.interceptor';
+import { ErrorInterceptor } from './shared/authentication/error.interceptor';
+import { AuthenticationService } from './shared/services/authentication.service';
+import { LoginComponent } from './shared/authentication/login.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -148,9 +154,12 @@ import { RouterService } from './shared/services/router.service';
     AppsListComponent,
     AddAppComponent,
     AppsModalComponent,
+
+    LoginComponent
   ],
   imports: [
     AppRoutingModule,
+
     BrowserAnimationsModule,
     BrowserModule,
     FlexLayoutModule,
@@ -183,7 +192,12 @@ import { RouterService } from './shared/services/router.service';
     OverlayContainer,
     RouterService,
     OSSet,
-    DatePipe
+    DatePipe,
+
+    AuthGuard,
+    AuthenticationService,
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
   ],
   bootstrap: [AppComponent],
   entryComponents: [

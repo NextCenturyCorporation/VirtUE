@@ -18,6 +18,13 @@ import {AddAppComponent} from './apps/add-app/add-app.component';
 
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 
+
+import { AuthGuard } from './shared/authentication/auth.guard';
+import { JwtInterceptor } from './shared/authentication/jwt.interceptor';
+import { ErrorInterceptor } from './shared/authentication/error.interceptor';
+import { AuthenticationService } from './shared/services/authentication.service';
+import { LoginComponent } from './shared/authentication/login.component';
+
 /**
  * This defines all the navigable URLs, what components should be loaded at each, and what data should be passed in to that
  * component.
@@ -44,13 +51,16 @@ const routes: Routes = [
     component: ConfigComponent,
     data: {
       breadcrumb: new Breadcrumb('Global Settings', '/settings')
-    }
+    },
+    canActivate: [AuthGuard]
+  }, {
+    path: 'login', component: LoginComponent
   }, {
     path: 'users',
     component: UserListComponent,
     data: {
       breadcrumb: new Breadcrumb('Users', '/users')
-    },
+    }
   }, {
     path: 'users',
     data: {

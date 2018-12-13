@@ -65,6 +65,8 @@ public class UsernamePasswordKerberosAuthorizationService implements IActiveDire
 		// loginTarget.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE);
 		Builder builder = loginTarget.request(MediaType.TEXT_HTML);
 		Entity<Form> entity = Entity.form(formData);
+		logger.debug(builder.toString());
+		logger.debug(entity.toString());
 		Response response = builder.post(entity);
 		// if (printResponses) {
 		// String result;
