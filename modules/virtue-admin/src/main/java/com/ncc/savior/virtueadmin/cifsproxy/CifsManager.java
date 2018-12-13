@@ -234,7 +234,7 @@ public class CifsManager {
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
 			String cifsHostname = vm.getInternalHostname();
 			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
-			String principal = String.format("http/%s.%s", cifsHostname, cifsDomain);
+			String principal = String.format("http/%s@%s", cifsHostname, cifsDomain);
 			String cifPropertyUpdate = String.format("echo 'savior.cifsproxy.principal=%s' > cifs-proxy.properties",
 					principal);
 			return cifPropertyUpdate;
