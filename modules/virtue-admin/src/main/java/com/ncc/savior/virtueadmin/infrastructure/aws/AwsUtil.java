@@ -347,7 +347,7 @@ public class AwsUtil {
 							+ sg.getVpcId());
 				}
 				if (defaultSecurityGroups.contains(sg.getGroupName()) && sg.getVpcId().equals(vpcId)) {
-					logger.trace("match!");
+					logger.trace("matched "+sg.getGroupName());
 					securityGroupIds.add(sg.getGroupId());
 				}
 			}

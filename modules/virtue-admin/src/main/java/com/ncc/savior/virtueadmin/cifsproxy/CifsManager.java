@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -29,7 +30,9 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
+import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteCommandCompletableFutureService.CommandGenerator;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -37,6 +40,7 @@ import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
+import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService.PollHandler;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
@@ -59,15 +63,32 @@ public class CifsManager {
 	private String cifsKeyName;
 	private InstanceType instanceType;
 	private String serverId;
-	private ArrayList<String> securityGroupIds;
+	private Collection<String> securityGroupIds;
+	private IVpcSubnetProvider vpcSubnetProvider;
+	private String subnetId;
 
 	@Value("${virtue.test:false}")
 	private boolean test;
+	@Value("${virtue.cifs.domain.user}")
+	private String domainAdminUser;
+	@Value("${virtue.cifs.domain.password}")
+	private String domainAdminUserPassword;
+	@Value("${virtue.cifs.domain.ip}")
+	private String domainIp;
+	@Value("${virtue.cufs.domain.name}")
+	private String cifsDomain;
+	@Value("${virtue.cifs.domain.url}")
+	private String cifsAdUrl;
+
+	@Value("${virtue.cifs.securityGroups}")
+	private String securityGroupsString;
+	@Value("${virtue.aws.server.subnet.name}")
+	private String subnetName;
 
 	public CifsManager(ServerIdProvider serverIdProvider, IActiveVirtueManager activeVirtueManager,
 			DesktopVirtueService desktopService, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
-			CompletableFutureServiceProvider serviceProvider, String cifsProxyAmi, String cifsProxyLoginUser,
-			String cifsKeyName, String instanceType) {
+			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider, String cifsProxyAmi,
+			String cifsProxyLoginUser, String cifsKeyName, String instanceType) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.cifsProxyDao = cifsProxyDao;
 		this.wrapper = wrapper;
@@ -76,6 +97,7 @@ public class CifsManager {
 		this.securityGroupIds = new ArrayList<String>();
 		this.cifsKeyName = cifsKeyName;
 		this.instanceType = InstanceType.fromValue(instanceType);
+		this.vpcSubnetProvider = vpcSubnetProvider;
 		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
 
@@ -111,7 +133,21 @@ public class CifsManager {
 
 	}
 
+	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
+		Collection<String> groups = new ArrayList<String>();
+		if (securityGroupsCommaSeparated != null) {
+			for (String group : securityGroupsCommaSeparated.split(",")) {
+				groups.add(group.trim());
+			}
+		}
+		return groups;
+	}
+
 	protected void sync() {
+		String vpcId = vpcSubnetProvider.getVpcId();
+		this.subnetId = AwsUtil.getSubnetIdFromName(vpcId, subnetName, wrapper);
+		this.securityGroupIds = AwsUtil.getSecurityGroupIdsByNameAndVpcId(splitOnComma(securityGroupsString), vpcId,
+				wrapper);
 		if (!test) {
 			AmazonEC2 ec2 = wrapper.getEc2();
 			DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
@@ -157,15 +193,99 @@ public class CifsManager {
 	}
 
 	protected VirtualMachine createCifsProxyVm(VirtueUser user) {
-		logger.debug("Creating cifs proxy for user =" + user.getUsername());
+		logger.debug("Creating cifs proxy for user=" + user.getUsername());
 		String name = "VRTU-Cifs-" + serverId + "-" + user.getUsername();
 		VirtueCreationAdditionalParameters virtueMods = new VirtueCreationAdditionalParameters(name);
 		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.CIFS_PROXY);
 		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.CIFS_PROXY);
 		virtueMods.setUsername(user.getUsername());
+		virtueMods.setSubnetId(subnetId);
 		VirtualMachine vm = wrapper.provisionVm(this.cifsProxyVmTemplate, name, securityGroupIds, cifsKeyName,
 				instanceType, virtueMods, null);
+		addVmToProvisionPipeline(vm, new CompletableFuture<VirtualMachine>());
 		return vm;
+	}
+
+	private void addVmToProvisionPipeline(VirtualMachine vm, CompletableFuture<VirtualMachine> future) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getAwsRenamingService().startFutures(vm, v);
+		cf = serviceProvider.getAwsNetworkingUpdateService().chainFutures(cf, v);
+		cf = serviceProvider.getEnsureDeleteVolumeOnTermination().chainFutures(cf, v);
+		// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
+		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
+		String baseCommand = "/usr/local/bin/post-deploy-config.sh";
+
+		// kinit -k http/webserver.test.savior
+		String cifsStart = String.format(
+				"sudo nohup env KRB5_TRACE=/dev/stdout java -Xint -jar cifs-proxy-server-0.0.1.jar --spring.config.location=cifs-proxy.properties,cifs-proxy-security.properties >& proxy.log&");
+
+		// cf = serviceProvider.getAddRsa().chainFutures(cf, v);
+		// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
+		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
+			String cifsHostname = vm.getInternalHostname();
+			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
+			String cifsPostDeploy = String.format(
+					"sudo %s --domain %s --admin %s --password %s --hostname %s --dcip %s --verbose &> post-deploy.log",
+					baseCommand, cifsDomain, domainAdminUser, domainAdminUserPassword, cifsHostname, domainIp);
+			return cifsPostDeploy;
+		}));
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
+			String cifsHostname = vm.getInternalHostname();
+			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
+			String principal = String.format("http/%s.%s", cifsHostname, cifsDomain);
+			String cifPropertyUpdate = String.format("echo 'savior.cifsproxy.principal=%s' > cifs-proxy.properties",
+					principal);
+			return cifPropertyUpdate;
+		}));
+		String cifPropertyUpdate = String.format("echo 'savior.security.ad.domain=%s' >> cifs-proxy-security.properties;",
+				cifsDomain);
+		cifPropertyUpdate += String.format("echo 'savior.security.ad.url=%s' >> cifs-proxy-security.properties;",
+				cifsAdUrl);
+		cifPropertyUpdate += String.format("echo 'savior.security.ldap=%s' >> cifs-proxy-security.properties;",
+				cifsAdUrl);
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifPropertyUpdate));
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("cat *.properties"));
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
+			String cifsHostname = vm.getInternalHostname();
+			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
+			String principal = String.format("http/%s.%s", cifsHostname, cifsDomain);
+			String cifsKinit = String.format("sudo kinit -k %s", principal);
+			return cifsKinit;
+		}));
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifsStart));
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
+			String cifsHostname = vm.getInternalHostname();
+			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
+			String cifsUpTest = String.format(
+					"while ! curl http://%s:8080/hello 2> /dev/null ; do echo -n '.' ; sleep 1; done", cifsHostname);
+			return cifsUpTest;
+		}));
+		cf.thenAccept((VirtualMachine myVm) -> {
+			logger.debug("CIFS Proxy future complete");
+			future.complete(myVm);
+		});
+		cf.exceptionally((ex) -> {
+			logger.error("EXCEPTION", ex);
+			future.completeExceptionally(ex);
+			vm.setState(VmState.ERROR);
+			return vm;
+		});
+	}
+
+	private void addToDeletePipeline(VirtualMachine vm, CompletableFuture<VirtualMachine> future) {
+		Void v = null;
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.DELETING);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getTestUpDown().chainFutures(cf, false);
+		cf = serviceProvider.getNetworkClearingService().chainFutures(cf, v);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf = serviceProvider.getAwsUpdateStatus().chainFutures(cf, VmState.DELETED);
+		cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
+		cf.thenAccept((myVm) -> {
+			future.complete(myVm);
+		});
 	}
 
 	private Runnable getTestForTimeoutRunnable() {
