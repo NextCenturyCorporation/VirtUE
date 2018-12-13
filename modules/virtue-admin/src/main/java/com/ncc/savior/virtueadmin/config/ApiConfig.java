@@ -24,12 +24,6 @@ import com.ncc.savior.virtueadmin.rest.DesktopRestService;
 import com.ncc.savior.virtueadmin.rest.HelloResource;
 import com.ncc.savior.virtueadmin.rest.UserResource;
 import com.ncc.savior.virtueadmin.util.WebServiceUtil;
-import com.ncc.savior.virtueadmin.config.CorsFilter;
-import com.ncc.savior.virtueadmin.security.BaseSecurityConfig;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.ContextLoader;
-import javax.ws.rs.container.ContainerResponseFilter;
 
 /**
  * ApiConfig is responsible for registering all the webserivce apis.
@@ -54,15 +48,7 @@ public class ApiConfig extends ResourceConfig {
 		register(UserResource.class);
 		register(WebServiceUtil.class);
 		register(MultiPartFeature.class);
-
-		register(CorsFilter.class, -100000);
-
-		// ApplicationContext rootCtx = ContextLoader.getCurrentWebApplicationContext();
-		// String t = rootCtx.toString();
-    // ContainerResponseFilter filter = rootCtx.getBean(CorsFilter.class);
-    // register(filter);
-
-
+//		register(CorsFilter.class);
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 
 

@@ -29,11 +29,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.config.CorsFilter;
+import com.ncc.savior.virtueadmin.data.IUserManager;
 
 /**
  * Base security configuration for Savior Server. All other security
@@ -71,7 +72,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().write("Login failure: " + exception.getMessage());
 			}
 		};
-		AuthenticationSuccessHandler successHandler=new AuthenticationSuccessHandler() {
+		AuthenticationSuccessHandler successHandler = new AuthenticationSuccessHandler() {
 
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -90,10 +91,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
 				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**").hasRole(USER_ROLE)
 				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
-				.failureHandler(authenticationFailureHandler).successHandler(successHandler)
-				.loginPage("/login").and().logout().permitAll();
-
-		// http.useFilter();
+				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login")
+				.permitAll().and().logout().permitAll();
 
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
@@ -101,6 +100,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				// .invalidSessionUrl("/login")
 				// .maximumSessions(1)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
+		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 		doConfigure(http);
 
 		http.csrf().disable();
