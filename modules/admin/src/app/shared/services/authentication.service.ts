@@ -44,12 +44,24 @@ export class AuthenticationService {
       //   headers: new HttpHeaders({ 'Content-Type': 'text/plain'})
       //   // headers: new HttpHeaders({ 'Content-Type': 'text/html' })
       // };
-      var httpOptions = {
+
+      // let httpOptions = {
+      //      headers: new HttpHeaders({
+      //         'Accept':'plain/text'
+      //      }),
+      //      'responseType': 'text' as 'json',
+      //      'observe': 'response' as 'response'
+      //   }
+      const httpOptions = {
            headers: new HttpHeaders({
-              'Accept':'plain/text'
+              // 'content-type':'application/json',
+              // 'content-type':'text/html',
+              'Authorization': 'Basic ' + btoa('username:password')
            }),
-           'responseType': 'text' as 'json'
+           observe: 'response' as 'response'
         }
+
+      httpOptions.headers = httpOptions.headers.append('Content-Type', 'text/html');//"application/x-www-form-urlencoded");
 
       console.log(`${this.baseUrl}login`, username, password);
       // return this.httpClient.post<any>(`${this.baseUrl}login`, {  params: params, headers: headers})
@@ -57,7 +69,10 @@ export class AuthenticationService {
       return this.httpClient.post(
             `${this.baseUrl}login`,
             JSON.stringify({username: username, password: password}),
-            httpOptions
+            {
+              ...httpOptions,
+              responseType: 'text'
+            }
           )
             // .pipe((data) => {console.log(JSON.stringify(data)); return data;});
       // return this.httpClient.post<string>(`${this.baseUrl}login`, JSON.stringify({username: username, password: password}), httpOptions)

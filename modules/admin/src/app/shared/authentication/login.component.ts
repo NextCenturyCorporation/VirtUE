@@ -31,9 +31,6 @@ export class LoginComponent implements OnInit {
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     }
 
-    // convenience getter for easy access to form fields
-    get f() { return this.loginForm.controls; }
-
     onSubmit() {
         this.submitted = true;
 
@@ -43,11 +40,11 @@ export class LoginComponent implements OnInit {
         }
 
         this.loading = true;
-        this.authenticationService.login(this.f.username.value, this.f.password.value)
+        this.authenticationService.login(this.loginForm.controls.username.value, this.loginForm.controls.password.value)
 					// .pipe(data => {console.log(data); return data;})
           .subscribe(
             data => {
-							console.log(JSON.stringify(data));
+							console.log(data);
               // this.router.navigate([this.returnUrl]);
             },
             error => {

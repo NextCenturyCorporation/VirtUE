@@ -100,7 +100,7 @@ import { DataRequestService } from './shared/services/dataRequest.service';
 import { RouterService } from './shared/services/router.service';
 
 import { AuthGuard } from './shared/authentication/auth.guard';
-import { JwtInterceptor } from './shared/authentication/jwt.interceptor';
+import { AuthenticationInterceptor } from './shared/authentication/authentication.interceptor';
 import { ErrorInterceptor } from './shared/authentication/error.interceptor';
 import { AuthenticationService } from './shared/services/authentication.service';
 import { LoginComponent } from './shared/authentication/login.component';
@@ -196,7 +196,7 @@ import { LoginComponent } from './shared/authentication/login.component';
 
     AuthGuard,
     AuthenticationService,
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthenticationInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
   ],
   bootstrap: [AppComponent],

@@ -32,6 +32,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.http.MediaType;
 
 import com.ncc.savior.virtueadmin.config.CorsFilter;
@@ -75,6 +76,12 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		};
 		AuthenticationSuccessHandler successHandler = new AuthenticationSuccessHandler() {
 
+			/**
+			 * Note: if you make a request to this (Spring's) login endpoint, and you include headers that spring's CORS aren't set up to use,
+			 * then your request will fall through and look for a Jersey 'login' endpoint. Since one exists, you'll be given back that html page,
+			 * which will send the requesting service's json-parser into cardiac arrest.
+			 */
+
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
@@ -89,7 +96,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login")
 				.permitAll().and().logout().permitAll();
 
-		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
 		http.sessionManagement().maximumSessions(10)
 				// .invalidSessionUrl("/login")

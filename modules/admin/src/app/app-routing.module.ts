@@ -1,26 +1,26 @@
-import {NgModule} from '@angular/core';
-import {RouterModule, Routes} from '@angular/router';
-import {Breadcrumb} from './shared/models/breadcrumb.model';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { Breadcrumb } from './shared/models/breadcrumb.model';
 
-import {DashboardComponent} from './dashboard/dashboard.component';
-import {ConfigComponent} from './config/config.component';
-import {UserListComponent} from './users/user-list/user-list.component';
-import {UserComponent} from './users/user.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ConfigComponent } from './config/config.component';
+import { UserListComponent } from './users/user-list/user-list.component';
+import { UserComponent } from './users/user.component';
 
-import {VirtueListComponent} from './virtues/virtue-list/virtue-list.component';
-import {VirtueComponent} from './virtues/virtue.component';
+import { VirtueListComponent } from './virtues/virtue-list/virtue-list.component';
+import { VirtueComponent } from './virtues/virtue.component';
 
-import {VmListComponent} from './vms/vm-list/vm-list.component';
-import {VmComponent} from './vms/vm.component';
+import { VmListComponent } from './vms/vm-list/vm-list.component';
+import { VmComponent } from './vms/vm.component';
 
-import {AppsListComponent} from './apps/apps-list/apps-list.component';
-import {AddAppComponent} from './apps/add-app/add-app.component';
+import { AppsListComponent } from './apps/apps-list/apps-list.component';
+import { AddAppComponent } from './apps/add-app/add-app.component';
 
-import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 
 import { AuthGuard } from './shared/authentication/auth.guard';
-import { JwtInterceptor } from './shared/authentication/jwt.interceptor';
+import { AuthenticationInterceptor } from './shared/authentication/authentication.interceptor';
 import { ErrorInterceptor } from './shared/authentication/error.interceptor';
 import { AuthenticationService } from './shared/services/authentication.service';
 import { LoginComponent } from './shared/authentication/login.component';
