@@ -77,7 +77,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 			logger.debug("From template=" + template);
 			logger.debug("  created instance=" + vi);
 			virtueDao.addVirtue(vi);
-			onVirtueCreation(vi);
+			onVirtueCreation(vi, template);
 			return vi;
 		} catch (Exception e) {
 			// TODO fix cloud manager to not throw exception. Throw something more specific.
@@ -268,10 +268,10 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 		virtueCreationDeletionListeners.add(vcdl);
 	}
 
-	private void onVirtueCreation(VirtueInstance virtue) {
+	private void onVirtueCreation(VirtueInstance virtue, VirtueTemplate template) {
 		for (VirtueCreationDeletionListener listener : virtueCreationDeletionListeners) {
 			try {
-				listener.onVirtueCreation(virtue);
+				listener.onVirtueCreation(virtue, template);
 			} catch (Exception e) {
 				logger.warn("Failed to notify virtue creation! Virtue=" + virtue, e);
 			}
@@ -289,7 +289,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	}
 
 	public static interface VirtueCreationDeletionListener {
-		void onVirtueCreation(VirtueInstance virtue);
+		void onVirtueCreation(VirtueInstance virtue, VirtueTemplate template);
 
 		void onVirtueDeletion(VirtueInstance virtue);
 	}

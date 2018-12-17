@@ -34,6 +34,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteCommandCompletableFutureService.CommandGenerator;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -123,8 +124,11 @@ public class CifsManager {
 			}
 
 			@Override
-			public void onVirtueCreation(VirtueInstance virtue) {
-				// do nothing
+			public void onVirtueCreation(VirtueInstance virtue, VirtueTemplate template) {
+				Collection<FileSystem> fileSystems = template.getFileSystems();
+				for (FileSystem fs : fileSystems) {
+					cifsOnVirtueCreation(virtue, fs);
+				}
 			}
 		});
 		this.cifsProxyVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "CifsProxyTemplate",
@@ -224,17 +228,14 @@ public class CifsManager {
 		// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.RUNNING);
 		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
-			String cifsHostname = vm.getInternalHostname();
-			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
+			String cifsHostname = getHostname(vm);
 			String cifsPostDeploy = String.format(
 					"sudo %s --domain %s --admin %s --password %s --hostname %s --dcip %s --verbose &> post-deploy.log",
 					baseCommand, cifsDomain, domainAdminUser, domainAdminUserPassword, cifsHostname, domainIp);
 			return cifsPostDeploy;
 		}));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
-			String cifsHostname = vm.getInternalHostname();
-			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
-			String principal = String.format("http/%s@%s", cifsHostname, cifsDomain);
+			String principal = getPrincipal(vm);
 			String cifPropertyUpdate = String.format("echo 'savior.cifsproxy.principal=%s' > cifs-proxy.properties",
 					principal);
 			return cifPropertyUpdate;
@@ -248,16 +249,13 @@ public class CifsManager {
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifPropertyUpdate));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("cat *.properties"));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
-			String cifsHostname = vm.getInternalHostname();
-			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
-			String principal = String.format("http/%s.%s", cifsHostname, cifsDomain);
+			String principal = getPrincipal(vm);
 			String cifsKinit = String.format("sudo kinit -k %s", principal);
 			return cifsKinit;
 		}));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifsStart));
 		CommandGenerator cg = new CommandGenerator((myVm) -> {
-			String cifsHostname = vm.getInternalHostname();
-			cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
+			String cifsHostname = getHostname(vm);
 			String cifsUpTest = String.format(
 					"while ! curl http://%s:8080/hello 2> /dev/null ; do echo -n '.' ; sleep 1; done", cifsHostname);
 			return cifsUpTest;
@@ -276,6 +274,18 @@ public class CifsManager {
 		});
 	}
 
+	private String getPrincipal(VirtualMachine vm) {
+		String cifsHostname = getHostname(vm);
+		String principal = String.format("http/%s.%s", cifsHostname, cifsDomain);
+		return principal;
+	}
+
+	private String getHostname(VirtualMachine vm) {
+		String cifsHostname = vm.getInternalHostname();
+		cifsHostname = cifsHostname.replaceAll(".ec2.internal", "");
+		return cifsHostname;
+	}
+
 	private void addToDeletePipeline(VirtualMachine vm, CompletableFuture<VirtualMachine> future) {
 		Void v = null;
 		CompletableFuture<VirtualMachine> cf = serviceProvider.getUpdateStatus().startFutures(vm, VmState.DELETING);
@@ -288,6 +298,18 @@ public class CifsManager {
 		cf.thenAccept((myVm) -> {
 			future.complete(myVm);
 		});
+	}
+
+	protected void cifsOnVirtueCreation(VirtueInstance virtue, FileSystem fs) {
+		VirtueUser user = userManager.getUser(virtue.getUsername());
+		VirtualMachine vm = cifsProxyDao.getCifsVm(user);
+		// should be hostname of file system.
+		String fsName = fs.getAddress();
+		String command = String.format(
+				"sudo /usr/local/bin/allow-delegation.sh --domain %s --admin %s --password %s --delegater %s --target %s --verbose",
+				cifsDomain, this.domainAdminUser, this.domainAdminUserPassword, this.getHostname(vm), fsName);
+		CommandGenerator extra = new CommandGenerator(command);
+		CompletableFuture<VirtualMachine> cf = serviceProvider.getRunRemoteCommand().startFutures(vm, extra);
 	}
 
 	private Runnable getTestForTimeoutRunnable() {
