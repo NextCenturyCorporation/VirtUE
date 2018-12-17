@@ -7,6 +7,9 @@ import java.security.Security;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
+import com.amazonaws.event.ProgressEvent;
+import com.amazonaws.event.ProgressEventType;
+import com.amazonaws.event.ProgressListener;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3EncryptionClientBuilder;
@@ -61,11 +64,25 @@ public class S3Upload {
 		// maximum upload size without multipart is 5GB.
 		TransferManager tm = TransferManagerBuilder.standard().withS3Client(client).build();
 		Upload upload = tm.upload(bucket, key, source);
+		upload.addProgressListener(new ProgressListener() {
+			long totalTransferred = 0;
+
+			@Override
+			public void progressChanged(ProgressEvent progressEvent) {
+
+				if (progressEvent.getEventType().equals(ProgressEventType.REQUEST_BYTE_TRANSFER_EVENT)) {
+					totalTransferred += progressEvent.getBytesTransferred();
+				} else {
+					System.out.println(
+							"Progress: " + progressEvent.getEventType() + " Total Transfered: " + totalTransferred);
+				}
+			}
+		});
 		try {
 			upload.waitForCompletion();
 		} catch (AmazonClientException | InterruptedException e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
 			tm.shutdownNow(true);
 		}
 	}
