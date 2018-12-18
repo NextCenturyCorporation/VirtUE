@@ -182,10 +182,15 @@ public class Route53Manager {
 	}
 
 	public String AddARecord(String dns, String ip) {
-		ChangeResourceRecordSetsRequest request = new ChangeResourceRecordSetsRequest().withHostedZoneId(hostedZoneId)
-				.withChangeBatch(new ChangeBatch().withComment("auto-generated via virtue server")
-						.withChanges(getAddARecordChange(dns, ip)));
-		client.changeResourceRecordSets(request);
+		try {
+			logger.debug("attemping to create A Record.  dns=" + dns + " ip=" + ip+ " hostedZoneId="+hostedZoneId);
+			ChangeResourceRecordSetsRequest request = new ChangeResourceRecordSetsRequest()
+					.withHostedZoneId(hostedZoneId).withChangeBatch(new ChangeBatch()
+							.withComment("auto-generated via virtue server").withChanges(getAddARecordChange(dns, ip)));
+			client.changeResourceRecordSets(request);
+		} catch (RuntimeException e) {
+			logger.error("failed to create A Record.  dns=" + dns + " ip=" + ip+ " hostedZoneId="+hostedZoneId, e);
+		}
 		return getFqdnFromHostname(dns);
 	}
 
