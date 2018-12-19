@@ -94,8 +94,6 @@
 
 	<bean name="cifsProxyManager" class="com.ncc.savior.virtueadmin.cifsproxy.CifsManager" init-method="sync">
 		<constructor-arg ref="serverIdProvider"></constructor-arg>
-		<constructor-arg ref="activeVirtueManager"></constructor-arg>
-		<constructor-arg ref="desktopService"></constructor-arg>
 		<constructor-arg ref="cifsProxyDao"></constructor-arg>
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
@@ -235,6 +233,7 @@
 		<constructor-arg ref="templateManager" />
 		<constructor-arg ref="appManager" />
 		<constructor-arg ref="resourceManager" />
+		<constructor-arg ref="cifsProxyManager" />
 	</bean>
 
 	<bean name="userService" class="com.ncc.savior.virtueadmin.service.UserDataService">

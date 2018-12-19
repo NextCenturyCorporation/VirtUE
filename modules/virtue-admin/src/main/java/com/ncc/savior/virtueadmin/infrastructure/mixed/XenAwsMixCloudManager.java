@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AsyncAwsEc2VmManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
@@ -17,6 +18,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalPar
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -65,6 +67,8 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 	private ISecurityGroupManager securityGroupManager;
 
+	private CifsManager cifsManager;
+
 	public XenAwsMixCloudManager(XenHostManager xenHostManager, AsyncAwsEc2VmManager awsVmManager,
 			CompletableFutureServiceProvider serviceProvider, WindowsStartupAppsService windowsNfsMountingService,
 			IVpcSubnetProvider vpcSubnetProvider, ISecurityGroupManager securityGroupManager) {
@@ -77,8 +81,6 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		// TODO this is a little out of place, but will work here for now.
 		this.windowsNfsMountingService = windowsNfsMountingService;
 	}
-
-	
 
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
@@ -147,6 +149,11 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
+
+		linuxFuture.thenAccept((myLinuxVms) -> {
+			Collection<FileSystem> fileSystems = template.getFileSystems();
+			cifsManager.addFilesystemLinux(fileSystems, myLinuxVms);
+		});
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
 			// When xen (really NFS) and all windows VM's are up
@@ -214,10 +221,13 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		}
 	}
 
-
-
 	@Override
 	public void sync(List<String> ids) {
 		awsVmManager.syncAll(ids);
+	}
+
+	@Override
+	public void setCifsManager(CifsManager cifsManager) {
+		this.cifsManager = cifsManager;
 	}
 }

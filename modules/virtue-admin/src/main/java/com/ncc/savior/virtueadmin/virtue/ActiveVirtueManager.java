@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
@@ -37,10 +38,13 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 
 	private Set<VirtueCreationDeletionListener> virtueCreationDeletionListeners;
 
-	public ActiveVirtueManager(ICloudManager cloudManager, IActiveVirtueDao virtueDao) {
+	public ActiveVirtueManager(ICloudManager cloudManager, IActiveVirtueDao virtueDao, CifsManager cifsManager) {
 		this.cloudManager = cloudManager;
 		this.virtueDao = virtueDao;
 		this.virtueCreationDeletionListeners = new HashSet<VirtueCreationDeletionListener>();
+		addVirtueCreationDeletionListener(cifsManager.getVirtueCreationDeletionListener());
+		cifsManager.setActiveVirtueManager(this);
+		cloudManager.setCifsManager(cifsManager);
 	}
 
 	@Override
@@ -74,8 +78,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public VirtueInstance provisionTemplate(VirtueUser user, VirtueTemplate template) {
 		try {
 			VirtueInstance vi = cloudManager.createVirtue(user, template);
-			logger.debug("From template=" + template);
-			logger.debug("  created instance=" + vi);
+			logger.debug("From template=" + template + " created instance=" + vi);
 			virtueDao.addVirtue(vi);
 			onVirtueCreation(vi, template);
 			return vi;
@@ -107,8 +110,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public VirtueInstance deleteVirtue(VirtueUser user, String instanceId) {
 		VirtueInstance vi = virtueDao.getVirtueInstance(instanceId).get();
 		if (vi == null) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND,
-					"Virtue id=" + instanceId + " was not found");
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Virtue id=" + instanceId + " was not found");
 		}
 
 		if (vi.getUsername().equals(user.getUsername()) || VirtueUser.isAdmin(user)) {
@@ -131,8 +133,7 @@ public class ActiveVirtueManager implements IActiveVirtueManager, IUpdateListene
 	public void adminDeleteVirtue(String instanceId) {
 		Optional<VirtueInstance> opt = virtueDao.getVirtueInstance(instanceId);
 		if (!opt.isPresent()) {
-			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND,
-					"Virtue id=" + instanceId + " was not found");
+			throw new SaviorException(SaviorErrorCode.VIRTUE_NOT_FOUND, "Virtue id=" + instanceId + " was not found");
 		} else {
 			VirtueInstance vi = opt.get();
 			CompletableFuture<VirtueInstance> future = new CompletableFuture<VirtueInstance>();

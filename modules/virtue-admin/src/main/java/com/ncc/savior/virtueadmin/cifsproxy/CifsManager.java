@@ -1,5 +1,7 @@
 package com.ncc.savior.virtueadmin.cifsproxy;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -24,7 +26,13 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.ncc.savior.util.SaviorErrorCode;
+import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.util.SshUtil;
 import com.ncc.savior.virtueadmin.data.IUserManager;
+import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpose;
@@ -42,11 +50,10 @@ import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
-import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService.PollHandler;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
+import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager.VirtueCreationDeletionListener;
-import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
 /**
  * Main manager class than handles creation and deletion of CIFs Proxies. There
@@ -56,7 +63,6 @@ public class CifsManager {
 	private static final Logger logger = LoggerFactory.getLogger(CifsManager.class);
 	@Autowired
 	private IUserManager userManager;
-	private IActiveVirtueManager activeVirtueManager;
 	private ICifsProxyDao cifsProxyDao;
 	private AwsEc2Wrapper wrapper;
 	private CompletableFutureServiceProvider serviceProvider;
@@ -85,12 +91,13 @@ public class CifsManager {
 	private String securityGroupsString;
 	@Value("${virtue.aws.server.subnet.name}")
 	private String subnetName;
+	private ActiveVirtueManager activeVirtueManager;
+	private IKeyManager keyManager;
 
-	public CifsManager(ServerIdProvider serverIdProvider, IActiveVirtueManager activeVirtueManager,
-			DesktopVirtueService desktopService, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
-			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider, String cifsProxyAmi,
-			String cifsProxyLoginUser, String cifsKeyName, String instanceType) {
-		this.activeVirtueManager = activeVirtueManager;
+	public CifsManager(ServerIdProvider serverIdProvider, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
+			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider,
+			IKeyManager keyManager, String cifsProxyAmi, String cifsProxyLoginUser, String cifsKeyName,
+			String instanceType) {
 		this.cifsProxyDao = cifsProxyDao;
 		this.wrapper = wrapper;
 		this.serviceProvider = serviceProvider;
@@ -99,10 +106,18 @@ public class CifsManager {
 		this.cifsKeyName = cifsKeyName;
 		this.instanceType = InstanceType.fromValue(instanceType);
 		this.vpcSubnetProvider = vpcSubnetProvider;
+		this.keyManager = keyManager;
 		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
 
-		desktopService.addPollHandler(new PollHandler() {
+		this.cifsProxyVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "CifsProxyTemplate",
+				OS.LINUX, cifsProxyAmi, new ArrayList<ApplicationDefinition>(), cifsProxyLoginUser, false, new Date(0),
+				"system");
+
+	}
+
+	public PollHandler getPollHandler() {
+		return new PollHandler() {
 
 			@Override
 			public void onPoll(VirtueUser user, Map<String, VirtueTemplate> templates,
@@ -114,27 +129,7 @@ public class CifsManager {
 				}
 				cifsProxyDao.updateUserTimeout(user);
 			}
-		});
-		activeVirtueManager.addVirtueCreationDeletionListener(new VirtueCreationDeletionListener() {
-
-			@Override
-			public void onVirtueDeletion(VirtueInstance virtue) {
-				VirtueUser user = userManager.getUser(virtue.getUsername());
-				testAndShutdownCifs(user);
-			}
-
-			@Override
-			public void onVirtueCreation(VirtueInstance virtue, VirtueTemplate template) {
-				Collection<FileSystem> fileSystems = template.getFileSystems();
-				for (FileSystem fs : fileSystems) {
-					cifsOnVirtueCreation(virtue, fs);
-				}
-			}
-		});
-		this.cifsProxyVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "CifsProxyTemplate",
-				OS.LINUX, cifsProxyAmi, new ArrayList<ApplicationDefinition>(), cifsProxyLoginUser, false, new Date(0),
-				"system");
-
+		};
 	}
 
 	private static Collection<String> splitOnComma(String securityGroupsCommaSeparated) {
@@ -309,7 +304,7 @@ public class CifsManager {
 				"sudo /usr/local/bin/allow-delegation.sh --domain %s --admin %s --password %s --delegater %s --target %s --verbose",
 				cifsDomain, this.domainAdminUser, this.domainAdminUserPassword, this.getHostname(vm), fsName);
 		CommandGenerator extra = new CommandGenerator(command);
-		CompletableFuture<VirtualMachine> cf = serviceProvider.getRunRemoteCommand().startFutures(vm, extra);
+		serviceProvider.getRunRemoteCommand().startFutures(vm, extra);
 	}
 
 	private Runnable getTestForTimeoutRunnable() {
@@ -347,5 +342,53 @@ public class CifsManager {
 		long timeout = cifsProxyDao.getUserTimeout(user);
 		long current = System.currentTimeMillis();
 		return (current > timeout);
+	}
+
+	public void addFilesystemLinux(Collection<FileSystem> fileSystems, Collection<VirtualMachine> myLinuxVms) {
+		logger.debug("Adding filesystems " + fileSystems + " for vms " + myLinuxVms);
+		for (VirtualMachine vm : myLinuxVms) {
+			try {
+				String keyName = vm.getPrivateKey();
+				File privateKeyFile = keyManager.getKeyFileByName(keyName);
+				Session session = SshUtil.getConnectedSession(vm, privateKeyFile);
+				for (FileSystem fs : fileSystems) {
+					//// servername/sharename /media/windowsshare cifs
+					// credentials=/home/ubuntuusername/.smbcredentials,iocharset=utf8,sec=ntlm 0
+					// 0
+
+					String networkPath = fs.getAddress();
+					String localPath = "/media/" + fs.getName();
+					String script = String.format("echo '%s %s cifs defaults 0 2' >> /etc/fstab", networkPath,
+							localPath);
+					SshUtil.sendCommandFromSession(session, script);
+				}
+			} catch (JSchException | IOException e) {
+				throw new SaviorException(SaviorErrorCode.SSH_ERROR,
+						"Unable to connect to VM for FileSystem attachment, vm=" + vm);
+			}
+		}
+	}
+
+	public VirtueCreationDeletionListener getVirtueCreationDeletionListener() {
+		return new VirtueCreationDeletionListener() {
+
+			@Override
+			public void onVirtueDeletion(VirtueInstance virtue) {
+				VirtueUser user = userManager.getUser(virtue.getUsername());
+				testAndShutdownCifs(user);
+			}
+
+			@Override
+			public void onVirtueCreation(VirtueInstance virtue, VirtueTemplate template) {
+				Collection<FileSystem> fileSystems = template.getFileSystems();
+				for (FileSystem fs : fileSystems) {
+					cifsOnVirtueCreation(virtue, fs);
+				}
+			}
+		};
+	}
+
+	public void setActiveVirtueManager(ActiveVirtueManager activeVirtueManager) {
+		this.activeVirtueManager = activeVirtueManager;
 	}
 }
