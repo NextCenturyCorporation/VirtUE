@@ -52,11 +52,12 @@ public enum SaviorErrorCode {
 	SECURITY_GROUP_NOT_FOUND(310, "Security Group Not Found",400),
 
 	DATABASE_ERROR(401, "Database Error", 500),
+	CIFS_PROXY_ERROR(401, "CIFS Proxy error"),
 
 	NOT_IMPLEMENTED(254, "function not implemented", 501),
 	UNKNOWN_ERROR(255, "unknown error"),
 	//Errors we shouldn't see because its older code
-	VIRTUAL_BOX_ERROR(1001, "Error with virtual box");
+	VIRTUAL_BOX_ERROR(1001, "Error with virtual box"), ;
 	//@formatter:on
 	private final int errorCode;
 	private final String readableString;

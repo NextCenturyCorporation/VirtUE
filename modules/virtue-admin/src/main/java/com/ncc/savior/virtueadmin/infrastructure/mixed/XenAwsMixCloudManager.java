@@ -152,7 +152,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 
 		linuxFuture.thenAccept((myLinuxVms) -> {
 			Collection<FileSystem> fileSystems = template.getFileSystems();
-			cifsManager.addFilesystemLinux(fileSystems, myLinuxVms);
+			cifsManager.addFilesystemLinux(user,fileSystems, myLinuxVms);
 		});
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {

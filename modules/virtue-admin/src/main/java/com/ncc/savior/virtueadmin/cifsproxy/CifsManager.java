@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.cifsproxy;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -11,6 +12,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +34,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.ncc.savior.util.SaviorErrorCode;
@@ -42,6 +51,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteCommandCompletableFutureService.CommandGenerator;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.CifsShareCreationParameter;
 import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -93,6 +103,8 @@ public class CifsManager {
 	private String subnetName;
 	private ActiveVirtueManager activeVirtueManager;
 	private IKeyManager keyManager;
+	private Client client;
+	private ObjectMapper jsonMapper;
 
 	public CifsManager(ServerIdProvider serverIdProvider, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
 			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider,
@@ -113,7 +125,8 @@ public class CifsManager {
 		this.cifsProxyVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "CifsProxyTemplate",
 				OS.LINUX, cifsProxyAmi, new ArrayList<ApplicationDefinition>(), cifsProxyLoginUser, false, new Date(0),
 				"system");
-
+		client = ClientBuilder.newClient();
+		this.jsonMapper = new ObjectMapper();
 	}
 
 	public PollHandler getPollHandler() {
@@ -298,6 +311,10 @@ public class CifsManager {
 	protected void cifsOnVirtueCreation(VirtueInstance virtue, FileSystem fs) {
 		VirtueUser user = userManager.getUser(virtue.getUsername());
 		VirtualMachine vm = cifsProxyDao.getCifsVm(user);
+		// create share if not created for user, store credentials
+		// See cifs proxy documentation
+		createShareOnCifsProxyVm(vm, user, fs);
+
 		// should be hostname of file system.
 		String fsName = fs.getAddress();
 		String command = String.format(
@@ -305,6 +322,23 @@ public class CifsManager {
 				cifsDomain, this.domainAdminUser, this.domainAdminUserPassword, this.getHostname(vm), fsName);
 		CommandGenerator extra = new CommandGenerator(command);
 		serviceProvider.getRunRemoteCommand().startFutures(vm, extra);
+	}
+
+	private void createShareOnCifsProxyVm(VirtualMachine vm, VirtueUser user, FileSystem fs) {
+		try {
+			String hostname = vm.getHostname();
+			WebTarget t = client.target("http://" + hostname + ":8080").path("share");
+			CifsShareCreationParameter cscp = new CifsShareCreationParameter(fs.getName(), fs.getId());
+			Entity<?> entity = Entity.json(cscp);
+			Response resp = t.request(MediaType.APPLICATION_JSON_TYPE).post(entity);
+			InputStream is = (InputStream) resp.getEntity();
+			CifsShareCreationParameter v = jsonMapper.readValue(is, CifsShareCreationParameter.class);
+			logger.debug("CIFS returned "+v);
+		} catch (IOException e) {
+			String msg = "Error creating share for CIFS Proxy";
+			logger.error(msg, e);
+			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg);
+		}
 	}
 
 	private Runnable getTestForTimeoutRunnable() {
@@ -344,8 +378,11 @@ public class CifsManager {
 		return (current > timeout);
 	}
 
-	public void addFilesystemLinux(Collection<FileSystem> fileSystems, Collection<VirtualMachine> myLinuxVms) {
-		logger.debug("Adding filesystems " + fileSystems + " for vms " + myLinuxVms);
+	public void addFilesystemLinux(VirtueUser user, Collection<FileSystem> fileSystems,
+			Collection<VirtualMachine> myLinuxVms) {
+		logger.debug("Adding filesystems " + fileSystems + " for vms " + myLinuxVms + " user=" + user);
+
+		// get credentials of for all file systems for user
 		for (VirtualMachine vm : myLinuxVms) {
 			try {
 				String keyName = vm.getPrivateKey();
@@ -355,7 +392,6 @@ public class CifsManager {
 					//// servername/sharename /media/windowsshare cifs
 					// credentials=/home/ubuntuusername/.smbcredentials,iocharset=utf8,sec=ntlm 0
 					// 0
-
 					String networkPath = fs.getAddress();
 					String localPath = "/media/" + fs.getName();
 					String script = String.format("echo '%s %s cifs defaults 0 2' >> /etc/fstab", networkPath,
