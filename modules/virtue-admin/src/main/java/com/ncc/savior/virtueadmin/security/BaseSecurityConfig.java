@@ -96,7 +96,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login")
 				.permitAll().and().logout().permitAll();
 
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+		// http.csrf().ignoringAntMatchers("/login").csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
 		http.sessionManagement().maximumSessions(10)
 				// .invalidSessionUrl("/login")

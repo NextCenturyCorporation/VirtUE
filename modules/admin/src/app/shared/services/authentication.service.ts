@@ -25,43 +25,6 @@ export class AuthenticationService {
     }
 
     login(username: string, password: string) {
-      // let headers = new HttpHeaders({
-      //     'Accept':'text/html'
-      //   });
-      //
-      // let params = new HttpParams();
-      // params = params
-      //   .set('username', username)
-      //   // .set('response_type', 'code')
-      //   .set('password', password)
-
-      // const httpOptions = {
-      //   // headers: new HttpHeaders(
-      //   //       { 'Content-Type': 'application/json',
-      //   //         'responseType': 'json',
-      //   //         'username': username, 'password': password
-      //   //       })
-      //   headers: new HttpHeaders({ 'Content-Type': 'text/plain'})
-      //   // headers: new HttpHeaders({ 'Content-Type': 'text/html' })
-      // };
-
-      // let httpOptions = {
-      //      headers: new HttpHeaders({
-      //         'Accept':'plain/text'
-      //      }),
-      //      'responseType': 'text' as 'json',
-      //      'observe': 'response' as 'response'
-      //   }
-      const httpOptions = {
-           headers: new HttpHeaders({
-              // 'content-type':'application/json',
-              // 'content-type':'text/html',
-              'Authorization': 'Basic ' + btoa('username:password')
-           }),
-           observe: 'response' as 'response'
-        }
-
-      httpOptions.headers = httpOptions.headers.append('Content-Type', 'text/html');//"application/x-www-form-urlencoded");
 
       console.log(`${this.baseUrl}login`, username, password);
       // return this.httpClient.post<any>(`${this.baseUrl}login`, {  params: params, headers: headers})
@@ -70,11 +33,12 @@ export class AuthenticationService {
             `${this.baseUrl}login`,
             JSON.stringify({username: username, password: password}),
             {
-              ...httpOptions,
+              // headers: {},
+              observe: 'response',
               responseType: 'text'
             }
           )
-            // .pipe((data) => {console.log(JSON.stringify(data)); return data;});
+      //       .pipe((data) => {console.log(JSON.stringify(data)); return data;});
       // return this.httpClient.post<string>(`${this.baseUrl}login`, JSON.stringify({username: username, password: password}), httpOptions)
         // .map((res:any, r2:any) => {
         //       console.log(res, r2);
@@ -97,6 +61,10 @@ export class AuthenticationService {
 
     logout() {
         // remove user from local storage to log user out
-        localStorage.removeItem('currentUser');
+        // localStorage.removeItem('currentUser');
     }
+
+    // getJSessionId() {
+    //   return "what on earth goes here";
+    // }
 }

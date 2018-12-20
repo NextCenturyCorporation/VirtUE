@@ -28,21 +28,26 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 	private String allowHeaders;
 	private String allowCredentials;
 	private String allowMethods;
+	private String exposeHeaders;
 
 	/** see note in BaseSecurityConfig about the result of requests made to Spring endpoints (like /login), when CORS is set up improperly */
 	@Autowired
 	public CorsFilter(Environment env) {
 		this.enabled = Boolean.valueOf(env.getProperty("savior.cors.enabled", "false"));
-		this.allowOrigin = env.getProperty("savior.cors.allow-origin", "*");
-		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization, responseType, withCredentials, X-Requested-With");
+		this.allowOrigin = env.getProperty("savior.cors.allow-origin", "http://localhost:4200");
+		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization, " +
+																				"responseType, withCredentials, X-Requested-With, X-XSRF-TOKEN, X-XSRF, XSRF-TOKEN, set-cookie");
 		this.allowCredentials = env.getProperty("savior.cors.allow-credentials", "true");
 		this.allowMethods = env.getProperty("savior.cors.allow-methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+		this.exposeHeaders = env.getProperty("savior.cors.expose-headers", "Set-Cookie, content-length, authentication, Access-Control-Allow-Headers " +
+		 																			"X-XSRF-TOKEN, X-XSRF, XSRF-TOKEN, accept, authorization, content-type, x-requested-with, jwt");
 		if (enabled) {
 			logger.debug("CORS Filter has been enabled");
 			logger.debug("  CORS-allow-origin=" + allowOrigin);
 			logger.debug("  CORS-allow-headers=" + allowHeaders);
 			logger.debug("  CORS-allow-credentials=" + allowCredentials);
 			logger.debug("  CORS-allow-methods=" + allowMethods);
+			logger.debug("  CORS-expose-headers=" + exposeHeaders);
 		}
 	}
 
@@ -53,6 +58,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 			response.getHeaders().add("Access-Control-Allow-Headers", allowHeaders);
 			response.getHeaders().add("Access-Control-Allow-Credentials", allowCredentials);
 			response.getHeaders().add("Access-Control-Allow-Methods", allowMethods);
+			response.getHeaders().add("Access-Control-Expose-Headers", exposeHeaders);
 		}
 	}
 
@@ -64,6 +70,19 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
 			throws IOException, ServletException {
+
+		// CsrfToken csrf = (CsrfToken) servletRequest.getAttribute(CsrfToken.class
+		//         .getName());
+    // if (csrf != null) {
+    //   Cookie cookie = WebUtils.getCookie(request, "XSRF-TOKEN");
+    //   String token = csrf.getToken();
+    //   if (cookie==null || token!=null && !token.equals(cookie.getValue())) {
+    //     cookie = new Cookie("XSRF-TOKEN", token);
+    //     cookie.setPath("/");
+    //     servletResponse.addCookie(cookie);
+    //   }
+    // }
+
 		if (enabled) {
 //			HttpServletRequest httpReq = (HttpServletRequest) servletRequest;
 			HttpServletResponse response = (HttpServletResponse) servletResponse;
@@ -71,6 +90,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 			response.setHeader("Access-Control-Allow-Headers", allowHeaders);
 			response.setHeader("Access-Control-Allow-Credentials", allowCredentials);
 			response.setHeader("Access-Control-Allow-Methods", allowMethods);
+			response.setHeader("Access-Control-Expose-Headers", exposeHeaders);
 		}
 		chain.doFilter(servletRequest, servletResponse);
 	}
