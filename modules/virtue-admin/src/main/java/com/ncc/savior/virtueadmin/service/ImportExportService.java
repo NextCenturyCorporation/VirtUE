@@ -82,7 +82,8 @@ public class ImportExportService {
 	private SecurityUserService securityService;
 
 	public ImportExportService(ITemplateManager templateManager, IUserManager userManager,
-			IXenGuestImageManager imageManager, ISecurityGroupManager securityGroupManager, IResourceManager resourceManager) {
+			IXenGuestImageManager imageManager, ISecurityGroupManager securityGroupManager,
+			IResourceManager resourceManager) {
 		this.jsonMapper = new ObjectMapper();
 		this.templateManager = templateManager;
 		this.userManager = userManager;
@@ -197,12 +198,11 @@ public class ImportExportService {
 
 	/**
 	 *
-	 * @param stream
-	 *            - stream of import zip file
-	 * @param waitUntilCompletion
-	 *            - if true, block the return until the upload is complete. If
-	 *            false, once the stream is read, return quicker even though more
-	 *            processing or transferring may be occurring.
+	 * @param stream              - stream of import zip file
+	 * @param waitUntilCompletion - if true, block the return until the upload is
+	 *                            complete. If false, once the stream is read,
+	 *                            return quicker even though more processing or
+	 *                            transferring may be occurring.
 	 */
 	@Transactional
 	public void importZip(InputStream stream, boolean waitUntilCompletion) {
@@ -750,7 +750,7 @@ public class ImportExportService {
 			instance = jsonMapper.readValue(resource.getInputStream(), klass);
 		} catch (IOException e) {
 			throw new SaviorException(SaviorErrorCode.JSON_ERROR,
-					"Unknown Error attempting to find import of type=" + type + " name=" + name);
+					"Unknown Error attempting to find import of type=" + type + " name=" + name, e);
 		}
 		return instance;
 	}

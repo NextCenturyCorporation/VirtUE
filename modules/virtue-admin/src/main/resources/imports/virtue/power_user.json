@@ -4,7 +4,7 @@
 	"enabled": true,
 	"awsTemplateName": "default-template",
 	"color": "#CE1256",
-	"virtualMachineTemplateIds": [
+	"vmTemplateIds": [
 		"IMPORT_windows_power_user",
 		"IMPORT_linux_power_user"
 	]

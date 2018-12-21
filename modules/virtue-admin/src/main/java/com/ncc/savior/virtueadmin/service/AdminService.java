@@ -325,12 +325,7 @@ public class AdminService {
 		}
 
 
-		// This ensures no doubles of the same object are stored in the VirtueTemplate.
-		// Is that for storage optimization? Error checking, because it shouldn't happen?
-		// It checks whether two items are equal using their equals() method. Which isn't implemented for at least
-		// VirtueTemplates, and even if it were, merging on equal objects would only give a different
-		// result than merging on ids, if equals() didn't check object id.
-		// See the next code chunks (doing the same as below, but for printers and file systems), for proposed change.
+		//below code just converts IDs from json to actual objects for database.
 		Collection<String> vmtIds = template.getVmTemplateIds();
 		Iterable<VirtualMachineTemplate> vmts;
 		if (vmtIds == null) {
@@ -351,9 +346,17 @@ public class AdminService {
 			Iterable<Printer> itrPrinters = resourceManager.getPrinters(new HashSet<String>(printerIds));
 			itrPrinters.forEach(printerSet::add); // go through the iterator and add each item to the printers ArrayList.
 		}
+		
+		List<FileSystem> fileSystems = new ArrayList<FileSystem>();
+		Collection<String> fsIds = template.getFileSystemIds();
+		if (fsIds != null) {
+			Iterable<FileSystem> fsItr = resourceManager.getFileSystems(new HashSet<String>(fsIds));
+			fsItr.forEach(fileSystems::add); // go through the iterator and add each item to the printers ArrayList.
+		}
 
 		template.setVmTemplates(vmTemplateSet);
 		template.setPrinters(printerSet);
+		template.setFileSystems(fileSystems);
 		template.setLastEditor(user.getUsername());
 		template.setLastModification(new Date());
 

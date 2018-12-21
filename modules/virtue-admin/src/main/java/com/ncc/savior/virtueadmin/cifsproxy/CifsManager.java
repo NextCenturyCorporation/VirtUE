@@ -3,6 +3,7 @@ package com.ncc.savior.virtueadmin.cifsproxy;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -20,6 +21,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -332,12 +334,20 @@ public class CifsManager {
 			Entity<?> entity = Entity.json(cscp);
 			Response resp = t.request(MediaType.APPLICATION_JSON_TYPE).post(entity);
 			InputStream is = (InputStream) resp.getEntity();
+			if (resp.getStatus() >= 400) {
+				String body = IOUtils.toString(is, "UTF8");
+				String msg = "Error creating share for CIFS Proxy.  Response code=" + resp.getStatus() + " body="
+						+ body;
+				logger.error(msg);
+				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg);
+			}
+
 			CifsShareCreationParameter v = jsonMapper.readValue(is, CifsShareCreationParameter.class);
-			logger.debug("CIFS returned "+v);
+			logger.debug("CIFS returned " + v);
 		} catch (IOException e) {
 			String msg = "Error creating share for CIFS Proxy";
 			logger.error(msg, e);
-			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg);
+			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
 		}
 	}
 
