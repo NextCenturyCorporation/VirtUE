@@ -2,6 +2,7 @@ package com.ncc.savior.virtueadmin.security;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,11 +17,16 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.ldap.core.DirContextAdapter;
+import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider;
 import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
 import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
@@ -30,7 +36,9 @@ import org.springframework.security.kerberos.client.ldap.KerberosLdapContextSour
 import org.springframework.security.kerberos.web.authentication.SpnegoAuthenticationProcessingFilter;
 import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
+import org.springframework.security.ldap.userdetails.UserDetailsContextMapper;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 /**
@@ -75,6 +83,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				adUrl);
 		provider.setConvertSubErrorCodesToExceptions(true);
 		provider.setUseAuthenticationRequestCredentials(true);
+		
 		return provider;
 	}
 
@@ -123,6 +132,7 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 		logger.entry(authenticationManager);
 		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
 		filter.setAuthenticationManager(authenticationManager);
+		
 		filter.setFailureHandler(new AuthenticationFailureHandler() {
 
 			@Override
@@ -148,13 +158,20 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	}
 
 	@Bean
-	public SunJaasKerberosTicketValidator sunJaasKerberosTicketValidator() {
+	public CollaredSunKerberosJaasTicketValidator sunJaasKerberosTicketValidator() {
 		logger.entry();
-		SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
+		CollaredSunKerberosJaasTicketValidator ticketValidator = new CollaredSunKerberosJaasTicketValidator();
+		SunJaasKerberosTicketValidator ticketValidator2 = new SunJaasKerberosTicketValidator();
 		ticketValidator.setServicePrincipal(servicePrincipal);
 		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabLocation));
 		ticketValidator.setDebug(true);
+		ticketValidator.setHoldOnToGSSContext(true);
+		
+//		ticketValidator2.setServicePrincipal(servicePrincipal);
+//		ticketValidator2.setKeyTabLocation(new FileSystemResource(keytabLocation));
+//		ticketValidator2.setDebug(true);
 		logger.exit(ticketValidator);
+		
 		return ticketValidator;
 	}
 

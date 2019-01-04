@@ -25,6 +25,12 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +66,8 @@ import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.service.AdminService;
 import com.ncc.savior.virtueadmin.service.ImportExportService;
 import com.ncc.savior.virtueadmin.service.PermissionService;
+import com.sun.security.jgss.ExtendedGSSContext;
+import com.sun.security.jgss.ExtendedGSSCredential;
 
 /**
  * Test and bootstrapping endpoint. This needs to be removed before production
@@ -456,21 +464,28 @@ public class DataResource {
 		templateManager.assignVirtueTemplateToUser(developer, virtueBrowsers.getId());
 		templateManager.assignVirtueTemplateToUser(developer, virtueMath.getId());
 
-		Printer printer3d = new Printer(UUID.randomUUID().toString(), "Makerbot 3D Printer", "127.0.0.10", "printing", true);
+		Printer printer3d = new Printer(UUID.randomUUID().toString(), "Makerbot 3D Printer", "127.0.0.10", "printing",
+				true);
 		Printer printerEpson = new Printer(UUID.randomUUID().toString(), "Epson 2780", "127.0.0.12", "Idle", true);
-		Printer printerBrother = new Printer(UUID.randomUUID().toString(), "Brother HL 5040", "127.0.0.13", "Error: Out of paper", true);
+		Printer printerBrother = new Printer(UUID.randomUUID().toString(), "Brother HL 5040", "127.0.0.13",
+				"Error: Out of paper", true);
 
 		resourceManager.addPrinter(printer3d);
 		resourceManager.addPrinter(printerEpson);
 		resourceManager.addPrinter(printerBrother);
 
-
-		FileSystem backupsFS = new FileSystem(UUID.randomUUID().toString(), "Backup tapes", "127.0.0.40", true, false, false, true);
-		FileSystem longTermFS = new FileSystem(UUID.randomUUID().toString(), "Long-term storage", "127.0.0.41", true, false, false, true);
-		FileSystem sharedFS = new FileSystem(UUID.randomUUID().toString(), "Shared files", "127.0.0.42", true, false, false, true);
-		// FileSystem backupsFS = new FileSystem(UUID.randomUUID().toString(), "Backup tapes", "127.0.0.40");
-		// FileSystem longTermFS = new FileSystem(UUID.randomUUID().toString(), "Long-term storage", "127.0.0.41");
-		// FileSystem sharedFS = new FileSystem(UUID.randomUUID().toString(), "Shared files", "127.0.0.42");
+		FileSystem backupsFS = new FileSystem(UUID.randomUUID().toString(), "Backup tapes", "127.0.0.40", true, false,
+				false, true);
+		FileSystem longTermFS = new FileSystem(UUID.randomUUID().toString(), "Long-term storage", "127.0.0.41", true,
+				false, false, true);
+		FileSystem sharedFS = new FileSystem(UUID.randomUUID().toString(), "Shared files", "127.0.0.42", true, false,
+				false, true);
+		// FileSystem backupsFS = new FileSystem(UUID.randomUUID().toString(), "Backup
+		// tapes", "127.0.0.40");
+		// FileSystem longTermFS = new FileSystem(UUID.randomUUID().toString(),
+		// "Long-term storage", "127.0.0.41");
+		// FileSystem sharedFS = new FileSystem(UUID.randomUUID().toString(), "Shared
+		// files", "127.0.0.42");
 
 		resourceManager.addFileSystem(backupsFS);
 		resourceManager.addFileSystem(longTermFS);
@@ -726,6 +741,29 @@ public class DataResource {
 		clearResourcesDatabase();
 		userManager.clear(true);
 		return "database cleared.";
+	}
+
+	@GET
+	@Path("ticket")
+	public void ticket() throws GSSException {
+		Oid krb5Mechanism = new Oid("1.2.840.113554.1.2.2");
+		Oid krb5PrincipalNameType = new Oid("1.2.840.113554.1.2.2.1");
+		int usage = GSSCredential.ACCEPT_ONLY;
+		GSSManager manager = GSSManager.getInstance();
+		Oid koid = new Oid("1.2.840.113554.1.2.2");
+		GSSName clientName = manager.createName("kdrumm", GSSName.NT_USER_NAME);
+		GSSCredential clientCred = manager.createCredential(clientName, 8 * 3600, koid, GSSCredential.INITIATE_ONLY);
+
+		GSSName serverName = manager.createName("kdrumm-del@VIRTUE2.NCCDO.COM", GSSName.NT_HOSTBASED_SERVICE);
+
+		GSSContext context = manager.createContext(serverName, koid, clientCred, GSSContext.DEFAULT_LIFETIME);
+		context.requestMutualAuth(true);
+		context.requestConf(false);
+		context.requestInteg(true);
+
+		byte[] outToken = context.initSecContext(new byte[0], 0, 0);
+		System.out.println(outToken);
+		context.dispose();
 	}
 
 	@GET

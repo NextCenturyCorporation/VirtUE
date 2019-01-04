@@ -3,7 +3,6 @@ package com.ncc.savior.virtueadmin.cifsproxy;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -22,6 +21,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +71,8 @@ import com.ncc.savior.virtueadmin.service.DesktopVirtueService.PollHandler;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager.VirtueCreationDeletionListener;
+import com.sun.security.jgss.ExtendedGSSContext;
+import com.sun.security.jgss.ExtendedGSSCredential;
 
 /**
  * Main manager class than handles creation and deletion of CIFs Proxies. There
@@ -98,6 +105,9 @@ public class CifsManager {
 	private String cifsDomain;
 	@Value("${virtue.cifs.domain.url}")
 	private String cifsAdUrl;
+
+	@Value("${savior.virtueadmin.principal}")
+	private String securityServerName;
 
 	@Value("${virtue.cifs.securityGroups}")
 	private String securityGroupsString;
@@ -332,6 +342,8 @@ public class CifsManager {
 			WebTarget t = client.target("http://" + hostname + ":8080").path("share");
 			CifsShareCreationParameter cscp = new CifsShareCreationParameter(fs.getName(), fs.getId());
 			Entity<?> entity = Entity.json(cscp);
+
+			byte[] token = getS4u2ProxyToken(user);
 			Response resp = t.request(MediaType.APPLICATION_JSON_TYPE).post(entity);
 			InputStream is = (InputStream) resp.getEntity();
 			if (resp.getStatus() >= 400) {
@@ -348,7 +360,72 @@ public class CifsManager {
 			String msg = "Error creating share for CIFS Proxy";
 			logger.error(msg, e);
 			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
+		} catch (GSSException e) {
+			String msg = "Error creating share for CIFS Proxy";
+			logger.error(msg, e);
+			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
 		}
+	}
+
+	private byte[] getS4u2ProxyToken(VirtueUser user) throws GSSException {
+		Oid krb5Mechanism = new Oid("1.2.840.113554.1.2.2");
+		Oid krb5PrincipalNameType = new Oid("1.2.840.113554.1.2.2.1");
+		int usage = GSSCredential.ACCEPT_ONLY;
+		GSSManager manager = GSSManager.getInstance();
+		GSSName userName = manager.createName(user.getUsername(), GSSName.NT_USER_NAME);
+		try {
+			ExtendedGSSCredential serviceCredentials1 = (ExtendedGSSCredential) manager.createCredential(userName,
+					GSSCredential.DEFAULT_LIFETIME, krb5Mechanism, usage);
+		} catch (Throwable t) {
+			logger.error("Failed first attempt", t);
+		}
+		try {
+			ExtendedGSSCredential serviceCredentials2 = (ExtendedGSSCredential) manager
+					.createCredential(GSSCredential.INITIATE_ONLY);
+		} catch (Throwable t) {
+			logger.error("Failed second attempt", t);
+		}
+		try {
+			securityServerName = "HTTP/EC2AMAZ-H6GG6ER@VIRTUE2.NCCDO.COM";
+			GSSName serverName = manager.createName(this.securityServerName, krb5PrincipalNameType);
+
+			ExtendedGSSCredential serviceCredentials = (ExtendedGSSCredential) manager.createCredential(serverName,
+					GSSCredential.DEFAULT_LIFETIME, krb5Mechanism, GSSCredential.ACCEPT_ONLY);
+			GSSCredential impersonatedUserCreds = ((ExtendedGSSCredential) serviceCredentials).impersonate(userName);
+
+			final Oid KRB5_PRINCIPAL_OID = new Oid("1.2.840.113554.1.2.2.1");
+			GSSName servicePrincipal = manager.createName("HTTP/webservice-host.domain.ltd", KRB5_PRINCIPAL_OID);
+			ExtendedGSSContext extendedContext = (ExtendedGSSContext) manager.createContext(servicePrincipal,
+					new Oid("1.3.6.1.5.5.2"), impersonatedUserCreds, GSSContext.DEFAULT_LIFETIME);
+			final byte[] token = extendedContext.initSecContext(new byte[0], 0, 0);
+//			return token;
+		} catch (Throwable t) {
+			logger.error("Failed again", t);
+
+//			return null;
+		}
+		try {
+			Oid koid = new Oid("1.2.840.113554.1.2.2");
+			GSSName clientName = manager.createName("kdrumm@VIRTUE2.NCCDO.COM", GSSName.NT_USER_NAME);
+			GSSCredential clientCred = manager.createCredential(clientName, 8 * 3600, koid,
+					GSSCredential.INITIATE_ONLY);
+
+			GSSName serverName = manager.createName("EC2AMAZ-H6GG6ER@VIRTUE2.NCCDO.COM", GSSName.NT_HOSTBASED_SERVICE);
+
+			GSSContext context = manager.createContext(serverName, koid, clientCred, GSSContext.DEFAULT_LIFETIME);
+			context.requestMutualAuth(true);
+			context.requestConf(false);
+			context.requestInteg(true);
+
+			byte[] outToken = context.initSecContext(new byte[0], 0, 0);
+			System.out.println(outToken);
+			context.dispose();
+		} catch (Throwable t) {
+			logger.error("Failed again", t);
+
+//			return null;
+		}
+		return null;
 	}
 
 	private Runnable getTestForTimeoutRunnable() {

@@ -9,6 +9,10 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ncc.savior.virtueadmin.cifsproxy.CifsManager;
 import com.ncc.savior.virtueadmin.infrastructure.ICloudManager;
@@ -149,7 +153,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
-
+		Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
 		linuxFuture.thenAccept((myLinuxVms) -> {
 			Collection<FileSystem> fileSystems = template.getFileSystems();
 			cifsManager.addFilesystemLinux(user,fileSystems, myLinuxVms);
