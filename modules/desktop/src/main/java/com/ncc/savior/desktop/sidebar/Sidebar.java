@@ -419,7 +419,6 @@ public class Sidebar implements VirtueChangeHandler {
 		if (loading) {
 			loading = false;
 			empty = true;
-			System.out.println("zoowee mama");
 			renderEmpty();
 		}
 	}

@@ -103,6 +103,7 @@ public class SidebarController {
 
 			@Override
 			public void run() {
+				List<DesktopVirtue> virtueList = new ArrayList<DesktopVirtue>();
 				while (!terminatePollThread) {
 					try {
 						DesktopUser currentUser = authService.getUser();
@@ -115,6 +116,10 @@ public class SidebarController {
 							} catch (IOException e1) {
 								// TODO do something with connection errors.
 								virtues = new ArrayList<DesktopVirtue>(0);
+							}
+
+							if (!virtues.isEmpty()) {
+								virtueList.addAll(virtues);
 							}
 
 							updateVirtues(virtues);
