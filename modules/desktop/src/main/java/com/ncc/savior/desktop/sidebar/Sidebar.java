@@ -156,6 +156,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public static boolean askAgain = true;
 	private boolean loading = true;
+	private boolean empty = false;
 
 	private Comparator<VirtueApplicationItem> sortAppsByStatus;
 	private Comparator<VirtueTileContainer> sortVtByStatus;
@@ -283,6 +284,9 @@ public class Sidebar implements VirtueChangeHandler {
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
 		}
+		if (empty) {
+			renderEmpty();
+		}
 
 		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
@@ -308,8 +312,9 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		if (loading) {
+		if (loading || empty) {
 			loading = false;
+			empty = false;
 			setInitialViewPort();
 		}
 
@@ -441,6 +446,25 @@ public class Sidebar implements VirtueChangeHandler {
 		sortByOption(keyword);
 
 		scrollPane.getViewport().validate();
+	}
+
+	@Override
+	public void addNoVirtues() {
+		if (loading) {
+			loading = false;
+			empty = true;
+			renderEmpty();
+		}
+	}
+
+	public void renderEmpty() {
+		JPanel emptyPanel = new JPanel();
+		emptyPanel.setLayout(new BorderLayout());
+		JLabel empty = new JLabel("No Virtues!");
+		empty.setHorizontalAlignment(SwingConstants.CENTER);
+		emptyPanel.add(empty);
+
+		scrollPane.setViewportView(emptyPanel);
 	}
 
 	@Override
@@ -804,7 +828,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(activeFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(favoritesTileView.getContainer());
 		}
 	}
@@ -819,7 +843,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(activeListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(appsListView.getContainer());
 		}
 	}
@@ -834,7 +858,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(activeTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(appsTileView.getContainer());
 		}
 	}
@@ -848,7 +872,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(virtueTileView.getContainer());
 		}
 	}
@@ -862,7 +886,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(virtueListView.getContainer());
 		}
 	}
