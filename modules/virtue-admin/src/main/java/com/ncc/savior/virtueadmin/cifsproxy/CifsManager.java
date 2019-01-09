@@ -60,14 +60,15 @@ public class CifsManager {
 	private InstanceType instanceType;
 	private String serverId;
 	private ArrayList<String> securityGroupIds;
+	private VirtueTimeoutManager virtueTimeoutManager;
 
 	@Value("${virtue.test:false}")
 	private boolean test;
 
 	public CifsManager(ServerIdProvider serverIdProvider, IActiveVirtueManager activeVirtueManager,
 			DesktopVirtueService desktopService, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
-			CompletableFutureServiceProvider serviceProvider, String cifsProxyAmi, String cifsProxyLoginUser,
-			String cifsKeyName, String instanceType) {
+			CompletableFutureServiceProvider serviceProvider, VirtueTimeoutManager virtueTimeoutManager, 
+			String cifsProxyAmi, String cifsProxyLoginUser, String cifsKeyName, String instanceType) {
 		this.activeVirtueManager = activeVirtueManager;
 		this.cifsProxyDao = cifsProxyDao;
 		this.wrapper = wrapper;
@@ -76,7 +77,10 @@ public class CifsManager {
 		this.securityGroupIds = new ArrayList<String>();
 		this.cifsKeyName = cifsKeyName;
 		this.instanceType = InstanceType.fromValue(instanceType);
+		this.virtueTimeoutManager = virtueTimeoutManager;
 		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 10000, 5000,
+				TimeUnit.MILLISECONDS);
+		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForUserTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
 
 		desktopService.addPollHandler(new PollHandler() {
@@ -90,6 +94,7 @@ public class CifsManager {
 					cifsProxyDao.updateCifsVm(user, vm);
 				}
 				cifsProxyDao.updateUserTimeout(user);
+				virtueTimeoutManager.updateUserTimeout(user);
 			}
 		});
 		activeVirtueManager.addVirtueCreationDeletionListener(new VirtueCreationDeletionListener() {
@@ -177,6 +182,20 @@ public class CifsManager {
 				// logger.debug("Testing for timeouts for users=" + users);
 				for (VirtueUser user : users) {
 					testAndShutdownCifs(user);
+				}
+			}
+		};
+	}
+	
+	private Runnable getTestForUserTimeoutRunnable() {
+		return new Runnable() {
+
+			@Override
+			public void run() {
+				Set<VirtueUser> users = cifsProxyDao.getAllUsers();
+				// logger.debug("Testing for timeouts for users=" + users);
+				for (VirtueUser user : users) {
+					virtueTimeoutManager.testAndShutdownVirtues(user, activeVirtueManager);
 				}
 			}
 		};
