@@ -115,7 +115,9 @@ cat > /etc/krb5.conf.d/savior.conf <<EOCONF
 		admin_server = ${domain}
 	}
 EOCONF
- 
+# savior.conf should be enough, but the CIFS Proxy has problems if default_realm isn't set in krb5.conf itself
+sed -i -e "/^\[libdefaults\] *\$/a\    default_realm = ${domain^^}" /etc/krb5.conf
+
 # set userPrincipalName
 ldapfile=/tmp/ldap-$$
 domainparts=${domain//./,dc=}
