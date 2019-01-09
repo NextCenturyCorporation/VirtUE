@@ -1,22 +1,28 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.SystemColor;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -779,7 +785,61 @@ public class Sidebar implements VirtueChangeHandler {
 
 		frame.pack();
 
+		boolean useSystemTray = true;
+		if (useSystemTray && SystemTray.isSupported()) {
+			setupSystemTray();
+		}
+
 		addEventListeners();
+	}
+
+	public void setupSystemTray() {
+		TrayIcon trayIcon;
+		SystemTray tray;
+		Image trayImage = saviorIcon.getImage();
+		tray = SystemTray.getSystemTray();
+
+		trayIcon = new TrayIcon(trayImage, "Savior Desktop");
+		trayIcon.setImageAutoSize(true);
+		trayIcon.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.setVisible(true);
+				frame.setExtendedState(JFrame.NORMAL);
+			}
+
+		});
+
+		frame.addWindowStateListener(new WindowStateListener() {
+
+			@Override
+			public void windowStateChanged(WindowEvent e) {
+				if (e.getNewState() == Frame.ICONIFIED) {
+					try {
+						tray.add(trayIcon);
+						frame.setVisible(false);
+					} catch (AWTException ex) {
+					}
+				}
+				if (e.getNewState() == 7) {
+					try {
+						tray.add(trayIcon);
+						frame.setVisible(false);
+					} catch (AWTException ex) {
+					}
+				}
+				if (e.getNewState() == Frame.MAXIMIZED_BOTH) {
+					tray.remove(trayIcon);
+					frame.setVisible(true);
+				}
+				if (e.getNewState() == Frame.NORMAL) {
+					tray.remove(trayIcon);
+					frame.setVisible(true);
+				}
+			}
+
+		});
 	}
 
 	public void sortWithKeyword() {
