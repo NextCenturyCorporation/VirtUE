@@ -155,6 +155,7 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
 		Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
 		linuxFuture.thenAccept((myLinuxVms) -> {
+			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
 			Collection<FileSystem> fileSystems = template.getFileSystems();
 			cifsManager.addFilesystemLinux(user,fileSystems, myLinuxVms);
 		});
