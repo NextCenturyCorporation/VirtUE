@@ -8,11 +8,11 @@ import {
 import { BrowserModule } from '@angular/platform-browser';
 
 import { DatePipe } from '@angular/common';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import {DomSanitizer} from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -94,14 +94,16 @@ import { ListFilterPipe } from './shared/abstracts/gen-table/list-filter.pipe';
 
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 
-import { BaseUrlService } from './shared/services/baseUrl.service';
 import { MessageService } from './shared/services/message.service';
 import { DataRequestService } from './shared/services/dataRequest.service';
 import { RouterService } from './shared/services/router.service';
+import { SensingService } from './shared/services/sensing.service';
+import { BaseUrlService } from './shared/services/baseUrl.service';
 
 import { AuthGuard } from './shared/authentication/auth.guard';
 import { AuthenticationInterceptor } from './shared/authentication/authentication.interceptor';
 import { ErrorInterceptor } from './shared/authentication/error.interceptor';
+import { BaseUrlInterceptor } from './shared/services/baseUrl.interceptor';
 import { AuthenticationService } from './shared/services/authentication.service';
 import { LoginComponent } from './shared/authentication/login.component';
 
@@ -165,6 +167,11 @@ import { LoginComponent } from './shared/authentication/login.component';
     FlexLayoutModule,
     FormsModule,
     HttpClientModule,
+    HttpClientXsrfModule
+      .withOptions({
+                         cookieName: 'XSRF-TOKEN',
+                         headerName: 'X-XSRF-TOKEN',
+             }),
     MatAutocompleteModule,
     MatButtonModule,
     MatCardModule,
@@ -186,16 +193,20 @@ import { LoginComponent } from './shared/authentication/login.component';
     OverlayModule
   ],
   providers: [
-    BaseUrlService,
     DataRequestService,
+    BaseUrlService,
     MessageService,
     OverlayContainer,
     RouterService,
+    SensingService,
     OSSet,
     DatePipe,
 
     AuthGuard,
     AuthenticationService,
+    HttpClientXsrfModule,
+    // { provide: HTTP_INTERCEPTORS, useExisting: HttpClientXsrfModule, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: BaseUrlInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: AuthenticationInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
   ],

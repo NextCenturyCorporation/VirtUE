@@ -23,7 +23,7 @@ import { DatasetNames } from '../gen-data-page/datasetNames.enum';
 
 /**
 * @class
- * This is the generic class which provides a central source for many common functions, currently:
+ * This is the generic class which provides a central source for common functions, currently:
  *  - routing
  *  - dialogs
  *  - formatting

@@ -8,6 +8,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -35,12 +36,10 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 	public CorsFilter(Environment env) {
 		this.enabled = Boolean.valueOf(env.getProperty("savior.cors.enabled", "false"));
 		this.allowOrigin = env.getProperty("savior.cors.allow-origin", "http://localhost:4200");
-		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization, " +
-																				"responseType, withCredentials, X-Requested-With, X-XSRF-TOKEN, X-XSRF, XSRF-TOKEN, set-cookie");
+		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization, responseType, xsrf-token, x-xsrf-token");
 		this.allowCredentials = env.getProperty("savior.cors.allow-credentials", "true");
 		this.allowMethods = env.getProperty("savior.cors.allow-methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-		this.exposeHeaders = env.getProperty("savior.cors.expose-headers", "Set-Cookie, content-length, authentication, Access-Control-Allow-Headers " +
-		 																			"X-XSRF-TOKEN, X-XSRF, XSRF-TOKEN, accept, authorization, content-type, x-requested-with, jwt");
+		this.exposeHeaders = env.getProperty("savior.cors.expose-headers", "Set-Cookie, content-length, content-type");//, x-requested-with, jwt, XSRF-Token, x-xsrf-token
 		if (enabled) {
 			logger.debug("CORS Filter has been enabled");
 			logger.debug("  CORS-allow-origin=" + allowOrigin);
@@ -83,8 +82,12 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
     //   }
     // }
 
+		if (((HttpServletRequest)servletRequest).getSession(false) != null) {
+			logger.debug("cors " + ((HttpServletRequest)servletRequest).getSession(false).getId());
+		}
+
 		if (enabled) {
-//			HttpServletRequest httpReq = (HttpServletRequest) servletRequest;
+			// HttpServletRequest httpReq = (HttpServletRequest) servletRequest;
 			HttpServletResponse response = (HttpServletResponse) servletResponse;
 			response.setHeader("Access-Control-Allow-Origin", allowOrigin);
 			response.setHeader("Access-Control-Allow-Headers", allowHeaders);

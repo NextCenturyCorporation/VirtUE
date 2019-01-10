@@ -60,7 +60,8 @@ const routes: Routes = [
     component: UserListComponent,
     data: {
       breadcrumb: new Breadcrumb('Users', '/users')
-    }
+    },
+    canActivate: [AuthGuard]
   }, {
     path: 'users',
     data: {

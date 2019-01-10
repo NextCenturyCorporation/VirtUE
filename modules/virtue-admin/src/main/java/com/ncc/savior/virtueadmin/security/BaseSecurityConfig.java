@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Cookie;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,6 +38,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 
 import com.ncc.savior.virtueadmin.config.CorsFilter;
 import com.ncc.savior.virtueadmin.data.IUserManager;
@@ -50,6 +55,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String ADMIN_ROLE = "ADMIN";
 	protected static final String USER_ROLE = "USER";
 
+	private String [] csrfDisabledURLs;
+
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
 
@@ -61,7 +68,28 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	protected BaseSecurityConfig(String type) {
 		logger.info("Security configuration enabled. Type=" + type);
+		csrfDisabledURLs = new String [] {
+								"/desktop/**",
+								"/data/**",
+		            "/login",
+		            "/logout"
+		    };
 	}
+
+	// @Override
+	// protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+	// // 	logger.debug("here " + auth.toString());
+	//     auth.inMemoryAuthentication()
+	//         .withUser("admin").password("e").roles("ADMIN")
+	//         .and()
+	//         .withUser("e").password("e").roles("ADMIN")
+	//         .and()
+	//         .withUser("user").password("12345").roles("USER");
+	//
+	// 		// auth.ldapAuthentication();
+	//
+	// 		// auth.
+	// }
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
@@ -70,42 +98,85 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			@Override
 			public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 					AuthenticationException exception) throws IOException, ServletException {
+				logger.debug("%%FAILED " + request.getRequestedSessionId());
+				// logger.debug("$$" + request.isRequestedSessionIdValid() + "\n");
 				response.setStatus(401);
 				response.getWriter().write("Login failure: " + exception.getMessage());
 			}
 		};
 		AuthenticationSuccessHandler successHandler = new AuthenticationSuccessHandler() {
-
 			/**
 			 * Note: if you make a request to this (Spring's) login endpoint, and you include headers that spring's CORS aren't set up to use,
 			 * then your request will fall through and look for a Jersey 'login' endpoint. Since one exists, you'll be given back that html page,
 			 * which will send the requesting service's json-parser into cardiac arrest.
 			 */
-
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
+
+				// logger.debug("&&" + request.getRequestedSessionId());
+				// logger.debug("++" + request.getQueryString());
+				// logger.debug("++" + request.getMethod());
+				// if ("POST".equalsIgnoreCase(request.getMethod()))	{
+				//    logger.debug("..." + request.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
+				// }
+				// logger.debug("++" + request.getPart("username"));
+				// logger.debug("++" + request.getParts());
+				// logger.debug("++" + request.getParts().iterator().next());
+				// logger.debug("**" + request.isRequestedSessionIdValid() + "\n");
 				response.setStatus(200);
 				response.setContentType(MediaType.APPLICATION_JSON.toString());
+
+				// for (String header : response.getHeaders("Set-Cookie")) {
+				// 	logger.debug(header);
+				// 	String[] words = header.split("=|;");
+				// 	if (words.length >= 2) {
+				// 		logger.debug(words[0] + " " + words[1]);
+				// 	}
+				// }
+				// logger.debug("\n\n");
 				response.getWriter().println("Login success");
 			}
 		};
-		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
-				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers("/desktop/**").hasRole(USER_ROLE)
-				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
-				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login")
-				.permitAll().and().logout().permitAll();
+		http
+				.authorizeRequests()
+					.antMatchers("/").permitAll() // what does this open?
+					.antMatchers("/favicon.ico").permitAll()
+					.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+					.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
+					.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
+					.antMatchers("/desktop/**").hasRole(USER_ROLE)
+					.antMatchers("/data/**").permitAll() // note this is an backdoor for development/testing.
+					.anyRequest().authenticated()
+					.and()
+				.formLogin()
+					.failureHandler(authenticationFailureHandler)
+					.successHandler(successHandler)
+					.loginPage("/login")//.permitAll()
+					.and()
+        // .exceptionHandling()
+        //   .accessDeniedHandler(getAccessDeniedHandler())
+          // .authenticationEntryPoint(authenticationEntryPoint())
+					// .and()
+				.logout()
+					.clearAuthentication(true)
+					.deleteCookies("XSRF-TOKEN")
+					.invalidateHttpSession(true)
+				;
 
-		// http.csrf().ignoringAntMatchers("/login").csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
-		http.sessionManagement().maximumSessions(10)
+		http.sessionManagement()//.maximumSessions(10) // per-person, or total?
 				// .invalidSessionUrl("/login")
-				// .maximumSessions(1)
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+				.maximumSessions(1)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
+
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
+
 		doConfigure(http);
 
-		http.csrf().disable();
+		// http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
@@ -135,6 +206,16 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		};
 	}
+
+	// private AuthenticationEntryPoint authenticationEntryPoint() {
+	//     return new AuthenticationEntryPoint() {
+	//       @Override
+	//       public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
+	//         httpServletResponse.getWriter().append("Not authenticated");
+	//         httpServletResponse.setStatus(401);
+	//       }
+	//     };
+	//   }
 
 	@Override
 	@Bean
@@ -176,4 +257,5 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		logger.warn(string);
 		return new User(username, "notUsed", true, true, true, true, new ArrayList<GrantedAuthority>(0));
 	}
+
 }

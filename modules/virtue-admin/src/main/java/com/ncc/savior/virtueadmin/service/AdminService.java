@@ -516,6 +516,7 @@ public class AdminService {
 		verifyAndReturnUser();
 		if (sessionId != null) {
 			SessionInformation session = sessionRegistry.getSessionInformation(sessionId);
+			logger.debug("%%%%%% " + session.getPrincipal());
 			VirtueSession vs = VirtueSession.fromSessionInformation(session);
 			return vs;
 		} else {

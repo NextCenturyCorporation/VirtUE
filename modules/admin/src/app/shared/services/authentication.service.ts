@@ -1,70 +1,79 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-// import { map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import 'rxjs/add/operator/map'
+import { catchError } from 'rxjs/operators/catchError';
 
-import { BaseUrlService } from './baseUrl.service';
+import { InterceptorRemoteDestinationHeader } from './baseUrl.interceptor';
 
 @Injectable()
 export class AuthenticationService {
   baseUrl: string;
+  authenticated: boolean = false;
 
     constructor(
-      private httpClient: HttpClient,
-      private baseUrlService: BaseUrlService
-    ) {
-      setTimeout(() => {
-        let sub = this.baseUrlService.getBaseUrl().subscribe( res => {
-          this.baseUrl = res[0].virtue_server;
-        }, error => {
-          sub.unsubscribe();
-        }, () => {
-          sub.unsubscribe();
-        });
-      }, 100);
-    }
+      private httpClient: HttpClient
+    ) { }
+
+    // check expires header
 
     login(username: string, password: string) {
+      console.log(username, password);
 
-      console.log(`${this.baseUrl}login`, username, password);
+      username = 'admin';
+
+      // const jsonBody = JSON.stringify({username: username, password: password});
+
+      const formBody = new HttpParams()
+          .set('username', username)
+          .set('password', password)//.toString();
+
+
       // return this.httpClient.post<any>(`${this.baseUrl}login`, {  params: params, headers: headers})
       // return this.httpClient.get<string>(`${this.baseUrl}login`, httpOptions)
       return this.httpClient.post(
-            `${this.baseUrl}login`,
-            JSON.stringify({username: username, password: password}),
+            `/login`,
+            formBody,
             {
-              // headers: {},
+              headers: new HttpHeaders()
+                            .set(InterceptorRemoteDestinationHeader, '')
+                            .set('Content-Type', 'application/x-www-form-urlencoded'),
               observe: 'response',
               responseType: 'text'
             }
           )
-      //       .pipe((data) => {console.log(JSON.stringify(data)); return data;});
-      // return this.httpClient.post<string>(`${this.baseUrl}login`, JSON.stringify({username: username, password: password}), httpOptions)
-        // .map((res:any, r2:any) => {
-        //       console.log(res, r2);
-        //        // res.json() //Convert response to JSON
-        //        //OR
-        //        return res.text(); //Convert response to a string
-        //    })
-          // .pipe((user: any) => {
-          //   console.log("returned: ", user);
-          //     // login successful if there's a jwt token in the response
-          //     if (user && user.token) {
-          //         // store user details and jwt token in local storage to keep user logged in between page refreshes
-          //         localStorage.setItem('currentUser', JSON.stringify(user));
-          //     }
-          //
-          //     return user;
-          // })
+          .pipe(map((response: any) => {
+            console.log('returned: ', response);
+            if (response && response.status === 200) {
+                // store user details, including sessionIDs, in localStorage to keep user logged in between page refreshes
+                // localStorage.setItem('currentUser', JSON.stringify(response));
+                // .... /permanently. Is this safe?
+                this.authenticated = true;
+            }
+            else {
+              this.authenticated = false;
+            }
+
+            return response;
+          }))
         ;
     }
 
     logout() {
-        // remove user from local storage to log user out
-        // localStorage.removeItem('currentUser');
+        this.authenticated = false;
+        return this.httpClient.post(
+          `/logout`,
+          {},
+          {
+            headers: new HttpHeaders().set(InterceptorRemoteDestinationHeader, ''),
+            observe: 'response',
+            responseType: 'text'
+          }
+        );
     }
 
-    // getJSessionId() {
-    //   return "what on earth goes here";
-    // }
+    isAuthenticated() {
+      console.log(this.authenticated);
+      return this.authenticated;
+    }
 }

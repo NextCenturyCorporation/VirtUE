@@ -29,10 +29,12 @@ public class VirtueSession {
 
 	public static VirtueSession fromSessionInformation(SessionInformation session) {
 		Date lastRequest = session.getLastRequest();
-		User principal = (User) session.getPrincipal();
+		// User principal = (User) session.getPrincipal();
 		String sessionId = session.getSessionId();
-		String username = principal.getUsername();
-		ArrayList<GrantedAuthority> auths = new ArrayList<GrantedAuthority>(principal.getAuthorities());
+		// String username = principal.getUsername();
+		String username = (String) session.getPrincipal();
+		// ArrayList<GrantedAuthority> auths = new ArrayList<GrantedAuthority>(principal.getAuthorities());
+		ArrayList<GrantedAuthority> auths = new ArrayList<GrantedAuthority>();
 		VirtueSession vs = new VirtueSession(sessionId, username, auths, lastRequest, session.isExpired());
 		return vs;
 	}

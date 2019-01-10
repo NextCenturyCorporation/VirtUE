@@ -34,7 +34,7 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
         });
 
         // reset login status
-        this.authenticationService.logout();
+        // this.authenticationService.logout();
 
         // get return url from route parameters or default to '/'
         this.returnUrl = this.activatedRoute.snapshot.queryParams['returnUrl'] || '/';
@@ -68,11 +68,11 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
           .subscribe(
             (data: HttpResponse<string>) => {
 							this.returnedData = data;
-							console.dir(data.headers.get('Set-Cookie'));
+							// console.dir(data.headers.get('Set-Cookie'));
 							// console.dir(data.headers.get('X-XSRF-TOKEN'));
 							// console.dir(data.headers.keys());
 							// console.dir(this.getMethods(data.headers));
-							console.log(this.returnUrl);
+							// console.log(this.returnUrl);
               // this.routerService.goToPage(this.returnUrl);
               this.routerService.goToPage('/users');
             },
@@ -83,7 +83,13 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
             });
   }
 
-	print() {
-		console.log(this.returnedData.headers);
+	logout() {
+		this.authenticationService.logout().subscribe(
+				something => {
+			console.log(something);
+			this.routerService.goToPage('/login');
+		});
+
+		// console.log(this.returnedData.headers.keys());
 	}
 }

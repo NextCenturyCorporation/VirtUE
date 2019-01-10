@@ -12,11 +12,13 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { IndexedObj } from '../models/indexedObj.model';
 import { MessageService } from './message.service';
 
+import { InterceptorRemoteDestinationHeader } from './baseUrl.interceptor';
+
 /**
  * define the html headers to go on the post requests
  */
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  headers: new HttpHeaders({ 'Content-Type': 'application/json'}).set(InterceptorRemoteDestinationHeader, '')
 };
 
 /**
@@ -29,7 +31,7 @@ const httpOptions = {
 export class DataRequestService {
 
   /** the root URL to query - the location of our virtue-admin server. */
-  private baseUrl: string;
+  private baseUrl: string = "/";
 
   /**
    * Just sets up those two parameters as attributes
@@ -47,7 +49,8 @@ export class DataRequestService {
    * @param url the url of the virtue-admin server
    */
   public setBaseUrl(url: string): void {
-    this.baseUrl = url;
+    // this.baseUrl = url;
+    return;
   }
 
   /**
@@ -60,7 +63,7 @@ export class DataRequestService {
    */
   public getRecords(subdomain: string): Observable<IndexedObj[]> {
     let url = this.baseUrl + subdomain;
-    return this.httpClient.get<IndexedObj[]>(url).catch(this.errorHandler);
+    return this.httpClient.get<IndexedObj[]>(url, httpOptions).catch(this.errorHandler);
   }
 
   /**
@@ -78,7 +81,7 @@ export class DataRequestService {
    */
   public getRecord(subdomain: string, id: string): Observable<IndexedObj> {
     let url = this.baseUrl + subdomain + id;
-    return this.httpClient.get<IndexedObj>(url).catch(this.errorHandler);
+    return this.httpClient.get<IndexedObj>(url, httpOptions).catch(this.errorHandler);
   }
 
   /**
@@ -115,7 +118,7 @@ export class DataRequestService {
 
     console.log('Deleting item at:', url);
 
-    return this.httpClient.delete(url).toPromise().catch(this.errorHandler);
+    return this.httpClient.delete(url, httpOptions).toPromise().catch(this.errorHandler);
   }
 
   /**
@@ -145,7 +148,7 @@ export class DataRequestService {
   public setRecordAvailability(subdomain: string, id: string, newStatus: boolean): Observable<IndexedObj> {
     let url = this.baseUrl + subdomain + id + '/setStatus';
 
-    return this.httpClient.put(url, newStatus).catch(this.errorHandler);
+    return this.httpClient.put(url, newStatus, httpOptions).catch(this.errorHandler);
   }
 
   /**
