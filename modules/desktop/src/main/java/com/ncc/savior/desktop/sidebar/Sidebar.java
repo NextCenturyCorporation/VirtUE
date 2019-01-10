@@ -279,7 +279,7 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.repaint();
 		setup(user);
 		frame.getContentPane().add(desktopContainer);
-		frame.setSize(491, 600);
+		// frame.setSize(491, 600);
 		setInitialViewPort();
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
@@ -450,14 +450,12 @@ public class Sidebar implements VirtueChangeHandler {
 		sortByOption(keyword);
 
 		scrollPane.getViewport().validate();
-		scrollPane.getViewport().repaint();
 	}
 
 	@Override
 	public void addNoVirtues() {
 		if (loading) {
 			loading = false;
-			System.out.println("THIS IS A BUG");
 			empty = true;
 			renderEmpty();
 		}
@@ -783,7 +781,7 @@ public class Sidebar implements VirtueChangeHandler {
 		scrollPane.validate();
 		scrollPane.repaint();
 
-		frame.pack();
+		// frame.pack();
 
 		addEventListeners();
 	}
