@@ -256,7 +256,7 @@
 	</bean>
 	
 	<bean name="virtueTimeoutManager"
-		class="com.ncc.savior.virtueadmin.cifsproxy.VirtueTimeoutManager">
+		class="com.ncc.savior.virtueadmin.virtue.VirtueTimeoutManager">
 		<constructor-arg value="${virtue.timeout}"></constructor-arg>
 		<constructor-arg ref="activeVirtueManager"></constructor-arg>
 		<constructor-arg ref="desktopService"></constructor-arg>

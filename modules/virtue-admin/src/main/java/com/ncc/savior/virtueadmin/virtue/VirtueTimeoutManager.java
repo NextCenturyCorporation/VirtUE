@@ -1,10 +1,11 @@
-package com.ncc.savior.virtueadmin.cifsproxy;
+package com.ncc.savior.virtueadmin.virtue;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService.PollHandler;
-import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 
 public class VirtueTimeoutManager {
 	@Autowired
@@ -29,10 +29,10 @@ public class VirtueTimeoutManager {
 	public VirtueTimeoutManager(Long timeout, IActiveVirtueManager activeVirtueManager,
 			DesktopVirtueService desktopService, CompletableFutureServiceProvider serviceProvider) {
 		this.timeout = timeout;
-		this.userTimeoutMap = Collections.synchronizedMap(new HashMap<String, Long>());
+		this.userTimeoutMap = new ConcurrentHashMap<String, Long>();
 		this.activeVirtueManager = activeVirtueManager;
 				
-		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForUserTimeoutRunnable(), 7000, 1000,
+		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForUserTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
 		
 		desktopService.addPollHandler(new PollHandler() {
@@ -40,27 +40,27 @@ public class VirtueTimeoutManager {
 			@Override
 			public void onPoll(VirtueUser user, Map<String, VirtueTemplate> templates,
 					Map<String, Set<VirtueInstance>> templateIdToActiveVirtues) {
-				updateUserTimeout(user);
+				updateUserTimeout(user.getUsername());
 			}
 		});
 	}
 	
-	public void updateUserTimeout(VirtueUser user) {
-		userTimeoutMap.put(user.getUsername(), System.currentTimeMillis() + timeout);
+	public void updateUserTimeout(String username) {
+		userTimeoutMap.put(username, System.currentTimeMillis() + timeout);
 	}
 	
 	public long getTimeout() {
 		return timeout;
 	}
 	
-	private boolean userTimedOut(VirtueUser user) {
+	private boolean userTimedOut(String username) {
 		if (timeout <= 0) {
 			return false;
 		} else {
-			Long timeout = userTimeoutMap.get(user.getUsername());
+			Long timeout = userTimeoutMap.get(username);
 			// prevents nullPointer when server starts
 			if (timeout == null) {
-				updateUserTimeout(user);
+				updateUserTimeout(username);
 				return false;
 			} else {
 				long current = System.currentTimeMillis();
@@ -70,8 +70,8 @@ public class VirtueTimeoutManager {
 	}
 
 	public void testAndShutdownVirtues(String username) {
-		VirtueUser user = userManager.getUser(username);
-		if (userTimedOut(user)) {
+		if (userTimedOut(username)) {
+			VirtueUser user = userManager.getUser(username);
 			Collection<VirtueInstance> vs = activeVirtueManager.getVirtuesForUser(user);
 			for (VirtueInstance instance : vs) {
 				if (instance.getState() == VirtueState.RUNNING) {
