@@ -285,7 +285,6 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.repaint();
 		setup(user);
 		frame.getContentPane().add(desktopContainer);
-		frame.setSize(491, 600);
 		setInitialViewPort();
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
@@ -399,10 +398,14 @@ public class Sidebar implements VirtueChangeHandler {
 							vlc.addApplication(ad, virtueListVa);
 
 							Consumer<Image> consumer = i -> {
-								appsTileVa.setTileImage(i);
-								virtueTileVa.setTileImage(i);
-								virtueListVa.setListImage(i);
-								appsListVa.setListImage(i);
+								Image tileImg = i.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
+								ImageIcon tileIcon = new ImageIcon(tileImg);
+								Image listImg = i.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+								ImageIcon listIcon = new ImageIcon(listImg);
+								appsTileVa.setImage(tileIcon);
+								virtueTileVa.setImage(tileIcon);
+								virtueListVa.setImage(listIcon);
+								appsListVa.setImage(listIcon);
 								favoritesTileView.setTileImage(ad, virtue, i);
 							};
 
@@ -783,7 +786,7 @@ public class Sidebar implements VirtueChangeHandler {
 		scrollPane.validate();
 		scrollPane.repaint();
 
-		frame.pack();
+		// frame.pack();
 
 		boolean useSystemTray = true;
 		if (useSystemTray && SystemTray.isSupported()) {

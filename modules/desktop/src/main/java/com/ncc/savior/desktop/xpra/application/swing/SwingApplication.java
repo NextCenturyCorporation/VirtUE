@@ -162,12 +162,12 @@ public class SwingApplication extends XpraApplication implements Closeable {
 				// + packet.getHeight());
 				int x = packet.getX();
 				int y = packet.getY();
-				// if (x < insetWidth) {
-				// x = insetWidth;
-				// }
-				// if (y < titleBarHeight) {
-				// y = titleBarHeight;
-				// }
+				if (x < insetWidth) {
+					x = insetWidth;
+				}
+				if (y < titleBarHeight) {
+					y = titleBarHeight;
+				}
 				frame.getContentPane().setSize(packet.getWidth(), packet.getHeight());
 				frame.getContentPane().setPreferredSize(new Dimension(packet.getWidth(), packet.getHeight()));
 
