@@ -409,18 +409,9 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		return container;
 	}
 
-	public void setTileImage(Image image) {
-		this.image = image;
-		Image newimg = image.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
-		appIcon.setIcon(imageIcon);
-	}
-
-	public void setListImage(Image image) {
-		this.image = image;
-		Image newimg = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-		ImageIcon imageIcon = new ImageIcon(newimg); // transform it back
-		appIcon.setIcon(imageIcon);
+	public void setImage(ImageIcon image) {
+		this.image = image.getImage();
+		appIcon.setIcon(image);
 	}
 
 	public void favorite() {

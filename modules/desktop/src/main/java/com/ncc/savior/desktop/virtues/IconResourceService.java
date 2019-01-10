@@ -69,10 +69,11 @@ public class IconResourceService implements IIconService {
 					Image cached = imageCache.get(iconKey);
 					if (cached != null) {
 						consumer.accept(cached);
+					} else {
+						Image foundImg = desktopService.getIcon(iconKey);
+						consumer.accept(foundImg);
+						imageCache.put(iconKey, foundImg);
 					}
-					Image foundImg = desktopService.getIcon(iconKey);
-					consumer.accept(foundImg);
-					imageCache.put(iconKey, foundImg);
 				} catch (IOException e) {
 					logger.debug("Error with image retrieval");
 				}
