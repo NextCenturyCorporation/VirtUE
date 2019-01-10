@@ -406,7 +406,7 @@ public class Sidebar implements VirtueChangeHandler {
 								virtueTileVa.setImage(tileIcon);
 								virtueListVa.setImage(listIcon);
 								appsListVa.setImage(listIcon);
-								favoritesTileView.setTileImage(ad, virtue, i);
+								favoritesTileView.setTileImage(ad, virtue, tileIcon);
 							};
 
 							iconService.getImage(ad.getIconKey(), consumer);

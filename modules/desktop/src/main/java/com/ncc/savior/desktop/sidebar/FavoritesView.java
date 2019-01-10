@@ -1,12 +1,12 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.awt.FlowLayout;
-import java.awt.Image;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
@@ -61,10 +61,10 @@ public class FavoritesView extends AbstractAppsView {
 		}
 	}
 
-	public void setTileImage(ApplicationDefinition ad, DesktopVirtue virtue, Image image) {
+	public void setTileImage(ApplicationDefinition ad, DesktopVirtue virtue, ImageIcon image) {
 		VirtueApplicationItem va = tiles.get(ad.getId() + virtue.getTemplateId());
 		if (va != null) {
-			va.setTileImage(image);
+			va.setImage(image);
 		}
 	}
 
