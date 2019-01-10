@@ -99,7 +99,6 @@
 		<constructor-arg ref="cifsProxyDao"></constructor-arg>
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
-		<constructor-arg ref="virtueTimeoutManager"></constructor-arg>
 		<constructor-arg value="${virtue.cifs.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.cifs.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.cifs.keyName}"></constructor-arg>
@@ -258,9 +257,10 @@
 	
 	<bean name="virtueTimeoutManager"
 		class="com.ncc.savior.virtueadmin.cifsproxy.VirtueTimeoutManager">
-		<constructor-arg>
-			<value>0</value>
-		</constructor-arg>
+		<constructor-arg value="${virtue.timeout}"></constructor-arg>
+		<constructor-arg ref="activeVirtueManager"></constructor-arg>
+		<constructor-arg ref="desktopService"></constructor-arg>
+		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 	</bean>
 
 	<bean name="securityService"
