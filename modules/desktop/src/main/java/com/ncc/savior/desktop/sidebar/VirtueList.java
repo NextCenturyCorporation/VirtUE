@@ -40,13 +40,11 @@ public class VirtueList extends AbstractVirtueView {
 	}
 
 	public void updateApp(ApplicationDefinition ad, DesktopVirtue virtue) {
-		if (virtue != null) {
-			VirtueListContainer vlc = virtues.get(virtue.getTemplateId());
-			if (vlc != null) {
-				VirtueApplicationItem va = vlc.tiles.get(ad.getId() + virtue.getTemplateId());
-				if (va != null) {
-					va.update(virtue);
-				}
+		VirtueListContainer vlc = virtues.get(virtue.getTemplateId());
+		if (vlc != null) {
+			VirtueApplicationItem va = vlc.tiles.get(ad.getId() + virtue.getTemplateId());
+			if (va != null) {
+				va.update(virtue);
 			}
 		}
 	}

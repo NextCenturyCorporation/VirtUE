@@ -284,9 +284,9 @@ public class Sidebar implements VirtueChangeHandler {
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
 		}
-		// if (empty) {
-		// renderEmpty();
-		// }
+		if (empty) {
+			renderEmpty();
+		}
 
 		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
@@ -313,9 +313,6 @@ public class Sidebar implements VirtueChangeHandler {
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
 		if (loading || empty) {
-			if (empty) {
-				System.out.println("THIS IS A BUG");
-			}
 			loading = false;
 			empty = false;
 			setInitialViewPort();
@@ -458,23 +455,23 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void addNoVirtues() {
-		// if (loading) {
-		// loading = false;
-		// System.out.println("THIS IS A BUG");
-		// empty = true;
-		// renderEmpty();
-		// }
+		if (loading) {
+			loading = false;
+			System.out.println("THIS IS A BUG");
+			empty = true;
+			renderEmpty();
+		}
 	}
 
-	// public void renderEmpty() {
-	// JPanel emptyPanel = new JPanel();
-	// emptyPanel.setLayout(new BorderLayout());
-	// JLabel empty = new JLabel("No Virtues!");
-	// empty.setHorizontalAlignment(SwingConstants.CENTER);
-	// emptyPanel.add(empty);
-	//
-	// scrollPane.setViewportView(emptyPanel);
-	// }
+	public void renderEmpty() {
+		JPanel emptyPanel = new JPanel();
+		emptyPanel.setLayout(new BorderLayout());
+		JLabel empty = new JLabel("No Virtues!");
+		empty.setHorizontalAlignment(SwingConstants.CENTER);
+		emptyPanel.add(empty);
+
+		scrollPane.setViewportView(emptyPanel);
+	}
 
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
