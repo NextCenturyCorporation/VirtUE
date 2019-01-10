@@ -167,8 +167,11 @@ public class SidebarController {
 				newCurrentVirtues.put(getMapKey(v), v);
 			}
 		}
+
 		if (!addedVirtues.isEmpty()) {
 			reportAddedVirtues(addedVirtues);
+		} else {
+			reportNoAddedVirtues();
 		}
 
 		Iterator<DesktopVirtue> removeItr = currentVirtues.values().iterator();
@@ -253,6 +256,17 @@ public class SidebarController {
 		}
 	}
 
+	protected void reportNoAddedVirtues() {
+		try {
+			if (logger.isTraceEnabled()) {
+				logger.debug("no virtues to be added");
+			}
+			changeHandler.addNoVirtues();
+		} catch (Exception e) {
+			logger.error("Error sending remove virtue event", e);
+		}
+	}
+
 	protected void reportAddedVirtues(List<DesktopVirtue> virtues) throws IOException {
 		try {
 			if (logger.isTraceEnabled()) {
@@ -282,6 +296,8 @@ public class SidebarController {
 		void changeVirtue(DesktopVirtue virtue);
 
 		void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException;
+
+		void addNoVirtues();
 
 	}
 

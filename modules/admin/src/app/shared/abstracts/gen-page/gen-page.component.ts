@@ -7,9 +7,6 @@ import { Observable } from 'rxjs/Observable';
 
 import { DialogsComponent } from '../../../dialogs/dialogs.component';
 
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/pairwise';
-
 import { RouterService } from '../../services/router.service';
 
 import { Column } from '../../models/column.model';

@@ -14,6 +14,7 @@ public class Virtue {
 	private static final XLogger LOGGER = XLoggerFactory.getXLogger(Virtue.class);
 
 	private String name;
+	private String id;
 	private String username;
 	private String password;
 
@@ -21,16 +22,14 @@ public class Virtue {
 	 * 
 	 * @param name
 	 *                     the name of the Virtue
-	 * @param username
-	 *                     the username to use to log in. Must be a valid username
-	 *                     for the system the Proxy runs on.
+	 * @param id
+	 *                     the unique identifier for the Virtue
 	 */
-	public Virtue(String name, String username, String password) {
+	public Virtue(String name, String id) {
 		super();
-		LOGGER.entry(name, username);
+		LOGGER.entry(name, id);
 		this.name = name;
-		this.username = username;
-		this.password = password;
+		this.id = id;
 		LOGGER.exit();
 	}
 
@@ -65,12 +64,37 @@ public class Virtue {
 	}
 
 	/**
-	 * Set the password to the empty string. This is a security measure so we don't
-	 * hold onto the password longer than necessary.
+	 * 
+	 * @return the unique identifier for the Virtue
 	 */
-	public void clearPassword() {
+	public String getId() {
 		LOGGER.entry();
-		password = "";
+		LOGGER.exit(id);
+		return id;
+	}
+
+	public void initUsername(String username) {
+		LOGGER.entry(username);
+		if (this.username != null && this.username.length() > 0) {
+			IllegalStateException e = new IllegalStateException(
+					"cannot initialize an already-set username '" + this.username + "'");
+			LOGGER.throwing(e);
+			throw e;
+		}
+		this.username = username;
+		LOGGER.exit();
+	}
+	
+
+	public void initPassword(String password) {
+		LOGGER.entry(password);
+		if (this.password != null && this.password.length() > 0) {
+			IllegalStateException e = new IllegalStateException(
+					"cannot initialize an already-set password '" + this.password + "'");
+			LOGGER.throwing(e);
+			throw e;
+		}
+		this.password = password;
 		LOGGER.exit();
 	}
 }

@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
@@ -36,14 +33,16 @@ import org.springframework.security.core.userdetails.User;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
+import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
-import com.ncc.savior.virtueadmin.data.IResourceManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.persistent.PersistentStorageManager;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
+import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.IconModel;
+import com.ncc.savior.virtueadmin.model.Printer;
 import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
@@ -53,8 +52,6 @@ import com.ncc.savior.virtueadmin.model.VirtueSession;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.Printer;
-import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 import com.ncc.savior.virtueadmin.virtue.IActiveVirtueManager;
 

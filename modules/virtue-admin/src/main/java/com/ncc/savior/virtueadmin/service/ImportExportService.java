@@ -34,8 +34,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.ncc.savior.tool.ImportExportUtils;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
-import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IResourceManager;
+import com.ncc.savior.virtueadmin.data.ITemplateManager;
 import com.ncc.savior.virtueadmin.data.IUserManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.images.IXenGuestImageManager;
@@ -46,8 +46,6 @@ import com.ncc.savior.virtueadmin.model.SecurityGroupPermission;
 import com.ncc.savior.virtueadmin.model.VirtualMachineTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
-import com.ncc.savior.virtueadmin.model.Printer;
-import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.security.SecurityUserService;
 
 /**

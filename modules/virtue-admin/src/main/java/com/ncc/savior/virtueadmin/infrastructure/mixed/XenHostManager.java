@@ -36,6 +36,8 @@ import com.ncc.savior.virtueadmin.data.IActiveVirtueDao;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsEc2Wrapper;
 import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpose;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.FutureCombiner;
 import com.ncc.savior.virtueadmin.infrastructure.aws.Route53Manager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalParameters;
@@ -60,11 +62,7 @@ import com.ncc.savior.virtueadmin.util.ServerIdProvider;
  */
 public class XenHostManager {
 	private static final String S3_DOWNLOAD_MAIN_CLASS = "com.ncc.savior.server.s3.S3Download";
-	private static final String XEN_LINUX_IMAGE_NAME = "disk.qcow2";
 	private static final String XEN_STANDARD = "standard";
-	private static final String XEN_STANDARD_FILE2 = "vmlinuz-4.2.0-42-generic";
-	private static final String XEN_STANDARD_SWAP_FILE = "swap.qcow2";
-	private static final String XEN_STANDARD_FILE1 = "initrd.img-4.2.0-42-generic";
 	private static final Logger logger = LoggerFactory.getLogger(XenHostManager.class);
 	private static final String VM_PREFIX = "VRTU-XG-";
 
@@ -161,6 +159,9 @@ public class XenHostManager {
 		}
 		virtueMods.setVirtueId(virtue.getId());
 		virtueMods.setVirtueTemplateId(virtue.getTemplateId());
+		virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.USER_VIRTUE);
+		virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.XEN_HOST);
+		virtueMods.setUsername(virtue.getUsername());
 		VirtualMachine xenVm = ec2Wrapper.provisionVm(xenVmTemplate,
 				"VRTU-Xen-" + serverId + "-" + virtue.getUsername() + "-" + virtueName, secGroupIds, xenKeyName,
 				xenInstanceType, virtueMods, iamRoleName);
@@ -247,6 +248,7 @@ public class XenHostManager {
 				guestManager.provisionGuests(virtue, linuxVmts, finalLinuxFuture, serverId);
 			}
 
+			@SuppressWarnings("unused")
 			private Runnable getCopyS3DataRunnableUsingCli(Collection<VirtualMachineTemplate> linuxVmts,
 					Session finalSession) {
 				Runnable copyS3Data = () -> {
@@ -285,19 +287,21 @@ public class XenHostManager {
 							String template = vmt.getTemplatePath();
 							templateSet.add(template);
 						}
-						List<String> lines = SshUtil.sendCommandFromSession(finalSession,
+						SshUtil.sendCommandFromSession(finalSession,
 								"sudo rm -rf /home/ec2-user/app-domains/master/* ");
 
-						copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE1, kmsKey);
-						copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_SWAP_FILE, kmsKey);
-						copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE2, kmsKey);
+						// copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE1, kmsKey);
+						// copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_SWAP_FILE,
+						// kmsKey);
+						// copyFileFromS3Java(finalSession, XEN_STANDARD, XEN_STANDARD_FILE2, kmsKey);
 						for (String templatePath : templateSet) {
-							copyFileFromS3Java(finalSession, templatePath, XEN_LINUX_IMAGE_NAME, kmsKey);
+							copyFolderFromS3Java(finalSession, templatePath, kmsKey);
+							// copyFileFromS3Java(finalSession, templatePath, XEN_LINUX_IMAGE_NAME, kmsKey);
 							// copyFolderFromS3Java(finalSession, templatePath, "master.cfg.bak");
-							lines = SshUtil.sendCommandFromSession(finalSession,
-									"sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
-											+ templatePath + "/");
-							logger.debug("Copy standard files output: " + lines);
+							// lines = SshUtil.sendCommandFromSession(finalSession,
+							// "sudo cp /home/ec2-user/app-domains/standard/* /home/ec2-user/app-domains/"
+							// + templatePath + "/");
+							// logger.debug("Copy standard files output: " + lines);
 						}
 					} catch (JSchException e) {
 						logger.error("Error attempting to copy s3 data", e);
@@ -317,6 +321,22 @@ public class XenHostManager {
 				logger.debug("Running command: " + cmd);
 				lines = SshUtil.sendCommandFromSession(finalSession, cmd);
 				logger.debug("s3 copy output: " + lines.get(lines.size() - 1));
+			}
+
+			private void copyFolderFromS3Java(Session finalSession, String templatePath, String kmsKey)
+					throws JSchException, IOException {
+				if (!templatePath.endsWith("/")) {
+					templatePath += "/";
+				}
+				String cmd = "sudo mkdir -p /home/ec2-user/app-domains/" + templatePath
+						+ "; sudo java -cp /home/ec2-user/s3download.jar " + S3_DOWNLOAD_MAIN_CLASS + " " + region + " "
+						+ kmsKey + " " + bucket + " " + templatePath + " /home/ec2-user/app-domains/" + templatePath
+						+ "/";
+				logger.debug("Running command: " + cmd);
+				List<String> lines = SshUtil.sendCommandFromSession(finalSession, cmd);
+				if (!lines.isEmpty()) {
+					logger.debug("s3  copy output: " + lines.get(lines.size() - 1));
+				}
 			}
 
 			private void copyFileFromS3Java(Session finalSession, String templatePath, String fileName,

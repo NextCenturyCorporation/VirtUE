@@ -1,22 +1,28 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.SystemColor;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -156,6 +162,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public static boolean askAgain = true;
 	private boolean loading = true;
+	private boolean empty = false;
 
 	private Comparator<VirtueApplicationItem> sortAppsByStatus;
 	private Comparator<VirtueTileContainer> sortVtByStatus;
@@ -283,6 +290,9 @@ public class Sidebar implements VirtueChangeHandler {
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
 		}
+		if (empty) {
+			renderEmpty();
+		}
 
 		UserAlertingServiceHolder.resetHistoryManager();
 		frame.setVisible(true);
@@ -308,8 +318,9 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		if (loading) {
+		if (loading || empty) {
 			loading = false;
+			empty = false;
 			setInitialViewPort();
 		}
 
@@ -441,6 +452,25 @@ public class Sidebar implements VirtueChangeHandler {
 		sortByOption(keyword);
 
 		scrollPane.getViewport().validate();
+	}
+
+	@Override
+	public void addNoVirtues() {
+		if (loading) {
+			loading = false;
+			empty = true;
+			renderEmpty();
+		}
+	}
+
+	public void renderEmpty() {
+		JPanel emptyPanel = new JPanel();
+		emptyPanel.setLayout(new BorderLayout());
+		JLabel empty = new JLabel("No Virtues!");
+		empty.setHorizontalAlignment(SwingConstants.CENTER);
+		emptyPanel.add(empty);
+
+		scrollPane.setViewportView(emptyPanel);
 	}
 
 	@Override
@@ -755,7 +785,61 @@ public class Sidebar implements VirtueChangeHandler {
 
 		frame.pack();
 
+		boolean useSystemTray = true;
+		if (useSystemTray && SystemTray.isSupported()) {
+			setupSystemTray();
+		}
+
 		addEventListeners();
+	}
+
+	public void setupSystemTray() {
+		TrayIcon trayIcon;
+		SystemTray tray;
+		Image trayImage = saviorIcon.getImage();
+		tray = SystemTray.getSystemTray();
+
+		trayIcon = new TrayIcon(trayImage, "Savior Desktop");
+		trayIcon.setImageAutoSize(true);
+		trayIcon.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.setVisible(true);
+				frame.setExtendedState(JFrame.NORMAL);
+			}
+
+		});
+
+		frame.addWindowStateListener(new WindowStateListener() {
+
+			@Override
+			public void windowStateChanged(WindowEvent e) {
+				if (e.getNewState() == Frame.ICONIFIED) {
+					try {
+						tray.add(trayIcon);
+						frame.setVisible(false);
+					} catch (AWTException ex) {
+					}
+				}
+				if (e.getNewState() == 7) {
+					try {
+						tray.add(trayIcon);
+						frame.setVisible(false);
+					} catch (AWTException ex) {
+					}
+				}
+				if (e.getNewState() == Frame.MAXIMIZED_BOTH) {
+					tray.remove(trayIcon);
+					frame.setVisible(true);
+				}
+				if (e.getNewState() == Frame.NORMAL) {
+					tray.remove(trayIcon);
+					frame.setVisible(true);
+				}
+			}
+
+		});
 	}
 
 	public void sortWithKeyword() {
@@ -804,7 +888,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(activeFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(favoritesTileView.getContainer());
 		}
 	}
@@ -819,7 +903,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(activeListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(appsListView.getContainer());
 		}
 	}
@@ -834,7 +918,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(activeTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(appsTileView.getContainer());
 		}
 	}
@@ -848,7 +932,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(virtueTileView.getContainer());
 		}
 	}
@@ -862,7 +946,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(virtueListView.getContainer());
 		}
 	}

@@ -33,7 +33,12 @@ public class WindowIconPacket extends WindowPacket implements IImagePacket {
 		this.width = PacketUtils.asInt(list.get(2));
 		this.height = PacketUtils.asInt(list.get(3));
 		this.encoding = ImageEncoding.parse(PacketUtils.asString(list.get(4)));
-		this.data = (byte[]) list.get(5);
+		Object o = list.get(5);
+		if (o instanceof String) {
+			this.data = ((String) o).getBytes();
+		} else {
+			this.data = (byte[]) o;
+		}
 	}
 
 	@Override

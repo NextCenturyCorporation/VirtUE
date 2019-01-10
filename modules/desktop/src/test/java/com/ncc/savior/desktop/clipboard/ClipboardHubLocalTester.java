@@ -83,6 +83,7 @@ public class ClipboardHubLocalTester {
 
 					@SuppressWarnings({ "unused", "resource" }) // ignore due to test nature of this class
 					ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
+					client.initRemoteClient();
 					while (true) {
 						// hold
 						JavaUtil.sleepAndLogInterruption(1000);

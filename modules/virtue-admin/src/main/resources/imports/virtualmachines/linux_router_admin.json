@@ -1,7 +1,7 @@
 {
     "name": "Router Admin VM",
     "os": "LINUX",
-    "templatePath": "test",
+    "templatePath": "master",
     "loginUser": "user",
     "enabled": true,
     "applicationIds": [

@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Location } from '@angular/common';
 
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/pairwise';
+
 import { Router, ActivationEnd, NavigationStart, NavigationEnd, RoutesRecognized } from '@angular/router';
 
 
@@ -13,7 +16,7 @@ export class RouterService {
 
   private previousUrl: string;
 
-  private history: string;
+  private history: string[] = [];
 
   constructor(
     private router: Router,
@@ -26,33 +29,42 @@ export class RouterService {
           this.previousUrl = event[0].urlAfterRedirects;
         });
 
-    // Tell angular to load a fresh, new, component every time a URL that needs this component loads,
-    // even if the user has been on that page before
+    // Tell angular to load a fresh, new, component every time the router navigates to a URL, even if the user has been there before.
     this.router.routeReuseStrategy.shouldReuseRoute = function(){
-        return false;
+      return false;
     };
 
     // make the page reload if the user clicks on a link to the same page they're on.
     this.router.events.subscribe((event) => {
-        if (event instanceof NavigationEnd) {
-            this.router.navigated = false;
-            window.scrollTo(0, 0);
-        }
+      if (event instanceof NavigationEnd) {
+        this.updateHistory(event.url);
+        this.router.navigated = false;
+        window.scrollTo(0, 0);
+      }
     });
   }
 
+  updateHistory( newUrl: string ): void {
+    let indxExistingEntry: number = this.history.indexOf(newUrl);
 
-  getRouteHistory(): string {
-    return this.history;
+    if (indxExistingEntry !== -1) {
+      this.history = this.history.slice(0, indxExistingEntry);
+    }
+
+    this.history.push(newUrl);
   }
 
-  getPreviousUrl(): string {
-    return this.previousUrl;
+  private hasPreviousPage(): boolean {
+    return this.history.length > 1;
+  }
+
+  private getPreviousPage(): string {
+    return this.history[this.history.length - 2];
   }
 
   toPreviousPage(): void {
-    if (this.previousUrl) {
-      this.goToPage(this.previousUrl);
+    if (this.hasPreviousPage()) {
+      this.goToPage(this.getPreviousPage());
     }
     else {
       this.toTopDomainPage();

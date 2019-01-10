@@ -54,6 +54,7 @@ public class XenGuestManager {
 	private VirtualMachine xenVm;
 	private Route53Manager route53;
 	private CompletableFutureServiceProvider serviceProvider;
+	private int numSensingPorts = 10;
 
 	public XenGuestManager(VirtualMachine xenVm, File keyFile, CompletableFutureServiceProvider serviceProvider,
 			Route53Manager route53) {
@@ -78,7 +79,6 @@ public class XenGuestManager {
 			int externalSshPort = 8001;
 			int externalSensingPort = 12001;
 			int startingInternalPort = 11001;
-			int numSensingPorts = 3;
 			// String sshConfig = sendCommandFromSession(session, "cat
 			// ~/.ssh/config").toString();
 			// if (!sshConfig.contains("UserKnownHostsFile")) {
@@ -167,6 +167,10 @@ public class XenGuestManager {
 		updateSshKnownHosts(session, ipAddress);
 		logger.debug("Attempting to setup port forwarding. ");
 		String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
+		if (hostname == null) {
+			hostname = "custom-" + ipAddress.replaceAll("\\.", "-");
+			logger.debug("hostname was not found!  Using " + hostname);
+		}
 		String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
 		setupHostname(session, loginUsername, hostname, dns, ipAddress);
 		setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
@@ -382,7 +386,6 @@ public class XenGuestManager {
 				int externalSshPort = 8001;
 				int externalSensingPort = 12001;
 				int startingInternalPort = 11001;
-				int numSensingPorts = 3;
 				vm.setState(VmState.LAUNCHING);
 				serviceProvider.getVmNotifierService().startFutures(vm, null);
 				// throw new SaviorException(SaviorErrorCode.NOT_IMPLEMENTED, "Restarting is not
@@ -562,5 +565,9 @@ public class XenGuestManager {
 		} finally {
 			SshUtil.disconnectLogErrors(session);
 		}
+	}
+
+	public void setNumSensingPorts(int numSensingPorts) {
+		this.numSensingPorts = numSensingPorts;
 	}
 }

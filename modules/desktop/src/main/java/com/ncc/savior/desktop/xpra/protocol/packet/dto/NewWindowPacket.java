@@ -101,11 +101,11 @@ public class NewWindowPacket extends WindowPacket {
 	}
 
 	private void fixXyIfFarOffBounds() {
-		int thresholdx = 4000;
+		int thresholdx = 40000;
 		if (x + thresholdx < 0) {
 			x = 0;
 		}
-		int thresholdy = 4000;
+		int thresholdy = 40000;
 		if (y + thresholdy < 0) {
 			y = 0;
 		}

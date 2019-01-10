@@ -1,5 +1,8 @@
 package com.ncc.savior.virtueadmin.infrastructure.aws;
 
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpose;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
+
 /**
  * POJO class that handles extra information for a Virtue. This class is for
  * transient data used in virtue setup.
@@ -11,6 +14,9 @@ public class VirtueCreationAdditionalParameters {
 	private String securityGroupId;
 	private String virtueId;
 	private String virtueTemplateId;
+	private VirtuePrimaryPurpose primaryPurpose;
+	private VirtueSecondaryPurpose secondaryPurpose;
+	private String username;
 
 	public void setVirtueId(String virtueId) {
 		this.virtueId = virtueId;
@@ -54,5 +60,29 @@ public class VirtueCreationAdditionalParameters {
 
 	public String getVirtueTemplateId() {
 		return virtueTemplateId;
+	}
+
+	public VirtuePrimaryPurpose getPrimaryPurpose() {
+		return primaryPurpose;
+	}
+
+	public void setPrimaryPurpose(VirtuePrimaryPurpose primaryPurpose) {
+		this.primaryPurpose = primaryPurpose;
+	}
+
+	public VirtueSecondaryPurpose getSecondaryPurpose() {
+		return secondaryPurpose;
+	}
+
+	public void setSecondaryPurpose(VirtueSecondaryPurpose secondaryPurpose) {
+		this.secondaryPurpose = secondaryPurpose;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }

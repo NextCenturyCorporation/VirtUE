@@ -22,6 +22,7 @@ public class CursorPacket extends Packet {
 	private byte[] bytes;
 	private String name;
 	private boolean empty;
+	private String format;
 
 	protected CursorPacket() {
 		super(PacketType.CURSOR);
@@ -30,30 +31,42 @@ public class CursorPacket extends Packet {
 	public CursorPacket(List<Object> list) {
 		super(PacketType.CURSOR);
 		Object first = list.get(1);
+		int index = 1;
+		// for some reason first can be a string with type, an empty string, or x
 		if (first instanceof String) {
 			if (((String) first).isEmpty()) {
+				this.empty = true;
+				return;
+			} else {
+				this.format = (String) first;
+				index = 2;
+			}
+		}
+		if (first instanceof byte[]) {
+			if (((byte[]) first).length == 0) {
 				this.empty = true;
 				return;
 			} else {
 				this.bytes = (byte[]) first;
 			}
 		}
-		this.x = PacketUtils.asInt(first);
-		this.y = PacketUtils.asInt(list, 2);
-		this.width = PacketUtils.asInt(list, 3);
-		this.height = PacketUtils.asInt(list, 4);
-		this.xHotspot = PacketUtils.asInt(list, 5);
-		this.yHotspot = PacketUtils.asInt(list, 6);
-		this.serial = PacketUtils.asInt(list, 7);
-		Object eight = list.get(8);
-		if (eight instanceof String) {
-			this.name = (String) eight;
+		this.x = PacketUtils.asInt(list, index);
+		this.y = PacketUtils.asInt(list, ++index);
+		this.width = PacketUtils.asInt(list, ++index);
+		this.height = PacketUtils.asInt(list, ++index);
+		this.xHotspot = PacketUtils.asInt(list, ++index);
+		this.yHotspot = PacketUtils.asInt(list, ++index);
+		this.serial = PacketUtils.asInt(list, ++index);
+		Object potentialName = list.get(index + 2);
+		if (potentialName instanceof byte[]) {
+			this.name = new String((byte[]) potentialName);
+			this.bytes = (byte[]) list.get(index + 1);
+			index += 2;
 		} else {
-			this.bytes = (byte[]) eight;
-			if (list.size() > 9) {
-				this.name = PacketUtils.asString(list.get(9));
-			}
+			this.name = new String((byte[]) list.get(++index));
 		}
+		// System.out.println("cursor packet" +
+		// PacketUtils.convertByteArraysToStrings(list));
 	}
 
 	public int getX() {

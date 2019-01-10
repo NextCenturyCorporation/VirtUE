@@ -1,6 +1,6 @@
 package com.ncc.savior.desktop.xpra.debug;
 
-import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ncc.savior.desktop.xpra.XpraClient;
+import com.ncc.savior.desktop.xpra.application.swing.SwingImageEncoder;
 import com.ncc.savior.desktop.xpra.protocol.IPacketHandler;
 import com.ncc.savior.desktop.xpra.protocol.ImageEncoding;
 import com.ncc.savior.desktop.xpra.protocol.packet.PacketType;
@@ -70,7 +71,7 @@ public class DebugPacketHandler implements IPacketHandler {
 		thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(true) {
+				while (true) {
 					DebugPackage p;
 					try {
 						p = queue.take();
@@ -179,11 +180,17 @@ public class DebugPacketHandler implements IPacketHandler {
 		BufferedWriter writer = null;
 
 		try {
-			String typeString = (p instanceof UnknownPacket ? (String) ((UnknownPacket) p).getList().get(0)
-					: p.getType().toString());
+			String typeString;
 			String windowPostfix = "";
-			if (p instanceof WindowPacket) {
-				windowPostfix = "-" + ((WindowPacket) p).getWindowId();
+			if (p instanceof UnknownPacket) {
+				byte[] first = (byte[]) ((UnknownPacket) p).getList().get(0);
+				typeString = new String(first);
+
+			} else {
+				typeString = p.getType().toString();
+				if (p instanceof WindowPacket) {
+					windowPostfix = "-" + ((WindowPacket) p).getWindowId();
+				}
 			}
 			File file = new File(debugDirectory, timestamp + "-" + typeString + windowPostfix + ".txt");
 			writer = new BufferedWriter(new FileWriter(file));
@@ -207,9 +214,18 @@ public class DebugPacketHandler implements IPacketHandler {
 	private void writeImage(IImagePacket p, long timestamp) {
 		try {
 			String extension = getExtensionFromEncoding(p.getEncoding());
-			File file = new File(debugDirectory, timestamp + "." + extension);
-			BufferedImage img = ImageIO.read(new ByteArrayInputStream(p.getData()));
-			ImageIO.write(img, extension, file);
+			RenderedImage img;
+			if (extension == null && p instanceof DrawPacket) {
+				DrawPacket dp = (DrawPacket) p;
+				img = SwingImageEncoder.decodeImage(ImageEncoding.rgb24, p.getData(), dp.getWidth(), dp.getHeight());
+				extension = "png";
+			} else {
+				img = ImageIO.read(new ByteArrayInputStream(p.getData()));
+			}
+			if (img != null) {
+				File file = new File(debugDirectory, timestamp + "." + extension);
+				ImageIO.write(img, extension, file);
+			}
 		} catch (IOException e) {
 			logger.debug("Unable to draw image for DrawPacket=" + p);
 		} catch (RuntimeException e) {
@@ -225,6 +241,8 @@ public class DebugPacketHandler implements IPacketHandler {
 			return "png";
 		case jpeg:
 			return "jpeg";
+		case rgb24:
+			return null;
 		default:
 			break;
 		}

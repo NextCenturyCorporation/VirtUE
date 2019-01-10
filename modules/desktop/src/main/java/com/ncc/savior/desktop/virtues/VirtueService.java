@@ -55,6 +55,7 @@ public class VirtueService {
 	private IClipboardManager clipboardManager;
 	protected AuthorizationService authorizationService;
 	private ColorManager colorManager;
+	private HashMap<String, Object> locks;
 
 	static {
 		startableVirtueStates = new ArrayList<VirtueState>();
@@ -67,14 +68,15 @@ public class VirtueService {
 
 	public VirtueService(DesktopResourceService desktopResourceService, IApplicationManagerFactory appManger,
 			IRdpClient rdpClient, IClipboardManager clipboardManager, AuthorizationService authService,
-			ColorManager colorManager) {
+			ColorManager colorManager, boolean packetDebug) {
 		this.desktopResourceService = desktopResourceService;
-		this.connectionManager = new XpraConnectionManager(appManger);
+		this.connectionManager = new XpraConnectionManager(appManger, packetDebug);
 		this.pendingApps = Collections.synchronizedMap(new HashMap<String, List<ApplicationDefinition>>());
 		this.rdpClient = rdpClient;
 		this.clipboardManager = clipboardManager;
 		this.authorizationService = authService;
 		this.colorManager = colorManager;
+		this.locks=new HashMap<String,Object>();
 	}
 
 	public void ensureConnectionForVirtue(DesktopVirtue virtue) {
@@ -165,26 +167,41 @@ public class VirtueService {
 			SshConnectionParameters params = getConnectionParams(app, key);
 			String colorDesc = (color == null ? "" : " with color " + color.toString());
 			logger.debug("verifying connection to " + app.getHostname() + colorDesc);
-			XpraClient client = connectionManager.getExistingClient(params);
-			if (client == null || client.getStatus() == Status.ERROR) {
-				logger.debug("needed new connection");
-				try {
-					connectionManager.createXpraServerAndAddDisplayToParams(params);
-					logger.debug("connecting clipboard");
-					clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
-				} catch (IOException e) {
-					logger.error("clipboard manager connection failed!", e);
-					VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
-							"Failed to connect clipboard to virtue");
-					UserAlertingServiceHolder.sendAlertLogError(pam, logger);
+			// synchronized by virtue prevents user from clicking the application button
+			// twice and getting 2 connections.
+			Object lock = getLock(virtue);
+			synchronized (lock) {
+				XpraClient client = connectionManager.getExistingClient(params);
+				if (client == null || client.getStatus() == Status.ERROR) {
+					logger.debug("needed new connection");
+					try {
+						connectionManager.createXpraServerAndAddDisplayToParams(params);
+						logger.debug("connecting clipboard");
+						clipboardManager.connectClipboard(params, virtue.getName(), virtue.getTemplateId());
+					} catch (IOException e) {
+						logger.error("clipboard manager connection failed!", e);
+						VirtueAlertMessage pam = new VirtueAlertMessage("Clipboard Failed", virtue,
+								"Failed to connect clipboard to virtue");
+						UserAlertingServiceHolder.sendAlertLogError(pam, logger);
+					}
+					client = connectionManager.createClient(params, color, virtue);
 				}
-				client = connectionManager.createClient(params, color, virtue);
 			}
 		} finally {
 			if (file != null && file.exists()) {
 				file.delete();
 			}
 		}
+	}
+
+	private synchronized Object getLock(DesktopVirtue virtue) {
+		String key = virtue.getTemplateId();
+		Object lock = locks.get(key);
+		if (lock == null) {
+			lock = new Object();
+			locks.put(key, lock);
+		}
+		return lock;
 	}
 
 	private SshConnectionParameters getConnectionParams(DesktopVirtueApplication app, String key) throws IOException {

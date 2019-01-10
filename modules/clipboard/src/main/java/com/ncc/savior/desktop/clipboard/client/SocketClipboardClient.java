@@ -42,6 +42,7 @@ public class SocketClipboardClient {
 		IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
 
 		ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
+		client.initRemoteClient();
 		client.waitUntilStopped();
 		client.close();
 	}

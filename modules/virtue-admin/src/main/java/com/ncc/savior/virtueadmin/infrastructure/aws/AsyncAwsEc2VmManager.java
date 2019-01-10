@@ -23,6 +23,8 @@ import com.ncc.savior.virtueadmin.infrastructure.BaseVmManager;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.IVmManager;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtuePrimaryPurpose;
+import com.ncc.savior.virtueadmin.infrastructure.aws.AwsUtil.VirtueSecondaryPurpose;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -121,6 +123,9 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 			if (virtueMods.getSecurityGroupId() != null) {
 				secGroupIds.add(virtueMods.getSecurityGroupId());
 			}
+			virtueMods.setPrimaryPurpose(VirtuePrimaryPurpose.USER_VIRTUE);
+			virtueMods.setSecondaryPurpose(VirtueSecondaryPurpose.WINDOWS);
+			virtueMods.setUsername(user.getUsername());
 			VirtualMachine vm = ec2Wrapper.provisionVm(vmt, namePrefix, secGroupIds, serverKeyName, instanceType,
 					virtueMods, null);
 			vms.add(vm);
@@ -355,6 +360,8 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 		DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 		Collection<Filter> filters = new ArrayList<Filter>();
 		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_SERVER_ID).withValues(serverId));
+		filters.add(new Filter(AwsUtil.FILTER_TAG + AwsUtil.TAG_PRIMARY)
+				.withValues(AwsUtil.VirtuePrimaryPurpose.USER_VIRTUE.toString()));
 		describeInstancesRequest.setFilters(filters);
 		DescribeInstancesResult result = ec2Wrapper.getEc2().describeInstances(describeInstancesRequest);
 
@@ -364,7 +371,7 @@ public class AsyncAwsEc2VmManager extends BaseVmManager {
 				List<Tag> tags = instance.getTags();
 				String instanceId = AwsUtil.tagGet(tags, AwsUtil.TAG_VIRTUE_INSTANCE_ID);
 				Integer stateCode = instance.getState().getCode();
-				if (instanceId != null && !ids.contains(instanceId) &&  stateCode!=TERMINATED) {
+				if (instanceId != null && !ids.contains(instanceId) && stateCode != TERMINATED) {
 					instancesToBeTerminated.add(instance.getInstanceId());
 				}
 			}
