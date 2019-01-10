@@ -279,7 +279,6 @@ public class Sidebar implements VirtueChangeHandler {
 		frame.repaint();
 		setup(user);
 		frame.getContentPane().add(desktopContainer);
-		// frame.setSize(491, 600);
 		setInitialViewPort();
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
