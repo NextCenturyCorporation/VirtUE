@@ -91,13 +91,21 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().println("Login success");
 			}
 		};
-		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
+		http.authorizeRequests()
+				.antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
 				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
 				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
 				.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
 				.antMatchers("/desktop/**").hasRole(USER_ROLE)
-				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
-				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login").permitAll().and().logout().permitAll();
+				.antMatchers("/data/**").permitAll().anyRequest().authenticated()
+				.and()
+			.formLogin()
+				.failureHandler(authenticationFailureHandler)
+				.successHandler(successHandler)
+				.loginPage("/login")
+				.and()
+			.logout()
+				.permitAll();
 
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
