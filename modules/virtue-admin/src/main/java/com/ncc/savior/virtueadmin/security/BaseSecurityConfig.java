@@ -105,7 +105,9 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.loginPage("/login")
 				.and()
 			.logout()
-				.permitAll();
+				.clearAuthentication(true)
+				.deleteCookies("XSRF-TOKEN")
+				.invalidateHttpSession(true);
 
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
