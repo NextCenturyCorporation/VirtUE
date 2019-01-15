@@ -34,7 +34,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 	/** see note in BaseSecurityConfig about the result of requests made to Spring endpoints (like /login), when CORS is set up improperly */
 	@Autowired
 	public CorsFilter(Environment env) {
-		this.enabled = Boolean.valueOf(env.getProperty("savior.cors.enabled", "true"));
+		this.enabled = Boolean.valueOf(env.getProperty("savior.cors.enabled", "false"));
 		this.allowOrigin = env.getProperty("savior.cors.allow-origin", "http://localhost:4200");
 		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization, responseType, xsrf-token, x-xsrf-token");
 		this.allowCredentials = env.getProperty("savior.cors.allow-credentials", "true");
