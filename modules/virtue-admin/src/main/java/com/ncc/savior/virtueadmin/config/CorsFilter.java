@@ -63,6 +63,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
 			throws IOException, ServletException {
+		logger.log("IM HERE##################################################################");
 		if (enabled) {
 //			HttpServletRequest httpReq = (HttpServletRequest) servletRequest;
 			HttpServletResponse response = (HttpServletResponse) servletResponse;
