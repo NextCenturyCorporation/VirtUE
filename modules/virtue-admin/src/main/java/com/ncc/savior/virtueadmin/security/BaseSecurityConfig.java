@@ -169,7 +169,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.sessionManagement()//.maximumSessions(10) // per-person, or total?
 				// .invalidSessionUrl("/login")
 				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-				.maximumSessions(1)
+				.maximumSessions(10)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
 
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);

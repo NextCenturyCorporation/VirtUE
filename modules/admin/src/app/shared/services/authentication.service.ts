@@ -5,14 +5,16 @@ import 'rxjs/add/operator/map'
 import { catchError } from 'rxjs/operators/catchError';
 
 import { InterceptorRemoteDestinationHeader } from './baseUrl.interceptor';
+import { RouterService } from './router.service';
 
 @Injectable()
 export class AuthenticationService {
   baseUrl: string;
-  authenticated: boolean = false;
+  authenticated: boolean = true;
 
     constructor(
-      private httpClient: HttpClient
+      private httpClient: HttpClient,
+      private routerService: RouterService
     ) { }
 
     // check expires header
@@ -20,7 +22,6 @@ export class AuthenticationService {
     login(username: string, password: string) {
       console.log(username, password);
 
-      username = 'admin';
 
       // const jsonBody = JSON.stringify({username: username, password: password});
 
@@ -31,9 +32,9 @@ export class AuthenticationService {
 
       // return this.httpClient.post<any>(`${this.baseUrl}login`, {  params: params, headers: headers})
       // return this.httpClient.get<string>(`${this.baseUrl}login`, httpOptions)
-      return this.httpClient.post(
+      return this.httpClient.get(
             `/login`,
-            formBody,
+            // formBody,
             {
               headers: new HttpHeaders()
                             .set(InterceptorRemoteDestinationHeader, '')
@@ -42,20 +43,20 @@ export class AuthenticationService {
               responseType: 'text'
             }
           )
-          .pipe(map((response: any) => {
-            console.log('returned: ', response);
-            if (response && response.status === 200) {
-                // store user details, including sessionIDs, in localStorage to keep user logged in between page refreshes
-                // localStorage.setItem('currentUser', JSON.stringify(response));
-                // .... /permanently. Is this safe?
-                this.authenticated = true;
-            }
-            else {
-              this.authenticated = false;
-            }
-
-            return response;
-          }))
+          // .pipe(map((response: any) => {
+          //   console.log('returned: ', response);
+          //   if (response && response.status === 200) {
+          //       // store user details, including sessionIDs, in localStorage to keep user logged in between page refreshes
+          //       // localStorage.setItem('currentUser', JSON.stringify(response));
+          //       // .... /permanently. Is this safe?
+          //       this.authenticated = true;
+          //   }
+          //   else {
+          //     this.authenticated = false;
+          //   }
+          //
+          //   return response;
+          // }))
         ;
     }
 
@@ -75,5 +76,11 @@ export class AuthenticationService {
     isAuthenticated() {
       console.log(this.authenticated);
       return this.authenticated;
+    }
+
+    markUnauthenticated() {
+      this.authenticated = false;
+      // reload this page, in case it shouldn't be viewed.
+      this.routerService.goToPage(this.routerService.getRouterUrl());
     }
 }

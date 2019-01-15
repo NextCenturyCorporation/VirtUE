@@ -86,6 +86,7 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
 	logout() {
 		this.authenticationService.logout().subscribe(
 				something => {
+			console.log("Logging out: ");
 			console.log(something);
 			this.routerService.goToPage('/login');
 		});

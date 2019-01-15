@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpResponse, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import 'rxjs/add/operator/do'
+import { map } from 'rxjs/operators';
+import 'rxjs/add/operator/map'
 import { _throw } from 'rxjs/observable/throw';
 import { catchError } from 'rxjs/operators/catchError';
 
@@ -55,36 +57,52 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     }
 
 
-    // console.log(request);
+    console.log(request);
     // return next.handle(request);
 
     return next
       .handle(request)
-      .pipe(catchError((res: any, caught: Observable<HttpEvent<any>> ) => {
-        console.log("**");
-        // console.log(res);
-        console.log(res.status);
-        console.log("**");
-        // if (res.status !== 200) {
-        //   return _throw(res.status);
-        // }
-        // return _throw(res.status);
+      .pipe(map((something) => {console.log("?");console.log(something);console.log("?"); return something}))
+      .pipe(map((response: any) => {
+        console.log('returned: ', response);
+        // if ( !(response && response.status === 200) ) {
+        //     // go to login
         //
-        return this.handleError(res)
-
-      }))
-      .do((ev: HttpEvent<any>) => {
-        // console.log("got an event",ev)
-        console.log("$$");
-        console.log(ev);
-        if (ev instanceof HttpResponse) {
-          console.log(ev.status);
-          // console.log('response headers', ev.headers.keys());
-          // console.log(ev.headers.get("expires"));
+        // }
+        if ( !response || response.status === 401 ) {
+            // go to login page and prevent access of anything else until you log in again. ?
+            this.auth.markUnauthenticated();
         }
-        console.log("$$");
-        return ev;
-      });
+
+        return response;
+      }))
+
+      // .pipe(catchError((res: any, caught: Observable<HttpEvent<any>> ) => {
+      //   console.log("**");
+      //   // console.log(res);
+      //   console.log(res.status);
+      //   console.log("**");
+      //   // if (res.status !== 200) {
+      //   //   return _throw(res.status);
+      //   // }
+      //   // return _throw(res.status);
+      //   //
+      //   return this.handleError(res)
+      //
+      // }))
+      // .do((ev: any) => {
+      //   // console.log("got an event",ev)
+      //   console.log("$$");
+      //   console.log(ev);
+      //   if (ev instanceof HttpResponse) {
+      //     console.log(ev.status);
+      //     // console.log('response headers', ev.headers.keys());
+      //     // console.log(ev.headers.get("expires"));
+      //   }
+      //   console.log("$$");
+      //   return ev;
+      // })
+      ;
   }
 
   public handleError(error: any) {
