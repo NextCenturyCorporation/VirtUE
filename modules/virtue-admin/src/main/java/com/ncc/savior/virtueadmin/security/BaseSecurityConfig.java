@@ -66,7 +66,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		csrfDisabledURLs = new String [] {
 			"/desktop/**",
 			"/data/**",
-			"/login",
+			//"/login",
 			"/logout"
 		    };
 	}
