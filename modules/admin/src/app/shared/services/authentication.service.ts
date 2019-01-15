@@ -32,9 +32,9 @@ export class AuthenticationService {
 
       // return this.httpClient.post<any>(`${this.baseUrl}login`, {  params: params, headers: headers})
       // return this.httpClient.get<string>(`${this.baseUrl}login`, httpOptions)
-      return this.httpClient.get(
+      return this.httpClient.post(
             `/login`,
-            // formBody,
+            formBody,
             {
               headers: new HttpHeaders()
                             .set(InterceptorRemoteDestinationHeader, '')
