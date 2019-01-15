@@ -48,7 +48,9 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(BaseSecurityConfig.class);
 	protected static final String ADMIN_ROLE = "ADMIN";
 	protected static final String USER_ROLE = "USER";
-
+	
+	private String [] csrfDisabledURLs;
+	
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
 
@@ -60,6 +62,12 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	protected BaseSecurityConfig(String type) {
 		logger.info("Security configuration enabled. Type=" + type);
+		csrfDisabledURLs = new String [] {
+			"/desktop/**",
+			"/data/**",
+			"/login",
+			"/logout"
+		    };
 	}
 
 	@Override
@@ -90,7 +98,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
 				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login").permitAll().and().logout().permitAll();
 
-		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
 		http.sessionManagement().maximumSessions(10)
 				// .invalidSessionUrl("/login")
@@ -99,7 +107,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 		doConfigure(http);
 
-		http.csrf().disable();
+		// http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
