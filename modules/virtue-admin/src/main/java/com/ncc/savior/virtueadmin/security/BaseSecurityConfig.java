@@ -103,11 +103,12 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.failureHandler(authenticationFailureHandler)
 				.successHandler(successHandler)
 				.loginPage("/login")
-				.and()
-			.logout()
-				.clearAuthentication(true)
-				.deleteCookies("XSRF-TOKEN")
-				.invalidateHttpSession(true);
+			//	.and()
+			//.logout()
+			//	.clearAuthentication(true)
+			//	.deleteCookies("XSRF-TOKEN")
+			//	.invalidateHttpSession(true)
+			;
 
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
