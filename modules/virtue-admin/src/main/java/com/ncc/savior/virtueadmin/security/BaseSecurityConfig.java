@@ -9,11 +9,8 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-<<<<<<< HEAD
 import javax.servlet.http.Cookie;
-=======
-import javax.ws.rs.HttpMethod;
->>>>>>> e8cc799e0dc45d6971f37a316d475fe4bb4387f6
+//import javax.ws.rs.HttpMethod;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
