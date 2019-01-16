@@ -184,7 +184,7 @@ public class Sidebar implements VirtueChangeHandler {
 	private BridgeSensorService bridgeSensorService;
 
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
-			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorResource) {
+			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorService) {
 		this.authService = authService;
 		this.virtueIdToVtc = new HashMap<String, VirtueTileContainer>();
 		this.virtueIdToVlc = new HashMap<String, VirtueListContainer>();
@@ -192,7 +192,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.iconService = iconService;
 		this.colorManager = colorManager;
 		this.preferenceService = preferenceService;
-		this.bridgeSensorService = bridgeSensorResource;
+		this.bridgeSensorService = bridgeSensorService;
 
 		this.textField = new JTextField();
 		this.searchLabel = new JLabel();

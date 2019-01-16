@@ -141,9 +141,9 @@ public class DesktopResourceService {
 		return result.toString();
 	}
 
-	public DesktopVirtueApplication startApplication(String virtueId, ApplicationDefinition appDefn)
+	public DesktopVirtueApplication startApplication(DesktopVirtue virtue, ApplicationDefinition appDefn)
 			throws IOException {
-		WebTarget target = baseApi.path("virtue").path(virtueId).path(appDefn.getId()).path("start");
+		WebTarget target = baseApi.path("virtue").path(virtue.getId()).path(appDefn.getId()).path("start");
 		String params = appDefn.getParameters();
 		if (params != null) {
 			target = target.queryParam("cliParams", params);
@@ -152,7 +152,7 @@ public class DesktopResourceService {
 		logger.debug("Started app=" + returnedApp);
 
 		bridgeSensorService.sendApplicationMessage("Started Application", authService.getUser().getUsername(),
-				MessageType.START_APPLICATION, appDefn.getId(), virtueId);
+				MessageType.START_APPLICATION, virtue.getId(), virtue.getName(), appDefn.getId(), appDefn.getName());
 
 		return returnedApp;
 
@@ -273,7 +273,7 @@ public class DesktopResourceService {
 		DesktopVirtue startingVirtue = getClass(target, "GET", DesktopVirtue.class);
 		// logger.debug("Started app=" + returnedApp);
 		bridgeSensorService.sendVirtueMessage("Created Virtue", authService.getUser().getUsername(),
-				MessageType.CREATE_VIRTUE, startingVirtue.getId());
+				MessageType.CREATE_VIRTUE, startingVirtue.getId(), startingVirtue.getName());
 		return startingVirtue;
 
 	}
@@ -285,7 +285,7 @@ public class DesktopResourceService {
 			logger.trace("Started virtue=" + virtue);
 		}
 		bridgeSensorService.sendVirtueMessage("Started Virtue", authService.getUser().getUsername(),
-				MessageType.START_VIRTUE, virtueId);
+				MessageType.START_VIRTUE, virtueId, virtue.getName());
 		return virtue;
 	}
 
@@ -296,7 +296,7 @@ public class DesktopResourceService {
 			logger.trace("Stopping virtue=" + virtue);
 		}
 		bridgeSensorService.sendVirtueMessage("Stopped Virtue", authService.getUser().getUsername(),
-				MessageType.STOP_VIRTUE, virtueId);
+				MessageType.STOP_VIRTUE, virtueId, virtue.getName());
 		return virtue;
 	}
 
@@ -330,7 +330,7 @@ public class DesktopResourceService {
 			logger.trace("Stopping virtue=" + virtue);
 		}
 		bridgeSensorService.sendVirtueMessage("Terminated Virtue", authService.getUser().getUsername(),
-				MessageType.TERMINATE_VIRTUE, virtueId);
+				MessageType.TERMINATE_VIRTUE, virtueId, virtue.getName());
 		return virtue;
 	}
 

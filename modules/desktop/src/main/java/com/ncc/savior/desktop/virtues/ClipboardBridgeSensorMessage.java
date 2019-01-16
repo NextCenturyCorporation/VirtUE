@@ -2,30 +2,30 @@ package com.ncc.savior.desktop.virtues;
 
 public class ClipboardBridgeSensorMessage extends BridgeSensorMessage {
 
-	private String source;
-	private String destination;
+	private String sourceGroupId;
+	private String destinationGroupId;
 
-	public ClipboardBridgeSensorMessage(String message, String username, MessageType messageType, String source,
-			String destination) {
+	public ClipboardBridgeSensorMessage(String message, String username, MessageType messageType, String sourceGroupId,
+			String destinationGroupId) {
 		super(message, username, messageType);
-		this.source = source;
-		this.destination = destination;
+		this.sourceGroupId = sourceGroupId;
+		this.destinationGroupId = destinationGroupId;
 	}
 
-	public String getSource() {
-		return source;
+	public String getSourceGroupId() {
+		return sourceGroupId;
 	}
 
-	public void setSource(String source) {
-		this.source = source;
+	public void setSourceGroupId(String sourceGroupId) {
+		this.sourceGroupId = sourceGroupId;
 	}
 
-	public String getDestination() {
-		return destination;
+	public String getDestinationGroupId() {
+		return destinationGroupId;
 	}
 
-	public void setDestination(String destination) {
-		this.destination = destination;
+	public void setDestinationGroupId(String destinationGroupId) {
+		this.destinationGroupId = destinationGroupId;
 	}
 
 }

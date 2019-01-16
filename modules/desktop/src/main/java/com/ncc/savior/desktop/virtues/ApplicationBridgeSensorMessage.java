@@ -1,15 +1,23 @@
 package com.ncc.savior.desktop.virtues;
 
-public class ApplicationBridgeSensorMessage extends BridgeSensorMessage {
+public class ApplicationBridgeSensorMessage extends VirtueBridgeSensorMessage {
 
 	private String applicationId;
-	private String virtueId;
+	private String applicationName;
 
 	public ApplicationBridgeSensorMessage(String message, String username, MessageType messageType,
-			String applicationId, String virtueId) {
-		super(message, username, messageType);
+			String virtueId, String virtueName, String applicationId, String applicationName) {
+		super(message, username, messageType, virtueId, virtueName);
 		this.applicationId = applicationId;
-		this.virtueId = virtueId;
+		this.applicationName = applicationName;
+	}
+
+	public String getApplicationName() {
+		return applicationName;
+	}
+
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
 	}
 
 	public String getApplicationId() {
@@ -20,11 +28,4 @@ public class ApplicationBridgeSensorMessage extends BridgeSensorMessage {
 		this.applicationId = applicationId;
 	}
 
-	public String getVirtueId() {
-		return virtueId;
-	}
-
-	public void setVirtueId(String virtueId) {
-		this.virtueId = virtueId;
-	}
 }
