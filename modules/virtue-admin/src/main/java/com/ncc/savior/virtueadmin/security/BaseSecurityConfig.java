@@ -66,7 +66,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		csrfDisabledURLs = new String [] {
 			"/desktop/**",
 			"/data/**",
-			//"/login",
+			"/login",
 			"/logout"
 		    };
 	}
@@ -93,9 +93,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		};
 		http.authorizeRequests()
 				.antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
-				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
-				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
-				.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
+				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).anyRequest().authenticated()
 				.antMatchers("/desktop/**").hasRole(USER_ROLE)
 				.antMatchers("/data/**").permitAll().anyRequest().authenticated()
 				.and()
@@ -103,14 +101,13 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.failureHandler(authenticationFailureHandler)
 				.successHandler(successHandler)
 				.loginPage("/login")
-			//	.and()
-			//.logout()
-			//	.clearAuthentication(true)
-			//	.deleteCookies("XSRF-TOKEN")
-			//	.invalidateHttpSession(true)
-			;
+				.and()
+			.logout()
+				.clearAuthentication(true)
+				.deleteCookies("XSRF-TOKEN")
+				.invalidateHttpSession(true);
 
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
 		http.sessionManagement().maximumSessions(10)
 				// .invalidSessionUrl("/login")
