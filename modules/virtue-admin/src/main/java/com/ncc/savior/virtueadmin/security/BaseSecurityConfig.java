@@ -98,6 +98,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
 				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls	
 				.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
+				.antMatchers(HttpMethod.OPTIONS,"/logout").permitAll()
 				.antMatchers("/desktop/**").hasRole(USER_ROLE)
 				.antMatchers("/data/**").permitAll().anyRequest().authenticated()
 				.and()
@@ -108,7 +109,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			.logout()
 				.clearAuthentication(true)
-				.deleteCookies("XSRF-TOKEN")
+				.deleteCookies("XSRF-TOKEN, JSESSIONID")
 				.invalidateHttpSession(true);
 
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
