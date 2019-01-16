@@ -35,7 +35,6 @@ import com.ncc.savior.desktop.clipboard.messages.IClipboardMessage;
 import com.ncc.savior.desktop.clipboard.serialization.IMessageSerializer;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ClipboardPermission;
-
 /**
  * Central hub point for the shared clipboard data. All messages should be sent
  * to the hub where they will be passed out to the appropriate other clients.
@@ -62,6 +61,7 @@ public class ClipboardHub {
 	private DisconnectListener disconnectListener;
 	private Map<String, String> groupIdToDisplayName;
 	private Set<IDefaultApplicationListener> defaultAppListeners;
+	private Set<IDataMessageListener> dataMessageListeners;
 
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
 		groupIdToDisplayName = new HashMap<String, String>();
@@ -75,6 +75,7 @@ public class ClipboardHub {
 		this.dataGuard = dataGuard;
 		dataGuard.setGroupIdToDisplayNameMap(groupIdToDisplayName);
 		defaultAppListeners = new HashSet<IDefaultApplicationListener>();
+		dataMessageListeners = new HashSet<IDataMessageListener>();
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -256,6 +257,9 @@ public class ClipboardHub {
 			IClipboardMessageSenderReceiver transmitter = transmitters.get(destId);
 			if (transmitter != null) {
 				sendMessageHandleError(message, transmitter, destId);
+				String dataSourceGroupId = transmitter.getGroupId();
+				String dataDestinationGroupId = messageSourceGroupId;
+				triggerDataMessage(dataSourceGroupId, dataDestinationGroupId);
 			}
 		} else if (message instanceof ClipboardFormatsRequestMessage) {
 			ClipboardFormatsRequestMessage m = (ClipboardFormatsRequestMessage) message;
@@ -332,6 +336,30 @@ public class ClipboardHub {
 		if (disconnectListener != null) {
 			disconnectListener.onDisconnect(clientId, e);
 		}
+	}
+	
+	public void addDataMessageListener(IDataMessageListener listener) {
+		dataMessageListeners.add(listener);
+	}
+	
+	public void triggerDataMessage(String dataSourceGroupId, String dataDestinationGroupId) {
+		for (IDataMessageListener listener : dataMessageListeners) {
+			listener.onMessage(dataSourceGroupId, dataDestinationGroupId);
+		}
+	}
+	
+	public void addRemoveVirtueListener(IDataMessageListener listener) {
+		dataMessageListeners.add(listener);
+	}
+
+	public void deleteRemoveVirtueListener(IDataMessageListener listener) {
+		dataMessageListeners.remove(listener);
+	}
+
+	public static interface IDataMessageListener {
+
+		public void onMessage(String dataSourceGroupId, String dataDestinationGroupId);
+
 	}
 
 	public void setDisconnectListener(DisconnectListener disconnectListener) {

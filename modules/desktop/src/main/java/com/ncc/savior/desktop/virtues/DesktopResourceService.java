@@ -50,8 +50,10 @@ public class DesktopResourceService {
 	private WebTarget baseApi;
 	private AuthorizationService authService;
 	private String targetHost;
+	private BridgeSensorService bridgeSensorService;
 
-	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames) {
+	public DesktopResourceService(AuthorizationService authService, String baseApiUri, boolean allowAllHostnames,
+			BridgeSensorService bridgeSensorService) {
 		try {
 			this.targetHost = new URI(baseApiUri).getHost();
 		} catch (URISyntaxException e1) {
@@ -71,10 +73,12 @@ public class DesktopResourceService {
 		}
 		jsonMapper = new ObjectMapper();
 		baseApi = client.target(baseApiUri);
+		this.bridgeSensorService = bridgeSensorService;
 	}
 
-	public DesktopResourceService(AuthorizationService authService, String baseApiUri) {
-		this(authService, baseApiUri, false);
+	public DesktopResourceService(AuthorizationService authService, String baseApiUri,
+			BridgeSensorService bridgeSensorService) {
+		this(authService, baseApiUri, false, bridgeSensorService);
 	}
 
 	public List<DesktopVirtue> getVirtues() throws IOException {
@@ -146,6 +150,10 @@ public class DesktopResourceService {
 		}
 		DesktopVirtueApplication returnedApp = getClass(target, "GET", DesktopVirtueApplication.class);
 		logger.debug("Started app=" + returnedApp);
+
+		bridgeSensorService.sendApplicationMessage("Started Application", authService.getUser().getUsername(),
+				MessageType.START_APPLICATION, appDefn.getId(), virtueId);
+
 		return returnedApp;
 
 	}
@@ -264,6 +272,8 @@ public class DesktopResourceService {
 		WebTarget target = baseApi.path("template").path(virtueTemplateId).path("start");
 		DesktopVirtue startingVirtue = getClass(target, "GET", DesktopVirtue.class);
 		// logger.debug("Started app=" + returnedApp);
+		bridgeSensorService.sendVirtueMessage("Created Virtue", authService.getUser().getUsername(),
+				MessageType.CREATE_VIRTUE, startingVirtue.getId());
 		return startingVirtue;
 
 	}
@@ -274,6 +284,8 @@ public class DesktopResourceService {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Started virtue=" + virtue);
 		}
+		bridgeSensorService.sendVirtueMessage("Started Virtue", authService.getUser().getUsername(),
+				MessageType.START_VIRTUE, virtueId);
 		return virtue;
 	}
 
@@ -283,6 +295,8 @@ public class DesktopResourceService {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Stopping virtue=" + virtue);
 		}
+		bridgeSensorService.sendVirtueMessage("Stopped Virtue", authService.getUser().getUsername(),
+				MessageType.STOP_VIRTUE, virtueId);
 		return virtue;
 	}
 
@@ -315,6 +329,8 @@ public class DesktopResourceService {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Stopping virtue=" + virtue);
 		}
+		bridgeSensorService.sendVirtueMessage("Terminated Virtue", authService.getUser().getUsername(),
+				MessageType.TERMINATE_VIRTUE, virtueId);
 		return virtue;
 	}
 
