@@ -54,6 +54,7 @@ public class SidebarApplication {
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean packetDebug = props.getBoolean(PropertyManager.PROPERTY_PACKET_DEBUG, false);
+		boolean enableBridgeSensor = props.getBoolean(PropertyManager.PROPERTY_BRIDGE_SENSOR_ENABLED, false);
 		long bridgeSensorTimeoutMillis = props.getLong(PropertyManager.PROPERTY_BRIDGE_SENSOR_TIMEOUT_MILLIS, 5000);
 		int port = props.getInt(PropertyManager.PROPERTY_BRIDGE_SENSOR_PORT, 8080);
 		String host = props.getString(PropertyManager.PROPERTY_BRIDGE_SENSOR_HOST);
@@ -69,7 +70,8 @@ public class SidebarApplication {
 
 		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
 				logoutUrl.toString());
-		BridgeSensorService bridgeSensorService = new BridgeSensorService(bridgeSensorTimeoutMillis, port, host, true);
+		BridgeSensorService bridgeSensorService = new BridgeSensorService(bridgeSensorTimeoutMillis, port, host,
+				enableBridgeSensor);
 		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl,
 				bridgeSensorService);
 		IApplicationManagerFactory appManager;
