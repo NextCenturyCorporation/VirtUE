@@ -8,7 +8,10 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+<<<<<<< HEAD
 import javax.servlet.http.HttpServletRequest;
+=======
+>>>>>>> e8cc799e0dc45d6971f37a316d475fe4bb4387f6
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -38,7 +41,7 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 		this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization");
 		this.allowCredentials = env.getProperty("savior.cors.allow-credentials", "true");
 		this.allowMethods = env.getProperty("savior.cors.allow-methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-		// this.allowHeaders = env.getProperty("savior.cors.allow-headers", "origin, content-type, accept, authorization, responseType, xsrf-token, x-xsrf-token");
+		
 		if (enabled) {
 			logger.debug("CORS Filter has been enabled");
 			logger.debug("  CORS-allow-origin=" + allowOrigin);
@@ -66,21 +69,8 @@ public class CorsFilter implements ContainerResponseFilter, Filter {
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
 			throws IOException, ServletException {
-
-		// CsrfToken csrf = (CsrfToken) servletRequest.getAttribute(CsrfToken.class
-		//         .getName());
-    // if (csrf != null) {
-    //   Cookie cookie = WebUtils.getCookie(request, "XSRF-TOKEN");
-    //   String token = csrf.getToken();
-    //   if (cookie==null || token!=null && !token.equals(cookie.getValue())) {
-    //     cookie = new Cookie("XSRF-TOKEN", token);
-    //     cookie.setPath("/");
-    //     servletResponse.addCookie(cookie);
-    //   }
-    // }
-
 		if (enabled) {
-			// HttpServletRequest httpReq = (HttpServletRequest) servletRequest;
+//			HttpServletRequest httpReq = (HttpServletRequest) servletRequest;
 			HttpServletResponse response = (HttpServletResponse) servletResponse;
 			response.setHeader("Access-Control-Allow-Origin", allowOrigin);
 			response.setHeader("Access-Control-Allow-Headers", allowHeaders);

@@ -9,7 +9,11 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+<<<<<<< HEAD
 import javax.servlet.http.Cookie;
+=======
+import javax.ws.rs.HttpMethod;
+>>>>>>> e8cc799e0dc45d6971f37a316d475fe4bb4387f6
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,14 +117,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.setStatus(200);
 				response.setContentType(MediaType.APPLICATION_JSON.toString());
 
-				// for (String header : response.getHeaders("Set-Cookie")) {
-				// 	logger.debug(header);
-				// 	String[] words = header.split("=|;");
-				// 	if (words.length >= 2) {
-				// 		logger.debug(words[0] + " " + words[1]);
-				// 	}
-				// }
-				// logger.debug("\n\n");
 				response.getWriter().println("Login success");
 			}
 		};
@@ -131,6 +127,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 					.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
 					.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
 					.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
+					.antMatchers(HttpMethod.OPTIONS,"/logout").permitAll()
 					.antMatchers("/desktop/**").hasRole(USER_ROLE)
 					.antMatchers("/data/**").permitAll().anyRequest().authenticated() // note this is an backdoor for development/testing.
 					.and()
@@ -141,7 +138,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 					.and()
 				.logout()
 					.clearAuthentication(true)
-					.deleteCookies("XSRF-TOKEN")
+					.deleteCookies("XSRF-TOKEN, JSESSIONID")
 					.invalidateHttpSession(true)
 				;
 
@@ -154,7 +151,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
 
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
-		// http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
 
 		doConfigure(http);
 
