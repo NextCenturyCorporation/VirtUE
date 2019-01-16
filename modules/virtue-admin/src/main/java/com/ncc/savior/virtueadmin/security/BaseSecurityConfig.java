@@ -34,6 +34,7 @@ import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.http.MediaType;
 
 import com.ncc.savior.virtueadmin.config.CorsFilter;
 import com.ncc.savior.virtueadmin.data.IUserManager;
