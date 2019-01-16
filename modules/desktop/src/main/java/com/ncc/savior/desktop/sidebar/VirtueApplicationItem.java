@@ -212,7 +212,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
-				if (!Sidebar.askAgain) {
+				if (event.getClickCount() == 2) {
 					try {
 						virtueService.startApplication(vc.getVirtue(), ad);
 
@@ -233,6 +233,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 							}
 						});
 
+						timer.setRepeats(false);
 						timer.start();
 
 						// virtue.setVirtueState(VirtueState.LAUNCHING);
@@ -241,7 +242,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 						String msg = "Error attempting to start a " + ad.getName() + " application";
 						logger.error(msg);
 					}
-				} else {
+				} else if (Sidebar.askAgain) {
 					setupDialog();
 				}
 			}
