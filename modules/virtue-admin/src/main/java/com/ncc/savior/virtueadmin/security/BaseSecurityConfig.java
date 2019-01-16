@@ -88,6 +88,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				response.setStatus(200);
+				response.setContentType(MediaType.APPLICATION_JSON.toString());
 				response.getWriter().println("Login success");
 			}
 		};
