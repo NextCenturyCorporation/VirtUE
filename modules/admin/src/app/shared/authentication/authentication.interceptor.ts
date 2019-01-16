@@ -32,33 +32,11 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     // });
 
     request = request.clone({
-      // headers: request.headers.set('content-type', 'x-form-encoded'),
-      // headers: request.headers.set('content-type', 'plain/text'),
-      // headers: request.headers.set('content-type', 'application/json'),
       withCredentials: true
     });
 
-    // add authorization header with jwt token if available
-    // let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    // if (currentUser && currentUser.token) {
-    //   request = request.clone({
-    //     setHeaders: {
-    //         Authorization: `Bearer ${currentUser.token}`
-    //     }
-    //   });
-    // }
-
-    if (this.auth.isAuthenticated()) {
-      // request = request.clone({
-      //   setHeaders: {
-      //       Authorization: `Bearer ${currentUser.token}`
-      //   }
-      // });
-    }
-
 
     console.log(request);
-    // return next.handle(request);
 
     return next
       .handle(request)

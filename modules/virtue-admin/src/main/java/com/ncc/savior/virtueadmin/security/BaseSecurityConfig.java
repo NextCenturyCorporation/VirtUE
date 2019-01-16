@@ -37,6 +37,7 @@ import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpMethod;
 
@@ -75,21 +76,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		            "/logout"
 		    };
 	}
-
-	// @Override
-	// protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-	// // 	logger.debug("here " + auth.toString());
-	//     auth.inMemoryAuthentication()
-	//         .withUser("admin").password("e").roles("ADMIN")
-	//         .and()
-	//         .withUser("e").password("e").roles("ADMIN")
-	//         .and()
-	//         .withUser("user").password("12345").roles("USER");
-	//
-	// 		// auth.ldapAuthentication();
-	//
-	// 		// auth.
-	// }
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
@@ -146,18 +132,13 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 					.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
 					.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
 					.antMatchers("/desktop/**").hasRole(USER_ROLE)
-					.antMatchers("/data/**").permitAll() // note this is an backdoor for development/testing.
-					.anyRequest().authenticated()
+					.antMatchers("/data/**").permitAll().anyRequest().authenticated() // note this is an backdoor for development/testing.
 					.and()
 				.formLogin()
 					.failureHandler(authenticationFailureHandler)
 					.successHandler(successHandler)
-					.loginPage("/login")//.permitAll()
+					.loginPage("/login")
 					.and()
-        // .exceptionHandling()
-        //   .accessDeniedHandler(getAccessDeniedHandler())
-          // .authenticationEntryPoint(authenticationEntryPoint())
-					// .and()
 				.logout()
 					.clearAuthentication(true)
 					.deleteCookies("XSRF-TOKEN")
@@ -167,12 +148,13 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
 		http.sessionManagement()//.maximumSessions(10) // per-person, or total?
-				// .invalidSessionUrl("/login")
+				.invalidSessionUrl("/login")
 				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 				.maximumSessions(10)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
 
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
+		// http.addFilterAfter(new CsrfTokenResponseHeaderBindingFilter(), CsrfFilter.class);
 
 		doConfigure(http);
 
