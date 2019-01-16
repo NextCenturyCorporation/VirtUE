@@ -66,7 +66,9 @@ import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.sidebar.prefs.DesktopPreference;
 import com.ncc.savior.desktop.sidebar.prefs.GridbagPreferenceViewer;
 import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
+import com.ncc.savior.desktop.virtues.BridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.BridgeSensorService;
+import com.ncc.savior.desktop.virtues.ClipboardBridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.MessageType;
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -286,7 +288,9 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	private void onLogin(DesktopUser user) throws IOException {
-		bridgeSensorService.sendMessage("Logged in", authService.getUser().getUsername(), MessageType.LOGIN);
+		BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged in", authService.getUser().getUsername(),
+				MessageType.LOGIN);
+		bridgeSensorService.sendMessage(messageObj);
 		frame.getContentPane().removeAll();
 		frame.validate();
 		frame.repaint();
@@ -1075,8 +1079,9 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void mouseClicked(MouseEvent event) {
 				try {
-					bridgeSensorService.sendMessage("Logged out", authService.getUser().getUsername(),
-							MessageType.LOGOUT);
+					BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out",
+							authService.getUser().getUsername(), MessageType.LOGOUT);
+					bridgeSensorService.sendMessage(messageObj);
 				} catch (InvalidUserLoginException e1) {
 					logger.error("error with sending message to bridge sensor");
 				}
@@ -1241,10 +1246,10 @@ public class Sidebar implements VirtueChangeHandler {
 			@Override
 			public void onMessage(String dataSourceGroupId, String dataDestinationGroupId) {
 				try {
-					bridgeSensorService.sendClipboardMessage("Pasted between virtues",
-							authService.getUser().getUsername(),
-							MessageType.PASTE,
-							dataSourceGroupId, dataDestinationGroupId);
+					ClipboardBridgeSensorMessage messageObj = new ClipboardBridgeSensorMessage("Pasted between virtues",
+							authService.getUser().getUsername(), MessageType.PASTE, dataSourceGroupId,
+							dataDestinationGroupId);
+					bridgeSensorService.sendMessage(messageObj);
 				} catch (InvalidUserLoginException e) {
 					logger.error("error with sending message to bridge sensor");
 				}

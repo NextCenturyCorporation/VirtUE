@@ -68,36 +68,8 @@ public class BridgeSensorService {
 		}
 	}
 
-	public void sendMessage(String message, String username, MessageType messageType) {
+	public void sendMessage(BridgeSensorMessage messageObj) {
 		if (enabled) {
-			BridgeSensorMessage messageObj = new BridgeSensorMessage(message, username, messageType);
-			messageQueue.add(messageObj);
-		}
-	}
-
-	public void sendClipboardMessage(String message, String username, MessageType messageType, String source,
-			String destination) {
-		if (enabled) {
-			ClipboardBridgeSensorMessage messageObj = new ClipboardBridgeSensorMessage(message, username, messageType,
-					source, destination);
-			messageQueue.add(messageObj);
-		}
-	}
-
-	public void sendVirtueMessage(String message, String username, MessageType messageType, String virtueId,
-			String virtueName) {
-		if (enabled) {
-			VirtueBridgeSensorMessage messageObj = new VirtueBridgeSensorMessage(message, username, messageType,
-					virtueId, virtueName);
-			messageQueue.add(messageObj);
-		}
-	}
-
-	public void sendApplicationMessage(String message, String username, MessageType messageType, String virtueId,
-			String virtueName, String applicationId, String applicationName) {
-		if (enabled) {
-			ApplicationBridgeSensorMessage messageObj = new ApplicationBridgeSensorMessage(message, username,
-					messageType, virtueId, virtueName, applicationId, applicationName);
 			messageQueue.add(messageObj);
 		}
 	}
