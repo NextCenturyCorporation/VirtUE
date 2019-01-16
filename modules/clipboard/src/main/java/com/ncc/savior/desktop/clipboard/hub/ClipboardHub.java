@@ -347,14 +347,6 @@ public class ClipboardHub {
 			listener.onMessage(dataSourceGroupId, dataDestinationGroupId);
 		}
 	}
-	
-	public void addRemoveVirtueListener(IDataMessageListener listener) {
-		dataMessageListeners.add(listener);
-	}
-
-	public void deleteRemoveVirtueListener(IDataMessageListener listener) {
-		dataMessageListeners.remove(listener);
-	}
 
 	public static interface IDataMessageListener {
 
