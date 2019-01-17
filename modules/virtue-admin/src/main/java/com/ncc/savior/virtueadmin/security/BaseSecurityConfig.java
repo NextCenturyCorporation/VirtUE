@@ -109,14 +109,14 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 			.logout()
 				.clearAuthentication(true)
-				.deleteCookies("XSRF-TOKEN, JSESSIONID")
+				.deleteCookies("XSRF-TOKEN", "JSESSIONID")
 				.invalidateHttpSession(true);
 
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
 		http.sessionManagement().maximumSessions(10)
 				// .invalidSessionUrl("/login")
-				// .maximumSessions(1)
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 		doConfigure(http);
