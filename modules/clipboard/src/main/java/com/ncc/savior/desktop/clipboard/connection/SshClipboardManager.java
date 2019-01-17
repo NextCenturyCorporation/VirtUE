@@ -66,7 +66,7 @@ public class SshClipboardManager implements IClipboardManager {
 	private ClipboardClient localClipboardClient;
 
 	private HashMap<String, ClipboardClientConnectionProperties> propertiesMap;
-
+	
 	private long retryPeriodMillis = 2000;
 
 	public SshClipboardManager(ClipboardHub clipboardHub, String sourceJarPath) {
@@ -137,7 +137,7 @@ public class SshClipboardManager implements IClipboardManager {
 			IMessageSerializer localClientSerializer = pair.serializerB;
 			this.clipboardHub.addClient(ClipboardPermission.DESKTOP_CLIENT_GROUP_ID, localHubSerializer,
 					"Local Desktop");
-			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper);
+			this.localClipboardClient = new ClipboardClient(localClientSerializer, clipboardWrapper, false);
 		} catch (Exception e) {
 			PlainAlertMessage pam = new PlainAlertMessage("Clipboard failed",
 					"Local clipboard initialization failed.  Local clipboard will not be connected with virtues.");

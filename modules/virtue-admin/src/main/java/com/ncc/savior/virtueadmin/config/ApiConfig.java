@@ -49,7 +49,7 @@ public class ApiConfig extends ResourceConfig {
 		register(WebServiceUtil.class);
 		register(MultiPartFeature.class);
 		
-//		register(CorsFilter.class);
+		register(CorsFilter.class);
 		
 		property(ServletProperties.FILTER_FORWARD_ON_404, true);
 		
