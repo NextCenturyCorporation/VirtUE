@@ -21,6 +21,7 @@ import com.ncc.savior.desktop.rdp.FreeRdpClient;
 import com.ncc.savior.desktop.rdp.IRdpClient;
 import com.ncc.savior.desktop.rdp.WindowsRdp;
 import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
+import com.ncc.savior.desktop.virtues.BridgeSensorService;
 import com.ncc.savior.desktop.virtues.DesktopResourceService;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.IconResourceService;
@@ -53,7 +54,11 @@ public class SidebarApplication {
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean packetDebug = props.getBoolean(PropertyManager.PROPERTY_PACKET_DEBUG, false);
-		boolean enableRMI = props.getBoolean(PropertyManager.PROPERTY_ENABLE_RMI, false);
+		boolean enableRMI = props.getBoolean(PropertyManager.PROPERTY_ENABLE_RMI, true);
+		boolean enableBridgeSensor = props.getBoolean(PropertyManager.PROPERTY_BRIDGE_SENSOR_ENABLED, false);
+		long bridgeSensorTimeoutMillis = props.getLong(PropertyManager.PROPERTY_BRIDGE_SENSOR_TIMEOUT_MILLIS, 5000);
+		int port = props.getInt(PropertyManager.PROPERTY_BRIDGE_SENSOR_PORT, 8080);
+		String host = props.getString(PropertyManager.PROPERTY_BRIDGE_SENSOR_HOST);
 		// boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS,
 		// false);
 		// String style = props.getString(PropertyManager.PROPERTY_STYLE);
@@ -66,7 +71,10 @@ public class SidebarApplication {
 
 		AuthorizationService authService = new AuthorizationService(requiredDomain, loginUrl.toString(),
 				logoutUrl.toString());
-		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl);
+		BridgeSensorService bridgeSensorService = new BridgeSensorService(bridgeSensorTimeoutMillis, port, host,
+				enableBridgeSensor);
+		DesktopResourceService drs = new DesktopResourceService(authService, desktopUrl.toString(), allowInsecureSsl,
+				bridgeSensorService);
 		IApplicationManagerFactory appManager;
 		appManager = new SwingApplicationManagerFactory(new SwingKeyboard(new SwingKeyMap()));
 		File freerdpExe = null;
@@ -90,9 +98,11 @@ public class SidebarApplication {
 		PreferenceService prefService = new PreferenceService(authService);
 		VirtueService virtueService = new VirtueService(drs, appManager, rdpClient, clipboardManager, authService,
 				colorManager, packetDebug);
-		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService);
+		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService,
+				bridgeSensorService);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
 		clipboardHub.addDefaultApplicationListener(sidebar.getDefaultApplicationHandler());
+		clipboardHub.addDataMessageListener(sidebar.getDataMessageListener());
 		controller.init(primaryFrame);
 	}
 }
