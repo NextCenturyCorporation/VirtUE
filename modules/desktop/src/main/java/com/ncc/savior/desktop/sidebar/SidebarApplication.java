@@ -53,6 +53,7 @@ public class SidebarApplication {
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean packetDebug = props.getBoolean(PropertyManager.PROPERTY_PACKET_DEBUG, false);
+		boolean enableRMI = props.getBoolean(PropertyManager.PROPERTY_ENABLE_RMI, true);
 		// boolean useColors = props.getBoolean(PropertyManager.PROPERTY_USE_COLORS,
 		// false);
 		// String style = props.getString(PropertyManager.PROPERTY_STYLE);
@@ -83,7 +84,7 @@ public class SidebarApplication {
 		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis, dialog);
 		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
 		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
-		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
+		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath, enableRMI);
 		ColorManager colorManager = new ColorManager();
 		IIconService iconService = new IconResourceService(drs);
 		PreferenceService prefService = new PreferenceService(authService);
