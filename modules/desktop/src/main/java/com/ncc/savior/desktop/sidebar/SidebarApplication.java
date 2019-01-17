@@ -54,7 +54,7 @@ public class SidebarApplication {
 		String freerdpPath = props.getString(PropertyManager.PROPERTY_FREERDP_PATH);
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean packetDebug = props.getBoolean(PropertyManager.PROPERTY_PACKET_DEBUG, false);
-		boolean enableRMI = props.getBoolean(PropertyManager.PROPERTY_ENABLE_RMI, true);
+		boolean enableRMI = props.getBoolean(PropertyManager.PROPERTY_ENABLE_RMI, false);
 		boolean enableBridgeSensor = props.getBoolean(PropertyManager.PROPERTY_BRIDGE_SENSOR_ENABLED, false);
 		long bridgeSensorTimeoutMillis = props.getLong(PropertyManager.PROPERTY_BRIDGE_SENSOR_TIMEOUT_MILLIS, 5000);
 		int port = props.getInt(PropertyManager.PROPERTY_BRIDGE_SENSOR_PORT, 8080);
