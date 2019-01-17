@@ -56,6 +56,7 @@ import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
+import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.IDataMessageListener;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
@@ -65,7 +66,11 @@ import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.sidebar.prefs.DesktopPreference;
 import com.ncc.savior.desktop.sidebar.prefs.GridbagPreferenceViewer;
 import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
+import com.ncc.savior.desktop.virtues.BridgeSensorMessage;
+import com.ncc.savior.desktop.virtues.BridgeSensorService;
+import com.ncc.savior.desktop.virtues.ClipboardBridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.IIconService;
+import com.ncc.savior.desktop.virtues.MessageType;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -178,8 +183,10 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private boolean useAdminColor = true;
 
+	private BridgeSensorService bridgeSensorService;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
-			ColorManager colorManager, PreferenceService preferenceService) {
+			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorService) {
 		this.authService = authService;
 		this.virtueIdToVtc = new HashMap<String, VirtueTileContainer>();
 		this.virtueIdToVlc = new HashMap<String, VirtueListContainer>();
@@ -187,6 +194,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.iconService = iconService;
 		this.colorManager = colorManager;
 		this.preferenceService = preferenceService;
+		this.bridgeSensorService = bridgeSensorService;
 
 		this.textField = new JTextField();
 		this.searchLabel = new JLabel();
@@ -280,6 +288,9 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	private void onLogin(DesktopUser user) throws IOException {
+		BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged in", authService.getUser().getUsername(),
+				MessageType.LOGIN);
+		bridgeSensorService.sendMessage(messageObj);
 		frame.getContentPane().removeAll();
 		frame.validate();
 		frame.repaint();
@@ -1067,6 +1078,13 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
+				try {
+					BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out",
+							authService.getUser().getUsername(), MessageType.LOGOUT);
+					bridgeSensorService.sendMessage(messageObj);
+				} catch (InvalidUserLoginException e1) {
+					logger.error("error with sending message to bridge sensor");
+				}
 				authService.logout();
 				loading = true;
 				try {
@@ -1221,5 +1239,22 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public IDefaultApplicationListener getDefaultApplicationHandler() {
 		return defaulApplicationLauncher;
+	}
+
+	public IDataMessageListener getDataMessageListener() {
+		IDataMessageListener listener = new IDataMessageListener() {
+			@Override
+			public void onMessage(String dataSourceGroupId, String dataDestinationGroupId) {
+				try {
+					ClipboardBridgeSensorMessage messageObj = new ClipboardBridgeSensorMessage("Pasted between virtues",
+							authService.getUser().getUsername(), MessageType.PASTE, dataSourceGroupId,
+							dataDestinationGroupId);
+					bridgeSensorService.sendMessage(messageObj);
+				} catch (InvalidUserLoginException e) {
+					logger.error("error with sending message to bridge sensor");
+				}
+			}
+		};
+		return listener;
 	}
 }

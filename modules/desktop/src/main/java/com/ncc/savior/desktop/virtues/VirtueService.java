@@ -237,7 +237,7 @@ public class VirtueService {
 					itr.remove();
 					Thread t = new Thread(() -> {
 						try {
-							DesktopVirtueApplication app = desktopResourceService.startApplication(virtue.getId(),
+							DesktopVirtueApplication app = desktopResourceService.startApplication(virtue,
 									appDefn);
 							ensureConnection(app, virtue, color);
 						} catch (Exception e) {
@@ -281,7 +281,7 @@ public class VirtueService {
 					v.setVirtueState(virtue.getVirtueState());
 				} else {
 					if (VirtueState.RUNNING.equals(virtue.getVirtueState())) {
-						app = desktopResourceService.startApplication(virtueId, appDefn);
+						app = desktopResourceService.startApplication(virtue, appDefn);
 						ensureConnection(app, virtue, color);
 					} else if (VirtueState.STOPPED.equals(virtue.getVirtueState())) {
 						startVirtue(virtue);
