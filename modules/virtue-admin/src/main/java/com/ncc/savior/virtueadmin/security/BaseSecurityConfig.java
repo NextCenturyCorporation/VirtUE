@@ -115,9 +115,10 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
-		http.sessionManagement().maximumSessions(10)
+		http.sessionManagement()
 				// .invalidSessionUrl("/login")
 				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+				.maximumSessions(10)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 		doConfigure(http);
