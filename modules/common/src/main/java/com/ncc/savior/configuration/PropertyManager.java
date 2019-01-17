@@ -46,6 +46,10 @@ public class PropertyManager {
 	public static final String PROPERTY_CLIPBOARD_ASK_TIMEOUT_MILLIS = "savior.desktop.clipboard.askTimeoutMillis";
 	public static final String PROPERTY_ALERT_PERSIST_TIME = "savior.desktop.alerts.persistMillis";
 	public static final String PROPERTY_PACKET_DEBUG = "savior.desktop.debug.packet";
+	public static final String PROPERTY_BRIDGE_SENSOR_TIMEOUT_MILLIS = "savior.desktop.bridgeSensor.timeoutMillis";
+	public static final String PROPERTY_BRIDGE_SENSOR_HOST = "savior.desktop.bridgeSensor.host";
+	public static final String PROPERTY_BRIDGE_SENSOR_PORT = "savior.desktop.bridgeSensor.port";
+	public static final String PROPERTY_BRIDGE_SENSOR_ENABLED = "savior.desktop.bridgeSensor.enabled";
 	private Properties props;
 
 	public PropertyManager(File... files) {
@@ -162,6 +166,17 @@ public class PropertyManager {
 		long value = defaultValue;
 		try {
 			value = Long.valueOf(strVal);
+		} catch (RuntimeException e) {
+			logger.warn("Error reading property=" + property, e);
+		}
+		return value;
+	}
+	
+	public int getInt(String property, int defaultValue) {
+		String strVal = getProperty(property, null);
+		int value = defaultValue;
+		try {
+			value = Integer.valueOf(strVal);
 		} catch (RuntimeException e) {
 			logger.warn("Error reading property=" + property, e);
 		}
