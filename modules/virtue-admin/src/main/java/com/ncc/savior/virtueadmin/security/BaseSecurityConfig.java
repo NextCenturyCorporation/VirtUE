@@ -16,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,9 +51,9 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	private static Logger logger = LoggerFactory.getLogger(BaseSecurityConfig.class);
 	protected static final String ADMIN_ROLE = "ADMIN";
 	protected static final String USER_ROLE = "USER";
-	
-	private String [] csrfDisabledURLs;
-	
+
+	private String[] csrfDisabledURLs;
+
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
 
@@ -63,12 +65,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	protected BaseSecurityConfig(String type) {
 		logger.info("Security configuration enabled. Type=" + type);
-		csrfDisabledURLs = new String [] {
-			"/desktop/**",
-			"/data/**",
-			"/login",
-			"/logout"
-		    };
+		csrfDisabledURLs = new String[] { "/desktop/**", "/data/**", "/login", "/logout" };
 	}
 
 	@Override
@@ -82,28 +79,33 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().write("Login failure: " + exception.getMessage());
 			}
 		};
-		AuthenticationSuccessHandler successHandler=new AuthenticationSuccessHandler() {
-			
+		AuthenticationSuccessHandler successHandler = new AuthenticationSuccessHandler() {
+
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 				response.setStatus(200);
+				response.setContentType(MediaType.APPLICATION_JSON.toString());
 				response.getWriter().println("Login success");
 			}
 		};
 		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
-				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
-				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
-				.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
-				.antMatchers("/desktop/**").hasRole(USER_ROLE)
-				.antMatchers("/data/**").permitAll().anyRequest().authenticated().and().formLogin()
-				.failureHandler(authenticationFailureHandler).successHandler(successHandler).loginPage("/login").permitAll().and().logout().permitAll();
+				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers(HttpMethod.OPTIONS, "/admin/**").permitAll()// allow
+																														// CORS
+																														// option
+																														// calls
+				.antMatchers(HttpMethod.OPTIONS, "/login").permitAll().antMatchers(HttpMethod.OPTIONS, "/logout")
+				.permitAll().antMatchers("/desktop/**").hasRole(USER_ROLE).antMatchers("/data/**").permitAll()
+				.anyRequest().authenticated().and().formLogin().failureHandler(authenticationFailureHandler)
+				.successHandler(successHandler).loginPage("/login").and().logout().clearAuthentication(true)
+				.deleteCookies("XSRF-TOKEN", "JSESSIONID").invalidateHttpSession(true);
 
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
+		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+				.ignoringAntMatchers(csrfDisabledURLs);
 
-		http.sessionManagement().maximumSessions(10)
+		http.sessionManagement()
 				// .invalidSessionUrl("/login")
-				// .maximumSessions(1)
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).maximumSessions(10)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 		doConfigure(http);
