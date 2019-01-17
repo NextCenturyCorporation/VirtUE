@@ -50,7 +50,6 @@ public class PropertyManager {
 	public static final String PROPERTY_BRIDGE_SENSOR_HOST = "savior.desktop.bridgeSensor.host";
 	public static final String PROPERTY_BRIDGE_SENSOR_PORT = "savior.desktop.bridgeSensor.port";
 	public static final String PROPERTY_BRIDGE_SENSOR_ENABLED = "savior.desktop.bridgeSensor.enabled";
-	public static final String PROPERTY_ENABLE_RMI = "savior.desktop.clipboard.enableRMI";
 	private Properties props;
 
 	public PropertyManager(File... files) {
