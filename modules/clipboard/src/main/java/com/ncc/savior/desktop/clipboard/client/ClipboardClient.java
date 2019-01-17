@@ -53,7 +53,7 @@ public class ClipboardClient implements Closeable {
 	 *            - abstraction for clipboard functions.
 	 */
 
-	public ClipboardClient(IMessageSerializer serializer, IClipboardWrapper clipboardWrapper) throws IOException {
+	public ClipboardClient(IMessageSerializer serializer, IClipboardWrapper clipboardWrapper, boolean enableRMI) throws IOException {
 		this.requestToThread = new TreeMap<String, Thread>();
 		this.requestToData = new TreeMap<String, ClipboardData>();
 		IClipboardMessageHandler handler = new IClipboardMessageHandler() {
@@ -125,7 +125,9 @@ public class ClipboardClient implements Closeable {
 			}
 		};
 		clipboardWrapper.setClipboardListener(listener);
-		RmiServer.bindServer(myId, transmitter);
+		if (enableRMI) {
+			RmiServer.bindServer(myId, transmitter);
+		}
 	}
 	
 	public void initRemoteClient() throws IOException {

@@ -55,6 +55,7 @@ public class SidebarApplication {
 		boolean allowInsecureSsl = props.getBoolean(PropertyManager.PROPERTY_ALLOW_INSECURE_SSL, false);
 		boolean packetDebug = props.getBoolean(PropertyManager.PROPERTY_PACKET_DEBUG, false);
 		boolean enableBridgeSensor = props.getBoolean(PropertyManager.PROPERTY_BRIDGE_SENSOR_ENABLED, false);
+		boolean enableRMI = props.getBoolean(PropertyManager.PROPERTY_ENABLE_RMI, false);
 		long bridgeSensorTimeoutMillis = props.getLong(PropertyManager.PROPERTY_BRIDGE_SENSOR_TIMEOUT_MILLIS, 5000);
 		int port = props.getInt(PropertyManager.PROPERTY_BRIDGE_SENSOR_PORT, 8080);
 		String host = props.getString(PropertyManager.PROPERTY_BRIDGE_SENSOR_HOST);
@@ -91,7 +92,7 @@ public class SidebarApplication {
 		ICrossGroupDataGuard dataGuard = new RestDataGuard(drs, dataGuardAskStickyTimeoutMillis, dialog);
 		ClipboardHub clipboardHub = new ClipboardHub(dataGuard);
 		UserAlertingServiceHolder.setAlertService(new ToastUserAlertService(alertPersistTimeMillis));
-		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath);
+		IClipboardManager clipboardManager = new SshClipboardManager(clipboardHub, sourceJarPath, enableRMI);
 		ColorManager colorManager = new ColorManager();
 		IIconService iconService = new IconResourceService(drs);
 		PreferenceService prefService = new PreferenceService(authService);

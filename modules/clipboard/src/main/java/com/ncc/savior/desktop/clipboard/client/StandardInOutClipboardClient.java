@@ -39,7 +39,7 @@ public class StandardInOutClipboardClient {
 
 			IConnectionWrapper connection = new StandardInOutConnection();
 			IMessageSerializer serializer = IMessageSerializer.getDefaultSerializer(connection);
-			ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper);
+			ClipboardClient client = new ClipboardClient(serializer, clipboardWrapper, false);
 			client.initRemoteClient();
 			client.waitUntilStopped();
 			client.close();
