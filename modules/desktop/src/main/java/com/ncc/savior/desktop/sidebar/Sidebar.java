@@ -185,11 +185,14 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private BridgeSensorService bridgeSensorService;
 
+	private Map<String, DesktopVirtue> virtueMap;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
 			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorService) {
 		this.authService = authService;
 		this.virtueIdToVtc = new HashMap<String, VirtueTileContainer>();
 		this.virtueIdToVlc = new HashMap<String, VirtueListContainer>();
+		this.virtueMap = new HashMap<String, DesktopVirtue>();
 		this.virtueService = virtueService;
 		this.iconService = iconService;
 		this.colorManager = colorManager;
@@ -310,6 +313,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void changeVirtue(DesktopVirtue virtue) {
+		virtueMap.put(virtue.getId(), virtue);
 		VirtueTileContainer vtc = virtueIdToVtc.get(virtue.getTemplateId());
 		VirtueListContainer vlc = virtueIdToVlc.get(virtue.getTemplateId());
 
@@ -335,6 +339,7 @@ public class Sidebar implements VirtueChangeHandler {
 		}
 
 		for (DesktopVirtue virtue : virtues) {
+			virtueMap.put(virtue.getTemplateId(), virtue);
 			if (useAdminColor) {
 				try {
 					Color hc = Color.decode(virtue.getColor());
@@ -489,6 +494,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	@Override
 	public void removeVirtue(DesktopVirtue virtue) {
+		virtueMap.remove(virtue.getId());
 		VirtueTileContainer vtc = virtueIdToVtc.remove(virtue.getTemplateId());
 		virtueIdToVlc.remove(virtue.getTemplateId());
 
@@ -1256,5 +1262,9 @@ public class Sidebar implements VirtueChangeHandler {
 			}
 		};
 		return listener;
+	}
+
+	public Map<String, DesktopVirtue> getVirtueMap() {
+		return virtueMap;
 	}
 }

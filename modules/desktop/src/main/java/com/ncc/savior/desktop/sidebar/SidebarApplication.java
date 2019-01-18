@@ -100,6 +100,7 @@ public class SidebarApplication {
 		Sidebar sidebar = new Sidebar(virtueService, authService, iconService, colorManager, prefService,
 				bridgeSensorService);
 		SidebarController controller = new SidebarController(virtueService, sidebar, authService);
+		// DesktopRmiServer.bindServer(virtueService, sidebar);
 		clipboardHub.addDefaultApplicationListener(sidebar.getDefaultApplicationHandler());
 		clipboardHub.addDataMessageListener(sidebar.getDataMessageListener());
 		controller.init(primaryFrame);
