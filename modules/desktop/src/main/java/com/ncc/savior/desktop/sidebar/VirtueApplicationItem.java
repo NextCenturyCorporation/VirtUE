@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.util.Comparator;
 
 import javax.swing.BorderFactory;
@@ -214,8 +215,7 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 				if ((event.getClickCount() == 2 && Sidebar.askAgain)
 						|| (event.getClickCount() == 1 && !Sidebar.askAgain)) {
 					try {
-						logger.debug("***********");
-						// virtueService.startApplication(vc.getVirtue(), ad);
+						virtueService.startApplication(vc.getVirtue(), ad);
 
 						if (hasFullBorder()) {
 							container.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.DARK_GRAY, Color.DARK_GRAY));
@@ -311,15 +311,14 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
 				dialog.dispose();
-				logger.debug("***********");
-				// try {
-				// virtueService.startApplication(virtue, ad);
-				// // virtue.setVirtueState(VirtueState.LAUNCHING);
-				// // vc.updateVirtue(virtue);
-				// } catch (IOException e1) {
-				// String msg = "Error attempting to start a " + ad.getName() + " application";
-				// logger.error(msg);
-				// }
+				try {
+					virtueService.startApplication(virtue, ad);
+					// virtue.setVirtueState(VirtueState.LAUNCHING);
+					// vc.updateVirtue(virtue);
+				} catch (IOException e1) {
+					String msg = "Error attempting to start a " + ad.getName() + " application";
+					logger.error(msg);
+				}
 			}
 		});
 
