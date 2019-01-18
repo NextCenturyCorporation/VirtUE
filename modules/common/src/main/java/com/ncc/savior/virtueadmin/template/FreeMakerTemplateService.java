@@ -17,6 +17,17 @@ import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateNotFoundException;
 
+/**
+ * Implementation of {@link ITemplateService} which uses FreeMaker as the
+ * implementation. This implementation utilizes a default/override system for
+ * templates. With a given templatePath (constructor arg), the service searchs
+ * for templates first in that path on the working directory. If a template
+ * cannot be found, it will then search the classpath. Therefore, we can put
+ * default files in the classpath/jar file and allow local instances to override
+ * using the working directory based templates.
+ * 
+ *
+ */
 public class FreeMakerTemplateService implements ITemplateService {
 	private static final Logger logger = LoggerFactory.getLogger(FreeMakerTemplateService.class);
 	private Configuration workingCfg;

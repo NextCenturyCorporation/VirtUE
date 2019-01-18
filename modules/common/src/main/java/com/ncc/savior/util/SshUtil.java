@@ -262,8 +262,19 @@ public class SshUtil {
 		return session;
 	}
 
-	public static List<String> runCommandsFromFile(ITemplateService templateService, Session session, String templateName,
-			Map<String, Object> dataModel) throws TemplateException {
+	/**
+	 * Utilizes an {@link ITemplateService} to send commands from a template file on
+	 * a session. Each line of the templated script will be run separately.
+	 * 
+	 * @param templateService
+	 * @param session
+	 * @param templateName
+	 * @param dataModel
+	 * @return
+	 * @throws TemplateException
+	 */
+	public static List<String> runCommandsFromFile(ITemplateService templateService, Session session,
+			String templateName, Map<String, Object> dataModel) throws TemplateException {
 		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
 		List<String> output = new ArrayList<String>();
 		for (String line : lines) {
