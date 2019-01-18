@@ -2,8 +2,8 @@
 #
 # print host names for servers
 #
-mydir=$(readlink --canonicalize $(dirname $0))
-cd "$mydir"
+mydir=$(readlink --canonicalize "$(dirname $0)")
+cd "$mydir" || exit 1
 #echo -ne "directory server: \t"
 #terraform state show aws_instance.directory_service | sed -n 's/public_dns *= \(.*\)/\1/p'
 echo -ne "file server: \t"

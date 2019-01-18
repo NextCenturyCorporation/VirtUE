@@ -167,6 +167,10 @@ public class XenGuestManager {
 		updateSshKnownHosts(session, ipAddress);
 		logger.debug("Attempting to setup port forwarding. ");
 		String hostname = SshUtil.sendCommandFromSession(session, "hostname").get(0);
+		if (hostname==null) {
+			hostname="custom-"+ipAddress.replaceAll("\\." ,"-");
+			logger.debug("hostname was not found!  Using "+hostname);
+		}
 		String dns = route53.AddARecord(hostname, xenVm.getInternalIpAddress());
 		setupHostname(session, loginUsername, hostname, dns, ipAddress);
 		setupPortForwarding(session, externalSensingPort, startingInternalPort, numSensingPorts, ipAddress);
