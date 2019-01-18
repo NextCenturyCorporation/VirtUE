@@ -109,7 +109,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			.deleteCookies("XSRF-TOKEN", "JSESSIONID")
 			.invalidateHttpSession(true);
 
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
+		//http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
 		http.sessionManagement()
 				// .invalidSessionUrl("/login")
@@ -118,7 +118,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 		doConfigure(http);
 
-		//http.csrf().disable();
+		http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
