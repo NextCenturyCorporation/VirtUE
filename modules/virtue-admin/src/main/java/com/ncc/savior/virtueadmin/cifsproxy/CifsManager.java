@@ -2,7 +2,6 @@ package com.ncc.savior.virtueadmin.cifsproxy;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -16,19 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +23,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.kerberos.client.KerberosRestTemplate;
 import org.springframework.util.MultiValueMap;
@@ -88,8 +74,6 @@ import com.ncc.savior.virtueadmin.service.DesktopVirtueService.PollHandler;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager.VirtueCreationDeletionListener;
-import com.sun.security.jgss.ExtendedGSSContext;
-import com.sun.security.jgss.ExtendedGSSCredential;
 
 /**
  * Main manager class than handles creation and deletion of CIFs Proxies. There
@@ -132,7 +116,6 @@ public class CifsManager {
 	private String subnetName;
 	private ActiveVirtueManager activeVirtueManager;
 	private IKeyManager keyManager;
-	private Client client;
 	private ObjectMapper jsonMapper;
 	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser> cifsVmUpdater;
 
@@ -155,7 +138,6 @@ public class CifsManager {
 		this.cifsProxyVmTemplate = new VirtualMachineTemplate(UUID.randomUUID().toString(), "CifsProxyTemplate",
 				OS.LINUX, cifsProxyAmi, new ArrayList<ApplicationDefinition>(), cifsProxyLoginUser, false, new Date(0),
 				"system");
-		client = ClientBuilder.newClient();
 		this.jsonMapper = new ObjectMapper();
 		this.cifsVmUpdater = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser>(
 				"CifsProxyUpdater") {
@@ -509,69 +491,6 @@ public class CifsManager {
 			}
 		}
 		return output;
-	}
-
-	private byte[] getS4u2ProxyToken(VirtueUser user) throws GSSException {
-
-		Oid krb5Mechanism = new Oid("1.2.840.113554.1.2.2");
-		Oid krb5PrincipalNameType = new Oid("1.2.840.113554.1.2.2.1");
-		int usage = GSSCredential.ACCEPT_ONLY;
-		GSSManager manager = GSSManager.getInstance();
-		GSSName userName = manager.createName(user.getUsername(), GSSName.NT_USER_NAME);
-
-		try {
-			ExtendedGSSCredential serviceCredentials1 = (ExtendedGSSCredential) manager.createCredential(userName,
-					GSSCredential.DEFAULT_LIFETIME, krb5Mechanism, usage);
-		} catch (Throwable t) {
-			logger.error("Failed first attempt", t);
-		}
-		try {
-			ExtendedGSSCredential serviceCredentials2 = (ExtendedGSSCredential) manager
-					.createCredential(GSSCredential.INITIATE_ONLY);
-		} catch (Throwable t) {
-			logger.error("Failed second attempt", t);
-		}
-		try {
-			securityServerName = "HTTP/EC2AMAZ-H6GG6ER@VIRTUE2.NCCDO.COM";
-			GSSName serverName = manager.createName(this.securityServerName, krb5PrincipalNameType);
-
-			ExtendedGSSCredential serviceCredentials = (ExtendedGSSCredential) manager.createCredential(serverName,
-					GSSCredential.DEFAULT_LIFETIME, krb5Mechanism, GSSCredential.ACCEPT_ONLY);
-			GSSCredential impersonatedUserCreds = ((ExtendedGSSCredential) serviceCredentials).impersonate(userName);
-
-			final Oid KRB5_PRINCIPAL_OID = new Oid("1.2.840.113554.1.2.2.1");
-			GSSName servicePrincipal = manager.createName("HTTP/webservice-host.domain.ltd", KRB5_PRINCIPAL_OID);
-			ExtendedGSSContext extendedContext = (ExtendedGSSContext) manager.createContext(servicePrincipal,
-					new Oid("1.3.6.1.5.5.2"), impersonatedUserCreds, GSSContext.DEFAULT_LIFETIME);
-			final byte[] token = extendedContext.initSecContext(new byte[0], 0, 0);
-//			return token;
-		} catch (Throwable t) {
-			logger.error("Failed again", t);
-
-//			return null;
-		}
-		try {
-			Oid koid = new Oid("1.2.840.113554.1.2.2");
-			GSSName clientName = manager.createName("kdrumm@VIRTUE2.NCCDO.COM", GSSName.NT_USER_NAME);
-			GSSCredential clientCred = manager.createCredential(clientName, 8 * 3600, koid,
-					GSSCredential.INITIATE_ONLY);
-
-			GSSName serverName = manager.createName("EC2AMAZ-H6GG6ER@VIRTUE2.NCCDO.COM", GSSName.NT_HOSTBASED_SERVICE);
-
-			GSSContext context = manager.createContext(serverName, koid, clientCred, GSSContext.DEFAULT_LIFETIME);
-			context.requestMutualAuth(true);
-			context.requestConf(false);
-			context.requestInteg(true);
-
-			byte[] outToken = context.initSecContext(new byte[0], 0, 0);
-			System.out.println(outToken);
-			context.dispose();
-		} catch (Throwable t) {
-			logger.error("Failed again", t);
-
-//			return null;
-		}
-		return null;
 	}
 
 	private Runnable getTestForTimeoutRunnable() {
