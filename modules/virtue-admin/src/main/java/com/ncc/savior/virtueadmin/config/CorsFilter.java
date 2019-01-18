@@ -2,6 +2,13 @@ package com.ncc.savior.virtueadmin.config;
 
 import java.io.IOException;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -13,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 @Provider
-public class CorsFilter implements ContainerResponseFilter {
+public class CorsFilter implements ContainerResponseFilter, Filter {
 	private static final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
 	private Boolean enabled;
@@ -46,5 +53,29 @@ public class CorsFilter implements ContainerResponseFilter {
 			response.getHeaders().add("Access-Control-Allow-Credentials", allowCredentials);
 			response.getHeaders().add("Access-Control-Allow-Methods", allowMethods);
 		}
+	}
+
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		//do nothing
+	}
+
+	@Override
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
+			throws IOException, ServletException {
+		if (enabled) {
+//			HttpServletRequest httpReq = (HttpServletRequest) servletRequest;
+			HttpServletResponse response = (HttpServletResponse) servletResponse;
+			response.setHeader("Access-Control-Allow-Origin", allowOrigin);
+			response.setHeader("Access-Control-Allow-Headers", allowHeaders);
+			response.setHeader("Access-Control-Allow-Credentials", allowCredentials);
+			response.setHeader("Access-Control-Allow-Methods", allowMethods);
+		}
+		chain.doFilter(servletRequest, servletResponse);
+	}
+
+ 	@Override
+	public void destroy() {
+		//do nothing
 	}
 }

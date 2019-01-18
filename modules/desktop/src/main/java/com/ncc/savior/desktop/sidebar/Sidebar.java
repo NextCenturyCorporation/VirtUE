@@ -1,22 +1,28 @@
 package com.ncc.savior.desktop.sidebar;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.SystemColor;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -50,6 +56,7 @@ import com.ncc.savior.desktop.alerting.UserAlertingServiceHolder;
 import com.ncc.savior.desktop.authorization.AuthorizationService;
 import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
+import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.IDataMessageListener;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
@@ -59,7 +66,11 @@ import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
 import com.ncc.savior.desktop.sidebar.prefs.DesktopPreference;
 import com.ncc.savior.desktop.sidebar.prefs.GridbagPreferenceViewer;
 import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
+import com.ncc.savior.desktop.virtues.BridgeSensorMessage;
+import com.ncc.savior.desktop.virtues.BridgeSensorService;
+import com.ncc.savior.desktop.virtues.ClipboardBridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.IIconService;
+import com.ncc.savior.desktop.virtues.MessageType;
 import com.ncc.savior.desktop.virtues.VirtueService;
 import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
@@ -156,6 +167,7 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public static boolean askAgain = true;
 	private boolean loading = true;
+	private boolean empty = false;
 
 	private Comparator<VirtueApplicationItem> sortAppsByStatus;
 	private Comparator<VirtueTileContainer> sortVtByStatus;
@@ -171,8 +183,10 @@ public class Sidebar implements VirtueChangeHandler {
 
 	private boolean useAdminColor = true;
 
+	private BridgeSensorService bridgeSensorService;
+
 	public Sidebar(VirtueService virtueService, AuthorizationService authService, IIconService iconService,
-			ColorManager colorManager, PreferenceService preferenceService) {
+			ColorManager colorManager, PreferenceService preferenceService, BridgeSensorService bridgeSensorService) {
 		this.authService = authService;
 		this.virtueIdToVtc = new HashMap<String, VirtueTileContainer>();
 		this.virtueIdToVlc = new HashMap<String, VirtueListContainer>();
@@ -180,6 +194,7 @@ public class Sidebar implements VirtueChangeHandler {
 		this.iconService = iconService;
 		this.colorManager = colorManager;
 		this.preferenceService = preferenceService;
+		this.bridgeSensorService = bridgeSensorService;
 
 		this.textField = new JTextField();
 		this.searchLabel = new JLabel();
@@ -273,15 +288,20 @@ public class Sidebar implements VirtueChangeHandler {
 	}
 
 	private void onLogin(DesktopUser user) throws IOException {
+		BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged in", authService.getUser().getUsername(),
+				MessageType.LOGIN);
+		bridgeSensorService.sendMessage(messageObj);
 		frame.getContentPane().removeAll();
 		frame.validate();
 		frame.repaint();
 		setup(user);
 		frame.getContentPane().add(desktopContainer);
-		frame.setSize(491, 600);
 		setInitialViewPort();
 		if (loading) {
 			scrollPane.setViewportView(loadingContainer);
+		}
+		if (empty) {
+			renderEmpty();
 		}
 
 		UserAlertingServiceHolder.resetHistoryManager();
@@ -308,8 +328,9 @@ public class Sidebar implements VirtueChangeHandler {
 	// ***Updating Virtues***
 	@Override
 	public void addVirtues(List<DesktopVirtue> virtues) throws IOException, InterruptedException, ExecutionException {
-		if (loading) {
+		if (loading || empty) {
 			loading = false;
+			empty = false;
 			setInitialViewPort();
 		}
 
@@ -388,11 +409,15 @@ public class Sidebar implements VirtueChangeHandler {
 							vlc.addApplication(ad, virtueListVa);
 
 							Consumer<Image> consumer = i -> {
-								appsTileVa.setTileImage(i);
-								virtueTileVa.setTileImage(i);
-								virtueListVa.setListImage(i);
-								appsListVa.setListImage(i);
-								favoritesTileView.setTileImage(ad, virtue, i);
+								Image tileImg = i.getScaledInstance(47, 50, java.awt.Image.SCALE_SMOOTH);
+								ImageIcon tileIcon = new ImageIcon(tileImg);
+								Image listImg = i.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);
+								ImageIcon listIcon = new ImageIcon(listImg);
+								appsTileVa.setImage(tileIcon);
+								virtueTileVa.setImage(tileIcon);
+								virtueListVa.setImage(listIcon);
+								appsListVa.setImage(listIcon);
+								favoritesTileView.setTileImage(ad, virtue, tileIcon);
 							};
 
 							iconService.getImage(ad.getIconKey(), consumer);
@@ -441,6 +466,25 @@ public class Sidebar implements VirtueChangeHandler {
 		sortByOption(keyword);
 
 		scrollPane.getViewport().validate();
+	}
+
+	@Override
+	public void addNoVirtues() {
+		if (loading) {
+			loading = false;
+			empty = true;
+			renderEmpty();
+		}
+	}
+
+	public void renderEmpty() {
+		JPanel emptyPanel = new JPanel();
+		emptyPanel.setLayout(new BorderLayout());
+		JLabel empty = new JLabel("No Virtues!");
+		empty.setHorizontalAlignment(SwingConstants.CENTER);
+		emptyPanel.add(empty);
+
+		scrollPane.setViewportView(emptyPanel);
 	}
 
 	@Override
@@ -753,9 +797,63 @@ public class Sidebar implements VirtueChangeHandler {
 		scrollPane.validate();
 		scrollPane.repaint();
 
-		frame.pack();
+		// frame.pack();
+
+		boolean useSystemTray = true;
+		if (useSystemTray && SystemTray.isSupported()) {
+			setupSystemTray();
+		}
 
 		addEventListeners();
+	}
+
+	public void setupSystemTray() {
+		TrayIcon trayIcon;
+		SystemTray tray;
+		Image trayImage = saviorIcon.getImage();
+		tray = SystemTray.getSystemTray();
+
+		trayIcon = new TrayIcon(trayImage, "Savior Desktop");
+		trayIcon.setImageAutoSize(true);
+		trayIcon.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.setVisible(true);
+				frame.setExtendedState(JFrame.NORMAL);
+			}
+
+		});
+
+		frame.addWindowStateListener(new WindowStateListener() {
+
+			@Override
+			public void windowStateChanged(WindowEvent e) {
+				if (e.getNewState() == Frame.ICONIFIED) {
+					try {
+						tray.add(trayIcon);
+						frame.setVisible(false);
+					} catch (AWTException ex) {
+					}
+				}
+				if (e.getNewState() == 7) {
+					try {
+						tray.add(trayIcon);
+						frame.setVisible(false);
+					} catch (AWTException ex) {
+					}
+				}
+				if (e.getNewState() == Frame.MAXIMIZED_BOTH) {
+					tray.remove(trayIcon);
+					frame.setVisible(true);
+				}
+				if (e.getNewState() == Frame.NORMAL) {
+					tray.remove(trayIcon);
+					frame.setVisible(true);
+				}
+			}
+
+		});
 	}
 
 	public void sortWithKeyword() {
@@ -804,7 +902,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(activeFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(favoritesTileView.getContainer());
 		}
 	}
@@ -819,7 +917,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(inactiveTileIcon);
 		listLabel.setIcon(activeListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(appsListView.getContainer());
 		}
 	}
@@ -834,7 +932,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesLabel.setIcon(inactiveFavoriteIcon);
 		tileLabel.setIcon(activeTileIcon);
 		listLabel.setIcon(inactiveListIcon);
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(appsTileView.getContainer());
 		}
 	}
@@ -848,7 +946,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(virtueTileView.getContainer());
 		}
 	}
@@ -862,7 +960,7 @@ public class Sidebar implements VirtueChangeHandler {
 		favoritesView.setVisible(false);
 		applicationsSelected.setBackground(new Color(239, 239, 239));
 		virtuesSelected.setBackground(new Color(153, 51, 204));
-		if (!loading) {
+		if (!loading && !empty) {
 			scrollPane.setViewportView(virtueListView.getContainer());
 		}
 	}
@@ -980,6 +1078,13 @@ public class Sidebar implements VirtueChangeHandler {
 		bottomBorder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
+				try {
+					BridgeSensorMessage messageObj = new BridgeSensorMessage("Logged out",
+							authService.getUser().getUsername(), MessageType.LOGOUT);
+					bridgeSensorService.sendMessage(messageObj);
+				} catch (InvalidUserLoginException e1) {
+					logger.error("error with sending message to bridge sensor");
+				}
 				authService.logout();
 				loading = true;
 				try {
@@ -1134,5 +1239,22 @@ public class Sidebar implements VirtueChangeHandler {
 
 	public IDefaultApplicationListener getDefaultApplicationHandler() {
 		return defaulApplicationLauncher;
+	}
+
+	public IDataMessageListener getDataMessageListener() {
+		IDataMessageListener listener = new IDataMessageListener() {
+			@Override
+			public void onMessage(String dataSourceGroupId, String dataDestinationGroupId) {
+				try {
+					ClipboardBridgeSensorMessage messageObj = new ClipboardBridgeSensorMessage("Pasted between virtues",
+							authService.getUser().getUsername(), MessageType.PASTE, dataSourceGroupId,
+							dataDestinationGroupId);
+					bridgeSensorService.sendMessage(messageObj);
+				} catch (InvalidUserLoginException e) {
+					logger.error("error with sending message to bridge sensor");
+				}
+			}
+		};
+		return listener;
 	}
 }

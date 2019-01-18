@@ -193,6 +193,6 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 				.accessDeniedHandler(getAccessDeniedHandler()).and()
 				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
 						BasicAuthenticationFilter.class);
-		http.csrf().disable();
+		//http.csrf().disable();
 	}
 }
