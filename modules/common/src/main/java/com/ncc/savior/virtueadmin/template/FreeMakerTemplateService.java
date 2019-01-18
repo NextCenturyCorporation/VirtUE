@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.template;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ public class FreeMakerTemplateService implements ITemplateService {
 			workingCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 			workingCfg.setLogTemplateExceptions(false);
 			workingCfg.setWrapUncheckedExceptions(true);
+		} catch (FileNotFoundException e) {
+			logger.warn("local directory "+workingDirTemplates.getAbsolutePath()+" not found.  Using default templates only!");
 		} catch (IOException e) {
 			logger.error("error setting up FreeMaker", e);
 		}
