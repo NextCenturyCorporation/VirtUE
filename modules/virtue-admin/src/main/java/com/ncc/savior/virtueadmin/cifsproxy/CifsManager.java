@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
@@ -31,10 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.kerberos.client.KerberosRestTemplate;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
@@ -45,11 +51,14 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.ncc.savior.util.JavaUtil;
 import com.ncc.savior.util.SaviorErrorCode;
 import com.ncc.savior.util.SaviorException;
 import com.ncc.savior.util.SshUtil;
@@ -66,6 +75,7 @@ import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureService
 import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteCommandCompletableFutureService.CommandGenerator;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.CifsShareCreationParameter;
+import com.ncc.savior.virtueadmin.model.CifsVirtueCreationParameter;
 import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -258,8 +268,8 @@ public class CifsManager {
 		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
 //		String baseCommand = "/usr/local/bin/post-deploy-config.sh";
-		String baseCommand="~/post-deploy-config.sh";
-		
+		String baseCommand = "~/post-deploy-config.sh";
+
 		// kinit -k http/webserver.test.savior
 		String cifsStart = String.format(
 				"sudo nohup env KRB5_TRACE=/dev/stdout java -Xint -jar cifs-proxy-server-0.0.1.jar --spring.config.location=cifs-proxy.properties,cifs-proxy-security.properties >& proxy.log&");
@@ -274,7 +284,8 @@ public class CifsManager {
 					baseCommand, cifsDomain, domainAdminUser, domainAdminUserPassword, cifsHostname, domainIp);
 			return cifsPostDeploy;
 		}));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("$?"));
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf,
+				new CommandGenerator("echo 'Error Code: $?'; $?; echo $?"));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
 			String principal = getPrincipal(vm);
 			String cifPropertyUpdate = String.format("echo 'savior.cifsproxy.principal=%s' > cifs-proxy.properties",
@@ -289,7 +300,8 @@ public class CifsManager {
 				cifsAdUrl);
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifPropertyUpdate));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("cat *.properties"));
-		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("echo sleeping; sleep 300; echo slept;"));
+		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf,
+				new CommandGenerator("echo sleeping; sleep 60; echo slept;"));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
 			String principal = getPrincipal(vm);
 			String cifsKinit = String.format("sudo kinit -k %s", principal);
@@ -343,71 +355,160 @@ public class CifsManager {
 		});
 	}
 
-	protected void cifsOnVirtueCreation(VirtueInstance virtue, FileSystem fs) {
+	public CifsShareCreationParameter createShareOnCifsProxyVm(VirtueInstance virtue, FileSystem fs, String password) {
 		try {
 			VirtueUser user = userManager.getUser(virtue.getUsername());
 			VirtualMachine vm = cifsProxyDao.getCifsVm(user);
-			// create share if not created for user, store credentials
-			// See cifs proxy documentation
-			createShareOnCifsProxyVm(virtue, vm, user, fs);
+			String hostname = getHostname(vm);
 
-			// should be hostname of file system.
-			String fsName = fs.getAddress();
-			String command = String.format(
-					"sudo /usr/local/bin/allow-delegation.sh --domain %s --admin %s --password %s --delegater %s --target %s --verbose",
-					cifsDomain, this.domainAdminUser, this.domainAdminUserPassword, this.getHostname(vm), fsName);
-			CommandGenerator extra = new CommandGenerator(command);
-			serviceProvider.getRunRemoteCommand().startFutures(vm, extra);
-		} catch (Throwable t) {
-			logger.error("error on cifs", t);
-		}
-	}
-
-	private void createShareOnCifsProxyVm(VirtueInstance virtue, VirtualMachine vm, VirtueUser user, FileSystem fs) {
-		try {
-			String hostname = vm.getHostname();
-			CifsShareCreationParameter cscp = new CifsShareCreationParameter(fs.getName(), fs.getId());
-
-//			WebTarget t = client.target("http://" + hostname + ":8080").path("share");
-//			Entity<?> entity = Entity.json(cscp);
-//			byte[] token = getS4u2ProxyToken(user);
-//			Response resp = t.request(MediaType.APPLICATION_JSON_TYPE).post(entity);
-//			InputStream is = (InputStream) resp.getEntity();
-//			status=resp.getStatus();
-			ObjectNode node =jsonMapper.createObjectNode();
-			ArrayNode permissions = jsonMapper.createArrayNode();
-			String server="";
-			String path="";
-			
-			node.put("name", fs.getName());
-			node.put("virtueId", virtue.getId());
-			node.put("server", server);
-			node.put("path", path);
-			node.set("permissions", permissions);
-			node.put("type", "CIFS");
-//			
-			String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 			KerberosRestTemplate krt = new KerberosRestTemplate(null, user.getUsername(), password, null);
-			String url = "http://" + hostname + ":8080/share";
-			
-			ResponseEntity<InputStream> resp = krt.postForEntity(url, cscp, InputStream.class);
-			int status = resp.getStatusCodeValue();
-			InputStream is = resp.getBody();
-
-			if (status >= 400) {
-				String body = IOUtils.toString(is, "UTF8");
-				String msg = "Error creating share for CIFS Proxy.  Response code=" + status + " body=" + body;
-				logger.error(msg);
-				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg);
-			}
-
-			CifsShareCreationParameter v = jsonMapper.readValue(is, CifsShareCreationParameter.class);
-			logger.debug("CIFS returned " + v);
-		} catch (IOException e) {
+			CifsShareCreationParameter shareResponse = createShare(virtue, hostname, fs, krt);
+			return shareResponse;
+		} catch (RestClientException e) {
 			String msg = "Error creating share for CIFS Proxy";
 			logger.error(msg, e);
 			throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
 		}
+	}
+
+	private CifsShareCreationParameter createShare(VirtueInstance virtue, String hostname, FileSystem fs,
+			KerberosRestTemplate krt) {
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("Content-Type", "application/json");
+		String shareUrl = "http://" + hostname + ":8080/share";
+		ObjectNode node = jsonMapper.createObjectNode();
+		ArrayNode permissions = jsonMapper.createArrayNode();
+		if (fs.getExecutePerm()) {
+			permissions.add("EXECUTE");
+		}
+		if (fs.getReadPerm()) {
+			permissions.add("READ");
+		}
+		if (fs.getWritePerm()) {
+			permissions.add("WRITE");
+		}
+		// TODO remove after testing
+		permissions.add("READ");
+
+		String server = "EC2AMAZ-H6GG6ER";
+		String path = "shared";
+
+		node.put("name", fs.getName());
+		node.put("virtueId", virtue.getId());
+		node.put("server", server.toLowerCase());
+		node.put("path", path);
+		node.set("permissions", permissions);
+		node.put("type", "CIFS");
+		HttpEntity<String> shareEntity = new HttpEntity<String>(node.toString(), headers);
+		CifsShareCreationParameter shareOutput = null;
+		try {
+			logger.debug("Sending: " + node.toString());
+			ResponseEntity<CifsShareCreationParameter> resp = krt.postForEntity(shareUrl, shareEntity,
+					CifsShareCreationParameter.class);
+			shareOutput = resp.getBody();
+			logger.debug("CIFS returned " + shareOutput);
+		} catch (RestClientException e) {
+			logger.error("error: ", e);
+			// String body = IOUtils.toString(is, "UTF8");
+			// String msg = "Error creating share for CIFS Proxy. Response code=" + status +
+			// " body=" + body;
+			// logger.error(msg);
+			// throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg);
+		}
+
+		return shareOutput;
+	}
+
+	public CifsVirtueCreationParameter cifsOnVirtueCreation(VirtueInstance virtue, FileSystem fs) {
+		try {
+			VirtueUser user = userManager.getUser(virtue.getUsername());
+			VirtualMachine vm = cifsProxyDao.getCifsVm(user);
+			String fsName = fs.getAddress();
+
+			String delegator = this.getHostname(vm);
+			logger.debug("******* - hardcode alert");
+			String target = "EC2AMAZ-H6GG6ER";
+
+			String command = String.format(
+					"sudo /usr/local/bin/allow-delegation.sh --domain %s --admin %s --password %s --delegater %s --target %s --verbose",
+					cifsDomain, this.domainAdminUser, this.domainAdminUserPassword, delegator, target);
+
+			File keyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
+			// Session session = SshUtil.getConnectedSession(vm, keyFile);
+			JSch ssh = new JSch();
+			Session session;
+			ssh.addIdentity(keyFile.getAbsolutePath());
+			session = ssh.getSession(vm.getUserName(), vm.getIpAddress(), vm.getSshPort());
+			session.setConfig("PreferredAuthentications", "publickey");
+			session.setConfig("StrictHostKeyChecking", "no");
+			session.setTimeout(1000);
+			session.connect();
+			List<String> lines = SshUtil.sendCommandFromSession(session, command);
+			// CommandGenerator extra = new CommandGenerator(command);
+			// CompletableFuture<VirtualMachine> f =
+			// serviceProvider.getRunRemoteCommand().startFutures(vm, extra);
+			// f.get();
+			// create share if not created for user, store credentials
+			// See cifs proxy documentation
+			// createShareOnCifsProxyVm(virtue, vm, user, fs);
+			try {
+				String hostname = getHostname(vm);
+				String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+				KerberosRestTemplate krt = new KerberosRestTemplate(null, user.getUsername(), password, null);
+
+				CifsVirtueCreationParameter output = createVirtue(virtue, fs, hostname, krt);
+				return output;
+			} catch (IOException | RestClientException e) {
+				String msg = "Error creating share for CIFS Proxy";
+				logger.error(msg, e);
+				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg, e);
+			}
+			// should be hostname of file system.
+
+		} catch (Throwable t) {
+			logger.error("error on cifs", t);
+		}
+		return null;
+	}
+
+	private CifsVirtueCreationParameter createVirtue(VirtueInstance virtue, FileSystem fs, String hostname,
+			KerberosRestTemplate krt) throws JsonProcessingException {
+		CifsVirtueCreationParameter output = null;
+		CifsVirtueCreationParameter cscp = new CifsVirtueCreationParameter(fs.getName(), virtue.getId());
+		String virtueUrl = "http://" + hostname + ":8080/virtue";
+
+		String cscpStr = jsonMapper.writeValueAsString(cscp);
+
+		output = kerberosRequestWithRetries(krt, output, virtueUrl, cscpStr, 3);
+		return output;
+	}
+
+	private CifsVirtueCreationParameter kerberosRequestWithRetries(KerberosRestTemplate krt,
+			CifsVirtueCreationParameter output, String virtueUrl, String cscpStr, int retries) {
+		MultiValueMap<String, String> headers = new HttpHeaders();
+		headers.add("Content-Type", "application/json");
+		HttpEntity<String> virtueEntity = new HttpEntity<String>(cscpStr, headers);
+		try {
+			logger.debug("sending: " + cscpStr);
+			ResponseEntity<CifsVirtueCreationParameter> resp = krt.postForEntity(virtueUrl, virtueEntity,
+					CifsVirtueCreationParameter.class);
+//					CifsShareCreationParameter output = jsonMapper.readValue(str, CifsShareCreationParameter.class);
+			output = resp.getBody();
+			logger.debug("response: " + output);
+		} catch (RestClientException e) {
+			if (retries > 0) {
+				logger.error("Error making kerberos request to CIFS Proxy.  Retrying", e);
+				JavaUtil.sleepAndLogInterruption(1000);
+				kerberosRequestWithRetries(krt, output, virtueUrl, cscpStr, retries - 1);
+			} else {
+//				String body = IOUtils.toString(is, "UTF8");
+				String msg = "Error making kerberos request to CIFS Proxy.  url=" + virtueUrl + " error="
+						+ e.getLocalizedMessage();
+//				logger.error(msg);
+				throw new SaviorException(SaviorErrorCode.CIFS_PROXY_ERROR, msg);
+			}
+		}
+		return output;
 	}
 
 	private byte[] getS4u2ProxyToken(VirtueUser user) throws GSSException {
@@ -510,25 +611,46 @@ public class CifsManager {
 		return (current > timeout);
 	}
 
-	public void addFilesystemLinux(VirtueUser user, Collection<FileSystem> fileSystems,
-			Collection<VirtualMachine> myLinuxVms) {
+	public void addFilesystemLinux(VirtueInstance vi, VirtueUser user, Collection<FileSystem> fileSystems,
+			Collection<VirtualMachine> myLinuxVms, Map<String, CifsVirtueCreationParameter> cifsVirtueParams,
+			String password) {
+		Map<String, CifsShareCreationParameter> shareParams = new HashMap<String, CifsShareCreationParameter>();
+		VirtualMachine cifsVm = cifsProxyDao.getCifsVm(user);
+		for (FileSystem fs : fileSystems) {
+			CifsShareCreationParameter c = createShareOnCifsProxyVm(vi, fs, password);
+			shareParams.put(fs.getId(), c);
+		}
+
 		logger.debug("Adding filesystems " + fileSystems + " for vms " + myLinuxVms + " user=" + user);
 
 		// get credentials of for all file systems for user
 		for (VirtualMachine vm : myLinuxVms) {
 			try {
-				String keyName = vm.getPrivateKey();
+				String keyName = vm.getPrivateKeyName();
 				File privateKeyFile = keyManager.getKeyFileByName(keyName);
 				Session session = SshUtil.getConnectedSession(vm, privateKeyFile);
 				for (FileSystem fs : fileSystems) {
+					CifsVirtueCreationParameter params = cifsVirtueParams.get(fs.getId());
 					//// servername/sharename /media/windowsshare cifs
 					// credentials=/home/ubuntuusername/.smbcredentials,iocharset=utf8,sec=ntlm 0
 					// 0
 					String networkPath = fs.getAddress();
 					String localPath = "/media/" + fs.getName();
-					String script = String.format("echo '%s %s cifs defaults 0 2' >> /etc/fstab", networkPath,
-							localPath);
+					//TODO instead of fs.getName(), we need to get the exported name 
+					logger.debug("****fix me");
+					networkPath = "//" + cifsVm.getInternalIpAddress() + "/" + fs.getName();
+					String credentialFileName = fs.getId();
+					String credentialsDir = "/home/user/.smbcredentials/";
+					String credentialFilePath = credentialsDir + credentialFileName;
+					String script = String.format("mkdir %s; sudo mkdir %s ;echo 'username=%s' >> %s", credentialsDir,
+							localPath, params.getUsername(), credentialFilePath);
+					String script2 = String.format("echo 'password=%s' >> %s", params.getPassword(),
+							credentialFilePath);
+					String script3 = String.format("sudo sh -c \"echo '%s %s cifs credentials=%s 0 2' >> /etc/fstab\"",
+							networkPath, localPath, credentialFilePath);
 					SshUtil.sendCommandFromSession(session, script);
+					SshUtil.sendCommandFromSession(session, script2);
+					SshUtil.sendCommandFromSession(session, script3);
 				}
 			} catch (JSchException | IOException e) {
 				throw new SaviorException(SaviorErrorCode.SSH_ERROR,
@@ -550,7 +672,7 @@ public class CifsManager {
 			public void onVirtueCreation(VirtueInstance virtue, VirtueTemplate template) {
 				Collection<FileSystem> fileSystems = template.getFileSystems();
 				for (FileSystem fs : fileSystems) {
-					cifsOnVirtueCreation(virtue, fs);
+//					cifsOnVirtueCreation(virtue, fs);
 				}
 			}
 		};

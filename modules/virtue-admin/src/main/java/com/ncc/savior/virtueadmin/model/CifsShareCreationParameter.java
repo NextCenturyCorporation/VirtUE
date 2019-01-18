@@ -1,63 +1,77 @@
 package com.ncc.savior.virtueadmin.model;
 
+import java.util.List;
+
 public class CifsShareCreationParameter {
 	private String name;
-	private String id;
-	private String username;
-	private String password;
-
-	protected CifsShareCreationParameter() {
-
+	private String virtueId;
+	private String server;
+	private String path;
+	private List<String> permissions;
+	private String type;
+	private String exportedName;
+	
+	public CifsShareCreationParameter() {
 	}
-
-	public CifsShareCreationParameter(String name, String id) {
-		this.name = name;
-		this.id = id;
-	}
-
-	public CifsShareCreationParameter(String name, String id, String username, String password) {
+	
+	public CifsShareCreationParameter(String name, String virtueId, String server, String path,
+			List<String> permissions, String type) {
 		super();
 		this.name = name;
-		this.id = id;
-		this.username = username;
-		this.password = password;
+		this.virtueId = virtueId;
+		this.server = server;
+		this.path = path;
+		this.permissions = permissions;
+		this.type = type;
 	}
 
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public String getId() {
-		return id;
+	public String getVirtueId() {
+		return virtueId;
 	}
-
-	public void setId(String id) {
-		this.id = id;
+	public void setVirtueId(String virtueId) {
+		this.virtueId = virtueId;
 	}
-
-	public String getUsername() {
-		return username;
+	public String getServer() {
+		return server;
 	}
-
-	public void setUsername(String username) {
-		this.username = username;
+	public void setServer(String server) {
+		this.server = server;
 	}
-
-	public String getPassword() {
-		return password;
+	public String getPath() {
+		return path;
 	}
-
-	public void setPassword(String password) {
-		this.password = password;
+	public void setPath(String path) {
+		this.path = path;
+	}
+	public List<String> getPermissions() {
+		return permissions;
+	}
+	public void setPermissions(List<String> permissions) {
+		this.permissions = permissions;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String getExportedName() {
+		return exportedName;
+	}
+	public void setExportedName(String exportedName) {
+		this.exportedName = exportedName;
 	}
 
 	@Override
 	public String toString() {
-		return "CifsShareCreationParameter [name=" + name + ", id=" + id + ", username=" + username + ", password="
-				+ password + "]";
+		return "CifsShareCreationParameter [name=" + name + ", virtueId=" + virtueId + ", server=" + server + ", path="
+				+ path + ", permissions=" + permissions + ", type=" + type + ", exportedName=" + exportedName + "]";
 	}
+	
 }

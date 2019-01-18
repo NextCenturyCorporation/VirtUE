@@ -22,6 +22,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueCreationAdditionalPar
 import com.ncc.savior.virtueadmin.infrastructure.aws.securitygroups.ISecurityGroupManager;
 import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
+import com.ncc.savior.virtueadmin.model.CifsVirtueCreationParameter;
 import com.ncc.savior.virtueadmin.model.FileSystem;
 import com.ncc.savior.virtueadmin.model.OS;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
@@ -153,11 +154,18 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		CompletableFuture<VirtualMachine> xenFuture = new CompletableFuture<VirtualMachine>();
 		// actually provisions xen host and then xen guests.
 		xenHostManager.provisionXenHost(vi, linuxVmts, xenFuture, linuxFuture, virtueMods);
-		Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
+//		Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
+
+		Collection<FileSystem> fileSystems = template.getFileSystems();
+		Map<String, CifsVirtueCreationParameter> cifsVirtueParams =new HashMap<String, CifsVirtueCreationParameter>();
+		for (FileSystem fs : fileSystems) {
+			CifsVirtueCreationParameter cvcp = cifsManager.cifsOnVirtueCreation(vi, fs);
+			cifsVirtueParams.put(fs.getId(), cvcp);
+		}
+		String password = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
 		linuxFuture.thenAccept((myLinuxVms) -> {
-			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
-			Collection<FileSystem> fileSystems = template.getFileSystems();
-			cifsManager.addFilesystemLinux(user,fileSystems, myLinuxVms);
+//			Authentication auth2 =  SecurityContextHolder.getContext().getAuthentication();
+			cifsManager.addFilesystemLinux(vi ,user, fileSystems, myLinuxVms, cifsVirtueParams, password);
 		});
 		// }
 		windowsFuture.thenCombine(xenFuture, (Collection<VirtualMachine> winVms, VirtualMachine xen) -> {
