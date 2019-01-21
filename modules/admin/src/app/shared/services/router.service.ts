@@ -99,7 +99,9 @@ export class RouterService {
   }
 
   loginRedirect() {
-    //remove params, so they don't build up in the return url.
-    this.router.navigate(['/login'], { queryParams: { returnUrl: this.getRouterUrl().split("?")[0] }});
+    console.log(this.getRouterUrl().split('?'));
+    if (this.getRouterUrl().split('?')[0] !== '/login') {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.getRouterUrl().split("?")[0] }});
+    }
   }
 }
