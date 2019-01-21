@@ -45,7 +45,7 @@ public class FreeMakerTemplateService implements ITemplateService {
 			workingCfg.setLogTemplateExceptions(false);
 			workingCfg.setWrapUncheckedExceptions(true);
 		} catch (FileNotFoundException e) {
-			logger.warn("local directory "+workingDirTemplates.getAbsolutePath()+" not found.  Using default templates only!");
+			logger.warn("local template directory "+workingDirTemplates.getAbsolutePath()+" not found.  Using default templates only!");
 		} catch (IOException e) {
 			logger.error("error setting up FreeMaker", e);
 		}
