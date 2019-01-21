@@ -1,0 +1,1 @@
+sudo /usr/local/bin/allow-delegation.sh --domain ${cifsDomain} --admin ${domainAdmin} --password ${domainPassword} --delegater ${delegator} --target ${target} --verbose
