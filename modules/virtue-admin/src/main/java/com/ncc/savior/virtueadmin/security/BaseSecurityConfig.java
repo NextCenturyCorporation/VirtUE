@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -57,7 +58,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected static final String ADMIN_ROLE = "ADMIN";
 	protected static final String USER_ROLE = "USER";
 
-	private String [] csrfDisabledURLs;
+	private String[] csrfDisabledURLs;
 
 	@Value("${savior.security.https.force:false}")
 	private boolean forceHttps;
@@ -70,12 +71,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	protected BaseSecurityConfig(String type) {
 		logger.info("Security configuration enabled. Type=" + type);
-		csrfDisabledURLs = new String [] {
-								"/desktop/**",
-								"/data/**",
-		            "/login",
-		            "/logout"
-		    };
+		csrfDisabledURLs = new String[] { "/desktop/**", "/data/**", "/login", "/logout" };
 	}
 
 	@Override
@@ -91,11 +87,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		};
 		AuthenticationSuccessHandler successHandler = new AuthenticationSuccessHandler() {
-			/**
-			 * Note: if you make a request to this (Spring's) login endpoint, and you include headers that spring's CORS aren't set up to use,
-			 * then your request will fall through and look for a Jersey 'login' endpoint. Since one exists, you'll be given back that html page,
-			 * which will send the requesting service's json-parser into cardiac arrest.
-			 */
+
 			@Override
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
@@ -134,10 +126,8 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.csrf().disable();
 
 		http.sessionManagement()
-				// .invalidSessionUrl("/login")
 				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-				.maximumSessions(10)
-				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
+				.maximumSessions(10).sessionRegistry(sessionRegistry()).expiredUrl("/login");
 
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 
