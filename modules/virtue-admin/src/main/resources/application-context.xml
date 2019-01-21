@@ -98,6 +98,7 @@
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
 		<constructor-arg ref="futureServiceProvider"></constructor-arg>
 		<constructor-arg ref="vpcSubnetProvider"></constructor-arg>
+		<constructor-arg ref="templateService"></constructor-arg>
 		<constructor-arg value="${virtue.cifs.ami}"></constructor-arg>
 		<constructor-arg value="${virtue.cifs.loginUser}"></constructor-arg>
 		<constructor-arg value="${virtue.cifs.keyName}"></constructor-arg>

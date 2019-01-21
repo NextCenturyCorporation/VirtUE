@@ -69,6 +69,8 @@ import com.ncc.savior.virtueadmin.model.VirtueTemplate;
 import com.ncc.savior.virtueadmin.model.VirtueUser;
 import com.ncc.savior.virtueadmin.model.VmState;
 import com.ncc.savior.virtueadmin.service.DesktopVirtueService.PollHandler;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
+import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 import com.ncc.savior.virtueadmin.util.ServerIdProvider;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager;
 import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager.VirtueCreationDeletionListener;
@@ -79,6 +81,7 @@ import com.ncc.savior.virtueadmin.virtue.ActiveVirtueManager.VirtueCreationDelet
  */
 public class CifsManager {
 	private static final Logger logger = LoggerFactory.getLogger(CifsManager.class);
+	private static final String CIFS_POST_DEPLOY_TEMPLATE = "cifs-post-deploy.tpl";
 	@Autowired
 	private IUserManager userManager;
 	private ICifsProxyDao cifsProxyDao;
@@ -116,11 +119,12 @@ public class CifsManager {
 	private IKeyManager keyManager;
 	private ObjectMapper jsonMapper;
 	private BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VirtueUser> cifsVmUpdater;
+	private ITemplateService templateService;
 
 	public CifsManager(ServerIdProvider serverIdProvider, ICifsProxyDao cifsProxyDao, AwsEc2Wrapper wrapper,
 			CompletableFutureServiceProvider serviceProvider, IVpcSubnetProvider vpcSubnetProvider,
-			IKeyManager keyManager, String cifsProxyAmi, String cifsProxyLoginUser, String cifsKeyName,
-			String instanceType) {
+			IKeyManager keyManager, ITemplateService templateService, String cifsProxyAmi, String cifsProxyLoginUser,
+			String cifsKeyName, String instanceType) {
 		this.cifsProxyDao = cifsProxyDao;
 		this.wrapper = wrapper;
 		this.serviceProvider = serviceProvider;
@@ -130,6 +134,7 @@ public class CifsManager {
 		this.instanceType = InstanceType.fromValue(instanceType);
 		this.vpcSubnetProvider = vpcSubnetProvider;
 		this.keyManager = keyManager;
+		this.templateService = templateService;
 		serviceProvider.getExecutor().scheduleWithFixedDelay(getTestForTimeoutRunnable(), 10000, 5000,
 				TimeUnit.MILLISECONDS);
 
@@ -269,22 +274,21 @@ public class CifsManager {
 		model.put("domainPassword", domainAdminUserPassword);
 		model.put("cifsAdUrl", cifsAdUrl);
 		model.put("domainIp", domainIp);
-		String principal = getPrincipal(vm);
-		model.put("principal", principal);
 		model.put("cifsPort", 8080);
-		
 
-		
-		ScriptGenerator scriptGenerator = new ScriptGenerator((myVm)-> {
-			String[] commands = {"need to template service"};
+		ScriptGenerator scriptGenerator = new ScriptGenerator((myVm) -> {
 			String cifsHostname = getHostname(myVm);
 			model.put("cifsHostname", cifsHostname);
-			
-			//template service
-			//template: cifs-post-deploy.tpl
-			
-			
-			return commands;
+			String principal = getPrincipal(vm);
+			model.put("principal", principal);
+			try {
+				String[] commands = templateService.processTemplateToLines(CIFS_POST_DEPLOY_TEMPLATE, model);
+				return commands;
+			} catch (TemplateException e) {
+				String msg = "Template Service error while trying to run cifs post deploy script";
+				logger.error(msg, e);
+				throw new SaviorException(SaviorErrorCode.TEMPLATE_ERROR, msg);
+			}
 		});
 		scriptGenerator.setDryRun(true);
 		cf = serviceProvider.getRunRemoteScript().chainFutures(cf, scriptGenerator);
@@ -327,7 +331,7 @@ public class CifsManager {
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator(cifPropertyUpdate));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator("cat *.properties"));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf,
-				new CommandGenerator("echo sleeping; sleep 60; echo slept;"));
+				new CommandGenerator("echo sleeping; sleep 20; echo slept;"));
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, new CommandGenerator((myVm) -> {
 			String principal = getPrincipal(vm);
 			String cifsKinit = String.format("sudo kinit -k %s", principal);
@@ -445,10 +449,27 @@ public class CifsManager {
 			String delegator = this.getHostname(vm);
 			logger.debug("******* - hardcode alert");
 			String target = "EC2AMAZ-H6GG6ER";
+			target = fs.getAddress();
+			target = getTargetHostname(target);
 
-			String command = String.format(
-					"sudo /usr/local/bin/allow-delegation.sh --domain %s --admin %s --password %s --delegater %s --target %s --verbose",
-					cifsDomain, this.domainAdminUser, this.domainAdminUserPassword, delegator, target);
+//			String command = String.format(
+//					"sudo /usr/local/bin/allow-delegation.sh --domain %s --admin %s --password %s --delegater %s --target %s --verbose",
+//					cifsDomain, this.domainAdminUser, this.domainAdminUserPassword, delegator, target);
+
+			HashMap<String, Object> model = new HashMap<String, Object>();
+			model.put("cifsDomain", cifsDomain);
+			model.put("domainAdmin", domainAdminUser);
+			model.put("domainPassword", domainAdminUserPassword);
+			model.put("cifsAdUrl", cifsAdUrl);
+			model.put("domainIp", domainIp);
+			model.put("delegator", delegator);
+			model.put("target", target);
+			model.put("fileSystem", fs);
+			model.put("cifsVm", vm);
+			model.put("user", user);
+
+//			logger.debug(command);
+//			logger.debug(String.join(",", cmds));
 
 			File keyFile = keyManager.getKeyFileByName(vm.getPrivateKeyName());
 			// Session session = SshUtil.getConnectedSession(vm, keyFile);
@@ -460,7 +481,8 @@ public class CifsManager {
 			session.setConfig("StrictHostKeyChecking", "no");
 			session.setTimeout(1000);
 			session.connect();
-			List<String> lines = SshUtil.sendCommandFromSession(session, command);
+//			List<String> lines = SshUtil.sendCommandFromSession(session, command);
+			SshUtil.runCommandsFromFile(templateService, session, "cifs-allow-delegation.tpl", model);
 			// CommandGenerator extra = new CommandGenerator(command);
 			// CompletableFuture<VirtualMachine> f =
 			// serviceProvider.getRunRemoteCommand().startFutures(vm, extra);
@@ -486,6 +508,19 @@ public class CifsManager {
 			logger.error("error on cifs", t);
 		}
 		return null;
+	}
+
+	private String getTargetHostname(String target) {
+		target=target.replaceAll("\\\\", "/");
+		while (target.startsWith("/")) {
+			target = target.substring(1);
+		}
+		int index = target.indexOf("/");
+		if (index > 0) {
+			target = target.substring(0, index );
+		}
+
+		return target;
 	}
 
 	private CifsVirtueCreationParameter createVirtue(VirtueInstance virtue, FileSystem fs, String hostname,
@@ -584,33 +619,37 @@ public class CifsManager {
 				File privateKeyFile = keyManager.getKeyFileByName(keyName);
 				Session session = SshUtil.getConnectedSession(vm, privateKeyFile);
 				for (FileSystem fs : fileSystems) {
-					CifsVirtueCreationParameter params = cifsVirtueParams.get(fs.getId());
-					//// servername/sharename /media/windowsshare cifs
-					// credentials=/home/ubuntuusername/.smbcredentials,iocharset=utf8,sec=ntlm 0
-					// 0
-					String networkPath = fs.getAddress();
-					String localPath = "/media/" + fs.getName();
-					// TODO instead of fs.getName(), we need to get the exported name
-					logger.debug("****fix me");
-					networkPath = "//" + cifsVm.getInternalIpAddress() + "/" + fs.getName();
-					String credentialFileName = fs.getId();
-					String credentialsDir = "/home/user/.smbcredentials/";
-					String credentialFilePath = credentialsDir + credentialFileName;
-					String script = String.format("mkdir %s; sudo mkdir %s ;echo 'username=%s' >> %s", credentialsDir,
-							localPath, params.getUsername(), credentialFilePath);
-					String script2 = String.format("echo 'password=%s' >> %s", params.getPassword(),
-							credentialFilePath);
-					String script3 = String.format("sudo sh -c \"echo '%s %s cifs credentials=%s 0 2' >> /etc/fstab\"",
-							networkPath, localPath, credentialFilePath);
-					SshUtil.sendCommandFromSession(session, script);
-					SshUtil.sendCommandFromSession(session, script2);
-					SshUtil.sendCommandFromSession(session, script3);
+					runFileSystemLinuxScripts(cifsVirtueParams, cifsVm, session, fs);
 				}
 			} catch (JSchException | IOException e) {
 				throw new SaviorException(SaviorErrorCode.SSH_ERROR,
 						"Unable to connect to VM for FileSystem attachment, vm=" + vm);
 			}
 		}
+	}
+
+	private void runFileSystemLinuxScripts(Map<String, CifsVirtueCreationParameter> cifsVirtueParams,
+			VirtualMachine cifsVm, Session session, FileSystem fs) throws JSchException, IOException {
+		CifsVirtueCreationParameter params = cifsVirtueParams.get(fs.getId());
+		//// servername/sharename /media/windowsshare cifs
+		// credentials=/home/ubuntuusername/.smbcredentials,iocharset=utf8,sec=ntlm 0
+		// 0
+		String networkPath = fs.getAddress();
+		String localPath = "/media/" + fs.getName();
+		// TODO instead of fs.getName(), we need to get the exported name
+		logger.debug("****fix me");
+		networkPath = "//" + cifsVm.getInternalIpAddress() + "/" + fs.getName();
+		String credentialFileName = fs.getId();
+		String credentialsDir = "/home/user/.smbcredentials/";
+		String credentialFilePath = credentialsDir + credentialFileName;
+		String script = String.format("mkdir %s; sudo mkdir %s ;echo 'username=%s' >> %s", credentialsDir, localPath,
+				params.getUsername(), credentialFilePath);
+		String script2 = String.format("echo 'password=%s' >> %s", params.getPassword(), credentialFilePath);
+		String script3 = String.format("sudo sh -c \"echo '%s %s cifs credentials=%s 0 2' >> /etc/fstab\"", networkPath,
+				localPath, credentialFilePath);
+		SshUtil.sendCommandFromSession(session, script);
+		SshUtil.sendCommandFromSession(session, script2);
+		SshUtil.sendCommandFromSession(session, script3);
 	}
 
 	public VirtueCreationDeletionListener getVirtueCreationDeletionListener() {

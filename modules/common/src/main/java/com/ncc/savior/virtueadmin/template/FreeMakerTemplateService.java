@@ -87,7 +87,7 @@ public class FreeMakerTemplateService implements ITemplateService {
 	public String[] processTemplateToLines(String templateName, Map<String, Object> dataModel)
 			throws TemplateException {
 		StringBuilderWriter out = new StringBuilderWriter();
-		processTemplate("windowsStartup.tpl", out, dataModel);
+		processTemplate(templateName, out, dataModel);
 		String str = out.toString();
 		String[] list = str.split("\\r?\\n");
 		return list;
