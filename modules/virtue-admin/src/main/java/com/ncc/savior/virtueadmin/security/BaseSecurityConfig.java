@@ -92,19 +92,27 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().println("Login success");
 			}
 		};
-		http.authorizeRequests().antMatchers("/").permitAll().antMatchers("/favicon.ico").permitAll()
-				.antMatchers("/admin/**").hasRole(ADMIN_ROLE).antMatchers(HttpMethod.OPTIONS, "/admin/**").permitAll()// allow
-																														// CORS
-																														// option
-																														// calls
-				.antMatchers(HttpMethod.OPTIONS, "/login").permitAll().antMatchers(HttpMethod.OPTIONS, "/logout")
-				.permitAll().antMatchers("/desktop/**").hasRole(USER_ROLE).antMatchers("/data/**").permitAll()
-				.anyRequest().authenticated().and().formLogin().failureHandler(authenticationFailureHandler)
-				.successHandler(successHandler).loginPage("/login").and().logout().clearAuthentication(true)
-				.deleteCookies("XSRF-TOKEN", "JSESSIONID").invalidateHttpSession(true);
+		http.authorizeRequests()
+			.antMatchers("/").permitAll()
+			.antMatchers("/favicon.ico").permitAll()
+			.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+			.antMatchers(HttpMethod.OPTIONS, "/admin/**").permitAll()// allow cors preflight requests
+			.antMatchers(HttpMethod.OPTIONS, "/login").permitAll()
+			.antMatchers(HttpMethod.OPTIONS, "/logout").permitAll()
+			.antMatchers("/desktop/**").hasRole(USER_ROLE)
+			.antMatchers("/data/**").permitAll().anyRequest().authenticated()
+			.and()
+		.formLogin()
+			.failureHandler(authenticationFailureHandler)
+			.successHandler(successHandler)
+			.loginPage("/login")
+			.and()
+		.logout()
+			.clearAuthentication(true)
+			.deleteCookies("XSRF-TOKEN", "JSESSIONID")
+			.invalidateHttpSession(true);
 
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-				.ignoringAntMatchers(csrfDisabledURLs);
+		//http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 
 		http.sessionManagement()
 				// .invalidSessionUrl("/login")
@@ -113,7 +121,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.addFilterBefore(new CorsFilter(env), ChannelProcessingFilter.class);
 		doConfigure(http);
 
-		// http.csrf().disable();
+		http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
