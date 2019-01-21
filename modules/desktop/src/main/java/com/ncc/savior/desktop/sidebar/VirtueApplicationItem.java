@@ -212,6 +212,8 @@ public class VirtueApplicationItem implements Comparable<VirtueApplicationItem> 
 		container.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent event) {
+				// double click starts applications when the prompt is enabled and single click
+				// starts applications when the prompt is disabled
 				if ((event.getClickCount() == 2 && Sidebar.askAgain)
 						|| (event.getClickCount() == 1 && !Sidebar.askAgain)) {
 					try {
