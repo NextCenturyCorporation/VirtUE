@@ -87,12 +87,12 @@
 		<constructor-arg value="${virtue.aws.usePublicDns:default}"></constructor-arg>
 	</bean>
 
-	<bean name="cifsProxyDao"
-		class="com.ncc.savior.virtueadmin.data.jpa.JpaCifsProxyDao">
+	<bean name="cifsProxyDao" class="com.ncc.savior.virtueadmin.data.jpa.JpaCifsProxyDao">
 		<constructor-arg value="${virtue.cifs.timeoutMills}"></constructor-arg>
 	</bean>
 
-	<bean name="cifsProxyManager" class="com.ncc.savior.virtueadmin.cifsproxy.CifsManager" init-method="sync">
+	<bean name="cifsProxyManager" class="com.ncc.savior.virtueadmin.cifsproxy.CifsManager"
+		init-method="sync">
 		<constructor-arg ref="serverIdProvider"></constructor-arg>
 		<constructor-arg ref="cifsProxyDao"></constructor-arg>
 		<constructor-arg ref="ec2Wrapper"></constructor-arg>
@@ -186,10 +186,16 @@
 		<constructor-arg ref="securityGroupManager"></constructor-arg>
 	</bean>
 
+	<bean name="templateService"
+		class="com.ncc.savior.virtueadmin.template.FreeMakerTemplateService">
+		<constructor-arg value="templates"></constructor-arg>
+	</bean>
+
 	<bean name="windowStartupService"
 		class="com.ncc.savior.virtueadmin.infrastructure.mixed.WindowsStartupAppsService">
 		<constructor-arg ref="virtueDao"></constructor-arg>
 		<constructor-arg ref="keyManager"></constructor-arg>
+		<constructor-arg ref="templateService"></constructor-arg>
 	</bean>
 
 	<bean name="persistentStorageDao"
@@ -254,7 +260,7 @@
 		<constructor-arg ref="xenGuestImageProvider" />
 		<constructor-arg ref="resourceManager" />
 	</bean>
-	
+
 	<bean name="virtueTimeoutManager"
 		class="com.ncc.savior.virtueadmin.virtue.VirtueTimeoutManager">
 		<constructor-arg value="${virtue.timeout}"></constructor-arg>
