@@ -272,18 +272,16 @@ public class SshUtil {
 	 * @param dataModel
 	 * @return
 	 * @throws TemplateException
+	 * @throws IOException 
+	 * @throws JSchException 
 	 */
 	public static List<String> runCommandsFromFile(ITemplateService templateService, Session session,
-			String templateName, Map<String, Object> dataModel) throws TemplateException {
+			String templateName, Map<String, Object> dataModel) throws TemplateException, JSchException, IOException {
 		String[] lines = templateService.processTemplateToLines(templateName, dataModel);
 		List<String> output = new ArrayList<String>();
 		for (String line : lines) {
-			try {
-				List<String> o = SshUtil.sendCommandFromSession(session, line);
-				output.addAll(o);
-			} catch (JSchException | IOException e) {
-				logger.error("Error sending command: " + line);
-			}
+			List<String> o = SshUtil.sendCommandFromSession(session, line);
+			output.addAll(o);
 		}
 		return output;
 	}

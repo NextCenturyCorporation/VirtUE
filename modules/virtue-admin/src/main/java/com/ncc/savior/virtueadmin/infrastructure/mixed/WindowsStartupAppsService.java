@@ -1,6 +1,7 @@
 package com.ncc.savior.virtueadmin.infrastructure.mixed;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,10 +53,11 @@ public class WindowsStartupAppsService {
 	String windowsStartupScript = "windowsStartup.tpl";
 	private ITemplateService templateService;
 
-	public WindowsStartupAppsService(IActiveVirtueDao activeVirtueDao, IKeyManager keyManager, ITemplateService templateService) {
+	public WindowsStartupAppsService(IActiveVirtueDao activeVirtueDao, IKeyManager keyManager,
+			ITemplateService templateService) {
 		this.activeVirtueDao = activeVirtueDao;
 		this.keyManager = keyManager;
-		this.templateService=templateService;
+		this.templateService = templateService;
 		this.virtueList = Collections.synchronizedList(new ArrayList<String>());
 		// startPollingThread();
 	}
@@ -135,7 +137,7 @@ public class WindowsStartupAppsService {
 			// output = SshUtil.sendCommandFromSession(session, cmd2);
 			// logger.debug(output.toString());
 			return true;
-		} catch (JSchException e) {
+		} catch (JSchException | IOException e) {
 			logger.debug("mount failed", e);
 		} catch (TemplateException e) {
 			logger.error("error attempting to initiate windows startup services", e);
