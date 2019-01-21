@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -22,6 +24,8 @@ import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VirtueInstance;
 import com.ncc.savior.virtueadmin.model.VirtueState;
 import com.ncc.savior.virtueadmin.model.VmState;
+import com.ncc.savior.virtueadmin.template.ITemplateService;
+import com.ncc.savior.virtueadmin.template.ITemplateService.TemplateException;
 
 /**
  * Used to add scripts, shortcuts or programs into the startup folder on a
@@ -46,10 +50,14 @@ public class WindowsStartupAppsService {
 	private Thread pollingThread;
 	private IKeyManager keyManager;
 	private List<String> virtueList;
+	String windowsStartupScript = "windowsStartup.tpl";
+	private ITemplateService templateService;
 
-	public WindowsStartupAppsService(IActiveVirtueDao activeVirtueDao, IKeyManager keyManager) {
+	public WindowsStartupAppsService(IActiveVirtueDao activeVirtueDao, IKeyManager keyManager,
+			ITemplateService templateService) {
 		this.activeVirtueDao = activeVirtueDao;
 		this.keyManager = keyManager;
+		this.templateService = templateService;
 		this.virtueList = Collections.synchronizedList(new ArrayList<String>());
 		// startPollingThread();
 	}
@@ -118,18 +126,21 @@ public class WindowsStartupAppsService {
 		logger.debug("Attempting to mount NFS on windows box for virtue " + nfsOrXen.getId());
 		try {
 			File keyFile = keyManager.getKeyFileByName(windows.getPrivateKeyName());
-			session=SshUtil.getConnectedSession(windows, keyFile);
-			String cmd = String.format(command, nfsOrXen.getInternalIpAddress());
-			String cmd2 = String.format(command2, nfsOrXen.getInternalIpAddress());
-			List<String> output = SshUtil.sendCommandFromSession(session, cmd);
-			logger.debug("Cmd=" + cmd + " output=" + output.toString());
-			output = SshUtil.sendCommandFromSession(session, cmd2);
-			logger.debug(output.toString());
+			session = SshUtil.getConnectedSession(windows, keyFile);
+			Map<String, Object> dataModel = new HashMap<String, Object>();
+			dataModel.put("nfs", nfsOrXen);
+			SshUtil.runCommandsFromFile(templateService, session, windowsStartupScript, dataModel);
+			// String cmd = String.format(command, nfsOrXen.getInternalIpAddress());
+			// String cmd2 = String.format(command2, nfsOrXen.getInternalIpAddress());
+			// List<String> output = SshUtil.sendCommandFromSession(session, cmd);
+			// logger.debug("Cmd=" + cmd + " output=" + output.toString());
+			// output = SshUtil.sendCommandFromSession(session, cmd2);
+			// logger.debug(output.toString());
 			return true;
-		} catch (JSchException e) {
+		} catch (JSchException | IOException e) {
 			logger.debug("mount failed", e);
-		} catch (IOException e) {
-			logger.debug("mount failed", e);
+		} catch (TemplateException e) {
+			logger.error("error attempting to initiate windows startup services", e);
 		} finally {
 			if (session != null) {
 				session.disconnect();
@@ -146,6 +157,10 @@ public class WindowsStartupAppsService {
 	 */
 	public void addVirtueToQueue(VirtueInstance vi) {
 		virtueList.add(vi.getId());
+	}
+
+	public void setWindowsStartupScript(String windowsStartupScript) {
+		this.windowsStartupScript = windowsStartupScript;
 	}
 
 }

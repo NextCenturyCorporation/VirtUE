@@ -39,6 +39,10 @@ public class AwsUpdateStatusCompletableFutureService
 				if (e.getErrorMessage().contains(vm.getName())) {
 					onFailure(wrapper, e);
 				}
+				//If we are trying to delete an already deleted vm, AWS won't find it.
+				if (e.getErrorCode().equals("InvalidInstanceID.NotFound") && VmState.DELETED.equals(wrapper.extra)&& e.getErrorMessage().contains(vm.getInfrastructureId())) {
+					vm.setState(VmState.DELETED);
+				}
 			}
 		}
 		Iterator<Wrapper> itr = wrappers.iterator();
