@@ -13,6 +13,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.ncc.savior.virtueadmin.infrastructure.IKeyManager;
 import com.ncc.savior.virtueadmin.infrastructure.IUpdateListener;
 import com.ncc.savior.virtueadmin.infrastructure.aws.VirtueAwsEc2Provider;
+import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteCommandCompletableFutureService.CommandGenerator;
 import com.ncc.savior.virtueadmin.model.VirtualMachine;
 import com.ncc.savior.virtueadmin.model.VmState;
 
@@ -60,6 +61,7 @@ public class CompletableFutureServiceProvider {
 	private IKeyManager keyManager;
 	private IUpdateListener<VirtualMachine> vmNotifier;
 	private RunRemoteCommandCompletableFutureService runRemoteCommand;
+	private RunRemoteScriptCompletableFutureService runRemoteScript;
 
 	public CompletableFutureServiceProvider(VirtueAwsEc2Provider ec2Provider,
 			IUpdateListener<VirtualMachine> vmNotifier, IKeyManager keyManager, boolean usePublicDns) {
@@ -94,6 +96,7 @@ public class CompletableFutureServiceProvider {
 		addRsa = new AddRsaKeyCompletableFutureService(executor, keyManager, rsaTimeoutMillis);
 		awsUpdateStatus = new AwsUpdateStatusCompletableFutureService(executor, ec2, awsStatusTimeoutMillis);
 		runRemoteCommand = new RunRemoteCommandCompletableFutureService(executor, keyManager);
+		runRemoteScript = new RunRemoteScriptCompletableFutureService(executor, keyManager);
 		updateStatus = new BaseImediateCompletableFutureService<VirtualMachine, VirtualMachine, VmState>(
 				"alterStatus") {
 			@Override
@@ -185,6 +188,10 @@ public class CompletableFutureServiceProvider {
 
 	public RunRemoteCommandCompletableFutureService getRunRemoteCommand() {
 		return runRemoteCommand;
+	}
+
+	public RunRemoteScriptCompletableFutureService getRunRemoteScript() {
+		return runRemoteScript;
 	}
 
 	public ScheduledExecutorService getExecutor() {

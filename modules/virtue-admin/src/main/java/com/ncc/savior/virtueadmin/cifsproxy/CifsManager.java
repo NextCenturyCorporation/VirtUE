@@ -13,9 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +56,7 @@ import com.ncc.savior.virtueadmin.infrastructure.aws.subnet.IVpcSubnetProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.BaseImediateCompletableFutureService;
 import com.ncc.savior.virtueadmin.infrastructure.future.CompletableFutureServiceProvider;
 import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteCommandCompletableFutureService.CommandGenerator;
+import com.ncc.savior.virtueadmin.infrastructure.future.RunRemoteScriptCompletableFutureService.ScriptGenerator;
 import com.ncc.savior.virtueadmin.model.ApplicationDefinition;
 import com.ncc.savior.virtueadmin.model.CifsShareCreationParameter;
 import com.ncc.savior.virtueadmin.model.CifsVirtueCreationParameter;
@@ -249,7 +247,53 @@ public class CifsManager {
 		// cf = serviceProvider.getUpdateStatus().chainFutures(cf, VmState.LAUNCHING);
 		// cf = serviceProvider.getVmNotifierService().chainFutures(cf, v);
 		cf = serviceProvider.getTestUpDown().chainFutures(cf, true);
-//		String baseCommand = "/usr/local/bin/post-deploy-config.sh";
+		cf = addScriptsToRunLaterTemplated(vm, cf);
+		cf = addScriptsToRunLaterOld(vm, cf);
+		cf.thenAccept((VirtualMachine myVm) -> {
+			logger.debug("CIFS Proxy future complete");
+			future.complete(myVm);
+		});
+		cf.exceptionally((ex) -> {
+			logger.error("EXCEPTION", ex);
+			future.completeExceptionally(ex);
+			vm.setState(VmState.ERROR);
+			return vm;
+		});
+	}
+
+	private CompletableFuture<VirtualMachine> addScriptsToRunLaterTemplated(VirtualMachine vm,
+			CompletableFuture<VirtualMachine> cf) {
+		HashMap<String, Object> model = new HashMap<String, Object>();
+		model.put("cifsDomain", cifsDomain);
+		model.put("domainAdmin", domainAdminUser);
+		model.put("domainPassword", domainAdminUserPassword);
+		model.put("cifsAdUrl", cifsAdUrl);
+		model.put("domainIp", domainIp);
+		String principal = getPrincipal(vm);
+		model.put("principal", principal);
+		model.put("cifsPort", 8080);
+		
+
+		
+		ScriptGenerator scriptGenerator = new ScriptGenerator((myVm)-> {
+			String[] commands = {"need to template service"};
+			String cifsHostname = getHostname(myVm);
+			model.put("cifsHostname", cifsHostname);
+			
+			//template service
+			//template: cifs-post-deploy.tpl
+			
+			
+			return commands;
+		});
+		scriptGenerator.setDryRun(true);
+		cf = serviceProvider.getRunRemoteScript().chainFutures(cf, scriptGenerator);
+		return cf;
+	}
+
+	private CompletableFuture<VirtualMachine> addScriptsToRunLaterOld(VirtualMachine vm,
+			CompletableFuture<VirtualMachine> cf) {
+		// String baseCommand = "/usr/local/bin/post-deploy-config.sh";
 		String baseCommand = "~/post-deploy-config.sh";
 
 		// kinit -k http/webserver.test.savior
@@ -299,16 +343,7 @@ public class CifsManager {
 		});
 		cg.setTimeoutMillis(300000);
 		cf = serviceProvider.getRunRemoteCommand().chainFutures(cf, cg);
-		cf.thenAccept((VirtualMachine myVm) -> {
-			logger.debug("CIFS Proxy future complete");
-			future.complete(myVm);
-		});
-		cf.exceptionally((ex) -> {
-			logger.error("EXCEPTION", ex);
-			future.completeExceptionally(ex);
-			vm.setState(VmState.ERROR);
-			return vm;
-		});
+		return cf;
 	}
 
 	private String getPrincipal(VirtualMachine vm) {
@@ -555,7 +590,7 @@ public class CifsManager {
 					// 0
 					String networkPath = fs.getAddress();
 					String localPath = "/media/" + fs.getName();
-					//TODO instead of fs.getName(), we need to get the exported name 
+					// TODO instead of fs.getName(), we need to get the exported name
 					logger.debug("****fix me");
 					networkPath = "//" + cifsVm.getInternalIpAddress() + "/" + fs.getName();
 					String credentialFileName = fs.getId();
