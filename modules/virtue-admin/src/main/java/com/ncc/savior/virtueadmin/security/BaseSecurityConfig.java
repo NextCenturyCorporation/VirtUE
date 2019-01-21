@@ -86,7 +86,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 					AuthenticationException exception) throws IOException, ServletException {
 				logger.debug("%%FAILED " + request.getRequestedSessionId());
-				// logger.debug("$$" + request.isRequestedSessionIdValid() + "\n");
 				response.setStatus(401);
 				response.getWriter().write("Login failure: " + exception.getMessage());
 			}
@@ -101,16 +100,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 					Authentication authentication) throws IOException, ServletException {
 
-				// logger.debug("&&" + request.getRequestedSessionId());
-				// logger.debug("++" + request.getQueryString());
-				// logger.debug("++" + request.getMethod());
-				// if ("POST".equalsIgnoreCase(request.getMethod()))	{
-				//    logger.debug("..." + request.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
-				// }
-				// logger.debug("++" + request.getPart("username"));
-				// logger.debug("++" + request.getParts());
-				// logger.debug("++" + request.getParts().iterator().next());
-				// logger.debug("**" + request.isRequestedSessionIdValid() + "\n");
 				response.setStatus(200);
 				response.setContentType(MediaType.APPLICATION_JSON.toString());
 
@@ -119,14 +108,15 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 		};
 		http
 				.authorizeRequests()
-					.antMatchers("/").permitAll() // what does this open?
+					.antMatchers("/").permitAll()
 					.antMatchers("/favicon.ico").permitAll()
 					.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
 					.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
 					.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
 					.antMatchers(HttpMethod.OPTIONS,"/logout").permitAll()
 					.antMatchers("/desktop/**").hasRole(USER_ROLE)
-					.antMatchers("/data/**").permitAll().anyRequest().authenticated() // note this is an backdoor for development/testing.
+					.antMatchers("/data/**").permitAll()// note this is an backdoor for development/testing.
+					.anyRequest().authenticated()
 					.and()
 				.formLogin()
 					.failureHandler(authenticationFailureHandler)
@@ -135,14 +125,16 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 					.and()
 				.logout()
 					.clearAuthentication(true)
-					.deleteCookies("XSRF-TOKEN, JSESSIONID")
+					// .deleteCookies("XSRF-TOKEN", "JSESSIONID")
+					.deleteCookies("JSESSIONID")
 					.invalidateHttpSession(true)
 				;
 
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
+		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
+		http.csrf().disable();
 
-		http.sessionManagement()//.maximumSessions(10) // per-person, or total?
-				.invalidSessionUrl("/login")
+		http.sessionManagement()
+				// .invalidSessionUrl("/login")
 				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
 				.maximumSessions(10)
 				.sessionRegistry(sessionRegistry()).expiredUrl("/login");
@@ -151,7 +143,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		doConfigure(http);
 
-		// http.csrf().disable();
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
@@ -181,16 +172,6 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		};
 	}
-
-	// private AuthenticationEntryPoint authenticationEntryPoint() {
-	//     return new AuthenticationEntryPoint() {
-	//       @Override
-	//       public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
-	//         httpServletResponse.getWriter().append("Not authenticated");
-	//         httpServletResponse.setStatus(401);
-	//       }
-	//     };
-	//   }
 
 	@Override
 	@Bean

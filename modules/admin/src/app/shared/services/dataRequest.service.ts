@@ -30,9 +30,6 @@ const httpOptions = {
 @Injectable()
 export class DataRequestService {
 
-  /** the root URL to query - the location of our virtue-admin server. */
-  private baseUrl: string = "/";
-
   /**
    * Just sets up those two parameters as attributes
    */
@@ -44,14 +41,6 @@ export class DataRequestService {
     private messageService: MessageService,
   ) {}
 
-  /**
-   * sets the url to use, to make requests to the virtue-admin server
-   * @param url the url of the virtue-admin server
-   */
-  public setBaseUrl(url: string): void {
-    // this.baseUrl = url;
-    return;
-  }
 
   /**
    * Request all items in the dataset at {subdomain}
@@ -62,7 +51,7 @@ export class DataRequestService {
    * @return a subscription that will return a list of objects, if/when available.
    */
   public getRecords(subdomain: string): Observable<IndexedObj[]> {
-    let url = this.baseUrl + subdomain;
+    let url = subdomain;
     return this.httpClient.get<IndexedObj[]>(url, httpOptions).catch(this.errorHandler);
   }
 
@@ -80,7 +69,7 @@ export class DataRequestService {
    * @return a subscription that will return the requested object, if it exists.
    */
   public getRecord(subdomain: string, id: string): Observable<IndexedObj> {
-    let url = this.baseUrl + subdomain + id;
+    let url = subdomain + id;
     return this.httpClient.get<IndexedObj>(url, httpOptions).catch(this.errorHandler);
   }
 
@@ -92,7 +81,7 @@ export class DataRequestService {
    * @return a subscription that will return the saved object as it exists on the backend.
    */
   public createRecord(subdomain: string, itemData: string): Observable<IndexedObj> {
-    let url = this.baseUrl + subdomain;
+    let url = subdomain;
     return this.httpClient.post(url, itemData, httpOptions).catch(this.errorHandler);
   }
 
@@ -114,7 +103,7 @@ export class DataRequestService {
    */
   public deleteRecord(subdomain: string, id: string): Promise<any> {
 
-    let url = this.baseUrl + subdomain + id;
+    let url = subdomain + id;
 
     console.log('Deleting item at:', url);
 
@@ -132,7 +121,7 @@ export class DataRequestService {
    *
    */
   public updateRecord(subdomain: string, id: string, itemData: string): Observable<IndexedObj> {
-    let url = this.baseUrl + subdomain + id;
+    let url = subdomain + id;
     return this.httpClient.put(url, itemData, httpOptions).catch(this.errorHandler);
   }
 
@@ -146,7 +135,7 @@ export class DataRequestService {
    * @return a subscription that will return the updated object as it exists on the backend.
    */
   public setRecordAvailability(subdomain: string, id: string, newStatus: boolean): Observable<IndexedObj> {
-    let url = this.baseUrl + subdomain + id + '/setStatus';
+    let url = subdomain + id + '/setStatus';
 
     return this.httpClient.put(url, newStatus, httpOptions).catch(this.errorHandler);
   }

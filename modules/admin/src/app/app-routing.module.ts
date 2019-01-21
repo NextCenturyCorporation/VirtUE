@@ -38,166 +38,172 @@ import { LoginComponent } from './shared/authentication/login.component';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full'
-  }, {
-    path: 'dashboard',
-    component: DashboardComponent,
-    data: {
-      breadcrumb: new Breadcrumb('Dashboard', '/dashboard')
-    }
-  }, {
-    path: 'settings',
-    component: ConfigComponent,
-    data: {
-      breadcrumb: new Breadcrumb('Global Settings', '/settings')
-    },
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard],
+    //canActivateChild: [AuthGuard],
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard'
+      }, {
+        path: 'dashboard',
+        component: DashboardComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Dashboard', '/dashboard')
+        }
+      }, {
+        path: 'settings',
+        component: ConfigComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Global Settings', '/settings')
+        }
+      }, {
+        path: 'users',
+        component: UserListComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Users', '/users')
+        }
+      }, {
+        path: 'users',
+        data: {
+          breadcrumb: new Breadcrumb('Users', '/users')
+        },
+        children: [
+          {
+          path: 'create',
+          component: UserComponent,
+          data: {
+            breadcrumb: new Breadcrumb('Add User Account', '/create')
+          }
+          }, {
+            path: 'view/:id',
+            component: UserComponent,
+            data: {
+              breadcrumb: new Breadcrumb('View User Account', '/view')
+            }
+          }, {
+            path: 'edit/:id',
+            component: UserComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Edit User Account', '/edit')
+            }
+          }, {
+            path: 'duplicate/:id',
+            component: UserComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Duplicate User Account',  '/duplicate')
+            }
+          }
+        ]
+      }, {
+        path: 'applications',
+        component: AppsListComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Applications', '/apps')
+        }
+      }, {
+          path: 'applications',
+          data: {
+            breadcrumb: new Breadcrumb('Applications', '/apps')
+          },
+        children: [
+          {
+            path: 'create',
+            component: AddAppComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Install New App', '/create')
+            }
+          // }, {
+          //   path: 'view/:id',
+          //   component: AppComponent,
+          //   data: {
+          //     breadcrumb: new Breadcrumb('View Application',  '/view')
+          //   }
+          }
+        ]
+      }, {
+        path: 'virtues',
+        component: VirtueListComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
+        }
+      }, {
+        path: 'virtues',
+        data: {
+          breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
+        },
+        children: [
+          {
+            path: 'create',
+            component: VirtueComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Create Virtue Template', '/create')
+            }
+          }, {
+            path: 'view/:id',
+            component: VirtueComponent,
+            data: {
+              breadcrumb: new Breadcrumb('View Virtue', '/view')
+            }
+          }, {
+          path: 'edit/:id',
+            component: VirtueComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Edit Virtue Template', '/edit')
+            }
+          }, {
+            path: 'duplicate/:id',
+            component: VirtueComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Duplicate Virtue Template', '/duplicate')
+            }
+          }
+        ]
+      }, {
+        path: 'vm-templates',
+        component: VmListComponent,
+        data: {
+          breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
+        }
+      }, {
+        path: 'vm-templates',
+        data: {
+          breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
+        },
+        children: [
+          {
+            path: 'create',
+            component: VmComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Build Virtual Machine', '/create')
+            }
+          }, {
+            path: 'view/:id',
+            component: VmComponent,
+            data: {
+              breadcrumb: new Breadcrumb('View Virtual Machine', '/view')
+            }
+          }, {
+            path: 'edit/:id',
+            component: VmComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Edit Virtual Machine', '/edit')
+            }
+          }, {
+            path: 'duplicate/:id',
+            component: VmComponent,
+            data: {
+              breadcrumb: new Breadcrumb('Duplicate Virtual Machine', '/duplicate')
+            }
+          },
+        ]
+      }
+    ]
   }, {
     path: 'login', component: LoginComponent
   }, {
-    path: 'users',
-    component: UserListComponent,
-    data: {
-      breadcrumb: new Breadcrumb('Users', '/users')
-    },
-    canActivate: [AuthGuard]
-  }, {
-    path: 'users',
-    data: {
-      breadcrumb: new Breadcrumb('Users', '/users')
-    },
-    children: [
-      {
-      path: 'create',
-      component: UserComponent,
-      data: {
-        breadcrumb: new Breadcrumb('Add User Account', '/create')
-      }
-      }, {
-        path: 'view/:id',
-        component: UserComponent,
-        data: {
-          breadcrumb: new Breadcrumb('View User Account', '/view')
-        }
-      }, {
-        path: 'edit/:id',
-        component: UserComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Edit User Account', '/edit')
-        }
-      }, {
-        path: 'duplicate/:id',
-        component: UserComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Duplicate User Account',  '/duplicate')
-        }
-      }
-    ]
-  }, {
-    path: 'applications',
-    component: AppsListComponent,
-    data: {
-      breadcrumb: new Breadcrumb('Applications', '/apps')
-    }
-  }, {
-      path: 'applications',
-      data: {
-        breadcrumb: new Breadcrumb('Applications', '/apps')
-      },
-    children: [
-      {
-        path: 'create',
-        component: AddAppComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Install New App', '/create')
-        }
-      // }, {
-      //   path: 'view/:id',
-      //   component: AppComponent,
-      //   data: {
-      //     breadcrumb: new Breadcrumb('View Application',  '/view')
-      //   }
-      }
-    ]
-  }, {
-    path: 'virtues',
-    component: VirtueListComponent,
-    data: {
-      breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
-    }
-  }, {
-    path: 'virtues',
-    data: {
-      breadcrumb: new Breadcrumb('Virtue Templates', '/virtues')
-    },
-    children: [
-      {
-        path: 'create',
-        component: VirtueComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Create Virtue Template', '/create')
-        }
-      }, {
-        path: 'view/:id',
-        component: VirtueComponent,
-        data: {
-          breadcrumb: new Breadcrumb('View Virtue', '/view')
-        }
-      }, {
-      path: 'edit/:id',
-        component: VirtueComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Edit Virtue Template', '/edit')
-        }
-      }, {
-        path: 'duplicate/:id',
-        component: VirtueComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Duplicate Virtue Template', '/duplicate')
-        }
-      }
-    ]
-  }, {
-    path: 'vm-templates',
-    component: VmListComponent,
-    data: {
-      breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
-    }
-  }, {
-    path: 'vm-templates',
-    data: {
-      breadcrumb: new Breadcrumb('Virtual Machine Templates', '/vm-templates')
-    },
-    children: [
-      {
-        path: 'create',
-        component: VmComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Build Virtual Machine', '/create')
-        }
-      }, {
-        path: 'view/:id',
-        component: VmComponent,
-        data: {
-          breadcrumb: new Breadcrumb('View Virtual Machine', '/view')
-        }
-      }, {
-        path: 'edit/:id',
-        component: VmComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Edit Virtual Machine', '/edit')
-        }
-      }, {
-        path: 'duplicate/:id',
-        component: VmComponent,
-        data: {
-          breadcrumb: new Breadcrumb('Duplicate Virtual Machine', '/duplicate')
-        }
-      },
-    ]
-  },
-  {path: '**', component: PageNotFoundComponent}
+    path: '**', component: PageNotFoundComponent
+  }
 ];
 
 /**

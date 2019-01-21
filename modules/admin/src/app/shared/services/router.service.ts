@@ -98,4 +98,8 @@ export class RouterService {
     return this.router.routerState.snapshot.url;
   }
 
+  loginRedirect() {
+    //remove params, so they don't build up in the return url.
+    this.router.navigate(['/login'], { queryParams: { returnUrl: this.getRouterUrl().split("?")[0] }});
+  }
 }

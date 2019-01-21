@@ -25,7 +25,6 @@ export class BaseUrlInterceptor implements HttpInterceptor {
   private baseUrl = "";
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-
     // Note that the call to get the baseUrl uses httpClient, which will try to apply all interceptors, including this one.
     // Use and check for a custom header to prevent infinite recursion here.
     // https://stackoverflow.com/questions/46469349/how-to-make-an-angular-module-to-ignore-http-interceptor-added-in-a-core-module
@@ -36,22 +35,17 @@ export class BaseUrlInterceptor implements HttpInterceptor {
     // It could instead be added to the classes which make local calls, but the calls made to load local icons are automatic and so can't
     // (probably) be changed.
 
-    // console.log("Request to url: ", request.url);
     if (request.headers.has(InterceptorRemoteDestinationHeader)) {
       const headers = request.headers.delete(InterceptorRemoteDestinationHeader);
       request = request.clone({ headers })
       // if the baseUrl hasn't been set yet, get it, and then make the call
       if (this.baseUrl === "") {
-        // console.log("Finding it again");
         return this.httpClient.get(this.baseUrlFilePath).mergeMap((jsonPacket: any) => {
-                                                          // console.log("Found it: ");
-                                                          // console.log(jsonPacket[0].virtue_server);
                                                           this.baseUrl = jsonPacket[0].virtue_server;
 
                                                           if (this.baseUrl.slice(-1) !== "/") {
                                                             this.baseUrl = this.baseUrl + "/";
                                                           }
-                                                          // console.log("New baseUrl: ", this.baseUrl);
 
                                                           return this.mutateCall(request, next);
                                                         });
@@ -66,7 +60,6 @@ export class BaseUrlInterceptor implements HttpInterceptor {
   }
 
   private mutateCall(request: HttpRequest<any>, next: HttpHandler) {
-    // console.log("incoming request: ", request.url);
     let baseUrl = this.baseUrl;
     // just so we don't end up with requests to `www.homepage.com//login`. Note that the requestUrl is immutable.
     if (request.url.slice(0,1) === "/") {

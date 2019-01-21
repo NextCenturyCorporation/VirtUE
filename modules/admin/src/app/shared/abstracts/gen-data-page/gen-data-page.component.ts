@@ -280,7 +280,9 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
     error => {
       console.log("Error in pulling dataset \'", updateQueue[0].datasetName, "\'");
       // close stream on error.
-      sub.unsubscribe();
+      if (sub) {
+        sub.unsubscribe();
+      }
       // TODO notify user
     },
     () => { // once the dataset has been pulled and fully processed above
