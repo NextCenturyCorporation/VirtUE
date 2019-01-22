@@ -99,28 +99,28 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		};
 		http
-				.authorizeRequests()
-					.antMatchers("/").permitAll()
-					.antMatchers("/favicon.ico").permitAll()
-					.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
-					.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
-					.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
-					.antMatchers(HttpMethod.OPTIONS,"/logout").permitAll()
-					.antMatchers("/desktop/**").hasRole(USER_ROLE)
-					.antMatchers("/data/**").permitAll()// note this is an backdoor for development/testing.
-					.anyRequest().authenticated()
-					.and()
-				.formLogin()
-					.failureHandler(authenticationFailureHandler)
-					.successHandler(successHandler)
-					.loginPage("/login")
-					.and()
-				.logout()
-					.clearAuthentication(true)
-					// .deleteCookies("XSRF-TOKEN", "JSESSIONID")
-					.deleteCookies("JSESSIONID")
-					.invalidateHttpSession(true)
-				;
+			.authorizeRequests()
+				.antMatchers("/").permitAll()
+				.antMatchers("/favicon.ico").permitAll()
+				.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+				.antMatchers(HttpMethod.OPTIONS,"/admin/**").permitAll()//allow CORS option calls
+				.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
+				.antMatchers(HttpMethod.OPTIONS,"/logout").permitAll()
+				.antMatchers("/desktop/**").hasRole(USER_ROLE)
+				.antMatchers("/data/**").permitAll()// note this is an backdoor for development/testing.
+				.anyRequest().authenticated()
+				.and()
+			.formLogin()
+				.failureHandler(authenticationFailureHandler)
+				.successHandler(successHandler)
+				.loginPage("/login")
+				.and()
+			.logout()
+				.clearAuthentication(true)
+				// .deleteCookies("XSRF-TOKEN", "JSESSIONID")
+				.deleteCookies("JSESSIONID")
+				.invalidateHttpSession(true)
+			;
 
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 		http.csrf().disable();
