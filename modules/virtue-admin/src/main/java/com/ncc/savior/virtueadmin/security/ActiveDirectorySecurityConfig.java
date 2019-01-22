@@ -72,7 +72,6 @@ public class ActiveDirectorySecurityConfig extends BaseSecurityConfig {
 	private File keytabLocation;
 
 	public ActiveDirectoryLdapAuthenticationProvider getActiveDirectoryLdapAuthenticationProvider() {
-		logger.debug("getActiveDirectoryLdapAuthenticationProvider: " + adDomain + " " + adUrl);
 		ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(adDomain,
 				adUrl);
 		provider.setConvertSubErrorCodesToExceptions(true);
