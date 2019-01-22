@@ -62,7 +62,7 @@ public class ClipboardHub {
 	private Map<String, String> groupIdToDisplayName;
 	private Set<IDefaultApplicationListener> defaultAppListeners;
 	private Set<IDataMessageListener> dataMessageListeners;
-
+	
 	public ClipboardHub(ICrossGroupDataGuard dataGuard) {
 		groupIdToDisplayName = new HashMap<String, String>();
 		transmitters = Collections.synchronizedMap(new TreeMap<String, IClipboardMessageSenderReceiver>());
@@ -270,13 +270,13 @@ public class ClipboardHub {
 						destId);
 			}
 		} else if (message instanceof DefaultApplicationMessage) {
-			notifyDefaultApplicationHandlers((DefaultApplicationMessage) message);
+			notifyDefaultApplicationHandlers((DefaultApplicationMessage) message, messageSourceGroupId);
 		}
 	}
 
-	private void notifyDefaultApplicationHandlers(DefaultApplicationMessage message) {
+	private void notifyDefaultApplicationHandlers(DefaultApplicationMessage message, String messageSourceGroupId) {
 		for (IDefaultApplicationListener listener : defaultAppListeners) {
-			listener.activateDefaultApp(message.getDefaultApplicationType(), message.getArguments());
+			listener.activateDefaultApp(message.getDefaultApplicationType(), message.getArguments(), messageSourceGroupId);
 		}
 	}
 

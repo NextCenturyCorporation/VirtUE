@@ -1,7 +1,9 @@
 package com.ncc.savior.desktop.sidebar;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.prefs.Preferences;
 
@@ -37,6 +39,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 	private IIconService iconService;
 	private ColorManager colorManager;
 	private PreferenceService preferenceService;
+	private Set<IHyperlinkMessageListener> hyperlinkMessageListeners;
 
 	public DefaultApplicationLauncher(VirtueService virtueService,
 			IIconService iconService, ColorManager colorManager, PreferenceService preferenceService) {
@@ -44,10 +47,12 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 		this.iconService = iconService;
 		this.colorManager = colorManager;
 		this.preferenceService = preferenceService;
+		this.hyperlinkMessageListeners = new HashSet<IHyperlinkMessageListener>();
 	}
 
 	@Override
-	public void activateDefaultApp(DefaultApplicationType defaultApplicationType, List<String> arguments) {
+	public void activateDefaultApp(DefaultApplicationType defaultApplicationType, List<String> arguments,
+			String sourceId) {
 		// TODO probably need to thread this
 		List<DesktopVirtue> possibleApps = virtueService.getApplicationsWithTag(defaultApplicationType.toString());
 		logger.debug("list of apps(" + possibleApps.size() + "): " + possibleApps);
@@ -62,14 +67,14 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 					pair.getLeft(), "Starting cross-virtue application, " + pair.getRight().getName()
 							+ ", using virtue, " + pair.getLeft().getName() + ", as indicated from user preference.");
 			UserAlertingServiceHolder.sendAlertLogError(vam, logger);
-			startAppWithParam(pair, params);
+			startAppWithParam(pair, params, sourceId);
 		} else {
-			startAppFromUserSelection(defaultApplicationType, possibleApps, params);
+			startAppFromUserSelection(defaultApplicationType, possibleApps, params, sourceId);
 		}
 
 	}
 
-	private void startAppWithParam(Pair<DesktopVirtue, ApplicationDefinition> pair, String params) {
+	private void startAppWithParam(Pair<DesktopVirtue, ApplicationDefinition> pair, String params, String sourceId) {
 		logger.debug("Starting application on " + pair);
 
 		try {
@@ -78,6 +83,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 			ApplicationDefinition app = pair.getRight();
 			app.setParameters(params);
 			virtueService.startApplication(pair.getLeft(), app);
+			triggerHyperlinkMessage(sourceId, pair.getLeft().getTemplateId(), DefaultApplicationType.BROWSER, params);
 		} catch (IOException e) {
 			logger.error("Error starting application", e);
 		}
@@ -119,7 +125,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 	}
 
 	private void startAppFromUserSelection(DefaultApplicationType defaultApplicationType,
-			List<DesktopVirtue> possibleApps, String params) {
+			List<DesktopVirtue> possibleApps, String params, String sourceId) {
 		Vector<Pair<DesktopVirtue, ApplicationDefinition>> comboList = new Vector<Pair<DesktopVirtue, ApplicationDefinition>>();
 		for (DesktopVirtue v : possibleApps) {
 			for (ApplicationDefinition a : v.getApps().values()) {
@@ -134,7 +140,7 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 		dald.setParameters(params);
 		dald.setAppType(defaultApplicationType);
 		dald.setStartAppBiConsumer((pair, ps) -> {
-			startAppWithParam(pair, ps);
+			startAppWithParam(pair, ps, sourceId);
 		});
 
 		dald.setSavePreferenceAction((pair) -> {
@@ -150,6 +156,24 @@ public class DefaultApplicationLauncher implements IDefaultApplicationListener {
 		});
 
 		dald.start();
+
+	}
+
+	public void addHyperlinkMessageListener(IHyperlinkMessageListener listener) {
+		hyperlinkMessageListeners.add(listener);
+	}
+
+	public void triggerHyperlinkMessage(String dataSourceGroupId, String dataDestinationGroupId,
+			DefaultApplicationType applicationType, String params) {
+		for (IHyperlinkMessageListener listener : hyperlinkMessageListeners) {
+			listener.onMessage(dataSourceGroupId, dataDestinationGroupId, applicationType, params);
+		}
+	}
+
+	public static interface IHyperlinkMessageListener {
+
+		public void onMessage(String dataSourceGroupId, String dataDestinationGroupId,
+				DefaultApplicationType applicationType, String params);
 
 	}
 }
