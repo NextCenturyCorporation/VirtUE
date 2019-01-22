@@ -34,7 +34,7 @@ export class AuthenticationInterceptor implements HttpInterceptor {
     return next
       .handle(request)
       .pipe(map((response: any) => {
-        if ( response && response.status && (response.status === 302 ) || (response.status === 400 ) || (response.status === 401 )) {
+        if ( response && response.status && ((response.status === 302 ) || (response.status === 400 ) || (response.status === 401 ))) {
             // go to login page and prevent access of anything else until you log in again.
             this.auth.markUnauthenticated();
         }

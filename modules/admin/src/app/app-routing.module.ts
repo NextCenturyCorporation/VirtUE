@@ -24,6 +24,7 @@ import { AuthenticationInterceptor } from './shared/authentication/authenticatio
 import { ErrorInterceptor } from './shared/authentication/error.interceptor';
 import { AuthenticationService } from './shared/services/authentication.service';
 import { LoginComponent } from './shared/authentication/login.component';
+import { LoginGuard } from './shared/authentication/login.guard';
 
 /**
  * This defines all the navigable URLs, what components should be loaded at each, and what data should be passed in to that
@@ -200,7 +201,9 @@ const routes: Routes = [
       }
     ]
   }, {
-    path: 'login', component: LoginComponent
+    path: 'login',
+    component: LoginComponent,
+    canActivate: [LoginGuard]
   }, {
     path: '**', component: PageNotFoundComponent
   }

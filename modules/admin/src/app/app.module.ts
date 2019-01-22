@@ -101,6 +101,7 @@ import { SensingService } from './shared/services/sensing.service';
 import { BaseUrlService } from './shared/services/baseUrl.service';
 
 import { AuthGuard } from './shared/authentication/auth.guard';
+import { LoginGuard } from './shared/authentication/login.guard';
 import { AuthenticationInterceptor } from './shared/authentication/authentication.interceptor';
 import { ErrorInterceptor } from './shared/authentication/error.interceptor';
 import { BaseUrlInterceptor } from './shared/services/baseUrl.interceptor';
@@ -203,6 +204,7 @@ import { LoginComponent } from './shared/authentication/login.component';
     DatePipe,
 
     AuthGuard,
+    LoginGuard,
     AuthenticationService,
     HttpClientXsrfModule,
     // { provide: HTTP_INTERCEPTORS, useExisting: HttpClientXsrfModule, multi: true },

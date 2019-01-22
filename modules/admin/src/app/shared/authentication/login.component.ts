@@ -13,10 +13,10 @@ import { GenericPageComponent } from '../abstracts/gen-page/gen-page.component';
 @Component({templateUrl: 'login.component.html'})
 export class LoginComponent extends GenericPageComponent implements OnInit {
     loginForm: FormGroup;
-    loading = false;
     submitted = false;
     returnUrl: string;
 		returnedData: any = {headers: ""};
+    message: string = "";
 
     constructor(
 			routerService: RouterService,
@@ -37,29 +37,15 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
         this.returnUrl = this.activatedRoute.snapshot.queryParams['returnUrl'] || '/';
     }
 
-		getMethods(obj) {
-		  var result = [];
-		  for (var id in obj) {
-		    try {
-		      if (typeof(obj[id]) == "function") {
-		        result.push(id + ": " + obj[id].toString());
-		      }
-		    } catch (err) {
-		      result.push(id + ": inaccessible");
-		    }
-		  }
-		  return result;
-		}
-
     onSubmit() {
         this.submitted = true;
+        this.message = "";
 
         // stop here if form is invalid
         if (this.loginForm.invalid) {
             return;
         }
 
-        this.loading = true;
         this.authenticationService.login(this.loginForm.controls.username.value, this.loginForm.controls.password.value)
           .subscribe(
             (data: HttpResponse<string>) => {
@@ -67,17 +53,9 @@ export class LoginComponent extends GenericPageComponent implements OnInit {
               this.routerService.goToPage(this.returnUrl);
             },
             error => {
-              this.loading = false;
+              console.log(error);
+              this.message = "Incorrect login information";
+              return error;
             });
   }
-
-	logout() {
-		this.authenticationService.logout().subscribe(
-				something => {
-			console.log("Logging out: ");
-			console.log(something);
-			this.routerService.goToPage('/login');
-		});
-
-	}
 }

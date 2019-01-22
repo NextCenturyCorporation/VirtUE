@@ -58,8 +58,11 @@ export class AuthenticationService {
             observe: 'response',
             responseType: 'text'
           }
-        )
-        ;
+        ).subscribe(
+    				something => {
+    			console.log("Logging out");
+    			this.routerService.goToPage('/login');
+    		});
     }
 
     isAuthenticated() {

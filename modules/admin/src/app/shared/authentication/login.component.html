@@ -16,8 +16,8 @@
             <div *ngIf="loginForm.controls.password.errors.required">Password is required</div>
         </div>
     </div>
+    <p>{{message}}</p>
     <div class="form-group">
         <button mat-button [disabled]="loading" class="btn btn-primary">Login</button>
     </div>
-    <button mat-button type='button' (click)="logout()">Logout</button>
 </form>

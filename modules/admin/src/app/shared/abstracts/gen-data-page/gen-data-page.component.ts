@@ -129,21 +129,10 @@ export abstract class GenericDataPageComponent extends GenericPageComponent {
 
   /**
    * This is the standard method that most components need to run upon load.
-   * It sets up the tool used to load data ([[DataRequestService.baseUrl]]), and sends out a request for the data the page needs.
+   * It used to perform other setup but now just sends out a request for the data the page needs.
    */
   cmnDataComponentSetup(): void {
-    // let sub = this.baseUrlService.getBaseUrl().subscribe( res => {
-    //   this.baseUrl = res[0].virtue_server;
-    //
-    //   this.dataRequestService.setBaseUrl(this.baseUrl);
-
       this.pullData();
-    // }, error => {
-    //   console.log("Error retrieving base url."); // TODO notify user
-    // }, () => {
-    //   sub.unsubscribe();
-    // });
-
   }
 
   /**

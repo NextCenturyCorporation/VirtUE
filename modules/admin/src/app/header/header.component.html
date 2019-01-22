@@ -1,10 +1,17 @@
 <header id="banner">
   <mat-toolbar color="primary">
     <span class="navbar-brand">Savior VirtUE</span>
-    <ul class="nav navbar-nav">
-      <li *ngFor="let n of navigation" class="nav-item" routerLinkActive="active">
-        <a class="nav-link" routerLink="{{ n.link }}" title="{{ n.value }}">{{ n.value }}</a>
-      </li>
+    <ng-container *ngIf=authService.isAuthenticated()>
+      <ul class="nav navbar-nav">
+          <li *ngFor="let n of getNavOptions()" class="nav-item" routerLinkActive="active">
+            <a class="nav-link" routerLink="{{ n.link }}" title="{{ n.value }}">{{ n.value }}</a>
+          </li>
+      </ul>
+      <ul class="nav navbar-nav" ng-style="{margin-left: auto; margin-right: 0;float: right;}">
+        <li class="nav-item" routerLinkActive="active" ng-style="{margin-left: auto; margin-right: 0;float: right;}">
+          <a class="nav-link" (click)=authService.logout() ng-style="{margin-left: auto; margin-right:0; float: right;}">Log out</a>
+        </li>
     </ul>
+    </ng-container>
   </mat-toolbar>
 </header>
