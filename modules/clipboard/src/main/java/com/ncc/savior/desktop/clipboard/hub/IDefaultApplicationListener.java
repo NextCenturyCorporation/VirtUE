@@ -19,6 +19,6 @@ public interface IDefaultApplicationListener {
 	 * @param arguments
 	 * @param string 
 	 */
-	void activateDefaultApp(DefaultApplicationType defaultApplicationType, List<String> arguments, String string);
+	void activateDefaultApp(DefaultApplicationType defaultApplicationType, List<String> arguments, String sourceId);
 
 }
