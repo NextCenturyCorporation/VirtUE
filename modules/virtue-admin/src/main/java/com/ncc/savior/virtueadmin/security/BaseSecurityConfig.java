@@ -107,7 +107,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.OPTIONS,"/login").permitAll()
 				.antMatchers(HttpMethod.OPTIONS,"/logout").permitAll()
 				.antMatchers("/desktop/**").hasRole(USER_ROLE)
-				.antMatchers("/data/**").permitAll()// note this is an backdoor for development/testing.
+				.antMatchers("/data/**").permitAll()// note this is a backdoor for development/testing.
 				.anyRequest().authenticated()
 				.and()
 			.formLogin()

@@ -37,7 +37,7 @@ export class BaseUrlInterceptor implements HttpInterceptor {
 
     if (request.headers.has(InterceptorRemoteDestinationHeader)) {
       const headers = request.headers.delete(InterceptorRemoteDestinationHeader);
-      request = request.clone({ headers })
+      request = request.clone({ headers});
       // if the baseUrl hasn't been set yet, get it, and then make the call
       if (this.baseUrl === "") {
         return this.httpClient.get(this.baseUrlFilePath).mergeMap((jsonPacket: any) => {
@@ -62,7 +62,7 @@ export class BaseUrlInterceptor implements HttpInterceptor {
   private mutateCall(request: HttpRequest<any>, next: HttpHandler) {
     let baseUrl = this.baseUrl;
     // just so we don't end up with requests to `www.homepage.com//login`. Note that the requestUrl is immutable.
-    if (request.url.slice(0,1) === "/") {
+    if (request.url.slice(0, 1) === "/") {
       baseUrl = baseUrl.slice(0, -1);
     }
     const correctedRequest = request.clone({ url: `${baseUrl}${request.url}` });

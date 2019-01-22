@@ -19,11 +19,11 @@ export class ErrorInterceptor implements HttpInterceptor {
             // you could get back in just by refreshing the page. So leaving off that check is no extra security,
             // and leads to weird stuff and annoyances any time there's an error on the backend.
             // Yes the backend shouldn't give errors. See console log below.
-            if ((err.status >= 400) && (err.status != 404) && (err.error.slice(12, 15) !== "255")) {
-                // auto logout if 401 response returned from api
-                this.authenticationService.markUnauthenticated();
-                // it'd be nice if the backend returned a 401 for auth failures and a 400 for everything else, but alas,
-                // it does not. It's 401 for some auth failures, 400 for others, and 400 for all other failures.
+            if ((err.status >= 400) && (err.status !== 404) && (err.error.slice(12, 15) !== "255")) {
+              // auto logout if 401 response returned from api
+              this.authenticationService.markUnauthenticated();
+              // it'd be nice if the backend returned a 401 for auth failures and a 400 for everything else, but alas,
+              // it does not. It's 401 for some auth failures, 400 for others, and 400 for all other failures.
             }
 
             if (err.status >= 400 && err.error.slice(12, 15) === "255") {

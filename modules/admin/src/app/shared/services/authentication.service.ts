@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { map } from 'rxjs/operators';
-import 'rxjs/add/operator/map'
+import 'rxjs/add/operator/map';
 import { catchError } from 'rxjs/operators/catchError';
 
 import { InterceptorRemoteDestinationHeader } from './baseUrl.interceptor';
@@ -22,7 +22,7 @@ export class AuthenticationService {
 
       const formBody = new HttpParams()
           .set('username', username)
-          .set('password', password)
+          .set('password', password);
 
 
       return this.httpClient.post(
@@ -59,10 +59,10 @@ export class AuthenticationService {
             responseType: 'text'
           }
         ).subscribe(
-    				something => {
-    			console.log("Logging out");
-    			this.routerService.goToPage('/login');
-    		});
+          something => {
+            console.log("Logging out");
+            this.routerService.goToPage('/login');
+          });
     }
 
     isAuthenticated() {
