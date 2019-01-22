@@ -114,6 +114,7 @@ public class UsernamePasswordKerberosAuthorizationService implements IActiveDire
 		if (logger.isTraceEnabled()) {
 			logger.trace("logout response: " + response.getStatus());
 		}
+		currentUser = null;
 	}
 
 	@Override
