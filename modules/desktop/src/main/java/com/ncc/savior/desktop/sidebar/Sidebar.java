@@ -58,8 +58,10 @@ import com.ncc.savior.desktop.authorization.DesktopUser;
 import com.ncc.savior.desktop.authorization.InvalidUserLoginException;
 import com.ncc.savior.desktop.clipboard.hub.ClipboardHub.IDataMessageListener;
 import com.ncc.savior.desktop.clipboard.hub.IDefaultApplicationListener;
+import com.ncc.savior.desktop.clipboard.messages.DefaultApplicationMessage.DefaultApplicationType;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueContainer.IUpdateListener;
 import com.ncc.savior.desktop.sidebar.AbstractVirtueView.IRemoveVirtueListener;
+import com.ncc.savior.desktop.sidebar.DefaultApplicationLauncher.IHyperlinkMessageListener;
 import com.ncc.savior.desktop.sidebar.LoginPage.ILoginEventListener;
 import com.ncc.savior.desktop.sidebar.SidebarController.VirtueChangeHandler;
 import com.ncc.savior.desktop.sidebar.defaultapp.VirtueStatusComparator;
@@ -69,6 +71,7 @@ import com.ncc.savior.desktop.sidebar.prefs.PreferenceService;
 import com.ncc.savior.desktop.virtues.BridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.BridgeSensorService;
 import com.ncc.savior.desktop.virtues.ClipboardBridgeSensorMessage;
+import com.ncc.savior.desktop.virtues.HyperlinkBridgeSensorMessage;
 import com.ncc.savior.desktop.virtues.IIconService;
 import com.ncc.savior.desktop.virtues.MessageType;
 import com.ncc.savior.desktop.virtues.VirtueService;
@@ -215,6 +218,24 @@ public class Sidebar implements VirtueChangeHandler {
 
 		this.defaulApplicationLauncher = new DefaultApplicationLauncher(virtueService, iconService, colorManager,
 				preferenceService);
+
+		defaulApplicationLauncher.addHyperlinkMessageListener(new IHyperlinkMessageListener() {
+
+			@Override
+			public void onMessage(String dataSourceGroupId, String dataDestinationGroupId,
+					DefaultApplicationType applicationType, String params) {
+				try {
+					HyperlinkBridgeSensorMessage messageObj = new HyperlinkBridgeSensorMessage(
+							"Opening new application through hyperlink",
+							authService.getUser().getUsername(), MessageType.HYPERLINK, dataSourceGroupId,
+							dataDestinationGroupId, applicationType, params);
+					bridgeSensorService.sendMessage(messageObj);
+				} catch (InvalidUserLoginException e) {
+					logger.error("error with sending message to bridge sensor");
+				}
+			}
+
+		});
 
 		AbstractVirtueView.addRemoveVirtueListener(new IRemoveVirtueListener() {
 

@@ -78,8 +78,6 @@ public class XenAwsMixCloudManager implements ICloudManager {
 		this.windowsNfsMountingService = windowsNfsMountingService;
 	}
 
-	
-
 	@Override
 	public void deleteVirtue(VirtueInstance virtueInstance, CompletableFuture<VirtueInstance> future) {
 		Collection<VirtualMachine> vms = virtueInstance.getVms();
@@ -153,13 +151,20 @@ public class XenAwsMixCloudManager implements ICloudManager {
 			// Add them to the windows startup services service
 
 			// windowsNfsMountingService.addVirtueToQueue(vi);
+			logger.debug("Adding vms to Windows Startup Services");
 			for (VirtualMachine windows : winVms) {
-				windowsNfsMountingService.addWindowsStartupServices(xen, windows);
+				try {
+					windowsNfsMountingService.addWindowsStartupServices(xen, windows);
+				} catch (Throwable t) {
+					logger.error("error adding to windows services",t);
+				}
 			}
+			logger.debug("Finished adding vms to Windows Startup Services");
 			return winVms;
 		}).thenAccept((Collection<VirtualMachine> finishedWindowsBoxes) -> {
 			// Once startup services are done on windows machines, set VM state to running
 			// and notify (notify saves to DB typically)
+			logger.debug("finished with windows boxes.  Setting to running vms=" + vms);
 			for (VirtualMachine winBox : finishedWindowsBoxes) {
 				CompletableFuture<VirtualMachine> myCf = serviceProvider.getUpdateStatus().startFutures(winBox,
 						VmState.RUNNING);
@@ -213,8 +218,6 @@ public class XenAwsMixCloudManager implements ICloudManager {
 			awsVmManager.rebootVm(vm, null);
 		}
 	}
-
-
 
 	@Override
 	public void sync(List<String> ids) {

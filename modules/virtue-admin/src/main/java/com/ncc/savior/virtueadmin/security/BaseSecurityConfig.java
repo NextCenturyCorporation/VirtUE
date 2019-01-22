@@ -98,6 +98,7 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 				response.getWriter().println("Login success");
 			}
 		};
+<<<<<<< HEAD
 		http
 				.authorizeRequests()
 					.antMatchers("/").permitAll()
@@ -124,6 +125,29 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		// http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
 		http.csrf().disable();
+=======
+		http.authorizeRequests()
+			.antMatchers("/").permitAll()
+			.antMatchers("/favicon.ico").permitAll()
+			.antMatchers("/admin/**").hasRole(ADMIN_ROLE)
+			.antMatchers(HttpMethod.OPTIONS, "/admin/**").permitAll()// allow cors preflight requests
+			.antMatchers(HttpMethod.OPTIONS, "/login").permitAll()
+			.antMatchers(HttpMethod.OPTIONS, "/logout").permitAll()
+			.antMatchers("/desktop/**").hasRole(USER_ROLE)
+			.antMatchers("/data/**").permitAll().anyRequest().authenticated()
+			.and()
+		.formLogin()
+			.failureHandler(authenticationFailureHandler)
+			.successHandler(successHandler)
+			.loginPage("/login")
+			.and()
+		.logout()
+			.clearAuthentication(true)
+			.deleteCookies("XSRF-TOKEN", "JSESSIONID")
+			.invalidateHttpSession(true);
+
+		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers(csrfDisabledURLs);
+>>>>>>> 10ca0a73084e06545bb3968bbb55a0158cad3d9e
 
 		http.sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -133,6 +157,10 @@ public abstract class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		doConfigure(http);
 
+<<<<<<< HEAD
+=======
+		//http.csrf().disable();
+>>>>>>> 10ca0a73084e06545bb3968bbb55a0158cad3d9e
 		if (forceHttps) {
 			// sets port mapping for insecure to secure. Although this line isn't necessary
 			// as it has 8080:8443 and 80:443 by default
